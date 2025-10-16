@@ -15,7 +15,7 @@ export default function ChangelogLoading() {
       <div className="space-y-4">
         <Skeleton size="sm" width="xs" className="mb-4" />
         <PageHeaderSkeleton />
-        <div className="flex items-center gap-6">
+        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6}>
           <Skeleton size="sm" width="lg" />
           <Skeleton size="sm" width="lg" />
         </div>
@@ -29,18 +29,18 @@ export default function ChangelogLoading() {
       </div>
 
       {/* Changelog Cards Skeleton */}
-      <div className={UI_CLASSES.SPACE_Y_6}>
+      <div className="space-y-6">
         {[...Array(6)].map((_, i) => (
           <div
             key={`changelog-skeleton-${i + 1}`}
             className="rounded-lg border bg-card p-6 animate-pulse"
           >
-            <div className={`flex ${UI_CLASSES.ITEMS_CENTER} gap-2 mb-3`}>
+            <div className={'flex items-center gap-2 mb-3'}>
               <Skeleton size="sm" width="xs" />
               <Skeleton size="sm" width="sm" />
             </div>
-            <Skeleton size="lg" width="2/3" className={UI_CLASSES.MB_2} />
-            <Skeleton size="sm" width="3xl" className={UI_CLASSES.MB_4} />
+            <Skeleton size="lg" width="2/3" className="mb-2" />
+            <Skeleton size="sm" width="3xl" className="mb-4" />
             <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
               <Skeleton size="sm" width="xs" rounded="full" />
               <Skeleton size="sm" width="xs" rounded="full" />

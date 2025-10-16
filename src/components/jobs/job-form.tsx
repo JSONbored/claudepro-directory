@@ -8,7 +8,6 @@
  */
 
 import { useId, useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -28,9 +27,10 @@ import {
   SelectValue,
 } from '@/src/components/ui/select';
 import { Textarea } from '@/src/components/ui/textarea';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import type { CreateJobInput } from '@/src/lib/schemas/content/job.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface JobFormProps {
   initialData?: Partial<CreateJobInput>;
@@ -74,9 +74,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
     const jobData: CreateJobInput = {
       title: formData.get('title') as string,
       company: formData.get('company') as string,
-      location: (formData.get('location') as string) || null,
+      location: (formData.get('location') as string) || undefined,
       description: formData.get('description') as string,
-      salary: (formData.get('salary') as string) || null,
+      salary: (formData.get('salary') as string) || undefined,
       remote: formData.get('remote') === 'on',
       type: formData.get('type') as
         | 'full-time'
@@ -84,16 +84,17 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         | 'contract'
         | 'internship'
         | 'freelance',
-      workplace: (formData.get('workplace') as 'On site' | 'Remote' | 'Hybrid') || null,
+      workplace: (formData.get('workplace') as 'On site' | 'Remote' | 'Hybrid') || undefined,
       experience:
-        (formData.get('experience') as 'Entry' | 'Mid' | 'Senior' | 'Lead' | 'Executive') || null,
+        (formData.get('experience') as 'Entry' | 'Mid' | 'Senior' | 'Lead' | 'Executive') ||
+        undefined,
       category: formData.get('category') as string,
       tags,
       requirements,
       benefits,
       link: formData.get('link') as string,
-      contact_email: (formData.get('contact_email') as string) || null,
-      company_logo: (formData.get('company_logo') as string) || null,
+      contact_email: (formData.get('contact_email') as string) || undefined,
+      company_logo: (formData.get('company_logo') as string) || undefined,
       plan: (formData.get('plan') as 'standard' | 'featured' | 'premium') || 'standard',
     };
 
@@ -102,14 +103,14 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         const result = await onSubmit(jobData);
 
         if (result?.success) {
-          toast.success(
+          toasts.success.actionCompleted(
             result.requiresPayment
               ? 'Job created! Contact us for payment.'
               : 'Job posted successfully!'
           );
         }
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Failed to save job');
+        toasts.error.fromError(error, 'Failed to save job');
       }
     });
   };
@@ -148,14 +149,14 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
   };
 
   return (
-    <form onSubmit={handleSubmit} className={UI_CLASSES.SPACE_Y_6}>
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Basic Info */}
       <Card>
         <CardHeader>
           <CardTitle>Job Details</CardTitle>
           <CardDescription>Basic information about the position</CardDescription>
         </CardHeader>
-        <CardContent className={UI_CLASSES.SPACE_Y_4}>
+        <CardContent className="space-y-4">
           <div>
             <Label htmlFor={titleId}>Job Title *</Label>
             <Input
@@ -278,9 +279,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
               placeholder="Describe the role, responsibilities, and what makes this opportunity great..."
               className="resize-none"
             />
-            <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
-              Minimum 50 characters
-            </p>
+            <p className={'text-xs text-muted-foreground mt-1'}>Minimum 50 characters</p>
           </div>
         </CardContent>
       </Card>
@@ -291,7 +290,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           <CardTitle>Requirements</CardTitle>
           <CardDescription>Skills and qualifications needed</CardDescription>
         </CardHeader>
-        <CardContent className={UI_CLASSES.SPACE_Y_4}>
+        <CardContent className="space-y-4">
           <div>
             <Label htmlFor={requirementInputId}>Add Requirement</Label>
             <div className={UI_CLASSES.FLEX_GAP_2}>
@@ -314,13 +313,13 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           </div>
 
           {requirements.length > 0 && (
-            <div className={UI_CLASSES.SPACE_Y_2}>
+            <div className="space-y-2">
               {requirements.map((req) => (
                 <div
                   key={req}
                   className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-2 border rounded`}
                 >
-                  <span className={UI_CLASSES.TEXT_SM}>{req}</span>
+                  <span className="text-sm">{req}</span>
                   <Button
                     type="button"
                     variant="ghost"
@@ -343,7 +342,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           <CardTitle>Benefits (Optional)</CardTitle>
           <CardDescription>Perks and benefits offered</CardDescription>
         </CardHeader>
-        <CardContent className={UI_CLASSES.SPACE_Y_4}>
+        <CardContent className="space-y-4">
           <div>
             <Label htmlFor={benefitInputId}>Add Benefit</Label>
             <div className={UI_CLASSES.FLEX_GAP_2}>
@@ -391,7 +390,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           <CardTitle>Tags *</CardTitle>
           <CardDescription>Keywords for search (minimum 1, maximum 10)</CardDescription>
         </CardHeader>
-        <CardContent className={UI_CLASSES.SPACE_Y_4}>
+        <CardContent className="space-y-4">
           <div>
             <Label htmlFor={tagInputId}>Add Tag</Label>
             <div className={UI_CLASSES.FLEX_GAP_2}>
@@ -432,7 +431,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           )}
 
           {tags.length === 0 && (
-            <p className={`${UI_CLASSES.TEXT_XS} text-destructive`}>At least one tag is required</p>
+            <p className={'text-xs text-destructive'}>At least one tag is required</p>
           )}
         </CardContent>
       </Card>
@@ -443,7 +442,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           <CardTitle>Application Details</CardTitle>
           <CardDescription>How candidates can apply</CardDescription>
         </CardHeader>
-        <CardContent className={UI_CLASSES.SPACE_Y_4}>
+        <CardContent className="space-y-4">
           <div>
             <Label htmlFor={linkId}>Application URL *</Label>
             <Input
@@ -494,19 +493,19 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
             <SelectContent>
               <SelectItem value="standard">
                 <div>
-                  <div className={UI_CLASSES.FONT_MEDIUM}>Standard (Free)</div>
+                  <div className="font-medium">Standard (Free)</div>
                   <div className={UI_CLASSES.TEXT_XS_MUTED}>Basic listing, 30 days</div>
                 </div>
               </SelectItem>
               <SelectItem value="featured">
                 <div>
-                  <div className={UI_CLASSES.FONT_MEDIUM}>Featured (Contact for pricing)</div>
+                  <div className="font-medium">Featured (Contact for pricing)</div>
                   <div className={UI_CLASSES.TEXT_XS_MUTED}>Top placement, badge, analytics</div>
                 </div>
               </SelectItem>
               <SelectItem value="premium">
                 <div>
-                  <div className={UI_CLASSES.FONT_MEDIUM}>Premium (Contact for pricing)</div>
+                  <div className="font-medium">Premium (Contact for pricing)</div>
                   <div className={UI_CLASSES.TEXT_XS_MUTED}>Featured + newsletter + promotion</div>
                 </div>
               </SelectItem>
@@ -521,7 +520,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
       <input type="hidden" name="benefits" value={JSON.stringify(benefits)} />
 
       {/* Submit */}
-      <div className={UI_CLASSES.FLEX_GAP_4}>
+      <div className="flex gap-4">
         <Button
           type="submit"
           disabled={isPending || tags.length === 0 || requirements.length === 0}

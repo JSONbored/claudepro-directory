@@ -125,6 +125,14 @@ const serverEnvSchema = z
       .optional()
       .describe('Secret key for cron job authorization (minimum 32 characters)'),
 
+    // BetterStack Heartbeat Monitoring (optional - for cron job health monitoring)
+    BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE: urlString
+      .optional()
+      .describe('BetterStack heartbeat URL for daily maintenance cron monitoring'),
+    BETTERSTACK_HEARTBEAT_WEEKLY_TASKS: urlString
+      .optional()
+      .describe('BetterStack heartbeat URL for weekly tasks cron monitoring'),
+
     // Email provider (Resend)
     RESEND_API_KEY: nonEmptyString
       .optional()
@@ -364,8 +372,11 @@ function validateEnv(): Env {
  * Performance: Lazy evaluation with memoization
  * Security: Server-only validation never runs client-side
  * This ensures type safety throughout the application
+ *
+ * Note: Not frozen to allow Next.js segment configuration exports to work
+ * Nested config objects (securityConfig, buildConfig) are frozen for security
  */
-export const env = validateEnv();
+export const env = Object.freeze(validateEnv());
 
 /**
  * Helper functions for common environment checks
@@ -375,18 +386,20 @@ export const isProduction = env.NODE_ENV === 'production';
 
 /**
  * Security configuration
+ * Production Security: Frozen to prevent runtime mutations
  */
-export const securityConfig = {
+export const securityConfig = Object.freeze({
   arcjetKey: env.ARCJET_KEY,
   rateLimitSecret: env.RATE_LIMIT_SECRET,
   cacheWarmToken: env.CACHE_WARM_AUTH_TOKEN,
   isSecured: !!(env.ARCJET_KEY && env.RATE_LIMIT_SECRET),
-} as const;
+} as const);
 
 /**
  * Build configuration
+ * Production Security: Frozen to prevent runtime mutations
  */
-export const buildConfig = {
+export const buildConfig = Object.freeze({
   version: env.npm_package_version,
   packageName: env.npm_package_name,
-} as const;
+} as const);

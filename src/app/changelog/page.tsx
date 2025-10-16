@@ -34,14 +34,14 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // ISR - revalidate every 5 minutes for fresh changelog entries
-export const revalidate = 300;
+export const revalidate = 900;
 
 /**
  * Generate metadata for changelog list page
  */
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    return await generatePageMetadata('/changelog');
+    return generatePageMetadata('/changelog');
   } catch (error) {
     logger.error(
       'Failed to generate changelog metadata',
@@ -72,7 +72,9 @@ export default async function ChangelogPage() {
           <div className="space-y-4">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className={
+                'inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors'
+              }
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back to Home</span>
@@ -87,7 +89,7 @@ export default async function ChangelogPage() {
             </div>
 
             {/* Stats */}
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6} text-sm text-muted-foreground`}>
               <div>
                 <span className="font-semibold text-foreground">{entries.length}</span> total
                 updates
@@ -112,7 +114,7 @@ export default async function ChangelogPage() {
         </div>
 
         {/* Email CTA - Footer section (matching homepage pattern) */}
-        <section className={`${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <section className={'mx-auto px-4 py-12'}>
           <InlineEmailCTA
             variant="hero"
             context="changelog-page"

@@ -1,35 +1,31 @@
 /**
- * Centralized Event Mapper Utility
+ * Centralized Event Mapper Utility - Configuration-Driven
  *
- * Maps content categories to their specific analytics event names.
- * Eliminates duplicate mapping logic across components.
+ * Auto-generates analytics event mappings from unified category registry.
+ * Zero hardcoded category lists - automatically stays in sync.
  *
- * October 2025 Production Standards:
+ * Modern 2025 Architecture:
+ * - Configuration-driven: Mappings derived from UNIFIED_CATEGORY_REGISTRY
  * - Type-safe with branded EventName types
- * - Centralized single source of truth
+ * - Automated: Adding category to registry automatically creates event mappings
  * - Validated category mappings
  * - Fallback to generic events
  * - Zero runtime errors with exhaustive checks
  *
+ * @see lib/config/category-config.ts - Single source of truth for categories
  * @module lib/analytics/event-mapper
  */
 
-import type { EventName } from '@/src/lib/analytics/events.config';
-import { EVENTS } from '@/src/lib/analytics/events.config';
+import type { EventName } from '@/src/lib/analytics/events.constants';
+import { EVENTS } from '@/src/lib/analytics/events.constants';
+import { getAllCategoryIds } from '@/src/lib/config/category-config';
+import type { ContentCategory as SharedContentCategory } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Content categories supported by the event mapper
+ * Extends shared ContentCategory to include aliases (mcp-servers)
  */
-export type ContentCategory =
-  | 'agents'
-  | 'mcp'
-  | 'mcp-servers'
-  | 'commands'
-  | 'rules'
-  | 'hooks'
-  | 'statuslines'
-  | 'collections'
-  | 'guides';
+export type ContentCategory = SharedContentCategory | 'mcp-servers';
 
 /**
  * Action types for event mapping
@@ -42,73 +38,109 @@ export type EventAction =
   | 'download_markdown';
 
 /**
- * Event mapping configuration
- * Maps action + category to specific event name
+ * ============================================
+ * DYNAMIC EVENT MAPPING GENERATION
+ * ============================================
+ *
+ * Builds event mappings from category registry using naming convention.
+ * Convention: {ACTION}_{CATEGORY_UPPER} (e.g., CONTENT_VIEW_AGENT)
  */
-const EVENT_MAPPINGS: Record<EventAction, Record<string, EventName>> = {
-  content_view: {
-    agents: EVENTS.CONTENT_VIEW_AGENT,
-    mcp: EVENTS.CONTENT_VIEW_MCP,
-    'mcp-servers': EVENTS.CONTENT_VIEW_MCP,
-    commands: EVENTS.CONTENT_VIEW_COMMAND,
-    rules: EVENTS.CONTENT_VIEW_RULE,
-    hooks: EVENTS.CONTENT_VIEW_HOOK,
-    statuslines: EVENTS.CONTENT_VIEW_STATUSLINE,
-    collections: EVENTS.CONTENT_VIEW_COLLECTION,
-  },
-  search: {
-    global: EVENTS.SEARCH_GLOBAL,
-    agents: EVENTS.SEARCH_AGENTS,
-    mcp: EVENTS.SEARCH_MCP,
-    'mcp-servers': EVENTS.SEARCH_MCP,
-    commands: EVENTS.SEARCH_COMMANDS,
-    rules: EVENTS.SEARCH_RULES,
-    hooks: EVENTS.SEARCH_HOOKS,
-    statuslines: EVENTS.SEARCH_STATUSLINES,
-    collections: EVENTS.SEARCH_COLLECTIONS,
-    guides: EVENTS.SEARCH_GUIDES,
-  },
-  copy_code: {
-    agents: EVENTS.COPY_CODE_AGENT,
-    mcp: EVENTS.COPY_CODE_MCP,
-    'mcp-servers': EVENTS.COPY_CODE_MCP,
-    commands: EVENTS.COPY_CODE_COMMAND,
-    rules: EVENTS.COPY_CODE_RULE,
-    hooks: EVENTS.COPY_CODE_HOOK,
-    statuslines: EVENTS.COPY_CODE_STATUSLINE,
-    guides: EVENTS.COPY_CODE_GUIDE,
-  },
-  copy_markdown: {
-    agents: EVENTS.COPY_MARKDOWN_AGENT,
-    mcp: EVENTS.COPY_MARKDOWN_MCP,
-    'mcp-servers': EVENTS.COPY_MARKDOWN_MCP,
-    commands: EVENTS.COPY_MARKDOWN_COMMAND,
-    rules: EVENTS.COPY_MARKDOWN_RULE,
-    hooks: EVENTS.COPY_MARKDOWN_HOOK,
-    statuslines: EVENTS.COPY_MARKDOWN_STATUSLINE,
-    collections: EVENTS.COPY_MARKDOWN_COLLECTION,
-  },
-  download_markdown: {
-    agents: EVENTS.DOWNLOAD_MARKDOWN_AGENT,
-    mcp: EVENTS.DOWNLOAD_MARKDOWN_MCP,
-    'mcp-servers': EVENTS.DOWNLOAD_MARKDOWN_MCP,
-    commands: EVENTS.DOWNLOAD_MARKDOWN_COMMAND,
-    rules: EVENTS.DOWNLOAD_MARKDOWN_RULE,
-    hooks: EVENTS.DOWNLOAD_MARKDOWN_HOOK,
-    statuslines: EVENTS.DOWNLOAD_MARKDOWN_STATUSLINE,
-    collections: EVENTS.DOWNLOAD_MARKDOWN_COLLECTION,
-  },
-};
+
+/**
+ * Convert category ID to event constant suffix
+ * agents → AGENT, mcp → MCP, statuslines → STATUSLINE
+ */
+function categoryToEventSuffix(categoryId: string): string {
+  // Special cases
+  if (categoryId === 'statuslines') return 'STATUSLINE';
+  if (categoryId === 'mcp') return 'MCP';
+
+  // Remove trailing 's' for singular form
+  const singular = categoryId.replace(/s$/, '');
+  return singular.toUpperCase();
+}
+
+/**
+ * Build event mappings dynamically from registry
+ * Automatically handles all categories - zero manual maintenance
+ */
+function buildEventMappings(): Record<EventAction, Record<string, EventName>> {
+  const categories = getAllCategoryIds();
+
+  const contentViewMap: Record<string, EventName> = {};
+  const searchMap: Record<string, EventName> = { global: EVENTS.SEARCH_GLOBAL };
+  const copyCodeMap: Record<string, EventName> = {};
+  const copyMarkdownMap: Record<string, EventName> = {};
+  const downloadMarkdownMap: Record<string, EventName> = {};
+
+  for (const categoryId of categories) {
+    const suffix = categoryToEventSuffix(categoryId);
+
+    // Build event constant names following convention
+    const contentViewKey = `CONTENT_VIEW_${suffix}` as keyof typeof EVENTS;
+    const searchKey = `SEARCH_${categoryId.toUpperCase()}` as keyof typeof EVENTS;
+    const copyCodeKey = `COPY_CODE_${suffix}` as keyof typeof EVENTS;
+    const copyMarkdownKey = `COPY_MARKDOWN_${suffix}` as keyof typeof EVENTS;
+    const downloadMarkdownKey = `DOWNLOAD_MARKDOWN_${suffix}` as keyof typeof EVENTS;
+
+    // Map to actual event constants if they exist
+    if (contentViewKey in EVENTS) {
+      contentViewMap[categoryId] = EVENTS[contentViewKey] as EventName;
+      contentViewMap['mcp-servers'] = EVENTS[contentViewKey] as EventName; // Alias
+    }
+
+    if (searchKey in EVENTS) {
+      searchMap[categoryId] = EVENTS[searchKey] as EventName;
+      searchMap['mcp-servers'] = EVENTS[searchKey] as EventName; // Alias
+    }
+
+    if (copyCodeKey in EVENTS) {
+      copyCodeMap[categoryId] = EVENTS[copyCodeKey] as EventName;
+      copyCodeMap['mcp-servers'] = EVENTS[copyCodeKey] as EventName; // Alias
+    }
+
+    if (copyMarkdownKey in EVENTS) {
+      copyMarkdownMap[categoryId] = EVENTS[copyMarkdownKey] as EventName;
+      copyMarkdownMap['mcp-servers'] = EVENTS[copyMarkdownKey] as EventName; // Alias
+    }
+
+    if (downloadMarkdownKey in EVENTS) {
+      downloadMarkdownMap[categoryId] = EVENTS[downloadMarkdownKey] as EventName;
+      downloadMarkdownMap['mcp-servers'] = EVENTS[downloadMarkdownKey] as EventName; // Alias
+    }
+  }
+
+  // Add guides events (not in main registry)
+  searchMap.guides = EVENTS.SEARCH_GUIDES;
+  copyCodeMap.guides = EVENTS.COPY_CODE_GUIDE;
+  copyMarkdownMap.guides = EVENTS.COPY_MARKDOWN_GUIDE;
+  downloadMarkdownMap.guides = EVENTS.DOWNLOAD_MARKDOWN_GUIDE;
+
+  return {
+    content_view: contentViewMap,
+    search: searchMap,
+    copy_code: copyCodeMap,
+    copy_markdown: copyMarkdownMap,
+    download_markdown: downloadMarkdownMap,
+  };
+}
+
+/**
+ * Event mapping configuration
+ * Auto-generated from category registry - zero manual maintenance
+ */
+const EVENT_MAPPINGS: Record<EventAction, Record<string, EventName>> = buildEventMappings();
 
 /**
  * Fallback events for when category is not found
+ * Use generic agent events as fallback
  */
 const FALLBACK_EVENTS: Record<EventAction, EventName> = {
-  content_view: EVENTS.CONTENT_VIEW_AGENT, // Default to agent
+  content_view: EVENTS.CONTENT_VIEW_AGENT,
   search: EVENTS.SEARCH_GLOBAL,
-  copy_code: EVENTS.COPY_CODE_OTHER,
-  copy_markdown: EVENTS.COPY_MARKDOWN_OTHER,
-  download_markdown: EVENTS.DOWNLOAD_MARKDOWN_OTHER,
+  copy_code: EVENTS.COPY_CODE_AGENT,
+  copy_markdown: EVENTS.COPY_MARKDOWN_AGENT,
+  download_markdown: EVENTS.DOWNLOAD_MARKDOWN_AGENT,
 };
 
 /**

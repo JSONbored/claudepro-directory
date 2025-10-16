@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import { ArrowLeft, Edit, Share2 } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
@@ -23,7 +23,7 @@ interface CollectionPageProps {
 
 export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
   const { slug } = await params;
-  return await generatePageMetadata('/account/library/:slug', { params: { slug } });
+  return generatePageMetadata('/account/library/:slug', { params: { slug } });
 }
 
 export default async function CollectionDetailPage({ params }: CollectionPageProps) {
@@ -69,19 +69,19 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     : null;
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       {/* Header */}
       <div>
         <Link href={ROUTES.ACCOUNT_LIBRARY}>
-          <Button variant="ghost" className="mb-4 flex items-center gap-2">
+          <Button variant="ghost" className={`mb-4 ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}>
             <ArrowLeft className="h-4 w-4" />
             Back to Library
           </Button>
         </Link>
 
-        <div className="flex items-start justify-between">
+        <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
               <h1 className="text-3xl font-bold">{collection.name}</h1>
               {collection.is_public && (
                 <Badge variant="outline" className="text-xs">
@@ -90,15 +90,15 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
               )}
             </div>
             {collection.description && (
-              <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>{collection.description}</p>
+              <p className="text-muted-foreground">{collection.description}</p>
             )}
-            <div className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
+            <div className={'text-sm text-muted-foreground mt-2'}>
               {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'} •{' '}
               {collection.view_count} views
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             {shareUrl && (
               <Button
                 variant="outline"
@@ -106,14 +106,14 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
                 onClick={() => {
                   navigator.clipboard.writeText(shareUrl);
                 }}
-                className="flex items-center gap-2"
+                className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
               >
                 <Share2 className="h-4 w-4" />
                 Share
               </Button>
             )}
             <Link href={`/account/library/${slug}/edit`}>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Edit className="h-4 w-4" />
                 Edit
               </Button>

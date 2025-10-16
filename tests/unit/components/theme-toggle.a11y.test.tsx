@@ -13,16 +13,16 @@
  * @see src/components/layout/theme-toggle.tsx
  */
 
-import { describe, expect, test } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, test } from 'vitest';
+import { ThemeToggle } from '@/src/components/layout/theme-toggle';
 import {
   axeTest,
   axeTestInteractive,
   testKeyboardNavigation,
   testScreenReaderCompatibility,
 } from '@/tests/utils/accessibility';
-import { ThemeToggle } from '@/src/components/layout/theme-toggle';
 
 describe('ThemeToggle - Accessibility', () => {
   test('should have no accessibility violations', async () => {

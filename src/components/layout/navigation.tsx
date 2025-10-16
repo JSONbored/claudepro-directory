@@ -52,7 +52,8 @@ import { NewIndicator } from '@/src/components/ui/new-indicator';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/ui/sheet';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 import { useSearchShortcut } from '@/src/hooks/use-search-shortcut';
-import { APP_CONFIG, ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
+import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import { ChevronDown, DiscordIcon, Github, LogoIcon, Menu } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -70,7 +71,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   // Only spread onClick if it's defined to avoid exactOptionalPropertyTypes issues
   const linkProps = {
     href,
-    className: `group relative px-2 py-1 text-sm font-medium transition-colors ${UI_CLASSES.DURATION_200} ${
+    className: `group relative px-2 py-1 text-sm font-medium transition-colors duration-200 ${
       active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
     } ${className}`,
     // WCAG 2.1 AA: Indicate current page for screen readers
@@ -83,7 +84,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
       {children}
       {/* Animated underline */}
       <span
-        className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all ${UI_CLASSES.DURATION_300} ${
+        className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all duration-300 ${
           active ? 'w-full' : 'w-0 group-hover:w-full'
         }`}
         aria-hidden="true"
@@ -149,34 +150,36 @@ export const Navigation = () => {
       <NavigationCommandMenu />
 
       <header
-        className={`sticky ${UI_CLASSES.TOP_0} ${UI_CLASSES.Z_50} ${UI_CLASSES.W_FULL} pt-1 px-3 pb-3 transition-all ${UI_CLASSES.DURATION_300} will-change-transform contain-layout`}
+        className={
+          'sticky top-0 z-50 w-full pt-1 px-3 pb-3 transition-all duration-300 will-change-transform contain-layout'
+        }
       >
         <div className="container mx-auto">
           <nav
-            className={`rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all ${UI_CLASSES.DURATION_300} ${
+            className={`rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 ${
               isScrolled ? 'shadow-xl' : ''
             }`}
             aria-label="Main navigation container"
           >
             <div className="px-3 md:px-4">
               <div
-                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-all ${UI_CLASSES.DURATION_300} will-change-transform ${
+                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-all duration-300 will-change-transform ${
                   isScrolled ? 'h-11 md:h-12' : 'h-14 md:h-16'
                 }`}
               >
                 {/* Logo */}
                 <Link
                   href={ROUTES.HOME}
-                  className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 ${UI_CLASSES.MIN_W_0} flex-shrink`}
+                  className={'flex items-center gap-2 min-w-0 flex-shrink'}
                   aria-label="Claude Pro Directory - Go to homepage"
                 >
                   <LogoIcon
-                    className={`transition-all ${UI_CLASSES.DURATION_300} flex-shrink-0 ${UI_CLASSES.HIDDEN} xl:${UI_CLASSES.BLOCK} ${
+                    className={`transition-all duration-300 flex-shrink-0 hidden xl:block ${
                       isScrolled ? 'h-6 w-6' : 'h-8 w-8'
                     }`}
                   />
                   <span
-                    className={`font-medium text-foreground transition-all ${UI_CLASSES.DURATION_300} ${UI_CLASSES.HIDDEN} xl:inline ${
+                    className={`font-medium text-foreground transition-all duration-300 hidden xl:inline ${
                       isScrolled ? 'text-base' : 'text-lg'
                     }`}
                   >
@@ -186,7 +189,7 @@ export const Navigation = () => {
 
                 {/* Desktop Navigation */}
                 <nav
-                  className="hidden lg:flex items-center gap-2 lg:gap-3 xl:gap-4 text-sm xl:text-base"
+                  className={`hidden ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} lg:gap-3 xl:gap-4 text-sm xl:text-base lg:flex`}
                   aria-label="Primary navigation"
                 >
                   {PRIMARY_NAVIGATION.map((link) => (
@@ -197,7 +200,7 @@ export const Navigation = () => {
                       onClick={() => setIsOpen(false)}
                     >
                       {link.isNew ? (
-                        <span className="flex items-center gap-1.5">
+                        <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
                           {link.label}
                           <NewIndicator label={`New: ${link.label}`} />
                         </span>
@@ -233,19 +236,23 @@ export const Navigation = () => {
                                   <DropdownMenuItem key={link.href} asChild>
                                     <Link
                                       href={link.href}
-                                      className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} gap-3 ${UI_CLASSES.W_FULL} cursor-pointer p-3 rounded-lg hover:bg-accent/10 hover:scale-[1.02] transition-all duration-200 group`}
+                                      className={
+                                        'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg hover:bg-accent/10 hover:scale-[1.02] transition-all duration-200 group'
+                                      }
                                     >
                                       {IconComponent && (
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted group-hover:bg-accent/20 transition-colors flex-shrink-0">
+                                        <div
+                                          className={
+                                            'flex h-10 w-10 items-center justify-center rounded-lg bg-muted group-hover:bg-accent/20 transition-colors flex-shrink-0'
+                                          }
+                                        >
                                           <IconComponent
                                             className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors"
                                             aria-hidden="true"
                                           />
                                         </div>
                                       )}
-                                      <div
-                                        className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} gap-1 flex-1`}
-                                      >
+                                      <div className={'flex flex-col items-start gap-1 flex-1'}>
                                         <div className="font-medium group-hover:text-accent transition-colors">
                                           {link.label}
                                         </div>
@@ -269,9 +276,15 @@ export const Navigation = () => {
                       <DropdownMenuItem asChild>
                         <Link
                           href={ROUTES.SUBMIT}
-                          className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} gap-3 ${UI_CLASSES.W_FULL} cursor-pointer p-3 rounded-lg bg-accent/5 hover:bg-accent/10 hover:scale-[1.01] transition-all duration-200 group`}
+                          className={
+                            'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg bg-accent/5 hover:bg-accent/10 hover:scale-[1.01] transition-all duration-200 group'
+                          }
                         >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20 group-hover:bg-accent/30 transition-colors flex-shrink-0">
+                          <div
+                            className={
+                              'flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20 group-hover:bg-accent/30 transition-colors flex-shrink-0'
+                            }
+                          >
                             <svg
                               className="h-5 w-5 text-accent"
                               aria-hidden="true"
@@ -287,9 +300,7 @@ export const Navigation = () => {
                               />
                             </svg>
                           </div>
-                          <div
-                            className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} gap-1 flex-1`}
-                          >
+                          <div className={'flex flex-col items-start gap-1 flex-1'}>
                             <div className="font-medium text-accent">Submit Config</div>
                             <div className="text-xs text-muted-foreground">
                               Share your configuration with the community
@@ -302,9 +313,9 @@ export const Navigation = () => {
                 </nav>
 
                 {/* Right Side Actions */}
-                <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 md:gap-3`}>
+                <div className={'flex items-center gap-2 md:gap-3'}>
                   {/* Global Search Trigger */}
-                  <div className={`${UI_CLASSES.HIDDEN} lg:${UI_CLASSES.BLOCK}`}>
+                  <div className={'hidden lg:block'}>
                     <SearchTrigger
                       variant="ghost"
                       size="sm"
@@ -327,15 +338,15 @@ export const Navigation = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
-                    className={`${UI_CLASSES.HIDDEN_SM_FLEX} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                    className={`hidden sm:flex ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                     aria-label="Join our Discord community"
                   >
                     <DiscordIcon className="h-4 w-4" />
                   </Button>
 
-                  <GitHubStarsButton className={`${UI_CLASSES.HIDDEN_SM_FLEX}`} />
+                  <GitHubStarsButton className={'hidden sm:flex'} />
 
-                  <UserMenu className={`${UI_CLASSES.HIDDEN} md:${UI_CLASSES.FLEX}`} />
+                  <UserMenu className={'hidden md:flex'} />
 
                   <ThemeToggle />
 
@@ -356,24 +367,19 @@ export const Navigation = () => {
                       className="w-[300px] sm:w-[380px] border-l border-border/50"
                     >
                       <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                      <div className={`${UI_CLASSES.FLEX_COL} h-full`}>
+                      <div className={'flex flex-col h-full'}>
                         {/* Header */}
-                        <div
-                          className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3 ${UI_CLASSES.PT_6} ${UI_CLASSES.PB_8} px-1`}
-                        >
+                        <div className={'flex items-center gap-3 pt-6 pb-8 px-1'}>
                           <LogoIcon className="h-8 w-8 flex-shrink-0" />
-                          <span className={`font-semibold ${UI_CLASSES.TEXT_LG} text-foreground`}>
+                          <span className={'font-semibold text-lg text-foreground'}>
                             {APP_CONFIG.domain}
                           </span>
                         </div>
 
                         {/* Main Navigation */}
-                        <div className={`flex-1 ${UI_CLASSES.OVERFLOW_Y_AUTO}`}>
-                          <nav
-                            className={`${UI_CLASSES.SPACE_Y_4} ${UI_CLASSES.PX_3}`}
-                            aria-label="Primary navigation"
-                          >
-                            <div className={UI_CLASSES.SPACE_Y_3}>
+                        <div className={'flex-1 overflow-y-auto'}>
+                          <nav className={'space-y-4 px-3'} aria-label="Primary navigation">
+                            <div className="space-y-3">
                               {PRIMARY_NAVIGATION.map((link) => (
                                 <NavLink
                                   key={link.href}
@@ -383,7 +389,7 @@ export const Navigation = () => {
                                   className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                                 >
                                   {link.isNew ? (
-                                    <span className="flex items-center gap-2">
+                                    <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                                       {link.label}
                                       <NewIndicator label={`New: ${link.label}`} />
                                     </span>
@@ -396,10 +402,10 @@ export const Navigation = () => {
 
                             {/* Secondary Navigation */}
                             <nav
-                              className={`${UI_CLASSES.PT_6} mt-4 ${UI_CLASSES.BORDER_T} border-border/30`}
+                              className={'pt-6 mt-4 border-t border-border/30'}
                               aria-label="Secondary navigation"
                             >
-                              <div className={UI_CLASSES.SPACE_Y_3}>
+                              <div className="space-y-3">
                                 {SECONDARY_NAVIGATION.flatMap((group) => group.links).map(
                                   (link) => (
                                     <NavLink
@@ -427,16 +433,16 @@ export const Navigation = () => {
                         </div>
 
                         {/* Footer Actions */}
-                        <div
-                          className={`${UI_CLASSES.BORDER_T} border-border/30 ${UI_CLASSES.PT_6} pb-6 ${UI_CLASSES.PX_6}`}
-                        >
+                        <div className={'border-t border-border/30 pt-6 pb-6 px-6'}>
                           <div
-                            className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} gap-6`}
+                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2} gap-6`}
                           >
                             <Button
                               variant="outline"
                               size="lg"
-                              className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} hover:bg-discord/10 hover:border-discord/30 transition-all duration-200 active:scale-[0.95]`}
+                              className={
+                                'w-16 h-16 rounded-2xl border-border/40 bg-card hover:bg-discord/10 hover:border-discord/30 transition-all duration-200 active:scale-[0.95]'
+                              }
                               onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
                               aria-label="Join our Discord community"
                             >
@@ -446,7 +452,9 @@ export const Navigation = () => {
                             <Button
                               variant="outline"
                               size="lg"
-                              className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} ${UI_CLASSES.HOVER_BG_ACCENT_10} hover:border-accent/30 transition-all duration-200 active:scale-[0.95]`}
+                              className={
+                                'w-16 h-16 rounded-2xl border-border/40 bg-card hover:bg-accent/10 hover:border-accent/30 transition-all duration-200 active:scale-[0.95]'
+                              }
                               onClick={() => window.open(SOCIAL_LINKS.github, '_blank')}
                               aria-label="View source code on GitHub"
                             >
@@ -454,7 +462,9 @@ export const Navigation = () => {
                             </Button>
 
                             <div
-                              className={`w-16 h-16 ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.ROUNDED_2XL} border border-border/40 ${UI_CLASSES.BG_CARD}`}
+                              className={
+                                'w-16 h-16 flex items-center justify-center rounded-2xl border border-border/40 bg-card'
+                              }
                             >
                               <ThemeToggle />
                             </div>

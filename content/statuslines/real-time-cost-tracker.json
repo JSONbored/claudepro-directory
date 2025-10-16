@@ -1,0 +1,25 @@
+{
+  "slug": "real-time-cost-tracker",
+  "description": "Real-time AI cost tracking statusline with per-session spend analytics, model pricing, and budget alerts",
+  "category": "statuslines",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-16",
+  "tags": ["cost", "pricing", "budget", "analytics", "monitoring"],
+  "statuslineType": "custom",
+  "content": "#!/usr/bin/env bash\n\n# Real-Time Cost Tracker\n# Calculate session costs based on token usage\n\nread -r input\n\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\n\n# 2025 Pricing (per 1M tokens)\nif [[ \"$model\" == *\"claude-sonnet-4\"* ]]; then\n  price_per_m=3.00\nelif [[ \"$model\" == *\"gpt-4\"* ]]; then\n  price_per_m=5.00\nelif [[ \"$model\" == *\"gemini\"* ]]; then\n  price_per_m=1.25\nelse\n  price_per_m=1.00\nfi\n\n# Calculate cost\ncost=$(awk \"BEGIN {printf \\\"%.4f\\\", ($tokens / 1000000) * $price_per_m}\")\n\n# Budget alert\nif (( $(echo \"$cost > 0.50\" | bc -l) )); then\n  color=\"\\033[31m\"  # Red\n  icon=\"⚠️\"\nelif (( $(echo \"$cost > 0.10\" | bc -l) )); then\n  color=\"\\033[33m\"  # Yellow\n  icon=\"💰\"\nelse\n  color=\"\\033[32m\"  # Green\n  icon=\"💵\"\nfi\n\necho -e \"${icon} ${color}$${cost}${color}\\033[0m │ ${tokens} tokens\"\n",
+  "features": [
+    "Real-time cost calculation",
+    "2025 model pricing (Claude, GPT-4, Gemini)",
+    "Budget threshold alerts",
+    "Color-coded spend warnings",
+    "Session cost tracking"
+  ],
+  "configuration": {
+    "format": "bash",
+    "refreshInterval": 1000,
+    "position": "right"
+  },
+  "requirements": ["Bash", "jq", "bc calculator"],
+  "preview": "💵 $0.0234 │ 7,800 tokens",
+  "source": "community"
+}

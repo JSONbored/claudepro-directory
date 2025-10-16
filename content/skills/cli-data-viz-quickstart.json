@@ -1,0 +1,40 @@
+{
+  "slug": "cli-data-viz-quickstart",
+  "title": "CLI Data Viz Quickstart",
+  "seoTitle": "CLI Data Visualization Quickstart Skill",
+  "description": "Turn CSV/JSON into quick charts from the command line; export PNG/SVG for reports.",
+  "category": "skills",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-15",
+  "tags": ["visualization", "charts", "python", "vega"],
+  "content": "# CLI Data Visualization Quickstart Skill\n\n## What This Skill Enables\n\nClaude can create charts and visualizations from your data (CSV, JSON, Excel) using matplotlib, seaborn, plotly, or other visualization libraries. Generate publication-ready charts, dashboards, and data visualizations with custom styling.\n\n## Prerequisites\n\n**Required:**\n- Claude Pro subscription\n- Code Interpreter feature enabled\n- Data file uploaded (CSV, JSON, Excel)\n\n**What Claude handles:**\n- Installing visualization libraries (matplotlib, seaborn, plotly)\n- Data loading and preprocessing\n- Chart generation with customization\n- Exporting to PNG, SVG, or interactive HTML\n- Multi-chart layouts and dashboards\n\n## How to Use This Skill\n\n### Quick Chart from Data\n\n**Prompt:** \"Create a bar chart from this CSV showing sales by category. Make it professional-looking with labels and save as chart.png\"\n\nClaude will:\n1. Load and analyze the CSV\n2. Generate bar chart\n3. Add labels, title, legend\n4. Apply professional styling\n5. Export high-resolution PNG\n\n### Time Series Plot\n\n**Prompt:** \"Plot this time series data: dates on x-axis, values on y-axis. Show trend line and save as SVG.\"\n\nClaude will:\n1. Parse date column\n2. Create line plot\n3. Add trend line (regression)\n4. Format dates nicely\n5. Export as scalable SVG\n\n### Multiple Subplots\n\n**Prompt:** \"Create a 2x2 grid of charts from this data:\n- Top left: revenue by month\n- Top right: customer distribution\n- Bottom left: product performance\n- Bottom right: regional breakdown\nUse consistent colors and save as dashboard.png\"\n\nClaude will:\n1. Create subplot layout\n2. Generate each chart\n3. Apply consistent styling\n4. Add overall title\n5. Export combined visualization\n\n### Interactive Chart\n\n**Prompt:** \"Create an interactive plotly chart with hover tooltips and zoom. Save as HTML.\"\n\nClaude will:\n1. Use plotly library\n2. Create interactive visualization\n3. Add hover information\n4. Enable zoom/pan\n5. Export as standalone HTML file\n\n## Common Workflows\n\n### Sales Dashboard\n```\n\"Create a sales dashboard from this data:\n1. Line chart: monthly revenue trend\n2. Bar chart: top 10 products by sales\n3. Pie chart: sales by region\n4. Table: key metrics summary\nUse a professional color scheme and save as sales_dashboard.png\"\n```\n\n### Statistical Visualization\n```\n\"Visualize this dataset statistically:\n1. Histogram with distribution curve\n2. Box plot showing quartiles\n3. Scatter plot with correlation\n4. Heatmap of correlations between variables\nAdd statistical annotations and save as analysis.png\"\n```\n\n### Comparative Analysis\n```\n\"Compare Year 2024 vs 2025 data:\n1. Side-by-side bar charts\n2. Percentage change annotations\n3. Highlight positive/negative changes with colors\n4. Add summary statistics\nMake it presentation-ready\"\n```\n\n### Custom Styled Chart\n```\n\"Create a chart matching our brand:\n- Primary color: #FF6B35\n- Font: Arial\n- Style: minimalist, no grid lines\n- Background: white\n- High DPI for print (300 dpi)\nShow monthly data as area chart\"\n```\n\n## Chart Types Available\n\n### Basic Charts\n- Line plots (single/multiple series)\n- Bar charts (vertical/horizontal)\n- Scatter plots (with trend lines)\n- Pie charts (with percentages)\n- Area charts (stacked/unstacked)\n\n### Statistical Charts\n- Histograms (with KDE)\n- Box plots (with outliers)\n- Violin plots\n- Heatmaps (correlation matrices)\n- Distribution plots\n\n### Advanced Charts\n- Multi-axis plots\n- Subplots and grids\n- 3D visualizations\n- Animated charts\n- Interactive dashboards\n\n## Tips for Best Results\n\n1. **Describe Your Data**: Tell Claude what each column represents\n2. **Specify Chart Type**: Be clear about visualization type (bar, line, scatter, etc.)\n3. **Styling Preferences**: Mention colors, fonts, size, DPI\n4. **Labels Matter**: Ask for clear titles, axis labels, legends\n5. **Export Format**: PNG for presentations, SVG for web, HTML for interactive\n6. **Size/Resolution**: Specify dimensions (\"800x600 pixels\" or \"10x6 inches at 300 dpi\")\n7. **Multiple Charts**: Describe layout (\"2x2 grid\" or \"side by side\")\n\n## Customization Options\n\n### Colors & Themes\n- Built-in themes (seaborn, ggplot, bmh)\n- Custom color palettes\n- Brand color matching\n- Color-blind friendly palettes\n\n### Annotations\n- Data labels on points/bars\n- Trend lines and statistics\n- Reference lines\n- Text annotations\n- Arrows and callouts\n\n### Export Options\n- PNG (raster, high DPI)\n- SVG (vector, scalable)\n- PDF (print-ready)\n- HTML (interactive)\n- Multiple formats at once\n\n## Troubleshooting\n\n**Issue:** Charts look cluttered\n**Solution:** \"Simplify the chart: remove grid, use fewer colors, increase spacing\"\n\n**Issue:** Text too small or overlapping\n**Solution:** \"Increase font size to 12pt and rotate x-axis labels 45 degrees\"\n\n**Issue:** Colors don't match brand\n**Solution:** Provide hex codes: \"Use #FF6B35 for primary, #4ECDC4 for secondary\"\n\n**Issue:** Export quality is poor\n**Solution:** \"Export at 300 DPI for print quality\" or \"Use vector format (SVG/PDF)\"\n\n**Issue:** Legend blocks data\n**Solution:** \"Move legend outside plot area to the right\" or \"Use smaller legend with abbreviations\"\n\n**Issue:** Date axis formatting is wrong\n**Solution:** \"Format x-axis dates as 'MMM YYYY' with one tick per month\"\n\n## Learn More\n\n- [Matplotlib Gallery](https://matplotlib.org/stable/gallery/index.html) - Chart examples and code\n- [Seaborn Tutorial](https://seaborn.pydata.org/tutorial.html) - Statistical visualization guide\n- [Plotly Documentation](https://plotly.com/python/) - Interactive charts\n- [Data Viz Best Practices](https://www.data-to-viz.com/) - Choosing the right chart\n- [Color Brewer](https://colorbrewer2.org/) - Color scheme picker\n",
+  "features": [
+    "CLI-first workflows",
+    "Common chart templates (bar/line/scatter)",
+    "Headless export",
+    "Reproducible configurations"
+  ],
+  "useCases": ["Exploratory analysis", "Executive snapshots", "CI artifact generation"],
+  "requirements": ["Python 3.11+ or Node.js 18+", "matplotlib/seaborn or vega/vega-lite"],
+  "examples": [
+    {
+      "title": "Bar chart from CSV (Python)",
+      "language": "python",
+      "code": "import pandas as pd\nimport matplotlib.pyplot as plt\n\ndf = pd.read_csv('data.csv')\ndf.groupby('category')['value'].sum().plot(kind='bar')\nplt.tight_layout(); plt.savefig('chart.png', dpi=200)"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": { "steps": ["Install Python 3.11+", "pip install pandas matplotlib seaborn"] },
+    "claudeCode": {
+      "steps": ["For Node: npm i vega vega-lite", "Use headless Chrome for SVG->PNG"]
+    }
+  },
+  "troubleshooting": [
+    {
+      "issue": "Fonts missing in headless mode",
+      "solution": "Install system fonts or specify a font path for rendering."
+    }
+  ],
+  "documentationUrl": "https://matplotlib.org/",
+  "source": "community"
+}

@@ -10,7 +10,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Checkbox } from '@/src/components/ui/checkbox';
@@ -19,6 +18,7 @@ import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
 import { createCollection, updateCollection } from '@/src/lib/actions/content.actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface Bookmark {
   id: string;
@@ -76,12 +76,12 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
     e.preventDefault();
 
     if (!name.trim()) {
-      toast.error('Collection name is required');
+      toasts.error.validation('Collection name is required');
       return;
     }
 
     if (name.length < 2) {
-      toast.error('Collection name must be at least 2 characters');
+      toasts.error.validation('Collection name must be at least 2 characters');
       return;
     }
 
@@ -99,7 +99,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             if (!result.data.collection) {
               throw new Error('Collection data not returned');
             }
-            toast.success('Collection created successfully!');
+            toasts.success.itemCreated('Collection');
             const collectionSlug = result.data.collection.slug;
             router.push(`/account/library/${collectionSlug}`);
             router.refresh();
@@ -117,21 +117,21 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             if (!result.data.collection) {
               throw new Error('Collection data not returned');
             }
-            toast.success('Collection updated successfully!');
+            toasts.success.itemUpdated('Collection');
             router.push(`/account/library/${result.data.collection.slug}`);
             router.refresh();
           }
         }
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Failed to save collection');
+        toasts.error.fromError(error, 'Failed to save collection');
       }
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className={UI_CLASSES.SPACE_Y_6}>
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Collection Name */}
-      <div className={UI_CLASSES.SPACE_Y_2}>
+      <div className="space-y-2">
         <Label htmlFor={nameId}>
           Collection Name <span className="text-destructive">*</span>
         </Label>
@@ -145,13 +145,11 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           required
           disabled={isPending}
         />
-        <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-          {name.length}/100 characters
-        </p>
+        <p className={'text-xs text-muted-foreground'}>{name.length}/100 characters</p>
       </div>
 
       {/* Collection Slug */}
-      <div className={UI_CLASSES.SPACE_Y_2}>
+      <div className="space-y-2">
         <Label htmlFor={slugId}>Slug</Label>
         <Input
           id={slugId}
@@ -163,13 +161,13 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           pattern="[a-z0-9-]+"
           disabled={isPending}
         />
-        <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+        <p className={'text-xs text-muted-foreground'}>
           Used in URL. Leave empty to auto-generate from name.
         </p>
       </div>
 
       {/* Description */}
-      <div className={UI_CLASSES.SPACE_Y_2}>
+      <div className="space-y-2">
         <Label htmlFor={descriptionId}>Description</Label>
         <Textarea
           id={descriptionId}
@@ -180,13 +178,11 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           rows={3}
           disabled={isPending}
         />
-        <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-          {description.length}/500 characters
-        </p>
+        <p className={'text-xs text-muted-foreground'}>{description.length}/500 characters</p>
       </div>
 
       {/* Public Toggle */}
-      <div className="flex items-center gap-3 rounded-lg border p-4">
+      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} rounded-lg border p-4`}>
         <Checkbox
           id={isPublicId}
           checked={isPublic}
@@ -197,7 +193,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           <Label htmlFor={isPublicId} className="text-base font-medium cursor-pointer">
             Public Collection
           </Label>
-          <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+          <p className={'text-sm text-muted-foreground'}>
             Make this collection visible on your public profile
           </p>
         </div>
@@ -205,10 +201,10 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
 
       {/* Bookmarks Selection (only in create mode initially) */}
       {mode === 'create' && bookmarks.length > 0 && (
-        <div className={UI_CLASSES.SPACE_Y_4}>
+        <div className="space-y-4">
           <div>
             <Label className="text-base">Add Bookmarks (Optional)</Label>
-            <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
+            <p className={'text-sm text-muted-foreground mt-1'}>
               Select bookmarks to add to this collection. You can add more later.
             </p>
           </div>
@@ -216,7 +212,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             {bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className="flex items-start space-x-3 rounded-md p-2 hover:bg-accent"
+                className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} rounded-md p-2 hover:bg-accent`}
               >
                 <Checkbox
                   id={bookmark.id}
@@ -236,7 +232,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                 <div className="flex-1">
                   <Label
                     htmlFor={bookmark.id}
-                    className="text-sm font-normal cursor-pointer flex items-center gap-2"
+                    className={`text-sm font-normal cursor-pointer ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}
                   >
                     <Badge variant="outline" className="text-xs capitalize">
                       {bookmark.content_type}
@@ -248,7 +244,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             ))}
           </div>
           {selectedBookmarks.length > 0 && (
-            <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+            <p className={'text-sm text-muted-foreground'}>
               {selectedBookmarks.length} bookmark{selectedBookmarks.length === 1 ? '' : 's'}{' '}
               selected
             </p>
@@ -259,14 +255,14 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       {/* Empty bookmarks message */}
       {mode === 'create' && bookmarks.length === 0 && (
         <div className="rounded-lg border border-dashed p-6 text-center">
-          <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+          <p className={'text-sm text-muted-foreground'}>
             You don't have any bookmarks yet. Create the collection first and add bookmarks later.
           </p>
         </div>
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-4 pt-4">
+      <div className={'flex items-center gap-4 pt-4'}>
         <Button type="submit" disabled={isPending} className="flex-1 sm:flex-initial">
           {isPending
             ? mode === 'create'

@@ -16,13 +16,12 @@
 import { describe, expect, test } from 'vitest';
 import {
   classifyEndpoint,
+  EXACT_ROUTE_CONFIG,
   getRateLimiterKey,
   getRouteDescription,
   isLLMsTxtRoute,
-  validateRateLimitConfig,
-  EXACT_ROUTE_CONFIG,
   ROUTE_PATTERNS,
-  LLMSTXT_PATTERNS,
+  validateRateLimitConfig,
 } from '@/src/lib/middleware/rate-limit-rules';
 
 describe('Rate Limit Rules - Configuration Validation', () => {
@@ -295,7 +294,7 @@ describe('Rate Limit Rules - Security Validation', () => {
   });
 
   test('should handle very long paths', () => {
-    const longPath = '/api/' + 'a'.repeat(1000);
+    const longPath = `/api/${'a'.repeat(1000)}`;
     expect(() => classifyEndpoint(longPath)).not.toThrow();
   });
 });

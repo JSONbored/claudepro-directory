@@ -24,11 +24,25 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { z } from 'zod';
 import {
   clearAllAnnouncementDismissals,
   getAnnouncementDismissalAnalytics,
   useAnnouncementDismissal,
 } from '@/src/hooks/use-announcement-dismissal';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
+
+/**
+ * Dismissal State Schema (Zod) for test validation
+ * Mirrors the production schema from use-announcement-dismissal.ts
+ */
+const dismissalStateSchema = z.record(
+  z.string(),
+  z.object({
+    dismissed: z.boolean(),
+    timestamp: z.string(),
+  })
+);
 
 describe('useAnnouncementDismissal Hook', () => {
   beforeEach(() => {
@@ -88,7 +102,10 @@ describe('useAnnouncementDismissal Hook', () => {
       const stored = window.localStorage.getItem('announcement-dismissals');
       expect(stored).not.toBeNull();
 
-      const parsed = JSON.parse(stored || '{}');
+      // Production-grade: safeParse with Zod validation
+      const parsed = safeParse(stored || '{}', dismissalStateSchema, {
+        strategy: ParseStrategy.VALIDATED_JSON,
+      });
       expect(parsed['test-announcement']).toBeDefined();
       expect(parsed['test-announcement'].dismissed).toBe(true);
     });
@@ -182,7 +199,10 @@ describe('useAnnouncementDismissal Hook', () => {
       });
 
       const stored1 = window.localStorage.getItem('announcement-dismissals');
-      const parsed1 = JSON.parse(stored1 || '{}');
+      // Production-grade: safeParse with Zod validation
+      const parsed1 = safeParse(stored1 || '{}', dismissalStateSchema, {
+        strategy: ParseStrategy.VALIDATED_JSON,
+      });
       expect(parsed1['test-announcement']).toBeDefined();
 
       act(() => {
@@ -190,7 +210,10 @@ describe('useAnnouncementDismissal Hook', () => {
       });
 
       const stored2 = window.localStorage.getItem('announcement-dismissals');
-      const parsed2 = JSON.parse(stored2 || '{}');
+      // Production-grade: safeParse with Zod validation
+      const parsed2 = safeParse(stored2 || '{}', dismissalStateSchema, {
+        strategy: ParseStrategy.VALIDATED_JSON,
+      });
       expect(parsed2['test-announcement']).toBeUndefined();
     });
 

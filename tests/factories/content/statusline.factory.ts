@@ -14,10 +14,7 @@
 
 import { faker } from '@faker-js/faker';
 import type { StatuslineContent } from '@/src/lib/schemas/content/statusline.schema';
-import {
-  createContentFactory,
-  type BaseContentTransientParams,
-} from '../shared/base-content.factory';
+import { createContentFactory } from '../shared/base-content.factory';
 
 export const statuslineFactory = createContentFactory<StatuslineContent>({
   category: 'statuslines',
@@ -39,7 +36,13 @@ export const statuslineFactory = createContentFactory<StatuslineContent>({
       'git status --short',
     ]),
   extendFields: () => ({
-    statuslineType: faker.helpers.arrayElement(['minimal', 'powerline', 'custom', 'rich', 'simple'] as const),
+    statuslineType: faker.helpers.arrayElement([
+      'minimal',
+      'powerline',
+      'custom',
+      'rich',
+      'simple',
+    ] as const),
     configuration: {
       format: faker.helpers.arrayElement(['bash', 'python', 'javascript'] as const),
       refreshInterval: faker.number.int({ min: 1000, max: 10000 }),

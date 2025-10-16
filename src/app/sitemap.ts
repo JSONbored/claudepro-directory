@@ -23,8 +23,9 @@ import { commandsMetadata } from '@/generated/commands-metadata';
 import { hooksMetadata } from '@/generated/hooks-metadata';
 import { mcpMetadata } from '@/generated/mcp-metadata';
 import { rulesMetadata } from '@/generated/rules-metadata';
+import { skillsMetadata } from '@/generated/skills-metadata';
 import { statuslinesMetadata } from '@/generated/statuslines-metadata';
-import { generateAllSiteUrls } from '@/src/lib/build/url-generator';
+import { generateAllSiteUrls } from '@/src/lib/build/url-generator.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 
 /**
@@ -50,6 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       mcpMetadata,
       rulesMetadata,
       statuslinesMetadata,
+      skillsMetadata,
     },
     {
       baseUrl,
@@ -70,7 +72,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 }
 
 /**
- * ISR Revalidation
- * Regenerate sitemap every hour to pick up new content
+ * ISR Revalidation - Sitemap for SEO (centralized config)
  */
-export const revalidate = 3600; // 1 hour
+export const revalidate = 21600;

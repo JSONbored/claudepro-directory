@@ -13,13 +13,11 @@
  * @group smoke
  */
 
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import {
+  expectVisible,
   navigateToHomepage,
   performSearch,
-  expectPageURL,
-  expectVisible,
-  expectText,
   waitForNetworkIdle,
 } from '../helpers/test-helpers';
 
@@ -31,15 +29,13 @@ test.describe('Search Functionality - Smoke Tests', () => {
     await page.keyboard.press(process.platform === 'darwin' ? 'Meta+KeyK' : 'Control+KeyK');
 
     // Verify command palette opened
-    const commandPalette = page.locator('[role="dialog"]').or(
-      page.locator('[role="combobox"]')
-    );
+    const commandPalette = page.locator('[role="dialog"]').or(page.locator('[role="combobox"]'));
     await expectVisible(commandPalette);
 
     // Verify search input exists and is focused
-    const searchInput = commandPalette.locator('input[type="search"]').or(
-      commandPalette.locator('[role="combobox"]')
-    );
+    const searchInput = commandPalette
+      .locator('input[type="search"]')
+      .or(commandPalette.locator('[role="combobox"]'));
     await expectVisible(searchInput);
     await expect(searchInput).toBeFocused();
   });
@@ -57,9 +53,7 @@ test.describe('Search Functionality - Smoke Tests', () => {
     await expect(page).toHaveURL(/\/(search|agents|mcp|rules|commands|hooks|statuslines)/);
 
     // Should show content items
-    const contentItems = page.locator('[data-content-item]').or(
-      page.locator('article')
-    );
+    const contentItems = page.locator('[data-content-item]').or(page.locator('article'));
     const count = await contentItems.count();
     expect(count).toBeGreaterThan(0);
   });
@@ -74,9 +68,7 @@ test.describe('Search Functionality - Smoke Tests', () => {
     await waitForNetworkIdle(page);
 
     // Should show results
-    const contentItems = page.locator('[data-content-item]').or(
-      page.locator('article')
-    );
+    const contentItems = page.locator('[data-content-item]').or(page.locator('article'));
     const count = await contentItems.count();
     expect(count).toBeGreaterThanOrEqual(0); // May be 0 if no database-related content
   });
@@ -88,9 +80,10 @@ test.describe('Search Functionality - Smoke Tests', () => {
     await page.keyboard.press(process.platform === 'darwin' ? 'Meta+KeyK' : 'Control+KeyK');
 
     // Try to submit empty search
-    const searchInput = page.locator('[role="combobox"]').or(
-      page.locator('[type="search"]')
-    ).first();
+    const searchInput = page
+      .locator('[role="combobox"]')
+      .or(page.locator('[type="search"]'))
+      .first();
     await searchInput.press('Enter');
 
     // Should not navigate or should show validation
@@ -112,9 +105,7 @@ test.describe('Search Functionality - Smoke Tests', () => {
 
     // Should show empty state or no results message
     const emptyState = page.getByText(/no results|not found|no items|nothing found/i);
-    const contentItems = page.locator('[data-content-item]').or(
-      page.locator('article')
-    );
+    const contentItems = page.locator('[data-content-item]').or(page.locator('article'));
 
     // Either show empty state OR have 0 items
     const hasEmptyState = await emptyState.isVisible({ timeout: 2000 }).catch(() => false);
@@ -137,15 +128,13 @@ test.describe('Search Functionality - Smoke Tests', () => {
       await filterButton.click();
 
       // Should open filter panel
-      const filterPanel = page.locator('[role="dialog"]').or(
-        page.locator('[data-filter-panel]')
-      );
+      const filterPanel = page.locator('[role="dialog"]').or(page.locator('[data-filter-panel]'));
       await expectVisible(filterPanel);
 
       // Verify filter options exist
-      const filterOptions = filterPanel.locator('[role="checkbox"]').or(
-        filterPanel.locator('input[type="checkbox"]')
-      );
+      const filterOptions = filterPanel
+        .locator('[role="checkbox"]')
+        .or(filterPanel.locator('input[type="checkbox"]'));
       expect(await filterOptions.count()).toBeGreaterThan(0);
     }
   });
@@ -161,9 +150,7 @@ test.describe('Search Functionality - Smoke Tests', () => {
       await sortButton.click();
 
       // Should show sort options
-      const sortOptions = page.getByRole('menuitem').or(
-        page.locator('[role="option"]')
-      );
+      const sortOptions = page.getByRole('menuitem').or(page.locator('[role="option"]'));
       expect(await sortOptions.count()).toBeGreaterThan(0);
     }
   });
@@ -178,9 +165,7 @@ test.describe('Search Functionality - Smoke Tests', () => {
     await waitForNetworkIdle(page);
 
     // Find first content item
-    const firstItem = page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).first();
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
 
     if (await firstItem.isVisible({ timeout: 2000 }).catch(() => false)) {
       // Should have title
@@ -188,8 +173,8 @@ test.describe('Search Functionality - Smoke Tests', () => {
       await expectVisible(title);
 
       // Should have some metadata (author, date, category, etc.)
-      const hasMetadata = await firstItem.locator('time, [data-author], [data-category]')
-        .count() > 0;
+      const hasMetadata =
+        (await firstItem.locator('time, [data-author], [data-category]').count()) > 0;
       expect(hasMetadata).toBeTruthy();
     }
   });
@@ -221,9 +206,7 @@ test.describe('Search Functionality - Smoke Tests', () => {
     await page.keyboard.press(process.platform === 'darwin' ? 'Meta+KeyK' : 'Control+KeyK');
 
     // Verify opened
-    const commandPalette = page.locator('[role="dialog"]').or(
-      page.locator('[role="combobox"]')
-    );
+    const commandPalette = page.locator('[role="dialog"]').or(page.locator('[role="combobox"]'));
     await expectVisible(commandPalette);
 
     // Close with Escape
@@ -260,9 +243,10 @@ test.describe('Search Functionality - Smoke Tests', () => {
     await page.keyboard.press(process.platform === 'darwin' ? 'Meta+KeyK' : 'Control+KeyK');
 
     // Type search query
-    const searchInput = page.locator('[role="combobox"]').or(
-      page.locator('[type="search"]')
-    ).first();
+    const searchInput = page
+      .locator('[role="combobox"]')
+      .or(page.locator('[type="search"]'))
+      .first();
     await searchInput.fill('test');
 
     // Wait for suggestions
@@ -275,7 +259,7 @@ test.describe('Search Functionality - Smoke Tests', () => {
 
     // Should have keyboard-navigable results
     const focusedElement = page.locator(':focus');
-    const isFocused = await focusedElement.count() > 0;
+    const isFocused = (await focusedElement.count()) > 0;
     expect(isFocused).toBeTruthy();
   });
 });

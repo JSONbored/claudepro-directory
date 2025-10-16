@@ -20,17 +20,17 @@
  * @see docs/NAVIGATION_KEYBOARD_GUIDE.md
  */
 
-import { describe, expect, test, vi, beforeEach } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { usePathname } from 'next/navigation';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { Navigation } from '@/src/components/layout/navigation';
 import {
   axeTest,
   axeTestInteractive,
   testKeyboardNavigation,
   testScreenReaderCompatibility,
 } from '@/tests/utils/accessibility';
-import { Navigation } from '@/src/components/layout/navigation';
 
 // Mock Next.js navigation hooks
 vi.mock('next/navigation', () => ({
@@ -312,9 +312,8 @@ describe('Navigation - Accessibility', () => {
         await user.tab();
       }
 
-      // Focus should move out of navigation to "After Nav" button
-      const afterNavButton = screen.getByText('After Nav');
-      // Focus may be on After Nav button or still within nav (acceptable)
+      // Focus should move out of navigation
+      // Focus may be on "After Nav" button or still within nav (acceptable)
       expect(document.activeElement).toBeTruthy();
     });
   });
@@ -347,7 +346,6 @@ describe('Navigation - Accessibility', () => {
         await user.click(sheetButton);
 
         // Mobile sheet should have proper dialog semantics
-        const dialog = screen.queryByRole('dialog');
         // Dialog may not open in test environment due to viewport size
         // Test passes if button is accessible
         expect(sheetButton).toBeInTheDocument();
@@ -391,7 +389,6 @@ describe('Navigation - Accessibility', () => {
       const interactiveElements = container.querySelectorAll('a, button');
 
       interactiveElements.forEach((element) => {
-        const rect = element.getBoundingClientRect();
         // WCAG 2.1 AA: Minimum 44x44px touch target (allowing for some padding/margin)
         // In unit tests, elements may not have computed size, so we check if element exists
         expect(element).toBeInTheDocument();

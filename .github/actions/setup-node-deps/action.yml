@@ -14,6 +14,10 @@ inputs:
     description: 'Additional arguments for npm ci'
     required: false
     default: ''
+  production-only:
+    description: 'Install only production dependencies (--omit=dev)'
+    required: false
+    default: 'false'
 
 outputs:
   cache-hit:
@@ -44,7 +48,14 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: npm ci ${{ inputs.install-args }}
+      run: |
+        if [ "${{ inputs.production-only }}" = "true" ]; then
+          echo "Installing production dependencies only..."
+          npm ci --ignore-scripts --omit=dev ${{ inputs.install-args }}
+        else
+          echo "Installing all dependencies..."
+          npm ci ${{ inputs.install-args }}
+        fi
 
     - name: Generate content metadata
       if: inputs.skip-build-content != 'true'

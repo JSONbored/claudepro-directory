@@ -11,8 +11,8 @@
  * @module tests/e2e/helpers
  */
 
-import { type Page, type Locator, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 // =============================================================================
 // Navigation Helpers
@@ -67,7 +67,7 @@ export async function navigateToSearch(page: Page, query?: string): Promise<void
   await page.goto(url);
   await page.waitForLoadState('networkidle');
   // Allow query parameters in URL check
-  await expect(page).toHaveURL(new RegExp(`^/search`));
+  await expect(page).toHaveURL(/^\/search/);
 }
 
 /**
@@ -171,10 +171,12 @@ export async function fillField(page: Page, selector: string, value: string): Pr
   // Try to find by label first (most accessible)
   const field = page.getByLabel(selector, { exact: false }).or(
     // Fallback to placeholder
-    page.getByPlaceholder(selector, { exact: false }).or(
-      // Fallback to CSS selector
-      page.locator(selector)
-    )
+    page
+      .getByPlaceholder(selector, { exact: false })
+      .or(
+        // Fallback to CSS selector
+        page.locator(selector)
+      )
   );
 
   await field.clear();
@@ -201,9 +203,9 @@ export async function clickButton(
   text: string,
   options: { exact?: boolean } = {}
 ): Promise<void> {
-  const button = page.getByRole('button', { name: text, exact: options.exact }).or(
-    page.locator(`button:has-text("${text}")`).or(page.locator(text))
-  );
+  const button = page
+    .getByRole('button', { name: text, exact: options.exact })
+    .or(page.locator(`button:has-text("${text}")`).or(page.locator(text)));
 
   await button.scrollIntoViewIfNeeded();
   await button.click();
@@ -221,9 +223,7 @@ export async function performSearch(page: Page, query: string): Promise<void> {
   await page.keyboard.press(process.platform === 'darwin' ? 'Meta+KeyK' : 'Control+KeyK');
 
   // Wait for command palette to open
-  const searchInput = page.locator('[role="combobox"]').or(
-    page.locator('[type="search"]')
-  ).first();
+  const searchInput = page.locator('[role="combobox"]').or(page.locator('[type="search"]')).first();
 
   await searchInput.fill(query);
   await page.keyboard.press('Enter');
@@ -358,13 +358,9 @@ export async function expectNoA11yViolations(
 
   // Log violations for debugging
   if (results.violations.length > 0) {
-    console.error('Accessibility violations detected:');
     for (const violation of results.violations) {
-      console.error(`  - ${violation.id}: ${violation.description}`);
-      console.error(`    Impact: ${violation.impact}`);
-      console.error(`    Nodes: ${violation.nodes.length}`);
-      for (const node of violation.nodes) {
-        console.error(`      - ${node.html}`);
+      for (const _node of violation.nodes) {
+        // Nodes are available for debugging if needed
       }
     }
   }

@@ -1,6 +1,7 @@
 import { headers } from 'next/headers';
 import Script from 'next/script';
-import { APP_CONFIG, SEO_CONFIG } from '@/src/lib/constants';
+import { SEO_CONFIG } from '@/src/lib/config/seo-config';
+import { APP_CONFIG } from '@/src/lib/constants';
 import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';

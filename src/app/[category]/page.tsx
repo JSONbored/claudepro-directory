@@ -40,13 +40,17 @@
 
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content-list-server';
-import { statsRedis } from '@/src/lib/cache';
+import { statsRedis } from '@/src/lib/cache.server';
 import { getCategoryConfig, isValidCategory } from '@/src/lib/config/category-config';
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-// ISR - revalidate every 5 minutes for fresh view counts
+/**
+ * ISR Configuration - Category listing pages
+ * Static configurations with view count updates - revalidate every 5 minutes
+ * Balances fresh analytics with performance for category browsing
+ */
 export const revalidate = 300;
 
 /**
@@ -111,7 +115,15 @@ export async function generateStaticParams() {
  */
 export async function generateMetadata({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;
-  return generatePageMetadata('/:category', { params: { category } });
+
+  // Load category config for metadata generation
+  const categoryConfig = getCategoryConfig(category);
+
+  return generatePageMetadata('/:category', {
+    params: { category },
+    categoryConfig: categoryConfig || undefined,
+    category,
+  });
 }
 
 /**
@@ -178,7 +190,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
       description={config.description}
       icon={config.icon.displayName?.toLowerCase() || 'sparkles'}
       items={items}
-      type={category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides'}
+      type={category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides' | 'skills'}
       searchPlaceholder={config.listPage.searchPlaceholder}
       badges={badges}
     />

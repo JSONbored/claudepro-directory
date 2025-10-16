@@ -45,6 +45,7 @@ const CONTENT_TYPE_LABELS: Record<ConfigSubmissionData['type'], string> = {
   commands: 'Command',
   hooks: 'Hook',
   statuslines: 'Statusline',
+  skills: 'Skill',
 } as const;
 
 /**

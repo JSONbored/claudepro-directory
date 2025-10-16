@@ -19,16 +19,16 @@
  * @see src/components/features/search/unified-search.tsx
  */
 
-import { describe, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, test, vi } from 'vitest';
+import { UnifiedSearch } from '@/src/components/features/search/unified-search';
 import {
   axeTest,
   axeTestInteractive,
   testKeyboardNavigation,
   testScreenReaderCompatibility,
 } from '@/tests/utils/accessibility';
-import { UnifiedSearch } from '@/src/components/features/search/unified-search';
 
 // Mock Next.js navigation
 vi.mock('next/navigation', () => ({
@@ -200,10 +200,7 @@ describe('UnifiedSearch - Accessibility', () => {
 
       const searchInput = screen.getByPlaceholderText('Search content...');
 
-      // Input may have aria-describedby for helpful hints
-      // Not required, but good practice
-      const describedBy = searchInput.getAttribute('aria-describedby');
-      // Test passes if attribute exists or doesn't (optional enhancement)
+      // Test passes - input is accessible
       expect(searchInput).toBeInTheDocument();
     });
   });

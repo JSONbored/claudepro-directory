@@ -26,7 +26,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { type SearchableItem, type SearchFilters, searchCache } from '@/src/lib/cache';
+import { searchWithFilters } from '@/src/lib/client/search';
 import { logger } from '@/src/lib/logger';
 import type {
   FilterState,
@@ -34,6 +34,7 @@ import type {
   UseSearchProps,
 } from '@/src/lib/schemas/component.schema';
 import type { ContentItem } from '@/src/lib/schemas/content/content-item-union.schema';
+import type { SearchableItem, SearchFilters } from '@/src/lib/schemas/search.schema';
 import { getDisplayTitle } from '@/src/lib/utils';
 import {
   hasActiveFilters,
@@ -83,17 +84,9 @@ async function performCachedSearch(
   const searchableData = data.map(convertToSearchableItem);
   const searchFilters = convertFilters(filters);
 
-  // Use cached search
-  const results = await searchCache.search(searchableData, query, searchFilters, {
+  // Use client-side search (no Redis caching - not needed for in-memory search)
+  const results = await searchWithFilters(searchableData, query, searchFilters, {
     threshold: options.threshold || 0.3,
-    includeScore: options.includeScore ?? true,
-    keys: [
-      { name: 'name', weight: 2 },
-      { name: 'description', weight: 1.5 },
-      { name: 'category', weight: 1 },
-      { name: 'author', weight: 0.8 },
-      { name: 'tags', weight: 0.6 },
-    ],
   });
 
   // Convert back to ContentItem format

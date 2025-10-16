@@ -19,6 +19,8 @@
  */
 
 import { z } from 'zod';
+import { UI_CONFIG } from '@/src/lib/constants';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import { nonNegativeInt, positiveInt } from './base-numbers';
 
 // ============================================================================
@@ -30,8 +32,8 @@ import { nonNegativeInt, positiveInt } from './base-numbers';
  */
 export const CURSOR_PAGINATION_LIMITS = {
   MIN_LIMIT: 1,
-  DEFAULT_LIMIT: 10,
-  MAX_LIMIT: 100,
+  DEFAULT_LIMIT: UI_CONFIG.pagination.defaultLimit,
+  MAX_LIMIT: UI_CONFIG.pagination.maxLimit,
   MAX_CURSOR_LENGTH: 500, // Base64 encoded cursor max length
 } as const;
 
@@ -271,8 +273,16 @@ export function createCursor(id: string | number): string {
 }
 
 /**
+ * Cursor payload schema (Zod)
+ * Production-grade runtime validation for cursor decoding
+ */
+const cursorPayloadSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+});
+
+/**
  * Decode a cursor to extract the identifier
- * Safely decodes base64 cursor with error handling
+ * Production-grade: Base64 decode + safeParse with Zod validation
  *
  * @param cursor - Base64-encoded cursor string
  * @returns Decoded identifier or null if invalid
@@ -285,15 +295,10 @@ export function decodeCursor(cursor: string): { id: string | number } | null {
     // Decode base64
     const decoded = Buffer.from(cursor, 'base64').toString('utf-8');
 
-    // Parse JSON
-    const parsed = JSON.parse(decoded) as { id: string | number };
-
-    // Validate structure
-    if (!parsed || typeof parsed.id === 'undefined') {
-      return null;
-    }
-
-    return parsed;
+    // Production-grade: safeParse with Zod validation
+    return safeParse(decoded, cursorPayloadSchema, {
+      strategy: ParseStrategy.VALIDATED_JSON,
+    });
   } catch {
     return null;
   }

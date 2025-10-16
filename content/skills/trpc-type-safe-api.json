@@ -1,0 +1,86 @@
+{
+  "slug": "trpc-type-safe-api",
+  "title": "tRPC Type-Safe API Builder",
+  "seoTitle": "tRPC Type-Safe API Builder Skill",
+  "description": "Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications.",
+  "category": "skills",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-16",
+  "tags": ["trpc", "typescript", "api", "type-safety", "t3-stack"],
+  "content": "# tRPC Type-Safe API Builder Skill\n\n## What This Skill Enables\n\nClaude can build fully type-safe APIs using tRPC (TypeScript Remote Procedure Call), part of the T3 Stack explosion in 2025. tRPC provides end-to-end type safety without code generation, schema stitching, or serialization layers - delivering a lighter, more intuitive developer experience than REST or GraphQL. With zero dependencies, tiny client-side footprint, and automatic type inference, tRPC makes full-stack TypeScript development actually enjoyable.\n\n## Prerequisites\n\n**Required:**\n- Claude Pro subscription or Claude Code CLI  \n- Node.js 18+ with TypeScript 5.0+\n- Understanding of React or Next.js\n- Basic API development knowledge\n\n**What Claude handles automatically:**\n- Setting up tRPC server with Express, Next.js, or standalone\n- Creating type-safe routers and procedures\n- Implementing middleware for authentication\n- Generating React Query hooks automatically\n- Adding input validation with Zod\n- Configuring error handling and transformers\n- Setting up WebSocket subscriptions\n- Integrating with Prisma or other ORMs\n\n## How to Use This Skill\n\n### Create Basic tRPC API\n\n**Prompt:** \"Set up a tRPC API with Next.js 15 that has procedures for creating, reading, updating, and deleting todos. Include Zod validation and automatic React Query hooks.\"\n\nClaude will:\n1. Initialize tRPC router with type-safe procedures\n2. Add Zod schemas for input validation\n3. Create CRUD operations with proper types\n4. Set up Next.js API route handlers\n5. Generate React hooks for client usage\n6. Include error handling and transformers\n7. Add TypeScript types exported automatically\n\n### Authentication Middleware\n\n**Prompt:** \"Add JWT authentication middleware to my tRPC API. Protected procedures should verify the token and attach user data to context.\"\n\nClaude will:\n1. Create authentication middleware\n2. Verify JWT tokens with jose library\n3. Extend tRPC context with user data\n4. Create protected procedure wrapper\n5. Add type-safe context typing\n6. Include refresh token logic\n7. Implement role-based authorization\n\n### Real-Time Subscriptions\n\n**Prompt:** \"Build a tRPC subscription that sends real-time notifications when new messages are posted. Use WebSocket transport.\"\n\nClaude will:\n1. Configure WebSocket link on client\n2. Create subscription procedure\n3. Implement event emitter pattern\n4. Add connection status handling\n5. Include automatic reconnection\n6. Type subscription payloads properly\n7. Add subscription filters\n\n### Full-Stack T3 App\n\n**Prompt:** \"Create a complete T3 Stack application with tRPC, Prisma, NextAuth, and Tailwind. Include user authentication, database models, and type-safe API routes.\"\n\nClaude will:\n1. Initialize T3 app with create-t3-app\n2. Set up Prisma schema and migrations\n3. Configure NextAuth providers\n4. Create tRPC routers for all features\n5. Build authenticated UI components\n6. Add optimistic updates with React Query\n7. Include comprehensive error handling\n\n## Tips for Best Results\n\n1. **Use Zod for Validation**: tRPC integrates perfectly with Zod. Always request Zod schemas for input validation to get runtime safety matching TypeScript types.\n\n2. **Leverage Context**: Put database clients, auth sessions, and shared utilities in tRPC context for type-safe access across all procedures.\n\n3. **React Query Integration**: tRPC's React hooks are powered by React Query. Request configurations for caching, refetching, and optimistic updates.\n\n4. **Organize with Sub-Routers**: For large APIs, ask Claude to split procedures into feature-based sub-routers (users, posts, comments) merged into a root router.\n\n5. **Type Inference Magic**: tRPC's `inferProcedureInput` and `inferProcedureOutput` utilities maintain types across client/server. Request these for shared type definitions.\n\n6. **Error Handling**: Use tRPC's `TRPCError` with specific codes (BAD_REQUEST, UNAUTHORIZED, etc.) for consistent error responses.\n\n## Common Workflows\n\n### E-Commerce API\n```\n\"Build a type-safe e-commerce API with tRPC:\n1. Product catalog with filtering and search\n2. Shopping cart management\n3. Order processing with Stripe\n4. User authentication with NextAuth\n5. Admin dashboard procedures\n6. Real-time inventory updates\n7. Include Zod validation and Prisma integration\"\n```\n\n### Social Media Backend\n```\n\"Create a social media backend using tRPC:\n1. User profiles with follow/unfollow\n2. Posts with likes and comments\n3. Real-time notifications via subscriptions\n4. Image uploads to S3\n5. Feed algorithm with pagination\n6. Direct messaging between users\n7. Content moderation procedures\"\n```\n\n### SaaS Multi-Tenant API\n```\n\"Build a multi-tenant SaaS API with tRPC:\n1. Organization and team management\n2. Role-based access control middleware\n3. Usage tracking and billing\n4. Webhook integrations\n5. Audit logging for all actions\n6. Rate limiting per tenant\n7. Data isolation at database level\"\n```\n\n### AI Chat Application\n```\n\"Create a chat app with tRPC and streaming:\n1. OpenAI integration with streaming responses\n2. Chat history with Prisma\n3. Real-time message updates\n4. Typing indicators via subscriptions\n5. File uploads for context\n6. Conversation summarization\n7. Cost tracking per user\"\n```\n\n## Troubleshooting\n\n**Issue:** Type errors between client and server\n**Solution:** Ensure both use the same TypeScript version and tRPC version. Export `AppRouter` type from server and import on client. Run `tsc --noEmit` to catch type issues.\n\n**Issue:** Queries not refetching properly\n**Solution:** Configure React Query's `staleTime` and `cacheTime`. Use `utils.invalidate()` after mutations or enable optimistic updates with `onMutate`.\n\n**Issue:** Authentication context undefined\n**Solution:** Verify middleware runs before protected procedures. Check that `createContext` properly extracts auth token from headers. Ensure client passes credentials.\n\n**Issue:** Slow API responses\n**Solution:** Add database query optimization, implement batching with DataLoader pattern, use tRPC's batching link on client, and consider Redis caching for expensive operations.\n\n**Issue:** WebSocket subscriptions disconnecting\n**Solution:** Implement heartbeat/ping-pong pattern, add automatic reconnection with exponential backoff, check firewall/proxy timeouts, and use connection pooling.\n\n**Issue:** Zod validation too strict\n**Solution:** Use `.optional()`, `.nullable()`, or `.default()` on schema fields. For flexible objects, use `z.record()` or `.passthrough()` to allow extra keys.\n\n## Learn More\n\n- [tRPC Official Documentation](https://trpc.io/docs/)\n- [T3 Stack Tutorial](https://create.t3.gg/)\n- [tRPC with Next.js 15 Guide](https://trpc.io/docs/nextjs)\n- [React Query Integration](https://trpc.io/docs/react-query)\n- [tRPC Awesome List](https://github.com/trpc/trpc/blob/main/www/docs/awesome-trpc.md)\n",
+  "features": [
+    "End-to-end type safety without code generation",
+    "Zero runtime dependencies and tiny bundle size",
+    "Automatic React Query hooks generation",
+    "WebSocket subscriptions support"
+  ],
+  "useCases": [
+    "Full-stack TypeScript applications",
+    "Real-time collaborative apps",
+    "Type-safe microservices communication"
+  ],
+  "requirements": [
+    "Node.js 18+",
+    "TypeScript 5.0+",
+    "@trpc/server ^10.0.0",
+    "@trpc/client ^10.0.0",
+    "@trpc/react-query ^10.0.0"
+  ],
+  "examples": [
+    {
+      "title": "tRPC Server Setup",
+      "language": "typescript",
+      "code": "import { initTRPC, TRPCError } from '@trpc/server';\nimport { z } from 'zod';\nimport { db } from './db';\n\n// Context creation\nexport const createContext = async ({ req }: { req: Request }) => {\n  const token = req.headers.get('authorization')?.replace('Bearer ', '');\n  const user = token ? await verifyToken(token) : null;\n  \n  return {\n    db,\n    user,\n  };\n};\n\ntype Context = Awaited<ReturnType<typeof createContext>>;\n\nconst t = initTRPC.context<Context>().create();\n\n// Middleware\nconst isAuthed = t.middleware(({ ctx, next }) => {\n  if (!ctx.user) {\n    throw new TRPCError({ code: 'UNAUTHORIZED' });\n  }\n  return next({\n    ctx: {\n      user: ctx.user,\n    },\n  });\n});\n\n// Procedures\nexport const publicProcedure = t.procedure;\nexport const protectedProcedure = t.procedure.use(isAuthed);\n\n// Router\nexport const appRouter = t.router({\n  users: t.router({\n    list: publicProcedure\n      .query(async ({ ctx }) => {\n        return ctx.db.user.findMany();\n      }),\n    \n    create: protectedProcedure\n      .input(\n        z.object({\n          name: z.string().min(3),\n          email: z.string().email(),\n        })\n      )\n      .mutation(async ({ ctx, input }) => {\n        return ctx.db.user.create({\n          data: input,\n        });\n      }),\n  }),\n});\n\nexport type AppRouter = typeof appRouter;"
+    },
+    {
+      "title": "Next.js API Route",
+      "language": "typescript",
+      "code": "// app/api/trpc/[trpc]/route.ts\nimport { fetchRequestHandler } from '@trpc/server/adapters/fetch';\nimport { appRouter, createContext } from '~/server/trpc';\n\nconst handler = (req: Request) =>\n  fetchRequestHandler({\n    endpoint: '/api/trpc',\n    req,\n    router: appRouter,\n    createContext,\n  });\n\nexport { handler as GET, handler as POST };"
+    },
+    {
+      "title": "React Client Usage",
+      "language": "typescript",
+      "code": "// app/providers.tsx\nimport { QueryClient, QueryClientProvider } from '@tanstack/react-query';\nimport { httpBatchLink } from '@trpc/client';\nimport { trpc } from '~/utils/trpc';\nimport { useState } from 'react';\n\nexport function Providers({ children }: { children: React.ReactNode }) {\n  const [queryClient] = useState(() => new QueryClient());\n  const [trpcClient] = useState(() =>\n    trpc.createClient({\n      links: [\n        httpBatchLink({\n          url: 'http://localhost:3000/api/trpc',\n          headers() {\n            return {\n              authorization: `Bearer ${getToken()}`,\n            };\n          },\n        }),\n      ],\n    })\n  );\n\n  return (\n    <trpc.Provider client={trpcClient} queryClient={queryClient}>\n      <QueryClientProvider client={queryClient}>\n        {children}\n      </QueryClientProvider>\n    </trpc.Provider>\n  );\n}\n\n// Component usage\nexport function UsersList() {\n  const { data: users, isLoading } = trpc.users.list.useQuery();\n  const createUser = trpc.users.create.useMutation();\n\n  if (isLoading) return <div>Loading...</div>;\n\n  return (\n    <div>\n      {users?.map((user) => (\n        <div key={user.id}>{user.name}</div>\n      ))}\n      <button\n        onClick={() =>\n          createUser.mutate({\n            name: 'New User',\n            email: 'user@example.com',\n          })\n        }\n      >\n        Add User\n      </button>\n    </div>\n  );\n}"
+    },
+    {
+      "title": "Real-Time Subscription",
+      "language": "typescript",
+      "code": "import { EventEmitter } from 'events';\nimport { observable } from '@trpc/server/observable';\n\nconst ee = new EventEmitter();\n\nexport const appRouter = t.router({\n  messages: t.router({\n    onNew: publicProcedure.subscription(() => {\n      return observable<Message>((emit) => {\n        const onMessage = (data: Message) => {\n          emit.next(data);\n        };\n        \n        ee.on('newMessage', onMessage);\n        \n        return () => {\n          ee.off('newMessage', onMessage);\n        };\n      });\n    }),\n    \n    send: protectedProcedure\n      .input(z.object({ text: z.string() }))\n      .mutation(async ({ ctx, input }) => {\n        const message = await ctx.db.message.create({\n          data: {\n            text: input.text,\n            userId: ctx.user.id,\n          },\n        });\n        \n        ee.emit('newMessage', message);\n        return message;\n      }),\n  }),\n});"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Initialize T3 app: npm create t3-app@latest",
+        "Or add to existing: npm install @trpc/server @trpc/client @trpc/react-query",
+        "Ask Claude: 'Set up tRPC with Next.js and create user CRUD routes'",
+        "Claude generates server and client configuration"
+      ]
+    },
+    "claudeCode": {
+      "steps": [
+        "npm install @trpc/server @trpc/client @trpc/react-query zod",
+        "npm install @tanstack/react-query",
+        "Create server/trpc.ts with router",
+        "Create utils/trpc.ts for client",
+        "Set up API route handler"
+      ]
+    }
+  },
+  "troubleshooting": [
+    {
+      "issue": "Type inference not working",
+      "solution": "Export AppRouter type from server, import on client. Ensure same TypeScript and tRPC versions. Check tsconfig.json has strict: true."
+    },
+    {
+      "issue": "React Query hooks missing",
+      "solution": "Verify trpc.Provider wraps app with QueryClientProvider. Check createTRPCReact import and proper initialization."
+    },
+    {
+      "issue": "CORS errors",
+      "solution": "Add CORS middleware to tRPC handler or set proper headers in Next.js API route. For development, use proxy in next.config.js."
+    }
+  ],
+  "documentationUrl": "https://trpc.io/docs/",
+  "source": "community"
+}

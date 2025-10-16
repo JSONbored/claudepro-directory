@@ -1,37 +1,46 @@
 /**
  * Content Type Configurations
  *
- * Centralized configuration for all content types.
- * Each config defines how that content type should be rendered in detail pages.
+ * Detail page rendering configuration for all content types.
+ * Derives metadata from unified category registry to eliminate duplication.
  *
+ * This file contains ONLY detail-page-specific behavior:
+ * - Primary actions (handlers, icons)
+ * - Section visibility flags
+ * - Generator functions (installation, use cases, troubleshooting)
+ *
+ * All base metadata (typeName, icon, colorScheme) imported from category-config.ts.
+ *
+ * @see lib/config/category-config.ts - Single source of truth for category metadata
  * @see lib/types/content-type-config.ts - Type definitions
  * @see components/unified-detail-page.tsx - Component consumer
  */
 
-import { toast } from 'sonner';
-import { BookOpen, Bot, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
+import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+import {
+  commonActions,
+  createNotificationAction,
+} from '@/src/lib/config/factories/action-factories';
+import {
+  commonGenerators,
+  createTroubleshootingGenerator,
+  createUseCasesGenerator,
+} from '@/src/lib/config/factories/generator-factories';
+import { BookOpen, Bot } from '@/src/lib/icons';
 import type { ContentTypeConfigRegistry } from '@/src/lib/types/content-type-config';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { getDisplayTitle } from '@/src/lib/utils';
-import { copyToClipboard } from '@/src/lib/utils/browser.utils';
 
 /**
  * Agent Configuration
  */
-const agentConfig: ContentTypeConfigRegistry['agents'] = {
-  typeName: 'Agent',
-  icon: Bot,
-  colorScheme: 'purple-500',
+const agentConfig: Partial<ContentTypeConfigRegistry['agents']> = {
+  // Base properties (typeName, icon, colorScheme) auto-injected by getContentTypeConfig()
 
-  primaryAction: {
-    label: 'Deploy Agent',
-    icon: <Bot className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
-    handler: () => {
-      toast.success('Agent Deployment', {
-        description: 'Copy the agent content and follow the installation instructions.',
-      });
-    },
-  },
+  primaryAction: createNotificationAction(
+    'Deploy Agent',
+    <Bot className={'h-4 w-4 mr-2'} />,
+    'Agent Deployment',
+    'Copy the agent content and follow the installation instructions.'
+  ),
 
   sections: {
     features: true,
@@ -62,16 +71,11 @@ const agentConfig: ContentTypeConfigRegistry['agents'] = {
       requirements: ['Claude Code or Claude SDK', 'Access to specified tools and functions'],
     }),
 
-    useCases: (item) => {
-      if ('useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0) {
-        return item.useCases;
-      }
-      return [
-        'Automate specialized development workflows',
-        'Provide expert guidance in specific domains',
-        'Enhance code quality and maintainability',
-      ];
-    },
+    useCases: createUseCasesGenerator([
+      'Automate specialized development workflows',
+      'Provide expert guidance in specific domains',
+      'Enhance code quality and maintainability',
+    ]),
 
     requirements: (item) => {
       const baseRequirements = ['Claude Code or Claude SDK'];
@@ -91,36 +95,16 @@ const agentConfig: ContentTypeConfigRegistry['agents'] = {
     },
   },
 
-  metadata: {
-    categoryLabel: 'Agent',
-    showGitHubLink: true,
-    githubPathPrefix: 'content/agents',
-  },
+  // Metadata (categoryLabel, showGitHubLink, githubPathPrefix) auto-injected by getContentTypeConfig()
 };
 
 /**
  * Command Configuration
  */
-const commandConfig: ContentTypeConfigRegistry['commands'] = {
-  typeName: 'Command',
-  icon: Terminal,
-  colorScheme: 'orange-500',
+const commandConfig: Partial<ContentTypeConfigRegistry['commands']> = {
+  // Base properties (typeName, icon, colorScheme) auto-injected by getContentTypeConfig()
 
-  primaryAction: {
-    label: 'Copy Command',
-    icon: <Terminal className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
-    handler: async (item) => {
-      const contentToCopy =
-        'content' in item && typeof item.content === 'string' ? item.content : '';
-      await copyToClipboard(contentToCopy, {
-        component: 'command-config',
-        action: 'copy-content',
-      });
-      toast.success('Copied!', {
-        description: 'Command content has been copied to your clipboard.',
-      });
-    },
-  },
+  primaryAction: commonActions.copyCommand(),
 
   sections: {
     features: true,
@@ -151,36 +135,19 @@ const commandConfig: ContentTypeConfigRegistry['commands'] = {
       requirements: ['Claude Code CLI', 'Command-specific dependencies (see content below)'],
     }),
 
-    useCases: (item) => {
-      if ('useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0) {
-        return item.useCases;
-      }
-
-      const commandName = getDisplayTitle({
-        title: item.title,
-        name: item.name,
-        slug: item.slug,
-        category: item.category,
-      });
-
-      return [
-        `Execute ${commandName} to automate repetitive tasks`,
-        `Integrate ${commandName} into development workflows`,
+    useCases: createUseCasesGenerator(
+      [
+        'Execute {title} to automate repetitive tasks',
+        'Integrate {title} into development workflows',
         'Streamline code review and quality assurance processes',
-      ];
-    },
+      ],
+      { useDisplayTitle: true }
+    ),
 
-    troubleshooting: (item) => {
-      const commandName = getDisplayTitle({
-        title: item.title || '',
-        name: item.name || '',
-        slug: item.slug,
-        category: item.category,
-      });
-
-      return [
+    troubleshooting: createTroubleshootingGenerator(
+      [
         {
-          issue: `${commandName} command not recognized`,
+          issue: '{title} command not recognized',
           solution:
             'Ensure Claude Code is properly installed and the command is configured in .claude/commands/',
         },
@@ -189,37 +156,21 @@ const commandConfig: ContentTypeConfigRegistry['commands'] = {
           solution:
             'Check your network connection and try again. For large projects, consider breaking down the task.',
         },
-      ];
-    },
+      ],
+      { useDisplayTitle: true }
+    ),
   },
 
-  metadata: {
-    categoryLabel: 'Command',
-    showGitHubLink: true,
-    githubPathPrefix: 'content/commands',
-  },
+  // Metadata (categoryLabel, showGitHubLink, githubPathPrefix) auto-injected by getContentTypeConfig()
 };
 
 /**
  * Hook Configuration
  */
-const hookConfig: ContentTypeConfigRegistry['hooks'] = {
-  typeName: 'Hook',
-  icon: Webhook,
-  colorScheme: 'blue-500',
+const hookConfig: Partial<ContentTypeConfigRegistry['hooks']> = {
+  // Base properties (typeName, icon, colorScheme) auto-injected by getContentTypeConfig()
 
-  primaryAction: {
-    label: 'View on GitHub',
-    icon: <Webhook className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
-    handler: (item) => {
-      if ('slug' in item && item.slug) {
-        window.open(
-          `https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/${item.slug}.json`,
-          '_blank'
-        );
-      }
-    },
-  },
+  primaryAction: commonActions.viewHookOnGitHub(),
 
   sections: {
     features: true,
@@ -253,54 +204,34 @@ const hookConfig: ContentTypeConfigRegistry['hooks'] = {
       ],
     }),
 
-    useCases: (item) => {
-      if ('useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0) {
-        return item.useCases;
-      }
-      return [
-        'Automate code formatting and quality checks',
-        'Trigger workflows on specific events',
-        'Integrate with external tools and services',
-      ];
-    },
+    useCases: createUseCasesGenerator([
+      'Automate code formatting and quality checks',
+      'Trigger workflows on specific events',
+      'Integrate with external tools and services',
+    ]),
 
-    troubleshooting: (_item) => {
-      return [
-        {
-          issue: 'Hook script not executing',
-          solution: 'Verify script has executable permissions (chmod +x) and correct shebang line.',
-        },
-        {
-          issue: 'Hook dependencies not found',
-          solution: 'Install required tools (jq, prettier, etc.) and ensure they are in your PATH.',
-        },
-      ];
-    },
+    troubleshooting: commonGenerators.staticTroubleshooting([
+      {
+        issue: 'Hook script not executing',
+        solution: 'Verify script has executable permissions (chmod +x) and correct shebang line.',
+      },
+      {
+        issue: 'Hook dependencies not found',
+        solution: 'Install required tools (jq, prettier, etc.) and ensure they are in your PATH.',
+      },
+    ]),
   },
 
-  metadata: {
-    categoryLabel: 'Hook',
-    showGitHubLink: true,
-    githubPathPrefix: 'content/hooks',
-  },
+  // Metadata (categoryLabel, showGitHubLink, githubPathPrefix) auto-injected by getContentTypeConfig()
 };
 
 /**
  * MCP Server Configuration
  */
-const mcpConfig: ContentTypeConfigRegistry['mcp'] = {
-  typeName: 'MCP Server',
-  icon: Server,
-  colorScheme: 'green-500',
+const mcpConfig: Partial<ContentTypeConfigRegistry['mcp']> = {
+  // Base properties (typeName, icon, colorScheme) auto-injected by getContentTypeConfig()
 
-  primaryAction: {
-    label: 'View Configuration',
-    icon: <Server className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
-    handler: () => {
-      const configSection = document.querySelector('[data-section="configuration"]');
-      configSection?.scrollIntoView({ behavior: 'smooth' });
-    },
-  },
+  primaryAction: commonActions.viewConfiguration(),
 
   sections: {
     features: true,
@@ -335,57 +266,41 @@ const mcpConfig: ContentTypeConfigRegistry['mcp'] = {
       ],
     }),
 
-    useCases: (item) => {
-      if ('useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0) {
-        return item.useCases;
-      }
-      return [
-        'Access external data sources and APIs',
-        'Integrate with third-party services',
-        'Extend Claude capabilities with custom tools',
-      ];
-    },
+    useCases: createUseCasesGenerator([
+      'Access external data sources and APIs',
+      'Integrate with third-party services',
+      'Extend Claude capabilities with custom tools',
+    ]),
 
-    troubleshooting: (_item) => {
-      return [
-        {
-          issue: 'Connection timeout or server not responding',
-          solution:
-            'Check network connectivity and verify server URL endpoints. Ensure firewall allows outbound connections.',
-        },
-        {
-          issue: 'Authentication errors or invalid credentials',
-          solution:
-            'Verify API key format and permissions. Check if credentials need to be refreshed or renewed.',
-        },
-      ];
-    },
+    troubleshooting: commonGenerators.staticTroubleshooting([
+      {
+        issue: 'Connection timeout or server not responding',
+        solution:
+          'Check network connectivity and verify server URL endpoints. Ensure firewall allows outbound connections.',
+      },
+      {
+        issue: 'Authentication errors or invalid credentials',
+        solution:
+          'Verify API key format and permissions. Check if credentials need to be refreshed or renewed.',
+      },
+    ]),
   },
 
-  metadata: {
-    categoryLabel: 'MCP Server',
-    showGitHubLink: true,
-    githubPathPrefix: 'content/mcp',
-  },
+  // Metadata (categoryLabel, showGitHubLink, githubPathPrefix) auto-injected by getContentTypeConfig()
 };
 
 /**
  * Rule Configuration
  */
-const ruleConfig: ContentTypeConfigRegistry['rules'] = {
-  typeName: 'Rule',
-  icon: BookOpen,
-  colorScheme: 'blue-500',
+const ruleConfig: Partial<ContentTypeConfigRegistry['rules']> = {
+  // Base properties (typeName, icon, colorScheme) auto-injected by getContentTypeConfig()
 
-  primaryAction: {
-    label: 'Use Rule',
-    icon: <BookOpen className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
-    handler: () => {
-      toast.success('Rule Integration', {
-        description: 'Copy the rule content and add it to your Claude configuration.',
-      });
-    },
-  },
+  primaryAction: createNotificationAction(
+    'Use Rule',
+    <BookOpen className={'h-4 w-4 mr-2'} />,
+    'Rule Integration',
+    'Copy the rule content and add it to your Claude configuration.'
+  ),
 
   sections: {
     features: false,
@@ -398,76 +313,33 @@ const ruleConfig: ContentTypeConfigRegistry['rules'] = {
   },
 
   generators: {
-    useCases: (item) => {
-      if ('useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0) {
-        return item.useCases;
+    useCases: createUseCasesGenerator(
+      [
+        'Improve code quality and consistency',
+        'Provide specialized guidance in your domain',
+        'Ensure best practices in development workflows',
+      ],
+      {
+        tagMapping: {
+          api: ['Design and review RESTful APIs and GraphQL schemas'],
+          security: ['Conduct security reviews and vulnerability assessments'],
+          frontend: ['Review frontend architecture and component design'],
+          backend: ['Design scalable backend architectures'],
+        },
       }
-
-      const tags = item.tags || [];
-      const generatedUseCases: string[] = [];
-
-      const tagBasedUseCases: Record<string, string[]> = {
-        api: ['Design and review RESTful APIs and GraphQL schemas'],
-        security: ['Conduct security reviews and vulnerability assessments'],
-        frontend: ['Review frontend architecture and component design'],
-        backend: ['Design scalable backend architectures'],
-      };
-
-      tags.forEach((tag) => {
-        const tagUseCases = tagBasedUseCases[tag];
-        if (tagUseCases) {
-          generatedUseCases.push(...tagUseCases);
-        }
-      });
-
-      if (generatedUseCases.length === 0) {
-        generatedUseCases.push(
-          'Improve code quality and consistency',
-          'Provide specialized guidance in your domain',
-          'Ensure best practices in development workflows'
-        );
-      }
-
-      return generatedUseCases;
-    },
+    ),
   },
 
-  metadata: {
-    categoryLabel: 'Rule',
-    showGitHubLink: true,
-    githubPathPrefix: 'content/rules',
-  },
+  // Metadata (categoryLabel, showGitHubLink, githubPathPrefix) auto-injected by getContentTypeConfig()
 };
 
 /**
  * Statusline Configuration
  */
-const statuslineConfig: ContentTypeConfigRegistry['statuslines'] = {
-  typeName: 'Statusline',
-  icon: Terminal,
-  colorScheme: 'cyan-500',
+const statuslineConfig: Partial<ContentTypeConfigRegistry['statuslines']> = {
+  // Base properties (typeName, icon, colorScheme) auto-injected by getContentTypeConfig()
 
-  primaryAction: {
-    label: 'Copy Script',
-    icon: <Terminal className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
-    handler: async (item) => {
-      const scriptContent =
-        'configuration' in item &&
-        typeof item.configuration === 'object' &&
-        item.configuration &&
-        'scriptContent' in item.configuration &&
-        typeof item.configuration.scriptContent === 'string'
-          ? item.configuration.scriptContent
-          : '';
-      await copyToClipboard(scriptContent, {
-        component: 'statusline-config',
-        action: 'copy-script',
-      });
-      toast.success('Copied!', {
-        description: 'Statusline script has been copied to your clipboard.',
-      });
-    },
-  },
+  primaryAction: commonActions.copyScript(),
 
   sections: {
     features: true,
@@ -506,16 +378,11 @@ const statuslineConfig: ContentTypeConfigRegistry['statuslines'] = {
       requirements: ['Claude Code CLI', 'Bash shell', 'Terminal with color support'],
     }),
 
-    useCases: (item) => {
-      if ('useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0) {
-        return item.useCases;
-      }
-      return [
-        'Display real-time session information in CLI',
-        'Customize terminal appearance and branding',
-        'Show project context and status at a glance',
-      ];
-    },
+    useCases: createUseCasesGenerator([
+      'Display real-time session information in CLI',
+      'Customize terminal appearance and branding',
+      'Show project context and status at a glance',
+    ]),
 
     requirements: (item) => {
       const baseRequirements = ['Claude Code CLI', 'Bash shell'];
@@ -536,45 +403,30 @@ const statuslineConfig: ContentTypeConfigRegistry['statuslines'] = {
       return [...baseRequirements, ...detectedRequirements];
     },
 
-    troubleshooting: (_item) => {
-      return [
-        {
-          issue: 'Statusline not displaying or showing incorrect output',
-          solution:
-            'Verify script has executable permissions and test it independently. Check Claude Code config path is correct.',
-        },
-        {
-          issue: 'Colors not rendering correctly',
-          solution:
-            'Ensure your terminal supports color codes. Try setting TERM=xterm-256color environment variable.',
-        },
-      ];
-    },
+    troubleshooting: commonGenerators.staticTroubleshooting([
+      {
+        issue: 'Statusline not displaying or showing incorrect output',
+        solution:
+          'Verify script has executable permissions and test it independently. Check Claude Code config path is correct.',
+      },
+      {
+        issue: 'Colors not rendering correctly',
+        solution:
+          'Ensure your terminal supports color codes. Try setting TERM=xterm-256color environment variable.',
+      },
+    ]),
   },
 
-  metadata: {
-    categoryLabel: 'Statusline',
-    showGitHubLink: true,
-    githubPathPrefix: 'content/statuslines',
-  },
+  // Metadata (categoryLabel, showGitHubLink, githubPathPrefix) auto-injected by getContentTypeConfig()
 };
 
 /**
  * Collection Configuration
  */
-const collectionConfig: ContentTypeConfigRegistry['collections'] = {
-  typeName: 'Collection',
-  icon: Layers,
-  colorScheme: 'indigo-500',
+const collectionConfig: Partial<ContentTypeConfigRegistry['collections']> = {
+  // Base properties (typeName, icon, colorScheme) auto-injected by getContentTypeConfig()
 
-  primaryAction: {
-    label: 'View Collection',
-    icon: <Layers className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
-    handler: () => {
-      const itemsSection = document.querySelector('[data-section="items"]');
-      itemsSection?.scrollIntoView({ behavior: 'smooth' });
-    },
-  },
+  primaryAction: commonActions.viewCollection(),
 
   sections: {
     features: false,
@@ -587,32 +439,77 @@ const collectionConfig: ContentTypeConfigRegistry['collections'] = {
   },
 
   generators: {
-    useCases: (item) => {
-      if ('useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0) {
-        return item.useCases;
-      }
-      return [
-        'Quick start with pre-configured bundles',
-        'Explore curated workflows and best practices',
-        'Discover related content organized by theme',
-      ];
-    },
+    useCases: createUseCasesGenerator([
+      'Quick start with pre-configured bundles',
+      'Explore curated workflows and best practices',
+      'Discover related content organized by theme',
+    ]),
   },
 
-  metadata: {
-    categoryLabel: 'Collection',
-    showGitHubLink: true,
-    githubPathPrefix: 'content/collections',
+  // Metadata (categoryLabel, showGitHubLink, githubPathPrefix) auto-injected by getContentTypeConfig()
+};
+
+/**
+ * Skill Configuration
+ */
+const skillConfig: Partial<ContentTypeConfigRegistry['skills']> = {
+  // Base properties (typeName, icon, colorScheme) auto-injected by getContentTypeConfig()
+
+  primaryAction: commonActions.applySkill(),
+
+  sections: {
+    features: true,
+    installation: true,
+    useCases: true,
+    configuration: false,
+    security: false,
+    troubleshooting: true,
+    examples: true,
   },
+
+  generators: {
+    useCases: createUseCasesGenerator(
+      [
+        'Apply {title} in real-world workflows',
+        'Automate tedious document tasks',
+        'Integrate into CI scripts and pipelines',
+      ],
+      { useDisplayTitle: true }
+    ),
+    installation: (item) => ({
+      claudeDesktop: {
+        steps: [
+          'Ensure required CLI tools are installed (see requirements below)',
+          'Restart Claude Desktop if new tools were added',
+        ],
+      },
+      claudeCode: {
+        steps: ['Install Python/Node packages as required', 'Verify versions match guide'],
+      },
+      requirements:
+        'requirements' in item &&
+        Array.isArray(item.requirements) &&
+        item.requirements.length > 0 &&
+        item.requirements.every((r): r is string => typeof r === 'string')
+          ? item.requirements
+          : ['Install dependencies noted in the guide'],
+    }),
+  },
+
+  // Metadata (categoryLabel, showGitHubLink, githubPathPrefix) auto-injected by getContentTypeConfig()
+  // Note: skills has showGitHubLink: false (exception), will be handled by auto-derivation
 };
 
 /**
  * Content Type Configuration Registry
  *
  * Central registry of all content type configurations.
- * Used internally by getContentTypeConfig function
+ * Used internally by getContentTypeConfig function.
+ *
+ * Note: Base properties (typeName, icon, colorScheme) and metadata
+ * are auto-injected by getContentTypeConfig() from UNIFIED_CATEGORY_REGISTRY.
  */
-const contentTypeConfigs: ContentTypeConfigRegistry = {
+const contentTypeConfigs = {
   agents: agentConfig,
   commands: commandConfig,
   hooks: hookConfig,
@@ -620,15 +517,71 @@ const contentTypeConfigs: ContentTypeConfigRegistry = {
   rules: ruleConfig,
   statuslines: statuslineConfig,
   collections: collectionConfig,
+  skills: skillConfig,
   guides: ruleConfig, // Guides use same config as rules for now
-};
+} as const;
 
 /**
- * Get configuration for a content type
+ * Get configuration for a content type with auto-injected metadata
+ *
+ * Auto-derives properties from UNIFIED_CATEGORY_REGISTRY to eliminate duplication:
+ * - Base properties: typeName, icon, colorScheme
+ * - Metadata: categoryLabel, showGitHubLink, githubPathPrefix
+ *
+ * Benefits:
+ * - DRY: Single source of truth (UNIFIED_CATEGORY_REGISTRY)
+ * - Type-safe: Full TypeScript validation
+ * - Future-proof: New categories automatically get correct metadata
+ *
+ * @param category - Category identifier (agents, mcp, commands, etc.)
+ * @returns Complete configuration with auto-injected metadata, or null if not found
  */
 export function getContentTypeConfig(
   category: string
 ): ContentTypeConfigRegistry[keyof ContentTypeConfigRegistry] | null {
-  const normalizedCategory = category.toLowerCase() as keyof ContentTypeConfigRegistry;
-  return contentTypeConfigs[normalizedCategory] || null;
+  const normalizedCategory = category.toLowerCase();
+
+  // Type-safe lookup with explicit keys
+  type ConfigKey = keyof typeof contentTypeConfigs;
+  const configKey = normalizedCategory as ConfigKey;
+
+  if (!(configKey in contentTypeConfigs)) return null;
+
+  const config = contentTypeConfigs[configKey];
+  if (!config) return null;
+
+  // Get category metadata from registry
+  type RegistryKey = keyof typeof UNIFIED_CATEGORY_REGISTRY;
+  const registryKey = normalizedCategory as RegistryKey;
+
+  if (!(registryKey in UNIFIED_CATEGORY_REGISTRY)) {
+    // Return config as-is if no registry entry (with type assertion for complete config)
+    return config as ContentTypeConfigRegistry[keyof ContentTypeConfigRegistry];
+  }
+
+  const categoryMeta = UNIFIED_CATEGORY_REGISTRY[registryKey];
+
+  // Auto-inject base properties
+  const enhancedConfig = {
+    ...config,
+    typeName: categoryMeta.title,
+    icon: categoryMeta.icon,
+    colorScheme: categoryMeta.colorScheme,
+  };
+
+  // Auto-inject metadata
+  enhancedConfig.metadata = {
+    ...config.metadata,
+    categoryLabel: categoryMeta.title,
+    // GitHub link defaults to true except for skills
+    showGitHubLink: config.metadata?.showGitHubLink ?? normalizedCategory !== 'skills',
+    // GitHub path: agents uses direct contentLoader, others use content/ prefix
+    githubPathPrefix:
+      config.metadata?.githubPathPrefix ||
+      (normalizedCategory === 'agents'
+        ? categoryMeta.contentLoader
+        : `content/${categoryMeta.contentLoader}`),
+  };
+
+  return enhancedConfig as ContentTypeConfigRegistry[keyof ContentTypeConfigRegistry];
 }

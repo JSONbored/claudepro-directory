@@ -57,7 +57,7 @@ describe('useViewTransition', () => {
       const originalMethod = document.startViewTransition;
 
       // @ts-expect-error - Testing unsupported environment
-      delete document.startViewTransition;
+      document.startViewTransition = undefined;
 
       const { result } = renderHook(() => useViewTransition());
 
@@ -74,7 +74,7 @@ describe('useViewTransition', () => {
       const originalMethod = document.startViewTransition;
 
       // @ts-expect-error - Testing unsupported environment
-      delete document.startViewTransition;
+      document.startViewTransition = undefined;
 
       const { result } = renderHook(() => useViewTransition());
 
@@ -186,7 +186,7 @@ describe('useViewTransition', () => {
       const originalMethod = document.startViewTransition;
 
       // @ts-expect-error - Testing unsupported environment
-      delete document.startViewTransition;
+      document.startViewTransition = undefined;
 
       const { result } = renderHook(() => useViewTransition());
       const updateCallback = vi.fn();

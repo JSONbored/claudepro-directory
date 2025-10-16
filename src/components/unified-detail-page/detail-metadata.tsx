@@ -44,7 +44,7 @@ export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
     <div className="container mx-auto px-4">
       {/* Author, Date & View Count Metadata */}
       {hasMetadata && (
-        <div className={UI_CLASSES.FLEX_WRAP_MUTED}>
+        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
           {item.author && (
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <User className="h-4 w-4" />
@@ -78,7 +78,7 @@ export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
         <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
           <Tag className="h-4 w-4 text-muted-foreground" />
           {item.tags.map((tag) => (
-            <Badge key={tag} variant="outline" className={UI_CLASSES.TEXT_XS}>
+            <Badge key={tag} variant="outline" className="text-xs">
               {tag}
             </Badge>
           ))}

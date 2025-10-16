@@ -109,9 +109,14 @@ function parseWithDevalue<T = unknown>(str: string): T {
 
 /**
  * Safely parse a string using JSON.parse with Zod validation
+ *
+ * **INTERNAL USE ONLY**: This is part of the safeParse abstraction layer.
+ * Direct JSON.parse is acceptable HERE because it's immediately followed by Zod validation.
+ * All other code in the codebase MUST use safeParse() instead of JSON.parse directly.
  */
 function parseWithValidation<T>(str: string, schema: z.ZodType<T>): T {
   try {
+    // Direct JSON.parse acceptable: Part of safeParse abstraction layer
     const parsed = JSON.parse(str);
     return schema.parse(parsed);
   } catch (error) {
@@ -123,9 +128,14 @@ function parseWithValidation<T>(str: string, schema: z.ZodType<T>): T {
 
 /**
  * Safely parse a string using JSON.parse (unsafe - for trusted data only)
+ *
+ * **INTERNAL USE ONLY**: This is part of the safeParse abstraction layer.
+ * Direct JSON.parse is acceptable HERE for the UNSAFE_JSON strategy (trusted data only).
+ * All other code in the codebase MUST use safeParse() instead of JSON.parse directly.
  */
 function parseWithUnsafeJSON<T = unknown>(str: string): T {
   try {
+    // Direct JSON.parse acceptable: Part of safeParse abstraction layer (UNSAFE_JSON strategy)
     return JSON.parse(str) as T;
   } catch (error) {
     throw new Error(
@@ -338,9 +348,14 @@ export function safeStringify<T = unknown>(value: T, options?: Partial<Stringify
 
 /**
  * Check if a string is valid JSON without parsing
+ *
+ * **INTERNAL USE ONLY**: This utility validates JSON syntax without returning parsed data.
+ * Direct JSON.parse is acceptable HERE because the result is discarded (validation only).
+ * All other code that needs parsed data MUST use safeParse() instead.
  */
 export function isValidJSON(str: string): boolean {
   try {
+    // Direct JSON.parse acceptable: Validation only, result discarded
     JSON.parse(str);
     return true;
   } catch {

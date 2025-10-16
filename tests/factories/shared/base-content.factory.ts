@@ -152,7 +152,7 @@ export function generateBaseContentFields<T extends BaseContentFields>(
       () => faker.helpers.arrayElement(['community', 'official', 'verified', 'claudepro'] as const),
       { probability: sourceProbability }
     ),
-    documentationUrl: faker.helpers.maybe(() => faker.internet.url() + '/docs', {
+    documentationUrl: faker.helpers.maybe(() => `${faker.internet.url()}/docs`, {
       probability: docUrlProbability,
     }),
     features: faker.helpers.maybe(

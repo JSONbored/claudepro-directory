@@ -32,6 +32,7 @@ export const unifiedContentItemSchema = z
         'rules',
         'commands',
         'hooks',
+        'skills',
         'guides',
         'jobs',
         'statuslines',
@@ -46,6 +47,12 @@ export const unifiedContentItemSchema = z
         'changelog',
       ])
       .describe('Content type category or subcategory for classification and filtering'),
+    subcategory: z
+      .enum(['tutorials', 'comparisons', 'workflows', 'use-cases', 'troubleshooting'])
+      .optional()
+      .describe('Guide subcategory for nested URL structure (/guides/{subcategory}/{slug})'),
+    // Production note: Using .optional() only (not .nullable()) for clean type semantics
+    // Absence is represented by omitted property, not null value
     author: z.string().describe('Name or identifier of the content creator or contributor'),
     dateAdded: z
       .string()
@@ -60,6 +67,12 @@ export const unifiedContentItemSchema = z
       .string()
       .optional()
       .describe('Display title for the content item, auto-generated for some types'), // guides, auto-generated for others
+    displayTitle: z
+      .string()
+      .optional()
+      .describe(
+        'Formatted display title with proper acronym capitalization (API, MCP, etc.), auto-generated at build time'
+      ),
     name: z.string().optional().describe('Auto-generated display name derived from slug or title'), // auto-generated display name
     content: z
       .string()
@@ -267,6 +280,42 @@ export const unifiedContentItemSchema = z
       .optional()
       .describe('Whether guide includes proper citations and references'),
     relatedGuides: stringArray.optional().describe('Slugs of related or complementary guides'),
+
+    // Collection-specific properties
+    collectionType: z
+      .enum(['starter-kit', 'workflow', 'advanced-system', 'use-case'])
+      .optional()
+      .describe('Type of collection bundle'),
+    items: z
+      .array(
+        z.object({
+          category: z
+            .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'])
+            .describe('Content category of the referenced item'),
+          slug: z.string().describe('URL slug of the referenced item'),
+          reason: z.string().optional().describe('Why this item is included in the collection'),
+        })
+      )
+      .optional()
+      .describe('Array of content items included in the collection'),
+    itemCount: z.number().optional().describe('Total number of items in the collection'),
+    prerequisites: stringArray
+      .optional()
+      .describe('Requirements or setup needed before using the collection'),
+    installationOrder: stringArray
+      .optional()
+      .describe('Recommended order for installing collection items'),
+    estimatedSetupTime: z
+      .string()
+      .optional()
+      .describe('Estimated time to complete collection setup (e.g., "30 minutes")'),
+    compatibility: z
+      .object({
+        claudeDesktop: z.boolean().describe('Whether compatible with Claude Desktop'),
+        claudeCode: z.boolean().describe('Whether compatible with Claude Code'),
+      })
+      .optional()
+      .describe('Platform compatibility information'),
 
     // Component-specific display properties
     type: z

@@ -19,16 +19,16 @@
  * @see src/components/shared/error-boundary.tsx
  */
 
-import { describe, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, test, vi } from 'vitest';
+import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import {
   axeTest,
   axeTestInteractive,
   testKeyboardNavigation,
   testScreenReaderCompatibility,
 } from '@/tests/utils/accessibility';
-import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 
 // Component that throws an error for testing
 function ThrowError({ shouldThrow }: { shouldThrow: boolean }) {
@@ -40,6 +40,7 @@ function ThrowError({ shouldThrow }: { shouldThrow: boolean }) {
 
 describe('ErrorBoundary - Accessibility', () => {
   // Suppress console.error for expected errors in tests
+  // biome-ignore lint/suspicious/noConsole: Intentionally capturing console.error for test setup
   const originalError = console.error;
 
   beforeEach(() => {
@@ -47,6 +48,7 @@ describe('ErrorBoundary - Accessibility', () => {
     console.error = vi.fn();
     // Mock window.umami to avoid undefined errors
     global.window = global.window || ({} as Window & typeof globalThis);
+    // biome-ignore lint/suspicious/noExplicitAny: Window global mock requires type assertion
     (window as any).umami = undefined;
   });
 
@@ -205,7 +207,8 @@ describe('ErrorBoundary - Accessibility', () => {
       const originalLocation = window.location;
       let mockHref = originalLocation.href;
 
-      delete (window as any).location;
+      // biome-ignore lint/suspicious/noExplicitAny: Window global modification for test requires type assertion
+      (window as any).location = undefined;
       window.location = {
         ...originalLocation,
         href: mockHref,
@@ -266,7 +269,7 @@ describe('ErrorBoundary - Accessibility', () => {
         </ErrorBoundary>
       );
 
-      const { hasAriaLabels } = testScreenReaderCompatibility(container);
+      testScreenReaderCompatibility(container);
       // Error boundary may not have explicit ARIA labels if using semantic HTML
       // which is acceptable
       expect(container).toBeInTheDocument();
@@ -379,7 +382,7 @@ describe('ErrorBoundary - Accessibility', () => {
       const buttons = container.querySelectorAll('button');
 
       // Tab through all buttons
-      for (let i = 0; i < buttons.length; i++) {
+      for (const _ of buttons) {
         await user.tab();
       }
 
@@ -430,8 +433,7 @@ describe('ErrorBoundary - Accessibility', () => {
         </ErrorBoundary>
       );
 
-      let stackTrace = screen.queryByText(/stack trace/i);
-      expect(stackTrace).not.toBeInTheDocument();
+      expect(screen.queryByText(/stack trace/i)).not.toBeInTheDocument();
 
       // Development mode - show technical details
       process.env.NODE_ENV = 'development';
@@ -441,9 +443,8 @@ describe('ErrorBoundary - Accessibility', () => {
         </ErrorBoundary>
       );
 
-      stackTrace = screen.queryByText(/stack trace/i);
-      // May or may not be visible depending on error
-      // Test passes if component doesn't crash
+      // Stack trace may or may not be visible depending on error
+      // Test passes if component doesn't crash during rerender
 
       process.env.NODE_ENV = originalEnv;
     });

@@ -20,11 +20,10 @@
  * @module app/api/cron/daily-maintenance
  */
 
-import { NextResponse } from 'next/server';
-import { cacheWarmer } from '@/src/lib/cache';
+import { cacheWarmer } from '@/src/lib/cache.server';
+import { createApiRoute } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
-import { withCronAuth } from '@/src/lib/middleware/cron-auth';
-import { emailSequenceService } from '@/src/lib/services/email-sequence.service';
+import { emailSequenceService } from '@/src/lib/services/email-sequence.server';
 import { createClient } from '@/src/lib/supabase/admin-client';
 
 export const runtime = 'nodejs';
@@ -56,202 +55,242 @@ interface TaskResult {
  * @param request - Next.js request object
  * @returns JSON response with all task results
  */
-export async function GET(request: Request) {
-  return withCronAuth(request, async () => {
-    const overallStartTime = performance.now();
-    const results: TaskResult[] = [];
+const route = createApiRoute({
+  auth: { type: 'cron' },
+  response: { envelope: false },
+  handlers: {
+    GET: async ({ okRaw }) => {
+      const overallStartTime = performance.now();
+      const results: TaskResult[] = [];
 
-    logger.info('Daily maintenance cron started');
+      logger.info('Daily maintenance cron started');
 
-    // ============================================
-    // TASK 1: CACHE WARMING
-    // ============================================
-    try {
-      const taskStart = performance.now();
-      logger.info('Task 1/3: Starting cache warming');
+      // ============================================
+      // TASK 1: CACHE WARMING
+      // ============================================
+      try {
+        const taskStart = performance.now();
+        logger.info('Task 1/3: Starting cache warming');
 
-      const cacheResult = await cacheWarmer.triggerManualWarming();
+        const cacheResult = await cacheWarmer.triggerManualWarming();
 
-      results.push({
-        task: 'cache_warming',
-        success: cacheResult.success ?? false,
-        duration_ms: Math.round(performance.now() - taskStart),
-        data: {
-          message: cacheResult.message,
-        },
-      });
+        results.push({
+          task: 'cache_warming',
+          success: cacheResult.success ?? false,
+          duration_ms: Math.round(performance.now() - taskStart),
+          data: {
+            message: cacheResult.message,
+          },
+        });
 
-      logger.info('Task 1/3: Cache warming complete', {
-        success: cacheResult.success ? 'true' : 'false',
-        message: cacheResult.message ?? 'No message',
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error(
-        'Task 1/3: Cache warming failed',
-        error instanceof Error ? error : new Error(String(error))
-      );
+        logger.info('Task 1/3: Cache warming complete', {
+          success: cacheResult.success ? 'true' : 'false',
+          message: cacheResult.message ?? 'No message',
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        logger.error(
+          'Task 1/3: Cache warming failed',
+          error instanceof Error ? error : new Error(String(error))
+        );
 
-      results.push({
-        task: 'cache_warming',
-        success: false,
-        duration_ms: Math.round(performance.now() - overallStartTime),
-        error: errorMessage,
-      });
-    }
-
-    // ============================================
-    // TASK 2: EXPIRE JOBS
-    // ============================================
-    try {
-      const taskStart = performance.now();
-      logger.info('Task 2/3: Starting job expiration');
-
-      const supabase = await createClient();
-      const now = new Date().toISOString();
-
-      // Find all active jobs that have expired
-      const { data: expiredJobs, error: selectError } = await supabase
-        .from('jobs')
-        .select('id, slug, title, company, expires_at, user_id')
-        .eq('status', 'active')
-        .lt('expires_at', now)
-        .not('expires_at', 'is', null);
-
-      if (selectError) {
-        throw new Error(`Failed to query expired jobs: ${selectError.message}`);
+        results.push({
+          task: 'cache_warming',
+          success: false,
+          duration_ms: Math.round(performance.now() - overallStartTime),
+          error: errorMessage,
+        });
       }
 
-      // Update expired jobs if any found
-      let expiredCount = 0;
-      if (expiredJobs && expiredJobs.length > 0) {
-        const typedExpiredJobs = expiredJobs as ExpiredJob[];
+      // ============================================
+      // TASK 2: EXPIRE JOBS
+      // ============================================
+      try {
+        const taskStart = performance.now();
+        logger.info('Task 2/3: Starting job expiration');
 
-        const { error: updateError } = await supabase
+        const supabase = await createClient();
+        const now = new Date().toISOString();
+
+        // Find all active jobs that have expired
+        const { data: expiredJobs, error: selectError } = await supabase
           .from('jobs')
-          .update({
-            status: 'expired',
-            active: false,
-          })
-          .in(
-            'id',
-            typedExpiredJobs.map((j) => j.id)
-          );
+          .select('id, slug, title, company, expires_at, user_id')
+          .eq('status', 'active')
+          .lt('expires_at', now)
+          .not('expires_at', 'is', null);
 
-        if (updateError) {
-          throw new Error(`Failed to update expired jobs: ${updateError.message}`);
+        if (selectError) {
+          throw new Error(`Failed to query expired jobs: ${selectError.message}`);
         }
 
-        expiredCount = typedExpiredJobs.length;
-        logger.info(
-          `Expired ${expiredCount} jobs: ${typedExpiredJobs.map((j) => j.slug).join(', ')}`
+        // Update expired jobs if any found
+        let expiredCount = 0;
+        if (expiredJobs && expiredJobs.length > 0) {
+          const typedExpiredJobs = expiredJobs as ExpiredJob[];
+
+          const { error: updateError } = await supabase
+            .from('jobs')
+            .update({
+              status: 'expired',
+              active: false,
+            })
+            .in(
+              'id',
+              typedExpiredJobs.map((j) => j.id)
+            );
+
+          if (updateError) {
+            throw new Error(`Failed to update expired jobs: ${updateError.message}`);
+          }
+
+          expiredCount = typedExpiredJobs.length;
+          logger.info(
+            `Expired ${expiredCount} jobs: ${typedExpiredJobs.map((j) => j.slug).join(', ')}`
+          );
+        }
+
+        results.push({
+          task: 'expire_jobs',
+          success: true,
+          duration_ms: Math.round(performance.now() - taskStart),
+          data: {
+            expired_count: expiredCount,
+            jobs_expired:
+              expiredJobs?.map((j) => ({
+                id: j.id,
+                slug: j.slug,
+                title: j.title,
+              })) || [],
+          },
+        });
+
+        logger.info('Task 2/3: Job expiration complete', {
+          expired_count: expiredCount,
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        logger.error(
+          'Task 2/3: Job expiration failed',
+          error instanceof Error ? error : new Error(String(error))
         );
+
+        results.push({
+          task: 'expire_jobs',
+          success: false,
+          duration_ms: Math.round(performance.now() - overallStartTime),
+          error: errorMessage,
+        });
       }
 
-      results.push({
-        task: 'expire_jobs',
-        success: true,
-        duration_ms: Math.round(performance.now() - taskStart),
-        data: {
-          expired_count: expiredCount,
-          jobs_expired:
-            expiredJobs?.map((j) => ({
-              id: j.id,
-              slug: j.slug,
-              title: j.title,
-            })) || [],
-        },
-      });
+      // ============================================
+      // TASK 3: PROCESS EMAIL SEQUENCES
+      // ============================================
+      try {
+        const taskStart = performance.now();
+        logger.info('Task 3/3: Starting email sequence processing');
 
-      logger.info('Task 2/3: Job expiration complete', {
-        expired_count: expiredCount,
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error(
-        'Task 2/3: Job expiration failed',
-        error instanceof Error ? error : new Error(String(error))
-      );
+        const emailResults = await emailSequenceService.processSequenceQueue();
 
-      results.push({
-        task: 'expire_jobs',
-        success: false,
-        duration_ms: Math.round(performance.now() - overallStartTime),
-        error: errorMessage,
-      });
-    }
+        results.push({
+          task: 'process_email_sequences',
+          success: true,
+          duration_ms: Math.round(performance.now() - taskStart),
+          data: {
+            sent: emailResults.sent,
+            failed: emailResults.failed,
+            total: emailResults.sent + emailResults.failed,
+            success_rate:
+              emailResults.sent > 0
+                ? `${((emailResults.sent / (emailResults.sent + emailResults.failed)) * 100).toFixed(1)}%`
+                : '0%',
+          },
+        });
 
-    // ============================================
-    // TASK 3: PROCESS EMAIL SEQUENCES
-    // ============================================
-    try {
-      const taskStart = performance.now();
-      logger.info('Task 3/3: Starting email sequence processing');
-
-      const emailResults = await emailSequenceService.processSequenceQueue();
-
-      results.push({
-        task: 'process_email_sequences',
-        success: true,
-        duration_ms: Math.round(performance.now() - taskStart),
-        data: {
+        logger.info('Task 3/3: Email sequence processing complete', {
           sent: emailResults.sent,
           failed: emailResults.failed,
-          total: emailResults.sent + emailResults.failed,
-          success_rate:
-            emailResults.sent > 0
-              ? `${((emailResults.sent / (emailResults.sent + emailResults.failed)) * 100).toFixed(1)}%`
-              : '0%',
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        logger.error(
+          'Task 3/3: Email sequence processing failed',
+          error instanceof Error ? error : new Error(String(error))
+        );
+
+        results.push({
+          task: 'process_email_sequences',
+          success: false,
+          duration_ms: Math.round(performance.now() - overallStartTime),
+          error: errorMessage,
+        });
+      }
+
+      // ============================================
+      // SUMMARY
+      // ============================================
+      const totalDuration = Math.round(performance.now() - overallStartTime);
+      const successfulTasks = results.filter((r) => r.success).length;
+      const failedTasks = results.filter((r) => !r.success).length;
+
+      logger.info('Daily maintenance cron completed', {
+        total_duration_ms: totalDuration,
+        total_duration_sec: (totalDuration / 1000).toFixed(2),
+        successful_tasks: successfulTasks,
+        failed_tasks: failedTasks,
+        task_summary: JSON.stringify(
+          results.map((r) => ({
+            task: r.task,
+            success: r.success,
+            duration_ms: r.duration_ms,
+          }))
+        ),
+      });
+
+      // ============================================
+      // BETTERSTACK HEARTBEAT (Success Only)
+      // ============================================
+      // Only send heartbeat on complete success - BetterStack will alert if heartbeat is missing
+      // Non-blocking: Heartbeat failure won't break cron execution
+      if (failedTasks === 0) {
+        const { env } = await import('@/src/lib/schemas/env.schema');
+        const heartbeatUrl = env.BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE;
+
+        if (heartbeatUrl) {
+          try {
+            await fetch(heartbeatUrl, {
+              method: 'GET',
+              signal: AbortSignal.timeout(5000), // 5 second timeout
+            });
+            logger.info('BetterStack heartbeat sent successfully');
+          } catch (error) {
+            // Non-critical: Log warning but don't fail the cron
+            logger.warn('Failed to send BetterStack heartbeat (non-critical)', {
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        }
+      }
+
+      return okRaw(
+        {
+          success: failedTasks === 0,
+          total_duration_ms: totalDuration,
+          successful_tasks: successfulTasks,
+          failed_tasks: failedTasks,
+          results,
+          timestamp: new Date().toISOString(),
         },
-      });
-
-      logger.info('Task 3/3: Email sequence processing complete', {
-        sent: emailResults.sent,
-        failed: emailResults.failed,
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error(
-        'Task 3/3: Email sequence processing failed',
-        error instanceof Error ? error : new Error(String(error))
+        { sMaxAge: 0, staleWhileRevalidate: 0 }
       );
+    },
+  },
+});
 
-      results.push({
-        task: 'process_email_sequences',
-        success: false,
-        duration_ms: Math.round(performance.now() - overallStartTime),
-        error: errorMessage,
-      });
-    }
-
-    // ============================================
-    // SUMMARY
-    // ============================================
-    const totalDuration = Math.round(performance.now() - overallStartTime);
-    const successfulTasks = results.filter((r) => r.success).length;
-    const failedTasks = results.filter((r) => !r.success).length;
-
-    logger.info('Daily maintenance cron completed', {
-      total_duration_ms: totalDuration,
-      total_duration_sec: (totalDuration / 1000).toFixed(2),
-      successful_tasks: successfulTasks,
-      failed_tasks: failedTasks,
-      task_summary: JSON.stringify(
-        results.map((r) => ({
-          task: r.task,
-          success: r.success,
-          duration_ms: r.duration_ms,
-        }))
-      ),
-    });
-
-    return NextResponse.json({
-      success: failedTasks === 0,
-      total_duration_ms: totalDuration,
-      successful_tasks: successfulTasks,
-      failed_tasks: failedTasks,
-      results,
-      timestamp: new Date().toISOString(),
-    });
-  });
+export async function GET(
+  request: Request,
+  context: { params: Promise<Record<string, never>> }
+): Promise<Response> {
+  if (!route.GET) return new Response('Method Not Allowed', { status: 405 });
+  return route.GET(request, context);
 }

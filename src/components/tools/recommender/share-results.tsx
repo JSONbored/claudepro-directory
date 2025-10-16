@@ -6,7 +6,6 @@
  */
 
 import { useState } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import {
   Dialog,
@@ -19,6 +18,7 @@ import { Input } from '@/src/components/ui/input';
 import { Check, Copy, Facebook, Linkedin, Mail, Share2, Twitter } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface ShareResultsProps {
   shareUrl: string;
@@ -33,10 +33,10 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      toast.success('Link copied to clipboard!');
+      toasts.success.linkCopied();
       setTimeout(() => setCopied(false), 2000);
     } catch (_error) {
-      toast.error('Failed to copy link');
+      toasts.error.copyFailed('link');
     }
   };
 
@@ -55,7 +55,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Share2 className="h-5 w-5" />
             Share Your Results
           </DialogTitle>
@@ -64,9 +64,9 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
           </DialogDescription>
         </DialogHeader>
 
-        <div className={UI_CLASSES.SPACE_Y_4}>
+        <div className="space-y-4">
           {/* Copy link */}
-          <div className="flex items-center gap-2">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Input
               readOnly
               value={shareUrl}

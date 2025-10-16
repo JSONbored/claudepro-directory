@@ -14,8 +14,9 @@ import { ViewTracker } from '@/src/components/shared/view-tracker';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
-import { contentCache, statsRedis } from '@/src/lib/cache';
-import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
+import { contentCache, statsRedis } from '@/src/lib/cache.server';
+import { APP_CONFIG } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { ArrowLeft, BookOpen, Calendar, Eye, FileText, Tag, Users, Zap } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -23,8 +24,11 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { GuideItemWithCategory } from '@/src/lib/utils/content.utils';
 
-// ISR Configuration - Revalidate every 5 minutes for fresh view counts
-export const revalidate = 300;
+/**
+ * ISR Configuration - Guide detail pages
+ * Documentation content updates occasionally - revalidate every 30 minutes
+ */
+export const revalidate = 1800;
 export const dynamicParams = true;
 
 // Validation schema for guide parameters
@@ -256,8 +260,15 @@ export async function generateMetadata({
   params: Promise<{ category: string; slug: string }>;
 }): Promise<Metadata> {
   const { category, slug } = await params;
+
+  // Load guide data for metadata generation
+  const guideData = await getSEOPageData(category, slug);
+
   return generatePageMetadata('/guides/:category/:slug', {
     params: { category, slug },
+    item: guideData || undefined,
+    category,
+    slug,
   });
 }
 
@@ -410,12 +421,12 @@ export default async function SEOGuidePage({
         <Script id={articleId} type="application/ld+json" strategy="afterInteractive">
           {JSON.stringify(articleData)}
         </Script>
-        <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
+        <div className={'min-h-screen bg-background'}>
           {/* Header - matches content pages */}
-          <div className={`${UI_CLASSES.BORDER_B} border-border/50 ${UI_CLASSES.BG_CARD}/30`}>
+          <div className={'border-b border-border/50 bg-card/30'}>
             <div className="container mx-auto px-4 py-8">
               {/* Modern back navigation */}
-              <div className={UI_CLASSES.MB_6}>
+              <div className="mb-6">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -429,19 +440,19 @@ export default async function SEOGuidePage({
                 </Button>
               </div>
 
-              <div className={UI_CLASSES.MAX_W_4XL}>
-                <div className={`flex ${UI_CLASSES.ITEMS_START} gap-4 ${UI_CLASSES.MB_6}`}>
-                  <div className={`p-3 ${UI_CLASSES.BG_ACCENT_10} rounded-lg`}>
+              <div className="max-w-4xl">
+                <div className={'flex items-start gap-4 mb-6'}>
+                  <div className={'p-3 bg-accent/10 rounded-lg'}>
                     <Icon className="h-6 w-6 text-primary" />
                   </div>
-                  <div className={UI_CLASSES.FLEX_1}>
-                    <h1 className={`text-3xl font-bold ${UI_CLASSES.MB_2}`}>{data.title}</h1>
+                  <div className="flex-1">
+                    <h1 className={'text-3xl font-bold mb-2'}>{data.title}</h1>
                     <p className="text-lg text-muted-foreground">{data.description}</p>
                   </div>
                 </div>
 
                 {/* Metadata */}
-                <div className={`${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.TEXT_SM_MUTED}`}>
+                <div className={`flex flex-wrap gap-4 ${UI_CLASSES.TEXT_SM_MUTED}`}>
                   <Badge variant="secondary">
                     {category ? categoryLabels[category] || category : 'Guide'}
                   </Badge>

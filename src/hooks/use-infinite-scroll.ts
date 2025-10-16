@@ -1,122 +1,175 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+'use client';
 
 /**
- * Options for configuring the infinite scroll behavior
+ * useInfiniteScroll Hook
+ * Production-grade infinite scroll using Intersection Observer API
+ * Fully compatible with CSS Grid layouts (no absolute positioning required)
  *
- * @property {number} [threshold=0.1] - Percentage of target visibility to trigger loading (0.0 to 1.0)
- * @property {string} [rootMargin='100px'] - Margin around the root element for early triggering
- * @property {boolean} [hasMore] - Whether more content is available to load
- * @property {boolean} [loading] - Whether content is currently being loaded
+ * Features:
+ * - Automatic batch loading with configurable sizes
+ * - Built-in loading state management
+ * - Threshold validation (0-1 range)
+ * - Proper cleanup and memory management
+ * - Performance optimized with useCallback memoization
+ * - Type-safe with full TypeScript support
+ *
+ * @module hooks/use-infinite-scroll
  */
-interface InfiniteScrollHookOptions {
-  threshold?: number;
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { logger } from '@/src/lib/logger';
+
+interface UseInfiniteScrollOptions {
+  /** Total number of items available */
+  totalItems: number;
+  /** Number of items to load per batch (default: 30) */
+  batchSize?: number;
+  /** Root margin for intersection observer - when to trigger load (default: '400px') */
   rootMargin?: string;
-  hasMore?: boolean;
-  loading?: boolean;
+  /** Threshold for intersection observer (0-1 range, default: 0.1) */
+  threshold?: number;
+  /** Custom root element for intersection observer (default: viewport) */
+  root?: Element | Document | null;
+}
+
+interface UseInfiniteScrollReturn {
+  /** Current number of items to display */
+  displayCount: number;
+  /** Whether more items are being loaded */
+  isLoading: boolean;
+  /** Whether there are more items to load */
+  hasMore: boolean;
+  /** Ref to attach to the sentinel element */
+  sentinelRef: (node: HTMLDivElement | null) => void;
+  /** Reset to initial state */
+  reset: () => void;
 }
 
 /**
- * Custom hook for implementing infinite scroll functionality using Intersection Observer API
- *
- * This hook automatically triggers the `onLoadMore` callback when a sentinel element
- * becomes visible in the viewport, enabling seamless infinite scrolling experiences.
- *
- * @param {() => void | Promise<void>} onLoadMore - Callback function to load more content
- * @param {InfiniteScrollHookOptions} options - Configuration options for scroll behavior
- * @param {number} [options.threshold=0.1] - Visibility threshold (0.0 to 1.0) to trigger loading
- * @param {string} [options.rootMargin='100px'] - Margin around root to trigger early loading
- * @param {boolean} [options.hasMore] - Flag indicating if more content is available
- * @param {boolean} [options.loading] - Flag indicating if content is currently loading
- *
- * @returns {React.RefObject<HTMLDivElement>} Ref object to attach to the sentinel element
+ * Hook for implementing infinite scroll with Intersection Observer
  *
  * @example
  * ```tsx
- * function ContentList() {
- *   const [items, setItems] = useState([]);
- *   const [hasMore, setHasMore] = useState(true);
- *   const [loading, setLoading] = useState(false);
+ * const { displayCount, isLoading, hasMore, sentinelRef } = useInfiniteScroll({
+ *   totalItems: items.length,
+ *   batchSize: 30,
+ *   rootMargin: '400px',
+ * });
  *
- *   const loadMore = async () => {
- *     setLoading(true);
- *     const newItems = await fetchMoreItems();
- *     setItems(prev => [...prev, ...newItems]);
- *     setHasMore(newItems.length > 0);
- *     setLoading(false);
- *   };
- *
- *   const observerTarget = useInfiniteScroll(loadMore, {
- *     threshold: 0.5,
- *     rootMargin: '200px',
- *     hasMore,
- *     loading,
- *   });
- *
- *   return (
- *     <div>
- *       {items.map(item => <Item key={item.id} {...item} />)}
- *       {hasMore && <div ref={observerTarget} />}
- *       {loading && <Spinner />}
- *     </div>
- *   );
- * }
+ * const displayedItems = items.slice(0, displayCount);
  * ```
  */
-export function useInfiniteScroll(
-  onLoadMore: () => void | Promise<void>,
-  options: InfiniteScrollHookOptions
-) {
-  const { threshold = 0.1, rootMargin = '100px', hasMore, loading } = options;
-  const observerTarget = useRef<HTMLDivElement>(null);
-  const [isIntersecting, setIsIntersecting] = useState(false);
+export function useInfiniteScroll({
+  totalItems,
+  batchSize = 30,
+  rootMargin = '400px',
+  threshold = 0.1,
+  root = null,
+}: UseInfiniteScrollOptions): UseInfiniteScrollReturn {
+  // Validate threshold (shadcn-inspired production safety)
+  const safeThreshold = useCallback(() => {
+    if (threshold < 0 || threshold > 1) {
+      logger.warn(
+        'Invalid threshold for infinite scroll',
+        { component: 'useInfiniteScroll' },
+        {
+          receivedThreshold: threshold,
+          usingDefault: 0.1,
+        }
+      );
+      return 0.1;
+    }
+    return threshold;
+  }, [threshold]);
+
+  const [displayCount, setDisplayCount] = useState(batchSize);
+  const [isLoading, setIsLoading] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
-    const [target] = entries;
-    if (target) {
-      setIsIntersecting(target.isIntersecting);
-    }
-  }, []);
+  const hasMore = displayCount < totalItems;
 
-  useEffect(() => {
-    if (isIntersecting && hasMore && !loading) {
-      const result = onLoadMore();
-      if (result instanceof Promise) {
-        result.catch(() => {
-          // Error already handled by parent component
-        });
+  /**
+   * Load next batch of items
+   * Uses setTimeout for smooth UX and to prevent race conditions
+   */
+  const loadMore = useCallback(() => {
+    if (isLoading || !hasMore) return;
+
+    setIsLoading(true);
+
+    // Small delay for smooth UX and to batch rapid scroll events
+    setTimeout(() => {
+      setDisplayCount((prev) => Math.min(prev + batchSize, totalItems));
+      setIsLoading(false);
+    }, 100);
+  }, [isLoading, hasMore, batchSize, totalItems]);
+
+  /**
+   * Callback ref for sentinel element
+   * Handles observer setup/cleanup with proper dependency tracking
+   */
+  const sentinelRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      // Disconnect previous observer
+      if (observerRef.current) {
+        observerRef.current.disconnect();
       }
-    }
-  }, [isIntersecting, hasMore, loading, onLoadMore]);
 
-  // Set up observer whenever hasMore or loading changes (indicates element may have been remounted)
+      // Don't observe if no more items (performance optimization)
+      if (!hasMore) return;
+
+      // Don't observe if currently loading (prevent duplicate requests)
+      if (isLoading) return;
+
+      // No node to observe
+      if (!node) return;
+
+      // Create new observer with validated threshold
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0]?.isIntersecting && hasMore) {
+            loadMore();
+          }
+        },
+        {
+          root,
+          rootMargin,
+          threshold: safeThreshold(),
+        }
+      );
+
+      // Start observing
+      observerRef.current.observe(node);
+    },
+    [hasMore, isLoading, loadMore, root, rootMargin, safeThreshold]
+  );
+
+  /**
+   * Reset to initial state
+   * Useful when filters/search changes
+   */
+  const reset = useCallback(() => {
+    setDisplayCount(batchSize);
+    setIsLoading(false);
+  }, [batchSize]);
+
+  /**
+   * Cleanup observer on unmount
+   * Prevents memory leaks
+   */
   useEffect(() => {
-    const element = observerTarget.current;
-
-    // Clean up existing observer
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-      observerRef.current = null;
-    }
-
-    // Set up new observer if element exists and conditions are right
-    if (element && hasMore && !loading) {
-      const observer = new IntersectionObserver(handleObserver, {
-        threshold,
-        rootMargin,
-      });
-
-      observer.observe(element);
-      observerRef.current = observer;
-    }
-
     return () => {
       if (observerRef.current) {
         observerRef.current.disconnect();
-        observerRef.current = null;
       }
     };
-  }, [handleObserver, threshold, rootMargin, hasMore, loading]);
+  }, []);
 
-  return observerTarget;
+  return {
+    displayCount,
+    isLoading,
+    hasMore,
+    sentinelRef,
+    reset,
+  };
 }

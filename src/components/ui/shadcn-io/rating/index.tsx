@@ -1,7 +1,6 @@
 'use client';
 
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
-import { type LucideProps, StarIcon } from 'lucide-react';
 import type { KeyboardEvent, MouseEvent, ReactElement, ReactNode } from 'react';
 import {
   Children,
@@ -13,6 +12,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { Star as StarIcon } from '@/src/lib/icons';
 import { cn } from '@/src/lib/utils';
 
 type RatingContextValue = {
@@ -39,9 +39,9 @@ const useRating = () => {
   return context;
 };
 
-export type RatingButtonProps = LucideProps & {
+export type RatingButtonProps = React.ComponentProps<typeof StarIcon> & {
   index?: number;
-  icon?: ReactElement<LucideProps>;
+  icon?: ReactElement<React.ComponentProps<typeof StarIcon>>;
 };
 
 export const RatingButton = ({

@@ -32,13 +32,15 @@ import { ChangelogArticleStructuredData } from '@/src/components/structured-data
 import { Separator } from '@/src/components/ui/separator';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
-import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
+import { APP_CONFIG } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import { ArrowLeft, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // ISR - revalidate every 10 minutes
-export const revalidate = 600;
+export const revalidate = 900;
 
 /**
  * Generate static params for all changelog entries
@@ -68,7 +70,15 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  return generatePageMetadata('/changelog/:slug', { params: { slug } });
+
+  // Load changelog entry for metadata generation
+  const entry = await getChangelogEntryBySlug(slug);
+
+  return generatePageMetadata('/changelog/:slug', {
+    params: { slug },
+    item: entry || undefined,
+    slug,
+  });
 }
 
 /**
@@ -120,7 +130,9 @@ export default async function ChangelogEntryPage({
           {/* Navigation */}
           <Link
             href={ROUTES.CHANGELOG}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className={
+              'inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors'
+            }
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Changelog</span>
@@ -128,7 +140,7 @@ export default async function ChangelogEntryPage({
 
           {/* Header */}
           <header className="space-y-4 pb-6">
-            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-sm text-muted-foreground`}>
               <Calendar className="h-4 w-4" />
               <time dateTime={entry.date}>{formatChangelogDate(entry.date)}</time>
             </div>
@@ -136,7 +148,7 @@ export default async function ChangelogEntryPage({
             <h1 className="text-4xl font-bold tracking-tight">{entry.title}</h1>
 
             {/* Canonical URL */}
-            <div className="flex items-center gap-2 text-sm">
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
               <span className="text-muted-foreground">Permanent link:</span>
               <a
                 href={canonicalUrl}
@@ -166,7 +178,9 @@ export default async function ChangelogEntryPage({
         <div className="space-y-4">
           <Link
             href={ROUTES.CHANGELOG}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className={
+              'inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors'
+            }
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Changelog</span>

@@ -26,14 +26,11 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v5
+    - name: Setup Node.js with dependencies
+      uses: ./.github/actions/setup-node-deps
       with:
-        node-version: '22'
-        cache: 'npm'
-
-    - name: Install dependencies (production only)
-      run: npm ci --ignore-scripts --omit=dev
+        production-only: 'true'
+        skip-build-content: 'true'
 
     - name: Get changed content files
       id: changed
@@ -64,8 +61,8 @@ jobs:
           # Check required fields based on category
           category=$(jq -r '.category' "$file" 2>/dev/null || echo "")
 
-          # For hooks, agents, rules, commands, statuslines, collections, and mcp, check slug instead of title
-          if [[ "$category" == "hooks" || "$category" == "agents" || "$category" == "rules" || "$category" == "commands" || "$category" == "statuslines" || "$category" == "collections" || "$category" == "mcp" ]]; then
+          # For hooks, agents, rules, commands, statuslines, collections, skills, and mcp, check slug instead of title
+          if [[ "$category" == "hooks" || "$category" == "agents" || "$category" == "rules" || "$category" == "commands" || "$category" == "statuslines" || "$category" == "collections" || "$category" == "mcp" || "$category" == "skills" ]]; then
             if ! jq -e '.slug' "$file" > /dev/null; then
               echo "ERROR: Missing slug in $category file $file"
               exit 1
@@ -95,7 +92,7 @@ jobs:
           fi
 
           # Validate category is valid
-          if [[ ! "$category" =~ ^(agents|mcp|rules|commands|hooks|statuslines|collections|guides|tutorials|comparisons|workflows|use-cases|troubleshooting|categories)$ ]]; then
+          if [[ ! "$category" =~ ^(agents|mcp|rules|commands|hooks|statuslines|collections|skills|guides|tutorials|comparisons|workflows|use-cases|troubleshooting|categories)$ ]]; then
             echo "ERROR: Invalid category '$category' in $file"
             exit 1
           fi
@@ -143,6 +140,9 @@ jobs:
             } else if (file.includes('/guides/')) {
               labels.add('guide');
               contentTypes.add('guide');
+            } else if (file.includes('/skills/')) {
+              labels.add('skill');
+              contentTypes.add('skill');
             }
 
             // Try to read JSON files for category validation
@@ -160,6 +160,7 @@ jobs:
                     'rules': 'rule',
                     'statuslines': 'statusline',
                     'collections': 'collection',
+                    'skills': 'skill',
                     'guides': 'guide'
                   };
 

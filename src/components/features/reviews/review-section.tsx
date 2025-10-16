@@ -18,7 +18,6 @@
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { StarRating } from '@/src/components/features/reviews/star-rating';
 import { BaseCard } from '@/src/components/shared/base-card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
@@ -26,6 +25,7 @@ import { Badge } from '@/src/components/ui/badge';
 import { markReviewHelpful } from '@/src/lib/actions/content.actions';
 import { ThumbsUp } from '@/src/lib/icons';
 import { formatDistanceToNow } from '@/src/lib/utils/data.utils';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 // Lazy load RatingHistogram component with recharts dependency (~100KB)
 // SSR disabled: Charts are visual decorations, not critical for SEO/accessibility
@@ -134,19 +134,19 @@ function ReviewCardItem({
         if (result?.data?.success) {
           setHasVoted(!hasVoted);
           setHelpfulCount((prev) => (hasVoted ? prev - 1 : prev + 1));
-          toast.success(hasVoted ? 'Vote removed' : 'Marked as helpful');
+          toasts.success.actionCompleted(hasVoted ? 'Vote removed' : 'Marked as helpful');
           router.refresh();
         }
       } catch (error) {
         if (error instanceof Error && error.message.includes('signed in')) {
-          toast.error('Please sign in to vote on reviews', {
+          toasts.raw.error('Please sign in to vote on reviews', {
             action: {
               label: 'Sign In',
               onClick: () => router.push(`/login?redirect=${window.location.pathname}`),
             },
           });
         } else {
-          toast.error(error instanceof Error ? error.message : 'Failed to update vote');
+          toasts.error.voteUpdateFailed();
         }
       }
     });
@@ -170,7 +170,7 @@ function ReviewCardItem({
             </Avatar>
             <div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <span className={`${UI_CLASSES.TEXT_SM} font-semibold`}>{displayName}</span>
+                <span className={'text-sm font-semibold'}>{displayName}</span>
                 {user.tier && user.tier !== 'free' && (
                   <Badge variant="secondary" className="text-xs capitalize">
                     {user.tier}
@@ -179,7 +179,7 @@ function ReviewCardItem({
               </div>
               <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mt-1`}>
                 <StarRating value={review.rating} size="sm" />
-                <span className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                <span className={'text-xs text-muted-foreground'}>
                   {formatDistanceToNow(new Date(review.created_at))}
                 </span>
               </div>
@@ -204,16 +204,12 @@ function ReviewCardItem({
       renderContent={() =>
         reviewText ? (
           <>
-            <p
-              className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} whitespace-pre-wrap`}
-            >
-              {displayText}
-            </p>
+            <p className={'text-sm text-muted-foreground whitespace-pre-wrap'}>{displayText}</p>
             {shouldTruncate && (
               <button
                 type="button"
                 onClick={() => setIsExpanded(!isExpanded)}
-                className={`${UI_CLASSES.TEXT_XS} text-primary hover:underline mt-1`}
+                className={'text-xs text-primary hover:underline mt-1'}
               >
                 {isExpanded ? 'Show less' : 'Read more'}
               </button>
@@ -233,9 +229,7 @@ function ReviewCardItem({
             className={`h-3.5 w-3.5 ${hasVoted ? 'fill-current' : ''}`}
             aria-hidden="true"
           />
-          <span className={UI_CLASSES.TEXT_XS}>
-            Helpful {helpfulCount > 0 && `(${helpfulCount})`}
-          </span>
+          <span className="text-xs">Helpful {helpfulCount > 0 && `(${helpfulCount})`}</span>
         </Button>
       )}
     />
@@ -328,7 +322,7 @@ export function ReviewSection({
           setTotalCount(result.data.total ?? 0);
         }
       } catch {
-        toast.error('Failed to load reviews');
+        toasts.error.loadFailed('reviews');
       } finally {
         setIsLoadingMore(false);
       }
@@ -361,13 +355,13 @@ export function ReviewSection({
         const result = await deleteReview({ review_id: reviewId });
 
         if (result?.data?.success) {
-          toast.success('Review deleted');
+          toasts.success.itemDeleted('Review');
           setReviews((prev) => prev.filter((r) => r.id !== reviewId));
           setTotalCount((prev) => prev - 1);
           router.refresh();
         }
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Failed to delete review');
+      } catch {
+        toasts.error.reviewActionFailed('delete');
       }
     });
   };
@@ -429,13 +423,11 @@ export function ReviewSection({
         <div className="space-y-4">
           {/* Sort Controls */}
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} flex-wrap gap-4`}>
-            <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+            <p className={'text-sm text-muted-foreground'}>
               Showing {reviews.length} of {totalCount} {totalCount === 1 ? 'review' : 'reviews'}
             </p>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <span className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-                Sort by:
-              </span>
+              <span className={'text-sm text-muted-foreground'}>Sort by:</span>
               <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue />
@@ -477,7 +469,7 @@ export function ReviewSection({
 
           {/* Load More Button */}
           {hasMore && (
-            <div className="flex justify-center pt-4">
+            <div className={'flex justify-center pt-4'}>
               <Button
                 variant="outline"
                 onClick={handleLoadMore}
@@ -503,13 +495,13 @@ export function ReviewSection({
 
       {/* Empty State */}
       {totalCount === 0 && !showForm && !aggregateData && (
-        <Card className={`p-8 text-center ${UI_CLASSES.BG_MUTED_50}`}>
+        <Card className={'p-8 text-center bg-muted/50'}>
           <MessageCircle
             className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50"
             aria-hidden="true"
           />
           <h3 className="text-lg font-semibold mb-2">No reviews yet</h3>
-          <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mb-4`}>
+          <p className={'text-sm text-muted-foreground mb-4'}>
             Be the first to share your experience with this configuration
           </p>
           <Button onClick={() => setShowForm(true)} className="gap-2">

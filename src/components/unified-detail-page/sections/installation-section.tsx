@@ -69,14 +69,12 @@ export function InstallationSection({
         {typeof installation === 'object' &&
           'claudeCode' in installation &&
           installation.claudeCode && (
-            <div className={UI_CLASSES.SPACE_Y_4}>
+            <div className="space-y-4">
               <div>
-                <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_2}`}>
-                  Claude Code Setup
-                </h4>
-                <ol className={`list-decimal list-inside ${UI_CLASSES.SPACE_Y_1} text-sm`}>
+                <h4 className={'font-medium mb-2'}>Claude Code Setup</h4>
+                <ol className={'list-decimal list-inside space-y-1 text-sm'}>
                   {installation.claudeCode.steps?.map((step: string) => (
-                    <li key={step.slice(0, 50)} className={UI_CLASSES.LEADING_RELAXED}>
+                    <li key={step.slice(0, 50)} className="leading-relaxed">
                       {step}
                     </li>
                   ))}
@@ -84,10 +82,8 @@ export function InstallationSection({
               </div>
               {installation.claudeCode.configPath && (
                 <div>
-                  <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_2}`}>
-                    Configuration Paths
-                  </h4>
-                  <div className={`${UI_CLASSES.SPACE_Y_1} text-sm`}>
+                  <h4 className={'font-medium mb-2'}>Configuration Paths</h4>
+                  <div className={'space-y-1 text-sm'}>
                     {Object.entries(installation.claudeCode.configPath).map(([location, path]) => (
                       <div key={location} className={UI_CLASSES.FLEX_GAP_2}>
                         <Badge variant="outline" className="capitalize">
@@ -106,14 +102,12 @@ export function InstallationSection({
         {typeof installation === 'object' &&
           'claudeDesktop' in installation &&
           installation.claudeDesktop && (
-            <div className={UI_CLASSES.SPACE_Y_4}>
+            <div className="space-y-4">
               <div>
-                <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_2}`}>
-                  Claude Desktop Setup
-                </h4>
-                <ol className={`list-decimal list-inside ${UI_CLASSES.SPACE_Y_1} text-sm`}>
+                <h4 className={'font-medium mb-2'}>Claude Desktop Setup</h4>
+                <ol className={'list-decimal list-inside space-y-1 text-sm'}>
                   {installation.claudeDesktop.steps?.map((step: string) => (
-                    <li key={step.slice(0, 50)} className={UI_CLASSES.LEADING_RELAXED}>
+                    <li key={step.slice(0, 50)} className="leading-relaxed">
                       {step}
                     </li>
                   ))}
@@ -121,10 +115,8 @@ export function InstallationSection({
               </div>
               {installation.claudeDesktop.configPath && (
                 <div>
-                  <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_2}`}>
-                    Configuration Paths
-                  </h4>
-                  <div className={`${UI_CLASSES.SPACE_Y_1} text-sm`}>
+                  <h4 className={'font-medium mb-2'}>Configuration Paths</h4>
+                  <div className={'space-y-1 text-sm'}>
                     {Object.entries(installation.claudeDesktop.configPath).map(
                       ([platform, path]) => (
                         <div key={platform} className={UI_CLASSES.FLEX_GAP_2}>
@@ -145,13 +137,13 @@ export function InstallationSection({
 
         {/* Requirements */}
         {installation.requirements && installation.requirements.length > 0 && (
-          <div className={UI_CLASSES.MT_4}>
-            <h4 className={`font-medium ${UI_CLASSES.MB_2}`}>Requirements</h4>
-            <ul className={UI_CLASSES.SPACE_Y_2}>
+          <div className="mt-4">
+            <h4 className={'font-medium mb-2'}>Requirements</h4>
+            <ul className="space-y-2">
               {installation.requirements.map((requirement: string) => (
                 <li key={requirement.slice(0, 50)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                   <div className="h-1.5 w-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
-                  <span className={`text-sm ${UI_CLASSES.LEADING_RELAXED}`}>{requirement}</span>
+                  <span className={'text-sm leading-relaxed'}>{requirement}</span>
                 </li>
               ))}
             </ul>

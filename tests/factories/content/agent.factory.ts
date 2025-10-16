@@ -29,8 +29,8 @@
 import { faker } from '@faker-js/faker';
 import type { AgentContent } from '@/src/lib/schemas/content/agent.schema';
 import {
-  createContentFactory,
   type BaseContentTransientParams,
+  createContentFactory,
 } from '../shared/base-content.factory';
 
 /** Agent-specific transient parameters */
@@ -65,15 +65,19 @@ export const agentFactory = createContentFactory<AgentContent>({
     'best-practices',
     'automation',
   ],
-  contentGenerator: (name) => faker.lorem.paragraphs({ min: 2, max: 4 }, '\n\n'),
-  extendFields: ({ name, slug, transientParams }) => {
-    const { withConfiguration = faker.datatype.boolean(), withInstallation = faker.datatype.boolean({ probability: 0.3 }) } =
-      transientParams as AgentFactoryTransientParams;
+  contentGenerator: (_name) => faker.lorem.paragraphs({ min: 2, max: 4 }, '\n\n'),
+  extendFields: ({ name: _name, slug, transientParams }) => {
+    const {
+      withConfiguration = faker.datatype.boolean(),
+      withInstallation = faker.datatype.boolean({ probability: 0.3 }),
+    } = transientParams as AgentFactoryTransientParams;
 
     return {
       configuration: withConfiguration
         ? {
-            temperature: parseFloat(faker.number.float({ min: 0, max: 1, fractionDigits: 2 }).toFixed(2)),
+            temperature: Number.parseFloat(
+              faker.number.float({ min: 0, max: 1, fractionDigits: 2 }).toFixed(2)
+            ),
             maxTokens: faker.helpers.arrayElement([1000, 2000, 4000, 8000]),
             systemPrompt: faker.lorem.paragraph({ min: 1, max: 3 }),
           }

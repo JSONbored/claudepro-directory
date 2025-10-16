@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { createErrorBoundaryFallback } from '@/src/lib/error-handler';
+import { createErrorBoundaryFallback } from '@/src/lib/error-handler/client';
 import { AlertTriangle, Home, RefreshCw } from '@/src/lib/icons';
 import { umamiEventDataSchema } from '@/src/lib/schemas/analytics.schema';
 import type { ErrorBoundaryProps, ErrorFallbackProps } from '@/src/lib/schemas/component.schema';
@@ -31,38 +31,34 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
   }, [resetErrorBoundary]);
 
   return (
-    <div
-      className={`min-h-screen bg-background flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.P_4}`}
-    >
-      <Card className={`${UI_CLASSES.MAX_W_2XL} w-full`}>
+    <div className={'min-h-screen bg-background flex items-center justify-center p-4'}>
+      <Card className={'max-w-2xl w-full'}>
         <CardHeader>
-          <div className="flex items-center gap-3">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
             <AlertTriangle className="h-8 w-8 text-destructive" aria-hidden="true" />
             <CardTitle as="h1" className="text-2xl">
               Something went wrong
             </CardTitle>
           </div>
-          <CardDescription className={UI_CLASSES.MT_2}>
+          <CardDescription className="mt-2">
             An unexpected error occurred. The error has been logged and we&apos;ll look into it.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {isDevelopment && error && (
-            <div className={`${UI_CLASSES.ROUNDED_LG} bg-muted ${UI_CLASSES.P_4} space-y-2`}>
-              <p className={`font-semibold ${UI_CLASSES.TEXT_SM}`}>Error Details:</p>
-              <pre className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.OVERFLOW_AUTO}`}>
-                {error.toString()}
-              </pre>
+            <div className={'rounded-lg bg-muted p-4 space-y-2'}>
+              <p className={'font-semibold text-sm'}>Error Details:</p>
+              <pre className={'text-xs overflow-auto'}>{error.toString()}</pre>
               {error.stack && (
-                <details className={UI_CLASSES.TEXT_XS}>
+                <details className="text-xs">
                   <summary className="cursor-pointer font-semibold">Stack Trace</summary>
-                  <pre className={`mt-2 ${UI_CLASSES.OVERFLOW_AUTO}`}>{error.stack}</pre>
+                  <pre className={'mt-2 overflow-auto'}>{error.stack}</pre>
                 </details>
               )}
             </div>
           )}
 
-          <div className={UI_CLASSES.FLEX_GAP_3}>
+          <div className="flex gap-3">
             <Button onClick={handleReset} variant="default">
               <RefreshCw className="h-4 w-4 mr-2" />
               Try Again

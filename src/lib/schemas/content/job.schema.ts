@@ -71,28 +71,36 @@ export type JobDatabase = z.infer<typeof jobDatabaseSchema>;
 /**
  * Job creation schema (for forms/submissions)
  * Omits auto-generated fields (id, timestamps, etc.)
+ *
+ * Production-grade pattern with exactOptionalPropertyTypes: true
+ * - .optional() = field can be omitted from form submission
+ * - Values are transformed to null before DB insertion (see actions)
+ * - Eliminates ambiguity of .nullable().optional() anti-pattern
+ */
+/**
+ * Production-grade pattern with exactOptionalPropertyTypes: true
+ * - .optional() = field can be omitted from form submission
+ * - Values are transformed to null before DB insertion (see actions)
+ * - Eliminates ambiguity of .nullable().optional() anti-pattern
  */
 export const createJobSchema = z.object({
   title: nonEmptyString.min(3).max(200, 'Title must be less than 200 characters'),
   company: nonEmptyString.min(2).max(200, 'Company name must be less than 200 characters'),
-  location: nonEmptyString
-    .max(200, 'Location must be less than 200 characters')
-    .nullable()
-    .optional(),
+  location: nonEmptyString.max(200, 'Location must be less than 200 characters').optional(),
   description: nonEmptyString.min(50, 'Description must be at least 50 characters'),
-  salary: z.string().max(100).nullable().optional(),
+  salary: z.string().max(100).optional(),
   remote: z.boolean().default(false),
   type: jobTypeSchema,
-  workplace: jobWorkplaceSchema.nullable().optional(),
-  experience: jobExperienceSchema.nullable().optional(),
+  workplace: jobWorkplaceSchema.optional(),
+  experience: jobExperienceSchema.optional(),
   category: nonEmptyString.max(100),
   tags: z.array(z.string()).min(1, 'Add at least one tag').max(10, 'Maximum 10 tags'),
   requirements: z.array(z.string()).min(1, 'Add at least one requirement').max(20),
   benefits: z.array(z.string()).max(20).default([]),
   link: urlString, // Apply URL
-  contact_email: z.string().email().nullable().optional(),
-  company_logo: urlString.nullable().optional(),
-  company_id: z.string().uuid().nullable().optional(),
+  contact_email: z.string().email().optional(),
+  company_logo: urlString.optional(),
+  company_id: z.string().uuid().optional(),
   plan: jobPlanSchema.default('standard'),
 });
 
@@ -101,25 +109,26 @@ export type CreateJobInput = z.infer<typeof createJobSchema>;
 /**
  * Job update schema (for editing existing jobs)
  * All fields optional except what's required to identify the job
+ * Production-grade: .optional() only, no .nullable() (transformed to null in actions)
  */
 export const updateJobSchema = z.object({
   id: z.string().uuid(),
   title: nonEmptyString.min(3).max(200).optional(),
   company: nonEmptyString.min(2).max(200).optional(),
-  location: nonEmptyString.max(200).nullable().optional(),
+  location: nonEmptyString.max(200).optional(),
   description: nonEmptyString.min(50).optional(),
-  salary: z.string().max(100).nullable().optional(),
+  salary: z.string().max(100).optional(),
   remote: z.boolean().optional(),
   type: jobTypeSchema.optional(),
-  workplace: jobWorkplaceSchema.nullable().optional(),
-  experience: jobExperienceSchema.nullable().optional(),
+  workplace: jobWorkplaceSchema.optional(),
+  experience: jobExperienceSchema.optional(),
   category: nonEmptyString.max(100).optional(),
   tags: z.array(z.string()).min(1).max(10).optional(),
   requirements: z.array(z.string()).min(1).max(20).optional(),
   benefits: z.array(z.string()).max(20).optional(),
   link: urlString.optional(),
-  contact_email: z.string().email().nullable().optional(),
-  company_logo: urlString.nullable().optional(),
+  contact_email: z.string().email().optional(),
+  company_logo: urlString.optional(),
 });
 
 export type UpdateJobInput = z.infer<typeof updateJobSchema>;

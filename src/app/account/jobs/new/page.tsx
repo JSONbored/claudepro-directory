@@ -2,9 +2,8 @@ import { redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/jobs/job-form';
 import { createJob } from '@/src/lib/actions/business.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/account/jobs/new');
+export const metadata = generatePageMetadata('/account/jobs/new');
 
 export default function NewJobPage() {
   const handleSubmit = async (data: Parameters<typeof createJob>[0]) => {
@@ -26,10 +25,10 @@ export default function NewJobPage() {
   };
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold mb-2">Post a Job</h1>
-        <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+        <p className="text-muted-foreground">
           Create a new job listing to reach talented developers
         </p>
       </div>

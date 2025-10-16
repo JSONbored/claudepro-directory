@@ -68,7 +68,7 @@ interface StatuslineTemplate extends BaseTemplate {
 }
 
 // Discriminated union of all template types
-type Template =
+export type Template =
   | AgentTemplate
   | MCPTemplate
   | RulesTemplate
@@ -186,9 +186,17 @@ const TEMPLATES = {
   ] satisfies CommandTemplate[],
   hooks: [] satisfies HookTemplate[],
   statuslines: [] satisfies StatuslineTemplate[],
+  collections: [],
 } as const;
 
-type ContentType = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines';
+type ContentType =
+  | 'agents'
+  | 'mcp'
+  | 'rules'
+  | 'commands'
+  | 'hooks'
+  | 'statuslines'
+  | 'collections';
 
 interface TemplateSelectorProps {
   contentType: ContentType;
@@ -206,7 +214,7 @@ export function TemplateSelector({ contentType, onSelect }: TemplateSelectorProp
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="w-full justify-between" type="button">
-          <span className="flex items-center gap-2">
+          <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <FileText className="h-4 w-4" />
             Use Template
           </span>
@@ -220,10 +228,8 @@ export function TemplateSelector({ contentType, onSelect }: TemplateSelectorProp
             onClick={() => onSelect(template)}
             className="flex-col items-start py-3 cursor-pointer"
           >
-            <div className={UI_CLASSES.FONT_MEDIUM}>{template.name}</div>
-            <div className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-0.5`}>
-              {template.description}
-            </div>
+            <div className="font-medium">{template.name}</div>
+            <div className={'text-xs text-muted-foreground mt-0.5'}>{template.description}</div>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

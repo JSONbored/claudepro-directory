@@ -9,12 +9,12 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { getUserSubmissions } from '@/src/lib/actions/business.actions';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { BADGE_COLORS, type SubmissionStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/account/submissions');
+export const metadata = generatePageMetadata('/account/submissions');
 
 export default async function SubmissionsPage() {
   const submissions = await getUserSubmissions();
@@ -54,11 +54,11 @@ export default async function SubmissionsPage() {
   };
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
           <h1 className="text-3xl font-bold mb-2">My Submissions</h1>
-          <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+          <p className="text-muted-foreground">
             {submissions.length} {submissions.length === 1 ? 'submission' : 'submissions'}
           </p>
         </div>
@@ -72,10 +72,10 @@ export default async function SubmissionsPage() {
 
       {submissions.length === 0 ? (
         <Card>
-          <CardContent className={`${UI_CLASSES.FLEX_COL_CENTER} py-12`}>
+          <CardContent className={'flex flex-col items-center py-12'}>
             <Send className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-xl font-semibold mb-2">No submissions yet</h3>
-            <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} text-center max-w-md mb-4`}>
+            <p className={'text-muted-foreground text-center max-w-md mb-4'}>
               Share your Claude configurations with the community! Your contributions help everyone
               build better AI workflows.
             </p>
@@ -92,11 +92,11 @@ export default async function SubmissionsPage() {
           {submissions.map((submission) => (
             <Card key={submission.id}>
               <CardHeader>
-                <div className="flex items-start justify-between">
+                <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                   <div className="flex-1">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                       {getStatusBadge(submission.status)}
-                      <Badge variant="outline" className={UI_CLASSES.TEXT_XS}>
+                      <Badge variant="outline" className="text-xs">
                         {getTypeLabel(submission.content_type)}
                       </Badge>
                     </div>
@@ -109,9 +109,7 @@ export default async function SubmissionsPage() {
               </CardHeader>
 
               <CardContent>
-                <div
-                  className={`${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.MB_4} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
-                >
+                <div className={'flex flex-wrap gap-4 mb-4 text-sm text-muted-foreground'}>
                   <div>Submitted {new Date(submission.created_at).toLocaleDateString()}</div>
                   {submission.merged_at && (
                     <>
@@ -129,20 +127,14 @@ export default async function SubmissionsPage() {
 
                 {submission.status === 'rejected' && submission.rejection_reason && (
                   <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded">
-                    <p
-                      className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-red-400 mb-1`}
-                    >
-                      Rejection Reason:
-                    </p>
-                    <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-                      {submission.rejection_reason}
-                    </p>
+                    <p className={'text-sm font-medium text-red-400 mb-1'}>Rejection Reason:</p>
+                    <p className={'text-sm text-muted-foreground'}>{submission.rejection_reason}</p>
                   </div>
                 )}
 
                 {submission.status === 'merged' && (
                   <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded">
-                    <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-green-400`}>
+                    <p className={'text-sm font-medium text-green-400'}>
                       🎉 Your contribution is now live on ClaudePro Directory!
                     </p>
                   </div>
@@ -178,12 +170,12 @@ export default async function SubmissionsPage() {
       <Card className="border-blue-500/20 bg-blue-500/5">
         <CardContent className="pt-6">
           <div className="flex gap-3">
-            <GitPullRequest className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
+            <GitPullRequest
+              className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+            />
             <div className="flex-1">
-              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-blue-400`}>
-                How it works
-              </p>
-              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
+              <p className={'text-sm font-medium text-blue-400'}>How it works</p>
+              <p className={'text-sm text-muted-foreground mt-1'}>
                 When you submit a configuration, we automatically create a Pull Request on GitHub.
                 Our team reviews it for quality, security, and accuracy. Once approved and merged,
                 your contribution goes live for everyone to use!

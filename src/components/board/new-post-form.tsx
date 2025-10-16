@@ -12,8 +12,7 @@ import {
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
-import { ROUTES } from '@/src/lib/constants';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 
 interface NewPostFormProps {
   onSubmit: (formData: FormData) => void;
@@ -31,7 +30,7 @@ export function NewPostForm({ onSubmit }: NewPostFormProps) {
           <CardTitle>Post Details</CardTitle>
           <CardDescription>Include either a URL, text content, or both</CardDescription>
         </CardHeader>
-        <CardContent className={UI_CLASSES.SPACE_Y_4}>
+        <CardContent className="space-y-4">
           <div>
             <Label htmlFor={titleId}>Title *</Label>
             <Input
@@ -46,7 +45,7 @@ export function NewPostForm({ onSubmit }: NewPostFormProps) {
           <div>
             <Label htmlFor={urlId}>URL (optional)</Label>
             <Input id={urlId} name="url" type="url" placeholder="https://example.com/article" />
-            <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
+            <p className={'text-xs text-muted-foreground mt-1'}>
               Share a link to an article, project, or resource
             </p>
           </div>
@@ -63,7 +62,7 @@ export function NewPostForm({ onSubmit }: NewPostFormProps) {
             />
           </div>
 
-          <div className={UI_CLASSES.FLEX_GAP_4}>
+          <div className="flex gap-4">
             <Button type="submit">Create Post</Button>
             <Button type="button" variant="outline" asChild>
               <a href={ROUTES.BOARD}>Cancel</a>

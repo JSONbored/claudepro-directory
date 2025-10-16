@@ -40,9 +40,9 @@ export const runtime = 'nodejs';
 
 /**
  * ISR revalidation
- * Revalidate every 10 minutes (600 seconds)
+ * Changelog entries update occasionally - revalidate every 15 minutes
  */
-export const revalidate = 600;
+export const revalidate = 900;
 
 /**
  * Generate static params for all changelog entries

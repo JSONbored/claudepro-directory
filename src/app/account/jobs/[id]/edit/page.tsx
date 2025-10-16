@@ -3,9 +3,8 @@ import { JobForm } from '@/src/components/jobs/job-form';
 import { updateJob } from '@/src/lib/actions/business.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/account/jobs/:id/edit');
+export const metadata = generatePageMetadata('/account/jobs/:id/edit');
 
 interface EditJobPageProps {
   params: Promise<{
@@ -54,30 +53,31 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   };
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold mb-2">Edit Job Listing</h1>
-        <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>Update your job posting details</p>
+        <p className="text-muted-foreground">Update your job posting details</p>
       </div>
 
       <JobForm
         initialData={{
           title: job.title,
           company: job.company,
-          location: job.location,
+          location: job.location ?? undefined,
           description: job.description,
-          salary: job.salary,
+          salary: job.salary ?? undefined,
           remote: job.remote ?? false,
           type: job.type as 'full-time' | 'part-time' | 'contract' | 'internship' | 'freelance',
-          workplace: job.workplace as 'On site' | 'Remote' | 'Hybrid' | null,
-          experience: job.experience as 'Entry' | 'Mid' | 'Senior' | 'Lead' | 'Executive' | null,
+          workplace: (job.workplace as 'On site' | 'Remote' | 'Hybrid') ?? undefined,
+          experience:
+            (job.experience as 'Entry' | 'Mid' | 'Senior' | 'Lead' | 'Executive') ?? undefined,
           category: job.category,
           tags: Array.isArray(job.tags) ? (job.tags as string[]) : [],
           requirements: Array.isArray(job.requirements) ? (job.requirements as string[]) : [],
           benefits: Array.isArray(job.benefits) ? (job.benefits as string[]) : [],
           link: job.link,
-          contact_email: job.contact_email,
-          company_logo: job.company_logo,
+          contact_email: job.contact_email ?? undefined,
+          company_logo: job.company_logo ?? undefined,
           plan: job.plan as 'featured' | 'standard' | 'premium',
         }}
         onSubmit={handleSubmit}

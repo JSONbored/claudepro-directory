@@ -14,7 +14,7 @@
  * @see src/lib/supabase/ directory
  */
 
-import { http, HttpResponse, delay } from 'msw';
+import { delay, HttpResponse, http } from 'msw';
 import { mockUsers } from '../fixtures/users';
 
 /**

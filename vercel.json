@@ -1,5 +1,5 @@
 {
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude).github/' ':(exclude)templates/' ':(exclude)*.md' ':(exclude)LICENSE' ':(exclude).gitignore'",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude).github/' ':(exclude)scripts/github-actions/' ':(exclude)templates/' ':(exclude)*.md' ':(exclude)LICENSE' ':(exclude).gitignore'",
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",

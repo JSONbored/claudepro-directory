@@ -41,7 +41,6 @@
  */
 
 import { useId, useState } from 'react';
-import { z } from 'zod';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -61,7 +60,6 @@ import {
 } from '@/src/components/ui/select';
 import { Textarea } from '@/src/components/ui/textarea';
 import { ChevronDown, ChevronUp, Code, Plus, Trash } from '@/src/lib/icons';
-import { baseUsageExampleSchema } from '@/src/lib/schemas/content/base-content.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
@@ -95,18 +93,38 @@ interface ExamplesArrayInputProps {
 }
 
 /**
- * Validate a single example against the schema
+ * Validate a single example
+ * Replaces Zod validation for bundle size optimization
  */
 function validateExample(example: UsageExample): { valid: boolean; error?: string } {
-  try {
-    baseUsageExampleSchema.parse(example);
-    return { valid: true };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { valid: false, error: error.issues[0]?.message || 'Invalid example' };
-    }
-    return { valid: false, error: 'Validation failed' };
+  // Validate title
+  if (!example.title || example.title.trim().length === 0) {
+    return { valid: false, error: 'Title is required' };
   }
+  if (example.title.length > 100) {
+    return { valid: false, error: 'Title must be 100 characters or less' };
+  }
+
+  // Validate code
+  if (!example.code || example.code.length === 0) {
+    return { valid: false, error: 'Code is required' };
+  }
+  if (example.code.length > 10000) {
+    return { valid: false, error: 'Code must be 10,000 characters or less' };
+  }
+
+  // Validate language
+  const validLanguages = SUPPORTED_LANGUAGES.map((l) => l.value);
+  if (!validLanguages.includes(example.language)) {
+    return { valid: false, error: 'Invalid language selected' };
+  }
+
+  // Validate description (optional)
+  if (example.description && example.description.length > 500) {
+    return { valid: false, error: 'Description must be 500 characters or less' };
+  }
+
+  return { valid: true };
 }
 
 /**
@@ -186,10 +204,10 @@ export function ExamplesArrayInput({
       <input type="hidden" name={name} value={examplesJson} />
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
           <Label className="text-base font-semibold">Usage Examples (optional)</Label>
-          <p className={cn(UI_CLASSES.TEXT_SM, UI_CLASSES.TEXT_MUTED_FOREGROUND, 'mt-1')}>
+          <p className={cn('text-sm', 'text-muted-foreground', 'mt-1')}>
             Add code examples to help users understand how to use this configuration. Max{' '}
             {maxExamples} examples.
           </p>
@@ -200,7 +218,7 @@ export function ExamplesArrayInput({
           size="sm"
           onClick={addExample}
           disabled={examples.length >= maxExamples}
-          className="flex items-center gap-2"
+          className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
         >
           <Plus className="h-4 w-4" />
           Add Example
@@ -214,7 +232,7 @@ export function ExamplesArrayInput({
             <CardContent className="py-8">
               <div className="text-center space-y-2">
                 <Code className="h-8 w-8 mx-auto text-muted-foreground" />
-                <p className={cn(UI_CLASSES.TEXT_SM, UI_CLASSES.TEXT_MUTED_FOREGROUND)}>
+                <p className={cn('text-sm', 'text-muted-foreground')}>
                   No examples added yet. Click "Add Example" to get started.
                 </p>
               </div>
@@ -233,11 +251,11 @@ export function ExamplesArrayInput({
           return (
             <Card key={example.id} className={cn(!validation.valid && 'border-destructive')}>
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <button
                     type="button"
                     onClick={() => toggleExpanded(index)}
-                    className="flex items-center gap-2 text-left flex-1 hover:opacity-70 transition-opacity"
+                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-left flex-1 hover:opacity-70 transition-opacity`}
                   >
                     {isExpanded ? (
                       <ChevronUp className="h-4 w-4" />
@@ -320,7 +338,7 @@ export function ExamplesArrayInput({
                       maxLength={10000}
                       required
                     />
-                    <p className={cn(UI_CLASSES.TEXT_XS, UI_CLASSES.TEXT_MUTED_FOREGROUND)}>
+                    <p className={cn('text-xs', 'text-muted-foreground')}>
                       {example.code.length} / 10,000 characters
                     </p>
                   </div>
@@ -336,7 +354,7 @@ export function ExamplesArrayInput({
                       className="min-h-[80px]"
                       maxLength={500}
                     />
-                    <p className={cn(UI_CLASSES.TEXT_XS, UI_CLASSES.TEXT_MUTED_FOREGROUND)}>
+                    <p className={cn('text-xs', 'text-muted-foreground')}>
                       {(example.description || '').length} / 500 characters
                     </p>
                   </div>

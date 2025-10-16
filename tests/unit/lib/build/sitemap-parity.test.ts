@@ -28,8 +28,8 @@ import { hooksMetadata } from '@/generated/hooks-metadata';
 import { mcpMetadata } from '@/generated/mcp-metadata';
 import { rulesMetadata } from '@/generated/rules-metadata';
 import { statuslinesMetadata } from '@/generated/statuslines-metadata';
-import { APP_CONFIG } from '@/src/lib/constants';
 import { generateAllSiteUrls } from '@/src/lib/build/url-generator';
+import { APP_CONFIG } from '@/src/lib/constants';
 
 describe('Sitemap Parity Test', () => {
   describe('Dynamic Sitemap Generation', () => {
@@ -141,7 +141,15 @@ describe('Sitemap Parity Test', () => {
         { baseUrl: APP_CONFIG.url }
       );
 
-      const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'];
+      const categories = [
+        'agents',
+        'mcp',
+        'rules',
+        'commands',
+        'hooks',
+        'statuslines',
+        'collections',
+      ];
       for (const category of categories) {
         const categoryUrl = urls.find((u) => u.loc === `${APP_CONFIG.url}/${category}`);
         expect(categoryUrl).toBeDefined();

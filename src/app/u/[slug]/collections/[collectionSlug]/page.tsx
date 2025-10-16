@@ -22,31 +22,27 @@ interface PublicCollectionPageProps {
   params: Promise<{ slug: string; collectionSlug: string }>;
 }
 
-export async function generateMetadata({ params }: PublicCollectionPageProps): Promise<Metadata> {
-  const { slug, collectionSlug } = await params;
-  return generatePageMetadata('/u/:slug/collections/:collectionSlug', {
-    params: { slug, collectionSlug },
-  });
-}
-
-export default async function PublicCollectionPage({ params }: PublicCollectionPageProps) {
-  const { slug, collectionSlug } = await params;
+/**
+ * Fetch public user collection data
+ *
+ * Shared data loader for both metadata generation and page rendering.
+ * Next.js 15 automatically deduplicates this during the same render cycle.
+ *
+ * @param slug - User profile slug
+ * @param collectionSlug - Collection slug
+ * @returns Collection data or null if not found
+ */
+async function getPublicCollection(slug: string, collectionSlug: string) {
   const supabase = await createAdminClient();
 
-  // Get current user (if logged in) for ownership check
-  const currentUserClient = await createClient();
-  const {
-    data: { user: currentUser },
-  } = await currentUserClient.auth.getUser();
-
-  // Get profile owner (single query optimization - fetch all needed fields at once)
+  // Fetch profile user
   const { data: profileUser } = await supabase.from('users').select('*').eq('slug', slug).single();
 
   if (!profileUser) {
-    notFound();
+    return null;
   }
 
-  // Get collection
+  // Fetch public collection
   const { data: collection } = await supabase
     .from('user_collections')
     .select('*')
@@ -55,7 +51,55 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
     .eq('is_public', true)
     .single();
 
+  return collection;
+}
+
+export async function generateMetadata({ params }: PublicCollectionPageProps): Promise<Metadata> {
+  const { slug, collectionSlug } = await params;
+
+  // Load collection data (automatically deduplicated by Next.js)
+  const collection = await getPublicCollection(slug, collectionSlug);
+
+  // Transform to metadata context item
+  // Converts null to undefined for TypeScript compatibility
+  const collectionItem = collection
+    ? {
+        name: collection.name,
+        description: collection.description ?? undefined,
+        dateAdded: collection.created_at,
+        lastModified: collection.updated_at,
+      }
+    : undefined;
+
+  return generatePageMetadata('/u/:slug/collections/:collectionSlug', {
+    params: { slug, collectionSlug },
+    item: collectionItem,
+    slug,
+    collectionSlug,
+  });
+}
+
+export default async function PublicCollectionPage({ params }: PublicCollectionPageProps) {
+  const { slug, collectionSlug } = await params;
+
+  // Get current user (if logged in) for ownership check
+  const currentUserClient = await createClient();
+  const {
+    data: { user: currentUser },
+  } = await currentUserClient.auth.getUser();
+
+  // Load collection data (automatically deduplicated by Next.js with generateMetadata call)
+  const collection = await getPublicCollection(slug, collectionSlug);
+
   if (!collection) {
+    notFound();
+  }
+
+  // Get profile owner for display
+  const supabase = await createAdminClient();
+  const { data: profileUser } = await supabase.from('users').select('*').eq('slug', slug).single();
+
+  if (!profileUser) {
     notFound();
   }
 
@@ -78,12 +122,12 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   const isOwner = currentUser?.id === profileUser.id;
 
   return (
-    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
-      <div className={`container ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.PX_4} py-12`}>
-        <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className={'min-h-screen bg-background'}>
+      <div className={'container mx-auto px-4 py-12'}>
+        <div className="space-y-6">
           {/* Navigation */}
           <Link href={`/u/${slug}`}>
-            <Button variant="ghost" className="flex items-center gap-2">
+            <Button variant="ghost" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <ArrowLeft className="h-4 w-4" />
               Back to {profileUser.name || slug}'s Profile
             </Button>
@@ -91,8 +135,8 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
           {/* Header */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-2`}>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <h1 className="text-3xl font-bold">{collection.name}</h1>
                 <Badge variant="outline">Public</Badge>
               </div>
@@ -106,12 +150,10 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
             </div>
 
             {collection.description && (
-              <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} max-w-3xl`}>
-                {collection.description}
-              </p>
+              <p className={'text-muted-foreground max-w-3xl'}>{collection.description}</p>
             )}
 
-            <div className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
+            <div className={'text-sm text-muted-foreground mt-2'}>
               Created by{' '}
               <Link href={`/u/${slug}`} className="text-primary hover:underline">
                 {profileUser.name || slug}
@@ -127,8 +169,8 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
             {!items || items.length === 0 ? (
               <Card>
-                <CardContent className={`${UI_CLASSES.FLEX_COL_CENTER} py-12`}>
-                  <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>This collection is empty</p>
+                <CardContent className={'flex flex-col items-center py-12'}>
+                  <p className="text-muted-foreground">This collection is empty</p>
                 </CardContent>
               </Card>
             ) : (
@@ -145,9 +187,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                             <Badge variant="outline" className="capitalize">
                               {item.content_type}
                             </Badge>
-                            <CardTitle className={UI_CLASSES.TEXT_LG}>
-                              {item.content_slug}
-                            </CardTitle>
+                            <CardTitle className="text-lg">{item.content_slug}</CardTitle>
                           </div>
                           {item.notes && (
                             <CardDescription className="mt-2">{item.notes}</CardDescription>
@@ -158,7 +198,11 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+                          >
                             <ExternalLink className="h-4 w-4" />
                             View
                           </Button>

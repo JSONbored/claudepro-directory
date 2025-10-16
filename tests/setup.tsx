@@ -21,8 +21,8 @@
 import { cleanup } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
-import { server } from './mocks/server';
 import { toHaveNoViolations } from 'jest-axe';
+import { server } from './mocks/server';
 
 // =============================================================================
 // jest-axe Setup
@@ -118,6 +118,7 @@ vi.mock('next/headers', () => ({
     return {
       get: (key: string) => headerMap.get(key),
       has: (key: string) => headerMap.has(key),
+      // biome-ignore lint/complexity/noBannedTypes: Headers.forEach callback type is generic in test mock
       forEach: (fn: Function) => headerMap.forEach(fn),
       entries: () => headerMap.entries(),
       keys: () => headerMap.keys(),
@@ -147,9 +148,11 @@ vi.mock('next/headers', () => ({
  * Renders as standard <img> in tests (no optimization)
  */
 vi.mock('next/image', () => ({
+  // biome-ignore lint/suspicious/noExplicitAny: Mock for Next.js Image component - props type is internal to Next.js
   default: (props: any) => {
     const { src, alt, width, height, ...rest } = props;
     // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
+    // biome-ignore lint/performance/noImgElement: Test mock intentionally uses img element for simplicity
     return <img src={src} alt={alt} width={width} height={height} {...rest} />;
   },
 }));
@@ -159,6 +162,7 @@ vi.mock('next/image', () => ({
  * Renders as standard <a> in tests (no prefetching)
  */
 vi.mock('next/link', () => ({
+  // biome-ignore lint/suspicious/noExplicitAny: Mock for Next.js Link component - props type is internal to Next.js
   default: ({ children, href, ...props }: any) => {
     return (
       <a href={href} {...props}>
@@ -213,6 +217,7 @@ global.IntersectionObserver = class IntersectionObserver {
   root = null;
   rootMargin = '';
   thresholds = [];
+  // biome-ignore lint/suspicious/noExplicitAny: Browser API mock requires type assertion for global assignment
 } as any;
 
 /**
@@ -233,6 +238,7 @@ global.ResizeObserver = class ResizeObserver {
   unobserve() {
     return null;
   }
+  // biome-ignore lint/suspicious/noExplicitAny: Browser API mock requires type assertion for global assignment
 } as any;
 
 /**

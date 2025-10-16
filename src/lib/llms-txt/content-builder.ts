@@ -298,17 +298,16 @@ function formatBulletList(title: string, items: string[]): string {
 
 /**
  * Type guard for Installation type
+ * Validates that value is a plain object (not null, array, Date, or RegExp)
  */
 function isInstallation(value: unknown): value is Installation {
-  if (value === null || value === undefined || typeof value !== 'object') {
-    return false;
-  }
-
-  if (Array.isArray(value) || value instanceof Date || value instanceof RegExp) {
-    return false;
-  }
-
-  return true;
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    !(value instanceof Date) &&
+    !(value instanceof RegExp)
+  );
 }
 
 /**
@@ -373,23 +372,65 @@ function formatInstallation(installation: unknown): string {
 }
 
 /**
- * Format configuration based on content type with proper typing
+ * Configuration formatter function type
+ * Takes raw config object and returns formatted text output
+ */
+type ConfigFormatter = (config: Record<string, unknown>) => string;
+
+/**
+ * Configuration formatter registry - eliminates switch/case pattern
+ *
+ * Registry-driven approach for mapping categories to formatters.
+ * Replaces 14-line switch statement with type-safe lookup.
+ *
+ * Architecture:
+ * - Partial mapping allows categories without configuration sections
+ * - Type-safe with explicit formatter signatures
+ * - Shared formatter for agents/commands/rules (formatAiConfiguration)
+ * - Zero updates needed when adding non-config categories
+ *
+ * @see formatMcpConfiguration - MCP server config formatter
+ * @see formatHookConfiguration - Hook script config formatter
+ * @see formatStatuslineConfiguration - Statusline display config formatter
+ * @see formatAiConfiguration - AI model config formatter (agents/commands/rules)
+ */
+const CONFIG_FORMATTERS: Partial<Record<string, ConfigFormatter>> = {
+  mcp: (config) => formatMcpConfiguration(config as MCPConfiguration),
+  hooks: (config) => formatHookConfiguration(config as HookConfiguration),
+  statuslines: (config) => formatStatuslineConfiguration(config as StatuslineConfiguration),
+  // Shared AI configuration formatter for content types with temperature/maxTokens
+  agents: (config) => formatAiConfiguration(config as AIConfiguration),
+  commands: (config) => formatAiConfiguration(config as AIConfiguration),
+  rules: (config) => formatAiConfiguration(config as AIConfiguration),
+};
+
+/**
+ * Format configuration based on content type using registry-driven approach
+ *
+ * Modern 2025 Architecture:
+ * - Configuration-driven: Uses CONFIG_FORMATTERS registry
+ * - Type-safe: Explicit formatter mapping
+ * - Zero duplication: Eliminated 14-line switch statement
+ * - Extensible: Add new formatters without modifying this function
+ *
+ * @param config - Configuration object to format
+ * @param category - Content category identifier
+ * @returns Formatted configuration text or empty string if no formatter
+ *
+ * @example
+ * ```typescript
+ * // MCP configuration
+ * formatConfiguration({ claudeDesktop: {...} }, 'mcp')
+ * // Returns: "CONFIGURATION\n-------------\n..."
+ *
+ * // Category without configuration
+ * formatConfiguration({}, 'collections')
+ * // Returns: ""
+ * ```
  */
 function formatConfiguration(config: Record<string, unknown>, category: string): string {
-  switch (category) {
-    case 'mcp':
-      return formatMcpConfiguration(config as MCPConfiguration);
-    case 'hooks':
-      return formatHookConfiguration(config as HookConfiguration);
-    case 'statuslines':
-      return formatStatuslineConfiguration(config as StatuslineConfiguration);
-    case 'agents':
-    case 'commands':
-    case 'rules':
-      return formatAiConfiguration(config as AIConfiguration);
-    default:
-      return '';
-  }
+  const formatter = CONFIG_FORMATTERS[category];
+  return formatter ? formatter(config) : '';
 }
 
 /**

@@ -7,9 +7,8 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/login');
+export const metadata = generatePageMetadata('/login');
 
 export default async function LoginPage({
   searchParams,
@@ -18,9 +17,7 @@ export default async function LoginPage({
 }) {
   const resolvedSearchParams = await searchParams;
   return (
-    <div
-      className={`${UI_CLASSES.MIN_H_SCREEN} ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} bg-background px-4`}
-    >
+    <div className={'min-h-screen flex items-center justify-center bg-background px-4'}>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Welcome to ClaudePro</CardTitle>
@@ -35,9 +32,7 @@ export default async function LoginPage({
               : {})}
           />
 
-          <p
-            className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} text-center mt-4`}
-          >
+          <p className={'text-xs text-muted-foreground text-center mt-4'}>
             By signing in, you agree to our Terms of Service and Privacy Policy
           </p>
         </CardContent>

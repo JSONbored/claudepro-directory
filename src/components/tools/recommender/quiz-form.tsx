@@ -18,7 +18,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { Separator } from '@/src/components/ui/separator';
@@ -37,6 +36,7 @@ import {
   type UseCase,
 } from '@/src/lib/schemas/recommender.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 import { QuestionCard } from './question-card';
 import { QuizProgress } from './quiz-progress';
 
@@ -118,7 +118,7 @@ export function QuizForm() {
   const handleSubmit = async () => {
     // Validate all required fields
     if (!(answers.useCase && answers.experienceLevel && answers.toolPreferences?.length)) {
-      toast.error('Please answer all required questions');
+      toasts.error.requiredFields();
       setCurrentQuestion(1); // Go back to first unanswered question
       return;
     }
@@ -154,7 +154,7 @@ export function QuizForm() {
             throw new Error('Failed to generate recommendations');
           }
         } catch (error) {
-          toast.error('Failed to generate recommendations. Please try again.');
+          toasts.error.actionFailed('generate recommendations');
           logger.error(
             'Quiz submission failed',
             error instanceof Error ? error : new Error(String(error))
@@ -162,7 +162,7 @@ export function QuizForm() {
         }
       });
     } catch (error) {
-      toast.error('Please check your answers and try again');
+      toasts.error.invalidInput();
       logger.error(
         'Quiz validation failed',
         error instanceof Error ? error : new Error(String(error))
@@ -173,7 +173,7 @@ export function QuizForm() {
   const progressPercentage = Math.round((currentQuestion / TOTAL_QUESTIONS) * 100);
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       {/* Progress indicator */}
       <QuizProgress
         currentQuestion={currentQuestion}
@@ -184,7 +184,7 @@ export function QuizForm() {
       {/* Question cards */}
       <Card className="relative overflow-hidden">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <span className="text-sm text-muted-foreground">
               Question {currentQuestion} of {TOTAL_QUESTIONS}
             </span>
@@ -540,7 +540,7 @@ export function QuizForm() {
 
           {/* Navigation buttons */}
           <Separator className="my-6" />
-          <div className="flex items-center justify-between">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <Button
               type="button"
               variant="outline"

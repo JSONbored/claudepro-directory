@@ -29,7 +29,8 @@
 
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { ZodType } from 'zod';
+import { type ZodType, z } from 'zod';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 
 export interface SchemaTestConfig {
   /** Human-readable schema name for test descriptions */
@@ -62,7 +63,10 @@ export function loadContentFiles(contentDir: string) {
     return files.map((filename) => {
       const filePath = join(fullPath, filename);
       const raw = readFileSync(filePath, 'utf-8');
-      const data = JSON.parse(raw);
+      // Production-grade: safeParse with permissive schema for test content loading
+      const data = safeParse(raw, z.unknown(), {
+        strategy: ParseStrategy.VALIDATED_JSON,
+      });
       return { filename, data, raw };
     });
   } catch (error) {

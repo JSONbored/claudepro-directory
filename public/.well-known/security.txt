@@ -1,0 +1,55 @@
+# Our security policy and vulnerability disclosure program
+#
+# This file complies with RFC 9116 (https://www.rfc-editor.org/rfc/rfc9116.html)
+# Last updated: 2025-10-16
+
+Contact: https://github.com/JSONbored/claudepro-directory/security/advisories/new
+Contact: mailto:security@claudepro.directory
+Expires: 2026-10-16T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://claudepro.directory/.well-known/security.txt
+
+# Vulnerability Disclosure Policy
+Policy: https://github.com/JSONbored/claudepro-directory/blob/main/SECURITY.md
+
+# Security Acknowledgments
+Acknowledgments: https://github.com/JSONbored/claudepro-directory/blob/main/SECURITY.md#hall-of-fame
+
+# Hiring
+Hiring: https://github.com/JSONbored
+
+# Out of Scope
+# The following are considered out of scope for vulnerability reports:
+# - Issues in third-party dependencies (report to upstream)
+# - Social engineering attacks
+# - Physical attacks
+# - Denial of Service (DoS) attacks
+# - Rate limit bypasses that don't lead to data exposure
+# - Issues requiring unlikely user interaction
+# - Issues in deprecated features
+# - Self-XSS
+
+# In Scope
+# We particularly appreciate reports for:
+# - Authentication/authorization bypass
+# - SQL injection, NoSQL injection
+# - Remote code execution (RCE)
+# - Cross-site scripting (XSS)
+# - Cross-site request forgery (CSRF)
+# - Server-side request forgery (SSRF)
+# - Sensitive data exposure
+# - Security misconfigurations
+# - Insecure direct object references (IDOR)
+
+# Response Time
+# - Initial response: Within 48 hours
+# - Status update: Within 7 days
+# - Resolution target: Within 90 days (severity-dependent)
+
+# Safe Harbor
+# We support responsible disclosure and will not pursue legal action against
+# security researchers who:
+# - Make a good faith effort to avoid privacy violations
+# - Do not exploit vulnerabilities beyond what is necessary to demonstrate them
+# - Report vulnerabilities privately to us first
+# - Allow reasonable time for fixes before public disclosure

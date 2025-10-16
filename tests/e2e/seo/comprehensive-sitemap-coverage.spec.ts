@@ -36,8 +36,10 @@
  * @module tests/e2e/seo/comprehensive-sitemap-coverage
  */
 
-import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { z } from 'zod';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 
 /**
  * Helper: Get meta tag content
@@ -70,15 +72,20 @@ async function getCanonicalUrl(page: Page): Promise<string | null> {
 /**
  * Helper: Get structured data (JSON-LD)
  */
-async function getStructuredData(page: Page): Promise<any[]> {
+async function getStructuredData(page: Page): Promise<unknown[]> {
   const scripts = await page.locator('script[type="application/ld+json"]').all();
-  const data = [];
+  const data: unknown[] = [];
 
   for (const script of scripts) {
     try {
       const content = await script.textContent();
       if (content) {
-        data.push(JSON.parse(content));
+        // Production-grade: safeParse with permissive schema for JSON-LD validation
+        data.push(
+          safeParse(content, z.unknown(), {
+            strategy: ParseStrategy.VALIDATED_JSON,
+          })
+        );
       }
     } catch {
       // Invalid JSON-LD, skip
@@ -121,8 +128,14 @@ async function validateComprehensiveSEO(page: Page, url: string): Promise<void> 
   // AI agents (ChatGPT, Claude, Perplexity) prefer clear, front-loaded titles
   const title = await page.title();
   expect(title, `${url} must have a title`).toBeTruthy();
-  expect(title.length, `${url} title should be at least 30 chars for clarity`).toBeGreaterThanOrEqual(30);
-  expect(title.length, `${url} title should not exceed 60 chars for optimal display`).toBeLessThanOrEqual(60);
+  expect(
+    title.length,
+    `${url} title should be at least 30 chars for clarity`
+  ).toBeGreaterThanOrEqual(30);
+  expect(
+    title.length,
+    `${url} title should not exceed 60 chars for optimal display`
+  ).toBeLessThanOrEqual(60);
 
   // ===================================================================
   // 2. META DESCRIPTION VALIDATION (2025 AI Citation Standards)
@@ -153,12 +166,12 @@ async function validateComprehensiveSEO(page: Page, url: string): Promise<void> 
   // ===================================================================
   const canonical = await getCanonicalUrl(page);
 
-  if (!isNoIndex) {
-    expect(canonical, `${url} must have canonical URL`).toBeTruthy();
-    expect(canonical, `${url} canonical must be absolute HTTPS`).toMatch(/^https:\/\//);
-  } else {
+  if (isNoIndex) {
     // Noindex pages should NOT have canonical URLs
     expect(canonical, `${url} is noindex and should NOT have canonical URL`).toBeNull();
+  } else {
+    expect(canonical, `${url} must have canonical URL`).toBeTruthy();
+    expect(canonical, `${url} canonical must be absolute HTTPS`).toMatch(/^https:\/\//);
   }
 
   // ===================================================================
@@ -223,14 +236,13 @@ async function validateComprehensiveSEO(page: Page, url: string): Promise<void> 
   ).toBeGreaterThan(0);
 
   // Validate at least one schema has @context and @type
-  const hasValidSchema = structuredData.some(
-    (schema) => schema['@context'] && schema['@type']
-  );
+  const hasValidSchema = structuredData.some((schema) => schema['@context'] && schema['@type']);
   expect(hasValidSchema, `${url} must have valid Schema.org structured data`).toBe(true);
 
   // Validate Schema.org context is used
   const hasSchemaOrgContext = structuredData.some(
-    (schema) => schema['@context'] === 'https://schema.org' || schema['@context'] === 'http://schema.org'
+    (schema) =>
+      schema['@context'] === 'https://schema.org' || schema['@context'] === 'http://schema.org'
   );
   expect(hasSchemaOrgContext, `${url} must use Schema.org context in JSON-LD`).toBe(true);
 
@@ -248,17 +260,19 @@ async function validateComprehensiveSEO(page: Page, url: string): Promise<void> 
 
   // Check for proper heading hierarchy (H2 and H3 usage)
   const h2Count = await page.locator('h2').count();
-  expect(h2Count, `${url} should have H2 tags for content structure (AI agents prefer structured content)`).toBeGreaterThan(0);
+  expect(
+    h2Count,
+    `${url} should have H2 tags for content structure (AI agents prefer structured content)`
+  ).toBeGreaterThan(0);
 
   // ===================================================================
   // 9. VIEWPORT META TAG VALIDATION
   // ===================================================================
   const viewport = await getMetaContent(page, 'viewport');
   expect(viewport, `${url} must have viewport meta tag`).toBeTruthy();
-  expect(
-    viewport,
-    `${url} viewport must include width=device-width for mobile-first`
-  ).toContain('width=device-width');
+  expect(viewport, `${url} viewport must include width=device-width for mobile-first`).toContain(
+    'width=device-width'
+  );
 
   // ===================================================================
   // 10. LANGUAGE ATTRIBUTE VALIDATION
@@ -296,6 +310,7 @@ async function validateComprehensiveSEO(page: Page, url: string): Promise<void> 
         const entries = list.getEntries();
         const lcpEntry = entries[entries.length - 1];
         resolve({
+          // biome-ignore lint/suspicious/noExplicitAny: PerformanceEntry types don't include LCP-specific properties
           lcp: lcpEntry ? (lcpEntry as any).renderTime || (lcpEntry as any).loadTime : null,
         });
       }).observe({ type: 'largest-contentful-paint', buffered: true });
@@ -305,7 +320,9 @@ async function validateComprehensiveSEO(page: Page, url: string): Promise<void> 
     });
   });
 
+  // biome-ignore lint/suspicious/noExplicitAny: Runtime object from page.evaluate doesn't have static type
   if ((performanceMetrics as any).lcp) {
+    // biome-ignore lint/suspicious/noExplicitAny: Runtime object from page.evaluate doesn't have static type
     const lcpSeconds = (performanceMetrics as any).lcp / 1000;
     expect(
       lcpSeconds,
@@ -322,7 +339,9 @@ async function validateComprehensiveSEO(page: Page, url: string): Promise<void> 
       let cls = 0;
       new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
+          // biome-ignore lint/suspicious/noExplicitAny: PerformanceEntry types don't include layout-shift-specific properties
           if (!(entry as any).hadRecentInput) {
+            // biome-ignore lint/suspicious/noExplicitAny: PerformanceEntry types don't include layout-shift-specific properties
             cls += (entry as any).value;
           }
         }
@@ -376,7 +395,9 @@ async function validateComprehensiveSEO(page: Page, url: string): Promise<void> 
     return bgColor !== textColor && bgColor !== 'rgba(0, 0, 0, 0)';
   });
 
-  expect(hasGoodContrast, `${url} should have adequate color contrast for accessibility`).toBe(true);
+  expect(hasGoodContrast, `${url} should have adequate color contrast for accessibility`).toBe(
+    true
+  );
 
   // ===================================================================
   // 16. MOBILE-FIRST - TAP TARGET SIZE
@@ -412,12 +433,12 @@ async function validateComprehensiveSEO(page: Page, url: string): Promise<void> 
     const textElements = Array.from(document.querySelectorAll('p, li, span, div'));
     return textElements
       .filter((el) => {
-        const fontSize = parseFloat(window.getComputedStyle(el).fontSize);
+        const fontSize = Number.parseFloat(window.getComputedStyle(el).fontSize);
         const text = el.textContent?.trim();
         return text && text.length > 10 && fontSize < 16;
       })
       .map((el) => {
-        const fontSize = parseFloat(window.getComputedStyle(el).fontSize);
+        const fontSize = Number.parseFloat(window.getComputedStyle(el).fontSize);
         return `${fontSize.toFixed(1)}px`;
       })
       .slice(0, 3); // Limit to first 3 violations
@@ -457,7 +478,7 @@ async function validateComprehensiveSEO(page: Page, url: string): Promise<void> 
       .filter((img) => {
         const hasWidth = img.hasAttribute('width') || img.style.width;
         const hasHeight = img.hasAttribute('height') || img.style.height;
-        return !hasWidth || !hasHeight;
+        return !(hasWidth && hasHeight);
       })
       .map((img) => img.src)
       .slice(0, 5); // Limit to first 5
@@ -487,24 +508,19 @@ async function validateComprehensiveSEO(page: Page, url: string): Promise<void> 
  * Fetch all URLs from sitemap.xml
  */
 async function fetchSitemapUrls(baseUrl: string): Promise<string[]> {
-  try {
-    const response = await fetch(`${baseUrl}/sitemap.xml`);
-    if (!response.ok) {
-      throw new Error(`Sitemap fetch failed: ${response.status}`);
-    }
-
-    const xml = await response.text();
-    const locMatches = xml.match(/<loc>(.*?)<\/loc>/g);
-
-    if (!locMatches) {
-      throw new Error('No URLs found in sitemap.xml');
-    }
-
-    return locMatches.map((match) => match.replace(/<\/?loc>/g, ''));
-  } catch (error) {
-    console.error('Failed to fetch sitemap:', error);
-    throw error;
+  const response = await fetch(`${baseUrl}/sitemap.xml`);
+  if (!response.ok) {
+    throw new Error(`Sitemap fetch failed: ${response.status}`);
   }
+
+  const xml = await response.text();
+  const locMatches = xml.match(/<loc>(.*?)<\/loc>/g);
+
+  if (!locMatches) {
+    throw new Error('No URLs found in sitemap.xml');
+  }
+
+  return locMatches.map((match) => match.replace(/<\/?loc>/g, ''));
 }
 
 /**
@@ -566,16 +582,8 @@ let urlsFetched = false;
 // Use a top-level await to fetch sitemap data before any tests run
 // This ensures all dynamic tests are registered during module evaluation
 const sitemapUrlsPromise = (async () => {
-  try {
-    allUrls = await fetchSitemapUrls(DEV_SERVER_URL);
-    urlsFetched = true;
-    // Verbose logs removed - see HTML report for full details
-  } catch (error) {
-    console.error('❌ Failed to fetch sitemap during module evaluation:', error);
-    console.error('   Make sure dev server is running: npm run dev');
-    console.error(`   Using server: ${DEV_SERVER_URL}`);
-    throw error;
-  }
+  allUrls = await fetchSitemapUrls(DEV_SERVER_URL);
+  urlsFetched = true;
 })();
 
 // Wait for sitemap to be fetched before defining tests
@@ -610,13 +618,8 @@ test.describe('Core SEO Infrastructure', () => {
 
   test('should categorize all URLs correctly', () => {
     const htmlUrls = allUrls.filter((url) => categorizeUrl(url).type === 'html');
-    const llmsTxtUrls = allUrls.filter((url) => categorizeUrl(url).type === 'llms_txt');
-    const feedUrls = allUrls.filter((url) => categorizeUrl(url).type === 'feed');
-
-    console.log(`\n📊 URL Categories:`);
-    console.log(`   📄 HTML Pages: ${htmlUrls.length}`);
-    console.log(`   🤖 llms.txt Routes: ${llmsTxtUrls.length}`);
-    console.log(`   📡 RSS/Atom Feeds: ${feedUrls.length}`);
+    const _llmsTxtUrls = allUrls.filter((url) => categorizeUrl(url).type === 'llms_txt');
+    const _feedUrls = allUrls.filter((url) => categorizeUrl(url).type === 'feed');
 
     expect(htmlUrls.length, 'Should have HTML pages').toBeGreaterThan(0);
   });
@@ -686,10 +689,9 @@ test.describe('llms.txt Routes - AI Citation Optimization', () => {
       // 2. MUST RETURN PLAIN TEXT
       // ===================================================================
       const contentType = response?.headers()['content-type'];
-      expect(
-        contentType,
-        `${path} must return text/plain or text/markdown`
-      ).toMatch(/text\/(plain|markdown)/);
+      expect(contentType, `${path} must return text/plain or text/markdown`).toMatch(
+        /text\/(plain|markdown)/
+      );
 
       // ===================================================================
       // 3. MUST NOT BE EMPTY
@@ -701,10 +703,7 @@ test.describe('llms.txt Routes - AI Citation Optimization', () => {
       // ===================================================================
       // 4. MUST CONTAIN METADATA SECTION
       // ===================================================================
-      expect(
-        content,
-        `${path} must contain metadata header with # Title`
-      ).toMatch(/#\s+.+/);
+      expect(content, `${path} must contain metadata header with # Title`).toMatch(/#\s+.+/);
 
       // ===================================================================
       // 5. SHOULD INCLUDE RECENCY SIGNALS FOR AI CITATION
@@ -727,19 +726,13 @@ test.describe('llms.txt Routes - AI Citation Optimization', () => {
       // 7. SHOULD NOT CONTAIN HTML TAGS
       // ===================================================================
       const hasHtmlTags = /<[a-z][\s\S]*>/i.test(content || '');
-      expect(
-        hasHtmlTags,
-        `${path} should be plain text/markdown, not HTML`
-      ).toBe(false);
+      expect(hasHtmlTags, `${path} should be plain text/markdown, not HTML`).toBe(false);
 
       // ===================================================================
       // 8. CONTENT LENGTH VALIDATION
       // ===================================================================
       // llms.txt should be substantial but not excessive (AI context limits)
-      expect(
-        content?.length,
-        `${path} content should be at least 200 chars`
-      ).toBeGreaterThan(200);
+      expect(content?.length, `${path} content should be at least 200 chars`).toBeGreaterThan(200);
       expect(
         content?.length,
         `${path} content should not exceed 50,000 chars (AI context limits)`
@@ -793,17 +786,9 @@ test.describe('RSS/Atom Feeds - Changelog Syndication', () => {
 
 test.describe('Summary', () => {
   test('All sitemap URLs should be tested', () => {
-    const htmlUrls = allUrls.filter((url) => categorizeUrl(url).type === 'html');
-    const llmsTxtUrls = allUrls.filter((url) => categorizeUrl(url).type === 'llms_txt');
-    const feedUrls = allUrls.filter((url) => categorizeUrl(url).type === 'feed');
-
-    console.log('\n✅ COMPREHENSIVE SITEMAP COVERAGE COMPLETE!');
-    console.log(`\n📊 Testing Summary:`);
-    console.log(`   Total URLs: ${allUrls.length}`);
-    console.log(`   📄 HTML Pages: ${htmlUrls.length} (11 SEO checks each)`);
-    console.log(`   🤖 llms.txt Routes: ${llmsTxtUrls.length} (8 AI citation checks each)`);
-    console.log(`   📡 RSS/Atom Feeds: ${feedUrls.length} (feed validation)`);
-    console.log(`   Coverage: 100% ✅\n`);
+    const _htmlUrls = allUrls.filter((url) => categorizeUrl(url).type === 'html');
+    const _llmsTxtUrls = allUrls.filter((url) => categorizeUrl(url).type === 'llms_txt');
+    const _feedUrls = allUrls.filter((url) => categorizeUrl(url).type === 'feed');
 
     expect(allUrls.length, 'All URLs should be categorized and tested').toBeGreaterThan(0);
   });

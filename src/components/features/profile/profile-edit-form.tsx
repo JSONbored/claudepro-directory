@@ -6,15 +6,17 @@
  */
 
 import { useId, useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
+import { Switch } from '@/src/components/ui/switch';
 import { Textarea } from '@/src/components/ui/textarea';
-import { updateProfile } from '@/src/lib/actions/user.actions';
+import { refreshProfileFromOAuth, updateProfile } from '@/src/lib/actions/user.actions';
 import { X } from '@/src/lib/icons';
 import type { ProfileData } from '@/src/lib/schemas/profile.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface ProfileEditFormProps {
   profile: ProfileData;
@@ -38,6 +40,8 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const [work, setWork] = useState(profile.work || '');
   const [website, setWebsite] = useState(profile.website || '');
   const [socialXLink, setSocialXLink] = useState(profile.social_x_link || '');
+  const [isPublic, setIsPublic] = useState<boolean>(profile.public ?? true);
+  const [followEmail, setFollowEmail] = useState<boolean>(profile.follow_email ?? true);
   const [interests, setInterests] = useState<string[]>(() => {
     if (
       Array.isArray(profile.interests) &&
@@ -55,18 +59,20 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
     startTransition(async () => {
       const result = await updateProfile({
         name: name || undefined,
-        bio: bio || null,
-        work: work || null,
-        website: website || null,
-        social_x_link: socialXLink || null,
+        bio: bio || '',
+        work: work || '',
+        website: website || '',
+        social_x_link: socialXLink || '',
         interests,
+        public: isPublic,
+        follow_email: followEmail,
       });
 
       if (result?.data?.success) {
-        toast.success('Profile updated successfully');
+        toasts.success.profileUpdated();
         setHasChanges(false);
       } else if (result?.serverError) {
-        toast.error(result.serverError);
+        toasts.error.serverError(result.serverError);
       }
     });
   };
@@ -76,17 +82,17 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
     if (!trimmed) return;
 
     if (interests.length >= 10) {
-      toast.error('Maximum 10 interests allowed');
+      toasts.error.validation('Maximum 10 interests allowed');
       return;
     }
 
     if (interests.includes(trimmed)) {
-      toast.error('Interest already added');
+      toasts.error.validation('Interest already added');
       return;
     }
 
     if (trimmed.length > 30) {
-      toast.error('Interest must be less than 30 characters');
+      toasts.error.validation('Interest must be less than 30 characters');
       return;
     }
 
@@ -208,7 +214,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
 
         {/* Display interests */}
         {interests.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
+          <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-3`}>
             {interests.map((interest) => (
               <Badge key={interest} variant="secondary" className="gap-1 pr-1">
                 {interest}
@@ -229,6 +235,41 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         </p>
       </div>
 
+      {/* Privacy & Notifications */}
+      <div className="space-y-4 pt-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <Label>Public profile</Label>
+            <p className="text-xs text-muted-foreground mt-1">Allow others to view your profile</p>
+          </div>
+          <Switch
+            checked={isPublic}
+            onCheckedChange={(checked) => {
+              setIsPublic(!!checked);
+              setHasChanges(true);
+            }}
+            aria-label="Toggle public profile visibility"
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div>
+            <Label>Email on new followers</Label>
+            <p className="text-xs text-muted-foreground mt-1">
+              Send me an email when someone follows me
+            </p>
+          </div>
+          <Switch
+            checked={followEmail}
+            onCheckedChange={(checked) => {
+              setFollowEmail(!!checked);
+              setHasChanges(true);
+            }}
+            aria-label="Toggle follower email notifications"
+          />
+        </div>
+      </div>
+
       {/* Form Actions */}
       <div className="flex gap-3 pt-4">
         <Button type="submit" disabled={isPending || !hasChanges}>
@@ -245,6 +286,8 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
               setWork(profile.work || '');
               setWebsite(profile.website || '');
               setSocialXLink(profile.social_x_link || '');
+              setIsPublic(profile.public ?? true);
+              setFollowEmail(profile.follow_email ?? true);
               setInterests(
                 Array.isArray(profile.interests) &&
                   profile.interests.every((item): item is string => typeof item === 'string')
@@ -259,5 +302,33 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         )}
       </div>
     </form>
+  );
+}
+
+// Small client button to refresh profile data from OAuth provider.
+export function RefreshProfileButton({ providerLabel }: { providerLabel: string }) {
+  const [isPending, startTransition] = useTransition();
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      onClick={() =>
+        startTransition(async () => {
+          const result = await refreshProfileFromOAuth();
+          if (result?.data?.success) {
+            toasts.success.actionCompleted(`Refreshed from ${providerLabel}`);
+          } else if (result?.serverError) {
+            toasts.error.serverError(result.serverError);
+          } else {
+            toasts.error.profileRefreshFailed();
+          }
+        })
+      }
+      disabled={isPending}
+    >
+      {isPending ? 'Refreshing...' : `Refresh from ${providerLabel}`}
+    </Button>
   );
 }

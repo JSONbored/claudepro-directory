@@ -22,8 +22,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { render, screen } from '@/tests/utils/test-utils';
 import { Announcement, AnnouncementTag, AnnouncementTitle } from '@/src/components/ui/announcement';
+import { render, screen } from '@/tests/utils/test-utils';
 
 describe('Announcement Component', () => {
   describe('Basic Rendering', () => {

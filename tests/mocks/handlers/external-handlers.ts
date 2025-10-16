@@ -19,7 +19,7 @@
  * - No test data pollution in production services
  */
 
-import { http, HttpResponse, delay } from 'msw';
+import { delay, HttpResponse, http } from 'msw';
 
 /**
  * External service handlers
@@ -29,12 +29,10 @@ export const externalHandlers = [
    * Supabase REST API - Generic query handler
    * Intercepts Supabase database queries
    */
-  http.get('https://*.supabase.co/rest/v1/:table', async ({ params, request }) => {
+  http.get('https://*.supabase.co/rest/v1/:table', async ({ params, request: _request }) => {
     await delay(100);
 
     const { table } = params;
-    const url = new URL(request.url);
-    const select = url.searchParams.get('select');
 
     // Mock response based on table
     const mockData: Record<string, unknown[]> = {
@@ -80,11 +78,11 @@ export const externalHandlers = [
   /**
    * Supabase REST API - POST (insert)
    */
-  http.post('https://*.supabase.co/rest/v1/:table', async ({ request, params }) => {
+  http.post('https://*.supabase.co/rest/v1/:table', async ({ request, params: _params }) => {
     await delay(150);
 
     const body = await request.json();
-    const { table } = params;
+    const { table } = _params;
 
     // Mock successful insert
     return HttpResponse.json(
@@ -103,7 +101,7 @@ export const externalHandlers = [
   /**
    * Supabase REST API - PATCH (update)
    */
-  http.patch('https://*.supabase.co/rest/v1/:table', async ({ request, params }) => {
+  http.patch('https://*.supabase.co/rest/v1/:table', async ({ request, params: _params }) => {
     await delay(100);
 
     const body = await request.json();
@@ -151,7 +149,7 @@ export const externalHandlers = [
   /**
    * Upstash Redis HTTP API - SET
    */
-  http.post('https://*.upstash.io/set/:key', async ({ params }) => {
+  http.post('https://*.upstash.io/set/:key', async ({ params: _params }) => {
     await delay(50);
 
     return HttpResponse.json({ result: 'OK' });
@@ -176,11 +174,8 @@ export const externalHandlers = [
 
     // Validate API key
     const apiKey = request.headers.get('authorization');
-    if (!apiKey || !apiKey.startsWith('Bearer re_')) {
-      return HttpResponse.json(
-        { error: 'Invalid API key' },
-        { status: 401 }
-      );
+    if (!apiKey?.startsWith('Bearer re_')) {
+      return HttpResponse.json({ error: 'Invalid API key' }, { status: 401 });
     }
 
     return HttpResponse.json(
@@ -230,7 +225,7 @@ export const externalHandlers = [
     return HttpResponse.json({
       login: username,
       id: 789012,
-      avatar_url: `https://avatars.githubusercontent.com/u/789012?v=4`,
+      avatar_url: 'https://avatars.githubusercontent.com/u/789012?v=4',
       html_url: `https://github.com/${username}`,
       name: 'Test User',
       bio: 'Software developer and open source contributor',
@@ -296,7 +291,8 @@ export const externalErrorHandlers = {
     return HttpResponse.json(
       {
         message: 'API rate limit exceeded',
-        documentation_url: 'https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting',
+        documentation_url:
+          'https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting',
       },
       {
         status: 403,

@@ -7,6 +7,7 @@
 
 import { AlertTriangle, CheckCircle, Info, Star } from '@/src/lib/icons';
 import { type InfoBoxProps, infoBoxPropsSchema } from '@/src/lib/schemas/shared.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function InfoBox(props: InfoBoxProps) {
   const validated = infoBoxPropsSchema.parse(props);
@@ -35,7 +36,7 @@ export function InfoBox(props: InfoBoxProps) {
       className={`my-6 border-l-4 rounded-r-lg p-6 ${variantStyles[variant]}`}
     >
       {title && (
-        <div className="flex items-center gap-2 mb-3">
+        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-3`}>
           {iconMap[variant]}
           <h4 className="font-semibold text-foreground" itemProp="name">
             {title}

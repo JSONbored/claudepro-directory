@@ -15,7 +15,6 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { BaseCard } from '@/src/components/shared/base-card';
 import { BookmarkButton } from '@/src/components/shared/bookmark-button';
 import { Badge } from '@/src/components/ui/badge';
@@ -42,7 +41,7 @@ import {
   TooltipTrigger,
 } from '@/src/components/ui/tooltip';
 import { addBookmarkBatch } from '@/src/lib/actions/user.actions';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import {
   ArrowRight,
   Award,
@@ -60,6 +59,7 @@ import {
 import type { RecommendationResponse } from '@/src/lib/schemas/recommender.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
+import { toasts } from '@/src/lib/utils/toast.utils';
 import { ShareResults } from './share-results';
 
 interface ResultsDisplayProps {
@@ -91,7 +91,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         const response = await addBookmarkBatch({ items });
 
         if (response?.data?.success) {
-          toast.success(
+          toasts.raw.success(
             `Saved ${response.data.saved_count} of ${response.data.total_requested} recommendations to your library`,
             {
               description: 'View them in your library',
@@ -104,10 +104,10 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             }
           );
         } else {
-          toast.error('Failed to save recommendations. Please try again.');
+          toasts.error.saveFailed();
         }
       } catch {
-        toast.error('Failed to save recommendations. Please try again.');
+        toasts.error.saveFailed();
       }
     });
   };
@@ -122,10 +122,10 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
   const categories = ['all', ...new Set(results.map((r) => r.category))];
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_8}>
+    <div className="space-y-8">
       {/* Header Section */}
       <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-2">
+        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
           <Sparkles className="h-6 w-6 text-primary" />
           <h1 className="text-3xl md:text-4xl font-bold">Your Personalized Recommendations</h1>
         </div>
@@ -137,7 +137,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </p>
 
         {/* Summary Stats */}
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <div className={'flex-wrap items-center justify-center gap-3'}>
           <Badge variant="secondary" className="text-sm">
             <TrendingUp className="h-3 w-3 mr-1" />
             {summary.avgMatchScore}% Avg Match
@@ -152,7 +152,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </div>
 
         {/* Actions */}
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <div className={'flex-wrap items-center justify-center gap-3'}>
           <Button
             variant="default"
             size="sm"
@@ -203,7 +203,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             <CardContent className="space-y-6">
               {/* Minimum Score Slider */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className="text-sm font-medium">Minimum Match Score</span>
                   <span className="text-sm text-muted-foreground">{minScore}%</span>
                 </div>
@@ -223,7 +223,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
               {/* Max Results Slider */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className="text-sm font-medium">Maximum Results</span>
                   <span className="text-sm text-muted-foreground">{maxResults}</span>
                 </div>
@@ -244,7 +244,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
               {/* Stats */}
               <div className="pt-4">
                 <Separator className="mb-4" />
-                <div className="flex items-center justify-between text-sm">
+                <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-sm`}>
                   <span className="text-muted-foreground">Showing results:</span>
                   <span className="font-medium">
                     {filteredResults.length} of {results.length}
@@ -310,7 +310,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
       {/* Category Filter Tabs */}
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-        <TabsList className="flex-wrap h-auto">
+        <TabsList className={'flex-wrap h-auto'}>
           {categories.map((category) => {
             const count =
               category === 'all'
@@ -405,8 +405,12 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                       renderContent={() => (
                         <>
                           {/* Primary reason for recommendation */}
-                          <div className="flex items-start gap-2 p-3 bg-accent/50 rounded-lg mb-3">
-                            <Info className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                          <div
+                            className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} p-3 bg-accent/50 rounded-lg mb-3`}
+                          >
+                            <Info
+                              className={`h-4 w-4 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                            />
                             <div>
                               <p className="text-sm font-medium">Why recommended:</p>
                               <p className="text-sm text-muted-foreground">
@@ -429,7 +433,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                       )}
                       renderMetadataBadges={() =>
                         result.viewCount !== undefined ? (
-                          <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <span
+                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} text-sm text-muted-foreground`}
+                          >
                             <Eye className="h-3 w-3" />
                             {result.viewCount}
                           </span>
@@ -442,7 +448,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                           className="w-full group -mx-4 -mb-4 mt-2"
                           asChild
                         >
-                          <span className="flex items-center justify-center gap-2">
+                          <span className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
                             View Details
                             <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                           </span>
@@ -458,7 +464,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
           {filteredResults.length === 0 && (
             <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
+              <CardContent className={UI_CLASSES.FLEX_COL_ITEMS_CENTER_JUSTIFY_CENTER}>
                 <p className="text-muted-foreground">No results in this category</p>
               </CardContent>
             </Card>
@@ -469,7 +475,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
       {/* Next Steps CTA */}
       <Card className="bg-primary/5 border-primary/20">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Sparkles className="h-5 w-5 text-primary" />
             What's Next?
           </CardTitle>
@@ -479,7 +485,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             Ready to start using these configurations? Click any card to view detailed setup
             instructions, examples, and documentation.
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className={UI_CLASSES.FLEX_WRAP_GAP_3}>
             <Button asChild>
               <Link href="/" className="gap-2">
                 Browse All Configs

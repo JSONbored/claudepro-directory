@@ -22,7 +22,7 @@
  * - Type-safe return values
  */
 
-import { contentCache } from '@/src/lib/cache';
+import { contentCache } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
 import type { ChangelogEntry, ParsedChangelog } from '@/src/lib/schemas/changelog.schema';
 import {

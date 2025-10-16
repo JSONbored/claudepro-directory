@@ -6,7 +6,6 @@ import { Input } from '@/src/components/ui/input';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
 import { Mail } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Newsletter signup form component
@@ -48,7 +47,7 @@ export function NewsletterForm({
   return (
     <form onSubmit={handleSubmit} className={className}>
       <div className="flex flex-col gap-2">
-        <div className="flex gap-2">
+        <div className={'flex gap-2'}>
           <Input
             type="email"
             placeholder="your@email.com"
@@ -73,7 +72,7 @@ export function NewsletterForm({
           </Button>
         </div>
         {error && (
-          <p id={errorId} className={`${UI_CLASSES.TEXT_SM} text-destructive`} role="alert">
+          <p id={errorId} className={'text-sm text-destructive'} role="alert">
             {error}
           </p>
         )}

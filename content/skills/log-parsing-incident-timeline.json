@@ -1,0 +1,38 @@
+{
+  "slug": "log-parsing-incident-timeline",
+  "title": "Log Parsing and Incident Timeline",
+  "seoTitle": "Log Parsing + Incident Timeline Skill",
+  "description": "Parse web/app/system logs into structured incidents and timelines with anomaly hints.",
+  "category": "skills",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-15",
+  "tags": ["logs", "observability", "ripgrep", "bash"],
+  "content": "# Log Parsing & Incident Timeline Skill\n\n## What This Skill Enables\n\nClaude can parse application logs, server logs, and system logs to extract errors, create incident timelines, identify patterns, and correlate events across distributed systems. Transform raw log data into actionable insights.\n\n## Prerequisites\n\n**Required:**\n- Claude Pro subscription\n- Code Interpreter feature enabled\n- Log files uploaded (text, JSON, or compressed)\n\n**What Claude handles:**\n- Installing log parsing tools (grep, awk, jq, logparser)\n- Pattern matching and extraction\n- Timestamp parsing and correlation\n- Error aggregation and analysis\n- Timeline generation\n\n## How to Use This Skill\n\n### Extract Errors from Logs\n\n**Prompt:** \"Find all errors in this application log from the past hour. Group by error type and show frequency.\"\n\nClaude will:\n1. Parse log timestamps\n2. Filter to last hour\n3. Extract error messages\n4. Group and count\n5. Present sorted by frequency\n\n### Create Incident Timeline\n\n**Prompt:** \"Create a timeline of what happened during the outage (2pm-3pm):\n- Filter to that time range\n- Show key events (errors, warnings, restarts)\n- Correlate across multiple log files\n- Present chronologically\"\n\nClaude will:\n1. Parse multiple log sources\n2. Filter by time range\n3. Extract significant events\n4. Merge and sort chronologically\n5. Create incident timeline\n\n### Analyze Request Flow\n\n**Prompt:** \"Trace request ID 'abc123' through all log files. Show the complete journey with timestamps and any errors encountered.\"\n\nClaude will:\n1. Search for request ID across files\n2. Extract all matching lines\n3. Sort by timestamp\n4. Identify errors or anomalies\n5. Show complete flow\n\n### Performance Analysis\n\n**Prompt:** \"Analyze response times in this access log:\n- Calculate p50, p95, p99 percentiles\n- Identify slowest requests\n- Show distribution histogram\n- Flag requests over 1 second\"\n\nClaude will:\n1. Extract response time data\n2. Calculate statistics\n3. Identify outliers\n4. Create visualization\n5. Report findings\n\n## Common Workflows\n\n### Post-Incident Analysis\n```\n\"Analyze logs from the incident:\n1. Extract all errors between 14:00-15:00\n2. Identify first error that occurred\n3. Show cascade of subsequent errors\n4. Correlate with deployment timestamp\n5. Create incident report with timeline\"\n```\n\n### Security Audit\n```\n\"Audit access logs for security issues:\n1. Find failed login attempts (3+ in 5 min)\n2. Identify IP addresses with suspicious patterns\n3. Detect potential SQL injection attempts\n4. Flag unusual user agent strings\n5. Generate security report\"\n```\n\n### Error Aggregation\n```\n\"Aggregate errors from past 7 days:\n1. Group by error type/stack trace\n2. Count occurrences over time\n3. Identify trends (increasing/decreasing)\n4. Show top 10 most common errors\n5. Export as CSV for tracking\"\n```\n\n### Multi-Service Correlation\n```\n\"Correlate logs from:\n- API gateway (nginx)\n- Application server (node.js)\n- Database (postgres)\n- Cache (redis)\nFor request ID xyz789, show complete flow across all services.\"\n```\n\n## Log Formats Supported\n\n### Common Formats\n- Apache/Nginx access logs\n- JSON structured logs\n- Syslog format\n- Application logs (various formats)\n- AWS CloudWatch logs\n- Docker container logs\n\n### Custom Formats\n- Claude can parse custom log formats\n- Provide sample line and field descriptions\n- Define regex patterns or delimiters\n\n## Tips for Best Results\n\n1. **Provide Context**: Describe log format and what you're looking for\n2. **Time Ranges**: Be specific about time periods (\"last hour\", \"between 2-3pm EST\")\n3. **Sample Lines**: Show Claude a few example log lines\n4. **Identifiers**: Mention correlation IDs (request ID, user ID, session ID)\n5. **Large Files**: For huge logs, ask Claude to sample or filter first\n6. **Compressed Logs**: Claude can handle .gz files directly\n7. **Multiple Files**: Upload related files together for correlation\n\n## Advanced Analysis\n\n### Pattern Detection\n- Anomaly detection in log volume\n- Unusual pattern recognition\n- Cyclic pattern identification\n- Outlier detection\n\n### Correlation Techniques\n- Cross-service request tracing\n- Time-based event correlation\n- User session reconstruction\n- Dependency mapping\n\n### Filtering & Extraction\n- Regex-based pattern matching\n- JSON path extraction\n- Field parsing and normalization\n- PII redaction\n\n## Troubleshooting\n\n**Issue:** Timestamps in different formats across logs\n**Solution:** Tell Claude the format: \"Timestamps are in ISO 8601 in app.log but Unix epoch in system.log\"\n\n**Issue:** Log files too large to process\n**Solution:** \"Sample every 10th line\" or \"Filter to errors only first\" or \"Process in 1-hour chunks\"\n\n**Issue:** Can't find specific error messages\n**Solution:** Provide example error text or pattern: \"Look for lines containing '500' or 'exception' or 'fatal'\"\n\n**Issue:** Multiple services use different request ID fields\n**Solution:** Map them: \"request_id in API logs, correlation_id in app logs, trace_id in database logs\"\n\n**Issue:** Logs contain sensitive data\n**Solution:** \"Redact IP addresses, emails, and API keys before analysis\" or \"Mask PII fields\"\n\n**Issue:** Time zone confusion\n**Solution:** Specify: \"All timestamps are in UTC\" or \"Convert to Eastern Time for analysis\"\n\n## Learn More\n\n- [Log Analysis Best Practices](https://www.loggly.com/ultimate-guide/analyzing-log-data/) - Comprehensive guide\n- [jq Manual](https://stedolan.github.io/jq/manual/) - JSON log parsing\n- [ripgrep Guide](https://github.com/BurntSushi/ripgrep) - Fast log searching\n- [Log Parsing Patterns](https://logz.io/blog/logstash-grok/) - Common log patterns\n- [Distributed Tracing](https://opentelemetry.io/docs/concepts/observability-primer/#distributed-traces) - Request correlation\n",
+  "features": [
+    "ripgrep-based fast filtering",
+    "Session/request correlation",
+    "Timeline generation",
+    "PII/secret redaction"
+  ],
+  "useCases": ["Post-incident analysis", "Live debugging", "Compliance reporting"],
+  "requirements": ["ripgrep (rg)", "jq (optional)", "bash or Python 3.11+"],
+  "examples": [
+    {
+      "title": "Extract errors and build a simple timeline",
+      "language": "bash",
+      "code": "# Filter 5xx from nginx and sort by time\nrg -n ' 5\\d\\d ' access.log | awk '{print $4, $5, $9, $7}' | sort > timeline.txt\nhead -n 5 timeline.txt"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": { "steps": ["Install ripgrep and jq"] },
+    "claudeCode": { "steps": ["Ensure logs are locally accessible", "Use rg for fast searches"] }
+  },
+  "troubleshooting": [
+    {
+      "issue": "No matches due to log format differences",
+      "solution": "Adjust patterns for your log format; test with small samples first."
+    }
+  ],
+  "documentationUrl": "https://github.com/BurntSushi/ripgrep",
+  "source": "community"
+}

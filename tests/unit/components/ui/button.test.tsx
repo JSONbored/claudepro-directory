@@ -25,8 +25,8 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@/tests/utils/test-utils';
 import { Button } from '@/src/components/ui/button';
+import { fireEvent, render, screen } from '@/tests/utils/test-utils';
 
 describe('Button Component', () => {
   describe('Basic Rendering', () => {

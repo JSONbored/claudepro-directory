@@ -7,7 +7,8 @@
  */
 
 import { z } from 'zod';
-import { APP_CONFIG, SEO_CONFIG } from '@/src/lib/constants';
+import { SEO_CONFIG } from '@/src/lib/config/seo-config';
+import { APP_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import { type SanitizationOptions, sanitizeContent } from './content-sanitizer';
 import { type ConversionOptions, markdownToPlainText } from './markdown-to-plain';

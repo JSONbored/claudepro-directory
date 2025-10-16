@@ -126,7 +126,11 @@ export type AIOptimization = z.infer<typeof aiOptimizationSchema>;
  * - Dash separator (9% higher CTR than pipe on Google)
  * - Support for static strings or dynamic functions
  */
-export type TitleConfig = string | ((context?: MetadataContext) => string | Promise<string>);
+/**
+ * **PERFORMANCE**: Synchronous only - no Promise overhead
+ * Next.js 15 can optimize synchronous metadata at build time
+ */
+export type TitleConfig = string | ((context?: MetadataContext) => string);
 
 /**
  * Structured Data Configuration Schema
@@ -206,15 +210,19 @@ export interface RouteMetadata {
    * Meta description (120-160 chars for AI optimization)
    * AI-optimized length based on October 2025 research
    * Can be static string or function for dynamic resolution
+   *
+   * **PERFORMANCE**: Synchronous only - no Promise overhead
    */
-  description: string | ((context?: MetadataContext) => string | Promise<string>);
+  description: string | ((context?: MetadataContext) => string);
 
   /**
    * Keywords array (max 10 for SEO best practice)
    * Optional - only used for specific content types
    * Can be static array or function for dynamic resolution
+   *
+   * **PERFORMANCE**: Synchronous only - no Promise overhead
    */
-  keywords?: string[] | ((context?: MetadataContext) => string[] | Promise<string[]>);
+  keywords?: string[] | ((context?: MetadataContext) => string[]);
 
   /**
    * OpenGraph configuration (REQUIRED for all routes)
@@ -286,19 +294,14 @@ const SEPARATOR = METADATA_DEFAULTS.separator; // " - " (3 chars)
 
 /**
  * Category display names for content routes
- * Maps URL slugs to human-readable category names
+ * Dynamically derived from unified category registry - zero manual maintenance
  * Used in content-tier titles: {name} - {category} - Claude Pro Directory
  */
-export const CATEGORY_NAMES: Record<string, string> = {
-  agents: 'AI Agents', // 9 chars → overhead 35, max title 20-25
-  mcp: 'MCP', // 3 chars → overhead 29, max title 26-31
-  rules: 'Rules', // 5 chars → overhead 31, max title 24-29
-  commands: 'Commands', // 8 chars → overhead 34, max title 21-26
-  hooks: 'Hooks', // 5 chars → overhead 31, max title 24-29
-  statuslines: 'Statuslines', // 11 chars → overhead 37, max title 18-23
-  guides: 'Guides', // 6 chars → overhead 32, max title 23-28
-  collections: 'Collections', // 11 chars → overhead 37, max title 18-23
-} as const;
+import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+
+export const CATEGORY_NAMES: Record<string, string> = Object.fromEntries(
+  Object.entries(UNIFIED_CATEGORY_REGISTRY).map(([key, config]) => [key, config.pluralTitle])
+) as Record<string, string>;
 
 /**
  * Smart title truncation that preserves word boundaries
@@ -552,11 +555,13 @@ export const METADATA_REGISTRY = {
    */
   '/tools/config-recommender': {
     title: buildPageTitle('Claude Config Recommender Tool'),
-    description: async () => {
-      const { getTotalContentCount } = await import('@/src/lib/content/content-loaders');
-      const count = await getTotalContentCount();
-      return `Find your perfect Claude configuration in 2 minutes. Answer 7 questions and get personalized recommendations from ${count}+ configs. Instant, AI-powered matching for your exact needs.`;
-    },
+    /**
+     * **PERFORMANCE**: Static description for build-time optimization
+     * Using 150+ as the count (stable baseline) instead of dynamic loading
+     * This eliminates async overhead and enables Next.js static analysis
+     */
+    description:
+      'Find your perfect Claude configuration in 2 minutes. Answer 7 questions and get personalized recommendations from 150+ configs. Instant, AI-powered matching for your exact needs.',
     keywords: [
       'claude config recommender',
       'claude configuration quiz',
@@ -659,41 +664,6 @@ export const METADATA_REGISTRY = {
       recencySignal: false,
       useArticleSchema: false,
       generateFAQSchema: true,
-      wikipediaStyle: false,
-    },
-  },
-
-  /**
-   * Collections List - Tier 2
-   * Curated content discovery
-   */
-  '/collections': {
-    title: buildPageTitle('Claude Configuration Collections 2025'),
-    description:
-      'Curated Claude AI collections for October 2025. Hand-picked MCP servers, agents, and workflows organized by use case, expertise level, and development needs.',
-    keywords: [
-      'claude collections',
-      'curated ai tools 2025',
-      'mcp server collections',
-      'claude workflows',
-    ],
-    openGraph: {
-      type: 'website' as const,
-    },
-    twitter: {
-      card: 'summary_large_image' as const,
-    },
-    structuredData: {
-      type: 'CollectionPage' as const,
-      breadcrumbs: true,
-      dateModified: true,
-      author: false,
-    },
-    aiOptimization: {
-      includeYear: true,
-      recencySignal: false,
-      useArticleSchema: false,
-      generateFAQSchema: false,
       wikipediaStyle: false,
     },
   },
@@ -942,7 +912,8 @@ export const METADATA_REGISTRY = {
    */
   '/404': {
     title: buildPageTitle('404 Not Found', 'Browse AI Configs'),
-    description: `The page you're looking for doesn't exist on Claude Pro Directory. Browse our collection of 150+ AI agents, MCP servers, rules, commands, hooks, and configurations instead.`,
+    description:
+      'Page not found. Explore our comprehensive collection of 150+ AI agents, MCP servers, rules, commands, hooks, statuslines, and configurations for Claude AI.',
     keywords: ['404', 'page not found', 'claude directory'],
     openGraph: {
       type: 'website' as const,
@@ -983,6 +954,7 @@ export const METADATA_REGISTRY = {
         commands: 'Browse Commands for Claude 2025',
         rules: 'Browse Rules for Claude AI 2025',
         statuslines: 'Browse Statuslines for Claude 2025',
+        skills: 'Browse Skills for Claude 2025',
       };
 
       const baseTitle =
@@ -1013,6 +985,8 @@ export const METADATA_REGISTRY = {
           'Browse Claude rules and system prompts for October 2025. Configure AI behavior, coding standards, security policies, and best practices for your development workflow.',
         statuslines:
           'Browse Claude statusline templates for October 2025. Customize your CLI status bar with project info, git status, environment indicators, and development metrics.',
+        skills:
+          'Browse Claude Skills for October 2025. Practical document and data workflows (PDF, DOCX, PPTX, XLSX) with exact dependencies, code examples, and troubleshooting.',
       };
 
       return (
@@ -1247,42 +1221,6 @@ export const METADATA_REGISTRY = {
       useArticleSchema: true,
       generateFAQSchema: false,
       wikipediaStyle: true,
-    },
-  },
-
-  /**
-   * Collection Detail Pages (/collections/:slug)
-   * Curated content collections
-   * Prioritizes seoTitle for <title> tag optimization
-   */
-  '/collections/:slug': {
-    title: (context?: MetadataContext) => {
-      // Prioritize seoTitle for SEO optimization (<60 chars)
-      const seoTitle = (context?.item as { seoTitle?: string })?.seoTitle;
-      const collectionTitle = seoTitle || context?.item?.title || 'Collection';
-      return buildContentTitle(collectionTitle, 'Collections');
-    },
-    description: (context?: MetadataContext) =>
-      context?.item?.description || 'Curated collection of Claude AI tools and configurations.',
-    keywords: ['claude collection', 'curated ai tools 2025', 'claude toolkit'],
-    openGraph: {
-      type: 'website' as const,
-    },
-    twitter: {
-      card: 'summary_large_image' as const,
-    },
-    structuredData: {
-      type: 'CollectionPage' as const,
-      breadcrumbs: true,
-      dateModified: true,
-      author: true,
-    },
-    aiOptimization: {
-      includeYear: true,
-      recencySignal: false,
-      useArticleSchema: false,
-      generateFAQSchema: false,
-      wikipediaStyle: false,
     },
   },
 

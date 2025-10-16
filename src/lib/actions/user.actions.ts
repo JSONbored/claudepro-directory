@@ -9,8 +9,6 @@
  * - Bookmarks (add, remove, batch operations, check status)
  * - Follow relationships (follow/unfollow, check status)
  * - Activity tracking (summary, timeline)
- * - Reputation management (recalculate, breakdown)
- * - Badge management (get badges, check new, trigger checks)
  *
  * Architecture:
  * - All actions use authedAction or rateLimitedAction middleware
@@ -32,15 +30,12 @@ import { logger } from '@/src/lib/logger';
 import { activityRepository } from '@/src/lib/repositories/activity.repository';
 import { bookmarkRepository } from '@/src/lib/repositories/bookmark.repository';
 import { followerRepository } from '@/src/lib/repositories/follower.repository';
-import { reputationRepository } from '@/src/lib/repositories/reputation.repository';
 import { type User, userRepository } from '@/src/lib/repositories/user.repository';
-import { userBadgeRepository } from '@/src/lib/repositories/user-badge.repository';
 import { userInteractionRepository } from '@/src/lib/repositories/user-interaction.repository';
 import {
   activityFilterSchema,
   activitySummarySchema,
   activityTimelineResponseSchema,
-  reputationBreakdownSchema,
 } from '@/src/lib/schemas/activity.schema';
 import { userIdSchema } from '@/src/lib/schemas/branded-types.schema';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
@@ -64,10 +59,22 @@ export const updateProfile = authedAction
   .action(async ({ parsedInput, ctx }) => {
     const { userId } = ctx;
 
-    // Filter out undefined values to avoid exactOptionalPropertyTypes issues
-    const updateData = Object.fromEntries(
-      Object.entries(parsedInput).filter(([_, value]) => value !== undefined)
-    ) as Partial<User>;
+    // Transform data for database storage
+    // Empty strings → null for nullable text fields (bio, work, website, social_x_link)
+    // This handles the impedance mismatch between form inputs (empty string for clearing)
+    // and database representation (null for absent values)
+    const updateData: Partial<User> = {};
+
+    for (const [key, value] of Object.entries(parsedInput)) {
+      if (value !== undefined) {
+        // Convert empty strings to null for nullable text fields
+        if (['bio', 'work', 'website', 'social_x_link'].includes(key) && value === '') {
+          updateData[key as keyof User] = null as never;
+        } else {
+          updateData[key as keyof User] = value as never;
+        }
+      }
+    }
 
     // Update via repository (includes caching and automatic error handling)
     const result = await userRepository.update(userId, updateData);
@@ -507,216 +514,4 @@ export const getActivityTimeline = authedAction
     }
 
     return result.data;
-  });
-
-// ============================================
-// REPUTATION ACTIONS
-// ============================================
-
-/**
- * Manually recalculate user's reputation
- * Useful for debugging or if automatic triggers fail
- */
-export const recalculateReputation = authedAction
-  .metadata({
-    actionName: 'recalculateReputation',
-    category: 'user',
-    rateLimit: {
-      maxRequests: 5, // Limit recalculations
-      windowSeconds: 60,
-    },
-  })
-  .schema(z.void())
-  .outputSchema(z.object({ new_score: z.number().int().nonnegative() }))
-  .action(async ({ ctx }) => {
-    const { userId } = ctx;
-
-    // Recalculate via repository (includes caching and error handling)
-    const result = await reputationRepository.recalculate(userId);
-
-    if (!result.success || result.data === undefined) {
-      throw new Error(result.error || 'Failed to recalculate reputation');
-    }
-
-    // Get updated profile via repository (includes caching)
-    const profileResult = await userRepository.findById(userId);
-    const profile = profileResult.success ? profileResult.data : null;
-
-    // Revalidate paths
-    if (profile?.slug) {
-      revalidatePath(`/u/${profile.slug}`);
-    }
-    revalidatePath('/account');
-    revalidatePath('/account/activity');
-
-    return {
-      new_score: result.data,
-    };
-  });
-
-/**
- * Get reputation breakdown
- * Shows how reputation was earned
- */
-export const getReputationBreakdown = authedAction
-  .metadata({
-    actionName: 'getReputationBreakdown',
-    category: 'user',
-  })
-  .schema(z.void())
-  .outputSchema(reputationBreakdownSchema)
-  .action(async ({ ctx }) => {
-    const { userId } = ctx;
-
-    // Get breakdown via repository (includes caching and parallel queries)
-    const result = await reputationRepository.getBreakdown(userId);
-
-    if (!(result.success && result.data)) {
-      throw new Error(result.error || 'Failed to fetch reputation breakdown');
-    }
-
-    return result.data;
-  });
-
-// ============================================
-// BADGE ACTIONS
-// ============================================
-
-/**
- * Get user's badges with details
- */
-export const getUserBadges = authedAction
-  .metadata({
-    actionName: 'getUserBadges',
-    category: 'user',
-  })
-  .schema(z.object({ user_id: z.string().uuid().optional() }))
-  .outputSchema(
-    z.object({
-      badges: z.array(
-        z.object({
-          id: z.string().uuid(),
-          badge_id: z.string().uuid(),
-          earned_at: z.string(),
-          featured: z.boolean(),
-          badge: z.object({
-            slug: z.string(),
-            name: z.string(),
-            description: z.string(),
-            icon: z.string().nullable(),
-            category: z.string(),
-          }),
-        })
-      ),
-    })
-  )
-  .action(async ({ parsedInput: { user_id }, ctx }) => {
-    // If no user_id provided, use current user
-    const targetUserId = user_id || ctx.userId;
-
-    // Fetch via repository (includes caching and badge details join)
-    const result = await userBadgeRepository.findByUserWithBadgeDetails(targetUserId);
-
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to fetch badges');
-    }
-
-    // Transform the data to match expected output format
-    const badges = (result.data || []).map((item) => ({
-      id: item.id,
-      badge_id: item.badge_id,
-      earned_at: item.earned_at,
-      featured: item.featured,
-      badge: {
-        slug: item.badges.slug,
-        name: item.badges.name,
-        description: item.badges.description,
-        icon: item.badges.icon,
-        category: item.badges.category,
-      },
-    }));
-
-    return {
-      badges,
-    };
-  });
-
-/**
- * Check for newly earned badges
- * Used for showing notifications
- */
-export const checkNewBadges = authedAction
-  .metadata({
-    actionName: 'checkNewBadges',
-    category: 'user',
-  })
-  .schema(z.object({ since: z.string().datetime().optional() }))
-  .outputSchema(
-    z.object({
-      new_badges: z.array(
-        z.object({
-          name: z.string(),
-          description: z.string(),
-          icon: z.string().nullable(),
-          earned_at: z.string(),
-        })
-      ),
-    })
-  )
-  .action(async ({ parsedInput: { since }, ctx }) => {
-    const { userId } = ctx;
-
-    // Fetch via repository (includes caching and badge details join)
-    const result = await userBadgeRepository.findRecentlyEarned(userId, since);
-
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to check badges');
-    }
-
-    const newBadges = (result.data || []).map((item) => ({
-      name: item.badge.name,
-      description: item.badge.description,
-      icon: item.badge.icon,
-      earned_at: item.earned_at,
-    }));
-
-    return {
-      new_badges: newBadges,
-    };
-  });
-
-/**
- * Manually trigger badge check for current user
- * Useful for testing or if automatic triggers fail
- */
-export const triggerBadgeCheck = authedAction
-  .metadata({
-    actionName: 'triggerBadgeCheck',
-    category: 'user',
-    rateLimit: {
-      maxRequests: 10,
-      windowSeconds: 60,
-    },
-  })
-  .schema(z.void())
-  .outputSchema(z.object({ badges_awarded: z.number().int().nonnegative() }))
-  .action(async ({ ctx }) => {
-    const { userId } = ctx;
-
-    // Get Supabase client for RPC call
-    const { createClient } = await import('@/src/lib/supabase/server');
-    const supabase = await createClient();
-
-    // Call the database function
-    const { data, error } = await supabase.rpc('check_all_badges', {
-      target_user_id: userId,
-    });
-
-    if (error) {
-      throw new Error(`Failed to check badges: ${error.message}`);
-    }
-
-    return {
-      badges_awarded: (data as number) || 0,
-    };
   });

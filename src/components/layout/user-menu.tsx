@@ -15,9 +15,9 @@
  */
 
 import type { User } from '@supabase/supabase-js';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -31,6 +31,7 @@ import {
 import { Activity, BookOpen, LogOut, Settings, User as UserIcon } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface UserMenuProps {
   className?: string;
@@ -81,14 +82,14 @@ export function UserMenu({ className }: UserMenuProps) {
       const { error } = await supabase.auth.signOut();
 
       if (error) {
-        toast.error(`Sign out failed: ${error.message}`);
+        toasts.error.authFailed(`Sign out failed: ${error.message}`);
       } else {
-        toast.success('Signed out successfully');
+        toasts.success.signedOut();
         router.push('/');
         router.refresh();
       }
     } catch {
-      toast.error('An unexpected error occurred');
+      toasts.error.serverError('An unexpected error occurred');
     } finally {
       setSigningOut(false);
     }
@@ -97,7 +98,7 @@ export function UserMenu({ className }: UserMenuProps) {
   // Loading state
   if (loading) {
     return (
-      <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${className}`}>
+      <div className={`flex items-center ${className}`}>
         <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
       </div>
     );
@@ -110,12 +111,14 @@ export function UserMenu({ className }: UserMenuProps) {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => router.push('/login')}
           className={UI_CLASSES.BUTTON_GHOST_ICON}
           aria-label="Sign in"
+          asChild
         >
-          <UserIcon className="h-4 w-4" />
-          <span className={`${UI_CLASSES.HIDDEN} lg:inline`}>Sign In</span>
+          <Link href="/login">
+            <UserIcon className="h-4 w-4" />
+            <span className={'hidden lg:inline'}>Sign In</span>
+          </Link>
         </Button>
       </div>
     );
@@ -154,7 +157,7 @@ export function UserMenu({ className }: UserMenuProps) {
         <DropdownMenuContent className="w-56" align="end" forceMount>
           {/* User Info */}
           <DropdownMenuLabel className="font-normal">
-            <div className={UI_CLASSES.FLEX_COL}>
+            <div className="flex flex-col">
               <p className="text-sm font-medium leading-none">{displayName}</p>
               <p className="text-xs leading-none text-muted-foreground mt-1">{user.email}</p>
             </div>
@@ -163,28 +166,25 @@ export function UserMenu({ className }: UserMenuProps) {
           <DropdownMenuSeparator />
 
           {/* Navigation Links */}
-          <DropdownMenuItem
-            onClick={() => router.push('/account/settings')}
-            className="cursor-pointer"
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
+          <DropdownMenuItem asChild>
+            <Link href="/account/settings">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem
-            onClick={() => router.push('/account/library')}
-            className="cursor-pointer"
-          >
-            <BookOpen className="mr-2 h-4 w-4" />
-            <span>Library</span>
+          <DropdownMenuItem asChild>
+            <Link href="/account/library">
+              <BookOpen className="mr-2 h-4 w-4" />
+              <span>Library</span>
+            </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem
-            onClick={() => router.push('/account/activity')}
-            className="cursor-pointer"
-          >
-            <Activity className="mr-2 h-4 w-4" />
-            <span>Activity</span>
+          <DropdownMenuItem asChild>
+            <Link href="/account/activity">
+              <Activity className="mr-2 h-4 w-4" />
+              <span>Activity</span>
+            </Link>
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />

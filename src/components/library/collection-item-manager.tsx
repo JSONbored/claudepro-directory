@@ -10,7 +10,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -29,6 +28,7 @@ import {
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@/src/lib/icons';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface CollectionItem {
   id: string;
@@ -72,7 +72,7 @@ export function CollectionItemManager({
 
   const handleAdd = async () => {
     if (!selectedBookmarkId) {
-      toast.error('Please select a bookmark to add');
+      toasts.error.validation('Please select a bookmark to add');
       return;
     }
 
@@ -89,12 +89,12 @@ export function CollectionItemManager({
         });
 
         if (result?.data?.success) {
-          toast.success('Item added to collection');
+          toasts.success.actionCompleted('Item added to collection');
           setSelectedBookmarkId('');
           router.refresh();
         }
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Failed to add item');
+        toasts.error.fromError(error, 'Failed to add item');
       }
     });
   };
@@ -108,11 +108,11 @@ export function CollectionItemManager({
         });
 
         if (result?.data?.success) {
-          toast.success('Item removed from collection');
+          toasts.success.actionCompleted('Item removed from collection');
           router.refresh();
         }
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Failed to remove item');
+        toasts.error.fromError(error, 'Failed to remove item');
       }
     });
   };
@@ -142,11 +142,11 @@ export function CollectionItemManager({
           collection_id: collectionId,
           items: reorderedItems,
         });
-        toast.success('Items reordered');
+        toasts.success.actionCompleted('Items reordered');
         router.refresh();
       } catch (_error) {
         setItems(items); // Revert on error
-        toast.error('Failed to reorder items');
+        toasts.error.actionFailed('reorder items');
       }
     });
   };
@@ -176,23 +176,21 @@ export function CollectionItemManager({
           collection_id: collectionId,
           items: reorderedItems,
         });
-        toast.success('Items reordered');
+        toasts.success.actionCompleted('Items reordered');
         router.refresh();
       } catch (_error) {
         setItems(items); // Revert on error
-        toast.error('Failed to reorder items');
+        toasts.error.actionFailed('reorder items');
       }
     });
   };
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_4}>
+    <div className="space-y-4">
       {/* Add Item Section */}
-      <div className="flex items-end gap-2 pb-4">
+      <div className={'flex items-end gap-2 pb-4'}>
         <div className="flex-1">
-          <div className={`${UI_CLASSES.TEXT_SM} font-medium mb-2 block`}>
-            Add Bookmark to Collection
-          </div>
+          <div className={'text-sm font-medium mb-2 block'}>Add Bookmark to Collection</div>
           <Select value={selectedBookmarkId} onValueChange={setSelectedBookmarkId}>
             <SelectTrigger>
               <SelectValue placeholder="Select a bookmark to add" />
@@ -205,7 +203,7 @@ export function CollectionItemManager({
               ) : (
                 availableToAdd.map((bookmark) => (
                   <SelectItem key={bookmark.id} value={bookmark.id}>
-                    <div className="flex items-center gap-2">
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                       <Badge variant="outline" className="text-xs capitalize">
                         {bookmark.content_type}
                       </Badge>
@@ -220,7 +218,7 @@ export function CollectionItemManager({
         <Button
           onClick={handleAdd}
           disabled={!selectedBookmarkId || isPending}
-          className="flex items-center gap-2"
+          className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
         >
           <Plus className="h-4 w-4" />
           Add
@@ -232,16 +230,16 @@ export function CollectionItemManager({
       {/* Items List */}
       {items.length === 0 ? (
         <div className="text-center py-12 border border-dashed rounded-lg">
-          <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+          <p className={'text-muted-foreground'}>
             No items in this collection yet. Add bookmarks above to get started.
           </p>
         </div>
       ) : (
-        <div className={UI_CLASSES.SPACE_Y_2}>
+        <div className="space-y-2">
           {items.map((item: CollectionItem, index: number) => (
             <div
               key={item.id}
-              className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors`}
             >
               {/* Order Controls */}
               <div className="flex flex-col gap-1">
@@ -274,21 +272,17 @@ export function CollectionItemManager({
 
               {/* Content Info */}
               <div className="flex-1">
-                <div className="flex items-center gap-2">
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                   <Badge variant="outline" className="text-xs capitalize">
                     {item.content_type}
                   </Badge>
                   <span className="text-sm font-medium">{item.content_slug}</span>
                 </div>
-                {item.notes && (
-                  <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
-                    {item.notes}
-                  </p>
-                )}
+                {item.notes && <p className={'text-xs text-muted-foreground mt-1'}>{item.notes}</p>}
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-1">
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 <Button
                   variant="ghost"
                   size="sm"

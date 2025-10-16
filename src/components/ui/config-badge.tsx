@@ -2,7 +2,6 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import type * as React from 'react';
 
 import { Badge } from '@/src/components/ui/badge';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 const configBadgeVariants = cva('text-xs font-medium border transition-colors', {
@@ -16,6 +15,7 @@ const configBadgeVariants = cva('text-xs font-medium border transition-colors', 
       statuslines: 'badge-category-statuslines',
       collections: 'badge-category-collections',
       guides: 'badge-category-guides',
+      skills: 'badge-category-skills',
       default: 'bg-gray-500/20 text-gray-500 border-gray-500/30',
     },
     source: {
@@ -51,6 +51,7 @@ export interface ConfigBadgeProps
     | 'statuslines'
     | 'collections'
     | 'guides'
+    | 'skills'
     | 'default';
   source?: 'official' | 'partner' | 'community' | 'verified' | 'experimental' | 'other';
   status?: 'active' | 'trending' | 'new' | 'updated' | 'deprecated';
@@ -102,7 +103,8 @@ export function TypeBadge({
     | 'hooks'
     | 'statuslines'
     | 'collections'
-    | 'guides';
+    | 'guides'
+    | 'skills';
 } & Omit<ConfigBadgeProps, 'type'>) {
   const displayText =
     type === 'mcp'
@@ -119,7 +121,9 @@ export function TypeBadge({
                 ? 'Statusline'
                 : type === 'collections'
                   ? 'Collection'
-                  : 'Guide';
+                  : type === 'skills'
+                    ? 'Skill'
+                    : 'Guide';
 
   return (
     <ConfigBadge type={type} className={className} {...props}>
@@ -194,7 +198,7 @@ export function TagBadge({
     <Badge
       variant="outline"
       className={cn(
-        `cursor-pointer transition-all duration-200 ${UI_CLASSES.HOVER_BG_ACCENT_10} hover:border-accent/30 border-muted-foreground/20 text-muted-foreground hover:text-accent`,
+        'cursor-pointer transition-all duration-200 hover:bg-accent/10 hover:border-accent/30 border-muted-foreground/20 text-muted-foreground hover:text-accent',
         className
       )}
       onClick={handleClick}

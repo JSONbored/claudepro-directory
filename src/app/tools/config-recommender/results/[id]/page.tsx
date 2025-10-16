@@ -20,8 +20,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { ResultsDisplay } from '@/src/components/tools/recommender/results-display';
-import { statsRedis } from '@/src/lib/cache';
-import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
+import { statsRedis } from '@/src/lib/cache.server';
+import { APP_CONFIG } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import { logger } from '@/src/lib/logger';
 import { generateRecommendations } from '@/src/lib/recommender/algorithm';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
@@ -34,7 +35,7 @@ interface PageProps {
   searchParams: Promise<{ answers?: string }>;
 }
 
-// ISR Configuration - Revalidate every hour
+// ISR - Static content (centralized config)
 export const revalidate = 3600;
 
 /**
@@ -44,7 +45,7 @@ export const revalidate = 3600;
  */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const baseMetadata = await generatePageMetadata('/tools/config-recommender/results/:id', {
+  const baseMetadata = generatePageMetadata('/tools/config-recommender/results/:id', {
     params: { id },
   });
 
@@ -103,14 +104,32 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
 
     // Combine all configurations with category tags
     const allConfigs: UnifiedContentItem[] = [
-      ...agentsData.map((item) => ({ ...item, category: 'agents' as const })),
-      ...mcpData.map((item) => ({ ...item, category: 'mcp' as const })),
-      ...rulesData.map((item) => ({ ...item, category: 'rules' as const })),
-      ...commandsData.map((item) => ({ ...item, category: 'commands' as const })),
-      ...hooksData.map((item) => ({ ...item, category: 'hooks' as const })),
-      ...statuslinesData.map((item) => ({ ...item, category: 'statuslines' as const })),
-      ...collectionsData.map((item) => ({ ...item, category: 'collections' as const })),
-    ] as UnifiedContentItem[];
+      ...(agentsData as UnifiedContentItem[]).map((item) => ({
+        ...item,
+        category: 'agents' as const,
+      })),
+      ...(mcpData as UnifiedContentItem[]).map((item) => ({ ...item, category: 'mcp' as const })),
+      ...(rulesData as UnifiedContentItem[]).map((item) => ({
+        ...item,
+        category: 'rules' as const,
+      })),
+      ...(commandsData as UnifiedContentItem[]).map((item) => ({
+        ...item,
+        category: 'commands' as const,
+      })),
+      ...(hooksData as UnifiedContentItem[]).map((item) => ({
+        ...item,
+        category: 'hooks' as const,
+      })),
+      ...(statuslinesData as UnifiedContentItem[]).map((item) => ({
+        ...item,
+        category: 'statuslines' as const,
+      })),
+      ...(collectionsData as UnifiedContentItem[]).map((item) => ({
+        ...item,
+        category: 'collections' as const,
+      })),
+    ];
 
     // Enrich with view counts from Redis
     const enrichedConfigs = await statsRedis.enrichWithViewCounts(allConfigs);

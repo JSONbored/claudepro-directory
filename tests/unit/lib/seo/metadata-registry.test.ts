@@ -94,6 +94,7 @@ describe('metadata-registry', () => {
     });
 
     it('should handle fallback for unknown categories', () => {
+      // biome-ignore lint/suspicious/noExplicitAny: Testing fallback behavior for unknown category
       const result = buildContentTitle('Test Item', 'unknown' as any);
       expect(result).toContain('unknown');
       expect(result).toContain(METADATA_DEFAULTS.siteName);
@@ -133,7 +134,11 @@ describe('metadata-registry', () => {
   describe('Category Overhead Calculations', () => {
     it('should calculate correct overhead for AI Agents', () => {
       const categoryDisplay = CATEGORY_NAMES.agents;
-      const overhead = METADATA_DEFAULTS.separator.length + categoryDisplay.length + METADATA_DEFAULTS.separator.length + METADATA_DEFAULTS.siteName.length;
+      const overhead =
+        METADATA_DEFAULTS.separator.length +
+        categoryDisplay.length +
+        METADATA_DEFAULTS.separator.length +
+        METADATA_DEFAULTS.siteName.length;
       const maxContentLength = 60 - overhead;
 
       expect(overhead).toBe(35); // " - " (3) + "AI Agents" (9) + " - " (3) + "Claude Pro Directory" (20)
@@ -142,16 +147,24 @@ describe('metadata-registry', () => {
 
     it('should calculate correct overhead for MCP', () => {
       const categoryDisplay = CATEGORY_NAMES.mcp;
-      const overhead = METADATA_DEFAULTS.separator.length + categoryDisplay.length + METADATA_DEFAULTS.separator.length + METADATA_DEFAULTS.siteName.length;
+      const overhead =
+        METADATA_DEFAULTS.separator.length +
+        categoryDisplay.length +
+        METADATA_DEFAULTS.separator.length +
+        METADATA_DEFAULTS.siteName.length;
       const maxContentLength = 60 - overhead;
 
-      expect(overhead).toBe(29); // " - " (3) + "MCP" (3) + " - " (3) + "Claude Pro Directory" (20)
-      expect(maxContentLength).toBe(31);
+      expect(overhead).toBe(37); // " - " (3) + "MCP Servers" (11) + " - " (3) + "Claude Pro Directory" (20)
+      expect(maxContentLength).toBe(23);
     });
 
     it('should calculate correct overhead for Rules', () => {
       const categoryDisplay = CATEGORY_NAMES.rules;
-      const overhead = METADATA_DEFAULTS.separator.length + categoryDisplay.length + METADATA_DEFAULTS.separator.length + METADATA_DEFAULTS.siteName.length;
+      const overhead =
+        METADATA_DEFAULTS.separator.length +
+        categoryDisplay.length +
+        METADATA_DEFAULTS.separator.length +
+        METADATA_DEFAULTS.siteName.length;
       const maxContentLength = 60 - overhead;
 
       expect(overhead).toBe(31); // " - " (3) + "Rules" (5) + " - " (3) + "Claude Pro Directory" (20)
@@ -160,7 +173,11 @@ describe('metadata-registry', () => {
 
     it('should calculate correct overhead for Commands', () => {
       const categoryDisplay = CATEGORY_NAMES.commands;
-      const overhead = METADATA_DEFAULTS.separator.length + categoryDisplay.length + METADATA_DEFAULTS.separator.length + METADATA_DEFAULTS.siteName.length;
+      const overhead =
+        METADATA_DEFAULTS.separator.length +
+        categoryDisplay.length +
+        METADATA_DEFAULTS.separator.length +
+        METADATA_DEFAULTS.siteName.length;
       const maxContentLength = 60 - overhead;
 
       expect(overhead).toBe(34); // " - " (3) + "Commands" (8) + " - " (3) + "Claude Pro Directory" (20)
@@ -169,7 +186,11 @@ describe('metadata-registry', () => {
 
     it('should calculate correct overhead for Hooks', () => {
       const categoryDisplay = CATEGORY_NAMES.hooks;
-      const overhead = METADATA_DEFAULTS.separator.length + categoryDisplay.length + METADATA_DEFAULTS.separator.length + METADATA_DEFAULTS.siteName.length;
+      const overhead =
+        METADATA_DEFAULTS.separator.length +
+        categoryDisplay.length +
+        METADATA_DEFAULTS.separator.length +
+        METADATA_DEFAULTS.siteName.length;
       const maxContentLength = 60 - overhead;
 
       expect(overhead).toBe(31); // " - " (3) + "Hooks" (5) + " - " (3) + "Claude Pro Directory" (20)
@@ -178,7 +199,11 @@ describe('metadata-registry', () => {
 
     it('should calculate correct overhead for Statuslines', () => {
       const categoryDisplay = CATEGORY_NAMES.statuslines;
-      const overhead = METADATA_DEFAULTS.separator.length + categoryDisplay.length + METADATA_DEFAULTS.separator.length + METADATA_DEFAULTS.siteName.length;
+      const overhead =
+        METADATA_DEFAULTS.separator.length +
+        categoryDisplay.length +
+        METADATA_DEFAULTS.separator.length +
+        METADATA_DEFAULTS.siteName.length;
       const maxContentLength = 60 - overhead;
 
       expect(overhead).toBe(37); // " - " (3) + "Statuslines" (11) + " - " (3) + "Claude Pro Directory" (20)
@@ -186,8 +211,12 @@ describe('metadata-registry', () => {
     });
 
     it('should calculate correct overhead for Guides', () => {
-      const categoryDisplay = CATEGORY_NAMES.guides;
-      const overhead = METADATA_DEFAULTS.separator.length + categoryDisplay.length + METADATA_DEFAULTS.separator.length + METADATA_DEFAULTS.siteName.length;
+      const categoryDisplay = 'Guides'; // SEO category not in main registry
+      const overhead =
+        METADATA_DEFAULTS.separator.length +
+        categoryDisplay.length +
+        METADATA_DEFAULTS.separator.length +
+        METADATA_DEFAULTS.siteName.length;
       const maxContentLength = 60 - overhead;
 
       expect(overhead).toBe(32); // " - " (3) + "Guides" (6) + " - " (3) + "Claude Pro Directory" (20)
@@ -196,7 +225,11 @@ describe('metadata-registry', () => {
 
     it('should calculate correct overhead for Collections', () => {
       const categoryDisplay = CATEGORY_NAMES.collections;
-      const overhead = METADATA_DEFAULTS.separator.length + categoryDisplay.length + METADATA_DEFAULTS.separator.length + METADATA_DEFAULTS.siteName.length;
+      const overhead =
+        METADATA_DEFAULTS.separator.length +
+        categoryDisplay.length +
+        METADATA_DEFAULTS.separator.length +
+        METADATA_DEFAULTS.siteName.length;
       const maxContentLength = 60 - overhead;
 
       expect(overhead).toBe(37); // " - " (3) + "Collections" (11) + " - " (3) + "Claude Pro Directory" (20)

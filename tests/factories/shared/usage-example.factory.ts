@@ -65,8 +65,6 @@ echo "Done!"`,
     ]),
     language,
     code: codeExamples[language] || codeExamples.typescript,
-    description: faker.datatype.boolean()
-      ? faker.lorem.sentence({ min: 5, max: 15 })
-      : undefined,
+    description: faker.datatype.boolean() ? faker.lorem.sentence({ min: 5, max: 15 }) : undefined,
   };
 });

@@ -25,8 +25,8 @@
  * @see https://www.w3.org/WAI/WCAG21/quickref/
  */
 
-import { render, type RenderOptions, type RenderResult } from '@testing-library/react';
-import { axe, type AxeResults, type RunOptions } from 'jest-axe';
+import { type RenderOptions, type RenderResult, render } from '@testing-library/react';
+import { type AxeResults, axe, type RunOptions } from 'jest-axe';
 import type { ReactElement } from 'react';
 
 // =============================================================================
@@ -62,10 +62,7 @@ export interface AxeConfig extends RunOptions {
  * const { container } = renderWithA11y(<Button>Click me</Button>);
  * ```
  */
-export function renderWithA11y(
-  ui: ReactElement,
-  options?: RenderOptions
-): RenderResult {
+export function renderWithA11y(ui: ReactElement, options?: RenderOptions): RenderResult {
   return render(ui, options);
 }
 
@@ -88,10 +85,7 @@ export function renderWithA11y(
  * });
  * ```
  */
-export async function axeTest(
-  container: Element,
-  config?: AxeConfig
-): Promise<AxeResults> {
+export async function axeTest(container: Element, config?: AxeConfig): Promise<AxeResults> {
   const { disabledRules = [], ...axeConfig } = config || {};
 
   const axeOptions: RunOptions = {
@@ -124,10 +118,7 @@ export async function axeTest(
  * });
  * ```
  */
-export async function expectAccessible(
-  ui: ReactElement,
-  config?: AxeConfig
-): Promise<AxeResults> {
+export async function expectAccessible(ui: ReactElement, config?: AxeConfig): Promise<AxeResults> {
   const { container } = render(ui);
   return axeTest(container, config);
 }
@@ -310,9 +301,7 @@ export function testScreenReaderCompatibility(container: Element): {
   );
 
   const semanticSelectors = ['nav', 'main', 'header', 'footer', 'article', 'section', 'aside'];
-  const semanticElements = Array.from(
-    container.querySelectorAll(semanticSelectors.join(', '))
-  );
+  const semanticElements = Array.from(container.querySelectorAll(semanticSelectors.join(', ')));
 
   return {
     hasAriaLabels: ariaElements.length > 0,
@@ -328,6 +317,7 @@ export function testScreenReaderCompatibility(container: Element): {
 
 declare global {
   namespace Vi {
+    // biome-ignore lint/suspicious/noExplicitAny: Type extension pattern for jest-axe matcher - requires any for generic type parameter
     interface Matchers<R = any> {
       toHaveNoViolations(): R;
     }

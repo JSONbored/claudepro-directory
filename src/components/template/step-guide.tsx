@@ -15,7 +15,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/ca
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import { Zap } from '@/src/lib/icons';
 import { type StepByStepGuideProps, stepGuidePropsSchema } from '@/src/lib/schemas/shared.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchMap } from '@/src/lib/utils/batch.utils';
 
 export async function StepByStepGuide(props: StepByStepGuideProps) {
@@ -33,19 +32,17 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
 
   return (
     <section itemScope itemType="https://schema.org/HowTo" className="my-8">
-      <div className={UI_CLASSES.MB_6}>
-        <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`} itemProp="name">
+      <div className="mb-6">
+        <h2 className={'text-2xl font-bold mb-2'} itemProp="name">
           {title}
         </h2>
         {description && (
-          <p className={`text-muted-foreground ${UI_CLASSES.MB_4}`} itemProp="description">
+          <p className={'text-muted-foreground mb-4'} itemProp="description">
             {description}
           </p>
         )}
         {totalTime && (
-          <div
-            className={`flex items-center ${UI_CLASSES.GAP_2} ${UI_CLASSES.TEXT_SM} text-muted-foreground`}
-          >
+          <div className={'flex items-center gap-2 text-sm text-muted-foreground'}>
             <Zap className="h-4 w-4" />
             <span itemProp="totalTime">Total time: {totalTime}</span>
           </div>
@@ -56,11 +53,13 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
         {highlightedSteps.map((step, index) => {
           const isLastStep = index === highlightedSteps.length - 1;
           return (
-            <div key={step.title} className={UI_CLASSES.RELATIVE}>
+            <div key={step.title} className="relative">
               {/* Connecting line */}
               {!isLastStep && (
                 <div
-                  className={`${UI_CLASSES.ABSOLUTE} left-5 top-14 ${UI_CLASSES.BOTTOM_0} w-0.5 bg-gradient-to-b from-primary/50 to-primary/10`}
+                  className={
+                    'absolute left-5 top-14 bottom-0 w-0.5 bg-gradient-to-b from-primary/50 to-primary/10'
+                  }
                 />
               )}
 
@@ -71,21 +70,23 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
               >
                 <CardHeader>
                   <CardTitle className="flex items-center gap-4" itemProp="name">
-                    <div className={UI_CLASSES.RELATIVE}>
+                    <div className="relative">
                       <div
-                        className={`flex-shrink-0 w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-full flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} shadow-lg`}
+                        className={
+                          'flex-shrink-0 w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center shadow-lg'
+                        }
                       >
-                        <span
-                          className={`text-primary-foreground ${UI_CLASSES.TEXT_BASE} ${UI_CLASSES.FONT_BOLD}`}
-                        >
+                        <span className={'text-primary-foreground text-base font-bold'}>
                           {index + 1}
                         </span>
                       </div>
                       <div
-                        className={`${UI_CLASSES.ABSOLUTE} ${UI_CLASSES.INSET_0} animate-ping rounded-full bg-primary opacity-20`}
+                        className={
+                          'absolute inset-0 animate-ping rounded-full bg-primary opacity-20'
+                        }
                       />
                     </div>
-                    <span className={`text-xl ${UI_CLASSES.FONT_BOLD}`}>{step.title}</span>
+                    <span className={'text-xl font-bold'}>{step.title}</span>
                     {step.time && (
                       <Badge
                         variant="secondary"
@@ -97,15 +98,12 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pl-14">
-                  <div
-                    itemProp="text"
-                    className={`${UI_CLASSES.TEXT_BASE} ${UI_CLASSES.MB_6} leading-relaxed`}
-                  >
+                  <div itemProp="text" className={'text-base mb-6 leading-relaxed'}>
                     {step.content || step.description}
                   </div>
 
                   {step.highlightedHtml && step.code && (
-                    <div className={UI_CLASSES.MB_6}>
+                    <div className="mb-6">
                       <ProductionCodeBlock
                         html={step.highlightedHtml}
                         code={step.code}

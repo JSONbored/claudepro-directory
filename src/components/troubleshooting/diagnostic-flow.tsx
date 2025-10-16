@@ -69,11 +69,11 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <div className={UI_CLASSES.SPACE_Y_4}>
+        <div className="space-y-4">
           {path.length > 0 && (
             <div className={UI_CLASSES.TEXT_SM_MUTED}>
-              <p className={`${UI_CLASSES.FONT_MEDIUM} mb-2`}>Diagnostic Path:</p>
-              <ol className={`list-decimal list-inside ${UI_CLASSES.SPACE_Y_1}`}>
+              <p className={'font-medium mb-2'}>Diagnostic Path:</p>
+              <ol className={'list-decimal list-inside space-y-1'}>
                 {path.map((step) => (
                   <li key={step}>{step}</li>
                 ))}
@@ -84,10 +84,12 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
           <Card className="bg-muted/30">
             <CardContent className="pt-6">
               {isComplete ? (
-                <div className={UI_CLASSES.SPACE_Y_4}>
-                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                <div className="space-y-4">
+                  <div
+                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-green-600 dark:text-green-400`}
+                  >
                     <CheckCircle className="h-5 w-5" />
-                    <p className={UI_CLASSES.FONT_MEDIUM}>Solution Found:</p>
+                    <p className="font-medium">Solution Found:</p>
                   </div>
                   <p className="text-muted-foreground">{currentStepData?.solution}</p>
                   <Button onClick={reset} variant="outline">
@@ -95,9 +97,9 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
                   </Button>
                 </div>
               ) : (
-                <div className={UI_CLASSES.SPACE_Y_4}>
-                  <p className={`text-lg ${UI_CLASSES.FONT_MEDIUM}`}>{currentStepData?.question}</p>
-                  <div className={UI_CLASSES.FLEX_GAP_4}>
+                <div className="space-y-4">
+                  <p className={'text-lg font-medium'}>{currentStepData?.question}</p>
+                  <div className="flex gap-4">
                     <Button onClick={() => handleAnswer('yes')} variant="default">
                       Yes
                     </Button>

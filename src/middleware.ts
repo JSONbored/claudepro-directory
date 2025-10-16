@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
 import { buildRateLimitConfig, isLLMsTxtRoute } from '@/src/lib/middleware/rate-limit-rules';
-import { rateLimiters } from '@/src/lib/rate-limiter';
+import { rateLimiters } from '@/src/lib/rate-limiter.server';
 import { env, securityConfig } from '@/src/lib/schemas/env.schema';
 
 // Force Node.js runtime for middleware (Redis compression requires node:zlib)
@@ -128,6 +128,11 @@ const noseconeConfig = {
             ] as const)
           : []),
       ],
+
+      // CSRF Protection: Restrict form submissions to same-origin only
+      // This prevents forms from submitting to external domains (CSRF attack vector)
+      // Server Actions are automatically protected (POST-only + Next.js headers)
+      formAction: ["'self'"],
 
       // Upgrade insecure requests in production
       upgradeInsecureRequests: isProduction,
@@ -640,6 +645,6 @@ export const config = {
      * - 863ad0a5c1124f59a060aa77f0861518.txt (IndexNow key file)
      * - *.png, *.jpg, *.jpeg, *.gif, *.webp, *.svg, *.ico (image files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest$|\\.well-known|js/|scripts/|css/|863ad0a5c1124f59a060aa77f0861518\\.txt|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest|service-worker.js|offline.html|\\.well-known|scripts/|863ad0a5c1124f59a060aa77f0861518\\.txt|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
   ],
 };

@@ -21,7 +21,7 @@ export const runtime = 'nodejs';
 
 /**
  * ISR revalidation
- * Revalidate every hour (3600 seconds) - API structure changes infrequently
+ * API structure changes infrequently - revalidate every hour
  */
 export const revalidate = 3600;
 

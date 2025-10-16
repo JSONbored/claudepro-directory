@@ -1,4 +1,13 @@
-import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
+import {
+  agents,
+  collections,
+  commands,
+  hooks,
+  mcp,
+  rules,
+  skills,
+  statuslines,
+} from '@/generated/content';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { TrendingContent } from '@/src/components/shared/trending-content';
 import { Badge } from '@/src/components/ui/badge';
@@ -11,15 +20,15 @@ import {
   trendingParamsSchema,
 } from '@/src/lib/schemas/search.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { getBatchTrendingData } from '@/src/lib/trending/calculator';
+import { getBatchTrendingData } from '@/src/lib/trending/calculator.server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 // Generate metadata from centralized registry
-export const metadata = await generatePageMetadata('/trending');
+export const metadata = generatePageMetadata('/trending');
 
 // ISR Configuration - Revalidate every 5 minutes for fresh Redis view counts
-export const revalidate = 300; // 5 minutes - Updates trending data while keeping static content
+export const revalidate = 300;
 
 /**
  * Load trending data using Redis-based view counts
@@ -50,7 +59,17 @@ async function getTrendingData(params: TrendingParams) {
       hooks: hooksData,
       statuslines: statuslinesData,
       collections: collectionsData,
-    } = await batchLoadContent({ rules, mcp, agents, commands, hooks, statuslines, collections });
+      skills: skillsData,
+    } = await batchLoadContent({
+      rules,
+      mcp,
+      agents,
+      commands,
+      hooks,
+      statuslines,
+      collections,
+      skills,
+    });
 
     // Calculate total count
     const totalCount =
@@ -60,7 +79,8 @@ async function getTrendingData(params: TrendingParams) {
       commandsData.length +
       hooksData.length +
       statuslinesData.length +
-      collectionsData.length;
+      collectionsData.length +
+      skillsData.length;
 
     // Use Redis-based trending calculator with sponsored content injection
     const trendingData = await getBatchTrendingData(
@@ -92,6 +112,10 @@ async function getTrendingData(params: TrendingParams) {
         collections: collectionsData.map((item: { [key: string]: unknown }) => ({
           ...item,
           category: 'collections' as const,
+        })),
+        skills: skillsData.map((item: { [key: string]: unknown }) => ({
+          ...item,
+          category: 'skills' as const,
         })),
       },
       { includeSponsored: true } // Enable sponsored content injection
@@ -149,18 +173,12 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   const pageTitleId = 'trending-page-title';
 
   return (
-    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
+    <div className={'min-h-screen bg-background'}>
       {/* Hero Section */}
-      <section
-        className={`relative py-24 px-4 ${UI_CLASSES.OVERFLOW_HIDDEN}`}
-        aria-labelledby={pageTitleId}
-      >
-        <div className={`container ${UI_CLASSES.MX_AUTO} text-center`}>
-          <div className={`${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}>
-            <Badge
-              variant="outline"
-              className={`mb-6 border-accent/20 ${UI_CLASSES.BG_ACCENT_5} text-accent`}
-            >
+      <section className={'relative py-24 px-4 overflow-hidden'} aria-labelledby={pageTitleId}>
+        <div className={'container mx-auto text-center'}>
+          <div className={'max-w-3xl mx-auto'}>
+            <Badge variant="outline" className={'mb-6 border-accent/20 bg-accent/5 text-accent'}>
               <TrendingUp className="h-3 w-3 mr-1 text-accent" aria-hidden="true" />
               Trending
             </Badge>
@@ -174,7 +192,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
               to date with what developers are using and loving.
             </p>
 
-            <ul className={`${UI_CLASSES.FLEX_WRAP_GAP_2} ${UI_CLASSES.JUSTIFY_CENTER} list-none`}>
+            <ul className={`${UI_CLASSES.FLEX_WRAP_GAP_2} justify-center list-none`}>
               <li>
                 <Badge variant="secondary">
                   <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
@@ -200,14 +218,14 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
 
       {/* Trending Content */}
       <section
-        className={`container ${UI_CLASSES.MX_AUTO} px-4 py-16`}
+        className={'container mx-auto px-4 py-16'}
         aria-label="Trending configurations content"
       >
         <TrendingContent trending={trending} popular={popular} recent={recent} />
       </section>
 
       {/* Email CTA - Moved to footer section to match homepage pattern */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+      <section className={'container mx-auto px-4 py-12'}>
         <InlineEmailCTA
           variant="hero"
           context="trending-page"

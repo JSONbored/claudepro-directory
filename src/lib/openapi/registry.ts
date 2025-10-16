@@ -174,7 +174,7 @@ export const trendingDataSchema = z.object({
 export const cacheWarmRequestSchema = z
   .object({
     types: z
-      .array(z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines']))
+      .array(z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections']))
       .optional()
       .openapi({
         description: 'Array of content types to warm cache for (omit for all types)',

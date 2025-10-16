@@ -3,14 +3,14 @@ import { notFound, redirect } from 'next/navigation';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
-export const metadata = await generatePageMetadata('/account/jobs/:id/analytics');
+export const metadata = generatePageMetadata('/account/jobs/:id/analytics');
 
 interface JobAnalyticsPageProps {
   params: Promise<{
@@ -53,7 +53,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
   };
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       {/* Header */}
       <div>
         <Button variant="ghost" size="sm" asChild className="mb-4">
@@ -66,7 +66,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
           <div>
             <h1 className="text-3xl font-bold mb-2">Job Analytics</h1>
-            <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>{job.title}</p>
+            <p className="text-muted-foreground">{job.title}</p>
           </div>
           {job.slug && (
             <Button variant="outline" asChild>
@@ -92,30 +92,30 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
         <CardContent>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>Company</p>
+              <p className="text-muted-foreground">Company</p>
               <p className="font-medium">{job.company}</p>
             </div>
             <div>
-              <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>Location</p>
+              <p className="text-muted-foreground">Location</p>
               <p className="font-medium">{job.location || 'Remote'}</p>
             </div>
             <div>
-              <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>Plan</p>
+              <p className="text-muted-foreground">Plan</p>
               <p className="font-medium capitalize">{job.plan}</p>
             </div>
             <div>
-              <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>Type</p>
+              <p className="text-muted-foreground">Type</p>
               <p className="font-medium capitalize">{job.type}</p>
             </div>
             {job.posted_at && (
               <div>
-                <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>Posted</p>
+                <p className="text-muted-foreground">Posted</p>
                 <p className="font-medium">{formatRelativeDate(job.posted_at)}</p>
               </div>
             )}
             {job.expires_at && (
               <div>
-                <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>Expires</p>
+                <p className="text-muted-foreground">Expires</p>
                 <p className="font-medium">{formatRelativeDate(job.expires_at)}</p>
               </div>
             )}
@@ -132,7 +132,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{viewCount.toLocaleString()}</div>
-            <p className={`text-xs ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+            <p className={'text-xs text-muted-foreground'}>
               Since {job.posted_at ? formatRelativeDate(job.posted_at) : 'creation'}
             </p>
           </CardContent>
@@ -145,7 +145,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{clickCount.toLocaleString()}</div>
-            <p className={`text-xs ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>Applications started</p>
+            <p className={'text-xs text-muted-foreground'}>Applications started</p>
           </CardContent>
         </Card>
 
@@ -156,9 +156,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{ctr}%</div>
-            <p className={`text-xs ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-              Of viewers clicked apply
-            </p>
+            <p className={'text-xs text-muted-foreground'}>Of viewers clicked apply</p>
           </CardContent>
         </Card>
       </div>
@@ -169,7 +167,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
           <CardTitle>Performance Insights</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className={UI_CLASSES.SPACE_Y_4}>
+          <div className="space-y-4">
             {viewCount === 0 && (
               <div className="p-4 bg-muted/50 rounded-lg">
                 <p className="text-sm">

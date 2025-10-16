@@ -21,10 +21,9 @@
  * @see src/app/api/[contentType]/route.ts
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { http, HttpResponse } from 'msw';
+import { HttpResponse, http } from 'msw';
+import { describe, expect, it } from 'vitest';
 import { server } from '@/tests/mocks/server';
-import { mockAgents, mockMcp } from '@/tests/mocks/fixtures/content';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 

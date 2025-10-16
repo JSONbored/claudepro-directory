@@ -23,9 +23,9 @@ export function Callout(props: CalloutProps) {
         {type === 'error' && <AlertTriangle className="h-4 w-4" />}
         {type === 'success' && <CheckCircle className="h-4 w-4" />}
         {type === 'tip' && <Zap className="h-4 w-4" />}
-        <div className={UI_CLASSES.FLEX_1}>
+        <div className="flex-1">
           {title && <AlertTitle>{title}</AlertTitle>}
-          <AlertDescription className={UI_CLASSES.MT_2}>{children}</AlertDescription>
+          <AlertDescription className="mt-2">{children}</AlertDescription>
         </div>
       </div>
     </Alert>

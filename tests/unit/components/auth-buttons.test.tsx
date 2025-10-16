@@ -12,9 +12,9 @@
  * @see src/components/auth/auth-buttons.tsx
  */
 
-import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { AuthButtons, SignOutButton } from '@/src/components/auth/auth-buttons';
 import { createClient } from '@/src/lib/supabase/client';
 
@@ -122,7 +122,7 @@ describe('AuthButtons Component', () => {
       expect(screen.getByRole('button', { name: /sign in with google/i })).toBeDisabled();
 
       // Resolve the promise
-      resolveSignIn!({ error: null });
+      resolveSignIn?.({ error: null });
     });
 
     test('should handle GitHub sign-in errors', async () => {
@@ -184,7 +184,7 @@ describe('AuthButtons Component', () => {
       expect(googleButton).toBeDisabled();
 
       // Resolve the promise
-      resolveSignIn!({ error: null });
+      resolveSignIn?.({ error: null });
     });
 
     test('should handle Google sign-in errors', async () => {
@@ -229,7 +229,7 @@ describe('AuthButtons Component', () => {
       expect(googleButton).toBeDisabled();
 
       // Resolve the promise
-      resolveSignIn!({ error: null });
+      resolveSignIn?.({ error: null });
     });
 
     test('should not allow clicking multiple buttons simultaneously', async () => {
@@ -266,7 +266,7 @@ describe('SignOutButton Component', () => {
     (createClient as ReturnType<typeof vi.fn>).mockReturnValue(mockSupabase);
 
     // Mock window.location
-    delete (window as unknown as { location: unknown }).location;
+    (window as unknown as { location: unknown }).location = undefined;
     (window as unknown as { location: { href: string } }).location = { href: '' };
   });
 
@@ -349,7 +349,7 @@ describe('SignOutButton Component', () => {
       expect(signOutButton).toBeDisabled();
 
       // Resolve the promise
-      resolveSignOut!({ error: null });
+      resolveSignOut?.({ error: null });
     });
 
     test('should prevent multiple simultaneous sign-out clicks', async () => {
@@ -373,7 +373,7 @@ describe('SignOutButton Component', () => {
       expect(mockSupabase.auth.signOut).toHaveBeenCalledTimes(1);
 
       // Resolve the promise
-      resolveSignOut!({ error: null });
+      resolveSignOut?.({ error: null });
     });
   });
 });

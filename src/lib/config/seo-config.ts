@@ -1,6 +1,6 @@
 /**
  * SEO Configuration
- * Centralized SEO constants for title optimization and metadata validation
+ * Centralized SEO constants for title optimization, metadata validation, and structured data
  *
  * October 2025 Standards:
  * - Title: 55-60 chars (Google optimal)
@@ -15,38 +15,58 @@
  * - buildContentTitle(): Content pages with smart truncation
  * - smartTruncate(): Word-boundary-aware title truncation
  *
+ * Consolidation: Moved from src/lib/constants.ts
+ * - SEO_CONFIG (core SEO settings)
+ * - SCHEMA_ORG (structured data)
+ * - OG_IMAGE_SIZE (social media images)
+ *
  * @see src/lib/seo/metadata-registry.ts
  */
 
 import { z } from 'zod';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
-
 /**
  * Suffix lengths for each category
  * Format: " - {Category} - Claude Pro Directory"
+ *
+ * Dynamically calculated from unified category registry where possible.
+ * Non-registry categories (guides subcategories, jobs, changelog) remain hardcoded.
  */
-export const SUFFIX_LENGTHS: Record<ContentCategory, number> = {
-  // Core content types
-  agents: 32, // " - Agents - Claude Pro Directory"
-  mcp: 29, // " - Mcp - Claude Pro Directory"
-  rules: 31, // " - Rules - Claude Pro Directory"
-  commands: 34, // " - Commands - Claude Pro Directory"
-  hooks: 31, // " - Hooks - Claude Pro Directory"
-  statuslines: 37, // " - Statuslines - Claude Pro Directory"
-  collections: 37, // " - Collections - Claude Pro Directory"
+import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+import { APP_CONFIG } from '@/src/lib/constants';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
-  // SEO content types
-  guides: 32, // " - Guides - Claude Pro Directory"
-  tutorials: 35, // " - Tutorials - Claude Pro Directory"
-  comparisons: 37, // " - Comparisons - Claude Pro Directory"
-  workflows: 35, // " - Workflows - Claude Pro Directory"
-  'use-cases': 36, // " - Use Cases - Claude Pro Directory"
-  troubleshooting: 41, // " - Troubleshooting - Claude Pro Directory"
-  categories: 36, // " - Categories - Claude Pro Directory"
+const SITE_NAME = 'Claude Pro Directory'; // 20 chars
+const SEPARATOR = ' - '; // 3 chars
+
+// Calculate suffix length: " - {CategoryName} - Claude Pro Directory"
+function calculateSuffixLength(categoryDisplayName: string): number {
+  return SEPARATOR.length + categoryDisplayName.length + SEPARATOR.length + SITE_NAME.length;
+}
+
+// Derive suffix lengths from registry and merge with non-registry categories
+export const SUFFIX_LENGTHS: Record<ContentCategory, number> = {
+  // Core content types (derived from registry)
+  agents: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.agents.pluralTitle),
+  mcp: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.mcp.pluralTitle),
+  rules: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.rules.pluralTitle),
+  commands: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.commands.pluralTitle),
+  hooks: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.hooks.pluralTitle),
+  statuslines: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.statuslines.pluralTitle),
+  collections: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.collections.pluralTitle),
+  skills: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.skills.pluralTitle),
+
+  // SEO content types (not in main registry)
+  guides: calculateSuffixLength('Guides'),
+  tutorials: calculateSuffixLength('Tutorials'),
+  comparisons: calculateSuffixLength('Comparisons'),
+  workflows: calculateSuffixLength('Workflows'),
+  'use-cases': calculateSuffixLength('Use Cases'),
+  troubleshooting: calculateSuffixLength('Troubleshooting'),
+  categories: calculateSuffixLength('Categories'),
 
   // Special types
-  jobs: 30, // " - Jobs - Claude Pro Directory"
-  changelog: 35, // " - Changelog - Claude Pro Directory"
+  jobs: calculateSuffixLength('Jobs'),
+  changelog: calculateSuffixLength('Changelog'),
 } as const;
 
 /**
@@ -77,6 +97,7 @@ export const MAX_BASE_TITLE_LENGTH: Record<ContentCategory, number> = {
   hooks: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.hooks, // 29 chars
   statuslines: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.statuslines, // 23 chars
   collections: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.collections, // 23 chars
+  skills: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.skills, // 28 chars
 
   // SEO content types
   guides: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.guides, // 28 chars
@@ -263,3 +284,67 @@ export const validatedMetadataSchema = z.object({
  * Type inference from validated metadata schema
  */
 export type ValidatedMetadata = z.infer<typeof validatedMetadataSchema>;
+
+// ============================================
+// CONSOLIDATED SEO CONFIGURATION
+// ============================================
+
+/**
+ * SEO Configuration Schema
+ * Core SEO settings for title, description, and keywords
+ * Moved from src/lib/constants.ts for better organization
+ */
+const seoConfigSchema = z.object({
+  defaultTitle: z.string().min(1).max(60),
+  titleTemplate: z.string().includes('%s'),
+  defaultDescription: z.string().min(10).max(160),
+  keywords: z.array(z.string().min(1)).min(1),
+});
+
+export const SEO_CONFIG = seoConfigSchema.parse({
+  defaultTitle: 'Claude Pro Directory',
+  titleTemplate: '%s - Claude Pro Directory',
+  defaultDescription:
+    'Open-source directory of 150+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.',
+  keywords: [
+    'claude ai',
+    'claude pro',
+    'mcp servers',
+    'claude agents',
+    'claude hooks',
+    'claude rules',
+    'claude commands',
+    'ai development',
+    'claude directory',
+  ],
+});
+
+/**
+ * Schema.org Structured Data
+ * JSON-LD structured data for SEO and search engines
+ * Moved from src/lib/constants.ts for better organization
+ */
+export const SCHEMA_ORG = {
+  organization: {
+    '@type': 'Organization',
+    name: APP_CONFIG.name,
+    url: APP_CONFIG.url,
+    description: APP_CONFIG.description,
+  },
+  website: {
+    '@type': 'WebSite',
+    name: APP_CONFIG.name,
+    url: APP_CONFIG.url,
+    description: SEO_CONFIG.defaultDescription,
+  },
+} as const;
+
+/**
+ * OpenGraph Image Configuration
+ * Standard image dimensions for social media sharing
+ * Moved from src/lib/constants.ts for better organization
+ */
+export const OG_IMAGE_SIZE = {
+  width: 1200,
+  height: 630,
+} as const;

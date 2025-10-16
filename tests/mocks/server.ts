@@ -61,8 +61,9 @@ export const server = setupServer(...handlers);
 /**
  * Export handlers for test-specific overrides
  */
+// biome-ignore lint/performance/noBarrelFile: MSW mock server barrel - intentional test infrastructure exports
 export { handlers } from './handlers';
-export { contentErrorHandlers } from './handlers/content-handlers';
 export { apiErrorHandlers, cronHandlers } from './handlers/api-handlers';
 export { authErrorHandlers } from './handlers/auth-handlers';
+export { contentErrorHandlers } from './handlers/content-handlers';
 export { externalErrorHandlers } from './handlers/external-handlers';

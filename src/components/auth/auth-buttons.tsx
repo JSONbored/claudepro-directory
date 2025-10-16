@@ -7,11 +7,12 @@
  * Reuses existing UI components (Button, icons)
  */
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import { Chrome, Github, LogOut } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface AuthButtonsProps {
   className?: string;
@@ -33,7 +34,7 @@ export function AuthButtons({ className, redirectTo }: AuthButtonsProps) {
     });
 
     if (error) {
-      toast.error(`Sign in failed: ${error.message}`);
+      toasts.error.authFailed(`Sign in failed: ${error.message}`);
       setLoading(null);
     }
     // If successful, user will be redirected to OAuth provider
@@ -77,6 +78,7 @@ export function AuthButtons({ className, redirectTo }: AuthButtonsProps) {
 
 export function SignOutButton({ className }: { className?: string }) {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const supabase = createClient();
 
   const handleSignOut = async () => {
@@ -84,13 +86,18 @@ export function SignOutButton({ className }: { className?: string }) {
     const { error } = await supabase.auth.signOut();
 
     if (error) {
-      toast.error(`Sign out failed: ${error.message}`);
+      toasts.error.authFailed(`Sign out failed: ${error.message}`);
+      setLoading(false);
     } else {
-      toast.success('Signed out successfully');
-      window.location.href = '/';
-    }
+      toasts.success.signedOut();
 
-    setLoading(false);
+      // Use Next.js router instead of window.location for proper SPA navigation
+      // This preserves client-side state and enables proper cache invalidation
+      router.push('/');
+      router.refresh(); // Force refresh to clear any cached authenticated data
+
+      setLoading(false);
+    }
   };
 
   return (

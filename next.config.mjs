@@ -152,6 +152,13 @@ const nextConfig = {
     // Enable when upgrading to canary: npm install next@canary
     // For now, our custom build-content.ts caching provides similar benefits
 
+    // ✨ Partial Prerendering (PPR) - requires next@canary (NOT available in stable 15.5.5)
+    // ppr: 'incremental',
+    // DISABLED: Error: "The experimental feature 'experimental.ppr' can only be enabled when using the latest canary version of Next.js"
+    // See: https://github.com/vercel/next.js/issues/71587
+    // Expected impact if enabled: 300-500ms perceived load time improvement
+    // Enable when upgrading to canary: npm install next@canary
+
     // ✨ Client-side router cache optimization (Next.js 15+)
     staleTimes: {
       dynamic: 30, // 30 seconds for dynamic routes
@@ -163,6 +170,25 @@ const nextConfig = {
 
     // ✨ Inline CSS for reduced network requests on initial load
     inlineCss: true,
+
+    // 🔒 Server Actions Security Configuration
+    serverActions: {
+      // CSRF Protection: Only allow server actions from same origin
+      // For production deployment behind proxies/load balancers, add those origins here
+      // Example: allowedOrigins: ['claudepro.directory', 'www.claudepro.directory', '*.vercel.app']
+      allowedOrigins: process.env.VERCEL_URL
+        ? [
+            'claudepro.directory',
+            'www.claudepro.directory',
+            '*.vercel.app', // Vercel preview deployments
+            process.env.VERCEL_URL, // Current deployment URL
+          ]
+        : undefined, // undefined = same-origin only (secure default)
+
+      // DoS Protection: Limit request body size for server actions
+      // Prevents large payload attacks while allowing reasonable form submissions
+      bodySizeLimit: '1mb', // 1MB limit (sufficient for forms, prevents abuse)
+    },
 
     // Modern optimizations
     cssChunking: 'strict',
@@ -183,6 +209,7 @@ const nextConfig = {
       'clsx',
       'tailwind-merge',
       '@vercel/analytics',
+      '@vercel/speed-insights',
       // NOTE: 'zod' removed - optimizePackageImports causes Turbopack to evaluate schemas during static analysis
       // This breaks Turbopack SSR with "Cannot read properties of undefined (reading '_string')" error
       // Zod schemas should be lazily evaluated at runtime, not during build-time tree-shaking
@@ -247,7 +274,7 @@ const nextConfig = {
   },
 
   // Simplified webpack config - let Turbopack handle most optimization
-  webpack: (config, { dev, webpack }) => {
+  webpack: (config, { dev, webpack, isServer }) => {
     // Only keep essential overrides for compatibility
     if (!dev) {
       // Keep template file exclusion (this is useful)
@@ -257,6 +284,17 @@ const nextConfig = {
           contextRegExp: /\/(content|seo\/templates)\//,
         })
       );
+    }
+
+    // Exclude Node.js built-ins from client bundles (server/client boundary fix)
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        'node:crypto': false,
+        'node:zlib': false,
+        crypto: false,
+        zlib: false,
+      };
     }
 
     // Essential alias only

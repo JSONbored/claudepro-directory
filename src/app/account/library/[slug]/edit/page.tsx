@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/ca
 import { ArrowLeft } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface EditCollectionPageProps {
   params: Promise<{ slug: string }>;
@@ -15,7 +14,7 @@ interface EditCollectionPageProps {
 
 export async function generateMetadata({ params }: EditCollectionPageProps): Promise<Metadata> {
   const { slug } = await params;
-  return await generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
+  return generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
 }
 
 export default async function EditCollectionPage({ params }: EditCollectionPageProps) {
@@ -50,7 +49,7 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
     .order('created_at', { ascending: false });
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       <div>
         <Link href={`/account/library/${slug}`}>
           <Button variant="ghost" className="mb-4 flex items-center gap-2">
@@ -59,9 +58,7 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
           </Button>
         </Link>
         <h1 className="text-3xl font-bold mb-2">Edit Collection</h1>
-        <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
-          Update your collection details and settings
-        </p>
+        <p className="text-muted-foreground">Update your collection details and settings</p>
       </div>
 
       <Card>

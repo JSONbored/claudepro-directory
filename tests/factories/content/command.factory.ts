@@ -14,10 +14,7 @@
 
 import { faker } from '@faker-js/faker';
 import type { CommandContent } from '@/src/lib/schemas/content/command.schema';
-import {
-  createContentFactory,
-  type BaseContentTransientParams,
-} from '../shared/base-content.factory';
+import { createContentFactory } from '../shared/base-content.factory';
 
 export const commandFactory = createContentFactory<CommandContent>({
   category: 'commands',

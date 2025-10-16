@@ -10,13 +10,13 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { getUserJobs } from '@/src/lib/actions/business.actions';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
-export const metadata = await generatePageMetadata('/account/jobs');
+export const metadata = generatePageMetadata('/account/jobs');
 
 export default async function MyJobsPage() {
   const jobs = await getUserJobs();
@@ -34,11 +34,11 @@ export default async function MyJobsPage() {
   };
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
           <h1 className="text-3xl font-bold mb-2">My Job Listings</h1>
-          <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+          <p className="text-muted-foreground">
             {jobs.length} {jobs.length === 1 ? 'listing' : 'listings'}
           </p>
         </div>
@@ -52,10 +52,10 @@ export default async function MyJobsPage() {
 
       {jobs.length === 0 ? (
         <Card>
-          <CardContent className={`${UI_CLASSES.FLEX_COL_CENTER} py-12`}>
+          <CardContent className={'flex flex-col items-center py-12'}>
             <Briefcase className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-xl font-semibold mb-2">No job listings yet</h3>
-            <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} text-center max-w-md mb-4`}>
+            <p className={'text-muted-foreground text-center max-w-md mb-4'}>
               Post your first job listing to reach talented developers in the Claude community
             </p>
             <Button asChild>
@@ -71,7 +71,7 @@ export default async function MyJobsPage() {
           {jobs.map((job) => (
             <Card key={job.id}>
               <CardHeader>
-                <div className="flex items-start justify-between">
+                <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                   <div className="flex-1">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                       <Badge className={getStatusColor(job.status ?? 'draft')} variant="outline">
@@ -88,9 +88,7 @@ export default async function MyJobsPage() {
               </CardHeader>
 
               <CardContent>
-                <div
-                  className={`${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.MB_4} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
-                >
+                <div className={'flex flex-wrap gap-4 mb-4 text-sm text-muted-foreground'}>
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                     <Eye className="h-4 w-4" />
                     {job.view_count ?? 0} views

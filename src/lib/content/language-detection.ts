@@ -10,6 +10,7 @@
  */
 
 import { createHash } from 'crypto';
+import { isValidJSON } from '@/src/lib/utils/data.utils';
 
 // Simple LRU cache implementation
 class LRUCache<K, V> {
@@ -74,13 +75,9 @@ function heuristicDetection(code: string): string {
   const trimmed = code.trim();
 
   // JSON detection (most common for configs)
-  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-    try {
-      JSON.parse(code);
-      return 'json';
-    } catch {
-      // Not valid JSON, continue
-    }
+  // Production-grade: Use isValidJSON utility for validation
+  if ((trimmed.startsWith('{') || trimmed.startsWith('[')) && isValidJSON(code)) {
+    return 'json';
   }
 
   // Shell/Bash - shebang or common commands

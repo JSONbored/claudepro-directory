@@ -16,7 +16,7 @@ import { ConfigCardSkeleton, Skeleton, TableSkeleton } from '../ui/loading-skele
 
 // Loading Skeletons using centralized skeleton components
 const RelatedContentSkeleton = () => (
-  <div className={`${UI_CLASSES.SPACE_Y_4} my-8`}>
+  <div className={'space-y-4 my-8'}>
     <Skeleton size="md" width="lg" />
     <div className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}>
       {[1, 2, 3].map((i) => (
@@ -27,11 +27,11 @@ const RelatedContentSkeleton = () => (
 );
 
 const MetricsSkeleton = () => (
-  <div className={`${UI_CLASSES.SPACE_Y_3} my-6`}>
+  <div className={'space-y-3 my-6'}>
     <Skeleton size="md" width="sm" />
-    <div className={`grid-cols-2 ${UI_CLASSES.GRID_RESPONSIVE_4_GAP_4}`}>
+    <div className={'grid-cols-2 grid gap-4 md:grid-cols-4'}>
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className={`bg-card/50 rounded-lg p-4 ${UI_CLASSES.SPACE_Y_2} animate-pulse`}>
+        <div key={i} className={'bg-card/50 rounded-lg p-4 space-y-2 animate-pulse'}>
           <Skeleton size="lg" width="1/2" />
           <Skeleton size="sm" width="3xl" />
         </div>
@@ -41,16 +41,16 @@ const MetricsSkeleton = () => (
 );
 
 const ComparisonTableSkeleton = () => (
-  <div className={`${UI_CLASSES.SPACE_Y_3} my-6`}>
+  <div className={'space-y-3 my-6'}>
     <Skeleton size="md" width="lg" />
     <TableSkeleton rows={3} columns={2} />
   </div>
 );
 
 const DiagnosticFlowSkeleton = () => (
-  <div className={`${UI_CLASSES.SPACE_Y_4} my-6`}>
+  <div className={'space-y-4 my-6'}>
     <Skeleton size="md" width="sm" />
-    <div className={UI_CLASSES.SPACE_Y_3}>
+    <div className="space-y-3">
       {[1, 2, 3].map((i) => (
         <ConfigCardSkeleton key={i} />
       ))}

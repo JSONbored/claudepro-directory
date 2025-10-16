@@ -13,7 +13,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/account/sponsorships/:id/analytics');
+export const metadata = generatePageMetadata('/account/sponsorships/:id/analytics');
 
 interface AnalyticsPageProps {
   params: Promise<{ id: string }>;
@@ -84,14 +84,14 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   const avgImpressionsPerDay = daysActive > 0 ? (impressionCount / daysActive).toFixed(0) : '0';
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       {/* Header */}
       <div>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
           <SponsoredBadge tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'} />
           <h1 className="text-3xl font-bold">Sponsorship Analytics</h1>
         </div>
-        <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+        <p className="text-muted-foreground">
           Detailed performance metrics for your sponsored content
         </p>
       </div>
@@ -100,7 +100,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className={UI_CLASSES.TEXT_SM}>Total Impressions</CardTitle>
+            <CardTitle className="text-sm">Total Impressions</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -108,7 +108,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
               <span className="text-3xl font-bold">{impressionCount.toLocaleString()}</span>
             </div>
             {sponsorship.impression_limit && (
-              <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
+              <p className={'text-xs text-muted-foreground mt-2'}>
                 of {sponsorship.impression_limit.toLocaleString()} limit
               </p>
             )}
@@ -117,46 +117,40 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className={UI_CLASSES.TEXT_SM}>Total Clicks</CardTitle>
+            <CardTitle className="text-sm">Total Clicks</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <MousePointer className="h-5 w-5 text-primary" />
               <span className="text-3xl font-bold">{clickCount.toLocaleString()}</span>
             </div>
-            <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
-              User engagements
-            </p>
+            <p className={'text-xs text-muted-foreground mt-2'}>User engagements</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className={UI_CLASSES.TEXT_SM}>Click-Through Rate</CardTitle>
+            <CardTitle className="text-sm">Click-Through Rate</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <BarChart className="h-5 w-5 text-primary" />
               <span className="text-3xl font-bold">{ctr}%</span>
             </div>
-            <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
-              Clicks / Impressions
-            </p>
+            <p className={'text-xs text-muted-foreground mt-2'}>Clicks / Impressions</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className={UI_CLASSES.TEXT_SM}>Avg. Daily Views</CardTitle>
+            <CardTitle className="text-sm">Avg. Daily Views</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <TrendingUp className="h-5 w-5 text-primary" />
               <span className="text-3xl font-bold">{avgImpressionsPerDay}</span>
             </div>
-            <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
-              Over {daysActive} days
-            </p>
+            <p className={'text-xs text-muted-foreground mt-2'}>Over {daysActive} days</p>
           </CardContent>
         </Card>
       </div>
@@ -167,36 +161,34 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardTitle>Campaign Details</CardTitle>
           <CardDescription>Current sponsorship configuration</CardDescription>
         </CardHeader>
-        <CardContent className={UI_CLASSES.SPACE_Y_4}>
+        <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Content Type</p>
-              <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>{sponsorship.content_type}</p>
+              <p className={'text-sm font-medium'}>Content Type</p>
+              <p className="text-muted-foreground">{sponsorship.content_type}</p>
             </div>
 
             <div>
-              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Content ID</p>
-              <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} font-mono ${UI_CLASSES.TEXT_XS}`}>
-                {sponsorship.content_id}
-              </p>
+              <p className={'text-sm font-medium'}>Content ID</p>
+              <p className={'text-muted-foreground font-mono text-xs'}>{sponsorship.content_id}</p>
             </div>
 
             <div>
-              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Start Date</p>
-              <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+              <p className={'text-sm font-medium'}>Start Date</p>
+              <p className="text-muted-foreground">
                 {new Date(sponsorship.start_date).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>End Date</p>
-              <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+              <p className={'text-sm font-medium'}>End Date</p>
+              <p className="text-muted-foreground">
                 {new Date(sponsorship.end_date).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Status</p>
+              <p className={'text-sm font-medium'}>Status</p>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Badge variant={sponsorship.active ? 'default' : 'outline'}>
                   {sponsorship.active ? 'Active' : 'Inactive'}
@@ -205,7 +197,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             </div>
 
             <div>
-              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Tier</p>
+              <p className={'text-sm font-medium'}>Tier</p>
               <div>
                 <SponsoredBadge tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'} />
               </div>
@@ -221,7 +213,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardDescription>Last 30 days</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className={UI_CLASSES.SPACE_Y_2}>
+          <div className="space-y-2">
             {Array.from({ length: 30 }).map((_, i) => {
               const date = new Date();
               date.setDate(date.getDate() - (29 - i));
@@ -271,7 +263,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardDescription>Improve your campaign performance</CardDescription>
         </CardHeader>
         <CardContent>
-          <ul className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.SPACE_Y_2}`}>
+          <ul className={'text-sm space-y-2'}>
             <li>• CTR above 2% is excellent for sponsored content</li>
             <li>• Featured tier gets 3x more impressions than promoted</li>
             <li>• Premium tier includes newsletter promotion for extra reach</li>

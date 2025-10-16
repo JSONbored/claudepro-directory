@@ -16,27 +16,21 @@ export function CaseStudy(props: CaseStudyProps) {
   const { company, industry, challenge, solution, results, metrics, testimonial, logo } = validated;
 
   return (
-    <Card
-      itemScope
-      itemType="https://schema.org/Article"
-      className={`my-8 ${UI_CLASSES.OVERFLOW_HIDDEN}`}
-    >
-      <CardHeader className={UI_CLASSES.PB_4}>
-        <div className={`flex ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN}`}>
+    <Card itemScope itemType="https://schema.org/Article" className={'my-8 overflow-hidden'}>
+      <CardHeader className="pb-4">
+        <div className={'flex items-start justify-between'}>
           <div>
             <CardTitle className="text-2xl" itemProp="headline">
               {company} Case Study
             </CardTitle>
             {industry && (
-              <Badge variant="outline" className={UI_CLASSES.MT_2}>
+              <Badge variant="outline" className="mt-2">
                 {industry}
               </Badge>
             )}
           </div>
           {logo && (
-            <div
-              className={`w-16 h-16 bg-muted rounded-lg flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER}`}
-            >
+            <div className={'w-16 h-16 bg-muted rounded-lg flex items-center justify-center'}>
               <BookOpen className="h-8 w-8 text-muted-foreground" />
             </div>
           )}
@@ -44,37 +38,25 @@ export function CaseStudy(props: CaseStudyProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-          <h4 className={`${UI_CLASSES.FONT_SEMIBOLD} text-destructive ${UI_CLASSES.MB_2}`}>
-            Challenge
-          </h4>
+          <h4 className={'font-semibold text-destructive mb-2'}>Challenge</h4>
           <p className="text-muted-foreground">{challenge}</p>
         </div>
 
         <div>
-          <h4 className={`${UI_CLASSES.FONT_SEMIBOLD} text-primary ${UI_CLASSES.MB_2}`}>
-            Solution
-          </h4>
+          <h4 className={'font-semibold text-primary mb-2'}>Solution</h4>
           <p className="text-muted-foreground">{solution}</p>
         </div>
 
         <div>
-          <h4
-            className={`${UI_CLASSES.FONT_SEMIBOLD} text-green-600 dark:text-green-400 ${UI_CLASSES.MB_2}`}
-          >
-            Results
-          </h4>
+          <h4 className={'font-semibold text-green-600 dark:text-green-400 mb-2'}>Results</h4>
           <p className="text-muted-foreground">{results}</p>
         </div>
 
         {metrics && Array.isArray(metrics) && metrics.length > 0 && (
-          <div
-            className={`grid grid-cols-2 md:grid-cols-3 gap-4 ${UI_CLASSES.PT_4} ${UI_CLASSES.BORDER_T}`}
-          >
+          <div className={'grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t'}>
             {metrics.map((metric) => (
               <div key={metric.label} className="text-center">
-                <p
-                  className={`text-2xl ${UI_CLASSES.FONT_BOLD} flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} gap-1`}
-                >
+                <p className={'text-2xl font-bold flex items-center justify-center gap-1'}>
                   {metric.value}
                   {metric.trend && (
                     <span
@@ -102,11 +84,9 @@ export function CaseStudy(props: CaseStudyProps) {
 
         {testimonial && (
           <blockquote className="border-l-4 border-primary pl-4 py-2 bg-muted/30 rounded-r-lg">
-            <p className={`italic text-muted-foreground ${UI_CLASSES.MB_2}`}>
-              "{testimonial.quote}"
-            </p>
+            <p className={'italic text-muted-foreground mb-2'}>"{testimonial.quote}"</p>
             <footer className="text-sm">
-              <cite className={`not-italic ${UI_CLASSES.FONT_SEMIBOLD}`}>{testimonial.author}</cite>
+              <cite className={'not-italic font-semibold'}>{testimonial.author}</cite>
               {testimonial.role && (
                 <span className="text-muted-foreground">, {testimonial.role}</span>
               )}

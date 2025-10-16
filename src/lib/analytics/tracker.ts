@@ -5,8 +5,8 @@
 
 import { logger } from '@/src/lib/logger';
 import { env, isDevelopment, isProduction } from '@/src/lib/schemas/env.schema';
-import type { EventPayload } from './event-payloads.types';
-import { EVENT_CONFIG, type EventName } from './events.config';
+import type { EventName, EventPayload, EventPayloads } from './events.constants';
+import { getEventConfig } from './events.constants';
 import { isUmamiAvailable } from './umami';
 
 // Environment checks using validated env schema
@@ -46,8 +46,11 @@ function sanitizePayload(
  * Universal tracking function that all components can use
  * Provides automatic validation, sampling, and error handling
  */
-export function trackEvent<T extends EventName>(eventName: T, payload?: EventPayload<T>): void {
-  const config = EVENT_CONFIG[eventName];
+export function trackEvent<T extends EventName>(
+  eventName: T,
+  payload?: T extends keyof EventPayloads ? EventPayload<T> : Record<string, unknown>
+): void {
+  const config = getEventConfig()[eventName];
 
   // Check if event is enabled
   if (!config?.enabled) {

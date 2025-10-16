@@ -11,11 +11,11 @@
  *
  * Reduction: ~50 lines through factory pattern consolidation
  *
- * @see lib/config/build-category-config.ts - Category configuration
+ * @see lib/config/category-config.ts - Unified category configuration
  */
 
-import type { BuildCategoryId } from '@/src/lib/config/build-category-config';
-import { getAllBuildCategoryConfigs } from '@/src/lib/config/build-category-config';
+import type { BuildCategoryId } from '@/src/lib/config/category-config';
+import { getAllBuildCategoryConfigs } from '@/src/lib/config/category-config';
 import { BatchLazyLoader } from '@/src/lib/utils/integration.utils';
 
 /**

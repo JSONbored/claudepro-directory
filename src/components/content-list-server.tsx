@@ -4,13 +4,13 @@ import { ContentSearchClient } from '@/src/components/content-search-client';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
-import { ROUTES } from '@/src/lib/constants';
-import { ExternalLink, getIconByName } from '@/src/lib/icons';
+import { ROUTES } from '@/src/lib/constants/routes';
+import { ExternalLink, HelpCircle } from '@/src/lib/icons';
 import type {
   ContentListServerProps,
   UnifiedContentItem,
 } from '@/src/lib/schemas/component.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ICON_NAME_MAP, UI_CLASSES } from '@/src/lib/ui-constants';
 
 function ContentHeroSection<T extends UnifiedContentItem>({
   title,
@@ -31,15 +31,13 @@ function ContentHeroSection<T extends UnifiedContentItem>({
 
   return (
     <section className={UI_CLASSES.CONTAINER_OVERFLOW_BORDER} aria-labelledby={pageTitleId}>
-      <div className={`container ${UI_CLASSES.MX_AUTO} px-4 py-20`}>
-        <div className={`text-center ${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}>
-          <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.JUSTIFY_CENTER} mb-6`}>
-            <div
-              className={`p-3 ${UI_CLASSES.BG_ACCENT_10} ${UI_CLASSES.ROUNDED_FULL}`}
-              aria-hidden="true"
-            >
+      <div className={'container mx-auto px-4 py-20'}>
+        <div className={'text-center max-w-3xl mx-auto'}>
+          <div className={'flex justify-center mb-6'}>
+            <div className={'p-3 bg-accent/10 rounded-full'} aria-hidden="true">
               {(() => {
-                const IconComponent = getIconByName(icon);
+                const IconComponent =
+                  ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
                 return <IconComponent className="h-8 w-8 text-primary" />;
               })()}
             </div>
@@ -51,16 +49,15 @@ function ContentHeroSection<T extends UnifiedContentItem>({
 
           <p className={UI_CLASSES.TEXT_HEADING_MEDIUM}>{description}</p>
 
-          <ul
-            className={`${UI_CLASSES.FLEX} flex-wrap ${UI_CLASSES.JUSTIFY_CENTER} gap-2 mb-8 list-none`}
-          >
+          <ul className={'flex flex-wrap justify-center gap-2 mb-8 list-none'}>
             {displayBadges.map((badge, idx) => (
               <li key={badge.text || `badge-${idx}`}>
                 <Badge variant={idx === 0 ? 'secondary' : 'outline'}>
                   {badge.icon &&
                     (() => {
                       if (typeof badge.icon === 'string') {
-                        const BadgeIconComponent = getIconByName(badge.icon);
+                        const BadgeIconComponent =
+                          ICON_NAME_MAP[badge.icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
                         return <BadgeIconComponent className="h-3 w-3 mr-1" aria-hidden="true" />;
                       }
                       const BadgeIcon = badge.icon;
@@ -90,11 +87,11 @@ function ContentHeroSection<T extends UnifiedContentItem>({
 
 function ContentSearchSkeleton() {
   return (
-    <div className={`${UI_CLASSES.W_FULL} space-y-4 animate-pulse`}>
-      <div className={`h-12 ${UI_CLASSES.BG_CARD_50} ${UI_CLASSES.ROUNDED_LG}`} />
-      <div className={`${UI_CLASSES.FLEX} gap-2 ${UI_CLASSES.JUSTIFY_END}`}>
-        <div className={`h-10 w-24 ${UI_CLASSES.BG_CARD_50} ${UI_CLASSES.ROUNDED_LG}`} />
-        <div className={`h-10 w-20 ${UI_CLASSES.BG_CARD_50} ${UI_CLASSES.ROUNDED_LG}`} />
+    <div className={'w-full space-y-4 animate-pulse'}>
+      <div className={'h-12 bg-card/50 rounded-lg'} />
+      <div className={'flex gap-2 justify-end'}>
+        <div className={'h-10 w-24 bg-card/50 rounded-lg'} />
+        <div className={'h-10 w-20 bg-card/50 rounded-lg'} />
       </div>
     </div>
   );
@@ -110,7 +107,7 @@ export function ContentListServer<T extends UnifiedContentItem>({
   badges = [],
 }: ContentListServerProps<T>) {
   return (
-    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
+    <div className={'min-h-screen bg-background'}>
       {/* Hero Section - Rendered immediately on server */}
       <ContentHeroSection
         title={title}
@@ -121,7 +118,7 @@ export function ContentListServer<T extends UnifiedContentItem>({
       />
 
       <section
-        className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}
+        className={'container mx-auto px-4 py-12'}
         aria-label={`${title} content and search`}
       >
         {/* Search Component with Suspense boundary */}
@@ -137,7 +134,7 @@ export function ContentListServer<T extends UnifiedContentItem>({
       </section>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+      <section className={'container mx-auto px-4 py-12'}>
         <InlineEmailCTA
           variant="hero"
           context="category-page"

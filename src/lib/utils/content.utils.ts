@@ -28,25 +28,15 @@ import { transforms } from '@/src/lib/security/validators';
  * Represents valid subcategories for guide content
  */
 export type GuideSubcategory =
-  | 'getting-started'
-  | 'configuration'
-  | 'customization'
-  | 'integration'
-  | 'troubleshooting'
-  | 'best-practices'
-  | 'advanced';
+  | 'tutorials'
+  | 'comparisons'
+  | 'workflows'
+  | 'use-cases'
+  | 'troubleshooting';
 
 // ============================================
-// CONTENT TRANSFORMATIONS
+// CONTENT UTILITIES
 // ============================================
-
-/**
- * Content item interface for components
- * Represents transformed content ready for display
- */
-export interface ContentItem extends UnifiedContentItem {
-  displayTitle: string;
-}
 
 /**
  * Additional metadata for content items
@@ -76,8 +66,27 @@ export function formatViewCount(count: number): string {
 }
 
 /**
+ * Formats copy/usage count with 'k' suffix for thousands
+ * @param count - Copy count number
+ * @returns Formatted string (e.g., "1.2k used")
+ *
+ * @example
+ * formatCopyCount(1234) // "1.2k used"
+ * formatCopyCount(500) // "500 used"
+ */
+export function formatCopyCount(count: number): string {
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}k used`;
+  }
+  return `${count} used`;
+}
+
+/**
  * Generates display title with proper formatting
  * Handles acronyms and special cases (API, MCP, AI, etc.)
+ *
+ * Used at build time to generate displayTitle field in content schemas.
+ * Eliminates runtime transformation overhead - computed once, cached forever.
  *
  * @param title - Raw title string
  * @returns Formatted display title
@@ -99,99 +108,6 @@ export function generateDisplayTitle(title: string): string {
       return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
     })
     .join(' ');
-}
-
-/**
- * Transform single content item with display title
- * @param item - Raw content item from schema
- * @returns Transformed content item with display title
- */
-function transformContentItem(item: UnifiedContentItem): ContentItem {
-  return {
-    ...item,
-    displayTitle: generateDisplayTitle(item.title || item.slug),
-  };
-}
-
-/**
- * Transform array of content items
- * @param items - Array of content items
- * @returns Array of transformed content items with display titles
- */
-function transformContentArray(items: readonly UnifiedContentItem[]): ContentItem[] {
-  return items.map(transformContentItem);
-}
-
-/**
- * Transforms UnifiedContentItem for detail page display
- * Includes all metadata and full content
- *
- * @param item - Raw content item from schema
- * @param relatedItems - Optional related items array
- * @returns Transformed content item with display title and related items
- *
- * @example
- * const result = transformForDetailPage(rawItem, relatedItems);
- * // Returns: { item: {..., displayTitle: "API Rate Limiter" }, relatedItems: [...] }
- */
-export function transformForDetailPage(
-  item: UnifiedContentItem,
-  relatedItems: UnifiedContentItem[] = []
-): {
-  item: ContentItem;
-  relatedItems: ContentItem[];
-} {
-  return {
-    item: transformContentItem(item),
-    relatedItems: transformContentArray(relatedItems),
-  };
-}
-
-/**
- * Transform for home page props
- * Accepts categorized content arrays and returns transformed versions
- * Handles both full content and metadata-only arrays
- *
- * @param data - Object containing arrays for each content category
- * @returns Object with transformed arrays for each category
- *
- * @example
- * const transformed = transformForHomePage({
- *   rules: rulesArray,
- *   mcp: mcpArray,
- *   agents: agentsArray,
- *   // ... other categories
- * });
- */
-export function transformForHomePage(data: {
-  rules: readonly UnifiedContentItem[];
-  mcp: readonly UnifiedContentItem[];
-  agents: readonly UnifiedContentItem[];
-  commands: readonly UnifiedContentItem[];
-  hooks: readonly UnifiedContentItem[];
-  statuslines: readonly UnifiedContentItem[];
-  collections: readonly UnifiedContentItem[];
-  allConfigs: readonly UnifiedContentItem[];
-}): {
-  rules: ContentItem[];
-  mcp: ContentItem[];
-  agents: ContentItem[];
-  commands: ContentItem[];
-  hooks: ContentItem[];
-  statuslines: ContentItem[];
-  collections: ContentItem[];
-  allConfigs: ContentItem[];
-} {
-  return {
-    rules: transformContentArray(data.rules),
-    mcp: transformContentArray(data.mcp),
-    agents: transformContentArray(data.agents),
-    commands: transformContentArray(data.commands),
-    hooks: transformContentArray(data.hooks),
-    statuslines: transformContentArray(data.statuslines),
-    collections: transformContentArray(data.collections),
-    allConfigs: transformContentArray(data.allConfigs),
-  };
 }
 
 // ============================================
@@ -353,30 +269,95 @@ function getExtensionFromLanguage(language: string): string {
 }
 
 /**
- * Generate a contextual filename based on content category
+ * Filename rule configuration interface
+ * Defines how filenames should be generated for each category
+ */
+interface FilenameRule {
+  /** Suffix to append to identifier (e.g., '-config') */
+  suffix: string;
+  /** Whether to use hookType field for filename (hooks only) */
+  useHookType?: boolean;
+}
+
+/**
+ * Filename generation rules registry - eliminates switch/case pattern
  *
- * SECURITY: All inputs sanitized using production security utilities
- * PERFORMANCE: Early returns, minimal string operations
- * UX: Semantic, human-readable filenames following Claude Code conventions
+ * Registry-driven approach for category-specific filename patterns.
+ * Replaces 29-line switch statement with configuration lookup.
+ *
+ * Architecture:
+ * - Partial mapping allows fallback to default for unknown categories
+ * - Configuration-driven: Add category → filename automatically works
+ * - Special handling: hookType extraction for hooks category
+ * - Consistent patterns: Config categories use '-config' suffix
+ *
+ * Filename Patterns:
+ * - Config categories (mcp, agents, commands, rules): {slug}-config.{ext}
+ * - Hooks: {hookType}.{ext} or {slug}.{ext}
+ * - Guide subcategories: {slug}.{ext}
+ * - Unknown/default: example.{ext}
+ *
+ * @see generateFilename - Consumer of this configuration
+ */
+const FILENAME_RULES: Partial<Record<string, FilenameRule>> = {
+  // Config categories - append '-config' suffix
+  mcp: { suffix: '-config' },
+  agents: { suffix: '-config' },
+  commands: { suffix: '-config' },
+  rules: { suffix: '-config' },
+
+  // Hooks - use hookType for semantic naming
+  hooks: { suffix: '', useHookType: true },
+
+  // Guide subcategories - simple slug-based naming
+  guides: { suffix: '' },
+  tutorials: { suffix: '' },
+  comparisons: { suffix: '' },
+  workflows: { suffix: '' },
+  'use-cases': { suffix: '' },
+  troubleshooting: { suffix: '' },
+
+  // Other categories can be added as needed
+  statuslines: { suffix: '' },
+  collections: { suffix: '' },
+  skills: { suffix: '' },
+};
+
+/**
+ * Generate a contextual filename based on content category using registry-driven approach
+ *
+ * Modern 2025 Architecture:
+ * - Configuration-driven: Uses FILENAME_RULES registry
+ * - Security: All inputs sanitized using production utilities
+ * - Performance: Early returns, O(1) lookup
+ * - UX: Semantic, human-readable filenames following Claude Code conventions
+ * - Eliminated: 29-line switch statement with 7 cases
  *
  * @param options - Filename generation options
  * @returns Generated filename with appropriate extension
  *
  * @example
  * ```typescript
- * // MCP server configuration
+ * // MCP server configuration (uses '-config' suffix from registry)
  * generateFilename({
  *   item: { category: 'mcp', slug: 'github-mcp-server', ... },
  *   language: 'json'
  * });
  * // Returns: "github-mcp-server-config.json"
  *
- * // Hook with hookType
+ * // Hook with hookType (uses hookType field from registry rule)
  * generateFilename({
  *   item: { category: 'hooks', slug: 'post-tool-use', hookType: 'PostToolUse', ... },
  *   language: 'bash'
  * });
  * // Returns: "post-tool-use.sh"
+ *
+ * // New category automatically supported
+ * generateFilename({
+ *   item: { category: 'skills', slug: 'pdf-processing', ... },
+ *   language: 'md'
+ * });
+ * // Returns: "pdf-processing.md" ✅
  * ```
  */
 export function generateFilename(options: FilenameGeneratorOptions): string {
@@ -397,42 +378,31 @@ export function generateFilename(options: FilenameGeneratorOptions): string {
   const rawIdentifier = slug || name || category;
   const identifier = sanitizeFilename(rawIdentifier);
 
-  // Handle multi-format MCP configs
+  // Handle multi-format MCP configs (special case - not in registry)
   if (format === 'multi' && section) {
     const sanitizedSection = sanitizeFilename(section);
     return `${identifier}-${sanitizedSection}.${ext}`;
   }
 
-  // Category-specific filename generation
-  switch (category) {
-    case 'mcp':
-    case 'agents':
-    case 'commands':
-    case 'rules':
-      return `${identifier}-config.${ext}`;
+  // Registry-driven filename generation
+  const rule = FILENAME_RULES[category];
 
-    case 'hooks': {
-      // Use hookType for semantic naming if available
-      const hookType = 'hookType' in item ? (item as { hookType?: string }).hookType : undefined;
-      if (hookType && typeof hookType === 'string') {
-        const hookSlug = convertHookTypeToKebab(hookType);
-        return `${sanitizeFilename(hookSlug)}.${ext}`;
-      }
-      return `${identifier}.${ext}`;
+  // Handle hookType special case if configured
+  if (rule?.useHookType) {
+    const hookType = 'hookType' in item ? (item as { hookType?: string }).hookType : undefined;
+    if (hookType && typeof hookType === 'string') {
+      const hookSlug = convertHookTypeToKebab(hookType);
+      return `${sanitizeFilename(hookSlug)}.${ext}`;
     }
-
-    case 'guides':
-    case 'tutorials':
-    case 'comparisons':
-    case 'workflows':
-    case 'use-cases':
-    case 'troubleshooting':
-      return `${identifier}.${ext}`;
-
-    default:
-      // Fallback for unknown categories
-      return `example.${ext}`;
   }
+
+  // Apply suffix rule or fallback to default
+  if (rule) {
+    return `${identifier}${rule.suffix}.${ext}`;
+  }
+
+  // Fallback for unknown categories
+  return `example.${ext}`;
 }
 
 /**
@@ -711,13 +681,11 @@ export function parseFrontmatter(frontmatterString: string): GuideFrontmatter {
  * These get nested under /guides/[category]/[slug]
  */
 const GUIDE_SUBCATEGORIES: GuideSubcategory[] = [
-  'getting-started',
-  'configuration',
-  'customization',
-  'integration',
+  'tutorials',
+  'comparisons',
+  'workflows',
+  'use-cases',
   'troubleshooting',
-  'best-practices',
-  'advanced',
 ];
 
 /**
@@ -749,14 +717,14 @@ export function isGuideSubcategory(value: unknown): value is GuideSubcategory {
  * getContentItemUrl({
  *   category: 'guides',
  *   slug: 'setup',
- *   subcategory: 'getting-started'
+ *   subcategory: 'tutorials'
  * })
- * // Returns: "/guides/getting-started/setup"
+ * // Returns: "/guides/tutorials/setup"
  */
 export function getContentItemUrl(item: {
   category: ContentCategory;
   slug: string;
-  subcategory?: string | null;
+  subcategory?: string | null | undefined;
 }): string {
   const { category, slug, subcategory } = item;
 

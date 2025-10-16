@@ -1,0 +1,38 @@
+{
+  "slug": "docx-report-generator",
+  "title": "DOCX Report Generator",
+  "seoTitle": "DOCX Report Generator Skill",
+  "description": "Fill templated DOCX with data to produce reports/invoices, with images and PDF export.",
+  "category": "skills",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-15",
+  "tags": ["docx", "reports", "templating", "python"],
+  "content": "# DOCX Report Generator Skill\n\n## What This Skill Enables\n\nClaude can create, edit, and format Microsoft Word documents (.docx) programmatically. Generate professional reports, proposals, documentation, and formatted documents with tables, charts, headers, and custom styling.\n\n## Prerequisites\n\n**Required:**\n- Claude Pro subscription\n- Code Interpreter feature enabled\n- Template document uploaded (optional, for editing existing docs)\n\n**What Claude handles:**\n- Installing python-docx and document libraries\n- Document structure and formatting\n- Table generation and styling\n- Page layout and sections\n- Converting between formats (Markdown → DOCX)\n\n## How to Use This Skill\n\n### Create a New Document\n\n**Prompt:** \"Create a professional business proposal document with:\n- Title page with company logo placeholder\n- Executive summary section\n- 3-column pricing table\n- Terms and conditions\nSave as proposal.docx\"\n\nClaude will:\n1. Create document structure\n2. Add formatted sections\n3. Generate styled tables\n4. Apply professional formatting\n5. Export as .docx file\n\n### Edit Existing Document\n\n**Prompt:** \"Open this contract template and:\n1. Replace all [COMPANY_NAME] with 'Acme Corp'\n2. Update the pricing table in section 3\n3. Add a new clause about termination\n4. Save as acme_contract.docx\"\n\nClaude will:\n1. Load the existing document\n2. Find and replace text\n3. Modify tables\n4. Insert new content\n5. Preserve original formatting\n\n### Generate Report from Data\n\n**Prompt:** \"Create a monthly sales report from this CSV data:\n- Executive summary with key metrics\n- Sales by region table\n- Top performers list\n- Month-over-month comparison chart\n- Save as sales_report_october.docx\"\n\nClaude will:\n1. Analyze the CSV data\n2. Calculate metrics\n3. Generate formatted sections\n4. Create tables with data\n5. Add visual elements\n\n### Format Conversion\n\n**Prompt:** \"Convert this Markdown document to a formatted Word document with:\n- Headings styled with built-in heading styles\n- Code blocks in monospace font\n- Bullet lists properly formatted\n- Save as documentation.docx\"\n\nClaude will:\n1. Parse Markdown structure\n2. Map to Word styles\n3. Apply formatting\n4. Generate DOCX\n\n## Common Workflows\n\n### Meeting Minutes Template\n```\n\"Create a meeting minutes template with:\n1. Header: Date, Time, Location, Attendees\n2. Agenda items section\n3. Discussion notes table (Topic | Discussion | Decision)\n4. Action items table (Task | Owner | Due Date | Status)\n5. Next meeting section\nUse professional formatting with the 'Office' built-in style.\"\n```\n\n### Invoice Generation\n```\n\"Generate an invoice document:\n1. Company header (name, address, logo placeholder)\n2. Invoice details (number, date, due date)\n3. Bill to / Ship to sections\n4. Line items table (Description, Qty, Rate, Amount)\n5. Subtotal, tax, total calculations\n6. Payment terms footer\nMake it look professional with borders and shading.\"\n```\n\n### Technical Documentation\n```\n\"Create technical documentation:\n1. Cover page with title and version\n2. Table of contents (auto-generated)\n3. Multiple sections with heading hierarchy\n4. Code examples in monospace with syntax highlighting\n5. Tables for API endpoints\n6. Numbered figures with captions\nUse consistent styling throughout.\"\n```\n\n### Resume/CV Formatting\n```\n\"Format this resume data into a professional document:\n1. Header with name and contact info\n2. Professional summary\n3. Work experience (company, role, dates, bullets)\n4. Education section\n5. Skills table (2 columns)\n6. Use modern, clean formatting\nSave as resume.docx\"\n```\n\n## Tips for Best Results\n\n1. **Be Specific About Formatting**: Mention fonts, sizes, colors, alignment\n2. **Reference Built-in Styles**: Use Word's built-in styles (\"Heading 1\", \"Title\", \"Intense Quote\")\n3. **Table Formatting**: Specify headers, borders, shading, column widths\n4. **Page Layout**: Mention margins, orientation, page size if non-standard\n5. **Images**: Provide image files or describe placeholder dimensions\n6. **Consistent Style**: Ask for style guides (\"use Arial 11pt throughout\")\n7. **Sections**: Use section breaks for different headers/footers\n\n## Advanced Features\n\n### Headers & Footers\n- Different first page headers\n- Page numbers with custom formatting\n- Chapter/section titles in headers\n- Watermarks and background\n\n### Table Enhancements\n- Merged cells\n- Repeating header rows\n- Conditional formatting\n- Auto-width columns\n\n### Document Automation\n- Mail merge from data files\n- Template-based generation\n- Batch document creation\n- Variable substitution\n\n## Troubleshooting\n\n**Issue:** Formatting doesn't look right\n**Solution:** Be more specific about styles. Reference Word's built-in style names or describe exact formatting (font, size, color, alignment)\n\n**Issue:** Tables break across pages poorly\n**Solution:** Ask Claude to set \"keep rows together\" or adjust table properties\n\n**Issue:** Images not appearing\n**Solution:** Upload images separately and reference them in your prompt, or describe placeholder dimensions\n\n**Issue:** Headers/footers not updating\n**Solution:** Specify which sections need different headers/footers and where section breaks should go\n\n**Issue:** Lost formatting when editing\n**Solution:** Ask Claude to preserve existing styles: \"Keep all original formatting except...\"\n\n## Learn More\n\n- [python-docx Documentation](https://python-docx.readthedocs.io/) - Comprehensive API guide\n- [Word Document Structure](https://python-docx.readthedocs.io/en/latest/user/documents.html) - Understanding .docx internals\n- [Office Open XML Spec](https://en.wikipedia.org/wiki/Office_Open_XML) - DOCX file format details\n- [Simon Willison's DOCX Analysis](https://simonwillison.net/2025/Oct/10/claude-skills/) - Claude's DOCX capabilities\n",
+  "features": [
+    "Template placeholders and loops",
+    "Image and table insertion",
+    "Page layout control",
+    "Optional PDF export pipeline"
+  ],
+  "useCases": ["Invoices and statements", "Client reports", "Batch document generation"],
+  "requirements": ["Python 3.11+", "docxtpl", "docx2pdf or libreoffice for PDF"],
+  "examples": [
+    {
+      "title": "Render a template (Python)",
+      "language": "python",
+      "code": "from docxtpl import DocxTemplate\n\ndoc = DocxTemplate('template.docx')\ncontext = { 'client': 'Acme', 'items': [{'name': 'Widget', 'price': 9.99}] }\ndoc.render(context)\ndoc.save('invoice.docx')"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": { "steps": ["Install Python 3.11+", "pip install docxtpl"] },
+    "claudeCode": { "steps": ["Install docxtpl", "Use libreoffice for reliable PDF export"] }
+  },
+  "troubleshooting": [
+    {
+      "issue": "Fonts or rendering differ across OS",
+      "solution": "Embed fonts or use a containerized conversion with consistent fonts."
+    }
+  ],
+  "documentationUrl": "https://docxtpl.readthedocs.io/",
+  "source": "community"
+}

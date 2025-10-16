@@ -1,0 +1,83 @@
+{
+  "slug": "mintlify-documentation-automation",
+  "title": "Mintlify AI Documentation Automation",
+  "seoTitle": "Mintlify AI Documentation Automation Skill",
+  "description": "Automate beautiful, searchable documentation creation with Mintlify, AI-powered content generation from code, and interactive MDX components.",
+  "category": "skills",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-16",
+  "tags": ["mintlify", "documentation", "mdx", "api-docs", "automation"],
+  "content": "# Mintlify AI Documentation Automation Skill\n\n## What This Skill Enables\n\nClaude can generate comprehensive, production-ready documentation using Mintlify - the modern documentation platform that has become the standard for developer-facing docs in 2025. This skill enables automatic API reference generation from code, interactive MDX components, multi-version documentation, and AI-powered content creation from JSDoc/TypeScript types.\n\n## Prerequisites\n\n**Required:**\n- Node.js 18+\n- Existing codebase with functions/APIs to document\n- Basic understanding of Markdown\n\n**What Claude handles automatically:**\n- Generating MDX documentation from TypeScript/JSDoc\n- Creating mint.json configuration with navigation\n- Building API reference pages from OpenAPI specs\n- Setting up interactive code examples\n- Configuring search, analytics, and versioning\n- Creating custom MDX components\n\n## How to Use This Skill\n\n### API Documentation from TypeScript\n\n**Prompt:** \"Generate Mintlify documentation from my TypeScript API client at src/api/users.ts. Include all JSDoc comments, parameter types, return types, and code examples.\"\n\nClaude will:\n1. Parse TypeScript file and extract exported functions\n2. Read JSDoc comments for descriptions\n3. Generate MDX files for each API endpoint\n4. Create proper Mintlify components (ParamField, ResponseField)\n5. Add code examples in multiple languages\n6. Generate response examples with proper formatting\n7. Update mint.json navigation\n\n### OpenAPI to Interactive Documentation\n\n**Prompt:** \"Convert my OpenAPI 3.0 spec (openapi.yaml) into Mintlify documentation with interactive API playground and authentication examples.\"\n\nClaude will create:\n1. API reference section in mint.json\n2. MDX file for each endpoint with proper structure\n3. Request/response examples using CodeGroup\n4. Authentication documentation with examples\n5. Error code reference table\n6. API playground integration\n7. SDK code examples (TypeScript, Python, cURL)\n\n### Complete Documentation Site Setup\n\n**Prompt:** \"Set up a complete Mintlify documentation site for my SaaS product with: Introduction, Quickstart, API Reference, Guides, Changelog. Include dark mode, search, and analytics.\"\n\nClaude will generate:\n1. Directory structure with organized MDX files\n2. mint.json with proper navigation tabs\n3. Introduction page with hero and feature cards\n4. Quickstart with step-by-step instructions\n5. API reference structure\n6. Guide templates\n7. Changelog format\n8. Dark mode configuration\n9. Search and analytics integration\n\n### Interactive Component Library Documentation\n\n**Prompt:** \"Document my React component library with interactive examples, prop tables, and usage guidelines. Components are in src/components/ui.\"\n\nClaude will create:\n1. Component documentation pages with descriptions\n2. PropTable components with TypeScript types\n3. Interactive code playgrounds\n4. Usage examples with best practices\n5. Accessibility guidelines per component\n6. Storybook integration links\n7. Installation and import instructions\n\n## Tips for Best Results\n\n1. **Rich JSDoc Comments**: Ensure your code has comprehensive JSDoc comments with @param, @returns, @throws, and @example tags for best auto-generation results.\n\n2. **OpenAPI First**: If you have an OpenAPI spec, use that as the source of truth. Mintlify's OpenAPI integration is more reliable than manual documentation.\n\n3. **Code Examples**: Request examples in multiple languages (TypeScript, JavaScript, Python, cURL) to maximize usefulness for different audiences.\n\n4. **Interactive Elements**: Ask for Mintlify-specific components (Accordion, Card, Tabs, CodeGroup) to make docs more engaging than plain Markdown.\n\n5. **Version Management**: For libraries, request versioned documentation setup from the start to avoid migration pain later.\n\n6. **Search Optimization**: Include descriptive meta titles and descriptions in frontmatter for better search discoverability.\n\n## Common Workflows\n\n### Complete API Documentation\n```\n\"Generate full Mintlify API documentation:\n1. Parse src/api/*.ts files for all exported functions\n2. Create API reference pages with proper Mintlify components\n3. Include TypeScript type definitions\n4. Add code examples in TypeScript, JavaScript, Python, and cURL\n5. Document all error codes and responses\n6. Set up authentication guide with OAuth 2.0 flow\n7. Configure API playground with authentication\n8. Add rate limiting documentation\"\n```\n\n### Component Library Docs\n```\n\"Build Mintlify docs for React component library:\n1. Document all components in src/components/ui\n2. Extract prop types from TypeScript interfaces\n3. Create PropTable for each component\n4. Add usage examples with CodeGroup\n5. Include accessibility guidelines (ARIA, keyboard)\n6. Link to Storybook for interactive demos\n7. Add installation guide with package manager options\n8. Create theming and customization guide\"\n```\n\n### SDK Documentation with Examples\n```\n\"Generate SDK documentation from TypeScript client:\n1. Document all SDK methods with parameters and returns\n2. Create quickstart with installation and auth setup\n3. Add comprehensive code examples for each method\n4. Include error handling patterns\n5. Document webhook integration\n6. Add retry and timeout configuration\n7. Create migration guide from v1 to v2\n8. Set up changelog with semantic versioning\"\n```\n\n### Multi-Version Documentation\n```\n\"Set up versioned Mintlify docs for API v1 and v2:\n1. Create separate documentation for each version\n2. Configure version switcher in mint.json\n3. Highlight breaking changes between versions\n4. Provide migration guide from v1 to v2\n5. Maintain v1 docs in archive with deprecation notice\n6. Set up URL structure: /v1/... and /v2/...\n7. Add version-specific examples\"\n```\n\n## Troubleshooting\n\n**Issue:** Mintlify build fails with \"Invalid frontmatter\"\n**Solution:** Ensure all MDX files have valid YAML frontmatter with required fields (title, description). Ask Claude to validate frontmatter syntax.\n\n**Issue:** Navigation doesn't match folder structure\n**Solution:** mint.json navigation must explicitly list all pages. Ask Claude to regenerate navigation section matching your actual MDX file structure.\n\n**Issue:** Code examples aren't syntax highlighted correctly\n**Solution:** Specify language in code fence (```typescript, not ```ts). Ask Claude to use full language names for better highlighting.\n\n**Issue:** API Reference pages look inconsistent\n**Solution:** Use Mintlify's built-in components (ParamField, ResponseField) instead of manual tables. Request Claude to refactor using proper components.\n\n**Issue:** Search doesn't find relevant pages\n**Solution:** Add descriptive `seoTitle` and `description` in frontmatter. Ask Claude to optimize metadata for search.\n\n## Learn More\n\n- [Mintlify Documentation](https://mintlify.com/docs)\n- [Mintlify Components](https://mintlify.com/docs/components)\n- [OpenAPI Integration](https://mintlify.com/docs/api-playground/openapi)\n- [Custom Components](https://mintlify.com/docs/components/custom)\n- [Versioning Guide](https://mintlify.com/docs/settings/versioning)\n",
+  "features": [
+    "Auto-generate docs from TypeScript/JSDoc",
+    "OpenAPI to interactive API reference",
+    "Interactive MDX components (Tabs, Accordion, CodeGroup)",
+    "Multi-version documentation support",
+    "Built-in search and analytics",
+    "API playground with authentication"
+  ],
+  "useCases": [
+    "API reference documentation from code",
+    "SDK and library documentation",
+    "Product documentation with guides and tutorials",
+    "Component library documentation"
+  ],
+  "requirements": [
+    "Node.js 18+",
+    "Mintlify CLI: npm install -g mintlify",
+    "Codebase with JSDoc or TypeScript types"
+  ],
+  "examples": [
+    {
+      "title": "API Reference Page from TypeScript",
+      "language": "mdx",
+      "code": "---\ntitle: 'Get User'\ndescription: 'Retrieve a user by their unique identifier'\napi: 'GET /api/users/{userId}'\n---\n\n# Get User\n\nRetrieves a user by their unique identifier.\n\n## Path Parameters\n\n<ParamField path=\"userId\" type=\"string\" required>\n  The user's unique identifier\n</ParamField>\n\n## Response\n\n<ResponseField name=\"id\" type=\"string\" required>\n  Unique user identifier\n</ResponseField>\n\n<ResponseField name=\"email\" type=\"string\" required>\n  User's email address\n</ResponseField>\n\n<ResponseField name=\"name\" type=\"string\" required>\n  Display name\n</ResponseField>\n\n<ResponseField name=\"role\" type=\"'admin' | 'user' | 'guest'\" required>\n  User role determining access permissions\n</ResponseField>\n\n## Code Examples\n\n<CodeGroup>\n\n```typescript TypeScript SDK\nimport { getUser } from '@yourapp/sdk';\n\nconst user = await getUser('user_123');\nconsole.log(user.name);\n```\n\n```javascript JavaScript\nconst response = await fetch('/api/users/user_123');\nconst user = await response.json();\n```\n\n```python Python\nimport requests\n\nresponse = requests.get('https://api.yourapp.com/users/user_123')\nuser = response.json()\n```\n\n```bash cURL\ncurl https://api.yourapp.com/users/user_123 \\\\\n  -H \"Authorization: Bearer YOUR_TOKEN\"\n```\n\n</CodeGroup>\n\n## Response Example\n\n<ResponseExample>\n\n```json 200 Success\n{\n  \"id\": \"user_123\",\n  \"email\": \"user@example.com\",\n  \"name\": \"John Doe\",\n  \"role\": \"user\",\n  \"createdAt\": \"2025-10-16T12:00:00Z\"\n}\n```\n\n```json 404 Not Found\n{\n  \"error\": \"User not found\",\n  \"code\": \"USER_NOT_FOUND\"\n}\n```\n\n</ResponseExample>\n\n## Error Codes\n\n<ResponseField name=\"404\" type=\"NotFoundError\">\n  User with the specified ID doesn't exist\n</ResponseField>\n\n<ResponseField name=\"403\" type=\"AuthorizationError\">\n  Caller lacks permission to access this user\n</ResponseField>"
+    },
+    {
+      "title": "Quickstart Guide with Steps",
+      "language": "mdx",
+      "code": "---\ntitle: 'Quickstart'\ndescription: 'Get started in 5 minutes'\nicon: 'rocket'\n---\n\n# Getting Started\n\nThis guide will help you integrate our SDK in under 5 minutes.\n\n<Steps>\n\n<Step title=\"Install the SDK\">\n  Install using your preferred package manager:\n\n  <CodeGroup>\n\n  ```bash npm\n  npm install @yourapp/sdk\n  ```\n\n  ```bash pnpm\n  pnpm add @yourapp/sdk\n  ```\n\n  ```bash yarn\n  yarn add @yourapp/sdk\n  ```\n\n  </CodeGroup>\n</Step>\n\n<Step title=\"Configure Environment\">\n  Add your API credentials to `.env`:\n\n  ```bash .env\n  API_KEY=your-api-key\n  API_URL=https://api.yourapp.com\n  ```\n\n  <Warning>\n    Never commit your `.env` file to version control.\n  </Warning>\n</Step>\n\n<Step title=\"Initialize the Client\">\n  Create a client instance:\n\n  ```typescript lib/client.ts\n  import { createClient } from '@yourapp/sdk';\n\n  export const client = createClient({\n    apiKey: process.env.API_KEY!,\n    baseUrl: process.env.API_URL!,\n  });\n  ```\n</Step>\n\n<Step title=\"Make Your First Request\">\n  Use the client in your application:\n\n  ```typescript app/page.tsx\n  import { client } from '@/lib/client';\n\n  export default async function Page() {\n    const users = await client.users.list();\n    \n    return (\n      <div>\n        {users.map(user => (\n          <div key={user.id}>{user.name}</div>\n        ))}\n      </div>\n    );\n  }\n  ```\n\n  <Check>\n    You're all set! Check out the API reference for more.\n  </Check>\n</Step>\n\n</Steps>\n\n## Next Steps\n\n<CardGroup cols={2}>\n\n<Card title=\"API Reference\" icon=\"code\" href=\"/api-reference\">\n  Explore the complete API documentation\n</Card>\n\n<Card title=\"Authentication\" icon=\"shield\" href=\"/guides/authentication\">\n  Learn about authentication and security\n</Card>\n\n</CardGroup>"
+    },
+    {
+      "title": "mint.json Configuration",
+      "language": "json",
+      "code": "{\n  \"$schema\": \"https://mintlify.com/schema.json\",\n  \"name\": \"Your API Documentation\",\n  \"logo\": {\n    \"dark\": \"/logo/dark.svg\",\n    \"light\": \"/logo/light.svg\"\n  },\n  \"favicon\": \"/favicon.svg\",\n  \"colors\": {\n    \"primary\": \"#0D9373\",\n    \"light\": \"#07C983\",\n    \"dark\": \"#0D9373\"\n  },\n  \"topbarLinks\": [\n    {\n      \"name\": \"Support\",\n      \"url\": \"mailto:support@example.com\"\n    }\n  ],\n  \"topbarCtaButton\": {\n    \"name\": \"Dashboard\",\n    \"url\": \"https://dashboard.example.com\"\n  },\n  \"tabs\": [\n    {\n      \"name\": \"API Reference\",\n      \"url\": \"api-reference\"\n    },\n    {\n      \"name\": \"Guides\",\n      \"url\": \"guides\"\n    }\n  ],\n  \"navigation\": [\n    {\n      \"group\": \"Get Started\",\n      \"pages\": [\n        \"introduction\",\n        \"quickstart\",\n        \"authentication\"\n      ]\n    },\n    {\n      \"group\": \"API Reference\",\n      \"pages\": [\n        \"api-reference/users\",\n        \"api-reference/organizations\",\n        \"api-reference/webhooks\"\n      ]\n    },\n    {\n      \"group\": \"Guides\",\n      \"pages\": [\n        \"guides/error-handling\",\n        \"guides/rate-limiting\",\n        \"guides/pagination\"\n      ]\n    }\n  ],\n  \"footerSocials\": {\n    \"twitter\": \"https://twitter.com/example\",\n    \"github\": \"https://github.com/example\"\n  },\n  \"analytics\": {\n    \"posthog\": {\n      \"apiKey\": \"phc_xxx\"\n    }\n  },\n  \"api\": {\n    \"baseUrl\": \"https://api.example.com\",\n    \"auth\": {\n      \"method\": \"bearer\"\n    }\n  }\n}"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Install Mintlify CLI: npm install -g mintlify",
+        "Initialize Mintlify: mintlify init",
+        "Ask Claude to generate documentation from your code",
+        "Review generated MDX files and mint.json",
+        "Run mintlify dev to preview locally"
+      ]
+    },
+    "claudeCode": {
+      "steps": [
+        "npm install -g mintlify",
+        "mintlify init",
+        "Ask Claude for documentation generation",
+        "mintlify dev",
+        "Deploy with mintlify deploy or integrate with Vercel"
+      ]
+    }
+  },
+  "troubleshooting": [
+    {
+      "issue": "Mintlify build fails with frontmatter errors",
+      "solution": "Ensure all MDX files have valid YAML frontmatter with 'title' and 'description' fields. No tabs in YAML."
+    },
+    {
+      "issue": "Navigation doesn't show all pages",
+      "solution": "Update mint.json navigation array to explicitly list all MDX file paths without .mdx extension."
+    },
+    {
+      "issue": "Code syntax highlighting not working",
+      "solution": "Use full language names in code fences: typescript, javascript, python, bash (not ts, js, py, sh)."
+    }
+  ],
+  "documentationUrl": "https://mintlify.com/docs",
+  "source": "community"
+}

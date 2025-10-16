@@ -31,10 +31,10 @@
  * @group a11y
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 import {
-  navigateToHomepage,
   navigateToCategory,
+  navigateToHomepage,
   waitForNetworkIdle,
 } from '../helpers/test-helpers';
 
@@ -45,13 +45,13 @@ import {
 /**
  * Get all headings on page in document order
  */
-async function getAllHeadings(page: Page): Promise<
-  Array<{ level: number; text: string; tagName: string }>
-> {
+async function getAllHeadings(
+  page: Page
+): Promise<Array<{ level: number; text: string; tagName: string }>> {
   return await page.evaluate(() => {
     const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'));
     return headings.map((heading) => ({
-      level: parseInt(heading.tagName.charAt(1), 10),
+      level: Number.parseInt(heading.tagName.charAt(1), 10),
       text: heading.textContent?.trim() || '',
       tagName: heading.tagName,
     }));
@@ -61,9 +61,10 @@ async function getAllHeadings(page: Page): Promise<
 /**
  * Validate heading hierarchy (no skipping levels)
  */
-function validateHeadingHierarchy(
-  headings: Array<{ level: number; text: string }>
-): { isValid: boolean; errors: string[] } {
+function validateHeadingHierarchy(headings: Array<{ level: number; text: string }>): {
+  isValid: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
   let previousLevel = 0;
 
@@ -131,7 +132,7 @@ test.describe('Homepage - Content Structure', () => {
 
     const h1Text = await page.locator('h1').first().textContent();
     expect(h1Text, 'H1 must have text content').toBeTruthy();
-    expect(h1Text!.length, 'H1 must have meaningful text').toBeGreaterThan(10);
+    expect(h1Text?.length, 'H1 must have meaningful text').toBeGreaterThan(10);
   });
 
   test('should have proper heading hierarchy', async ({ page }) => {
@@ -169,16 +170,28 @@ test.describe('Homepage - Content Structure', () => {
     const landmarks = await getLandmarkRoles(page);
 
     // Should have banner (header)
-    expect(landmarks.some((role) => role === 'banner' || role === 'header'), 'Should have banner landmark').toBe(true);
+    expect(
+      landmarks.some((role) => role === 'banner' || role === 'header'),
+      'Should have banner landmark'
+    ).toBe(true);
 
     // Should have navigation
-    expect(landmarks.some((role) => role === 'navigation' || role === 'nav'), 'Should have navigation landmark').toBe(true);
+    expect(
+      landmarks.some((role) => role === 'navigation' || role === 'nav'),
+      'Should have navigation landmark'
+    ).toBe(true);
 
     // Should have main
-    expect(landmarks.some((role) => role === 'main'), 'Should have main landmark').toBe(true);
+    expect(
+      landmarks.some((role) => role === 'main'),
+      'Should have main landmark'
+    ).toBe(true);
 
     // Should have contentinfo (footer)
-    expect(landmarks.some((role) => role === 'contentinfo' || role === 'footer'), 'Should have contentinfo landmark').toBe(true);
+    expect(
+      landmarks.some((role) => role === 'contentinfo' || role === 'footer'),
+      'Should have contentinfo landmark'
+    ).toBe(true);
   });
 
   test('should have accessible navigation', async ({ page }) => {
@@ -194,7 +207,10 @@ test.describe('Homepage - Content Structure', () => {
       const title = await link.getAttribute('title');
 
       const hasAccessibleName = (text && text.trim().length > 0) || ariaLabel || title;
-      expect(hasAccessibleName, 'All links must have accessible names (text, aria-label, or title)').toBe(true);
+      expect(
+        hasAccessibleName,
+        'All links must have accessible names (text, aria-label, or title)'
+      ).toBe(true);
     }
   });
 
@@ -206,7 +222,7 @@ test.describe('Homepage - Content Structure', () => {
     if (buttons.length > 0) {
       for (const button of buttons) {
         const text = await button.textContent();
-        const ariaLabel = await link.getAttribute('aria-label');
+        const ariaLabel = await button.getAttribute('aria-label');
 
         const hasAccessibleName = (text && text.trim().length > 0) || ariaLabel;
         expect(hasAccessibleName, 'All buttons must have accessible names').toBe(true);
@@ -231,7 +247,7 @@ test.describe('Homepage - Content Structure', () => {
 // =============================================================================
 
 test.describe('Category Pages - Content Structure', () => {
-  const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'];
+  const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'];
 
   for (const category of categories) {
     test.describe(`${category} category`, () => {
@@ -334,9 +350,9 @@ test.describe('Content Detail Pages - Structure', () => {
     await waitForNetworkIdle(page);
 
     // Look for breadcrumb navigation
-    const breadcrumb = page.locator('[aria-label*="breadcrumb"]').or(
-      page.locator('[data-breadcrumb]').or(page.locator('nav ol'))
-    );
+    const breadcrumb = page
+      .locator('[aria-label*="breadcrumb"]')
+      .or(page.locator('[data-breadcrumb]').or(page.locator('nav ol')));
 
     if ((await breadcrumb.count()) > 0) {
       // Breadcrumbs should be in a nav element
@@ -437,9 +453,7 @@ test.describe('Search Page - Structure', () => {
     await expect(main).toBeVisible();
 
     // Should have search input with label
-    const searchInput = page.locator('input[type="search"]').or(
-      page.getByRole('searchbox')
-    );
+    const searchInput = page.locator('input[type="search"]').or(page.getByRole('searchbox'));
 
     if ((await searchInput.count()) > 0) {
       const input = searchInput.first();
@@ -465,9 +479,9 @@ test.describe('Search Page - Structure', () => {
     await waitForNetworkIdle(page);
 
     // Results container should have role="region" or aria-live
-    const resultsContainer = page.locator('[role="region"]').or(
-      page.locator('[aria-live]').or(page.locator('[data-search-results]'))
-    );
+    const resultsContainer = page
+      .locator('[role="region"]')
+      .or(page.locator('[aria-live]').or(page.locator('[data-search-results]')));
 
     if ((await resultsContainer.count()) > 0) {
       // Should have accessible name or aria-label
@@ -536,9 +550,9 @@ test.describe('Forms - Accessibility', () => {
       await page.waitForTimeout(1000);
 
       // Error messages should have role="alert" or aria-live
-      const errorMessages = page.locator('[role="alert"]').or(
-        page.locator('[aria-live="assertive"]').or(page.locator('[aria-live="polite"]'))
-      );
+      const errorMessages = page
+        .locator('[role="alert"]')
+        .or(page.locator('[aria-live="assertive"]').or(page.locator('[aria-live="polite"]')));
 
       if ((await errorMessages.count()) > 0) {
         // Errors should be visible

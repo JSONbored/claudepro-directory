@@ -27,10 +27,10 @@
  */
 
 import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { formatChangelogDateRFC822, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { apiResponse } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
 /**
@@ -39,10 +39,9 @@ import { logger } from '@/src/lib/logger';
 export const runtime = 'nodejs';
 
 /**
- * ISR revalidation
- * Revalidate every 10 minutes (600 seconds) for fresh changelog updates
+ * ISR revalidation - RSS feed for SEO (centralized config)
  */
-export const revalidate = 600;
+export const revalidate = 21600;
 
 /**
  * Maximum number of entries to include in RSS feed
@@ -130,14 +129,10 @@ ${categories.map((cat) => `      <category>${escapeXml(cat)}</category>`).join('
       entriesCount: entries.length,
     });
 
-    // Return RSS XML with proper headers
-    return new NextResponse(rss, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/rss+xml; charset=utf-8',
-        'Cache-Control': 'public, max-age=600, s-maxage=600, stale-while-revalidate=3600',
-        'X-Content-Type-Options': 'nosniff',
-      },
+    // Return RSS XML via unified builder
+    return apiResponse.raw(rss, {
+      contentType: 'application/rss+xml; charset=utf-8',
+      cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
     });
   } catch (error) {
     requestLogger.error(
@@ -155,12 +150,10 @@ ${categories.map((cat) => `      <category>${escapeXml(cat)}</category>`).join('
   </channel>
 </rss>`;
 
-    return new NextResponse(errorRss, {
+    return apiResponse.raw(errorRss, {
+      contentType: 'application/rss+xml; charset=utf-8',
       status: 500,
-      headers: {
-        'Content-Type': 'application/rss+xml; charset=utf-8',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-      },
+      cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
     });
   }
 }

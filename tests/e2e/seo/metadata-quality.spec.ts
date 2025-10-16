@@ -43,13 +43,14 @@
  * @group production-ready
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
+import { z } from 'zod';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import {
   getAllCategoryContent,
-  getAllGuides,
-  getAllCollections,
   getAllChangelogs,
-  getAllStaticRoutes,
+  getAllCollections,
+  getAllGuides,
 } from '../helpers/content-loader';
 
 // =============================================================================
@@ -71,13 +72,6 @@ async function getOGContent(page: Page, property: string): Promise<string | null
 }
 
 /**
- * Get Twitter Card meta tag content
- */
-async function getTwitterContent(page: Page, name: string): Promise<string | null> {
-  return await page.locator(`meta[name="twitter:${name}"]`).getAttribute('content');
-}
-
-/**
  * Get canonical URL
  */
 async function getCanonicalUrl(page: Page): Promise<string | null> {
@@ -87,17 +81,22 @@ async function getCanonicalUrl(page: Page): Promise<string | null> {
 /**
  * Get all JSON-LD structured data blocks
  */
-async function getStructuredData(page: Page): Promise<any[]> {
+async function getStructuredData(page: Page): Promise<unknown[]> {
   const scripts = await page.locator('script[type="application/ld+json"]').all();
-  const data: any[] = [];
+  const data: unknown[] = [];
 
   for (const script of scripts) {
     const content = await script.textContent();
     if (content) {
       try {
-        data.push(JSON.parse(content));
-      } catch (error) {
-        console.error(`Failed to parse JSON-LD on ${page.url()}:`, content);
+        // Production-grade: safeParse with permissive schema for JSON-LD validation
+        data.push(
+          safeParse(content, z.unknown(), {
+            strategy: ParseStrategy.VALIDATED_JSON,
+          })
+        );
+      } catch (_error) {
+        // Invalid JSON - skip this script block
       }
     }
   }
@@ -126,8 +125,14 @@ async function waitForNetworkIdle(page: Page): Promise<void> {
  */
 function validateTitleLength(title: string, pagePath: string): void {
   expect(title, `${pagePath}: Title must exist`).toBeTruthy();
-  expect(title.length, `${pagePath}: Title too long (${title.length} chars): "${title}"`).toBeLessThanOrEqual(60);
-  expect(title.length, `${pagePath}: Title too short (${title.length} chars)`).toBeGreaterThanOrEqual(55);
+  expect(
+    title.length,
+    `${pagePath}: Title too long (${title.length} chars): "${title}"`
+  ).toBeLessThanOrEqual(60);
+  expect(
+    title.length,
+    `${pagePath}: Title too short (${title.length} chars)`
+  ).toBeGreaterThanOrEqual(55);
 }
 
 /**
@@ -160,7 +165,7 @@ function validateNoPlaceholderText(text: string, fieldName: string, pagePath: st
     /placeholder/i,
     /test content/i,
     /sample text/i,
-    /\[.*\]/,  // [placeholder] pattern
+    /\[.*\]/, // [placeholder] pattern
   ];
 
   for (const pattern of placeholderPatterns) {
@@ -216,8 +221,8 @@ async function validateOpenGraphMetadata(page: Page, pagePath: string): Promise<
   }
 
   // Validate no placeholder text in OG fields
-  validateNoPlaceholderText(ogTitle!, 'og:title', pagePath);
-  validateNoPlaceholderText(ogDescription!, 'og:description', pagePath);
+  if (ogTitle) validateNoPlaceholderText(ogTitle, 'og:title', pagePath);
+  if (ogDescription) validateNoPlaceholderText(ogDescription, 'og:description', pagePath);
 }
 
 /**
@@ -236,7 +241,9 @@ async function validateStructuredData(page: Page, pagePath: string): Promise<voi
   for (const data of structuredData) {
     expect(data['@context'], `${pagePath}: JSON-LD must have @context`).toBeTruthy();
     expect(data['@type'], `${pagePath}: JSON-LD must have @type`).toBeTruthy();
-    expect(data['@context'], `${pagePath}: JSON-LD @context must be schema.org`).toBe('https://schema.org');
+    expect(data['@context'], `${pagePath}: JSON-LD @context must be schema.org`).toBe(
+      'https://schema.org'
+    );
   }
 }
 
@@ -245,7 +252,7 @@ async function validateStructuredData(page: Page, pagePath: string): Promise<voi
  * - Year mentions (2025 or "October 2025") for recency signals
  * - Research shows 3.2x more citations for fresh content
  */
-async function validateAIOptimization(page: Page, pagePath: string): Promise<void> {
+async function validateAIOptimization(page: Page, _pagePath: string): Promise<void> {
   const description = await getMetaContent(page, 'description');
 
   if (description) {
@@ -253,7 +260,7 @@ async function validateAIOptimization(page: Page, pagePath: string): Promise<voi
     const hasYearMention = /2025|October 2025/i.test(description);
 
     if (!hasYearMention) {
-      console.warn(`⚠️  ${pagePath}: Description missing year mention for AI optimization`);
+      // Note: Year mention is optional but recommended for AI citation freshness
     }
   }
 }
@@ -479,7 +486,9 @@ test.describe('Metadata Quality: All Changelog Pages', () => {
 
         // Changelog-specific: Should have Article type for og:type
         const ogType = await getOGContent(page, 'type');
-        expect(ogType, `${changelog.path}: Changelogs should use og:type="article"`).toBe('article');
+        expect(ogType, `${changelog.path}: Changelogs should use og:type="article"`).toBe(
+          'article'
+        );
       });
     }
   }
@@ -498,34 +507,8 @@ test.describe('Metadata Quality: Summary Report', () => {
     const collectionPages = getAllCollections().length; // 9+
     const changelogPages = getAllChangelogs().length; // 30+
 
-    const totalRoutes = staticRoutes + categoryPages + contentPages + guidePages + collectionPages + changelogPages;
-
-    console.log(`
-╔════════════════════════════════════════════════════════════════════════╗
-║                    METADATA QUALITY REPORT                              ║
-╠════════════════════════════════════════════════════════════════════════╣
-║ Static Routes:         ${staticRoutes.toString().padStart(4)} pages                                      ║
-║ Category Pages:        ${categoryPages.toString().padStart(4)} pages                                      ║
-║ Content Detail Pages:  ${contentPages.toString().padStart(4)} pages                                      ║
-║ Guide Pages:           ${guidePages.toString().padStart(4)} pages                                      ║
-║ Collection Pages:      ${collectionPages.toString().padStart(4)} pages                                      ║
-║ Changelog Pages:       ${changelogPages.toString().padStart(4)} pages                                      ║
-╠════════════════════════════════════════════════════════════════════════╣
-║ TOTAL ROUTES TESTED:   ${totalRoutes.toString().padStart(4)} pages                                      ║
-╚════════════════════════════════════════════════════════════════════════╝
-
-✅ All routes validated against 8 quality gates:
-   1. Title length (30-65 chars)
-   2. Description length (140-165 chars)
-   3. No placeholder text
-   4. Canonical URLs (HTTPS, no trailing slash)
-   5. OpenGraph metadata (complete with 1200x630 images)
-   6. Structured data presence (valid JSON-LD)
-   7. AI optimization (year mentions)
-   8. Schema.org validation
-
-🎯 Target: 64+ routes | Actual: ${totalRoutes} routes | Status: ${totalRoutes >= 64 ? '✅ PASSED' : '❌ FAILED'}
-    `);
+    const totalRoutes =
+      staticRoutes + categoryPages + contentPages + guidePages + collectionPages + changelogPages;
 
     expect(totalRoutes, 'Should test at least 64 public routes').toBeGreaterThanOrEqual(64);
   });

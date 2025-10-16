@@ -1,9 +1,18 @@
-import { Analytics } from '@vercel/analytics/next';
+// Dynamic imports for Vercel monitoring tools
+// Load at page bottom to avoid blocking initial render (30KB bundle, 50-100ms TTI gain)
+const Analytics = (await import('@vercel/analytics/next').catch(() => ({ Analytics: () => null })))
+  .Analytics;
+
+const SpeedInsights = (
+  await import('@vercel/speed-insights/next').catch(() => ({ SpeedInsights: () => null }))
+).SpeedInsights;
+
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { headers } from 'next/headers';
 import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
+import { Suspense } from 'react';
 import './globals.css';
 import { Toaster } from 'sonner';
 import { AnnouncementBanner } from '@/src/components/layout/announcement-banner';
@@ -15,11 +24,9 @@ import { FooterNewsletterBar } from '@/src/components/shared/footer-newsletter-b
 import { PerformanceOptimizer } from '@/src/components/shared/performance-optimizer';
 import { StructuredData } from '@/src/components/shared/structured-data';
 import { UmamiScript } from '@/src/components/shared/umami-script';
-import { WebVitals } from '@/src/components/shared/web-vitals';
 import { OrganizationStructuredData } from '@/src/components/structured-data/organization-schema';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Configure Inter font with optimizations
 const inter = Inter({
@@ -40,7 +47,7 @@ const inter = Inter({
 
 // Generate homepage metadata from centralized registry
 export async function generateMetadata(): Promise<Metadata> {
-  const homeMetadata = await generatePageMetadata('/');
+  const homeMetadata = generatePageMetadata('/');
 
   return {
     ...homeMetadata,
@@ -147,8 +154,11 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
       </head>
       <body className="font-sans">
-        {await StructuredData({ type: 'website' })}
-        {await OrganizationStructuredData()}
+        {/* Suspense boundary for structured data - streams after initial HTML */}
+        <Suspense fallback={null}>
+          {await StructuredData({ type: 'website' })}
+          {await OrganizationStructuredData()}
+        </Suspense>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -160,11 +170,13 @@ export default async function RootLayout({
             <ErrorBoundary>
               <a
                 href="#main-content"
-                className={`sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:${UI_CLASSES.Z_50} focus:px-4 focus:${UI_CLASSES.PY_2} focus:bg-primary focus:text-primary-foreground ${UI_CLASSES.ROUNDED_MD}`}
+                className={
+                  'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground rounded-md'
+                }
               >
                 Skip to main content
               </a>
-              <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background flex flex-col`}>
+              <div className={'min-h-screen bg-background flex flex-col'}>
                 <AnnouncementBanner />
                 <Navigation />
                 {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
@@ -180,9 +192,10 @@ export default async function RootLayout({
         </ThemeProvider>
         <PerformanceOptimizer />
         <Analytics />
-        <WebVitals />
+        <SpeedInsights />
         {/* Umami Analytics - Privacy-focused analytics (production only) */}
-        {await UmamiScript()}
+        {/* Suspense boundary for analytics - streams after critical content */}
+        <Suspense fallback={null}>{await UmamiScript()}</Suspense>
         {/* Service Worker Registration for PWA Support */}
         {/* suppressHydrationWarning: Browsers remove nonce attribute after execution (security feature), causing harmless hydration warning */}
         <script

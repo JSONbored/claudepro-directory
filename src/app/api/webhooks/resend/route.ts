@@ -5,8 +5,9 @@
  * Security Layers:
  * 1. Middleware (Arcjet) - Bot detection, WAF, general rate limiting
  * 2. Svix Signature Verification - Cryptographic proof of authenticity
- * 3. Redis Rate Limiting - Per-event-type rate limits
- * 4. Zod Validation - Schema validation
+ * 3. Idempotency Protection - Redis-based replay attack prevention (24h TTL)
+ * 4. Redis Rate Limiting - Per-event-type rate limits
+ * 5. Zod Validation - Schema validation
  *
  * Events Handled:
  * - email.bounced: Track and auto-remove bad emails
@@ -16,14 +17,15 @@
  * - email.delivery_delayed: Monitoring
  */
 
-import { type NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { Webhook } from 'svix';
-import { handleApiError } from '@/src/lib/error-handler';
+import { redisClient } from '@/src/lib/cache.server';
+import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
-import { rateLimiters } from '@/src/lib/rate-limiter';
+import { rateLimiters } from '@/src/lib/rate-limiter.server';
 import { env } from '@/src/lib/schemas/env.schema';
 import { resendWebhookEventSchema } from '@/src/lib/schemas/webhook.schema';
-import { webhookService } from '@/src/lib/services/webhook.service';
+import { webhookService } from '@/src/lib/services/webhook.server';
 
 // Force Node.js runtime (required for Svix crypto operations)
 export const runtime = 'nodejs';
@@ -102,6 +104,51 @@ export async function POST(request: NextRequest) {
 
   const event = validatedEvent.data;
 
+  // Idempotency check - prevent replay attacks and duplicate processing
+  // Use svix-id as unique identifier (Svix guarantees uniqueness)
+  const idempotencyKey = `webhook:processed:${event.type}:${event.data.email_id}:${svixId}`;
+
+  // Check if this webhook has already been processed
+  const alreadyProcessed = await redisClient.executeOperation(
+    async (redis) => {
+      const exists = await redis.get(idempotencyKey);
+      return exists !== null;
+    },
+    async () => false, // Fallback if Redis unavailable - allow processing but log warning
+    'webhook_idempotency_check'
+  );
+
+  if (alreadyProcessed) {
+    logger.info('Webhook already processed - idempotent response', undefined, {
+      svixId,
+      eventType: event.type,
+      emailId: event.data.email_id,
+    });
+    // Return success to acknowledge receipt (prevent retries)
+    return apiResponse.okRaw(
+      {
+        received: true,
+        alreadyProcessed: true,
+        eventType: event.type,
+        timestamp: new Date().toISOString(),
+      },
+      { sMaxAge: 0, staleWhileRevalidate: 0 }
+    );
+  }
+
+  // Mark webhook as processed (24 hour TTL to prevent indefinite storage growth)
+  await redisClient.executeOperation(
+    async (redis) => {
+      await redis.setex(idempotencyKey, 86400, '1'); // 24 hours in seconds
+    },
+    async () => {
+      logger.warn('Failed to set webhook idempotency key - processing will continue', undefined, {
+        svixId,
+      });
+    },
+    'webhook_idempotency_set'
+  );
+
   // Apply rate limiting based on event type
   const isAnalyticsEvent = event.type === 'email.opened' || event.type === 'email.clicked';
   const limiter = isAnalyticsEvent ? rateLimiters.webhookAnalytics : rateLimiters.webhookBounce;
@@ -113,11 +160,11 @@ export async function POST(request: NextRequest) {
       limit: rateLimitCheck.limit,
       retryAfter: rateLimitCheck.retryAfter,
     });
-    return new Response('Too Many Requests', {
+    return apiResponse.raw(null, {
+      contentType: 'application/json; charset=utf-8',
       status: 429,
-      headers: {
-        'Retry-After': String(rateLimitCheck.retryAfter),
-      },
+      headers: { 'Retry-After': String(rateLimitCheck.retryAfter) },
+      cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
     });
   }
 
@@ -135,10 +182,13 @@ export async function POST(request: NextRequest) {
     );
   });
 
-  // Return success immediately
-  return NextResponse.json({
-    received: true,
-    eventType: event.type,
-    timestamp: new Date().toISOString(),
-  });
+  // Return success immediately (no envelope for webhook acknowledgement)
+  return apiResponse.okRaw(
+    {
+      received: true,
+      eventType: event.type,
+      timestamp: new Date().toISOString(),
+    },
+    { sMaxAge: 0, staleWhileRevalidate: 0 }
+  );
 }

@@ -3,16 +3,17 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import path from 'path';
+import { z } from 'zod';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card } from '@/src/components/ui/card';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import { markdownToSafeHtml } from '@/src/lib/content/markdown-utils';
 import { ArrowLeft, Tags } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { ComparisonData } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 
 // ISR Configuration - Revalidate every 7 days for SEO pages
 export const dynamic = 'force-static'; // Force static generation
@@ -58,6 +59,16 @@ async function getComparisonData(slug: string): Promise<ComparisonData | null> {
   }
 }
 
+/**
+ * Comparison metadata schema (Zod)
+ * Production-grade runtime validation for static params generation
+ */
+const comparisonMetadataSchema = z.array(
+  z.object({
+    slug: z.string(),
+  })
+);
+
 export async function generateStaticParams() {
   try {
     const metadataPath = path.join(
@@ -67,9 +78,14 @@ export async function generateStaticParams() {
       'comparisons',
       '_metadata.json'
     );
-    const metadata = JSON.parse(await fs.readFile(metadataPath, 'utf-8'));
+    const content = await fs.readFile(metadataPath, 'utf-8');
 
-    return metadata.map((item: { slug: string }) => ({
+    // Production-grade: safeParse with Zod validation
+    const metadata = safeParse(content, comparisonMetadataSchema, {
+      strategy: ParseStrategy.VALIDATED_JSON,
+    });
+
+    return metadata.map((item) => ({
       slug: item.slug,
     }));
   } catch (_error) {
@@ -84,7 +100,15 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  return generatePageMetadata('/compare/:slug', { params: { slug } });
+
+  // Load comparison data for metadata generation
+  const comparisonData = await getComparisonData(slug);
+
+  return generatePageMetadata('/compare/:slug', {
+    params: { slug },
+    item: comparisonData || undefined,
+    slug,
+  });
 }
 
 export default async function ComparisonPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -143,14 +167,14 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
 
     // Add Tailwind classes to the sanitized HTML for proper styling
     htmlContent = htmlContent
-      .replace(/<h1>/g, `<h1 class="text-3xl font-bold ${UI_CLASSES.MT_8} mb-4">`)
-      .replace(/<h2>/g, `<h2 class="text-2xl font-semibold ${UI_CLASSES.MT_6} mb-3">`)
-      .replace(/<h3>/g, `<h3 class="text-xl font-medium ${UI_CLASSES.MT_4} mb-2">`)
+      .replace(/<h1>/g, `<h1 class="text-3xl font-bold mt-8 mb-4">`)
+      .replace(/<h2>/g, `<h2 class="text-2xl font-semibold mt-6 mb-3">`)
+      .replace(/<h3>/g, `<h3 class="text-xl font-medium mt-4 mb-2">`)
       .replace(/<a /g, '<a class="text-primary hover:underline" ')
       .replace(/<li>/g, '<li class="ml-6 list-disc">')
       .replace(/<table>/g, '<table class="w-full border-collapse my-4">')
       .replace(/<tr>/g, '<tr class="border-b">')
-      .replace(/<td>/g, `<td class="${UI_CLASSES.P_2}">`)
+      .replace(/<td>/g, `<td class="p-2">`)
       .replace(/<p>/g, '<p class="mb-4">');
   } catch (error) {
     logger.error(
@@ -166,17 +190,15 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
   }
 
   return (
-    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
-      <div className={`container mx-auto px-4 py-8 ${UI_CLASSES.MAX_W_4XL}`}>
+    <div className={'min-h-screen bg-background'}>
+      <div className={'container mx-auto px-4 py-8 max-w-4xl'}>
         {/* Breadcrumb */}
-        <nav
-          className={`flex items-center space-x-2 text-sm text-muted-foreground ${UI_CLASSES.MB_6}`}
-        >
-          <Link href={ROUTES.HOME} className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
+        <nav className={'flex items-center space-x-2 text-sm text-muted-foreground mb-6'}>
+          <Link href={ROUTES.HOME} className="hover:text-primary">
             Home
           </Link>
           <span>/</span>
-          <Link href={ROUTES.COMPARE} className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
+          <Link href={ROUTES.COMPARE} className="hover:text-primary">
             Compare
           </Link>
           <span>/</span>
@@ -185,21 +207,21 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
 
         {/* Back Button */}
         <Link href={ROUTES.HOME}>
-          <Button variant="ghost" size="sm" className={UI_CLASSES.MB_6}>
+          <Button variant="ghost" size="sm" className="mb-6">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Directory
           </Button>
         </Link>
 
         {/* Category Badges */}
-        <div className={`flex gap-2 ${UI_CLASSES.MB_6}`}>
+        <div className={'flex gap-2 mb-6'}>
           <Badge variant="outline">{data.category1}</Badge>
           {data.category1 !== data.category2 && <Badge variant="outline">{data.category2}</Badge>}
           <Badge variant="secondary">Comparison</Badge>
         </div>
 
         {/* Main Content */}
-        <Card className={UI_CLASSES.P_8}>
+        <Card className="p-8">
           <article
             className="prose prose-invert max-w-none"
             // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized using DOMPurify
@@ -208,14 +230,12 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
         </Card>
 
         {/* Footer CTA */}
-        <div
-          className={`${UI_CLASSES.MT_8} ${UI_CLASSES.P_6} ${UI_CLASSES.BG_ACCENT_10} rounded-lg`}
-        >
-          <h3 className={`text-lg font-semibold ${UI_CLASSES.MB_2}`}>Explore More Claude Tools</h3>
+        <div className={'mt-8 p-6 bg-accent/10 rounded-lg'}>
+          <h3 className={'text-lg font-semibold mb-2'}>Explore More Claude Tools</h3>
           <p className="text-muted-foreground mb-4">
             Discover more configurations and tools for Claude AI in our community directory.
           </p>
-          <div className={UI_CLASSES.FLEX_GAP_3}>
+          <div className="flex gap-3">
             <Link href={`/${data.category1}`}>
               <Button variant="outline" size="sm">
                 <Tags className="mr-2 h-4 w-4" />

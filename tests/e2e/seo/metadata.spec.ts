@@ -36,12 +36,13 @@
  * @group seo
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
+import { z } from 'zod';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import {
-  navigateToHomepage,
   navigateToCategory,
+  navigateToHomepage,
   navigateToSearch,
-  navigateToSubmit,
   waitForNetworkIdle,
 } from '../helpers/test-helpers';
 
@@ -80,17 +81,22 @@ async function getCanonicalUrl(page: Page): Promise<string | null> {
 /**
  * Get all JSON-LD structured data
  */
-async function getStructuredData(page: Page): Promise<any[]> {
+async function getStructuredData(page: Page): Promise<unknown[]> {
   const scripts = await page.locator('script[type="application/ld+json"]').all();
-  const data: any[] = [];
+  const data: unknown[] = [];
 
   for (const script of scripts) {
     const content = await script.textContent();
     if (content) {
       try {
-        data.push(JSON.parse(content));
-      } catch (error) {
-        console.error('Failed to parse JSON-LD:', content);
+        // Production-grade: safeParse with permissive schema for JSON-LD validation
+        data.push(
+          safeParse(content, z.unknown(), {
+            strategy: ParseStrategy.VALIDATED_JSON,
+          })
+        );
+      } catch (_error) {
+        // Invalid JSON - skip this script block
       }
     }
   }
@@ -114,19 +120,19 @@ function validateTitleLength(title: string): {
       length,
       recommendation: 'Optimal for all search engines',
     };
-  } else if (length <= 65) {
+  }
+  if (length <= 65) {
     return {
       isValid: true,
       length,
       recommendation: 'Good for Bing, may truncate on Google',
     };
-  } else {
-    return {
-      isValid: false,
-      length,
-      recommendation: 'Too long - will truncate on all engines',
-    };
   }
+  return {
+    isValid: false,
+    length,
+    recommendation: 'Too long - will truncate on all engines',
+  };
 }
 
 /**
@@ -145,37 +151,42 @@ function validateDescriptionLength(description: string): {
       length,
       recommendation: 'Optimal for desktop search results',
     };
-  } else if (length >= 120 && length < 150) {
+  }
+  if (length >= 120 && length < 150) {
     return {
       isValid: true,
       length,
       recommendation: 'Good for mobile, slightly short for desktop',
     };
-  } else if (length > 160 && length <= 165) {
+  }
+  if (length > 160 && length <= 165) {
     return {
       isValid: false,
       length,
       recommendation: 'Slightly too long - may truncate',
     };
-  } else if (length < 120) {
+  }
+  if (length < 120) {
     return {
       isValid: false,
       length,
       recommendation: 'Too short - missing SEO opportunity',
     };
-  } else {
-    return {
-      isValid: false,
-      length,
-      recommendation: 'Too long - will truncate on all devices',
-    };
   }
+  return {
+    isValid: false,
+    length,
+    recommendation: 'Too long - will truncate on all devices',
+  };
 }
 
 /**
  * Validate OG image dimensions
  */
-function validateOGImageDimensions(width: number, height: number): {
+function validateOGImageDimensions(
+  width: number,
+  height: number
+): {
   isValid: boolean;
   ratio: number;
   recommendation: string;
@@ -189,19 +200,19 @@ function validateOGImageDimensions(width: number, height: number): {
       ratio,
       recommendation: 'Perfect - matches Facebook/LinkedIn standards',
     };
-  } else if (Math.abs(ratio - expectedRatio) < 0.1) {
+  }
+  if (Math.abs(ratio - expectedRatio) < 0.1) {
     return {
       isValid: true,
       ratio,
       recommendation: 'Acceptable aspect ratio',
     };
-  } else {
-    return {
-      isValid: false,
-      ratio,
-      recommendation: 'Non-standard dimensions - may crop incorrectly',
-    };
   }
+  return {
+    isValid: false,
+    ratio,
+    recommendation: 'Non-standard dimensions - may crop incorrectly',
+  };
 }
 
 // =============================================================================
@@ -216,8 +227,14 @@ test.describe('Homepage SEO - Static Route', () => {
     expect(title).toBeTruthy();
 
     const validation = validateTitleLength(title);
-    expect(validation.length, `Title: "${title}"\nLength: ${validation.length}\n${validation.recommendation}`).toBeGreaterThanOrEqual(55);
-    expect(validation.length, `Title: "${title}"\nLength: ${validation.length}\n${validation.recommendation}`).toBeLessThanOrEqual(60);
+    expect(
+      validation.length,
+      `Title: "${title}"\nLength: ${validation.length}\n${validation.recommendation}`
+    ).toBeGreaterThanOrEqual(55);
+    expect(
+      validation.length,
+      `Title: "${title}"\nLength: ${validation.length}\n${validation.recommendation}`
+    ).toBeLessThanOrEqual(60);
   });
 
   test('should have optimal meta description (150-160 chars)', async ({ page }) => {
@@ -226,9 +243,17 @@ test.describe('Homepage SEO - Static Route', () => {
     const description = await getMetaContent(page, 'description');
     expect(description).toBeTruthy();
 
-    const validation = validateDescriptionLength(description!);
-    expect(validation.length, `Description length: ${validation.length}\n${validation.recommendation}`).toBeGreaterThanOrEqual(150);
-    expect(validation.length, `Description length: ${validation.length}\n${validation.recommendation}`).toBeLessThanOrEqual(160);
+    if (description) {
+      const validation = validateDescriptionLength(description);
+      expect(
+        validation.length,
+        `Description length: ${validation.length}\n${validation.recommendation}`
+      ).toBeGreaterThanOrEqual(150);
+      expect(
+        validation.length,
+        `Description length: ${validation.length}\n${validation.recommendation}`
+      ).toBeLessThanOrEqual(160);
+    }
   });
 
   test('should include year for AI citation optimization', async ({ page }) => {
@@ -269,11 +294,13 @@ test.describe('Homepage SEO - Static Route', () => {
     expect(ogWidth).toBe('1200');
     expect(ogHeight).toBe('630');
 
-    const validation = validateOGImageDimensions(
-      parseInt(ogWidth!, 10),
-      parseInt(ogHeight!, 10)
-    );
-    expect(validation.isValid, validation.recommendation).toBe(true);
+    if (ogWidth && ogHeight) {
+      const validation = validateOGImageDimensions(
+        Number.parseInt(ogWidth, 10),
+        Number.parseInt(ogHeight, 10)
+      );
+      expect(validation.isValid, validation.recommendation).toBe(true);
+    }
   });
 
   test('should have Twitter Card metadata', async ({ page }) => {
@@ -379,8 +406,13 @@ test.describe('Static Routes SEO', () => {
         const description = await getMetaContent(page, 'description');
         expect(description, 'Description is required').toBeTruthy();
 
-        const descValidation = validateDescriptionLength(description!);
-        expect(descValidation.isValid, `Description: ${description}\nLength: ${descValidation.length}\n${descValidation.recommendation}`).toBe(true);
+        if (description) {
+          const descValidation = validateDescriptionLength(description);
+          expect(
+            descValidation.isValid,
+            `Description: ${description}\nLength: ${descValidation.length}\n${descValidation.recommendation}`
+          ).toBe(true);
+        }
       });
 
       test('should have complete Open Graph metadata', async ({ page }) => {
@@ -447,8 +479,10 @@ test.describe('Category Pages SEO', () => {
         const description = await getMetaContent(page, 'description');
         expect(description).toBeTruthy();
 
-        const descValidation = validateDescriptionLength(description!);
-        expect(descValidation.isValid, `Description length: ${descValidation.length}`).toBe(true);
+        if (description) {
+          const descValidation = validateDescriptionLength(description);
+          expect(descValidation.isValid, `Description length: ${descValidation.length}`).toBe(true);
+        }
       });
 
       test('should have complete Open Graph metadata', async ({ page }) => {
@@ -477,9 +511,7 @@ test.describe('Category Pages SEO', () => {
         await navigateToCategory(page, category.slug);
 
         const structuredData = await getStructuredData(page);
-        const breadcrumbSchema = structuredData.find(
-          (data) => data['@type'] === 'BreadcrumbList'
-        );
+        const breadcrumbSchema = structuredData.find((data) => data['@type'] === 'BreadcrumbList');
 
         // Breadcrumbs are optional for category pages, but if present should be valid
         if (breadcrumbSchema) {
@@ -519,8 +551,10 @@ test.describe('Content Detail Pages SEO', () => {
     const description = await getMetaContent(page, 'description');
     expect(description).toBeTruthy();
 
-    const descValidation = validateDescriptionLength(description!);
-    expect(descValidation.isValid, `Description length: ${descValidation.length}`).toBe(true);
+    if (description) {
+      const descValidation = validateDescriptionLength(description);
+      expect(descValidation.isValid, `Description length: ${descValidation.length}`).toBe(true);
+    }
 
     // Validate Open Graph
     const ogTitle = await getOGContent(page, 'title');
@@ -549,9 +583,7 @@ test.describe('Content Detail Pages SEO', () => {
     await waitForNetworkIdle(page);
 
     const structuredData = await getStructuredData(page);
-    const softwareSchema = structuredData.find(
-      (data) => data['@type'] === 'SoftwareApplication'
-    );
+    const softwareSchema = structuredData.find((data) => data['@type'] === 'SoftwareApplication');
 
     // SoftwareApplication schema should exist for agent detail pages
     if (softwareSchema) {
@@ -572,9 +604,7 @@ test.describe('Content Detail Pages SEO', () => {
     await waitForNetworkIdle(page);
 
     const structuredData = await getStructuredData(page);
-    const breadcrumbSchema = structuredData.find(
-      (data) => data['@type'] === 'BreadcrumbList'
-    );
+    const breadcrumbSchema = structuredData.find((data) => data['@type'] === 'BreadcrumbList');
 
     // Breadcrumbs should exist for detail pages
     if (breadcrumbSchema) {
@@ -635,8 +665,10 @@ test.describe('Guide Detail Pages SEO', () => {
       const description = await getMetaContent(page, 'description');
       expect(description).toBeTruthy();
 
-      const descValidation = validateDescriptionLength(description!);
-      expect(descValidation.isValid).toBe(true);
+      if (description) {
+        const descValidation = validateDescriptionLength(description);
+        expect(descValidation.isValid).toBe(true);
+      }
 
       // Validate Open Graph
       const ogType = await getOGContent(page, 'type');
@@ -729,7 +761,9 @@ test.describe('Cross-Page SEO Consistency', () => {
 
     // All site names should be identical
     const uniqueSiteNames = [...new Set(siteNames)];
-    expect(uniqueSiteNames.length, 'All pages should have same og:site_name').toBeLessThanOrEqual(1);
+    expect(uniqueSiteNames.length, 'All pages should have same og:site_name').toBeLessThanOrEqual(
+      1
+    );
   });
 
   test('all pages should use HTTPS in canonical URLs', async ({ page }) => {
@@ -764,9 +798,9 @@ test.describe('Cross-Page SEO Consistency', () => {
 
 import {
   getAllCategoryContent,
-  getAllGuides,
-  getAllCollections,
   getAllChangelogs,
+  getAllCollections,
+  getAllGuides,
   getAllStaticRoutes,
 } from '../helpers/content-loader';
 
@@ -781,15 +815,27 @@ async function validateCoreSEO(page: Page, pagePath: string) {
   // 1. Meta title must exist and be optimal length
   const title = await page.title();
   expect(title, `${pagePath}: Title must exist`).toBeTruthy();
-  expect(title.length, `${pagePath}: Title should be 55-60 chars (currently ${title.length})`).toBeGreaterThanOrEqual(55);
-  expect(title.length, `${pagePath}: Title should be 55-60 chars (currently ${title.length})`).toBeLessThanOrEqual(60);
+  expect(
+    title.length,
+    `${pagePath}: Title should be 55-60 chars (currently ${title.length})`
+  ).toBeGreaterThanOrEqual(55);
+  expect(
+    title.length,
+    `${pagePath}: Title should be 55-60 chars (currently ${title.length})`
+  ).toBeLessThanOrEqual(60);
 
   // 2. Meta description must exist and be optimal length
   const description = await getMetaContent(page, 'description');
   expect(description, `${pagePath}: Description must exist`).toBeTruthy();
   if (description) {
-    expect(description.length, `${pagePath}: Description should be 150-160 chars (currently ${description.length})`).toBeGreaterThanOrEqual(150);
-    expect(description.length, `${pagePath}: Description should be 150-160 chars (currently ${description.length})`).toBeLessThanOrEqual(160);
+    expect(
+      description.length,
+      `${pagePath}: Description should be 150-160 chars (currently ${description.length})`
+    ).toBeGreaterThanOrEqual(150);
+    expect(
+      description.length,
+      `${pagePath}: Description should be 150-160 chars (currently ${description.length})`
+    ).toBeLessThanOrEqual(160);
   }
 
   // 3. Open Graph metadata must be complete
@@ -844,7 +890,7 @@ test.describe('Dynamic SEO: All Guide Pages', () => {
 
       // Guide-specific: Should have HowTo structured data
       const structuredData = await getStructuredData(page);
-      const hasHowTo = structuredData.some(data => data['@type'] === 'HowTo');
+      const hasHowTo = structuredData.some((data) => data['@type'] === 'HowTo');
       expect(hasHowTo, `${guide.path}: Should have HowTo structured data`).toBeTruthy();
     });
   }
@@ -888,7 +934,9 @@ test.describe('Dynamic SEO: All Static Routes', () => {
   const staticRoutes = getAllStaticRoutes();
 
   test(`should test all static routes (found ${staticRoutes.length} routes)`, () => {
-    expect(staticRoutes.length, 'Should have comprehensive static route coverage').toBeGreaterThan(0);
+    expect(staticRoutes.length, 'Should have comprehensive static route coverage').toBeGreaterThan(
+      0
+    );
   });
 
   // Test every static route dynamically
@@ -935,7 +983,9 @@ test.describe('New Routes SEO - Phase 5', () => {
         expect(description, `${route.path}: Description must exist`).toBeTruthy();
 
         if (description) {
-          expect(description.length, `${route.path}: Description length`).toBeGreaterThanOrEqual(150);
+          expect(description.length, `${route.path}: Description length`).toBeGreaterThanOrEqual(
+            150
+          );
           expect(description.length, `${route.path}: Description length`).toBeLessThanOrEqual(160);
         }
       });
@@ -960,7 +1010,9 @@ test.describe('New Routes SEO - Phase 5', () => {
         const canonical = await getCanonicalUrl(page);
         expect(canonical, `${route.path}: Canonical URL required`).toBeTruthy();
         expect(canonical, `${route.path}: Canonical must use HTTPS`).toMatch(/^https:\/\//);
-        expect(canonical, `${route.path}: Canonical should not have trailing slash`).not.toMatch(/\/$/);
+        expect(canonical, `${route.path}: Canonical should not have trailing slash`).not.toMatch(
+          /\/$/
+        );
       });
     });
   }
@@ -992,9 +1044,7 @@ test.describe('llms.txt Alternate Links', () => {
   test('should NOT have llms.txt alternate link on category pages', async ({ page }) => {
     await navigateToCategory(page, 'mcp');
 
-    const llmsTxtLink = await page
-      .locator('link[rel="alternate"][type="text/plain"]')
-      .count();
+    const llmsTxtLink = await page.locator('link[rel="alternate"][type="text/plain"]').count();
 
     expect(llmsTxtLink, 'Category pages should NOT have llms.txt alternate link').toBe(0);
   });
@@ -1002,9 +1052,7 @@ test.describe('llms.txt Alternate Links', () => {
   test('should NOT have llms.txt alternate link on homepage', async ({ page }) => {
     await navigateToHomepage(page);
 
-    const llmsTxtLink = await page
-      .locator('link[rel="alternate"][type="text/plain"]')
-      .count();
+    const llmsTxtLink = await page.locator('link[rel="alternate"][type="text/plain"]').count();
 
     expect(llmsTxtLink, 'Homepage should NOT have llms.txt alternate link').toBe(0);
   });
@@ -1026,7 +1074,10 @@ test.describe('llms.txt Alternate Links', () => {
       // Navigate to llms.txt URL
       const response = await page.goto(llmsTxtHref);
       expect(response?.status(), 'llms.txt should be accessible (200 OK)').toBe(200);
-      expect(response?.headers()['content-type'], 'llms.txt should have text/plain content-type').toContain('text/plain');
+      expect(
+        response?.headers()['content-type'],
+        'llms.txt should have text/plain content-type'
+      ).toContain('text/plain');
     }
   });
 });
@@ -1091,7 +1142,9 @@ test.describe('Changelog Pages SEO', () => {
     const description = await getMetaContent(page, 'description');
 
     if (description) {
-      expect(description, 'Changelog description should include year for AI optimization').toMatch(/2025|October 2025/i);
+      expect(description, 'Changelog description should include year for AI optimization').toMatch(
+        /2025|October 2025/i
+      );
     }
   });
 });

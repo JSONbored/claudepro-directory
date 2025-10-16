@@ -30,10 +30,10 @@
  */
 
 import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
 import { chromium } from 'playwright';
-import { redisClient } from '@/src/lib/cache';
+import { redisClient } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
 // Route configuration
@@ -316,43 +316,54 @@ export async function GET(request: NextRequest) {
 
     // Validate dimensions
     if (width < 100 || width > 2400 || height < 100 || height > 2400) {
-      return NextResponse.json(
+      return apiResponse.okRaw(
         { error: 'Invalid dimensions. Width and height must be between 100 and 2400.' },
-        { status: 400 }
+        { status: 400, sMaxAge: 0, staleWhileRevalidate: 0 }
       );
     }
 
-    // Validate path format
+    // Validate path format - must be a path, not a full URL
     if (!path.startsWith('/')) {
-      return NextResponse.json(
+      return apiResponse.okRaw(
         { error: 'Invalid path. Path must start with forward slash.' },
-        { status: 400 }
+        { status: 400, sMaxAge: 0, staleWhileRevalidate: 0 }
+      );
+    }
+
+    // Critical: Prevent passing full URLs instead of paths
+    // This catches the common mistake of passing "https://domain.com/path" instead of "/path"
+    if (path.includes('://') || path.startsWith('http')) {
+      return apiResponse.okRaw(
+        {
+          error:
+            'Invalid path. Expected a relative path (e.g., "/agents") but received a full URL. Extract pathname before calling this API.',
+        },
+        { status: 400, sMaxAge: 0, staleWhileRevalidate: 0 }
       );
     }
 
     // Security: Prevent path traversal
     if (path.includes('..') || path.includes('//')) {
-      return NextResponse.json({ error: 'Invalid path format.' }, { status: 400 });
+      return apiResponse.okRaw(
+        { error: 'Invalid path format.' },
+        { status: 400, sMaxAge: 0, staleWhileRevalidate: 0 }
+      );
     }
 
     // Generate or retrieve OG image
     const image = await getOrGenerateOGImage(path, width, height, refresh);
 
-    // Return image with proper headers
-    // Convert Buffer to Uint8Array for NextResponse (fully compatible with BodyInit)
-    return new NextResponse(new Uint8Array(image), {
+    // Return image via unified response builder
+    return apiResponse.raw(new Uint8Array(image), {
+      contentType: 'image/png',
       status: 200,
       headers: {
-        'Content-Type': 'image/png',
         'Content-Length': String(image.length),
-        // CDN caching: 30 days with stale-while-revalidate
-        'Cache-Control': 'public, max-age=2592000, stale-while-revalidate=604800',
-        // ETag for conditional requests
         ETag: `"og-${path}-${width}x${height}"`,
-        // CORS for external embedding
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET',
       },
+      cache: { sMaxAge: 2592000, staleWhileRevalidate: 604800 },
     });
   } catch (error) {
     logger.error(
@@ -363,12 +374,10 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    return NextResponse.json(
-      {
-        error: 'Failed to generate OpenGraph image',
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    );
+    return handleApiError(error instanceof Error ? error : new Error(String(error)), {
+      route: '/api/og',
+      method: 'GET',
+      operation: 'og_generation',
+    });
   }
 }

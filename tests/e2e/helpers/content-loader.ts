@@ -19,15 +19,15 @@
  * @module tests/e2e/helpers/content-loader
  */
 
+import fs from 'node:fs';
+import path from 'node:path';
 import { agentsMetadata } from '../../../generated/agents-metadata';
+import { collectionsMetadata } from '../../../generated/collections-metadata';
 import { commandsMetadata } from '../../../generated/commands-metadata';
 import { hooksMetadata } from '../../../generated/hooks-metadata';
 import { mcpMetadata } from '../../../generated/mcp-metadata';
 import { rulesMetadata } from '../../../generated/rules-metadata';
 import { statuslinesMetadata } from '../../../generated/statuslines-metadata';
-import { collectionsMetadata } from '../../../generated/collections-metadata';
-import fs from 'node:fs';
-import path from 'node:path';
 
 export interface ContentMetadata {
   slug: string;
@@ -254,7 +254,7 @@ export function getAllChangelogs(): CollectionMetadata[] {
  * ```
  */
 export function getContentByCategory(category: string): ContentMetadata[] {
-  return getAllCategoryContent().filter(item => item.category === category);
+  return getAllCategoryContent().filter((item) => item.category === category);
 }
 
 /**
