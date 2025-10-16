@@ -1745,6 +1745,59 @@ CREATE POLICY "Service role has full access to helpful votes"
   WITH CHECK (true);
 
 -- =====================================================
+-- TABLE PERMISSIONS (GRANT STATEMENTS)
+-- =====================================================
+-- Grant table-level access to authenticated and anonymous roles
+-- RLS policies control row-level access
+-- Without these GRANTs, users get "permission denied" errors
+
+-- Authenticated users (logged-in)
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.users TO authenticated;
+GRANT SELECT, INSERT, DELETE ON public.bookmarks TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.user_collections TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.collection_items TO authenticated;
+GRANT SELECT, INSERT, DELETE ON public.followers TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.companies TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.jobs TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.user_mcps TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.user_content TO authenticated;
+GRANT SELECT, INSERT ON public.posts TO authenticated;
+GRANT SELECT, INSERT, DELETE ON public.votes TO authenticated;
+GRANT SELECT, INSERT ON public.comments TO authenticated;
+GRANT SELECT ON public.payments TO authenticated;
+GRANT SELECT ON public.subscriptions TO authenticated;
+GRANT SELECT ON public.sponsored_content TO authenticated;
+GRANT INSERT ON public.sponsored_impressions TO authenticated;
+GRANT INSERT ON public.sponsored_clicks TO authenticated;
+GRANT SELECT ON public.submissions TO authenticated;
+GRANT SELECT ON public.badges TO authenticated;
+GRANT SELECT ON public.user_badges TO authenticated;
+GRANT SELECT ON public.featured_configs TO authenticated;
+GRANT INSERT ON public.user_interactions TO authenticated;
+GRANT SELECT ON public.user_affinities TO authenticated;
+GRANT SELECT ON public.user_similarities TO authenticated;
+GRANT SELECT ON public.content_similarities TO authenticated;
+GRANT SELECT, INSERT ON public.review_ratings TO authenticated;
+GRANT SELECT, INSERT, DELETE ON public.review_helpful_votes TO authenticated;
+
+-- Anonymous users (not logged-in, public browsing only)
+GRANT SELECT ON public.users TO anon;
+GRANT SELECT ON public.user_collections TO anon;
+GRANT SELECT ON public.collection_items TO anon;
+GRANT SELECT ON public.followers TO anon;
+GRANT SELECT ON public.companies TO anon;
+GRANT SELECT ON public.jobs TO anon;
+GRANT SELECT ON public.user_mcps TO anon;
+GRANT SELECT ON public.user_content TO anon;
+GRANT SELECT ON public.posts TO anon;
+GRANT SELECT ON public.comments TO anon;
+GRANT SELECT ON public.sponsored_content TO anon;
+GRANT SELECT ON public.badges TO anon;
+GRANT SELECT ON public.user_badges TO anon;
+GRANT SELECT ON public.featured_configs TO anon;
+GRANT SELECT ON public.content_similarities TO anon;
+
+-- =====================================================
 -- SEED DATA: Initial Badge Definitions
 -- =====================================================
 
@@ -1764,7 +1817,7 @@ ON CONFLICT (slug) DO NOTHING;
 -- =====================================================
 -- INITIAL SETUP COMPLETE
 -- =====================================================
--- Last Updated: October 8, 2025
+-- Last Updated: October 16, 2025
 --
 -- Schema includes:
 --   ✅ All tables (users, bookmarks, jobs, sponsored content, badges, etc.)
@@ -1777,6 +1830,7 @@ ON CONFLICT (slug) DO NOTHING;
 --   ✅ Security functions (with SET search_path)
 --   ✅ Atomic increment function for tracking
 --   ✅ RLS policies
+--   ✅ Table permissions (GRANT statements for authenticated and anon roles)
 --   ✅ Triggers for auto-updates, reputation, and badge awarding
 --   ✅ Initial badge definitions
 --

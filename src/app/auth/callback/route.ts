@@ -77,6 +77,20 @@ export async function GET(request: NextRequest) {
     });
 
     if (!error && data.session) {
+      // Refresh profile from OAuth metadata to sync name/avatar
+      try {
+        await supabase.rpc('refresh_profile_from_oauth', { user_id: data.user.id });
+        logger.info('Auth callback refreshed profile from OAuth', {
+          userId: data.user.id,
+        });
+      } catch (refreshError) {
+        // Non-fatal: log and continue
+        logger.warn('Auth callback failed to refresh profile', {
+          userId: data.user.id,
+          error: refreshError instanceof Error ? refreshError.message : String(refreshError),
+        });
+      }
+
       // Successful auth - build redirect URL
       const forwardedHost = request.headers.get('x-forwarded-host');
       const isLocalEnv = process.env.NODE_ENV === 'development';

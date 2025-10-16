@@ -1,31 +1,20 @@
 /**
  * Static OpenGraph Image Server
  *
- * Serves pre-generated OG images created at build time.
- * Images are real screenshots of pages generated via Playwright during build.
+ * Serves a single static OG image for all routes.
+ * The image (og-image.webp) is a professionally designed 1200x630 WebP file
+ * that represents the brand and is optimized for social media sharing.
  *
- * Build-Time Generation:
- * - Real screenshots using Playwright (scripts/generate-og-images.ts)
- * - Sharp optimization (WebP, 85% quality, 1200x630)
- * - Incremental regeneration with SHA-256 caching
- * - Parallel processing (5 concurrent screenshots)
- *
- * Query Parameters:
- * - path: The page path (e.g., /trending, /agents/code-reviewer)
- *
- * Examples:
- * - /api/og?path=/trending
- * - /api/og?path=/agents/code-reviewer
- * - /api/og?path=/
- *
- * Performance:
+ * Features:
+ * - Single static image for all pages (consistent branding)
+ * - Aggressive CDN caching (30 days with stale-while-revalidate)
+ * - Security validations (path traversal, format checks)
  * - Serving time: ~1-5ms (static file)
- * - CDN cache: 30 days with stale-while-revalidate
- * - No runtime generation overhead
  *
- * Fallback Behavior:
- * - Returns default OG image if specific route image not found
- * - Logs missing images for future generation
+ * Usage:
+ * - /api/og?path=/ (serves og-image.webp)
+ * - /api/og?path=/trending (serves og-image.webp)
+ * - All paths return the same beautiful brand image
  *
  * @module api/og/route
  */
@@ -40,85 +29,19 @@ import { logger } from '@/src/lib/logger';
 export const runtime = 'nodejs';
 export const maxDuration = 10; // Static serving is fast
 
-// Paths configuration
-const OG_IMAGES_DIR = resolve(process.cwd(), 'public/og-images');
-const MANIFEST_PATH = resolve(OG_IMAGES_DIR, 'manifest.json');
-const DEFAULT_IMAGE = resolve(OG_IMAGES_DIR, 'home.webp');
-
-/**
- * Route manifest type
- */
-interface RouteManifest {
-  route: string;
-  filename: string;
-  hash: string;
-  generatedAt: string;
-  size: number;
-}
-
-/**
- * Load manifest (lazy-loaded and cached)
- */
-let manifestCache: RouteManifest[] | null = null;
-function loadManifest(): RouteManifest[] {
-  if (manifestCache) return manifestCache;
-
-  try {
-    const data = readFileSync(MANIFEST_PATH, 'utf-8');
-    manifestCache = JSON.parse(data);
-    return manifestCache || [];
-  } catch {
-    logger.warn('OG image manifest not found - run npm run generate:og-images');
-    return [];
-  }
-}
-
-/**
- * Convert route path to filename
- */
-function routeToFilename(route: string): string {
-  return route === '/' ? 'home.webp' : `${route.replace(/^\//, '').replace(/\//g, '-')}.webp`;
-}
-
-/**
- * Get OG image for route
- * Returns pre-generated image or fallback to default
- */
-function getOGImage(path: string): { buffer: Buffer; filename: string } {
-  const manifest = loadManifest();
-
-  // Find in manifest
-  const entry = manifest.find((m) => m.route === path);
-  const filename = entry?.filename || routeToFilename(path);
-  const imagePath = resolve(OG_IMAGES_DIR, filename);
-
-  try {
-    const buffer = readFileSync(imagePath);
-    return { buffer, filename };
-  } catch {
-    // Fallback to default image
-    logger.info(`OG image not found for ${path}, using default`);
-
-    try {
-      const buffer = readFileSync(DEFAULT_IMAGE);
-      return { buffer, filename: 'home.webp' };
-    } catch {
-      // No default image available
-      throw new Error('No OG images available - run npm run generate:og-images');
-    }
-  }
-}
+// Static OG image path
+const OG_IMAGE_PATH = resolve(process.cwd(), 'public/og-images/og-image.webp');
 
 /**
  * GET /api/og
  *
- * Serve pre-generated OpenGraph image for any page path
+ * Serve static OpenGraph image for all routes
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
 
-    // Get path parameter
+    // Get path parameter (for logging/analytics, not used for routing)
     const path = searchParams.get('path') || '/';
 
     // Validate path format - must be a path, not a full URL
@@ -137,8 +60,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get pre-generated image
-    const { buffer, filename } = getOGImage(path);
+    // Load static OG image
+    const buffer = readFileSync(OG_IMAGE_PATH);
 
     // Return image via unified response builder
     return apiResponse.raw(new Uint8Array(buffer), {
@@ -146,7 +69,7 @@ export async function GET(request: NextRequest) {
       status: 200,
       headers: {
         'Content-Length': String(buffer.length),
-        ETag: `"og-${filename}"`,
+        ETag: '"og-image-static"',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET',
       },

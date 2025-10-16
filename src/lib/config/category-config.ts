@@ -15,7 +15,6 @@
  * - app/[category]/page.tsx (list pages)
  * - app/[category]/[slug]/page.tsx (detail pages)
  * - scripts/build-content.ts (build-time processing)
- * - scripts/generate-static-apis.ts (API generation)
  * - lib/content-loaders.ts (dynamic content loading)
  * - lib/seo/* (metadata generation)
  * - lib/analytics/* (event mapping)
