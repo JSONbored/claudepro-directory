@@ -23,7 +23,7 @@ import {
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { getBatchTrendingData } from '@/src/lib/trending/calculator.server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { batchLoadContent } from '@/src/lib/utils/batch.utils';
+import { batchFetch, batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 // Generate metadata from centralized registry
 export const metadata = generatePageMetadata('/trending');
@@ -171,11 +171,12 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   const { trending, popular, recent, totalCount } = await getTrendingData(params);
 
   // Enrich all tabs with copy counts from Redis (parallel batch operations)
-  const [enrichedTrending, enrichedPopular, enrichedRecent] = await Promise.all([
+  // Using batchFetch for type-safe tuple preservation
+  const [enrichedTrending, enrichedPopular, enrichedRecent] = await batchFetch([
     statsRedis.enrichWithAllCounts(trending),
     statsRedis.enrichWithAllCounts(popular),
     statsRedis.enrichWithAllCounts(recent),
-  ]);
+  ] as const);
 
   // This is a server component, so we'll use a static ID
   const pageTitleId = 'trending-page-title';

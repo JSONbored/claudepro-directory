@@ -406,7 +406,17 @@ export async function middleware(request: NextRequest) {
   // OAuth callback - apply minimal middleware (security headers only, no rate limiting)
   // This prevents middleware from interfering with cookie setting during OAuth flow
   if (pathname.startsWith('/auth/callback')) {
+    console.log('🛡️ [MIDDLEWARE] OAuth callback detected, applying minimal middleware', {
+      pathname,
+      cookies: request.cookies.getAll().map((c) => ({ name: c.name, hasValue: !!c.value })),
+    });
+
     const noseconeResponse = await noseconeMiddleware();
+
+    console.log('🛡️ [MIDDLEWARE] Nosecone response created for OAuth callback', {
+      status: noseconeResponse.status,
+      headers: Object.fromEntries(noseconeResponse.headers.entries()),
+    });
 
     if (isDevelopment) {
       const duration = performance.now() - startTime;

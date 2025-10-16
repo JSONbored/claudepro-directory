@@ -59,34 +59,39 @@ export async function createClient() {
       },
       setAll(cookiesToSet) {
         try {
-          // Log cookie setting attempts in production for debugging
-          if (process.env.NODE_ENV === 'production') {
-            logger.info('Setting auth cookies', {
-              context: 'supabase_server_client',
-              cookieCount: cookiesToSet.length,
-              cookieNames: cookiesToSet.map((c) => c.name).join(', '),
-            });
-          }
+          // DEBUG: Log ALL cookie setting attempts
+          logger.info('Supabase setAll called', {
+            cookieCount: cookiesToSet.length,
+            cookieNames: cookiesToSet.map((c) => c.name).join(', '),
+            environment: process.env.NODE_ENV ?? 'unknown',
+          });
 
           for (const { name, value, options } of cookiesToSet) {
-            // Ensure secure cookie attributes
-            cookieStore.set(name, value, {
+            const finalOptions = {
               ...options,
               // Force secure attributes for production
               secure: process.env.NODE_ENV === 'production',
               httpOnly: true,
-              sameSite: 'lax',
+              sameSite: 'lax' as const,
               path: '/',
+            };
+
+            logger.info('Supabase setting cookie', {
+              name,
+              valueLength: value.length,
+              secure: finalOptions.secure,
+              httpOnly: finalOptions.httpOnly,
+              sameSite: finalOptions.sameSite,
+              path: finalOptions.path,
             });
+
+            // Ensure secure cookie attributes
+            cookieStore.set(name, value, finalOptions);
           }
 
-          // Log success in production
-          if (process.env.NODE_ENV === 'production') {
-            logger.info('Auth cookies set successfully', {
-              context: 'supabase_server_client',
-              cookieCount: cookiesToSet.length,
-            });
-          }
+          logger.info('Supabase all cookies set successfully', {
+            count: cookiesToSet.length,
+          });
         } catch (error) {
           // CRITICAL: Only ignore errors from Server Components
           // In Route Handlers, cookie-setting failures should be logged

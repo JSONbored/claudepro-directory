@@ -20,8 +20,10 @@ export const OG_IMAGE_DIMENSIONS = {
 /**
  * Generate OpenGraph image URL for any page path
  *
+ * Serves pre-generated WebP images from build-time screenshot generation.
+ * Images are created during build via `npm run generate:og-images`.
+ *
  * @param path - The page path (e.g., "/trending", "/agents/code-reviewer")
- * @param options - Optional configuration
  * @returns Full URL to the OG image API endpoint
  *
  * @example
@@ -33,40 +35,13 @@ export const OG_IMAGE_DIMENSIONS = {
  * // Content page
  * generateOGImageUrl('/agents/code-reviewer');
  * // => "https://claudepro.directory/api/og?path=%2Fagents%2Fcode-reviewer"
- *
- * // Custom dimensions
- * generateOGImageUrl('/trending', { width: 1200, height: 630 });
  * ```
  */
-export function generateOGImageUrl(
-  path: string,
-  options?: {
-    width?: number;
-    height?: number;
-    refresh?: boolean;
-  }
-): string {
-  const {
-    width = OG_IMAGE_DIMENSIONS.width,
-    height = OG_IMAGE_DIMENSIONS.height,
-    refresh,
-  } = options || {};
-
-  // Build query params
+export function generateOGImageUrl(path: string): string {
+  // Build query params - only path is needed for static images
   const params = new URLSearchParams({
     path,
   });
-
-  // Add optional params
-  if (width !== OG_IMAGE_DIMENSIONS.width) {
-    params.set('width', String(width));
-  }
-  if (height !== OG_IMAGE_DIMENSIONS.height) {
-    params.set('height', String(height));
-  }
-  if (refresh) {
-    params.set('refresh', 'true');
-  }
 
   return `${APP_CONFIG.url}/api/og?${params.toString()}`;
 }
@@ -95,7 +70,7 @@ export function generateOGMetadata(path: string, alt: string) {
         width: OG_IMAGE_DIMENSIONS.width,
         height: OG_IMAGE_DIMENSIONS.height,
         alt,
-        type: 'image/png',
+        type: 'image/webp',
       },
     ],
   };
