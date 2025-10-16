@@ -151,8 +151,8 @@ vi.mock('next/image', () => ({
   // biome-ignore lint/suspicious/noExplicitAny: Mock for Next.js Image component - props type is internal to Next.js
   default: (props: any) => {
     const { src, alt, width, height, ...rest } = props;
-    // biome-ignore lint/performance/noImgElement: Test mock intentionally uses img element for simplicity
     // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
+    // biome-ignore lint/performance/noImgElement: Test mock intentionally uses img element for simplicity
     return <img src={src} alt={alt} width={width} height={height} {...rest} />;
   },
 }));

@@ -41,13 +41,23 @@
 // biome-ignore lint/performance/noBarrelFile: Test factories barrel - intentional convenience exports
 // biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
 export * from './content/agent.factory';
+// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
 export * from './content/collection.factory';
+// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
 export * from './content/command.factory';
+// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
 export * from './content/hook.factory';
+// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
 export * from './content/mcp.factory';
+// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
 export * from './content/rule.factory';
+// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
 export * from './content/statusline.factory';
+// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
 export * from './shared/usage-example.factory';
+// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
 export * from './user/bookmark.factory';
+// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
 export * from './user/review.factory';
+// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
 export * from './user/user.factory';

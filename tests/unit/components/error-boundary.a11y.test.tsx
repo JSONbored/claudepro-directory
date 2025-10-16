@@ -40,6 +40,7 @@ function ThrowError({ shouldThrow }: { shouldThrow: boolean }) {
 
 describe('ErrorBoundary - Accessibility', () => {
   // Suppress console.error for expected errors in tests
+  // biome-ignore lint/suspicious/noConsole: Intentionally capturing console.error for test setup
   const originalError = console.error;
 
   beforeEach(() => {
@@ -47,6 +48,7 @@ describe('ErrorBoundary - Accessibility', () => {
     console.error = vi.fn();
     // Mock window.umami to avoid undefined errors
     global.window = global.window || ({} as Window & typeof globalThis);
+    // biome-ignore lint/suspicious/noExplicitAny: Window global mock requires type assertion
     (window as any).umami = undefined;
   });
 
@@ -205,6 +207,7 @@ describe('ErrorBoundary - Accessibility', () => {
       const originalLocation = window.location;
       let mockHref = originalLocation.href;
 
+      // biome-ignore lint/suspicious/noExplicitAny: Window global modification for test requires type assertion
       (window as any).location = undefined;
       window.location = {
         ...originalLocation,
@@ -379,7 +382,7 @@ describe('ErrorBoundary - Accessibility', () => {
       const buttons = container.querySelectorAll('button');
 
       // Tab through all buttons
-      for (let i = 0; i < buttons.length; i++) {
+      for (const _ of buttons) {
         await user.tab();
       }
 
