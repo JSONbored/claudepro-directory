@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
-import { APP_CONFIG, SEO_CONFIG } from '@/src/lib/constants';
+import { SEO_CONFIG } from '@/src/lib/config/seo-config';
+import { APP_CONFIG } from '@/src/lib/constants';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {

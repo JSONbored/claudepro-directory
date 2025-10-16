@@ -7,7 +7,8 @@
 
 import Link from 'next/link';
 import { Badge } from '@/src/components/ui/badge';
-import { APP_CONFIG, ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
+import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import { DiscordIcon, ExternalLink, Github, Sparkles } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

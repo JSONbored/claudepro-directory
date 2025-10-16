@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { contentCache, statsRedis } from '@/src/lib/cache.server';
-import { CACHE_CONFIG, UI_CONFIG } from '@/src/lib/constants';
+import { UI_CONFIG } from '@/src/lib/constants';
+import { CACHE_CONFIG } from '@/src/lib/constants/cache';
 import { createApiRoute } from '@/src/lib/error-handler';
 import { rateLimiters } from '@/src/lib/rate-limiter.server';
 import {

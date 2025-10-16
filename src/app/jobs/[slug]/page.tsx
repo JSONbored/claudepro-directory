@@ -5,7 +5,8 @@ import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-sc
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
+import { APP_CONFIG } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import { jobs } from '@/src/lib/data/jobs';
 import {
   ArrowLeft,

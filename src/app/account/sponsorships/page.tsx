@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';

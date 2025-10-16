@@ -29,9 +29,16 @@
  * That's it! Everything else auto-updates.
  */
 
-import type { LucideIcon } from 'lucide-react';
 import type { z } from 'zod';
-import { BookOpen, Code, Layers, Sparkles, Terminal, Webhook } from '@/src/lib/icons';
+import {
+  BookOpen,
+  Code,
+  Layers,
+  type LucideIcon,
+  Sparkles,
+  Terminal,
+  Webhook,
+} from '@/src/lib/icons';
 import { type AgentContent, agentContentSchema } from '@/src/lib/schemas/content/agent.schema';
 import {
   type CollectionContent,

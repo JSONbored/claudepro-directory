@@ -13,7 +13,6 @@
  * @see Research Report: "shadcn Navbar Components" - Section 5
  */
 
-import type { LucideIcon } from 'lucide-react';
 import {
   BookOpen,
   Briefcase,
@@ -22,6 +21,7 @@ import {
   FileText,
   Handshake,
   Layers,
+  type LucideIcon,
   MessageSquare,
   Plug,
   PlusCircle,

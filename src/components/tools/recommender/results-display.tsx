@@ -41,7 +41,7 @@ import {
   TooltipTrigger,
 } from '@/src/components/ui/tooltip';
 import { addBookmarkBatch } from '@/src/lib/actions/user.actions';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import {
   ArrowRight,
   Award,

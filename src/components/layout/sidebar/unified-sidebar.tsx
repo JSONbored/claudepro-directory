@@ -28,7 +28,7 @@ import {
   TooltipTrigger,
 } from '@/src/components/ui/tooltip';
 import { CategoryNavigationCard } from '@/src/components/unified-detail-page/sidebar/category-navigation-card';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import {
   BookOpen,
   Clock,

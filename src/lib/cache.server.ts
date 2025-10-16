@@ -62,49 +62,46 @@ export type { Redis };
 // ============================================
 
 /**
+ * SHARED MEMORY CONSTRAINT (SINGLE SOURCE OF TRUTH)
+ * Used by both ENV validation and CacheService instance validation
+ * to ensure consistency across the system.
+ */
+const CACHE_MEMORY_CONSTRAINT = {
+  MIN_MB: 10, // Minimum usable cache size (below this, cache is too small to be useful)
+  MAX_MB: 500, // Maximum per-cache limit (Vercel serverless: 512MB total)
+} as const;
+
+/**
+ * Shared memory validation schema builder
+ * Creates a Zod schema with consistent constraints
+ */
+const createMemorySchema = (defaultValue: number) =>
+  z
+    .number()
+    .int()
+    .min(CACHE_MEMORY_CONSTRAINT.MIN_MB)
+    .max(CACHE_MEMORY_CONSTRAINT.MAX_MB)
+    .default(defaultValue);
+
+/**
  * Cache memory limits configuration
  * ENV-configurable with production-optimized defaults
  *
  * Environment Variables:
  * - CACHE_FALLBACK_MEMORY_MB: Fallback cache memory limit (default: 20MB prod, 100MB dev)
  * - CACHE_API_MEMORY_MB: API cache memory limit (default: 10MB prod, 50MB dev)
- * - CACHE_SESSION_MEMORY_MB: Session cache memory limit (default: 6MB prod, 30MB dev)
+ * - CACHE_SESSION_MEMORY_MB: Session cache memory limit (default: 10MB prod, 30MB dev)
  * - CACHE_CONTENT_MEMORY_MB: Content cache memory limit (default: 20MB prod, 100MB dev)
- * - CACHE_TEMP_MEMORY_MB: Temp cache memory limit (default: 4MB prod, 20MB dev)
+ * - CACHE_TEMP_MEMORY_MB: Temp cache memory limit (default: 10MB prod, 20MB dev)
  *
- * Validation: 1MB min, 500MB max per cache
+ * Constraints: ${CACHE_MEMORY_CONSTRAINT.MIN_MB}-${CACHE_MEMORY_CONSTRAINT.MAX_MB} MB per cache
  */
 const cacheMemoryLimitsSchema = z.object({
-  fallback: z
-    .number()
-    .int()
-    .min(1)
-    .max(500)
-    .default(isProduction ? 20 : 100),
-  api: z
-    .number()
-    .int()
-    .min(1)
-    .max(500)
-    .default(isProduction ? 10 : 50),
-  session: z
-    .number()
-    .int()
-    .min(1)
-    .max(500)
-    .default(isProduction ? 6 : 30),
-  content: z
-    .number()
-    .int()
-    .min(1)
-    .max(500)
-    .default(isProduction ? 20 : 100),
-  temp: z
-    .number()
-    .int()
-    .min(1)
-    .max(500)
-    .default(isProduction ? 4 : 20),
+  fallback: createMemorySchema(isProduction ? 20 : 100),
+  api: createMemorySchema(isProduction ? 10 : 50),
+  session: createMemorySchema(isProduction ? 10 : 30),
+  content: createMemorySchema(isProduction ? 20 : 100),
+  temp: createMemorySchema(isProduction ? 10 : 20),
 });
 
 type CacheMemoryLimits = z.infer<typeof cacheMemoryLimitsSchema>;
@@ -698,6 +695,8 @@ export const redisClient = new RedisClientManager();
 type CompressionAlgorithm = 'gzip' | 'brotli' | 'none';
 
 // Cache configuration schema
+// NOTE: maxMemoryMB validation removed - values are pre-validated via CACHE_MEMORY_LIMITS
+// This eliminates dual-schema validation and ensures single source of truth
 const cacheConfigSchema = z.object({
   defaultTTL: z.number().int().min(60).max(86400).default(3600), // 1 hour default
   keyPrefix: z.string().min(1).max(20).default('cache'),
@@ -706,7 +705,7 @@ const cacheConfigSchema = z.object({
   enableCompression: z.boolean().default(true),
   enableFallback: z.boolean().default(true),
   maxValueSize: z.number().int().min(1024).max(10485760).default(1048576), // 1MB default
-  maxMemoryMB: z.number().int().min(10).max(500).default(100), // Memory limit for fallback
+  maxMemoryMB: z.number().int(), // Pre-validated via CACHE_MEMORY_LIMITS (min: 10, max: 500)
   enableLogging: z.boolean().default(false),
 });
 
@@ -1509,7 +1508,7 @@ export const CacheServices = {
 
   /**
    * Session cache - 24 hours TTL with gzip compression
-   * Memory: ENV-configurable via CACHE_SESSION_MEMORY_MB (default: 30MB dev, 6MB prod)
+   * Memory: ENV-configurable via CACHE_SESSION_MEMORY_MB (default: 30MB dev, 10MB prod)
    */
   session: new CacheService({
     keyPrefix: 'session',
@@ -1538,7 +1537,7 @@ export const CacheServices = {
 
   /**
    * Temporary cache - 15 minutes TTL, no compression for speed
-   * Memory: ENV-configurable via CACHE_TEMP_MEMORY_MB (default: 20MB dev, 4MB prod)
+   * Memory: ENV-configurable via CACHE_TEMP_MEMORY_MB (default: 20MB dev, 10MB prod)
    */
   temp: new CacheService({
     keyPrefix: 'temp',

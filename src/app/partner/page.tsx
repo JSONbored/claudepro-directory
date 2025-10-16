@@ -9,7 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
+import { SOCIAL_LINKS } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import {
   ArrowRight,
   Briefcase,

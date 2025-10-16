@@ -23,11 +23,10 @@
 
 'use client';
 
-import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { Button } from '@/src/components/ui/button';
-import { Check } from '@/src/lib/icons';
+import { Check, type LucideIcon } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';

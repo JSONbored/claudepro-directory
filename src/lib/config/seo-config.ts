@@ -1,6 +1,6 @@
 /**
  * SEO Configuration
- * Centralized SEO constants for title optimization and metadata validation
+ * Centralized SEO constants for title optimization, metadata validation, and structured data
  *
  * October 2025 Standards:
  * - Title: 55-60 chars (Google optimal)
@@ -15,6 +15,11 @@
  * - buildContentTitle(): Content pages with smart truncation
  * - smartTruncate(): Word-boundary-aware title truncation
  *
+ * Consolidation: Moved from src/lib/constants.ts
+ * - SEO_CONFIG (core SEO settings)
+ * - SCHEMA_ORG (structured data)
+ * - OG_IMAGE_SIZE (social media images)
+ *
  * @see src/lib/seo/metadata-registry.ts
  */
 
@@ -27,6 +32,7 @@ import { z } from 'zod';
  * Non-registry categories (guides subcategories, jobs, changelog) remain hardcoded.
  */
 import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+import { APP_CONFIG } from '@/src/lib/constants';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
 const SITE_NAME = 'Claude Pro Directory'; // 20 chars
@@ -278,3 +284,67 @@ export const validatedMetadataSchema = z.object({
  * Type inference from validated metadata schema
  */
 export type ValidatedMetadata = z.infer<typeof validatedMetadataSchema>;
+
+// ============================================
+// CONSOLIDATED SEO CONFIGURATION
+// ============================================
+
+/**
+ * SEO Configuration Schema
+ * Core SEO settings for title, description, and keywords
+ * Moved from src/lib/constants.ts for better organization
+ */
+const seoConfigSchema = z.object({
+  defaultTitle: z.string().min(1).max(60),
+  titleTemplate: z.string().includes('%s'),
+  defaultDescription: z.string().min(10).max(160),
+  keywords: z.array(z.string().min(1)).min(1),
+});
+
+export const SEO_CONFIG = seoConfigSchema.parse({
+  defaultTitle: 'Claude Pro Directory',
+  titleTemplate: '%s - Claude Pro Directory',
+  defaultDescription:
+    'Open-source directory of 150+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.',
+  keywords: [
+    'claude ai',
+    'claude pro',
+    'mcp servers',
+    'claude agents',
+    'claude hooks',
+    'claude rules',
+    'claude commands',
+    'ai development',
+    'claude directory',
+  ],
+});
+
+/**
+ * Schema.org Structured Data
+ * JSON-LD structured data for SEO and search engines
+ * Moved from src/lib/constants.ts for better organization
+ */
+export const SCHEMA_ORG = {
+  organization: {
+    '@type': 'Organization',
+    name: APP_CONFIG.name,
+    url: APP_CONFIG.url,
+    description: APP_CONFIG.description,
+  },
+  website: {
+    '@type': 'WebSite',
+    name: APP_CONFIG.name,
+    url: APP_CONFIG.url,
+    description: SEO_CONFIG.defaultDescription,
+  },
+} as const;
+
+/**
+ * OpenGraph Image Configuration
+ * Standard image dimensions for social media sharing
+ * Moved from src/lib/constants.ts for better organization
+ */
+export const OG_IMAGE_SIZE = {
+  width: 1200,
+  height: 630,
+} as const;

@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { CACHE_CONFIG } from '@/src/lib/constants';
+import { CACHE_CONFIG } from '@/src/lib/constants/cache';
 import { logger } from '@/src/lib/logger';
 import { isDevelopment } from '@/src/lib/schemas/env.schema';
 import {
