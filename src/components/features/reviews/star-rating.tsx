@@ -72,11 +72,7 @@ export function StarRating({
         ))}
       </Rating>
       {showValue && (
-        <span
-          className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} ml-1 font-medium`}
-        >
-          {value.toFixed(1)}
-        </span>
+        <span className={'text-sm text-muted-foreground ml-1 font-medium'}>{value.toFixed(1)}</span>
       )}
     </div>
   );
@@ -99,12 +95,10 @@ export function StarRatingCompact({ average, count, size = 'sm' }: StarRatingCom
         className={`${size === 'sm' ? 'h-3.5 w-3.5' : 'h-4 w-4'} fill-amber-400 text-amber-400`}
         aria-hidden="true"
       />
-      <span className={`${size === 'sm' ? UI_CLASSES.TEXT_XS : UI_CLASSES.TEXT_SM} font-medium`}>
+      <span className={`${size === 'sm' ? 'text-xs' : 'text-sm'} font-medium`}>
         {average.toFixed(1)}
       </span>
-      <span
-        className={`${size === 'sm' ? UI_CLASSES.TEXT_XS : UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
-      >
+      <span className={`${size === 'sm' ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
         ({count})
       </span>
     </div>

@@ -65,8 +65,8 @@ export const agentFactory = createContentFactory<AgentContent>({
     'best-practices',
     'automation',
   ],
-  contentGenerator: (name) => faker.lorem.paragraphs({ min: 2, max: 4 }, '\n\n'),
-  extendFields: ({ name, slug, transientParams }) => {
+  contentGenerator: (_name) => faker.lorem.paragraphs({ min: 2, max: 4 }, '\n\n'),
+  extendFields: ({ name: _name, slug, transientParams }) => {
     const {
       withConfiguration = faker.datatype.boolean(),
       withInstallation = faker.datatype.boolean({ probability: 0.3 }),

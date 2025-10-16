@@ -38,6 +38,8 @@
  * @see https://fakerjs.dev/
  */
 
+// biome-ignore lint/performance/noBarrelFile: Test factories barrel - intentional convenience exports
+// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
 export * from './content/agent.factory';
 export * from './content/collection.factory';
 export * from './content/command.factory';

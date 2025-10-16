@@ -1068,7 +1068,7 @@ export class CacheService {
 
       try {
         return (await existing.promise) as T | null;
-      } catch (error) {
+      } catch (_error) {
         // Error already logged by original caller
         return null;
       }

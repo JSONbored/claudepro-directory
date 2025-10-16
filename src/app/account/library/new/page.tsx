@@ -7,7 +7,6 @@ import { ROUTES } from '@/src/lib/constants/routes';
 import { ArrowLeft } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata = generatePageMetadata('/account/library/new');
 
@@ -29,7 +28,7 @@ export default async function NewCollectionPage() {
     .order('created_at', { ascending: false });
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       <div>
         <Link href={ROUTES.ACCOUNT_LIBRARY}>
           <Button variant="ghost" className="mb-4 flex items-center gap-2">
@@ -38,9 +37,7 @@ export default async function NewCollectionPage() {
           </Button>
         </Link>
         <h1 className="text-3xl font-bold mb-2">Create Collection</h1>
-        <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
-          Organize your bookmarks into a custom collection
-        </p>
+        <p className="text-muted-foreground">Organize your bookmarks into a custom collection</p>
       </div>
 
       <Card>

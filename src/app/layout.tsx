@@ -27,7 +27,6 @@ import { UmamiScript } from '@/src/components/shared/umami-script';
 import { OrganizationStructuredData } from '@/src/components/structured-data/organization-schema';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Configure Inter font with optimizations
 const inter = Inter({
@@ -171,11 +170,13 @@ export default async function RootLayout({
             <ErrorBoundary>
               <a
                 href="#main-content"
-                className={`sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:${UI_CLASSES.Z_50} focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground ${UI_CLASSES.ROUNDED_MD}`}
+                className={
+                  'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground rounded-md'
+                }
               >
                 Skip to main content
               </a>
-              <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background flex flex-col`}>
+              <div className={'min-h-screen bg-background flex flex-col'}>
                 <AnnouncementBanner />
                 <Navigation />
                 {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}

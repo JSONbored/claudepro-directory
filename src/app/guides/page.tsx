@@ -16,7 +16,6 @@ import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * ISR Configuration - Guides listing page
@@ -137,7 +136,7 @@ export default async function GuidesPage() {
       />
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+      <section className={'container mx-auto px-4 py-12'}>
         <InlineEmailCTA
           variant="hero"
           context="guides-page"

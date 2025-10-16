@@ -43,11 +43,11 @@ export default async function LibraryPage() {
   const collectionCount = collections?.length || 0;
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
           <h1 className="text-3xl font-bold mb-2">My Library</h1>
-          <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+          <p className="text-muted-foreground">
             {bookmarkCount} bookmarks • {collectionCount} collections
           </p>
         </div>
@@ -59,7 +59,7 @@ export default async function LibraryPage() {
         </Link>
       </div>
 
-      <Tabs defaultValue="bookmarks" className={UI_CLASSES.W_FULL}>
+      <Tabs defaultValue="bookmarks" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="bookmarks" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Bookmark className="h-4 w-4" />
@@ -71,13 +71,13 @@ export default async function LibraryPage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="bookmarks" className={UI_CLASSES.SPACE_Y_4}>
+        <TabsContent value="bookmarks" className="space-y-4">
           {!bookmarks || bookmarks.length === 0 ? (
             <Card>
-              <CardContent className={`${UI_CLASSES.FLEX_COL_CENTER} py-12`}>
+              <CardContent className={'flex flex-col items-center py-12'}>
                 <Bookmark className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-xl font-semibold mb-2">No bookmarks yet</h3>
-                <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} text-center max-w-md`}>
+                <p className={'text-muted-foreground text-center max-w-md'}>
                   Start exploring the directory and bookmark your favorite agents, MCP servers,
                   rules, and more!
                 </p>
@@ -92,14 +92,12 @@ export default async function LibraryPage() {
                 <Card key={bookmark.id}>
                   <CardHeader>
                     <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
-                      <div className={UI_CLASSES.FLEX_1}>
+                      <div className="flex-1">
                         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                           <Badge variant="outline" className="capitalize">
                             {bookmark.content_type}
                           </Badge>
-                          <CardTitle className={UI_CLASSES.TEXT_LG}>
-                            {bookmark.content_slug}
-                          </CardTitle>
+                          <CardTitle className="text-lg">{bookmark.content_slug}</CardTitle>
                         </div>
                         {bookmark.notes && (
                           <CardDescription className="mt-2">{bookmark.notes}</CardDescription>
@@ -114,7 +112,7 @@ export default async function LibraryPage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                    <p className={'text-xs text-muted-foreground'}>
                       Saved {new Date(bookmark.created_at).toLocaleDateString()}
                     </p>
                   </CardContent>
@@ -124,13 +122,13 @@ export default async function LibraryPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="collections" className={UI_CLASSES.SPACE_Y_4}>
+        <TabsContent value="collections" className="space-y-4">
           {!collections || collections.length === 0 ? (
             <Card>
-              <CardContent className={`${UI_CLASSES.FLEX_COL_CENTER} py-12`}>
+              <CardContent className={'flex flex-col items-center py-12'}>
                 <FolderOpen className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-xl font-semibold mb-2">No collections yet</h3>
-                <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} text-center max-w-md mb-4`}>
+                <p className={'text-muted-foreground text-center max-w-md mb-4'}>
                   Organize your bookmarks into custom collections! Group related configurations
                   together and share them with others.
                 </p>
@@ -149,7 +147,7 @@ export default async function LibraryPage() {
                   <Link href={`/account/library/${collection.slug}`}>
                     <CardHeader>
                       <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
-                        <div className={UI_CLASSES.FLEX_1}>
+                        <div className="flex-1">
                           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
                             <Layers className="h-4 w-4 text-primary" />
                             {collection.is_public && (
@@ -158,7 +156,7 @@ export default async function LibraryPage() {
                               </Badge>
                             )}
                           </div>
-                          <CardTitle className={UI_CLASSES.TEXT_LG}>{collection.name}</CardTitle>
+                          <CardTitle className="text-lg">{collection.name}</CardTitle>
                           {collection.description && (
                             <CardDescription className="mt-2 line-clamp-2">
                               {collection.description}
@@ -169,10 +167,10 @@ export default async function LibraryPage() {
                     </CardHeader>
                     <CardContent>
                       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                        <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                        <p className={'text-xs text-muted-foreground'}>
                           {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'}
                         </p>
-                        <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                        <p className={'text-xs text-muted-foreground'}>
                           {collection.view_count} views
                         </p>
                       </div>

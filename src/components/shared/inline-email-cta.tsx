@@ -154,17 +154,13 @@ export function InlineEmailCTA({
           className
         )}
       >
-        <div className={`${UI_CLASSES.FLEX} justify-center mb-4`}>
+        <div className={'flex justify-center mb-4'}>
           <div className="p-4 bg-primary/10 rounded-full">
             <Mail className="h-8 w-8 text-primary" aria-hidden="true" />
           </div>
         </div>
-        <h2 className={`text-3xl md:text-4xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_4}`}>
-          {finalHeadline}
-        </h2>
-        <p className={`text-lg text-muted-foreground ${UI_CLASSES.MB_6} max-w-2xl mx-auto`}>
-          {finalDescription}
-        </p>
+        <h2 className={'text-3xl md:text-4xl font-bold mb-4'}>{finalHeadline}</h2>
+        <p className={'text-lg text-muted-foreground mb-6 max-w-2xl mx-auto'}>{finalDescription}</p>
         <div className="max-w-md mx-auto">
           <NewsletterForm source="inline" className="w-full" />
         </div>
@@ -180,8 +176,8 @@ export function InlineEmailCTA({
     return (
       <Card className={cn('border-primary/20 bg-card/50', className)}>
         <CardHeader className="pb-4">
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.MB_2}`}>
-            <div className={`${UI_CLASSES.P_2} bg-primary/10 rounded-md`}>
+          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-2`}>
+            <div className={'p-2 bg-primary/10 rounded-md'}>
               <Mail className="h-5 w-5 text-primary" aria-hidden="true" />
             </div>
             <CardTitle className="text-xl">{finalHeadline}</CardTitle>
@@ -203,14 +199,14 @@ export function InlineEmailCTA({
     return (
       <div
         className={cn(
-          `flex items-center gap-4 justify-between ${UI_CLASSES.P_4}`,
+          'flex items-center gap-4 justify-between p-4',
           'bg-accent/5 border border-border/50 rounded-lg',
           className
         )}
       >
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} flex-1`}>
-          <Mail className={`h-4 w-4 text-primary ${UI_CLASSES.FLEX_SHRINK_0}`} aria-hidden="true" />
-          <div className={UI_CLASSES.FLEX_1_MIN_W_0}>
+          <Mail className={'h-4 w-4 text-primary flex-shrink-0'} aria-hidden="true" />
+          <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{finalHeadline}</p>
             <p className="text-xs text-muted-foreground truncate">{finalDescription}</p>
           </div>
@@ -225,11 +221,11 @@ export function InlineEmailCTA({
     return (
       <Card
         className={cn(
-          `h-full ${UI_CLASSES.FLEX_COL} border-primary/20 bg-gradient-to-br from-primary/5 to-background`,
+          'h-full flex flex-col border-primary/20 bg-gradient-to-br from-primary/5 to-background',
           className
         )}
       >
-        <CardHeader className={UI_CLASSES.FLEX_1}>
+        <CardHeader className="flex-1">
           <div className="mb-4">
             <div className={'inline-flex p-3 bg-primary/10 rounded-lg'}>
               <Mail className="h-6 w-6 text-primary" aria-hidden="true" />

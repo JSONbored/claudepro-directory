@@ -31,12 +31,10 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
 
   return (
     <div className="mb-16">
-      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_8}`}>
-        <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD}`}>
+      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
+        <h2 className={'text-2xl font-bold'}>
           Search Results
-          <span className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} ml-2`}>
-            ({filteredResults.length} found)
-          </span>
+          <span className={'text-muted-foreground ml-2'}>({filteredResults.length} found)</span>
         </h2>
         <Button variant="outline" onClick={onClearSearch} className="text-sm">
           Clear Search
@@ -57,13 +55,9 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
         />
       ) : (
         <div className={UI_CLASSES.CONTAINER_CARD_MUTED}>
-          <Search
-            className={`h-12 w-12 ${UI_CLASSES.MX_AUTO} mb-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}/50`}
-          />
-          <h3 className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_SEMIBOLD} mb-2`}>
-            No results found
-          </h3>
-          <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+          <Search className={'h-12 w-12 mx-auto mb-4 text-muted-foreground/50'} />
+          <h3 className={'text-lg font-semibold mb-2'}>No results found</h3>
+          <p className="text-muted-foreground">
             Try different keywords or browse our featured content below
           </p>
         </div>

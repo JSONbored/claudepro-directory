@@ -42,13 +42,13 @@ export default async function BoardPage() {
   const { data: posts } = await supabase.rpc('get_popular_posts');
 
   return (
-    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
+    <div className={'min-h-screen bg-background'}>
       {/* Hero */}
       <section className={`${UI_CLASSES.CONTAINER_OVERFLOW_BORDER}`}>
-        <div className={`container ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.PX_4} py-20`}>
-          <div className={`text-center ${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}>
-            <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.MB_6}`}>
-              <div className={`p-3 ${UI_CLASSES.BG_ACCENT_10} ${UI_CLASSES.ROUNDED_FULL}`}>
+        <div className={'container mx-auto px-4 py-20'}>
+          <div className={'text-center max-w-3xl mx-auto'}>
+            <div className={'flex justify-center mb-6'}>
+              <div className={'p-3 bg-accent/10 rounded-full'}>
                 <MessageSquare className="h-8 w-8 text-primary" />
               </div>
             </div>
@@ -59,7 +59,7 @@ export default async function BoardPage() {
               Share your Claude discoveries, ask questions, and connect with the community
             </p>
 
-            <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} gap-2 ${UI_CLASSES.MB_8}`}>
+            <div className={'flex justify-center gap-2 mb-8'}>
               <Badge variant="secondary">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 Trending Discussions
@@ -78,13 +78,13 @@ export default async function BoardPage() {
       </section>
 
       {/* Posts */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+      <section className={'container mx-auto px-4 py-12'}>
         {!posts || posts.length === 0 ? (
           <Card>
-            <CardContent className={`${UI_CLASSES.FLEX_COL_CENTER} py-12`}>
+            <CardContent className={'flex flex-col items-center py-12'}>
               <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-xl font-semibold mb-2">No posts yet</h3>
-              <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} text-center max-w-md mb-4`}>
+              <p className={'text-muted-foreground text-center max-w-md mb-4'}>
                 Be the first to share something with the community!
               </p>
               <Button asChild>
@@ -96,13 +96,13 @@ export default async function BoardPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className={UI_CLASSES.SPACE_Y_4}>
+          <div className="space-y-4">
             {posts.map((post: PopularPost) => (
               <Card key={post.id} className={UI_CLASSES.CARD_GRADIENT_HOVER}>
                 <CardHeader>
                   <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                     <div className="flex-1">
-                      <CardTitle className={UI_CLASSES.TEXT_LG}>
+                      <CardTitle className="text-lg">
                         <span>{post.title}</span>
                       </CardTitle>
 
@@ -112,9 +112,7 @@ export default async function BoardPage() {
                         </CardDescription>
                       )}
 
-                      <div
-                        className={`flex items-center gap-3 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-3`}
-                      >
+                      <div className={'flex items-center gap-3 text-xs text-muted-foreground mt-3'}>
                         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                           <Avatar className="w-4 h-4">
                             <AvatarFallback>
@@ -153,7 +151,7 @@ export default async function BoardPage() {
       </section>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+      <section className={'container mx-auto px-4 py-12'}>
         <InlineEmailCTA
           variant="hero"
           context="board-page"

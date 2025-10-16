@@ -8,7 +8,6 @@
 import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { type FeatureGridProps, featureGridPropsSchema } from '@/src/lib/schemas/shared.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function FeatureGrid(props: FeatureGridProps) {
   const validated = featureGridPropsSchema.parse(props);
@@ -27,8 +26,8 @@ export function FeatureGrid(props: FeatureGridProps) {
 
   return (
     <section itemScope itemType="https://schema.org/ItemList" className="my-8">
-      <div className={UI_CLASSES.MB_6}>
-        <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`} itemProp="name">
+      <div className="mb-6">
+        <h2 className={'text-2xl font-bold mb-2'} itemProp="name">
           {title}
         </h2>
         {description && (
@@ -44,7 +43,9 @@ export function FeatureGrid(props: FeatureGridProps) {
             key={feature.title}
             itemScope
             itemType="https://schema.org/ListItem"
-            className={`${UI_CLASSES.RELATIVE} border border-border/50 bg-gradient-to-br from-card/30 via-card/50 to-card/30 hover:from-card/50 hover:via-card/70 hover:to-card/50 transition-all duration-300 h-full group overflow-hidden shadow-lg hover:shadow-xl hover:-translate-y-1`}
+            className={
+              'relative border border-border/50 bg-gradient-to-br from-card/30 via-card/50 to-card/30 hover:from-card/50 hover:via-card/70 hover:to-card/50 transition-all duration-300 h-full group overflow-hidden shadow-lg hover:shadow-xl hover:-translate-y-1'
+            }
             style={{
               animationDelay: `${index * 50}ms`,
               animation: 'fadeInUp 0.5s ease-out forwards',
@@ -52,16 +53,20 @@ export function FeatureGrid(props: FeatureGridProps) {
           >
             {/* Gradient overlay */}
             <div
-              className={`${UI_CLASSES.ABSOLUTE} inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}
+              className={
+                'absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none'
+              }
             />
 
             <CardHeader>
               <CardTitle
-                className={`flex ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN} ${UI_CLASSES.RELATIVE} z-10`}
+                className={'flex items-start justify-between relative z-10'}
                 itemProp="name"
               >
                 <span
-                  className={`bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent ${UI_CLASSES.FONT_SEMIBOLD}`}
+                  className={
+                    'bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent font-semibold'
+                  }
                 >
                   {feature.title}
                 </span>
@@ -75,7 +80,7 @@ export function FeatureGrid(props: FeatureGridProps) {
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent className={`${UI_CLASSES.RELATIVE} z-10`}>
+            <CardContent className={'relative z-10'}>
               <p itemProp="description" className="text-muted-foreground leading-relaxed">
                 {feature.description}
               </p>

@@ -18,7 +18,7 @@ function RelatedContentSkeleton() {
       <div className="h-8 w-48 bg-muted animate-pulse rounded" />
       <div className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}>
         {[1, 2, 3].map((i) => (
-          <div key={i} className={`h-48 bg-muted animate-pulse ${UI_CLASSES.ROUNDED_LG}`} />
+          <div key={i} className={'h-48 bg-muted animate-pulse rounded-lg'} />
         ))}
       </div>
     </div>

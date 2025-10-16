@@ -94,6 +94,7 @@ describe('metadata-registry', () => {
     });
 
     it('should handle fallback for unknown categories', () => {
+      // biome-ignore lint/suspicious/noExplicitAny: Testing fallback behavior for unknown category
       const result = buildContentTitle('Test Item', 'unknown' as any);
       expect(result).toContain('unknown');
       expect(result).toContain(METADATA_DEFAULTS.siteName);

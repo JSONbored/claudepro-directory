@@ -26,7 +26,6 @@ import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
@@ -129,7 +128,7 @@ export async function UnifiedDetailPage({
   // Handle case where config is not found - AFTER ALL HOOKS
   if (!config) {
     return (
-      <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
+      <div className={'min-h-screen bg-background'}>
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">Configuration Not Found</h1>
@@ -143,7 +142,7 @@ export async function UnifiedDetailPage({
   }
 
   return (
-    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
+    <div className={'min-h-screen bg-background'}>
       {/* Header - Client component for interactivity */}
       <DetailHeader displayTitle={displayTitle} item={item} config={config} />
 

@@ -129,9 +129,9 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
   };
 
   return (
-    <form onSubmit={handleSubmit} className={UI_CLASSES.SPACE_Y_6}>
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Collection Name */}
-      <div className={UI_CLASSES.SPACE_Y_2}>
+      <div className="space-y-2">
         <Label htmlFor={nameId}>
           Collection Name <span className="text-destructive">*</span>
         </Label>
@@ -145,13 +145,11 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           required
           disabled={isPending}
         />
-        <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-          {name.length}/100 characters
-        </p>
+        <p className={'text-xs text-muted-foreground'}>{name.length}/100 characters</p>
       </div>
 
       {/* Collection Slug */}
-      <div className={UI_CLASSES.SPACE_Y_2}>
+      <div className="space-y-2">
         <Label htmlFor={slugId}>Slug</Label>
         <Input
           id={slugId}
@@ -163,13 +161,13 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           pattern="[a-z0-9-]+"
           disabled={isPending}
         />
-        <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+        <p className={'text-xs text-muted-foreground'}>
           Used in URL. Leave empty to auto-generate from name.
         </p>
       </div>
 
       {/* Description */}
-      <div className={UI_CLASSES.SPACE_Y_2}>
+      <div className="space-y-2">
         <Label htmlFor={descriptionId}>Description</Label>
         <Textarea
           id={descriptionId}
@@ -180,15 +178,11 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           rows={3}
           disabled={isPending}
         />
-        <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-          {description.length}/500 characters
-        </p>
+        <p className={'text-xs text-muted-foreground'}>{description.length}/500 characters</p>
       </div>
 
       {/* Public Toggle */}
-      <div
-        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.ROUNDED_LG} border ${UI_CLASSES.P_4}`}
-      >
+      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} rounded-lg border p-4`}>
         <Checkbox
           id={isPublicId}
           checked={isPublic}
@@ -199,7 +193,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           <Label htmlFor={isPublicId} className="text-base font-medium cursor-pointer">
             Public Collection
           </Label>
-          <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+          <p className={'text-sm text-muted-foreground'}>
             Make this collection visible on your public profile
           </p>
         </div>
@@ -207,10 +201,10 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
 
       {/* Bookmarks Selection (only in create mode initially) */}
       {mode === 'create' && bookmarks.length > 0 && (
-        <div className={UI_CLASSES.SPACE_Y_4}>
+        <div className="space-y-4">
           <div>
             <Label className="text-base">Add Bookmarks (Optional)</Label>
-            <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
+            <p className={'text-sm text-muted-foreground mt-1'}>
               Select bookmarks to add to this collection. You can add more later.
             </p>
           </div>
@@ -218,7 +212,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             {bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} rounded-md ${UI_CLASSES.P_2} ${UI_CLASSES.HOVER_BG_ACCENT}`}
+                className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} rounded-md p-2 hover:bg-accent`}
               >
                 <Checkbox
                   id={bookmark.id}
@@ -238,7 +232,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                 <div className="flex-1">
                   <Label
                     htmlFor={bookmark.id}
-                    className={`${UI_CLASSES.TEXT_SM} font-normal cursor-pointer ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}
+                    className={`text-sm font-normal cursor-pointer ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}
                   >
                     <Badge variant="outline" className="text-xs capitalize">
                       {bookmark.content_type}
@@ -250,7 +244,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             ))}
           </div>
           {selectedBookmarks.length > 0 && (
-            <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+            <p className={'text-sm text-muted-foreground'}>
               {selectedBookmarks.length} bookmark{selectedBookmarks.length === 1 ? '' : 's'}{' '}
               selected
             </p>
@@ -261,7 +255,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       {/* Empty bookmarks message */}
       {mode === 'create' && bookmarks.length === 0 && (
         <div className="rounded-lg border border-dashed p-6 text-center">
-          <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+          <p className={'text-sm text-muted-foreground'}>
             You don't have any bookmarks yet. Create the collection first and add bookmarks later.
           </p>
         </div>
@@ -269,7 +263,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
 
       {/* Actions */}
       <div className={'flex items-center gap-4 pt-4'}>
-        <Button type="submit" disabled={isPending} className={UI_CLASSES.FLEX_1_SM_FLEX_INITIAL}>
+        <Button type="submit" disabled={isPending} className="flex-1 sm:flex-initial">
           {isPending
             ? mode === 'create'
               ? 'Creating...'

@@ -358,13 +358,9 @@ export async function expectNoA11yViolations(
 
   // Log violations for debugging
   if (results.violations.length > 0) {
-    console.error('Accessibility violations detected:');
     for (const violation of results.violations) {
-      console.error(`  - ${violation.id}: ${violation.description}`);
-      console.error(`    Impact: ${violation.impact}`);
-      console.error(`    Nodes: ${violation.nodes.length}`);
-      for (const node of violation.nodes) {
-        console.error(`      - ${node.html}`);
+      for (const _node of violation.nodes) {
+        // Nodes are available for debugging if needed
       }
     }
   }

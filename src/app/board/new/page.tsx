@@ -3,7 +3,6 @@ import { NewPostForm } from '@/src/components/board/new-post-form';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { createPost } from '@/src/lib/actions/content.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata = generatePageMetadata('/board/new');
 
@@ -27,12 +26,12 @@ export default function NewPostPage() {
   };
 
   return (
-    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background ${UI_CLASSES.PX_4} py-12`}>
-      <div className={`container ${UI_CLASSES.MX_AUTO} max-w-2xl`}>
-        <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className={'min-h-screen bg-background px-4 py-12'}>
+      <div className={'container mx-auto max-w-2xl'}>
+        <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold mb-2">Create a Post</h1>
-            <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+            <p className="text-muted-foreground">
               Share a link, ask a question, or start a discussion
             </p>
           </div>
@@ -41,7 +40,7 @@ export default function NewPostPage() {
         </div>
 
         {/* Email CTA - Footer section (matching homepage pattern) */}
-        <section className={`${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <section className={'mx-auto px-4 py-12'}>
           <InlineEmailCTA
             variant="hero"
             context="board-new-page"

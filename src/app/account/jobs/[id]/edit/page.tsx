@@ -3,7 +3,6 @@ import { JobForm } from '@/src/components/jobs/job-form';
 import { updateJob } from '@/src/lib/actions/business.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata = generatePageMetadata('/account/jobs/:id/edit');
 
@@ -54,10 +53,10 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   };
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold mb-2">Edit Job Listing</h1>
-        <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>Update your job posting details</p>
+        <p className="text-muted-foreground">Update your job posting details</p>
       </div>
 
       <JobForm

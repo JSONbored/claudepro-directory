@@ -203,7 +203,9 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                 return (
                   <li key={slug} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                     <span
-                      className={`${UI_CLASSES.FLEX_SHRINK_0} ${UI_CLASSES.FLEX} items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-sm font-semibold`}
+                      className={
+                        'flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-sm font-semibold'
+                      }
                       aria-hidden="true"
                     >
                       {index + 1}

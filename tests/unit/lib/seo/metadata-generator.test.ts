@@ -32,7 +32,6 @@
  * @see src/lib/seo/metadata-registry.ts
  */
 
-import type { Metadata } from 'next';
 import { describe, expect, it } from 'vitest';
 import { APP_CONFIG } from '@/src/lib/constants';
 import {
@@ -589,8 +588,7 @@ describe('generatePageMetadata()', () => {
         const description = metadata.description as string;
 
         if (route === '/community') {
-          console.log('Community description:', description);
-          console.log('Community description length:', description.length);
+          // Community route has special handling - validated separately
         }
 
         expect(description.length, `Route ${route} description length`).toBeGreaterThanOrEqual(150);

@@ -29,7 +29,7 @@ export const externalHandlers = [
    * Supabase REST API - Generic query handler
    * Intercepts Supabase database queries
    */
-  http.get('https://*.supabase.co/rest/v1/:table', async ({ params, request }) => {
+  http.get('https://*.supabase.co/rest/v1/:table', async ({ params, request: _request }) => {
     await delay(100);
 
     const { table } = params;
@@ -78,11 +78,11 @@ export const externalHandlers = [
   /**
    * Supabase REST API - POST (insert)
    */
-  http.post('https://*.supabase.co/rest/v1/:table', async ({ request, params }) => {
+  http.post('https://*.supabase.co/rest/v1/:table', async ({ request, params: _params }) => {
     await delay(150);
 
     const body = await request.json();
-    const { table } = params;
+    const { table } = _params;
 
     // Mock successful insert
     return HttpResponse.json(
@@ -101,7 +101,7 @@ export const externalHandlers = [
   /**
    * Supabase REST API - PATCH (update)
    */
-  http.patch('https://*.supabase.co/rest/v1/:table', async ({ request, params }) => {
+  http.patch('https://*.supabase.co/rest/v1/:table', async ({ request, params: _params }) => {
     await delay(100);
 
     const body = await request.json();
@@ -149,7 +149,7 @@ export const externalHandlers = [
   /**
    * Upstash Redis HTTP API - SET
    */
-  http.post('https://*.upstash.io/set/:key', async ({ params }) => {
+  http.post('https://*.upstash.io/set/:key', async ({ params: _params }) => {
     await delay(50);
 
     return HttpResponse.json({ result: 'OK' });
@@ -174,7 +174,7 @@ export const externalHandlers = [
 
     // Validate API key
     const apiKey = request.headers.get('authorization');
-    if (!(apiKey && apiKey.startsWith('Bearer re_'))) {
+    if (!apiKey?.startsWith('Bearer re_')) {
       return HttpResponse.json({ error: 'Invalid API key' }, { status: 401 });
     }
 

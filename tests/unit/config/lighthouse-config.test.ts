@@ -26,7 +26,7 @@ const loadLighthouseConfig = () => {
 
   // Create a minimal module context
   const module = { exports: {} };
-  const exports = module.exports;
+  const _exports = module.exports;
 
   // Execute the config file
   // biome-ignore lint/security/noGlobalEval: Required for loading CJS config in ESM test
@@ -121,7 +121,7 @@ describe('Lighthouse CI Configuration', () => {
 
       expect(assertions['button-name']).toBe('error');
       expect(assertions['link-name']).toBe('error');
-      expect(assertions['label']).toBe('error');
+      expect(assertions.label).toBe('error');
     });
 
     test('should enforce color contrast (WCAG AA)', () => {
@@ -139,15 +139,15 @@ describe('Lighthouse CI Configuration', () => {
     test('should enforce semantic HTML structure', () => {
       const { assertions } = config.ci.assert;
 
-      expect(assertions['list']).toBe('error');
-      expect(assertions['listitem']).toBe('error');
+      expect(assertions.list).toBe('error');
+      expect(assertions.listitem).toBe('error');
       expect(assertions['th-has-data-cells']).toBe('error');
     });
 
     test('should enforce proper form labeling', () => {
       const { assertions } = config.ci.assert;
 
-      expect(assertions['label']).toBe('error');
+      expect(assertions.label).toBe('error');
       expect(assertions['form-field-multiple-labels']).toBe('error');
     });
 
@@ -302,7 +302,7 @@ describe('Lighthouse CI Configuration', () => {
   describe('Tabindex and Focus Management', () => {
     test('should enforce proper tabindex usage', () => {
       const { assertions } = config.ci.assert;
-      expect(assertions['tabindex']).toBe('error');
+      expect(assertions.tabindex).toBe('error');
     });
   });
 

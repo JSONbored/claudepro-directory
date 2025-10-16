@@ -45,7 +45,6 @@ import { type CategoryId, getAllCategoryIds } from '@/src/lib/config/category-co
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { featuredService } from '@/src/lib/services/featured.server';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 
 /**
@@ -244,7 +243,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const initialSearchQuery = resolvedParams.q || '';
 
   return (
-    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
+    <div className={'min-h-screen bg-background'}>
       {/* Hero + Search Section */}
       <div className="relative overflow-hidden">
         {/* Meteors Background Layer - Constrained to viewport height */}
@@ -262,8 +261,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         {/* Static Hero Section - Server Rendered - Streams immediately */}
         <section className={'relative z-10 border-b border-border/50'} aria-label="Homepage hero">
           {/* Content Layer - Above meteors */}
-          <div className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-10 sm:py-16 lg:py-24`}>
-            <div className={`text-center ${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
+          <div className={'relative container mx-auto px-4 py-10 sm:py-16 lg:py-24'}>
+            <div className={'text-center max-w-4xl mx-auto'}>
               <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 text-foreground tracking-tight">
                 The home for Claude{' '}
                 <RollingText
@@ -274,7 +273,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               </h1>
 
               <p
-                className={`text-base sm:text-lg lg:text-xl text-muted-foreground ${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}
+                className={
+                  'text-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto'
+                }
               >
                 Discover and share the best Claude configurations. Explore expert rules, browse
                 powerful MCP servers, find specialized agents and commands, discover automation
@@ -293,7 +294,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       </div>
 
       {/* Email CTA - Streams independently */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+      <section className={'container mx-auto px-4 py-12'}>
         <Suspense fallback={null}>
           <InlineEmailCTA
             variant="hero"

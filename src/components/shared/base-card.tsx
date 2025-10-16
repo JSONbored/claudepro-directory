@@ -245,20 +245,16 @@ export const BaseCard = memo(
 
           {/* Standard header (config/collection cards) */}
           {!renderHeader && (
-            <div
-              className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN}`}
-            >
-              <div className={UI_CLASSES.FLEX_1}>
+            <div className={'flex items-start justify-between'}>
+              <div className="flex-1">
                 {/* Top badges slot (type, difficulty, sponsored, etc.) */}
                 {renderTopBadges && (
-                  <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 mb-1`}>
-                    {renderTopBadges()}
-                  </div>
+                  <div className={'flex items-center gap-2 mb-1'}>{renderTopBadges()}</div>
                 )}
 
                 {/* Title */}
                 <CardTitle
-                  className={`${UI_CLASSES.TEXT_LG} font-semibold text-foreground ${disableNavigation ? '' : 'group-hover:text-accent transition-colors-smooth'}`}
+                  className={`text-lg font-semibold text-foreground ${disableNavigation ? '' : 'group-hover:text-accent transition-colors-smooth'}`}
                 >
                   {displayTitle}
                 </CardTitle>
@@ -273,7 +269,7 @@ export const BaseCard = memo(
 
               {/* Source badge (right side of header) */}
               {source && (
-                <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-1 ml-2`}>
+                <div className={'flex items-center gap-1 ml-2'}>
                   <SourceBadge source={source} />
                 </div>
               )}
@@ -287,14 +283,14 @@ export const BaseCard = memo(
 
           {/* Tags */}
           {tags && tags.length > 0 && (
-            <div className={`flex flex-wrap gap-1 ${UI_CLASSES.MB_4}`}>
+            <div className={'flex flex-wrap gap-1 mb-4'}>
               {visibleTags?.map((tag: string) => (
                 <TagBadge key={tag} tag={tag} />
               ))}
               {overflowCount > 0 && (
                 <Badge
                   variant="outline"
-                  className={`${UI_CLASSES.TEXT_XS} border-muted-foreground/20 text-muted-foreground`}
+                  className={'text-xs border-muted-foreground/20 text-muted-foreground'}
                 >
                   +{overflowCount}
                 </Badge>
@@ -306,9 +302,7 @@ export const BaseCard = memo(
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             {/* Left side: Author and custom metadata */}
             {(showAuthor && author) || customMetadataText ? (
-              <div
-                className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 ${UI_CLASSES.TEXT_XS} text-muted-foreground`}
-              >
+              <div className={'flex items-center gap-2 text-xs text-muted-foreground'}>
                 {showAuthor && author && (
                   <span>
                     by{' '}

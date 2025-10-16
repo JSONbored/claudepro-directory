@@ -714,7 +714,8 @@ function topoSort(tasks: CronTask[]): CronTask[] {
 
   const order: CronTask[] = [];
   while (queue.length > 0) {
-    const id = queue.shift()!;
+    const id = queue.shift();
+    if (!id) break; // Type guard - should never happen given while condition
     const task = idToTask.get(id);
     if (task) order.push(task);
     for (const v of adj.get(id) || []) {

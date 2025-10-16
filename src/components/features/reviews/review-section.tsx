@@ -170,7 +170,7 @@ function ReviewCardItem({
             </Avatar>
             <div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <span className={`${UI_CLASSES.TEXT_SM} font-semibold`}>{displayName}</span>
+                <span className={'text-sm font-semibold'}>{displayName}</span>
                 {user.tier && user.tier !== 'free' && (
                   <Badge variant="secondary" className="text-xs capitalize">
                     {user.tier}
@@ -179,7 +179,7 @@ function ReviewCardItem({
               </div>
               <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mt-1`}>
                 <StarRating value={review.rating} size="sm" />
-                <span className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                <span className={'text-xs text-muted-foreground'}>
                   {formatDistanceToNow(new Date(review.created_at))}
                 </span>
               </div>
@@ -204,16 +204,12 @@ function ReviewCardItem({
       renderContent={() =>
         reviewText ? (
           <>
-            <p
-              className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} whitespace-pre-wrap`}
-            >
-              {displayText}
-            </p>
+            <p className={'text-sm text-muted-foreground whitespace-pre-wrap'}>{displayText}</p>
             {shouldTruncate && (
               <button
                 type="button"
                 onClick={() => setIsExpanded(!isExpanded)}
-                className={`${UI_CLASSES.TEXT_XS} text-primary hover:underline mt-1`}
+                className={'text-xs text-primary hover:underline mt-1'}
               >
                 {isExpanded ? 'Show less' : 'Read more'}
               </button>
@@ -233,9 +229,7 @@ function ReviewCardItem({
             className={`h-3.5 w-3.5 ${hasVoted ? 'fill-current' : ''}`}
             aria-hidden="true"
           />
-          <span className={UI_CLASSES.TEXT_XS}>
-            Helpful {helpfulCount > 0 && `(${helpfulCount})`}
-          </span>
+          <span className="text-xs">Helpful {helpfulCount > 0 && `(${helpfulCount})`}</span>
         </Button>
       )}
     />
@@ -429,13 +423,11 @@ export function ReviewSection({
         <div className="space-y-4">
           {/* Sort Controls */}
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} flex-wrap gap-4`}>
-            <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+            <p className={'text-sm text-muted-foreground'}>
               Showing {reviews.length} of {totalCount} {totalCount === 1 ? 'review' : 'reviews'}
             </p>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <span className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-                Sort by:
-              </span>
+              <span className={'text-sm text-muted-foreground'}>Sort by:</span>
               <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue />
@@ -477,7 +469,7 @@ export function ReviewSection({
 
           {/* Load More Button */}
           {hasMore && (
-            <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.JUSTIFY_CENTER} pt-4`}>
+            <div className={'flex justify-center pt-4'}>
               <Button
                 variant="outline"
                 onClick={handleLoadMore}
@@ -509,7 +501,7 @@ export function ReviewSection({
             aria-hidden="true"
           />
           <h3 className="text-lg font-semibold mb-2">No reviews yet</h3>
-          <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mb-4`}>
+          <p className={'text-sm text-muted-foreground mb-4'}>
             Be the first to share your experience with this configuration
           </p>
           <Button onClick={() => setShowForm(true)} className="gap-2">

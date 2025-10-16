@@ -47,7 +47,7 @@ const UnifiedSearch = dynamic(
     })),
   {
     ssr: false,
-    loading: () => <div className={`h-14 bg-muted/50 ${UI_CLASSES.ROUNDED_LG} animate-pulse`} />,
+    loading: () => <div className={'h-14 bg-muted/50 rounded-lg animate-pulse'} />,
   }
 );
 
@@ -123,8 +123,8 @@ function HomePageClientComponent({
   return (
     <>
       {/* Search Section */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pt-8 pb-12`}>
-        <div className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
+      <section className={'container mx-auto px-4 pt-8 pb-12'}>
+        <div className={'max-w-4xl mx-auto'}>
           <UnifiedSearch
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
             onSearch={handleSearch}
@@ -141,7 +141,9 @@ function HomePageClientComponent({
           {/* Modern 2025 Architecture: Configuration-Driven Stats Display */}
           {stats ? (
             <div
-              className={`flex flex-wrap ${UI_CLASSES.JUSTIFY_CENTER} gap-4 lg:gap-6 text-xs lg:text-sm text-muted-foreground mt-6`}
+              className={
+                'flex flex-wrap justify-center gap-4 lg:gap-6 text-xs lg:text-sm text-muted-foreground mt-6'
+              }
             >
               {getCategoryStatsConfig().map(({ categoryId, icon: Icon, displayText, delay }) => (
                 <div key={categoryId} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -157,7 +159,7 @@ function HomePageClientComponent({
         </div>
       </section>
 
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pb-16`}>
+      <section className={'container mx-auto px-4 pb-16'}>
         {/* Search Results Section - TanStack Virtual */}
         <LazySearchSection
           isSearching={isSearching}

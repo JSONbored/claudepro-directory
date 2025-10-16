@@ -34,19 +34,15 @@ export const metadata = generatePageMetadata('/partner');
 
 export default function PartnerPage() {
   return (
-    <div className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+    <div className={'container mx-auto px-4 py-12'}>
       {/* Header */}
-      <div
-        className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.TEXT_CENTER} mb-16`}
-      >
-        <Badge variant="outline" className={UI_CLASSES.MB_6}>
+      <div className={'max-w-4xl mx-auto text-center mb-16'}>
+        <Badge variant="outline" className="mb-6">
           <Handshake className="h-3 w-3 mr-1" />
           Partnership & Advertising
         </Badge>
-        <h1 className={`text-4xl md:text-5xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_6}`}>
-          Grow Your Business With Us
-        </h1>
-        <p className={`text-xl ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+        <h1 className={'text-4xl md:text-5xl font-bold mb-6'}>Grow Your Business With Us</h1>
+        <p className={'text-xl text-muted-foreground'}>
           Connect with thousands of Claude AI professionals and showcase your tools, services, and
           opportunities
         </p>
@@ -54,17 +50,19 @@ export default function PartnerPage() {
 
       {/* Limited Time Offer Banner */}
       <Card
-        className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO} mb-12 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20`}
+        className={
+          'max-w-4xl mx-auto mb-12 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20'
+        }
       >
-        <CardContent className={UI_CLASSES.PT_6}>
+        <CardContent className="pt-6">
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} flex-wrap gap-4`}>
             <div className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3}`}>
-              <div className={`${UI_CLASSES.P_2} bg-primary/10 ${UI_CLASSES.ROUNDED_FULL}`}>
+              <div className={'p-2 bg-primary/10 rounded-full'}>
                 <Sparkles className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className={`font-semibold ${UI_CLASSES.TEXT_LG}`}>Limited Time Offer</p>
-                <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+                <p className={'font-semibold text-lg'}>Limited Time Offer</p>
+                <p className="text-muted-foreground">
                   First 20 partners get 50% off for 3 months - Limited spots remaining!
                 </p>
               </div>
@@ -77,20 +75,18 @@ export default function PartnerPage() {
       </Card>
 
       {/* Primary Monetization Options */}
-      <div
-        className={`${UI_CLASSES.GRID_RESPONSIVE_2_GAP_8} max-w-5xl ${UI_CLASSES.MX_AUTO} mb-12`}
-      >
+      <div className={'grid gap-8 md:grid-cols-2 max-w-5xl mx-auto mb-12'}>
         {/* Job Listings */}
         <Card
-          className={`${UI_CLASSES.RELATIVE} overflow-hidden border-2 hover:border-primary/50 ${UI_CLASSES.TRANSITION_COLORS}`}
+          className={'relative overflow-hidden border-2 hover:border-primary/50 transition-colors'}
         >
           <div
-            className={`${UI_CLASSES.ABSOLUTE} top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full`}
+            className={
+              'absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full'
+            }
           />
           <CardHeader>
-            <div
-              className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN} mb-4`}
-            >
+            <div className={'flex items-start justify-between mb-4'}>
               <div className="p-3 bg-blue-500/10 rounded-lg">
                 <Briefcase className="h-6 w-6 text-blue-500" />
               </div>
@@ -103,41 +99,35 @@ export default function PartnerPage() {
               Hire top Claude AI talent from our engaged community
             </CardDescription>
           </CardHeader>
-          <CardContent className={UI_CLASSES.SPACE_Y_4}>
-            <div className={UI_CLASSES.SPACE_Y_3}>
+          <CardContent className="space-y-4">
+            <div className="space-y-3">
               <div className={UI_CLASSES.FLEX_GAP_2}>
                 <TrendingUp className="h-4 w-4 text-green-500 mt-0.5" />
-                <div className={UI_CLASSES.FLEX_COL}>
-                  <p className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}>
-                    Premium Visibility
-                  </p>
+                <div className="flex flex-col">
+                  <p className={'font-medium text-sm'}>Premium Visibility</p>
                   <p className={UI_CLASSES.TEXT_XS_MUTED}>Featured placement in Jobs section</p>
                 </div>
               </div>
               <div className={UI_CLASSES.FLEX_GAP_2}>
                 <Users className="h-4 w-4 text-green-500 mt-0.5" />
-                <div className={UI_CLASSES.FLEX_COL}>
-                  <p className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}>
-                    Targeted Audience
-                  </p>
+                <div className="flex flex-col">
+                  <p className={'font-medium text-sm'}>Targeted Audience</p>
                   <p className={UI_CLASSES.TEXT_XS_MUTED}>Reach Claude developers & AI engineers</p>
                 </div>
               </div>
               <div className={UI_CLASSES.FLEX_GAP_2}>
                 <Zap className="h-4 w-4 text-green-500 mt-0.5" />
-                <div className={UI_CLASSES.FLEX_COL}>
-                  <p className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}>
-                    30-Day Listings
-                  </p>
+                <div className="flex flex-col">
+                  <p className={'font-medium text-sm'}>30-Day Listings</p>
                   <p className={UI_CLASSES.TEXT_XS_MUTED}>Extended visibility for your positions</p>
                 </div>
               </div>
             </div>
-            <div className={`pt-4 ${UI_CLASSES.BORDER_T}`}>
+            <div className={'pt-4 border-t'}>
               <p className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4`}>
                 Perfect for companies building with Claude and AI tools
               </p>
-              <Button className={UI_CLASSES.W_FULL} size="lg" asChild>
+              <Button className="w-full" size="lg" asChild>
                 <a
                   href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=${encodeURIComponent(
                     'Job Listing Inquiry - Claude Pro Directory'
@@ -173,7 +163,7 @@ Best regards,
                   )}`}
                 >
                   Post a Job
-                  <ArrowRight className={`h-4 w-4 ${UI_CLASSES.ML_2}`} />
+                  <ArrowRight className={'h-4 w-4 ml-2'} />
                 </a>
               </Button>
             </div>
@@ -182,15 +172,15 @@ Best regards,
 
         {/* Sponsored Listings */}
         <Card
-          className={`${UI_CLASSES.RELATIVE} overflow-hidden border-2 hover:border-primary/50 ${UI_CLASSES.TRANSITION_COLORS}`}
+          className={'relative overflow-hidden border-2 hover:border-primary/50 transition-colors'}
         >
           <div
-            className={`${UI_CLASSES.ABSOLUTE} top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-full`}
+            className={
+              'absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-full'
+            }
           />
           <CardHeader>
-            <div
-              className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN} mb-4`}
-            >
+            <div className={'flex items-start justify-between mb-4'}>
               <div className="p-3 bg-purple-500/10 rounded-lg">
                 <Megaphone className="h-6 w-6 text-purple-500" />
               </div>
@@ -203,39 +193,35 @@ Best regards,
               Promote your tools, MCP servers, or services
             </CardDescription>
           </CardHeader>
-          <CardContent className={UI_CLASSES.SPACE_Y_4}>
-            <div className={UI_CLASSES.SPACE_Y_3}>
+          <CardContent className="space-y-4">
+            <div className="space-y-3">
               <div className={UI_CLASSES.FLEX_GAP_2}>
                 <Target className="h-4 w-4 text-green-500 mt-0.5" />
-                <div className={UI_CLASSES.FLEX_COL}>
-                  <p className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}>Top Positions</p>
+                <div className="flex flex-col">
+                  <p className={'font-medium text-sm'}>Top Positions</p>
                   <p className={UI_CLASSES.TEXT_XS_MUTED}>Featured in category listings</p>
                 </div>
               </div>
               <div className={UI_CLASSES.FLEX_GAP_2}>
                 <Sparkles className="h-4 w-4 text-green-500 mt-0.5" />
-                <div className={UI_CLASSES.FLEX_COL}>
-                  <p className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}>
-                    "Sponsored" Badge
-                  </p>
+                <div className="flex flex-col">
+                  <p className={'font-medium text-sm'}>"Sponsored" Badge</p>
                   <p className={UI_CLASSES.TEXT_XS_MUTED}>Stand out with premium designation</p>
                 </div>
               </div>
               <div className={UI_CLASSES.FLEX_GAP_2}>
                 <TrendingUp className="h-4 w-4 text-green-500 mt-0.5" />
-                <div className={UI_CLASSES.FLEX_COL}>
-                  <p className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}>
-                    Analytics Dashboard
-                  </p>
+                <div className="flex flex-col">
+                  <p className={'font-medium text-sm'}>Analytics Dashboard</p>
                   <p className={UI_CLASSES.TEXT_XS_MUTED}>Track views and engagement</p>
                 </div>
               </div>
             </div>
-            <div className={`pt-4 ${UI_CLASSES.BORDER_T}`}>
+            <div className={'pt-4 border-t'}>
               <p className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4`}>
                 Available for all categories: Agents, MCP, Rules, Commands, Hooks
               </p>
-              <Button className={UI_CLASSES.W_FULL} size="lg" variant="default" asChild>
+              <Button className="w-full" size="lg" variant="default" asChild>
                 <a
                   href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=${encodeURIComponent(
                     'Sponsored Placement Inquiry - Claude Pro Directory'
@@ -282,7 +268,7 @@ Best regards,
                   )}`}
                 >
                   Get Featured
-                  <ArrowRight className={`h-4 w-4 ${UI_CLASSES.ML_2}`} />
+                  <ArrowRight className={'h-4 w-4 ml-2'} />
                 </a>
               </Button>
             </div>
@@ -291,57 +277,49 @@ Best regards,
       </div>
 
       {/* Value Props Section */}
-      <div
-        className={`grid grid-cols-2 md:grid-cols-4 gap-4 ${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO} mb-16`}
-      >
-        <Card className={UI_CLASSES.TEXT_CENTER}>
-          <CardContent className={UI_CLASSES.PT_6}>
-            <p className={`text-lg ${UI_CLASSES.FONT_BOLD} text-primary`}>Featured</p>
+      <div className={'grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-16'}>
+        <Card className="text-center">
+          <CardContent className="pt-6">
+            <p className={'text-lg font-bold text-primary'}>Featured</p>
             <p className={UI_CLASSES.TEXT_SM_MUTED}>Placement</p>
           </CardContent>
         </Card>
-        <Card className={UI_CLASSES.TEXT_CENTER}>
-          <CardContent className={UI_CLASSES.PT_6}>
-            <p className={`text-lg ${UI_CLASSES.FONT_BOLD} text-primary`}>Targeted</p>
+        <Card className="text-center">
+          <CardContent className="pt-6">
+            <p className={'text-lg font-bold text-primary'}>Targeted</p>
             <p className={UI_CLASSES.TEXT_SM_MUTED}>Audience</p>
           </CardContent>
         </Card>
-        <Card className={UI_CLASSES.TEXT_CENTER}>
-          <CardContent className={UI_CLASSES.PT_6}>
-            <p className={`text-lg ${UI_CLASSES.FONT_BOLD} text-primary`}>Quick</p>
+        <Card className="text-center">
+          <CardContent className="pt-6">
+            <p className={'text-lg font-bold text-primary'}>Quick</p>
             <p className={UI_CLASSES.TEXT_SM_MUTED}>Setup</p>
           </CardContent>
         </Card>
-        <Card className={UI_CLASSES.TEXT_CENTER}>
-          <CardContent className={UI_CLASSES.PT_6}>
-            <p className={`text-lg ${UI_CLASSES.FONT_BOLD} text-primary`}>Cancel</p>
+        <Card className="text-center">
+          <CardContent className="pt-6">
+            <p className={'text-lg font-bold text-primary'}>Cancel</p>
             <p className={UI_CLASSES.TEXT_SM_MUTED}>Anytime</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Other Partnership Types */}
-      <div className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO} mb-16`}>
-        <h2
-          className={`text-2xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.TEXT_CENTER} ${UI_CLASSES.MB_8}`}
-        >
-          Other Partnership Opportunities
-        </h2>
-        <div className={UI_CLASSES.GRID_RESPONSIVE_3_NO_LG}>
+      <div className={'max-w-4xl mx-auto mb-16'}>
+        <h2 className={'text-2xl font-bold text-center mb-8'}>Other Partnership Opportunities</h2>
+        <div className="grid gap-6 md:grid-cols-3">
           <Card>
             <CardHeader>
-              <div
-                className={`${UI_CLASSES.P_2} bg-primary/10 rounded-lg w-fit ${UI_CLASSES.MB_3}`}
-              >
+              <div className={'p-2 bg-primary/10 rounded-lg w-fit mb-3'}>
                 <Building2 className="h-5 w-5 text-primary" />
               </div>
               <CardTitle className="text-lg">Integration Partners</CardTitle>
             </CardHeader>
             <CardContent>
-              <CardDescription className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.MB_3}`}>
+              <CardDescription className={'text-sm mb-3'}>
                 Integrate your tools with Claude configurations
               </CardDescription>
-              <ul className={`${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.TEXT_SM_MUTED}`}>
+              <ul className={`space-y-1 ${UI_CLASSES.TEXT_SM_MUTED}`}>
                 <li className={UI_CLASSES.FLEX_GAP_2}>
                   <span className="text-green-500">✓</span>
                   API access
@@ -360,18 +338,16 @@ Best regards,
 
           <Card>
             <CardHeader>
-              <div
-                className={`${UI_CLASSES.P_2} bg-primary/10 rounded-lg w-fit ${UI_CLASSES.MB_3}`}
-              >
+              <div className={'p-2 bg-primary/10 rounded-lg w-fit mb-3'}>
                 <Users className="h-5 w-5 text-primary" />
               </div>
               <CardTitle className="text-lg">Content Partners</CardTitle>
             </CardHeader>
             <CardContent>
-              <CardDescription className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.MB_3}`}>
+              <CardDescription className={'text-sm mb-3'}>
                 Contribute premium configurations
               </CardDescription>
-              <ul className={`${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.TEXT_SM_MUTED}`}>
+              <ul className={`space-y-1 ${UI_CLASSES.TEXT_SM_MUTED}`}>
                 <li className={UI_CLASSES.FLEX_GAP_2}>
                   <span className="text-green-500">✓</span>
                   Featured status
@@ -390,18 +366,16 @@ Best regards,
 
           <Card>
             <CardHeader>
-              <div
-                className={`${UI_CLASSES.P_2} bg-primary/10 rounded-lg w-fit ${UI_CLASSES.MB_3}`}
-              >
+              <div className={'p-2 bg-primary/10 rounded-lg w-fit mb-3'}>
                 <Rocket className="h-5 w-5 text-primary" />
               </div>
               <CardTitle className="text-lg">Enterprise</CardTitle>
             </CardHeader>
             <CardContent>
-              <CardDescription className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.MB_3}`}>
+              <CardDescription className={'text-sm mb-3'}>
                 Custom solutions for large teams
               </CardDescription>
-              <ul className={`${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.TEXT_SM_MUTED}`}>
+              <ul className={`space-y-1 ${UI_CLASSES.TEXT_SM_MUTED}`}>
                 <li className={UI_CLASSES.FLEX_GAP_2}>
                   <span className="text-green-500">✓</span>
                   Private listings
@@ -421,27 +395,25 @@ Best regards,
       </div>
 
       {/* CTA */}
-      <div className={`${UI_CLASSES.TEXT_CENTER} max-w-2xl ${UI_CLASSES.MX_AUTO}`}>
+      <div className={'text-center max-w-2xl mx-auto'}>
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="pt-8 pb-8">
-            <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}>Ready to Get Started?</h2>
-            <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_6}`}>
+            <h2 className={'text-2xl font-bold mb-4'}>Ready to Get Started?</h2>
+            <p className={'text-muted-foreground mb-6'}>
               Join the first 20 partners and get 50% off for your first 3 months. Let's discuss how
               we can help grow your business.
             </p>
-            <div
-              className={`${UI_CLASSES.FLEX_COL} sm:flex-row gap-4 ${UI_CLASSES.JUSTIFY_CENTER}`}
-            >
+            <div className={'flex flex-col sm:flex-row gap-4 justify-center'}>
               <Button size="lg" asChild>
                 <a href={`mailto:${SOCIAL_LINKS.partnerEmail}`}>
-                  <Mail className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />
+                  <Mail className={'h-4 w-4 mr-2'} />
                   Contact Sales
                 </a>
               </Button>
               <Button size="lg" variant="outline" asChild>
                 <Link href={ROUTES.SUBMIT}>
                   Submit Configuration
-                  <ArrowRight className={`h-4 w-4 ${UI_CLASSES.ML_2}`} />
+                  <ArrowRight className={'h-4 w-4 ml-2'} />
                 </Link>
               </Button>
             </div>
@@ -453,7 +425,7 @@ Best regards,
       </div>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+      <section className={'container mx-auto px-4 py-12'}>
         <InlineEmailCTA
           variant="hero"
           context="partner-page"

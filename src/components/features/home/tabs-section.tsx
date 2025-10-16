@@ -23,7 +23,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/ta
 import { CATEGORY_CONFIGS, HOMEPAGE_TAB_CATEGORIES } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface TabsSectionProps {
   activeTab: string;
@@ -43,7 +42,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   );
 
   return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className={UI_CLASSES.SPACE_Y_8}>
+    <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-8">
       <TabsList className="grid w-full lg:w-auto lg:grid-flow-col lg:auto-cols-fr gap-1">
         {HOMEPAGE_TAB_CATEGORIES.map((tab) => {
           // Get display name from category config, or use tab name
@@ -57,7 +56,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
           }
 
           return (
-            <TabsTrigger key={tab} value={tab} className={UI_CLASSES.TEXT_SM}>
+            <TabsTrigger key={tab} value={tab} className="text-sm">
               {displayName}
             </TabsTrigger>
           );
@@ -72,7 +71,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
             : CATEGORY_CONFIGS[tab]?.pluralTitle?.toLowerCase() || tab;
 
         return (
-          <TabsContent key={tab} value={tab} className={UI_CLASSES.SPACE_Y_6}>
+          <TabsContent key={tab} value={tab} className="space-y-6">
             {filteredResults.length > 0 ? (
               <VirtualizedGrid<UnifiedContentItem>
                 items={filteredResults}
@@ -91,13 +90,9 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
                 keyExtractor={(item: UnifiedContentItem) => item.slug}
               />
             ) : (
-              <div className={`${UI_CLASSES.TEXT_CENTER} py-12`}>
-                <p className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-                  No {categoryName} found
-                </p>
-                <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
-                  Try adjusting your filters.
-                </p>
+              <div className={'text-center py-12'}>
+                <p className={'text-lg text-muted-foreground'}>No {categoryName} found</p>
+                <p className={'text-sm text-muted-foreground mt-2'}>Try adjusting your filters.</p>
               </div>
             )}
           </TabsContent>
@@ -105,25 +100,21 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
       })}
 
       {/* Community tab with custom content */}
-      <TabsContent value="community" className={UI_CLASSES.SPACE_Y_6}>
-        <div className={`${UI_CLASSES.TEXT_CENTER} ${UI_CLASSES.MB_8}`}>
-          <h3 className={`text-2xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`}>
-            Featured Contributors
-          </h3>
-          <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+      <TabsContent value="community" className="space-y-6">
+        <div className={'text-center mb-8'}>
+          <h3 className={'text-2xl font-bold mb-2'}>Featured Contributors</h3>
+          <p className="text-muted-foreground">
             Meet the experts creating amazing Claude configurations
           </p>
         </div>
 
-        <div className={UI_CLASSES.TEXT_CENTER}>
-          <p
-            className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_6}`}
-          >
+        <div className="text-center">
+          <p className={'text-lg text-muted-foreground mb-6'}>
             Coming soon! Featured contributors who create amazing Claude configurations.
           </p>
         </div>
 
-        <div className={`${UI_CLASSES.TEXT_CENTER} pt-8`}>
+        <div className={'text-center pt-8'}>
           <Button variant="outline" asChild>
             <Link href={ROUTES.COMMUNITY}>View All Contributors</Link>
           </Button>

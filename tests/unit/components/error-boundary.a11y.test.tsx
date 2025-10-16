@@ -205,7 +205,7 @@ describe('ErrorBoundary - Accessibility', () => {
       const originalLocation = window.location;
       let mockHref = originalLocation.href;
 
-      delete (window as any).location;
+      (window as any).location = undefined;
       window.location = {
         ...originalLocation,
         href: mockHref,

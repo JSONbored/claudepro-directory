@@ -207,7 +207,7 @@ export function ExamplesArrayInput({
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
           <Label className="text-base font-semibold">Usage Examples (optional)</Label>
-          <p className={cn(UI_CLASSES.TEXT_SM, UI_CLASSES.TEXT_MUTED_FOREGROUND, 'mt-1')}>
+          <p className={cn('text-sm', 'text-muted-foreground', 'mt-1')}>
             Add code examples to help users understand how to use this configuration. Max{' '}
             {maxExamples} examples.
           </p>
@@ -232,7 +232,7 @@ export function ExamplesArrayInput({
             <CardContent className="py-8">
               <div className="text-center space-y-2">
                 <Code className="h-8 w-8 mx-auto text-muted-foreground" />
-                <p className={cn(UI_CLASSES.TEXT_SM, UI_CLASSES.TEXT_MUTED_FOREGROUND)}>
+                <p className={cn('text-sm', 'text-muted-foreground')}>
                   No examples added yet. Click "Add Example" to get started.
                 </p>
               </div>
@@ -338,7 +338,7 @@ export function ExamplesArrayInput({
                       maxLength={10000}
                       required
                     />
-                    <p className={cn(UI_CLASSES.TEXT_XS, UI_CLASSES.TEXT_MUTED_FOREGROUND)}>
+                    <p className={cn('text-xs', 'text-muted-foreground')}>
                       {example.code.length} / 10,000 characters
                     </p>
                   </div>
@@ -354,7 +354,7 @@ export function ExamplesArrayInput({
                       className="min-h-[80px]"
                       maxLength={500}
                     />
-                    <p className={cn(UI_CLASSES.TEXT_XS, UI_CLASSES.TEXT_MUTED_FOREGROUND)}>
+                    <p className={cn('text-xs', 'text-muted-foreground')}>
                       {(example.description || '').length} / 500 characters
                     </p>
                   </div>

@@ -50,7 +50,7 @@ export const ChangelogContent = memo(({ entry }: ChangelogContentProps) => {
   if (entry.categories.Security.length > 0) nonEmptyCategories.push('Security');
 
   return (
-    <article className={`${UI_CLASSES.SPACE_Y_6} max-w-none`}>
+    <article className={'space-y-6 max-w-none'}>
       {/* TL;DR Section */}
       {entry.tldr && (
         <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">

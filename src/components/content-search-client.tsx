@@ -6,7 +6,6 @@ import { ConfigCard } from '@/src/components/features/content/config-card';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import { VirtualizedGrid } from '@/src/components/shared/virtualized-grid';
 import { useLocalSearch } from '@/src/hooks/use-search';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 const UnifiedSearch = dynamic(
   () =>
@@ -15,7 +14,7 @@ const UnifiedSearch = dynamic(
     })),
   {
     ssr: false,
-    loading: () => <div className={`h-14 bg-muted/50 ${UI_CLASSES.ROUNDED_LG} animate-pulse`} />,
+    loading: () => <div className={'h-14 bg-muted/50 rounded-lg animate-pulse'} />,
   }
 );
 

@@ -12,7 +12,6 @@ import { ArrowLeft, Tags } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { ComparisonData } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // ISR Configuration - Revalidate every 7 days for SEO pages
 export const dynamic = 'force-static'; // Force static generation
@@ -158,7 +157,7 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
       .replace(/<li>/g, '<li class="ml-6 list-disc">')
       .replace(/<table>/g, '<table class="w-full border-collapse my-4">')
       .replace(/<tr>/g, '<tr class="border-b">')
-      .replace(/<td>/g, `<td class="${UI_CLASSES.P_2}">`)
+      .replace(/<td>/g, `<td class="p-2">`)
       .replace(/<p>/g, '<p class="mb-4">');
   } catch (error) {
     logger.error(
@@ -174,17 +173,15 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
   }
 
   return (
-    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
-      <div className={`container mx-auto px-4 py-8 ${UI_CLASSES.MAX_W_4XL}`}>
+    <div className={'min-h-screen bg-background'}>
+      <div className={'container mx-auto px-4 py-8 max-w-4xl'}>
         {/* Breadcrumb */}
-        <nav
-          className={`flex items-center space-x-2 text-sm text-muted-foreground ${UI_CLASSES.MB_6}`}
-        >
-          <Link href={ROUTES.HOME} className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
+        <nav className={'flex items-center space-x-2 text-sm text-muted-foreground mb-6'}>
+          <Link href={ROUTES.HOME} className="hover:text-primary">
             Home
           </Link>
           <span>/</span>
-          <Link href={ROUTES.COMPARE} className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
+          <Link href={ROUTES.COMPARE} className="hover:text-primary">
             Compare
           </Link>
           <span>/</span>
@@ -193,14 +190,14 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
 
         {/* Back Button */}
         <Link href={ROUTES.HOME}>
-          <Button variant="ghost" size="sm" className={UI_CLASSES.MB_6}>
+          <Button variant="ghost" size="sm" className="mb-6">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Directory
           </Button>
         </Link>
 
         {/* Category Badges */}
-        <div className={`flex gap-2 ${UI_CLASSES.MB_6}`}>
+        <div className={'flex gap-2 mb-6'}>
           <Badge variant="outline">{data.category1}</Badge>
           {data.category1 !== data.category2 && <Badge variant="outline">{data.category2}</Badge>}
           <Badge variant="secondary">Comparison</Badge>
@@ -216,8 +213,8 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
         </Card>
 
         {/* Footer CTA */}
-        <div className={`mt-8 p-6 ${UI_CLASSES.BG_ACCENT_10} rounded-lg`}>
-          <h3 className={`text-lg font-semibold ${UI_CLASSES.MB_2}`}>Explore More Claude Tools</h3>
+        <div className={'mt-8 p-6 bg-accent/10 rounded-lg'}>
+          <h3 className={'text-lg font-semibold mb-2'}>Explore More Claude Tools</h3>
           <p className="text-muted-foreground mb-4">
             Discover more configurations and tools for Claude AI in our community directory.
           </p>

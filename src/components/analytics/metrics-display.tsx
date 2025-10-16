@@ -40,7 +40,7 @@ function BadgeDelta({
   return (
     <span
       className={cn(
-        `inline-flex ${UI_CLASSES.ITEMS_CENTER} gap-1 px-2 py-0.5 ${UI_CLASSES.ROUNDED_FULL} text-xs`,
+        'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs',
         colorClass,
         className
       )}
@@ -61,18 +61,12 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
       {(title || description) && (
         <div className="mb-8 text-center">
           {title && (
-            <h3
-              className={`text-xl ${UI_CLASSES.FONT_SEMIBOLD} mb-3 text-foreground`}
-              itemProp="name"
-            >
+            <h3 className={'text-xl font-semibold mb-3 text-foreground'} itemProp="name">
               {title}
             </h3>
           )}
           {description && (
-            <p
-              className={`text-muted-foreground ${UI_CLASSES.TEXT_LG} max-w-3xl mx-auto`}
-              itemProp="description"
-            >
+            <p className={'text-muted-foreground text-lg max-w-3xl mx-auto'} itemProp="description">
               {description}
             </p>
           )}
@@ -101,7 +95,7 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
             <div
               key={`${metricLabel}-${metricValue}`}
               className={cn(
-                `${UI_CLASSES.ROUNDED_LG} p-6 bg-gradient-to-br border backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl`,
+                'rounded-lg p-6 bg-gradient-to-br border backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl',
                 gradientClass
               )}
             >
@@ -112,7 +106,9 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
 
               {/* Metric Value */}
               <p
-                className={`mt-2 text-3xl ${UI_CLASSES.FONT_BOLD} bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent`}
+                className={
+                  'mt-2 text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent'
+                }
               >
                 {metricValue}
               </p>
@@ -120,7 +116,7 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
               {/* Change indicator */}
               {metricChange && (
                 <div className={`mt-4 ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}>
-                  <BadgeDelta deltaType={deltaType} className={UI_CLASSES.FONT_SEMIBOLD} />
+                  <BadgeDelta deltaType={deltaType} className="font-semibold" />
                   <span className="text-sm font-medium text-muted-foreground">{metricChange}</span>
                 </div>
               )}

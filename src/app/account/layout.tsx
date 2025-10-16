@@ -58,12 +58,10 @@ export default async function AccountLayout({ children }: { children: React.Reac
   ];
 
   return (
-    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
+    <div className={'min-h-screen bg-background'}>
       {/* Top navigation */}
-      <div className={`border-b ${UI_CLASSES.PX_4} py-4`}>
-        <div
-          className={`container ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_BETWEEN}`}
-        >
+      <div className={'border-b px-4 py-4'}>
+        <div className={'container mx-auto flex items-center justify-between'}>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Link href="/" className="group-hover:text-accent transition-colors-smooth">
               ← Back to Directory
@@ -71,7 +69,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
           </div>
           <div className="flex items-center gap-4">
             {profile?.slug && (
-              <Link href={`/u/${profile.slug}`} className={UI_CLASSES.TEXT_SM}>
+              <Link href={`/u/${profile.slug}`} className="text-sm">
                 View Profile
               </Link>
             )}
@@ -80,11 +78,11 @@ export default async function AccountLayout({ children }: { children: React.Reac
         </div>
       </div>
 
-      <div className={`container ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.PX_4} py-8`}>
+      <div className={'container mx-auto px-4 py-8'}>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Sidebar */}
           <Card className="md:col-span-1 h-fit p-4">
-            <div className={`flex items-center gap-3 ${UI_CLASSES.MB_6} pb-4 border-b`}>
+            <div className={'flex items-center gap-3 mb-6 pb-4 border-b'}>
               {profile?.image ? (
                 <Image
                   src={profile.image}
@@ -99,15 +97,15 @@ export default async function AccountLayout({ children }: { children: React.Reac
                 </div>
               )}
               <div>
-                <p className={UI_CLASSES.FONT_MEDIUM}>{profile?.name || user.email}</p>
+                <p className="font-medium">{profile?.name || user.email}</p>
                 <p className={UI_CLASSES.TEXT_XS_MUTED}>{user.email}</p>
               </div>
             </div>
 
-            <nav className={UI_CLASSES.SPACE_Y_2}>
+            <nav className="space-y-2">
               {navigation.map((item) => (
                 <Link key={item.name} href={item.href}>
-                  <Button variant="ghost" className={`w-full justify-start ${UI_CLASSES.TEXT_SM}`}>
+                  <Button variant="ghost" className={'w-full justify-start text-sm'}>
                     <item.icon className="h-4 w-4 mr-2" />
                     {item.name}
                   </Button>

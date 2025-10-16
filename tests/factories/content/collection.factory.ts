@@ -75,7 +75,7 @@ export const collectionFactory = Factory.define<
       () => faker.helpers.arrayElement(['community', 'official', 'verified', 'claudepro'] as const),
       { probability: 0.5 }
     ),
-    documentationUrl: faker.helpers.maybe(() => faker.internet.url() + '/docs', {
+    documentationUrl: faker.helpers.maybe(() => `${faker.internet.url()}/docs`, {
       probability: 0.4,
     }),
     features: faker.helpers.maybe(

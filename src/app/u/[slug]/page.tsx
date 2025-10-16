@@ -93,7 +93,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   }
 
   return (
-    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
+    <div className={'min-h-screen bg-background'}>
       {/* Hero/Profile Header */}
       <section className="relative">
         {profile.hero && (
@@ -102,9 +102,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
           </div>
         )}
 
-        <div className={`container ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.PX_4}`}>
+        <div className={'container mx-auto px-4'}>
           <div className={`flex items-start justify-between ${profile.hero ? '-mt-16' : 'pt-12'}`}>
-            <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_4}>
+            <div className="flex items-start gap-4">
               {profile.image ? (
                 <Image
                   src={profile.image}
@@ -121,12 +121,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
               <div className="mt-4">
                 <h1 className="text-3xl font-bold">{profile.name || slug}</h1>
-                {profile.work && <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>{profile.work}</p>}
-                {profile.bio && (
-                  <p className={`${UI_CLASSES.TEXT_SM} mt-2 max-w-2xl`}>{profile.bio}</p>
-                )}
+                {profile.work && <p className="text-muted-foreground">{profile.work}</p>}
+                {profile.bio && <p className={'text-sm mt-2 max-w-2xl'}>{profile.bio}</p>}
 
-                <div className={`flex items-center gap-4 mt-3 ${UI_CLASSES.TEXT_SM}`}>
+                <div className={'flex items-center gap-4 mt-3 text-sm'}>
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                     <Users className="h-4 w-4" />
                     {followerCount || 0} followers
@@ -176,15 +174,15 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
       </section>
 
       {/* Content */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.PX_4} py-12`}>
+      <section className={'container mx-auto px-4 py-12'}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Stats sidebar */}
-          <div className={UI_CLASSES.SPACE_Y_4}>
+          <div className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className={UI_CLASSES.TEXT_SM}>Activity</CardTitle>
+                <CardTitle className="text-sm">Activity</CardTitle>
               </CardHeader>
-              <CardContent className={UI_CLASSES.SPACE_Y_3}>
+              <CardContent className="space-y-3">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Reputation</span>
                   <Badge variant="secondary">{profile.reputation_score || 0}</Badge>
@@ -203,7 +201,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Member since</span>
-                  <span className={UI_CLASSES.TEXT_SM}>
+                  <span className="text-sm">
                     {new Date(profile.created_at).toLocaleDateString('en-US', {
                       month: 'short',
                       year: 'numeric',
@@ -221,17 +219,17 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
               {!posts || posts.length === 0 ? (
                 <Card>
-                  <CardContent className={`${UI_CLASSES.FLEX_COL_CENTER} py-12`}>
+                  <CardContent className={'flex flex-col items-center py-12'}>
                     <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>No posts yet</p>
+                    <p className="text-muted-foreground">No posts yet</p>
                   </CardContent>
                 </Card>
               ) : (
-                <div className={UI_CLASSES.SPACE_Y_4}>
+                <div className="space-y-4">
                   {posts.map((post) => (
                     <Card key={post.id}>
                       <CardHeader>
-                        <CardTitle className={UI_CLASSES.TEXT_LG}>
+                        <CardTitle className="text-lg">
                           {post.url ? (
                             <a
                               href={post.url}
@@ -254,9 +252,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                         )}
                       </CardHeader>
                       <CardContent>
-                        <div
-                          className={`flex items-center gap-3 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
-                        >
+                        <div className={'flex items-center gap-3 text-xs text-muted-foreground'}>
                           <Badge variant="secondary">{post.vote_count || 0} votes</Badge>
                           <span>{post.comment_count || 0} comments</span>
                           <span>•</span>
@@ -275,9 +271,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
               {!collections || collections.length === 0 ? (
                 <Card>
-                  <CardContent className={`${UI_CLASSES.FLEX_COL_CENTER} py-12`}>
+                  <CardContent className={'flex flex-col items-center py-12'}>
                     <FolderOpen className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>No public collections yet</p>
+                    <p className="text-muted-foreground">No public collections yet</p>
                   </CardContent>
                 </Card>
               ) : (
@@ -286,7 +282,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                     <Card key={collection.id} className={UI_CLASSES.CARD_INTERACTIVE}>
                       <a href={`/u/${slug}/collections/${collection.slug}`}>
                         <CardHeader>
-                          <CardTitle className={UI_CLASSES.TEXT_LG}>{collection.name}</CardTitle>
+                          <CardTitle className="text-lg">{collection.name}</CardTitle>
                           {collection.description && (
                             <CardDescription className="line-clamp-2">
                               {collection.description}
@@ -295,13 +291,13 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                         </CardHeader>
                         <CardContent>
                           <div
-                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.TEXT_SM}`}
+                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-sm`}
                           >
-                            <span className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+                            <span className="text-muted-foreground">
                               {collection.item_count}{' '}
                               {collection.item_count === 1 ? 'item' : 'items'}
                             </span>
-                            <span className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+                            <span className="text-muted-foreground">
                               {collection.view_count} views
                             </span>
                           </div>

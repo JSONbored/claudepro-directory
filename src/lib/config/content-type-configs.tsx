@@ -28,7 +28,6 @@ import {
 } from '@/src/lib/config/factories/generator-factories';
 import { BookOpen, Bot } from '@/src/lib/icons';
 import type { ContentTypeConfigRegistry } from '@/src/lib/types/content-type-config';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Agent Configuration
@@ -38,7 +37,7 @@ const agentConfig: Partial<ContentTypeConfigRegistry['agents']> = {
 
   primaryAction: createNotificationAction(
     'Deploy Agent',
-    <Bot className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
+    <Bot className={'h-4 w-4 mr-2'} />,
     'Agent Deployment',
     'Copy the agent content and follow the installation instructions.'
   ),
@@ -298,7 +297,7 @@ const ruleConfig: Partial<ContentTypeConfigRegistry['rules']> = {
 
   primaryAction: createNotificationAction(
     'Use Rule',
-    <BookOpen className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
+    <BookOpen className={'h-4 w-4 mr-2'} />,
     'Rule Integration',
     'Copy the rule content and add it to your Claude configuration.'
   ),

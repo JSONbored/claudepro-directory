@@ -173,7 +173,7 @@ export function QuizForm() {
   const progressPercentage = Math.round((currentQuestion / TOTAL_QUESTIONS) * 100);
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       {/* Progress indicator */}
       <QuizProgress
         currentQuestion={currentQuestion}

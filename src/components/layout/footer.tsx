@@ -24,21 +24,19 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className={`${UI_CLASSES.BORDER_T} border-border/50 bg-background/95 backdrop-blur`}>
+    <footer className={'border-t border-border/50 bg-background/95 backdrop-blur'}>
       <div className="container mx-auto px-4 py-8">
         <div className={`${UI_CLASSES.GRID_RESPONSIVE_3} gap-8`}>
           {/* About Section */}
           <div>
-            <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_4}`}>{APP_CONFIG.name}</h3>
-            <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED} ${UI_CLASSES.MB_4}`}>
-              {APP_CONFIG.description}
-            </p>
-            <div className={`flex ${UI_CLASSES.ITEMS_CENTER} gap-4`}>
+            <h3 className={'font-semibold mb-4'}>{APP_CONFIG.name}</h3>
+            <p className={'text-sm text-muted-foreground mb-4'}>{APP_CONFIG.description}</p>
+            <div className={'flex items-center gap-4'}>
               <Link
                 href={SOCIAL_LINKS.github || '#'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
+                className={'text-muted-foreground hover:text-foreground transition-colors-smooth'}
                 aria-label="GitHub"
               >
                 <Github className="h-5 w-5" />
@@ -47,7 +45,7 @@ export function Footer() {
                 href={SOCIAL_LINKS.discord || '#'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
+                className={'text-muted-foreground hover:text-foreground transition-colors-smooth'}
                 aria-label="Discord"
               >
                 <DiscordIcon className="h-5 w-5" />
@@ -61,12 +59,12 @@ export function Footer() {
 
           {/* Quick Links Section */}
           <div>
-            <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_4}`}>Quick Links</h3>
-            <ul className={`space-y-2 ${UI_CLASSES.TEXT_SM}`}>
+            <h3 className={'font-semibold mb-4'}>Quick Links</h3>
+            <ul className={'space-y-2 text-sm'}>
               <li>
                 <Link
                   href={ROUTES.GUIDES}
-                  className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
+                  className={'text-muted-foreground hover:text-foreground transition-colors-smooth'}
                 >
                   Guides
                 </Link>
@@ -74,7 +72,7 @@ export function Footer() {
               <li>
                 <Link
                   href={ROUTES.COLLECTIONS}
-                  className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
+                  className={'text-muted-foreground hover:text-foreground transition-colors-smooth'}
                 >
                   Collections
                 </Link>
@@ -82,7 +80,7 @@ export function Footer() {
               <li>
                 <Link
                   href={ROUTES.CHANGELOG}
-                  className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
+                  className={'text-muted-foreground hover:text-foreground transition-colors-smooth'}
                 >
                   Changelog
                 </Link>
@@ -90,7 +88,7 @@ export function Footer() {
               <li>
                 <Link
                   href={ROUTES.COMMUNITY}
-                  className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
+                  className={'text-muted-foreground hover:text-foreground transition-colors-smooth'}
                 >
                   Community
                 </Link>
@@ -98,7 +96,7 @@ export function Footer() {
               <li>
                 <Link
                   href={ROUTES.SUBMIT}
-                  className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
+                  className={'text-muted-foreground hover:text-foreground transition-colors-smooth'}
                 >
                   Submit
                 </Link>
@@ -108,12 +106,14 @@ export function Footer() {
 
           {/* AI & Resources Section */}
           <div>
-            <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_4}`}>AI & Resources</h3>
-            <ul className={`space-y-2 ${UI_CLASSES.TEXT_SM}`}>
+            <h3 className={'font-semibold mb-4'}>AI & Resources</h3>
+            <ul className={'space-y-2 text-sm'}>
               <li>
                 <Link
                   href={ROUTES.LLMS_TXT}
-                  className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH} inline-flex items-center gap-2`}
+                  className={
+                    'text-muted-foreground hover:text-foreground transition-colors-smooth inline-flex items-center gap-2'
+                  }
                   aria-label="LLMs.txt - AI-optimized content"
                 >
                   <Sparkles className="h-4 w-4" />
@@ -123,7 +123,7 @@ export function Footer() {
               <li>
                 <Link
                   href={ROUTES.API_DOCS}
-                  className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
+                  className={'text-muted-foreground hover:text-foreground transition-colors-smooth'}
                 >
                   API Docs
                 </Link>
@@ -131,7 +131,7 @@ export function Footer() {
               <li>
                 <Link
                   href={ROUTES.PARTNER}
-                  className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
+                  className={'text-muted-foreground hover:text-foreground transition-colors-smooth'}
                 >
                   Partner Program
                 </Link>
@@ -142,12 +142,14 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div
-          className={`mt-8 ${UI_CLASSES.PT_6} ${UI_CLASSES.BORDER_T} border-border/30 flex flex-col sm:flex-row ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_BETWEEN} gap-4`}
+          className={
+            'mt-8 pt-6 border-t border-border/30 flex flex-col sm:flex-row items-center justify-between gap-4'
+          }
         >
-          <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED}`}>
+          <p className={'text-sm text-muted-foreground'}>
             © {currentYear} {APP_CONFIG.author}. All rights reserved.
           </p>
-          <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED}`}>
+          <p className={'text-xs text-muted-foreground'}>
             <Link
               href={ROUTES.LLMS_TXT}
               className="hover:text-foreground transition-colors inline-flex items-center gap-1"

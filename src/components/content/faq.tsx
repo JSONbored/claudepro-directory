@@ -3,7 +3,6 @@ import Script from 'next/script';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
 import { type FAQProps, faqPropsSchema } from '@/src/lib/schemas/shared.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * AIOptimizedFAQ - FAQ component optimized for AI citation and SEO
@@ -62,8 +61,8 @@ export async function AIOptimizedFAQ(props: FAQProps) {
 
       {/* Visual FAQ Component - No schema.org microdata attributes */}
       <section className="my-8 space-y-6">
-        <div className={UI_CLASSES.MB_6}>
-          <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`}>{title}</h2>
+        <div className="mb-6">
+          <h2 className={'text-2xl font-bold mb-2'}>{title}</h2>
           {description && <p className="text-muted-foreground">{description}</p>}
         </div>
 
@@ -71,13 +70,13 @@ export async function AIOptimizedFAQ(props: FAQProps) {
           {validQuestions.map((faq) => (
             <Card key={faq.question} className="border border-border bg-code/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle
-                  className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_SEMIBOLD} flex ${UI_CLASSES.ITEMS_START} gap-3`}
-                >
+                <CardTitle className={'text-lg font-semibold flex items-start gap-3'}>
                   <div
-                    className={`flex-shrink-0 w-6 h-6 bg-primary/10 ${UI_CLASSES.ROUNDED_FULL} flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} mt-0.5`}
+                    className={
+                      'flex-shrink-0 w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center mt-0.5'
+                    }
                   >
-                    <span className={`text-primary text-sm ${UI_CLASSES.FONT_BOLD}`}>Q</span>
+                    <span className={'text-primary text-sm font-bold'}>Q</span>
                   </div>
                   {faq.question}
                 </CardTitle>

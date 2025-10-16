@@ -69,7 +69,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     : null;
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       {/* Header */}
       <div>
         <Link href={ROUTES.ACCOUNT_LIBRARY}>
@@ -80,7 +80,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
         </Link>
 
         <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
-          <div className={UI_CLASSES.FLEX_1}>
+          <div className="flex-1">
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
               <h1 className="text-3xl font-bold">{collection.name}</h1>
               {collection.is_public && (
@@ -90,9 +90,9 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
               )}
             </div>
             {collection.description && (
-              <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>{collection.description}</p>
+              <p className="text-muted-foreground">{collection.description}</p>
             )}
-            <div className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
+            <div className={'text-sm text-muted-foreground mt-2'}>
               {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'} •{' '}
               {collection.view_count} views
             </div>

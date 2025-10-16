@@ -33,7 +33,6 @@ import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/schemas/component.schema';
 import { sanitizers } from '@/src/lib/security/validators';
 
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 // Re-export FilterState for backward compatibility
@@ -139,9 +138,9 @@ export function UnifiedSearch({
 
   return (
     <ErrorBoundary fallback={SearchErrorFallback}>
-      <search className={cn(`w-full ${UI_CLASSES.SPACE_Y_4}`, className)}>
+      <search className={cn('w-full space-y-4', className)}>
         {/* Search Bar */}
-        <div className={UI_CLASSES.SPACE_Y_3}>
+        <div className="space-y-3">
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
               <Search className="h-5 w-5 text-accent" aria-hidden="true" />
@@ -153,7 +152,9 @@ export function UnifiedSearch({
               value={localSearchQuery}
               onChange={(e) => setLocalSearchQuery(e.target.value)}
               placeholder={placeholder}
-              className={`pl-12 pr-4 h-14 text-base bg-card/50 backdrop-blur-sm border-border/50 focus:border-accent/50 focus:${UI_CLASSES.BG_CARD} transition-smooth w-full`}
+              className={
+                'pl-12 pr-4 h-14 text-base bg-card/50 backdrop-blur-sm border-border/50 focus:border-accent/50 focus:bg-card transition-smooth w-full'
+              }
               aria-label="Search configurations"
               aria-describedby={resultCount > 0 && localSearchQuery ? searchResultsId : undefined}
               autoComplete="off"
@@ -193,7 +194,7 @@ export function UnifiedSearch({
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                 className={cn(
                   'h-10 px-4 gap-2 transition-smooth',
-                  isFilterOpen && `${UI_CLASSES.BG_ACCENT_10} border-accent`
+                  isFilterOpen && 'bg-accent/10 border-accent'
                 )}
                 aria-expanded={isFilterOpen}
                 aria-controls={filterPanelId}
@@ -222,7 +223,7 @@ export function UnifiedSearch({
 
         {/* Comprehensive ARIA live announcements for all search scenarios */}
         <div
-          className={`${UI_CLASSES.TEXT_SM} text-muted-foreground`}
+          className={'text-sm text-muted-foreground'}
           id={searchResultsId}
           aria-live="polite"
           aria-atomic="true"

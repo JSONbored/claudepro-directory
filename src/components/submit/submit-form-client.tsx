@@ -270,15 +270,15 @@ export function SubmitFormClient() {
     <>
       {/* Success Message */}
       {submissionResult && (
-        <Card className={`${UI_CLASSES.MB_6} border-green-500/20 bg-green-500/5`}>
-          <CardContent className={`${UI_CLASSES.PT_6}`}>
+        <Card className={'mb-6 border-green-500/20 bg-green-500/5'}>
+          <CardContent className={'pt-6'}>
             <div className={UI_CLASSES.FLEX_COL_SM_ROW_ITEMS_START}>
               <CheckCircle
                 className={`h-5 w-5 text-green-500 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
               />
-              <div className={UI_CLASSES.FLEX_1_MIN_W_0}>
-                <p className={UI_CLASSES.FONT_MEDIUM}>Submission Successful! 🎉</p>
-                <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium">Submission Successful! 🎉</p>
+                <p className={'text-sm text-muted-foreground mt-1'}>
                   Your configuration has been submitted for review. Pull Request #
                   {submissionResult.prNumber} created on GitHub.
                 </p>
@@ -320,7 +320,9 @@ export function SubmitFormClient() {
                     setName(''); // Reset name when type changes
                   }}
                   required
-                  className={`${UI_CLASSES.FLEX} h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm`}
+                  className={
+                    'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm'
+                  }
                 >
                   <option value="agents">Claude Agent (System Prompt)</option>
                   <option value="mcp">MCP Server</option>
@@ -390,9 +392,7 @@ export function SubmitFormClient() {
             <div className="space-y-2">
               <Label htmlFor={githubId}>GitHub Repository (optional)</Label>
               <div className={UI_CLASSES.FLEX_GAP_2}>
-                <Github
-                  className={`h-5 w-5 mt-2.5 text-muted-foreground ${UI_CLASSES.FLEX_SHRINK_0}`}
-                />
+                <Github className={'h-5 w-5 mt-2.5 text-muted-foreground flex-shrink-0'} />
                 <Input
                   id={githubId}
                   name="github"
@@ -415,7 +415,7 @@ export function SubmitFormClient() {
                     rows={12}
                     className="font-mono text-sm resize-y"
                   />
-                  <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                  <p className={'text-xs text-muted-foreground'}>
                     Write your Claude system prompt in plain text. No JSON formatting needed!
                   </p>
                 </div>
@@ -461,7 +461,7 @@ export function SubmitFormClient() {
                     rows={12}
                     className="font-mono text-sm resize-y"
                   />
-                  <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                  <p className={'text-xs text-muted-foreground'}>
                     Define Claude's expertise and guidelines in plain text.
                   </p>
                 </div>
@@ -506,7 +506,7 @@ export function SubmitFormClient() {
                   rows={12}
                   className="font-mono text-sm resize-y"
                 />
-                <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                <p className={'text-xs text-muted-foreground'}>
                   Provide command content in markdown format with frontmatter. No JSON needed!
                 </p>
               </div>
@@ -524,7 +524,7 @@ export function SubmitFormClient() {
                     rows={12}
                     className="font-mono text-sm resize-y"
                   />
-                  <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                  <p className={'text-xs text-muted-foreground'}>
                     Write your bash hook script in plain text.
                   </p>
                 </div>
@@ -536,7 +536,9 @@ export function SubmitFormClient() {
                       id={hookTypeId}
                       name="hookType"
                       required
-                      className={`${UI_CLASSES.FLEX} h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm`}
+                      className={
+                        'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm'
+                      }
                     >
                       <option value="pre-tool-use">Pre Tool Use</option>
                       <option value="post-tool-use">Post Tool Use</option>
@@ -565,7 +567,7 @@ export function SubmitFormClient() {
                     rows={12}
                     className="font-mono text-sm resize-y"
                   />
-                  <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                  <p className={'text-xs text-muted-foreground'}>
                     Write your bash statusline script in plain text.
                   </p>
                 </div>
@@ -576,7 +578,9 @@ export function SubmitFormClient() {
                     <select
                       id={statuslineTypeId}
                       name="statuslineType"
-                      className={`${UI_CLASSES.FLEX} h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm`}
+                      className={
+                        'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm'
+                      }
                     >
                       <option value="custom">Custom</option>
                       <option value="minimal">Minimal</option>
@@ -599,7 +603,9 @@ export function SubmitFormClient() {
                     <select
                       id={positionId}
                       name="position"
-                      className={`${UI_CLASSES.FLEX} h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm`}
+                      className={
+                        'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm'
+                      }
                     >
                       <option value="left">Left</option>
                       <option value="right">Right</option>
@@ -628,7 +634,9 @@ export function SubmitFormClient() {
                       id={serverTypeId}
                       name="serverType"
                       required
-                      className={`${UI_CLASSES.FLEX} h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm`}
+                      className={
+                        'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm'
+                      }
                     >
                       <option value="stdio">STDIO</option>
                       <option value="sse">SSE</option>
@@ -677,9 +685,7 @@ export function SubmitFormClient() {
                     rows={4}
                     className="font-mono text-sm resize-y"
                   />
-                  <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-                    One per line, format: KEY=value
-                  </p>
+                  <p className={'text-xs text-muted-foreground'}>One per line, format: KEY=value</p>
                 </div>
               </>
             )}
@@ -692,7 +698,7 @@ export function SubmitFormClient() {
                 name="tags"
                 placeholder="productivity, ai, automation (comma-separated)"
               />
-              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+              <p className={'text-sm text-muted-foreground'}>
                 Separate multiple tags with commas (max 10)
               </p>
             </div>
@@ -705,7 +711,7 @@ export function SubmitFormClient() {
               <Button
                 type="submit"
                 disabled={isPending}
-                className={`w-full ${UI_CLASSES.FLEX_1_SM_FLEX_INITIAL}`}
+                className={'w-full flex-1 sm:flex-initial'}
               >
                 {isPending ? (
                   <>
@@ -725,11 +731,9 @@ export function SubmitFormClient() {
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 sm:p-4">
               <div className={`${UI_CLASSES.FLEX_GAP_2} sm:gap-3`}>
                 <Github className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
-                <div className={UI_CLASSES.FLEX_1_MIN_W_0}>
-                  <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-blue-400`}>
-                    How it works
-                  </p>
-                  <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
+                <div className="flex-1 min-w-0">
+                  <p className={'text-sm font-medium text-blue-400'}>How it works</p>
+                  <p className={'text-sm text-muted-foreground mt-1'}>
                     We'll automatically create a Pull Request with your submission. Our team reviews
                     for quality and accuracy, then merges it to make your contribution live!
                   </p>

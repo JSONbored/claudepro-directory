@@ -71,7 +71,7 @@ export function TroubleshootingSection({ items, description }: TroubleshootingSe
         {validated.description && <CardDescription>{validated.description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <ul className={UI_CLASSES.SPACE_Y_4}>
+        <ul className="space-y-4">
           {validated.items.map((trouble) => {
             // Simple string format
             if (typeof trouble === 'string') {
@@ -85,10 +85,10 @@ export function TroubleshootingSection({ items, description }: TroubleshootingSe
 
             // Issue/solution object format
             return (
-              <li key={trouble.issue.slice(0, 50)} className={UI_CLASSES.SPACE_Y_2}>
+              <li key={trouble.issue.slice(0, 50)} className="space-y-2">
                 <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                   <div className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-                  <div className={UI_CLASSES.SPACE_Y_1}>
+                  <div className="space-y-1">
                     <p className="text-sm font-medium text-foreground">{trouble.issue}</p>
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       {trouble.solution}

@@ -26,12 +26,10 @@ export default async function ActivityPage() {
 
   if (!(summary && timeline)) {
     return (
-      <div className={UI_CLASSES.SPACE_Y_6}>
+      <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold mb-2">Activity</h1>
-          <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
-            Sign in to view your contribution history
-          </p>
+          <p className="text-muted-foreground">Sign in to view your contribution history</p>
         </div>
       </div>
     );
@@ -40,20 +38,18 @@ export default async function ActivityPage() {
   const { activities } = timeline;
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold mb-2">Activity</h1>
-        <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
-          Your contribution history and community activity
-        </p>
+        <p className="text-muted-foreground">Your contribution history and community activity</p>
       </div>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className={UI_CLASSES.TEXT_SM}>Posts</CardTitle>
+            <CardTitle className="text-sm">Posts</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -65,7 +61,7 @@ export default async function ActivityPage() {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className={UI_CLASSES.TEXT_SM}>Comments</CardTitle>
+            <CardTitle className="text-sm">Comments</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -77,7 +73,7 @@ export default async function ActivityPage() {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className={UI_CLASSES.TEXT_SM}>Votes</CardTitle>
+            <CardTitle className="text-sm">Votes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -89,7 +85,7 @@ export default async function ActivityPage() {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className={UI_CLASSES.TEXT_SM}>Submissions</CardTitle>
+            <CardTitle className="text-sm">Submissions</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -98,9 +94,7 @@ export default async function ActivityPage() {
                 {summary.merged_submissions}/{summary.total_submissions}
               </span>
             </div>
-            <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
-              Merged
-            </p>
+            <p className={'text-xs text-muted-foreground mt-1'}>Merged</p>
           </CardContent>
         </Card>
       </div>

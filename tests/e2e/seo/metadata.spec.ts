@@ -79,17 +79,17 @@ async function getCanonicalUrl(page: Page): Promise<string | null> {
 /**
  * Get all JSON-LD structured data
  */
-async function getStructuredData(page: Page): Promise<any[]> {
+async function getStructuredData(page: Page): Promise<unknown[]> {
   const scripts = await page.locator('script[type="application/ld+json"]').all();
-  const data: any[] = [];
+  const data: unknown[] = [];
 
   for (const script of scripts) {
     const content = await script.textContent();
     if (content) {
       try {
         data.push(JSON.parse(content));
-      } catch (error) {
-        console.error('Failed to parse JSON-LD:', content);
+      } catch (_error) {
+        // Invalid JSON - skip this script block
       }
     }
   }
@@ -236,15 +236,17 @@ test.describe('Homepage SEO - Static Route', () => {
     const description = await getMetaContent(page, 'description');
     expect(description).toBeTruthy();
 
-    const validation = validateDescriptionLength(description!);
-    expect(
-      validation.length,
-      `Description length: ${validation.length}\n${validation.recommendation}`
-    ).toBeGreaterThanOrEqual(150);
-    expect(
-      validation.length,
-      `Description length: ${validation.length}\n${validation.recommendation}`
-    ).toBeLessThanOrEqual(160);
+    if (description) {
+      const validation = validateDescriptionLength(description);
+      expect(
+        validation.length,
+        `Description length: ${validation.length}\n${validation.recommendation}`
+      ).toBeGreaterThanOrEqual(150);
+      expect(
+        validation.length,
+        `Description length: ${validation.length}\n${validation.recommendation}`
+      ).toBeLessThanOrEqual(160);
+    }
   });
 
   test('should include year for AI citation optimization', async ({ page }) => {
@@ -285,11 +287,13 @@ test.describe('Homepage SEO - Static Route', () => {
     expect(ogWidth).toBe('1200');
     expect(ogHeight).toBe('630');
 
-    const validation = validateOGImageDimensions(
-      Number.parseInt(ogWidth!, 10),
-      Number.parseInt(ogHeight!, 10)
-    );
-    expect(validation.isValid, validation.recommendation).toBe(true);
+    if (ogWidth && ogHeight) {
+      const validation = validateOGImageDimensions(
+        Number.parseInt(ogWidth, 10),
+        Number.parseInt(ogHeight, 10)
+      );
+      expect(validation.isValid, validation.recommendation).toBe(true);
+    }
   });
 
   test('should have Twitter Card metadata', async ({ page }) => {
@@ -395,11 +399,13 @@ test.describe('Static Routes SEO', () => {
         const description = await getMetaContent(page, 'description');
         expect(description, 'Description is required').toBeTruthy();
 
-        const descValidation = validateDescriptionLength(description!);
-        expect(
-          descValidation.isValid,
-          `Description: ${description}\nLength: ${descValidation.length}\n${descValidation.recommendation}`
-        ).toBe(true);
+        if (description) {
+          const descValidation = validateDescriptionLength(description);
+          expect(
+            descValidation.isValid,
+            `Description: ${description}\nLength: ${descValidation.length}\n${descValidation.recommendation}`
+          ).toBe(true);
+        }
       });
 
       test('should have complete Open Graph metadata', async ({ page }) => {
@@ -466,8 +472,10 @@ test.describe('Category Pages SEO', () => {
         const description = await getMetaContent(page, 'description');
         expect(description).toBeTruthy();
 
-        const descValidation = validateDescriptionLength(description!);
-        expect(descValidation.isValid, `Description length: ${descValidation.length}`).toBe(true);
+        if (description) {
+          const descValidation = validateDescriptionLength(description);
+          expect(descValidation.isValid, `Description length: ${descValidation.length}`).toBe(true);
+        }
       });
 
       test('should have complete Open Graph metadata', async ({ page }) => {
@@ -536,8 +544,10 @@ test.describe('Content Detail Pages SEO', () => {
     const description = await getMetaContent(page, 'description');
     expect(description).toBeTruthy();
 
-    const descValidation = validateDescriptionLength(description!);
-    expect(descValidation.isValid, `Description length: ${descValidation.length}`).toBe(true);
+    if (description) {
+      const descValidation = validateDescriptionLength(description);
+      expect(descValidation.isValid, `Description length: ${descValidation.length}`).toBe(true);
+    }
 
     // Validate Open Graph
     const ogTitle = await getOGContent(page, 'title');
@@ -648,8 +658,10 @@ test.describe('Guide Detail Pages SEO', () => {
       const description = await getMetaContent(page, 'description');
       expect(description).toBeTruthy();
 
-      const descValidation = validateDescriptionLength(description!);
-      expect(descValidation.isValid).toBe(true);
+      if (description) {
+        const descValidation = validateDescriptionLength(description);
+        expect(descValidation.isValid).toBe(true);
+      }
 
       // Validate Open Graph
       const ogType = await getOGContent(page, 'type');

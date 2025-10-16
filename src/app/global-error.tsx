@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { logger } from '@/src/lib/logger';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export default function GlobalError({
   error,
@@ -25,12 +24,8 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body>
-        <div
-          className={`${UI_CLASSES.FLEX_COL_CENTER} min-h-screen ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.P_4} font-sans`}
-        >
-          <div
-            className={`max-w-md p-8 ${UI_CLASSES.ROUNDED_LG} border border-border ${UI_CLASSES.BG_CARD} text-center`}
-          >
+        <div className={'flex flex-col items-center min-h-screen justify-center p-4 font-sans'}>
+          <div className={'max-w-md p-8 rounded-lg border border-border bg-card text-center'}>
             <h2 className="mb-4 text-2xl font-bold text-destructive">Application Error</h2>
             <p className="mb-6 text-muted-foreground">
               A critical error occurred. Please refresh the page or try again later.
@@ -38,7 +33,9 @@ export default function GlobalError({
             <button
               type="button"
               onClick={reset}
-              className={`px-4 py-2 ${UI_CLASSES.ROUNDED_MD} bg-primary text-primary-foreground border-none cursor-pointer text-base hover:bg-primary/90 ${UI_CLASSES.TRANSITION_COLORS}`}
+              className={
+                'px-4 py-2 rounded-md bg-primary text-primary-foreground border-none cursor-pointer text-base hover:bg-primary/90 transition-colors'
+              }
             >
               Reset Application
             </button>

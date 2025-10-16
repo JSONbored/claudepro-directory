@@ -45,9 +45,9 @@ export function CopyableHeading({
   };
 
   const sizeClasses = {
-    1: `text-3xl ${UI_CLASSES.FONT_BOLD} mt-8 mb-6`,
-    2: `text-2xl ${UI_CLASSES.FONT_BOLD} mt-8 mb-4`,
-    3: `text-xl ${UI_CLASSES.FONT_SEMIBOLD} mt-6 mb-3`,
+    1: 'text-3xl font-bold mt-8 mb-6',
+    2: 'text-2xl font-bold mt-8 mb-4',
+    3: 'text-xl font-semibold mt-6 mb-3',
   };
 
   const Tag = `h${level}` as 'h1' | 'h2' | 'h3';
@@ -63,7 +63,9 @@ export function CopyableHeading({
         <button
           type="button"
           onClick={handleCopy}
-          className={`opacity-0 group-hover:opacity-100 transition-opacity p-1 ${UI_CLASSES.HOVER_BG_ACCENT} rounded`}
+          className={
+            'opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-accent rounded'
+          }
           title="Copy link to heading"
         >
           {copied ? (
@@ -141,7 +143,7 @@ export function CopyableCodeBlock({ children, className, ...props }: MdxElementP
         {copied ? (
           <CheckCircle className="h-4 w-4 text-green-500" />
         ) : (
-          <Copy className={`h-4 w-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`} />
+          <Copy className={'h-4 w-4 text-muted-foreground'} />
         )}
       </button>
     </div>
@@ -156,7 +158,7 @@ export function ExternalLinkComponent({ href, children, className, ...props }: M
       target="_blank"
       rel="noopener noreferrer"
       {...props}
-      className={`text-primary hover:underline ${UI_CLASSES.TRANSITION_COLORS} inline-flex items-center gap-1 ${className || ''}`}
+      className={`text-primary hover:underline transition-colors inline-flex items-center gap-1 ${className || ''}`}
     >
       {children}
       <ExternalLink className="h-3 w-3" />
@@ -170,7 +172,7 @@ export function InternalLinkComponent({ href, children, className, ...props }: M
     <Link
       href={href}
       {...props}
-      className={`text-primary hover:underline ${UI_CLASSES.TRANSITION_COLORS} ${className || ''}`}
+      className={`text-primary hover:underline transition-colors ${className || ''}`}
     >
       {children}
     </Link>

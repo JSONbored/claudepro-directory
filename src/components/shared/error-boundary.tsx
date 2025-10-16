@@ -31,9 +31,7 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
   }, [resetErrorBoundary]);
 
   return (
-    <div
-      className={`min-h-screen bg-background flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.P_4}`}
-    >
+    <div className={'min-h-screen bg-background flex items-center justify-center p-4'}>
       <Card className={'max-w-2xl w-full'}>
         <CardHeader>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
@@ -48,11 +46,11 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {isDevelopment && error && (
-            <div className={`${UI_CLASSES.ROUNDED_LG} bg-muted ${UI_CLASSES.P_4} space-y-2`}>
-              <p className={`font-semibold ${UI_CLASSES.TEXT_SM}`}>Error Details:</p>
-              <pre className={`${UI_CLASSES.TEXT_XS} overflow-auto`}>{error.toString()}</pre>
+            <div className={'rounded-lg bg-muted p-4 space-y-2'}>
+              <p className={'font-semibold text-sm'}>Error Details:</p>
+              <pre className={'text-xs overflow-auto'}>{error.toString()}</pre>
               {error.stack && (
-                <details className={UI_CLASSES.TEXT_XS}>
+                <details className="text-xs">
                   <summary className="cursor-pointer font-semibold">Stack Trace</summary>
                   <pre className={'mt-2 overflow-auto'}>{error.stack}</pre>
                 </details>

@@ -26,44 +26,17 @@ export const UI_CLASSES = {
   /**
    * Grid Layouts
    */
-  GRID_RESPONSIVE_2_GAP_8: 'grid gap-8 md:grid-cols-2',
   GRID_RESPONSIVE_3:
     'grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start auto-rows-fr',
-  GRID_RESPONSIVE_3_NO_LG: 'grid gap-6 md:grid-cols-3',
   GRID_RESPONSIVE_3_TIGHT: 'grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
   GRID_RESPONSIVE_4: 'grid gap-6 md:grid-cols-2 lg:grid-cols-4',
-  GRID_RESPONSIVE_4_GAP_4: 'grid gap-4 md:grid-cols-4',
   GRID_RESPONSIVE_LIST: 'grid gap-6 md:grid-cols-2 lg:grid-cols-3 list-none',
-  GRID_GAP_4: 'grid gap-4',
-
-  /**
-   * Grid Layouts - Extended
-   */
-  /**
-   * Icon Positioning
-   */
-  ICON_ABSOLUTE_LEFT:
-    'absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground',
   /**
    * Text Styles
    */
   TEXT_HEADING_HERO: 'text-4xl lg:text-6xl font-bold mb-6 text-foreground',
   TEXT_HEADING_LARGE: 'text-xl text-muted-foreground mb-8 leading-relaxed',
   TEXT_HEADING_MEDIUM: 'text-lg text-muted-foreground mb-8 leading-relaxed',
-  TEXT_MUTED: 'text-muted-foreground',
-  TEXT_MUTED_FOREGROUND: 'text-muted-foreground',
-  /**
-   * Transitions & Animations
-   */
-  TRANSITION_COLORS_SMOOTH: 'transition-colors-smooth',
-  /**
-   * Transitions
-   */
-  TRANSITION_COLORS: 'transition-colors',
-  /**
-   * Framer Motion Animation Constants
-   * Production-grade spring physics for natural, fluid motion
-   */
   /**
    * Container Styles
    */
@@ -81,23 +54,16 @@ export const UI_CLASSES = {
   FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2: 'flex items-center justify-center gap-2',
   FLEX_ITEMS_START_GAP_2: 'flex items-start gap-2',
   FLEX_ITEMS_START_GAP_3: 'flex items-start gap-3',
-  FLEX_ITEMS_START_GAP_4: 'flex items-start gap-4',
   FLEX_ITEMS_START_JUSTIFY_BETWEEN: 'flex items-start justify-between',
   FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2: 'flex items-start justify-between gap-2',
-  FLEX_ITEMS_END_GAP_2: 'flex items-end gap-2',
   FLEX_GAP_2: 'flex gap-2',
   FLEX_WRAP_GAP_2: 'flex flex-wrap gap-2',
   FLEX_WRAP_GAP_3: 'flex flex-wrap gap-3',
   /**
    * Flex Layouts - Extended
    */
-  FLEX_COL: 'flex flex-col',
-  FLEX_COL_CENTER: 'flex flex-col items-center',
-  FLEX_COL_ITEMS_START: 'flex flex-col items-start',
   FLEX_COL_ITEMS_CENTER_GAP_4: 'flex flex-col items-center gap-4',
   FLEX_COL_ITEMS_CENTER_JUSTIFY_CENTER: 'flex flex-col items-center justify-center py-12',
-  FLEX_COL_GAP_1: 'flex flex-col gap-1',
-  FLEX_COL_GAP_2: 'flex flex-col gap-2',
   FLEX_COL_SM_ROW_GAP_2: 'flex flex-col sm:flex-row gap-2 sm:gap-3',
   FLEX_COL_SM_ROW_GAP_3: 'flex flex-col sm:flex-row gap-3 sm:gap-4',
   FLEX_COL_SM_ROW_ITEMS_START: 'flex flex-col sm:flex-row items-start gap-3',
@@ -106,266 +72,12 @@ export const UI_CLASSES = {
   /**
    * Flexbox - Extended
    */
-  FLEX_1: 'flex-1',
-  FLEX_1_MIN_W_0: 'flex-1 min-w-0',
-  FLEX_1_SM_FLEX_INITIAL: 'flex-1 sm:flex-initial',
-  FLEX_SHRINK_0: 'flex-shrink-0',
   FLEX_SHRINK_0_MT_0_5: 'flex-shrink-0 mt-0.5',
-  /**
-   * Inline Flex Patterns
-   */
-  INLINE_FLEX_ITEMS_CENTER_GAP_2: 'inline-flex items-center gap-2',
-
-  /**
-   * Layout Alignment - Justify
-   */
-  JUSTIFY_CENTER: 'justify-center',
-  JUSTIFY_BETWEEN: 'justify-between',
-  /**
-   * Layout Alignment - Items
-   */
-  ITEMS_START: 'items-start',
-  ITEMS_CENTER: 'items-center',
-  /**
-   * Align Self
-   */
-  /**
-   * Place Content
-   */
-  /**
-   * Place Items
-   */
-  /**
-   * Gap Utilities
-   */
-  /**
-   * Spacing Utilities
-   */
-  SPACE_Y_1: 'space-y-1',
-  SPACE_Y_2: 'space-y-2',
-  SPACE_Y_3: 'space-y-3',
-  SPACE_Y_4: 'space-y-4',
-  SPACE_Y_6: 'space-y-6',
-  SPACE_Y_8: 'space-y-8',
-  SPACE_Y_TIGHT_PLUS: 'space-y-1.5',
   /**
    * Text Size & Color Combinations
    */
   TEXT_XS_MUTED: 'text-xs text-muted-foreground',
   TEXT_SM_MUTED: 'text-sm text-muted-foreground',
-  /**
-   * Text Alignment
-   */
-  TEXT_CENTER: 'text-center',
-  /**
-   * Text Sizes
-   */
-  TEXT_XS: 'text-xs',
-  TEXT_SM: 'text-sm',
-  TEXT_BASE: 'text-base',
-  TEXT_LG: 'text-lg',
-  /**
-   * Font Weights
-   */
-  FONT_MEDIUM: 'font-medium',
-  FONT_SEMIBOLD: 'font-semibold',
-  FONT_BOLD: 'font-bold',
-  /**
-   * Text Transformations
-   */
-  /**
-   * Text Rendering
-   */
-  /**
-   * Margin Utilities
-   */
-  MB_2: 'mb-2',
-  MB_3: 'mb-3',
-  MB_4: 'mb-4',
-  MB_6: 'mb-6',
-  MB_8: 'mb-8',
-  ML_2: 'ml-2',
-  MR_2: 'mr-2',
-  MX_AUTO: 'mx-auto',
-
-  /**
-   * Padding Utilities
-   */
-  P_2: 'p-2',
-  P_4: 'p-4',
-  PX_2: 'px-2',
-  PX_3: 'px-3',
-  PX_4: 'px-4',
-  PT_6: 'pt-6',
-  /**
-   * List & Item Styles
-   */
-  FLEX_WRAP_MUTED: 'flex flex-wrap gap-4 text-sm text-muted-foreground mb-4',
-
-  /**
-   * Link Styles
-   */
-  LINK_ACCENT_UNDERLINE: 'text-accent hover:underline flex items-center gap-2',
-
-  /**
-   * Badge & Indicator Styles
-   */
-  /**
-   * Hidden Utilities
-   */
-  HIDDEN_SM_FLEX: 'hidden sm:flex',
-
-  /**
-   * Screen Reader Utilities
-   */
-  /**
-   * Border Radius
-   */
-  ROUNDED_MD: 'rounded-md',
-  ROUNDED_LG: 'rounded-lg',
-  ROUNDED_2XL: 'rounded-2xl',
-  ROUNDED_FULL: 'rounded-full',
-
-  /**
-   * Borders
-   */
-  BORDER_T: 'border-t',
-  /**
-   * Border Colors
-   */
-  /**
-   * Line Clamp
-   */
-  /**
-   * Leading (Line Height)
-   */
-  LEADING_RELAXED: 'leading-relaxed',
-  /**
-   * Background Colors
-   */
-  BG_CARD: 'bg-card',
-  BG_ACCENT_10: 'bg-accent/10',
-  /**
-   * Hover Background States
-   */
-  HOVER_BG_ACCENT: 'hover:bg-accent',
-  HOVER_TEXT_FOREGROUND: 'hover:text-foreground',
-  /**
-   * Width & Height
-   */
-  W_FULL: 'w-full',
-  /**
-   * Min Width
-   */
-  MIN_W_0: 'min-w-0',
-  /**
-   * Max Width
-   */
-  MAX_W_3XL: 'max-w-3xl',
-  MAX_W_4XL: 'max-w-4xl',
-  /**
-   * Min Height
-   */
-  MIN_H_SCREEN: 'min-h-screen',
-
-  /**
-   * Max Height
-   */
-  /**
-   * Position
-   */
-  ABSOLUTE: 'absolute',
-  RELATIVE: 'relative',
-  /**
-   * Position Values
-   */
-  /**
-   * Display
-   */
-  FLEX: 'flex',
-  HIDDEN: 'hidden',
-
-  /**
-   * Opacity
-   */
-  /**
-   * Z-Index
-   */
-  Z_50: 'z-50',
-
-  /**
-   * Overflow
-   */
-  OVERFLOW_X_AUTO: 'overflow-x-auto',
-  /**
-   * Overscroll Behavior
-   */
-  /**
-   * Object Fit
-   */
-  /**
-   * Object Position
-   */
-  /**
-   * Aspect Ratio
-   */
-  /**
-   * Hover Text Colors
-   */
-  HOVER_TEXT_PRIMARY: 'hover:text-primary',
-  GROUP_HOVER_TEXT_PRIMARY: 'group-hover:text-primary',
-
-  /**
-   * Whitespace
-   */
-  /**
-   * Word Break
-   */
-  /**
-   * Pointer Events
-   */
-  /**
-   * Cursor Utilities
-   */
-  /**
-   * Text Overflow
-   */
-  /**
-   * User Selection
-   */
-  /**
-   * Ring Utilities
-   */
-  /**
-   * Group Utilities
-   */
-  /**
-   * Focus & Outline
-   */
-  /**
-   * Backdrop Effects
-   */
-  /**
-   * Shadows
-   */
-  /**
-   * Visibility
-   */
-  /**
-   * Scroll Behavior
-   */
-  /**
-   * Scroll Margin/Padding
-   */
-  /**
-   * Isolation
-   */
-  /**
-   * Mix Blend Mode
-   */
-  /**
-   * Will Change
-   */
   /**
    * Code Block Styles - Production-grade patterns
    */
@@ -382,13 +94,6 @@ export const UI_CLASSES = {
   CODE_BLOCK_TAB_ACTIVE: 'text-primary border-primary',
   CODE_BLOCK_TAB_INACTIVE: 'text-muted-foreground border-transparent hover:text-foreground',
   CODE_BLOCK_GROUP_WRAPPER: 'relative group my-6',
-
-  /**
-   * Code Block - Background Colors
-   */
-  /**
-   * Touch Targets (Mobile-optimized)
-   */
 } as const;
 
 /**

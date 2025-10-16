@@ -110,7 +110,7 @@ test.describe('LLMs.txt Routes - Smoke Tests', () => {
     // Extract a slug from the list content (look for pattern like /collections/slug)
     const slugMatch = listContent.match(/\/collections\/([a-z0-9-]+)/i);
 
-    if (slugMatch && slugMatch[1]) {
+    if (slugMatch?.[1]) {
       const slug = slugMatch[1];
       const detailResponse = await page.goto(`/collections/${slug}/llms.txt`);
 

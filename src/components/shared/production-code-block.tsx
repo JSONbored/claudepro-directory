@@ -190,7 +190,7 @@ export function ProductionCodeBlock({
           {isCopied ? (
             <Check className="h-4 w-4 text-green-500" />
           ) : (
-            <Copy className={`h-4 w-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`} />
+            <Copy className={'h-4 w-4 text-muted-foreground'} />
           )}
         </button>
       )}

@@ -5,8 +5,6 @@
  * Displays individual quiz questions with consistent styling
  */
 
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-
 interface QuestionCardProps {
   question: string;
   description?: string;
@@ -16,7 +14,7 @@ interface QuestionCardProps {
 
 export function QuestionCard({ question, description, required, children }: QuestionCardProps) {
   return (
-    <div className={UI_CLASSES.SPACE_Y_4}>
+    <div className="space-y-4">
       <div>
         <h3 className="text-lg font-semibold flex items-center gap-2">
           {question}

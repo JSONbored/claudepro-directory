@@ -79,17 +79,17 @@ async function getCanonicalUrl(page: Page): Promise<string | null> {
 /**
  * Get all JSON-LD structured data blocks
  */
-async function getStructuredData(page: Page): Promise<any[]> {
+async function getStructuredData(page: Page): Promise<unknown[]> {
   const scripts = await page.locator('script[type="application/ld+json"]').all();
-  const data: any[] = [];
+  const data: unknown[] = [];
 
   for (const script of scripts) {
     const content = await script.textContent();
     if (content) {
       try {
         data.push(JSON.parse(content));
-      } catch (error) {
-        console.error(`Failed to parse JSON-LD on ${page.url()}:`, content);
+      } catch (_error) {
+        // Invalid JSON - skip this script block
       }
     }
   }
@@ -214,8 +214,8 @@ async function validateOpenGraphMetadata(page: Page, pagePath: string): Promise<
   }
 
   // Validate no placeholder text in OG fields
-  validateNoPlaceholderText(ogTitle!, 'og:title', pagePath);
-  validateNoPlaceholderText(ogDescription!, 'og:description', pagePath);
+  if (ogTitle) validateNoPlaceholderText(ogTitle, 'og:title', pagePath);
+  if (ogDescription) validateNoPlaceholderText(ogDescription, 'og:description', pagePath);
 }
 
 /**
@@ -245,7 +245,7 @@ async function validateStructuredData(page: Page, pagePath: string): Promise<voi
  * - Year mentions (2025 or "October 2025") for recency signals
  * - Research shows 3.2x more citations for fresh content
  */
-async function validateAIOptimization(page: Page, pagePath: string): Promise<void> {
+async function validateAIOptimization(page: Page, _pagePath: string): Promise<void> {
   const description = await getMetaContent(page, 'description');
 
   if (description) {
@@ -253,7 +253,7 @@ async function validateAIOptimization(page: Page, pagePath: string): Promise<voi
     const hasYearMention = /2025|October 2025/i.test(description);
 
     if (!hasYearMention) {
-      console.warn(`⚠️  ${pagePath}: Description missing year mention for AI optimization`);
+      // Note: Year mention is optional but recommended for AI citation freshness
     }
   }
 }
@@ -502,33 +502,6 @@ test.describe('Metadata Quality: Summary Report', () => {
 
     const totalRoutes =
       staticRoutes + categoryPages + contentPages + guidePages + collectionPages + changelogPages;
-
-    console.log(`
-╔════════════════════════════════════════════════════════════════════════╗
-║                    METADATA QUALITY REPORT                              ║
-╠════════════════════════════════════════════════════════════════════════╣
-║ Static Routes:         ${staticRoutes.toString().padStart(4)} pages                                      ║
-║ Category Pages:        ${categoryPages.toString().padStart(4)} pages                                      ║
-║ Content Detail Pages:  ${contentPages.toString().padStart(4)} pages                                      ║
-║ Guide Pages:           ${guidePages.toString().padStart(4)} pages                                      ║
-║ Collection Pages:      ${collectionPages.toString().padStart(4)} pages                                      ║
-║ Changelog Pages:       ${changelogPages.toString().padStart(4)} pages                                      ║
-╠════════════════════════════════════════════════════════════════════════╣
-║ TOTAL ROUTES TESTED:   ${totalRoutes.toString().padStart(4)} pages                                      ║
-╚════════════════════════════════════════════════════════════════════════╝
-
-✅ All routes validated against 8 quality gates:
-   1. Title length (30-65 chars)
-   2. Description length (140-165 chars)
-   3. No placeholder text
-   4. Canonical URLs (HTTPS, no trailing slash)
-   5. OpenGraph metadata (complete with 1200x630 images)
-   6. Structured data presence (valid JSON-LD)
-   7. AI optimization (year mentions)
-   8. Schema.org validation
-
-🎯 Target: 64+ routes | Actual: ${totalRoutes} routes | Status: ${totalRoutes >= 64 ? '✅ PASSED' : '❌ FAILED'}
-    `);
 
     expect(totalRoutes, 'Should test at least 64 public routes').toBeGreaterThanOrEqual(64);
   });

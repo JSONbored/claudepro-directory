@@ -36,7 +36,7 @@ export function TLDRSummary(props: TLDRSummaryProps) {
             <h4 className="font-semibold mb-2">Key Takeaways:</h4>
             <ul className="space-y-1">
               {keyPoints.map((point) => (
-                <li key={point} className={`flex ${UI_CLASSES.ITEMS_START} gap-2 text-sm`}>
+                <li key={point} className={'flex items-start gap-2 text-sm'}>
                   <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
                   <span>{point}</span>
                 </li>

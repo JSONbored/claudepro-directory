@@ -31,13 +31,13 @@ export default async function CompaniesPage() {
     .order('created_at', { ascending: false });
 
   return (
-    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
+    <div className={'min-h-screen bg-background'}>
       {/* Hero */}
       <section className={`${UI_CLASSES.CONTAINER_OVERFLOW_BORDER}`}>
-        <div className={`container ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.PX_4} py-20`}>
-          <div className={`text-center ${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}>
-            <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.MB_6}`}>
-              <div className={`p-3 ${UI_CLASSES.BG_ACCENT_10} ${UI_CLASSES.ROUNDED_FULL}`}>
+        <div className={'container mx-auto px-4 py-20'}>
+          <div className={'text-center max-w-3xl mx-auto'}>
+            <div className={'flex justify-center mb-6'}>
+              <div className={'p-3 bg-accent/10 rounded-full'}>
                 <Building className="h-8 w-8 text-primary" />
               </div>
             </div>
@@ -48,7 +48,7 @@ export default async function CompaniesPage() {
               Discover companies building the future with Claude and Cursor
             </p>
 
-            <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} gap-2 ${UI_CLASSES.MB_8}`}>
+            <div className={'flex justify-center gap-2 mb-8'}>
               <Badge variant="secondary">
                 <Building className="h-3 w-3 mr-1" />
                 {companies?.length || 0} Companies
@@ -67,13 +67,13 @@ export default async function CompaniesPage() {
       </section>
 
       {/* Companies Grid */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+      <section className={'container mx-auto px-4 py-12'}>
         {!companies || companies.length === 0 ? (
           <Card>
-            <CardContent className={`${UI_CLASSES.FLEX_COL_CENTER} py-12`}>
+            <CardContent className={'flex flex-col items-center py-12'}>
               <Building className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-xl font-semibold mb-2">No companies yet</h3>
-              <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} text-center max-w-md mb-4`}>
+              <p className={'text-muted-foreground text-center max-w-md mb-4'}>
                 Be the first company to join the directory!
               </p>
               <Button asChild>
@@ -124,16 +124,14 @@ export default async function CompaniesPage() {
 
                 <CardContent>
                   {company.description && (
-                    <p
-                      className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_4} line-clamp-2`}
-                    >
+                    <p className={'text-sm text-muted-foreground mb-4 line-clamp-2'}>
                       {company.description}
                     </p>
                   )}
 
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     {company.size && (
-                      <Badge variant="outline" className={UI_CLASSES.TEXT_XS}>
+                      <Badge variant="outline" className="text-xs">
                         {company.size} employees
                       </Badge>
                     )}
@@ -154,7 +152,7 @@ export default async function CompaniesPage() {
       </section>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+      <section className={'container mx-auto px-4 py-12'}>
         <InlineEmailCTA
           variant="hero"
           context="companies-page"

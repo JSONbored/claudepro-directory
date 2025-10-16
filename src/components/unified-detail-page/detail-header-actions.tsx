@@ -22,7 +22,6 @@ import { Button } from '@/src/components/ui/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { ArrowLeft, Copy } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 /**
@@ -128,7 +127,7 @@ export function DetailHeaderActions({
   return (
     <>
       {/* Back navigation */}
-      <div className={UI_CLASSES.MB_6}>
+      <div className="mb-6">
         <Button
           variant="ghost"
           onClick={() => router.back()}
@@ -140,38 +139,34 @@ export function DetailHeaderActions({
       </div>
 
       {/* Main content header */}
-      <div
-        className={`${UI_CLASSES.FLEX_COL} lg:flex-row lg:${UI_CLASSES.ITEMS_START} lg:${UI_CLASSES.JUSTIFY_BETWEEN} gap-6`}
-      >
-        <div className={UI_CLASSES.FLEX_1}>
-          <div className={`flex items-center gap-3 ${UI_CLASSES.MB_4}`}>
-            <Badge variant="secondary" className={`${UI_CLASSES.TEXT_XS} font-medium`}>
+      <div className={'flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6'}>
+        <div className="flex-1">
+          <div className={'flex items-center gap-3 mb-4'}>
+            <Badge variant="secondary" className={'text-xs font-medium'}>
               {typeName}
             </Badge>
-            <Badge variant="outline" className={UI_CLASSES.TEXT_XS}>
+            <Badge variant="outline" className="text-xs">
               {category}
             </Badge>
           </div>
 
-          <h1 className={`text-4xl ${UI_CLASSES.FONT_BOLD} tracking-tight ${UI_CLASSES.MB_4}`}>
-            {displayTitle}
-          </h1>
+          <h1 className={'text-4xl font-bold tracking-tight mb-4'}>{displayTitle}</h1>
 
           {item.description && (
-            <p className={`text-xl text-muted-foreground ${UI_CLASSES.MB_6} leading-relaxed`}>
+            <p className={'text-xl text-muted-foreground mb-6 leading-relaxed'}>
               {item.description}
             </p>
           )}
         </div>
 
         {/* Action buttons */}
-        <div className={`${UI_CLASSES.FLEX_COL} sm:flex-row gap-3`}>
-          <Button onClick={() => handleActionClick(primaryAction)} className={UI_CLASSES.MIN_W_0}>
+        <div className={'flex flex-col sm:flex-row gap-3'}>
+          <Button onClick={() => handleActionClick(primaryAction)} className="min-w-0">
             {primaryAction.label}
           </Button>
 
           {hasContent && (
-            <Button variant="outline" onClick={handleCopyContent} className={UI_CLASSES.MIN_W_0}>
+            <Button variant="outline" onClick={handleCopyContent} className="min-w-0">
               {copied ? (
                 <>
                   <Copy className="h-4 w-4 mr-2" />
@@ -191,7 +186,7 @@ export function DetailHeaderActions({
             llmsTxtUrl={`/${category}/${item.slug}/llms.txt`}
             variant="outline"
             size="default"
-            className={UI_CLASSES.MIN_W_0}
+            className="min-w-0"
           />
 
           {/* Copy as Markdown button */}
@@ -200,7 +195,7 @@ export function DetailHeaderActions({
             slug={item.slug}
             variant="outline"
             size="default"
-            className={UI_CLASSES.MIN_W_0}
+            className="min-w-0"
           />
 
           {/* Download Markdown button */}
@@ -209,7 +204,7 @@ export function DetailHeaderActions({
             slug={item.slug}
             variant="outline"
             size="default"
-            className={UI_CLASSES.MIN_W_0}
+            className="min-w-0"
           />
 
           {secondaryActions?.map((action) => (
@@ -217,7 +212,7 @@ export function DetailHeaderActions({
               key={action.label}
               variant="outline"
               onClick={() => handleActionClick(action)}
-              className={UI_CLASSES.MIN_W_0}
+              className="min-w-0"
             >
               {action.label}
             </Button>

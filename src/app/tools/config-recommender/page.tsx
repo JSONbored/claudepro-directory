@@ -40,10 +40,10 @@ export const revalidate = false;
 
 export default function ConfigRecommenderPage() {
   return (
-    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
+    <div className={'min-h-screen bg-background'}>
       {/* Hero Section */}
       <section className={'relative py-16 px-4 overflow-hidden'}>
-        <div className={`container ${UI_CLASSES.MX_AUTO} text-center ${UI_CLASSES.MAX_W_4XL}`}>
+        <div className={'container mx-auto text-center max-w-4xl'}>
           {/* Badge */}
           <Badge variant="outline" className={'mb-6 border-primary/20 bg-accent/5 text-primary'}>
             <Sparkles className="h-3 w-3 mr-1" aria-hidden="true" />
@@ -56,15 +56,13 @@ export default function ConfigRecommenderPage() {
           </h1>
 
           {/* Description */}
-          <p
-            className={`text-lg md:text-xl ${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO} mb-8`}
-          >
+          <p className={'text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8'}>
             Answer 7 quick questions and get personalized recommendations from our catalog of 147+
             configurations. Instant results, zero cost, tailored to your needs.
           </p>
 
           {/* Stats */}
-          <div className={`flex flex-wrap ${UI_CLASSES.JUSTIFY_CENTER} gap-3`}>
+          <div className={'flex flex-wrap justify-center gap-3'}>
             <Badge variant="secondary" className="text-sm">
               <Clock className="h-3 w-3 mr-1" aria-hidden="true" />2 minutes
             </Badge>
@@ -81,15 +79,15 @@ export default function ConfigRecommenderPage() {
       </section>
 
       {/* Quiz Section */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pb-16`}>
-        <div className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
+      <section className={'container mx-auto px-4 pb-16'}>
+        <div className={'max-w-4xl mx-auto'}>
           <QuizForm />
         </div>
       </section>
 
       {/* Benefits Section */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pb-16`}>
-        <div className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
+      <section className={'container mx-auto px-4 pb-16'}>
+        <div className={'max-w-4xl mx-auto'}>
           <h2 className="text-2xl font-bold text-center mb-8">How It Works</h2>
 
           <div className="grid gap-6 md:grid-cols-3">
@@ -97,7 +95,9 @@ export default function ConfigRecommenderPage() {
               <CardHeader>
                 <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
                   <span
-                    className={`${UI_CLASSES.FLEX} items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold`}
+                    className={
+                      'flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold'
+                    }
                   >
                     1
                   </span>
@@ -116,7 +116,9 @@ export default function ConfigRecommenderPage() {
               <CardHeader>
                 <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
                   <span
-                    className={`${UI_CLASSES.FLEX} items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold`}
+                    className={
+                      'flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold'
+                    }
                   >
                     2
                   </span>
@@ -135,7 +137,9 @@ export default function ConfigRecommenderPage() {
               <CardHeader>
                 <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
                   <span
-                    className={`${UI_CLASSES.FLEX} items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold`}
+                    className={
+                      'flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold'
+                    }
                   >
                     3
                   </span>
@@ -153,8 +157,8 @@ export default function ConfigRecommenderPage() {
       </section>
 
       {/* Features Section */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pb-16`}>
-        <div className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
+      <section className={'container mx-auto px-4 pb-16'}>
+        <div className={'max-w-4xl mx-auto'}>
           <Card className="bg-accent/5 border-accent/20">
             <CardHeader>
               <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -195,7 +199,7 @@ export default function ConfigRecommenderPage() {
       </section>
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+      <section className={'container mx-auto px-4 py-12'}>
         <InlineEmailCTA
           variant="hero"
           context="config-recommender-page"

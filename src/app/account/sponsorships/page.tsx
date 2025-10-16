@@ -39,11 +39,11 @@ export default async function SponsorshipsPage() {
   }
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
           <h1 className="text-3xl font-bold mb-2">Sponsorships</h1>
-          <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+          <p className="text-muted-foreground">
             {sponsorships?.length || 0} active{' '}
             {sponsorships?.length === 1 ? 'campaign' : 'campaigns'}
           </p>
@@ -116,7 +116,7 @@ export default async function SponsorshipsPage() {
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div>
                     <div
-                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mb-1`}
+                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} text-xs text-muted-foreground mb-1`}
                     >
                       <Eye className="h-3 w-3" />
                       Impressions
@@ -131,7 +131,7 @@ export default async function SponsorshipsPage() {
 
                   <div>
                     <div
-                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mb-1`}
+                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} text-xs text-muted-foreground mb-1`}
                     >
                       <MousePointer className="h-3 w-3" />
                       Clicks
@@ -141,7 +141,7 @@ export default async function SponsorshipsPage() {
 
                   <div>
                     <div
-                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mb-1`}
+                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} text-xs text-muted-foreground mb-1`}
                     >
                       <BarChart className="h-3 w-3" />
                       CTR

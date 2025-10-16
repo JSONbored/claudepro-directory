@@ -145,7 +145,7 @@ test.describe('Robots.txt - Basic Access', () => {
     const content = await page.textContent('body');
 
     expect(content, 'robots.txt should not be empty').toBeTruthy();
-    expect(content!.length, 'robots.txt should have meaningful content').toBeGreaterThan(100);
+    expect(content?.length, 'robots.txt should have meaningful content').toBeGreaterThan(100);
   });
 
   test('should be valid UTF-8 text', async ({ page }) => {
@@ -175,7 +175,8 @@ test.describe('Robots.txt - Structure & Syntax', () => {
     await page.goto('/robots.txt');
     const content = await page.textContent('body');
 
-    const data = parseRobotsTxt(content!);
+    expect(content, 'robots.txt should have content').toBeTruthy();
+    const data = parseRobotsTxt(content ?? '');
 
     expect(data.rules.length, 'Should have at least one rule').toBeGreaterThan(0);
 
@@ -191,7 +192,8 @@ test.describe('Robots.txt - Structure & Syntax', () => {
 
     expect(content, 'Should declare sitemap location').toContain('Sitemap:');
 
-    const data = parseRobotsTxt(content!);
+    expect(content, 'robots.txt should have content').toBeTruthy();
+    const data = parseRobotsTxt(content ?? '');
     expect(data.sitemaps.length, 'Should have at least one sitemap').toBeGreaterThan(0);
 
     // Sitemap URL should be absolute
@@ -204,7 +206,8 @@ test.describe('Robots.txt - Structure & Syntax', () => {
     await page.goto('/robots.txt');
     const content = await page.textContent('body');
 
-    const data = parseRobotsTxt(content!);
+    expect(content, 'robots.txt should have content').toBeTruthy();
+    const data = parseRobotsTxt(content ?? '');
     expect(data.comments.length, 'Should have explanatory comments').toBeGreaterThan(0);
   });
 });
@@ -232,11 +235,12 @@ test.describe('Robots.txt - AI Crawler Configuration', () => {
         `User-agent: ${crawler.name}`
       );
 
-      const data = parseRobotsTxt(content!);
+      expect(content, 'robots.txt should have content').toBeTruthy();
+      const data = parseRobotsTxt(content ?? '');
       const rule = findRule(data.rules, crawler.name);
 
       expect(rule, `Should have rule for ${crawler.name}`).toBeDefined();
-      expect(rule!.allow.length, `${crawler.name} should have Allow directives`).toBeGreaterThan(0);
+      expect(rule?.allow.length, `${crawler.name} should have Allow directives`).toBeGreaterThan(0);
     });
   }
 
@@ -244,7 +248,8 @@ test.describe('Robots.txt - AI Crawler Configuration', () => {
     await page.goto('/robots.txt');
     const content = await page.textContent('body');
 
-    const data = parseRobotsTxt(content!);
+    expect(content, 'robots.txt should have content').toBeTruthy();
+    const data = parseRobotsTxt(content ?? '');
 
     for (const crawler of aiCrawlers) {
       const rule = findRule(data.rules, crawler.name);
@@ -259,7 +264,8 @@ test.describe('Robots.txt - AI Crawler Configuration', () => {
     await page.goto('/robots.txt');
     const content = await page.textContent('body');
 
-    const data = parseRobotsTxt(content!);
+    expect(content, 'robots.txt should have content').toBeTruthy();
+    const data = parseRobotsTxt(content ?? '');
 
     for (const crawler of aiCrawlers) {
       const rule = findRule(data.rules, crawler.name);
@@ -274,7 +280,8 @@ test.describe('Robots.txt - AI Crawler Configuration', () => {
     await page.goto('/robots.txt');
     const content = await page.textContent('body');
 
-    const data = parseRobotsTxt(content!);
+    expect(content, 'robots.txt should have content').toBeTruthy();
+    const data = parseRobotsTxt(content ?? '');
 
     for (const crawler of aiCrawlers) {
       const rule = findRule(data.rules, crawler.name);
@@ -299,7 +306,8 @@ test.describe('Robots.txt - General Crawler Configuration', () => {
     await page.goto('/robots.txt');
     const content = await page.textContent('body');
 
-    const data = parseRobotsTxt(content!);
+    expect(content, 'robots.txt should have content').toBeTruthy();
+    const data = parseRobotsTxt(content ?? '');
     const wildcardRule = findRule(data.rules, '*');
 
     expect(wildcardRule, 'Should have wildcard (*) rule for all crawlers').toBeDefined();
@@ -309,11 +317,12 @@ test.describe('Robots.txt - General Crawler Configuration', () => {
     await page.goto('/robots.txt');
     const content = await page.textContent('body');
 
-    const data = parseRobotsTxt(content!);
+    expect(content, 'robots.txt should have content').toBeTruthy();
+    const data = parseRobotsTxt(content ?? '');
     const wildcardRule = findRule(data.rules, '*');
 
     expect(wildcardRule).toBeDefined();
-    expect(wildcardRule!.allow, 'Wildcard should allow root').toContain('/');
+    expect(wildcardRule?.allow, 'Wildcard should allow root').toContain('/');
   });
 
   test('should allow all main content categories', async ({ page }) => {
@@ -375,7 +384,8 @@ test.describe('Robots.txt - Security & Access Control', () => {
     await page.goto('/robots.txt');
     const content = await page.textContent('body');
 
-    const data = parseRobotsTxt(content!);
+    expect(content, 'robots.txt should have content').toBeTruthy();
+    const data = parseRobotsTxt(content ?? '');
     const wildcardRule = findRule(data.rules, '*');
 
     // Public paths should not be in disallow list
@@ -466,7 +476,8 @@ test.describe('Robots.txt - RFC 9309 Compliance', () => {
     await page.goto('/robots.txt');
     const content = await page.textContent('body');
 
-    const data = parseRobotsTxt(content!);
+    expect(content, 'robots.txt should have content').toBeTruthy();
+    const data = parseRobotsTxt(content ?? '');
 
     for (const rule of data.rules) {
       // All Allow/Disallow paths should start with /
@@ -480,7 +491,8 @@ test.describe('Robots.txt - RFC 9309 Compliance', () => {
     await page.goto('/robots.txt');
     const content = await page.textContent('body');
 
-    const data = parseRobotsTxt(content!);
+    expect(content, 'robots.txt should have content').toBeTruthy();
+    const data = parseRobotsTxt(content ?? '');
 
     for (const sitemap of data.sitemaps) {
       expect(sitemap, 'Sitemap must be absolute URL').toMatch(/^https?:\/\//);
@@ -497,7 +509,8 @@ test.describe('Robots.txt - Integration', () => {
     await page.goto('/robots.txt');
     const content = await page.textContent('body');
 
-    const data = parseRobotsTxt(content!);
+    expect(content, 'robots.txt should have content').toBeTruthy();
+    const data = parseRobotsTxt(content ?? '');
     expect(data.sitemaps.length).toBeGreaterThan(0);
 
     const sitemapUrl = data.sitemaps[0];
@@ -567,7 +580,8 @@ test.describe('Robots.txt - Performance', () => {
     await page.goto('/robots.txt');
     const content = await page.textContent('body');
 
-    const sizeInBytes = new Blob([content!]).size;
+    expect(content, 'robots.txt should have content').toBeTruthy();
+    const sizeInBytes = new Blob([content ?? '']).size;
     expect(sizeInBytes, 'robots.txt should be under 10KB').toBeLessThan(10 * 1024);
   });
 });

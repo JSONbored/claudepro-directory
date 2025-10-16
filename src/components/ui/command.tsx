@@ -5,7 +5,6 @@ import { Command as CommandPrimitive } from 'cmdk';
 import type * as React from 'react';
 import { Dialog, DialogContent } from '@/src/components/ui/dialog';
 import { Search } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 const Command = ({
@@ -45,7 +44,7 @@ const CommandInput = ({
 }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input> & {
   ref?: React.Ref<React.ElementRef<typeof CommandPrimitive.Input>>;
 }) => (
-  <div className={`flex ${UI_CLASSES.ITEMS_CENTER} border-b px-3`} cmdk-input-wrapper="">
+  <div className={'flex items-center border-b px-3'} cmdk-input-wrapper="">
     <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
     <CommandPrimitive.Input
       ref={ref}

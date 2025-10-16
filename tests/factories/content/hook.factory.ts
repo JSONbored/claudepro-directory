@@ -14,10 +14,7 @@
 
 import { faker } from '@faker-js/faker';
 import type { HookContent } from '@/src/lib/schemas/content/hook.schema';
-import {
-  type BaseContentTransientParams,
-  createContentFactory,
-} from '../shared/base-content.factory';
+import { createContentFactory } from '../shared/base-content.factory';
 
 export const hookFactory = createContentFactory<HookContent>({
   category: 'hooks',

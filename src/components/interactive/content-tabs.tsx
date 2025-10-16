@@ -8,7 +8,6 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
 import { type ContentTabsProps, contentTabsPropsSchema } from '@/src/lib/schemas/shared.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function ContentTabs(props: ContentTabsProps) {
   const validated = contentTabsPropsSchema.parse(props);
@@ -24,8 +23,8 @@ export function ContentTabs(props: ContentTabsProps) {
   return (
     <section itemScope itemType="https://schema.org/ItemList" className="my-8">
       {title && (
-        <div className={UI_CLASSES.MB_6}>
-          <h3 className={`text-xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`} itemProp="name">
+        <div className="mb-6">
+          <h3 className={'text-xl font-bold mb-2'} itemProp="name">
             {title}
           </h3>
           {description && (
@@ -36,9 +35,9 @@ export function ContentTabs(props: ContentTabsProps) {
         </div>
       )}
 
-      <Tabs defaultValue={firstValue} className={UI_CLASSES.W_FULL}>
+      <Tabs defaultValue={firstValue} className="w-full">
         <TabsList
-          className={`grid ${UI_CLASSES.W_FULL} grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 h-auto p-1`}
+          className={'grid w-full grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 h-auto p-1'}
         >
           {validItems.map((item) => (
             <TabsTrigger

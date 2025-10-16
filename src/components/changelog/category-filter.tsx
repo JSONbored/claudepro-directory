@@ -23,7 +23,6 @@ import { memo, useMemo } from 'react';
 import { Badge } from '@/src/components/ui/badge';
 import { TabsList, TabsTrigger } from '@/src/components/ui/tabs';
 import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Props for CategoryFilter component
@@ -93,11 +92,7 @@ export const CategoryFilter = memo(({ entries, activeCategory }: CategoryFilterP
   return (
     <TabsList className="grid w-full lg:w-auto lg:grid-flow-col lg:auto-cols-fr gap-1">
       {FILTER_CATEGORIES.map((category) => (
-        <TabsTrigger
-          key={category}
-          value={category}
-          className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2`}
-        >
+        <TabsTrigger key={category} value={category} className={'text-sm flex items-center gap-2'}>
           <span>{category}</span>
           <Badge
             variant={activeCategory === category ? 'default' : 'secondary'}

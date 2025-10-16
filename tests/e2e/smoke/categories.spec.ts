@@ -140,7 +140,7 @@ test.describe('Category Pages - Smoke Tests', () => {
     if (await description.isVisible({ timeout: 2000 }).catch(() => false)) {
       const text = await description.textContent();
       expect(text).toBeTruthy();
-      expect(text!.length).toBeGreaterThan(20);
+      expect(text?.length).toBeGreaterThan(20);
     }
   });
 

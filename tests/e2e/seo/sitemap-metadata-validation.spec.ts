@@ -138,7 +138,7 @@ async function fetchSitemapURLs(baseUrl: string): Promise<SitemapURL[]> {
 
   // Extract URLs from sitemap structure
   const urlset = result.urlset;
-  if (!(urlset && urlset.url)) {
+  if (!urlset?.url) {
     throw new Error('Invalid sitemap structure - missing urlset or url elements');
   }
 
@@ -166,7 +166,7 @@ async function fetchSitemapURLs(baseUrl: string): Promise<SitemapURL[]> {
  * @param page - Playwright page object
  * @returns Page metadata object
  */
-async function extractPageMetadata(page: any): Promise<PageMetadata> {
+async function extractPageMetadata(page: Page): Promise<PageMetadata> {
   const url = page.url();
 
   // Extract metadata from HTML
@@ -363,13 +363,10 @@ async function processBatch<T, R>(
 // ============================================
 
 test.describe('Sitemap Metadata Validation', () => {
-  test('should validate metadata for ALL pages in sitemap', async ({ page, browser }) => {
+  test('should validate metadata for ALL pages in sitemap', async ({ page: _page, browser }) => {
     // Step 1: Fetch sitemap URLs
     test.setTimeout(600000); // 10 minutes for full sitemap validation
-
-    console.log(`\n📄 Fetching sitemap from ${BASE_URL}/sitemap.xml...`);
     const sitemapURLs = await fetchSitemapURLs(BASE_URL);
-    console.log(`✅ Found ${sitemapURLs.length} URLs in sitemap\n`);
 
     // Step 2: Validate each URL's metadata
     const allViolations: MetadataViolation[] = [];
@@ -403,11 +400,9 @@ test.describe('Sitemap Metadata Validation', () => {
 
         processedCount++;
         if (processedCount % 50 === 0) {
-          console.log(`   Processed ${processedCount}/${sitemapURLs.length} pages...`);
+          // Progress checkpoint - could log here if needed
         }
       } catch (error) {
-        // Log error but don't fail entire test
-        console.error(`   ❌ Failed to validate ${url}:`, error);
         allViolations.push({
           url,
           field: 'page',
@@ -417,16 +412,7 @@ test.describe('Sitemap Metadata Validation', () => {
         });
       }
     };
-
-    // Process URLs in batches
-    console.log(
-      `🔍 Validating metadata for ${sitemapURLs.length} pages (${BATCH_SIZE} at a time)...\n`
-    );
     await processBatch(sitemapURLs, BATCH_SIZE, validateURL);
-
-    console.log(
-      `\n✅ Validation complete: ${processedCount}/${sitemapURLs.length} pages processed\n`
-    );
 
     // Step 3: Report violations
     if (allViolations.length > 0) {
@@ -452,7 +438,7 @@ test.describe('Sitemap Metadata Validation', () => {
         })
         .join('\n');
 
-      const summary =
+      const _summary =
         `\n${'='.repeat(80)}\n📊 METADATA VALIDATION SUMMARY\n${'='.repeat(80)}\n\n` +
         `Total Pages: ${sitemapURLs.length}\n` +
         `Pages with Violations: ${Object.keys(violationsByURL).length}\n` +
@@ -465,22 +451,13 @@ test.describe('Sitemap Metadata Validation', () => {
         `${'='.repeat(80)}${errorReport}\n\n` +
         `${'='.repeat(80)}\n`;
 
-      console.error(summary);
-
       // Fail test with comprehensive error message
       expect(allViolations.length).toBe(0);
     }
-
-    // Success message
-    console.log(`\n${'='.repeat(80)}`);
-    console.log(`✅ SUCCESS: All ${sitemapURLs.length} pages have valid metadata!`);
-    console.log(`${'='.repeat(80)}\n`);
   });
 
   test('should have no generic fallback titles in sitemap', async ({ page }) => {
     test.setTimeout(600000);
-
-    console.log('\n🔍 Checking for generic fallback titles...');
     const sitemapURLs = await fetchSitemapURLs(BASE_URL);
 
     const genericTitlePages: string[] = [];
@@ -500,23 +477,19 @@ test.describe('Sitemap Metadata Validation', () => {
             genericTitlePages.push(`${sitemapURL.loc} -> "${title}"`);
           }
         }
-      } catch (error) {
-        console.error(`   Failed to check ${sitemapURL.loc}:`, error);
+      } catch (_error) {
+        // Page load error - skip validation for this URL
       }
     };
 
     await processBatch(sitemapURLs, BATCH_SIZE, checkURL);
 
     if (genericTitlePages.length > 0) {
-      const errorMsg =
+      const _errorMsg =
         `\n❌ Found ${genericTitlePages.length} pages with generic fallback titles:\n\n` +
         genericTitlePages.map((p) => `  - ${p}`).join('\n') +
         '\n\nThese pages are using fallback metadata instead of actual content-based titles.\n';
-
-      console.error(errorMsg);
       expect(genericTitlePages.length).toBe(0);
     }
-
-    console.log(`✅ No generic fallback titles found in ${sitemapURLs.length} pages\n`);
   });
 });

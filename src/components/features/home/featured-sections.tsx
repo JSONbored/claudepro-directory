@@ -43,9 +43,9 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
 
     return (
       <div>
-        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_8}`}>
-          <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD}`}>{title}</h2>
-          <Link href={href} className={UI_CLASSES.LINK_ACCENT_UNDERLINE}>
+        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
+          <h2 className={'text-2xl font-bold'}>{title}</h2>
+          <Link href={href} className="text-accent hover:underline flex items-center gap-2">
             View all <ExternalLink className="h-4 w-4" />
           </Link>
         </div>
@@ -100,20 +100,16 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories }) =>
 
       {/* Featured Jobs */}
       <div>
-        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_8}`}>
-          <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD}`}>Featured Jobs</h2>
-          <Link href={ROUTES.JOBS} className={UI_CLASSES.LINK_ACCENT_UNDERLINE}>
+        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
+          <h2 className={'text-2xl font-bold'}>Featured Jobs</h2>
+          <Link href={ROUTES.JOBS} className="text-accent hover:underline flex items-center gap-2">
             View all <ExternalLink className="h-4 w-4" />
           </Link>
         </div>
         <div className={UI_CLASSES.CONTAINER_CARD_MUTED}>
-          <Briefcase
-            className={`h-12 w-12 ${UI_CLASSES.MX_AUTO} mb-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}/50`}
-          />
-          <h3 className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_2}`}>
-            Find Your Next AI Role
-          </h3>
-          <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_6}`}>
+          <Briefcase className={'h-12 w-12 mx-auto mb-4 text-muted-foreground/50'} />
+          <h3 className={'text-lg font-semibold mb-2'}>Find Your Next AI Role</h3>
+          <p className={'text-muted-foreground mb-6'}>
             Discover opportunities with companies building the future of AI
           </p>
           <Button asChild>

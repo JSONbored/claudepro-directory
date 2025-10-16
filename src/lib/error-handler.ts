@@ -746,7 +746,7 @@ function cloneWithHeaders(original: Response, headers: Record<string, string>): 
  * const { GET, POST } = createApiRoute({ ... });
  * export { GET, POST };
  */
-export function createApiRoute<P = any, Q = any, H = any, B = any>(
+export function createApiRoute<P = unknown, Q = unknown, H = unknown, B = unknown>(
   options: CreateApiRouteOptions<P, Q, H, B>
 ): Partial<Record<HttpMethod, NextRouteHandler<P>>> {
   const { validate, rateLimit, auth, response, handlers } = options;

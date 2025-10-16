@@ -29,16 +29,16 @@ export const JobCard = memo(({ job }: JobCardProps) => {
       )}
 
       <CardHeader className="pb-4">
-        <div className={`flex ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN}`}>
-          <div className={UI_CLASSES.FLEX_1}>
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.MB_2}`}>
+        <div className={'flex items-start justify-between'}>
+          <div className="flex-1">
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-2`}>
               {job.companyLogo && (
                 <Image
                   src={job.companyLogo}
                   alt={`${job.company} logo`}
                   width={48}
                   height={48}
-                  className={`${UI_CLASSES.ROUNDED_LG} object-cover`}
+                  className={'rounded-lg object-cover'}
                   loading="lazy"
                   placeholder="blur"
                   blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABQODxIPDRQSEBIXFRQYHjIhHhwcHj0sLiQySUBMS0dARkVQWnNiUFVtVkVGZIhlbXd7gYKBTmCNl4x9lnN+gXz/2wBDARUXFx4aHjshITt8U0ZTfHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHz/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
@@ -48,18 +48,14 @@ export const JobCard = memo(({ job }: JobCardProps) => {
                 <CardTitle className={'text-xl group-hover:text-accent transition-colors-smooth'}>
                   <Link href={`/jobs/${job.slug}`}>{job.title}</Link>
                 </CardTitle>
-                <div
-                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
-                >
+                <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-muted-foreground`}>
                   <Building className="h-4 w-4" />
-                  <span className={UI_CLASSES.FONT_MEDIUM}>{job.company}</span>
+                  <span className="font-medium">{job.company}</span>
                 </div>
               </div>
             </div>
 
-            <div
-              className={`${UI_CLASSES.FLEX_WRAP_GAP_3} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
-            >
+            <div className={`${UI_CLASSES.FLEX_WRAP_GAP_3} text-sm text-muted-foreground`}>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 <MapPin className="h-4 w-4" />
                 {job.location}
@@ -77,7 +73,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
             </div>
           </div>
 
-          <div className={`${UI_CLASSES.FLEX_COL} items-end gap-2`}>
+          <div className={'flex flex-col items-end gap-2'}>
             <Badge className={getTypeColor(job.type)}>{job.type.replace('-', ' ')}</Badge>
             {job.remote && <Badge variant="secondary">Remote</Badge>}
           </div>
@@ -85,17 +81,17 @@ export const JobCard = memo(({ job }: JobCardProps) => {
       </CardHeader>
 
       <CardContent className="pt-0">
-        <p className={`text-muted-foreground ${UI_CLASSES.MB_4} line-clamp-2`}>{job.description}</p>
+        <p className={'text-muted-foreground mb-4 line-clamp-2'}>{job.description}</p>
 
-        <div className={UI_CLASSES.MB_4}>
+        <div className="mb-4">
           <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
             {job.tags.slice(0, 4).map((tag) => (
-              <Badge key={tag} variant="outline" className={UI_CLASSES.TEXT_XS}>
+              <Badge key={tag} variant="outline" className="text-xs">
                 {tag}
               </Badge>
             ))}
             {job.tags.length > 4 && (
-              <Badge variant="outline" className={UI_CLASSES.TEXT_XS}>
+              <Badge variant="outline" className="text-xs">
                 +{job.tags.length - 4} more
               </Badge>
             )}
@@ -103,7 +99,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
         </div>
 
         <div className="flex gap-3">
-          <Button asChild className={UI_CLASSES.FLEX_1}>
+          <Button asChild className="flex-1">
             <a href={job.applyUrl} target="_blank" rel="noopener noreferrer">
               Apply Now
               <ExternalLink className="h-4 w-4 ml-2" />

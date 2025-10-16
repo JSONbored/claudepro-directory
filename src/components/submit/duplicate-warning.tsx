@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/src/components/ui/alert';
 import { AlertTriangle } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface DuplicateWarningProps {
   contentType: string;
@@ -75,7 +74,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
 
   if (checking) {
     return (
-      <div className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} animate-pulse`}>
+      <div className={'text-sm text-muted-foreground animate-pulse'}>
         Checking for duplicates...
       </div>
     );
@@ -90,7 +89,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
       <AlertTriangle className="h-4 w-4 text-yellow-400" />
       <AlertTitle className="text-yellow-400">Suggestion</AlertTitle>
       <AlertDescription>
-        <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>{warning}</p>
+        <p className={'text-sm text-muted-foreground'}>{warning}</p>
       </AlertDescription>
     </Alert>
   );

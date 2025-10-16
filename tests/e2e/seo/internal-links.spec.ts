@@ -32,7 +32,7 @@
  * @group links
  */
 
-import { expect, type Locator, type Page, test } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 import {
   navigateToCategory,
   navigateToHomepage,
@@ -83,7 +83,7 @@ async function getAllInternalLinks(page: Page, baseUrl: string): Promise<LinkInf
           return null;
         }
       })
-      .filter((link): link is LinkInfo => link !== null && link.isInternal);
+      .filter((link): link is LinkInfo => link?.isInternal);
   }, baseUrl);
 }
 

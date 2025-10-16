@@ -37,19 +37,19 @@ export function CodeGroup(props: CodeGroupWithHighlightedExamples) {
   return (
     <section itemScope itemType="https://schema.org/SoftwareSourceCode" className="my-10">
       {title && (
-        <div className={UI_CLASSES.MB_4}>
-          <h3 className={`text-xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`} itemProp="name">
+        <div className="mb-4">
+          <h3 className={'text-xl font-bold mb-2'} itemProp="name">
             {title}
           </h3>
           {description && (
-            <p className={`${UI_CLASSES.TEXT_BASE} text-muted-foreground`} itemProp="description">
+            <p className={'text-base text-muted-foreground'} itemProp="description">
               {description}
             </p>
           )}
         </div>
       )}
 
-      <div className={UI_CLASSES.SPACE_Y_2}>
+      <div className="space-y-2">
         {/* Tabs */}
         <div className={UI_CLASSES.CODE_BLOCK_TAB_CONTAINER}>
           {examples.map((example, index) => {
@@ -68,9 +68,7 @@ export function CodeGroup(props: CodeGroupWithHighlightedExamples) {
                 <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                   <span className="font-mono">{example.language}</span>
                   {example.filename && (
-                    <span className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-                      • {example.filename}
-                    </span>
+                    <span className={'text-xs text-muted-foreground'}>• {example.filename}</span>
                   )}
                 </span>
               </button>

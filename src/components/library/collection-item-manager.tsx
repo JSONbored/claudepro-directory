@@ -186,13 +186,11 @@ export function CollectionItemManager({
   };
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_4}>
+    <div className="space-y-4">
       {/* Add Item Section */}
-      <div className={`${UI_CLASSES.FLEX_ITEMS_END_GAP_2} pb-4`}>
-        <div className={UI_CLASSES.FLEX_1}>
-          <div className={`${UI_CLASSES.TEXT_SM} font-medium mb-2 block`}>
-            Add Bookmark to Collection
-          </div>
+      <div className={'flex items-end gap-2 pb-4'}>
+        <div className="flex-1">
+          <div className={'text-sm font-medium mb-2 block'}>Add Bookmark to Collection</div>
           <Select value={selectedBookmarkId} onValueChange={setSelectedBookmarkId}>
             <SelectTrigger>
               <SelectValue placeholder="Select a bookmark to add" />
@@ -232,19 +230,19 @@ export function CollectionItemManager({
       {/* Items List */}
       {items.length === 0 ? (
         <div className="text-center py-12 border border-dashed rounded-lg">
-          <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+          <p className={'text-muted-foreground'}>
             No items in this collection yet. Add bookmarks above to get started.
           </p>
         </div>
       ) : (
-        <div className={UI_CLASSES.SPACE_Y_2}>
+        <div className="space-y-2">
           {items.map((item: CollectionItem, index: number) => (
             <div
               key={item.id}
               className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors`}
             >
               {/* Order Controls */}
-              <div className={UI_CLASSES.FLEX_COL_GAP_1}>
+              <div className="flex flex-col gap-1">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -273,18 +271,14 @@ export function CollectionItemManager({
               </div>
 
               {/* Content Info */}
-              <div className={UI_CLASSES.FLEX_1}>
+              <div className="flex-1">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                   <Badge variant="outline" className="text-xs capitalize">
                     {item.content_type}
                   </Badge>
                   <span className="text-sm font-medium">{item.content_slug}</span>
                 </div>
-                {item.notes && (
-                  <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
-                    {item.notes}
-                  </p>
-                )}
+                {item.notes && <p className={'text-xs text-muted-foreground mt-1'}>{item.notes}</p>}
               </div>
 
               {/* Actions */}

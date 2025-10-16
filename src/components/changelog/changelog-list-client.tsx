@@ -70,7 +70,7 @@ export function ChangelogListClient({ entries }: ChangelogListClientProps) {
     <Tabs
       value={activeCategory}
       onValueChange={(value) => setActiveCategory(value as 'All' | ChangelogCategory)}
-      className={UI_CLASSES.SPACE_Y_6}
+      className="space-y-6"
     >
       {/* Category Filter */}
       <CategoryFilter
@@ -99,7 +99,7 @@ export function ChangelogListClient({ entries }: ChangelogListClientProps) {
                     showAuthor={false}
                     className="transition-all duration-200"
                     renderTopBadges={() => (
-                      <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2`}>
+                      <div className={'flex items-center gap-2'}>
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <time
                           dateTime={entry.date}
@@ -132,7 +132,9 @@ export function ChangelogListClient({ entries }: ChangelogListClientProps) {
                     }
                     customMetadataText={
                       <div
-                        className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 text-sm text-primary group-hover:text-accent transition-colors-smooth font-medium transition-colors`}
+                        className={
+                          'flex items-center gap-2 text-sm text-primary group-hover:text-accent transition-colors-smooth font-medium transition-colors'
+                        }
                       >
                         <span>Read full changelog</span>
                         <ArrowRight className="h-4 w-4" />

@@ -64,7 +64,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
           </DialogDescription>
         </DialogHeader>
 
-        <div className={UI_CLASSES.SPACE_Y_4}>
+        <div className="space-y-4">
           {/* Copy link */}
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Input

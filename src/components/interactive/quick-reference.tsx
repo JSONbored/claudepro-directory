@@ -42,13 +42,15 @@ export function QuickReference(props: QuickReferenceProps) {
         {description && <CardDescription itemProp="description">{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <div className={`${UI_CLASSES.GRID_GAP_4} ${columns === 2 ? 'md:grid-cols-2' : ''}`}>
+        <div className={`grid gap-4 ${columns === 2 ? 'md:grid-cols-2' : ''}`}>
           {validItems.map((item, index) => (
             <div
               key={`${item.label}-${index}`}
               itemScope
               itemType="https://schema.org/PropertyValue"
-              className={`${UI_CLASSES.FLEX_COL} sm:flex-row sm:${UI_CLASSES.ITEMS_START} gap-2 sm:gap-4 p-3 bg-card/50 rounded-lg border`}
+              className={
+                'flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 p-3 bg-card/50 rounded-lg border'
+              }
             >
               <div className="sm:w-1/3">
                 <dt itemProp="name" className={`font-medium ${UI_CLASSES.TEXT_SM_MUTED}`}>

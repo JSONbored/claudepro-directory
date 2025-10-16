@@ -117,12 +117,10 @@ export function AnnouncementBanner() {
               {/* Announcement Content */}
               <Announcement
                 variant={announcement.variant}
-                className={`${UI_CLASSES.FLEX_1} border-none bg-transparent shadow-none`}
+                className={'flex-1 border-none bg-transparent shadow-none'}
               >
                 {announcement.tag && (
-                  <AnnouncementTag
-                    className={`text-[9px] sm:text-xs ${UI_CLASSES.FLEX_SHRINK_0} font-bold`}
-                  >
+                  <AnnouncementTag className={'text-[9px] sm:text-xs flex-shrink-0 font-bold'}>
                     {announcement.tag}
                   </AnnouncementTag>
                 )}
@@ -136,7 +134,7 @@ export function AnnouncementBanner() {
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent && (
                         <IconComponent
-                          className={`h-3 w-3 sm:h-4 sm:w-4 ${UI_CLASSES.FLEX_SHRINK_0}`}
+                          className={'h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0'}
                           aria-hidden="true"
                         />
                       )}
@@ -146,7 +144,7 @@ export function AnnouncementBanner() {
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent && (
                         <IconComponent
-                          className={`h-3 w-3 sm:h-4 sm:w-4 ${UI_CLASSES.FLEX_SHRINK_0}`}
+                          className={'h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0'}
                           aria-hidden="true"
                         />
                       )}

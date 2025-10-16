@@ -44,8 +44,8 @@ export function Accordion(props: AccordionProps) {
   return (
     <section className="my-8" aria-label={title || 'Accordion section'}>
       {title && (
-        <div className={UI_CLASSES.MB_6}>
-          <h3 className={`text-xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`}>{title}</h3>
+        <div className="mb-6">
+          <h3 className={'text-xl font-bold mb-2'}>{title}</h3>
           {description && <p className="text-muted-foreground">{description}</p>}
         </div>
       )}
@@ -61,10 +61,10 @@ export function Accordion(props: AccordionProps) {
             <button
               type="button"
               onClick={() => toggleItem(index)}
-              className={`${UI_CLASSES.W_FULL} text-left`}
+              className={'w-full text-left'}
               aria-expanded={openItems.has(index)}
             >
-              <CardHeader className={`hover:bg-muted/30 ${UI_CLASSES.TRANSITION_COLORS}`}>
+              <CardHeader className={'hover:bg-muted/30 transition-colors'}>
                 <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} itemProp="name">
                   <span>{item.title}</span>
                   <div className="ml-4 flex-shrink-0">

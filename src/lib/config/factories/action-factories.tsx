@@ -24,7 +24,6 @@ import type { ReactNode } from 'react';
 import { BookOpen, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import type { ActionButtonConfig } from '@/src/lib/types/content-type-config';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 /**
@@ -51,7 +50,7 @@ export type ContentExtractor = (item: UnifiedContentItem) => string;
  * // commands category
  * primaryAction: createCopyAction(
  *   'Copy Command',
- *   <Terminal className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
+ *   <Terminal className={`h-4 w-4 mr-2`} />,
  *   (item) => ('content' in item && typeof item.content === 'string' ? item.content : ''),
  *   'Copied!',
  *   'Command content has been copied to your clipboard.'
@@ -94,7 +93,7 @@ export function createCopyAction(
  * // mcp category
  * primaryAction: createScrollAction(
  *   'View Configuration',
- *   <Server className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
+ *   <Server className={`h-4 w-4 mr-2`} />,
  *   'configuration'
  * )
  * ```
@@ -131,7 +130,7 @@ export function createScrollAction(
  * // agents category
  * primaryAction: createNotificationAction(
  *   'Deploy Agent',
- *   <Bot className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
+ *   <Bot className={`h-4 w-4 mr-2`} />,
  *   'Agent Deployment',
  *   'Copy the agent content and follow the installation instructions.'
  * )
@@ -170,7 +169,7 @@ export function createNotificationAction(
  * // hooks category
  * primaryAction: createGitHubLinkAction(
  *   'View on GitHub',
- *   <Webhook className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
+ *   <Webhook className={`h-4 w-4 mr-2`} />,
  *   'https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/{slug}.json'
  * )
  * ```
@@ -178,7 +177,7 @@ export function createNotificationAction(
 export function createGitHubLinkAction(
   pathTemplate: string,
   label = 'View on GitHub',
-  icon: ReactNode = <Webhook className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />
+  icon: ReactNode = <Webhook className={'h-4 w-4 mr-2'} />
 ): ActionButtonConfig {
   return {
     label,
@@ -205,7 +204,7 @@ export const commonActions = {
   copyCommand: () =>
     createCopyAction(
       'Copy Command',
-      <Terminal className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
+      <Terminal className={'h-4 w-4 mr-2'} />,
       (item) => ('content' in item && typeof item.content === 'string' ? item.content : ''),
       'Copied!',
       'Command content has been copied to your clipboard.'
@@ -217,7 +216,7 @@ export const commonActions = {
   copyScript: () =>
     createCopyAction(
       'Copy Script',
-      <Terminal className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
+      <Terminal className={'h-4 w-4 mr-2'} />,
       (item) =>
         'configuration' in item &&
         typeof item.configuration === 'object' &&
@@ -236,7 +235,7 @@ export const commonActions = {
   viewConfiguration: () =>
     createScrollAction(
       'View Configuration',
-      <Server className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
+      <Server className={'h-4 w-4 mr-2'} />,
       'configuration'
     ),
 
@@ -244,22 +243,14 @@ export const commonActions = {
    * View collection action (for collections category)
    */
   viewCollection: () =>
-    createScrollAction(
-      'View Collection',
-      <Layers className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
-      'items'
-    ),
+    createScrollAction('View Collection', <Layers className={'h-4 w-4 mr-2'} />, 'items'),
 
   /**
    * Apply skill action (for skills category)
    * Renamed from useSkill to avoid React hook naming convention
    */
   applySkill: () =>
-    createScrollAction(
-      'Use Skill',
-      <BookOpen className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
-      'content'
-    ),
+    createScrollAction('Use Skill', <BookOpen className={'h-4 w-4 mr-2'} />, 'content'),
 
   /**
    * View hooks on GitHub action (for hooks category)
@@ -268,6 +259,6 @@ export const commonActions = {
     createGitHubLinkAction(
       'https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/{slug}.json',
       'View on GitHub',
-      <Webhook className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />
+      <Webhook className={'h-4 w-4 mr-2'} />
     ),
 } as const;

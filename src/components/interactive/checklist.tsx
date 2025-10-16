@@ -66,10 +66,10 @@ export function Checklist(props: ChecklistProps) {
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <div className={UI_CLASSES.MB_4}>
-          <div className={`w-full bg-muted ${UI_CLASSES.ROUNDED_FULL} h-2`}>
+        <div className="mb-4">
+          <div className={'w-full bg-muted rounded-full h-2'}>
             <div
-              className={`bg-primary h-2 ${UI_CLASSES.ROUNDED_FULL} transition-all duration-300`}
+              className={'bg-primary h-2 rounded-full transition-all duration-300'}
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -80,7 +80,9 @@ export function Checklist(props: ChecklistProps) {
               key={`${item.task}-${index}`}
               itemScope
               itemType="https://schema.org/ListItem"
-              className={`flex ${UI_CLASSES.ITEMS_START} gap-3 p-3 ${UI_CLASSES.ROUNDED_LG} bg-muted/30 hover:bg-muted/50 ${UI_CLASSES.TRANSITION_COLORS}`}
+              className={
+                'flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors'
+              }
             >
               <button
                 type="button"
@@ -89,7 +91,7 @@ export function Checklist(props: ChecklistProps) {
                 aria-label={`Mark ${item.task} as ${checkedItems.has(index) ? 'incomplete' : 'complete'}`}
               >
                 <div
-                  className={`w-5 h-5 rounded border-2 flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.TRANSITION_COLORS} ${
+                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
                     checkedItems.has(index)
                       ? 'bg-primary border-primary'
                       : 'border-border hover:border-primary'
@@ -100,7 +102,7 @@ export function Checklist(props: ChecklistProps) {
                   )}
                 </div>
               </button>
-              <div className={UI_CLASSES.FLEX_1}>
+              <div className="flex-1">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                   <span
                     itemProp="name"

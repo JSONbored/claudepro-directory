@@ -14,10 +14,7 @@
 
 import { faker } from '@faker-js/faker';
 import type { StatuslineContent } from '@/src/lib/schemas/content/statusline.schema';
-import {
-  type BaseContentTransientParams,
-  createContentFactory,
-} from '../shared/base-content.factory';
+import { createContentFactory } from '../shared/base-content.factory';
 
 export const statuslineFactory = createContentFactory<StatuslineContent>({
   category: 'statuslines',

@@ -132,7 +132,7 @@ test.describe('Homepage - Content Structure', () => {
 
     const h1Text = await page.locator('h1').first().textContent();
     expect(h1Text, 'H1 must have text content').toBeTruthy();
-    expect(h1Text!.length, 'H1 must have meaningful text').toBeGreaterThan(10);
+    expect(h1Text?.length, 'H1 must have meaningful text').toBeGreaterThan(10);
   });
 
   test('should have proper heading hierarchy', async ({ page }) => {
@@ -222,7 +222,7 @@ test.describe('Homepage - Content Structure', () => {
     if (buttons.length > 0) {
       for (const button of buttons) {
         const text = await button.textContent();
-        const ariaLabel = await link.getAttribute('aria-label');
+        const ariaLabel = await button.getAttribute('aria-label');
 
         const hasAccessibleName = (text && text.trim().length > 0) || ariaLabel;
         expect(hasAccessibleName, 'All buttons must have accessible names').toBe(true);

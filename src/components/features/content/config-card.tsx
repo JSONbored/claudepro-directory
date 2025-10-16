@@ -133,7 +133,7 @@ export const ConfigCard = memo(
               {isCollection && collectionType && COLLECTION_TYPE_LABELS && (
                 <Badge
                   variant="outline"
-                  className={`${UI_CLASSES.TEXT_XS} ${BADGE_COLORS.collectionType[collectionType]}`}
+                  className={`text-xs ${BADGE_COLORS.collectionType[collectionType]}`}
                 >
                   <Layers className="h-3 w-3 mr-1" aria-hidden="true" />
                   {COLLECTION_TYPE_LABELS[collectionType]}
@@ -143,7 +143,7 @@ export const ConfigCard = memo(
               {isCollection && collectionDifficulty && (
                 <Badge
                   variant="outline"
-                  className={`${UI_CLASSES.TEXT_XS} ${BADGE_COLORS.difficulty[collectionDifficulty]}`}
+                  className={`text-xs ${BADGE_COLORS.difficulty[collectionDifficulty]}`}
                 >
                   {collectionDifficulty}
                 </Badge>
@@ -152,7 +152,7 @@ export const ConfigCard = memo(
               {isCollection && itemCount !== undefined && (
                 <Badge
                   variant="outline"
-                  className={`${UI_CLASSES.TEXT_XS} border-muted-foreground/20 text-muted-foreground`}
+                  className={'text-xs border-muted-foreground/20 text-muted-foreground'}
                 >
                   {itemCount} {itemCount === 1 ? 'item' : 'items'}
                 </Badge>
@@ -275,7 +275,7 @@ export const ConfigCard = memo(
               <Button
                 variant="ghost"
                 size="sm"
-                className={`h-7 px-2 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                className={`h-7 px-2 text-xs ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   window.location.href = targetPath;

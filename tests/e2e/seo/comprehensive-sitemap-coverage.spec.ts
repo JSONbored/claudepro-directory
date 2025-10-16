@@ -70,9 +70,9 @@ async function getCanonicalUrl(page: Page): Promise<string | null> {
 /**
  * Helper: Get structured data (JSON-LD)
  */
-async function getStructuredData(page: Page): Promise<any[]> {
+async function getStructuredData(page: Page): Promise<unknown[]> {
   const scripts = await page.locator('script[type="application/ld+json"]').all();
-  const data = [];
+  const data: unknown[] = [];
 
   for (const script of scripts) {
     try {
@@ -303,6 +303,7 @@ async function validateComprehensiveSEO(page: Page, url: string): Promise<void> 
         const entries = list.getEntries();
         const lcpEntry = entries[entries.length - 1];
         resolve({
+          // biome-ignore lint/suspicious/noExplicitAny: PerformanceEntry types don't include LCP-specific properties
           lcp: lcpEntry ? (lcpEntry as any).renderTime || (lcpEntry as any).loadTime : null,
         });
       }).observe({ type: 'largest-contentful-paint', buffered: true });
@@ -312,7 +313,9 @@ async function validateComprehensiveSEO(page: Page, url: string): Promise<void> 
     });
   });
 
+  // biome-ignore lint/suspicious/noExplicitAny: Runtime object from page.evaluate doesn't have static type
   if ((performanceMetrics as any).lcp) {
+    // biome-ignore lint/suspicious/noExplicitAny: Runtime object from page.evaluate doesn't have static type
     const lcpSeconds = (performanceMetrics as any).lcp / 1000;
     expect(
       lcpSeconds,
@@ -329,7 +332,9 @@ async function validateComprehensiveSEO(page: Page, url: string): Promise<void> 
       let cls = 0;
       new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
+          // biome-ignore lint/suspicious/noExplicitAny: PerformanceEntry types don't include layout-shift-specific properties
           if (!(entry as any).hadRecentInput) {
+            // biome-ignore lint/suspicious/noExplicitAny: PerformanceEntry types don't include layout-shift-specific properties
             cls += (entry as any).value;
           }
         }
@@ -496,24 +501,19 @@ async function validateComprehensiveSEO(page: Page, url: string): Promise<void> 
  * Fetch all URLs from sitemap.xml
  */
 async function fetchSitemapUrls(baseUrl: string): Promise<string[]> {
-  try {
-    const response = await fetch(`${baseUrl}/sitemap.xml`);
-    if (!response.ok) {
-      throw new Error(`Sitemap fetch failed: ${response.status}`);
-    }
-
-    const xml = await response.text();
-    const locMatches = xml.match(/<loc>(.*?)<\/loc>/g);
-
-    if (!locMatches) {
-      throw new Error('No URLs found in sitemap.xml');
-    }
-
-    return locMatches.map((match) => match.replace(/<\/?loc>/g, ''));
-  } catch (error) {
-    console.error('Failed to fetch sitemap:', error);
-    throw error;
+  const response = await fetch(`${baseUrl}/sitemap.xml`);
+  if (!response.ok) {
+    throw new Error(`Sitemap fetch failed: ${response.status}`);
   }
+
+  const xml = await response.text();
+  const locMatches = xml.match(/<loc>(.*?)<\/loc>/g);
+
+  if (!locMatches) {
+    throw new Error('No URLs found in sitemap.xml');
+  }
+
+  return locMatches.map((match) => match.replace(/<\/?loc>/g, ''));
 }
 
 /**
@@ -575,16 +575,8 @@ let urlsFetched = false;
 // Use a top-level await to fetch sitemap data before any tests run
 // This ensures all dynamic tests are registered during module evaluation
 const sitemapUrlsPromise = (async () => {
-  try {
-    allUrls = await fetchSitemapUrls(DEV_SERVER_URL);
-    urlsFetched = true;
-    // Verbose logs removed - see HTML report for full details
-  } catch (error) {
-    console.error('❌ Failed to fetch sitemap during module evaluation:', error);
-    console.error('   Make sure dev server is running: npm run dev');
-    console.error(`   Using server: ${DEV_SERVER_URL}`);
-    throw error;
-  }
+  allUrls = await fetchSitemapUrls(DEV_SERVER_URL);
+  urlsFetched = true;
 })();
 
 // Wait for sitemap to be fetched before defining tests
@@ -619,13 +611,8 @@ test.describe('Core SEO Infrastructure', () => {
 
   test('should categorize all URLs correctly', () => {
     const htmlUrls = allUrls.filter((url) => categorizeUrl(url).type === 'html');
-    const llmsTxtUrls = allUrls.filter((url) => categorizeUrl(url).type === 'llms_txt');
-    const feedUrls = allUrls.filter((url) => categorizeUrl(url).type === 'feed');
-
-    console.log('\n📊 URL Categories:');
-    console.log(`   📄 HTML Pages: ${htmlUrls.length}`);
-    console.log(`   🤖 llms.txt Routes: ${llmsTxtUrls.length}`);
-    console.log(`   📡 RSS/Atom Feeds: ${feedUrls.length}`);
+    const _llmsTxtUrls = allUrls.filter((url) => categorizeUrl(url).type === 'llms_txt');
+    const _feedUrls = allUrls.filter((url) => categorizeUrl(url).type === 'feed');
 
     expect(htmlUrls.length, 'Should have HTML pages').toBeGreaterThan(0);
   });
@@ -792,17 +779,9 @@ test.describe('RSS/Atom Feeds - Changelog Syndication', () => {
 
 test.describe('Summary', () => {
   test('All sitemap URLs should be tested', () => {
-    const htmlUrls = allUrls.filter((url) => categorizeUrl(url).type === 'html');
-    const llmsTxtUrls = allUrls.filter((url) => categorizeUrl(url).type === 'llms_txt');
-    const feedUrls = allUrls.filter((url) => categorizeUrl(url).type === 'feed');
-
-    console.log('\n✅ COMPREHENSIVE SITEMAP COVERAGE COMPLETE!');
-    console.log('\n📊 Testing Summary:');
-    console.log(`   Total URLs: ${allUrls.length}`);
-    console.log(`   📄 HTML Pages: ${htmlUrls.length} (11 SEO checks each)`);
-    console.log(`   🤖 llms.txt Routes: ${llmsTxtUrls.length} (8 AI citation checks each)`);
-    console.log(`   📡 RSS/Atom Feeds: ${feedUrls.length} (feed validation)`);
-    console.log('   Coverage: 100% ✅\n');
+    const _htmlUrls = allUrls.filter((url) => categorizeUrl(url).type === 'html');
+    const _llmsTxtUrls = allUrls.filter((url) => categorizeUrl(url).type === 'llms_txt');
+    const _feedUrls = allUrls.filter((url) => categorizeUrl(url).type === 'feed');
 
     expect(allUrls.length, 'All URLs should be categorized and tested').toBeGreaterThan(0);
   });

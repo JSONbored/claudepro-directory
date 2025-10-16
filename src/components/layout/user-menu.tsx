@@ -97,7 +97,7 @@ export function UserMenu({ className }: UserMenuProps) {
   // Loading state
   if (loading) {
     return (
-      <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${className}`}>
+      <div className={`flex items-center ${className}`}>
         <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
       </div>
     );
@@ -115,7 +115,7 @@ export function UserMenu({ className }: UserMenuProps) {
           aria-label="Sign in"
         >
           <UserIcon className="h-4 w-4" />
-          <span className={`${UI_CLASSES.HIDDEN} lg:inline`}>Sign In</span>
+          <span className={'hidden lg:inline'}>Sign In</span>
         </Button>
       </div>
     );
@@ -154,7 +154,7 @@ export function UserMenu({ className }: UserMenuProps) {
         <DropdownMenuContent className="w-56" align="end" forceMount>
           {/* User Info */}
           <DropdownMenuLabel className="font-normal">
-            <div className={UI_CLASSES.FLEX_COL}>
+            <div className="flex flex-col">
               <p className="text-sm font-medium leading-none">{displayName}</p>
               <p className="text-xs leading-none text-muted-foreground mt-1">{user.email}</p>
             </div>

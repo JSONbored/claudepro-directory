@@ -159,7 +159,7 @@ test.describe('Homepage - Smoke Tests', () => {
     // Check meta description
     const metaDescription = await page.locator('meta[name="description"]').getAttribute('content');
     expect(metaDescription).toBeTruthy();
-    expect(metaDescription!.length).toBeGreaterThan(50);
+    expect(metaDescription?.length).toBeGreaterThan(50);
 
     // Check Open Graph tags
     const ogTitle = await page.locator('meta[property="og:title"]').getAttribute('content');

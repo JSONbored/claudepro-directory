@@ -130,7 +130,9 @@ export default async function ChangelogEntryPage({
           {/* Navigation */}
           <Link
             href={ROUTES.CHANGELOG}
-            className={`${UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.HOVER_TEXT_FOREGROUND} ${UI_CLASSES.TRANSITION_COLORS}`}
+            className={
+              'inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors'
+            }
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Changelog</span>
@@ -138,9 +140,7 @@ export default async function ChangelogEntryPage({
 
           {/* Header */}
           <header className="space-y-4 pb-6">
-            <div
-              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
-            >
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-sm text-muted-foreground`}>
               <Calendar className="h-4 w-4" />
               <time dateTime={entry.date}>{formatChangelogDate(entry.date)}</time>
             </div>
@@ -148,7 +148,7 @@ export default async function ChangelogEntryPage({
             <h1 className="text-4xl font-bold tracking-tight">{entry.title}</h1>
 
             {/* Canonical URL */}
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM}`}>
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
               <span className="text-muted-foreground">Permanent link:</span>
               <a
                 href={canonicalUrl}
@@ -178,7 +178,9 @@ export default async function ChangelogEntryPage({
         <div className="space-y-4">
           <Link
             href={ROUTES.CHANGELOG}
-            className={`${UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.HOVER_TEXT_FOREGROUND} ${UI_CLASSES.TRANSITION_COLORS}`}
+            className={
+              'inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors'
+            }
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Changelog</span>

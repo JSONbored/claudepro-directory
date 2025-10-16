@@ -18,7 +18,7 @@ export default function ChangelogEntryLoading() {
       {/* Header Skeleton */}
       <header className="space-y-4 pb-6 animate-pulse">
         {/* Date */}
-        <div className={`flex ${UI_CLASSES.ITEMS_CENTER} gap-3`}>
+        <div className={'flex items-center gap-3'}>
           <Skeleton size="sm" width="xs" />
           <Skeleton size="sm" width="sm" />
         </div>
@@ -27,7 +27,7 @@ export default function ChangelogEntryLoading() {
         <Skeleton size="xl" width="3/4" />
 
         {/* Canonical URL */}
-        <div className={`flex ${UI_CLASSES.ITEMS_CENTER} gap-2`}>
+        <div className={'flex items-center gap-2'}>
           <Skeleton size="sm" width="xs" />
           <Skeleton size="sm" width="2xl" />
         </div>
@@ -36,7 +36,7 @@ export default function ChangelogEntryLoading() {
       <Separator className="my-6" />
 
       {/* Content Skeleton */}
-      <div className={UI_CLASSES.SPACE_Y_6}>
+      <div className="space-y-6">
         {/* TL;DR Box */}
         <div className="rounded-lg border p-4 animate-pulse">
           <Skeleton size="sm" width="xs" className="mb-2" />

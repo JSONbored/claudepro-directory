@@ -47,9 +47,7 @@ export function RatingHistogram({
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} justify-center mb-2`}>
             <Star className="h-8 w-8 text-muted-foreground/30" aria-hidden="true" />
           </div>
-          <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-            No reviews yet. Be the first to review!
-          </p>
+          <p className={'text-sm text-muted-foreground'}>No reviews yet. Be the first to review!</p>
         </div>
       </Card>
     );
@@ -84,14 +82,14 @@ export function RatingHistogram({
             ))}
           </div>{' '}
         </div>
-        <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+        <p className={'text-sm text-muted-foreground'}>
           Based on {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
         </p>
       </div>
 
       {/* Chart: Rating Distribution */}
       <div>
-        <h3 className={`${UI_CLASSES.TEXT_SM} font-semibold mb-3`}>Rating Distribution</h3>
+        <h3 className={'text-sm font-semibold mb-3'}>Rating Distribution</h3>
         <ChartContainer height="200px" className="w-full">
           <HorizontalBarChart
             data={chartData}

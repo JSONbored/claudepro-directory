@@ -74,7 +74,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
   };
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <div className="space-y-6">
       {/* Filter Tabs */}
       <div className="flex gap-2 flex-wrap">
         <Button
@@ -124,11 +124,11 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
       </div>
 
       {/* Timeline */}
-      <div className={UI_CLASSES.SPACE_Y_3}>
+      <div className="space-y-3">
         {filteredActivities.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
-              <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+              <p className="text-muted-foreground">
                 No {filter === 'all' ? '' : filter} activity yet
               </p>
             </CardContent>

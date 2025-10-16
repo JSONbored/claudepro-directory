@@ -421,12 +421,12 @@ export default async function SEOGuidePage({
         <Script id={articleId} type="application/ld+json" strategy="afterInteractive">
           {JSON.stringify(articleData)}
         </Script>
-        <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
+        <div className={'min-h-screen bg-background'}>
           {/* Header - matches content pages */}
-          <div className={`border-b border-border/50 ${UI_CLASSES.BG_CARD}/30`}>
+          <div className={'border-b border-border/50 bg-card/30'}>
             <div className="container mx-auto px-4 py-8">
               {/* Modern back navigation */}
-              <div className={UI_CLASSES.MB_6}>
+              <div className="mb-6">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -440,13 +440,13 @@ export default async function SEOGuidePage({
                 </Button>
               </div>
 
-              <div className={UI_CLASSES.MAX_W_4XL}>
-                <div className={`flex ${UI_CLASSES.ITEMS_START} gap-4 ${UI_CLASSES.MB_6}`}>
-                  <div className={`p-3 ${UI_CLASSES.BG_ACCENT_10} rounded-lg`}>
+              <div className="max-w-4xl">
+                <div className={'flex items-start gap-4 mb-6'}>
+                  <div className={'p-3 bg-accent/10 rounded-lg'}>
                     <Icon className="h-6 w-6 text-primary" />
                   </div>
-                  <div className={UI_CLASSES.FLEX_1}>
-                    <h1 className={`text-3xl font-bold ${UI_CLASSES.MB_2}`}>{data.title}</h1>
+                  <div className="flex-1">
+                    <h1 className={'text-3xl font-bold mb-2'}>{data.title}</h1>
                     <p className="text-lg text-muted-foreground">{data.description}</p>
                   </div>
                 </div>

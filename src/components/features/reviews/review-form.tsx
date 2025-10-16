@@ -139,16 +139,10 @@ export function ReviewForm({
           aria-invalid={showRatingError ? 'true' : undefined}
         />
         {rating === 0 && !showRatingError && (
-          <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
-            Click a star to rate
-          </p>
+          <p className={'text-xs text-muted-foreground mt-1'}>Click a star to rate</p>
         )}
         {showRatingError && (
-          <p
-            id={ratingErrorId}
-            className={`${UI_CLASSES.TEXT_SM} text-destructive mt-1`}
-            role="alert"
-          >
+          <p id={ratingErrorId} className={'text-sm text-destructive mt-1'} role="alert">
             Please select a star rating before submitting
           </p>
         )}
@@ -158,9 +152,7 @@ export function ReviewForm({
       <div>
         <Label htmlFor={textareaId} className="mb-2 block">
           Your Review{' '}
-          <span className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} font-normal`}>
-            (optional)
-          </span>
+          <span className={'text-xs text-muted-foreground font-normal'}>(optional)</span>
         </Label>
         <Textarea
           id={textareaId}
@@ -174,20 +166,16 @@ export function ReviewForm({
           {...(hasTextError ? { errorId: textareaErrorId } : {})}
         />
         {hasTextError && (
-          <p
-            id={textareaErrorId}
-            className={`${UI_CLASSES.TEXT_SM} text-destructive mt-1`}
-            role="alert"
-          >
+          <p id={textareaErrorId} className={'text-sm text-destructive mt-1'} role="alert">
             Review text cannot exceed {MAX_REVIEW_LENGTH} characters
           </p>
         )}
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mt-1`}>
-          <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+          <p className={'text-xs text-muted-foreground'}>
             Help others by sharing details about your experience
           </p>
           <p
-            className={`${UI_CLASSES.TEXT_XS} ${charactersRemaining < 100 ? 'text-destructive' : UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+            className={`text-xs ${charactersRemaining < 100 ? 'text-destructive' : 'text-muted-foreground'}`}
           >
             {charactersRemaining} characters remaining
           </p>
