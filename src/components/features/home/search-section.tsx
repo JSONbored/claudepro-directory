@@ -2,15 +2,15 @@
 
 /**
  * SearchSection Component
- * Production 2025 Architecture: TanStack Virtual for infinite lists
+ * Production 2025 Architecture: Infinite Scroll with Intersection Observer
  *
  * Handles search UI and results display for the homepage
- * Uses virtualization for optimal performance with large result sets
+ * Uses infinite scroll for optimal performance with large result sets
  */
 
 import { type FC, memo } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
-import { VirtualizedGrid } from '@/src/components/shared/virtualized-grid';
+import { InfiniteScrollGrid } from '@/src/components/shared/infinite-scroll-grid';
 import { Button } from '@/src/components/ui/button';
 import { Search } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
@@ -42,11 +42,10 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
       </div>
 
       {filteredResults.length > 0 ? (
-        <VirtualizedGrid<UnifiedContentItem>
+        <InfiniteScrollGrid<UnifiedContentItem>
           items={filteredResults}
-          estimateSize={400}
-          overscan={5}
           gap={24}
+          batchSize={30}
           renderItem={(item: UnifiedContentItem) => (
             <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
           )}

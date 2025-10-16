@@ -107,7 +107,6 @@
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.75.0",
     "@tailwindcss/postcss": "^4.1.14",
-    "@tanstack/react-virtual": "^3.13.12",
     "@types/he": "^1.2.3",
     "@types/node": "^24.7.2",
     "@types/react": "^19.2.2",

@@ -1,0 +1,84 @@
+{
+  "slug": "webassembly-module-development",
+  "title": "WebAssembly Module Development",
+  "seoTitle": "WebAssembly WASM Module Development Skill",
+  "description": "Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads.",
+  "category": "skills",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-16",
+  "tags": ["webassembly", "wasm", "rust", "performance", "wasi"],
+  "content": "# WebAssembly Module Development Skill\n\n## What This Skill Enables\n\nClaude can build production-ready WebAssembly modules that run at near-native speeds across web browsers, serverless platforms, and edge computing environments. With WASI 0.3 bringing native async support and WebAssembly 2.0 complete as of March 2025, WASM has transitioned from experimental to production-ready for AI workloads, cloud-native applications, and high-performance web apps.\n\n## Prerequisites\n\n**Required:**\n- Claude Pro subscription or Claude Code CLI\n- Rust (recommended) or C++/Go compiler\n- Node.js 18+ for JavaScript integration\n- Basic understanding of systems programming\n\n**What Claude handles automatically:**\n- Writing Rust/C++ code optimized for WASM\n- Compiling to WebAssembly with proper optimizations\n- Generating JavaScript bindings with wasm-bindgen\n- Setting up WASI for system calls\n- Implementing Component Model for interoperability\n- Optimizing binary size and performance\n- Testing WASM modules in multiple runtimes\n\n## How to Use This Skill\n\n### Create a Basic WASM Module\n\n**Prompt:** \"Build a WebAssembly module in Rust that calculates Fibonacci numbers. Include JavaScript bindings and deploy to npm.\"\n\nClaude will:\n1. Set up Rust project with wasm-pack\n2. Write optimized Fibonacci implementation\n3. Add wasm-bindgen annotations\n4. Compile to WASM with size optimizations\n5. Generate TypeScript definitions\n6. Create npm package configuration\n7. Include usage examples for web and Node.js\n\n### Image Processing with WASM\n\n**Prompt:** \"Create a WebAssembly module that applies image filters (grayscale, blur, sharpen) to ImageData from canvas. Optimize for processing 4K images in real-time.\"\n\nClaude will:\n1. Write Rust image processing algorithms\n2. Use rayon for parallel processing\n3. Interface with JavaScript canvas API\n4. Implement zero-copy memory sharing\n5. Add SIMD optimizations where available\n6. Create worker thread wrapper\n7. Benchmark against pure JavaScript\n\n### AI Model Inference with WASM\n\n**Prompt:** \"Build a WebAssembly module that runs ONNX neural network models in the browser. Support image classification with MobileNetV3.\"\n\nClaude will:\n1. Integrate wasm-bindgen with onnxruntime-web\n2. Load and cache ONNX models\n3. Implement preprocessing pipeline\n4. Run inference with WebAssembly backend\n5. Add batching for multiple inputs\n6. Optimize memory allocation\n7. Include model quantization for smaller binaries\n\n### Serverless Function with WASI\n\n**Prompt:** \"Create a WebAssembly module with WASI 0.3 that processes CSV files, performs data transformations, and writes results to stdout. Deploy to Fermyon Spin.\"\n\nClaude will:\n1. Write Rust code using WASI SDK\n2. Implement async file I/O with WASI 0.3\n3. Add CSV parsing and transformation logic\n4. Configure for Spin serverless platform\n5. Set up component model interfaces\n6. Add error handling and logging\n7. Deploy with spin.toml configuration\n\n## Tips for Best Results\n\n1. **Choose Rust for Production**: While multiple languages compile to WASM, Rust offers the best tooling (wasm-pack, wasm-bindgen) and smallest binary sizes. Ask Claude to use Rust unless you have specific requirements.\n\n2. **Optimize Binary Size**: WASM modules should be <500KB for web deployments. Request `wasm-opt -Oz` optimization and enable LTO (Link-Time Optimization) in Cargo.toml.\n\n3. **Use Component Model**: For WASI 0.3, request Component Model implementation for better interoperability and async support.\n\n4. **Memory Management**: WebAssembly uses linear memory. Ask Claude to implement proper memory allocation strategies and avoid memory leaks with proper drop implementations.\n\n5. **JavaScript Interop**: Use wasm-bindgen for seamless JavaScript integration. Request TypeScript definitions generation for better DX.\n\n6. **SIMD When Available**: For compute-intensive tasks, ask Claude to use WebAssembly SIMD instructions for 4-8x performance improvements.\n\n## Common Workflows\n\n### High-Performance Web App Component\n```\n\"Create a WebAssembly module for my React app that:\n1. Parses and validates 10MB JSON files instantly\n2. Performs complex data aggregations\n3. Exports results to CSV format\n4. Includes TypeScript types\n5. Loads asynchronously without blocking UI\n6. Caches compiled module in IndexedDB\n7. Falls back to JavaScript if WASM not supported\"\n```\n\n### Cryptocurrency Mining (Educational)\n```\n\"Build a WebAssembly SHA-256 hasher in Rust:\n1. Implements Bitcoin mining algorithm\n2. Uses multi-threading with Web Workers\n3. Achieves >1000 hashes per second\n4. Includes difficulty adjustment\n5. Reports progress to JavaScript\n6. Optimized with SIMD instructions\"\n```\n\n### Video Codec in Browser\n```\n\"Create a WebAssembly H.264 decoder:\n1. Decode video streams in real-time (30fps)\n2. Output to canvas via ImageData\n3. Support seeking and playback controls\n4. Use multi-threading for parallel decode\n5. Implement memory-efficient frame buffer\n6. Package as Web Component\"\n```\n\n### Database Query Engine\n```\n\"Build a WebAssembly SQLite query engine:\n1. Compile SQLite to WASM with WASI\n2. Implement virtual file system in browser\n3. Support full SQL query syntax\n4. Persist database to IndexedDB\n5. Include transaction support\n6. Expose async API to JavaScript\n7. Add query performance analytics\"\n```\n\n## Troubleshooting\n\n**Issue:** WASM module binary is too large (>2MB)\n**Solution:** Enable LTO and opt-level in Cargo.toml, run wasm-opt with -Oz flag, remove unused dependencies, and consider dynamic linking for shared code.\n\n**Issue:** JavaScript can't call WASM functions\n**Solution:** Ensure wasm-bindgen attributes are present (#[wasm_bindgen]), rebuild with wasm-pack, and check that JavaScript imports the generated bindings correctly.\n\n**Issue:** Performance slower than expected\n**Solution:** Enable WASM SIMD, use multi-threading with Web Workers, avoid frequent boundary crossings between JS and WASM, and profile with Chrome DevTools Performance tab.\n\n**Issue:** Memory errors or crashes\n**Solution:** Check for buffer overflows, ensure proper memory allocation, implement Drop trait for cleanup, and use wasm-bindgen's #[wasm_bindgen(inspectable)] for debugging.\n\n**Issue:** WASI functions not available\n**Solution:** Update to WASI SDK 0.3+, configure WASI runtime (wasmtime, wasmer), and use preview2 modules. Not all WASI functions are available in browser environments.\n\n**Issue:** Cannot debug WASM code\n**Solution:** Enable source maps with wasm-pack build --dev, use Chrome DevTools WASM debugging, add console.log bindings via web_sys crate, or use wasmtime with --invoke for CLI debugging.\n\n## Learn More\n\n- [WebAssembly Official Site](https://webassembly.org/)\n- [Rust and WebAssembly Book](https://rustwasm.github.io/book/)\n- [wasm-pack Documentation](https://rustwasm.github.io/wasm-pack/)\n- [WASI 0.3 Specification](https://github.com/WebAssembly/WASI/blob/main/preview2/README.md)\n- [WebAssembly Component Model](https://github.com/WebAssembly/component-model)\n- [AssemblyScript Language](https://www.assemblyscript.org/)\n",
+  "features": [
+    "Near-native performance in browser and serverless",
+    "Multi-language support: Rust, C++, Go, AssemblyScript",
+    "WASI 0.3 with native async support",
+    "Component Model for interoperability"
+  ],
+  "useCases": [
+    "High-performance web applications",
+    "AI model inference in browser",
+    "Serverless functions with portable code"
+  ],
+  "requirements": [
+    "Rust 1.70+ and wasm-pack",
+    "wasm-bindgen 0.2.87+",
+    "WASI SDK 20+ (for WASI modules)",
+    "Node.js 18+ for JavaScript integration"
+  ],
+  "examples": [
+    {
+      "title": "Fibonacci Calculator (Rust)",
+      "language": "rust",
+      "code": "use wasm_bindgen::prelude::*;\n\n#[wasm_bindgen]\npub fn fibonacci(n: u32) -> u64 {\n    match n {\n        0 => 0,\n        1 => 1,\n        _ => {\n            let mut a = 0u64;\n            let mut b = 1u64;\n            for _ in 2..=n {\n                let temp = a + b;\n                a = b;\n                b = temp;\n            }\n            b\n        }\n    }\n}\n\n#[wasm_bindgen]\npub struct Calculator {\n    cache: Vec<u64>,\n}\n\n#[wasm_bindgen]\nimpl Calculator {\n    #[wasm_bindgen(constructor)]\n    pub fn new() -> Calculator {\n        Calculator { cache: vec![0, 1] }\n    }\n\n    pub fn nth(&mut self, n: usize) -> u64 {\n        while self.cache.len() <= n {\n            let len = self.cache.len();\n            let next = self.cache[len - 1] + self.cache[len - 2];\n            self.cache.push(next);\n        }\n        self.cache[n]\n    }\n}"
+    },
+    {
+      "title": "Image Grayscale Filter",
+      "language": "rust",
+      "code": "use wasm_bindgen::prelude::*;\nuse wasm_bindgen::Clamped;\nuse web_sys::ImageData;\n\n#[wasm_bindgen]\npub fn grayscale(data: &mut [u8]) {\n    for pixel in data.chunks_exact_mut(4) {\n        let gray = (0.299 * pixel[0] as f32\n            + 0.587 * pixel[1] as f32\n            + 0.114 * pixel[2] as f32) as u8;\n        pixel[0] = gray;\n        pixel[1] = gray;\n        pixel[2] = gray;\n    }\n}\n\n#[wasm_bindgen]\npub fn process_image(image_data: ImageData) -> Result<ImageData, JsValue> {\n    let mut data = image_data.data().to_vec();\n    grayscale(&mut data);\n    \n    ImageData::new_with_u8_clamped_array_and_sh(\n        Clamped(&data),\n        image_data.width(),\n        image_data.height(),\n    )\n}"
+    },
+    {
+      "title": "JavaScript Integration",
+      "language": "javascript",
+      "code": "import init, { fibonacci, Calculator } from './pkg/wasm_module.js';\n\nasync function runWasm() {\n  // Initialize the WASM module\n  await init();\n\n  // Call simple function\n  console.log('Fibonacci(10):', fibonacci(10));\n\n  // Use class instance\n  const calc = new Calculator();\n  console.log('nth(20):', calc.nth(20));\n  console.log('nth(30):', calc.nth(30));\n\n  // Process image\n  const canvas = document.getElementById('canvas');\n  const ctx = canvas.getContext('2d');\n  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);\n  \n  const processedImage = process_image(imageData);\n  ctx.putImageData(processedImage, 0, 0);\n}\n\nrunWasm();"
+    },
+    {
+      "title": "Cargo.toml Configuration",
+      "language": "toml",
+      "code": "[package]\nname = \"wasm-module\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[lib]\ncrate-type = [\"cdylib\", \"rlib\"]\n\n[dependencies]\nwasm-bindgen = \"0.2\"\nweb-sys = { version = \"0.3\", features = [\"ImageData\"] }\njs-sys = \"0.3\"\n\n[profile.release]\nopt-level = \"z\"\nlto = true\ncodegen-units = 1\npanic = \"abort\"\n\n[package.metadata.wasm-pack.profile.release]\nwasm-opt = ['-Oz']"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Install Rust: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh",
+        "Add WASM target: rustup target add wasm32-unknown-unknown",
+        "Install wasm-pack: cargo install wasm-pack",
+        "Ask Claude: 'Create a WebAssembly module for [task]'"
+      ]
+    },
+    "claudeCode": {
+      "steps": [
+        "cargo new --lib my-wasm-module",
+        "Edit Cargo.toml with wasm dependencies",
+        "wasm-pack build --target web",
+        "Import in JavaScript: import init from './pkg/module.js'"
+      ]
+    }
+  },
+  "troubleshooting": [
+    {
+      "issue": "wasm-pack build fails",
+      "solution": "Ensure Rust toolchain is up-to-date (rustup update), wasm32-unknown-unknown target is installed, and Cargo.toml has correct crate-type."
+    },
+    {
+      "issue": "Binary size too large",
+      "solution": "Enable LTO, set opt-level = 'z', run wasm-opt -Oz, and remove debug symbols with wasm-strip."
+    },
+    {
+      "issue": "JavaScript imports fail",
+      "solution": "Use correct import path to pkg/ directory, ensure init() is called before using WASM functions, and check browser console for loading errors."
+    }
+  ],
+  "documentationUrl": "https://webassembly.org/",
+  "source": "community"
+}

@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import { memo } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
-import { VirtualizedGrid } from '@/src/components/shared/virtualized-grid';
+import { InfiniteScrollGrid } from '@/src/components/shared/infinite-scroll-grid';
 import { useLocalSearch } from '@/src/hooks/use-search';
 
 const UnifiedSearch = dynamic(
@@ -27,12 +27,12 @@ import { ICON_NAME_MAP } from '@/src/lib/ui-constants';
 
 /**
  * Content Search Client Component
- * Production 2025 Architecture: TanStack Virtual for infinite lists
+ * Production 2025 Architecture: Infinite Scroll with Intersection Observer
  *
  * Performance Optimizations:
- * - TanStack Virtual renders only ~15 visible items
- * - Constant memory usage regardless of dataset size
- * - 60fps scroll performance with 10,000+ items
+ * - Intersection Observer for progressive loading
+ * - Loads 30 items per batch for optimal performance
+ * - Compatible with CSS Grid layout
  * - Memoized to prevent re-renders when parent state changes
  * - Only re-renders when items/searchPlaceholder/title/icon props change
  */
@@ -65,14 +65,13 @@ function ContentSearchClientComponent<T extends UnifiedContentItem>({
         />
       </ErrorBoundary>
 
-      {/* Virtualized Grid Results */}
+      {/* Infinite Scroll Grid Results */}
       {filteredItems.length > 0 ? (
         <ErrorBoundary>
-          <VirtualizedGrid<T>
+          <InfiniteScrollGrid<T>
             items={filteredItems}
-            estimateSize={400}
-            overscan={5}
             gap={24}
+            batchSize={30}
             renderItem={(item: T) => (
               <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
             )}

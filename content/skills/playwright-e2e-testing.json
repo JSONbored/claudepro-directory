@@ -1,0 +1,73 @@
+{
+  "slug": "playwright-e2e-testing",
+  "title": "Playwright E2E Testing Automation",
+  "seoTitle": "Playwright E2E Testing Automation Skill",
+  "description": "Automate end-to-end testing with Playwright, AI-powered test generation, and comprehensive browser coverage for modern web applications.",
+  "category": "skills",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-16",
+  "tags": ["testing", "playwright", "e2e", "automation", "ai"],
+  "content": "# Playwright E2E Testing Automation Skill\n\n## What This Skill Enables\n\nClaude can write, execute, and maintain end-to-end tests using Playwright, the modern browser automation framework that has overtaken Cypress in npm downloads as of 2025. This skill enables cross-browser testing (Chrome, Firefox, Safari/WebKit), AI-powered test generation with GitHub Copilot integration, and official MCP (Model Context Protocol) support for structured DOM interactions.\n\n## Prerequisites\n\n**Required:**\n- Claude Pro subscription or Claude Code CLI\n- Node.js 18+ installed\n- Basic understanding of your application's user flows\n\n**What Claude handles automatically:**\n- Installing Playwright and browser binaries\n- Generating test files with proper TypeScript types\n- Setting up test configurations and reporters\n- Writing selectors using accessibility snapshots\n- Debugging test failures with traces and screenshots\n- Optimizing tests for parallel execution\n\n## How to Use This Skill\n\n### Basic Test Generation\n\n**Prompt:** \"Create a Playwright test that logs into my application at localhost:3000, navigates to /dashboard, and verifies the welcome message appears.\"\n\nClaude will:\n1. Install Playwright if not present (`npm init playwright@latest`)\n2. Generate a test file with proper page object patterns\n3. Use accessibility-first selectors (role, label, text)\n4. Include assertions with auto-retry logic\n5. Add screenshot capture on failure\n\n### AI-Powered Test Creation from User Stories\n\n**Prompt:** \"I have a checkout flow: user adds product to cart, enters shipping info, selects payment method, and completes order. Write comprehensive Playwright tests covering happy path and error cases.\"\n\nClaude will:\n1. Break down the user story into discrete test scenarios\n2. Generate test files organized by feature\n3. Include data-driven tests with fixtures\n4. Add network mocking for payment gateway\n5. Implement custom assertions for order confirmation\n6. Set up test retry logic for flaky network calls\n\n### Cross-Browser Testing Suite\n\n**Prompt:** \"Set up Playwright to test my application across Chrome, Firefox, and Safari with parallel execution. Include mobile viewport testing for iOS and Android.\"\n\nClaude will:\n1. Configure `playwright.config.ts` with multiple projects\n2. Define desktop and mobile browser contexts\n3. Set up parallel worker configuration\n4. Configure test sharding for CI/CD\n5. Add HTML reporter with trace viewer\n6. Include screenshot comparison for visual regression\n\n### API Testing Integration\n\n**Prompt:** \"Write Playwright tests that verify my REST API endpoints before running UI tests. Mock the API responses for offline testing.\"\n\nClaude will:\n1. Use Playwright's `request` context for API calls\n2. Create API test fixtures for reusable setup\n3. Implement request/response interception\n4. Generate mock data with realistic values\n5. Set up contract testing with schema validation\n6. Add performance timing assertions\n\n## Tips for Best Results\n\n1. **Use Accessibility Selectors**: Playwright's MCP support leverages accessibility snapshots. Ask Claude to use `getByRole()`, `getByLabel()`, and `getByText()` instead of CSS selectors for more resilient tests.\n\n2. **Parallel Execution**: Playwright's native parallelism is a key advantage. Request test organization that maximizes parallel worker usage with proper test isolation.\n\n3. **Auto-Wait Smart Defaults**: Playwright automatically waits for elements to be actionable. Avoid explicit waits unless dealing with specific timing requirements.\n\n4. **Trace on Failure**: Enable trace recording for CI environments to debug failures without reproducing locally: `--trace on-first-retry`.\n\n5. **Codegen for Complex Flows**: For intricate user interactions, ask Claude to generate tests using `npx playwright codegen` output as a starting point.\n\n6. **Test Sharding**: For large test suites in CI, request sharding configuration: `--shard=1/4` to split tests across multiple jobs.\n\n## Common Workflows\n\n### Complete E2E Test Suite Setup\n```\n\"Set up a production-ready Playwright test suite for my Next.js app with:\n1. Authentication flow tests with session storage\n2. Visual regression testing with screenshot comparison\n3. API mocking for external services\n4. CI/CD integration with GitHub Actions\n5. HTML report with trace viewer\n6. Parallel execution across 4 workers\"\n```\n\n### AI-Assisted Test Maintenance\n```\n\"My application's login form changed from using email to username.\nUpdate all Playwright tests that interact with the login form,\nusing accessibility selectors instead of data-testid attributes.\"\n```\n\n### Performance Testing\n```\n\"Write Playwright tests that measure:\n1. First Contentful Paint (FCP)\n2. Largest Contentful Paint (LCP)\n3. Time to Interactive (TTI)\n4. Total Blocking Time (TBT)\nFail tests if any metric exceeds Web Vitals thresholds.\"\n```\n\n### Mobile-First Testing\n```\n\"Create Playwright tests for mobile web experience:\n1. Test on iPhone 13 and Pixel 5 viewports\n2. Verify touch interactions (swipe, pinch-to-zoom)\n3. Test offline mode with service worker\n4. Validate responsive image loading\n5. Check mobile-specific navigation menu\"\n```\n\n## Troubleshooting\n\n**Issue:** Tests are flaky and fail intermittently\n**Solution:** Ask Claude to add explicit `waitForLoadState('networkidle')` calls, increase timeout for specific actions with `{ timeout: 10000 }`, or implement custom wait conditions with `page.waitForFunction()`.\n\n**Issue:** Selectors break when UI changes\n**Solution:** Request migration to accessibility selectors (`getByRole`, `getByLabel`) which are more resilient to DOM structure changes. Playwright's MCP integration makes this the preferred approach.\n\n**Issue:** Tests run too slowly in CI\n**Solution:** Ask Claude to implement test sharding across multiple GitHub Actions jobs, optimize test setup with global authentication fixtures, and enable trace recording only on failure.\n\n**Issue:** Cannot test third-party authentication (OAuth, SSO)\n**Solution:** Request implementation of authentication state storage with `storageState` option, bypassing the login flow for most tests while keeping one dedicated authentication test.\n\n**Issue:** Screenshot comparison fails due to font rendering differences\n**Solution:** Ask Claude to configure Playwright's `maxDiffPixels` or `threshold` options, or use textual assertions instead of visual regression for text-heavy areas.\n\n## Learn More\n\n- [Playwright Official Documentation](https://playwright.dev/)\n- [Playwright MCP Integration Guide](https://github.com/microsoft/playwright/blob/main/docs/src/mcp.md)\n- [Playwright vs Cypress 2025 Comparison](https://playwright.dev/docs/why-playwright)\n- [AI-Powered Testing with Playwright](https://playwright.dev/docs/codegen)\n- [Playwright Test Best Practices](https://playwright.dev/docs/best-practices)\n",
+  "features": [
+    "Cross-browser testing: Chrome, Firefox, Safari (WebKit)",
+    "AI-powered test generation with GitHub Copilot",
+    "MCP support for accessibility-driven interactions",
+    "Native parallel execution and test sharding"
+  ],
+  "useCases": [
+    "End-to-end testing for web applications",
+    "Visual regression testing with screenshots",
+    "API testing and contract validation"
+  ],
+  "requirements": ["Node.js 18+", "Playwright 1.40+", "@playwright/test"],
+  "examples": [
+    {
+      "title": "Basic E2E Test with Authentication",
+      "language": "typescript",
+      "code": "import { test, expect } from '@playwright/test';\n\ntest.describe('Dashboard Tests', () => {\n  test.beforeEach(async ({ page }) => {\n    // Login before each test\n    await page.goto('http://localhost:3000/login');\n    await page.getByLabel('Email').fill('user@example.com');\n    await page.getByLabel('Password').fill('password123');\n    await page.getByRole('button', { name: 'Sign In' }).click();\n    await page.waitForURL('**/dashboard');\n  });\n\n  test('displays welcome message', async ({ page }) => {\n    const heading = page.getByRole('heading', { name: /welcome/i });\n    await expect(heading).toBeVisible();\n  });\n\n  test('loads user profile data', async ({ page }) => {\n    await page.getByRole('link', { name: 'Profile' }).click();\n    await expect(page.getByText('user@example.com')).toBeVisible();\n  });\n});"
+    },
+    {
+      "title": "API Testing with Request Context",
+      "language": "typescript",
+      "code": "import { test, expect } from '@playwright/test';\n\ntest.describe('API Tests', () => {\n  test('GET /api/users returns valid data', async ({ request }) => {\n    const response = await request.get('http://localhost:3000/api/users');\n    expect(response.ok()).toBeTruthy();\n    \n    const users = await response.json();\n    expect(users).toHaveLength(10);\n    expect(users[0]).toHaveProperty('email');\n  });\n\n  test('POST /api/users creates new user', async ({ request }) => {\n    const response = await request.post('http://localhost:3000/api/users', {\n      data: {\n        name: 'Test User',\n        email: 'test@example.com'\n      }\n    });\n    expect(response.status()).toBe(201);\n    \n    const user = await response.json();\n    expect(user.id).toBeDefined();\n  });\n});"
+    },
+    {
+      "title": "Parallel Test Configuration",
+      "language": "typescript",
+      "code": "// playwright.config.ts\nimport { defineConfig, devices } from '@playwright/test';\n\nexport default defineConfig({\n  testDir: './tests',\n  fullyParallel: true,\n  forbidOnly: !!process.env.CI,\n  retries: process.env.CI ? 2 : 0,\n  workers: process.env.CI ? 4 : undefined,\n  reporter: [['html'], ['json', { outputFile: 'test-results.json' }]],\n  use: {\n    baseURL: 'http://localhost:3000',\n    trace: 'on-first-retry',\n    screenshot: 'only-on-failure',\n  },\n  projects: [\n    {\n      name: 'chromium',\n      use: { ...devices['Desktop Chrome'] },\n    },\n    {\n      name: 'firefox',\n      use: { ...devices['Desktop Firefox'] },\n    },\n    {\n      name: 'webkit',\n      use: { ...devices['Desktop Safari'] },\n    },\n    {\n      name: 'Mobile Chrome',\n      use: { ...devices['Pixel 5'] },\n    },\n    {\n      name: 'Mobile Safari',\n      use: { ...devices['iPhone 13'] },\n    },\n  ],\n  webServer: {\n    command: 'npm run dev',\n    url: 'http://localhost:3000',\n    reuseExistingServer: !process.env.CI,\n  },\n});"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Ask Claude: 'Set up Playwright for my project'",
+        "Claude will run: npm init playwright@latest",
+        "Select TypeScript, test directory, and GitHub Actions options",
+        "Claude installs browsers automatically"
+      ]
+    },
+    "claudeCode": {
+      "steps": [
+        "npx playwright install --with-deps",
+        "Verify installation: npx playwright --version",
+        "Generate example test: npx playwright codegen localhost:3000"
+      ]
+    }
+  },
+  "troubleshooting": [
+    {
+      "issue": "Browser binaries not found",
+      "solution": "Run 'npx playwright install' to download Chromium, Firefox, and WebKit binaries."
+    },
+    {
+      "issue": "Tests timeout in CI",
+      "solution": "Increase timeout in config: use: { actionTimeout: 10000, navigationTimeout: 30000 }"
+    },
+    {
+      "issue": "Selectors not found",
+      "solution": "Use accessibility selectors (getByRole, getByLabel) instead of CSS selectors. Enable MCP integration for better selector generation."
+    }
+  ],
+  "documentationUrl": "https://playwright.dev/",
+  "source": "community"
+}

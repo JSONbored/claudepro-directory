@@ -17,7 +17,7 @@
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
-import { VirtualizedGrid } from '@/src/components/shared/virtualized-grid';
+import { InfiniteScrollGrid } from '@/src/components/shared/infinite-scroll-grid';
 import { Button } from '@/src/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
 import { CATEGORY_CONFIGS, HOMEPAGE_TAB_CATEGORIES } from '@/src/lib/config/category-config';
@@ -72,29 +72,16 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
 
         return (
           <TabsContent key={tab} value={tab} className="space-y-6">
-            {filteredResults.length > 0 ? (
-              <VirtualizedGrid<UnifiedContentItem>
-                items={filteredResults}
-                estimateSize={400}
-                overscan={5}
-                gap={24}
-                renderItem={(item: UnifiedContentItem) => (
-                  <ConfigCard
-                    item={item}
-                    variant="default"
-                    showCategory={true}
-                    showActions={true}
-                  />
-                )}
-                emptyMessage={`No ${categoryName} found`}
-                keyExtractor={(item: UnifiedContentItem) => item.slug}
-              />
-            ) : (
-              <div className={'text-center py-12'}>
-                <p className={'text-lg text-muted-foreground'}>No {categoryName} found</p>
-                <p className={'text-sm text-muted-foreground mt-2'}>Try adjusting your filters.</p>
-              </div>
-            )}
+            <InfiniteScrollGrid<UnifiedContentItem>
+              items={filteredResults}
+              gap={24}
+              batchSize={30}
+              renderItem={(item: UnifiedContentItem) => (
+                <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
+              )}
+              emptyMessage={`No ${categoryName} found. Try adjusting your filters.`}
+              keyExtractor={(item: UnifiedContentItem) => item.slug}
+            />
           </TabsContent>
         );
       })}
