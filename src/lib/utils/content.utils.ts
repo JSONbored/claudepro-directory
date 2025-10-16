@@ -357,30 +357,95 @@ function getExtensionFromLanguage(language: string): string {
 }
 
 /**
- * Generate a contextual filename based on content category
+ * Filename rule configuration interface
+ * Defines how filenames should be generated for each category
+ */
+interface FilenameRule {
+  /** Suffix to append to identifier (e.g., '-config') */
+  suffix: string;
+  /** Whether to use hookType field for filename (hooks only) */
+  useHookType?: boolean;
+}
+
+/**
+ * Filename generation rules registry - eliminates switch/case pattern
  *
- * SECURITY: All inputs sanitized using production security utilities
- * PERFORMANCE: Early returns, minimal string operations
- * UX: Semantic, human-readable filenames following Claude Code conventions
+ * Registry-driven approach for category-specific filename patterns.
+ * Replaces 29-line switch statement with configuration lookup.
+ *
+ * Architecture:
+ * - Partial mapping allows fallback to default for unknown categories
+ * - Configuration-driven: Add category → filename automatically works
+ * - Special handling: hookType extraction for hooks category
+ * - Consistent patterns: Config categories use '-config' suffix
+ *
+ * Filename Patterns:
+ * - Config categories (mcp, agents, commands, rules): {slug}-config.{ext}
+ * - Hooks: {hookType}.{ext} or {slug}.{ext}
+ * - Guide subcategories: {slug}.{ext}
+ * - Unknown/default: example.{ext}
+ *
+ * @see generateFilename - Consumer of this configuration
+ */
+const FILENAME_RULES: Partial<Record<string, FilenameRule>> = {
+  // Config categories - append '-config' suffix
+  mcp: { suffix: '-config' },
+  agents: { suffix: '-config' },
+  commands: { suffix: '-config' },
+  rules: { suffix: '-config' },
+
+  // Hooks - use hookType for semantic naming
+  hooks: { suffix: '', useHookType: true },
+
+  // Guide subcategories - simple slug-based naming
+  guides: { suffix: '' },
+  tutorials: { suffix: '' },
+  comparisons: { suffix: '' },
+  workflows: { suffix: '' },
+  'use-cases': { suffix: '' },
+  troubleshooting: { suffix: '' },
+
+  // Other categories can be added as needed
+  statuslines: { suffix: '' },
+  collections: { suffix: '' },
+  skills: { suffix: '' },
+};
+
+/**
+ * Generate a contextual filename based on content category using registry-driven approach
+ *
+ * Modern 2025 Architecture:
+ * - Configuration-driven: Uses FILENAME_RULES registry
+ * - Security: All inputs sanitized using production utilities
+ * - Performance: Early returns, O(1) lookup
+ * - UX: Semantic, human-readable filenames following Claude Code conventions
+ * - Eliminated: 29-line switch statement with 7 cases
  *
  * @param options - Filename generation options
  * @returns Generated filename with appropriate extension
  *
  * @example
  * ```typescript
- * // MCP server configuration
+ * // MCP server configuration (uses '-config' suffix from registry)
  * generateFilename({
  *   item: { category: 'mcp', slug: 'github-mcp-server', ... },
  *   language: 'json'
  * });
  * // Returns: "github-mcp-server-config.json"
  *
- * // Hook with hookType
+ * // Hook with hookType (uses hookType field from registry rule)
  * generateFilename({
  *   item: { category: 'hooks', slug: 'post-tool-use', hookType: 'PostToolUse', ... },
  *   language: 'bash'
  * });
  * // Returns: "post-tool-use.sh"
+ *
+ * // New category automatically supported
+ * generateFilename({
+ *   item: { category: 'skills', slug: 'pdf-processing', ... },
+ *   language: 'md'
+ * });
+ * // Returns: "pdf-processing.md" ✅
  * ```
  */
 export function generateFilename(options: FilenameGeneratorOptions): string {
@@ -401,42 +466,31 @@ export function generateFilename(options: FilenameGeneratorOptions): string {
   const rawIdentifier = slug || name || category;
   const identifier = sanitizeFilename(rawIdentifier);
 
-  // Handle multi-format MCP configs
+  // Handle multi-format MCP configs (special case - not in registry)
   if (format === 'multi' && section) {
     const sanitizedSection = sanitizeFilename(section);
     return `${identifier}-${sanitizedSection}.${ext}`;
   }
 
-  // Category-specific filename generation
-  switch (category) {
-    case 'mcp':
-    case 'agents':
-    case 'commands':
-    case 'rules':
-      return `${identifier}-config.${ext}`;
+  // Registry-driven filename generation
+  const rule = FILENAME_RULES[category];
 
-    case 'hooks': {
-      // Use hookType for semantic naming if available
-      const hookType = 'hookType' in item ? (item as { hookType?: string }).hookType : undefined;
-      if (hookType && typeof hookType === 'string') {
-        const hookSlug = convertHookTypeToKebab(hookType);
-        return `${sanitizeFilename(hookSlug)}.${ext}`;
-      }
-      return `${identifier}.${ext}`;
+  // Handle hookType special case if configured
+  if (rule?.useHookType) {
+    const hookType = 'hookType' in item ? (item as { hookType?: string }).hookType : undefined;
+    if (hookType && typeof hookType === 'string') {
+      const hookSlug = convertHookTypeToKebab(hookType);
+      return `${sanitizeFilename(hookSlug)}.${ext}`;
     }
-
-    case 'guides':
-    case 'tutorials':
-    case 'comparisons':
-    case 'workflows':
-    case 'use-cases':
-    case 'troubleshooting':
-      return `${identifier}.${ext}`;
-
-    default:
-      // Fallback for unknown categories
-      return `example.${ext}`;
   }
+
+  // Apply suffix rule or fallback to default
+  if (rule) {
+    return `${identifier}${rule.suffix}.${ext}`;
+  }
+
+  // Fallback for unknown categories
+  return `example.${ext}`;
 }
 
 /**
