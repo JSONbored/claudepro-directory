@@ -28,7 +28,7 @@ import {
   SheetTitle,
 } from '@/src/components/ui/sheet';
 import { postCopyEmailCaptureAction } from '@/src/lib/actions/email-capture';
-import { EVENTS } from '@/src/lib/analytics/events.config';
+import { EVENTS } from '@/src/lib/analytics/events.constants';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';

@@ -4,8 +4,8 @@
  * Refactored to use centralized tracker with source-specific events
  */
 
-import type { EventName } from '@/src/lib/analytics/events.config';
-import { EVENTS } from '@/src/lib/analytics/events.config';
+import type { EventName } from '@/src/lib/analytics/events.constants';
+import { EVENTS } from '@/src/lib/analytics/events.constants';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 
 /**

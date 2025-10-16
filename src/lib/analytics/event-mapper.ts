@@ -16,8 +16,8 @@
  * @module lib/analytics/event-mapper
  */
 
-import type { EventName } from '@/src/lib/analytics/events.config';
-import { EVENTS } from '@/src/lib/analytics/events.config';
+import type { EventName } from '@/src/lib/analytics/events.constants';
+import { EVENTS } from '@/src/lib/analytics/events.constants';
 import { getAllCategoryIds } from '@/src/lib/config/category-config';
 import type { ContentCategory as SharedContentCategory } from '@/src/lib/schemas/shared.schema';
 

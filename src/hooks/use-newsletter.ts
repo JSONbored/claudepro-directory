@@ -24,8 +24,8 @@
 
 import { useCallback, useState, useTransition } from 'react';
 import { subscribeToNewsletter } from '@/src/lib/actions/newsletter-signup';
-import type { EventName } from '@/src/lib/analytics/events.config';
-import { EVENTS } from '@/src/lib/analytics/events.config';
+import type { EventName } from '@/src/lib/analytics/events.constants';
+import { EVENTS } from '@/src/lib/analytics/events.constants';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { logger } from '@/src/lib/logger';
 import { toasts } from '@/src/lib/utils/toast.utils';
