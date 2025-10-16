@@ -341,7 +341,7 @@ class EmailSequenceService {
           async (redis) => {
             await redis.zrem(`email_sequence:due:${this.SEQUENCE_ID}:${step}`, email);
           },
-          () => {},
+          () => null, // Fallback: gracefully handle Redis unavailability
           'email_sequence_cancel_zrem'
         );
       }
