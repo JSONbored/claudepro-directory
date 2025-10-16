@@ -126,8 +126,8 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} font-sans`}>
       <head>
-        {/* PWA Manifest - Next.js generates at /manifest from src/app/manifest.ts */}
-        <link rel="manifest" href="/manifest" />
+        {/* PWA Manifest - Next.js generates at /manifest.webmanifest from src/app/manifest.ts */}
+        {/* Manifest link is automatically injected by Next.js metadata API (line 109) */}
 
         {/* iOS Safari PWA Support */}
         <meta name="apple-mobile-web-app-capable" content="yes" />

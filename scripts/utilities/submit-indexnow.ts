@@ -148,9 +148,9 @@ async function main() {
     const urls = await getAllUrls();
     logger.success(`✅ Collected ${urls.length} URLs\n`);
 
-    // Verify key file exists (relative to script location)
+    // Verify key file exists (relative to script location: scripts/utilities/ -> ../../public/)
     const keyFilePath = decodeURIComponent(
-      new URL(`../public/${INDEXNOW_API_KEY}.txt`, import.meta.url).pathname
+      new URL(`../../public/${INDEXNOW_API_KEY}.txt`, import.meta.url).pathname
     );
     if (!existsSync(keyFilePath)) {
       logger.failure(`❌ Key file not found: ${keyFilePath}`);

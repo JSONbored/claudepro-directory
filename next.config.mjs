@@ -448,6 +448,10 @@ const nextConfig = {
             key: 'Content-Type',
             value: 'application/javascript',
           },
+          {
+            key: 'Service-Worker-Allowed',
+            value: '/', // Allow service worker to control all routes from root
+          },
         ],
       },
     ];
