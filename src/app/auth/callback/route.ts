@@ -15,8 +15,8 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/src/lib/supabase/server';
 import { logger } from '@/src/lib/logger';
+import { createClient } from '@/src/lib/supabase/server';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -117,16 +117,11 @@ export async function GET(request: NextRequest) {
       });
 
       return response;
-    } else {
-      logger.error(
-        'Auth callback exchange failed',
-        error?.message ?? 'Unknown error',
-        {
-          errorStatus: error?.status?.toString() ?? 'unknown',
-          errorName: error?.name ?? 'unknown',
-        }
-      );
     }
+    logger.error('Auth callback exchange failed', error?.message ?? 'Unknown error', {
+      errorStatus: error?.status?.toString() ?? 'unknown',
+      errorName: error?.name ?? 'unknown',
+    });
   } else {
     logger.error('Auth callback no code provided');
   }

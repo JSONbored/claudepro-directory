@@ -59,39 +59,14 @@ export async function createClient() {
       },
       setAll(cookiesToSet) {
         try {
-          // DEBUG: Log ALL cookie setting attempts
-          logger.info('Supabase setAll called', {
-            cookieCount: cookiesToSet.length,
-            cookieNames: cookiesToSet.map((c) => c.name).join(', '),
-            environment: process.env.NODE_ENV ?? 'unknown',
-          });
-
-          for (const { name, value, options } of cookiesToSet) {
-            const finalOptions = {
-              ...options,
-              // Force secure attributes for production
-              secure: process.env.NODE_ENV === 'production',
-              httpOnly: true,
-              sameSite: 'lax' as const,
-              path: '/',
-            };
-
-            logger.info('Supabase setting cookie', {
-              name,
-              valueLength: value.length,
-              secure: finalOptions.secure,
-              httpOnly: finalOptions.httpOnly,
-              sameSite: finalOptions.sameSite,
-              path: finalOptions.path,
-            });
-
-            // Ensure secure cookie attributes
-            cookieStore.set(name, value, finalOptions);
-          }
-
-          logger.info('Supabase all cookies set successfully', {
+          logger.info('Supabase setting cookies', {
             count: cookiesToSet.length,
           });
+
+          // Trust Supabase's cookie options - don't override
+          for (const { name, value, options } of cookiesToSet) {
+            cookieStore.set(name, value, options);
+          }
         } catch (error) {
           // CRITICAL: Only ignore errors from Server Components
           // In Route Handlers, cookie-setting failures should be logged
