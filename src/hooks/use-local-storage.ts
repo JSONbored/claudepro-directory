@@ -1,7 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 
 /**
  * Sensitive key patterns that should NEVER be stored in localStorage
@@ -47,6 +49,22 @@ export const PROHIBITED_LOCALSTORAGE_PATTERNS = [
 function containsSensitivePattern(key: string): boolean {
   const lowerKey = key.toLowerCase();
   return PROHIBITED_LOCALSTORAGE_PATTERNS.some((pattern) => lowerKey.includes(pattern));
+}
+
+/**
+ * Production-grade default deserializer
+ * Uses safeParse with permissive schema for generic localStorage values
+ *
+ * @param value - Serialized string from localStorage
+ * @returns Parsed value of type T
+ *
+ * @internal
+ */
+function safeDeserialize<T = unknown>(value: string): T {
+  // Use safeParse with permissive unknown schema (client-safe VALIDATED_JSON strategy)
+  return safeParse<T>(value, z.unknown() as z.ZodType<T>, {
+    strategy: ParseStrategy.VALIDATED_JSON,
+  });
 }
 
 /**
@@ -116,7 +134,7 @@ export interface UseLocalStorageReturn<T> {
  * @param {T} [options.defaultValue] - Default value if no stored value exists
  * @param {boolean} [options.syncAcrossTabs=true] - Enable cross-tab synchronization
  * @param {(value: T) => string} [options.serialize] - Custom serializer (default: JSON.stringify)
- * @param {(value: string) => T} [options.deserialize] - Custom deserializer (default: JSON.parse)
+ * @param {(value: string) => T} [options.deserialize] - Custom deserializer (default: safeDeserialize with safeParse + Zod validation)
  *
  * @returns {UseLocalStorageReturn<T>} Object with value, setValue, removeValue, and error
  *
@@ -212,7 +230,7 @@ export function useLocalStorage<T>(
     defaultValue,
     syncAcrossTabs = true,
     serialize = JSON.stringify,
-    deserialize = JSON.parse,
+    deserialize = safeDeserialize,
   } = options;
 
   // 🔒 SECURITY: Runtime validation for sensitive key patterns (development only)

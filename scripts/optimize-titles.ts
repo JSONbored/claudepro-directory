@@ -12,11 +12,27 @@
 import { existsSync } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
+import { z } from 'zod';
 import { logger } from '../src/lib/logger.js';
 import type { ContentCategory } from '../src/lib/schemas/shared.schema.js';
 import { type ContentItem, enhanceTitle } from '../src/lib/seo/title-enhancer.js';
+import { ParseStrategy, safeParse } from '../src/lib/utils/data.utils.js';
 
 const DRY_RUN = process.argv.includes('--dry-run');
+
+/**
+ * Content item schema for JSON file parsing (Zod)
+ * Production-grade runtime validation with permissive passthrough
+ */
+const contentItemSchema = z
+  .object({
+    title: z.string().optional(),
+    seoTitle: z.string().optional(),
+    slug: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+    category: z.string().optional(),
+  })
+  .passthrough();
 
 interface OptimizationStats {
   total: number;
@@ -30,7 +46,10 @@ interface OptimizationStats {
  */
 async function updateJsonFile(filePath: string, seoTitle: string): Promise<void> {
   const content = await fs.readFile(filePath, 'utf-8');
-  const data = JSON.parse(content);
+  // Production-grade: safeParse with Zod validation
+  const data = safeParse(content, contentItemSchema, {
+    strategy: ParseStrategy.VALIDATED_JSON,
+  });
 
   // Add or update seoTitle field (insert after title if exists)
   if (data.seoTitle) {
@@ -117,7 +136,10 @@ async function optimizeJsonContent(
 
     try {
       const content = await fs.readFile(filePath, 'utf-8');
-      const data = JSON.parse(content) as ContentItem;
+      // Production-grade: safeParse with Zod validation
+      const data = safeParse(content, contentItemSchema, {
+        strategy: ParseStrategy.VALIDATED_JSON,
+      }) as ContentItem;
       data.category = category;
 
       const result = enhanceTitle(data, category);

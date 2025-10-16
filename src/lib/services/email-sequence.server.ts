@@ -15,22 +15,34 @@
  */
 
 import type { ReactElement } from 'react';
-import { redisClient } from '@/src/lib/cache.server';
+import { z } from 'zod';
+import { CacheServices, redisClient } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
 import { resendService } from '@/src/lib/services/resend.server';
 
 /**
+ * Email sequence cache - Uses session cache (24h TTL, gzip compression)
+ * Appropriate for user-specific data with medium-term persistence
+ */
+const emailCache = CacheServices.session;
+
+/**
+ * Email sequence state schema (Zod)
+ */
+const emailSequenceSchema = z.object({
+  sequenceId: z.string(),
+  email: z.string().email(),
+  currentStep: z.number().int().min(1).max(5),
+  totalSteps: z.number().int().min(1).max(5),
+  startedAt: z.string().datetime(),
+  lastSentAt: z.string().datetime().nullable(),
+  status: z.enum(['active', 'completed', 'cancelled']),
+});
+
+/**
  * Email sequence state
  */
-export interface EmailSequence {
-  sequenceId: string;
-  email: string;
-  currentStep: number;
-  totalSteps: number;
-  startedAt: string; // ISO date
-  lastSentAt: string | null; // ISO date
-  status: 'active' | 'completed' | 'cancelled';
-}
+export type EmailSequence = z.infer<typeof emailSequenceSchema>;
 
 /**
  * Sequence delays in seconds (converted from days)
@@ -215,17 +227,11 @@ class EmailSequenceService {
    * @param step - Step number (2-5)
    */
   private async sendSequenceEmail(email: string, step: number): Promise<void> {
-    // Get sequence state
+    // Get sequence state with schema validation
     const key = `email_sequence:${this.SEQUENCE_ID}:${email}`;
 
-    const sequenceData = await redisClient.executeOperation(
-      async (redis) => {
-        const data = await redis.get(key);
-        return data ? (JSON.parse(data as string) as EmailSequence) : null;
-      },
-      () => null,
-      'email_sequence_get'
-    );
+    // Production-grade: CacheService handles compression, XSS protection, and Zod validation
+    const sequenceData = await emailCache.getTyped<EmailSequence>(key, emailSequenceSchema);
 
     if (!sequenceData || sequenceData.status !== 'active') {
       logger.warn('Sequence not active or not found', { email, step });
@@ -319,27 +325,26 @@ class EmailSequenceService {
     try {
       const key = `email_sequence:${this.SEQUENCE_ID}:${email}`;
 
-      await redisClient.executeOperation(
-        async (redis) => {
-          const data = await redis.get(key);
-          if (data) {
-            const sequence: EmailSequence = JSON.parse(data as string);
-            sequence.status = 'cancelled';
-            await redis.set(key, JSON.stringify(sequence), {
-              ex: 90 * 86400,
-            });
-          }
+      // Get with schema validation
+      const sequence = await emailCache.getTyped<EmailSequence>(key, emailSequenceSchema);
 
-          // Remove from all due queues
-          for (let step = 2; step <= 5; step++) {
+      if (sequence) {
+        // Update status and save back
+        sequence.status = 'cancelled';
+        await emailCache.set(key, sequence, 90 * 86400); // 90 days TTL
+      }
+
+      // Remove from due queues (direct Redis operations for sorted sets)
+      // TODO: Consider adding sorted set operations to CacheService
+      for (let step = 2; step <= 5; step++) {
+        await redisClient.executeOperation(
+          async (redis) => {
             await redis.zrem(`email_sequence:due:${this.SEQUENCE_ID}:${step}`, email);
-          }
-        },
-        () => {
-          logger.error('Failed to cancel sequence', undefined, { email });
-        },
-        'email_sequence_cancel'
-      );
+          },
+          () => {},
+          'email_sequence_cancel_zrem'
+        );
+      }
 
       logger.info('Sequence cancelled', {
         email,
@@ -364,14 +369,8 @@ class EmailSequenceService {
     try {
       const key = `email_sequence:${this.SEQUENCE_ID}:${email}`;
 
-      return await redisClient.executeOperation(
-        async (redis) => {
-          const data = await redis.get(key);
-          return data ? (JSON.parse(data as string) as EmailSequence) : null;
-        },
-        () => null,
-        'email_sequence_get_status'
-      );
+      // Production-grade: CacheService handles compression, XSS protection, and Zod validation
+      return await emailCache.getTyped<EmailSequence>(key, emailSequenceSchema);
     } catch (error) {
       logger.error(
         'Get sequence status error',

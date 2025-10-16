@@ -68,7 +68,7 @@ interface StatuslineTemplate extends BaseTemplate {
 }
 
 // Discriminated union of all template types
-type Template =
+export type Template =
   | AgentTemplate
   | MCPTemplate
   | RulesTemplate

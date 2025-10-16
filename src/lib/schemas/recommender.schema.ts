@@ -13,9 +13,11 @@
  * - Enum-based answers prevent injection attacks
  * - Max length constraints on all string fields
  * - URL encoding for shareable results
+ * - Production-grade JSON parsing with safeParse utility
  */
 
 import { z } from 'zod';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import { percentage, positiveInt } from './primitives/base-numbers';
 import { mediumString, nonEmptyString, shortString } from './primitives/base-strings';
 
@@ -356,14 +358,17 @@ export function encodeQuizAnswers(answers: QuizAnswers): string {
 
 /**
  * Helper: Decode answers from URL
- * Validates and parses base64-encoded quiz answers
+ * Production-grade: Base64 decode + safeParse with Zod validation
  * Server-side only function (uses Node.js Buffer)
  */
 export function decodeQuizAnswers(encoded: string): QuizAnswers {
   try {
     const json: string = Buffer.from(encoded, 'base64url').toString('utf-8');
-    const parsed = JSON.parse(json);
-    return quizAnswersSchema.parse(parsed);
+
+    // Production-grade: safeParse with Zod validation
+    return safeParse<QuizAnswers>(json, quizAnswersSchema, {
+      strategy: ParseStrategy.VALIDATED_JSON,
+    });
   } catch (_error) {
     throw new Error('Invalid or corrupted quiz answers data');
   }

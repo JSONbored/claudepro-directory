@@ -11,6 +11,8 @@
 
 import { readdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import { z } from 'zod';
+import { ParseStrategy, safeParse } from '../src/lib/utils/data.utils.js';
 
 interface OldFormat {
   examples?: string[];
@@ -85,7 +87,16 @@ function convertExample(example: string, index: number, category: string): NewEx
 function migrateFile(filePath: string): boolean {
   try {
     const content = readFileSync(filePath, 'utf-8');
-    const data = JSON.parse(content) as OldFormat;
+    // Production-grade: safeParse with permissive schema
+    const oldFormatSchema = z
+      .object({
+        examples: z.array(z.unknown()).optional(),
+      })
+      .passthrough();
+
+    const data = safeParse(content, oldFormatSchema, {
+      strategy: ParseStrategy.VALIDATED_JSON,
+    }) as OldFormat;
 
     // Skip if no examples field
     if (!(data.examples && Array.isArray(data.examples))) {

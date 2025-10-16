@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import path from 'path';
+import { z } from 'zod';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card } from '@/src/components/ui/card';
@@ -12,6 +13,7 @@ import { ArrowLeft, Tags } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { ComparisonData } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 
 // ISR Configuration - Revalidate every 7 days for SEO pages
 export const dynamic = 'force-static'; // Force static generation
@@ -57,6 +59,16 @@ async function getComparisonData(slug: string): Promise<ComparisonData | null> {
   }
 }
 
+/**
+ * Comparison metadata schema (Zod)
+ * Production-grade runtime validation for static params generation
+ */
+const comparisonMetadataSchema = z.array(
+  z.object({
+    slug: z.string(),
+  })
+);
+
 export async function generateStaticParams() {
   try {
     const metadataPath = path.join(
@@ -66,9 +78,14 @@ export async function generateStaticParams() {
       'comparisons',
       '_metadata.json'
     );
-    const metadata = JSON.parse(await fs.readFile(metadataPath, 'utf-8'));
+    const content = await fs.readFile(metadataPath, 'utf-8');
 
-    return metadata.map((item: { slug: string }) => ({
+    // Production-grade: safeParse with Zod validation
+    const metadata = safeParse(content, comparisonMetadataSchema, {
+      strategy: ParseStrategy.VALIDATED_JSON,
+    });
+
+    return metadata.map((item) => ({
       slug: item.slug,
     }));
   } catch (_error) {

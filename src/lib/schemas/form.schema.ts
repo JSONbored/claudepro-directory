@@ -16,6 +16,7 @@ import {
   trimString,
 } from '@/src/lib/schemas/primitives/sanitization-transforms';
 import { VALIDATION_PATTERNS } from '@/src/lib/security/patterns';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 
 /**
  * Base fields shared across all content types
@@ -234,6 +235,7 @@ export type ConfigSubmissionData = z.output<typeof configSubmissionSchema>;
 
 /**
  * JSON-LD utilities (moved from previous version)
+ * Production-grade: XSS validation + safeParse for round-trip safety
  */
 export function validateJsonLdSafe(data: unknown): unknown {
   const jsonString = JSON.stringify(data);
@@ -246,7 +248,10 @@ export function validateJsonLdSafe(data: unknown): unknown {
     throw new Error('JavaScript protocol not allowed in JSON-LD data');
   }
 
-  return JSON.parse(jsonString);
+  // Production-grade: safeParse with permissive unknown schema for round-trip validation
+  return safeParse(jsonString, z.unknown(), {
+    strategy: ParseStrategy.VALIDATED_JSON,
+  });
 }
 
 export function serializeJsonLd(data: unknown): string {

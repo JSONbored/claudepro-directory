@@ -35,6 +35,8 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
+import { z } from 'zod';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -507,9 +509,11 @@ function extractStructuredData(content: string): Array<{ schema: unknown; lineNu
 
     if (inJsonLd) {
       if (line.includes('</script>')) {
-        // Parse the accumulated JSON-LD
+        // Parse the accumulated JSON-LD with production-grade validation
         try {
-          const parsed = JSON.parse(jsonLdContent);
+          const parsed = safeParse(jsonLdContent, z.unknown(), {
+            strategy: ParseStrategy.VALIDATED_JSON,
+          });
           schemas.push({ schema: parsed, lineNumber: jsonLdStartLine });
         } catch (_error) {
           // Invalid JSON will be caught by validation

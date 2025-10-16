@@ -13,6 +13,7 @@
 
 import Link from 'next/link';
 import { useId, useState, useTransition } from 'react';
+import { z } from 'zod';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -27,11 +28,20 @@ import { Textarea } from '@/src/components/ui/textarea';
 import { submitConfiguration } from '@/src/lib/actions/business.actions';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { CheckCircle, ExternalLink, Github, Send } from '@/src/lib/icons';
+// Note: Server action already validates with configSubmissionSchema
+// Client-side validation would be redundant and cause type mismatches
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import { DuplicateWarning } from './duplicate-warning';
 import { ExamplesArrayInput } from './examples-array-input';
-import { TemplateSelector } from './template-selector';
+import { type Template, TemplateSelector } from './template-selector';
+
+/**
+ * Examples array schema (Zod)
+ * Production-grade runtime validation for form examples field
+ */
+const examplesArraySchema = z.array(z.string());
 
 type ContentType =
   | 'agents'
@@ -82,87 +92,73 @@ export function SubmitFormClient() {
   const positionId = useId();
 
   // Handle template selection
-  // biome-ignore lint/suspicious/noExplicitAny: Templates have dynamic fields based on content type
-  const handleTemplateSelect = (template: any) => {
+  // Templates are type-safe discriminated unions for UI pre-fill convenience
+  const handleTemplateSelect = (template: Template) => {
     // Pre-fill form with template data using name attributes
     // NOTE: Cannot use querySelector('#id') because useId() generates dynamic IDs like ':r0:'
     const form = document.querySelector('form') as HTMLFormElement;
     if (!form) return;
 
-    // Set name
-    if (template.name) {
-      setName(template.name);
-      const nameInput = form.querySelector('[name="name"]') as HTMLInputElement;
-      if (nameInput) nameInput.value = template.name;
-    }
+    // Set common fields (present in all templates)
+    setName(template.name);
+    const nameInput = form.querySelector('[name="name"]') as HTMLInputElement;
+    if (nameInput) nameInput.value = template.name;
 
-    // Set description
-    if (template.description) {
-      const descInput = form.querySelector('[name="description"]') as HTMLTextAreaElement;
-      if (descInput) descInput.value = template.description;
-    }
+    const descInput = form.querySelector('[name="description"]') as HTMLTextAreaElement;
+    if (descInput) descInput.value = template.description;
 
-    // Set category
-    if (template.category) {
-      const categoryInput = form.querySelector('[name="category"]') as HTMLInputElement;
-      if (categoryInput) categoryInput.value = template.category;
-    }
+    const categoryInput = form.querySelector('[name="category"]') as HTMLInputElement;
+    if (categoryInput) categoryInput.value = template.category;
 
-    // Set tags
-    if (template.tags) {
-      const tagsInput = form.querySelector('[name="tags"]') as HTMLInputElement;
-      if (tagsInput) tagsInput.value = template.tags;
-    }
+    const tagsInput = form.querySelector('[name="tags"]') as HTMLInputElement;
+    if (tagsInput) tagsInput.value = template.tags;
 
-    // Type-specific fields
-    if (contentType === 'agents' && template.systemPrompt) {
+    // Type-specific fields with TypeScript type narrowing
+    if (template.type === 'agent') {
       const promptInput = form.querySelector('[name="systemPrompt"]') as HTMLTextAreaElement;
       if (promptInput) promptInput.value = template.systemPrompt;
 
-      if (template.temperature !== undefined) {
-        const tempInput = form.querySelector('[name="temperature"]') as HTMLInputElement;
-        if (tempInput) tempInput.value = template.temperature.toString();
-      }
+      const tempInput = form.querySelector('[name="temperature"]') as HTMLInputElement;
+      if (tempInput) tempInput.value = template.temperature.toString();
 
-      if (template.maxTokens !== undefined) {
-        const tokensInput = form.querySelector('[name="maxTokens"]') as HTMLInputElement;
-        if (tokensInput) tokensInput.value = template.maxTokens.toString();
-      }
+      const tokensInput = form.querySelector('[name="maxTokens"]') as HTMLInputElement;
+      if (tokensInput) tokensInput.value = template.maxTokens.toString();
     }
 
-    if (contentType === 'rules' && template.rulesContent) {
+    if (template.type === 'rules') {
       const rulesInput = form.querySelector('[name="rulesContent"]') as HTMLTextAreaElement;
       if (rulesInput) rulesInput.value = template.rulesContent;
+
+      const tempInput = form.querySelector('[name="temperature"]') as HTMLInputElement;
+      if (tempInput) tempInput.value = template.temperature.toString();
+
+      const tokensInput = form.querySelector('[name="maxTokens"]') as HTMLInputElement;
+      if (tokensInput) tokensInput.value = template.maxTokens.toString();
     }
 
-    if (contentType === 'mcp') {
-      if (template.npmPackage) {
-        const npmInput = form.querySelector('[name="npmPackage"]') as HTMLInputElement;
-        if (npmInput) npmInput.value = template.npmPackage;
-      }
-      if (template.serverType) {
-        const typeInput = form.querySelector('[name="serverType"]') as HTMLSelectElement;
-        if (typeInput) typeInput.value = template.serverType;
-      }
-      if (template.installCommand) {
-        const installInput = form.querySelector('[name="installCommand"]') as HTMLInputElement;
-        if (installInput) installInput.value = template.installCommand;
-      }
-      if (template.configCommand) {
-        const configInput = form.querySelector('[name="configCommand"]') as HTMLInputElement;
-        if (configInput) configInput.value = template.configCommand;
-      }
-      if (template.toolsDescription) {
-        const toolsInput = form.querySelector('[name="toolsDescription"]') as HTMLTextAreaElement;
-        if (toolsInput) toolsInput.value = template.toolsDescription;
-      }
+    if (template.type === 'mcp') {
+      const npmInput = form.querySelector('[name="npmPackage"]') as HTMLInputElement;
+      if (npmInput) npmInput.value = template.npmPackage;
+
+      const typeInput = form.querySelector('[name="serverType"]') as HTMLSelectElement;
+      if (typeInput) typeInput.value = template.serverType;
+
+      const installInput = form.querySelector('[name="installCommand"]') as HTMLInputElement;
+      if (installInput) installInput.value = template.installCommand;
+
+      const configInput = form.querySelector('[name="configCommand"]') as HTMLInputElement;
+      if (configInput) configInput.value = template.configCommand;
+
+      const toolsInput = form.querySelector('[name="toolsDescription"]') as HTMLTextAreaElement;
+      if (toolsInput) toolsInput.value = template.toolsDescription;
+
       if (template.envVars) {
         const envInput = form.querySelector('[name="envVars"]') as HTMLTextAreaElement;
         if (envInput) envInput.value = template.envVars;
       }
     }
 
-    if (contentType === 'commands' && template.commandContent) {
+    if (template.type === 'command') {
       const cmdInput = form.querySelector('[name="commandContent"]') as HTMLTextAreaElement;
       if (cmdInput) cmdInput.value = template.commandContent;
     }
@@ -177,77 +173,55 @@ export function SubmitFormClient() {
       try {
         const formData = new FormData(event.currentTarget);
 
-        // Build submission data based on type
-        const baseData = {
+        /**
+         * CONFIGURATION-DRIVEN SUBMISSION
+         * Extract all form fields generically and pass to server action.
+         * Server action validates with configSubmissionSchema which handles:
+         * - Type discrimination (based on `type` field)
+         * - Coercion (string → number)
+         * - Validation (min/max/regex)
+         * - Transformation (trim, split tags/arrays)
+         * - Sanitization (security transforms)
+         *
+         * Adding new content types = just update form.schema.ts
+         * Zero changes needed here!
+         */
+        const submissionData: Record<string, unknown> = {
           type: contentType,
-          name: formData.get('name') as string,
-          description: formData.get('description') as string,
-          category: formData.get('category') as string,
-          author: formData.get('author') as string,
-          github: (formData.get('github') as string) || undefined,
-          tags: (formData.get('tags') as string) || undefined,
-          examples: (() => {
-            const examplesJson = formData.get('examples') as string;
-            if (!examplesJson || examplesJson === '[]') return undefined;
-            try {
-              return JSON.parse(examplesJson);
-            } catch {
-              return undefined;
-            }
-          })(),
         };
 
-        // biome-ignore lint/suspicious/noExplicitAny: Dynamic form data with type-specific fields added in switch statement
-        const submissionData: any = { ...baseData };
+        // Extract all form fields generically
+        for (const [key, value] of formData.entries()) {
+          // Handle examples JSON parsing with production-grade validation
+          if (key === 'examples') {
+            const examplesJson = value as string;
+            if (examplesJson && examplesJson !== '[]') {
+              try {
+                // Production-grade: safeParse with Zod validation (client-safe VALIDATED_JSON strategy)
+                submissionData.examples = safeParse(examplesJson, examplesArraySchema, {
+                  strategy: ParseStrategy.VALIDATED_JSON,
+                });
+              } catch {
+                // Invalid JSON - server will handle validation error
+                submissionData.examples = undefined;
+              }
+            }
+            continue;
+          }
 
-        // Add type-specific fields
-        switch (contentType) {
-          case 'agents':
-            submissionData.systemPrompt = formData.get('systemPrompt') as string;
-            submissionData.temperature =
-              Number.parseFloat(formData.get('temperature') as string) || 0.7;
-            submissionData.maxTokens =
-              Number.parseInt(formData.get('maxTokens') as string, 10) || 8000;
-            break;
-
-          case 'rules':
-            submissionData.rulesContent = formData.get('rulesContent') as string;
-            submissionData.temperature =
-              Number.parseFloat(formData.get('temperature') as string) || 0.7;
-            submissionData.maxTokens =
-              Number.parseInt(formData.get('maxTokens') as string, 10) || 8000;
-            break;
-
-          case 'commands':
-            submissionData.commandContent = formData.get('commandContent') as string;
-            break;
-
-          case 'hooks':
-            submissionData.hookScript = formData.get('hookScript') as string;
-            submissionData.hookType = formData.get('hookType') as string;
-            submissionData.triggeredBy = (formData.get('triggeredBy') as string) || undefined;
-            break;
-
-          case 'statuslines':
-            submissionData.statuslineScript = formData.get('statuslineScript') as string;
-            submissionData.statuslineType = formData.get('statuslineType') as string;
-            submissionData.refreshInterval =
-              Number.parseInt(formData.get('refreshInterval') as string, 10) || 1000;
-            submissionData.position = formData.get('position') as string;
-            break;
-
-          case 'mcp':
-            submissionData.npmPackage = formData.get('npmPackage') as string;
-            submissionData.serverType = formData.get('serverType') as string;
-            submissionData.installCommand = formData.get('installCommand') as string;
-            submissionData.configCommand = formData.get('configCommand') as string;
-            submissionData.toolsDescription =
-              (formData.get('toolsDescription') as string) || undefined;
-            submissionData.envVars = (formData.get('envVars') as string) || undefined;
-            break;
+          // Add all other fields as-is (server will coerce/transform via Zod)
+          submissionData[key] = value || undefined;
         }
 
-        const result = await submitConfiguration(submissionData);
+        /**
+         * Submit to server action for validation
+         * Type assertion is correct here because:
+         * 1. Data shape is unknown at compile-time (user input)
+         * 2. Server validates at runtime with configSubmissionSchema (Zod)
+         * 3. This is proper separation: client collects, server validates
+         */
+        // biome-ignore lint/suspicious/noExplicitAny: Passing unknown user data to validating server action
+        const result = await submitConfiguration(submissionData as any);
 
         if (result?.data?.success) {
           setSubmissionResult({

@@ -22,7 +22,7 @@
  */
 
 import { useVirtualizer, useWindowVirtualizer } from '@tanstack/react-virtual';
-import { memo, type ReactNode, useRef } from 'react';
+import { memo, type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 
 interface VirtualizedGridProps<T> {
@@ -105,8 +105,28 @@ function WindowVirtualizedGrid<T>({
 }: Omit<VirtualizedGridProps<T>, 'useWindowScroll'>) {
   const parentRef = useRef<HTMLDivElement>(null);
 
+  // Determine columns based on viewport width
+  const getColumnCount = useCallback(() => {
+    if (typeof window === 'undefined') return 3;
+    const width = window.innerWidth;
+    if (width < 768) return 1; // mobile
+    if (width < 1024) return 2; // tablet
+    return 3; // desktop
+  }, []);
+
+  const [columnCount, setColumnCount] = useState(getColumnCount);
+
+  useEffect(() => {
+    const handleResize = () => setColumnCount(getColumnCount());
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [getColumnCount]);
+
+  // Calculate rows needed for grid layout
+  const rowCount = Math.ceil(items.length / columnCount);
+
   const virtualizer = useWindowVirtualizer({
-    count: items.length,
+    count: rowCount,
     estimateSize: () => estimateSize,
     overscan,
     scrollMargin: parentRef.current?.offsetTop ?? 0,
@@ -135,32 +155,40 @@ function WindowVirtualizedGrid<T>({
       <div
         style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}
       >
-        <div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            gap: `${gap}px`,
-            transform: `translateY(${(virtualItems[0]?.start ?? 0) - (virtualizer.options.scrollMargin ?? 0)}px)`,
-          }}
-        >
-          {virtualItems.map((virtualRow) => {
-            const item = items[virtualRow.index];
-            if (!item) return null;
+        {virtualItems.map((virtualRow) => {
+          // Calculate which items belong to this row
+          const startIndex = virtualRow.index * columnCount;
+          const endIndex = Math.min(startIndex + columnCount, items.length);
+          const rowItems = items.slice(startIndex, endIndex);
 
-            const key = keyExtractor ? keyExtractor(item, virtualRow.index) : virtualRow.key;
+          return (
+            <div
+              key={virtualRow.key}
+              data-index={virtualRow.index}
+              ref={virtualizer.measureElement}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                gap: `${gap}px`,
+                transform: `translateY(${virtualRow.start - (virtualizer.options.scrollMargin ?? 0)}px)`,
+              }}
+            >
+              {rowItems.map((item, indexInRow) => {
+                const itemIndex = startIndex + indexInRow;
+                const key = keyExtractor ? keyExtractor(item, itemIndex) : itemIndex;
 
-            return (
-              <ErrorBoundary key={key}>
-                <div data-index={virtualRow.index} ref={virtualizer.measureElement}>
-                  {renderItem(item, virtualRow.index)}
-                </div>
-              </ErrorBoundary>
-            );
-          })}
-        </div>
+                return (
+                  <ErrorBoundary key={key}>
+                    <div>{renderItem(item, itemIndex)}</div>
+                  </ErrorBoundary>
+                );
+              })}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -182,8 +210,28 @@ function ElementVirtualizedGrid<T>({
 }: Omit<VirtualizedGridProps<T>, 'useWindowScroll'>) {
   const parentRef = useRef<HTMLDivElement>(null);
 
+  // Determine columns based on viewport width
+  const getColumnCount = useCallback(() => {
+    if (typeof window === 'undefined') return 3;
+    const width = window.innerWidth;
+    if (width < 768) return 1; // mobile
+    if (width < 1024) return 2; // tablet
+    return 3; // desktop
+  }, []);
+
+  const [columnCount, setColumnCount] = useState(getColumnCount);
+
+  useEffect(() => {
+    const handleResize = () => setColumnCount(getColumnCount());
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [getColumnCount]);
+
+  // Calculate rows needed for grid layout
+  const rowCount = Math.ceil(items.length / columnCount);
+
   const virtualizer = useVirtualizer({
-    count: items.length,
+    count: rowCount,
     getScrollElement: () => parentRef.current,
     estimateSize: () => estimateSize,
     overscan,
@@ -222,32 +270,40 @@ function ElementVirtualizedGrid<T>({
       <div
         style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}
       >
-        <div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            gap: `${gap}px`,
-            transform: `translateY(${virtualItems[0]?.start ?? 0}px)`,
-          }}
-        >
-          {virtualItems.map((virtualRow) => {
-            const item = items[virtualRow.index];
-            if (!item) return null;
+        {virtualItems.map((virtualRow) => {
+          // Calculate which items belong to this row
+          const startIndex = virtualRow.index * columnCount;
+          const endIndex = Math.min(startIndex + columnCount, items.length);
+          const rowItems = items.slice(startIndex, endIndex);
 
-            const key = keyExtractor ? keyExtractor(item, virtualRow.index) : virtualRow.key;
+          return (
+            <div
+              key={virtualRow.key}
+              data-index={virtualRow.index}
+              ref={virtualizer.measureElement}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                gap: `${gap}px`,
+                transform: `translateY(${virtualRow.start}px)`,
+              }}
+            >
+              {rowItems.map((item, indexInRow) => {
+                const itemIndex = startIndex + indexInRow;
+                const key = keyExtractor ? keyExtractor(item, itemIndex) : itemIndex;
 
-            return (
-              <ErrorBoundary key={key}>
-                <div data-index={virtualRow.index} ref={virtualizer.measureElement}>
-                  {renderItem(item, virtualRow.index)}
-                </div>
-              </ErrorBoundary>
-            );
-          })}
-        </div>
+                return (
+                  <ErrorBoundary key={key}>
+                    <div>{renderItem(item, itemIndex)}</div>
+                  </ErrorBoundary>
+                );
+              })}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

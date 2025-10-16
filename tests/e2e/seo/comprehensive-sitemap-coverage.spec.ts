@@ -38,6 +38,8 @@
 
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
+import { z } from 'zod';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 
 /**
  * Helper: Get meta tag content
@@ -78,7 +80,12 @@ async function getStructuredData(page: Page): Promise<unknown[]> {
     try {
       const content = await script.textContent();
       if (content) {
-        data.push(JSON.parse(content));
+        // Production-grade: safeParse with permissive schema for JSON-LD validation
+        data.push(
+          safeParse(content, z.unknown(), {
+            strategy: ParseStrategy.VALIDATED_JSON,
+          })
+        );
       }
     } catch {
       // Invalid JSON-LD, skip

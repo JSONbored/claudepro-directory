@@ -6,8 +6,10 @@
  * /content/{type}/{slug}.json
  */
 
+import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
 import type { ConfigSubmissionData } from '@/src/lib/schemas/form.schema';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import { fileExists, listFiles } from './client';
 
 /**
@@ -559,33 +561,31 @@ export function formatContentFile(data: ConfigSubmissionData & { slug: string })
 }
 
 /**
+ * Content validation schema (Zod)
+ * Production-grade runtime validation for content files
+ */
+const contentFileValidationSchema = z.object({
+  slug: z.string().min(1),
+  description: z.string().min(1),
+  category: z.string().min(1),
+  author: z.string().min(1),
+  dateAdded: z.string().min(1),
+  tags: z.array(z.string()),
+});
+
+/**
  * Validate content file structure
- * Ensures the formatted content matches expected schema
+ * Production-grade: Uses Zod schema validation with safeParse
  */
 export function validateContentFile(content: string): boolean {
   try {
-    const parsed = JSON.parse(content);
-
-    // Check required fields
-    const requiredFields = ['slug', 'description', 'category', 'author', 'dateAdded', 'tags'];
-
-    for (const field of requiredFields) {
-      if (!(field in parsed)) {
-        logger.warn(`Content validation failed: Missing field "${field}"`);
-        return false;
-      }
-    }
-
-    // Validate types
-    if (typeof parsed.slug !== 'string') return false;
-    if (typeof parsed.description !== 'string') return false;
-    if (typeof parsed.category !== 'string') return false;
-    if (typeof parsed.author !== 'string') return false;
-    if (typeof parsed.dateAdded !== 'string') return false;
-    if (!Array.isArray(parsed.tags)) return false;
-
+    // Production-grade: safeParse with Zod validation
+    safeParse(content, contentFileValidationSchema, {
+      strategy: ParseStrategy.VALIDATED_JSON,
+    });
     return true;
   } catch (error) {
+    // Log detailed validation errors
     logger.error(
       'Content validation error',
       error instanceof Error ? error : new Error(String(error))

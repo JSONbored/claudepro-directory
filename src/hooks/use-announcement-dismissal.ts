@@ -1,7 +1,9 @@
 'use client';
 
+import { z } from 'zod';
 import { useLocalStorage } from '@/src/hooks/use-local-storage';
 import { logger } from '@/src/lib/logger';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 
 /**
  * Dismissal State Interface
@@ -17,6 +19,18 @@ interface DismissalState {
     timestamp: string;
   };
 }
+
+/**
+ * Dismissal State Schema (Zod)
+ * Production-grade runtime validation for localStorage data
+ */
+const dismissalStateSchema = z.record(
+  z.string(),
+  z.object({
+    dismissed: z.boolean(),
+    timestamp: z.string(),
+  })
+);
 
 /**
  * Return type for useAnnouncementDismissal hook
@@ -180,7 +194,12 @@ export function getAnnouncementDismissalAnalytics(): DismissalState {
 
   try {
     const stored = window.localStorage.getItem('announcement-dismissals');
-    return stored ? JSON.parse(stored) : {};
+    if (!stored) return {};
+
+    // Production-grade: safeParse with Zod validation
+    return safeParse<DismissalState>(stored, dismissalStateSchema, {
+      strategy: ParseStrategy.VALIDATED_JSON,
+    });
   } catch (error) {
     logger.error(
       'Failed to read dismissal analytics',

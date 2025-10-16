@@ -37,6 +37,8 @@
  */
 
 import { expect, type Page, test } from '@playwright/test';
+import { z } from 'zod';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import {
   navigateToCategory,
   navigateToHomepage,
@@ -87,7 +89,12 @@ async function getStructuredData(page: Page): Promise<unknown[]> {
     const content = await script.textContent();
     if (content) {
       try {
-        data.push(JSON.parse(content));
+        // Production-grade: safeParse with permissive schema for JSON-LD validation
+        data.push(
+          safeParse(content, z.unknown(), {
+            strategy: ParseStrategy.VALIDATED_JSON,
+          })
+        );
       } catch (_error) {
         // Invalid JSON - skip this script block
       }

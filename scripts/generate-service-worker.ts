@@ -25,9 +25,11 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { z } from 'zod';
 import { getAllCategoryIds } from '../src/lib/config/category-config.js';
 import { SECURITY_CONFIG } from '../src/lib/constants/security.js';
 import { logger } from '../src/lib/logger.js';
+import { ParseStrategy, safeParse } from '../src/lib/utils/data.utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = join(__filename, '..');
@@ -507,8 +509,17 @@ async function generateServiceWorker() {
   logger.info('🔧 Generating service worker from UNIFIED_CATEGORY_REGISTRY...');
 
   try {
-    // Read package.json for version
-    const packageJson = JSON.parse(await readFile(join(ROOT_DIR, 'package.json'), 'utf-8'));
+    // Read package.json for version with production-grade parsing
+    const packageJsonContent = await readFile(join(ROOT_DIR, 'package.json'), 'utf-8');
+    const packageJsonSchema = z
+      .object({
+        version: z.string().optional(),
+      })
+      .passthrough();
+
+    const packageJson = safeParse(packageJsonContent, packageJsonSchema, {
+      strategy: ParseStrategy.VALIDATED_JSON,
+    });
     const version = packageJson.version || '1.0.0';
     const cacheVersion = version.replace(/\./g, '-');
 

@@ -57,6 +57,7 @@ import {
 } from '@/generated/content';
 import { logger } from '@/src/lib/logger';
 import { batchLoadContent } from '@/src/lib/utils/batch.utils';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 
 /**
  * Configuration
@@ -160,9 +161,11 @@ async function needsRegeneration(route: string, force: boolean): Promise<boolean
       return true;
     }
 
-    // Validate metadata
+    // Validate metadata with production-grade parsing
     const metadataRaw = await readFile(metadataPath, 'utf-8');
-    const metadata = ImageMetadataSchema.parse(JSON.parse(metadataRaw));
+    const metadata = safeParse(metadataRaw, ImageMetadataSchema, {
+      strategy: ParseStrategy.VALIDATED_JSON,
+    });
 
     // Check if dimensions are correct
     if (

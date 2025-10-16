@@ -1020,6 +1020,48 @@ export class CacheService {
   }
 
   /**
+   * Get value from cache with schema validation
+   * Production-grade: Runtime Zod validation + existing XSS protection
+   *
+   * @param key - Cache key
+   * @param schema - Zod schema for domain-specific validation
+   * @returns Validated value or null
+   *
+   * @example
+   * ```ts
+   * const emailSequenceSchema = z.object({
+   *   email: z.string().email(),
+   *   status: z.enum(['active', 'completed']),
+   * });
+   *
+   * const sequence = await cache.getTyped('email:123', emailSequenceSchema);
+   * // TypeScript knows sequence is fully validated EmailSequence type
+   * ```
+   */
+  async getTyped<T>(key: string, schema: z.ZodType<T>): Promise<T | null> {
+    try {
+      // Use existing get() for cache infrastructure (compression, XSS protection, etc.)
+      const rawValue = await this.get<unknown>(key);
+
+      if (rawValue === null) {
+        return null;
+      }
+
+      // Additional domain-specific validation with Zod
+      const validatedValue = schema.parse(rawValue);
+
+      return validatedValue;
+    } catch (error) {
+      this.stats.errors++;
+      const err = error instanceof Error ? error : new Error(String(error));
+      logger.error(`Schema validation failed for key: ${key}`, err, {
+        errorType: error instanceof z.ZodError ? 'ZodValidationError' : 'UnknownError',
+      });
+      return null;
+    }
+  }
+
+  /**
    * Get value from cache or compute it if missing
    * Implements request coalescing to prevent thundering herd
    *

@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
 import type { MDXFrontmatter } from '@/src/lib/schemas/markdown.schema';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import { getSharedHighlighter } from './shiki-singleton';
 
 // MDX node schema for type safety
@@ -204,16 +205,19 @@ export function parseMDXFrontmatter(content: string): {
         // If object closed on same line
         if (objectDepth === 0) {
           try {
-            const parsed = JSON.parse(objectContent);
-            const validated = frontmatterValueSchema.safeParse(parsed);
-            frontmatter[currentKey] = validated.success ? validated.data : objectContent;
+            // Production-grade: safeParse with Zod validation
+            const parsed = safeParse(objectContent, frontmatterValueSchema, {
+              strategy: ParseStrategy.VALIDATED_JSON,
+            });
+            frontmatter[currentKey] = parsed;
           } catch (error) {
+            // Fallback to raw string if parsing fails
+            frontmatter[currentKey] = objectContent;
             logger.warn('Failed to parse frontmatter object', {
               key: currentKey,
               content: objectContent.slice(0, 100),
               error: error instanceof Error ? error.message : String(error),
             });
-            frontmatter[currentKey] = objectContent;
           }
           inObject = false;
           currentKey = '';
@@ -235,16 +239,19 @@ export function parseMDXFrontmatter(content: string): {
       // Object complete
       if (objectDepth === 0) {
         try {
-          const parsed = JSON.parse(objectContent);
-          const validated = frontmatterValueSchema.safeParse(parsed);
-          frontmatter[currentKey] = validated.success ? validated.data : objectContent;
+          // Production-grade: safeParse with Zod validation
+          const parsed = safeParse(objectContent, frontmatterValueSchema, {
+            strategy: ParseStrategy.VALIDATED_JSON,
+          });
+          frontmatter[currentKey] = parsed;
         } catch (error) {
+          // Fallback to raw string if parsing fails
+          frontmatter[currentKey] = objectContent;
           logger.warn('Failed to parse multiline frontmatter object', {
             key: currentKey,
             content: objectContent.slice(0, 100),
             error: error instanceof Error ? error.message : String(error),
           });
-          frontmatter[currentKey] = objectContent;
         }
         inObject = false;
         currentKey = '';

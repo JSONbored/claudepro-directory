@@ -31,6 +31,23 @@ import { generateSlugFromFilename } from '@/src/lib/schemas/content-generation.s
 import { slugToTitle } from '@/src/lib/utils';
 import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
 import { generateDisplayTitle } from '@/src/lib/utils/content.utils';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
+
+/**
+ * Build cache schema (Zod) for runtime validation
+ * Production-grade validation for incremental builds
+ */
+const buildCacheSchema = z.object({
+  version: z.string(),
+  files: z.record(
+    z.string(),
+    z.object({
+      hash: z.string(),
+      mtime: z.number(),
+    })
+  ),
+  lastBuild: z.string().datetime(),
+});
 
 /**
  * Build cache interface for incremental builds
@@ -87,18 +104,26 @@ function computeContentHash(content: string): string {
 
 /**
  * Load build cache from disk
- * Performance: Async I/O with graceful failure
+ * Production-grade: Async I/O with schema validation and graceful failure
  *
  * @param cacheDir - Cache directory path
- * @returns Build cache or null if not found/invalid
+ * @returns Validated build cache or null if not found/invalid
  */
 export async function loadBuildCache(cacheDir: string): Promise<BuildCache | null> {
   try {
     await mkdir(cacheDir, { recursive: true });
     const cachePath = join(cacheDir, 'build-cache.json');
     const content = await readFile(cachePath, 'utf-8');
-    return JSON.parse(content) as BuildCache;
-  } catch {
+
+    // Production-grade: safeParse with Zod validation
+    return safeParse<BuildCache>(content, buildCacheSchema, {
+      strategy: ParseStrategy.VALIDATED_JSON,
+    });
+  } catch (error) {
+    // Log validation errors for debugging
+    logger.debug('Build cache load failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return null;
   }
 }
@@ -187,15 +212,18 @@ async function processContentFile<T extends ContentType>(
       }
     }
 
-    // Parse JSON with validation
+    // Production-grade: Parse JSON with validation using safeParse
     const rawJsonSchema = z
       .object({})
       .passthrough()
       .describe('Raw JSON content schema with passthrough for unknown fields');
+
     let parsedData: z.infer<typeof rawJsonSchema>;
     try {
-      const rawParsed = JSON.parse(content);
-      parsedData = rawJsonSchema.parse(rawParsed);
+      // safeParse handles JSON.parse + Zod validation in one secure operation
+      parsedData = safeParse(content, rawJsonSchema, {
+        strategy: ParseStrategy.VALIDATED_JSON,
+      });
     } catch (parseError) {
       throw new Error(
         `JSON parse error: ${parseError instanceof Error ? parseError.message : String(parseError)}`

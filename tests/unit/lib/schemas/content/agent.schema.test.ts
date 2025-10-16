@@ -25,7 +25,9 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { z } from 'zod';
 import { agentContentSchema } from '@/src/lib/schemas/content/agent.schema';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 
 // Path to content directory (relative to project root)
 const CONTENT_DIR = join(process.cwd(), 'content/agents');
@@ -41,7 +43,10 @@ function loadAgentFiles() {
     return files.map((filename) => {
       const filePath = join(CONTENT_DIR, filename);
       const raw = readFileSync(filePath, 'utf-8');
-      const data = JSON.parse(raw);
+      // Production-grade: safeParse with permissive schema for test content loading
+      const data = safeParse(raw, z.unknown(), {
+        strategy: ParseStrategy.VALIDATED_JSON,
+      });
       return { filename, data, raw };
     });
   } catch (error) {
