@@ -89,7 +89,7 @@ export default async function MyJobsPage() {
 
               <CardContent>
                 <div
-                  className={`${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.MB_4} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+                  className={`flex flex-wrap gap-4 ${UI_CLASSES.MB_4} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
                 >
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                     <Eye className="h-4 w-4" />

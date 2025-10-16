@@ -141,7 +141,7 @@ export default async function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {profile.image && (
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4}>
+            <div className="flex items-center gap-4">
               <Image
                 src={profile.image}
                 alt={profile.name || 'Profile'}

@@ -65,11 +65,11 @@ export default async function AccountLayout({ children }: { children: React.Reac
           className={`container ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_BETWEEN}`}
         >
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <Link href="/" className={UI_CLASSES.HOVER_TEXT_ACCENT}>
+            <Link href="/" className="group-hover:text-accent transition-colors-smooth">
               ← Back to Directory
             </Link>
           </div>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4}>
+          <div className="flex items-center gap-4">
             {profile?.slug && (
               <Link href={`/u/${profile.slug}`} className={UI_CLASSES.TEXT_SM}>
                 View Profile

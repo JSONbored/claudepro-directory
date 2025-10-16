@@ -238,7 +238,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                 <div className="flex-1">
                   <Label
                     htmlFor={bookmark.id}
-                    className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_NORMAL} ${UI_CLASSES.CURSOR_POINTER} ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}
+                    className={`${UI_CLASSES.TEXT_SM} font-normal cursor-pointer ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}
                   >
                     <Badge variant="outline" className="text-xs capitalize">
                       {bookmark.content_type}
@@ -268,7 +268,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       )}
 
       {/* Actions */}
-      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4} pt-4`}>
+      <div className={'flex items-center gap-4 pt-4'}>
         <Button type="submit" disabled={isPending} className={UI_CLASSES.FLEX_1_SM_FLEX_INITIAL}>
           {isPending
             ? mode === 'create'

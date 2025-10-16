@@ -105,7 +105,7 @@ export function AnnouncementBanner() {
             bg-accent/10
             backdrop-blur-sm
             transition-all
-            ${UI_CLASSES.DURATION_300}
+            duration-300
             motion-reduce:transition-none
             shadow-sm
             hover:shadow-md
@@ -168,7 +168,7 @@ export function AnnouncementBanner() {
                     hover:bg-accent/20
                     rounded-full
                     transition-colors
-                    ${UI_CLASSES.DURATION_200}
+                    duration-200
                     focus-visible:ring-2
                     focus-visible:ring-accent
                     focus-visible:ring-offset-2

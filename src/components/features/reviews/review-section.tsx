@@ -503,7 +503,7 @@ export function ReviewSection({
 
       {/* Empty State */}
       {totalCount === 0 && !showForm && !aggregateData && (
-        <Card className={`p-8 text-center ${UI_CLASSES.BG_MUTED_50}`}>
+        <Card className={'p-8 text-center bg-muted/50'}>
           <MessageCircle
             className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50"
             aria-hidden="true"

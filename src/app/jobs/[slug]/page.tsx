@@ -106,7 +106,7 @@ export default async function JobPage({ params }: PageProps) {
 
       <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
         {/* Header */}
-        <div className={`${UI_CLASSES.BORDER_B} border-border/50 ${UI_CLASSES.BG_CARD}/30`}>
+        <div className={`border-b border-border/50 ${UI_CLASSES.BG_CARD}/30`}>
           <div className="container mx-auto px-4 py-8">
             <Button variant="ghost" asChild className={UI_CLASSES.MB_6}>
               <Link href={ROUTES.JOBS}>
@@ -122,9 +122,7 @@ export default async function JobPage({ params }: PageProps) {
                 </div>
                 <div className="flex-1">
                   <h1 className="text-3xl font-bold mb-2">{job.title}</h1>
-                  <p className={`${UI_CLASSES.TEXT_XL} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-                    {job.company}
-                  </p>
+                  <p className={`text-xl ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>{job.company}</p>
                 </div>
               </div>
 

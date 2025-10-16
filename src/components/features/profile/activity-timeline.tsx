@@ -155,7 +155,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                                 href={activity.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`hover:text-primary ${UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_1}`}
+                                className={'hover:text-primary inline-flex items-center gap-1'}
                               >
                                 {activity.title}
                                 <ExternalLink className="h-3 w-3" />
@@ -222,7 +222,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                                 href={activity.pr_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`${UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_1} hover:text-primary`}
+                                className={'inline-flex items-center gap-1 hover:text-primary'}
                               >
                                 View PR
                                 <ExternalLink className="h-3 w-3" />

@@ -141,10 +141,10 @@ export function DetailHeaderActions({
 
       {/* Main content header */}
       <div
-        className={`${UI_CLASSES.FLEX_COL} lg:flex-row lg:${UI_CLASSES.ITEMS_START} lg:${UI_CLASSES.JUSTIFY_BETWEEN} ${UI_CLASSES.GAP_6}`}
+        className={`${UI_CLASSES.FLEX_COL} lg:flex-row lg:${UI_CLASSES.ITEMS_START} lg:${UI_CLASSES.JUSTIFY_BETWEEN} gap-6`}
       >
         <div className={UI_CLASSES.FLEX_1}>
-          <div className={`flex items-center ${UI_CLASSES.GAP_3} ${UI_CLASSES.MB_4}`}>
+          <div className={`flex items-center gap-3 ${UI_CLASSES.MB_4}`}>
             <Badge variant="secondary" className={`${UI_CLASSES.TEXT_XS} font-medium`}>
               {typeName}
             </Badge>
@@ -165,7 +165,7 @@ export function DetailHeaderActions({
         </div>
 
         {/* Action buttons */}
-        <div className={`${UI_CLASSES.FLEX_COL} sm:flex-row ${UI_CLASSES.GAP_3}`}>
+        <div className={`${UI_CLASSES.FLEX_COL} sm:flex-row gap-3`}>
           <Button onClick={() => handleActionClick(primaryAction)} className={UI_CLASSES.MIN_W_0}>
             {primaryAction.label}
           </Button>

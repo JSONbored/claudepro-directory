@@ -155,16 +155,14 @@ export default async function SubmitPage() {
             {recentMerged.map((submission) => (
               <div
                 key={submission.id}
-                className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} pb-3 ${UI_CLASSES.BORDER_B} border-border/50 last:border-0 last:pb-0`}
+                className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} pb-3 border-b border-border/50 last:border-0 last:pb-0`}
               >
                 <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} truncate`}>
                     {submission.content_name}
                   </p>
-                  <div
-                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mt-1 ${UI_CLASSES.FLEX_WRAP}`}
-                  >
+                  <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mt-1 flex-wrap`}>
                     <Badge variant="outline" className="text-xs">
                       {TYPE_LABELS[submission.content_type]}
                     </Badge>
@@ -207,7 +205,7 @@ export default async function SubmitPage() {
                 <Link
                   key={contributor.slug}
                   href={`/u/${contributor.slug}`}
-                  className={`flex items-center justify-between ${UI_CLASSES.PY_2} hover:bg-accent/5 ${UI_CLASSES.PX_2} -mx-2 rounded transition-colors`}
+                  className={`flex items-center justify-between py-2 hover:bg-accent/5 ${UI_CLASSES.PX_2} -mx-2 rounded transition-colors`}
                 >
                   <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} min-w-0 flex-1`}>
                     <span

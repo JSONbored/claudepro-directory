@@ -535,14 +535,9 @@ function withBaseHeaders(
 
 function validateOutputIfNeeded(data: unknown, validate?: ZodSchemaUnknown): void {
   if (!validate) return;
-  try {
-    // Only enforce strict validation during development to avoid breaking production unexpectedly
-    if (isDevelopment) {
-      validate.parse(data);
-    }
-  } catch (error) {
-    // If validation fails, throw a ZodError to be handled by error utilities
-    throw error;
+  // Only enforce strict validation during development to avoid breaking production unexpectedly
+  if (isDevelopment) {
+    validate.parse(data); // Throws ZodError if validation fails
   }
 }
 
@@ -716,7 +711,7 @@ type ApiMethodHandler<P = unknown, Q = unknown, H = unknown, B = unknown> = (
   ctx: ApiHandlerContext<P, Q, H, B>
 ) => Promise<Response | NextResponse | unknown>;
 
-export interface CreateApiRouteOptions<P = any, Q = any, H = any, B = any> {
+export interface CreateApiRouteOptions<P = unknown, Q = unknown, H = unknown, B = unknown> {
   validate?: RouteValidationSchemas<P, Q, H, B>;
   rateLimit?: { limiter?: RateLimiter };
   auth?: { type?: 'devOnly' | 'cron' };
@@ -726,8 +721,12 @@ export interface CreateApiRouteOptions<P = any, Q = any, H = any, B = any> {
 
 function isResponse(value: unknown): value is Response | NextResponse {
   if (!value || typeof value !== 'object') return false;
-  const anyVal = value as any;
-  return typeof anyVal.headers === 'object' && typeof anyVal.status === 'number';
+  return (
+    'headers' in value &&
+    typeof value.headers === 'object' &&
+    'status' in value &&
+    typeof value.status === 'number'
+  );
 }
 
 function cloneWithHeaders(original: Response, headers: Record<string, string>): Response {

@@ -151,9 +151,9 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
 
     // Add Tailwind classes to the sanitized HTML for proper styling
     htmlContent = htmlContent
-      .replace(/<h1>/g, `<h1 class="text-3xl font-bold ${UI_CLASSES.MT_8} mb-4">`)
-      .replace(/<h2>/g, `<h2 class="text-2xl font-semibold ${UI_CLASSES.MT_6} mb-3">`)
-      .replace(/<h3>/g, `<h3 class="text-xl font-medium ${UI_CLASSES.MT_4} mb-2">`)
+      .replace(/<h1>/g, `<h1 class="text-3xl font-bold mt-8 mb-4">`)
+      .replace(/<h2>/g, `<h2 class="text-2xl font-semibold mt-6 mb-3">`)
+      .replace(/<h3>/g, `<h3 class="text-xl font-medium mt-4 mb-2">`)
       .replace(/<a /g, '<a class="text-primary hover:underline" ')
       .replace(/<li>/g, '<li class="ml-6 list-disc">')
       .replace(/<table>/g, '<table class="w-full border-collapse my-4">')
@@ -207,7 +207,7 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
         </div>
 
         {/* Main Content */}
-        <Card className={UI_CLASSES.P_8}>
+        <Card className="p-8">
           <article
             className="prose prose-invert max-w-none"
             // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized using DOMPurify
@@ -216,14 +216,12 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
         </Card>
 
         {/* Footer CTA */}
-        <div
-          className={`${UI_CLASSES.MT_8} ${UI_CLASSES.P_6} ${UI_CLASSES.BG_ACCENT_10} rounded-lg`}
-        >
+        <div className={`mt-8 p-6 ${UI_CLASSES.BG_ACCENT_10} rounded-lg`}>
           <h3 className={`text-lg font-semibold ${UI_CLASSES.MB_2}`}>Explore More Claude Tools</h3>
           <p className="text-muted-foreground mb-4">
             Discover more configurations and tools for Claude AI in our community directory.
           </p>
-          <div className={UI_CLASSES.FLEX_GAP_3}>
+          <div className="flex gap-3">
             <Link href={`/${data.category1}`}>
               <Button variant="outline" size="sm">
                 <Tags className="mr-2 h-4 w-4" />

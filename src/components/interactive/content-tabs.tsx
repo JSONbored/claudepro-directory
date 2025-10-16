@@ -25,10 +25,7 @@ export function ContentTabs(props: ContentTabsProps) {
     <section itemScope itemType="https://schema.org/ItemList" className="my-8">
       {title && (
         <div className={UI_CLASSES.MB_6}>
-          <h3
-            className={`${UI_CLASSES.TEXT_XL} ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`}
-            itemProp="name"
-          >
+          <h3 className={`text-xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`} itemProp="name">
             {title}
           </h3>
           {description && (
@@ -41,7 +38,7 @@ export function ContentTabs(props: ContentTabsProps) {
 
       <Tabs defaultValue={firstValue} className={UI_CLASSES.W_FULL}>
         <TabsList
-          className={`${UI_CLASSES.GRID} ${UI_CLASSES.W_FULL} grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 h-auto p-1`}
+          className={`grid ${UI_CLASSES.W_FULL} grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 h-auto p-1`}
         >
           {validItems.map((item) => (
             <TabsTrigger
@@ -58,7 +55,7 @@ export function ContentTabs(props: ContentTabsProps) {
           <TabsContent
             key={item.value}
             value={item.value}
-            className={UI_CLASSES.MT_4}
+            className="mt-4"
             itemScope
             itemType="https://schema.org/ListItem"
           >

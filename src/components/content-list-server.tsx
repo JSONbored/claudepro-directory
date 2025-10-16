@@ -93,10 +93,10 @@ function ContentHeroSection<T extends UnifiedContentItem>({
 function ContentSearchSkeleton() {
   return (
     <div className={`${UI_CLASSES.W_FULL} space-y-4 animate-pulse`}>
-      <div className={`h-12 ${UI_CLASSES.BG_CARD_50} ${UI_CLASSES.ROUNDED_LG}`} />
-      <div className={`${UI_CLASSES.FLEX} gap-2 ${UI_CLASSES.JUSTIFY_END}`}>
-        <div className={`h-10 w-24 ${UI_CLASSES.BG_CARD_50} ${UI_CLASSES.ROUNDED_LG}`} />
-        <div className={`h-10 w-20 ${UI_CLASSES.BG_CARD_50} ${UI_CLASSES.ROUNDED_LG}`} />
+      <div className={`h-12 bg-card/50 ${UI_CLASSES.ROUNDED_LG}`} />
+      <div className={`${UI_CLASSES.FLEX} gap-2 justify-end`}>
+        <div className={`h-10 w-24 bg-card/50 ${UI_CLASSES.ROUNDED_LG}`} />
+        <div className={`h-10 w-20 bg-card/50 ${UI_CLASSES.ROUNDED_LG}`} />
       </div>
     </div>
   );

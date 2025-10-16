@@ -522,7 +522,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
       <input type="hidden" name="benefits" value={JSON.stringify(benefits)} />
 
       {/* Submit */}
-      <div className={UI_CLASSES.FLEX_GAP_4}>
+      <div className="flex gap-4">
         <Button
           type="submit"
           disabled={isPending || tags.length === 0 || requirements.length === 0}

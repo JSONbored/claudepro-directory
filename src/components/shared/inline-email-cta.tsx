@@ -203,7 +203,7 @@ export function InlineEmailCTA({
     return (
       <div
         className={cn(
-          `${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4} justify-between ${UI_CLASSES.P_4}`,
+          `flex items-center gap-4 justify-between ${UI_CLASSES.P_4}`,
           'bg-accent/5 border border-border/50 rounded-lg',
           className
         )}
@@ -231,7 +231,7 @@ export function InlineEmailCTA({
       >
         <CardHeader className={UI_CLASSES.FLEX_1}>
           <div className="mb-4">
-            <div className={`${UI_CLASSES.INLINE_FLEX} p-3 bg-primary/10 rounded-lg`}>
+            <div className={'inline-flex p-3 bg-primary/10 rounded-lg'}>
               <Mail className="h-6 w-6 text-primary" aria-hidden="true" />
             </div>
           </div>

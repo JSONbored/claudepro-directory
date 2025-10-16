@@ -42,13 +42,10 @@ export default function ConfigRecommenderPage() {
   return (
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       {/* Hero Section */}
-      <section className={`relative py-16 px-4 ${UI_CLASSES.OVERFLOW_HIDDEN}`}>
+      <section className={'relative py-16 px-4 overflow-hidden'}>
         <div className={`container ${UI_CLASSES.MX_AUTO} text-center ${UI_CLASSES.MAX_W_4XL}`}>
           {/* Badge */}
-          <Badge
-            variant="outline"
-            className={`mb-6 border-primary/20 ${UI_CLASSES.BG_ACCENT_5} text-primary`}
-          >
+          <Badge variant="outline" className={'mb-6 border-primary/20 bg-accent/5 text-primary'}>
             <Sparkles className="h-3 w-3 mr-1" aria-hidden="true" />
             AI-Powered Recommendations
           </Badge>

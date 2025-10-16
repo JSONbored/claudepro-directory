@@ -113,6 +113,7 @@ const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>
  * This allows: import { render, screen, waitFor } from '@/tests/utils/test-utils'
  */
 // Re-export only the commonly used utilities to avoid barrel performance issues
+// biome-ignore lint/performance/noBarrelFile: Test utilities - intentional re-export for convenience
 export { fireEvent, screen, waitFor } from '@testing-library/react';
 
 /**
@@ -188,10 +189,18 @@ export function mockMatchMedia(query: string, matches: boolean) {
       matches: q === query ? matches : false,
       media: q,
       onchange: null,
-      addListener: () => {},
-      removeListener: () => {},
-      addEventListener: () => {},
-      removeEventListener: () => {},
+      addListener: () => {
+        /* Mock: no-op */
+      },
+      removeListener: () => {
+        /* Mock: no-op */
+      },
+      addEventListener: () => {
+        /* Mock: no-op */
+      },
+      removeEventListener: () => {
+        /* Mock: no-op */
+      },
       dispatchEvent: () => true,
     }),
   });
@@ -217,9 +226,15 @@ export function mockIntersectionObserver() {
       callbacks.push(callback);
     }
 
-    observe() {}
-    disconnect() {}
-    unobserve() {}
+    observe() {
+      /* Mock: no-op */
+    }
+    disconnect() {
+      /* Mock: no-op */
+    }
+    unobserve() {
+      /* Mock: no-op */
+    }
     takeRecords() {
       return [];
     }
@@ -227,7 +242,7 @@ export function mockIntersectionObserver() {
     root = null;
     rootMargin = '';
     thresholds = [];
-  } as any;
+  } as unknown as typeof IntersectionObserver;
 
   return {
     triggerIntersection(isIntersecting: boolean) {

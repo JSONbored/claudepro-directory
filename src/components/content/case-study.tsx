@@ -16,19 +16,15 @@ export function CaseStudy(props: CaseStudyProps) {
   const { company, industry, challenge, solution, results, metrics, testimonial, logo } = validated;
 
   return (
-    <Card
-      itemScope
-      itemType="https://schema.org/Article"
-      className={`my-8 ${UI_CLASSES.OVERFLOW_HIDDEN}`}
-    >
-      <CardHeader className={UI_CLASSES.PB_4}>
+    <Card itemScope itemType="https://schema.org/Article" className={'my-8 overflow-hidden'}>
+      <CardHeader className="pb-4">
         <div className={`flex ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN}`}>
           <div>
             <CardTitle className="text-2xl" itemProp="headline">
               {company} Case Study
             </CardTitle>
             {industry && (
-              <Badge variant="outline" className={UI_CLASSES.MT_2}>
+              <Badge variant="outline" className="mt-2">
                 {industry}
               </Badge>
             )}
@@ -67,9 +63,7 @@ export function CaseStudy(props: CaseStudyProps) {
         </div>
 
         {metrics && Array.isArray(metrics) && metrics.length > 0 && (
-          <div
-            className={`grid grid-cols-2 md:grid-cols-3 gap-4 ${UI_CLASSES.PT_4} ${UI_CLASSES.BORDER_T}`}
-          >
+          <div className={`grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 ${UI_CLASSES.BORDER_T}`}>
             {metrics.map((metric) => (
               <div key={metric.label} className="text-center">
                 <p

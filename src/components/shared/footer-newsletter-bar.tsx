@@ -92,7 +92,7 @@ export function FooterNewsletterBar() {
 
   return (
     <aside
-      className={`${UI_CLASSES.FIXED} ${UI_CLASSES.BOTTOM_0} left-0 right-0 ${UI_CLASSES.Z_50} bg-[var(--color-bg-overlay)] backdrop-blur-xl border-t-2 border-[var(--color-border-medium)] shadow-xl animate-in slide-in-from-bottom duration-300`}
+      className={`fixed bottom-0 left-0 right-0 ${UI_CLASSES.Z_50} bg-[var(--color-bg-overlay)] backdrop-blur-xl border-t-2 border-[var(--color-border-medium)] shadow-xl animate-in slide-in-from-bottom duration-300`}
       aria-label="Newsletter signup"
     >
       {/* Subtle Claude orange accent border */}
@@ -100,7 +100,7 @@ export function FooterNewsletterBar() {
       <div className="container mx-auto px-4 py-4">
         {/* Desktop layout */}
         <div
-          className={`${UI_CLASSES.HIDDEN} md:${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_BETWEEN} ${UI_CLASSES.GAP_4}`}
+          className={`${UI_CLASSES.HIDDEN} md:${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_BETWEEN} gap-4`}
         >
           <p className="text-sm font-medium text-primary">
             Get weekly updates on{' '}
@@ -121,9 +121,7 @@ export function FooterNewsletterBar() {
         </div>
 
         {/* Mobile layout */}
-        <div
-          className={`${UI_CLASSES.FLEX} md:${UI_CLASSES.HIDDEN} ${UI_CLASSES.FLEX_COL} ${UI_CLASSES.GAP_3}`}
-        >
+        <div className={`${UI_CLASSES.FLEX} md:${UI_CLASSES.HIDDEN} ${UI_CLASSES.FLEX_COL} gap-3`}>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <p className="text-sm font-medium text-primary">
               <span className="text-[var(--color-accent-light)]">Weekly updates</span> on new tools

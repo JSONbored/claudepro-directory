@@ -71,7 +71,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   // Only spread onClick if it's defined to avoid exactOptionalPropertyTypes issues
   const linkProps = {
     href,
-    className: `group relative px-2 py-1 text-sm font-medium transition-colors ${UI_CLASSES.DURATION_200} ${
+    className: `group relative px-2 py-1 text-sm font-medium transition-colors duration-200 ${
       active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
     } ${className}`,
     // WCAG 2.1 AA: Indicate current page for screen readers
@@ -84,7 +84,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
       {children}
       {/* Animated underline */}
       <span
-        className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all ${UI_CLASSES.DURATION_300} ${
+        className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all duration-300 ${
           active ? 'w-full' : 'w-0 group-hover:w-full'
         }`}
         aria-hidden="true"
@@ -150,18 +150,18 @@ export const Navigation = () => {
       <NavigationCommandMenu />
 
       <header
-        className={`sticky ${UI_CLASSES.TOP_0} ${UI_CLASSES.Z_50} ${UI_CLASSES.W_FULL} pt-1 px-3 pb-3 transition-all ${UI_CLASSES.DURATION_300} will-change-transform contain-layout`}
+        className={`sticky top-0 ${UI_CLASSES.Z_50} ${UI_CLASSES.W_FULL} pt-1 px-3 pb-3 transition-all duration-300 will-change-transform contain-layout`}
       >
         <div className="container mx-auto">
           <nav
-            className={`rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all ${UI_CLASSES.DURATION_300} ${
+            className={`rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 ${
               isScrolled ? 'shadow-xl' : ''
             }`}
             aria-label="Main navigation container"
           >
             <div className="px-3 md:px-4">
               <div
-                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-all ${UI_CLASSES.DURATION_300} will-change-transform ${
+                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-all duration-300 will-change-transform ${
                   isScrolled ? 'h-11 md:h-12' : 'h-14 md:h-16'
                 }`}
               >
@@ -172,12 +172,12 @@ export const Navigation = () => {
                   aria-label="Claude Pro Directory - Go to homepage"
                 >
                   <LogoIcon
-                    className={`transition-all ${UI_CLASSES.DURATION_300} flex-shrink-0 ${UI_CLASSES.HIDDEN} xl:${UI_CLASSES.BLOCK} ${
+                    className={`transition-all duration-300 flex-shrink-0 ${UI_CLASSES.HIDDEN} xl:block ${
                       isScrolled ? 'h-6 w-6' : 'h-8 w-8'
                     }`}
                   />
                   <span
-                    className={`font-medium text-foreground transition-all ${UI_CLASSES.DURATION_300} ${UI_CLASSES.HIDDEN} xl:inline ${
+                    className={`font-medium text-foreground transition-all duration-300 ${UI_CLASSES.HIDDEN} xl:inline ${
                       isScrolled ? 'text-base' : 'text-lg'
                     }`}
                   >
@@ -238,7 +238,7 @@ export const Navigation = () => {
                                     >
                                       {IconComponent && (
                                         <div
-                                          className={`${UI_CLASSES.FLEX} h-10 w-10 ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.ROUNDED_LG} ${UI_CLASSES.BG_MUTED} group-hover:bg-accent/20 ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.FLEX_SHRINK_0}`}
+                                          className={`${UI_CLASSES.FLEX} h-10 w-10 ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.ROUNDED_LG} bg-muted group-hover:bg-accent/20 ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.FLEX_SHRINK_0}`}
                                         >
                                           <IconComponent
                                             className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors"
@@ -309,7 +309,7 @@ export const Navigation = () => {
                 {/* Right Side Actions */}
                 <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 md:gap-3`}>
                   {/* Global Search Trigger */}
-                  <div className={`${UI_CLASSES.HIDDEN} lg:${UI_CLASSES.BLOCK}`}>
+                  <div className={`${UI_CLASSES.HIDDEN} lg:block`}>
                     <SearchTrigger
                       variant="ghost"
                       size="sm"
@@ -364,7 +364,7 @@ export const Navigation = () => {
                       <div className={`${UI_CLASSES.FLEX_COL} h-full`}>
                         {/* Header */}
                         <div
-                          className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3 ${UI_CLASSES.PT_6} ${UI_CLASSES.PB_8} px-1`}
+                          className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3 ${UI_CLASSES.PT_6} pb-8 px-1`}
                         >
                           <LogoIcon className="h-8 w-8 flex-shrink-0" />
                           <span className={`font-semibold ${UI_CLASSES.TEXT_LG} text-foreground`}>
@@ -373,7 +373,7 @@ export const Navigation = () => {
                         </div>
 
                         {/* Main Navigation */}
-                        <div className={`flex-1 ${UI_CLASSES.OVERFLOW_Y_AUTO}`}>
+                        <div className={'flex-1 overflow-y-auto'}>
                           <nav
                             className={`${UI_CLASSES.SPACE_Y_4} ${UI_CLASSES.PX_3}`}
                             aria-label="Primary navigation"
@@ -433,7 +433,7 @@ export const Navigation = () => {
 
                         {/* Footer Actions */}
                         <div
-                          className={`${UI_CLASSES.BORDER_T} border-border/30 ${UI_CLASSES.PT_6} pb-6 ${UI_CLASSES.PX_6}`}
+                          className={`${UI_CLASSES.BORDER_T} border-border/30 ${UI_CLASSES.PT_6} pb-6 px-6`}
                         >
                           <div
                             className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2} gap-6`}
@@ -451,7 +451,7 @@ export const Navigation = () => {
                             <Button
                               variant="outline"
                               size="lg"
-                              className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} ${UI_CLASSES.HOVER_BG_ACCENT_10} hover:border-accent/30 transition-all duration-200 active:scale-[0.95]`}
+                              className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} hover:bg-accent/10 hover:border-accent/30 transition-all duration-200 active:scale-[0.95]`}
                               onClick={() => window.open(SOCIAL_LINKS.github, '_blank')}
                               aria-label="View source code on GitHub"
                             >

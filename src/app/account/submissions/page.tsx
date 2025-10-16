@@ -110,7 +110,7 @@ export default async function SubmissionsPage() {
 
               <CardContent>
                 <div
-                  className={`${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.MB_4} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+                  className={`flex flex-wrap gap-4 ${UI_CLASSES.MB_4} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
                 >
                   <div>Submitted {new Date(submission.created_at).toLocaleDateString()}</div>
                   {submission.merged_at && (
@@ -177,7 +177,7 @@ export default async function SubmissionsPage() {
       {/* Info Card */}
       <Card className="border-blue-500/20 bg-blue-500/5">
         <CardContent className="pt-6">
-          <div className={UI_CLASSES.FLEX_GAP_3}>
+          <div className="flex gap-3">
             <GitPullRequest
               className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
             />

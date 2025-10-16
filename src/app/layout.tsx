@@ -171,7 +171,7 @@ export default async function RootLayout({
             <ErrorBoundary>
               <a
                 href="#main-content"
-                className={`sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:${UI_CLASSES.Z_50} focus:px-4 focus:${UI_CLASSES.PY_2} focus:bg-primary focus:text-primary-foreground ${UI_CLASSES.ROUNDED_MD}`}
+                className={`sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:${UI_CLASSES.Z_50} focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground ${UI_CLASSES.ROUNDED_MD}`}
               >
                 Skip to main content
               </a>

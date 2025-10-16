@@ -260,10 +260,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </div>
 
         {/* Static Hero Section - Server Rendered - Streams immediately */}
-        <section
-          className={`relative ${UI_CLASSES.Z_10} ${UI_CLASSES.BORDER_B} border-border/50`}
-          aria-label="Homepage hero"
-        >
+        <section className={'relative z-10 border-b border-border/50'} aria-label="Homepage hero">
           {/* Content Layer - Above meteors */}
           <div className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-10 sm:py-16 lg:py-24`}>
             <div className={`text-center ${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
@@ -288,7 +285,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </section>
 
         {/* Content Section - Streams independently after hero */}
-        <div className={`relative ${UI_CLASSES.Z_10}`}>
+        <div className={'relative z-10'}>
           <Suspense fallback={<LoadingSkeleton />}>
             <HomeContentSection searchQuery={initialSearchQuery} />
           </Suspense>

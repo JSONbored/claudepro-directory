@@ -63,7 +63,7 @@ export function SearchFilterPanel({
 
   return (
     <section
-      className={`bg-card/30 border border-border/50 rounded-lg ${UI_CLASSES.P_4} md:${UI_CLASSES.P_6} ${UI_CLASSES.SPACE_Y_4} md:${UI_CLASSES.SPACE_Y_6}`}
+      className={`bg-card/30 border border-border/50 rounded-lg ${UI_CLASSES.P_4} md:p-6 ${UI_CLASSES.SPACE_Y_4} md:${UI_CLASSES.SPACE_Y_6}`}
     >
       {/* Main Filters */}
       <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
@@ -205,7 +205,7 @@ export function SearchFilterPanel({
                   <Badge
                     key={tag}
                     variant={filters.tags?.includes(tag) ? 'default' : 'outline'}
-                    className={`cursor-pointer transition-all duration-200 ${UI_CLASSES.HOVER_BG_ACCENT_10}`}
+                    className={'cursor-pointer transition-all duration-200 hover:bg-accent/10'}
                     onClick={() => onToggleTag(tag)}
                     role="button"
                     tabIndex={0}

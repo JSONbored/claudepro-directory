@@ -277,7 +277,7 @@ function HomepageStatsSkeleton({ className, ...props }: React.HTMLAttributes<HTM
   return (
     <div
       className={cn(
-        `${UI_CLASSES.FLEX_WRAP} ${UI_CLASSES.JUSTIFY_CENTER} gap-4 lg:gap-6 text-xs lg:text-sm animate-pulse`,
+        `flex-wrap ${UI_CLASSES.JUSTIFY_CENTER} gap-4 lg:gap-6 text-xs lg:text-sm animate-pulse`,
         className
       )}
       {...props}

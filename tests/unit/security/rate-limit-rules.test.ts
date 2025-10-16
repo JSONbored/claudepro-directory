@@ -20,7 +20,6 @@ import {
   getRateLimiterKey,
   getRouteDescription,
   isLLMsTxtRoute,
-  LLMSTXT_PATTERNS,
   ROUTE_PATTERNS,
   validateRateLimitConfig,
 } from '@/src/lib/middleware/rate-limit-rules';

@@ -63,7 +63,7 @@ export function NewPostForm({ onSubmit }: NewPostFormProps) {
             />
           </div>
 
-          <div className={UI_CLASSES.FLEX_GAP_4}>
+          <div className="flex gap-4">
             <Button type="submit">Create Post</Button>
             <Button type="button" variant="outline" asChild>
               <a href={ROUTES.BOARD}>Cancel</a>

@@ -237,7 +237,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                               href={post.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className={UI_CLASSES.HOVER_TEXT_ACCENT}
+                              className="group-hover:text-accent transition-colors-smooth"
                             >
                               {post.title}
                             </a>

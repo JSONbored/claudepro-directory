@@ -34,7 +34,7 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
     <div
       className={`min-h-screen bg-background flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.P_4}`}
     >
-      <Card className={`${UI_CLASSES.MAX_W_2XL} w-full`}>
+      <Card className={'max-w-2xl w-full'}>
         <CardHeader>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
             <AlertTriangle className="h-8 w-8 text-destructive" aria-hidden="true" />
@@ -42,7 +42,7 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
               Something went wrong
             </CardTitle>
           </div>
-          <CardDescription className={UI_CLASSES.MT_2}>
+          <CardDescription className="mt-2">
             An unexpected error occurred. The error has been logged and we&apos;ll look into it.
           </CardDescription>
         </CardHeader>
@@ -50,19 +50,17 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
           {isDevelopment && error && (
             <div className={`${UI_CLASSES.ROUNDED_LG} bg-muted ${UI_CLASSES.P_4} space-y-2`}>
               <p className={`font-semibold ${UI_CLASSES.TEXT_SM}`}>Error Details:</p>
-              <pre className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.OVERFLOW_AUTO}`}>
-                {error.toString()}
-              </pre>
+              <pre className={`${UI_CLASSES.TEXT_XS} overflow-auto`}>{error.toString()}</pre>
               {error.stack && (
                 <details className={UI_CLASSES.TEXT_XS}>
                   <summary className="cursor-pointer font-semibold">Stack Trace</summary>
-                  <pre className={`mt-2 ${UI_CLASSES.OVERFLOW_AUTO}`}>{error.stack}</pre>
+                  <pre className={'mt-2 overflow-auto'}>{error.stack}</pre>
                 </details>
               )}
             </div>
           )}
 
-          <div className={UI_CLASSES.FLEX_GAP_3}>
+          <div className="flex gap-3">
             <Button onClick={handleReset} variant="default">
               <RefreshCw className="h-4 w-4 mr-2" />
               Try Again

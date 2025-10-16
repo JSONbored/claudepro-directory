@@ -22,7 +22,7 @@ export function SearchTrigger({
   const sizeClasses = {
     sm: `h-8 ${UI_CLASSES.PX_3} ${UI_CLASSES.TEXT_XS}`,
     md: `h-10 ${UI_CLASSES.PX_4} text-sm`,
-    lg: `h-12 ${UI_CLASSES.PX_6} text-base`,
+    lg: 'h-12 px-6 text-base',
   };
 
   if (variant === 'minimal') {
@@ -31,11 +31,11 @@ export function SearchTrigger({
         type="button"
         onClick={onClick}
         className={`
-          ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.GAP_3} w-full max-w-md ${UI_CLASSES.PX_4} py-2.5
+          ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3 w-full max-w-md ${UI_CLASSES.PX_4} py-2.5
           bg-background border border-border ${UI_CLASSES.ROUNDED_LG}
           text-muted-foreground hover:text-foreground
           hover:border-border/80 transition-colors
-          ${UI_CLASSES.GROUP} cursor-pointer
+          group cursor-pointer
           ${className}
         `}
       >
@@ -43,7 +43,7 @@ export function SearchTrigger({
         <span className={`${UI_CLASSES.FLEX_1} text-left text-sm`}>Search content...</span>
         {showShortcut && (
           <div
-            className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.GAP_1} ${UI_CLASSES.TEXT_XS}`}
+            className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-1 ${UI_CLASSES.TEXT_XS}`}
           >
             <kbd className={`px-1.5 py-0.5 ${UI_CLASSES.TEXT_XS} bg-muted border rounded`}>⌘K</kbd>
           </div>
@@ -57,9 +57,9 @@ export function SearchTrigger({
       <Search className="h-4 w-4 mr-2" />
       Search
       {showShortcut && size !== 'sm' && (
-        <div className={`ml-2 ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.GAP_1}`}>
+        <div className={`ml-2 ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-1`}>
           <kbd
-            className={`px-1.5 py-0.5 ${UI_CLASSES.TEXT_XS} bg-muted border rounded ${UI_CLASSES.HIDDEN} sm:${UI_CLASSES.INLINE_BLOCK}`}
+            className={`px-1.5 py-0.5 ${UI_CLASSES.TEXT_XS} bg-muted border rounded ${UI_CLASSES.HIDDEN} sm:inline-block`}
           >
             ⌘K
           </kbd>

@@ -82,7 +82,7 @@ function ContentSearchClientComponent<T extends UnifiedContentItem>({
           />
         </ErrorBoundary>
       ) : (
-        <output className={`text-center py-12 ${UI_CLASSES.BLOCK}`}>
+        <output className={'text-center py-12 block'}>
           {(() => {
             const IconComponent = ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
             return (

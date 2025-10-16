@@ -20,7 +20,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
   return (
     <Card className={`${UI_CLASSES.CARD_GRADIENT_HOVER} relative`}>
       {job.featured && (
-        <div className={`absolute -top-2 -right-2 ${UI_CLASSES.Z_10}`}>
+        <div className={'absolute -top-2 -right-2 z-10'}>
           <Badge className="bg-accent text-accent-foreground">
             <Star className="h-3 w-3 mr-1" />
             Featured
@@ -45,7 +45,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
                 />
               )}
               <div>
-                <CardTitle className={`text-xl ${UI_CLASSES.HOVER_TEXT_ACCENT}`}>
+                <CardTitle className={'text-xl group-hover:text-accent transition-colors-smooth'}>
                   <Link href={`/jobs/${job.slug}`}>{job.title}</Link>
                 </CardTitle>
                 <div
@@ -77,7 +77,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
             </div>
           </div>
 
-          <div className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_END} gap-2`}>
+          <div className={`${UI_CLASSES.FLEX_COL} items-end gap-2`}>
             <Badge className={getTypeColor(job.type)}>{job.type.replace('-', ' ')}</Badge>
             {job.remote && <Badge variant="secondary">Remote</Badge>}
           </div>
@@ -85,9 +85,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
       </CardHeader>
 
       <CardContent className="pt-0">
-        <p className={`text-muted-foreground ${UI_CLASSES.MB_4} ${UI_CLASSES.LINE_CLAMP_2}`}>
-          {job.description}
-        </p>
+        <p className={`text-muted-foreground ${UI_CLASSES.MB_4} line-clamp-2`}>{job.description}</p>
 
         <div className={UI_CLASSES.MB_4}>
           <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
@@ -104,7 +102,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
           </div>
         </div>
 
-        <div className={UI_CLASSES.FLEX_GAP_3}>
+        <div className="flex gap-3">
           <Button asChild className={UI_CLASSES.FLEX_1}>
             <a href={job.applyUrl} target="_blank" rel="noopener noreferrer">
               Apply Now

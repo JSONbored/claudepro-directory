@@ -45,24 +45,14 @@ export function ErrorTable(props: ErrorTableProps) {
           <table className={UI_CLASSES.W_FULL}>
             <thead className="border-b bg-muted/30">
               <tr>
-                <th
-                  className={`${UI_CLASSES.TEXT_LEFT} ${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}
-                >
+                <th className={`text-left ${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}>
                   Error Code
                 </th>
-                <th
-                  className={`${UI_CLASSES.TEXT_LEFT} ${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}
-                >
+                <th className={`text-left ${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}>
                   Severity
                 </th>
-                <th
-                  className={`${UI_CLASSES.TEXT_LEFT} ${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}
-                >
-                  Message
-                </th>
-                <th
-                  className={`${UI_CLASSES.TEXT_LEFT} ${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}
-                >
+                <th className={`text-left ${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}>Message</th>
+                <th className={`text-left ${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}>
                   Solution
                 </th>
               </tr>

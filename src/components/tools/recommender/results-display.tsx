@@ -137,9 +137,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </p>
 
         {/* Summary Stats */}
-        <div
-          className={`${UI_CLASSES.FLEX_WRAP} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.GAP_3}`}
-        >
+        <div className={`flex-wrap ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} gap-3`}>
           <Badge variant="secondary" className="text-sm">
             <TrendingUp className="h-3 w-3 mr-1" />
             {summary.avgMatchScore}% Avg Match
@@ -154,9 +152,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </div>
 
         {/* Actions */}
-        <div
-          className={`${UI_CLASSES.FLEX_WRAP} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.GAP_3}`}
-        >
+        <div className={`flex-wrap ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} gap-3`}>
           <Button
             variant="default"
             size="sm"
@@ -314,7 +310,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
       {/* Category Filter Tabs */}
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-        <TabsList className={`${UI_CLASSES.FLEX_WRAP} h-auto`}>
+        <TabsList className={'flex-wrap h-auto'}>
           {categories.map((category) => {
             const count =
               category === 'all'
@@ -425,7 +421,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
                           {/* Additional reasons */}
                           {result.reasons.length > 1 && (
-                            <div className={UI_CLASSES.FLEX_WRAP_GAP_1}>
+                            <div className="flex flex-wrap gap-1">
                               {result.reasons.slice(1, 4).map((reason) => (
                                 <Badge key={reason.message} variant="secondary" className="text-xs">
                                   {reason.message}

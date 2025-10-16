@@ -153,7 +153,7 @@ export function UnifiedSearch({
               value={localSearchQuery}
               onChange={(e) => setLocalSearchQuery(e.target.value)}
               placeholder={placeholder}
-              className={`pl-12 pr-4 h-14 text-base ${UI_CLASSES.BG_CARD_50} backdrop-blur-sm border-border/50 focus:border-accent/50 focus:${UI_CLASSES.BG_CARD} transition-smooth w-full`}
+              className={`pl-12 pr-4 h-14 text-base bg-card/50 backdrop-blur-sm border-border/50 focus:border-accent/50 focus:${UI_CLASSES.BG_CARD} transition-smooth w-full`}
               aria-label="Search configurations"
               aria-describedby={resultCount > 0 && localSearchQuery ? searchResultsId : undefined}
               autoComplete="off"
@@ -162,7 +162,7 @@ export function UnifiedSearch({
 
           {/* Sort and Filter Controls */}
           {showFilters && (
-            <div className={`flex gap-2 ${UI_CLASSES.JUSTIFY_END}`}>
+            <div className={'flex gap-2 justify-end'}>
               {/* Sort Dropdown styled as button */}
               <Select
                 value={filters.sort || 'trending'}
@@ -171,7 +171,9 @@ export function UnifiedSearch({
               >
                 <SelectTrigger
                   id={sortSelectId}
-                  className={`w-auto h-10 px-4 bg-background border-border ${UI_CLASSES.HOVER_BG_ACCENT_10} transition-smooth`}
+                  className={
+                    'w-auto h-10 px-4 bg-background border-border hover:bg-accent/10 transition-smooth'
+                  }
                   aria-label="Sort configurations"
                 >
                   <span className="text-sm">Sort: </span>

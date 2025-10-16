@@ -42,7 +42,7 @@ export function RatingHistogram({
   // If no reviews, show empty state
   if (totalReviews === 0) {
     return (
-      <Card className={`p-6 ${UI_CLASSES.BG_MUTED_50}`}>
+      <Card className={'p-6 bg-muted/50'}>
         <div className="text-center">
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} justify-center mb-2`}>
             <Star className="h-8 w-8 text-muted-foreground/30" aria-hidden="true" />

@@ -45,9 +45,9 @@ export function CopyableHeading({
   };
 
   const sizeClasses = {
-    1: `text-3xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MT_8} mb-6`,
-    2: `text-2xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MT_8} mb-4`,
-    3: `text-xl ${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MT_6} mb-3`,
+    1: `text-3xl ${UI_CLASSES.FONT_BOLD} mt-8 mb-6`,
+    2: `text-2xl ${UI_CLASSES.FONT_BOLD} mt-8 mb-4`,
+    3: `text-xl ${UI_CLASSES.FONT_SEMIBOLD} mt-6 mb-3`,
   };
 
   const Tag = `h${level}` as 'h1' | 'h2' | 'h3';
@@ -56,7 +56,7 @@ export function CopyableHeading({
     <Tag
       id={id}
       {...props}
-      className={`${sizeClasses[level]} scroll-mt-16 ${UI_CLASSES.GROUP} flex items-center gap-2 ${className || ''}`}
+      className={`${sizeClasses[level]} scroll-mt-16 group flex items-center gap-2 ${className || ''}`}
     >
       {children}
       {id && (
@@ -156,7 +156,7 @@ export function ExternalLinkComponent({ href, children, className, ...props }: M
       target="_blank"
       rel="noopener noreferrer"
       {...props}
-      className={`text-primary hover:underline ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.INLINE_FLEX} items-center gap-1 ${className || ''}`}
+      className={`text-primary hover:underline ${UI_CLASSES.TRANSITION_COLORS} inline-flex items-center gap-1 ${className || ''}`}
     >
       {children}
       <ExternalLink className="h-3 w-3" />

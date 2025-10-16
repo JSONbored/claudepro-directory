@@ -26,14 +26,14 @@ export function Footer() {
   return (
     <footer className={`${UI_CLASSES.BORDER_T} border-border/50 bg-background/95 backdrop-blur`}>
       <div className="container mx-auto px-4 py-8">
-        <div className={`${UI_CLASSES.GRID_RESPONSIVE_3} ${UI_CLASSES.GAP_8}`}>
+        <div className={`${UI_CLASSES.GRID_RESPONSIVE_3} gap-8`}>
           {/* About Section */}
           <div>
             <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_4}`}>{APP_CONFIG.name}</h3>
             <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED} ${UI_CLASSES.MB_4}`}>
               {APP_CONFIG.description}
             </p>
-            <div className={`flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.GAP_4}`}>
+            <div className={`flex ${UI_CLASSES.ITEMS_CENTER} gap-4`}>
               <Link
                 href={SOCIAL_LINKS.github || '#'}
                 target="_blank"
@@ -113,7 +113,7 @@ export function Footer() {
               <li>
                 <Link
                   href={ROUTES.LLMS_TXT}
-                  className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH} inline-flex items-center ${UI_CLASSES.GAP_2}`}
+                  className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH} inline-flex items-center gap-2`}
                   aria-label="LLMs.txt - AI-optimized content"
                 >
                   <Sparkles className="h-4 w-4" />
@@ -142,7 +142,7 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div
-          className={`${UI_CLASSES.MT_8} ${UI_CLASSES.PT_6} ${UI_CLASSES.BORDER_T} border-border/30 flex flex-col sm:flex-row ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_BETWEEN} ${UI_CLASSES.GAP_4}`}
+          className={`mt-8 ${UI_CLASSES.PT_6} ${UI_CLASSES.BORDER_T} border-border/30 flex flex-col sm:flex-row ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_BETWEEN} gap-4`}
         >
           <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED}`}>
             © {currentYear} {APP_CONFIG.author}. All rights reserved.

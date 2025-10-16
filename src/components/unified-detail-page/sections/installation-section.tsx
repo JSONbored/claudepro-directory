@@ -145,7 +145,7 @@ export function InstallationSection({
 
         {/* Requirements */}
         {installation.requirements && installation.requirements.length > 0 && (
-          <div className={UI_CLASSES.MT_4}>
+          <div className="mt-4">
             <h4 className={`font-medium ${UI_CLASSES.MB_2}`}>Requirements</h4>
             <ul className={UI_CLASSES.SPACE_Y_2}>
               {installation.requirements.map((requirement: string) => (

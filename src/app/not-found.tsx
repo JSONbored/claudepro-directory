@@ -17,7 +17,7 @@ export default function NotFound() {
     <div
       className={`${UI_CLASSES.MIN_H_SCREEN} ${UI_CLASSES.FLEX} items-center justify-center bg-background px-4`}
     >
-      <Card className={`${UI_CLASSES.MAX_W_LG} ${UI_CLASSES.W_FULL} ${UI_CLASSES.P_8} text-center`}>
+      <Card className={`max-w-lg ${UI_CLASSES.W_FULL} p-8 text-center`}>
         <div className={UI_CLASSES.MB_6}>
           <h1 className={`text-6xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_4} text-primary`}>
             404
@@ -31,7 +31,7 @@ export default function NotFound() {
         </div>
 
         <div
-          className={`${UI_CLASSES.FLEX} ${UI_CLASSES.FLEX_COL} ${UI_CLASSES.GAP_3} sm:flex-row sm:justify-center`}
+          className={`${UI_CLASSES.FLEX} ${UI_CLASSES.FLEX_COL} gap-3 sm:flex-row sm:justify-center`}
         >
           <Link href={ROUTES.HOME}>
             <Button size="lg">
@@ -47,7 +47,7 @@ export default function NotFound() {
           </Link>
         </div>
 
-        <div className={`${UI_CLASSES.MT_8} ${UI_CLASSES.TEXT_SM} text-muted-foreground`}>
+        <div className={`mt-8 ${UI_CLASSES.TEXT_SM} text-muted-foreground`}>
           <p className={UI_CLASSES.MB_2}>Popular pages:</p>
           <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.FLEX_WRAP_GAP_2} justify-center`}>
             <Link href={ROUTES.AGENTS} className={UI_CLASSES.HOVER_TEXT_PRIMARY}>

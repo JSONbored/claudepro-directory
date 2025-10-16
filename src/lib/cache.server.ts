@@ -694,9 +694,18 @@ export const redisClient = new RedisClientManager();
 // Compression algorithms
 type CompressionAlgorithm = 'gzip' | 'brotli' | 'none';
 
-// Cache configuration schema
-// NOTE: maxMemoryMB validation removed - values are pre-validated via CACHE_MEMORY_LIMITS
-// This eliminates dual-schema validation and ensures single source of truth
+/**
+ * Cache Configuration Schema
+ *
+ * DRY Principle: maxMemoryMB validation is centralized in CACHE_MEMORY_LIMITS
+ * - All values flow through cacheMemoryLimitsSchema (ENV validation)
+ * - CACHE_MEMORY_LIMITS provides pre-validated integers (min: 10MB, max: 500MB)
+ * - No redundant validation needed here - single source of truth
+ *
+ * Architecture:
+ * ENV → cacheMemoryLimitsSchema → CACHE_MEMORY_LIMITS → CacheService constructor → cacheConfigSchema
+ *                (validates)                                                          (trusts)
+ */
 const cacheConfigSchema = z.object({
   defaultTTL: z.number().int().min(60).max(86400).default(3600), // 1 hour default
   keyPrefix: z.string().min(1).max(20).default('cache'),
@@ -705,7 +714,7 @@ const cacheConfigSchema = z.object({
   enableCompression: z.boolean().default(true),
   enableFallback: z.boolean().default(true),
   maxValueSize: z.number().int().min(1024).max(10485760).default(1048576), // 1MB default
-  maxMemoryMB: z.number().int(), // Pre-validated via CACHE_MEMORY_LIMITS (min: 10, max: 500)
+  maxMemoryMB: z.number(), // Pre-validated via CACHE_MEMORY_LIMITS - trusts upstream validation
   enableLogging: z.boolean().default(false),
 });
 

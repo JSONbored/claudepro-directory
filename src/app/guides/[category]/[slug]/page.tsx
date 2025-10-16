@@ -423,7 +423,7 @@ export default async function SEOGuidePage({
         </Script>
         <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
           {/* Header - matches content pages */}
-          <div className={`${UI_CLASSES.BORDER_B} border-border/50 ${UI_CLASSES.BG_CARD}/30`}>
+          <div className={`border-b border-border/50 ${UI_CLASSES.BG_CARD}/30`}>
             <div className="container mx-auto px-4 py-8">
               {/* Modern back navigation */}
               <div className={UI_CLASSES.MB_6}>
@@ -452,7 +452,7 @@ export default async function SEOGuidePage({
                 </div>
 
                 {/* Metadata */}
-                <div className={`${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.TEXT_SM_MUTED}`}>
+                <div className={`flex flex-wrap gap-4 ${UI_CLASSES.TEXT_SM_MUTED}`}>
                   <Badge variant="secondary">
                     {category ? categoryLabels[category] || category : 'Guide'}
                   </Badge>

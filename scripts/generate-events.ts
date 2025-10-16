@@ -967,8 +967,6 @@ function generateUnifiedEventsFile(): string {
  *
  * Components importing EVENTS get ~2KB, NOT ~7KB like the old architecture.
  *
- * Generated: ${new Date().toISOString()}
- *
  * @module lib/analytics/events.constants
  * @generated
  */

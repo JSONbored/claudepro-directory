@@ -175,16 +175,10 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   return (
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       {/* Hero Section */}
-      <section
-        className={`relative py-24 px-4 ${UI_CLASSES.OVERFLOW_HIDDEN}`}
-        aria-labelledby={pageTitleId}
-      >
+      <section className={'relative py-24 px-4 overflow-hidden'} aria-labelledby={pageTitleId}>
         <div className={`container ${UI_CLASSES.MX_AUTO} text-center`}>
           <div className={`${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}>
-            <Badge
-              variant="outline"
-              className={`mb-6 border-accent/20 ${UI_CLASSES.BG_ACCENT_5} text-accent`}
-            >
+            <Badge variant="outline" className={'mb-6 border-accent/20 bg-accent/5 text-accent'}>
               <TrendingUp className="h-3 w-3 mr-1 text-accent" aria-hidden="true" />
               Trending
             </Badge>

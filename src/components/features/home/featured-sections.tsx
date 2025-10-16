@@ -77,7 +77,7 @@ interface FeaturedSectionsProps {
 
 const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories }) => {
   return (
-    <div className={`${UI_CLASSES.SPACE_Y_16} mb-16`}>
+    <div className={'space-y-16 mb-16'}>
       {/* Dynamically render featured sections based on HOMEPAGE_FEATURED_CATEGORIES */}
       {HOMEPAGE_FEATURED_CATEGORIES.map((categorySlug) => {
         const items = categories[categorySlug];

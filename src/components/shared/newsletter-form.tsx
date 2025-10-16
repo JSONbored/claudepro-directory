@@ -48,7 +48,7 @@ export function NewsletterForm({
   return (
     <form onSubmit={handleSubmit} className={className}>
       <div className={UI_CLASSES.FLEX_COL_GAP_2}>
-        <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.GAP_2}`}>
+        <div className={`${UI_CLASSES.FLEX} gap-2`}>
           <Input
             type="email"
             placeholder="your@email.com"

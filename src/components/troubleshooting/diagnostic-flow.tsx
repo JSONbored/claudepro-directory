@@ -99,7 +99,7 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
               ) : (
                 <div className={UI_CLASSES.SPACE_Y_4}>
                   <p className={`text-lg ${UI_CLASSES.FONT_MEDIUM}`}>{currentStepData?.question}</p>
-                  <div className={UI_CLASSES.FLEX_GAP_4}>
+                  <div className="flex gap-4">
                     <Button onClick={() => handleAnswer('yes')} variant="default">
                       Yes
                     </Button>

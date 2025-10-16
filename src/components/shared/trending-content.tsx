@@ -67,7 +67,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
                 <li key={item.slug} className="relative">
                   {index < 3 && (
                     <Badge
-                      className={`absolute -top-2 -right-2 ${UI_CLASSES.Z_10}`}
+                      className={'absolute -top-2 -right-2 z-10'}
                       variant="default"
                       aria-label={`Rank ${index + 1}`}
                     >

@@ -16,7 +16,6 @@
 
 import { domAnimation, LazyMotion, m, type Transition, useInView } from 'framer-motion';
 import * as React from 'react';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 const ENTRY_ANIMATION = {
@@ -116,7 +115,7 @@ export function RollingText({
         {...props}
       >
         <span className="sr-only">{currentWord}</span>
-        <span aria-hidden="true" className={UI_CLASSES.INLINE_FLEX}>
+        <span aria-hidden="true" className="inline-flex">
           {isMounted ? (
             characters.map((item, idx) => (
               <m.span

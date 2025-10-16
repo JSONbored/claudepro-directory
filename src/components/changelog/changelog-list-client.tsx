@@ -132,7 +132,7 @@ export function ChangelogListClient({ entries }: ChangelogListClientProps) {
                     }
                     customMetadataText={
                       <div
-                        className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 text-sm text-primary ${UI_CLASSES.HOVER_TEXT_ACCENT} font-medium transition-colors`}
+                        className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 text-sm text-primary group-hover:text-accent transition-colors-smooth font-medium transition-colors`}
                       >
                         <span>Read full changelog</span>
                         <ArrowRight className="h-4 w-4" />

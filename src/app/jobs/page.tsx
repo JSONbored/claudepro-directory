@@ -247,7 +247,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   (params.employment && params.employment !== 'any') ||
                   params.remote) && (
                   <div
-                    className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4 ${UI_CLASSES.PT_4} ${UI_CLASSES.BORDER_T} border-border`}
+                    className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4 pt-4 ${UI_CLASSES.BORDER_T} border-border`}
                   >
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Active filters:</span>
                     {(params.search || params.q || params.query) && (
@@ -332,7 +332,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   companies working on the future of AI. Be the first to know when new positions are
                   posted.
                 </p>
-                <div className={UI_CLASSES.FLEX_GAP_4}>
+                <div className="flex gap-4">
                   <Button asChild>
                     <Link href={ROUTES.PARTNER}>
                       <Plus className="h-4 w-4 mr-2" />
@@ -352,9 +352,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                 className={`${UI_CLASSES.FLEX_COL_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} py-16`}
               >
                 <Briefcase className={`h-16 w-16 ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mb-4`} />
-                <h3 className={`${UI_CLASSES.TEXT_XL} font-semibold ${UI_CLASSES.MB_2}`}>
-                  No Jobs Found
-                </h3>
+                <h3 className={`text-xl font-semibold ${UI_CLASSES.MB_2}`}>No Jobs Found</h3>
                 <p
                   className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} text-center ${UI_CLASSES.MB_6} max-w-md`}
                 >

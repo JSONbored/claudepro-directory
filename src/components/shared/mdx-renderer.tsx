@@ -142,7 +142,7 @@ const components = {
   blockquote: ({ children, className, ...props }: z.infer<typeof mdxElementPropsSchema>) => (
     <blockquote
       {...props}
-      className={`border-l-4 border-primary pl-4 ${UI_CLASSES.PY_2} my-6 bg-accent/10 rounded-r-lg italic text-muted-foreground ${className || ''}`}
+      className={`border-l-4 border-primary pl-4 py-2 my-6 bg-accent/10 rounded-r-lg italic text-muted-foreground ${className || ''}`}
     >
       {children}
     </blockquote>
@@ -153,7 +153,7 @@ const components = {
     <div className={`my-8 ${UI_CLASSES.OVERFLOW_X_AUTO}`}>
       <table
         {...props}
-        className={`w-full border-collapse border border-border ${UI_CLASSES.ROUNDED_LG} ${UI_CLASSES.OVERFLOW_HIDDEN} ${className || ''}`}
+        className={`w-full border-collapse border border-border ${UI_CLASSES.ROUNDED_LG} overflow-hidden ${className || ''}`}
       >
         {children}
       </table>
@@ -163,17 +163,14 @@ const components = {
   th: ({ children, className, ...props }: z.infer<typeof mdxElementPropsSchema>) => (
     <th
       {...props}
-      className={`border border-border bg-muted ${UI_CLASSES.PX_4} ${UI_CLASSES.PY_2} text-left font-semibold ${className || ''}`}
+      className={`border border-border bg-muted ${UI_CLASSES.PX_4} py-2 text-left font-semibold ${className || ''}`}
     >
       {children}
     </th>
   ),
 
   td: ({ children, className, ...props }: z.infer<typeof mdxElementPropsSchema>) => (
-    <td
-      {...props}
-      className={`border border-border ${UI_CLASSES.PX_4} ${UI_CLASSES.PY_2} ${className || ''}`}
-    >
+    <td {...props} className={`border border-border ${UI_CLASSES.PX_4} py-2 ${className || ''}`}>
       {children}
     </td>
   ),

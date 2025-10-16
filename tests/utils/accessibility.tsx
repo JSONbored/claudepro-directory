@@ -317,6 +317,7 @@ export function testScreenReaderCompatibility(container: Element): {
 
 declare global {
   namespace Vi {
+    // biome-ignore lint/suspicious/noExplicitAny: Type extension pattern for jest-axe matcher - requires any for generic type parameter
     interface Matchers<R = any> {
       toHaveNoViolations(): R;
     }

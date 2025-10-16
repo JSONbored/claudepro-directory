@@ -112,7 +112,7 @@ export default async function CompaniesPage() {
                       <CardTitle>
                         <Link
                           href={`/companies/${company.slug}`}
-                          className={UI_CLASSES.HOVER_TEXT_ACCENT}
+                          className="group-hover:text-accent transition-colors-smooth"
                         >
                           {company.name}
                         </Link>
@@ -125,7 +125,7 @@ export default async function CompaniesPage() {
                 <CardContent>
                   {company.description && (
                     <p
-                      className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_4} ${UI_CLASSES.LINE_CLAMP_2}`}
+                      className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_4} line-clamp-2`}
                     >
                       {company.description}
                     </p>

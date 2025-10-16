@@ -33,9 +33,16 @@
  * - buildJobPostingSchema() - JobPosting schema for job listings (Phase 3)
  * - buildCollectionPageSchema() - CollectionPage schema for collections (Phase 3)
  *
+ * **Note on Non-null Assertions:**
+ * This test file uses non-null assertions (!) extensively for array access.
+ * This is safe because we control all test data and verify array lengths before accessing.
+ * Pattern: expect(array).toHaveLength(n) followed by array[0]! access.
+ *
  * @see src/lib/structured-data/schema-builder.ts
  * @see https://schema.org/ - Schema.org documentation
  */
+
+// biome-ignore lint/style/noNonNullAssertion: Test file with controlled data - all non-null assertions are safe after length checks
 
 import { describe, expect, it } from 'vitest';
 import { APP_CONFIG } from '@/src/lib/constants';

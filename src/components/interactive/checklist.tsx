@@ -80,7 +80,7 @@ export function Checklist(props: ChecklistProps) {
               key={`${item.task}-${index}`}
               itemScope
               itemType="https://schema.org/ListItem"
-              className={`flex ${UI_CLASSES.ITEMS_START} gap-3 p-3 ${UI_CLASSES.ROUNDED_LG} bg-muted/30 ${UI_CLASSES.HOVER_BG_MUTED_50} ${UI_CLASSES.TRANSITION_COLORS}`}
+              className={`flex ${UI_CLASSES.ITEMS_START} gap-3 p-3 ${UI_CLASSES.ROUNDED_LG} bg-muted/30 hover:bg-muted/50 ${UI_CLASSES.TRANSITION_COLORS}`}
             >
               <button
                 type="button"

@@ -38,13 +38,13 @@ export function FeatureGrid(props: FeatureGridProps) {
         )}
       </div>
 
-      <div className={`${UI_CLASSES.GRID} grid-cols-1 ${gridCols[columns]} gap-6`}>
+      <div className={`grid grid-cols-1 ${gridCols[columns]} gap-6`}>
         {validFeatures.map((feature, index) => (
           <Card
             key={feature.title}
             itemScope
             itemType="https://schema.org/ListItem"
-            className={`${UI_CLASSES.RELATIVE} border border-border/50 bg-gradient-to-br from-card/30 via-card/50 to-card/30 hover:from-card/50 hover:via-card/70 hover:to-card/50 transition-all duration-300 ${UI_CLASSES.H_FULL} ${UI_CLASSES.GROUP} overflow-hidden shadow-lg hover:shadow-xl hover:-translate-y-1`}
+            className={`${UI_CLASSES.RELATIVE} border border-border/50 bg-gradient-to-br from-card/30 via-card/50 to-card/30 hover:from-card/50 hover:via-card/70 hover:to-card/50 transition-all duration-300 h-full group overflow-hidden shadow-lg hover:shadow-xl hover:-translate-y-1`}
             style={{
               animationDelay: `${index * 50}ms`,
               animation: 'fadeInUp 0.5s ease-out forwards',
@@ -52,12 +52,12 @@ export function FeatureGrid(props: FeatureGridProps) {
           >
             {/* Gradient overlay */}
             <div
-              className={`${UI_CLASSES.ABSOLUTE} ${UI_CLASSES.INSET_0} bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${UI_CLASSES.POINTER_EVENTS_NONE}`}
+              className={`${UI_CLASSES.ABSOLUTE} inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}
             />
 
             <CardHeader>
               <CardTitle
-                className={`flex ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN} ${UI_CLASSES.RELATIVE} ${UI_CLASSES.Z_10}`}
+                className={`flex ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN} ${UI_CLASSES.RELATIVE} z-10`}
                 itemProp="name"
               >
                 <span
@@ -75,7 +75,7 @@ export function FeatureGrid(props: FeatureGridProps) {
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent className={`${UI_CLASSES.RELATIVE} ${UI_CLASSES.Z_10}`}>
+            <CardContent className={`${UI_CLASSES.RELATIVE} z-10`}>
               <p itemProp="description" className="text-muted-foreground leading-relaxed">
                 {feature.description}
               </p>

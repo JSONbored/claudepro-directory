@@ -17,12 +17,12 @@ export default function CommunityPage() {
   return (
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       {/* Hero Section */}
-      <section className={`relative py-24 ${UI_CLASSES.PX_4} ${UI_CLASSES.OVERFLOW_HIDDEN}`}>
+      <section className={`relative py-24 ${UI_CLASSES.PX_4} overflow-hidden`}>
         <div className={`container ${UI_CLASSES.MX_AUTO} text-center`}>
           <div className={`${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}>
             <Badge
               variant="outline"
-              className={`${UI_CLASSES.MB_6} border-accent/20 ${UI_CLASSES.BG_ACCENT_5} text-accent`}
+              className={`${UI_CLASSES.MB_6} border-accent/20 bg-accent/5 text-accent`}
             >
               <Users className="h-3 w-3 mr-1 text-accent" />
               Community
@@ -37,7 +37,7 @@ export default function CommunityPage() {
               configurations, learn from the community, and contribute to our open-source directory.
             </p>
 
-            <div className={`${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.JUSTIFY_CENTER}`}>
+            <div className={`flex flex-wrap gap-4 ${UI_CLASSES.JUSTIFY_CENTER}`}>
               <Button size="lg" asChild>
                 <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer">
                   <Github className={`h-5 w-5 ${UI_CLASSES.MR_2}`} />

@@ -47,9 +47,7 @@ const UnifiedSearch = dynamic(
     })),
   {
     ssr: false,
-    loading: () => (
-      <div className={`h-14 ${UI_CLASSES.BG_MUTED_50} ${UI_CLASSES.ROUNDED_LG} animate-pulse`} />
-    ),
+    loading: () => <div className={`h-14 bg-muted/50 ${UI_CLASSES.ROUNDED_LG} animate-pulse`} />,
   }
 );
 

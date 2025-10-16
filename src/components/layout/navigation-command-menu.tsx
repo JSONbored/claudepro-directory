@@ -133,11 +133,9 @@ export function NavigationCommandMenu() {
               <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Statuslines</span>
                 <span className="text-xs text-muted-foreground">
-                  <span className={UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_1}>
+                  <span className="inline-flex items-center gap-1">
                     Editor status bar configs
-                    <span
-                      className={`${UI_CLASSES.INLINE_FLEX} h-1.5 w-1.5 rounded-full bg-accent`}
-                    />
+                    <span className={'inline-flex h-1.5 w-1.5 rounded-full bg-accent'} />
                   </span>
                 </span>
               </div>
@@ -150,11 +148,9 @@ export function NavigationCommandMenu() {
               <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Collections</span>
                 <span className="text-xs text-muted-foreground">
-                  <span className={UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_1}>
+                  <span className="inline-flex items-center gap-1">
                     Curated content bundles
-                    <span
-                      className={`${UI_CLASSES.INLINE_FLEX} h-1.5 w-1.5 rounded-full bg-accent`}
-                    />
+                    <span className={'inline-flex h-1.5 w-1.5 rounded-full bg-accent'} />
                   </span>
                 </span>
               </div>

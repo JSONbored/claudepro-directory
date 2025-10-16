@@ -258,16 +258,14 @@ export const BaseCard = memo(
 
                 {/* Title */}
                 <CardTitle
-                  className={`${UI_CLASSES.TEXT_LG} font-semibold text-foreground ${disableNavigation ? '' : UI_CLASSES.HOVER_TEXT_ACCENT}`}
+                  className={`${UI_CLASSES.TEXT_LG} font-semibold text-foreground ${disableNavigation ? '' : 'group-hover:text-accent transition-colors-smooth'}`}
                 >
                   {displayTitle}
                 </CardTitle>
 
                 {/* Description */}
                 {description && (
-                  <CardDescription
-                    className={`text-sm text-muted-foreground mt-1 ${UI_CLASSES.LINE_CLAMP_2}`}
-                  >
+                  <CardDescription className={'text-sm text-muted-foreground mt-1 line-clamp-2'}>
                     {description}
                   </CardDescription>
                 )}
@@ -289,7 +287,7 @@ export const BaseCard = memo(
 
           {/* Tags */}
           {tags && tags.length > 0 && (
-            <div className={`${UI_CLASSES.FLEX_WRAP_GAP_1} ${UI_CLASSES.MB_4}`}>
+            <div className={`flex flex-wrap gap-1 ${UI_CLASSES.MB_4}`}>
               {visibleTags?.map((tag: string) => (
                 <TagBadge key={tag} tag={tag} />
               ))}

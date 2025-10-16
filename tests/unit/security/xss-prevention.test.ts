@@ -384,6 +384,7 @@ describe('XSS Prevention - HTML Sanitizer', () => {
 
     test('should handle null/undefined gracefully', async () => {
       // DOMPurify converts non-strings to strings
+      // biome-ignore lint/suspicious/noExplicitAny: Testing null input handling
       const sanitized = await DOMPurify.sanitize(null as any);
       expect(typeof sanitized).toBe('string');
     });

@@ -114,7 +114,7 @@ export const DetailSidebar = memo(function DetailSidebar({
       >
         {item.category && (
           <div>
-            <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_1}`}>Category</h4>
+            <h4 className={`${UI_CLASSES.FONT_MEDIUM} mb-1`}>Category</h4>
             <Badge
               variant="default"
               className={`text-xs ${UI_CLASSES.FONT_MEDIUM} ${
@@ -133,7 +133,7 @@ export const DetailSidebar = memo(function DetailSidebar({
           'temperature' in (item.configuration as object) &&
           typeof (item.configuration as { temperature?: number }).temperature === 'number' && (
             <div>
-              <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_1}`}>Temperature</h4>
+              <h4 className={`${UI_CLASSES.FONT_MEDIUM} mb-1`}>Temperature</h4>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Thermometer className="h-3 w-3 text-orange-500" />
                 <Badge
@@ -148,7 +148,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
         {hasPackage && (
           <div>
-            <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_1}`}>Package</h4>
+            <h4 className={`${UI_CLASSES.FONT_MEDIUM} mb-1`}>Package</h4>
             <Badge variant="outline" className="font-mono text-xs">
               {String((item as { package: string }).package)}
             </Badge>
@@ -157,7 +157,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
         {hasAuth && (
           <div>
-            <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_1}`}>Authentication</h4>
+            <h4 className={`${UI_CLASSES.FONT_MEDIUM} mb-1`}>Authentication</h4>
             <p className={UI_CLASSES.TEXT_SM_MUTED}>
               {(item as { requiresAuth: boolean }).requiresAuth ? 'Required' : 'Not required'}
             </p>
@@ -166,8 +166,8 @@ export const DetailSidebar = memo(function DetailSidebar({
 
         {hasPermissions && (item.permissions as string[]).length > 0 && (
           <div>
-            <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_1}`}>Permissions</h4>
-            <div className={UI_CLASSES.FLEX_WRAP_GAP_1}>
+            <h4 className={`${UI_CLASSES.FONT_MEDIUM} mb-1`}>Permissions</h4>
+            <div className="flex flex-wrap gap-1">
               {(item.permissions as string[]).map((perm: string) => (
                 <Badge key={perm} variant="outline" className={UI_CLASSES.TEXT_XS}>
                   {perm}
@@ -179,7 +179,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
         {item.source && (
           <div>
-            <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_1}`}>Source</h4>
+            <h4 className={`${UI_CLASSES.FONT_MEDIUM} mb-1`}>Source</h4>
             <Badge variant="outline">{item.source}</Badge>
           </div>
         )}
@@ -195,7 +195,7 @@ export const DetailSidebar = memo(function DetailSidebar({
           <button
             key={relatedItem.slug}
             type="button"
-            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-3 rounded-lg border border-border ${UI_CLASSES.HOVER_BG_MUTED_50} ${UI_CLASSES.TRANSITION_COLORS} cursor-pointer w-full text-left`}
+            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-3 rounded-lg border border-border hover:bg-muted/50 ${UI_CLASSES.TRANSITION_COLORS} cursor-pointer w-full text-left`}
             onClick={() => router.push(getContentItemUrl(relatedItem))}
           >
             <div className={`${UI_CLASSES.FLEX_1} ${UI_CLASSES.MIN_W_0}`}>

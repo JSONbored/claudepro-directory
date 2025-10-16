@@ -29,7 +29,7 @@ export default function GlobalError({
           className={`${UI_CLASSES.FLEX_COL_CENTER} min-h-screen ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.P_4} font-sans`}
         >
           <div
-            className={`max-w-md ${UI_CLASSES.P_8} ${UI_CLASSES.ROUNDED_LG} border border-border ${UI_CLASSES.BG_CARD} text-center`}
+            className={`max-w-md p-8 ${UI_CLASSES.ROUNDED_LG} border border-border ${UI_CLASSES.BG_CARD} text-center`}
           >
             <h2 className="mb-4 text-2xl font-bold text-destructive">Application Error</h2>
             <p className="mb-6 text-muted-foreground">
@@ -38,7 +38,7 @@ export default function GlobalError({
             <button
               type="button"
               onClick={reset}
-              className={`px-4 ${UI_CLASSES.PY_2} ${UI_CLASSES.ROUNDED_MD} bg-primary text-primary-foreground border-none cursor-pointer text-base hover:bg-primary/90 ${UI_CLASSES.TRANSITION_COLORS}`}
+              className={`px-4 py-2 ${UI_CLASSES.ROUNDED_MD} bg-primary text-primary-foreground border-none cursor-pointer text-base hover:bg-primary/90 ${UI_CLASSES.TRANSITION_COLORS}`}
             >
               Reset Application
             </button>

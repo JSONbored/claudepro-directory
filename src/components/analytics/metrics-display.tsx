@@ -62,7 +62,7 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
         <div className="mb-8 text-center">
           {title && (
             <h3
-              className={`${UI_CLASSES.TEXT_XL} ${UI_CLASSES.FONT_SEMIBOLD} mb-3 text-foreground`}
+              className={`text-xl ${UI_CLASSES.FONT_SEMIBOLD} mb-3 text-foreground`}
               itemProp="name"
             >
               {title}
@@ -101,7 +101,7 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
             <div
               key={`${metricLabel}-${metricValue}`}
               className={cn(
-                `${UI_CLASSES.ROUNDED_LG} p-6 bg-gradient-to-br border backdrop-blur-sm transition-all duration-300 hover:${UI_CLASSES.SCALE_105} hover:shadow-xl`,
+                `${UI_CLASSES.ROUNDED_LG} p-6 bg-gradient-to-br border backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl`,
                 gradientClass
               )}
             >

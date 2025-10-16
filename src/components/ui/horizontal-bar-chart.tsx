@@ -127,7 +127,7 @@ export function HorizontalBarChart({
                 rx={borderRadius}
               />
 
-              {/* Actual bar */}
+              {/* Actual bar - ARIA attributes removed (not valid on SVG rect elements) */}
               <rect
                 x={labelWidth}
                 y={yPosition}
@@ -136,9 +136,6 @@ export function HorizontalBarChart({
                 fill={point.fill || barColor}
                 rx={borderRadius}
                 className="transition-all duration-300 ease-out"
-                aria-valuenow={point.value}
-                aria-valuemin={0}
-                aria-valuemax={maxValue}
               />
 
               {/* Value label (right side) */}

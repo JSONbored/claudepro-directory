@@ -46,7 +46,7 @@ export default function PartnerPage() {
         <h1 className={`text-4xl md:text-5xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_6}`}>
           Grow Your Business With Us
         </h1>
-        <p className={`${UI_CLASSES.TEXT_XL} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+        <p className={`text-xl ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
           Connect with thousands of Claude AI professionals and showcase your tools, services, and
           opportunities
         </p>
@@ -78,14 +78,14 @@ export default function PartnerPage() {
 
       {/* Primary Monetization Options */}
       <div
-        className={`${UI_CLASSES.GRID_RESPONSIVE_2_GAP_8} ${UI_CLASSES.MAX_W_5XL} ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.MB_12}`}
+        className={`${UI_CLASSES.GRID_RESPONSIVE_2_GAP_8} max-w-5xl ${UI_CLASSES.MX_AUTO} mb-12`}
       >
         {/* Job Listings */}
         <Card
           className={`${UI_CLASSES.RELATIVE} overflow-hidden border-2 hover:border-primary/50 ${UI_CLASSES.TRANSITION_COLORS}`}
         >
           <div
-            className={`${UI_CLASSES.ABSOLUTE} ${UI_CLASSES.TOP_0} ${UI_CLASSES.RIGHT_0} w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full`}
+            className={`${UI_CLASSES.ABSOLUTE} top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full`}
           />
           <CardHeader>
             <div
@@ -133,7 +133,7 @@ export default function PartnerPage() {
                 </div>
               </div>
             </div>
-            <div className={`${UI_CLASSES.PT_4} ${UI_CLASSES.BORDER_T}`}>
+            <div className={`pt-4 ${UI_CLASSES.BORDER_T}`}>
               <p className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4`}>
                 Perfect for companies building with Claude and AI tools
               </p>
@@ -185,7 +185,7 @@ Best regards,
           className={`${UI_CLASSES.RELATIVE} overflow-hidden border-2 hover:border-primary/50 ${UI_CLASSES.TRANSITION_COLORS}`}
         >
           <div
-            className={`${UI_CLASSES.ABSOLUTE} ${UI_CLASSES.TOP_0} ${UI_CLASSES.RIGHT_0} w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-full`}
+            className={`${UI_CLASSES.ABSOLUTE} top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-full`}
           />
           <CardHeader>
             <div
@@ -231,7 +231,7 @@ Best regards,
                 </div>
               </div>
             </div>
-            <div className={`${UI_CLASSES.PT_4} ${UI_CLASSES.BORDER_T}`}>
+            <div className={`pt-4 ${UI_CLASSES.BORDER_T}`}>
               <p className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4`}>
                 Available for all categories: Agents, MCP, Rules, Commands, Hooks
               </p>
@@ -421,7 +421,7 @@ Best regards,
       </div>
 
       {/* CTA */}
-      <div className={`${UI_CLASSES.TEXT_CENTER} ${UI_CLASSES.MAX_W_2XL} ${UI_CLASSES.MX_AUTO}`}>
+      <div className={`${UI_CLASSES.TEXT_CENTER} max-w-2xl ${UI_CLASSES.MX_AUTO}`}>
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="pt-8 pb-8">
             <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}>Ready to Get Started?</h2>
@@ -445,7 +445,7 @@ Best regards,
                 </Link>
               </Button>
             </div>
-            <p className={`${UI_CLASSES.TEXT_XS_MUTED} ${UI_CLASSES.MT_4}`}>
+            <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-4`}>
               Custom pricing available • No setup fees • Cancel anytime
             </p>
           </CardContent>
