@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { contentCache, statsRedis } from '@/src/lib/cache.server';
-import { CACHE_CONFIG, REVALIDATE_TIMES, UI_CONFIG } from '@/src/lib/constants';
+import { CACHE_CONFIG, UI_CONFIG } from '@/src/lib/constants';
 import { createApiRoute } from '@/src/lib/error-handler';
 import { rateLimiters } from '@/src/lib/rate-limiter.server';
 import {
@@ -92,7 +92,7 @@ const route = createApiRoute({
           const totalCount = (await statsRedis.getTrending(category, 100)).length;
 
           return okRaw(cached, {
-            sMaxAge: REVALIDATE_TIMES.api,
+            sMaxAge: 300, // 5 minutes (API revalidation)
             staleWhileRevalidate: 86400,
             cacheHit: true,
             additionalHeaders: {
@@ -153,7 +153,7 @@ const route = createApiRoute({
       }
 
       return okRaw(response, {
-        sMaxAge: REVALIDATE_TIMES.api,
+        sMaxAge: 300, // 5 minutes (API revalidation)
         staleWhileRevalidate: 86400,
         cacheHit: false,
         additionalHeaders: {

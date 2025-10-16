@@ -396,27 +396,6 @@ export const DEV_CONFIG = {
 } as const;
 
 /**
- * Security Configuration
- * Inlined to avoid barrel file pattern
- */
-export const SECURITY_CONFIG = {
-  headers: {
-    'X-Frame-Options': 'DENY',
-    'X-Content-Type-Options': 'nosniff',
-    'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-  },
-  // Trusted hostnames for validation
-  trustedHostnames: {
-    github: ['github.com', 'www.github.com'] as const,
-    umami: ['umami.claudepro.directory'] as const,
-    vercel: ['va.vercel-scripts.com'] as const,
-  },
-  // Allowed origins for postMessage
-  allowedOrigins: ['https://claudepro.directory', 'https://www.claudepro.directory'] as const,
-} as const;
-
-/**
  * Time Constants
  * Common time conversions for consistency across the codebase
  */
@@ -459,19 +438,6 @@ export const CACHE_HEADERS = {
   SHORT: 'public, max-age=60, s-maxage=60, stale-while-revalidate=300', // 1 minute
   STREAMING: 'public, max-age=0, must-revalidate', // For streaming/dynamic content
   NO_CACHE: 'no-cache, no-store, must-revalidate', // No caching
-} as const;
-
-/**
- * Revalidate Times (in seconds)
- * ISR revalidation intervals for Next.js pages
- */
-export const REVALIDATE_TIMES = {
-  homepage: 3600, // 1 hour
-  content: 14400, // 4 hours
-  static: 86400, // 24 hours
-  guides: 604800, // 1 week
-  trending: 3600, // 1 hour
-  api: 300, // 5 minutes
 } as const;
 
 /**

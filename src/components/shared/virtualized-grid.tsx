@@ -20,7 +20,7 @@
  * @module components/shared/virtualized-grid
  */
 
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useVirtualizer, useWindowVirtualizer } from '@tanstack/react-virtual';
 import { memo, type ReactNode, useRef } from 'react';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 
@@ -63,7 +63,7 @@ interface VirtualizedGridProps<T> {
   gap?: number;
 
   /**
-   * CSS class for the scrollable container
+   * CSS class for the container
    */
   className?: string;
 
@@ -77,18 +77,33 @@ interface VirtualizedGridProps<T> {
    * Used for React reconciliation
    */
   keyExtractor?: (item: T, index: number) => string | number;
+
+  /**
+   * Use window scrolling instead of container scrolling
+   * When true, virtualizes against the main window scroll
+   * When false, creates its own scrollable container
+   *
+   * @default true
+   */
+  useWindowScroll?: boolean;
 }
 
 /**
  * Virtualized Grid Component
+ * Production 2025 Architecture: Window or Element Scrolling
  *
  * Production Implementation:
  * - Only renders ~15 visible items in DOM regardless of total count
- * - Auto-measures item heights dynamically
+ * - Auto-measures item heights dynamically with ResizeObserver
  * - Maintains constant memory usage
  * - 60fps scroll performance even with 10,000+ items
+ * - Supports both window scrolling (default) and container scrolling
  *
- * @example
+ * Scroll Modes:
+ * - useWindowScroll={true} (default): Normal page scrolling, no nested scrollbar
+ * - useWindowScroll={false}: Creates own scrollable container (80vh max)
+ *
+ * @example Window Scrolling (Default - No nested scrollbar)
  * ```tsx
  * <VirtualizedGrid
  *   items={allItems} // 1000 items
@@ -96,7 +111,17 @@ interface VirtualizedGridProps<T> {
  *   overscan={5}
  *   renderItem={(item) => <Card item={item} />}
  * />
- * // Only ~15 items rendered in DOM at any time
+ * // Virtualizes with main window scroll - natural page behavior
+ * ```
+ *
+ * @example Container Scrolling (Bounded lists)
+ * ```tsx
+ * <VirtualizedGrid
+ *   items={allItems}
+ *   useWindowScroll={false}
+ *   renderItem={(item) => <Card item={item} />}
+ * />
+ * // Creates scrollable container with max height
  * ```
  */
 function VirtualizedGridComponent<T>({
@@ -108,25 +133,39 @@ function VirtualizedGridComponent<T>({
   className = '',
   emptyMessage = 'No items found',
   keyExtractor,
+  useWindowScroll = true,
 }: VirtualizedGridProps<T>) {
-  // Ref for the scrollable parent element - stable across renders
+  // Ref for container element (used for both window and element scrolling)
   const parentRef = useRef<HTMLDivElement>(null);
 
-  // Initialize virtualizer with production-optimized settings for ELEMENT scrolling
-  // This is the proper pattern from TanStack Virtual docs
-  const virtualizer = useVirtualizer({
-    count: items.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => estimateSize,
-    overscan,
-    // Enable dynamic height measurement for variable-sized items
-    ...(typeof window !== 'undefined' && 'ResizeObserver' in window
-      ? {
-          measureElement: (element: Element) =>
-            element?.getBoundingClientRect().height ?? estimateSize,
-        }
-      : {}),
-  });
+  // Use the appropriate virtualizer hook based on scroll type
+  const virtualizer = useWindowScroll
+    ? // Window scrolling - proper production pattern for page content
+      useWindowVirtualizer({
+        count: items.length,
+        estimateSize: () => estimateSize,
+        overscan,
+        // Enable dynamic height measurement for variable-sized items
+        ...(typeof window !== 'undefined' && 'ResizeObserver' in window
+          ? {
+              measureElement: (element: Element) =>
+                element?.getBoundingClientRect().height ?? estimateSize,
+            }
+          : {}),
+      })
+    : // Element scrolling - for bounded containers
+      useVirtualizer({
+        count: items.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => estimateSize,
+        overscan,
+        ...(typeof window !== 'undefined' && 'ResizeObserver' in window
+          ? {
+              measureElement: (element: Element) =>
+                element?.getBoundingClientRect().height ?? estimateSize,
+            }
+          : {}),
+      });
 
   // Early return for empty state
   if (items.length === 0) {
@@ -144,14 +183,22 @@ function VirtualizedGridComponent<T>({
     <div
       ref={parentRef}
       className={className}
-      style={{
-        height: `${Math.min(virtualizer.getTotalSize(), 2000)}px`,
-        maxHeight: '80vh',
-        overflow: 'auto',
-        position: 'relative',
-        // Enable hardware acceleration for smooth scrolling
-        willChange: 'transform',
-      }}
+      style={
+        useWindowScroll
+          ? {
+              // Window scrolling: no height/overflow constraints
+              position: 'relative',
+              width: '100%',
+            }
+          : {
+              // Element scrolling: create scrollable container
+              height: `${Math.min(virtualizer.getTotalSize(), 2000)}px`,
+              maxHeight: '80vh',
+              overflow: 'auto',
+              position: 'relative',
+              willChange: 'transform',
+            }
+      }
     >
       {/*
         Outer container sized to total virtual height

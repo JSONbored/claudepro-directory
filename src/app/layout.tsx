@@ -12,6 +12,7 @@ import { Inter } from 'next/font/google';
 import { headers } from 'next/headers';
 import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
+import { Suspense } from 'react';
 import './globals.css';
 import { Toaster } from 'sonner';
 import { AnnouncementBanner } from '@/src/components/layout/announcement-banner';
@@ -154,8 +155,11 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
       </head>
       <body className="font-sans">
-        {await StructuredData({ type: 'website' })}
-        {await OrganizationStructuredData()}
+        {/* Suspense boundary for structured data - streams after initial HTML */}
+        <Suspense fallback={null}>
+          {await StructuredData({ type: 'website' })}
+          {await OrganizationStructuredData()}
+        </Suspense>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -189,7 +193,8 @@ export default async function RootLayout({
         <Analytics />
         <SpeedInsights />
         {/* Umami Analytics - Privacy-focused analytics (production only) */}
-        {await UmamiScript()}
+        {/* Suspense boundary for analytics - streams after critical content */}
+        <Suspense fallback={null}>{await UmamiScript()}</Suspense>
         {/* Service Worker Registration for PWA Support */}
         {/* suppressHydrationWarning: Browsers remove nonce attribute after execution (security feature), causing harmless hydration warning */}
         <script

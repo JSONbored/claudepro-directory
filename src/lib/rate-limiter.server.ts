@@ -18,6 +18,7 @@ import {
   requestPathSchema,
 } from '@/src/lib/schemas/middleware.schema';
 import { sanitizeApiError } from '@/src/lib/security/error-sanitizer';
+import { logRateLimitExceeded } from '@/src/lib/security/security-monitor.server';
 
 // Use MiddlewareRateLimitConfig from middleware schema
 // Additional interface for extended functionality
@@ -160,11 +161,27 @@ export class RateLimiter {
     const headersList = request.headers;
     const clientIP =
       headersList.get('cf-connecting-ip') || headersList.get('x-forwarded-for') || 'unknown';
+    const pathname = new URL(request.url).pathname;
+    const userAgent = headersList.get('user-agent') || '';
 
+    // Log to security monitoring system
+    await logRateLimitExceeded({
+      clientIP,
+      path: pathname,
+      limit: info.limit,
+      actual: info.limit + 1, // They exceeded by at least 1
+      metadata: {
+        userAgent,
+        resetTime: info.resetTime,
+        retryAfter: info.retryAfter,
+      },
+    });
+
+    // Also log via standard logger for backward compatibility
     logger.warn('Rate limit exceeded', {
       ip: clientIP,
-      path: new URL(request.url).pathname,
-      userAgent: headersList.get('user-agent') || '',
+      path: pathname,
+      userAgent,
       limit: info.limit,
       remaining: info.remaining,
       resetTime: info.resetTime,

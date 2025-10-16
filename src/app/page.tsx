@@ -16,9 +16,11 @@
  */
 
 import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
 import { HomePageClient } from '@/src/components/features/home';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
+import { LoadingSkeleton } from '@/src/components/ui/loading-skeleton';
 
 // Lazy load animations to improve LCP (40-60 KB saved from initial bundle)
 // RollingText uses Framer Motion and impacts homepage First Load
@@ -71,12 +73,11 @@ interface HomePageProps {
   }>;
 }
 
-// Server component that loads data
-export default async function HomePage({ searchParams }: HomePageProps) {
-  // Extract and sanitize search query from URL
-  const resolvedParams = await searchParams;
-  const initialSearchQuery = resolvedParams.q || '';
-
+/**
+ * Async data loader component - streams content independently
+ * Wrapped in Suspense for progressive HTML streaming
+ */
+async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
   /**
    * Modern 2025 Architecture: Dynamic Category Loading
    *
@@ -225,6 +226,24 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   };
 
   return (
+    <HomePageClient
+      initialData={initialData}
+      initialSearchQuery={searchQuery}
+      featuredByCategory={enrichedFeaturedByCategory}
+      stats={Object.fromEntries(
+        categoryIds.map((id) => [id, enrichedCategoryData[id]?.length || 0])
+      )}
+    />
+  );
+}
+
+// Server component that renders layout with streaming
+export default async function HomePage({ searchParams }: HomePageProps) {
+  // Extract and sanitize search query from URL
+  const resolvedParams = await searchParams;
+  const initialSearchQuery = resolvedParams.q || '';
+
+  return (
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       {/* Hero + Search Section */}
       <div className="relative overflow-hidden">
@@ -240,7 +259,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           />
         </div>
 
-        {/* Static Hero Section - Server Rendered */}
+        {/* Static Hero Section - Server Rendered - Streams immediately */}
         <section
           className={`relative ${UI_CLASSES.Z_10} ${UI_CLASSES.BORDER_B} border-border/50`}
           aria-label="Homepage hero"
@@ -268,27 +287,24 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </div>
         </section>
 
-        {/* Client Component for Interactive Features (Search, etc) */}
+        {/* Content Section - Streams independently after hero */}
         <div className={`relative ${UI_CLASSES.Z_10}`}>
-          <HomePageClient
-            initialData={initialData}
-            initialSearchQuery={initialSearchQuery}
-            featuredByCategory={enrichedFeaturedByCategory}
-            stats={Object.fromEntries(
-              categoryIds.map((id) => [id, enrichedCategoryData[id]?.length || 0])
-            )}
-          />
+          <Suspense fallback={<LoadingSkeleton />}>
+            <HomeContentSection searchQuery={initialSearchQuery} />
+          </Suspense>
         </div>
       </div>
 
-      {/* Email CTA - Moved to bottom of page */}
+      {/* Email CTA - Streams independently */}
       <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
-        <InlineEmailCTA
-          variant="hero"
-          context="homepage"
-          headline="Join 1,000+ Claude Power Users"
-          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
-        />
+        <Suspense fallback={null}>
+          <InlineEmailCTA
+            variant="hero"
+            context="homepage"
+            headline="Join 1,000+ Claude Power Users"
+            description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+          />
+        </Suspense>
       </section>
     </div>
   );

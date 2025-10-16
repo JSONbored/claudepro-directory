@@ -53,6 +53,7 @@ import { z } from 'zod';
 import { redisClient } from '@/src/lib/cache.server';
 import { SERVER_ACTION_RATE_LIMITS } from '@/src/lib/config/rate-limits.config';
 import { logger } from '@/src/lib/logger';
+import { logAuthFailure } from '@/src/lib/security/security-monitor.server';
 
 /**
  * Action metadata schema for tracking and observability
@@ -298,6 +299,27 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
   } = await supabase.auth.getUser();
 
   if (error || !user) {
+    // Extract client IP and path for security monitoring
+    const headersList = await headers();
+    const clientIP =
+      headersList.get('cf-connecting-ip') ||
+      headersList.get('x-forwarded-for') ||
+      headersList.get('x-real-ip') ||
+      'unknown';
+    const referer = headersList.get('referer') || 'unknown';
+
+    // Log to security monitoring system
+    await logAuthFailure({
+      clientIP,
+      path: referer,
+      reason: error?.message || 'No valid session',
+      metadata: {
+        actionName: metadata?.actionName || 'unknown',
+        errorCode: error?.name || 'AUTH_REQUIRED',
+      },
+    });
+
+    // Also log via standard logger for backward compatibility
     const warnData: Record<string, string> = {
       actionName: metadata?.actionName || 'unknown',
     };

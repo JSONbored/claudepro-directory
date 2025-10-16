@@ -38,7 +38,6 @@ import {
   cacheCategorySchema,
   cacheInvalidationResultSchema,
   cacheKeyParamsSchema,
-  cacheStatsSchema,
   parseRedisZRangeResponse,
   popularItemsQuerySchema,
 } from '@/src/lib/schemas/cache.schema';
@@ -57,6 +56,115 @@ export type { Redis };
 // ============================================
 // REDIS CLIENT CONFIGURATION
 // ============================================
+
+// ============================================
+// CACHE MEMORY CONFIGURATION
+// ============================================
+
+/**
+ * Cache memory limits configuration
+ * ENV-configurable with production-optimized defaults
+ *
+ * Environment Variables:
+ * - CACHE_FALLBACK_MEMORY_MB: Fallback cache memory limit (default: 20MB prod, 100MB dev)
+ * - CACHE_API_MEMORY_MB: API cache memory limit (default: 10MB prod, 50MB dev)
+ * - CACHE_SESSION_MEMORY_MB: Session cache memory limit (default: 6MB prod, 30MB dev)
+ * - CACHE_CONTENT_MEMORY_MB: Content cache memory limit (default: 20MB prod, 100MB dev)
+ * - CACHE_TEMP_MEMORY_MB: Temp cache memory limit (default: 4MB prod, 20MB dev)
+ *
+ * Validation: 1MB min, 500MB max per cache
+ */
+const cacheMemoryLimitsSchema = z.object({
+  fallback: z
+    .number()
+    .int()
+    .min(1)
+    .max(500)
+    .default(isProduction ? 20 : 100),
+  api: z
+    .number()
+    .int()
+    .min(1)
+    .max(500)
+    .default(isProduction ? 10 : 50),
+  session: z
+    .number()
+    .int()
+    .min(1)
+    .max(500)
+    .default(isProduction ? 6 : 30),
+  content: z
+    .number()
+    .int()
+    .min(1)
+    .max(500)
+    .default(isProduction ? 20 : 100),
+  temp: z
+    .number()
+    .int()
+    .min(1)
+    .max(500)
+    .default(isProduction ? 4 : 20),
+});
+
+type CacheMemoryLimits = z.infer<typeof cacheMemoryLimitsSchema>;
+
+/**
+ * Parse and validate cache memory limits from ENV
+ * Logs warnings for invalid values and falls back to defaults
+ */
+function parseCacheMemoryLimits(): CacheMemoryLimits {
+  const rawConfig = {
+    fallback: process.env.CACHE_FALLBACK_MEMORY_MB
+      ? Number.parseInt(process.env.CACHE_FALLBACK_MEMORY_MB, 10)
+      : undefined,
+    api: process.env.CACHE_API_MEMORY_MB
+      ? Number.parseInt(process.env.CACHE_API_MEMORY_MB, 10)
+      : undefined,
+    session: process.env.CACHE_SESSION_MEMORY_MB
+      ? Number.parseInt(process.env.CACHE_SESSION_MEMORY_MB, 10)
+      : undefined,
+    content: process.env.CACHE_CONTENT_MEMORY_MB
+      ? Number.parseInt(process.env.CACHE_CONTENT_MEMORY_MB, 10)
+      : undefined,
+    temp: process.env.CACHE_TEMP_MEMORY_MB
+      ? Number.parseInt(process.env.CACHE_TEMP_MEMORY_MB, 10)
+      : undefined,
+  };
+
+  const result = cacheMemoryLimitsSchema.safeParse(rawConfig);
+
+  if (!result.success) {
+    logger.warn('Invalid cache memory limits in ENV, using defaults', {
+      issueCount: result.error.issues.length,
+      providedValues: JSON.stringify(rawConfig),
+    });
+    return cacheMemoryLimitsSchema.parse({});
+  }
+
+  // Log configuration on startup for observability
+  const totalMB =
+    result.data.fallback +
+    result.data.api +
+    result.data.session +
+    result.data.content +
+    result.data.temp;
+
+  logger.info('Cache memory limits configured', {
+    environment: isProduction ? 'production' : 'development',
+    fallbackMB: result.data.fallback,
+    apiMB: result.data.api,
+    sessionMB: result.data.session,
+    contentMB: result.data.content,
+    tempMB: result.data.temp,
+    totalMB,
+  });
+
+  return result.data;
+}
+
+// Global cache memory limits
+export const CACHE_MEMORY_LIMITS = parseCacheMemoryLimits();
 
 // Client-safe Redis config
 const redisConfig = {
@@ -101,7 +209,9 @@ class RedisClientManager {
   >();
   private fallbackCleanupInterval: NodeJS.Timeout | null = null;
   private fallbackMemoryBytes = 0;
-  private readonly MAX_FALLBACK_MEMORY_MB = 100; // 100MB limit for fallback storage
+  // ENV-configurable memory limit with validation and observability
+  private readonly MAX_FALLBACK_MEMORY_MB = CACHE_MEMORY_LIMITS.fallback;
+  private lastMemoryWarningTime = 0; // Throttle memory warnings (max 1 per minute)
 
   constructor(config?: Partial<RedisClientConfig>) {
     this.config = redisClientConfigSchema.parse({
@@ -325,6 +435,7 @@ class RedisClientManager {
 
   /**
    * Fallback storage operations with memory management
+   * Monitors memory pressure and logs warnings when approaching limits
    */
   async setFallback(key: string, value: string, ttlSeconds?: number): Promise<void> {
     const expiry = ttlSeconds ? Date.now() + ttlSeconds * 1000 : 0;
@@ -340,6 +451,21 @@ class RedisClientManager {
     // Add new entry
     this.fallbackStorage.set(key, { value, expiry, size, lastAccess: now });
     this.fallbackMemoryBytes += size;
+
+    // Memory pressure monitoring (throttled to max 1 warning per minute)
+    const maxBytes = this.MAX_FALLBACK_MEMORY_MB * 1024 * 1024;
+    const usagePercent = (this.fallbackMemoryBytes / maxBytes) * 100;
+
+    if (usagePercent >= 80 && now - this.lastMemoryWarningTime > 60000) {
+      logger.warn('Fallback cache memory pressure high', {
+        usagePercent: usagePercent.toFixed(2),
+        currentMB: (this.fallbackMemoryBytes / 1024 / 1024).toFixed(2),
+        limitMB: this.MAX_FALLBACK_MEMORY_MB,
+        keys: this.fallbackStorage.size,
+        action: usagePercent >= 100 ? 'evicting_lru' : 'monitoring',
+      });
+      this.lastMemoryWarningTime = now;
+    }
 
     // Evict if over memory limit
     this.evictLRU();
@@ -625,10 +751,52 @@ export class CacheService {
     deletes: 0,
     errors: 0,
     fallbackHits: 0,
+    coalescedRequests: 0, // Deduplicated thundering herd requests
   };
+
+  // Request coalescing: Prevent thundering herd by deduplicating in-flight requests
+  // Maps cache key -> { promise, timestamp, callers }
+  private inFlightRequests = new Map<
+    string,
+    {
+      promise: Promise<unknown>;
+      timestamp: number;
+      callers: number;
+    }
+  >();
+
+  // Cleanup interval for hung requests (max 30s lifetime)
+  private readonly REQUEST_TIMEOUT_MS = 30000;
 
   constructor(config?: Partial<CacheConfig>) {
     this.config = cacheConfigSchema.parse(config || {});
+    this.startRequestCleanup();
+  }
+
+  /**
+   * Cleanup hung in-flight requests every 30 seconds
+   * Prevents memory leaks from failed/hung compute functions
+   */
+  private startRequestCleanup(): void {
+    if (typeof setInterval === 'undefined') return; // Server-only feature
+
+    setInterval(() => {
+      const now = Date.now();
+      let cleaned = 0;
+
+      for (const [key, request] of this.inFlightRequests.entries()) {
+        if (now - request.timestamp > this.REQUEST_TIMEOUT_MS) {
+          this.inFlightRequests.delete(key);
+          cleaned++;
+        }
+      }
+
+      if (cleaned > 0 && this.config.enableLogging) {
+        logger.debug(`Cleaned ${cleaned} hung in-flight requests`, {
+          keyPrefix: this.config.keyPrefix,
+        });
+      }
+    }, 30000);
   }
 
   /**
@@ -841,6 +1009,90 @@ export class CacheService {
       logger.error(`Cache get failed for key: ${key}`, err);
       return null;
     }
+  }
+
+  /**
+   * Get value from cache or compute it if missing
+   * Implements request coalescing to prevent thundering herd
+   *
+   * @param key - Cache key
+   * @param compute - Async function to compute value on cache miss
+   * @param ttl - Optional TTL override (defaults to config.defaultTTL)
+   * @returns Cached or computed value
+   *
+   * @example
+   * ```ts
+   * const user = await cache.getOrCompute(
+   *   `user:${id}`,
+   *   async () => db.users.findById(id),
+   *   3600
+   * );
+   * ```
+   *
+   * **Thundering Herd Prevention:**
+   * - Multiple concurrent requests for the same key share a single compute call
+   * - Prevents database/API overload during cache misses
+   * - Automatic cleanup of in-flight requests after 30s timeout
+   * - Thread-safe with proper error isolation
+   */
+  async getOrCompute<T>(key: string, compute: () => Promise<T>, ttl?: number): Promise<T | null> {
+    // Try cache first
+    const cached = await this.get<T>(key);
+    if (cached !== null) {
+      return cached;
+    }
+
+    const fullKey = this.generateKey(key);
+
+    // Check if request is already in-flight
+    const existing = this.inFlightRequests.get(fullKey);
+    if (existing) {
+      // Coalesce: Join existing computation
+      this.stats.coalescedRequests++;
+      existing.callers++;
+
+      if (this.config.enableLogging) {
+        logger.debug(`Request coalesced for key: ${key}`, {
+          callers: existing.callers,
+          ageMs: Date.now() - existing.timestamp,
+        });
+      }
+
+      try {
+        return (await existing.promise) as T | null;
+      } catch (error) {
+        // Error already logged by original caller
+        return null;
+      }
+    }
+
+    // Create new in-flight request
+    const promise = (async (): Promise<T | null> => {
+      try {
+        const value = await compute();
+
+        // Store in cache
+        await this.set(key, value, ttl);
+
+        return value;
+      } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        logger.error(`Compute failed for key: ${key}`, err);
+        throw error; // Propagate to all callers
+      } finally {
+        // Cleanup: Remove from in-flight map
+        this.inFlightRequests.delete(fullKey);
+      }
+    })();
+
+    // Register in-flight request
+    this.inFlightRequests.set(fullKey, {
+      promise,
+      timestamp: Date.now(),
+      callers: 1,
+    });
+
+    return promise;
   }
 
   /**
@@ -1193,12 +1445,12 @@ export class CacheService {
   }
 
   /**
-   * Get cache statistics
+   * Get cache statistics with request coalescing metrics
    */
-  getStats(): z.infer<typeof cacheStatsSchema> {
+  getStats() {
     const total = this.stats.hits + this.stats.misses;
 
-    return cacheStatsSchema.parse({
+    return {
       hits: this.stats.hits,
       misses: this.stats.misses,
       sets: this.stats.sets,
@@ -1206,7 +1458,9 @@ export class CacheService {
       errors: this.stats.errors,
       hitRate: total > 0 ? (this.stats.hits / total) * 100 : 0,
       fallbackHits: this.stats.fallbackHits,
-    });
+      coalescedRequests: this.stats.coalescedRequests,
+      inFlightRequests: this.inFlightRequests.size,
+    };
   }
 
   /**
@@ -1220,6 +1474,7 @@ export class CacheService {
       deletes: 0,
       errors: 0,
       fallbackHits: 0,
+      coalescedRequests: 0,
     };
   }
 
@@ -1233,11 +1488,13 @@ export class CacheService {
 
 /**
  * Pre-configured cache services for different use cases
- * Optimized with Brotli compression and memory management
+ * ENV-configurable with production-optimized defaults
+ * See CACHE_MEMORY_LIMITS for configuration
  */
 export const CacheServices = {
   /**
    * API response cache - 1 hour TTL with Brotli compression
+   * Memory: ENV-configurable via CACHE_API_MEMORY_MB (default: 50MB dev, 10MB prod)
    */
   api: new CacheService({
     keyPrefix: 'api',
@@ -1246,12 +1503,13 @@ export const CacheServices = {
     compressionAlgorithm: 'brotli', // Better compression than gzip
     compressionThreshold: 500, // Compress anything over 500 bytes
     maxValueSize: 2097152, // 2MB max
-    maxMemoryMB: 50, // 50MB fallback memory limit
-    enableLogging: process.env.NODE_ENV === 'development',
+    maxMemoryMB: CACHE_MEMORY_LIMITS.api,
+    enableLogging: !isProduction,
   }),
 
   /**
    * Session cache - 24 hours TTL with gzip compression
+   * Memory: ENV-configurable via CACHE_SESSION_MEMORY_MB (default: 30MB dev, 6MB prod)
    */
   session: new CacheService({
     keyPrefix: 'session',
@@ -1259,12 +1517,13 @@ export const CacheServices = {
     enableCompression: true,
     compressionAlgorithm: 'gzip', // Faster for smaller payloads
     compressionThreshold: 1000,
-    maxMemoryMB: 30,
+    maxMemoryMB: CACHE_MEMORY_LIMITS.session,
     enableLogging: false,
   }),
 
   /**
    * Content cache - 6 hours TTL with aggressive Brotli compression
+   * Memory: ENV-configurable via CACHE_CONTENT_MEMORY_MB (default: 100MB dev, 20MB prod)
    */
   content: new CacheService({
     keyPrefix: 'content',
@@ -1273,18 +1532,19 @@ export const CacheServices = {
     compressionAlgorithm: 'brotli', // Best for large content
     compressionThreshold: 200, // Compress aggressively
     maxValueSize: 5242880, // 5MB max
-    maxMemoryMB: 100, // Larger memory pool for content
-    enableLogging: process.env.NODE_ENV === 'development',
+    maxMemoryMB: CACHE_MEMORY_LIMITS.content,
+    enableLogging: !isProduction,
   }),
 
   /**
    * Temporary cache - 15 minutes TTL, no compression for speed
+   * Memory: ENV-configurable via CACHE_TEMP_MEMORY_MB (default: 20MB dev, 4MB prod)
    */
   temp: new CacheService({
     keyPrefix: 'temp',
     defaultTTL: 900,
     enableCompression: false, // Speed over size
-    maxMemoryMB: 20,
+    maxMemoryMB: CACHE_MEMORY_LIMITS.temp,
     enableLogging: false,
   }),
 } as const;

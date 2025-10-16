@@ -25,5 +25,9 @@ export const SECURITY_CONFIG = {
     vercel: ['va.vercel-scripts.com'] as const,
   },
   // Allowed origins for postMessage
-  allowedOrigins: ['https://claudepro.directory', 'https://www.claudepro.directory'] as const,
+  allowedOrigins: [
+    'https://claudepro.directory',
+    'https://www.claudepro.directory',
+    'https://dev.claudepro.directory',
+  ] as const,
 } as const;
