@@ -20,6 +20,7 @@ export const CONTENT_PATHS = {
   commands: 'content/commands',
   hooks: 'content/hooks',
   statuslines: 'content/statuslines',
+  skills: 'content/skills',
 } as const;
 
 /**
@@ -422,6 +423,19 @@ const buildMcpTemplate: ContentTemplateBuilder<'mcp'> = (data) => {
 };
 
 /**
+ * Build skill content template
+ * Extracts skill guide content, requirements, and installation steps
+ *
+ * @param data - Skill submission data with slug
+ * @returns Skill content structure with optional requirements and installation
+ */
+const buildSkillTemplate: ContentTemplateBuilder<'skills'> = (data) => ({
+  content: data.skillContent,
+  ...(data.requirements ? { requirements: data.requirements } : {}),
+  ...(data.installation ? { installation: { steps: data.installation } } : {}),
+});
+
+/**
  * Content file template registry type
  * Mapped type ensures each template builder receives correct data type
  *
@@ -471,6 +485,7 @@ const CONTENT_TEMPLATES = {
   hooks: buildHookTemplate,
   statuslines: buildStatuslineTemplate,
   mcp: buildMcpTemplate,
+  skills: buildSkillTemplate,
 } as const satisfies ContentTemplateRegistry;
 
 /**

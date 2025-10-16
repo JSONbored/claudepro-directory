@@ -164,6 +164,25 @@ const nextConfig = {
     // ✨ Inline CSS for reduced network requests on initial load
     inlineCss: true,
 
+    // 🔒 Server Actions Security Configuration
+    serverActions: {
+      // CSRF Protection: Only allow server actions from same origin
+      // For production deployment behind proxies/load balancers, add those origins here
+      // Example: allowedOrigins: ['claudepro.directory', 'www.claudepro.directory', '*.vercel.app']
+      allowedOrigins: process.env.VERCEL_URL
+        ? [
+            'claudepro.directory',
+            'www.claudepro.directory',
+            '*.vercel.app', // Vercel preview deployments
+            process.env.VERCEL_URL, // Current deployment URL
+          ]
+        : undefined, // undefined = same-origin only (secure default)
+
+      // DoS Protection: Limit request body size for server actions
+      // Prevents large payload attacks while allowing reasonable form submissions
+      bodySizeLimit: '1mb', // 1MB limit (sufficient for forms, prevents abuse)
+    },
+
     // Modern optimizations
     cssChunking: 'strict',
     scrollRestoration: true,

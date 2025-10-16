@@ -183,6 +183,40 @@ export const mcpSubmissionSchema = z.object({
 });
 
 /**
+ * Skills submission schema - Task-focused capability guides (PDF, DOCX, PPTX, XLSX, etc.)
+ */
+export const skillsSubmissionSchema = z.object({
+  type: z.literal('skills'),
+  ...baseSubmissionFields,
+
+  // Plaintext skill guide content
+  skillContent: nonEmptyString
+    .min(100, 'Skill content must be at least 100 characters')
+    .max(15000, 'Skill content is too long (max 15000 characters)')
+    .describe('Detailed skill guide content with examples and best practices'),
+
+  // Optional requirements (comma-separated list)
+  requirements: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (!val) return undefined;
+      return val
+        .split(',')
+        .map((r) => r.trim())
+        .filter(Boolean);
+    })
+    .describe('Required dependencies/tools (comma-separated)'),
+
+  // Optional installation instructions
+  installation: z
+    .string()
+    .max(2000, 'Installation instructions too long')
+    .optional()
+    .describe('Installation or setup instructions'),
+});
+
+/**
  * Union of all submission types
  */
 export const configSubmissionSchema = z.discriminatedUnion('type', [
@@ -192,6 +226,7 @@ export const configSubmissionSchema = z.discriminatedUnion('type', [
   hooksSubmissionSchema,
   statuslinesSubmissionSchema,
   mcpSubmissionSchema,
+  skillsSubmissionSchema,
 ]);
 
 export type ConfigSubmissionInput = z.input<typeof configSubmissionSchema>;

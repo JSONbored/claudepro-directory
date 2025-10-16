@@ -7,6 +7,7 @@
  * Reuses existing UI components (Button, icons)
  */
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/src/components/ui/button';
 import { Chrome, Github, LogOut } from '@/src/lib/icons';
@@ -77,6 +78,7 @@ export function AuthButtons({ className, redirectTo }: AuthButtonsProps) {
 
 export function SignOutButton({ className }: { className?: string }) {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const supabase = createClient();
 
   const handleSignOut = async () => {
@@ -85,12 +87,17 @@ export function SignOutButton({ className }: { className?: string }) {
 
     if (error) {
       toasts.error.authFailed(`Sign out failed: ${error.message}`);
+      setLoading(false);
     } else {
       toasts.success.signedOut();
-      window.location.href = '/';
-    }
 
-    setLoading(false);
+      // Use Next.js router instead of window.location for proper SPA navigation
+      // This preserves client-side state and enables proper cache invalidation
+      router.push('/');
+      router.refresh(); // Force refresh to clear any cached authenticated data
+
+      setLoading(false);
+    }
   };
 
   return (

@@ -5,10 +5,36 @@
  * - Automatic validation with Zod schemas
  * - Centralized logging middleware
  * - Rate limiting middleware (Redis-based)
- * - Authentication middleware stub (Phase 1)
+ * - Authentication middleware (Supabase integration)
  * - Consistent error handling
  * - Full TypeScript type inference
  * - Performance monitoring
+ * - Multi-layer CSRF Protection
+ *
+ * 🔒 CSRF Protection (Defense-in-Depth):
+ * Layer 1: CSP form-action directive (middleware.ts)
+ *   - Restricts form submissions to same-origin via Nosecone CSP header
+ *   - Browser-level enforcement prevents malicious form submissions
+ *
+ * Layer 2: Next.js Server Actions built-in protection
+ *   - POST-only requests with Next.js action header requirement
+ *   - Origin header validation matches request origin to host domain
+ *   - Same-site cookie enforcement
+ *
+ * Layer 3: Explicit allowedOrigins validation (next.config.mjs)
+ *   - experimental.serverActions.allowedOrigins restricts valid origins
+ *   - Configured for claudepro.directory + Vercel preview deployments
+ *   - Prevents CSRF even if proxies/load balancers modify headers
+ *
+ * Layer 4: Request body size limits (next.config.mjs)
+ *   - bodySizeLimit: '1mb' prevents DoS via large payloads
+ *   - Complements CSRF protection with resource abuse prevention
+ *
+ * Additional Security:
+ * - Rate limiting: Redis-based atomic operations (100 req/60s per IP)
+ * - Input validation: Zod schema enforcement on all inputs
+ * - Error sanitization: Production-safe error messages (no stack traces)
+ * - Session validation: Supabase auth integration for authenticated actions
  *
  * Architecture Benefits:
  * - Reduces boilerplate by ~70% per action
@@ -18,6 +44,7 @@
  * - Eliminates manual try-catch blocks
  *
  * @see https://next-safe-action.dev
+ * @see https://docs.arcjet.com/nosecone/reference (CSP configuration)
  */
 
 import { headers } from 'next/headers';

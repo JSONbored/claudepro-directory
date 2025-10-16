@@ -16,8 +16,23 @@ import { createClient } from '@/src/lib/supabase/server';
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  // Get the redirect URL (where to send user after auth)
-  const next = searchParams.get('next') ?? '/';
+
+  // Get and validate the redirect URL (prevent open redirect attacks)
+  const nextParam = searchParams.get('next') ?? '/';
+
+  // Validate redirect URL:
+  // 1. Must start with / (relative path)
+  // 2. Must NOT start with // (protocol-relative URL that could redirect to external domain)
+  // 3. Must NOT contain @ (could be used for credential phishing)
+  // 4. Must NOT start with /\ (Windows-style path that could bypass validation)
+  const isValidRedirect =
+    nextParam.startsWith('/') &&
+    !nextParam.startsWith('//') &&
+    !nextParam.startsWith('/\\') &&
+    !nextParam.includes('@');
+
+  // Use validated redirect or fallback to homepage
+  const next = isValidRedirect ? nextParam : '/';
 
   if (code) {
     const supabase = await createClient();

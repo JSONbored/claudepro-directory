@@ -129,6 +129,11 @@ const noseconeConfig = {
           : []),
       ],
 
+      // CSRF Protection: Restrict form submissions to same-origin only
+      // This prevents forms from submitting to external domains (CSRF attack vector)
+      // Server Actions are automatically protected (POST-only + Next.js headers)
+      formAction: ["'self'"],
+
       // Upgrade insecure requests in production
       upgradeInsecureRequests: isProduction,
     },

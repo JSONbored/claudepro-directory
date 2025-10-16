@@ -59,9 +59,9 @@ import {
 
 /**
  * Configuration: Content categories (derived from registry)
- * Note: Featured service focuses on main content categories (excludes skills for now)
+ * Dynamically includes all categories from UNIFIED_CATEGORY_REGISTRY
  */
-const CONTENT_CATEGORIES = getAllCategoryIds().filter((cat) => cat !== 'skills');
+const CONTENT_CATEGORIES = getAllCategoryIds();
 
 /**
  * Configuration: Score weights for multi-factor algorithm
@@ -483,6 +483,7 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
         hooksData,
         statuslinesData,
         collectionsData,
+        skillsData,
       ] = await batchFetch([
         getContentByCategory('rules'),
         getContentByCategory('mcp'),
@@ -491,6 +492,7 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
         getContentByCategory('hooks'),
         getContentByCategory('statuslines'),
         getContentByCategory('collections'),
+        getContentByCategory('skills'),
       ]);
 
       // Use trending calculator to get popular content per category
@@ -502,6 +504,7 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
         hooks: hooksData,
         statuslines: statuslinesData,
         collections: collectionsData,
+        skills: skillsData,
       });
 
       // Group popular items by category - ensure all 7 categories are represented
@@ -516,6 +519,7 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
         hooks: hooksData,
         statuslines: statuslinesData,
         collections: collectionsData,
+        skills: skillsData,
       };
 
       for (const category of CONTENT_CATEGORIES) {

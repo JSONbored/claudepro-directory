@@ -291,6 +291,7 @@ class DigestService {
         hooks: hooksData,
         statuslines: statuslinesData,
         collections: collectionsData,
+        skills: skillsData,
       } = await batchLoadContent({
         agents,
         mcp,
@@ -299,6 +300,7 @@ class DigestService {
         hooks,
         statuslines,
         collections,
+        skills,
       });
 
       const allContent = [
@@ -317,6 +319,10 @@ class DigestService {
         ...(collectionsData as ContentItem[]).map((item) => ({
           ...item,
           category: 'collections' as const,
+        })),
+        ...(skillsData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'skills' as const,
         })),
       ];
 

@@ -2,14 +2,15 @@
 
 /**
  * SearchSection Component
- * SHA-2102: Extracted from home-page-client.tsx for better modularity
+ * Production 2025 Architecture: TanStack Virtual for infinite lists
  *
  * Handles search UI and results display for the homepage
+ * Uses virtualization for optimal performance with large result sets
  */
 
 import { type FC, memo } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
-import { InfiniteScrollContainer } from '@/src/components/shared/infinite-scroll-container';
+import { VirtualizedGrid } from '@/src/components/shared/virtualized-grid';
 import { Button } from '@/src/components/ui/button';
 import { Search } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
@@ -18,18 +19,12 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 interface SearchSectionProps {
   isSearching: boolean;
   filteredResults: readonly UnifiedContentItem[];
-  displayedItems: UnifiedContentItem[];
-  hasMore: boolean;
-  loadMore: () => Promise<UnifiedContentItem[]>;
   onClearSearch: () => void;
 }
 
 const SearchSectionComponent: FC<SearchSectionProps> = ({
   isSearching,
   filteredResults,
-  displayedItems,
-  hasMore,
-  loadMore,
   onClearSearch,
 }) => {
   if (!isSearching) return null;
@@ -49,21 +44,17 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
       </div>
 
       {filteredResults.length > 0 ? (
-        <InfiniteScrollContainer
-          items={displayedItems}
-          renderItem={(item) => (
-            <ConfigCard
-              key={item.slug}
-              item={item}
-              variant="default"
-              showCategory={true}
-              showActions={true}
-            />
+        <VirtualizedGrid<UnifiedContentItem>
+          items={filteredResults}
+          estimateSize={400}
+          overscan={5}
+          gap={24}
+          className="min-h-[800px]"
+          renderItem={(item: UnifiedContentItem) => (
+            <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
           )}
-          loadMore={loadMore}
-          hasMore={hasMore}
           emptyMessage="No results found"
-          keyExtractor={(item) => item.slug}
+          keyExtractor={(item: UnifiedContentItem) => item.slug}
         />
       ) : (
         <div className={UI_CLASSES.CONTAINER_CARD_MUTED}>

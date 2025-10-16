@@ -59,7 +59,15 @@ export async function createClient() {
       setAll(cookiesToSet) {
         try {
           for (const { name, value, options } of cookiesToSet) {
-            cookieStore.set(name, value, options);
+            // Ensure secure cookie attributes
+            cookieStore.set(name, value, {
+              ...options,
+              // Force secure attributes for production
+              secure: process.env.NODE_ENV === 'production',
+              httpOnly: true,
+              sameSite: 'lax',
+              path: '/',
+            });
           }
         } catch {
           // The `setAll` method was called from a Server Component.

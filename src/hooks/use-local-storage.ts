@@ -4,6 +4,52 @@ import { useCallback, useEffect, useState } from 'react';
 import { logger } from '@/src/lib/logger';
 
 /**
+ * Sensitive key patterns that should NEVER be stored in localStorage
+ *
+ * 🔒 SECURITY WARNING:
+ * localStorage is NOT encrypted and is accessible to any JavaScript on the page (XSS attacks).
+ * These patterns help detect accidental storage of sensitive data.
+ *
+ * @see {@link https://owasp.org/www-community/vulnerabilities/Cross_Site_Scripting_(XSS)}
+ */
+export const PROHIBITED_LOCALSTORAGE_PATTERNS = [
+  'password',
+  'passwd',
+  'pwd',
+  'secret',
+  'token',
+  'auth',
+  'jwt',
+  'key',
+  'api',
+  'credential',
+  'session',
+  'cookie',
+  'private',
+  'ssn',
+  'credit',
+  'card',
+  'cvv',
+  'pin',
+  'oauth',
+  'refresh',
+  'access',
+] as const;
+
+/**
+ * Checks if a localStorage key contains sensitive patterns
+ *
+ * @param key - The localStorage key to validate
+ * @returns true if key contains prohibited patterns, false otherwise
+ *
+ * @internal
+ */
+function containsSensitivePattern(key: string): boolean {
+  const lowerKey = key.toLowerCase();
+  return PROHIBITED_LOCALSTORAGE_PATTERNS.some((pattern) => lowerKey.includes(pattern));
+}
+
+/**
  * Options for configuring the localStorage hook behavior
  *
  * @typeParam T - Type of the stored value
@@ -42,6 +88,28 @@ export interface UseLocalStorageReturn<T> {
  * deserialization, and synchronization across browser tabs. It handles SSR gracefully
  * and includes comprehensive error handling.
  *
+ * 🔒 CRITICAL SECURITY WARNING:
+ * localStorage is NOT encrypted and is vulnerable to XSS attacks. Any JavaScript running on your
+ * page can access localStorage data. NEVER store sensitive data including:
+ * - Passwords, API keys, tokens (JWT, OAuth, session, refresh tokens)
+ * - Authentication credentials or session identifiers
+ * - Private keys, secrets, or encryption keys
+ * - Personal identifiable information (SSN, credit cards, etc.)
+ * - Any data that could be exploited if stolen
+ *
+ * SAFE USE CASES:
+ * ✅ User preferences (theme, language, display settings)
+ * ✅ UI state (collapsed panels, selected tabs, filters)
+ * ✅ Non-sensitive feature flags
+ * ✅ Public data or anonymized analytics preferences
+ *
+ * For sensitive data, use:
+ * - Secure, HttpOnly cookies (inaccessible to JavaScript)
+ * - Server-side session storage
+ * - Memory-only state (lost on page refresh, but safe from XSS)
+ *
+ * This hook includes runtime validation in development to warn about potentially sensitive keys.
+ *
  * @typeParam T - Type of the value to store
  * @param {string} key - localStorage key to use for storage
  * @param {UseLocalStorageOptions<T>} [options] - Configuration options
@@ -52,9 +120,12 @@ export interface UseLocalStorageReturn<T> {
  *
  * @returns {UseLocalStorageReturn<T>} Object with value, setValue, removeValue, and error
  *
+ * @see {@link PROHIBITED_LOCALSTORAGE_PATTERNS} for list of sensitive key patterns
+ * @see {@link https://owasp.org/www-community/vulnerabilities/Cross_Site_Scripting_(XSS)}
+ *
  * @example
  * ```tsx
- * // Simple usage with primitive values
+ * // ✅ SAFE: Simple usage with primitive values (UI preferences)
  * function UserPreferences() {
  *   const { value: theme, setValue: setTheme } = useLocalStorage('theme', {
  *     defaultValue: 'light'
@@ -67,7 +138,7 @@ export interface UseLocalStorageReturn<T> {
  *   );
  * }
  *
- * // Complex object storage
+ * // ✅ SAFE: Complex object storage (non-sensitive data)
  * interface UserSettings {
  *   notifications: boolean;
  *   language: string;
@@ -103,6 +174,18 @@ export interface UseLocalStorageReturn<T> {
  *
  * @example
  * ```tsx
+ * // ❌ DANGEROUS: DO NOT store sensitive data in localStorage
+ * // BAD - Vulnerable to XSS attacks:
+ * const { value: apiKey } = useLocalStorage('api-key', { defaultValue: '' });
+ * const { value: password } = useLocalStorage('user-password', { defaultValue: '' });
+ *
+ * // GOOD - Use secure, HttpOnly cookies or server-side sessions instead:
+ * // Set via server-side Set-Cookie header with HttpOnly flag
+ * // Access via server-side request.cookies, never expose to client JavaScript
+ * ```
+ *
+ * @example
+ * ```tsx
  * // Custom serialization for Date objects
  * function DatePicker() {
  *   const { value, setValue } = useLocalStorage<Date>('selected-date', {
@@ -131,6 +214,28 @@ export function useLocalStorage<T>(
     serialize = JSON.stringify,
     deserialize = JSON.parse,
   } = options;
+
+  // 🔒 SECURITY: Runtime validation for sensitive key patterns (development only)
+  // Warn developers if they accidentally try to store sensitive data in localStorage
+  if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+    if (containsSensitivePattern(key)) {
+      // biome-ignore lint/suspicious/noConsole: Intentional security warning for developers
+      console.warn(
+        `🔒 SECURITY WARNING: localStorage key "${key}" contains a sensitive pattern (${PROHIBITED_LOCALSTORAGE_PATTERNS.filter((p) => key.toLowerCase().includes(p)).join(', ')}).\n` +
+          'localStorage is NOT encrypted and is vulnerable to XSS attacks.\n' +
+          'NEVER store passwords, tokens, API keys, or other sensitive data in localStorage.\n' +
+          'Use secure HttpOnly cookies or server-side sessions instead.\n' +
+          'See: https://owasp.org/www-community/vulnerabilities/Cross_Site_Scripting_(XSS)'
+      );
+      logger.warn('localStorage used with potentially sensitive key', {
+        component: 'useLocalStorage',
+        key,
+        matchedPatterns: PROHIBITED_LOCALSTORAGE_PATTERNS.filter((p) =>
+          key.toLowerCase().includes(p)
+        ).join(', '),
+      });
+    }
+  }
 
   const [error, setError] = useState<Error | null>(null);
 
