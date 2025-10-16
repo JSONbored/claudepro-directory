@@ -238,6 +238,66 @@
   // Initialize
   init();
 
+  /**
+   * PWA Install Tracking
+   * Track when users install the app to their home screen
+   */
+  let deferredPrompt = null;
+
+  // Capture the beforeinstallprompt event
+  window.addEventListener("beforeinstallprompt", (e) => {
+    // Prevent the mini-infobar from appearing on mobile
+    e.preventDefault();
+
+    // Stash the event so it can be triggered later
+    deferredPrompt = e;
+
+    // Track that the prompt was shown
+    if (typeof window.umami !== "undefined") {
+      window.umami.track("pwa_prompt_shown", {
+        platform: navigator.platform || "unknown",
+        standalone: window.matchMedia("(display-mode: standalone)").matches,
+      });
+    }
+
+    log("[PWA] Install prompt ready");
+
+    // Optionally show custom install UI
+    // You can dispatch a custom event here for your React components
+    window.dispatchEvent(new CustomEvent("pwa-installable"));
+  });
+
+  // Track the installation
+  window.addEventListener("appinstalled", () => {
+    log("[PWA] App installed successfully");
+
+    // Track successful installation
+    if (typeof window.umami !== "undefined") {
+      window.umami.track("pwa_installed", {
+        platform: navigator.platform || "unknown",
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Clear the deferred prompt
+    deferredPrompt = null;
+
+    // Dispatch custom event for app to show success message
+    window.dispatchEvent(new CustomEvent("pwa-installed"));
+  });
+
+  // Track when app is launched from home screen
+  if (window.matchMedia("(display-mode: standalone)").matches) {
+    log("[PWA] App launched in standalone mode");
+
+    if (typeof window.umami !== "undefined") {
+      window.umami.track("pwa_launched", {
+        platform: navigator.platform || "unknown",
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
   // Expose control functions for debugging and user preferences
   window.claudeProSW = {
     unregister: async () => {
@@ -260,6 +320,45 @@
         waiting: !!registration?.waiting,
         scope: registration?.scope,
       };
+    },
+    // PWA Install Control
+    install: async () => {
+      if (!deferredPrompt) {
+        log("[PWA] No install prompt available");
+        return { success: false, reason: "no_prompt" };
+      }
+
+      // Show the install prompt
+      deferredPrompt.prompt();
+
+      // Wait for the user to respond to the prompt
+      const { outcome } = await deferredPrompt.userChoice;
+
+      log("[PWA] User choice:", outcome);
+
+      // Track user response
+      if (typeof window.umami !== "undefined") {
+        if (outcome === "accepted") {
+          window.umami.track("pwa_prompt_accepted", {
+            platform: navigator.platform || "unknown",
+          });
+        } else {
+          window.umami.track("pwa_prompt_dismissed", {
+            platform: navigator.platform || "unknown",
+          });
+        }
+      }
+
+      // Clear the prompt
+      deferredPrompt = null;
+
+      return {
+        success: outcome === "accepted",
+        outcome,
+      };
+    },
+    isInstallable: () => {
+      return deferredPrompt !== null;
     },
   };
 })();

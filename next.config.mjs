@@ -425,7 +425,7 @@ const nextConfig = {
         ],
       },
       {
-        source: '/manifest',
+        source: '/manifest.webmanifest',
         headers: [
           {
             key: 'Cache-Control',

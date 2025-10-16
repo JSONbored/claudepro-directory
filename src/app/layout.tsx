@@ -22,6 +22,7 @@ import { PostCopyEmailProvider } from '@/src/components/providers/post-copy-emai
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import { FooterNewsletterBar } from '@/src/components/shared/footer-newsletter-bar';
 import { PerformanceOptimizer } from '@/src/components/shared/performance-optimizer';
+import { PwaInstallTracker } from '@/src/components/shared/pwa-install-tracker';
 import { StructuredData } from '@/src/components/shared/structured-data';
 import { UmamiScript } from '@/src/components/shared/umami-script';
 import { OrganizationStructuredData } from '@/src/components/structured-data/organization-schema';
@@ -105,7 +106,7 @@ export async function generateMetadata(): Promise<Metadata> {
         },
       ],
     },
-    manifest: '/manifest',
+    manifest: '/manifest.webmanifest',
   };
 }
 
@@ -196,6 +197,8 @@ export default async function RootLayout({
         {/* Umami Analytics - Privacy-focused analytics (production only) */}
         {/* Suspense boundary for analytics - streams after critical content */}
         <Suspense fallback={null}>{await UmamiScript()}</Suspense>
+        {/* PWA Install Tracking - Tracks PWA installation events */}
+        <PwaInstallTracker />
         {/* Service Worker Registration for PWA Support */}
         {/* suppressHydrationWarning: Browsers remove nonce attribute after execution (security feature), causing harmless hydration warning */}
         <script
