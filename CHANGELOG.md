@@ -1,4 +1,73 @@
 # Changelog
+## 2025-10-16 - BetterStack Heartbeat Monitoring for Cron Jobs
+
+**TL;DR:** Implemented secure BetterStack heartbeat monitoring for Vercel cron jobs to automatically detect failures and send alerts when scheduled tasks don't complete successfully. Uses success-only reporting pattern with environment variable configuration for open-source security.
+
+### What Changed
+
+Added BetterStack heartbeat monitoring integration to both Vercel cron jobs (daily maintenance and weekly tasks) following open-source security best practices. Heartbeat URLs are stored as environment variables and only sent on successful task completion. BetterStack automatically alerts when expected heartbeats don't arrive, providing reliable uptime monitoring for critical scheduled operations.
+
+### Added
+
+- **BetterStack Environment Variables** - Added `BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE` and `BETTERSTACK_HEARTBEAT_WEEKLY_TASKS` to server environment schema with Zod urlString validation
+- **Success-Only Heartbeat Pattern** - Implemented non-blocking heartbeat pings that only fire when all cron tasks complete successfully (failedTasks === 0)
+- **Graceful Error Handling** - Heartbeat failures logged as warnings but don't break cron execution, with 5-second timeout for reliability
+- **Security-First Implementation** - Lazy imports to avoid circular dependencies, server-only execution, no secrets in repository
+
+### Technical Details
+
+**Monitoring Configuration:**
+- **Daily Maintenance Cron**: Sends heartbeat at ~3 AM UTC after successful cache warming, job expiration, and email sequence processing
+- **Weekly Tasks Cron**: Sends heartbeat Monday 12 AM UTC after successful featured content calculation and weekly digest distribution
+- **BetterStack Settings**: Daily 24h period with 30min grace, Weekly 7d period with 2h grace, alerts on missing heartbeat
+
+**Implementation Pattern:**
+```typescript
+// Only send on complete success
+if (failedTasks === 0) {
+  const { env } = await import('@/src/lib/schemas/env.schema');
+  const heartbeatUrl = env.BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE;
+
+  if (heartbeatUrl) {
+    try {
+      await fetch(heartbeatUrl, {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000), // Non-blocking
+      });
+      logger.info('BetterStack heartbeat sent successfully');
+    } catch (error) {
+      logger.warn('Failed to send BetterStack heartbeat (non-critical)', { error });
+    }
+  }
+}
+```
+
+**Security Features:**
+- ✅ No hardcoded URLs - stored in Vercel environment variables
+- ✅ Type-safe validation with Zod urlString schema
+- ✅ Server-only execution - never exposed to client bundle
+- ✅ Open-source safe - no secrets in git repository
+- ✅ Non-blocking - heartbeat failure doesn't break cron
+- ✅ Lazy import pattern to avoid circular dependencies
+
+**Files Modified:**
+- `src/lib/schemas/env.schema.ts` - Added heartbeat URL environment variables to serverEnvSchema
+- `src/app/api/cron/daily-maintenance/route.ts` - Added heartbeat ping after successful task completion
+- `src/app/api/cron/weekly-tasks/route.ts` - Added heartbeat ping after successful task completion
+
+**Why Success-Only Reporting:**
+- Simpler than dual success/failure reporting
+- More reliable (network issues during failure could cause false negatives)
+- Standard practice for heartbeat monitoring (Cronitor, Healthchecks.io)
+- BetterStack alerts when expected heartbeat doesn't arrive (missing = failure detected)
+
+**Deployment:**
+- Environment variables configured in Vercel for production and preview environments
+- No code changes needed after initial deployment - fully managed via Vercel env vars
+- TypeScript compilation verified - all type checks pass
+
+This implementation provides robust monitoring for critical cron operations with zero impact on execution performance and full security compliance for open-source projects.
+
 ## 2025-10-16 - October 2025 AI-Native Development Content Expansion
 
 **TL;DR:** Added 20 cutting-edge, AI-native development content pieces validated against October 2025 trends across Agents (4), Statuslines (4), Rules (4), Commands (4), and Skills (4) categories. All content features production-ready patterns for multi-agent orchestration, AI-powered workflows, and next-generation development tools with strong SEO potential.
