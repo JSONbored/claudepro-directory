@@ -23,28 +23,56 @@ permissions:
   pull-requests: write
 
 jobs:
+  # Build PR branch using reusable workflow
+  build-pr:
+    name: Build PR Branch
+    uses: ./.github/workflows/build-reusable.yml
+    with:
+      cache-key-suffix: 'bundle-pr'
+      upload-artifact: true
+
+  # Build base branch using reusable workflow
+  build-base:
+    name: Build Base Branch
+    uses: ./.github/workflows/build-reusable.yml
+    with:
+      cache-key-suffix: 'bundle-base'
+      upload-artifact: true
+      checkout-ref: ${{ github.base_ref }}
+
+  # Analyze and compare bundle sizes
   analyze:
-    name: Analyze Bundle Size
+    name: Analyze & Compare
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
+    needs: [build-pr, build-base]
 
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v5
 
       - uses: ./.github/actions/setup-node-deps
+        with:
+          skip-build-content: 'true'
 
-      - name: Build PR version
-        run: npm run build
-        env:
-          NEXT_TELEMETRY_DISABLED: 1
+      - name: Download PR build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build-pr.outputs.artifact-name }}
+          path: .next-pr
 
-      - name: Analyze bundle (PR)
+      - name: Move PR build to analysis location
+        run: |
+          rm -rf .next
+          mv .next-pr/.next .next
+          echo "✅ PR build restored for analysis"
+
+      - name: Analyze PR bundle
         run: npx -y nextjs-bundle-analysis@0.8.0
         env:
           BUNDLE_ANALYSIS_COMMENT: true
 
-      - name: Upload bundle analysis
+      - name: Upload PR bundle analysis
         uses: actions/upload-artifact@v4
         with:
           name: bundle-analysis-pr
@@ -55,15 +83,21 @@ jobs:
         uses: actions/checkout@v5
         with:
           ref: ${{ github.base_ref }}
+          clean: false
 
-      - uses: ./.github/actions/setup-node-deps
+      - name: Download base build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build-base.outputs.artifact-name }}
+          path: .next-base
 
-      - name: Build base version
-        run: npm run build
-        env:
-          NEXT_TELEMETRY_DISABLED: 1
+      - name: Move base build to analysis location
+        run: |
+          rm -rf .next
+          mv .next-base/.next .next
+          echo "✅ Base build restored for analysis"
 
-      - name: Analyze bundle (base)
+      - name: Analyze base bundle
         run: npx -y nextjs-bundle-analysis@0.8.0
 
       - name: Upload base bundle analysis

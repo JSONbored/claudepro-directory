@@ -1,0 +1,146 @@
+name: 'Validate Content Files'
+description: 'Unified content validation for schema, SEO, and metadata quality checks'
+
+inputs:
+  validation-type:
+    description: 'Validation type: schema | seo | titles | metadata | quality-gates'
+    required: true
+  files:
+    description: 'Specific files to validate (space-separated paths). Leave empty to validate all.'
+    required: false
+    default: ''
+  output-file:
+    description: 'Path to write validation report output'
+    required: false
+    default: ''
+  continue-on-error:
+    description: 'Whether to continue on validation errors'
+    required: false
+    default: 'false'
+
+outputs:
+  validation-failed:
+    description: 'Whether validation failed (true/false)'
+    value: ${{ steps.validate.outputs.failed }}
+  validation-report:
+    description: 'Path to validation report file'
+    value: ${{ steps.validate.outputs.report-path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run validation
+      id: validate
+      shell: bash
+      run: |
+        set +e  # Don't exit on error immediately
+        VALIDATION_TYPE="${{ inputs.validation-type }}"
+        FILES="${{ inputs.files }}"
+        OUTPUT_FILE="${{ inputs.output-file }}"
+        CONTINUE_ON_ERROR="${{ inputs.continue-on-error }}"
+        FAILED="false"
+
+        echo "=== Running $VALIDATION_TYPE validation ==="
+
+        case "$VALIDATION_TYPE" in
+          schema)
+            # Schema validation using validate-content.ts
+            if [ -n "$FILES" ]; then
+              # Validate specific files
+              for file in $FILES; do
+                echo "Validating $file..."
+                if ! npx tsx scripts/validate-content.ts "$file"; then
+                  FAILED="true"
+                fi
+              done
+            else
+              # Validate all content (content build handles this)
+              if ! npm run build:content; then
+                FAILED="true"
+              fi
+            fi
+            ;;
+
+          seo)
+            # SEO standards validation
+            if [ -n "$OUTPUT_FILE" ]; then
+              if ! npm run validate:seo > "$OUTPUT_FILE" 2>&1; then
+                FAILED="true"
+              fi
+              cat "$OUTPUT_FILE"
+            else
+              if ! npm run validate:seo; then
+                FAILED="true"
+              fi
+            fi
+            ;;
+
+          titles)
+            # Title length validation
+            if [ -n "$OUTPUT_FILE" ]; then
+              if ! npm run validate:titles:quick > "$OUTPUT_FILE" 2>&1; then
+                FAILED="true"
+              fi
+              cat "$OUTPUT_FILE"
+            else
+              if ! npm run validate:titles:quick; then
+                FAILED="true"
+              fi
+            fi
+            ;;
+
+          metadata)
+            # Metadata quality validation (Phase 5)
+            if [ -n "$OUTPUT_FILE" ]; then
+              if ! npm run validate:seo -- --report > "$OUTPUT_FILE" 2>&1; then
+                FAILED="true"
+              fi
+              cat "$OUTPUT_FILE"
+            else
+              if ! npm run validate:seo -- --report; then
+                FAILED="true"
+              fi
+            fi
+            ;;
+
+          quality-gates)
+            # Quality gates check (requires metadata report)
+            if [ ! -f "metadata-report.txt" ]; then
+              echo "❌ Error: metadata-report.txt not found. Run metadata validation first."
+              FAILED="true"
+            else
+              # Source quality gates script
+              if [ -f "scripts/check-quality-gates.sh" ]; then
+                if ! bash scripts/check-quality-gates.sh metadata-report.txt; then
+                  FAILED="true"
+                fi
+              else
+                echo "⚠️  Warning: scripts/check-quality-gates.sh not found, skipping quality gates"
+              fi
+            fi
+            ;;
+
+          *)
+            echo "❌ Error: Unknown validation type '$VALIDATION_TYPE'"
+            echo "Valid types: schema, seo, titles, metadata, quality-gates"
+            FAILED="true"
+            ;;
+        esac
+
+        # Set outputs
+        echo "failed=$FAILED" >> $GITHUB_OUTPUT
+        if [ -n "$OUTPUT_FILE" ]; then
+          echo "report-path=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+        fi
+
+        # Handle error continuation
+        if [ "$FAILED" = "true" ] && [ "$CONTINUE_ON_ERROR" = "false" ]; then
+          echo "❌ Validation failed and continue-on-error is false"
+          exit 1
+        elif [ "$FAILED" = "true" ]; then
+          echo "⚠️  Validation failed but continuing (continue-on-error=true)"
+          exit 0
+        else
+          echo "✅ Validation passed"
+          exit 0
+        fi

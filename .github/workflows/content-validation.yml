@@ -26,14 +26,11 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v5
+    - name: Setup Node.js with dependencies
+      uses: ./.github/actions/setup-node-deps
       with:
-        node-version: '22'
-        cache: 'npm'
-
-    - name: Install dependencies (production only)
-      run: npm ci --ignore-scripts --omit=dev
+        production-only: 'true'
+        skip-build-content: 'true'
 
     - name: Get changed content files
       id: changed
