@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { NewsletterForm } from './newsletter-form';
 
 const meta = {
-  title: 'Shared/NewsletterForm',
+  title: 'Growth/NewsletterForm',
   component: NewsletterForm,
   parameters: {
     layout: 'centered',

@@ -31,7 +31,7 @@
  */
 
 import Script from 'next/script';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/src/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import {

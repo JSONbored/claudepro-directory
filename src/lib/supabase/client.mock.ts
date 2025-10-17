@@ -17,24 +17,18 @@
  * Returns a mock client with no-op auth methods
  */
 export function createClient() {
-  console.log('[STORYBOOK MOCK] Supabase createClient called');
-
   return {
     auth: {
-      signInWithOAuth: async (options: any) => {
-        console.log('[STORYBOOK MOCK] signInWithOAuth called with:', options);
+      signInWithOAuth: async (_options: any) => {
         return { data: null, error: null };
       },
       signOut: async () => {
-        console.log('[STORYBOOK MOCK] signOut called');
         return { error: null };
       },
       getUser: async () => {
-        console.log('[STORYBOOK MOCK] getUser called');
         return { data: { user: null }, error: null };
       },
       getSession: async () => {
-        console.log('[STORYBOOK MOCK] getSession called');
         return { data: { session: null }, error: null };
       },
     },

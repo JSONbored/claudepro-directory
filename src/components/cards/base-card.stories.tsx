@@ -36,7 +36,7 @@ import { BaseCard } from './base-card';
  */
 
 const meta = {
-  title: 'Shared/BaseCard',
+  title: 'Cards/BaseCard',
   component: BaseCard,
   parameters: {
     layout: 'padded',
@@ -488,28 +488,6 @@ export const ReviewVariant: Story = {
 };
 
 /**
- * No Navigation
- * Card that doesn't navigate when clicked
- */
-export const NoNavigation: Story = {
-  args: {
-    displayTitle: 'Static Card',
-    description: 'This card is non-interactive and does not navigate when clicked.',
-    author: 'Static Team',
-    ariaLabel: 'Static Card - No navigation example',
-    disableNavigation: true,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Card with disableNavigation=true. No click handler, no hover effects. Useful for read-only contexts.',
-      },
-    },
-  },
-};
-
-/**
  * No Author
  * Card without author attribution in footer
  */
@@ -727,6 +705,236 @@ export const AllVariants: Story = {
     docs: {
       description: {
         story: 'Compare all card variants side-by-side. Notice spacing and layout differences.',
+      },
+    },
+  },
+};
+
+/**
+ * ==============================================================================
+ * NEW PROPS: TOP ACCENT & COMPACT MODE (Phase 2 Consolidation)
+ * ==============================================================================
+ */
+
+/**
+ * Top Accent Mode
+ * Card with subtle top border accent for related content
+ * Used by RelatedContentClient for visual distinction
+ */
+export const TopAccent: Story = {
+  args: {
+    displayTitle: 'Related Content Card',
+    description:
+      'Card with topAccent prop showing subtle border at the top. Used in related content carousels for visual distinction.',
+    author: 'Related Team',
+    tags: ['related', 'accent', 'visual'],
+    ariaLabel: 'Related content card with top accent',
+    targetPath: '/example/related',
+    topAccent: true,
+    renderTopBadges: () => (
+      <>
+        <UnifiedBadge variant="category" category="agents">
+          Agent
+        </UnifiedBadge>
+        <UnifiedBadge
+          variant="base"
+          style="secondary"
+          className="text-xs bg-primary/10 text-primary border-primary/30"
+        >
+          Related
+        </UnifiedBadge>
+      </>
+    ),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '**NEW: topAccent prop** - Adds subtle top border (h-px bg-border) with hover effect. ' +
+          'Used by RelatedContentClient to visually distinguish related content cards from main content. ' +
+          'Notice the thin border at the very top of the card.',
+      },
+    },
+  },
+};
+
+/**
+ * Compact Mode
+ * Card with tighter spacing for dense grid layouts
+ * Used by RelatedContentClient and UnifiedCardGrid
+ */
+export const CompactMode: Story = {
+  args: {
+    displayTitle: 'Compact Card',
+    description: 'Card with compactMode prop showing reduced padding (p-4) and tighter spacing.',
+    author: 'Compact Team',
+    tags: ['compact', 'dense', 'grid'],
+    ariaLabel: 'Compact mode card',
+    targetPath: '/example/compact',
+    compactMode: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '**NEW: compactMode prop** - Reduces padding to p-4 and tightens header/content spacing (pb-2, pt-0). ' +
+          'Used in UnifiedCardGrid tight variant and RelatedContentClient for denser card displays. ' +
+          'Compare with default card to see reduced whitespace.',
+      },
+    },
+  },
+};
+
+/**
+ * Top Accent + Compact Mode Combined
+ * Shows both new props working together
+ * This is the exact configuration used by RelatedContentClient
+ */
+export const RelatedContentStyle: Story = {
+  render: () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold mb-3">
+          RelatedContentClient Configuration (topAccent + compactMode)
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <BaseCard
+            displayTitle="Similar Agent"
+            description="AI-powered code review agent that analyzes pull requests."
+            tags={['typescript', 'code-review']}
+            ariaLabel="Similar agent card"
+            targetPath="/example/similar-1"
+            topAccent
+            compactMode
+            renderTopBadges={() => (
+              <div className="flex items-center justify-between gap-2 w-full">
+                <UnifiedBadge
+                  variant="category"
+                  category="agents"
+                  className="font-medium px-2 sm:px-3 py-1 border text-xs sm:text-sm flex-shrink-0"
+                >
+                  agents
+                </UnifiedBadge>
+                <UnifiedBadge
+                  variant="base"
+                  style="default"
+                  className="text-2xs sm:text-xs font-medium border px-1.5 sm:px-2 py-1 flex-shrink-0"
+                >
+                  Related
+                </UnifiedBadge>
+              </div>
+            )}
+          />
+          <BaseCard
+            displayTitle="Popular MCP Server"
+            description="Database connectivity server with unified interface."
+            tags={['database', 'sql']}
+            ariaLabel="Popular MCP server card"
+            targetPath="/example/similar-2"
+            topAccent
+            compactMode
+            renderTopBadges={() => (
+              <div className="flex items-center justify-between gap-2 w-full">
+                <UnifiedBadge
+                  variant="category"
+                  category="mcp"
+                  className="font-medium px-2 sm:px-3 py-1 border text-xs sm:text-sm flex-shrink-0"
+                >
+                  mcp
+                </UnifiedBadge>
+                <UnifiedBadge
+                  variant="base"
+                  style="secondary"
+                  className="text-2xs sm:text-xs font-medium border px-1.5 sm:px-2 py-1 flex-shrink-0"
+                >
+                  Similar Topics
+                </UnifiedBadge>
+              </div>
+            )}
+          />
+          <BaseCard
+            displayTitle="Trending Tutorial"
+            description="Complete guide to building MCP servers from scratch."
+            tags={['tutorial', 'guide']}
+            ariaLabel="Trending tutorial card"
+            targetPath="/example/similar-3"
+            topAccent
+            compactMode
+            renderTopBadges={() => (
+              <div className="flex items-center justify-between gap-2 w-full">
+                <UnifiedBadge
+                  variant="category"
+                  category="tutorials"
+                  className="font-medium px-2 sm:px-3 py-1 border text-xs sm:text-sm flex-shrink-0"
+                >
+                  tutorials
+                </UnifiedBadge>
+                <UnifiedBadge
+                  variant="base"
+                  style="default"
+                  className="text-2xs sm:text-xs font-medium border px-1.5 sm:px-2 py-1 flex-shrink-0"
+                >
+                  Trending
+                </UnifiedBadge>
+              </div>
+            )}
+          />
+        </div>
+      </div>
+      <div>
+        <h3 className="text-lg font-semibold mb-3">
+          Standard Configuration (no topAccent/compactMode)
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <BaseCard
+            displayTitle="Similar Agent"
+            description="AI-powered code review agent that analyzes pull requests."
+            tags={['typescript', 'code-review']}
+            ariaLabel="Standard agent card"
+            targetPath="/example/standard-1"
+            renderTopBadges={() => (
+              <UnifiedBadge variant="category" category="agents">
+                agents
+              </UnifiedBadge>
+            )}
+          />
+          <BaseCard
+            displayTitle="Popular MCP Server"
+            description="Database connectivity server with unified interface."
+            tags={['database', 'sql']}
+            ariaLabel="Standard MCP server card"
+            targetPath="/example/standard-2"
+            renderTopBadges={() => (
+              <UnifiedBadge variant="category" category="mcp">
+                mcp
+              </UnifiedBadge>
+            )}
+          />
+          <BaseCard
+            displayTitle="Trending Tutorial"
+            description="Complete guide to building MCP servers from scratch."
+            tags={['tutorial', 'guide']}
+            ariaLabel="Standard tutorial card"
+            targetPath="/example/standard-3"
+            renderTopBadges={() => (
+              <UnifiedBadge variant="category" category="tutorials">
+                tutorials
+              </UnifiedBadge>
+            )}
+          />
+        </div>
+      </div>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '**Side-by-side comparison** of RelatedContentClient styling (top) vs standard cards (bottom). ' +
+          'Notice:\n\n' +
+          '- **Top row**: Tighter gaps (gap-4), reduced padding, subtle top accent\n' +
+          '- **Bottom row**: Standard gaps (gap-6), default padding, no accent\n\n' +
+          'The top row demonstrates how topAccent + compactMode work together for dense, visually distinct related content grids.',
       },
     },
   },

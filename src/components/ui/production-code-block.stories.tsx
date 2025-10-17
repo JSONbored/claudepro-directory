@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ProductionCodeBlock } from './production-code-block';
 
 const meta = {
-  title: 'Shared/ProductionCodeBlock',
+  title: 'UI/ProductionCodeBlock',
   component: ProductionCodeBlock,
   parameters: {
     layout: 'padded',

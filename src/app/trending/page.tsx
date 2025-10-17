@@ -8,7 +8,7 @@ import {
   skills,
   statuslines,
 } from '@/generated/content';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
+import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
 import { TrendingContent } from '@/src/components/shared/trending-content';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { statsRedis } from '@/src/lib/cache.server';

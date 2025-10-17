@@ -21,7 +21,7 @@ import { UnifiedContentSection } from './unified-content-section';
  */
 
 const meta = {
-  title: 'Unified Detail Page/UnifiedContentSection',
+  title: 'Pages/UnifiedContentSection',
   component: UnifiedContentSection,
   parameters: {
     layout: 'padded',

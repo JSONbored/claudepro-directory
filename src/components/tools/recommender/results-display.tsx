@@ -15,7 +15,7 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
-import { BaseCard } from '@/src/components/shared/base-card';
+import { BaseCard } from '@/src/components/cards/base-card';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,

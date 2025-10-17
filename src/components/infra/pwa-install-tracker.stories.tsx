@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { PwaInstallTracker } from './pwa-install-tracker';
 
 const meta = {
-  title: 'Shared/PwaInstallTracker',
+  title: 'Infra/PwaInstallTracker',
   component: PwaInstallTracker,
   parameters: {
     layout: 'centered',

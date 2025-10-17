@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { FooterNewsletterBar } from './footer-newsletter-bar';
 
 const meta = {
-  title: 'Shared/FooterNewsletterBar',
+  title: 'Growth/FooterNewsletterBar',
   component: FooterNewsletterBar,
   parameters: {
     layout: 'fullscreen',

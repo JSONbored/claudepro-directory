@@ -60,7 +60,7 @@
  */
 
 import { notFound } from 'next/navigation';
-import { UnifiedTracker } from '@/src/components/shared/unified-tracker';
+import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
 import { UnifiedStructuredData } from '@/src/components/structured-data/unified-structured-data';
 import { UnifiedDetailPage } from '@/src/components/unified-detail-page';

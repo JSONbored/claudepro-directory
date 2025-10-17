@@ -11,10 +11,9 @@ import {
   type ContentIndex,
   type ContentItem,
   contentIndexSchema,
+  type RelatedContentItem,
 } from '@/src/lib/schemas/related-content.schema';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { viewCountService } from '@/src/lib/services/view-count.server';
-import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 // Clean, production Zod schemas
 
@@ -36,7 +35,7 @@ const scoredItemSchema = z.object({
     popularity: z.number().optional(),
   }),
   score: z.number(),
-  matchType: z.enum(['same_category', 'tag_match', 'keyword_match', 'trending']),
+  matchType: z.string(), // Changed from z.enum() for scalability
 });
 
 type ScoredItem = z.infer<typeof scoredItemSchema>;
@@ -49,34 +48,6 @@ const relatedContentInputSchema = z.object({
   limit: z.number().min(1).max(20).default(3),
   featured: z.array(z.string()).default([]),
   exclude: z.array(z.string()).default([]),
-});
-
-const relatedContentItemSchema = z.object({
-  slug: z.string(),
-  title: z.string(),
-  description: z.string(),
-  category: z.string(),
-  url: z.string(),
-  score: z.number().min(0).max(100),
-  matchType: z.enum(['same_category', 'tag_match', 'keyword_match', 'trending']),
-  views: z.number().optional(),
-  matchDetails: z
-    .object({
-      matchedTags: z.array(z.string()),
-      matchedKeywords: z.array(z.string()),
-    })
-    .optional(),
-});
-
-const relatedContentResponseSchema = z.object({
-  items: z.array(relatedContentItemSchema),
-  performance: z.object({
-    fetchTime: z.number().int().min(0),
-    cacheHit: z.boolean(),
-    itemCount: z.number().int().min(0),
-    algorithmVersion: z.string(),
-  }),
-  algorithm: z.string(),
 });
 
 // Event tracking schemas
@@ -106,10 +77,18 @@ const relatedContentViewEventSchema = z.object({
 });
 
 // Type exports
-// Note: ContentItem, ContentIndex, and CategorizedContentIndex are now exported from @/lib/schemas/related-content.schema
+// Note: ContentItem, ContentIndex, RelatedContentItem are imported from @/lib/schemas/related-content.schema
 export type RelatedContentInput = z.infer<typeof relatedContentInputSchema>;
-export type RelatedContentItem = z.infer<typeof relatedContentItemSchema>;
-export type RelatedContentResponse = z.infer<typeof relatedContentResponseSchema>;
+export type RelatedContentResponse = {
+  items: RelatedContentItem[];
+  performance: {
+    fetchTime: number;
+    cacheHit: boolean;
+    itemCount: number;
+    algorithmVersion: string;
+  };
+  algorithm: string;
+};
 
 // Event tracking type exports
 export type CarouselNavigationEvent = z.infer<typeof carouselNavigationEventSchema>;
@@ -154,7 +133,7 @@ class RelatedContentService {
       const scoredItems = this.scoreItems(contentIndex.items, config);
       const finalItems = await this.selectFinalItems(scoredItems, config);
 
-      const response = relatedContentResponseSchema.parse({
+      return {
         items: finalItems,
         performance: {
           fetchTime: Math.round(performance.now() - startTime),
@@ -163,9 +142,7 @@ class RelatedContentService {
           algorithmVersion: this.algorithmVersion,
         },
         algorithm: this.algorithmVersion,
-      });
-
-      return response;
+      };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Related content service error', error as Error, {
@@ -398,22 +375,24 @@ class RelatedContentService {
     const viewCounts = await viewCountService.getBatchViewCounts(viewCountRequests);
 
     // Create final items with real view counts
-    return itemsToProcess.map((result) => {
+    // Returns properly typed RelatedContentItem[] with all required fields
+    return itemsToProcess.map((result): RelatedContentItem => {
       const viewCountKey = `${result.item.category}:${result.item.slug}`;
       const viewCountResult = viewCounts[viewCountKey];
 
-      return relatedContentItemSchema.parse({
+      return {
         slug: result.item.slug,
         title: result.item.title,
+        name: result.item.name,
         description: result.item.description,
         category: result.item.category,
-        url: getContentItemUrl({
-          category: result.item.category as ContentCategory,
-          slug: result.item.slug,
-        }),
+        author: result.item.author || 'Community',
+        dateAdded: result.item.dateAdded || new Date().toISOString(),
+        tags: result.item.tags || [],
+        source: 'community' as const,
         score: result.score,
         matchType: result.matchType,
-        views: viewCountResult?.views || 0, // Use real/deterministic view count
+        views: viewCountResult?.views || 0,
         matchDetails: {
           matchedTags: result.item.tags.filter((tag) => config.currentTags.includes(tag)),
           matchedKeywords:
@@ -421,7 +400,7 @@ class RelatedContentService {
               (kw: string) => config.currentKeywords.includes(kw)
             ) || [],
         },
-      });
+      };
     });
   }
 
@@ -429,7 +408,7 @@ class RelatedContentService {
    * Create empty response
    */
   private createEmptyResponse(fetchTime: number): RelatedContentResponse {
-    return relatedContentResponseSchema.parse({
+    return {
       items: [],
       performance: {
         fetchTime: Math.round(fetchTime),
@@ -438,7 +417,7 @@ class RelatedContentService {
         algorithmVersion: this.algorithmVersion,
       },
       algorithm: this.algorithmVersion,
-    });
+    };
   }
 }
 

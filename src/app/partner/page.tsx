@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
+import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,

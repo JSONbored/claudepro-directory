@@ -22,7 +22,7 @@
  */
 
 import { expect, test } from '@playwright/test';
-import { captureWithFocus, getMaskLocators, waitForPageStable } from '@/tests/utils/visual-testing';
+import { getMaskLocators, waitForPageStable } from '@/tests/utils/visual-testing';
 
 /**
  * Content Detail Page Visual Tests

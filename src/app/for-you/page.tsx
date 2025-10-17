@@ -10,8 +10,8 @@
  */
 
 import { redirect } from 'next/navigation';
+import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
 import { ForYouFeedClient } from '@/src/components/personalization/for-you-feed-client';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { getForYouFeed } from '@/src/lib/actions/analytics.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';

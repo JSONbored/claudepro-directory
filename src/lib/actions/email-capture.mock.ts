@@ -16,14 +16,12 @@
  * Mock: Capture email after copy action
  * @returns Success response with mock data
  */
-export const postCopyEmailCaptureAction = async (params: {
+export const postCopyEmailCaptureAction = async (_params: {
   email: string;
   copyType: string;
   category?: string;
   slug?: string;
 }) => {
-  console.log('[STORYBOOK MOCK] postCopyEmailCaptureAction called with:', params);
-
   // Simulate a delay like the real server action
   await new Promise((resolve) => setTimeout(resolve, 300));
 

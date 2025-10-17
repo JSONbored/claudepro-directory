@@ -35,7 +35,7 @@ function ErrorTrigger() {
 }
 
 const meta = {
-  title: 'Shared/ErrorBoundary',
+  title: 'Infra/ErrorBoundary',
   component: ErrorBoundary,
   parameters: {
     layout: 'fullscreen',

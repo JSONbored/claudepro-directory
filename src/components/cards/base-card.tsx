@@ -167,6 +167,20 @@ export interface BaseCardProps {
    * Additional CSS classes
    */
   className?: string;
+
+  /**
+   * Show subtle top accent border for related content
+   * Used by related content carousel for visual distinction
+   * @default false
+   */
+  topAccent?: boolean;
+
+  /**
+   * Compact mode with tighter spacing for grid layouts
+   * Reduces padding and gaps for denser card displays
+   * @default false
+   */
+  compactMode?: boolean;
 }
 
 /**
@@ -210,6 +224,8 @@ export const BaseCard = memo(
     disableNavigation = false,
     showAuthor = true,
     className,
+    topAccent = false,
+    compactMode = false,
   }: BaseCardProps) => {
     const navigationParam: string | UseCardNavigationOptions | undefined =
       disableNavigation || !targetPath
@@ -231,14 +247,21 @@ export const BaseCard = memo(
 
     const cardContent = (
       <Card
-        className={`${disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? 'p-6' : ''} ${variant === 'review' ? 'p-4 rounded-lg border' : ''} ${className || ''}`}
+        className={`${disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? 'p-6' : ''} ${variant === 'review' ? 'p-4 rounded-lg border' : ''} ${compactMode ? 'p-4' : ''} ${className || ''} relative`}
         onClick={disableNavigation ? undefined : handleCardClick}
         role="article"
         aria-label={ariaLabel}
         tabIndex={disableNavigation ? undefined : 0}
         onKeyDown={disableNavigation ? undefined : handleKeyDown}
       >
-        <CardHeader className={variant === 'review' ? 'p-0 mb-3' : 'pb-3'}>
+        {/* Top accent border for related content */}
+        {topAccent && (
+          <div className="absolute top-0 left-0 right-0 h-px bg-border opacity-70 group-hover:opacity-100 transition-opacity" />
+        )}
+
+        <CardHeader
+          className={`${variant === 'review' ? 'p-0 mb-3' : 'pb-3'} ${compactMode ? 'pb-2' : ''}`}
+        >
           {/* Custom header slot (for review avatar/rating, changelog date) */}
           {renderHeader?.()}
 
@@ -289,7 +312,9 @@ export const BaseCard = memo(
           )}
         </CardHeader>
 
-        <CardContent className={variant === 'review' ? 'p-0' : 'pt-0'}>
+        <CardContent
+          className={`${variant === 'review' ? 'p-0' : 'pt-0'} ${compactMode ? 'pt-0' : ''}`}
+        >
           {/* Custom content slot (for review expandable text) */}
           {renderContent && <div className="mb-3">{renderContent()}</div>}
 

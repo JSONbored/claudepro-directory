@@ -26,7 +26,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChangelogContent } from '@/src/components/changelog/changelog-content';
-import { UnifiedTracker } from '@/src/components/shared/unified-tracker';
+import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
 import { ChangelogArticleStructuredData } from '@/src/components/structured-data/changelog-structured-data';
 import { Separator } from '@/src/components/ui/separator';

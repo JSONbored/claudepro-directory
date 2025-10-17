@@ -24,7 +24,7 @@ import { UnifiedReview } from './unified-review';
  */
 
 const meta = {
-  title: 'Features/Reviews/UnifiedReview',
+  title: 'Cards/UnifiedReview',
   component: UnifiedReview,
   parameters: {
     layout: 'padded',

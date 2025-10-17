@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { JobCard } from './job-card';
 
 const meta = {
-  title: 'Shared/JobCard',
+  title: 'Cards/JobCard',
   component: JobCard,
   parameters: {
     layout: 'padded',

@@ -21,7 +21,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { UnifiedTracker } from './unified-tracker';
 
 const meta = {
-  title: 'Shared/UnifiedTracker',
+  title: 'Infra/UnifiedTracker',
   component: UnifiedTracker,
   parameters: {
     layout: 'centered',

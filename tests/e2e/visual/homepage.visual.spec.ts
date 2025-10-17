@@ -35,12 +35,7 @@
  */
 
 import { expect, test } from '@playwright/test';
-import {
-  captureDarkMode,
-  capturePageSnapshot,
-  getMaskLocators,
-  waitForPageStable,
-} from '@/tests/utils/visual-testing';
+import { getMaskLocators, waitForPageStable } from '@/tests/utils/visual-testing';
 
 /**
  * Homepage Visual Tests

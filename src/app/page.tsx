@@ -18,7 +18,7 @@
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { HomePageClient } from '@/src/components/features/home';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
+import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { LoadingSkeleton } from '@/src/components/ui/loading-skeleton';
 

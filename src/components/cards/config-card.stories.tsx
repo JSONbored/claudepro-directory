@@ -39,7 +39,7 @@ import { ConfigCard } from './config-card';
  * Defines component metadata and global settings for all stories
  */
 const meta = {
-  title: 'Features/Content/ConfigCard',
+  title: 'Cards/ConfigCard',
   component: ConfigCard,
   parameters: {
     layout: 'padded',

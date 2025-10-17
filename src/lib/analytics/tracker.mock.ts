@@ -17,6 +17,4 @@
  * @param eventName - Name of the event
  * @param payload - Event payload data
  */
-export function trackEvent(eventName: string, payload?: Record<string, unknown>): void {
-  console.log('[STORYBOOK MOCK] trackEvent called:', { eventName, payload });
-}
+export function trackEvent(_eventName: string, _payload?: Record<string, unknown>): void {}

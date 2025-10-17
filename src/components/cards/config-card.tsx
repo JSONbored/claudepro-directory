@@ -14,8 +14,8 @@
  */
 
 import { memo } from 'react';
-import { UnifiedReview } from '@/src/components/features/reviews/unified-review';
-import { BaseCard } from '@/src/components/shared/base-card';
+import { BaseCard } from '@/src/components/cards/base-card';
+import { UnifiedReview } from '@/src/components/cards/unified-review';
 import { Button } from '@/src/components/ui/button';
 import { BorderBeam } from '@/src/components/ui/magic/border-beam';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';

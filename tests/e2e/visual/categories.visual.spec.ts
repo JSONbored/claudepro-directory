@@ -215,9 +215,6 @@ test.describe('Category Grid - Responsive Behavior', () => {
         };
       });
 
-      // Log for debugging (visible in test output)
-      console.log(`Viewport: ${viewportWidth}px, Grid: ${gridComputedStyle.gridTemplateColumns}`);
-
       // Expectations based on breakpoints
       if (viewportWidth < 768) {
         // Mobile: 1 column

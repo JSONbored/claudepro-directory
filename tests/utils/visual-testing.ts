@@ -200,7 +200,7 @@ export async function disableAnimations(page: Page): Promise<void> {
  */
 export async function capturePageSnapshot(
   page: Page,
-  name: string,
+  _name: string,
   options: Omit<SnapshotOptions, 'name'> = {}
 ): Promise<void> {
   const {
@@ -252,7 +252,7 @@ export async function capturePageSnapshot(
  */
 export async function captureElementSnapshot(
   locator: Locator,
-  name: string,
+  _name: string,
   options: Omit<SnapshotOptions, 'name' | 'fullPage'> = {}
 ): Promise<void> {
   const { animations = 'disabled', timeout = 30000, ...restOptions } = options;
@@ -535,9 +535,7 @@ export async function percySnapshotStable(
   try {
     const percySnapshot = await import('@percy/playwright');
     await percySnapshot.default(page, name, options);
-  } catch {
-    console.warn('Percy not installed - skipping Percy snapshot');
-  }
+  } catch {}
 }
 
 // =============================================================================

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Copy, Download, Share2, Sparkles } from 'lucide-react';
+import { Copy, Download, Share2 } from 'lucide-react';
 import { UnifiedButton } from './unified-button';
 
 /**

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/src/components/content-search-client';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
+import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
 import { Button } from '@/src/components/ui/button';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';

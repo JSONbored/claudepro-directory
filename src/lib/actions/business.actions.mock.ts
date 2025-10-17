@@ -17,7 +17,6 @@
  * @returns Success response with mock data
  */
 export async function trackSponsoredClick() {
-  console.log('[STORYBOOK MOCK] trackSponsoredClick called');
   return { success: true };
 }
 
@@ -26,7 +25,6 @@ export async function trackSponsoredClick() {
  * @returns Success response with mock data
  */
 export async function trackSponsoredImpression() {
-  console.log('[STORYBOOK MOCK] trackSponsoredImpression called');
   return { success: true };
 }
 
@@ -34,8 +32,7 @@ export async function trackSponsoredImpression() {
  * Mock: Toggle job status (active/paused)
  * @returns Success response with mock data
  */
-export async function toggleJobStatus(params: { id: string; status: string }) {
-  console.log('[STORYBOOK MOCK] toggleJobStatus called with:', params);
+export async function toggleJobStatus(_params: { id: string; status: string }) {
   return { data: { success: true } };
 }
 
@@ -43,7 +40,6 @@ export async function toggleJobStatus(params: { id: string; status: string }) {
  * Mock: Delete job listing
  * @returns Success response with mock data
  */
-export async function deleteJob(params: { id: string }) {
-  console.log('[STORYBOOK MOCK] deleteJob called with:', params);
+export async function deleteJob(_params: { id: string }) {
   return { data: { success: true } };
 }

@@ -2,7 +2,22 @@ import Image from 'next/image';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { memo } from 'react';
 import { z } from 'zod';
-import { ErrorBoundary } from '@/src/components/shared/error-boundary';
+import { ErrorBoundary } from '@/src/components/infra/error-boundary';
+// Import all MDX components from consolidated file
+import {
+  // Lazy-loaded heavy components (code-split with React.lazy)
+  ComparisonTable,
+  // Eager-loaded lightweight components
+  CopyableCodeBlock,
+  CopyableHeading,
+  DiagnosticFlow,
+  ErrorTable,
+  ExternalLinkComponent,
+  InternalLinkComponent,
+  MetricsDisplay,
+  SmartRelatedContent,
+  StepByStepGuide,
+} from '@/src/components/ui/mdx-components';
 import { mdxOptions } from '@/src/lib/content/mdx-config';
 import type {
   mdxElementPropsSchema,
@@ -18,28 +33,15 @@ import { Checklist } from '../interactive/checklist';
 import { ContentTabs as Tabs } from '../interactive/content-tabs';
 import { ExpertQuote } from '../interactive/expert-quote';
 import { QuickReference } from '../interactive/quick-reference';
-import { setPageMetadata } from '../smart-related-content/with-metadata';
+// ARCHITECTURAL MODERNIZATION: Removed setPageMetadata import
+// OLD: Module-level state pattern (anti-pattern for client components)
+// NEW: Direct prop passing via component wrapper (see SmartRelatedContent below)
 import { CodeGroupServer as CodeGroup } from '../template/code-group-server';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { UnifiedBadge } from '../ui/unified-badge';
 import { UnifiedContentBox } from '../ui/unified-content-box';
-// Import heavy components as lazy-loaded (Suspense boundaries)
-import {
-  ComparisonTable,
-  DiagnosticFlow,
-  ErrorTable,
-  MetricsDisplay,
-  SmartRelatedContent,
-  StepByStepGuide,
-} from './lazy-mdx-components';
-import {
-  CopyableCodeBlock,
-  CopyableHeading,
-  ExternalLinkComponent,
-  InternalLinkComponent,
-} from './mdx-components';
 
 // Props schemas for MDX components are imported from shared.schema
 
@@ -58,14 +60,20 @@ const mdxRendererPropsSchema = z.object({
 type MDXRendererProps = z.infer<typeof mdxRendererPropsSchema>;
 
 /**
- * Global variable to store pathname for MDX components
+ * ARCHITECTURAL MODERNIZATION: Eliminated module-level state
  *
- * NOTE: This is safe in Next.js App Router server components
- * Each request gets its own execution context, so there's no
- * cross-request state leakage. For client components, pathname
- * is passed as a prop directly to avoid stale closures.
+ * OLD PATTERN (REMOVED):
+ * - let currentPathname = '' (module-level state)
+ * - setPageMetadata() call in render function
+ * - Global state shared across renders (anti-pattern)
+ * - Wrapper functions (buildMDXComponents factory)
+ *
+ * NEW PATTERN:
+ * - Direct components object (no factory function)
+ * - MDXRemote scope prop for passing metadata
+ * - No wrappers, no shared state
+ * - Type-safe, maintainable, no race conditions
  */
-let currentPathname = '';
 
 // Custom components for MDX
 const components = {
@@ -198,24 +206,18 @@ const components = {
   FeatureGrid,
   MetricsDisplay,
   QuickReference,
-  SmartRelatedContent: (props: Parameters<typeof SmartRelatedContent>[0]) => (
-    <SmartRelatedContent {...props} pathname={currentPathname} />
-  ),
+  SmartRelatedContent,
   StepByStepGuide,
   Tabs,
   TLDRSummary,
 };
 
 function MDXRendererComponent(props: MDXRendererProps) {
-  const { source, className, pathname, metadata } = mdxRendererPropsSchema.parse(props);
+  const { source, className } = mdxRendererPropsSchema.parse(props);
 
-  // Set pathname for SmartRelatedContent to use
-  currentPathname = pathname || '';
-
-  // Set metadata for SmartRelatedContent to use
-  if (metadata) {
-    setPageMetadata(metadata);
-  }
+  // PROPER MODERNIZATION: Metadata passed via MDXContentProvider context
+  // SmartRelatedContent accesses via useMDXContent() hook
+  // NO module-level state, NO scope hacks, NO wrappers
 
   return (
     <div className={`prose prose-invert max-w-none ${className}`}>

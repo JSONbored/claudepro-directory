@@ -73,7 +73,7 @@ const relatedContentItemSchema = z
     category: z.string().max(50).describe('Primary category classification'),
     author: shortString.describe('Content creator or author name'),
     dateAdded: z.string().max(50).describe('Date when content was added to the system'),
-    tags: stringArray.readonly().describe('Read-only array of content tags for categorization'),
+    tags: stringArray.describe('Array of content tags for categorization'),
     source: z
       .enum(['official', 'community', 'verified', 'claudepro'])
       .describe('Origin or verification status of the content'),
@@ -86,8 +86,10 @@ const relatedContentItemSchema = z
     // Related content specific fields
     score: percentage.describe('Relevance score for related content matching (0-100)'),
     matchType: z
-      .enum(['same_category', 'tag_match', 'keyword_match', 'trending'])
-      .describe('Type of matching algorithm used to find this related content'),
+      .string()
+      .describe(
+        'Type of matching algorithm used to find this related content (e.g., same_category, tag_match, keyword_match, trending)'
+      ),
     views: z.number().optional().describe('Optional view count for popularity metrics'),
     matchDetails: z
       .object({

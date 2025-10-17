@@ -19,8 +19,9 @@
  * @see components/unified-detail-page.tsx - Original 685-line implementation
  */
 
-import { UnifiedReview } from '@/src/components/features/reviews/unified-review';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
+import { UnifiedReview } from '@/src/components/cards/unified-review';
+import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
+import { UnifiedContentSection } from '@/src/components/pages/unified-content-section';
 import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
@@ -31,7 +32,6 @@ import { getDisplayTitle } from '@/src/lib/utils';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 import { DetailSidebar } from './sidebar/detail-sidebar';
-import { UnifiedContentSection } from './unified-content-section';
 
 export interface UnifiedDetailPageProps {
   item: UnifiedContentItem;

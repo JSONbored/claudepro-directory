@@ -23,7 +23,7 @@
  */
 
 import { Suspense } from 'react';
-import { ConfigCard } from '@/src/components/features/content/config-card';
+import { ConfigCard } from '@/src/components/cards/config-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { getContentBySlug } from '@/src/lib/content/content-loaders';
 import { AlertTriangle, CheckCircle } from '@/src/lib/icons';

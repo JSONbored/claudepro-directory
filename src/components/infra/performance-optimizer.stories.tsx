@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { PerformanceOptimizer } from './performance-optimizer';
 
 const meta = {
-  title: 'Shared/PerformanceOptimizer',
+  title: 'Infra/PerformanceOptimizer',
   component: PerformanceOptimizer,
   parameters: {
     layout: 'centered',

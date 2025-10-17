@@ -64,6 +64,10 @@
       "storybook": "./src/lib/analytics/event-mapper.mock.js",
       "default": "./src/lib/analytics/event-mapper.ts"
     },
+    "#lib/analytics/events/related-content": {
+      "storybook": "./src/lib/analytics/events/related-content.mock.ts",
+      "default": "./src/lib/analytics/events/related-content.ts"
+    },
     "#lib/env-client": {
       "storybook": "./src/lib/env-client.mock.ts",
       "default": "./src/lib/env-client.ts"

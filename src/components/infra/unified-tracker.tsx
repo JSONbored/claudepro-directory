@@ -74,8 +74,8 @@ export type UnifiedTrackerProps =
  * @param deps - Dependencies for useEffect
  */
 function useTrackingEffect(
-  trackingFn: () => void | Promise<unknown>,
-  delay = 0,
+  trackingFn: () => undefined | Promise<unknown>,
+  delay: number,
   deps: React.DependencyList
 ) {
   useEffect(() => {
@@ -140,7 +140,7 @@ function ViewVariant({
   useTrackingEffect(
     () => {
       // Dynamic import for Storybook compatibility (server action)
-      import('#lib/actions/track-view')
+      return import('#lib/actions/track-view')
         .then((module) => module.trackView({ category, slug }))
         .catch(() => {
           // Silent failure - Storybook mock will handle this
@@ -166,7 +166,7 @@ function PageViewVariant({
   useTrackingEffect(
     () => {
       // Dynamic imports for Storybook compatibility (analytics modules)
-      Promise.all([import('#lib/analytics/event-mapper'), import('#lib/analytics/tracker')])
+      return Promise.all([import('#lib/analytics/event-mapper'), import('#lib/analytics/tracker')])
         .then(([eventMapper, tracker]) => {
           const eventName = eventMapper.getContentViewEvent(category);
           tracker.trackEvent(eventName, {

@@ -9,7 +9,7 @@ import fs from 'fs/promises';
 import type { Metadata } from 'next';
 import path from 'path';
 import { ContentListServer } from '@/src/components/content-list-server';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
+import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
 import { statsRedis } from '@/src/lib/cache.server';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { logger } from '@/src/lib/logger';

@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { InlineEmailCTA } from './inline-email-cta';
 
 const meta = {
-  title: 'Shared/InlineEmailCTA',
+  title: 'Growth/InlineEmailCTA',
   component: InlineEmailCTA,
   parameters: {
     layout: 'padded',

@@ -16,8 +16,8 @@
 
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
-import { ConfigCard } from '@/src/components/features/content/config-card';
-import { InfiniteScrollGrid } from '@/src/components/shared/infinite-scroll-grid';
+import { ConfigCard } from '@/src/components/cards/config-card';
+import { UnifiedCardGrid } from '@/src/components/cards/unified-card-grid';
 import { Button } from '@/src/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
 import { CATEGORY_CONFIGS, HOMEPAGE_TAB_CATEGORIES } from '@/src/lib/config/category-config';
@@ -72,15 +72,17 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
 
         return (
           <TabsContent key={tab} value={tab} className="space-y-6">
-            <InfiniteScrollGrid<UnifiedContentItem>
+            <UnifiedCardGrid
               items={filteredResults}
-              gap={24}
+              variant="normal"
+              infiniteScroll
               batchSize={30}
-              renderItem={(item: UnifiedContentItem) => (
+              emptyMessage={`No ${categoryName} found. Try adjusting your filters.`}
+              ariaLabel={`${categoryName} results`}
+              keyExtractor={(item) => item.slug}
+              renderCard={(item: UnifiedContentItem) => (
                 <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
               )}
-              emptyMessage={`No ${categoryName} found. Try adjusting your filters.`}
-              keyExtractor={(item: UnifiedContentItem) => item.slug}
             />
           </TabsContent>
         );

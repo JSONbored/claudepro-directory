@@ -19,6 +19,7 @@
 import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useState } from 'react';
 import { postCopyEmailCaptureAction } from '#lib/actions/email-capture';
+import { trackEvent } from '#lib/analytics/tracker';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import {
@@ -29,7 +30,6 @@ import {
   SheetTitle,
 } from '@/src/components/ui/sheet';
 import { EVENTS } from '@/src/lib/analytics/events.constants';
-import { trackEvent } from '@/src/lib/analytics/tracker';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';

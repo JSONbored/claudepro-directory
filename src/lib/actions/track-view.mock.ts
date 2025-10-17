@@ -17,7 +17,6 @@
  * @returns Success response with mock data
  */
 export async function trackView() {
-  console.log('[STORYBOOK MOCK] trackView called');
   return { success: true };
 }
 
@@ -26,6 +25,5 @@ export async function trackView() {
  * @returns Success response with mock data
  */
 export async function trackCopy() {
-  console.log('[STORYBOOK MOCK] trackCopy called');
   return { success: true };
 }

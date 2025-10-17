@@ -11,7 +11,8 @@
 
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
-import { ConfigCard } from '@/src/components/features/content/config-card';
+import { ConfigCard } from '@/src/components/cards/config-card';
+import { UnifiedCardGrid } from '@/src/components/cards/unified-card-grid';
 import { Button } from '@/src/components/ui/button';
 import { CATEGORY_CONFIGS, HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
@@ -49,17 +50,13 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
             View all <ExternalLink className="h-4 w-4" />
           </Link>
         </div>
-        <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
-          {featuredItems.map((item) => (
-            <ConfigCard
-              key={item.slug}
-              item={item}
-              variant="default"
-              showCategory={true}
-              showActions={true}
-            />
-          ))}
-        </div>
+        <UnifiedCardGrid
+          items={featuredItems}
+          cardComponent={ConfigCard}
+          cardProps={{ variant: 'default', showCategory: true, showActions: true }}
+          variant="normal"
+          ariaLabel={`Featured ${title}`}
+        />
       </div>
     );
   }

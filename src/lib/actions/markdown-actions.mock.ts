@@ -22,8 +22,6 @@ export const copyMarkdownAction = async (params: {
   includeMetadata?: boolean;
   includeFooter?: boolean;
 }) => {
-  console.log('[STORYBOOK MOCK] copyMarkdownAction called with:', params);
-
   // Simulate a delay like the real server action
   await new Promise((resolve) => setTimeout(resolve, 300));
 
@@ -45,8 +43,6 @@ export const downloadMarkdownAction = async (params: {
   includeMetadata?: boolean;
   includeFooter?: boolean;
 }) => {
-  console.log('[STORYBOOK MOCK] downloadMarkdownAction called with:', params);
-
   // Simulate a delay like the real server action
   await new Promise((resolve) => setTimeout(resolve, 300));
 

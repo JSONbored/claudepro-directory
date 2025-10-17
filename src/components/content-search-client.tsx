@@ -2,9 +2,9 @@
 
 import dynamic from 'next/dynamic';
 import { memo } from 'react';
-import { ConfigCard } from '@/src/components/features/content/config-card';
-import { ErrorBoundary } from '@/src/components/shared/error-boundary';
-import { InfiniteScrollGrid } from '@/src/components/shared/infinite-scroll-grid';
+import { ConfigCard } from '@/src/components/cards/config-card';
+import { UnifiedCardGrid } from '@/src/components/cards/unified-card-grid';
+import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { useLocalSearch } from '@/src/hooks/use-search';
 
 const UnifiedSearch = dynamic(
@@ -68,15 +68,17 @@ function ContentSearchClientComponent<T extends UnifiedContentItem>({
       {/* Infinite Scroll Grid Results */}
       {filteredItems.length > 0 ? (
         <ErrorBoundary>
-          <InfiniteScrollGrid<T>
+          <UnifiedCardGrid
             items={filteredItems}
-            gap={24}
+            variant="normal"
+            infiniteScroll
             batchSize={30}
-            renderItem={(item: T) => (
+            emptyMessage={`No ${title.toLowerCase()} found`}
+            ariaLabel="Search results"
+            keyExtractor={(item) => item.slug}
+            renderCard={(item: T) => (
               <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
             )}
-            emptyMessage={`No ${title.toLowerCase()} found`}
-            keyExtractor={(item: T) => item.slug}
           />
         </ErrorBoundary>
       ) : (

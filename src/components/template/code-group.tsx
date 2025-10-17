@@ -12,7 +12,7 @@
 'use client';
 
 import React from 'react';
-import { ProductionCodeBlock } from '@/src/components/shared/production-code-block';
+import { ProductionCodeBlock } from '@/src/components/ui/production-code-block';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export interface CodeGroupWithHighlightedExamples {

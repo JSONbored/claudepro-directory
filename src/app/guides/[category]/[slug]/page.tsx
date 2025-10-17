@@ -5,12 +5,12 @@ import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import path from 'path';
 import { z } from 'zod';
+import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
+import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 // Removed unused import: CategoryGuidesPage
 import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar';
 import { MDXContentProvider } from '@/src/components/providers/mdx-content-provider';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { MDXRenderer } from '@/src/components/shared/mdx-renderer';
-import { UnifiedTracker } from '@/src/components/shared/unified-tracker';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';

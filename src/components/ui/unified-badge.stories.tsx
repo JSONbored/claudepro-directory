@@ -238,7 +238,7 @@ export const TagInactive: Story = {
     variant: 'tag',
     tag: 'React',
     isActive: false,
-    onClick: () => console.log('Tag clicked'),
+    onClick: () => {},
   },
 };
 
@@ -247,7 +247,7 @@ export const TagActive: Story = {
     variant: 'tag',
     tag: 'TypeScript',
     isActive: true,
-    onClick: () => console.log('Tag clicked'),
+    onClick: () => {},
   },
 };
 
@@ -256,8 +256,8 @@ export const TagWithRemove: Story = {
     variant: 'tag',
     tag: 'Next.js',
     isActive: true,
-    onClick: () => console.log('Tag clicked'),
-    onRemove: () => console.log('Tag removed'),
+    onClick: () => {},
+    onRemove: () => {},
   },
 };
 

@@ -92,6 +92,22 @@ export const unifiedContentItemSchema = z
       .optional()
       .describe('Origin or verification status of the content'),
 
+    // Related content specific properties (added for RelatedContentItem compatibility)
+    score: z.number().optional().describe('Relevance score for related content matching (0-100)'),
+    matchType: z
+      .string()
+      .optional()
+      .describe(
+        'Type of matching algorithm used for related content (e.g., same_category, tag_match, keyword_match, trending)'
+      ),
+    matchDetails: z
+      .object({
+        matchedTags: stringArray.describe('Tags that matched with source content'),
+        matchedKeywords: stringArray.describe('Keywords that matched with source content'),
+      })
+      .optional()
+      .describe('Detailed match information for related content'),
+
     // Features and capabilities
     features: stringArray.optional().describe('List of key features or capabilities provided'),
     useCases: stringArray.optional().describe('Common use cases or application scenarios'),

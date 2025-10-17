@@ -6,7 +6,7 @@ import { Button } from '@/src/components/ui/button';
 import { PostCopyEmailModal } from './post-copy-email-modal';
 
 const meta = {
-  title: 'Shared/PostCopyEmailModal',
+  title: 'Growth/PostCopyEmailModal',
   component: PostCopyEmailModal,
   parameters: {
     layout: 'centered',

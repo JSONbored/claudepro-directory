@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
+import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
 import { SubmitFormClient } from '@/src/components/submit/submit-form-client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';

@@ -17,7 +17,6 @@
  * @returns Success response with mock data
  */
 export async function addBookmark() {
-  console.log('[STORYBOOK MOCK] addBookmark called');
   return { success: true, message: 'Bookmark added (mock)' };
 }
 
@@ -26,6 +25,5 @@ export async function addBookmark() {
  * @returns Success response with mock data
  */
 export async function removeBookmark() {
-  console.log('[STORYBOOK MOCK] removeBookmark called');
   return { success: true, message: 'Bookmark removed (mock)' };
 }

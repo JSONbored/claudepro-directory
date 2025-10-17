@@ -133,6 +133,7 @@ const config: StorybookConfig = {
         // NOTE: event-mapper mock is .js (not .ts) to avoid TypeScript compilation issues
         '#lib/analytics/tracker': path.resolve(__dirname, '../src/lib/analytics/tracker.mock.ts'),
         '#lib/analytics/event-mapper': path.resolve(__dirname, '../src/lib/analytics/event-mapper.mock.js'),
+        '#lib/analytics/events/related-content': path.resolve(__dirname, '../src/lib/analytics/events/related-content.mock.ts'),
 
         // Providers
         '#lib/providers/post-copy-email': path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.mock.tsx'),

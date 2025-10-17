@@ -4,9 +4,9 @@
  * Refactored to use centralized tracker with source-specific events
  */
 
+import { trackEvent } from '#lib/analytics/tracker';
 import type { EventName } from '@/src/lib/analytics/events.constants';
 import { EVENTS } from '@/src/lib/analytics/events.constants';
-import { trackEvent } from '@/src/lib/analytics/tracker';
 
 /**
  * Get source-specific related content view event based on category

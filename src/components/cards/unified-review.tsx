@@ -49,7 +49,7 @@ import {
   markReviewHelpful,
   updateReview,
 } from '#lib/actions/content';
-import { BaseCard } from '@/src/components/shared/base-card';
+import { BaseCard } from '@/src/components/cards/base-card';
 import { Button } from '@/src/components/ui/button';
 import { Card } from '@/src/components/ui/card';
 import { ChartContainer, HorizontalBarChart } from '@/src/components/ui/horizontal-bar-chart';

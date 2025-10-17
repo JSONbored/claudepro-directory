@@ -9,8 +9,8 @@
  */
 
 import { type FC, memo } from 'react';
-import { ConfigCard } from '@/src/components/features/content/config-card';
-import { InfiniteScrollGrid } from '@/src/components/shared/infinite-scroll-grid';
+import { ConfigCard } from '@/src/components/cards/config-card';
+import { UnifiedCardGrid } from '@/src/components/cards/unified-card-grid';
 import { Button } from '@/src/components/ui/button';
 import { Search } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
@@ -42,15 +42,17 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
       </div>
 
       {filteredResults.length > 0 ? (
-        <InfiniteScrollGrid<UnifiedContentItem>
+        <UnifiedCardGrid
           items={filteredResults}
-          gap={24}
+          variant="normal"
+          infiniteScroll
           batchSize={30}
-          renderItem={(item: UnifiedContentItem) => (
+          emptyMessage="No results found"
+          ariaLabel="Search results"
+          keyExtractor={(item) => item.slug}
+          renderCard={(item: UnifiedContentItem) => (
             <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
           )}
-          emptyMessage="No results found"
-          keyExtractor={(item: UnifiedContentItem) => item.slug}
         />
       ) : (
         <div className={UI_CLASSES.CONTAINER_CARD_MUTED}>

@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
-import { JobCard } from '@/src/components/shared/job-card';
+import { JobCard } from '@/src/components/cards/job-card';
+import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { Input } from '@/src/components/ui/input';

@@ -18,7 +18,7 @@
  */
 
 import type { Metadata } from 'next';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
+import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
 import { QuizForm } from '@/src/components/tools/recommender/quiz-form';
 import {
   Card,
