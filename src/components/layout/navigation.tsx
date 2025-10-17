@@ -34,7 +34,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
-import { GitHubStarsButton } from '@/src/components/layout/github-stars-button';
 import { NavigationCommandMenu } from '@/src/components/layout/navigation-command-menu';
 import { ThemeToggle } from '@/src/components/layout/theme-toggle';
 import { UserMenu } from '@/src/components/layout/user-menu';
@@ -50,6 +49,7 @@ import {
 } from '@/src/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/ui/sheet';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
+import { UnifiedButton } from '@/src/components/ui/unified-button';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 import { useSearchShortcut } from '@/src/hooks/use-search-shortcut';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
@@ -344,7 +344,7 @@ export const Navigation = () => {
                     <DiscordIcon className="h-4 w-4" />
                   </Button>
 
-                  <GitHubStarsButton className={'hidden md:flex'} />
+                  <UnifiedButton variant="github-stars" className={'hidden md:flex'} />
 
                   <UserMenu className={'hidden md:flex'} />
 

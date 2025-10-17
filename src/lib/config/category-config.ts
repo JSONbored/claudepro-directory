@@ -55,7 +55,7 @@ import {
   type StatuslineContent,
   statuslineContentSchema,
 } from '@/src/lib/schemas/content/statusline.schema';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import { type ContentCategory, getAllContentCategories } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Content type discriminated union
@@ -802,9 +802,26 @@ export function isValidCategory(category: string): category is CategoryId {
 
 /**
  * Get all category IDs as array
+ * Now delegates to lightweight schema helper to avoid circular dependencies
+ *
+ * @returns Array of category IDs from schema enum
  */
 export function getAllCategoryIds(): CategoryId[] {
-  return Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[];
+  return getAllContentCategories() as CategoryId[];
+}
+
+/**
+ * Validate that UNIFIED_CATEGORY_REGISTRY matches the schema
+ * Compile-time check to ensure registry completeness
+ */
+const _registryValidation: readonly ContentCategory[] = Object.keys(
+  UNIFIED_CATEGORY_REGISTRY
+) as CategoryId[];
+if (_registryValidation.length !== getAllContentCategories().length) {
+  throw new Error(
+    'UNIFIED_CATEGORY_REGISTRY is out of sync with contentCategorySchema. ' +
+      `Registry has ${_registryValidation.length} categories, schema has ${getAllContentCategories().length}.`
+  );
 }
 
 /**

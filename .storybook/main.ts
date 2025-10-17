@@ -122,6 +122,28 @@ const config: StorybookConfig = {
         '#lib/actions/user': path.resolve(__dirname, '../src/lib/actions/user.actions.mock.ts'),
         '#lib/actions/track-view': path.resolve(__dirname, '../src/lib/actions/track-view.mock.ts'),
         '#lib/actions/business': path.resolve(__dirname, '../src/lib/actions/business.actions.mock.ts'),
+        '#lib/actions/markdown': path.resolve(__dirname, '../src/lib/actions/markdown-actions.mock.ts'),
+        '#lib/actions/email-capture': path.resolve(__dirname, '../src/lib/actions/email-capture.mock.ts'),
+
+        // Supabase client
+        '#lib/supabase/client': path.resolve(__dirname, '../src/lib/supabase/client.mock.ts'),
+
+        // Analytics
+        // NOTE: event-mapper mock is .js (not .ts) to avoid TypeScript compilation issues
+        '#lib/analytics/tracker': path.resolve(__dirname, '../src/lib/analytics/tracker.mock.ts'),
+        '#lib/analytics/event-mapper': path.resolve(__dirname, '../src/lib/analytics/event-mapper.mock.js'),
+
+        // Providers
+        '#lib/providers/post-copy-email': path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.mock.tsx'),
+
+        // Providers and utilities (need absolute path aliases for @/ imports)
+        // CRITICAL: Must include ALL possible resolution paths
+        '@/src/components/providers/post-copy-email-provider': path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.mock.tsx'),
+        '@/src/components/providers/post-copy-email-provider.tsx': path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.mock.tsx'),
+        '/src/components/providers/post-copy-email-provider': path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.mock.tsx'),
+        '/src/components/providers/post-copy-email-provider.tsx': path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.mock.tsx'),
+        [path.resolve(__dirname, '../src/components/providers/post-copy-email-provider')]: path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.mock.tsx'),
+        [path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.tsx')]: path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.mock.tsx'),
 
         // Server Infrastructure (Node.js modules)
         // CRITICAL: Must include ALL path variants (absolute, @/ alias, with/without .ts)
@@ -141,8 +163,29 @@ const config: StorybookConfig = {
       // This resolves #lib/actions/* imports to .mock.ts files in Storybook
       // while using real .ts files in production (configured in package.json "imports")
       // @see package.json "imports" field for conditional mapping
+      //
+      // Vite resolve.conditions order matters:
+      // 1. 'storybook' - Custom condition for our mocks
+      // 2. ...existing conditions (import, module, browser, default)
+      //
+      // This allows package.json "imports" like:
+      // "#lib/analytics/event-mapper": {
+      //   "storybook": "./src/lib/analytics/event-mapper.mock.ts",
+      //   "default": "./src/lib/analytics/event-mapper.ts"
+      // }
       config.resolve.conditions = ['storybook', ...(config.resolve.conditions || [])];
     }
+
+    // Exclude .mock.js files from Vite transformation
+    // These are plain ES modules that should be served as-is
+    if (!config.optimizeDeps) {
+      config.optimizeDeps = {};
+    }
+    if (!config.optimizeDeps.exclude) {
+      config.optimizeDeps.exclude = [];
+    }
+    config.optimizeDeps.exclude.push('**/analytics/*.mock.js');
+
     return config;
   },
 

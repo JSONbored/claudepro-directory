@@ -13,12 +13,10 @@
  */
 
 import { useRouter } from 'next/navigation';
-import { CopyLLMsButton } from '@/src/components/shared/copy-llms-button';
-import { CopyMarkdownButton } from '@/src/components/shared/copy-markdown-button';
-import { DownloadMarkdownButton } from '@/src/components/shared/download-markdown-button';
 import type { CopyType } from '@/src/components/shared/post-copy-email-modal';
 import { Button } from '@/src/components/ui/button';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
+import { UnifiedButton } from '@/src/components/ui/unified-button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { ArrowLeft, Copy } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
@@ -182,27 +180,30 @@ export function DetailHeaderActions({
           )}
 
           {/* Copy for AI button */}
-          <CopyLLMsButton
+          <UnifiedButton
+            variant="copy-llms"
             llmsTxtUrl={`/${category}/${item.slug}/llms.txt`}
-            variant="outline"
+            buttonVariant="outline"
             size="default"
             className="min-w-0"
           />
 
           {/* Copy as Markdown button */}
-          <CopyMarkdownButton
+          <UnifiedButton
+            variant="copy-markdown"
             category={category}
             slug={item.slug}
-            variant="outline"
+            buttonVariant="outline"
             size="default"
             className="min-w-0"
           />
 
           {/* Download Markdown button */}
-          <DownloadMarkdownButton
+          <UnifiedButton
+            variant="download-markdown"
             category={category}
             slug={item.slug}
-            variant="outline"
+            buttonVariant="outline"
             size="default"
             className="min-w-0"
           />

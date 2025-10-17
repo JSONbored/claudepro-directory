@@ -18,6 +18,7 @@
 
 import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useState } from 'react';
+import { postCopyEmailCaptureAction } from '#lib/actions/email-capture';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import {
@@ -27,7 +28,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/src/components/ui/sheet';
-import { postCopyEmailCaptureAction } from '@/src/lib/actions/email-capture';
 import { EVENTS } from '@/src/lib/analytics/events.constants';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { logger } from '@/src/lib/logger';

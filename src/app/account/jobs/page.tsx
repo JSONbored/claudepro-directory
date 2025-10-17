@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { JobActions } from '@/src/components/jobs/job-actions';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -9,6 +8,7 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
+import { UnifiedButton } from '@/src/components/ui/unified-button';
 import { getUserJobs } from '@/src/lib/actions/business.actions';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
@@ -133,7 +133,15 @@ export default async function MyJobsPage() {
                     </Button>
                   )}
 
-                  <JobActions jobId={job.id} currentStatus={job.status ?? 'draft'} />
+                  {(job.status === 'active' || job.status === 'paused') && (
+                    <UnifiedButton
+                      variant="job-toggle"
+                      jobId={job.id}
+                      currentStatus={job.status ?? 'draft'}
+                    />
+                  )}
+
+                  <UnifiedButton variant="job-delete" jobId={job.id} />
                 </div>
               </CardContent>
             </Card>

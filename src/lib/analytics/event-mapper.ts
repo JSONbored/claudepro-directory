@@ -16,10 +16,11 @@
  * @module lib/analytics/event-mapper
  */
 
-import type { EventName } from '@/src/lib/analytics/events.constants';
-import { EVENTS } from '@/src/lib/analytics/events.constants';
-import { getAllCategoryIds } from '@/src/lib/config/category-config';
-import type { ContentCategory as SharedContentCategory } from '@/src/lib/schemas/shared.schema';
+import { EVENTS, type EventName } from '@/src/lib/analytics/events.constants';
+import {
+  getAllContentCategories,
+  type ContentCategory as SharedContentCategory,
+} from '@/src/lib/schemas/shared.schema';
 
 /**
  * Content categories supported by the event mapper
@@ -36,6 +37,16 @@ export type EventAction =
   | 'copy_code'
   | 'copy_markdown'
   | 'download_markdown';
+
+/**
+ * ============================================
+ * STATIC EVENTS IMPORT
+ * ============================================
+ *
+ * EVENTS is now statically imported at top level.
+ * This works in Storybook because event-mapper is mocked via subpath imports.
+ * The mock file never imports EVENTS, so no circular dependency occurs.
+ */
 
 /**
  * ============================================
@@ -61,11 +72,12 @@ function categoryToEventSuffix(categoryId: string): string {
 }
 
 /**
- * Build event mappings dynamically from registry
+ * Build event mappings dynamically from category schema
  * Automatically handles all categories - zero manual maintenance
+ * Uses lightweight schema enum instead of heavy category config
  */
 function buildEventMappings(): Record<EventAction, Record<string, EventName>> {
-  const categories = getAllCategoryIds();
+  const categories = getAllContentCategories();
 
   const contentViewMap: Record<string, EventName> = {};
   const searchMap: Record<string, EventName> = { global: EVENTS.SEARCH_GLOBAL };
@@ -127,21 +139,36 @@ function buildEventMappings(): Record<EventAction, Record<string, EventName>> {
 
 /**
  * Event mapping configuration
- * Auto-generated from category registry - zero manual maintenance
+ * Lazy-loaded to avoid module initialization errors in Storybook
+ * Auto-generated from category schema - zero manual maintenance
  */
-const EVENT_MAPPINGS: Record<EventAction, Record<string, EventName>> = buildEventMappings();
+let EVENT_MAPPINGS: Record<EventAction, Record<string, EventName>> | null = null;
+
+function getEventMappings(): Record<EventAction, Record<string, EventName>> {
+  if (!EVENT_MAPPINGS) {
+    EVENT_MAPPINGS = buildEventMappings();
+  }
+  return EVENT_MAPPINGS;
+}
 
 /**
  * Fallback events for when category is not found
- * Use generic agent events as fallback
+ * Lazy-loaded to avoid circular dependency with EVENTS in Storybook
  */
-const FALLBACK_EVENTS: Record<EventAction, EventName> = {
-  content_view: EVENTS.CONTENT_VIEW_AGENT,
-  search: EVENTS.SEARCH_GLOBAL,
-  copy_code: EVENTS.COPY_CODE_AGENT,
-  copy_markdown: EVENTS.COPY_MARKDOWN_AGENT,
-  download_markdown: EVENTS.DOWNLOAD_MARKDOWN_AGENT,
-};
+let FALLBACK_EVENTS: Record<EventAction, EventName> | null = null;
+
+function getFallbackEvents(): Record<EventAction, EventName> {
+  if (!FALLBACK_EVENTS) {
+    FALLBACK_EVENTS = {
+      content_view: EVENTS.CONTENT_VIEW_AGENT,
+      search: EVENTS.SEARCH_GLOBAL,
+      copy_code: EVENTS.COPY_CODE_AGENT,
+      copy_markdown: EVENTS.COPY_MARKDOWN_AGENT,
+      download_markdown: EVENTS.DOWNLOAD_MARKDOWN_AGENT,
+    };
+  }
+  return FALLBACK_EVENTS;
+}
 
 /**
  * Get event name for a specific action and content category
@@ -163,13 +190,15 @@ const FALLBACK_EVENTS: Record<EventAction, EventName> = {
  * ```
  */
 export function getEventForCategory(action: EventAction, category: string): EventName {
-  const actionMap = EVENT_MAPPINGS[action];
+  const mappings = getEventMappings();
+  const fallbacks = getFallbackEvents();
+  const actionMap = mappings[action];
 
   if (!actionMap) {
-    return FALLBACK_EVENTS[action] || EVENTS.SEARCH_GLOBAL;
+    return fallbacks[action] || EVENTS.SEARCH_GLOBAL;
   }
 
-  return actionMap[category] || FALLBACK_EVENTS[action];
+  return actionMap[category] || fallbacks[action];
 }
 
 /**
@@ -271,7 +300,8 @@ export function getDownloadMarkdownEvent(category: string): EventName {
  * ```
  */
 export function isValidCategory(action: EventAction, category: string): boolean {
-  const actionMap = EVENT_MAPPINGS[action];
+  const mappings = getEventMappings();
+  const actionMap = mappings[action];
   return actionMap ? category in actionMap : false;
 }
 
@@ -288,6 +318,7 @@ export function isValidCategory(action: EventAction, category: string): boolean 
  * ```
  */
 export function getValidCategories(action: EventAction): string[] {
-  const actionMap = EVENT_MAPPINGS[action];
+  const mappings = getEventMappings();
+  const actionMap = mappings[action];
   return actionMap ? Object.keys(actionMap) : [];
 }

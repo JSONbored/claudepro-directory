@@ -83,6 +83,38 @@ export const cacheableCategorySchema = z
 export type ContentCategory = z.infer<typeof contentCategorySchema>;
 
 /**
+ * Get all content category IDs as array
+ * Lightweight helper that uses Zod's built-in options property
+ * Safe for Storybook environment with fallback
+ *
+ * @returns Array of all valid content category strings
+ *
+ * @example
+ * ```typescript
+ * const categories = getAllContentCategories();
+ * // Returns: ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'guides', 'tutorials', ...]
+ * ```
+ */
+export function getAllContentCategories(): readonly ContentCategory[] {
+  try {
+    return contentCategorySchema.options || [];
+  } catch (error) {
+    // Fallback for Storybook/test environments where Zod might not be fully initialized
+    console.warn('[getAllContentCategories] Zod schema not initialized, using fallback');
+    return [
+      'agents',
+      'mcp',
+      'rules',
+      'commands',
+      'hooks',
+      'statuslines',
+      'skills',
+      'collections',
+    ] as const;
+  }
+}
+
+/**
  * Content Types
  * Used across: middleware, static-api
  */

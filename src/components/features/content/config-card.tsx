@@ -16,11 +16,10 @@
 import { memo } from 'react';
 import { StarRatingCompact } from '@/src/components/features/reviews/star-rating';
 import { BaseCard } from '@/src/components/shared/base-card';
-import { BookmarkButton } from '@/src/components/shared/bookmark-button';
-import { CardCopyAction } from '@/src/components/shared/card-copy-action';
 import { Button } from '@/src/components/ui/button';
 import { BorderBeam } from '@/src/components/ui/magic/border-beam';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
+import { UnifiedButton } from '@/src/components/ui/unified-button';
 import {
   Award,
   Copy as CopyIcon,
@@ -302,15 +301,19 @@ export const ConfigCard = memo(
               )}
 
               {/* Bookmark button */}
-              <BookmarkButton contentType={item.category || 'agents'} contentSlug={item.slug} />
+              <UnifiedButton
+                variant="bookmark"
+                contentType={item.category || 'agents'}
+                contentSlug={item.slug}
+              />
 
               {behavior.showCopyButton && (
-                <CardCopyAction
+                <UnifiedButton
+                  variant="card-copy"
                   url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
                   category={item.category || ''}
                   slug={item.slug}
                   title={displayTitle}
-                  componentName="config-card"
                 />
               )}
 

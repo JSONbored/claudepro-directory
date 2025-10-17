@@ -17,7 +17,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { getCopyCodeEvent } from '@/src/lib/analytics/event-mapper';
+import { getCopyCodeEvent } from '#lib/analytics/event-mapper';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { Check, ChevronDown, Copy } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

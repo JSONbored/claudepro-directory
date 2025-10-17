@@ -16,7 +16,6 @@
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { BaseCard } from '@/src/components/shared/base-card';
-import { BookmarkButton } from '@/src/components/shared/bookmark-button';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -40,6 +39,7 @@ import {
   TooltipTrigger,
 } from '@/src/components/ui/tooltip';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
+import { UnifiedButton } from '@/src/components/ui/unified-button';
 import { addBookmarkBatch } from '@/src/lib/actions/user.actions';
 import { ROUTES } from '@/src/lib/constants/routes';
 import {
@@ -380,7 +380,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
                   {/* Bookmark button (bottom right) */}
                   <div className="absolute bottom-4 right-4 z-10">
-                    <BookmarkButton
+                    <UnifiedButton
+                      variant="bookmark"
                       contentType={result.category}
                       contentSlug={result.slug}
                       initialBookmarked={false}

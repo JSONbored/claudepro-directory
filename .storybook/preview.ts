@@ -25,9 +25,12 @@ import '../src/app/globals.css';
 // Import viewport presets from Storybook-specific export (avoids server dependencies)
 import { VIEWPORT_PRESETS, BREAKPOINTS } from '../src/lib/ui-constants.storybook';
 
+// Import PostCopyEmailProvider mock for unified-button stories
+import { PostCopyEmailProvider } from '../src/components/providers/post-copy-email-provider.mock';
+
 /**
- * Global Decorator: Wraps all stories with ThemeProvider
- * Provides dark mode support to all components
+ * Global Decorator: Wraps all stories with ThemeProvider and PostCopyEmailProvider
+ * Provides dark mode support and email capture context to all components
  *
  * Note: Using createElement instead of JSX for Storybook SWC compatibility
  */
@@ -41,9 +44,13 @@ const withThemeProvider = (Story: React.ComponentType) => {
       disableTransitionOnChange: false,
     },
     React.createElement(
-      'div',
-      { className: 'min-h-screen bg-background text-foreground' },
-      React.createElement(Story)
+      PostCopyEmailProvider,
+      {},
+      React.createElement(
+        'div',
+        { className: 'min-h-screen bg-background text-foreground' },
+        React.createElement(Story)
+      )
     )
   );
 };

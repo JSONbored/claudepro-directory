@@ -10,7 +10,7 @@
  */
 
 import { useEffect } from 'react';
-import { getContentViewEvent } from '@/src/lib/analytics/event-mapper';
+import { getContentViewEvent } from '#lib/analytics/event-mapper';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 
 interface PageViewTrackerProps {

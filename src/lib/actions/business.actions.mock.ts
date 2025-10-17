@@ -29,3 +29,21 @@ export async function trackSponsoredImpression() {
   console.log('[STORYBOOK MOCK] trackSponsoredImpression called');
   return { success: true };
 }
+
+/**
+ * Mock: Toggle job status (active/paused)
+ * @returns Success response with mock data
+ */
+export async function toggleJobStatus(params: { id: string; status: string }) {
+  console.log('[STORYBOOK MOCK] toggleJobStatus called with:', params);
+  return { data: { success: true } };
+}
+
+/**
+ * Mock: Delete job listing
+ * @returns Success response with mock data
+ */
+export async function deleteJob(params: { id: string }) {
+  console.log('[STORYBOOK MOCK] deleteJob called with:', params);
+  return { data: { success: true } };
+}

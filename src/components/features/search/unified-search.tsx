@@ -13,6 +13,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useId, useState } from 'react';
+import { getSearchEvent } from '#lib/analytics/event-mapper';
 import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import { Button } from '@/src/components/ui/button';
@@ -27,7 +28,6 @@ import {
 } from '@/src/components/ui/select';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
-import { getSearchEvent } from '@/src/lib/analytics/event-mapper';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/schemas/component.schema';

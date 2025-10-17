@@ -35,6 +35,38 @@
     "#lib/actions/business": {
       "storybook": "./src/lib/actions/business.actions.mock.ts",
       "default": "./src/lib/actions/business.actions.ts"
+    },
+    "#lib/actions/markdown": {
+      "storybook": "./src/lib/actions/markdown-actions.mock.ts",
+      "default": "./src/lib/actions/markdown-actions.ts"
+    },
+    "#lib/actions/email-capture": {
+      "storybook": "./src/lib/actions/email-capture.mock.ts",
+      "default": "./src/lib/actions/email-capture.ts"
+    },
+    "#lib/supabase/client": {
+      "storybook": "./src/lib/supabase/client.mock.ts",
+      "default": "./src/lib/supabase/client.ts"
+    },
+    "#lib/providers/post-copy-email": {
+      "storybook": "./src/components/providers/post-copy-email-provider.mock.tsx",
+      "default": "./src/components/providers/post-copy-email-provider.tsx"
+    },
+    "#lib/analytics/tracker": {
+      "storybook": "./src/lib/analytics/tracker.mock.ts",
+      "default": "./src/lib/analytics/tracker.ts"
+    },
+    "#lib/analytics/event-mapper": {
+      "storybook": "./src/lib/analytics/event-mapper.mock.js",
+      "default": "./src/lib/analytics/event-mapper.ts"
+    },
+    "#lib/env-client": {
+      "storybook": "./src/lib/env-client.mock.ts",
+      "default": "./src/lib/env-client.ts"
+    },
+    "#lib/schemas/env": {
+      "storybook": "./src/lib/schemas/env.schema.mock.ts",
+      "default": "./src/lib/schemas/env.schema.ts"
     }
   },
   "scripts": {

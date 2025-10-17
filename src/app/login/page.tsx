@@ -1,4 +1,3 @@
-import { AuthButtons } from '@/src/components/auth/auth-buttons';
 import {
   Card,
   CardContent,
@@ -6,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { UnifiedButton } from '@/src/components/ui/unified-button';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 export const metadata = generatePageMetadata('/login');
@@ -26,11 +26,26 @@ export default async function LoginPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AuthButtons
-            {...(resolvedSearchParams.redirect
-              ? { redirectTo: resolvedSearchParams.redirect }
-              : {})}
-          />
+          <div>
+            <UnifiedButton
+              variant="auth-signin"
+              provider="github"
+              className="w-full mb-2"
+              {...(resolvedSearchParams.redirect
+                ? { redirectTo: resolvedSearchParams.redirect }
+                : {})}
+            />
+
+            <UnifiedButton
+              variant="auth-signin"
+              provider="google"
+              buttonVariant="outline"
+              className="w-full"
+              {...(resolvedSearchParams.redirect
+                ? { redirectTo: resolvedSearchParams.redirect }
+                : {})}
+            />
+          </div>
 
           <p className={'text-xs text-muted-foreground text-center mt-4'}>
             By signing in, you agree to our Terms of Service and Privacy Policy

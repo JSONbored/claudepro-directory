@@ -20,15 +20,29 @@ import { BatchLazyLoader } from '@/src/lib/utils/integration.utils';
 
 /**
  * Factory function to create metadata loaders dynamically
- * Modern approach: Dynamic import path generation
+ * Vite-compatible approach: Explicit import mapping for static analysis
  *
  * @param categoryId - Category identifier
  * @returns Loader function for metadata
  */
 function createMetadataLoaderFactory(categoryId: BuildCategoryId) {
   const varName = categoryId.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+
+  // Explicit imports for Vite static analysis
+  // Vite requires the static part of dynamic imports to be analyzable
+  const loaderMap: Record<BuildCategoryId, () => Promise<any>> = {
+    agents: () => import('@/generated/agents-metadata'),
+    mcp: () => import('@/generated/mcp-metadata'),
+    commands: () => import('@/generated/commands-metadata'),
+    rules: () => import('@/generated/rules-metadata'),
+    hooks: () => import('@/generated/hooks-metadata'),
+    statuslines: () => import('@/generated/statuslines-metadata'),
+    skills: () => import('@/generated/skills-metadata'),
+    collections: () => import('@/generated/collections-metadata'),
+  };
+
   return () =>
-    import(`@/generated/${categoryId}-metadata`).then((m) => {
+    loaderMap[categoryId]().then((m) => {
       const metadataKey = `${varName}Metadata`;
       return m[metadataKey];
     });
