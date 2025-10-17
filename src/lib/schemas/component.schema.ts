@@ -110,7 +110,8 @@ export interface TrendingContentProps {
 
 /**
  * View tracker props
- * MODERNIZATION: category now registry-driven (supports all 11 categories)
+ * DEPRECATED: Use UnifiedTrackerProps from unified-tracker.tsx instead
+ * Kept for backwards compatibility during migration
  */
 const viewTrackerPropsSchema = z.object({
   category: contentCategorySchema.describe(

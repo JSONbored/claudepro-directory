@@ -10,16 +10,26 @@
 import type { ReactNode } from 'react';
 import { createContext, useContext } from 'react';
 
+interface EmailCaptureContext {
+  category?: string;
+  slug?: string;
+  action?: string;
+}
+
 interface PostCopyEmailContextValue {
-  openModal: (context: any) => void;
+  openModal: (context: EmailCaptureContext) => void;
 }
 
 const PostCopyEmailContext = createContext<PostCopyEmailContextValue | undefined>(undefined);
 
 export function PostCopyEmailProvider({ children }: { children: ReactNode }) {
   const value: PostCopyEmailContextValue = {
-    openModal: () => {
-      console.log('[STORYBOOK MOCK] PostCopyEmailProvider.openModal called');
+    openModal: (context: EmailCaptureContext) => {
+      // Silent no-op for Storybook - validate context shape but don't log
+      // In production, this would trigger email capture modal
+      if (context) {
+        // Context validated, no action needed in mock
+      }
     },
   };
 

@@ -60,8 +60,7 @@
  */
 
 import { notFound } from 'next/navigation';
-import { PageViewTracker } from '@/src/components/shared/page-view-tracker';
-import { ViewTracker } from '@/src/components/shared/view-tracker';
+import { UnifiedTracker } from '@/src/components/shared/unified-tracker';
 import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
 import { UnifiedStructuredData } from '@/src/components/structured-data/unified-structured-data';
 import { UnifiedDetailPage } from '@/src/components/unified-detail-page';
@@ -271,11 +270,8 @@ export default async function DetailPage({
   if (category === 'collections') {
     return (
       <>
-        <ViewTracker
-          category={category} // MODERNIZATION: No cast needed - ViewTrackerProps now uses ContentCategory
-          slug={slug}
-        />
-        <PageViewTracker category={category} slug={slug} />
+        <UnifiedTracker variant="view" category={category} slug={slug} />
+        <UnifiedTracker variant="page-view" category={category} slug={slug} />
         {
           await UnifiedStructuredData({
             item: itemData as Parameters<typeof UnifiedStructuredData>[0]['item'],
@@ -305,11 +301,8 @@ export default async function DetailPage({
   // Default rendering: All other categories use UnifiedDetailPage
   return (
     <>
-      <ViewTracker
-        category={category} // MODERNIZATION: No cast needed - ViewTrackerProps now uses ContentCategory
-        slug={slug}
-      />
-      <PageViewTracker category={category} slug={slug} />
+      <UnifiedTracker variant="view" category={category} slug={slug} />
+      <UnifiedTracker variant="page-view" category={category} slug={slug} />
       {
         await UnifiedStructuredData({
           item: itemData as Parameters<typeof UnifiedStructuredData>[0]['item'],

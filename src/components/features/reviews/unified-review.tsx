@@ -39,7 +39,7 @@
  */
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useId, useMemo, useState, useTransition } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState, useTransition } from 'react';
 // Server actions with Storybook mocking via #lib subpath imports
 import {
   createReview,
@@ -382,6 +382,7 @@ function SectionVariant({
   contentSlug,
   currentUserId,
 }: Extract<UnifiedReviewProps, { variant: 'section' }>) {
+  const sortSelectId = useId(); // Generate unique ID for sort select
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'recent' | 'helpful' | 'rating_high' | 'rating_low'>(
@@ -399,32 +400,35 @@ function SectionVariant({
 
   const REVIEWS_PER_PAGE = 10;
 
-  // Load reviews
-  const loadReviews = async (pageNum: number, sort: typeof sortBy) => {
-    setIsLoading(true);
-    try {
-      const result = await getReviews({
-        content_type: contentType,
-        content_slug: contentSlug,
-        sort_by: sort,
-        offset: (pageNum - 1) * REVIEWS_PER_PAGE,
-        limit: REVIEWS_PER_PAGE,
-      });
+  // Load reviews - wrapped in useCallback for stable reference
+  const loadReviews = useCallback(
+    async (pageNum: number, sort: typeof sortBy) => {
+      setIsLoading(true);
+      try {
+        const result = await getReviews({
+          content_type: contentType,
+          content_slug: contentSlug,
+          sort_by: sort,
+          offset: (pageNum - 1) * REVIEWS_PER_PAGE,
+          limit: REVIEWS_PER_PAGE,
+        });
 
-      if (result?.data) {
-        const { reviews, hasMore } = result.data;
-        setReviews((prev) => (pageNum === 1 ? reviews : [...prev, ...reviews]));
-        setHasMore(hasMore);
+        if (result?.data) {
+          const { reviews, hasMore } = result.data;
+          setReviews((prev) => (pageNum === 1 ? reviews : [...prev, ...reviews]));
+          setHasMore(hasMore);
+        }
+      } catch (_error) {
+        toasts.error.reviewActionFailed('load');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (_error) {
-      toasts.error.reviewActionFailed('load');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [contentType, contentSlug]
+  );
 
-  // Load aggregate rating
-  const loadAggregateRating = async () => {
+  // Load aggregate rating - wrapped in useCallback for stable reference
+  const loadAggregateRating = useCallback(async () => {
     try {
       const result = await getAggregateRating({
         content_type: contentType,
@@ -437,7 +441,7 @@ function SectionVariant({
     } catch (_error) {
       // Silent fail - optional feature
     }
-  };
+  }, [contentType, contentSlug]);
 
   // Initial load - useEffect for async operations (fire-and-forget pattern)
   useEffect(() => {
@@ -445,8 +449,7 @@ function SectionVariant({
     void loadReviews(1, sortBy);
     // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
     void loadAggregateRating();
-    // biome-ignore lint/correctness/useExhaustiveDependencies: Only run on mount
-  }, []);
+  }, [loadReviews, loadAggregateRating, sortBy]);
 
   // Handle sort change (fire-and-forget pattern)
   const handleSortChange = (newSort: typeof sortBy) => {
@@ -471,7 +474,8 @@ function SectionVariant({
       if (result?.data?.success) {
         toasts.success.itemDeleted('Review');
         setReviews((prev) => prev.filter((r) => r.id !== reviewId));
-        loadAggregateRating();
+        // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
+        void loadAggregateRating();
         router.refresh();
       }
     } catch (_error) {
@@ -497,11 +501,11 @@ function SectionVariant({
       <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}`}>
         <h3 className="text-lg font-semibold">Reviews ({aggregateRating?.count || 0})</h3>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <Label htmlFor="sort-reviews" className="text-sm text-muted-foreground">
+          <Label htmlFor={sortSelectId} className="text-sm text-muted-foreground">
             Sort by:
           </Label>
           <select
-            id="sort-reviews"
+            id={sortSelectId}
             value={sortBy}
             onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
             className="text-sm border rounded px-2 py-1"

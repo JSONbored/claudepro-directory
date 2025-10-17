@@ -218,7 +218,17 @@ export const ConfigCard = memo(
             <>
               {/* View count badge */}
               {behavior.showViewCount && viewCount !== undefined && (
-                <div onClick={(e) => e.stopPropagation()}>
+                <button
+                  type="button"
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.stopPropagation();
+                    }
+                  }}
+                  className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                  aria-label={`${formatViewCount(viewCount)} views`}
+                >
                   <UnifiedBadge
                     variant="base"
                     style="secondary"
@@ -227,12 +237,22 @@ export const ConfigCard = memo(
                     <Eye className="h-3.5 w-3.5" aria-hidden="true" />
                     <span className="text-xs">{formatViewCount(viewCount)}</span>
                   </UnifiedBadge>
-                </div>
+                </button>
               )}
 
               {/* Copy count badge - social proof for engagement */}
               {behavior.showCopyCount && copyCount !== undefined && copyCount > 0 && (
-                <div onClick={(e) => e.stopPropagation()}>
+                <button
+                  type="button"
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.stopPropagation();
+                    }
+                  }}
+                  className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                  aria-label={`${formatCopyCount(copyCount)} copies`}
+                >
                   <UnifiedBadge
                     variant="base"
                     style="secondary"
@@ -241,7 +261,7 @@ export const ConfigCard = memo(
                     <CopyIcon className="h-3.5 w-3.5" aria-hidden="true" />
                     <span className="text-xs">{formatCopyCount(copyCount)}</span>
                   </UnifiedBadge>
-                </div>
+                </button>
               )}
 
               {/* Rating badge - shows average rating and count */}

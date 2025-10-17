@@ -10,7 +10,7 @@ import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar'
 import { MDXContentProvider } from '@/src/components/providers/mdx-content-provider';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { MDXRenderer } from '@/src/components/shared/mdx-renderer';
-import { ViewTracker } from '@/src/components/shared/view-tracker';
+import { UnifiedTracker } from '@/src/components/shared/unified-tracker';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
@@ -532,7 +532,7 @@ export default async function SEOGuidePage({
         </div>
 
         {/* Track guide views for trending analytics */}
-        <ViewTracker category="guides" slug={guideSlug} />
+        <UnifiedTracker variant="view" category="guides" slug={guideSlug} />
       </>
     );
   } catch (error: unknown) {

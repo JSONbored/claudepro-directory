@@ -34,7 +34,7 @@ export const Default: Story = {
         </p>
         <div className="space-y-4">
           {Array.from({ length: 20 }).map((_, i) => (
-            <p key={i} className="text-muted-foreground">
+            <p key={`paragraph-${i}-${Date.now()}`} className="text-muted-foreground">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
               incididunt ut labore et dolore magna aliqua.
             </p>
@@ -139,7 +139,7 @@ export const WithPageContent: Story = {
               applications via the API.
             </p>
             {Array.from({ length: 10 }).map((_, i) => (
-              <p key={i}>
+              <p key={`scroll-content-${i}-${Date.now()}`}>
                 This is additional content to demonstrate scrolling behavior and the sticky footer
                 newsletter bar. The bar will appear at the bottom of the viewport after 3 seconds.
               </p>

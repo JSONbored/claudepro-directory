@@ -26,7 +26,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChangelogContent } from '@/src/components/changelog/changelog-content';
-import { ViewTracker } from '@/src/components/shared/view-tracker';
+import { UnifiedTracker } from '@/src/components/shared/unified-tracker';
 import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
 import { ChangelogArticleStructuredData } from '@/src/components/structured-data/changelog-structured-data';
 import { Separator } from '@/src/components/ui/separator';
@@ -103,7 +103,7 @@ export default async function ChangelogEntryPage({
     return (
       <>
         {/* View Tracker - Track page views */}
-        <ViewTracker category="changelog" slug={entry.slug} />
+        <UnifiedTracker variant="view" category="changelog" slug={entry.slug} />
 
         {/* Structured Data - TechArticle Schema */}
         <ChangelogArticleStructuredData entry={entry} />
