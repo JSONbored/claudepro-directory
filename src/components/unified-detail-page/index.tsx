@@ -19,11 +19,12 @@
  * @see components/unified-detail-page.tsx - Original 685-line implementation
  */
 
-import { ReviewSection } from '@/src/components/features/reviews/review-section';
+import { UnifiedReview } from '@/src/components/features/reviews/unified-review';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { getDisplayTitle } from '@/src/lib/utils';
@@ -429,10 +430,11 @@ export async function UnifiedDetailPage({
 
             {/* Reviews & Ratings Section */}
             <div className="mt-12 pt-12 border-t">
-              <ReviewSection
-                contentType={item.category}
+              <UnifiedReview
+                variant="section"
+                contentType={item.category as ContentCategory}
                 contentSlug={item.slug}
-                currentUserId={currentUserId}
+                {...(currentUserId && { currentUserId })}
               />
             </div>
 

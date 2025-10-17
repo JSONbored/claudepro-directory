@@ -14,7 +14,7 @@
  */
 
 import { memo } from 'react';
-import { StarRatingCompact } from '@/src/components/features/reviews/star-rating';
+import { UnifiedReview } from '@/src/components/features/reviews/unified-review';
 import { BaseCard } from '@/src/components/shared/base-card';
 import { Button } from '@/src/components/ui/button';
 import { BorderBeam } from '@/src/components/ui/magic/border-beam';
@@ -256,7 +256,8 @@ export const ConfigCard = memo(
                   }}
                   className="bg-transparent border-0 p-0 cursor-default"
                 >
-                  <StarRatingCompact
+                  <UnifiedReview
+                    variant="rating-compact"
                     average={ratingData.average}
                     count={ratingData.count}
                     size="sm"

@@ -124,6 +124,7 @@ const config: StorybookConfig = {
         '#lib/actions/business': path.resolve(__dirname, '../src/lib/actions/business.actions.mock.ts'),
         '#lib/actions/markdown': path.resolve(__dirname, '../src/lib/actions/markdown-actions.mock.ts'),
         '#lib/actions/email-capture': path.resolve(__dirname, '../src/lib/actions/email-capture.mock.ts'),
+        '#lib/actions/content': path.resolve(__dirname, '../src/lib/actions/content.actions.mock.ts'),
 
         // Supabase client
         '#lib/supabase/client': path.resolve(__dirname, '../src/lib/supabase/client.mock.ts'),

@@ -44,6 +44,10 @@
       "storybook": "./src/lib/actions/email-capture.mock.ts",
       "default": "./src/lib/actions/email-capture.ts"
     },
+    "#lib/actions/content": {
+      "storybook": "./src/lib/actions/content.actions.mock.ts",
+      "default": "./src/lib/actions/content.actions.ts"
+    },
     "#lib/supabase/client": {
       "storybook": "./src/lib/supabase/client.mock.ts",
       "default": "./src/lib/supabase/client.ts"
