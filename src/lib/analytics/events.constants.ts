@@ -273,16 +273,6 @@ export const EVENTS = {
   PERSONALIZATION_SIMILAR_CONFIG_CLICKED: 'personalization_similar_config_clicked',
   PERSONALIZATION_FOR_YOU_VIEWED: 'personalization_for_you_viewed',
   PERSONALIZATION_USAGE_RECOMMENDATION_SHOWN: 'personalization_usage_recommendation_shown',
-
-  // Badge & Reputation System
-  BADGE_EARNED: 'badge_earned',
-  BADGE_FEATURED: 'badge_featured',
-  BADGE_UNFEATURED: 'badge_unfeatured',
-  BADGE_VIEWED: 'badge_viewed',
-  REPUTATION_GAINED: 'reputation_gained',
-  REPUTATION_LOST: 'reputation_lost',
-  REPUTATION_TIER_REACHED: 'reputation_tier_reached',
-  REPUTATION_BREAKDOWN_VIEWED: 'reputation_breakdown_viewed',
 } as const;
 
 /**
@@ -677,48 +667,6 @@ function buildEventConfig(): Record<EventName, EventConfig> {
     [EVENTS.PERSONALIZATION_USAGE_RECOMMENDATION_SHOWN]: {
       description: 'Usage-based recommendation displayed',
       category: 'PERSONALIZATION',
-      enabled: true,
-    },
-
-    // Badge & Reputation System
-    [EVENTS.BADGE_EARNED]: {
-      description: 'User earns a new badge',
-      category: 'FEATURE',
-      enabled: true,
-    },
-    [EVENTS.BADGE_FEATURED]: {
-      description: 'User features a badge on their profile',
-      category: 'INTERACTION',
-      enabled: true,
-    },
-    [EVENTS.BADGE_UNFEATURED]: {
-      description: 'User unfeatures a badge from their profile',
-      category: 'INTERACTION',
-      enabled: true,
-    },
-    [EVENTS.BADGE_VIEWED]: {
-      description: 'User views badge details',
-      category: 'CONTENT',
-      enabled: true,
-    },
-    [EVENTS.REPUTATION_GAINED]: {
-      description: 'User gains reputation points',
-      category: 'FEATURE',
-      enabled: true,
-    },
-    [EVENTS.REPUTATION_LOST]: {
-      description: 'User loses reputation points',
-      category: 'FEATURE',
-      enabled: true,
-    },
-    [EVENTS.REPUTATION_TIER_REACHED]: {
-      description: 'User reaches a new reputation tier',
-      category: 'FEATURE',
-      enabled: true,
-    },
-    [EVENTS.REPUTATION_BREAKDOWN_VIEWED]: {
-      description: 'User views reputation breakdown',
-      category: 'CONTENT',
       enabled: true,
     },
   } as Record<EventName, EventConfig>;
@@ -1447,61 +1395,6 @@ export interface EventPayloads {
     trigger: string;
     recommendations_count: number;
     context_type?: string;
-  };
-
-  // Badge & Reputation Events
-  [EVENTS.BADGE_EARNED]: {
-    badge_slug: string;
-    badge_name: string;
-    badge_rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
-    badge_category: string;
-    trigger: string;
-    user_reputation: number;
-  };
-
-  [EVENTS.BADGE_FEATURED]: {
-    badge_slug: string;
-    badge_name: string;
-    featured_count: number;
-  };
-
-  [EVENTS.BADGE_UNFEATURED]: {
-    badge_slug: string;
-    badge_name: string;
-    featured_count: number;
-  };
-
-  [EVENTS.BADGE_VIEWED]: {
-    badge_slug: string;
-    badge_name: string;
-    view_context: 'profile' | 'list' | 'notification';
-  };
-
-  [EVENTS.REPUTATION_GAINED]: {
-    amount: number;
-    reason: string;
-    new_total: number;
-    old_total: number;
-  };
-
-  [EVENTS.REPUTATION_LOST]: {
-    amount: number;
-    reason: string;
-    new_total: number;
-    old_total: number;
-  };
-
-  [EVENTS.REPUTATION_TIER_REACHED]: {
-    tier_name: string;
-    tier_icon: string;
-    reputation_required: number;
-    user_reputation: number;
-  };
-
-  [EVENTS.REPUTATION_BREAKDOWN_VIEWED]: {
-    user_id: string;
-    total_reputation: number;
-    view_context: 'profile' | 'account' | 'modal';
   };
 }
 

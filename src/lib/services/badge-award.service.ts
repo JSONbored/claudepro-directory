@@ -22,7 +22,6 @@
  * @module services/badge-award
  */
 
-import { EVENTS } from '@/src/lib/analytics/events.constants';
 import {
   type AwardCriteria,
   type BadgeDefinition,
@@ -280,31 +279,8 @@ async function awardBadge(
       userBadgeId: result.data?.id || 'unknown',
     });
 
-    // Track badge award analytics
-    try {
-      const badgeDefinition = getBadge(badgeSlug);
-      const reputationResult = await reputationRepository.getBreakdown(userId);
-
-      if (badgeDefinition) {
-        // Note: trackEvent is imported from tracker.ts in production
-        // For now, just log the event data
-        logger.info(EVENTS.BADGE_EARNED, {
-          badge_slug: badgeSlug,
-          badge_name: badgeDefinition.name,
-          badge_rarity: badgeDefinition.rarity,
-          badge_category: badgeDefinition.category,
-          trigger: 'auto_award',
-          user_reputation: reputationResult.success ? reputationResult.data?.total || 0 : 0,
-        });
-      }
-    } catch (analyticsError) {
-      // Non-critical - just log
-      logger.error(
-        'Failed to track badge award analytics',
-        analyticsError instanceof Error ? analyticsError : new Error(String(analyticsError)),
-        { userId, badgeSlug }
-      );
-    }
+    // TODO: Track badge award analytics when analytics events are added
+    // trackEvent(EVENTS.BADGE_EARNED, { userId, badgeSlug, ... })
 
     return { success: true };
   } catch (error) {

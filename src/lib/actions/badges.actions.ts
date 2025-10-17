@@ -19,14 +19,7 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
-import {
-  type BadgeDefinition,
-  getAllBadges,
-  getAutoAwardBadges,
-  getBadge,
-  getBadgesByCategory,
-  getBadgesByRarity,
-} from '@/src/lib/config/badges.config';
+import { getAutoAwardBadges } from '@/src/lib/config/badges.config';
 import {
   type UserBadgeWithBadge,
   userBadgeRepository,
@@ -280,39 +273,6 @@ export async function userHasBadge(userId: string, badgeId: string): Promise<boo
   }
 
   return result.data ?? false;
-}
-
-// =============================================================================
-// BADGE REGISTRY QUERIES
-// =============================================================================
-
-/**
- * Get all available badges in the system
- * Returns badge definitions from configuration
- */
-export function getAllAvailableBadges(): BadgeDefinition[] {
-  return getAllBadges();
-}
-
-/**
- * Get badge definition by slug
- */
-export function getBadgeDefinition(slug: string): BadgeDefinition | undefined {
-  return getBadge(slug);
-}
-
-/**
- * Get badges in a category
- */
-export function getBadgesInCategory(category: string): BadgeDefinition[] {
-  return getBadgesByCategory(category as Parameters<typeof getBadgesByCategory>[0]);
-}
-
-/**
- * Get badges by rarity level
- */
-export function getBadgesOfRarity(rarity: string): BadgeDefinition[] {
-  return getBadgesByRarity(rarity as Parameters<typeof getBadgesByRarity>[0]);
 }
 
 // =============================================================================
