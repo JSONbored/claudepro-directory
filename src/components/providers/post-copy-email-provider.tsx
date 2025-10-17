@@ -16,7 +16,10 @@
 'use client';
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { type CopyType, PostCopyEmailModal } from '@/src/components/growth/post-copy-email-modal';
+import {
+  type CopyType,
+  PostCopyEmailModal,
+} from '@/src/components/features/growth/post-copy-email-modal';
 
 /**
  * Modal context data structure

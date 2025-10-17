@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/src/components/content-search-client';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
+import { InlineEmailCTA } from '@/src/components/features/growth/inline-email-cta';
 import { Button } from '@/src/components/primitives/button';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ExternalLink, HelpCircle } from '@/src/lib/icons';

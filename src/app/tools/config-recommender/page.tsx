@@ -19,7 +19,7 @@
 
 import type { Metadata } from 'next';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
+import { InlineEmailCTA } from '@/src/components/features/growth/inline-email-cta';
 import {
   Card,
   CardContent,

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
+import { InlineEmailCTA } from '@/src/components/features/growth/inline-email-cta';
 import { NewPostForm } from '@/src/components/forms/new-post-form';
-import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
 import { createPost } from '@/src/lib/actions/content.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 

@@ -24,8 +24,8 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ChangelogListClient } from '@/src/components/changelog/changelog-list-client';
-import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
+import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
+import { InlineEmailCTA } from '@/src/components/features/growth/inline-email-cta';
 import { ChangelogBlogStructuredData } from '@/src/components/structured-data/changelog-structured-data';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { ArrowLeft } from '@/src/lib/icons';

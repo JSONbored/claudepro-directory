@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
+import { InlineEmailCTA } from '@/src/components/features/growth/inline-email-cta';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,

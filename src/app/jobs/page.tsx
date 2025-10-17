@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { JobCard } from '@/src/components/domain/job-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
+import { InlineEmailCTA } from '@/src/components/features/growth/inline-email-cta';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent } from '@/src/components/primitives/card';
 import { Input } from '@/src/components/primitives/input';

@@ -17,7 +17,7 @@
 
 import { useCallback } from 'react';
 import { usePostCopyEmail } from '#lib/providers/post-copy-email';
-import type { CopyType } from '@/src/components/growth/post-copy-email-modal';
+import type { CopyType } from '@/src/components/features/growth/post-copy-email-modal';
 import { type UseCopyToClipboardOptions, useCopyToClipboard } from './use-copy-to-clipboard';
 
 /**

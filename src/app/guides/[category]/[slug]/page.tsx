@@ -7,7 +7,7 @@ import path from 'path';
 import { z } from 'zod';
 import { MDXRenderer } from '@/src/components/content/mdx-renderer';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
+import { InlineEmailCTA } from '@/src/components/features/growth/inline-email-cta';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 // Removed unused import: CategoryGuidesPage
 import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar';

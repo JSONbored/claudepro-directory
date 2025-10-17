@@ -1,4 +1,4 @@
-import { ActivityTimeline } from '@/src/components/features/profile/activity-timeline';
+import { ActivityTimeline } from '@/src/components/features/reputation/activity-timeline';
 import {
   Card,
   CardContent,

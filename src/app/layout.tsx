@@ -15,7 +15,7 @@ import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
 import './globals.css';
 import { Toaster } from 'sonner';
-import { FooterNewsletterBar } from '@/src/components/growth/footer-newsletter-bar';
+import { FooterNewsletterBar } from '@/src/components/features/growth/footer-newsletter-bar';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { PerformanceOptimizer } from '@/src/components/infra/performance-optimizer';
 import { PwaInstallTracker } from '@/src/components/infra/pwa-install-tracker';

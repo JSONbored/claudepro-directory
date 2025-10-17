@@ -300,7 +300,7 @@ const LazyRelatedContentClient = lazy(() =>
 );
 
 const LazyMetricsDisplay = lazy(() =>
-  import('../analytics/metrics-display').then((m) => ({
+  import('../features/analytics/metrics-display').then((m) => ({
     default: m.MetricsDisplay,
   }))
 );

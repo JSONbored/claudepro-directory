@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { NewsletterForm } from '@/src/components/growth/newsletter-form';
+import { NewsletterForm } from '@/src/components/features/growth/newsletter-form';
 import { Button } from '@/src/components/primitives/button';
 import { X } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
