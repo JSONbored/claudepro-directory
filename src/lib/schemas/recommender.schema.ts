@@ -15,14 +15,14 @@
  * - URL encoding for shareable results
  * - Production-grade JSON parsing with safeParse utility
  *
- * MODERNIZATION: Uses registry-driven contentCategorySchema for tool preferences and categories
+ * MODERNIZATION: Uses registry-driven categoryIdSchema for tool preferences and categories
  */
 
 import { z } from 'zod';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import { percentage, positiveInt } from './primitives/base-numbers';
 import { mediumString, nonEmptyString, shortString } from './primitives/base-strings';
-import { contentCategorySchema } from './shared.schema';
+import { categoryIdSchema } from './shared.schema';
 
 /**
  * Primary Use Case Options
@@ -59,7 +59,7 @@ export type ExperienceLevel = z.infer<typeof experienceLevelSchema>;
  * Maps directly to content categories (registry-driven)
  * MODERNIZATION: Now supports all 11 categories from UNIFIED_CATEGORY_REGISTRY
  */
-export const toolPreferenceSchema = contentCategorySchema.describe(
+export const toolPreferenceSchema = categoryIdSchema.describe(
   'Preferred Claude configuration tool type (all categories supported)'
 );
 
@@ -157,7 +157,7 @@ export const recommendationResultSchema = z
     slug: nonEmptyString.max(200).describe('Configuration slug identifier'),
     title: nonEmptyString.max(200).describe('Configuration title'),
     description: mediumString.describe('Configuration description'),
-    category: contentCategorySchema.describe(
+    category: categoryIdSchema.describe(
       'Configuration category (derived from UNIFIED_CATEGORY_REGISTRY)'
     ),
 

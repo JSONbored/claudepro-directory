@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { viewCount } from '@/src/lib/schemas/primitives/base-numbers';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import { normalizeString } from '@/src/lib/schemas/primitives/sanitization-transforms';
-import { type ContentCategory, contentCategorySchema } from './shared.schema';
+import { type CategoryId, categoryIdSchema } from './shared.schema';
 
 /**
  * Branded slug validation for content identifiers
@@ -86,8 +86,8 @@ export type AnalyticsResponse = z.infer<typeof analyticsResponseSchema>;
 export function validateTrackingParams(
   category: unknown,
   slug: unknown
-): { category: ContentCategory; slug: string } {
-  const validatedCategory = contentCategorySchema.parse(category);
+): { category: CategoryId; slug: string } {
+  const validatedCategory = categoryIdSchema.parse(category);
   const validatedSlug = contentSlugSchema.parse(slug);
 
   return {

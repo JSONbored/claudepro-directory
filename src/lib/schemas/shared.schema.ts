@@ -34,7 +34,7 @@ import {
  * Content Categories
  * Used across: analytics, content, content-generation, related-content, static-api
  *
- * IMPORTANT: ContentCategory type is imported from category-config.ts (single source of truth).
+ * IMPORTANT: CategoryId type is imported from category-config.ts (single source of truth).
  * Do NOT manually add categories here - add them to UNIFIED_CATEGORY_REGISTRY instead.
  *
  * Subcategories (like guide types: tutorials, comparisons, etc.) are NOT
@@ -42,33 +42,35 @@ import {
  */
 
 /**
- * ContentCategory - Single source of truth for all content categories
+ * CategoryId - THE ONLY category type (derived from UNIFIED_CATEGORY_REGISTRY)
  *
- * ARCHITECTURE: Defined in shared.schema.ts (schema layer) to avoid circular dependencies.
- * category-config.ts imports this type, not the other way around.
+ * ARCHITECTURE: UNIFIED_CATEGORY_REGISTRY in category-config.ts is the ONLY source of truth.
+ * CategoryId = keyof typeof UNIFIED_CATEGORY_REGISTRY
+ *
+ * ONE NAME. ONE CONCEPT. NO ALIASES.
  */
-export const CONTENT_CATEGORIES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const;
-
-export type ContentCategory = (typeof CONTENT_CATEGORIES)[number];
+export type { CategoryId } from '@/src/lib/config/category-config';
+export { VALID_CATEGORIES } from '@/src/lib/config/category-config';
 
 /**
- * Zod schema for content categories
+ * Zod schema for categories
+ * Hardcoded enum values must match UNIFIED_CATEGORY_REGISTRY keys exactly
  */
-export const contentCategorySchema = z
-  .enum(CONTENT_CATEGORIES)
-  .describe('All valid content categories - single source of truth');
+export const categoryIdSchema = z
+  .enum([
+    'agents',
+    'mcp',
+    'rules',
+    'commands',
+    'hooks',
+    'statuslines',
+    'skills',
+    'collections',
+    'guides',
+    'jobs',
+    'changelog',
+  ])
+  .describe('All valid categories - derived from UNIFIED_CATEGORY_REGISTRY');
 
 /**
  * Cacheable categories - subset that supports Redis caching (generateFullContent=true)

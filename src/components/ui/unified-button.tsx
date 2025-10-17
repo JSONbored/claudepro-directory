@@ -66,7 +66,7 @@ import {
   Trash,
 } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -138,7 +138,7 @@ type BookmarkVariant = {
 type CardCopyVariant = {
   variant: 'card-copy';
   url: string;
-  category: ContentCategory;
+  category: CategoryId;
   slug: string;
   title: string;
 } & ButtonStyleProps;
@@ -641,7 +641,7 @@ function BookmarkButton({
 
   // Validate content type - only actual categories, NOT subcategories
   // Subcategories (tutorials, workflows, etc.) should be bookmarked as 'guides'
-  const VALID_CATEGORIES: readonly ContentCategory[] = [
+  const VALID_CATEGORIES: readonly CategoryId[] = [
     'agents',
     'mcp',
     'rules',
@@ -655,8 +655,8 @@ function BookmarkButton({
     'skills',
   ];
 
-  const isValidCategory = (value: string): value is ContentCategory => {
-    return VALID_CATEGORIES.includes(value as ContentCategory);
+  const isValidCategory = (value: string): value is CategoryId => {
+    return VALID_CATEGORIES.includes(value as CategoryId);
   };
 
   const handleToggle = async (e: React.MouseEvent) => {

@@ -33,7 +33,7 @@ import type {
   CollectionContent,
   CollectionItemReference,
 } from '@/src/lib/schemas/content/collection.schema';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchMap } from '@/src/lib/utils/batch.utils';
 
@@ -69,7 +69,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
     collection.items,
     async (itemRef: CollectionItemReference): Promise<ItemWithData | null> => {
       try {
-        const item = await getContentBySlug(itemRef.category as ContentCategory, itemRef.slug);
+        const item = await getContentBySlug(itemRef.category as CategoryId, itemRef.slug);
         return item ? { ...itemRef, data: item } : null;
       } catch (error) {
         logger.error('Failed to load collection item', error as Error, {

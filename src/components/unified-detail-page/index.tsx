@@ -25,7 +25,7 @@ import { UnifiedContentSection } from '@/src/components/pages/unified-content-se
 import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { getDisplayTitle } from '@/src/lib/utils';
@@ -432,7 +432,7 @@ export async function UnifiedDetailPage({
             <div className="mt-12 pt-12 border-t">
               <UnifiedReview
                 variant="section"
-                contentType={item.category as ContentCategory}
+                contentType={item.category as CategoryId}
                 contentSlug={item.slug}
                 {...(currentUserId && { currentUserId })}
               />

@@ -33,7 +33,7 @@ import { z } from 'zod';
  */
 import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 
 const SITE_NAME = 'Claude Pro Directory'; // 20 chars
 const SEPARATOR = ' - '; // 3 chars
@@ -57,7 +57,7 @@ export const SUFFIX_LENGTHS = {
   guides: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.guides.pluralTitle),
   jobs: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.jobs.pluralTitle),
   changelog: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.changelog.pluralTitle),
-} as const satisfies Record<ContentCategory, number>;
+} as const satisfies Record<CategoryId, number>;
 
 /**
  * Maximum total title length (SEO best practice)
@@ -92,7 +92,7 @@ export const MAX_BASE_TITLE_LENGTH = {
   guides: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.guides,
   jobs: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.jobs,
   changelog: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.changelog,
-} as const satisfies Record<ContentCategory, number>;
+} as const satisfies Record<CategoryId, number>;
 
 // ============================================
 // METADATA QUALITY RULES & VALIDATION

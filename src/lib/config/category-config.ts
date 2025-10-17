@@ -73,8 +73,6 @@ import {
   type StatuslineContent,
   statuslineContentSchema,
 } from '@/src/lib/schemas/content/statusline.schema';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
-
 /**
  * Content type discriminated union
  * Modern TypeScript pattern for type-safe content handling
@@ -102,10 +100,13 @@ export type ContentType =
  * - All properties remain strongly typed
  * - Used by build scripts, UI components, SEO, analytics, and more
  */
-export interface UnifiedCategoryConfig<T extends ContentType = ContentType> {
+export interface UnifiedCategoryConfig<
+  T extends ContentType = ContentType,
+  TId extends string = string,
+> {
   // ===== IDENTITY =====
-  /** Category identifier (must match ContentCategory type) */
-  readonly id: ContentCategory;
+  /** Category identifier - type-safe literal from UNIFIED_CATEGORY_REGISTRY keys */
+  readonly id: TId;
 
   // ===== DISPLAY PROPERTIES =====
   title: string; // Singular display name
@@ -193,7 +194,7 @@ export interface UnifiedCategoryConfig<T extends ContentType = ContentType> {
  */
 export const UNIFIED_CATEGORY_REGISTRY = {
   agents: {
-    id: 'agents' as ContentCategory,
+    id: 'agents',
     title: 'AI Agent',
     pluralTitle: 'AI Agents',
     description:
@@ -248,7 +249,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   mcp: {
-    id: 'mcp' as ContentCategory,
+    id: 'mcp',
     title: 'MCP Server',
     pluralTitle: 'MCP Servers',
     description:
@@ -299,7 +300,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   commands: {
-    id: 'commands' as ContentCategory,
+    id: 'commands',
     title: 'Command',
     pluralTitle: 'Commands',
     description:
@@ -350,7 +351,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   rules: {
-    id: 'rules' as ContentCategory,
+    id: 'rules',
     title: 'Rule',
     pluralTitle: 'Rules',
     description: "Custom rules to guide Claude's behavior and responses in your projects.",
@@ -400,7 +401,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   hooks: {
-    id: 'hooks' as ContentCategory,
+    id: 'hooks',
     title: 'Hook',
     pluralTitle: 'Hooks',
     description: 'Event-driven automation hooks that trigger during Claude Code operations.',
@@ -450,7 +451,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   statuslines: {
-    id: 'statuslines' as ContentCategory,
+    id: 'statuslines',
     title: 'Statusline',
     pluralTitle: 'Statuslines',
     description:
@@ -511,7 +512,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   collections: {
-    id: 'collections' as ContentCategory,
+    id: 'collections',
     title: 'Collection',
     pluralTitle: 'Collections',
     description:
@@ -571,7 +572,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   skills: {
-    id: 'skills' as ContentCategory,
+    id: 'skills',
     title: 'Skill',
     pluralTitle: 'Skills',
     description:
@@ -628,7 +629,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   guides: {
-    id: 'guides' as ContentCategory,
+    id: 'guides',
     title: 'Guide',
     pluralTitle: 'Guides',
     description:
@@ -688,7 +689,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   jobs: {
-    id: 'jobs' as ContentCategory,
+    id: 'jobs',
     title: 'Job',
     pluralTitle: 'Jobs',
     description:
@@ -739,7 +740,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   changelog: {
-    id: 'changelog' as ContentCategory,
+    id: 'changelog',
     title: 'Changelog',
     pluralTitle: 'Changelog',
     description:
@@ -791,15 +792,29 @@ export type UnifiedCategoryConfigValue = (typeof UNIFIED_CATEGORY_REGISTRY)[Cate
 
 /**
  * Get valid category slugs for routing validation
+ *
+ * @architecture DERIVED FROM REGISTRY
+ * Uses Object.keys() to dynamically extract category IDs from UNIFIED_CATEGORY_REGISTRY.
+ * TypeScript types this as string[] by default, but we know these are CategoryId values.
+ *
+ * This is the ONE acceptable cast in the entire system because:
+ * 1. Object.keys() ALWAYS returns the registry keys
+ * 2. CategoryId is derived from registry keys via `keyof typeof UNIFIED_CATEGORY_REGISTRY`
+ * 3. Therefore the cast is safe by construction - the runtime value matches the type
+ *
+ * All other code should use isValidCategory() type guard or iterate this array - NO OTHER CASTS.
  */
-export const VALID_CATEGORIES = Object.keys(UNIFIED_CATEGORY_REGISTRY);
+export const VALID_CATEGORIES = Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[];
 
 /**
  * Get category config by URL slug
  * Returns unified category configuration from UNIFIED_CATEGORY_REGISTRY
  */
 export function getCategoryConfig(slug: string): UnifiedCategoryConfigValue | null {
-  return UNIFIED_CATEGORY_REGISTRY[slug as CategoryId] || null;
+  if (!isValidCategory(slug)) {
+    return null;
+  }
+  return UNIFIED_CATEGORY_REGISTRY[slug];
 }
 
 /**
@@ -811,12 +826,13 @@ export function isValidCategory(category: string): category is CategoryId {
 
 /**
  * Get all category IDs as array
- * Directly from registry - single source of truth
  *
- * @returns Array of category IDs from UNIFIED_CATEGORY_REGISTRY
+ * @returns Array of all category IDs from UNIFIED_CATEGORY_REGISTRY
+ *
+ * @architecture Just returns VALID_CATEGORIES (which is Object.keys(registry))
  */
 export function getAllCategoryIds(): CategoryId[] {
-  return Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[];
+  return VALID_CATEGORIES;
 }
 
 // REMOVED: Registry validation check - no longer needed

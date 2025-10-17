@@ -26,7 +26,7 @@ import {
   reorderCollectionItems,
 } from '@/src/lib/actions/content.actions';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@/src/lib/icons';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -83,7 +83,7 @@ export function CollectionItemManager({
       try {
         const result = await addItemToCollection({
           collection_id: collectionId,
-          content_type: bookmark.content_type as ContentCategory,
+          content_type: bookmark.content_type as CategoryId,
           content_slug: bookmark.content_slug,
           order: items.length, // Add to end
         });

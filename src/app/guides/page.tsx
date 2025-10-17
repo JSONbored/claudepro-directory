@@ -14,7 +14,7 @@ import { statsRedis } from '@/src/lib/cache.server';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**
@@ -70,7 +70,7 @@ async function getAllGuides(): Promise<UnifiedContentItem[]> {
             title: frontmatter.title || filename,
             description: frontmatter.description || '',
             slug: filename, // Just the filename, not the full path
-            category: 'guides' as ContentCategory, // Always 'guides' for parent category
+            category: 'guides' as CategoryId, // Always 'guides' for parent category
             subcategory: category as
               | 'tutorials'
               | 'comparisons'

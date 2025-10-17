@@ -30,7 +30,7 @@ import type {
   RelatedContentItem,
   SmartRelatedContentProps,
 } from '@/src/lib/schemas/related-content.schema';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 /**
@@ -204,7 +204,7 @@ export function RelatedContentClient({
             <BaseCard
               key={`${item.category}-${item.slug}`}
               targetPath={getContentItemUrl({
-                category: item.category as ContentCategory,
+                category: item.category as CategoryId,
                 slug: item.slug,
               })}
               displayTitle={item.title || item.name || item.slug}
@@ -217,7 +217,7 @@ export function RelatedContentClient({
                 // Track click with dynamic import (Storybook compatible)
                 if (trackingEnabled) {
                   const itemUrl = getContentItemUrl({
-                    category: item.category as ContentCategory,
+                    category: item.category as CategoryId,
                     slug: item.slug,
                   });
 

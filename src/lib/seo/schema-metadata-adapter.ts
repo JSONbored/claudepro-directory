@@ -21,7 +21,7 @@
  * @module lib/seo/schema-metadata-adapter
  */
 
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 
 // ============================================
 // TYPE DEFINITIONS
@@ -33,7 +33,7 @@ import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
  */
 export interface MetadataDerivationRule {
   /** Content category this rule applies to */
-  category: ContentCategory;
+  category: CategoryId;
 
   /** How to derive the title from schema */
   titleField: string | ((schema: Record<string, unknown>) => string);
@@ -61,7 +61,7 @@ export interface MetadataDerivationRule {
  *
  * NOTE: Subcategories (tutorials, workflows, etc.) are handled by the 'guides' rule
  */
-export const CATEGORY_METADATA_RULES: Record<ContentCategory, MetadataDerivationRule> = {
+export const CATEGORY_METADATA_RULES: Record<CategoryId, MetadataDerivationRule> = {
   // Core content types
   agents: {
     category: 'agents',
@@ -171,7 +171,7 @@ export const CATEGORY_METADATA_RULES: Record<ContentCategory, MetadataDerivation
  * Routes to category-specific derivation function
  */
 export function deriveMetadataFromSchema(
-  category: ContentCategory,
+  category: CategoryId,
   schema: Record<string, unknown>
 ): { title: string; description: string; keywords: string[] } | null {
   const rule = CATEGORY_METADATA_RULES[category];

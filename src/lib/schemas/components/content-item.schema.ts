@@ -3,7 +3,7 @@
  * This creates a unified interface for components that includes ALL possible properties
  * from all content types, with proper optional handling for TypeScript strict mode
  *
- * MODERNIZATION: Uses registry-driven contentCategorySchema throughout
+ * MODERNIZATION: Uses registry-driven categoryIdSchema throughout
  */
 
 import { z } from 'zod';
@@ -16,7 +16,7 @@ import {
   mcpServerTypeSchema,
   statuslineTypeSchema,
 } from '@/src/lib/schemas/primitives/content-enums';
-import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
+import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Unified content item schema for components
@@ -28,7 +28,7 @@ export const unifiedContentItemSchema = z
     // Base properties (common to all content types)
     slug: z.string().describe('Unique URL-friendly identifier for the content item'),
     description: z.string().describe('Brief summary or overview of the content item'),
-    category: contentCategorySchema.describe(
+    category: categoryIdSchema.describe(
       'Content type category for classification and filtering. Derived from UNIFIED_CATEGORY_REGISTRY.'
     ),
     subcategory: z
@@ -295,7 +295,7 @@ export const unifiedContentItemSchema = z
     items: z
       .array(
         z.object({
-          category: contentCategorySchema.describe(
+          category: categoryIdSchema.describe(
             'Content category of the referenced item (registry-driven, supports all 11 categories)'
           ),
           slug: z.string().describe('URL slug of the referenced item'),

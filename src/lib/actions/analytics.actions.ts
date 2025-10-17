@@ -49,7 +49,7 @@ import {
   userAffinitiesResponseSchema,
 } from '@/src/lib/schemas/personalization.schema';
 import { type QuizAnswers, quizAnswersSchema } from '@/src/lib/schemas/recommender.schema';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
@@ -397,9 +397,9 @@ export const getSimilarConfigs = rateLimitedAction
             slug: toContentId(sim.content_slug),
             title: sim.content_slug, // Will be enriched by client
             description: '',
-            category: sim.content_type as ContentCategory,
+            category: sim.content_type as CategoryId,
             url: getContentItemUrl({
-              category: sim.content_type as ContentCategory,
+              category: sim.content_type as CategoryId,
               slug: sim.content_slug,
             }),
             score: Math.round(sim.similarity_score * 100),

@@ -5,7 +5,7 @@
  * SHA-2100: Removed ui-props.schema.ts (177 lines of unused runtime validation)
  * Extracted only the ConfigCardProps type that's actually used
  *
- * MODERNIZATION: All category types now derived from ContentCategory (registry-driven)
+ * MODERNIZATION: All category types now derived from CategoryId (registry-driven)
  */
 
 import { z } from 'zod';
@@ -14,7 +14,7 @@ import type { TrendingContentItem } from '@/src/lib/trending/calculator.server';
 import type { UnifiedContentItem } from './components/content-item.schema';
 import type { HomePageClientProps } from './components/page-props.schema';
 import type { SortOption } from './content-filter.schema';
-import { type ContentCategory, contentCategorySchema } from './shared.schema';
+import { type CategoryId, categoryIdSchema } from './shared.schema';
 
 /**
  * Config card component props (extracted from deleted ui-props.schema.ts)
@@ -114,7 +114,7 @@ export interface TrendingContentProps {
  * Kept for backwards compatibility during migration
  */
 const viewTrackerPropsSchema = z.object({
-  category: contentCategorySchema.describe(
+  category: categoryIdSchema.describe(
     'Content category for view tracking (derived from UNIFIED_CATEGORY_REGISTRY)'
   ),
   slug: nonEmptyString.max(200),
@@ -130,7 +130,7 @@ export type ContentListServerProps<T extends UnifiedContentItem = UnifiedContent
   description: string;
   icon: string;
   items: readonly T[] | T[];
-  type: ContentCategory;
+  type: CategoryId;
   searchPlaceholder?: string;
   badges?: Array<{
     icon?: string | React.ComponentType<{ className?: string }>;
@@ -144,7 +144,7 @@ export type ContentListServerProps<T extends UnifiedContentItem = UnifiedContent
 export type RelatedConfigsProps<T extends UnifiedContentItem = UnifiedContentItem> = {
   configs: T[];
   title?: string;
-  type?: ContentCategory;
+  type?: CategoryId;
 };
 
 /**
@@ -163,7 +163,7 @@ export type FloatingSearchSidebarProps = {
  */
 export type ContentSearchClientProps<T extends UnifiedContentItem = UnifiedContentItem> = {
   items: readonly T[] | T[];
-  type: ContentCategory;
+  type: CategoryId;
   searchPlaceholder: string;
   title: string;
   icon: string;
@@ -175,7 +175,7 @@ export type ContentSearchClientProps<T extends UnifiedContentItem = UnifiedConte
 export type ContentSidebarProps<T extends UnifiedContentItem = UnifiedContentItem> = {
   item: T;
   relatedItems: T[];
-  type: import('./shared.schema').ContentCategory;
+  type: import('./shared.schema').CategoryId;
   typeName: string;
 };
 

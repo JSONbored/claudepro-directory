@@ -40,7 +40,7 @@ import {
 import { userIdSchema } from '@/src/lib/schemas/branded-types.schema';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import { updateProfileSchema } from '@/src/lib/schemas/profile.schema';
-import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
+import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
 import { batchAll } from '@/src/lib/utils/batch.utils';
 
 // ============================================
@@ -145,7 +145,7 @@ export const refreshProfileFromOAuth = authedAction
 
 // Bookmark schema
 const bookmarkSchema = z.object({
-  content_type: contentCategorySchema,
+  content_type: categoryIdSchema,
   content_slug: nonEmptyString
     .max(200, 'Content slug is too long')
     .regex(
@@ -211,7 +211,7 @@ export const addBookmark = authedAction
  * Remove a bookmark
  */
 const removeBookmarkSchema = z.object({
-  content_type: contentCategorySchema,
+  content_type: categoryIdSchema,
   content_slug: nonEmptyString,
 });
 
@@ -291,7 +291,7 @@ export const addBookmarkBatch = authedAction
       items: z
         .array(
           z.object({
-            content_type: contentCategorySchema,
+            content_type: categoryIdSchema,
             content_slug: nonEmptyString,
           })
         )

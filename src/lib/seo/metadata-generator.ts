@@ -18,7 +18,7 @@ import { type ValidatedMetadata, validatedMetadataSchema } from '@/src/lib/confi
 import { APP_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import { generateOGImageUrl, OG_IMAGE_DIMENSIONS } from '@/src/lib/og/url-generator';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import type { MetadataContext, RouteMetadata, TitleConfig } from '@/src/lib/seo/metadata-registry';
 import {
   applyAIOptimization,
@@ -255,10 +255,10 @@ function convertToNextMetadata(
 function getContentSchemaForRoute(
   route: string,
   context?: MetadataContext
-): { category: ContentCategory; schema: Record<string, unknown> } | null {
+): { category: CategoryId; schema: Record<string, unknown> } | null {
   // Extract category from route pattern
   if (route === '/:category/:slug' && context?.params?.category && context?.item) {
-    const category = context.params.category as ContentCategory;
+    const category = context.params.category as CategoryId;
     return {
       category,
       schema: context.item as Record<string, unknown>,

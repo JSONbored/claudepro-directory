@@ -10,7 +10,7 @@ import {
   OPTIMAL_MIN,
   SUFFIX_LENGTHS,
 } from '@/src/lib/config/seo-config';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 
 export interface ContentItem {
   title?: string;
@@ -179,7 +179,7 @@ const strategies: EnhancementStrategy[] = [
 /**
  * Calculate total title length with category suffix
  */
-export function calculateTitleLength(baseTitle: string, category: ContentCategory): number {
+export function calculateTitleLength(baseTitle: string, category: CategoryId): number {
   const suffixLength = SUFFIX_LENGTHS[category as keyof typeof SUFFIX_LENGTHS] || 0;
   return baseTitle.length + suffixLength;
 }
@@ -187,7 +187,7 @@ export function calculateTitleLength(baseTitle: string, category: ContentCategor
 /**
  * Check if title needs enhancement
  */
-export function shouldEnhanceTitle(item: ContentItem, category: ContentCategory): boolean {
+export function shouldEnhanceTitle(item: ContentItem, category: CategoryId): boolean {
   const currentTitle = item.seoTitle || item.title || item.name || item.slug;
   const currentLength = calculateTitleLength(currentTitle, category);
 
@@ -198,7 +198,7 @@ export function shouldEnhanceTitle(item: ContentItem, category: ContentCategory)
 /**
  * Enhance a title using smart strategies
  */
-export function enhanceTitle(item: ContentItem, category: ContentCategory): EnhancementResult {
+export function enhanceTitle(item: ContentItem, category: CategoryId): EnhancementResult {
   const originalTitle = item.seoTitle || item.title || item.name || item.slug;
   const currentLength = calculateTitleLength(originalTitle, category);
 
@@ -254,7 +254,7 @@ export function enhanceTitle(item: ContentItem, category: ContentCategory): Enha
  */
 export function batchEnhance(
   items: ContentItem[],
-  category: ContentCategory
+  category: CategoryId
 ): Map<string, EnhancementResult> {
   const results = new Map<string, EnhancementResult>();
 

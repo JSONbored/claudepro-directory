@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { contentIdSchema, sessionIdSchema, userIdSchema } from './branded-types.schema';
 import { percentage, positiveInt } from './primitives/base-numbers';
 import { nonEmptyString } from './primitives/base-strings';
-import { contentCategorySchema } from './shared.schema';
+import { categoryIdSchema } from './shared.schema';
 
 // =====================================================
 // USER INTERACTIONS
@@ -25,7 +25,7 @@ export type InteractionType = z.infer<typeof interactionTypeSchema>;
 export const userInteractionSchema = z.object({
   id: z.string().uuid().optional(),
   user_id: userIdSchema,
-  content_type: contentCategorySchema,
+  content_type: categoryIdSchema,
   content_slug: contentIdSchema,
   interaction_type: interactionTypeSchema,
   session_id: sessionIdSchema.optional(),
@@ -37,7 +37,7 @@ export type UserInteraction = z.infer<typeof userInteractionSchema>;
 
 // Input schema for tracking interactions
 export const trackInteractionSchema = z.object({
-  content_type: contentCategorySchema,
+  content_type: categoryIdSchema,
   content_slug: contentIdSchema,
   interaction_type: interactionTypeSchema,
   session_id: sessionIdSchema.optional(),
@@ -56,7 +56,7 @@ export type TrackInteractionInput = z.infer<typeof trackInteractionSchema>;
 export const affinityScoreSchema = z.object({
   id: z.string().uuid().optional(),
   user_id: userIdSchema,
-  content_type: contentCategorySchema,
+  content_type: categoryIdSchema,
   content_slug: contentIdSchema,
   affinity_score: z.number().min(0).max(100),
   based_on: z
@@ -101,9 +101,9 @@ export type UserSimilarity = z.infer<typeof userSimilaritySchema>;
 // Content similarity
 export const contentSimilaritySchema = z.object({
   id: z.string().uuid().optional(),
-  content_a_type: contentCategorySchema,
+  content_a_type: categoryIdSchema,
   content_a_slug: contentIdSchema,
-  content_b_type: contentCategorySchema,
+  content_b_type: categoryIdSchema,
   content_b_slug: contentIdSchema,
   similarity_score: z.number().min(0).max(1),
   similarity_factors: z
@@ -140,7 +140,7 @@ export const personalizedRecommendationSchema = z.object({
   slug: contentIdSchema,
   title: nonEmptyString,
   description: z.string(),
-  category: contentCategorySchema,
+  category: categoryIdSchema,
   url: z.string().url(),
 
   // Scoring
@@ -173,7 +173,7 @@ export const similarConfigsResponseSchema = z.object({
   similar_items: z.array(personalizedRecommendationSchema),
   source_item: z.object({
     slug: contentIdSchema,
-    category: contentCategorySchema,
+    category: categoryIdSchema,
   }),
   algorithm_version: z.string().default('v1.0'),
 });
@@ -196,14 +196,14 @@ export type UsageRecommendationResponse = z.infer<typeof usageRecommendationResp
 export const forYouQuerySchema = z.object({
   limit: positiveInt.max(50).default(12),
   offset: positiveInt.default(0),
-  category: contentCategorySchema.optional(),
+  category: categoryIdSchema.optional(),
   exclude_bookmarked: z.boolean().default(false),
 });
 
 export type ForYouQuery = z.infer<typeof forYouQuerySchema>;
 
 export const similarConfigsQuerySchema = z.object({
-  content_type: contentCategorySchema,
+  content_type: categoryIdSchema,
   content_slug: contentIdSchema,
   limit: positiveInt.max(20).default(6),
 });

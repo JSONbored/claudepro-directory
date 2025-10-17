@@ -3,14 +3,14 @@
  * Production-grade validation for HTTP requests and middleware operations
  * Ensures request integrity and security validation
  *
- * MODERNIZATION: Uses registry-driven contentCategorySchema for category validation
+ * MODERNIZATION: Uses registry-driven categoryIdSchema for category validation
  */
 
 import { z } from 'zod';
 import { nonNegativeInt, positiveInt } from './primitives/base-numbers';
 import { nonEmptyString } from './primitives/base-strings';
 import { parseContentType } from './primitives/sanitization-transforms';
-import { contentCategorySchema } from './shared.schema';
+import { categoryIdSchema } from './shared.schema';
 
 /**
  * Security constants for middleware
@@ -205,7 +205,7 @@ export const searchQueryValidationSchema = z
       .optional()
       .describe('Search query string with alphanumeric and basic punctuation only (max 500 chars)'),
     category: z
-      .union([z.literal('all'), contentCategorySchema])
+      .union([z.literal('all'), categoryIdSchema])
       .optional()
       .describe('Content category to filter search results (all categories from registry + "all")'),
     page: positiveInt

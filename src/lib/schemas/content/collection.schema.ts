@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { baseContentMetadataSchema } from '@/src/lib/schemas/content/base-content.schema';
 import { limitedMediumStringArray } from '@/src/lib/schemas/primitives/base-arrays';
 import { mediumString, shortString } from '@/src/lib/schemas/primitives/base-strings';
-import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
+import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Collection Item Reference Schema
@@ -26,7 +26,7 @@ import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
  */
 const collectionItemReferenceSchema = z
   .object({
-    category: contentCategorySchema
+    category: categoryIdSchema
       .refine((cat) => cat !== 'collections', {
         message: 'Collections cannot reference other collections (prevents circular dependencies)',
       })

@@ -18,13 +18,13 @@
 
 import { EVENTS, type EventName } from '@/src/lib/analytics/events.constants';
 import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
-import type { ContentCategory as SharedContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId as SharedCategoryId } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Content categories supported by the event mapper
- * Extends shared ContentCategory to include aliases (mcp-servers)
+ * Extends shared CategoryId to include aliases (mcp-servers)
  */
-export type ContentCategory = SharedContentCategory | 'mcp-servers';
+export type CategoryId = SharedCategoryId | 'mcp-servers';
 
 /**
  * Action types for event mapping

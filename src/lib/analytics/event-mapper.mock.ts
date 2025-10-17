@@ -24,7 +24,7 @@ export type EventAction =
 /**
  * Content categories (duplicated from real event-mapper to avoid imports)
  */
-export type ContentCategory =
+export type CategoryId =
   | 'agents'
   | 'mcp'
   | 'mcp-servers'

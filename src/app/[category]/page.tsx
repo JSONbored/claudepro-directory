@@ -204,7 +204,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
       description={config.description}
       icon={config.icon.displayName?.toLowerCase() || 'sparkles'}
       items={items}
-      type={category} // MODERNIZATION: No cast needed - category already ContentCategory from route params
+      type={category} // MODERNIZATION: No cast needed - category already CategoryId from route params
       searchPlaceholder={config.listPage.searchPlaceholder}
       badges={badges}
     />

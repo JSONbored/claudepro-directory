@@ -46,7 +46,7 @@ import { validateCacheKey, validateTTL } from '@/src/lib/schemas/primitives/api-
 import { stringArray } from '@/src/lib/schemas/primitives/base-arrays';
 import { nonNegativeInt, positiveInt } from '@/src/lib/schemas/primitives/base-numbers';
 import { isoDatetimeString, nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 import { ParseStrategy, safeParse, safeStringify } from '@/src/lib/utils/data.utils';
 
@@ -2924,7 +2924,7 @@ class CacheInvalidationService {
    * Invalidate caches when content is updated
    */
   async invalidateContentCaches(
-    category: ContentCategory,
+    category: CategoryId,
     slug: string,
     options: {
       invalidateRelated?: boolean;
@@ -3004,7 +3004,7 @@ class CacheInvalidationService {
   /**
    * Find cache keys that might contain the updated content
    */
-  private async findRelatedCacheKeys(category: ContentCategory, slug: string): Promise<string[]> {
+  private async findRelatedCacheKeys(category: CategoryId, slug: string): Promise<string[]> {
     const keys: string[] = [];
 
     // Get related categories that might include this content
@@ -3053,10 +3053,10 @@ class CacheInvalidationService {
   /**
    * Get related categories for cross-category invalidation
    */
-  private getRelatedCategories(category: ContentCategory): ContentCategory[] {
+  private getRelatedCategories(category: CategoryId): CategoryId[] {
     // NOTE: Subcategories (tutorials, workflows, etc.) are NOT categories
     // They are under 'guides' and should not be tracked separately
-    const relationships: Record<string, ContentCategory[]> = {
+    const relationships: Record<string, CategoryId[]> = {
       guides: ['agents', 'mcp'],
       agents: ['commands', 'rules'],
       mcp: ['agents', 'hooks'],

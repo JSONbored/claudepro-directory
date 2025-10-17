@@ -33,7 +33,7 @@ import { reviewRepository } from '@/src/lib/repositories/review.repository';
 import { userInteractionRepository } from '@/src/lib/repositories/user-interaction.repository';
 import { voteRepository } from '@/src/lib/repositories/vote.repository';
 import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives/base-strings';
-import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
+import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
 
 // =====================================================
 // COLLECTION SCHEMAS
@@ -59,7 +59,7 @@ const collectionSchema = z.object({
 
 const collectionItemSchema = z.object({
   collection_id: z.string().uuid('Invalid collection ID'),
-  content_type: contentCategorySchema,
+  content_type: categoryIdSchema,
   content_slug: nonEmptyString
     .max(200, 'Content slug is too long')
     .regex(
@@ -86,7 +86,7 @@ const reorderItemsSchema = z.object({
 // =====================================================
 
 const reviewInputSchema = z.object({
-  content_type: contentCategorySchema,
+  content_type: categoryIdSchema,
   content_slug: nonEmptyString
     .max(200, 'Content slug is too long')
     .regex(
@@ -131,7 +131,7 @@ const helpfulVoteSchema = z.object({
 });
 
 const getReviewsSchema = z.object({
-  content_type: contentCategorySchema,
+  content_type: categoryIdSchema,
   content_slug: nonEmptyString.max(200),
   sort_by: z.enum(['recent', 'helpful', 'rating_high', 'rating_low']).default('recent'),
   limit: z.number().int().min(1).max(100).default(20),
@@ -1022,7 +1022,7 @@ export const getAggregateRating = rateLimitedAction
   })
   .schema(
     z.object({
-      content_type: contentCategorySchema,
+      content_type: categoryIdSchema,
       content_slug: nonEmptyString.max(200),
     })
   )

@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import type { LucideIcon } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Troubleshooting item structure
@@ -126,10 +126,10 @@ export interface ContentTypeConfig {
  * Type-safe content type discriminator
  * Re-exported from canonical schema definition
  */
-export type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+export type { CategoryId } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Configuration registry type
  * Partial because not all content categories have detailed configs
  */
-export type ContentTypeConfigRegistry = Partial<Record<ContentCategory, ContentTypeConfig>>;
+export type ContentTypeConfigRegistry = Partial<Record<CategoryId, ContentTypeConfig>>;

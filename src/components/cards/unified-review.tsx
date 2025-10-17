@@ -57,7 +57,7 @@ import { Label } from '@/src/components/ui/label';
 import { Rating, RatingButton } from '@/src/components/ui/shadcn-io/rating';
 import { Textarea } from '@/src/components/ui/textarea';
 import { Edit, Star, ThumbsUp, Trash } from '@/src/lib/icons';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatDistanceToNow } from '@/src/lib/utils/data.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -144,7 +144,7 @@ export interface RatingDistribution {
 export type UnifiedReviewProps =
   | {
       variant: 'form';
-      contentType: ContentCategory;
+      contentType: CategoryId;
       contentSlug: string;
       existingReview?: {
         id: string;
@@ -156,7 +156,7 @@ export type UnifiedReviewProps =
     }
   | {
       variant: 'section';
-      contentType: ContentCategory;
+      contentType: CategoryId;
       contentSlug: string;
       currentUserId?: string | undefined;
     }
@@ -587,7 +587,7 @@ function ReviewCardItem({
       <Card className="p-6">
         <UnifiedReview
           variant="form"
-          contentType={review.content_type as ContentCategory}
+          contentType={review.content_type as CategoryId}
           contentSlug={review.content_slug}
           existingReview={{
             id: review.id,
