@@ -14,9 +14,9 @@
 
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
-import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
+import { getAllCategoryIds } from '@/src/lib/config/category-config';
 
-// Extend Zod with OpenAPI methods (.openapi())
+// Extend Zod with OpenAPI methods (.openapi()) FIRST
 extendZodWithOpenApi(z);
 
 /**
@@ -26,8 +26,9 @@ extendZodWithOpenApi(z);
  */
 
 // Base schemas with OpenAPI metadata
-// MODERNIZED: Uses contentCategorySchema from registry (all 11 categories)
-export const contentTypeSchema = contentCategorySchema.openapi({
+// MODERNIZED: Dynamically derived from UNIFIED_CATEGORY_REGISTRY
+const categoryIds = getAllCategoryIds();
+export const contentTypeSchema = z.enum(categoryIds as [string, ...string[]]).openapi({
   description: 'Content category identifier (derived from UNIFIED_CATEGORY_REGISTRY)',
   example: 'agents',
 });
@@ -176,7 +177,7 @@ export const trendingDataSchema = z.object({
 export const cacheWarmRequestSchema = z
   .object({
     types: z
-      .array(contentCategorySchema)
+      .array(contentTypeSchema)
       .optional()
       .openapi({
         description:

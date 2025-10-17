@@ -59,17 +59,21 @@
               "enum": [
                 "agents",
                 "mcp",
-                "rules",
                 "commands",
+                "rules",
                 "hooks",
                 "statuslines",
-                "collections"
+                "collections",
+                "skills",
+                "guides",
+                "jobs",
+                "changelog"
               ],
-              "description": "Content category identifier",
+              "description": "Content category identifier (derived from UNIFIED_CATEGORY_REGISTRY)",
               "example": "agents"
             },
             "required": true,
-            "description": "Content category identifier",
+            "description": "Content category identifier (derived from UNIFIED_CATEGORY_REGISTRY)",
             "name": "category",
             "in": "path"
           },
@@ -152,13 +156,17 @@
                           "enum": [
                             "agents",
                             "mcp",
-                            "rules",
                             "commands",
+                            "rules",
                             "hooks",
                             "statuslines",
-                            "collections"
+                            "collections",
+                            "skills",
+                            "guides",
+                            "jobs",
+                            "changelog"
                           ],
-                          "description": "Content category identifier",
+                          "description": "Content category identifier (derived from UNIFIED_CATEGORY_REGISTRY)",
                           "example": "agents"
                         }
                       },
@@ -303,17 +311,21 @@
               "enum": [
                 "agents",
                 "mcp",
-                "rules",
                 "commands",
+                "rules",
                 "hooks",
                 "statuslines",
-                "collections"
+                "collections",
+                "skills",
+                "guides",
+                "jobs",
+                "changelog"
               ],
-              "description": "Content category identifier",
+              "description": "Content category identifier (derived from UNIFIED_CATEGORY_REGISTRY)",
               "example": "agents"
             },
             "required": true,
-            "description": "Content category identifier",
+            "description": "Content category identifier (derived from UNIFIED_CATEGORY_REGISTRY)",
             "name": "category",
             "in": "path"
           },
@@ -496,17 +508,21 @@
               "enum": [
                 "agents",
                 "mcp",
-                "rules",
                 "commands",
+                "rules",
                 "hooks",
                 "statuslines",
-                "collections"
+                "collections",
+                "skills",
+                "guides",
+                "jobs",
+                "changelog"
               ],
-              "description": "Content category identifier",
+              "description": "Content category identifier (derived from UNIFIED_CATEGORY_REGISTRY)",
               "example": "agents"
             },
             "required": false,
-            "description": "Content category identifier",
+            "description": "Content category identifier (derived from UNIFIED_CATEGORY_REGISTRY)",
             "name": "category",
             "in": "query"
           },
@@ -792,13 +808,17 @@
                                 "enum": [
                                   "agents",
                                   "mcp",
-                                  "rules",
                                   "commands",
+                                  "rules",
                                   "hooks",
                                   "statuslines",
-                                  "collections"
+                                  "collections",
+                                  "skills",
+                                  "guides",
+                                  "jobs",
+                                  "changelog"
                                 ],
-                                "description": "Content category identifier",
+                                "description": "Content category identifier (derived from UNIFIED_CATEGORY_REGISTRY)",
                                 "example": "agents"
                               },
                               "slug": {
@@ -959,14 +979,20 @@
                       "enum": [
                         "agents",
                         "mcp",
-                        "rules",
                         "commands",
+                        "rules",
                         "hooks",
                         "statuslines",
-                        "collections"
-                      ]
+                        "collections",
+                        "skills",
+                        "guides",
+                        "jobs",
+                        "changelog"
+                      ],
+                      "description": "Content category identifier (derived from UNIFIED_CATEGORY_REGISTRY)",
+                      "example": "agents"
                     },
-                    "description": "Array of content types to warm cache for (omit for all types)",
+                    "description": "Array of content types to warm cache for (omit for all types) - registry-driven",
                     "example": [
                       "agents",
                       "mcp"
