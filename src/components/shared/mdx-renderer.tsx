@@ -3,6 +3,15 @@ import { MDXRemote } from 'next-mdx-remote/rsc';
 import { memo } from 'react';
 import { z } from 'zod';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
+import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/alert';
+import { Button } from '@/src/components/primitives/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/primitives/card';
 // Import all MDX components from consolidated file
 import {
   // Lazy-loaded heavy components (code-split with React.lazy)
@@ -32,9 +41,6 @@ import { Checklist } from '../interactive/checklist';
 // OLD: Module-level state pattern (anti-pattern for client components)
 // NEW: Direct prop passing via component wrapper (see SmartRelatedContent below)
 import { CodeGroupServer as CodeGroup } from '../template/code-group-server';
-import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { Button } from '../ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { UnifiedBadge } from '../ui/unified-badge';
 import { UnifiedContentBox } from '../ui/unified-content-box';
 

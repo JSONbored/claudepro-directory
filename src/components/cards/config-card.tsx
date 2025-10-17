@@ -16,7 +16,7 @@
 import { memo } from 'react';
 import { BaseCard } from '@/src/components/cards/base-card';
 import { UnifiedReview } from '@/src/components/cards/unified-review';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import { BorderBeam } from '@/src/components/ui/magic/border-beam';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { UnifiedButton } from '@/src/components/ui/unified-button';

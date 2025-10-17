@@ -10,11 +10,11 @@
 
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
-import { Button } from '@/src/components/ui/button';
-import { Checkbox } from '@/src/components/ui/checkbox';
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
-import { Textarea } from '@/src/components/ui/textarea';
+import { Button } from '@/src/components/primitives/button';
+import { Checkbox } from '@/src/components/primitives/checkbox';
+import { Input } from '@/src/components/primitives/input';
+import { Label } from '@/src/components/primitives/label';
+import { Textarea } from '@/src/components/primitives/textarea';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { createCollection, updateCollection } from '@/src/lib/actions/content.actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

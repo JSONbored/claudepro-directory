@@ -14,16 +14,16 @@
 import Link from 'next/link';
 import { useId, useState, useTransition } from 'react';
 import { z } from 'zod';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
+} from '@/src/components/primitives/card';
+import { Input } from '@/src/components/primitives/input';
+import { Label } from '@/src/components/primitives/label';
 import { submitConfiguration } from '@/src/lib/actions/business.actions';
 import { COMMON_FIELDS, FORM_CONFIGS, TAGS_FIELD } from '@/src/lib/config/form-field-config';
 import { ROUTES } from '@/src/lib/constants/routes';

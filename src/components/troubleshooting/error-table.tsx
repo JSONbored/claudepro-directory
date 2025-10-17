@@ -11,7 +11,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { AlertTriangle, Info } from '@/src/lib/icons';
 import { type ErrorTableProps, errorTablePropsSchema } from '@/src/lib/schemas/shared.schema';

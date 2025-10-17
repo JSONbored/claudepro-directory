@@ -20,7 +20,7 @@
 'use client';
 
 import { memo, useMemo } from 'react';
-import { TabsList, TabsTrigger } from '@/src/components/ui/tabs';
+import { TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
 

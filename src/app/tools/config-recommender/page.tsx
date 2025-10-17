@@ -19,14 +19,14 @@
 
 import type { Metadata } from 'next';
 import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
-import { QuizForm } from '@/src/components/tools/recommender/quiz-form';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
+import { QuizForm } from '@/src/components/tools/recommender/quiz-form';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

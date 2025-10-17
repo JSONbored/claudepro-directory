@@ -18,9 +18,9 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Separator } from '@/src/components/ui/separator';
+import { Button } from '@/src/components/primitives/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
+import { Separator } from '@/src/components/primitives/separator';
 import { generateConfigRecommendations } from '@/src/lib/actions/analytics.actions';
 import { ArrowLeft, ArrowRight, Loader2, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

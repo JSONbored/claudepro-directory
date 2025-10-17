@@ -1,17 +1,17 @@
 'use client';
 
 import { useId } from 'react';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
-import { Textarea } from '@/src/components/ui/textarea';
+} from '@/src/components/primitives/card';
+import { Input } from '@/src/components/primitives/input';
+import { Label } from '@/src/components/primitives/label';
+import { Textarea } from '@/src/components/primitives/textarea';
 import { ROUTES } from '@/src/lib/constants/routes';
 
 interface NewPostFormProps {

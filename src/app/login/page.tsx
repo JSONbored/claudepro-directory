@@ -4,7 +4,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { UnifiedButton } from '@/src/components/ui/unified-button';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 

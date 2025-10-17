@@ -16,15 +16,15 @@
 
 import Link from 'next/link';
 import { memo, useEffect, useState } from 'react';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
+import { Button } from '@/src/components/primitives/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
+import { Input } from '@/src/components/primitives/input';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/src/components/ui/tooltip';
+} from '@/src/components/primitives/tooltip';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { CategoryNavigationCard } from '@/src/components/unified-detail-page/sidebar/category-navigation-card';
 import { ROUTES } from '@/src/lib/constants/routes';

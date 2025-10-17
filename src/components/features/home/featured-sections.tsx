@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
 import { ConfigCard } from '@/src/components/cards/config-card';
 import { UnifiedCardGrid } from '@/src/components/cards/unified-card-grid';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   HOMEPAGE_FEATURED_CATEGORIES,
   UNIFIED_CATEGORY_REGISTRY,

@@ -30,7 +30,7 @@ import {
   LazySearchSection,
   LazyTabsSection,
 } from '@/src/components/features/home/lazy-homepage-sections';
-import { HomepageStatsSkeleton } from '@/src/components/ui/loading-skeleton';
+import { HomepageStatsSkeleton } from '@/src/components/primitives/loading-skeleton';
 import { NumberTicker } from '@/src/components/ui/magic/number-ticker';
 import { useSearch } from '@/src/hooks/use-search';
 import {

@@ -8,24 +8,24 @@
  */
 
 import { useId, useState, useTransition } from 'react';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
+} from '@/src/components/primitives/card';
+import { Input } from '@/src/components/primitives/input';
+import { Label } from '@/src/components/primitives/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
-import { Textarea } from '@/src/components/ui/textarea';
+} from '@/src/components/primitives/select';
+import { Textarea } from '@/src/components/primitives/textarea';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import type { CreateJobInput } from '@/src/lib/schemas/content/job.schema';

@@ -18,8 +18,8 @@ import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
 import { ConfigCard } from '@/src/components/cards/config-card';
 import { UnifiedCardGrid } from '@/src/components/cards/unified-card-grid';
-import { Button } from '@/src/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
+import { Button } from '@/src/components/primitives/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import {
   HOMEPAGE_TAB_CATEGORIES,
   UNIFIED_CATEGORY_REGISTRY,

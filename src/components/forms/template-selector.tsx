@@ -1,12 +1,12 @@
 'use client';
 
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/src/components/ui/dropdown-menu';
+} from '@/src/components/primitives/dropdown-menu';
 import { TEMPLATES, type Template } from '@/src/lib/config/templates';
 import { ChevronDown, FileText } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

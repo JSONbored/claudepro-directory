@@ -40,15 +40,15 @@
  * ```
  */
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/avatar';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
+} from '@/src/components/primitives/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { BookOpen, CheckCircle, Zap } from '@/src/lib/icons';
 import type {

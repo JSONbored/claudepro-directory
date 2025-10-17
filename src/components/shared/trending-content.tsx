@@ -3,7 +3,7 @@
 import { memo, useId } from 'react';
 import { ConfigCard } from '@/src/components/cards/config-card';
 import { UnifiedCardGrid } from '@/src/components/cards/unified-card-grid';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { Clock, Star, TrendingUp } from '@/src/lib/icons';
 import type { TrendingContentProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';

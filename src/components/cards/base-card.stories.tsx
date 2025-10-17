@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { Bookmark, Copy, ExternalLink, Eye, Github } from '@/src/lib/icons';
 import { BaseCard } from './base-card';

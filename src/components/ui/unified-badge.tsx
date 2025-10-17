@@ -22,7 +22,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/src/components/ui/tooltip';
+} from '@/src/components/primitives/tooltip';
 import { Star, TrendingUp, Zap } from '@/src/lib/icons';
 import { cn } from '@/src/lib/utils';
 

@@ -3,8 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Button } from '@/src/components/primitives/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from '@/src/lib/icons';
 import type { JobCardProps } from '@/src/lib/schemas/component.schema';

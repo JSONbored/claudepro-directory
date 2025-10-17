@@ -23,7 +23,7 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { BaseCard } from '@/src/components/cards/base-card';
 import { CategoryFilter } from '@/src/components/changelog/category-filter';
-import { Tabs, TabsContent } from '@/src/components/ui/tabs';
+import { Tabs, TabsContent } from '@/src/components/primitives/tabs';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import {
   formatChangelogDateShort,

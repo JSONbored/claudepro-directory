@@ -35,8 +35,12 @@
 
 import Link from 'next/link';
 import React, { lazy, Suspense } from 'react';
+import {
+  ConfigCardSkeleton,
+  Skeleton,
+  TableSkeleton,
+} from '@/src/components/primitives/loading-skeleton';
 import { useMDXContent } from '@/src/components/providers/mdx-content-provider';
-import { ConfigCardSkeleton, Skeleton, TableSkeleton } from '@/src/components/ui/loading-skeleton';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { CheckCircle, Copy, ExternalLink } from '@/src/lib/icons';
 import type {

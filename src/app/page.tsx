@@ -19,8 +19,8 @@ import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { HomePageClient } from '@/src/components/features/home';
 import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
+import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
-import { LoadingSkeleton } from '@/src/components/ui/loading-skeleton';
 
 // Lazy load animations to improve LCP (40-60 KB saved from initial bundle)
 // RollingText uses Framer Motion and impacts homepage First Load

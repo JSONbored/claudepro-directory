@@ -12,7 +12,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { AlertTriangle, BookOpen, CheckCircle } from '@/src/lib/icons';
 import { type ChecklistProps, checklistPropsSchema } from '@/src/lib/schemas/shared.schema';

@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { CheckCircle } from '@/src/lib/icons';
 import {
   type DiagnosticFlowProps,

@@ -41,24 +41,24 @@
  */
 
 import { useId, useState } from 'react';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
+} from '@/src/components/primitives/card';
+import { Input } from '@/src/components/primitives/input';
+import { Label } from '@/src/components/primitives/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
-import { Textarea } from '@/src/components/ui/textarea';
+} from '@/src/components/primitives/select';
+import { Textarea } from '@/src/components/primitives/textarea';
 import { ChevronDown, ChevronUp, Code, Plus, Trash } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';

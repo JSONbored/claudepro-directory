@@ -6,11 +6,11 @@
  */
 
 import { useId, useState, useTransition } from 'react';
-import { Button } from '@/src/components/ui/button';
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
-import { Switch } from '@/src/components/ui/switch';
-import { Textarea } from '@/src/components/ui/textarea';
+import { Button } from '@/src/components/primitives/button';
+import { Input } from '@/src/components/primitives/input';
+import { Label } from '@/src/components/primitives/label';
+import { Switch } from '@/src/components/primitives/switch';
+import { Textarea } from '@/src/components/primitives/textarea';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { refreshProfileFromOAuth, updateProfile } from '@/src/lib/actions/user.actions';
 import { X } from '@/src/lib/icons';

@@ -10,15 +10,15 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
-import { Separator } from '@/src/components/ui/separator';
+} from '@/src/components/primitives/select';
+import { Separator } from '@/src/components/primitives/separator';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import {
   addItemToCollection,

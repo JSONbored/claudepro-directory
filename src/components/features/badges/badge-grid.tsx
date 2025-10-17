@@ -27,13 +27,13 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/src/components/ui/tooltip';
+} from '@/src/components/primitives/tooltip';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { toggleBadgeFeatured } from '@/src/lib/actions/badges.actions';
 import {

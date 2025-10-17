@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import { FeaturedSectionSkeleton } from '@/src/components/ui/loading-skeleton';
+import { FeaturedSectionSkeleton } from '@/src/components/primitives/loading-skeleton';
 
 /**
  * Lazy-loaded FeaturedSections with skeleton loading state

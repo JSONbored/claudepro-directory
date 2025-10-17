@@ -6,8 +6,8 @@
  */
 
 import { useState } from 'react';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent } from '@/src/components/ui/card';
+import { Button } from '@/src/components/primitives/button';
+import { Card, CardContent } from '@/src/components/primitives/card';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ExternalLink, FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import type { Activity, ActivityType } from '@/src/lib/schemas/activity.schema';

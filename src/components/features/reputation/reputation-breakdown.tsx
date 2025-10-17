@@ -25,7 +25,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { HorizontalBarChart } from '@/src/components/ui/horizontal-bar-chart';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import {

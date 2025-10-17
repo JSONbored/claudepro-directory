@@ -57,7 +57,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { ProductionCodeBlock } from '@/src/components/ui/production-code-block';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import type { LucideIcon } from '@/src/lib/icons';

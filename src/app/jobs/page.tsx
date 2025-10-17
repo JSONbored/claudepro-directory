@@ -1,16 +1,16 @@
 import Link from 'next/link';
 import { JobCard } from '@/src/components/cards/job-card';
 import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent } from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
+import { Button } from '@/src/components/primitives/button';
+import { Card, CardContent } from '@/src/components/primitives/card';
+import { Input } from '@/src/components/primitives/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
+} from '@/src/components/primitives/select';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { getJobs, type Job } from '@/src/lib/data/jobs';

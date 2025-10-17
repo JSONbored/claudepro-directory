@@ -16,16 +16,16 @@ import { useCallback, useEffect, useId, useState } from 'react';
 import { getSearchEvent } from '#lib/analytics/event-mapper';
 import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
-import { Button } from '@/src/components/ui/button';
-import { Collapsible, CollapsibleContent } from '@/src/components/ui/collapsible';
-import { Input } from '@/src/components/ui/input';
+import { Button } from '@/src/components/primitives/button';
+import { Collapsible, CollapsibleContent } from '@/src/components/primitives/collapsible';
+import { Input } from '@/src/components/primitives/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
+} from '@/src/components/primitives/select';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
 import { trackEvent } from '@/src/lib/analytics/tracker';

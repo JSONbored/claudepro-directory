@@ -32,8 +32,8 @@
 
 import Script from 'next/script';
 import { useCallback, useState } from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/src/components/ui/alert';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import {
   AlertTriangle,
   CheckCircle,

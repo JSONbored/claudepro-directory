@@ -19,9 +19,9 @@
  * - Maintainability: Hard → Easy
  */
 
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
-import { Textarea } from '@/src/components/ui/textarea';
+import { Input } from '@/src/components/primitives/input';
+import { Label } from '@/src/components/primitives/label';
+import { Textarea } from '@/src/components/primitives/textarea';
 import type {
   ContentTypeConfig,
   FieldDefinition,

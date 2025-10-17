@@ -24,7 +24,7 @@
 
 import { Suspense } from 'react';
 import { ConfigCard } from '@/src/components/cards/config-card';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { getContentBySlug } from '@/src/lib/content/content-loaders';
 import { AlertTriangle, CheckCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

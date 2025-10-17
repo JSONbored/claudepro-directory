@@ -14,17 +14,17 @@
  */
 
 import { useId } from 'react';
-import { Button } from '@/src/components/ui/button';
-import { Label } from '@/src/components/ui/label';
-import { ScrollArea } from '@/src/components/ui/scroll-area';
+import { Button } from '@/src/components/primitives/button';
+import { Label } from '@/src/components/primitives/label';
+import { ScrollArea } from '@/src/components/primitives/scroll-area';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
-import { Slider } from '@/src/components/ui/slider';
+} from '@/src/components/primitives/select';
+import { Slider } from '@/src/components/primitives/slider';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import type { FilterState } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

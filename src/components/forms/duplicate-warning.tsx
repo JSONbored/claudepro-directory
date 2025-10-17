@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/src/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/alert';
 import { AlertTriangle } from '@/src/lib/icons';
 
 interface DuplicateWarningProps {

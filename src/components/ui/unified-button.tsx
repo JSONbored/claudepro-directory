@@ -45,7 +45,7 @@ import { trackCopy } from '#lib/actions/track-view';
 import { addBookmark, removeBookmark } from '#lib/actions/user';
 import { usePostCopyEmail } from '#lib/providers/post-copy-email';
 import { createClient } from '#lib/supabase/client';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import {

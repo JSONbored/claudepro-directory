@@ -3,14 +3,14 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { BadgeGrid } from '@/src/components/features/badges/badge-grid';
 import { ReputationBreakdown } from '@/src/components/features/reputation/reputation-breakdown';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { getPublicUserBadges } from '@/src/lib/actions/badges.actions';
 import { getUserReputation } from '@/src/lib/actions/reputation.actions';

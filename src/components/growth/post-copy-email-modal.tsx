@@ -20,15 +20,15 @@ import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useState } from 'react';
 import { postCopyEmailCaptureAction } from '#lib/actions/email-capture';
 import { trackEvent } from '#lib/analytics/tracker';
-import { Button } from '@/src/components/ui/button';
-import { Input } from '@/src/components/ui/input';
+import { Button } from '@/src/components/primitives/button';
+import { Input } from '@/src/components/primitives/input';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/src/components/ui/sheet';
+} from '@/src/components/primitives/sheet';
 import { EVENTS } from '@/src/lib/analytics/events.constants';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';

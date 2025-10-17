@@ -15,7 +15,7 @@
  * - Correct usage: Server components can import server-only code
  */
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { ProductionCodeBlock } from '@/src/components/ui/production-code-block';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { UnifiedContentBox } from '@/src/components/ui/unified-content-box';

@@ -1,14 +1,14 @@
 import Link from 'next/link';
 import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
-import { Avatar, AvatarFallback } from '@/src/components/ui/avatar';
-import { Button } from '@/src/components/ui/button';
+import { Avatar, AvatarFallback } from '@/src/components/primitives/avatar';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { MessageSquare, Plus, TrendingUp, User as UserIcon } from '@/src/lib/icons';

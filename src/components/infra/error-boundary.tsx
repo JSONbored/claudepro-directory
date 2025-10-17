@@ -2,14 +2,14 @@
 
 import { useCallback } from 'react';
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { createErrorBoundaryFallback } from '@/src/lib/error-handler/client';
 import { AlertTriangle, Home, RefreshCw } from '@/src/lib/icons';
 import { umamiEventDataSchema } from '@/src/lib/schemas/analytics.schema';

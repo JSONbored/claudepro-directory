@@ -16,28 +16,28 @@
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { BaseCard } from '@/src/components/cards/base-card';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@/src/components/ui/collapsible';
-import { Separator } from '@/src/components/ui/separator';
-import { Slider } from '@/src/components/ui/slider';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
+} from '@/src/components/primitives/collapsible';
+import { Separator } from '@/src/components/primitives/separator';
+import { Slider } from '@/src/components/primitives/slider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/src/components/ui/tooltip';
+} from '@/src/components/primitives/tooltip';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { UnifiedButton } from '@/src/components/ui/unified-button';
 import { addBookmarkBatch } from '@/src/lib/actions/user.actions';

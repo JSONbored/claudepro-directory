@@ -1,8 +1,8 @@
 'use client';
 
 import { useId } from 'react';
-import { Button } from '@/src/components/ui/button';
-import { Input } from '@/src/components/ui/input';
+import { Button } from '@/src/components/primitives/button';
+import { Input } from '@/src/components/primitives/input';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
 import { Mail } from '@/src/lib/icons';

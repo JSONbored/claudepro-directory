@@ -1,15 +1,15 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Separator } from '@/src/components/ui/separator';
+} from '@/src/components/primitives/card';
+import { Separator } from '@/src/components/primitives/separator';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { trackView } from '@/src/lib/actions/track-view';
 import { ArrowLeft, ExternalLink } from '@/src/lib/icons';

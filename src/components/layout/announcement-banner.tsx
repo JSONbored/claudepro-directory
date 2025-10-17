@@ -2,7 +2,11 @@
 
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { Announcement, AnnouncementTag, AnnouncementTitle } from '@/src/components/ui/announcement';
+import {
+  Announcement,
+  AnnouncementTag,
+  AnnouncementTitle,
+} from '@/src/components/primitives/announcement';
 import { getActiveAnnouncement } from '@/src/config/announcements';
 import { useAnnouncementDismissal } from '@/src/hooks/use-announcement-dismissal';
 import {

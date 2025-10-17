@@ -9,10 +9,10 @@ import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 // Removed unused import: CategoryGuidesPage
 import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar';
+import { Button } from '@/src/components/primitives/button';
+import { Card, CardContent } from '@/src/components/primitives/card';
 import { MDXContentProvider } from '@/src/components/providers/mdx-content-provider';
 import { MDXRenderer } from '@/src/components/shared/mdx-renderer';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent } from '@/src/components/ui/card';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { contentCache, statsRedis } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';

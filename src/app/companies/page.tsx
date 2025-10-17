@@ -1,14 +1,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Building, ExternalLink, Plus, Star } from '@/src/lib/icons';

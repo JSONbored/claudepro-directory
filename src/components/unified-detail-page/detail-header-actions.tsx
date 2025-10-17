@@ -14,7 +14,7 @@
 
 import { useRouter } from 'next/navigation';
 import type { CopyType } from '@/src/components/growth/post-copy-email-modal';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { UnifiedButton } from '@/src/components/ui/unified-button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
