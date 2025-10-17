@@ -14,12 +14,15 @@
  * - Max length constraints on all string fields
  * - URL encoding for shareable results
  * - Production-grade JSON parsing with safeParse utility
+ *
+ * MODERNIZATION: Uses registry-driven contentCategorySchema for tool preferences and categories
  */
 
 import { z } from 'zod';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import { percentage, positiveInt } from './primitives/base-numbers';
 import { mediumString, nonEmptyString, shortString } from './primitives/base-strings';
+import { contentCategorySchema } from './shared.schema';
 
 /**
  * Primary Use Case Options
@@ -53,11 +56,12 @@ export type ExperienceLevel = z.infer<typeof experienceLevelSchema>;
 
 /**
  * Tool Preference Options
- * Maps directly to content categories
+ * Maps directly to content categories (registry-driven)
+ * MODERNIZATION: Now supports all 11 categories from UNIFIED_CATEGORY_REGISTRY
  */
-export const toolPreferenceSchema = z
-  .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'])
-  .describe('Preferred Claude configuration tool type');
+export const toolPreferenceSchema = contentCategorySchema.describe(
+  'Preferred Claude configuration tool type (all categories supported)'
+);
 
 export type ToolPreference = z.infer<typeof toolPreferenceSchema>;
 
@@ -145,6 +149,7 @@ export type RecommendationReason = z.infer<typeof recommendationReasonSchema>;
 /**
  * Single Recommendation Result
  * A recommended configuration with scoring and explanation
+ * MODERNIZATION: category now registry-driven (supports all 11 categories)
  */
 export const recommendationResultSchema = z
   .object({
@@ -152,9 +157,9 @@ export const recommendationResultSchema = z
     slug: nonEmptyString.max(200).describe('Configuration slug identifier'),
     title: nonEmptyString.max(200).describe('Configuration title'),
     description: mediumString.describe('Configuration description'),
-    category: z
-      .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'])
-      .describe('Configuration category'),
+    category: contentCategorySchema.describe(
+      'Configuration category (derived from UNIFIED_CATEGORY_REGISTRY)'
+    ),
 
     // Scoring and matching
     matchScore: percentage.describe('Overall match score (0-100)'),

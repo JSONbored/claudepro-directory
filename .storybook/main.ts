@@ -178,13 +178,15 @@ const config: StorybookConfig = {
 
     // Exclude .mock.js files from Vite transformation
     // These are plain ES modules that should be served as-is
+    // NOTE: Vite only supports single wildcard in external paths
     if (!config.optimizeDeps) {
       config.optimizeDeps = {};
     }
     if (!config.optimizeDeps.exclude) {
       config.optimizeDeps.exclude = [];
     }
-    config.optimizeDeps.exclude.push('**/analytics/*.mock.js');
+    // Use specific path instead of double wildcard (Vite limitation)
+    config.optimizeDeps.exclude.push('src/lib/analytics/event-mapper.mock.js');
 
     return config;
   },

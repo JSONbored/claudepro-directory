@@ -111,40 +111,13 @@ export const CLAUDE_CONFIG = claudeConfigSchema.parse({
 });
 
 /**
- * Content Categories Schema (leveraging existing schema)
+ * Content Categories
+ * **ARCHITECTURAL FIX**: Removed CONTENT_CATEGORIES and SEO_CATEGORIES constants (outdated)
+ * Use UNIFIED_CATEGORY_REGISTRY from category-config.ts as single source of truth instead
  */
-import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
-
-// CONSOLIDATION: Use complete category list from centralized schema instead of partial list
-// This eliminates the type mismatch between constants and actual categories used
-export const CONTENT_CATEGORIES = {
-  // Core content types (have dedicated directories in /content)
-  agents: 'agents',
-  mcp: 'mcp',
-  rules: 'rules',
-  commands: 'commands',
-  hooks: 'hooks',
-  statuslines: 'statuslines',
-  skills: 'skills',
-  // SEO content types (in /seo directory)
-  guides: 'guides',
-  tutorials: 'tutorials',
-  comparisons: 'comparisons',
-  workflows: 'workflows',
-  'use-cases': 'use-cases',
-  troubleshooting: 'troubleshooting',
-  categories: 'categories',
-  collections: 'collections',
-  // Special types
-  jobs: 'jobs',
-} as const;
-
-// Validate each category exists in the centralized schema
-Object.values(CONTENT_CATEGORIES).forEach((category) => {
-  contentCategorySchema.parse(category);
-});
 
 // CONSOLIDATION: Export unified main content categories for splitting logic
+// **ARCHITECTURAL FIX**: Added guides, jobs, changelog to match UNIFIED_CATEGORY_REGISTRY
 export const MAIN_CONTENT_CATEGORIES = [
   'hooks',
   'mcp',
@@ -154,16 +127,12 @@ export const MAIN_CONTENT_CATEGORIES = [
   'statuslines',
   'collections',
   'skills',
+  'guides',
+  'jobs',
+  'changelog',
 ] as const;
 
-// CONSOLIDATION: Export SEO categories for better organization
-export const SEO_CATEGORIES = [
-  'tutorials',
-  'comparisons',
-  'workflows',
-  'use-cases',
-  'troubleshooting',
-] as const;
+// **ARCHITECTURAL FIX**: Removed unused SEO_CATEGORIES (guide subcategories, not top-level categories)
 
 /**
  * Content Directory Paths Schema

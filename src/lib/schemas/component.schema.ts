@@ -4,6 +4,8 @@
  *
  * SHA-2100: Removed ui-props.schema.ts (177 lines of unused runtime validation)
  * Extracted only the ConfigCardProps type that's actually used
+ *
+ * MODERNIZATION: All category types now derived from ContentCategory (registry-driven)
  */
 
 import { z } from 'zod';
@@ -12,6 +14,7 @@ import type { TrendingContentItem } from '@/src/lib/trending/calculator.server';
 import type { UnifiedContentItem } from './components/content-item.schema';
 import type { HomePageClientProps } from './components/page-props.schema';
 import type { SortOption } from './content-filter.schema';
+import { type ContentCategory, contentCategorySchema } from './shared.schema';
 
 /**
  * Config card component props (extracted from deleted ui-props.schema.ts)
@@ -73,7 +76,7 @@ export interface ErrorFallbackProps {
 
 // JobCard component props
 export interface JobCardProps {
-  job: import('@/src/lib/schemas/content/content-types').JobContent;
+  job: import('@/src/lib/schemas/content/job.schema').JobContent;
 }
 
 // UnifiedSearch component props
@@ -107,18 +110,12 @@ export interface TrendingContentProps {
 
 /**
  * View tracker props
+ * MODERNIZATION: category now registry-driven (supports all 11 categories)
  */
 const viewTrackerPropsSchema = z.object({
-  category: z.enum([
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'guides',
-    'changelog',
-    'skills',
-  ]),
+  category: contentCategorySchema.describe(
+    'Content category for view tracking (derived from UNIFIED_CATEGORY_REGISTRY)'
+  ),
   slug: nonEmptyString.max(200),
 });
 
@@ -132,7 +129,7 @@ export type ContentListServerProps<T extends UnifiedContentItem = UnifiedContent
   description: string;
   icon: string;
   items: readonly T[] | T[];
-  type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides' | 'skills';
+  type: ContentCategory;
   searchPlaceholder?: string;
   badges?: Array<{
     icon?: string | React.ComponentType<{ className?: string }>;
@@ -146,7 +143,7 @@ export type ContentListServerProps<T extends UnifiedContentItem = UnifiedContent
 export type RelatedConfigsProps<T extends UnifiedContentItem = UnifiedContentItem> = {
   configs: T[];
   title?: string;
-  type?: 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' | 'guides' | 'skills';
+  type?: ContentCategory;
 };
 
 /**
@@ -165,7 +162,7 @@ export type FloatingSearchSidebarProps = {
  */
 export type ContentSearchClientProps<T extends UnifiedContentItem = UnifiedContentItem> = {
   items: readonly T[] | T[];
-  type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides' | 'skills';
+  type: ContentCategory;
   searchPlaceholder: string;
   title: string;
   icon: string;

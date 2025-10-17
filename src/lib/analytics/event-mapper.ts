@@ -17,10 +17,8 @@
  */
 
 import { EVENTS, type EventName } from '@/src/lib/analytics/events.constants';
-import {
-  getAllContentCategories,
-  type ContentCategory as SharedContentCategory,
-} from '@/src/lib/schemas/shared.schema';
+import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+import type { ContentCategory as SharedContentCategory } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Content categories supported by the event mapper
@@ -72,12 +70,12 @@ function categoryToEventSuffix(categoryId: string): string {
 }
 
 /**
- * Build event mappings dynamically from category schema
+ * Build event mappings dynamically from category registry
  * Automatically handles all categories - zero manual maintenance
- * Uses lightweight schema enum instead of heavy category config
+ * Derives from UNIFIED_CATEGORY_REGISTRY (single source of truth)
  */
 function buildEventMappings(): Record<EventAction, Record<string, EventName>> {
-  const categories = getAllContentCategories();
+  const categories = Object.keys(UNIFIED_CATEGORY_REGISTRY);
 
   const contentViewMap: Record<string, EventName> = {};
   const searchMap: Record<string, EventName> = { global: EVENTS.SEARCH_GLOBAL };

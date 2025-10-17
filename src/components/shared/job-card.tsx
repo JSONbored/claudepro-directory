@@ -91,7 +91,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
 
         <div className="mb-4">
           <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-            {job.tags.slice(0, 4).map((tag) => (
+            {job.tags.slice(0, 4).map((tag: string) => (
               <UnifiedBadge key={tag} variant="base" style="outline" className="text-xs">
                 {tag}
               </UnifiedBadge>

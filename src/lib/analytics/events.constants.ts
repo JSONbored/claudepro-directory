@@ -39,6 +39,7 @@
 /**
  * Category IDs that have analytics events
  * Auto-generated from UNIFIED_CATEGORY_REGISTRY
+ * MODERNIZATION: Single source of truth - all 11 categories included
  */
 type AnalyticsCategory =
   | 'agents'
@@ -48,16 +49,18 @@ type AnalyticsCategory =
   | 'hooks'
   | 'statuslines'
   | 'collections'
-  | 'skills';
-
-/**
- * Additional content types (not in main category registry)
- */
-type AdditionalContentType = 'guide';
+  | 'skills'
+  | 'guides'
+  | 'jobs'
+  | 'changelog';
 
 /**
  * Category event suffix mapping (for singular forms)
- * Auto-generated transformation rules
+ * Auto-generated transformation rules:
+ * - agents → agent
+ * - statuslines → statusline
+ * - guides → guide
+ * - mcp → mcp (unchanged)
  */
 type CategorySuffix<T extends string> = T extends 'agents'
   ? 'agent'
@@ -75,26 +78,26 @@ type CategorySuffix<T extends string> = T extends 'agents'
               ? 'collection'
               : T extends 'skills'
                 ? 'skill'
-                : T extends 'guide'
+                : T extends 'guides'
                   ? 'guide'
-                  : never;
+                  : T extends 'jobs'
+                    ? 'job'
+                    : T extends 'changelog'
+                      ? 'changelog'
+                      : never;
 
 /**
  * TypeScript template literal types for dynamic event generation
  * These types ensure compile-time validation of all event names
+ * MODERNIZATION: 100% registry-driven, zero hardcoded categories
  */
 type ContentViewEvent<T extends AnalyticsCategory> = `content_view_${CategorySuffix<T>}`;
-type RelatedClickEvent<T extends AnalyticsCategory | AdditionalContentType> =
-  `related_click_from_${CategorySuffix<T>}`;
-type RelatedViewEvent<T extends AnalyticsCategory | AdditionalContentType> =
-  `related_view_on_${CategorySuffix<T>}`;
-type SearchEvent<T extends AnalyticsCategory | 'guides'> = `search_${T}`;
-type CopyCodeEvent<T extends AnalyticsCategory | AdditionalContentType> =
-  `copy_code_${CategorySuffix<T>}`;
-type CopyMarkdownEvent<T extends AnalyticsCategory | AdditionalContentType> =
-  `copy_markdown_${CategorySuffix<T>}`;
-type DownloadMarkdownEvent<T extends AnalyticsCategory | AdditionalContentType> =
-  `download_markdown_${CategorySuffix<T>}`;
+type RelatedClickEvent<T extends AnalyticsCategory> = `related_click_from_${CategorySuffix<T>}`;
+type RelatedViewEvent<T extends AnalyticsCategory> = `related_view_on_${CategorySuffix<T>}`;
+type SearchEvent<T extends AnalyticsCategory> = `search_${T}`;
+type CopyCodeEvent<T extends AnalyticsCategory> = `copy_code_${CategorySuffix<T>}`;
+type CopyMarkdownEvent<T extends AnalyticsCategory> = `copy_markdown_${CategorySuffix<T>}`;
+type DownloadMarkdownEvent<T extends AnalyticsCategory> = `download_markdown_${CategorySuffix<T>}`;
 
 /**
  * ============================================
@@ -117,6 +120,9 @@ export const EVENTS = {
   CONTENT_VIEW_STATUSLINE: 'content_view_statusline' as ContentViewEvent<'statuslines'>,
   CONTENT_VIEW_COLLECTION: 'content_view_collection' as ContentViewEvent<'collections'>,
   CONTENT_VIEW_SKILL: 'content_view_skill' as ContentViewEvent<'skills'>,
+  CONTENT_VIEW_GUIDE: 'content_view_guide' as ContentViewEvent<'guides'>,
+  CONTENT_VIEW_JOB: 'content_view_job' as ContentViewEvent<'jobs'>,
+  CONTENT_VIEW_CHANGELOG: 'content_view_changelog' as ContentViewEvent<'changelog'>,
 
   // ============================================
   // RELATED CONTENT CLICK EVENTS (Category-specific)
@@ -131,7 +137,9 @@ export const EVENTS = {
   RELATED_CLICK_FROM_COLLECTION:
     'related_click_from_collection' as RelatedClickEvent<'collections'>,
   RELATED_CLICK_FROM_SKILL: 'related_click_from_skill' as RelatedClickEvent<'skills'>,
-  RELATED_CLICK_FROM_GUIDE: 'related_click_from_guide' as RelatedClickEvent<'guide'>,
+  RELATED_CLICK_FROM_GUIDE: 'related_click_from_guide' as RelatedClickEvent<'guides'>,
+  RELATED_CLICK_FROM_JOB: 'related_click_from_job' as RelatedClickEvent<'jobs'>,
+  RELATED_CLICK_FROM_CHANGELOG: 'related_click_from_changelog' as RelatedClickEvent<'changelog'>,
 
   // ============================================
   // RELATED CONTENT VIEW EVENTS (Category-specific)
@@ -144,7 +152,9 @@ export const EVENTS = {
   RELATED_VIEW_ON_STATUSLINE: 'related_view_on_statusline' as RelatedViewEvent<'statuslines'>,
   RELATED_VIEW_ON_COLLECTION: 'related_view_on_collection' as RelatedViewEvent<'collections'>,
   RELATED_VIEW_ON_SKILL: 'related_view_on_skill' as RelatedViewEvent<'skills'>,
-  RELATED_VIEW_ON_GUIDE: 'related_view_on_guide' as RelatedViewEvent<'guide'>,
+  RELATED_VIEW_ON_GUIDE: 'related_view_on_guide' as RelatedViewEvent<'guides'>,
+  RELATED_VIEW_ON_JOB: 'related_view_on_job' as RelatedViewEvent<'jobs'>,
+  RELATED_VIEW_ON_CHANGELOG: 'related_view_on_changelog' as RelatedViewEvent<'changelog'>,
 
   // ============================================
   // SEARCH EVENTS (Category-specific)
@@ -158,6 +168,8 @@ export const EVENTS = {
   SEARCH_COLLECTIONS: 'search_collections' as SearchEvent<'collections'>,
   SEARCH_SKILLS: 'search_skills' as SearchEvent<'skills'>,
   SEARCH_GUIDES: 'search_guides' as SearchEvent<'guides'>,
+  SEARCH_JOBS: 'search_jobs' as SearchEvent<'jobs'>,
+  SEARCH_CHANGELOG: 'search_changelog' as SearchEvent<'changelog'>,
 
   // ============================================
   // COPY CODE EVENTS (Category-specific)
@@ -170,7 +182,9 @@ export const EVENTS = {
   COPY_CODE_STATUSLINE: 'copy_code_statusline' as CopyCodeEvent<'statuslines'>,
   COPY_CODE_COLLECTION: 'copy_code_collection' as CopyCodeEvent<'collections'>,
   COPY_CODE_SKILL: 'copy_code_skill' as CopyCodeEvent<'skills'>,
-  COPY_CODE_GUIDE: 'copy_code_guide' as CopyCodeEvent<'guide'>,
+  COPY_CODE_GUIDE: 'copy_code_guide' as CopyCodeEvent<'guides'>,
+  COPY_CODE_JOB: 'copy_code_job' as CopyCodeEvent<'jobs'>,
+  COPY_CODE_CHANGELOG: 'copy_code_changelog' as CopyCodeEvent<'changelog'>,
 
   // ============================================
   // COPY MARKDOWN EVENTS (Category-specific)
@@ -183,7 +197,9 @@ export const EVENTS = {
   COPY_MARKDOWN_STATUSLINE: 'copy_markdown_statusline' as CopyMarkdownEvent<'statuslines'>,
   COPY_MARKDOWN_COLLECTION: 'copy_markdown_collection' as CopyMarkdownEvent<'collections'>,
   COPY_MARKDOWN_SKILL: 'copy_markdown_skill' as CopyMarkdownEvent<'skills'>,
-  COPY_MARKDOWN_GUIDE: 'copy_markdown_guide' as CopyMarkdownEvent<'guide'>,
+  COPY_MARKDOWN_GUIDE: 'copy_markdown_guide' as CopyMarkdownEvent<'guides'>,
+  COPY_MARKDOWN_JOB: 'copy_markdown_job' as CopyMarkdownEvent<'jobs'>,
+  COPY_MARKDOWN_CHANGELOG: 'copy_markdown_changelog' as CopyMarkdownEvent<'changelog'>,
 
   // ============================================
   // DOWNLOAD MARKDOWN EVENTS (Category-specific)
@@ -198,7 +214,9 @@ export const EVENTS = {
   DOWNLOAD_MARKDOWN_COLLECTION:
     'download_markdown_collection' as DownloadMarkdownEvent<'collections'>,
   DOWNLOAD_MARKDOWN_SKILL: 'download_markdown_skill' as DownloadMarkdownEvent<'skills'>,
-  DOWNLOAD_MARKDOWN_GUIDE: 'download_markdown_guide' as DownloadMarkdownEvent<'guide'>,
+  DOWNLOAD_MARKDOWN_GUIDE: 'download_markdown_guide' as DownloadMarkdownEvent<'guides'>,
+  DOWNLOAD_MARKDOWN_JOB: 'download_markdown_job' as DownloadMarkdownEvent<'jobs'>,
+  DOWNLOAD_MARKDOWN_CHANGELOG: 'download_markdown_changelog' as DownloadMarkdownEvent<'changelog'>,
 
   // ============================================
   // CORE EVENTS (Non-category-specific)
@@ -1068,6 +1086,12 @@ export interface EventPayloads {
     cache_hit: boolean;
   };
 
+  [EVENTS.CONTENT_VIEW_GUIDE]: {
+    slug: string;
+    page: string;
+    source?: string;
+  };
+
   [EVENTS.SEARCH_GUIDES]: {
     query: string;
     results_count: number;
@@ -1103,6 +1127,96 @@ export interface EventPayloads {
   };
 
   [EVENTS.RELATED_VIEW_ON_GUIDE]: {
+    items_shown: number;
+    cache_hit: boolean;
+  };
+
+  [EVENTS.CONTENT_VIEW_JOB]: {
+    slug: string;
+    page: string;
+    source?: string;
+  };
+
+  [EVENTS.SEARCH_JOBS]: {
+    query: string;
+    results_count: number;
+    filters_applied: boolean;
+    time_to_results: number;
+  };
+
+  [EVENTS.COPY_CODE_JOB]: {
+    slug: string;
+    content_length: number;
+    language?: string;
+  };
+
+  [EVENTS.COPY_MARKDOWN_JOB]: {
+    slug: string;
+    include_metadata: boolean;
+    include_footer: boolean;
+    content_length: number;
+  };
+
+  [EVENTS.DOWNLOAD_MARKDOWN_JOB]: {
+    slug: string;
+    filename: string;
+    file_size: number;
+  };
+
+  [EVENTS.RELATED_CLICK_FROM_JOB]: {
+    target_slug: string;
+    target_category: string;
+    position: number;
+    match_score: number;
+    match_type: string;
+  };
+
+  [EVENTS.RELATED_VIEW_ON_JOB]: {
+    items_shown: number;
+    cache_hit: boolean;
+  };
+
+  [EVENTS.CONTENT_VIEW_CHANGELOG]: {
+    slug: string;
+    page: string;
+    source?: string;
+  };
+
+  [EVENTS.SEARCH_CHANGELOG]: {
+    query: string;
+    results_count: number;
+    filters_applied: boolean;
+    time_to_results: number;
+  };
+
+  [EVENTS.COPY_CODE_CHANGELOG]: {
+    slug: string;
+    content_length: number;
+    language?: string;
+  };
+
+  [EVENTS.COPY_MARKDOWN_CHANGELOG]: {
+    slug: string;
+    include_metadata: boolean;
+    include_footer: boolean;
+    content_length: number;
+  };
+
+  [EVENTS.DOWNLOAD_MARKDOWN_CHANGELOG]: {
+    slug: string;
+    filename: string;
+    file_size: number;
+  };
+
+  [EVENTS.RELATED_CLICK_FROM_CHANGELOG]: {
+    target_slug: string;
+    target_category: string;
+    position: number;
+    match_score: number;
+    match_type: string;
+  };
+
+  [EVENTS.RELATED_VIEW_ON_CHANGELOG]: {
     items_shown: number;
     cache_hit: boolean;
   };

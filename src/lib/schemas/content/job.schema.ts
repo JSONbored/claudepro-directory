@@ -22,9 +22,10 @@ export const jobPlanSchema = z.enum(['standard', 'featured', 'premium']);
 export const jobStatusSchema = z.enum(['draft', 'active', 'expired', 'paused', 'deleted']);
 
 /**
- * Database job schema (complete record from Supabase)
+ * Job schema (complete record from Supabase)
+ * Modernized naming: Job instead of JobDatabase
  */
-export const jobDatabaseSchema = z.object({
+export const jobSchema = z.object({
   id: z.string().uuid(),
   user_id: z.string().uuid().nullable(),
   company_id: z.string().uuid().nullable(),
@@ -66,7 +67,7 @@ export const jobDatabaseSchema = z.object({
   updated_at: z.string().datetime(),
 });
 
-export type JobDatabase = z.infer<typeof jobDatabaseSchema>;
+export type Job = z.infer<typeof jobSchema>;
 
 /**
  * Job creation schema (for forms/submissions)
@@ -145,7 +146,7 @@ export const toggleJobStatusSchema = z.object({
  * Job display schema (for frontend consumption)
  * Transforms database record to match existing JobContent type
  */
-export const jobContentSchema = jobDatabaseSchema.transform((data) => ({
+export const jobContentSchema = jobSchema.transform((data) => ({
   // Map to existing JobContent type fields
   slug: data.slug,
   description: data.description,

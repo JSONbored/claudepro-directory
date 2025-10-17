@@ -90,7 +90,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 Discover the best [RESEARCH: resource type from verified taxonomy] for [RESEARCH: use case from documented applications]. This collection represents [RESEARCH: curation timeframe from actual curation process] of research and evaluation across [RESEARCH: evaluation scope from methodology]. Each resource meets our [RESEARCH: quality criteria from established standards] and has been verified by [RESEARCH: verification process from quality assurance].
 
-<Callout type="info" title="Collection Overview">
+<UnifiedContentBox contentType="callout" type="info" title="Collection Overview">
 **Resources:** [COUNT: Total number] [RESEARCH: resource type]  
 **Categories:** [COUNT: Category count] [RESEARCH: classification system]  
 **Quality Standard:** [RESEARCH: Quality criteria from evaluation framework]  
@@ -350,7 +350,7 @@ Understanding our selection process ensures you're getting the highest quality [
           
           {/* Advanced resource cards */}
           <div className={`space-y-6 ${UI_CLASSES.MT_6}`}>
-            <Callout type="tip" title="Advanced Resource Notice">
+            <UnifiedContentBox contentType="callout" type="tip" title="Advanced Resource Notice">
             These resources require [RESEARCH: prerequisites from documentation] and are designed for [RESEARCH: target expertise level from classification]. Consider starting with [RESEARCH: beginner alternatives from progression path] if you're new to [RESEARCH: domain area].
             </Callout>
             
@@ -411,7 +411,7 @@ Understanding our selection process ensures you're getting the highest quality [
   rating={5}
 />
 
-<Accordion
+<UnifiedContentBox contentType="accordion"
   title="Community Feedback"
   description="What users say about these resources"
   items={[
@@ -514,7 +514,7 @@ Understanding our selection process ensures you're getting the highest quality [
 
 ## Resource Maintenance
 
-<Callout type="info" title="Collection Updates">
+<UnifiedContentBox contentType="callout" type="info" title="Collection Updates">
 **Update Schedule:** [RESEARCH: Update frequency from maintenance plan]  
 **Quality Review:** [RESEARCH: Review process from quality assurance]  
 **Community Input:** [RESEARCH: Community contribution process from guidelines]  
@@ -556,7 +556,7 @@ Understanding our selection process ensures you're getting the highest quality [
 
 ## Frequently Asked Questions
 
-<AIOptimizedFAQ 
+<UnifiedContentBox contentType="faq" 
   title="Collection Questions"
   description="Common questions about this curated collection"
   questions={[
@@ -591,7 +591,7 @@ Understanding our selection process ensures you're getting the highest quality [
 
 ---
 
-<Callout type="success" title="Start Exploring">
+<UnifiedContentBox contentType="callout" type="success" title="Start Exploring">
 **Ready to dive in?** Choose resources that match your [RESEARCH: selection criteria from guidance] and [RESEARCH: skill level from framework].
 
 **Need help choosing?** Use our [RESEARCH: decision framework from selection guide] or ask the [community](/community) for personalized recommendations.

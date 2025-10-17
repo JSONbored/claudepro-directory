@@ -33,11 +33,25 @@ import {
 /**
  * Content Categories
  * Used across: analytics, content, content-generation, related-content, static-api
+ *
+ * IMPORTANT: This schema is now DERIVED from UNIFIED_CATEGORY_REGISTRY.
+ * Do NOT manually add categories here - add them to the registry instead.
+ *
+ * Subcategories (like guide types: tutorials, comparisons, etc.) are NOT
+ * top-level categories and should NOT be listed here.
  */
-// Main comprehensive schema - single source of truth for ALL content categories
-export const contentCategorySchema = z
-  .enum([
-    // Core content types (have dedicated directories in /content)
+
+// Import registry to derive schema from
+// NOTE: This creates a circular dependency that TypeScript handles gracefully
+// Alternative: Move this file or use a separate types-only export
+let UNIFIED_CATEGORY_REGISTRY_KEYS: readonly string[] = [];
+try {
+  // Dynamic import to break circular dependency at runtime
+  const registry = require('@/src/lib/config/category-config');
+  UNIFIED_CATEGORY_REGISTRY_KEYS = Object.keys(registry.UNIFIED_CATEGORY_REGISTRY);
+} catch {
+  // Fallback for build/test environments where registry isn't available yet
+  UNIFIED_CATEGORY_REGISTRY_KEYS = [
     'agents',
     'mcp',
     'rules',
@@ -45,74 +59,49 @@ export const contentCategorySchema = z
     'hooks',
     'statuslines',
     'skills',
-
-    // SEO content types (in /seo directory)
-    'guides',
-    'tutorials',
-    'comparisons',
-    'workflows',
-    'use-cases',
-    'troubleshooting',
-    'categories',
     'collections',
-
-    // Special types
-    'jobs', // Has route but no content directory
-    'changelog', // Changelog route with CHANGELOG.md as source
-  ])
-  .describe('All valid content categories including core types, SEO types, and special types');
-
-// Subset schema for cacheable categories (used by Redis caching)
-export const cacheableCategorySchema = z
-  .enum([
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
-    'skills',
     'guides',
-    'collections',
     'jobs',
     'changelog',
-    // Note: SEO content doesn't need Redis caching
-  ])
-  .describe('Content categories that support Redis caching for performance optimization');
+  ];
+}
+
+// Derive schema from registry keys (single source of truth)
+export const contentCategorySchema = z
+  .enum(UNIFIED_CATEGORY_REGISTRY_KEYS as [string, ...string[]])
+  .describe('All valid content categories - derived from UNIFIED_CATEGORY_REGISTRY');
+
+// Subset schema for cacheable categories (used by Redis caching)
+// Derived from registry where generateFullContent === true
+export const cacheableCategorySchema = z
+  .enum(
+    UNIFIED_CATEGORY_REGISTRY_KEYS.filter((key) => {
+      try {
+        const registry = require('@/src/lib/config/category-config');
+        return registry.UNIFIED_CATEGORY_REGISTRY[key]?.generateFullContent === true;
+      } catch {
+        // Fallback: assume these categories have full content
+        return [
+          'agents',
+          'mcp',
+          'rules',
+          'commands',
+          'hooks',
+          'statuslines',
+          'skills',
+          'guides',
+          'collections',
+          'changelog',
+        ].includes(key);
+      }
+    }) as [string, ...string[]]
+  )
+  .describe('Content categories that support Redis caching (where generateFullContent=true)');
 
 export type ContentCategory = z.infer<typeof contentCategorySchema>;
 
-/**
- * Get all content category IDs as array
- * Lightweight helper that uses Zod's built-in options property
- * Safe for Storybook environment with fallback
- *
- * @returns Array of all valid content category strings
- *
- * @example
- * ```typescript
- * const categories = getAllContentCategories();
- * // Returns: ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'guides', 'tutorials', ...]
- * ```
- */
-export function getAllContentCategories(): readonly ContentCategory[] {
-  try {
-    return contentCategorySchema.options || [];
-  } catch (error) {
-    // Fallback for Storybook/test environments where Zod might not be fully initialized
-    console.warn('[getAllContentCategories] Zod schema not initialized, using fallback');
-    return [
-      'agents',
-      'mcp',
-      'rules',
-      'commands',
-      'hooks',
-      'statuslines',
-      'skills',
-      'collections',
-    ] as const;
-  }
-}
+// REMOVED: getAllContentCategories() - No longer needed
+// Use: Object.keys(UNIFIED_CATEGORY_REGISTRY) from category-config.ts instead
 
 /**
  * Content Types

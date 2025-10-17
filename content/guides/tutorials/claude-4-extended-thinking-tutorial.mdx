@@ -36,7 +36,7 @@ citationReady: true
 
 Master Claude 4's revolutionary extended thinking API that enables reasoning chains up to 500K tokens. By completion, you'll have a production-ready implementation achieving 74.5% accuracy on complex coding tasks and understand how companies like GitHub, Cursor, and Replit leverage this technology for 54% productivity gains. This guide includes 6 practical examples, 8 code samples, and 4 real-world production patterns.
 
-<Callout type="info" title="Tutorial Requirements">
+<UnifiedContentBox contentType="callout" type="info" title="Tutorial Requirements">
 **Prerequisites:** Basic API knowledge, Python or JavaScript experience
 
 **Time Required:** 25 minutes active work
@@ -193,7 +193,7 @@ batch_responses = client.batch.create(
 
 Understanding these concepts ensures you can adapt this tutorial to your specific needs and troubleshoot issues effectively.
 
-<Accordion
+<UnifiedContentBox contentType="accordion"
   title="Core Concepts Deep Dive"
   description="Essential knowledge for mastering extended thinking"
   items={[
@@ -462,7 +462,7 @@ workflow:
 
 ## Troubleshooting Guide
 
-<Callout type="warning" title="Common Issues and Solutions">
+<UnifiedContentBox contentType="callout" type="warning" title="Common Issues and Solutions">
 **Issue 1: "Rate limit exceeded after 2 complex prompts"**
 
 **Solution:** Upgrade from Pro ($20) to Max tier ($100-200/month). Pro tier aggressively limits extended thinking requests. This fixes token allocation restrictions and prevents workflow interruptions.
@@ -478,7 +478,7 @@ workflow:
 
 ## Advanced Techniques
 
-<Callout type="tip" title="Professional Tips">
+<UnifiedContentBox contentType="callout" type="tip" title="Professional Tips">
 **Performance Optimization:** Combine Sonnet 4 for routine tasks with selective Opus 4.1 deployment reduces costs by 60-70% while maintaining output quality. GitHub and Cursor use this hybrid approach.
 
 **Security Best Practice:** Always preserve thinking blocks in multi-turn conversations for audit trails. Never modify or reorder thinking sequences as this causes API validation errors.
@@ -518,7 +518,7 @@ workflow:
 
 ## Next Steps and Learning Path
 
-<AIOptimizedFAQ
+<UnifiedContentBox contentType="faq"
   title="Continue Your Learning Journey"
   description="Common questions about advancing from this tutorial"
   questions={[
@@ -591,7 +591,7 @@ workflow:
 
 ---
 
-<Callout type="success" title="Tutorial Complete!">
+<UnifiedContentBox contentType="callout" type="success" title="Tutorial Complete!">
 **Congratulations!** You've mastered Claude 4's extended thinking API and can now build production systems achieving 74.5% coding accuracy.
 
 **What you achieved:**

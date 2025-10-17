@@ -484,6 +484,9 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
         statuslinesData,
         collectionsData,
         skillsData,
+        guidesData,
+        jobsData,
+        changelogData,
       ] = await batchFetch([
         getContentByCategory('rules'),
         getContentByCategory('mcp'),
@@ -493,6 +496,9 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
         getContentByCategory('statuslines'),
         getContentByCategory('collections'),
         getContentByCategory('skills'),
+        getContentByCategory('guides'),
+        getContentByCategory('jobs'),
+        getContentByCategory('changelog'),
       ]);
 
       // Use trending calculator to get popular content per category
@@ -505,9 +511,12 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
         statuslines: statuslinesData,
         collections: collectionsData,
         skills: skillsData,
+        guides: guidesData,
+        jobs: jobsData,
+        changelog: changelogData,
       });
 
-      // Group popular items by category - ensure all 7 categories are represented
+      // Group popular items by category - ensure all categories are represented
       const fallbackResult: Record<string, readonly UnifiedContentItem[]> = {};
 
       // Map of category to its raw data for fallback
@@ -520,6 +529,9 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
         statuslines: statuslinesData,
         collections: collectionsData,
         skills: skillsData,
+        guides: guidesData,
+        jobs: jobsData,
+        changelog: changelogData,
       };
 
       for (const category of CONTENT_CATEGORIES) {

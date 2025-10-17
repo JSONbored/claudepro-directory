@@ -90,8 +90,10 @@ async function generateTestRoutes(): Promise<TestRoute[]> {
     },
   ];
 
-  // Category routes
-  const categories = ['agents', 'mcp', 'hooks', 'commands', 'rules', 'statuslines', 'skills'];
+  // Category routes - MODERNIZATION: All categories from UNIFIED_CATEGORY_REGISTRY
+  const { getAllCategoryIds } = await import('../../src/lib/config/category-config.js');
+  const categories = getAllCategoryIds();
+
   for (const category of categories) {
     routes.push({
       path: `/${category}/llms.txt`,

@@ -28,8 +28,8 @@ import { z } from 'zod';
  * Suffix lengths for each category
  * Format: " - {Category} - Claude Pro Directory"
  *
- * Dynamically calculated from unified category registry where possible.
- * Non-registry categories (guides subcategories, jobs, changelog) remain hardcoded.
+ * Fully derived from UNIFIED_CATEGORY_REGISTRY (single source of truth).
+ * All categories are calculated dynamically from registry.pluralTitle.
  */
 import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -43,8 +43,8 @@ function calculateSuffixLength(categoryDisplayName: string): number {
   return SEPARATOR.length + categoryDisplayName.length + SEPARATOR.length + SITE_NAME.length;
 }
 
-// Derive suffix lengths from registry and merge with non-registry categories
-export const SUFFIX_LENGTHS: Record<ContentCategory, number> = {
+// Derive suffix lengths from registry - fully registry-driven
+export const SUFFIX_LENGTHS = {
   // Core content types (derived from registry)
   agents: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.agents.pluralTitle),
   mcp: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.mcp.pluralTitle),
@@ -54,20 +54,10 @@ export const SUFFIX_LENGTHS: Record<ContentCategory, number> = {
   statuslines: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.statuslines.pluralTitle),
   collections: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.collections.pluralTitle),
   skills: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.skills.pluralTitle),
-
-  // SEO content types (not in main registry)
-  guides: calculateSuffixLength('Guides'),
-  tutorials: calculateSuffixLength('Tutorials'),
-  comparisons: calculateSuffixLength('Comparisons'),
-  workflows: calculateSuffixLength('Workflows'),
-  'use-cases': calculateSuffixLength('Use Cases'),
-  troubleshooting: calculateSuffixLength('Troubleshooting'),
-  categories: calculateSuffixLength('Categories'),
-
-  // Special types
-  jobs: calculateSuffixLength('Jobs'),
-  changelog: calculateSuffixLength('Changelog'),
-} as const;
+  guides: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.guides.pluralTitle),
+  jobs: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.jobs.pluralTitle),
+  changelog: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.changelog.pluralTitle),
+} as const satisfies Record<ContentCategory, number>;
 
 /**
  * Maximum total title length (SEO best practice)
@@ -87,31 +77,22 @@ export const MIN_ENHANCEMENT_GAIN = 3;
 
 /**
  * Maximum available characters for base title (before suffix) per category
+ * Fully derived from UNIFIED_CATEGORY_REGISTRY
  */
-export const MAX_BASE_TITLE_LENGTH: Record<ContentCategory, number> = {
+export const MAX_BASE_TITLE_LENGTH = {
   // Core content types
-  agents: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.agents, // 28 chars
-  mcp: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.mcp, // 31 chars (most room)
-  rules: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.rules, // 29 chars
-  commands: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.commands, // 26 chars
-  hooks: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.hooks, // 29 chars
-  statuslines: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.statuslines, // 23 chars
-  collections: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.collections, // 23 chars
-  skills: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.skills, // 28 chars
-
-  // SEO content types
-  guides: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.guides, // 28 chars
-  tutorials: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.tutorials, // 25 chars
-  comparisons: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.comparisons, // 23 chars
-  workflows: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.workflows, // 25 chars
-  'use-cases': MAX_TITLE_LENGTH - SUFFIX_LENGTHS['use-cases'], // 24 chars
-  troubleshooting: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.troubleshooting, // 19 chars
-  categories: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.categories, // 24 chars
-
-  // Special types
-  jobs: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.jobs, // 30 chars
-  changelog: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.changelog, // 25 chars
-} as const;
+  agents: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.agents,
+  mcp: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.mcp,
+  rules: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.rules,
+  commands: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.commands,
+  hooks: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.hooks,
+  statuslines: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.statuslines,
+  collections: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.collections,
+  skills: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.skills,
+  guides: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.guides,
+  jobs: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.jobs,
+  changelog: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.changelog,
+} as const satisfies Record<ContentCategory, number>;
 
 // ============================================
 // METADATA QUALITY RULES & VALIDATION

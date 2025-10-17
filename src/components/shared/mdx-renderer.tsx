@@ -11,12 +11,8 @@ import type {
   mdxLinkPropsSchema,
 } from '@/src/lib/schemas/shared.schema';
 // Import lightweight components (always loaded)
-import { Accordion } from '../content/accordion';
-import { Callout } from '../content/callout';
 import { CaseStudy } from '../content/case-study';
-import { AIOptimizedFAQ } from '../content/faq';
 import { FeatureGrid } from '../content/feature-grid';
-import { InfoBox } from '../content/info-box';
 import { TLDRSummary } from '../content/tldr-summary';
 import { Checklist } from '../interactive/checklist';
 import { ContentTabs as Tabs } from '../interactive/content-tabs';
@@ -28,6 +24,7 @@ import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { UnifiedBadge } from '../ui/unified-badge';
+import { UnifiedContentBox } from '../ui/unified-content-box';
 // Import heavy components as lazy-loaded (Suspense boundaries)
 import {
   ComparisonTable,
@@ -187,9 +184,10 @@ const components = {
   Button,
 
   // AI-Optimized Components with Schema.org markup
-  Accordion,
-  AIOptimizedFAQ,
-  Callout,
+  // Unified Content Box - NO WRAPPERS, direct discriminated union
+  UnifiedContentBox,
+
+  // Other content components
   CaseStudy,
   Checklist,
   CodeGroup,
@@ -198,7 +196,6 @@ const components = {
   ErrorTable,
   ExpertQuote,
   FeatureGrid,
-  InfoBox,
   MetricsDisplay,
   QuickReference,
   SmartRelatedContent: (props: Parameters<typeof SmartRelatedContent>[0]) => (

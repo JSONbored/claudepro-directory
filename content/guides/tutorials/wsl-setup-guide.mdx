@@ -36,7 +36,7 @@ citationReady: true
 
 Master Claude Code installation on Windows through proper WSL2 configuration. By completion, you'll have a fully functional Claude Code environment with optimized performance. This guide includes 5 practical examples, 12 code samples, and 4 real-world troubleshooting scenarios.
 
-<InfoBox
+<UnifiedContentBox contentType="infobox"
   title="Prerequisites Check"
   content="Windows 10 Build 18362.1049+ or Windows 11, 8GB RAM minimum, virtualization enabled in BIOS, administrator access for installation. Verify requirements before starting."
   type="tip"
@@ -140,7 +140,7 @@ wsl --shutdown`
   ]}
 />
 
-<Callout type="warning" title="Common Installation Error">
+<UnifiedContentBox contentType="callout" type="warning" title="Common Installation Error">
 **Error: WslRegisterDistribution failed with error: 0x80370114**  
 **Solution:** Enable Virtual Machine Platform feature. Run `dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart` in PowerShell as Administrator.
 </Callout>
@@ -458,7 +458,7 @@ source ~/.bashrc`
 
 ## Troubleshooting Common Issues
 
-<Accordion
+<UnifiedContentBox contentType="accordion"
   title="Problem Solutions"
   items={[
     {
@@ -508,7 +508,7 @@ source ~/.bashrc`
 
 ## Verification Checklist
 
-<InfoBox
+<UnifiedContentBox contentType="infobox"
   title="Installation Verification Steps"
   content="Run these commands to confirm successful setup. All should complete without errors."
   type="success"
@@ -590,7 +590,7 @@ echo "All checks complete!"`
 
 ## Advanced Techniques
 
-<Callout type="tip" title="Professional Tips">
+<UnifiedContentBox contentType="callout" type="tip" title="Professional Tips">
 **Performance Optimization:** Use Linux filesystem exclusively for 20x speed improvement. Projects in ~/dev run faster than /mnt/c/.
 
 **Security Best Practice:** Always configure npm to use user directories. Never use sudo with npm installations.
@@ -633,7 +633,7 @@ echo "All checks complete!"`
 
 ## Frequently Asked Questions
 
-<AIOptimizedFAQ
+<UnifiedContentBox contentType="faq"
   title="Common Questions"
   description="Quick answers to frequent WSL Claude Code questions"
   faqs={[
@@ -711,7 +711,7 @@ echo "All checks complete!"`
 
 ---
 
-<Callout type="success" title="Tutorial Complete!">
+<UnifiedContentBox contentType="callout" type="success" title="Tutorial Complete!">
 **Congratulations!** You've mastered Claude Code WSL setup and can now develop efficiently on Windows.
 
 **What you achieved:**

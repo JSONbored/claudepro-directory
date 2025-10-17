@@ -8,10 +8,13 @@
  * - Each API endpoint is registered with request/response schemas
  * - Schemas use .openapi() method for OpenAPI metadata
  * - Registry feeds into lib/openapi/spec.ts for final spec generation
+ *
+ * MODERNIZATION: All category schemas derived from UNIFIED_CATEGORY_REGISTRY
  */
 
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
+import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
 
 // Extend Zod with OpenAPI methods (.openapi())
 extendZodWithOpenApi(z);
@@ -23,12 +26,11 @@ extendZodWithOpenApi(z);
  */
 
 // Base schemas with OpenAPI metadata
-export const contentTypeSchema = z
-  .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'])
-  .openapi({
-    description: 'Content category identifier',
-    example: 'agents',
-  });
+// MODERNIZED: Uses contentCategorySchema from registry (all 11 categories)
+export const contentTypeSchema = contentCategorySchema.openapi({
+  description: 'Content category identifier (derived from UNIFIED_CATEGORY_REGISTRY)',
+  example: 'agents',
+});
 
 export const slugSchema = z
   .string()
@@ -174,10 +176,11 @@ export const trendingDataSchema = z.object({
 export const cacheWarmRequestSchema = z
   .object({
     types: z
-      .array(z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections']))
+      .array(contentCategorySchema)
       .optional()
       .openapi({
-        description: 'Array of content types to warm cache for (omit for all types)',
+        description:
+          'Array of content types to warm cache for (omit for all types) - registry-driven',
         example: ['agents', 'mcp'],
       }),
     force: z.boolean().default(false).openapi({

@@ -8,6 +8,7 @@
 /**
  * Content statistics type
  * Used for tracking counts across all categories
+ * Modernized: includes all 11 categories from UNIFIED_CATEGORY_REGISTRY
  */
 export type ContentStats = {
   agents: number;
@@ -19,33 +20,6 @@ export type ContentStats = {
   statuslines: number;
   collections: number;
   skills: number;
-};
-
-/**
- * Placeholder job content type
- * Jobs feature not fully implemented yet
- *
- * NOTE: This is a TypeScript type, not a Zod schema.
- * When jobs are properly implemented, create job.schema.ts with Zod validation.
- */
-export type JobContent = {
-  slug: string;
-  description: string;
-  category: string;
-  author: string;
-  dateAdded: string;
-  tags: string[];
-  title: string;
-  company: string;
-  location: string;
-  salary?: string;
-  type: string;
-  postedAt: string;
-  requirements: string[];
-  benefits: string[];
-  applyUrl: string;
-  contactEmail: string;
-  remote: boolean;
-  featured?: boolean;
-  companyLogo?: string;
+  jobs: number;
+  changelog: number;
 };

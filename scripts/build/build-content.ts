@@ -255,7 +255,8 @@ async function main(): Promise<void> {
     );
 
     // Generate TypeScript files for each category
-    const contentStats: Record<string, number> = { guides: 0 }; // guides handled separately
+    // MODERNIZATION: contentStats populated dynamically from BUILD_CATEGORY_CONFIGS (registry-driven)
+    const contentStats: Record<string, number> = {};
     let totalFiles = 0;
     let totalValid = 0;
     let totalInvalid = 0;

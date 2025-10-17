@@ -15,10 +15,10 @@
  * - Correct usage: Server components can import server-only code
  */
 
-import { Callout } from '@/src/components/content/callout';
 import { ProductionCodeBlock } from '@/src/components/shared/production-code-block';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
+import { UnifiedContentBox } from '@/src/components/ui/unified-content-box';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import { Zap } from '@/src/lib/icons';
 import { type StepByStepGuideProps, stepGuidePropsSchema } from '@/src/lib/schemas/shared.schema';
@@ -123,9 +123,9 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
                   )}
 
                   {step.tip && (
-                    <Callout type="tip" title="💡 Pro tip">
+                    <UnifiedContentBox contentType="callout" type="tip" title="💡 Pro tip">
                       {step.tip}
-                    </Callout>
+                    </UnifiedContentBox>
                   )}
                 </CardContent>
               </Card>

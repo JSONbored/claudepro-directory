@@ -37,7 +37,7 @@ citationReady: true
 
 Before setting up MCP servers, ensure your system meets these requirements:
 
-<InfoBox title="System Requirements" variant="important">
+<UnifiedContentBox contentType="infobox" title="System Requirements" variant="important">
   - **Operating System**: macOS 12+, Windows 10+, or Ubuntu 20.04+
   - **Claude Desktop**: Version 0.7.0 or higher
   - **Node.js**: Version 18.0+ (LTS recommended)
@@ -119,7 +119,7 @@ Before setting up MCP servers, ensure your system meets these requirements:
 
 ## Advanced Configuration Options
 
-<Accordion
+<UnifiedContentBox contentType="accordion"
   title="Configuration Deep Dive"
   items={[
     {
@@ -206,11 +206,11 @@ server.connect(process.stdin, process.stdout);`
 
 ## Troubleshooting Common Issues
 
-<Callout type="warning" title="Common Configuration Errors">
+<UnifiedContentBox contentType="callout" type="warning" title="Common Configuration Errors">
   If your MCP server isn't working, check these common issues:
 </Callout>
 
-<InfoBox title="Troubleshooting Checklist" variant="warning">
+<UnifiedContentBox contentType="infobox" title="Troubleshooting Checklist" variant="warning">
   - **Invalid JSON syntax**: Validate your claude_desktop_config.json with a JSON validator
   - **Incorrect file paths**: Always use absolute paths, not relative paths
   - **Missing dependencies**: Run `npm list -g` to verify all packages are installed
@@ -221,7 +221,7 @@ server.connect(process.stdin, process.stdout);`
 
 ## Performance Optimization Tips
 
-<InfoBox title="Pro Tip" variant="info">
+<UnifiedContentBox contentType="infobox" title="Pro Tip" variant="info">
   Optimizing your MCP servers can significantly improve Claude Desktop's responsiveness and reduce resource usage.
 </InfoBox>
 
@@ -262,7 +262,7 @@ server.connect(process.stdin, process.stdout);`
 
 ## Frequently Asked Questions
 
-<AIOptimizedFAQ
+<UnifiedContentBox contentType="faq"
   title="MCP Server Setup FAQ"
   description="Answers to common questions about MCP server configuration"
   questions={[
@@ -297,6 +297,6 @@ server.connect(process.stdin, process.stdout);`
 
 Setting up MCP servers for Claude Desktop opens up powerful integration possibilities. Start with basic servers like filesystem access, then gradually add more complex integrations as you become comfortable with the configuration process. Remember to prioritize security and regularly update your servers for optimal performance.
 
-<Callout type="success" title="Ready to Get Started?">
+<UnifiedContentBox contentType="callout" type="success" title="Ready to Get Started?">
   You now have all the knowledge needed to set up and configure MCP servers for Claude Desktop. Start with a simple filesystem server and expand from there!
 </Callout>

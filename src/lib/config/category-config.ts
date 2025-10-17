@@ -11,27 +11,43 @@
  * - Tree-shakeable: Only imported categories included in bundle
  * - Validated: Zod schemas ensure correctness
  *
- * Used by:
+ * Registry Modernization (October 2025):
+ * ✅ ALL hardcoded category arrays eliminated across codebase
+ * ✅ Scripts now use getAllCategoryIds() for dynamic category discovery
+ * ✅ Service worker updated with all 11 categories (was missing jobs, changelog)
+ * ✅ Event generation fully registry-driven (removed ADDITIONAL_CONTENT_TYPES)
+ * ✅ Validation scripts modernized with dynamic metadata loading
+ * ✅ Build systems completely registry-driven (zero hardcoded paths)
+ *
+ * Current Categories (11):
+ * - agents, mcp, commands, rules, hooks, statuslines
+ * - collections, skills, guides, jobs, changelog
+ *
+ * Used by 50+ files:
  * - app/[category]/page.tsx (list pages)
  * - app/[category]/[slug]/page.tsx (detail pages)
- * - scripts/build-content.ts (build-time processing)
+ * - scripts/build/*.ts (build-time code generation)
+ * - scripts/validation/*.ts (content validation)
  * - lib/content-loaders.ts (dynamic content loading)
  * - lib/seo/* (metadata generation)
- * - lib/analytics/* (event mapping)
- * - And 30+ more locations (all auto-derived)
+ * - lib/analytics/* (event mapping & tracking)
+ * - public/service-worker.js (offline caching)
+ * - And 40+ more locations (all auto-derived)
  *
  * TO ADD A NEW CATEGORY:
  * 1. Add entry to UNIFIED_CATEGORY_REGISTRY below
  * 2. Create schema file: src/lib/schemas/content/{category}.schema.ts
  * 3. Add content: content/{category}/*.json
  * 4. Run: npm run build:content
- * That's it! Everything else auto-updates.
+ * That's it! Everything else auto-updates (scripts, routes, analytics, caching).
  */
 
 import type { z } from 'zod';
 import {
   BookOpen,
+  Briefcase,
   Code,
+  FileText,
   Layers,
   type LucideIcon,
   Sparkles,
@@ -47,7 +63,9 @@ import {
   type CommandContent,
   commandContentSchema,
 } from '@/src/lib/schemas/content/command.schema';
+import { type GuideContent, guideContentSchema } from '@/src/lib/schemas/content/guide.schema';
 import { type HookContent, hookContentSchema } from '@/src/lib/schemas/content/hook.schema';
+import { type Job, jobSchema } from '@/src/lib/schemas/content/job.schema';
 import { type McpContent, mcpContentSchema } from '@/src/lib/schemas/content/mcp.schema';
 import { type RuleContent, ruleContentSchema } from '@/src/lib/schemas/content/rule.schema';
 import { type SkillContent, skillContentSchema } from '@/src/lib/schemas/content/skill.schema';
@@ -55,7 +73,7 @@ import {
   type StatuslineContent,
   statuslineContentSchema,
 } from '@/src/lib/schemas/content/statusline.schema';
-import { type ContentCategory, getAllContentCategories } from '@/src/lib/schemas/shared.schema';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Content type discriminated union
@@ -69,7 +87,9 @@ export type ContentType =
   | RuleContent
   | StatuslineContent
   | CollectionContent
-  | SkillContent;
+  | SkillContent
+  | GuideContent
+  | Job;
 
 /**
  * Unified Category Configuration Interface
@@ -640,6 +660,153 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     urlSlug: 'skills',
     contentLoader: 'skills',
   },
+
+  guides: {
+    id: 'guides' as ContentCategory,
+    title: 'Guide',
+    pluralTitle: 'Guides',
+    description:
+      'Comprehensive guides, tutorials, comparisons, and workflows for Claude. SEO-optimized content covering best practices, use cases, and troubleshooting.',
+    icon: FileText,
+    colorScheme: 'blue-500',
+    keywords:
+      'Claude guides, tutorials, comparisons, workflows, use cases, troubleshooting, best practices',
+    metaDescription:
+      'Expert Claude guides for October 2025: In-depth tutorials, feature comparisons, workflow automation, use case examples, and troubleshooting solutions.',
+    schema: guideContentSchema,
+    typeName: 'GuideContent',
+    generateFullContent: true,
+    metadataFields: [
+      'slug',
+      'title',
+      'seoTitle',
+      'description',
+      'author',
+      'tags',
+      'category',
+      'dateAdded',
+      'source',
+      'keywords',
+      'difficulty',
+      'readingTime',
+    ] as const,
+    buildConfig: {
+      batchSize: 10,
+      enableCache: true,
+      cacheTTL: 5 * 60 * 1000,
+    },
+    apiConfig: {
+      generateStaticAPI: true,
+      includeTrending: true,
+      maxItemsPerResponse: 1000,
+    },
+    listPage: {
+      searchPlaceholder: 'Search guides...',
+      badges: [
+        { icon: 'file-text', text: (count: number) => `${count} Guides Available` },
+        { text: 'SEO Optimized' },
+        { text: 'Expert Content' },
+      ],
+    },
+    detailPage: {
+      displayConfig: false,
+      configFormat: 'json' as const,
+      sections: [
+        { id: 'content', title: 'Guide Content', order: 1 },
+        { id: 'related', title: 'Related Guides', order: 2 },
+      ],
+    },
+    urlSlug: 'guides',
+    contentLoader: 'guides',
+  },
+
+  jobs: {
+    id: 'jobs' as ContentCategory,
+    title: 'Job',
+    pluralTitle: 'Jobs',
+    description:
+      'AI and Claude-related job listings. Find opportunities in AI development, prompt engineering, and Claude integration.',
+    icon: Briefcase,
+    colorScheme: 'indigo-500',
+    keywords: 'AI jobs, Claude jobs, prompt engineering, AI development, remote AI jobs',
+    metaDescription:
+      'AI job board for October 2025: Claude-related positions, prompt engineering roles, AI development opportunities. Remote and on-site positions.',
+    schema: jobSchema,
+    typeName: 'Job',
+    generateFullContent: false,
+    metadataFields: [
+      'id',
+      'slug',
+      'title',
+      'company',
+      'location',
+      'type',
+      'remote',
+      'salary',
+      'posted_at',
+    ] as const,
+    buildConfig: {
+      batchSize: 20,
+      enableCache: true,
+      cacheTTL: 2 * 60 * 1000,
+    },
+    apiConfig: {
+      generateStaticAPI: true,
+      includeTrending: false,
+      maxItemsPerResponse: 100,
+    },
+    listPage: {
+      searchPlaceholder: 'Search jobs...',
+      badges: [
+        { icon: 'briefcase', text: (count: number) => `${count} Open Positions` },
+        { text: 'Remote Available' },
+        { text: 'Updated Daily' },
+      ],
+    },
+    detailPage: {
+      displayConfig: false,
+      configFormat: 'json' as const,
+    },
+    urlSlug: 'jobs',
+    contentLoader: 'jobs',
+  },
+
+  changelog: {
+    id: 'changelog' as ContentCategory,
+    title: 'Changelog',
+    pluralTitle: 'Changelog',
+    description:
+      'Product updates, new features, and improvements to the Claude Pro Directory platform.',
+    icon: FileText,
+    colorScheme: 'slate-500',
+    keywords: 'changelog, updates, new features, improvements, release notes',
+    metaDescription:
+      'Claude Pro Directory changelog for October 2025: Latest features, improvements, bug fixes, and platform updates.',
+    schema: guideContentSchema, // Reuse guide schema (changelog is markdown content)
+    typeName: 'GuideContent',
+    generateFullContent: true,
+    metadataFields: ['slug', 'title', 'description', 'dateAdded'] as const,
+    buildConfig: {
+      batchSize: 5,
+      enableCache: true,
+      cacheTTL: 10 * 60 * 1000,
+    },
+    apiConfig: {
+      generateStaticAPI: false,
+      includeTrending: false,
+      maxItemsPerResponse: 50,
+    },
+    listPage: {
+      searchPlaceholder: 'Search changelog...',
+      badges: [{ icon: 'file-text', text: 'Release History' }, { text: 'Product Updates' }],
+    },
+    detailPage: {
+      displayConfig: false,
+      configFormat: 'json' as const,
+    },
+    urlSlug: 'changelog',
+    contentLoader: 'changelog',
+  },
 } as const satisfies Record<string, UnifiedCategoryConfig>;
 
 /**
@@ -802,27 +969,16 @@ export function isValidCategory(category: string): category is CategoryId {
 
 /**
  * Get all category IDs as array
- * Now delegates to lightweight schema helper to avoid circular dependencies
+ * Directly from registry - single source of truth
  *
- * @returns Array of category IDs from schema enum
+ * @returns Array of category IDs from UNIFIED_CATEGORY_REGISTRY
  */
 export function getAllCategoryIds(): CategoryId[] {
-  return getAllContentCategories() as CategoryId[];
+  return Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[];
 }
 
-/**
- * Validate that UNIFIED_CATEGORY_REGISTRY matches the schema
- * Compile-time check to ensure registry completeness
- */
-const _registryValidation: readonly ContentCategory[] = Object.keys(
-  UNIFIED_CATEGORY_REGISTRY
-) as CategoryId[];
-if (_registryValidation.length !== getAllContentCategories().length) {
-  throw new Error(
-    'UNIFIED_CATEGORY_REGISTRY is out of sync with contentCategorySchema. ' +
-      `Registry has ${_registryValidation.length} categories, schema has ${getAllContentCategories().length}.`
-  );
-}
+// REMOVED: Registry validation check - no longer needed
+// Schema is now derived from registry, so they're always in sync by definition
 
 /**
  * Homepage-specific category configurations

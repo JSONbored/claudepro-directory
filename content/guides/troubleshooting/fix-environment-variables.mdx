@@ -22,13 +22,13 @@ citationReady: true
 Claude Code configuration errors commonly affect authentication, OAuth handling, and permission settings. This guide provides platform-specific fixes for Windows WSL, macOS, and Linux. Security best practices protect API keys with layered approaches. Automated management with direnv simplifies environment setup.
 </TLDRSummary>
 
-<Callout type="warning" title="Critical Configuration Alert">
+<UnifiedContentBox contentType="callout" type="warning" title="Critical Configuration Alert">
 Configuration issues represent a significant portion of Claude Code support requests. OAuth callback failures and API key exposure risks remain top concerns. This guide addresses the most common configuration problems through proper setup patterns.
 </Callout>
 
 ## Problem Overview
 
-<InfoBox
+<UnifiedContentBox contentType="infobox"
   title="Claude Code Configuration Error Indicators"
   icon="AlertTriangle"
   type="warning"
@@ -349,7 +349,7 @@ claude /status`
 
 ## Prevention Strategies
 
-<Callout type="success" title="Prevent Future Configuration Issues">
+<UnifiedContentBox contentType="callout" type="success" title="Prevent Future Configuration Issues">
 **Automated Environment Management:** Use direnv for directory-based configuration loading
 
 **Container-Based Development:** Docker ensures consistent environments - Prevents platform-specific issues entirely
@@ -359,7 +359,7 @@ claude /status`
 
 ## Alternative Solutions
 
-<Accordion
+<UnifiedContentBox contentType="accordion"
   title="When Standard Fixes Don't Work"
   description="Alternative approaches for persistent or unusual cases"
   items={[
@@ -671,7 +671,7 @@ volumes:
 
 ## Team Setup Guide
 
-<InfoBox
+<UnifiedContentBox contentType="infobox"
   title="Team and Enterprise Configuration"
   icon="Users"
   type="info"
@@ -740,7 +740,7 @@ export MCP_SERVERS="github,stackexchange,filesystem"`
 
 ## Common Pitfalls
 
-<Callout type="warning"
+<UnifiedContentBox contentType="callout" type="warning"
   title="Critical Anti-Patterns to Avoid"
   items={[
     "Hardcoding API keys in source code - exposed in version control",
@@ -788,7 +788,7 @@ export MCP_SERVERS="github,stackexchange,filesystem"`
 
 ## AIOptimizedFAQ
 
-<AIOptimizedFAQ
+<UnifiedContentBox contentType="faq"
   questions={[
     {
       question: "Why does Claude Code show 'OAuth account information not found' after successful browser login?",
@@ -824,7 +824,7 @@ export MCP_SERVERS="github,stackexchange,filesystem"`
 
 ---
 
-<Callout type="success" title="Issue Resolved?">
+<UnifiedContentBox contentType="callout" type="success" title="Issue Resolved?">
 **Problem solved?** Great! Consider implementing direnv for automatic environment management to prevent recurrence.
 
 **Still having issues?** Join our [community](/community) for additional support or contact Anthropic support for enterprise assistance.

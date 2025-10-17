@@ -239,31 +239,28 @@ async function verifySectionPages(collector: ResultCollector): Promise<void> {
 }
 
 async function verifyCategoryPages(collector: ResultCollector): Promise<void> {
-  // Dynamic imports for code splitting
-  const [
-    { agentsMetadata },
-    { mcpMetadata },
-    { rulesMetadata },
-    { commandsMetadata },
-    { hooksMetadata },
-    { statuslinesMetadata },
-  ] = await Promise.all([
-    import('../generated/agents-metadata.js'),
-    import('../generated/mcp-metadata.js'),
-    import('../generated/rules-metadata.js'),
-    import('../generated/commands-metadata.js'),
-    import('../generated/hooks-metadata.js'),
-    import('../generated/statuslines-metadata.js'),
-  ]);
+  // MODERNIZATION: Dynamic metadata loading from UNIFIED_CATEGORY_REGISTRY
+  const { getAllCategoryIds } = await import('../../src/lib/config/category-config.js');
+  const categoryIds = getAllCategoryIds();
 
-  const metadataMap = {
-    agents: agentsMetadata,
-    mcp: mcpMetadata,
-    rules: rulesMetadata,
-    commands: commandsMetadata,
-    hooks: hooksMetadata,
-    statuslines: statuslinesMetadata,
-  };
+  // Dynamic imports for all categories
+  const metadataImports = await Promise.all(
+    categoryIds.map(async (catId) => {
+      try {
+        const module = await import(`../generated/${catId}-metadata.js`);
+        const varName = catId.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+        const metadataKey = `${varName}Metadata`;
+        return { category: catId, metadata: module[metadataKey] || [] };
+      } catch (error) {
+        console.warn(`Warning: Could not load metadata for ${catId}:`, error);
+        return { category: catId, metadata: [] };
+      }
+    })
+  );
+
+  const metadataMap = Object.fromEntries(
+    metadataImports.map(({ category, metadata }) => [category, metadata])
+  );
 
   // Process categories in parallel
   await Promise.all(

@@ -39,6 +39,9 @@ function createMetadataLoaderFactory(categoryId: BuildCategoryId) {
     statuslines: () => import('@/generated/statuslines-metadata'),
     skills: () => import('@/generated/skills-metadata'),
     collections: () => import('@/generated/collections-metadata'),
+    guides: () => import('@/generated/guides-metadata'),
+    jobs: () => import('@/generated/jobs-metadata'),
+    changelog: () => import('@/generated/changelog-metadata'),
   };
 
   return () =>
