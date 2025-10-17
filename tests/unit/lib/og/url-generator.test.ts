@@ -54,208 +54,54 @@ describe('generateOGImageUrl()', () => {
   describe('Basic URL Generation', () => {
     it('generates URL for homepage', () => {
       const url = generateOGImageUrl('/');
-      expect(url).toBe(`${BASE_URL}/api/og?path=%2F`);
+      expect(url).toBe(`${BASE_URL}/og-images/og-image.webp`);
     });
 
     it('generates URL for section page', () => {
       const url = generateOGImageUrl('/trending');
-      expect(url).toBe(`${BASE_URL}/api/og?path=%2Ftrending`);
+      expect(url).toBe(`${BASE_URL}/og-images/og-image.webp`);
     });
 
     it('generates URL for category page', () => {
       const url = generateOGImageUrl('/agents');
-      expect(url).toBe(`${BASE_URL}/api/og?path=%2Fagents`);
+      expect(url).toBe(`${BASE_URL}/og-images/og-image.webp`);
     });
 
     it('generates URL for content detail page', () => {
       const url = generateOGImageUrl('/agents/code-reviewer');
-      expect(url).toBe(`${BASE_URL}/api/og?path=%2Fagents%2Fcode-reviewer`);
+      expect(url).toBe(`${BASE_URL}/og-images/og-image.webp`);
     });
 
     it('generates URL for guide page', () => {
       const url = generateOGImageUrl('/guides/tutorials/mcp-setup');
-      expect(url).toBe(`${BASE_URL}/api/og?path=%2Fguides%2Ftutorials%2Fmcp-setup`);
-    });
-
-    it('properly encodes special characters in path', () => {
-      const url = generateOGImageUrl('/guides/api & integration');
-      // URLSearchParams uses '+' for spaces (valid encoding) and %26 for &
-      expect(url).toContain('%2Fguides%2Fapi+%26+integration');
-    });
-
-    it('properly encodes Unicode characters', () => {
-      const url = generateOGImageUrl('/guides/test-🤖');
-      expect(url).toContain('%F0%9F%A4%96'); // Encoded emoji
-    });
-  });
-
-  describe('Default Dimensions', () => {
-    it('omits width parameter when using default', () => {
-      const url = generateOGImageUrl('/trending');
-      expect(url).not.toContain('width=');
-    });
-
-    it('omits height parameter when using default', () => {
-      const url = generateOGImageUrl('/trending');
-      expect(url).not.toContain('height=');
-    });
-
-    it('uses defaults when options is undefined', () => {
-      const url = generateOGImageUrl('/trending', undefined);
-      expect(url).toBe(`${BASE_URL}/api/og?path=%2Ftrending`);
-    });
-
-    it('uses defaults when options is empty object', () => {
-      const url = generateOGImageUrl('/trending', {});
-      expect(url).toBe(`${BASE_URL}/api/og?path=%2Ftrending`);
-    });
-  });
-
-  describe('Custom Dimensions', () => {
-    it('includes width parameter when different from default (1200)', () => {
-      const url = generateOGImageUrl('/trending', { width: 1000 });
-      expect(url).toContain('width=1000');
-      expect(url).not.toContain('height='); // Height uses default, omitted
-    });
-
-    it('includes height parameter when different from default (630)', () => {
-      const url = generateOGImageUrl('/trending', { height: 500 });
-      expect(url).toContain('height=500');
-      expect(url).not.toContain('width='); // Width uses default, omitted
-    });
-
-    it('includes both width and height when both differ from defaults', () => {
-      const url = generateOGImageUrl('/trending', { width: 1000, height: 500 });
-      expect(url).toContain('width=1000');
-      expect(url).toContain('height=500');
-    });
-
-    it('preserves path parameter with custom dimensions', () => {
-      const url = generateOGImageUrl('/agents/code-reviewer', { width: 800, height: 400 });
-      expect(url).toContain('path=%2Fagents%2Fcode-reviewer');
-      expect(url).toContain('width=800');
-      expect(url).toContain('height=400');
-    });
-
-    it('handles Twitter Card dimensions (summary)', () => {
-      const url = generateOGImageUrl('/trending', { width: 120, height: 120 });
-      expect(url).toContain('width=120');
-      expect(url).toContain('height=120');
-    });
-
-    it('handles large custom dimensions', () => {
-      const url = generateOGImageUrl('/trending', { width: 2400, height: 1260 });
-      expect(url).toContain('width=2400');
-      expect(url).toContain('height=1260');
-    });
-
-    it('omits width when it matches default', () => {
-      const url = generateOGImageUrl('/trending', { width: 1200, height: 500 });
-      expect(url).not.toContain('width=');
-      expect(url).toContain('height=500');
-    });
-
-    it('omits height when it matches default', () => {
-      const url = generateOGImageUrl('/trending', { width: 1000, height: 630 });
-      expect(url).toContain('width=1000');
-      expect(url).not.toContain('height=');
-    });
-  });
-
-  describe('Refresh Parameter', () => {
-    it('omits refresh parameter by default', () => {
-      const url = generateOGImageUrl('/trending');
-      expect(url).not.toContain('refresh=');
-    });
-
-    it('omits refresh parameter when false', () => {
-      const url = generateOGImageUrl('/trending', { refresh: false });
-      expect(url).not.toContain('refresh=');
-    });
-
-    it('includes refresh parameter when true', () => {
-      const url = generateOGImageUrl('/trending', { refresh: true });
-      expect(url).toContain('refresh=true');
-    });
-
-    it('combines refresh with custom dimensions', () => {
-      const url = generateOGImageUrl('/trending', { width: 1000, height: 500, refresh: true });
-      expect(url).toContain('width=1000');
-      expect(url).toContain('height=500');
-      expect(url).toContain('refresh=true');
-    });
-  });
-
-  describe('Query Parameter Ordering', () => {
-    it('includes path as first parameter', () => {
-      const url = generateOGImageUrl('/trending', { width: 1000, height: 500 });
-      const pathIndex = url.indexOf('path=');
-      const paramIndex = url.indexOf('width=');
-      expect(pathIndex).toBeLessThan(paramIndex);
-      expect(pathIndex).toBeGreaterThan(0); // Ensures path is found
-    });
-
-    it('properly formats multiple query parameters with ampersands', () => {
-      const url = generateOGImageUrl('/trending', { width: 1000, height: 500, refresh: true });
-      expect(url).toContain('path=%2Ftrending');
-      expect(url).toContain('&width=1000');
-      expect(url).toContain('&height=500');
-      expect(url).toContain('&refresh=true');
-    });
-  });
-
-  describe('Edge Cases', () => {
-    it('handles root path', () => {
-      const url = generateOGImageUrl('/');
-      expect(url).toContain('path=%2F');
-    });
-
-    it('handles deep nested paths', () => {
-      const url = generateOGImageUrl('/guides/tutorials/advanced/mcp-server-setup');
-      expect(url).toContain('path=%2Fguides%2Ftutorials%2Fadvanced%2Fmcp-server-setup');
-    });
-
-    it('handles paths with query parameters (encodes them)', () => {
-      const url = generateOGImageUrl('/search?q=test');
-      expect(url).toContain('path=%2Fsearch%3Fq%3Dtest');
-    });
-
-    it('handles paths with hash fragments', () => {
-      const url = generateOGImageUrl('/guides#section');
-      expect(url).toContain('path=%2Fguides%23section');
-    });
-
-    it('handles zero dimensions', () => {
-      const url = generateOGImageUrl('/trending', { width: 0, height: 0 });
-      expect(url).toContain('width=0');
-      expect(url).toContain('height=0');
+      expect(url).toBe(`${BASE_URL}/og-images/og-image.webp`);
     });
   });
 
   describe('Real-World Examples', () => {
     it('generates URL for trending page OG image', () => {
       const url = generateOGImageUrl('/trending');
-      expect(url).toBe(`${BASE_URL}/api/og?path=%2Ftrending`);
+      expect(url).toBe(`${BASE_URL}/og-images/og-image.webp`);
     });
 
     it('generates URL for agent detail OG image', () => {
       const url = generateOGImageUrl('/agents/code-reviewer');
-      expect(url).toBe(`${BASE_URL}/api/og?path=%2Fagents%2Fcode-reviewer`);
+      expect(url).toBe(`${BASE_URL}/og-images/og-image.webp`);
     });
 
     it('generates URL for guide OG image', () => {
       const url = generateOGImageUrl('/guides/tutorials/mcp-setup');
-      expect(url).toBe(`${BASE_URL}/api/og?path=%2Fguides%2Ftutorials%2Fmcp-setup`);
+      expect(url).toBe(`${BASE_URL}/og-images/og-image.webp`);
     });
 
     it('generates URL for collection OG image', () => {
       const url = generateOGImageUrl('/collections/best-agents');
-      expect(url).toBe(`${BASE_URL}/api/og?path=%2Fcollections%2Fbest-agents`);
+      expect(url).toBe(`${BASE_URL}/og-images/og-image.webp`);
     });
 
     it('generates URL for API docs OG image', () => {
       const url = generateOGImageUrl('/api-docs/getContentByCategory');
-      expect(url).toBe(`${BASE_URL}/api/og?path=%2Fapi-docs%2FgetContentByCategory`);
+      expect(url).toBe(`${BASE_URL}/og-images/og-image.webp`);
     });
   });
 
@@ -287,7 +133,7 @@ describe('generateOGMetadata()', () => {
 
     it('includes image URL with encoded path', () => {
       const metadata = generateOGMetadata('/trending', 'Trending Configurations');
-      expect(metadata.images[0].url).toContain('/api/og?path=%2Ftrending');
+      expect(metadata.images[0].url).toContain('/og-images/og-image.webp');
     });
 
     it('includes standard OG dimensions (1200x630)', () => {
@@ -303,7 +149,7 @@ describe('generateOGMetadata()', () => {
 
     it('includes image type', () => {
       const metadata = generateOGMetadata('/trending', 'Trending Configurations');
-      expect(metadata.images[0].type).toBe('image/png');
+      expect(metadata.images[0].type).toBe('image/webp');
     });
   });
 
@@ -350,7 +196,7 @@ describe('generateOGMetadata()', () => {
   describe('Real-World Examples', () => {
     it('generates metadata for homepage', () => {
       const metadata = generateOGMetadata('/', 'Claude Pro Directory');
-      expect(metadata.images[0].url).toContain('/api/og?path=%2F');
+      expect(metadata.images[0].url).toContain('/og-images/og-image.webp');
       expect(metadata.images[0].alt).toBe('Claude Pro Directory');
       expect(metadata.images[0].width).toBe(1200);
       expect(metadata.images[0].height).toBe(630);
@@ -358,13 +204,13 @@ describe('generateOGMetadata()', () => {
 
     it('generates metadata for agent detail page', () => {
       const metadata = generateOGMetadata('/agents/code-reviewer', 'Code Reviewer Agent');
-      expect(metadata.images[0].url).toContain('/api/og?path=%2Fagents%2Fcode-reviewer');
+      expect(metadata.images[0].url).toContain('/og-images/og-image.webp');
       expect(metadata.images[0].alt).toBe('Code Reviewer Agent');
     });
 
     it('generates metadata for guide page', () => {
       const metadata = generateOGMetadata('/guides/tutorials/mcp-setup', 'MCP Server Setup');
-      expect(metadata.images[0].url).toContain('/api/og?path=%2Fguides%2Ftutorials%2Fmcp-setup');
+      expect(metadata.images[0].url).toContain('/og-images/og-image.webp');
       expect(metadata.images[0].alt).toBe('MCP Server Setup');
     });
   });
@@ -385,7 +231,7 @@ describe('generateTwitterMetadata()', () => {
 
     it('includes image URL', () => {
       const metadata = generateTwitterMetadata('/trending', 'Trending Configurations');
-      expect(metadata.images[0].url).toContain('/api/og?path=%2Ftrending');
+      expect(metadata.images[0].url).toContain('/og-images/og-image.webp');
     });
 
     it('includes standard dimensions', () => {
@@ -445,17 +291,17 @@ describe('generateTwitterMetadata()', () => {
     it('generates metadata for homepage', () => {
       const metadata = generateTwitterMetadata('/', 'Claude Pro Directory');
       expect(metadata.card).toBe('summary_large_image');
-      expect(metadata.images[0].url).toContain('/api/og?path=%2F');
+      expect(metadata.images[0].url).toContain('/og-images/og-image.webp');
     });
 
     it('generates metadata for agent detail page', () => {
       const metadata = generateTwitterMetadata('/agents/code-reviewer', 'Code Reviewer Agent');
-      expect(metadata.images[0].url).toContain('/api/og?path=%2Fagents%2Fcode-reviewer');
+      expect(metadata.images[0].url).toContain('/og-images/og-image.webp');
     });
 
     it('generates metadata for guide page', () => {
       const metadata = generateTwitterMetadata('/guides/tutorials/mcp-setup', 'MCP Server Setup');
-      expect(metadata.images[0].url).toContain('/api/og?path=%2Fguides%2Ftutorials%2Fmcp-setup');
+      expect(metadata.images[0].url).toContain('/og-images/og-image.webp');
     });
   });
 
