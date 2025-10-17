@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -7,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { getUserSubmissions } from '@/src/lib/actions/business.actions';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from '@/src/lib/icons';

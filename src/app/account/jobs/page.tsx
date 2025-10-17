@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedButton } from '@/src/components/domain/unified-button';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -7,8 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
-import { UnifiedButton } from '@/src/components/ui/unified-button';
 import { getUserJobs } from '@/src/lib/actions/business.actions';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';

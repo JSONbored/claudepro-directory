@@ -16,6 +16,7 @@
 
 import Link from 'next/link';
 import { memo, useEffect, useState } from 'react';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { Input } from '@/src/components/primitives/input';
@@ -25,7 +26,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/primitives/tooltip';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { CategoryNavigationCard } from '@/src/components/unified-detail-page/sidebar/category-navigation-card';
 import { ROUTES } from '@/src/lib/constants/routes';
 import {

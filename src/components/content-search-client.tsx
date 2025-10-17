@@ -2,8 +2,8 @@
 
 import dynamic from 'next/dynamic';
 import { memo } from 'react';
-import { ConfigCard } from '@/src/components/cards/config-card';
-import { UnifiedCardGrid } from '@/src/components/cards/unified-card-grid';
+import { ConfigCard } from '@/src/components/domain/config-card';
+import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { useLocalSearch } from '@/src/hooks/use-search';
 

@@ -51,6 +51,7 @@
  * @see unified-content-section.stories.tsx - Comprehensive Storybook documentation
  */
 
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import {
   Card,
   CardContent,
@@ -59,7 +60,6 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { ProductionCodeBlock } from '@/src/components/ui/production-code-block';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import type { LucideIcon } from '@/src/lib/icons';
 import { Copy } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';

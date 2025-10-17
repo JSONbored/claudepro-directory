@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { BadgeGrid } from '@/src/components/features/badges/badge-grid';
 import { ReputationBreakdown } from '@/src/components/features/reputation/reputation-breakdown';
 import { Button } from '@/src/components/primitives/button';
@@ -11,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { getPublicUserBadges } from '@/src/lib/actions/badges.actions';
 import { getUserReputation } from '@/src/lib/actions/reputation.actions';
 import { FolderOpen, Globe, MessageSquare, Users } from '@/src/lib/icons';

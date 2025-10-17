@@ -18,8 +18,8 @@
  */
 
 import { memo } from 'react';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { MDXRenderer } from '@/src/components/shared/mdx-renderer';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import type { ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 

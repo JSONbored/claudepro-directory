@@ -19,6 +19,8 @@
 
 import { FileText, MessageSquare, Star, ThumbsUp, TrendingUp, Trophy } from 'lucide-react';
 import { memo } from 'react';
+import { HorizontalBarChart } from '@/src/components/domain/horizontal-bar-chart';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import {
   Card,
   CardContent,
@@ -26,8 +28,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { HorizontalBarChart } from '@/src/components/ui/horizontal-bar-chart';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import {
   getNextTier,
   getReputationTier,

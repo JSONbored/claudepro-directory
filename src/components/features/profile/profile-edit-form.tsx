@@ -6,12 +6,12 @@
  */
 
 import { useId, useState, useTransition } from 'react';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Input } from '@/src/components/primitives/input';
 import { Label } from '@/src/components/primitives/label';
 import { Switch } from '@/src/components/primitives/switch';
 import { Textarea } from '@/src/components/primitives/textarea';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { refreshProfileFromOAuth, updateProfile } from '@/src/lib/actions/user.actions';
 import { X } from '@/src/lib/icons';
 import type { ProfileData } from '@/src/lib/schemas/profile.schema';

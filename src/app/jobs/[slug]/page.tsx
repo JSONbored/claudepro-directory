@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { jobs } from '@/src/lib/data/jobs';

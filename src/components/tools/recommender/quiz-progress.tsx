@@ -5,7 +5,7 @@
  * Displays progress bar and question counter for quiz
  */
 
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { CheckCircle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

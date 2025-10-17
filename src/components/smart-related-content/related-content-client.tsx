@@ -21,9 +21,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import { BaseCard } from '@/src/components/cards/base-card';
-import { UnifiedCardGrid } from '@/src/components/cards/unified-card-grid';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
+import { BaseCard } from '@/src/components/domain/base-card';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { Sparkles } from '@/src/lib/icons';
 import { relatedContentService } from '@/src/lib/related-content/service';
 import type {

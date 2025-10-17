@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

@@ -13,10 +13,10 @@
  */
 
 import { useRouter } from 'next/navigation';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedButton } from '@/src/components/domain/unified-button';
 import type { CopyType } from '@/src/components/growth/post-copy-email-modal';
 import { Button } from '@/src/components/primitives/button';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
-import { UnifiedButton } from '@/src/components/ui/unified-button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { ArrowLeft, Copy } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';

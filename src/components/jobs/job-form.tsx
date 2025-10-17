@@ -8,6 +8,7 @@
  */
 
 import { useId, useState, useTransition } from 'react';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -26,7 +27,6 @@ import {
   SelectValue,
 } from '@/src/components/primitives/select';
 import { Textarea } from '@/src/components/primitives/textarea';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import type { CreateJobInput } from '@/src/lib/schemas/content/job.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

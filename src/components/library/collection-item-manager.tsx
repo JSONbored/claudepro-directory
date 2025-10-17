@@ -10,6 +10,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import {
   Select,
@@ -19,7 +20,6 @@ import {
   SelectValue,
 } from '@/src/components/primitives/select';
 import { Separator } from '@/src/components/primitives/separator';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import {
   addItemToCollection,
   removeItemFromCollection,

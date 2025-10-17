@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
 import { Avatar, AvatarFallback } from '@/src/components/primitives/avatar';
 import { Button } from '@/src/components/primitives/button';
@@ -9,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { MessageSquare, Plus, TrendingUp, User as UserIcon } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

@@ -15,7 +15,9 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
-import { BaseCard } from '@/src/components/cards/base-card';
+import { BaseCard } from '@/src/components/domain/base-card';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedButton } from '@/src/components/domain/unified-button';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -38,8 +40,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/primitives/tooltip';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
-import { UnifiedButton } from '@/src/components/ui/unified-button';
 import { addBookmarkBatch } from '@/src/lib/actions/user.actions';
 import { ROUTES } from '@/src/lib/constants/routes';
 import {

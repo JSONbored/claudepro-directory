@@ -15,9 +15,9 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';

@@ -18,6 +18,7 @@
  */
 
 import type { Metadata } from 'next';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
 import {
   Card,
@@ -27,7 +28,6 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { QuizForm } from '@/src/components/tools/recommender/quiz-form';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

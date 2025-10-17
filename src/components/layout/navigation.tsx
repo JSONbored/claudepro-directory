@@ -33,6 +33,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedButton } from '@/src/components/domain/unified-button';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
 import { NavigationCommandMenu } from '@/src/components/layout/navigation-command-menu';
 import { ThemeToggle } from '@/src/components/layout/theme-toggle';
@@ -48,8 +50,6 @@ import {
   DropdownMenuTrigger,
 } from '@/src/components/primitives/dropdown-menu';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/primitives/sheet';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
-import { UnifiedButton } from '@/src/components/ui/unified-button';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 import { useSearchShortcut } from '@/src/hooks/use-search-shortcut';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';

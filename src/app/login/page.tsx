@@ -1,3 +1,4 @@
+import { UnifiedButton } from '@/src/components/domain/unified-button';
 import {
   Card,
   CardContent,
@@ -5,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { UnifiedButton } from '@/src/components/ui/unified-button';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 export const metadata = generatePageMetadata('/login');

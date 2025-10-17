@@ -12,8 +12,8 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { ConfigCard } from '@/src/components/cards/config-card';
-import { UnifiedCardGrid } from '@/src/components/cards/unified-card-grid';
+import { ConfigCard } from '@/src/components/domain/config-card';
+import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { EVENTS } from '@/src/lib/analytics/events.constants';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import type { CategoryId } from '@/src/lib/config/category-config';

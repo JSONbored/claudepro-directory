@@ -25,6 +25,7 @@
 
 import type { ReactNode } from 'react';
 import { memo } from 'react';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { SponsoredTracker } from '@/src/components/features/sponsored/sponsored-tracker';
 import {
   Card,
@@ -33,7 +34,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { type UseCardNavigationOptions, useCardNavigation } from '@/src/hooks/use-card-navigation';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

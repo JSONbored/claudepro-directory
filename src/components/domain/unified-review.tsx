@@ -49,13 +49,13 @@ import {
   markReviewHelpful,
   updateReview,
 } from '#lib/actions/content';
-import { BaseCard } from '@/src/components/cards/base-card';
+import { BaseCard } from '@/src/components/domain/base-card';
+import { ChartContainer, HorizontalBarChart } from '@/src/components/domain/horizontal-bar-chart';
 import { Button } from '@/src/components/primitives/button';
 import { Card } from '@/src/components/primitives/card';
 import { Label } from '@/src/components/primitives/label';
 import { Rating, RatingButton } from '@/src/components/primitives/shadcn-io/rating';
 import { Textarea } from '@/src/components/primitives/textarea';
-import { ChartContainer, HorizontalBarChart } from '@/src/components/ui/horizontal-bar-chart';
 import { Edit, Star, ThumbsUp, Trash } from '@/src/lib/icons';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

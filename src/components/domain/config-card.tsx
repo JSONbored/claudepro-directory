@@ -14,12 +14,12 @@
  */
 
 import { memo } from 'react';
-import { BaseCard } from '@/src/components/cards/base-card';
-import { UnifiedReview } from '@/src/components/cards/unified-review';
+import { BaseCard } from '@/src/components/domain/base-card';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedButton } from '@/src/components/domain/unified-button';
+import { UnifiedReview } from '@/src/components/domain/unified-review';
 import { Button } from '@/src/components/primitives/button';
 import { BorderBeam } from '@/src/components/ui/magic/border-beam';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
-import { UnifiedButton } from '@/src/components/ui/unified-button';
 import {
   Award,
   Copy as CopyIcon,

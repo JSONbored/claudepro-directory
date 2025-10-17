@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -10,7 +11,6 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { Separator } from '@/src/components/primitives/separator';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { trackView } from '@/src/lib/actions/track-view';
 import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

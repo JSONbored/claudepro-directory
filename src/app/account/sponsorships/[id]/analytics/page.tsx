@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import {
   Card,
   CardContent,
@@ -6,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';

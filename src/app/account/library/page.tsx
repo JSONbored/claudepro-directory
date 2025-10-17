@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -8,7 +9,6 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Bookmark, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
 import { Button } from '@/src/components/primitives/button';
 import {
@@ -9,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Building, ExternalLink, Plus, Star } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

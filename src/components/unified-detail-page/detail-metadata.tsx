@@ -10,7 +10,7 @@
  */
 
 import { z } from 'zod';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { Calendar, Eye, Tag, User } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';

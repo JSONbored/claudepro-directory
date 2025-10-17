@@ -21,10 +21,10 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { BaseCard } from '@/src/components/cards/base-card';
 import { CategoryFilter } from '@/src/components/changelog/category-filter';
+import { BaseCard } from '@/src/components/domain/base-card';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Tabs, TabsContent } from '@/src/components/primitives/tabs';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import {
   formatChangelogDateShort,
   getChangelogPath,

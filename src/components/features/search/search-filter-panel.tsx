@@ -14,6 +14,7 @@
  */
 
 import { useId } from 'react';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Label } from '@/src/components/primitives/label';
 import { ScrollArea } from '@/src/components/primitives/scroll-area';
@@ -25,7 +26,6 @@ import {
   SelectValue,
 } from '@/src/components/primitives/select';
 import { Slider } from '@/src/components/primitives/slider';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import type { FilterState } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

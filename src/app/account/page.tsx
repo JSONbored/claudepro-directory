@@ -1,3 +1,4 @@
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import {
   Card,
   CardContent,
@@ -5,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Bookmark, Calendar } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

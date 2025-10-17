@@ -3,9 +3,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from '@/src/lib/icons';
 import type { JobCardProps } from '@/src/lib/schemas/component.schema';
 import { BADGE_COLORS, type JobType, UI_CLASSES } from '@/src/lib/ui-constants';

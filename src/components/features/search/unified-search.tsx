@@ -14,6 +14,7 @@
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { getSearchEvent } from '#lib/analytics/event-mapper';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { Button } from '@/src/components/primitives/button';
@@ -26,7 +27,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/primitives/select';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';

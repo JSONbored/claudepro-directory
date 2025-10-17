@@ -5,6 +5,7 @@
  * Used in 1 MDX file across the codebase - Specialized for troubleshooting documentation
  */
 
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import {
   Card,
   CardContent,
@@ -12,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { AlertTriangle, Info } from '@/src/lib/icons';
 import { type ErrorTableProps, errorTablePropsSchema } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

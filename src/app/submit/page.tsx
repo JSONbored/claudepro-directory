@@ -1,8 +1,8 @@
 import Link from 'next/link';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { SubmitFormClient } from '@/src/components/forms/submit-form-client';
 import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import {
   getRecentMerged,
   getSubmissionStats,

@@ -6,9 +6,9 @@
  */
 
 import { useState } from 'react';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent } from '@/src/components/primitives/card';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ExternalLink, FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import type { Activity, ActivityType } from '@/src/lib/schemas/activity.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

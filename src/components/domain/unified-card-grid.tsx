@@ -28,7 +28,7 @@
 
 import type { ReactNode } from 'react';
 import { memo } from 'react';
-import { ConfigCard } from '@/src/components/cards/config-card';
+import { ConfigCard } from '@/src/components/domain/config-card';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
