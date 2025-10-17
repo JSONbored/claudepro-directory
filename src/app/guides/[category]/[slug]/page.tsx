@@ -22,7 +22,6 @@ import { ArrowLeft, BookOpen, Calendar, Eye, FileText, Tag, Users, Zap } from '@
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { GuideItemWithCategory } from '@/src/lib/utils/content.utils';
 
 /**
  * ISR Configuration - Guide detail pages
@@ -104,70 +103,6 @@ async function getSEOPageData(category: string, slug: string): Promise<SEOPageDa
     },
     24 * 60 * 60 // Cache for 24 hours
   );
-}
-
-// Unused function - kept for future potential use
-// @ts-expect-error - Function intentionally unused, kept for future use
-async function _getCategoryGuides(category: string): Promise<GuideItemWithCategory[]> {
-  const cacheKey = `category-guides:${category}`;
-
-  const guides = await contentCache.cacheWithRefresh(
-    cacheKey,
-    async () => {
-      const guidesList: GuideItemWithCategory[] = [];
-
-      try {
-        const dir = path.join(process.cwd(), 'content', 'guides', category);
-
-        // Read directory directly - catch will handle if it doesn't exist
-        const files = await fs.readdir(dir);
-
-        for (const file of files) {
-          if (file.endsWith('.mdx')) {
-            try {
-              const content = await fs.readFile(path.join(dir, file), 'utf-8');
-              const { frontmatter } = parseMDXFrontmatter(content);
-
-              guidesList.push({
-                title: frontmatter.title || file.replace('.mdx', ''),
-                description: frontmatter.description || '',
-                slug: `/guides/${category}/${file.replace('.mdx', '')}`,
-                category,
-                dateUpdated: frontmatter.dateUpdated || '',
-                frontmatter: {
-                  title: frontmatter.title || file.replace('.mdx', ''),
-                  description: frontmatter.description || '',
-                },
-              });
-            } catch {
-              // Skip files that fail to parse
-            }
-          }
-        }
-      } catch {
-        // Directory doesn't exist
-      }
-
-      return guidesList;
-    },
-    4 * 60 * 60 // Cache for 4 hours
-  );
-
-  // Enrich with view counts from Redis
-  const enriched = await statsRedis.enrichWithViewCounts(
-    guides.map((guide) => ({
-      ...guide,
-      category: 'guides' as const,
-      slug: guide.slug.replace('/guides/', ''), // e.g., "tutorials/desktop-mcp-setup"
-    }))
-  );
-
-  // Restore original category field and slug format
-  return enriched.map((guide, index) => ({
-    ...guide,
-    category,
-    slug: guides[index]?.slug || guide.slug,
-  }));
 }
 
 async function getRelatedGuides(

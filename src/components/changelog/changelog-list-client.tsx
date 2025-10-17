@@ -22,7 +22,6 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { BaseCard } from '@/src/components/cards/base-card';
-import { UnifiedCardGrid } from '@/src/components/cards/unified-card-grid';
 import { CategoryFilter } from '@/src/components/changelog/category-filter';
 import { Tabs, TabsContent } from '@/src/components/ui/tabs';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
@@ -82,79 +81,82 @@ export function ChangelogListClient({ entries }: ChangelogListClientProps) {
 
       {/* Filtered Entries List */}
       <TabsContent value={activeCategory} className="mt-6">
-        <UnifiedCardGrid<ChangelogEntry>
-          items={filteredEntries}
-          variant="list"
-          emptyMessage={`No changelog entries found for ${activeCategory.toLowerCase()} category.`}
-          ariaLabel="Changelog entries"
-          keyExtractor={(entry) => entry.slug}
-          renderCard={(entry) => {
-            const targetPath = getChangelogPath(entry.slug);
-            const nonEmptyCategories = getNonEmptyCategories(entry.categories);
-            const displayDate = getRelativeTime(entry.date);
+        {filteredEntries.length === 0 ? (
+          <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
+            <p className="text-lg text-muted-foreground">
+              No changelog entries found for {activeCategory.toLowerCase()} category.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6" aria-label="Changelog entries">
+            {filteredEntries.map((entry) => {
+              const targetPath = getChangelogPath(entry.slug);
+              const nonEmptyCategories = getNonEmptyCategories(entry.categories);
+              const displayDate = getRelativeTime(entry.date);
 
-            return (
-              <Link key={entry.slug} href={targetPath} className="block">
-                <BaseCard
-                  variant="changelog"
-                  targetPath={targetPath}
-                  displayTitle={entry.title}
-                  {...(entry.tldr && { description: entry.tldr })}
-                  ariaLabel={`${entry.title} - ${entry.date}`}
-                  showAuthor={false}
-                  className="transition-all duration-200"
-                  renderTopBadges={() => (
-                    <div className={'flex items-center gap-2'}>
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <time
-                        dateTime={entry.date}
-                        className="text-sm font-medium text-muted-foreground"
-                        title={formatChangelogDateShort(entry.date)}
-                      >
-                        {displayDate}
-                      </time>
-                    </div>
-                  )}
-                  renderContent={() =>
-                    nonEmptyCategories.length > 0 ? (
-                      <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2}`}>
-                        {nonEmptyCategories.slice(0, 4).map((category) => (
-                          <UnifiedBadge
-                            key={category}
-                            variant="base"
-                            style="outline"
-                            className={`${BADGE_COLORS.changelogCategory[category as keyof typeof BADGE_COLORS.changelogCategory]} font-medium`}
-                          >
-                            {category}
-                          </UnifiedBadge>
-                        ))}
-                        {nonEmptyCategories.length > 4 && (
-                          <UnifiedBadge
-                            variant="base"
-                            style="outline"
-                            className="text-muted-foreground"
-                          >
-                            +{nonEmptyCategories.length - 4} more
-                          </UnifiedBadge>
-                        )}
+              return (
+                <Link key={entry.slug} href={targetPath} className="block">
+                  <BaseCard
+                    variant="changelog"
+                    targetPath={targetPath}
+                    displayTitle={entry.title}
+                    {...(entry.tldr && { description: entry.tldr })}
+                    ariaLabel={`${entry.title} - ${entry.date}`}
+                    showAuthor={false}
+                    className="transition-all duration-200"
+                    renderTopBadges={() => (
+                      <div className={'flex items-center gap-2'}>
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <time
+                          dateTime={entry.date}
+                          className="text-sm font-medium text-muted-foreground"
+                          title={formatChangelogDateShort(entry.date)}
+                        >
+                          {displayDate}
+                        </time>
                       </div>
-                    ) : null
-                  }
-                  customMetadataText={
-                    <div
-                      className={
-                        'flex items-center gap-2 text-sm text-primary group-hover:text-accent transition-colors-smooth font-medium transition-colors'
-                      }
-                    >
-                      <span>Read full changelog</span>
-                      <ArrowRight className="h-4 w-4" />
-                    </div>
-                  }
-                />
-              </Link>
-            );
-          }}
-        />
+                    )}
+                    renderContent={() =>
+                      nonEmptyCategories.length > 0 ? (
+                        <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2}`}>
+                          {nonEmptyCategories.slice(0, 4).map((category) => (
+                            <UnifiedBadge
+                              key={category}
+                              variant="base"
+                              style="outline"
+                              className={`${BADGE_COLORS.changelogCategory[category as keyof typeof BADGE_COLORS.changelogCategory]} font-medium`}
+                            >
+                              {category}
+                            </UnifiedBadge>
+                          ))}
+                          {nonEmptyCategories.length > 4 && (
+                            <UnifiedBadge
+                              variant="base"
+                              style="outline"
+                              className="text-muted-foreground"
+                            >
+                              +{nonEmptyCategories.length - 4} more
+                            </UnifiedBadge>
+                          )}
+                        </div>
+                      ) : null
+                    }
+                    customMetadataText={
+                      <div
+                        className={
+                          'flex items-center gap-2 text-sm text-primary group-hover:text-accent transition-colors-smooth font-medium transition-colors'
+                        }
+                      >
+                        <span>Read full changelog</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </div>
+                    }
+                  />
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </TabsContent>
     </Tabs>
   );

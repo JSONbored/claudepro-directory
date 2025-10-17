@@ -17,6 +17,7 @@ import {
   nonEmptyString,
   shortString,
 } from './primitives/base-strings';
+import { categoryIdSchema } from './shared.schema';
 
 /**
  * Primary content item type - represents any content item across all categories
@@ -72,7 +73,7 @@ const relatedContentItemSchema = z
   .object({
     slug: nonEmptyString.max(200).describe('Unique identifier for the content item'),
     description: mediumString.describe('Brief description of the content'),
-    category: z.string().max(50).describe('Primary category classification'),
+    category: categoryIdSchema.describe('Primary category classification'),
     author: shortString.describe('Content creator or author name'),
     dateAdded: z.string().max(50).describe('Date when content was added to the system'),
     tags: stringArray.describe('Array of content tags for categorization'),

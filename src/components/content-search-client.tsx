@@ -76,7 +76,7 @@ function ContentSearchClientComponent<T extends UnifiedContentItem>({
             emptyMessage={`No ${title.toLowerCase()} found`}
             ariaLabel="Search results"
             keyExtractor={(item) => item.slug}
-            renderCard={(item: T) => (
+            renderCard={(item) => (
               <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
             )}
           />

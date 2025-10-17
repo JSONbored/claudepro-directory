@@ -30,7 +30,6 @@ import type {
   RelatedContentItem,
   SmartRelatedContentProps,
 } from '@/src/lib/schemas/related-content.schema';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 /**
@@ -76,7 +75,8 @@ function getMatchTypeBadge(matchType: string): {
 /**
  * Extract category from pathname
  */
-function getCategoryFromPath(pathname: string): string {
+function getCategoryFromPath(pathname: string | undefined): string {
+  if (!pathname) return 'unknown';
   const pathParts = pathname.split('/').filter(Boolean);
   return pathParts[0] || 'unknown';
 }
@@ -112,8 +112,9 @@ export function RelatedContentClient({
   const [cacheHit, setCacheHit] = useState(false);
 
   // Get pathname from props or window.location (browser-safe)
-  const pathname =
-    providedPathname || (typeof window !== 'undefined' ? window.location.pathname : '/');
+  // Nullish coalescing ensures type safety (only falls back on null/undefined, not empty string)
+  const pathname: string =
+    providedPathname ?? (typeof window !== 'undefined' ? window.location.pathname : '/');
 
   useEffect(() => {
     const fetchRelatedContent = async () => {
@@ -140,7 +141,7 @@ export function RelatedContentClient({
       }
     };
 
-    fetchRelatedContent();
+    void fetchRelatedContent();
   }, [pathname, currentTags, currentKeywords, featured, exclude, limit]);
 
   // Track view when component loads (dynamic import for Storybook)
@@ -197,17 +198,17 @@ export function RelatedContentClient({
         emptyMessage="No related content available"
         loadingMessage="Finding related content..."
         renderCard={(item, index) => {
-          const matchBadge = getMatchTypeBadge(item.matchType);
+          const matchBadge = getMatchTypeBadge(item.matchType ?? 'unknown');
           const categoryBadge = getCategoryBadgeClass(item.category);
 
           return (
             <BaseCard
               key={`${item.category}-${item.slug}`}
               targetPath={getContentItemUrl({
-                category: item.category as CategoryId,
+                category: item.category,
                 slug: item.slug,
               })}
-              displayTitle={item.title || item.name || item.slug}
+              displayTitle={item.title ?? item.name ?? item.slug}
               description={item.description}
               tags={item.matchDetails?.matchedTags?.slice(0, 2) ?? []}
               topAccent
@@ -217,7 +218,7 @@ export function RelatedContentClient({
                 // Track click with dynamic import (Storybook compatible)
                 if (trackingEnabled) {
                   const itemUrl = getContentItemUrl({
-                    category: item.category as CategoryId,
+                    category: item.category,
                     slug: item.slug,
                   });
 
@@ -227,7 +228,7 @@ export function RelatedContentClient({
                         pathname,
                         itemUrl,
                         index + 1,
-                        item.score,
+                        item.score ?? 0,
                         item.matchType
                       );
                     })

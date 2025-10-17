@@ -56,7 +56,6 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
         <UnifiedCardGrid
           items={featuredItems}
           cardComponent={ConfigCard}
-          cardProps={{ variant: 'default', showCategory: true, showActions: true }}
           variant="normal"
           ariaLabel={`Featured ${title}`}
         />

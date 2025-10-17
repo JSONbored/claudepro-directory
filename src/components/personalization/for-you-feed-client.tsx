@@ -129,7 +129,6 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
       <UnifiedCardGrid
         items={filteredItems}
         cardComponent={ConfigCard}
-        cardProps={{ showCategory: true }}
         variant="normal"
         emptyMessage="No recommendations found for this category."
         ariaLabel="Personalized recommendations"

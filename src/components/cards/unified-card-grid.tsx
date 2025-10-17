@@ -26,12 +26,12 @@
  * @module components/ui/unified-card-grid
  */
 
-import type { ComponentType, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { memo } from 'react';
-import type { BaseCardProps } from '@/src/components/cards/base-card';
+import { ConfigCard } from '@/src/components/cards/config-card';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
-import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
+import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
@@ -41,18 +41,16 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 export type GridVariant = 'normal' | 'tight' | 'wide' | 'list';
 
 /**
- * Minimum item requirements - any object with a slug property
- * Allows UnifiedContentItem, ChangelogEntry, or any custom item type
- * Uses minimal constraint for maximum flexibility
- */
-type GridItem = { slug: string };
-
-/**
  * Base props shared by all variants
+ *
+ * **ARCHITECTURAL DECISION: UnifiedContentItem Only**
+ * This component requires UnifiedContentItem - NOT a generic GridItem.
+ * Previous generic approach created type complexity for zero benefit.
+ * All 12 usage sites pass UnifiedContentItem objects.
  */
-interface BaseGridProps<T extends GridItem> {
+interface BaseGridProps {
   /** Array of items to display */
-  items: readonly T[];
+  items: readonly UnifiedContentItem[];
 
   /** Grid layout variant (default: 'normal') */
   variant?: GridVariant;
@@ -76,40 +74,34 @@ interface BaseGridProps<T extends GridItem> {
   /** ARIA label for the grid section */
   ariaLabel?: string;
   /** Function to extract unique key from item (default: uses slug) */
-  keyExtractor?: (item: T, index: number) => string | number;
+  keyExtractor?: (item: UnifiedContentItem, index: number) => string | number;
 }
 
 /**
  * Discriminated union for card rendering options
- * Type-safe: cardComponent and cardProps must match
+ * Type-safe: each branch has exactly what it needs
+ *
+ * ARCHITECTURAL DECISION: Only ConfigCard or custom renderCard
+ * - ConfigCard: Standard card with defaults
+ * - renderCard: Full control (can use BaseCard with custom props)
+ * - Removed generic ComponentType branch (unused, type-unsafe)
  */
-type CardRenderingProps<T extends GridItem> =
+type CardRenderingProps =
   | {
       /** Use ConfigCard component */
-      cardComponent: ComponentType<ConfigCardProps & { item: T }>;
-      /** Props for ConfigCard */
-      cardProps?: Partial<ConfigCardProps>;
-      renderCard?: never;
-    }
-  | {
-      /** Use BaseCard component */
-      cardComponent: ComponentType<BaseCardProps & { item: T }>;
-      /** Props for BaseCard */
-      cardProps?: Partial<BaseCardProps>;
+      cardComponent: typeof ConfigCard;
       renderCard?: never;
     }
   | {
       /** Custom render function */
-      renderCard: (item: T, index: number) => ReactNode;
+      renderCard: (item: UnifiedContentItem, index: number) => ReactNode;
       cardComponent?: never;
-      cardProps?: never;
     };
 
 /**
  * Final props type: base + discriminated card rendering
  */
-export type UnifiedCardGridProps<T extends GridItem = GridItem> = BaseGridProps<T> &
-  CardRenderingProps<T>;
+export type UnifiedCardGridProps = BaseGridProps & CardRenderingProps;
 
 /**
  * Grid variant to className mapping
@@ -125,7 +117,7 @@ const GRID_VARIANTS: Record<GridVariant, string> = {
 /**
  * UnifiedCardGrid Component
  *
- * Renders items in a responsive CSS Grid with optional infinite scroll.
+ * Renders UnifiedContentItem objects in a responsive CSS Grid with optional infinite scroll.
  * Designed for maximum reusability and type safety.
  *
  * @example
@@ -165,22 +157,20 @@ const GRID_VARIANTS: Record<GridVariant, string> = {
  * />
  * ```
  */
-function UnifiedCardGridComponent<T extends GridItem = GridItem>({
-  items,
-  cardComponent: CardComponent,
-  cardProps,
-  renderCard,
-  variant = 'normal',
-  className = '',
-  infiniteScroll = false,
-  batchSize = 30,
-  rootMargin = '400px',
-  emptyMessage = 'No items found',
-  loadingMessage = 'Loading more...',
-  loading = false,
-  ariaLabel,
-  keyExtractor,
-}: UnifiedCardGridProps<T>) {
+function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
+  const {
+    items,
+    variant = 'normal',
+    className = '',
+    infiniteScroll = false,
+    batchSize = 30,
+    rootMargin = '400px',
+    emptyMessage = 'No items found',
+    loadingMessage = 'Loading more...',
+    loading = false,
+    ariaLabel,
+    keyExtractor,
+  } = props;
   // Infinite scroll hook (only used when infiniteScroll=true)
   const { displayCount, isLoading, hasMore, sentinelRef } = useInfiniteScroll({
     totalItems: items.length,
@@ -193,7 +183,7 @@ function UnifiedCardGridComponent<T extends GridItem = GridItem>({
   const displayedItems = infiniteScroll ? items.slice(0, displayCount) : items;
 
   // Default key extractor uses slug (standard across all UnifiedContentItem)
-  const getKey = keyExtractor || ((item: T, index: number) => item.slug || index);
+  const getKey = keyExtractor || ((item: UnifiedContentItem, index: number) => item.slug || index);
 
   // Empty state
   if (items.length === 0 && !loading) {
@@ -226,13 +216,9 @@ function UnifiedCardGridComponent<T extends GridItem = GridItem>({
         {displayedItems.map((item, index) => {
           const key = getKey(item, index);
 
-          // Render card based on provided method
-          // Type-safe: discriminated union ensures cardComponent and cardProps match
-          const cardContent = renderCard ? (
-            renderCard(item, index)
-          ) : CardComponent ? (
-            <CardComponent {...cardProps} item={item} />
-          ) : null;
+          // Render card based on provided method (discriminated union)
+          const cardContent: ReactNode =
+            'renderCard' in props ? props.renderCard(item, index) : <ConfigCard item={item} />;
 
           // Wrap in error boundary for safety
           return <ErrorBoundary key={key}>{cardContent}</ErrorBoundary>;
@@ -263,7 +249,7 @@ function UnifiedCardGridComponent<T extends GridItem = GridItem>({
 }
 
 /**
- * Memoized export with generic type preservation
+ * Memoized export
  * Prevents re-renders when parent state changes
  */
-export const UnifiedCardGrid = memo(UnifiedCardGridComponent) as typeof UnifiedCardGridComponent;
+export const UnifiedCardGrid = memo(UnifiedCardGridComponent);

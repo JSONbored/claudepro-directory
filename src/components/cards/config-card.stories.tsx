@@ -357,7 +357,6 @@ export const NoActions: Story = {
  * Tests card behavior in grid context across viewports
  */
 export const ResponsiveGrid: Story = {
-  args: {} as any,
   render: () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <ConfigCard item={sampleAgent} variant="default" showCategory showActions />
@@ -387,7 +386,6 @@ export const ResponsiveGrid: Story = {
  * Side-by-side comparison of all major variants
  */
 export const AllVariants: Story = {
-  args: {} as any,
   render: () => (
     <div className="space-y-6">
       <div>

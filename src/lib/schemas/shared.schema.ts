@@ -42,15 +42,15 @@ import {
  */
 
 /**
- * CategoryId - THE ONLY category type (derived from UNIFIED_CATEGORY_REGISTRY)
+ * CategoryId - THE ONLY category type (derived from VALID_CATEGORIES)
  *
- * ARCHITECTURE: UNIFIED_CATEGORY_REGISTRY in category-config.ts is the ONLY source of truth.
- * CategoryId = keyof typeof UNIFIED_CATEGORY_REGISTRY
+ * ARCHITECTURE: Imported from category-types.ts (client-safe, no schema imports).
+ * This breaks circular dependency: shared.schema → category-config → collection.schema → shared.schema
  *
  * ONE NAME. ONE CONCEPT. NO ALIASES.
  */
-export type { CategoryId } from '@/src/lib/config/category-config';
-export { VALID_CATEGORIES } from '@/src/lib/config/category-config';
+export type { CategoryId } from '@/src/lib/config/category-types';
+export { VALID_CATEGORIES } from '@/src/lib/config/category-types';
 
 /**
  * Zod schema for categories
