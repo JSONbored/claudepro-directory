@@ -125,7 +125,7 @@ export class ReputationRepository extends CachedRepository<ReputationBreakdown, 
       };
 
       // Cache the result
-      this.setCache(cacheKey, breakdown as unknown as ReputationBreakdown);
+      this.setCache(cacheKey, breakdown);
 
       return breakdown;
     });

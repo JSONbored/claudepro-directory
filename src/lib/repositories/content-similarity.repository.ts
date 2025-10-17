@@ -70,7 +70,7 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
   async findById(id: string): Promise<RepositoryResult<ContentSimilarity | null>> {
     return this.executeOperation('findById', async () => {
       const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
+      const cached = this.getFromCache<ContentSimilarity>(cacheKey);
       if (cached) return cached;
 
       const supabase = await createClient();
@@ -315,11 +315,8 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
     return this.executeOperation('findSimilarContent', async (): Promise<SimilarityResult[]> => {
       if (!(options?.offset || options?.limit || options?.minScore)) {
         const cacheKey = this.getCacheKey('content', `${contentType}:${contentSlug}`);
-        const cached = this.getFromCache(cacheKey);
-        if (cached)
-          return Array.isArray(cached)
-            ? (cached as unknown as SimilarityResult[])
-            : ([cached] as unknown as SimilarityResult[]);
+        const cached = this.getFromCache<SimilarityResult[]>(cacheKey);
+        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -388,7 +385,7 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
 
       if (!(options?.offset || options?.limit || options?.minScore) && results.length > 0) {
         const cacheKey = this.getCacheKey('content', `${contentType}:${contentSlug}`);
-        this.setCache(cacheKey, results as unknown as ContentSimilarity);
+        this.setCache(cacheKey, results);
       }
 
       return results;

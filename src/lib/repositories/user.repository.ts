@@ -463,7 +463,7 @@ export class UserRepository extends CachedRepository<User, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data as unknown as User);
+        this.setCache(cacheKey, data);
       }
 
       return data || [];

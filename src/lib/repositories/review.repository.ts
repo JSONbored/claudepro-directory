@@ -78,7 +78,7 @@ export class ReviewRepository extends CachedRepository<Review, string> {
   async findById(id: string): Promise<RepositoryResult<Review | null>> {
     return this.executeOperation('findById', async () => {
       const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
+      const cached = this.getFromCache<Review>(cacheKey);
       if (cached) return cached;
 
       const supabase = await createClient();
@@ -310,8 +310,8 @@ export class ReviewRepository extends CachedRepository<Review, string> {
     return this.executeOperation('findByContent', async () => {
       if (!(options?.offset || options?.limit)) {
         const cacheKey = this.getCacheKey('content', `${contentType}:${contentSlug}`);
-        const cached = this.getFromCache(cacheKey);
-        if (cached) return Array.isArray(cached) ? cached : [cached];
+        const cached = this.getFromCache<Review[]>(cacheKey);
+        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -344,7 +344,7 @@ export class ReviewRepository extends CachedRepository<Review, string> {
 
       if (!(options?.offset || options?.limit) && data) {
         const cacheKey = this.getCacheKey('content', `${contentType}:${contentSlug}`);
-        this.setCache(cacheKey, data as unknown as Review);
+        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -361,7 +361,7 @@ export class ReviewRepository extends CachedRepository<Review, string> {
   ): Promise<RepositoryResult<Review | null>> {
     return this.executeOperation('findByUserAndContent', async () => {
       const cacheKey = this.getCacheKey('user-content', `${userId}:${contentType}:${contentSlug}`);
-      const cached = this.getFromCache(cacheKey);
+      const cached = this.getFromCache<Review>(cacheKey);
       if (cached) return cached;
 
       const supabase = await createClient();
@@ -395,8 +395,8 @@ export class ReviewRepository extends CachedRepository<Review, string> {
     return this.executeOperation('findByUser', async () => {
       if (!(options?.offset || options?.limit)) {
         const cacheKey = this.getCacheKey('user', userId);
-        const cached = this.getFromCache(cacheKey);
-        if (cached) return Array.isArray(cached) ? cached : [cached];
+        const cached = this.getFromCache<Review[]>(cacheKey);
+        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -425,7 +425,7 @@ export class ReviewRepository extends CachedRepository<Review, string> {
 
       if (!(options?.offset || options?.limit) && data) {
         const cacheKey = this.getCacheKey('user', userId);
-        this.setCache(cacheKey, data as unknown as Review);
+        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -438,8 +438,8 @@ export class ReviewRepository extends CachedRepository<Review, string> {
   async getStats(contentType: string, contentSlug: string): Promise<RepositoryResult<ReviewStats>> {
     return this.executeOperation('getStats', async () => {
       const cacheKey = this.getCacheKey('stats', `${contentType}:${contentSlug}`);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached as unknown as ReviewStats;
+      const cached = this.getFromCache<ReviewStats>(cacheKey);
+      if (cached) return cached;
 
       const supabase = await createClient();
       const { data: reviews, error } = await supabase
@@ -480,7 +480,7 @@ export class ReviewRepository extends CachedRepository<Review, string> {
       };
 
       // Cache the stats
-      this.setCache(cacheKey, stats as unknown as Review);
+      this.setCache(cacheKey, stats);
 
       return stats;
     });

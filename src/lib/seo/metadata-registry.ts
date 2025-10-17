@@ -944,10 +944,14 @@ export const METADATA_REGISTRY = {
         agents: 'Browse AI Agents for Claude 2025',
         mcp: 'Browse MCP Servers for Claude 2025',
         hooks: 'Browse Hooks for Claude Code 2025',
-        commands: 'Browse Commands for Claude 2025',
-        rules: 'Browse Rules for Claude AI 2025',
+        commands: 'Browse Commands for Claude Code 2025',
+        rules: 'Browse Rules for Claude Code AI 2025',
         statuslines: 'Browse Statuslines for Claude 2025',
-        skills: 'Browse Skills for Claude 2025',
+        collections: 'Browse Collections for Claude 2025',
+        skills: 'Browse Claude Skills & Workflows 2025',
+        guides: 'Browse Claude Guides & Tutorials 2025',
+        jobs: 'Browse AI & Claude Job Openings 2025',
+        changelog: 'Browse Changelog & Updates for 2025',
       };
 
       const baseTitle =
@@ -978,8 +982,15 @@ export const METADATA_REGISTRY = {
           'Browse Claude rules and system prompts for October 2025. Configure AI behavior, coding standards, security policies, and best practices for your development workflow.',
         statuslines:
           'Browse Claude statusline templates for October 2025. Customize your CLI status bar with project info, git status, environment indicators, and development metrics.',
+        collections:
+          'Browse curated Claude collections for October 2025. Complete workflow bundles with agents, MCP servers, commands, and rules ready to deploy instantly to any project.',
         skills:
-          'Browse Claude Skills for October 2025. Practical document and data workflows (PDF, DOCX, PPTX, XLSX) with exact dependencies, code examples, and troubleshooting.',
+          'Browse Claude Skills for October 2025. Practical document workflows (PDF, DOCX, PPTX, XLSX) with exact dependencies, code examples, and troubleshooting guides.',
+        guides:
+          'Browse expert Claude guides for October 2025. In-depth comparisons, workflow automation, use cases, troubleshooting, and best practices for Claude AI development.',
+        jobs: 'Browse AI and Claude jobs for October 2025. Remote and on-site positions in prompt engineering, AI development, Claude integration, and ML engineering roles.',
+        changelog:
+          'Browse Claude Pro Directory changelog for October 2025. Latest features, improvements, bug fixes, new content categories, and community contribution updates.',
       };
 
       return (

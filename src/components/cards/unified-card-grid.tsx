@@ -41,12 +41,6 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 export type GridVariant = 'normal' | 'tight' | 'wide' | 'list';
 
 /**
- * Card component type
- * Supports ConfigCard, BaseCard, or any custom card component
- */
-type CardComponent<T> = ComponentType<ConfigCardProps & { item: T }> | ComponentType<BaseCardProps>;
-
-/**
  * Minimum item requirements - any object with a slug property
  * Allows UnifiedContentItem, ChangelogEntry, or any custom item type
  * Uses minimal constraint for maximum flexibility
@@ -54,30 +48,17 @@ type CardComponent<T> = ComponentType<ConfigCardProps & { item: T }> | Component
 type GridItem = { slug: string };
 
 /**
- * Props for UnifiedCardGrid component
- * Type-safe generics with minimal constraints for maximum flexibility
+ * Base props shared by all variants
  */
-export interface UnifiedCardGridProps<T extends GridItem = GridItem> {
-  // ===== REQUIRED =====
+interface BaseGridProps<T extends GridItem> {
   /** Array of items to display */
   items: readonly T[];
 
-  // ===== CARD RENDERING (Choose ONE) =====
-  /** Option 1: Use existing card component (ConfigCard, BaseCard) */
-  cardComponent?: CardComponent<T>;
-  /** Option 1b: Props to pass to card component */
-  cardProps?: Partial<ConfigCardProps> | Partial<BaseCardProps>;
-
-  /** Option 2: Custom render function for special cases */
-  renderCard?: (item: T, index: number) => ReactNode;
-
-  // ===== LAYOUT =====
   /** Grid layout variant (default: 'normal') */
   variant?: GridVariant;
   /** Additional CSS classes */
   className?: string;
 
-  // ===== FEATURES =====
   /** Enable infinite scroll (default: false) */
   infiniteScroll?: boolean;
   /** Number of items to load per batch (default: 30) */
@@ -85,7 +66,6 @@ export interface UnifiedCardGridProps<T extends GridItem = GridItem> {
   /** Root margin for intersection observer (default: '400px') */
   rootMargin?: string;
 
-  // ===== STATES =====
   /** Message shown when no items exist */
   emptyMessage?: string;
   /** Message shown while loading more items */
@@ -93,12 +73,43 @@ export interface UnifiedCardGridProps<T extends GridItem = GridItem> {
   /** Show loading state */
   loading?: boolean;
 
-  // ===== ACCESSIBILITY =====
   /** ARIA label for the grid section */
   ariaLabel?: string;
   /** Function to extract unique key from item (default: uses slug) */
   keyExtractor?: (item: T, index: number) => string | number;
 }
+
+/**
+ * Discriminated union for card rendering options
+ * Type-safe: cardComponent and cardProps must match
+ */
+type CardRenderingProps<T extends GridItem> =
+  | {
+      /** Use ConfigCard component */
+      cardComponent: ComponentType<ConfigCardProps & { item: T }>;
+      /** Props for ConfigCard */
+      cardProps?: Partial<ConfigCardProps>;
+      renderCard?: never;
+    }
+  | {
+      /** Use BaseCard component */
+      cardComponent: ComponentType<BaseCardProps & { item: T }>;
+      /** Props for BaseCard */
+      cardProps?: Partial<BaseCardProps>;
+      renderCard?: never;
+    }
+  | {
+      /** Custom render function */
+      renderCard: (item: T, index: number) => ReactNode;
+      cardComponent?: never;
+      cardProps?: never;
+    };
+
+/**
+ * Final props type: base + discriminated card rendering
+ */
+export type UnifiedCardGridProps<T extends GridItem = GridItem> = BaseGridProps<T> &
+  CardRenderingProps<T>;
 
 /**
  * Grid variant to className mapping
@@ -216,10 +227,11 @@ function UnifiedCardGridComponent<T extends GridItem = GridItem>({
           const key = getKey(item, index);
 
           // Render card based on provided method
+          // Type-safe: discriminated union ensures cardComponent and cardProps match
           const cardContent = renderCard ? (
             renderCard(item, index)
           ) : CardComponent ? (
-            <CardComponent {...(cardProps as any)} item={item} />
+            <CardComponent {...cardProps} item={item} />
           ) : null;
 
           // Wrap in error boundary for safety

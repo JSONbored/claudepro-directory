@@ -16,10 +16,26 @@ import { ConfigCard } from '@/src/components/cards/config-card';
 import { UnifiedCardGrid } from '@/src/components/cards/unified-card-grid';
 import { EVENTS } from '@/src/lib/analytics/events.constants';
 import { trackEvent } from '@/src/lib/analytics/tracker';
+import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ForYouFeedResponse } from '@/src/lib/schemas/personalization.schema';
 
 interface ForYouFeedClientProps {
   initialData: ForYouFeedResponse;
+}
+
+/** Transformed recommendation item with tracking data */
+interface TransformedRecommendation {
+  slug: string;
+  title: string;
+  name: string;
+  description: string;
+  category: CategoryId;
+  tags: string[];
+  author: string;
+  popularity: number | undefined;
+  viewCount: number | undefined;
+  _recommendationSource: string;
+  _recommendationReason: string | undefined;
 }
 
 export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
@@ -42,22 +58,24 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
   );
 
   // MODERNIZATION: Memoize data transformation outside render
-  const transformedRecommendations = useMemo(
+  const transformedRecommendations = useMemo<TransformedRecommendation[]>(
     () =>
-      recommendations.map((rec) => ({
-        slug: rec.slug,
-        title: rec.title,
-        name: rec.title,
-        description: rec.description,
-        category: rec.category,
-        tags: rec.tags || [],
-        author: rec.author || 'Unknown',
-        popularity: rec.popularity,
-        viewCount: rec.view_count,
-        // Store recommendation-specific data for tracking
-        _recommendationSource: rec.source,
-        _recommendationReason: rec.reason,
-      })),
+      recommendations.map(
+        (rec): TransformedRecommendation => ({
+          slug: rec.slug,
+          title: rec.title,
+          name: rec.title,
+          description: rec.description,
+          category: rec.category,
+          tags: rec.tags || [],
+          author: rec.author || 'Unknown',
+          popularity: rec.popularity,
+          viewCount: rec.view_count,
+          // Store recommendation-specific data for tracking
+          _recommendationSource: rec.source,
+          _recommendationReason: rec.reason,
+        })
+      ),
     [recommendations]
   );
 
@@ -109,7 +127,7 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
 
       {/* Recommendations grid - MODERNIZED with UnifiedCardGrid */}
       <UnifiedCardGrid
-        items={filteredItems as any[]}
+        items={filteredItems}
         cardComponent={ConfigCard}
         cardProps={{ showCategory: true }}
         variant="normal"
@@ -118,9 +136,9 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
       />
 
       {/* Show recommendation reasons below grid if needed */}
-      {filteredItems.some((item: any) => item._recommendationReason) && (
+      {filteredItems.some((item) => item._recommendationReason) && (
         <div className="mt-6 space-y-2">
-          {filteredItems.map((item: any) =>
+          {filteredItems.map((item) =>
             item._recommendationReason ? (
               <p key={item.slug} className="text-xs text-muted-foreground italic">
                 <strong>{item.title}:</strong> {item._recommendationReason}

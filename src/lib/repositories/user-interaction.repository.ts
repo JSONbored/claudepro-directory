@@ -331,7 +331,7 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
 
       if (!(options?.offset || options?.limit) && data) {
         const cacheKey = this.getCacheKey('user', userId);
-        this.setCache(cacheKey, data as unknown as UserInteraction);
+        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -383,7 +383,7 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
 
       if (!(options?.offset || options?.limit) && data) {
         const cacheKey = this.getCacheKey('content', `${contentType}:${contentSlug}`);
-        this.setCache(cacheKey, data as unknown as UserInteraction);
+        this.setCache(cacheKey, data);
       }
 
       return data || [];

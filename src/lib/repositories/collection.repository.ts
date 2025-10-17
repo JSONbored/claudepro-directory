@@ -61,7 +61,7 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
   async findById(id: string): Promise<RepositoryResult<Collection | null>> {
     return this.executeOperation('findById', async () => {
       const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
+      const cached = this.getFromCache<Collection>(cacheKey);
       if (cached) return cached;
 
       const supabase = await createClient();
@@ -289,8 +289,8 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
     return this.executeOperation('findByUser', async () => {
       if (!(options?.offset || options?.limit)) {
         const cacheKey = this.getCacheKey('user', userId);
-        const cached = this.getFromCache(cacheKey);
-        if (cached) return Array.isArray(cached) ? cached : [cached];
+        const cached = this.getFromCache<Collection[]>(cacheKey);
+        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -319,7 +319,7 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
 
       if (!(options?.offset || options?.limit) && data) {
         const cacheKey = this.getCacheKey('user', userId);
-        this.setCache(cacheKey, data as unknown as Collection);
+        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -335,7 +335,7 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
   ): Promise<RepositoryResult<Collection | null>> {
     return this.executeOperation('findByUserAndSlug', async () => {
       const cacheKey = this.getCacheKey('slug', `${userId}:${slug}`);
-      const cached = this.getFromCache(cacheKey);
+      const cached = this.getFromCache<Collection>(cacheKey);
       if (cached) return cached;
 
       const supabase = await createClient();
@@ -464,11 +464,8 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
     return this.executeOperation('getItems', async (): Promise<CollectionItem[]> => {
       if (!(options?.offset || options?.limit)) {
         const cacheKey = this.getCacheKey('items', collectionId);
-        const cached = this.getFromCache(cacheKey);
-        if (cached)
-          return Array.isArray(cached)
-            ? (cached as unknown as CollectionItem[])
-            : ([cached] as unknown as CollectionItem[]);
+        const cached = this.getFromCache<CollectionItem[]>(cacheKey);
+        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -497,7 +494,7 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
 
       if (!(options?.offset || options?.limit) && data) {
         const cacheKey = this.getCacheKey('items', collectionId);
-        this.setCache(cacheKey, data as unknown as Collection);
+        this.setCache(cacheKey, data);
       }
 
       return data || [];

@@ -408,7 +408,7 @@ export class PostRepository extends CachedRepository<Post, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data as unknown as Post);
+        this.setCache(cacheKey, data);
       }
 
       return data || [];

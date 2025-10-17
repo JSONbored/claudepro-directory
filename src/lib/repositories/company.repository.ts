@@ -430,7 +430,7 @@ export class CompanyRepository extends CachedRepository<Company, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data as unknown as Company);
+        this.setCache(cacheKey, data);
       }
 
       return data || [];

@@ -109,22 +109,18 @@ export default async function ChangelogEntryPage({
         <ChangelogArticleStructuredData entry={entry} />
 
         {/* Breadcrumb Schema - SEO optimization */}
-        {
-          await (
-            <BreadcrumbSchema
-              items={[
-                {
-                  name: 'Changelog',
-                  url: `${APP_CONFIG.url}/changelog`,
-                },
-                {
-                  name: entry.title,
-                  url: `${APP_CONFIG.url}/changelog/${entry.slug}`,
-                },
-              ]}
-            />
-          )
-        }
+        <BreadcrumbSchema
+          items={[
+            {
+              name: 'Changelog',
+              url: `${APP_CONFIG.url}/changelog`,
+            },
+            {
+              name: entry.title,
+              url: `${APP_CONFIG.url}/changelog/${entry.slug}`,
+            },
+          ]}
+        />
 
         <article className="container max-w-4xl py-8 space-y-8">
           {/* Navigation */}

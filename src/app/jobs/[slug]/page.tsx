@@ -87,22 +87,18 @@ export default async function JobPage({ params }: PageProps) {
   return (
     <>
       {/* Breadcrumb Schema - SEO optimization */}
-      {
-        await (
-          <BreadcrumbSchema
-            items={[
-              {
-                name: 'Jobs',
-                url: `${APP_CONFIG.url}/jobs`,
-              },
-              {
-                name: job.title,
-                url: `${APP_CONFIG.url}/jobs/${job.slug}`,
-              },
-            ]}
-          />
-        )
-      }
+      <BreadcrumbSchema
+        items={[
+          {
+            name: 'Jobs',
+            url: `${APP_CONFIG.url}/jobs`,
+          },
+          {
+            name: job.title,
+            url: `${APP_CONFIG.url}/jobs/${job.slug}`,
+          },
+        ]}
+      />
 
       <div className={'min-h-screen bg-background'}>
         {/* Header */}

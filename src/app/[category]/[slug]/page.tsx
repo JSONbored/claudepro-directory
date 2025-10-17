@@ -279,27 +279,21 @@ export default async function DetailPage({
       <>
         <UnifiedTracker variant="view" category={category} slug={slug} />
         <UnifiedTracker variant="page-view" category={category} slug={slug} />
-        {
-          await UnifiedStructuredData({
-            item: itemData as Parameters<typeof UnifiedStructuredData>[0]['item'],
-          })
-        }
-        {
-          await (
-            <BreadcrumbSchema
-              items={[
-                {
-                  name: config.title || category,
-                  url: `${APP_CONFIG.url}/${category}`,
-                },
-                {
-                  name: itemData.displayTitle || itemData.title || slug,
-                  url: `${APP_CONFIG.url}/${category}/${slug}`,
-                },
-              ]}
-            />
-          )
-        }
+        <UnifiedStructuredData
+          item={itemData as Parameters<typeof UnifiedStructuredData>[0]['item']}
+        />
+        <BreadcrumbSchema
+          items={[
+            {
+              name: config.title || category,
+              url: `${APP_CONFIG.url}/${category}`,
+            },
+            {
+              name: itemData.displayTitle || itemData.title || slug,
+              url: `${APP_CONFIG.url}/${category}/${slug}`,
+            },
+          ]}
+        />
         <CollectionDetailView collection={itemData as CollectionContent} />
       </>
     );
@@ -310,27 +304,21 @@ export default async function DetailPage({
     <>
       <UnifiedTracker variant="view" category={category} slug={slug} />
       <UnifiedTracker variant="page-view" category={category} slug={slug} />
-      {
-        await UnifiedStructuredData({
-          item: itemData as Parameters<typeof UnifiedStructuredData>[0]['item'],
-        })
-      }
-      {
-        await (
-          <BreadcrumbSchema
-            items={[
-              {
-                name: config.title || category,
-                url: `${APP_CONFIG.url}/${category}`,
-              },
-              {
-                name: itemData.displayTitle || itemData.title || slug,
-                url: `${APP_CONFIG.url}/${category}/${slug}`,
-              },
-            ]}
-          />
-        )
-      }
+      <UnifiedStructuredData
+        item={itemData as Parameters<typeof UnifiedStructuredData>[0]['item']}
+      />
+      <BreadcrumbSchema
+        items={[
+          {
+            name: config.title || category,
+            url: `${APP_CONFIG.url}/${category}`,
+          },
+          {
+            name: itemData.displayTitle || itemData.title || slug,
+            url: `${APP_CONFIG.url}/${category}/${slug}`,
+          },
+        ]}
+      />
       <UnifiedDetailPage item={itemData} relatedItems={relatedItemsData} viewCount={viewCount} />
     </>
   );

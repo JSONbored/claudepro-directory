@@ -51,7 +51,7 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
   async findById(id: string): Promise<RepositoryResult<Submission | null>> {
     return this.executeOperation('findById', async () => {
       const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
+      const cached = this.getFromCache<Submission>(cacheKey);
       if (cached) return cached;
 
       const supabase = await createClient();
@@ -277,8 +277,8 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
   ): Promise<RepositoryResult<Submission[]>> {
     return this.executeOperation('findByUser', async () => {
       const cacheKey = this.getCacheKey('user', userId);
-      const cached = this.getFromCache(cacheKey);
-      if (cached && !options) return Array.isArray(cached) ? cached : [cached];
+      const cached = this.getFromCache<Submission[]>(cacheKey);
+      if (cached && !options) return cached;
 
       const supabase = await createClient();
       let query = supabase.from('submissions').select('*').eq('user_id', userId);
@@ -303,7 +303,7 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
       }
 
       if (data && !options) {
-        this.setCache(cacheKey, data as unknown as Submission);
+        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -472,13 +472,12 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
   > {
     return this.executeOperation('getStats', async () => {
       const cacheKey = this.getCacheKey('stats', 'all');
-      const cached = this.getFromCache(cacheKey);
-      if (cached)
-        return cached as unknown as {
-          total: number;
-          pending: number;
-          mergedThisWeek: number;
-        };
+      const cached = this.getFromCache<{
+        total: number;
+        pending: number;
+        mergedThisWeek: number;
+      }>(cacheKey);
+      if (cached) return cached;
 
       const supabase = await createClient();
 
@@ -519,7 +518,7 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
         mergedThisWeek: mergedWeekResult.count || 0,
       };
 
-      this.setCache(cacheKey, stats as unknown as Submission);
+      this.setCache(cacheKey, stats);
       return stats;
     });
   }

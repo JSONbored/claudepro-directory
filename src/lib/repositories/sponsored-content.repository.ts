@@ -306,7 +306,7 @@ export class SponsoredContentRepository extends CachedRepository<SponsoredConten
         return true;
       });
 
-      this.setCache(cacheKey, filtered as unknown as SponsoredContent);
+      this.setCache(cacheKey, filtered);
 
       return filtered;
     });

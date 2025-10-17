@@ -64,7 +64,7 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
   async findById(id: string): Promise<RepositoryResult<UserAffinity | null>> {
     return this.executeOperation('findById', async () => {
       const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
+      const cached = this.getFromCache<UserAffinity>(cacheKey);
       if (cached) return cached;
 
       const supabase = await createClient();
@@ -298,8 +298,8 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
     return this.executeOperation('findByUser', async () => {
       if (!(options?.offset || options?.limit || options?.minScore)) {
         const cacheKey = this.getCacheKey('user', userId);
-        const cached = this.getFromCache(cacheKey);
-        if (cached) return Array.isArray(cached) ? cached : [cached];
+        const cached = this.getFromCache<UserAffinity[]>(cacheKey);
+        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -333,7 +333,7 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
 
       if (!(options?.offset || options?.limit || options?.minScore) && data) {
         const cacheKey = this.getCacheKey('user', userId);
-        this.setCache(cacheKey, data as unknown as UserAffinity);
+        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -350,7 +350,7 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
   ): Promise<RepositoryResult<UserAffinity | null>> {
     return this.executeOperation('findByUserAndContent', async () => {
       const cacheKey = this.getCacheKey('user-content', `${userId}:${contentType}:${contentSlug}`);
-      const cached = this.getFromCache(cacheKey);
+      const cached = this.getFromCache<UserAffinity>(cacheKey);
       if (cached) return cached;
 
       const supabase = await createClient();
@@ -466,8 +466,8 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
   async getStats(userId: string): Promise<RepositoryResult<AffinityStats>> {
     return this.executeOperation('getStats', async () => {
       const cacheKey = this.getCacheKey('stats', userId);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached as unknown as AffinityStats;
+      const cached = this.getFromCache<AffinityStats>(cacheKey);
+      if (cached) return cached;
 
       const affinitiesResult = await this.findByUser(userId);
       if (!affinitiesResult.success) {
@@ -524,7 +524,7 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
         top_content: topContent,
       };
 
-      this.setCache(cacheKey, stats as unknown as UserAffinity);
+      this.setCache(cacheKey, stats);
 
       return stats;
     });
