@@ -118,8 +118,8 @@ describe('generatePageMetadata()', () => {
       expect(images).toHaveLength(1);
       expect(images[0].width).toBe(1200);
       expect(images[0].height).toBe(630);
-      expect(images[0].type).toBe('image/png');
-      expect(images[0].url).toContain('/api/og?path=');
+      expect(images[0].type).toBe('image/webp');
+      expect(images[0].url).toContain('/og-images/og-image.webp');
     });
 
     it('includes Twitter Card metadata', async () => {
@@ -144,7 +144,7 @@ describe('generatePageMetadata()', () => {
       expect(images).toHaveLength(1);
       expect(images[0].width).toBe(1200);
       expect(images[0].height).toBe(630);
-      expect(images[0].url).toContain('/api/og?path=');
+      expect(images[0].url).toContain('/og-images/og-image.webp');
     });
 
     it('includes robots directives for crawlers', async () => {
@@ -210,14 +210,12 @@ describe('generatePageMetadata()', () => {
       expect(metadata.openGraph?.type).toBe('website');
     });
 
-    it('generates unique OG image URL for trending page', async () => {
+    it('generates OG image URL for trending page', async () => {
       const metadata = await generatePageMetadata('/trending');
       const images = metadata.openGraph?.images as Array<{ url: string }>;
 
-      // URL should contain the encoded path
-      expect(images[0].url).toContain('/api/og');
-      expect(images[0].url).toContain('path=');
-      expect(images[0].url).toContain('%2Ftrending');
+      // All routes use the same static OG image
+      expect(images[0].url).toContain('/og-images/og-image.webp');
     });
   });
 

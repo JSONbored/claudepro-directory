@@ -28,6 +28,7 @@ import { contentCache } from '@/src/lib/cache.server';
 import { getAllCategoryIds } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import { isNewContent } from '@/src/lib/utils/content.utils';
 
 /**
  * Cache TTL configuration
@@ -38,6 +39,24 @@ const CACHE_TTL = {
   CATEGORY: 14400, // 4 hours
   ITEM: 7200, // 2 hours
 } as const;
+
+/**
+ * SERVER-SIDE ENRICHMENT: Add computed fields to content items
+ *
+ * Performance Pattern: Compute once at load time, not at render time
+ * - Eliminates 50-100 client-side Date() calls per page
+ * - Zero re-computation on every render
+ * - Cacheable boolean flag (ISR/CDN friendly)
+ *
+ * @param items - Content items to enrich
+ * @returns Enriched items with isNew field
+ */
+function enrichContentItems(items: UnifiedContentItem[]): UnifiedContentItem[] {
+  return items.map((item) => ({
+    ...item,
+    isNew: isNewContent(item.dateAdded),
+  }));
+}
 
 /**
  * ============================================
@@ -147,7 +166,9 @@ export async function getContentByCategory(category: string): Promise<UnifiedCon
           category,
           itemCount: cached.length,
         });
-        return cached;
+        // Note: Cached items already enriched, but verify isNew is fresh
+        // (Important: isNew changes daily, so we re-compute for cache hits)
+        return enrichContentItems(cached);
       }
     }
 
@@ -168,9 +189,13 @@ export async function getContentByCategory(category: string): Promise<UnifiedCon
 
     const items = await loader();
 
-    // Cache the result for 4 hours (async, non-blocking)
-    if (contentCache.isEnabled() && items.length > 0) {
-      contentCache.cacheContentMetadata(category, items, CACHE_TTL.CATEGORY).catch((err) =>
+    // SERVER-SIDE ENRICHMENT: Add computed fields (isNew, etc.)
+    // Performance: Compute once here, not per-render in components
+    const enrichedItems = enrichContentItems(items);
+
+    // Cache the enriched result for 4 hours (async, non-blocking)
+    if (contentCache.isEnabled() && enrichedItems.length > 0) {
+      contentCache.cacheContentMetadata(category, enrichedItems, CACHE_TTL.CATEGORY).catch((err) =>
         logger.warn('Failed to cache category content', {
           category,
           error: err,
@@ -180,9 +205,9 @@ export async function getContentByCategory(category: string): Promise<UnifiedCon
 
     logger.debug('Content loaded from file system', {
       category,
-      itemCount: items.length,
+      itemCount: enrichedItems.length,
     });
-    return items;
+    return enrichedItems;
   } catch (error) {
     logger.error(
       `Failed to load content for category: ${category}`,

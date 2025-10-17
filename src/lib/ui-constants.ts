@@ -5,7 +5,217 @@
  * Usage: Replace long className strings with these constants
  * Before: className="card-gradient hover-lift transition-smooth group"
  * After: className={UI_CLASSES.CARD_GRADIENT_HOVER}
+ *
+ * =============================================================================
+ * RESPONSIVE BREAKPOINT STRATEGY (Tailwind CSS)
+ * =============================================================================
+ *
+ * Standard Breakpoints:
+ * - Mobile:   < 768px   (default, no prefix)
+ * - Tablet:   ≥ 768px   (md: prefix)
+ * - Desktop:  ≥ 1024px  (lg: prefix)
+ * - Wide:     ≥ 1280px  (xl: prefix)
+ *
+ * IMPORTANT: Avoid sm: (640px) breakpoint for consistency
+ * - Reason: Creates inconsistent behavior between mobile (< 768px) and tablet (≥ 768px)
+ * - Grid layouts use md: and lg: breakpoints
+ * - Navigation shows/hides at md: (768px) and lg: (1024px)
+ *
+ * Standard Patterns:
+ * 1. Mobile → Tablet transition: Use md: (768px)
+ *    Example: flex flex-col md:flex-row
+ *
+ * 2. Tablet → Desktop transition: Use lg: (1024px)
+ *    Example: hidden md:block lg:flex
+ *
+ * 3. Grid layouts:
+ *    Example: grid-cols-1 md:grid-cols-2 lg:grid-cols-3
+ *
+ * 4. Navigation visibility:
+ *    Desktop nav: hidden md:flex
+ *    Mobile menu: lg:hidden
+ *
+ * Architecture Decision:
+ * - This ensures no "gap" where neither mobile nor desktop UI shows
+ * - Aligns all responsive breakpoints across components
+ * - Follows Tailwind's mobile-first philosophy
+ * - Matches industry standard tablet breakpoint (768px iPad)
+ *
+ * =============================================================================
+ * RESPONSIVE DESIGN TOKENS (2025 Modern Architecture)
+ * =============================================================================
+ *
+ * Configuration-driven responsive system for systematic multi-viewport support.
+ * Use these tokens for viewport testing, container queries, and responsive logic.
+ *
+ * @see BREAKPOINTS - Standard viewport sizes for testing and media queries
+ * @see CONTAINER_BREAKPOINTS - Container query breakpoints (Tailwind v4 @container)
+ * @see RESPONSIVE_SPACING - Proportional spacing that scales across viewports
  */
+
+/**
+ * Standard Viewport Breakpoints (px values)
+ * Aligned with Tailwind CSS defaults and industry standards
+ *
+ * Usage:
+ * - Playwright viewport configuration
+ * - Visual regression testing
+ * - Responsive logic in components
+ * - Media query generation
+ *
+ * @example
+ * ```typescript
+ * import { BREAKPOINTS } from '@/src/lib/ui-constants';
+ *
+ * // Playwright viewport configuration
+ * viewport: { width: BREAKPOINTS.tablet, height: 1024 }
+ *
+ * // Responsive logic
+ * if (windowWidth >= BREAKPOINTS.desktop) { ... }
+ * ```
+ */
+export const BREAKPOINTS = {
+  /** Mobile (iPhone SE, small phones) - 320px */
+  mobile: 320,
+  /** Tablet (iPad portrait, medium screens) - 768px */
+  tablet: 768,
+  /** Desktop (Laptop, small desktop) - 1024px */
+  desktop: 1024,
+  /** Wide (Large desktop) - 1280px */
+  wide: 1280,
+  /** Ultra (1080p+ monitors) - 1920px */
+  ultra: 1920,
+} as const;
+
+/**
+ * Container Query Breakpoints (px values)
+ * For use with Tailwind v4 @container queries
+ *
+ * Container queries allow components to adapt based on their parent container width,
+ * not viewport width. This makes components truly reusable in any context.
+ *
+ * Usage:
+ * - Use @container in parent: className="@container"
+ * - Use @<size>: in children: className="@md:grid-cols-2"
+ *
+ * When to Use:
+ * - ✅ Reusable components (cards, modals, sidebars)
+ * - ✅ Components used in multiple layout contexts
+ * - ✅ Design system components
+ * - ❌ Page-level layouts (use regular breakpoints)
+ *
+ * @example
+ * ```tsx
+ * // Parent container
+ * <div className="@container">
+ *   {/* Child adapts to container, not viewport *\/}
+ *   <div className="grid @md:grid-cols-2 @lg:grid-cols-3">
+ *     <ConfigCard />
+ *   </div>
+ * </div>
+ * ```
+ */
+export const CONTAINER_BREAKPOINTS = {
+  /** Small container - 384px */
+  sm: 384,
+  /** Medium container - 448px */
+  md: 448,
+  /** Large container - 512px */
+  lg: 512,
+  /** Extra large container - 576px */
+  xl: 576,
+  /** 2XL container - 672px */
+  '2xl': 672,
+} as const;
+
+/**
+ * Responsive Spacing Scale
+ * Proportional spacing tokens that scale gracefully across viewports
+ *
+ * Philosophy:
+ * - Mobile: Tighter spacing (space is precious)
+ * - Tablet: Medium spacing (balanced)
+ * - Desktop: Generous spacing (ample screen real estate)
+ *
+ * Usage: Use these in gap, padding, margin for responsive scaling
+ *
+ * @example
+ * ```tsx
+ * import { RESPONSIVE_SPACING } from '@/src/lib/ui-constants';
+ *
+ * // Component with responsive gap
+ * <div className={`flex gap-${RESPONSIVE_SPACING.gap.mobile} md:gap-${RESPONSIVE_SPACING.gap.tablet}`}>
+ * ```
+ */
+export const RESPONSIVE_SPACING = {
+  /** Gap spacing across viewports */
+  gap: {
+    mobile: 4, // 1rem (16px)
+    tablet: 6, // 1.5rem (24px)
+    desktop: 8, // 2rem (32px)
+  },
+  /** Container padding across viewports */
+  container: {
+    mobile: 4, // 1rem (16px)
+    tablet: 6, // 1.5rem (24px)
+    desktop: 8, // 2rem (32px)
+  },
+  /** Section spacing (between major sections) */
+  section: {
+    mobile: 12, // 3rem (48px)
+    tablet: 16, // 4rem (64px)
+    desktop: 24, // 6rem (96px)
+  },
+} as const;
+
+/**
+ * Viewport Dimension Presets
+ * Common device dimensions for visual testing and responsive development
+ *
+ * Usage:
+ * - Playwright projects configuration
+ * - Storybook viewport addon
+ * - Visual regression testing baselines
+ *
+ * @example
+ * ```typescript
+ * import { VIEWPORT_PRESETS } from '@/src/lib/ui-constants';
+ *
+ * // Playwright config
+ * use: { viewport: VIEWPORT_PRESETS.iphone13 }
+ * ```
+ */
+export const VIEWPORT_PRESETS = {
+  /** iPhone SE (smallest modern phone) */
+  iphoneSE: { width: 375, height: 667 },
+  /** iPhone 13/14/15 (standard modern phone) */
+  iphone13: { width: 390, height: 844 },
+  /** iPhone 13/14/15 Pro Max (large phone) */
+  iphone13ProMax: { width: 428, height: 926 },
+  /** iPad (portrait) */
+  ipadPortrait: { width: 768, height: 1024 },
+  /** iPad (landscape) */
+  ipadLandscape: { width: 1024, height: 768 },
+  /** iPad Pro 12.9" (portrait) */
+  ipadProPortrait: { width: 1024, height: 1366 },
+  /** iPad Pro 12.9" (landscape) */
+  ipadProLandscape: { width: 1366, height: 1024 },
+  /** Laptop (13" MacBook) */
+  laptop: { width: 1280, height: 800 },
+  /** Desktop (1080p monitor) */
+  desktop1080p: { width: 1920, height: 1080 },
+  /** Desktop (1440p monitor) */
+  desktop1440p: { width: 2560, height: 1440 },
+  /** Desktop (4K monitor) */
+  desktop4k: { width: 3840, height: 2160 },
+} as const;
+
+/**
+ * Type-safe breakpoint keys
+ */
+export type BreakpointKey = keyof typeof BREAKPOINTS;
+export type ContainerBreakpointKey = keyof typeof CONTAINER_BREAKPOINTS;
+export type ViewportPresetKey = keyof typeof VIEWPORT_PRESETS;
 
 export const UI_CLASSES = {
   /**
@@ -98,10 +308,11 @@ export const UI_CLASSES = {
   /**
    * Responsive Card Layouts
    * Mobile-first design with progressive enhancement
+   * Breakpoint strategy: md: (768px) aligns with grid layouts (md:grid-cols-2 lg:grid-cols-3)
    */
-  CARD_BADGE_CONTAINER: 'flex flex-wrap gap-1 sm:gap-2 mb-4',
-  CARD_FOOTER_RESPONSIVE: 'flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between',
-  CARD_METADATA_BADGES: 'flex items-center gap-1 text-xs flex-wrap sm:flex-nowrap',
+  CARD_BADGE_CONTAINER: 'flex flex-wrap gap-1.5 md:gap-2 mb-4',
+  CARD_FOOTER_RESPONSIVE: 'flex flex-col gap-2 md:flex-row md:items-center md:justify-between',
+  CARD_METADATA_BADGES: 'flex items-center gap-1 text-xs flex-wrap md:flex-nowrap',
 } as const;
 
 /**

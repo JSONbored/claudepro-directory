@@ -20,30 +20,26 @@ export const OG_IMAGE_DIMENSIONS = {
 /**
  * Generate OpenGraph image URL for any page path
  *
- * Serves pre-generated WebP images from build-time screenshot generation.
- * Images are created during build via `npm run generate:og-images`.
+ * Returns the static WebP image optimized for social media sharing.
+ * All routes use the same professionally designed brand image.
  *
- * @param path - The page path (e.g., "/trending", "/agents/code-reviewer")
- * @returns Full URL to the OG image API endpoint
+ * @param path - The page path (ignored - all routes use same image)
+ * @returns Full URL to the static OG image
  *
  * @example
  * ```ts
  * // Homepage
  * generateOGImageUrl('/');
- * // => "https://claudepro.directory/api/og?path=%2F"
+ * // => "https://claudepro.directory/og-images/og-image.webp"
  *
- * // Content page
+ * // Content page (same image)
  * generateOGImageUrl('/agents/code-reviewer');
- * // => "https://claudepro.directory/api/og?path=%2Fagents%2Fcode-reviewer"
+ * // => "https://claudepro.directory/og-images/og-image.webp"
  * ```
  */
-export function generateOGImageUrl(path: string): string {
-  // Build query params - only path is needed for static images
-  const params = new URLSearchParams({
-    path,
-  });
-
-  return `${APP_CONFIG.url}/api/og?${params.toString()}`;
+export function generateOGImageUrl(_path: string): string {
+  // Return static image URL - path parameter maintained for future dynamic generation
+  return `${APP_CONFIG.url}/og-images/og-image.webp`;
 }
 
 /**

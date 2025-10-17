@@ -57,12 +57,12 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       ...homeMetadata.openGraph,
       locale: 'en_US',
-      // OG images now generated via unified /api/og endpoint (included in homeMetadata)
+      // Static OG image served from /og-images/og-image.webp (included in homeMetadata)
     },
     twitter: {
       ...homeMetadata.twitter,
       creator: '@JSONbored',
-      // Twitter images now generated via unified /api/og endpoint (included in homeMetadata)
+      // Static OG image served from /og-images/og-image.webp (included in homeMetadata)
     },
     alternates: {
       ...homeMetadata.alternates,

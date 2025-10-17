@@ -189,7 +189,7 @@ export const Navigation = () => {
 
                 {/* Desktop Navigation */}
                 <nav
-                  className={`hidden ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} lg:gap-3 xl:gap-4 text-sm xl:text-base lg:flex`}
+                  className={`hidden ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} md:gap-3 lg:gap-4 text-sm lg:text-base md:flex`}
                   aria-label="Primary navigation"
                 >
                   {PRIMARY_NAVIGATION.map((link) => (
@@ -315,7 +315,7 @@ export const Navigation = () => {
                 {/* Right Side Actions */}
                 <div className={'flex items-center gap-2 md:gap-3'}>
                   {/* Global Search Trigger */}
-                  <div className={'hidden lg:block'}>
+                  <div className={'hidden md:block'}>
                     <SearchTrigger
                       variant="ghost"
                       size="sm"
@@ -338,13 +338,13 @@ export const Navigation = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
-                    className={`hidden sm:flex ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                    className={`hidden md:flex ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                     aria-label="Join our Discord community"
                   >
                     <DiscordIcon className="h-4 w-4" />
                   </Button>
 
-                  <GitHubStarsButton className={'hidden sm:flex'} />
+                  <GitHubStarsButton className={'hidden md:flex'} />
 
                   <UserMenu className={'hidden md:flex'} />
 
@@ -356,7 +356,7 @@ export const Navigation = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="md:hidden"
+                        className="lg:hidden"
                         aria-label="Open mobile menu"
                       >
                         <Menu className="h-5 w-5" />
