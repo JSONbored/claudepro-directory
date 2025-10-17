@@ -49,8 +49,10 @@ export type UserBadgeWithBadge = {
 
 /** Badge earned item for notifications */
 export type BadgeEarnedItem = {
+  id: string;
   earned_at: string;
   badge: {
+    slug: string;
     name: string;
     description: string;
     icon: string | null;
@@ -386,8 +388,10 @@ export class UserBadgeRepository extends CachedRepository<UserBadge, string> {
         .from('user_badges')
         .select(
           `
+          id,
           earned_at,
           badge:badges (
+            slug,
             name,
             description,
             icon

@@ -22,6 +22,7 @@ import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { TypeBadge } from '@/src/components/ui/config-badge';
 import { BorderBeam } from '@/src/components/ui/magic/border-beam';
+import { NewBadge } from '@/src/components/ui/new-indicator';
 import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
 import {
   Award,
@@ -35,7 +36,12 @@ import {
 import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
 import { BADGE_COLORS, CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
-import { formatCopyCount, formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
+import {
+  formatCopyCount,
+  formatViewCount,
+  getContentItemUrl,
+  isNewContent,
+} from '@/src/lib/utils/content.utils';
 
 export const ConfigCard = memo(
   ({ item, variant = 'default', showCategory = true, showActions = true }: ConfigCardProps) => {
@@ -179,6 +185,9 @@ export const ConfigCard = memo(
                   showIcon={true}
                 />
               )}
+
+              {/* New badge - 0-7 days old content */}
+              {isNewContent(item.dateAdded) && <NewBadge variant="default" />}
             </>
           )}
           renderMetadataBadges={() => (

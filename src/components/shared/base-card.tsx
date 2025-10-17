@@ -283,7 +283,7 @@ export const BaseCard = memo(
 
           {/* Tags */}
           {tags && tags.length > 0 && (
-            <div className={'flex flex-wrap gap-1 mb-4'}>
+            <div className={UI_CLASSES.CARD_BADGE_CONTAINER}>
               {visibleTags?.map((tag: string) => (
                 <TagBadge key={tag} tag={tag} />
               ))}
@@ -299,7 +299,7 @@ export const BaseCard = memo(
           )}
 
           {/* Footer: Metadata and Actions */}
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+          <div className={UI_CLASSES.CARD_FOOTER_RESPONSIVE}>
             {/* Left side: Author and custom metadata */}
             {(showAuthor && author) || customMetadataText ? (
               <div className={'flex items-center gap-2 text-xs text-muted-foreground'}>
@@ -324,7 +324,7 @@ export const BaseCard = memo(
             )}
 
             {/* Right side: Metadata badges and actions */}
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+            <div className={UI_CLASSES.CARD_METADATA_BADGES}>
               {/* Metadata badges slot (view count, item count, etc.) */}
               {renderMetadataBadges?.()}
 

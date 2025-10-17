@@ -530,18 +530,18 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
           // We have enough trending items
           fallbackResult[category] = trendingItems.slice(0, LOADER_CONFIG.MAX_ITEMS_PER_CATEGORY);
         } else {
-          // Not enough trending items, supplement with raw data sorted alphabetically
+          // Not enough trending items, supplement with newest content
           const rawData = categoryDataMap[category] || [];
           const combined = [...trendingItems];
 
-          // Add non-trending items alphabetically until we have 6
+          // Add non-trending items sorted by newest first until we have 6
           const trendingSlugs = new Set(trendingItems.map((item) => item.slug));
           const additionalItems = rawData
             .filter((item) => !trendingSlugs.has(item.slug))
             .sort((a, b) => {
-              const titleA = a.title || a.name || '';
-              const titleB = b.title || b.name || '';
-              return titleA.localeCompare(titleB);
+              const dateA = new Date(a.dateAdded ?? '1970-01-01').getTime();
+              const dateB = new Date(b.dateAdded ?? '1970-01-01').getTime();
+              return dateB - dateA; // Newest first
             })
             .slice(0, LOADER_CONFIG.MAX_ITEMS_PER_CATEGORY - trendingItems.length);
 

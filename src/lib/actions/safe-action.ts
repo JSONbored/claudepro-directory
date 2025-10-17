@@ -63,7 +63,7 @@ const actionMetadataSchema = z.object({
     description: 'Unique name for the action (e.g., trackView, trackCopy)',
   }),
   category: z
-    .enum(['analytics', 'form', 'content', 'user', 'admin'])
+    .enum(['analytics', 'form', 'content', 'user', 'admin', 'reputation'])
     .optional()
     .meta({ description: 'Action category for grouping' }),
   rateLimit: z
