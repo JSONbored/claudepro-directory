@@ -1,9 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  ProfileEditForm,
-  RefreshProfileButton,
-} from '@/src/components/features/profile/profile-edit-form';
+import { ProfileEditForm, RefreshProfileButton } from '@/src/components/forms/profile-edit-form';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,

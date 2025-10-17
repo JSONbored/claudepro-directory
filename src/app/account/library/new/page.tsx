@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { CollectionForm } from '@/src/components/library/collection-form';
+import { CollectionForm } from '@/src/components/forms/collection-form';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { ROUTES } from '@/src/lib/constants/routes';
