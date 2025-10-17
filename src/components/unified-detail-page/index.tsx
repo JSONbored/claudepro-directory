@@ -29,13 +29,8 @@ import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
-import { BulletListSection } from './sections/bullet-list-section';
-import { ConfigurationSection } from './sections/configuration-section';
-import { ContentSection } from './sections/content-section';
-import { InstallationSection } from './sections/installation-section';
-import { TroubleshootingSection } from './sections/troubleshooting-section';
-import { UsageExamplesSection } from './sections/usage-examples-section';
 import { DetailSidebar } from './sidebar/detail-sidebar';
+import { UnifiedContentSection } from './unified-content-section';
 
 export interface UnifiedDetailPageProps {
   item: UnifiedContentItem;
@@ -105,24 +100,197 @@ export async function UnifiedDetailPage({
       : config.generators.requirements?.(item) || [];
   })();
 
-  // Pre-render configuration HTML for 'json' format (server-side syntax highlighting)
-  const preHighlightedConfigHtml = await (async () => {
-    // Only pre-render for 'json' format (rules, agents, commands)
-    // 'mcp' uses 'multi' format (plain pre blocks), 'hooks' uses 'hook' format (plain pre blocks)
-    if (
-      item.category !== 'mcp' &&
-      item.category !== 'hooks' &&
+  // ============================================================================
+  // DATA LAYER: Pre-process ALL async operations (syntax highlighting)
+  // ============================================================================
+  // Architecture: Page-level async processing (data layer) → Client components (presentation layer)
+  // Benefits: Parallel processing, testable components, proper separation of concerns
+
+  // Import async utilities at top of data processing section
+  const { detectLanguage } = await import('@/src/lib/content/language-detection');
+  const { generateFilename, generateMultiFormatFilename, generateHookFilename } = await import(
+    '@/src/lib/utils/content.utils'
+  );
+  const { batchMap, batchFetch } = await import('@/src/lib/utils/batch.utils');
+  const { transformMcpConfigForDisplay } = await import('@/src/lib/utils/content.utils');
+
+  // Pre-process content highlighting (ContentSection data)
+  const contentData = await (async () => {
+    // Extract content from item
+    let content = '';
+    if ('content' in item && typeof (item as { content?: string }).content === 'string') {
+      content = (item as { content: string }).content;
+    } else if (
       'configuration' in item &&
-      item.configuration
+      (item as unknown as { configuration?: unknown }).configuration
     ) {
+      const cfg = (item as unknown as { configuration?: unknown }).configuration;
+      content = typeof cfg === 'string' ? cfg : JSON.stringify(cfg, null, 2);
+    }
+
+    if (!content) return null;
+
+    try {
+      const languageHint =
+        'language' in item ? (item as { language?: string }).language : undefined;
+      const language = await detectLanguage(content, languageHint);
+      const filename = generateFilename({ item, language });
+      const html = await highlightCode(content, language);
+
+      return { html, code: content, language, filename };
+    } catch (_error) {
+      return null;
+    }
+  })();
+
+  // Pre-process configuration highlighting (ConfigurationSection data)
+  const configData = await (async () => {
+    if (!('configuration' in item && item.configuration)) return null;
+
+    const format = item.category === 'mcp' ? 'multi' : item.category === 'hooks' ? 'hook' : 'json';
+
+    // Multi-format configuration (MCP servers)
+    if (format === 'multi') {
+      const config = item.configuration as {
+        claudeDesktop?: Record<string, unknown>;
+        claudeCode?: Record<string, unknown>;
+        http?: Record<string, unknown>;
+        sse?: Record<string, unknown>;
+      };
+
       try {
-        return await highlightCode(JSON.stringify(item.configuration, null, 2), 'json');
+        const highlightedConfigs = await batchMap(Object.entries(config), async ([key, value]) => {
+          if (!value) return null;
+
+          const displayValue =
+            key === 'claudeDesktop' || key === 'claudeCode'
+              ? transformMcpConfigForDisplay(value as Record<string, unknown>)
+              : value;
+
+          const code = JSON.stringify(displayValue, null, 2);
+          const html = await highlightCode(code, 'json');
+          const filename = generateMultiFormatFilename(item, key, 'json');
+
+          return { key, html, code, filename };
+        });
+
+        return {
+          format: 'multi' as const,
+          configs: highlightedConfigs.filter(
+            (c): c is { key: string; html: string; code: string; filename: string } => c !== null
+          ),
+        };
       } catch (_error) {
-        // Fallback to undefined if highlighting fails - ConfigurationSection will use plain pre
-        return undefined;
+        return null;
       }
     }
-    return undefined;
+
+    // Hook configuration format
+    if (format === 'hook') {
+      const config = item.configuration as {
+        hookConfig?: { hooks?: Record<string, unknown> };
+        scriptContent?: string;
+      };
+
+      try {
+        const [highlightedHookConfig, highlightedScript] = await batchFetch([
+          config.hookConfig
+            ? highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json')
+            : Promise.resolve(null),
+          config.scriptContent
+            ? highlightCode(config.scriptContent, 'bash')
+            : Promise.resolve(null),
+        ]);
+
+        return {
+          format: 'hook' as const,
+          hookConfig: highlightedHookConfig
+            ? {
+                html: highlightedHookConfig,
+                code: JSON.stringify(config.hookConfig, null, 2),
+                filename: generateHookFilename(item, 'hookConfig', 'json'),
+              }
+            : null,
+          scriptContent:
+            highlightedScript && config.scriptContent
+              ? {
+                  html: highlightedScript,
+                  code: config.scriptContent,
+                  filename: generateHookFilename(item, 'scriptContent', 'bash'),
+                }
+              : null,
+        };
+      } catch (_error) {
+        return null;
+      }
+    }
+
+    // Default JSON configuration
+    try {
+      const code = JSON.stringify(item.configuration, null, 2);
+      const html = await highlightCode(code, 'json');
+      const filename = generateFilename({ item, language: 'json' });
+
+      return { format: 'json' as const, html, code, filename };
+    } catch (_error) {
+      return null;
+    }
+  })();
+
+  // Pre-process usage examples highlighting (UsageExamplesSection data)
+  const examplesData = await (async () => {
+    if (
+      !('examples' in item && Array.isArray(item.examples)) ||
+      item.examples.length === 0 ||
+      !item.examples.every((ex) => typeof ex === 'object' && 'code' in ex)
+    ) {
+      return null;
+    }
+
+    try {
+      const examples = item.examples as Array<{
+        title: string;
+        code: string;
+        language: string;
+        description?: string;
+      }>;
+
+      const highlightedExamples = await Promise.all(
+        examples.map(async (example) => {
+          const html = await highlightCode(example.code, example.language);
+          // Generate filename from title
+          const filename = `${example.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')}.${
+            {
+              typescript: 'ts',
+              javascript: 'js',
+              json: 'json',
+              bash: 'sh',
+              shell: 'sh',
+              python: 'py',
+              yaml: 'yml',
+              markdown: 'md',
+              plaintext: 'txt',
+            }[example.language] || 'txt'
+          }`;
+
+          return {
+            title: example.title,
+            ...(example.description && { description: example.description }),
+            html,
+            code: example.code,
+            language: example.language,
+            filename,
+          };
+        })
+      );
+
+      return highlightedExamples;
+    } catch (_error) {
+      return null;
+    }
   })();
 
   // Handle case where config is not found - AFTER ALL HOOKS
@@ -155,18 +323,22 @@ export async function UnifiedDetailPage({
           {/* Primary content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Content/Code section */}
-            {(('content' in item && typeof (item as { content?: string }).content === 'string') ||
-              ('configuration' in item && (item as { configuration?: object }).configuration)) && (
-              <ContentSection
-                item={item}
+            {contentData && (
+              <UnifiedContentSection
+                variant="content"
                 title={`${config.typeName} Content`}
                 description={`The main content for this ${config.typeName.toLowerCase()}.`}
+                html={contentData.html}
+                code={contentData.code}
+                language={contentData.language}
+                filename={contentData.filename}
               />
             )}
 
             {/* Features Section */}
             {config.sections.features && features.length > 0 && (
-              <BulletListSection
+              <UnifiedContentSection
+                variant="bullets"
                 title="Features"
                 description="Key capabilities and functionality"
                 items={features}
@@ -177,7 +349,8 @@ export async function UnifiedDetailPage({
 
             {/* Requirements Section */}
             {requirements.length > 0 && (
-              <BulletListSection
+              <UnifiedContentSection
+                variant="bullets"
                 title="Requirements"
                 description="Prerequisites and dependencies"
                 items={requirements}
@@ -188,23 +361,38 @@ export async function UnifiedDetailPage({
 
             {/* Installation Section */}
             {config.sections.installation && installation && (
-              <InstallationSection installation={installation} item={item} />
+              <UnifiedContentSection
+                variant="installation"
+                installation={installation}
+                item={item}
+              />
             )}
 
             {/* Configuration Section */}
-            {config.sections.configuration && 'configuration' in item && item.configuration && (
-              <ConfigurationSection
-                item={item}
-                format={
-                  item.category === 'mcp' ? 'multi' : item.category === 'hooks' ? 'hook' : 'json'
-                }
-                preHighlightedConfigHtml={preHighlightedConfigHtml}
+            {config.sections.configuration && configData && (
+              <UnifiedContentSection
+                variant="configuration"
+                {...(configData.format === 'multi'
+                  ? { format: 'multi' as const, configs: configData.configs }
+                  : configData.format === 'hook'
+                    ? {
+                        format: 'hook' as const,
+                        hookConfig: configData.hookConfig,
+                        scriptContent: configData.scriptContent,
+                      }
+                    : {
+                        format: 'json' as const,
+                        html: configData.html,
+                        code: configData.code,
+                        filename: configData.filename,
+                      })}
               />
             )}
 
             {/* Use Cases Section */}
             {config.sections.useCases && useCases.length > 0 && (
-              <BulletListSection
+              <UnifiedContentSection
+                variant="bullets"
                 title="Use Cases"
                 description="Common scenarios and applications"
                 items={useCases}
@@ -215,7 +403,8 @@ export async function UnifiedDetailPage({
 
             {/* Security Section (MCP-specific) */}
             {config.sections.security && 'security' in item && Array.isArray(item.security) && (
-              <BulletListSection
+              <UnifiedContentSection
+                variant="bullets"
                 title="Security Best Practices"
                 description="Important security considerations"
                 items={item.security as string[]}
@@ -226,39 +415,17 @@ export async function UnifiedDetailPage({
 
             {/* Troubleshooting Section */}
             {config.sections.troubleshooting && troubleshooting.length > 0 && (
-              <TroubleshootingSection
+              <UnifiedContentSection
+                variant="troubleshooting"
                 items={troubleshooting}
                 description="Common issues and solutions"
               />
             )}
 
             {/* Usage Examples Section - GitHub-style code snippets with syntax highlighting */}
-            {config.sections.examples &&
-              'examples' in item &&
-              Array.isArray(item.examples) &&
-              item.examples.length > 0 &&
-              // Type guard: Check if examples use new structured format (objects with title/code/language)
-              item.examples.every((ex) => typeof ex === 'object' && 'code' in ex) && (
-                <UsageExamplesSection
-                  examples={
-                    item.examples as Array<{
-                      title: string;
-                      code: string;
-                      language:
-                        | 'typescript'
-                        | 'javascript'
-                        | 'json'
-                        | 'bash'
-                        | 'shell'
-                        | 'python'
-                        | 'yaml'
-                        | 'markdown'
-                        | 'plaintext';
-                      description?: string;
-                    }>
-                  }
-                />
-              )}
+            {config.sections.examples && examplesData && examplesData.length > 0 && (
+              <UnifiedContentSection variant="examples" examples={examplesData} />
+            )}
 
             {/* Reviews & Ratings Section */}
             <div className="mt-12 pt-12 border-t">

@@ -49,33 +49,26 @@ export const ConfigCard = memo(
     const behavior =
       CARD_BEHAVIORS[item.category as keyof typeof CARD_BEHAVIORS] || CARD_BEHAVIORS.default;
 
-    // Extract sponsored metadata
-    const isSponsored = (item as { isSponsored?: boolean }).isSponsored;
-    const sponsoredId = (item as { sponsoredId?: string }).sponsoredId;
-    const sponsorTier = (item as { sponsorTier?: string }).sponsorTier;
-    const position = (item as { position?: number }).position;
-    const viewCount = (item as { viewCount?: number }).viewCount;
+    // Extract sponsored metadata - UnifiedContentItem already includes these properties
+    const { isSponsored, sponsoredId, sponsorTier, position, viewCount } = item;
+
+    // copyCount is a runtime property added by analytics (not in schema)
     const copyCount = (item as { copyCount?: number }).copyCount;
 
     // Extract featured metadata (weekly algorithm selection)
+    // Note: _featured is a computed property added by trending algorithm, not in schema
     const featuredData = (item as { _featured?: { rank: number; score: number } })._featured;
     const isFeatured = !!featuredData;
     const featuredRank = featuredData?.rank;
 
     // Extract rating metadata (if available)
+    // Note: _rating is a computed property added by rating aggregator, not in schema
     const ratingData = (item as { _rating?: { average: number; count: number } })._rating;
     const hasRating = ratingData && ratingData.count > 0;
 
     // Extract collection-specific metadata (tree-shakeable - only loaded for collections)
     const isCollection = item.category === 'collections';
-    const collectionType = isCollection
-      ? (item as { collectionType?: 'starter-kit' | 'workflow' | 'advanced-system' | 'use-case' })
-          .collectionType
-      : undefined;
-    const collectionDifficulty = isCollection
-      ? (item as { difficulty?: 'beginner' | 'intermediate' | 'advanced' }).difficulty
-      : undefined;
-    const itemCount = isCollection ? (item as { itemCount?: number }).itemCount : undefined;
+    const { collectionType, difficulty: collectionDifficulty, itemCount } = item;
 
     // Collection type label mapping (tree-shakeable)
     const COLLECTION_TYPE_LABELS = isCollection
@@ -167,15 +160,19 @@ export const ConfigCard = memo(
                 </UnifiedBadge>
               )}
 
-              {isCollection && collectionDifficulty && (
-                <UnifiedBadge
-                  variant="base"
-                  style="outline"
-                  className={`text-xs ${BADGE_COLORS.difficulty[collectionDifficulty]}`}
-                >
-                  {collectionDifficulty}
-                </UnifiedBadge>
-              )}
+              {isCollection &&
+                collectionDifficulty &&
+                (collectionDifficulty === 'beginner' ||
+                  collectionDifficulty === 'intermediate' ||
+                  collectionDifficulty === 'advanced') && (
+                  <UnifiedBadge
+                    variant="base"
+                    style="outline"
+                    className={`text-xs ${BADGE_COLORS.difficulty[collectionDifficulty]}`}
+                  >
+                    {collectionDifficulty}
+                  </UnifiedBadge>
+                )}
 
               {isCollection && itemCount !== undefined && (
                 <UnifiedBadge

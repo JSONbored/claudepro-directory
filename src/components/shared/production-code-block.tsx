@@ -17,9 +17,8 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { getCopyCodeEvent } from '#lib/analytics/event-mapper';
-import { trackEvent } from '@/src/lib/analytics/tracker';
 import { Check, ChevronDown, Copy } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -68,17 +67,26 @@ export function ProductionCodeBlock({
       toasts.success.codeCopied();
       setTimeout(() => setIsCopied(false), 2000);
 
-      // Track copy event with content-type-specific analytics
+      // Track copy event with content-type-specific analytics (dynamic import for Storybook compatibility)
       const pathParts = pathname?.split('/').filter(Boolean) || [];
       const category = pathParts[0] || 'unknown';
       const slug = pathParts[1] || 'unknown';
-      const eventName = getCopyCodeEvent(category);
 
-      trackEvent(eventName, {
-        slug,
-        content_length: code.length,
-        ...(language && { language }),
-      });
+      Promise.all([import('#lib/analytics/event-mapper'), import('#lib/analytics/tracker')])
+        .then(([eventMapper, tracker]) => {
+          const eventName = eventMapper.getCopyCodeEvent(category);
+          tracker.trackEvent(eventName, {
+            slug,
+            content_length: code.length,
+            ...(language && { language }),
+          });
+        })
+        .catch((err) => {
+          // Silently fail analytics in non-production environments (e.g., Storybook)
+          if (process.env.NODE_ENV === 'production') {
+            logger.error('Analytics tracking failed in ProductionCodeBlock', err as Error);
+          }
+        });
     } catch (_err) {
       toasts.error.copyFailed('code');
     }

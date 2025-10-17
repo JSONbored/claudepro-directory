@@ -1,19 +1,60 @@
 /**
- * CategoryNavigationCard - Server Component for category navigation
+ * CategoryNavigationCard Component - Icon Navigation Grid (Server Component)
  *
- * CONVERTED: Client → Server component (Link works in server components)
- * Pure rendering of category navigation links
+ * **ARCHITECTURAL DECISION: NOT CONSOLIDATED WITH BaseCard**
  *
- * Performance: Eliminated from client bundle, server-rendered
- */
-
-/**
- * CategoryNavigationCard - Category navigation with icons
+ * CategoryNavigationCard is a specialized navigation component that renders
+ * a horizontal grid of category icons, NOT a content display card.
+ * It serves a fundamentally different purpose than BaseCard.
  *
- * Extracted from unified-sidebar.tsx (lines 246-272)
- * Reusable category navigation component for any categorized content
+ * **Why CategoryNavigationCard is separate from BaseCard:**
  *
- * @see components/unified-sidebar.tsx - Original implementation
+ * 1. **Different UI Pattern**
+ *    - CategoryNavigationCard: Horizontal icon grid with tooltips (navigation)
+ *    - BaseCard: Vertical content card with title, description, tags, actions
+ *
+ * 2. **Zero Visual Similarity**
+ *    - CategoryNavigationCard: No Card components, no CardHeader, no CardContent
+ *    - Uses: TooltipProvider + Link grid with icons
+ *    - BaseCard: Uses Card/CardHeader/CardContent/CardFooter hierarchy
+ *
+ * 3. **Different Component Type**
+ *    - CategoryNavigationCard: Server component (zero client JS)
+ *    - BaseCard: Client component (needs useCardNavigation hook)
+ *
+ * 4. **Zero Functional Overlap**
+ *    - CategoryNavigationCard has: category icons, active state, tooltips
+ *    - BaseCard has: title, description, tags, metadata badges, action buttons
+ *    - NO shared rendering logic or features
+ *
+ * 5. **Production Optimization**
+ *    - Server-rendered with Zod validation (runtime safety)
+ *    - No React.memo needed (server components don't re-render)
+ *    - Already eliminated from client bundle
+ *
+ * 6. **Single Responsibility**
+ *    - Navigation component (category switching)
+ *    - NOT a content display component
+ *
+ * **Performance Benefits:**
+ * - Server-rendered (zero client JS)
+ * - Zod validation ensures type safety at runtime
+ * - Link components work natively in server components
+ *
+ * **Usage:**
+ * ```tsx
+ * <CategoryNavigationCard
+ *   currentCategory="use-cases"
+ *   categories={categoryInfo}
+ *   basePath="/guides"
+ * />
+ * ```
+ *
+ * **Renders:**
+ * Horizontal icon grid: [Icon] [Icon] [Icon] [Icon] (with hover tooltips)
+ *
+ * @see src/components/layout/sidebar/unified-sidebar.tsx - Primary usage
+ * @see src/components/shared/base-card.tsx - Content display cards (different purpose)
  */
 
 import Link from 'next/link';

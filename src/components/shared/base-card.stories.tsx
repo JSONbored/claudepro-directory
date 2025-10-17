@@ -1,26 +1,30 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { Button } from '@/src/components/ui/button';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
+import { Bookmark, Copy, ExternalLink, Eye, Github } from '@/src/lib/icons';
+import { BaseCard } from './base-card';
+
 /**
  * BaseCard Storybook Stories
  *
- * Component isolation and composition testing for BaseCard.
- * Tests all render slots, variants, and responsive behavior across breakpoints.
+ * Foundation card component with composition-based architecture.
+ * Provides customizable slots for ConfigCard, CollectionCard, ReviewCard, and ChangelogCard.
+ *
+ * **Architecture:**
+ * - Composition over inheritance (render props pattern)
+ * - Type-safe props with discriminated unions
+ * - Customizable slots: renderHeader, renderTopBadges, renderContent, renderMetadataBadges, renderActions
+ * - 4 variants: default, detailed, review, changelog
+ * - Full accessibility (ARIA labels, keyboard navigation)
+ * - Performance optimized with React.memo
+ *
+ * **Eliminates Duplication:**
+ * - Shared card structure and navigation logic
+ * - Integrated useCardNavigation hook
+ * - Sponsored content tracking support
+ * - ~140 LOC reduction from ConfigCard/CollectionCard consolidation
  *
  * **Usage:**
- * ```bash
- * npm run storybook
- * # Navigate to Shared → BaseCard
- * # Use viewport toolbar to test mobile/tablet/desktop
- * ```
- *
- * **Why BaseCard?**
- * BaseCard is the foundation for ConfigCard, CollectionCard, ReviewCard, and ChangelogCard.
- * It provides a composition-based architecture with customizable slots:
- * - renderHeader: Custom header content (avatar, rating, date)
- * - renderTopBadges: Type badges, difficulty badges, status badges
- * - renderContent: Custom content sections (expandable text, etc.)
- * - renderMetadataBadges: View count, item count, rating
- * - renderActions: Action buttons (GitHub, docs, bookmark, copy)
- *
- * **Composition Pattern:**
  * ```tsx
  * <BaseCard
  *   displayTitle="Card Title"
@@ -29,21 +33,8 @@
  *   renderActions={() => <Button>Action</Button>}
  * />
  * ```
- *
- * @see src/components/shared/base-card.tsx - Component implementation
- * @see src/components/features/content/config-card.tsx - ConfigCard usage example
- * @see RESPONSIVE_DESIGN.md - Responsive design architecture
  */
 
-import type { Meta, StoryObj } from '@storybook/react';
-import { Button } from '@/src/components/ui/button';
-import { UnifiedBadge } from '@/src/components/ui/unified-badge';
-import { Bookmark, Copy, ExternalLink, Eye, Github } from '@/src/lib/icons';
-import { BaseCard } from './base-card';
-
-/**
- * BaseCard Meta Configuration
- */
 const meta = {
   title: 'Shared/BaseCard',
   component: BaseCard,
@@ -51,8 +42,28 @@ const meta = {
     layout: 'padded',
     docs: {
       description: {
-        component:
-          'Foundation card component with composition-based architecture. Provides customizable slots for different card types. Used by ConfigCard, CollectionCard, ReviewCard, and ChangelogCard to eliminate code duplication.',
+        component: `
+**Base Card Component** - Foundation for all content display cards.
+
+Composition-based architecture with customizable render slots:
+- \`renderHeader\`: Custom header (avatar, rating, date)
+- \`renderTopBadges\`: Type badges, difficulty, status
+- \`renderContent\`: Custom content sections (expandable text)
+- \`renderMetadataBadges\`: View count, item count, ratings
+- \`renderActions\`: Action buttons (GitHub, docs, bookmark, copy)
+
+**Variants:**
+- \`default\`: Standard card with default padding
+- \`detailed\`: Increased padding (p-6) for spacious layout
+- \`review\`: Compact styling (p-4) for review content
+- \`changelog\`: Optimized for changelog entries
+
+**Used By:**
+- ConfigCard (agents, mcp, commands, rules, hooks, guides)
+- CollectionCard (starter-kits, workflows)
+- ReviewCard (user reviews and feedback)
+- ChangelogCard (version updates and releases)
+        `,
       },
     },
   },
@@ -80,6 +91,12 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+/**
+ * ==============================================================================
+ * BASIC CARD VARIANTS
+ * ==============================================================================
+ */
 
 /**
  * Minimal Card
@@ -169,6 +186,12 @@ export const WithSource: Story = {
     },
   },
 };
+
+/**
+ * ==============================================================================
+ * RENDER SLOT VARIANTS
+ * ==============================================================================
+ */
 
 /**
  * Card with Top Badges
@@ -412,6 +435,12 @@ export const FullFeatured: Story = {
 };
 
 /**
+ * ==============================================================================
+ * VISUAL VARIANTS & DISPLAY OPTIONS
+ * ==============================================================================
+ */
+
+/**
  * Detailed Variant
  * Uses detailed variant with increased padding
  */
@@ -532,11 +561,16 @@ export const CustomMetadata: Story = {
 };
 
 /**
+ * ==============================================================================
+ * LAYOUT & RESPONSIVE TESTING
+ * ==============================================================================
+ */
+
+/**
  * Responsive Grid Layout
  * Tests card behavior in grid context across viewports
  */
 export const ResponsiveGrid: Story = {
-  args: {} as any,
   render: () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <BaseCard
@@ -649,7 +683,6 @@ export const ResponsiveGrid: Story = {
  * Side-by-side comparison of all card variants
  */
 export const AllVariants: Story = {
-  args: {} as any,
   render: () => (
     <div className="space-y-6">
       <div>

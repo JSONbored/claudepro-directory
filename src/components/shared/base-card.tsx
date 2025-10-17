@@ -281,17 +281,7 @@ export const BaseCard = memo(
                         | 'other'
                     }
                   >
-                    {source === 'official'
-                      ? 'Official'
-                      : source === 'partner'
-                        ? 'Partner'
-                        : source === 'community'
-                          ? 'Community'
-                          : source === 'verified'
-                            ? 'Verified'
-                            : source === 'experimental'
-                              ? 'Experimental'
-                              : 'Other'}
+                    {source.charAt(0).toUpperCase() + source.slice(1)}
                   </UnifiedBadge>
                 </div>
               )}
