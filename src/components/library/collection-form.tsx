@@ -10,12 +10,12 @@
 
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Checkbox } from '@/src/components/ui/checkbox';
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { createCollection, updateCollection } from '@/src/lib/actions/content.actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -234,9 +234,9 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                     htmlFor={bookmark.id}
                     className={`text-sm font-normal cursor-pointer ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}
                   >
-                    <Badge variant="outline" className="text-xs capitalize">
+                    <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                       {bookmark.content_type}
-                    </Badge>
+                    </UnifiedBadge>
                     {bookmark.content_slug}
                   </Label>
                 </div>

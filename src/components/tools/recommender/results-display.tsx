@@ -17,7 +17,6 @@ import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { BaseCard } from '@/src/components/shared/base-card';
 import { BookmarkButton } from '@/src/components/shared/bookmark-button';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -40,6 +39,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/ui/tooltip';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { addBookmarkBatch } from '@/src/lib/actions/user.actions';
 import { ROUTES } from '@/src/lib/constants/routes';
 import {
@@ -138,17 +138,17 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
         {/* Summary Stats */}
         <div className={'flex-wrap items-center justify-center gap-3'}>
-          <Badge variant="secondary" className="text-sm">
+          <UnifiedBadge variant="base" style="secondary" className="text-sm">
             <TrendingUp className="h-3 w-3 mr-1" />
             {summary.avgMatchScore}% Avg Match
-          </Badge>
-          <Badge variant="secondary" className="text-sm">
+          </UnifiedBadge>
+          <UnifiedBadge variant="base" style="secondary" className="text-sm">
             <BarChart className="h-3 w-3 mr-1" />
             {summary.diversityScore}% Diversity
-          </Badge>
-          <Badge variant="outline" className="text-sm">
+          </UnifiedBadge>
+          <UnifiedBadge variant="base" style="outline" className="text-sm">
             Top Category: {summary.topCategory}
-          </Badge>
+          </UnifiedBadge>
         </div>
 
         {/* Actions */}
@@ -349,13 +349,14 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Badge
-                            variant="secondary"
+                          <UnifiedBadge
+                            variant="base"
+                            style="secondary"
                             className={`${getMatchScoreColor(result.matchScore)} font-bold text-base px-3 py-1`}
                           >
                             <Sparkles className="h-3 w-3 mr-1" />
                             {result.matchScore}%
-                          </Badge>
+                          </UnifiedBadge>
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>Match Score: How well this fits your needs</p>
@@ -367,9 +368,13 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                   {/* Rank badge (top left) */}
                   {result.rank <= 3 && (
                     <div className="absolute top-4 left-4 z-10">
-                      <Badge variant="outline" className="bg-background/80 backdrop-blur-sm">
+                      <UnifiedBadge
+                        variant="base"
+                        style="outline"
+                        className="bg-background/80 backdrop-blur-sm"
+                      >
                         <Award className="h-3 w-3 mr-1" />#{result.rank}
-                      </Badge>
+                      </UnifiedBadge>
                     </div>
                   )}
 
@@ -398,9 +403,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                       author={result.author}
                       className="relative overflow-hidden hover:shadow-lg transition-all"
                       renderTopBadges={() => (
-                        <Badge variant="outline" className="w-fit capitalize">
+                        <UnifiedBadge variant="base" style="outline" className="w-fit capitalize">
                           {result.category}
-                        </Badge>
+                        </UnifiedBadge>
                       )}
                       renderContent={() => (
                         <>
@@ -423,9 +428,14 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                           {result.reasons.length > 1 && (
                             <div className="flex flex-wrap gap-1">
                               {result.reasons.slice(1, 4).map((reason) => (
-                                <Badge key={reason.message} variant="secondary" className="text-xs">
+                                <UnifiedBadge
+                                  key={reason.message}
+                                  variant="base"
+                                  style="secondary"
+                                  className="text-xs"
+                                >
                                   {reason.message}
-                                </Badge>
+                                </UnifiedBadge>
                               ))}
                             </div>
                           )}

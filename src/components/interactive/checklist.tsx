@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { Badge } from '@/src/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -14,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { AlertTriangle, BookOpen, CheckCircle } from '@/src/lib/icons';
 import { type ChecklistProps, checklistPropsSchema } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -61,7 +61,9 @@ export function Checklist(props: ChecklistProps) {
             {typeIcons[type]}
             {title || `${type.charAt(0).toUpperCase() + type.slice(1)} Checklist`}
           </CardTitle>
-          <Badge variant={progress === 100 ? 'default' : 'secondary'}>{progress}% Complete</Badge>
+          <UnifiedBadge variant="base" style={progress === 100 ? 'default' : 'secondary'}>
+            {progress}% Complete
+          </UnifiedBadge>
         </div>
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>

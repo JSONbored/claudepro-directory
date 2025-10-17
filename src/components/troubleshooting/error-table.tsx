@@ -5,7 +5,6 @@
  * Used in 1 MDX file across the codebase - Specialized for troubleshooting documentation
  */
 
-import { Badge } from '@/src/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -13,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { AlertTriangle, Info } from '@/src/lib/icons';
 import { type ErrorTableProps, errorTablePropsSchema } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -59,12 +59,16 @@ export function ErrorTable(props: ErrorTableProps) {
                 >
                   <td className={'p-4 font-mono text-sm'}>{error.code}</td>
                   <td className="p-4">
-                    <Badge className={severityColors[error.severity]} variant="secondary">
+                    <UnifiedBadge
+                      variant="base"
+                      style="secondary"
+                      className={severityColors[error.severity]}
+                    >
                       <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                         {severityIcons[error.severity]}
                         {error.severity}
                       </span>
-                    </Badge>
+                    </UnifiedBadge>
                   </td>
                   <td className={'p-4 text-sm'}>{error.message}</td>
                   <td className={'p-4 text-sm text-muted-foreground'}>{error.solution}</td>

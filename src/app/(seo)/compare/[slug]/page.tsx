@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import path from 'path';
 import { z } from 'zod';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { markdownToSafeHtml } from '@/src/lib/content/markdown-utils';
 import { ArrowLeft, Tags } from '@/src/lib/icons';
@@ -215,9 +215,17 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
 
         {/* Category Badges */}
         <div className={'flex gap-2 mb-6'}>
-          <Badge variant="outline">{data.category1}</Badge>
-          {data.category1 !== data.category2 && <Badge variant="outline">{data.category2}</Badge>}
-          <Badge variant="secondary">Comparison</Badge>
+          <UnifiedBadge variant="base" style="outline">
+            {data.category1}
+          </UnifiedBadge>
+          {data.category1 !== data.category2 && (
+            <UnifiedBadge variant="base" style="outline">
+              {data.category2}
+            </UnifiedBadge>
+          )}
+          <UnifiedBadge variant="base" style="secondary">
+            Comparison
+          </UnifiedBadge>
         </div>
 
         {/* Main Content */}

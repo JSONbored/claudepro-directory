@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -9,6 +8,7 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Bookmark, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -94,9 +94,9 @@ export default async function LibraryPage() {
                     <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                       <div className="flex-1">
                         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                          <Badge variant="outline" className="capitalize">
+                          <UnifiedBadge variant="base" style="outline" className="capitalize">
                             {bookmark.content_type}
-                          </Badge>
+                          </UnifiedBadge>
                           <CardTitle className="text-lg">{bookmark.content_slug}</CardTitle>
                         </div>
                         {bookmark.notes && (
@@ -151,9 +151,9 @@ export default async function LibraryPage() {
                           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
                             <Layers className="h-4 w-4 text-primary" />
                             {collection.is_public && (
-                              <Badge variant="outline" className="text-xs">
+                              <UnifiedBadge variant="base" style="outline" className="text-xs">
                                 Public
-                              </Badge>
+                              </UnifiedBadge>
                             )}
                           </div>
                           <CardTitle className="text-lg">{collection.name}</CardTitle>

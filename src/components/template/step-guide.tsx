@@ -1,17 +1,24 @@
 /**
  * StepByStepGuide - Tutorial step component with animated progression (SERVER COMPONENT)
  *
+ * @server This is a SERVER-ONLY component (async, imports batch.utils → cache.server)
+ *
  * PRODUCTION-GRADE: Server-side Shiki syntax highlighting
  * - Used in 24+ MDX files across the codebase
  * - Zero client-side JavaScript for syntax highlighting
  * - Secure: Uses trusted Shiki renderer
  * - Performant: Pre-rendered on server
+ *
+ * **Architecture:**
+ * - Server Component: Uses batchMap from batch.utils (imports cache.server)
+ * - NOT Storybook-compatible (requires server-side execution)
+ * - Correct usage: Server components can import server-only code
  */
 
 import { Callout } from '@/src/components/content/callout';
 import { ProductionCodeBlock } from '@/src/components/shared/production-code-block';
-import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import { Zap } from '@/src/lib/icons';
 import { type StepByStepGuideProps, stepGuidePropsSchema } from '@/src/lib/schemas/shared.schema';
@@ -88,12 +95,13 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
                     </div>
                     <span className={'text-xl font-bold'}>{step.title}</span>
                     {step.time && (
-                      <Badge
-                        variant="secondary"
+                      <UnifiedBadge
+                        variant="base"
+                        style="secondary"
                         className="ml-auto bg-primary/10 text-primary border-primary/30"
                       >
                         ⏱ {step.time}
-                      </Badge>
+                      </UnifiedBadge>
                     )}
                   </CardTitle>
                 </CardHeader>

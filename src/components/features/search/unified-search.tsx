@@ -15,7 +15,6 @@ import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Collapsible, CollapsibleContent } from '@/src/components/ui/collapsible';
 import { Input } from '@/src/components/ui/input';
@@ -26,12 +25,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/ui/select';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
 import { getSearchEvent } from '@/src/lib/analytics/event-mapper';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/schemas/component.schema';
-import { sanitizers } from '@/src/lib/security/validators';
+import { sanitizers } from '@/src/lib/security/validators-sync';
 
 import { cn } from '@/src/lib/utils';
 
@@ -203,13 +203,14 @@ export function UnifiedSearch({
                 <Filter className="h-4 w-4" aria-hidden="true" />
                 <span>Filter</span>
                 {activeFilterCount > 0 && (
-                  <Badge
-                    variant="secondary"
+                  <UnifiedBadge
+                    variant="base"
+                    style="secondary"
                     className="ml-1 px-1.5 py-0 h-5"
                     aria-label={`${activeFilterCount} active filters`}
                   >
                     {activeFilterCount}
-                  </Badge>
+                  </UnifiedBadge>
                 )}
                 {isFilterOpen ? (
                   <ChevronUp className="h-3 w-3 ml-1" aria-hidden="true" />

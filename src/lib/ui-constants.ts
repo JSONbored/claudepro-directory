@@ -341,7 +341,12 @@ export type UIClassKey = keyof typeof UI_CLASSES;
  * }
  * ```
  */
-import { getAllCategoryIds } from '@/src/lib/config/category-config';
+// REMOVED: import from category-config to prevent server code in browser
+// Previously: import { getAllCategoryIds, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+//
+// Architecture Decision: Hardcode category IDs here instead of importing from category-config
+// to avoid pulling server-side dependencies into browser bundles (Storybook compatibility).
+// These values are static configuration and don't change at runtime.
 
 // Default behavior template for config-based categories
 const DEFAULT_CONFIG_BEHAVIOR = {
@@ -361,16 +366,20 @@ const DEFAULT_GUIDE_BEHAVIOR = {
   showFeaturedBadge: true,
 } as const;
 
-// Build behaviors dynamically from registry
+// Static list of category IDs (matches UNIFIED_CATEGORY_REGISTRY keys)
+// Update this list when adding new categories to category-config.ts
+const CATEGORY_IDS = ['agents', 'hooks', 'mcps', 'rules', 'skills'] as const;
+
+// Build behaviors statically
 const derivedBehaviors = Object.fromEntries(
-  getAllCategoryIds().map((categoryId) => [categoryId, DEFAULT_CONFIG_BEHAVIOR])
+  CATEGORY_IDS.map((categoryId) => [categoryId, DEFAULT_CONFIG_BEHAVIOR])
 );
 
 export const CARD_BEHAVIORS = {
   // Default for unknown categories
   default: DEFAULT_CONFIG_BEHAVIOR,
 
-  // Registry categories (auto-derived)
+  // Registry categories (static)
   ...derivedBehaviors,
 
   // Guide categories (educational content - not copyable)
@@ -464,28 +473,23 @@ export const BADGE_COLORS = {
   },
 
   /**
-   * Content category badge colors - Configuration-Driven
-   * Auto-derived from colorScheme in unified category registry
+   * Content category badge colors - Static Configuration
+   * Hardcoded from category-config.ts colorScheme values for browser compatibility
+   * Update when adding new categories to category-config.ts
    * Used in: DetailSidebar category badges
    */
-  category: (() => {
-    // Note: Using require() for module-level initialization (import would be hoisted)
-    // Type is safe because UNIFIED_CATEGORY_REGISTRY has strict typing
-    const { UNIFIED_CATEGORY_REGISTRY } = require('@/src/lib/config/category-config') as {
-      UNIFIED_CATEGORY_REGISTRY: Record<string, { colorScheme: string; [key: string]: unknown }>;
-    };
-    const colors: Record<string, string> = {
-      default: 'bg-primary/20 text-primary border-primary/30',
-    };
-
-    // Auto-generate badge colors from registry colorScheme
-    for (const [key, config] of Object.entries(UNIFIED_CATEGORY_REGISTRY)) {
-      const color = config.colorScheme.replace('-500', ''); // Extract base color
-      colors[key] = `bg-${color}-500/20 text-${color}-500 border-${color}-500/30`;
-    }
-
-    return colors;
-  })(),
+  category: {
+    default: 'bg-primary/20 text-primary border-primary/30',
+    // From UNIFIED_CATEGORY_REGISTRY colorScheme mappings:
+    agents: 'bg-purple-500/20 text-purple-500 border-purple-500/30',
+    mcp: 'bg-green-500/20 text-green-500 border-green-500/30',
+    commands: 'bg-orange-500/20 text-orange-500 border-orange-500/30',
+    rules: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
+    hooks: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
+    statuslines: 'bg-cyan-500/20 text-cyan-500 border-cyan-500/30',
+    collections: 'bg-indigo-500/20 text-indigo-500 border-indigo-500/30',
+    skills: 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30',
+  },
 
   /**
    * Submission status badge colors (SHA-3146)

@@ -1,11 +1,18 @@
 /**
  * ConfigurationSection - Multi-format configuration display section (SERVER COMPONENT)
  *
+ * @server This is a SERVER-ONLY component (async, imports batch.utils → cache.server)
+ *
  * PRODUCTION-GRADE: Server-side Shiki syntax highlighting for all configurations
  * - Zero client-side JavaScript for syntax highlighting
  * - Consistent colored syntax across all formats
  * - Secure: No manual HTML escaping, uses trusted Shiki renderer
  * - Performant: Pre-rendered on server, cached
+ *
+ * **Architecture:**
+ * - Server Component: Uses batchMap from batch.utils (imports cache.server)
+ * - NOT Storybook-compatible (requires server-side execution)
+ * - Correct usage: Server components can import server-only code
  *
  * Handles: JSON configs, multi-format MCP configs, hook configs
  */

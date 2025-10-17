@@ -19,7 +19,6 @@
 
 import { FileText, MessageSquare, Star, ThumbsUp, TrendingUp, Trophy } from 'lucide-react';
 import { memo } from 'react';
-import { Badge } from '@/src/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -28,6 +27,7 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { HorizontalBarChart } from '@/src/components/ui/horizontal-bar-chart';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import {
   getNextTier,
   getReputationTier,
@@ -154,15 +154,16 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
             </CardTitle>
             <CardDescription>Community contribution score</CardDescription>
           </div>
-          <Badge
-            variant="secondary"
+          <UnifiedBadge
+            variant="base"
+            style="secondary"
             className={cn(
               'text-base font-bold px-3 py-1',
               TIER_COLORS[currentTier.name] || TIER_COLORS.Newcomer
             )}
           >
             {breakdown.total}
-          </Badge>
+          </UnifiedBadge>
         </div>
       </CardHeader>
 
@@ -171,13 +172,14 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
         <div className="space-y-2">
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <span className={UI_CLASSES.TEXT_SM_MUTED}>Current Tier</span>
-            <Badge
-              variant="outline"
+            <UnifiedBadge
+              variant="base"
+              style="outline"
               className={cn('gap-1.5', TIER_COLORS[currentTier.name] || TIER_COLORS.Newcomer)}
             >
               <span className="text-base">{currentTier.icon}</span>
               {currentTier.name}
-            </Badge>
+            </UnifiedBadge>
           </div>
           <p className="text-xs text-muted-foreground">{currentTier.description}</p>
         </div>

@@ -10,7 +10,7 @@
  */
 
 import { z } from 'zod';
-import { Badge } from '@/src/components/ui/badge';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { Calendar, Eye, Tag, User } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
@@ -78,9 +78,9 @@ export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
         <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
           <Tag className="h-4 w-4 text-muted-foreground" />
           {item.tags.map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs">
+            <UnifiedBadge key={tag} variant="base" style="outline" className="text-xs">
               {tag}
-            </Badge>
+            </UnifiedBadge>
           ))}
         </div>
       )}

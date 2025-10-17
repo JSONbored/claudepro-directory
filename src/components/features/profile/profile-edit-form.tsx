@@ -6,12 +6,12 @@
  */
 
 import { useId, useState, useTransition } from 'react';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Switch } from '@/src/components/ui/switch';
 import { Textarea } from '@/src/components/ui/textarea';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { refreshProfileFromOAuth, updateProfile } from '@/src/lib/actions/user.actions';
 import { X } from '@/src/lib/icons';
 import type { ProfileData } from '@/src/lib/schemas/profile.schema';
@@ -216,7 +216,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         {interests.length > 0 && (
           <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-3`}>
             {interests.map((interest) => (
-              <Badge key={interest} variant="secondary" className="gap-1 pr-1">
+              <UnifiedBadge key={interest} variant="base" style="secondary" className="gap-1 pr-1">
                 {interest}
                 <button
                   type="button"
@@ -226,7 +226,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
                 >
                   <X className="h-3 w-3" />
                 </button>
-              </Badge>
+              </UnifiedBadge>
             ))}
           </div>
         )}

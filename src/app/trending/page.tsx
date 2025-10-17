@@ -10,7 +10,7 @@ import {
 } from '@/generated/content';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { TrendingContent } from '@/src/components/shared/trending-content';
-import { Badge } from '@/src/components/ui/badge';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { statsRedis } from '@/src/lib/cache.server';
 import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -187,10 +187,14 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
       <section className={'relative py-24 px-4 overflow-hidden'} aria-labelledby={pageTitleId}>
         <div className={'container mx-auto text-center'}>
           <div className={'max-w-3xl mx-auto'}>
-            <Badge variant="outline" className={'mb-6 border-accent/20 bg-accent/5 text-accent'}>
+            <UnifiedBadge
+              variant="base"
+              style="outline"
+              className={'mb-6 border-accent/20 bg-accent/5 text-accent'}
+            >
               <TrendingUp className="h-3 w-3 mr-1 text-accent" aria-hidden="true" />
               Trending
-            </Badge>
+            </UnifiedBadge>
 
             <h1 id={pageTitleId} className="text-4xl md:text-6xl font-bold mb-6">
               Trending Configurations
@@ -203,22 +207,22 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
 
             <ul className={`${UI_CLASSES.FLEX_WRAP_GAP_2} justify-center list-none`}>
               <li>
-                <Badge variant="secondary">
+                <UnifiedBadge variant="base" style="secondary">
                   <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
                   Real-time updates
-                </Badge>
+                </UnifiedBadge>
               </li>
               <li>
-                <Badge variant="secondary">
+                <UnifiedBadge variant="base" style="secondary">
                   <Star className="h-3 w-3 mr-1" aria-hidden="true" />
                   Based on views
-                </Badge>
+                </UnifiedBadge>
               </li>
               <li>
-                <Badge variant="secondary">
+                <UnifiedBadge variant="base" style="secondary">
                   <Users className="h-3 w-3 mr-1" aria-hidden="true" />
                   {totalCount} total configs
-                </Badge>
+                </UnifiedBadge>
               </li>
             </ul>
           </div>

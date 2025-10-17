@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -8,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -78,20 +77,30 @@ export default async function SponsorshipsPage() {
                 <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                   <div className="flex-1">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                      <SponsoredBadge
+                      <UnifiedBadge
+                        variant="sponsored"
                         tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'}
+                        showIcon
                       />
                       {isActive ? (
-                        <Badge className="bg-green-500/10 text-green-400 border-green-500/20">
+                        <UnifiedBadge
+                          variant="base"
+                          className="bg-green-500/10 text-green-400 border-green-500/20"
+                        >
                           Active
-                        </Badge>
+                        </UnifiedBadge>
                       ) : (
-                        <Badge variant="outline">Inactive</Badge>
+                        <UnifiedBadge variant="base" style="outline">
+                          Inactive
+                        </UnifiedBadge>
                       )}
                       {hasHitLimit && (
-                        <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20">
+                        <UnifiedBadge
+                          variant="base"
+                          className="bg-orange-500/10 text-orange-400 border-orange-500/20"
+                        >
                           Limit Reached
-                        </Badge>
+                        </UnifiedBadge>
                       )}
                     </div>
                     <CardTitle className="mt-2">

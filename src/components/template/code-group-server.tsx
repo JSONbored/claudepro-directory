@@ -1,10 +1,17 @@
 /**
  * CodeGroupServer - Server wrapper for CodeGroup with Shiki highlighting
  *
+ * @server This is a SERVER-ONLY component (async, imports batch.utils → cache.server)
+ *
  * PRODUCTION-GRADE: Pre-renders all code examples on the server
  * - Async server component that highlights all examples
  * - Passes highlighted HTML to client CodeGroup component
  * - Optimal performance: Highlighting happens once on server
+ *
+ * **Architecture:**
+ * - Server Component: Uses batchMap from batch.utils (imports cache.server)
+ * - NOT Storybook-compatible (requires server-side execution)
+ * - Correct usage: Server components can import server-only code
  */
 
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';

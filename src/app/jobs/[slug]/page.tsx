@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { jobs } from '@/src/lib/data/jobs';
@@ -153,9 +153,9 @@ export default async function JobPage({ params }: PageProps) {
               {/* Tags */}
               <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
                 {job.tags.map((skill) => (
-                  <Badge key={skill} variant="secondary">
+                  <UnifiedBadge key={skill} variant="base" style="secondary">
                     {skill}
-                  </Badge>
+                  </UnifiedBadge>
                 ))}
               </div>
             </div>

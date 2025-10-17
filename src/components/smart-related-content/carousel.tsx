@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Badge } from '@/src/components/ui/badge';
 import { Card } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import {
   trackRelatedContentClick,
   trackRelatedContentView,
@@ -205,14 +205,15 @@ export function RelatedCarouselClient({
                 </p>
               </div>
             </div>
-            <Badge
-              variant="secondary"
+            <UnifiedBadge
+              variant="base"
+              style="secondary"
               className={
                 'bg-primary/10 text-primary border-primary/30 font-medium px-2 sm:px-3 py-1 text-xs sm:text-sm flex-shrink-0'
               }
             >
               AI Powered
-            </Badge>
+            </UnifiedBadge>
           </div>
         </div>
       )}
@@ -245,21 +246,24 @@ export function RelatedCarouselClient({
                 }
               >
                 <div className={'flex items-start justify-between gap-2 mb-4'}>
-                  <Badge
+                  <UnifiedBadge
                     className={`${categoryStyles.badge} font-medium px-2 sm:px-3 py-1 border text-xs sm:text-sm flex-shrink-0`}
-                    variant="secondary"
+                    variant="base"
+                    style="secondary"
                   >
                     {item.category}
-                  </Badge>
-                  <Badge
-                    variant={matchBadge.variant}
-                    className={
-                      'text-2xs sm:text-xs font-medium border px-1.5 sm:px-2 py-1 group-hover:border-current/40 transition-colors flex-shrink-0'
-                    }
-                    title={matchBadge.label === 'Keyword' ? 'Keyword Match' : matchBadge.label}
-                  >
-                    {matchBadge.label}
-                  </Badge>
+                  </UnifiedBadge>
+                  <div title={matchBadge.label === 'Keyword' ? 'Keyword Match' : matchBadge.label}>
+                    <UnifiedBadge
+                      variant="base"
+                      style={matchBadge.variant}
+                      className={
+                        'text-2xs sm:text-xs font-medium border px-1.5 sm:px-2 py-1 group-hover:border-current/40 transition-colors flex-shrink-0'
+                      }
+                    >
+                      {matchBadge.label}
+                    </UnifiedBadge>
+                  </div>
                 </div>
 
                 <div className={'flex-1 flex flex-col'}>
@@ -286,25 +290,27 @@ export function RelatedCarouselClient({
                   <div className={'pt-3 border-t border-border/30 mt-auto'}>
                     <div className="flex flex-wrap gap-1">
                       {item.matchDetails.matchedTags.slice(0, 2).map((tag: string) => (
-                        <Badge
+                        <UnifiedBadge
                           key={tag}
-                          variant="outline"
+                          variant="base"
+                          style="outline"
                           className={
                             'text-2xs sm:text-xs bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 transition-colors px-1.5 sm:px-2 py-1'
                           }
                         >
                           {tag}
-                        </Badge>
+                        </UnifiedBadge>
                       ))}
                       {item.matchDetails.matchedTags.length > 2 && (
-                        <Badge
-                          variant="outline"
+                        <UnifiedBadge
+                          variant="base"
+                          style="outline"
                           className={
                             'text-2xs sm:text-xs bg-muted/50 text-muted-foreground border-muted px-1.5 sm:px-2 py-1'
                           }
                         >
                           +{item.matchDetails.matchedTags.length - 2}
-                        </Badge>
+                        </UnifiedBadge>
                       )}
                     </div>
                   </div>

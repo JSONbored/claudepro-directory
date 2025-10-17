@@ -23,6 +23,17 @@ export interface ConfigCardProps {
   showCategory?: boolean;
   showActions?: boolean;
   className?: string;
+  /**
+   * Optional render function for sponsored wrapper
+   * Only kept for backwards compatibility with BaseCard
+   * (Will be removed once all consumers are migrated to direct SponsoredTracker usage)
+   */
+  renderSponsoredWrapper?: (
+    children: React.ReactNode,
+    sponsoredId: string,
+    targetUrl: string,
+    position?: number
+  ) => React.ReactNode;
 }
 
 // Re-export commonly used types from ./components

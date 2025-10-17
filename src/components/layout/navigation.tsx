@@ -48,8 +48,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/src/components/ui/dropdown-menu';
-import { NewIndicator } from '@/src/components/ui/new-indicator';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/ui/sheet';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 import { useSearchShortcut } from '@/src/hooks/use-search-shortcut';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
@@ -202,7 +202,7 @@ export const Navigation = () => {
                       {link.isNew ? (
                         <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
                           {link.label}
-                          <NewIndicator label={`New: ${link.label}`} />
+                          <UnifiedBadge variant="new-indicator" label={`New: ${link.label}`} />
                         </span>
                       ) : (
                         link.label
@@ -391,7 +391,10 @@ export const Navigation = () => {
                                   {link.isNew ? (
                                     <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                                       {link.label}
-                                      <NewIndicator label={`New: ${link.label}`} />
+                                      <UnifiedBadge
+                                        variant="new-indicator"
+                                        label={`New: ${link.label}`}
+                                      />
                                     </span>
                                   ) : (
                                     link.label

@@ -19,7 +19,7 @@
 
 import { memo } from 'react';
 import { MDXRenderer } from '@/src/components/shared/mdx-renderer';
-import { Badge } from '@/src/components/ui/badge';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import type { ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -63,13 +63,14 @@ export const ChangelogContent = memo(({ entry }: ChangelogContentProps) => {
       {nonEmptyCategories.length > 0 && (
         <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} py-2`}>
           {nonEmptyCategories.map((category) => (
-            <Badge
+            <UnifiedBadge
               key={category}
-              variant="outline"
+              variant="base"
+              style="outline"
               className={`${BADGE_COLORS.changelogCategory[category as keyof typeof BADGE_COLORS.changelogCategory]} font-medium`}
             >
               {category}
-            </Badge>
+            </UnifiedBadge>
           ))}
         </div>
       )}

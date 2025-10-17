@@ -26,7 +26,6 @@
 import type { ReactNode } from 'react';
 import { memo } from 'react';
 import { SponsoredTracker } from '@/src/components/features/sponsored/sponsored-tracker';
-import { Badge } from '@/src/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -34,7 +33,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { SourceBadge, TagBadge } from '@/src/components/ui/config-badge';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { type UseCardNavigationOptions, useCardNavigation } from '@/src/hooks/use-card-navigation';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -270,7 +269,30 @@ export const BaseCard = memo(
               {/* Source badge (right side of header) */}
               {source && (
                 <div className={'flex items-center gap-1 ml-2'}>
-                  <SourceBadge source={source} />
+                  <UnifiedBadge
+                    variant="source"
+                    source={
+                      source as
+                        | 'official'
+                        | 'partner'
+                        | 'community'
+                        | 'verified'
+                        | 'experimental'
+                        | 'other'
+                    }
+                  >
+                    {source === 'official'
+                      ? 'Official'
+                      : source === 'partner'
+                        ? 'Partner'
+                        : source === 'community'
+                          ? 'Community'
+                          : source === 'verified'
+                            ? 'Verified'
+                            : source === 'experimental'
+                              ? 'Experimental'
+                              : 'Other'}
+                  </UnifiedBadge>
                 </div>
               )}
             </div>
@@ -285,15 +307,16 @@ export const BaseCard = memo(
           {tags && tags.length > 0 && (
             <div className={UI_CLASSES.CARD_BADGE_CONTAINER}>
               {visibleTags?.map((tag: string) => (
-                <TagBadge key={tag} tag={tag} />
+                <UnifiedBadge key={tag} variant="tag" tag={tag} />
               ))}
               {overflowCount > 0 && (
-                <Badge
-                  variant="outline"
+                <UnifiedBadge
+                  variant="base"
+                  style="outline"
                   className={'text-xs border-muted-foreground/20 text-muted-foreground'}
                 >
                   +{overflowCount}
-                </Badge>
+                </UnifiedBadge>
               )}
             </div>
           )}
@@ -337,7 +360,7 @@ export const BaseCard = memo(
     );
 
     // Wrap in sponsored tracker if this is sponsored content
-    if (isSponsored && sponsoredId) {
+    if (isSponsored && sponsoredId && targetPath) {
       return (
         <SponsoredTracker
           sponsoredId={sponsoredId}

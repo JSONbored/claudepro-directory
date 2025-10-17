@@ -5,8 +5,8 @@
  * Used in 27+ MDX files across the codebase
  */
 
-import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { type FeatureGridProps, featureGridPropsSchema } from '@/src/lib/schemas/shared.schema';
 
 export function FeatureGrid(props: FeatureGridProps) {
@@ -71,12 +71,13 @@ export function FeatureGrid(props: FeatureGridProps) {
                   {feature.title}
                 </span>
                 {feature.badge && (
-                  <Badge
-                    variant="secondary"
+                  <UnifiedBadge
+                    variant="base"
+                    style="secondary"
                     className="ml-2 bg-gradient-to-r from-primary/20 to-primary/30 border-primary/30 shadow-sm"
                   >
                     {feature.badge}
-                  </Badge>
+                  </UnifiedBadge>
                 )}
               </CardTitle>
             </CardHeader>

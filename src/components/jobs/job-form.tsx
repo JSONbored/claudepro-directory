@@ -8,7 +8,6 @@
  */
 
 import { useId, useState, useTransition } from 'react';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -27,6 +26,7 @@ import {
   SelectValue,
 } from '@/src/components/ui/select';
 import { Textarea } from '@/src/components/ui/textarea';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import type { CreateJobInput } from '@/src/lib/schemas/content/job.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -367,7 +367,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           {benefits.length > 0 && (
             <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
               {benefits.map((benefit) => (
-                <Badge key={benefit} variant="secondary">
+                <UnifiedBadge key={benefit} variant="base" style="secondary">
                   {benefit}
                   <button
                     type="button"
@@ -377,7 +377,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
                   >
                     ×
                   </button>
-                </Badge>
+                </UnifiedBadge>
               ))}
             </div>
           )}
@@ -415,7 +415,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           {tags.length > 0 && (
             <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
               {tags.map((tag) => (
-                <Badge key={tag} variant="outline">
+                <UnifiedBadge key={tag} variant="base" style="outline">
                   {tag}
                   <button
                     type="button"
@@ -425,7 +425,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
                   >
                     ×
                   </button>
-                </Badge>
+                </UnifiedBadge>
               ))}
             </div>
           )}

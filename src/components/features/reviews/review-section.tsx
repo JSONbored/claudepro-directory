@@ -21,7 +21,7 @@ import { useCallback, useEffect, useId, useState, useTransition } from 'react';
 import { StarRating } from '@/src/components/features/reviews/star-rating';
 import { BaseCard } from '@/src/components/shared/base-card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
-import { Badge } from '@/src/components/ui/badge';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { markReviewHelpful } from '@/src/lib/actions/content.actions';
 import { ThumbsUp } from '@/src/lib/icons';
 import { formatDistanceToNow } from '@/src/lib/utils/data.utils';
@@ -172,9 +172,9 @@ function ReviewCardItem({
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <span className={'text-sm font-semibold'}>{displayName}</span>
                 {user.tier && user.tier !== 'free' && (
-                  <Badge variant="secondary" className="text-xs capitalize">
+                  <UnifiedBadge variant="base" style="secondary" className="text-xs capitalize">
                     {user.tier}
-                  </Badge>
+                  </UnifiedBadge>
                 )}
               </div>
               <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mt-1`}>

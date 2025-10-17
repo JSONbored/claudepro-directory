@@ -15,9 +15,9 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';
@@ -120,8 +120,9 @@ export const DetailSidebar = memo(function DetailSidebar({
             {item.category && (
               <div>
                 <h4 className={'font-medium mb-1'}>Category</h4>
-                <Badge
-                  variant="default"
+                <UnifiedBadge
+                  variant="base"
+                  style="default"
                   className={`text-xs font-medium ${
                     BADGE_COLORS.category[item.category as CategoryType] ||
                     BADGE_COLORS.category.default
@@ -130,7 +131,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                   {item.category === 'mcp'
                     ? 'MCP Server'
                     : item.category.charAt(0).toUpperCase() + item.category.slice(1)}
-                </Badge>
+                </UnifiedBadge>
               </div>
             )}
 
@@ -141,14 +142,15 @@ export const DetailSidebar = memo(function DetailSidebar({
                   <h4 className={'font-medium mb-1'}>Temperature</h4>
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                     <Thermometer className="h-3 w-3 text-orange-500" />
-                    <Badge
-                      variant="outline"
+                    <UnifiedBadge
+                      variant="base"
+                      style="outline"
                       className={
                         'text-xs font-medium bg-orange-500/10 text-orange-600 border-orange-500/30'
                       }
                     >
                       {String((item.configuration as { temperature: number }).temperature)}
-                    </Badge>
+                    </UnifiedBadge>
                   </div>
                 </div>
               )}
@@ -156,9 +158,9 @@ export const DetailSidebar = memo(function DetailSidebar({
             {hasPackage && (
               <div>
                 <h4 className={'font-medium mb-1'}>Package</h4>
-                <Badge variant="outline" className="font-mono text-xs">
+                <UnifiedBadge variant="base" style="outline" className="font-mono text-xs">
                   {String((item as { package: string }).package)}
-                </Badge>
+                </UnifiedBadge>
               </div>
             )}
 
@@ -176,9 +178,9 @@ export const DetailSidebar = memo(function DetailSidebar({
                 <h4 className={'font-medium mb-1'}>Permissions</h4>
                 <div className="flex flex-wrap gap-1">
                   {(item.permissions as string[]).map((perm: string) => (
-                    <Badge key={perm} variant="outline" className="text-xs">
+                    <UnifiedBadge key={perm} variant="base" style="outline" className="text-xs">
                       {perm}
-                    </Badge>
+                    </UnifiedBadge>
                   ))}
                 </div>
               </div>
@@ -187,7 +189,9 @@ export const DetailSidebar = memo(function DetailSidebar({
             {item.source && (
               <div>
                 <h4 className={'font-medium mb-1'}>Source</h4>
-                <Badge variant="outline">{item.source}</Badge>
+                <UnifiedBadge variant="base" style="outline">
+                  {item.source}
+                </UnifiedBadge>
               </div>
             )}
           </CardContent>

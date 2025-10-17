@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import { Badge } from '@/src/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -7,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
@@ -88,7 +87,11 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
       {/* Header */}
       <div>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <SponsoredBadge tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'} />
+          <UnifiedBadge
+            variant="sponsored"
+            tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'}
+            showIcon
+          />
           <h1 className="text-3xl font-bold">Sponsorship Analytics</h1>
         </div>
         <p className="text-muted-foreground">
@@ -190,16 +193,20 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             <div>
               <p className={'text-sm font-medium'}>Status</p>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Badge variant={sponsorship.active ? 'default' : 'outline'}>
+                <UnifiedBadge variant="base" style={sponsorship.active ? 'default' : 'outline'}>
                   {sponsorship.active ? 'Active' : 'Inactive'}
-                </Badge>
+                </UnifiedBadge>
               </div>
             </div>
 
             <div>
               <p className={'text-sm font-medium'}>Tier</p>
               <div>
-                <SponsoredBadge tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'} />
+                <UnifiedBadge
+                  variant="sponsored"
+                  tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'}
+                  showIcon
+                />
               </div>
             </div>
           </div>

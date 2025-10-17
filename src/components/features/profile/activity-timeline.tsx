@@ -6,9 +6,9 @@
  */
 
 import { useState } from 'react';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ExternalLink, FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import type { Activity, ActivityType } from '@/src/lib/schemas/activity.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -54,7 +54,9 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
       rejected: 'destructive' as const,
     };
     return (
-      <Badge variant={variants[status as keyof typeof variants] || 'secondary'}>{status}</Badge>
+      <UnifiedBadge variant="base" style={variants[status as keyof typeof variants] || 'secondary'}>
+        {status}
+      </UnifiedBadge>
     );
   };
 
@@ -172,9 +174,13 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                             <span>{activity.comment_count} comments</span>
                           </div>
                         </div>
-                        <Badge variant="outline" className="text-xs whitespace-nowrap">
+                        <UnifiedBadge
+                          variant="base"
+                          style="outline"
+                          className="text-xs whitespace-nowrap"
+                        >
                           Posted
-                        </Badge>
+                        </UnifiedBadge>
                       </div>
                     )}
 
@@ -189,9 +195,13 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                           </p>
                           <p className="text-sm line-clamp-2">{activity.content}</p>
                         </div>
-                        <Badge variant="outline" className="text-xs whitespace-nowrap">
+                        <UnifiedBadge
+                          variant="base"
+                          style="outline"
+                          className="text-xs whitespace-nowrap"
+                        >
                           Comment
-                        </Badge>
+                        </UnifiedBadge>
                       </div>
                     )}
 
@@ -200,9 +210,13 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                         <p className="text-sm">
                           Upvoted <span className="font-medium">{activity.post_title}</span>
                         </p>
-                        <Badge variant="outline" className="text-xs whitespace-nowrap">
+                        <UnifiedBadge
+                          variant="base"
+                          style="outline"
+                          className="text-xs whitespace-nowrap"
+                        >
                           Voted
-                        </Badge>
+                        </UnifiedBadge>
                       </div>
                     )}
 
@@ -213,9 +227,9 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                           <div
                             className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm text-muted-foreground`}
                           >
-                            <Badge variant="secondary" className="text-xs">
+                            <UnifiedBadge variant="base" style="secondary" className="text-xs">
                               {activity.content_type}
-                            </Badge>
+                            </UnifiedBadge>
                             {getStatusBadge(activity.status)}
                             {activity.pr_url && (
                               <a

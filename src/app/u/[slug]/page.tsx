@@ -3,7 +3,6 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { BadgeGrid } from '@/src/components/features/badges/badge-grid';
 import { ReputationBreakdown } from '@/src/components/features/reputation/reputation-breakdown';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -12,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { getPublicUserBadges } from '@/src/lib/actions/badges.actions';
 import { getUserReputation } from '@/src/lib/actions/reputation.actions';
 import { FolderOpen, Globe, MessageSquare, Users } from '@/src/lib/icons';
@@ -178,9 +178,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   profile.interests.every((item): item is string => typeof item === 'string') && (
                     <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4`}>
                       {profile.interests.map((interest) => (
-                        <Badge key={interest} variant="secondary">
+                        <UnifiedBadge key={interest} variant="base" style="secondary">
                           {interest}
-                        </Badge>
+                        </UnifiedBadge>
                       ))}
                     </div>
                   )}
@@ -218,19 +218,26 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               <CardContent className="space-y-3">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Posts</span>
-                  <Badge variant="secondary">{posts?.length || 0}</Badge>
+                  <UnifiedBadge variant="base" style="secondary">
+                    {posts?.length || 0}
+                  </UnifiedBadge>
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Collections</span>
-                  <Badge variant="secondary">{collections?.length || 0}</Badge>
+                  <UnifiedBadge variant="base" style="secondary">
+                    {collections?.length || 0}
+                  </UnifiedBadge>
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Account Tier</span>
-                  <Badge variant={profile.tier === 'pro' ? 'default' : 'secondary'}>
+                  <UnifiedBadge
+                    variant="base"
+                    style={profile.tier === 'pro' ? 'default' : 'secondary'}
+                  >
                     {profile.tier
                       ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
                       : 'Free'}
-                  </Badge>
+                  </UnifiedBadge>
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Member since</span>
@@ -286,7 +293,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                       </CardHeader>
                       <CardContent>
                         <div className={'flex items-center gap-3 text-xs text-muted-foreground'}>
-                          <Badge variant="secondary">{post.vote_count || 0} votes</Badge>
+                          <UnifiedBadge variant="base" style="secondary">
+                            {post.vote_count || 0} votes
+                          </UnifiedBadge>
                           <span>{post.comment_count || 0} comments</span>
                           <span>•</span>
                           <span>{new Date(post.created_at).toLocaleDateString()}</span>

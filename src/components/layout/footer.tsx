@@ -6,7 +6,7 @@
  */
 
 import Link from 'next/link';
-import { Badge } from '@/src/components/ui/badge';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { DiscordIcon, ExternalLink, Github, Sparkles } from '@/src/lib/icons';
@@ -50,10 +50,14 @@ export function Footer() {
               >
                 <DiscordIcon className="h-5 w-5" />
               </Link>
-              <Badge variant="outline" className="border-accent/20 bg-accent/5 text-accent ml-2">
+              <UnifiedBadge
+                variant="base"
+                style="outline"
+                className="border-accent/20 bg-accent/5 text-accent ml-2"
+              >
                 <ExternalLink className="h-3 w-3 mr-1 text-accent" />
                 Open Source
-              </Badge>
+              </UnifiedBadge>
             </div>
           </div>
 

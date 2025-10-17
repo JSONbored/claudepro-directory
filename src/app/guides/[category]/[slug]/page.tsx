@@ -11,9 +11,9 @@ import { MDXContentProvider } from '@/src/components/providers/mdx-content-provi
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { MDXRenderer } from '@/src/components/shared/mdx-renderer';
 import { ViewTracker } from '@/src/components/shared/view-tracker';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { contentCache, statsRedis } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
@@ -453,9 +453,9 @@ export default async function SEOGuidePage({
 
                 {/* Metadata */}
                 <div className={`flex flex-wrap gap-4 ${UI_CLASSES.TEXT_SM_MUTED}`}>
-                  <Badge variant="secondary">
+                  <UnifiedBadge variant="base" style="secondary">
                     {category ? categoryLabels[category] || category : 'Guide'}
-                  </Badge>
+                  </UnifiedBadge>
                   {data.dateUpdated && (
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <Calendar className="h-4 w-4" />
@@ -463,13 +463,14 @@ export default async function SEOGuidePage({
                     </div>
                   )}
                   {viewCount > 0 && (
-                    <Badge
-                      variant="secondary"
+                    <UnifiedBadge
+                      variant="base"
+                      style="secondary"
                       className="h-7 px-2.5 gap-1.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
                     >
                       <Eye className="h-3.5 w-3.5" aria-hidden="true" />
                       <span className="text-xs">{formatViewCount(viewCount)}</span>
-                    </Badge>
+                    </UnifiedBadge>
                   )}
                 </div>
 
@@ -477,10 +478,10 @@ export default async function SEOGuidePage({
                 {data.keywords && data.keywords.length > 0 && (
                   <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4`}>
                     {data.keywords.map((keyword: string) => (
-                      <Badge key={keyword} variant="outline">
+                      <UnifiedBadge key={keyword} variant="base" style="outline">
                         <Tag className="h-3 w-3 mr-1" />
                         {keyword}
-                      </Badge>
+                      </UnifiedBadge>
                     ))}
                   </div>
                 )}

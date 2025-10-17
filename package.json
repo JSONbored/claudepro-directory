@@ -23,6 +23,20 @@
     "node": ">=22.0.0",
     "npm": ">=10.0.0"
   },
+  "imports": {
+    "#lib/actions/user": {
+      "storybook": "./src/lib/actions/user.actions.mock.ts",
+      "default": "./src/lib/actions/user.actions.ts"
+    },
+    "#lib/actions/track-view": {
+      "storybook": "./src/lib/actions/track-view.mock.ts",
+      "default": "./src/lib/actions/track-view.ts"
+    },
+    "#lib/actions/business": {
+      "storybook": "./src/lib/actions/business.actions.mock.ts",
+      "default": "./src/lib/actions/business.actions.ts"
+    }
+  },
   "scripts": {
     "dev": "npm run build:content && npm run generate:service-worker && next dev --turbopack",
     "build": "npm run generate:events && npm run build:content && npm run generate:service-worker && npm run generate:openapi && npm run build:api-docs && next build --turbopack",
@@ -77,7 +91,9 @@
     "tech-debt:baseline": "config/tools/tech-debt/tracker.sh baseline",
     "tech-debt:check": "config/tools/tech-debt/tracker.sh check",
     "tech-debt:report": "config/tools/tech-debt/tracker.sh report",
-    "generate:events": "tsx scripts/build/generate-events.ts"
+    "generate:events": "tsx scripts/build/generate-events.ts",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@arcjet/next": "^1.0.0-beta.13",
@@ -146,10 +162,16 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
     "@biomejs/biome": "2.2.6",
+    "@chromatic-com/storybook": "^4.1.1",
     "@faker-js/faker": "^10.1.0",
     "@lhci/cli": "^0.15.1",
     "@next/bundle-analyzer": "^15.5.5",
     "@playwright/test": "^1.56.0",
+    "@storybook/addon-a11y": "^9.1.12",
+    "@storybook/addon-docs": "^9.1.12",
+    "@storybook/addon-links": "^9.1.12",
+    "@storybook/nextjs": "^9.1.12",
+    "@storybook/nextjs-vite": "^9.1.12",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
@@ -166,6 +188,7 @@
     "knip": "^5.65.0",
     "lefthook": "^1.13.6",
     "msw": "^2.11.5",
+    "storybook": "^9.1.12",
     "ultracite": "^5.6.4",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"

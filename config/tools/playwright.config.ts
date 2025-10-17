@@ -23,6 +23,7 @@
  */
 
 import { defineConfig, devices } from '@playwright/test';
+import { BREAKPOINTS, VIEWPORT_PRESETS } from '@/src/lib/ui-constants';
 
 /**
  * Determine if running in CI environment
@@ -184,12 +185,125 @@ export default defineConfig({
 
   /**
    * Browser Projects
-   * Test on multiple browsers for cross-browser compatibility
+   * Test on multiple browsers and viewports for comprehensive coverage
+   *
+   * =============================================================================
+   * RESPONSIVE VIEWPORT PROJECTS (2025 Architecture)
+   * =============================================================================
+   *
+   * Systematic multi-viewport testing using BREAKPOINTS from ui-constants.ts.
+   * Ensures responsive design works perfectly at all standard breakpoints.
+   *
+   * Viewport Strategy:
+   * 1. mobile-viewport (320px) - Smallest phones (iPhone SE)
+   * 2. tablet-viewport (768px) - Tablets (iPad portrait)
+   * 3. desktop-viewport (1024px) - Laptops
+   * 4. wide-viewport (1280px) - Large desktops
+   * 5. ultra-viewport (1920px) - 1080p+ monitors
+   *
+   * Visual Regression Testing:
+   * - Each viewport project can capture screenshots for comparison
+   * - Use page.screenshot() in tests for baseline/comparison
+   * - Pair with Percy/Chromatic for automated visual regression
+   *
+   * @see src/lib/ui-constants.ts - Single source of truth for breakpoints
    */
   projects: [
     /**
+     * ===========================================================================
+     * VIEWPORT-BASED PROJECTS (Responsive Testing)
+     * ===========================================================================
+     */
+
+    /**
+     * Mobile Viewport (320px)
+     * Smallest modern phones - iPhone SE, compact Android phones
+     * Tests mobile-first experience at minimum supported width
+     */
+    {
+      name: 'mobile-viewport',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: BREAKPOINTS.mobile, height: 568 },
+        isMobile: true,
+        hasTouch: true,
+        deviceScaleFactor: 2,
+      },
+      // Run visual snapshot tests in this project
+      testMatch: /.*\.(spec|e2e|visual)\.ts$/,
+    },
+
+    /**
+     * Tablet Viewport (768px)
+     * iPad portrait, medium screens
+     * Critical breakpoint - where most layouts switch from mobile to tablet
+     */
+    {
+      name: 'tablet-viewport',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: VIEWPORT_PRESETS.ipadPortrait,
+        isMobile: true,
+        hasTouch: true,
+        deviceScaleFactor: 2,
+      },
+      testMatch: /.*\.(spec|e2e|visual)\.ts$/,
+    },
+
+    /**
+     * Desktop Viewport (1024px)
+     * Laptop screens, small desktops
+     * Where desktop layouts fully activate (lg: breakpoint)
+     */
+    {
+      name: 'desktop-viewport',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: BREAKPOINTS.desktop, height: 768 },
+        deviceScaleFactor: 1,
+      },
+      testMatch: /.*\.(spec|e2e|visual)\.ts$/,
+    },
+
+    /**
+     * Wide Viewport (1280px)
+     * Large desktops, external monitors
+     * Standard 720p+ desktop experience
+     */
+    {
+      name: 'wide-viewport',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: VIEWPORT_PRESETS.laptop,
+        deviceScaleFactor: 1,
+      },
+      testMatch: /.*\.(spec|e2e|visual)\.ts$/,
+    },
+
+    /**
+     * Ultra Viewport (1920px)
+     * 1080p monitors, 4K displays
+     * Maximum layout width testing
+     */
+    {
+      name: 'ultra-viewport',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: VIEWPORT_PRESETS.desktop1080p,
+        deviceScaleFactor: 1,
+      },
+      testMatch: /.*\.(spec|e2e|visual)\.ts$/,
+    },
+
+    /**
+     * ===========================================================================
+     * BROWSER COMPATIBILITY PROJECTS
+     * ===========================================================================
+     */
+
+    /**
      * Chromium (Chrome, Edge)
-     * Primary browser for most tests
+     * Primary browser for general E2E tests (non-visual)
      */
     {
       name: 'chromium',
@@ -200,6 +314,9 @@ export default defineConfig({
           args: ['--enable-features=NetworkService,NetworkServiceInProcess'],
         },
       },
+      // Exclude visual tests (handled by viewport projects)
+      testMatch: /.*\.(spec|e2e)\.ts$/,
+      testIgnore: /.*\.visual\.(spec|test)\.ts$/,
     },
 
     /**
@@ -223,12 +340,22 @@ export default defineConfig({
     // },
 
     /**
-     * Mobile Chrome
-     * Test mobile experience
+     * ===========================================================================
+     * DEVICE-SPECIFIC PROJECTS
+     * ===========================================================================
+     */
+
+    /**
+     * Mobile Chrome (Real Device Emulation)
+     * Pixel 5 emulation - tests real device quirks
+     * Use for device-specific testing (touch, mobile Chrome features)
      */
     {
       name: 'mobile-chrome',
       use: { ...devices['Pixel 5'] },
+      // Exclude visual tests (handled by mobile-viewport)
+      testMatch: /.*\.(spec|e2e)\.ts$/,
+      testIgnore: /.*\.visual\.(spec|test)\.ts$/,
     },
 
     /**
@@ -240,6 +367,12 @@ export default defineConfig({
     //   name: 'mobile-safari',
     //   use: { ...devices['iPhone 13'] },
     // },
+
+    /**
+     * ===========================================================================
+     * SPECIALIZED PROJECTS
+     * ===========================================================================
+     */
 
     /**
      * Accessibility Tests

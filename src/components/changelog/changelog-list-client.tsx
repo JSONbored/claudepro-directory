@@ -23,8 +23,8 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { CategoryFilter } from '@/src/components/changelog/category-filter';
 import { BaseCard } from '@/src/components/shared/base-card';
-import { Badge } from '@/src/components/ui/badge';
 import { Tabs, TabsContent } from '@/src/components/ui/tabs';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import {
   formatChangelogDateShort,
   getChangelogPath,
@@ -114,18 +114,23 @@ export function ChangelogListClient({ entries }: ChangelogListClientProps) {
                       nonEmptyCategories.length > 0 ? (
                         <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2}`}>
                           {nonEmptyCategories.slice(0, 4).map((category) => (
-                            <Badge
+                            <UnifiedBadge
                               key={category}
-                              variant="outline"
+                              variant="base"
+                              style="outline"
                               className={`${BADGE_COLORS.changelogCategory[category as keyof typeof BADGE_COLORS.changelogCategory]} font-medium`}
                             >
                               {category}
-                            </Badge>
+                            </UnifiedBadge>
                           ))}
                           {nonEmptyCategories.length > 4 && (
-                            <Badge variant="outline" className="text-muted-foreground">
+                            <UnifiedBadge
+                              variant="base"
+                              style="outline"
+                              className="text-muted-foreground"
+                            >
                               +{nonEmptyCategories.length - 4} more
-                            </Badge>
+                            </UnifiedBadge>
                           )}
                         </div>
                       ) : null

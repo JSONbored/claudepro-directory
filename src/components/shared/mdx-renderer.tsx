@@ -25,9 +25,9 @@ import { QuickReference } from '../interactive/quick-reference';
 import { setPageMetadata } from '../smart-related-content/with-metadata';
 import { CodeGroupServer as CodeGroup } from '../template/code-group-server';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { UnifiedBadge } from '../ui/unified-badge';
 // Import heavy components as lazy-loaded (Suspense boundaries)
 import {
   ComparisonTable,
@@ -178,7 +178,7 @@ const components = {
   Alert,
   AlertDescription,
   AlertTitle,
-  Badge,
+  Badge: UnifiedBadge,
   Card,
   CardContent,
   CardDescription,

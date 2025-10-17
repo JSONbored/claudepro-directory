@@ -1,6 +1,6 @@
 import type * as React from 'react';
 
-import { badgeVariants } from '@/src/components/ui/badge';
+import { baseBadgeVariants } from '@/src/components/ui/unified-badge';
 import { cn } from '@/src/lib/utils';
 
 /**
@@ -58,7 +58,7 @@ export function Announcement({
   return (
     <output
       className={cn(
-        badgeVariants({ variant }),
+        baseBadgeVariants({ variant }),
         // Announcement-specific styles
         'inline-flex items-center gap-2',
         'px-3 py-1.5',

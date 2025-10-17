@@ -5,7 +5,7 @@
  * Displays progress bar and question counter for quiz
  */
 
-import { Badge } from '@/src/components/ui/badge';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { CheckCircle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -26,9 +26,9 @@ export function QuizProgress({
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
           <span className="text-sm font-medium">Progress</span>
-          <Badge variant="secondary">
+          <UnifiedBadge variant="base" style="secondary">
             {currentQuestion} / {totalQuestions}
-          </Badge>
+          </UnifiedBadge>
         </div>
         {percentComplete === 100 && (
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm text-primary`}>

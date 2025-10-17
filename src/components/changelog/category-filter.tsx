@@ -20,8 +20,8 @@
 'use client';
 
 import { memo, useMemo } from 'react';
-import { Badge } from '@/src/components/ui/badge';
 import { TabsList, TabsTrigger } from '@/src/components/ui/tabs';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
 
 /**
@@ -94,12 +94,13 @@ export const CategoryFilter = memo(({ entries, activeCategory }: CategoryFilterP
       {FILTER_CATEGORIES.map((category) => (
         <TabsTrigger key={category} value={category} className={'text-sm flex items-center gap-2'}>
           <span>{category}</span>
-          <Badge
-            variant={activeCategory === category ? 'default' : 'secondary'}
+          <UnifiedBadge
+            variant="base"
+            style={activeCategory === category ? 'default' : 'secondary'}
             className="ml-1 h-5 min-w-[1.5rem] justify-center px-1.5 text-xs"
           >
             {categoryCounts[category]}
-          </Badge>
+          </UnifiedBadge>
         </TabsTrigger>
       ))}
     </TabsList>

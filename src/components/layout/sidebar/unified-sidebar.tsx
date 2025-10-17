@@ -16,7 +16,6 @@
 
 import Link from 'next/link';
 import { memo, useEffect, useState } from 'react';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { Input } from '@/src/components/ui/input';
@@ -26,6 +25,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/ui/tooltip';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { CategoryNavigationCard } from '@/src/components/unified-detail-page/sidebar/category-navigation-card';
 import { ROUTES } from '@/src/lib/constants/routes';
 import {
@@ -272,7 +272,7 @@ function UnifiedSidebarComponent({
               {/* Active Filters (if any) */}
               {showFilters && searchQuery && (
                 <div className={'mt-2 flex flex-wrap gap-1'}>
-                  <Badge variant="secondary" className={'text-xs h-5'}>
+                  <UnifiedBadge variant="base" style="secondary" className={'text-xs h-5'}>
                     {searchQuery}
                     <button
                       type="button"
@@ -282,7 +282,7 @@ function UnifiedSidebarComponent({
                     >
                       ×
                     </button>
-                  </Badge>
+                  </UnifiedBadge>
                 </div>
               )}
             </CardContent>
@@ -320,9 +320,13 @@ function UnifiedSidebarComponent({
                           <span className="text-muted-foreground/60 mr-1.5">{index + 1}.</span>
                           {guide.title}
                         </span>
-                        <Badge variant="secondary" className="text-2xs h-4 px-1 bg-muted/50">
+                        <UnifiedBadge
+                          variant="base"
+                          style="secondary"
+                          className="text-2xs h-4 px-1 bg-muted/50"
+                        >
                           {guide.views}
-                        </Badge>
+                        </UnifiedBadge>
                       </Link>
                     ))
                   )}

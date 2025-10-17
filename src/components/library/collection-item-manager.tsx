@@ -10,7 +10,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
   Select,
@@ -20,6 +19,7 @@ import {
   SelectValue,
 } from '@/src/components/ui/select';
 import { Separator } from '@/src/components/ui/separator';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import {
   addItemToCollection,
   removeItemFromCollection,
@@ -204,9 +204,9 @@ export function CollectionItemManager({
                 availableToAdd.map((bookmark) => (
                   <SelectItem key={bookmark.id} value={bookmark.id}>
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                      <Badge variant="outline" className="text-xs capitalize">
+                      <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                         {bookmark.content_type}
-                      </Badge>
+                      </UnifiedBadge>
                       {bookmark.content_slug}
                     </div>
                   </SelectItem>
@@ -273,9 +273,9 @@ export function CollectionItemManager({
               {/* Content Info */}
               <div className="flex-1">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <Badge variant="outline" className="text-xs capitalize">
+                  <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                     {item.content_type}
-                  </Badge>
+                  </UnifiedBadge>
                   <span className="text-sm font-medium">{item.content_slug}</span>
                 </div>
                 {item.notes && <p className={'text-xs text-muted-foreground mt-1'}>{item.notes}</p>}

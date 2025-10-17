@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { JobCard } from '@/src/components/shared/job-card';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { Input } from '@/src/components/ui/input';
@@ -12,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/ui/select';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { getJobs, type Job } from '@/src/lib/data/jobs';
 import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@/src/lib/icons';
@@ -147,12 +147,16 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             </p>
 
             <div className={'flex flex-wrap justify-center gap-2 mb-8'}>
-              <Badge variant="secondary">
+              <UnifiedBadge variant="base" style="secondary">
                 <Briefcase className="h-3 w-3 mr-1" />
                 {allJobs.length} Jobs Available
-              </Badge>
-              <Badge variant="outline">Community Driven</Badge>
-              <Badge variant="outline">Verified Listings</Badge>
+              </UnifiedBadge>
+              <UnifiedBadge variant="base" style="outline">
+                Community Driven
+              </UnifiedBadge>
+              <UnifiedBadge variant="base" style="outline">
+                Verified Listings
+              </UnifiedBadge>
             </div>
 
             <Button variant="outline" size="sm" asChild>
@@ -249,7 +253,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4 pt-4 border-t border-border`}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Active filters:</span>
                     {(params.search || params.q || params.query) && (
-                      <Badge variant="secondary">
+                      <UnifiedBadge variant="base" style="secondary">
                         Search: {params.search || params.q || params.query}
                         <Link
                           href={buildFilterUrl({ search: undefined })}
@@ -258,10 +262,10 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         >
                           ×
                         </Link>
-                      </Badge>
+                      </UnifiedBadge>
                     )}
                     {params.category && params.category !== 'all' && (
-                      <Badge variant="secondary">
+                      <UnifiedBadge variant="base" style="secondary">
                         {params.category.charAt(0).toUpperCase() + params.category.slice(1)}
                         <Link
                           href={buildFilterUrl({ category: undefined })}
@@ -270,10 +274,10 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         >
                           ×
                         </Link>
-                      </Badge>
+                      </UnifiedBadge>
                     )}
                     {params.employment && params.employment !== 'any' && (
-                      <Badge variant="secondary">
+                      <UnifiedBadge variant="base" style="secondary">
                         {params.employment.charAt(0).toUpperCase() +
                           params.employment.slice(1).replace('time', ' Time')}
                         <Link
@@ -283,10 +287,10 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         >
                           ×
                         </Link>
-                      </Badge>
+                      </UnifiedBadge>
                     )}
                     {params.remote === true && (
-                      <Badge variant="secondary">
+                      <UnifiedBadge variant="base" style="secondary">
                         Remote
                         <Link
                           href={buildFilterUrl({ remote: undefined })}
@@ -295,7 +299,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         >
                           ×
                         </Link>
-                      </Badge>
+                      </UnifiedBadge>
                     )}
                     <Button variant="ghost" size="sm" asChild>
                       <Link href={ROUTES.JOBS} className="text-xs">

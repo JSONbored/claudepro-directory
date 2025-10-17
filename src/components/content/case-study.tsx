@@ -5,8 +5,8 @@
  * Used in 1 MDX file across the codebase - Specialized component for business case studies
  */
 
-import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { BookOpen } from '@/src/lib/icons';
 import { type CaseStudyProps, caseStudyPropsSchema } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -24,9 +24,9 @@ export function CaseStudy(props: CaseStudyProps) {
               {company} Case Study
             </CardTitle>
             {industry && (
-              <Badge variant="outline" className="mt-2">
+              <UnifiedBadge variant="base" style="outline" className="mt-2">
                 {industry}
-              </Badge>
+              </UnifiedBadge>
             )}
           </div>
           {logo && (

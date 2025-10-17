@@ -1,10 +1,14 @@
 /**
  * Collection Detail View Component
  *
+ * @server This is a SERVER-ONLY component (imports batch.utils → cache.server)
+ *
  * Extracted from src/app/collections/[slug]/page.tsx for reuse in UnifiedDetailPage.
  * Renders collection-specific sections: prerequisites, embedded items, installation order, compatibility.
  *
  * **Architecture:**
+ * - Server Component: Uses batchFetch from batch.utils (imports cache.server)
+ * - NOT Storybook-compatible (requires server-side execution)
  * - Follows composition pattern from unified-detail-page
  * - Reuses ConfigCard for embedded item display
  * - Preserves all collection-specific UI features

@@ -18,12 +18,9 @@ import { StarRatingCompact } from '@/src/components/features/reviews/star-rating
 import { BaseCard } from '@/src/components/shared/base-card';
 import { BookmarkButton } from '@/src/components/shared/bookmark-button';
 import { CardCopyAction } from '@/src/components/shared/card-copy-action';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
-import { TypeBadge } from '@/src/components/ui/config-badge';
 import { BorderBeam } from '@/src/components/ui/magic/border-beam';
-import { NewIndicator } from '@/src/components/ui/new-indicator';
-import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import {
   Award,
   Copy as CopyIcon,
@@ -36,14 +33,16 @@ import {
 import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
 import { BADGE_COLORS, CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
-import {
-  formatCopyCount,
-  formatViewCount,
-  getContentItemUrl,
-} from '@/src/lib/utils/content.utils';
+import { formatCopyCount, formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 export const ConfigCard = memo(
-  ({ item, variant = 'default', showCategory = true, showActions = true }: ConfigCardProps) => {
+  ({
+    item,
+    variant = 'default',
+    showCategory = true,
+    showActions = true,
+    renderSponsoredWrapper,
+  }: ConfigCardProps) => {
     const displayTitle = getDisplayTitle(item);
     const targetPath = getContentItemUrl(item);
 
@@ -115,12 +114,14 @@ export const ConfigCard = memo(
           {...(isSponsored && { isSponsored })}
           {...(sponsoredId && { sponsoredId })}
           {...(position !== undefined && { position })}
+          {...(renderSponsoredWrapper && { renderSponsoredWrapper })}
           // Custom render slots
           renderTopBadges={() => (
             <>
               {showCategory && (
-                <TypeBadge
-                  type={
+                <UnifiedBadge
+                  variant="category"
+                  category={
                     (item.category || 'agents') as
                       | 'hooks'
                       | 'agents'
@@ -130,43 +131,68 @@ export const ConfigCard = memo(
                       | 'guides'
                       | 'collections'
                       | 'skills'
+                      | 'statuslines'
                   }
-                />
+                >
+                  {item.category === 'mcp'
+                    ? 'MCP'
+                    : item.category === 'agents'
+                      ? 'Agent'
+                      : item.category === 'commands'
+                        ? 'Command'
+                        : item.category === 'hooks'
+                          ? 'Hook'
+                          : item.category === 'rules'
+                            ? 'Rule'
+                            : item.category === 'statuslines'
+                              ? 'Statusline'
+                              : item.category === 'collections'
+                                ? 'Collection'
+                                : item.category === 'guides'
+                                  ? 'Guide'
+                                  : item.category === 'skills'
+                                    ? 'Skill'
+                                    : 'Agent'}
+                </UnifiedBadge>
               )}
 
               {/* Collection-specific badges (tree-shakeable) */}
               {isCollection && collectionType && COLLECTION_TYPE_LABELS && (
-                <Badge
-                  variant="outline"
+                <UnifiedBadge
+                  variant="base"
+                  style="outline"
                   className={`text-xs ${BADGE_COLORS.collectionType[collectionType]}`}
                 >
                   <Layers className="h-3 w-3 mr-1" aria-hidden="true" />
                   {COLLECTION_TYPE_LABELS[collectionType]}
-                </Badge>
+                </UnifiedBadge>
               )}
 
               {isCollection && collectionDifficulty && (
-                <Badge
-                  variant="outline"
+                <UnifiedBadge
+                  variant="base"
+                  style="outline"
                   className={`text-xs ${BADGE_COLORS.difficulty[collectionDifficulty]}`}
                 >
                   {collectionDifficulty}
-                </Badge>
+                </UnifiedBadge>
               )}
 
               {isCollection && itemCount !== undefined && (
-                <Badge
-                  variant="outline"
+                <UnifiedBadge
+                  variant="base"
+                  style="outline"
                   className={'text-xs border-muted-foreground/20 text-muted-foreground'}
                 >
                   {itemCount} {itemCount === 1 ? 'item' : 'items'}
-                </Badge>
+                </UnifiedBadge>
               )}
 
               {/* Featured badge - weekly algorithm selection */}
               {isFeatured && (
-                <Badge
-                  variant="secondary"
+                <UnifiedBadge
+                  variant="base"
+                  style="secondary"
                   className="gap-1 border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 text-amber-600 dark:text-amber-400 hover:from-amber-500/15 hover:to-yellow-500/15 transition-all duration-300 shadow-sm hover:shadow-md font-semibold animate-in fade-in slide-in-from-top-2"
                 >
                   {featuredRank && featuredRank <= 3 ? (
@@ -176,43 +202,50 @@ export const ConfigCard = memo(
                   )}
                   Featured
                   {featuredRank && <span className="text-xs opacity-75">#{featuredRank}</span>}
-                </Badge>
+                </UnifiedBadge>
               )}
               {isSponsored && sponsorTier && (
-                <SponsoredBadge
+                <UnifiedBadge
+                  variant="sponsored"
                   tier={sponsorTier as 'featured' | 'promoted' | 'spotlight'}
-                  showIcon={true}
+                  showIcon
                 />
               )}
 
               {/* New indicator - 0-7 days old content (server-computed) */}
-              {item.isNew && <NewIndicator label="New content" className="ml-0.5" />}
+              {item.isNew && (
+                <UnifiedBadge variant="new-indicator" label="New content" className="ml-0.5" />
+              )}
             </>
           )}
           renderMetadataBadges={() => (
             <>
               {/* View count badge */}
               {behavior.showViewCount && viewCount !== undefined && (
-                <Badge
-                  variant="secondary"
-                  className="h-7 px-2.5 gap-1.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span className="text-xs">{formatViewCount(viewCount)}</span>
-                </Badge>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <UnifiedBadge
+                    variant="base"
+                    style="secondary"
+                    className="h-7 px-2.5 gap-1.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
+                  >
+                    <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span className="text-xs">{formatViewCount(viewCount)}</span>
+                  </UnifiedBadge>
+                </div>
               )}
 
               {/* Copy count badge - social proof for engagement */}
               {behavior.showCopyCount && copyCount !== undefined && copyCount > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="h-7 px-2.5 gap-1.5 bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 hover:bg-green-500/15 transition-colors font-medium"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <CopyIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span className="text-xs">{formatCopyCount(copyCount)}</span>
-                </Badge>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <UnifiedBadge
+                    variant="base"
+                    style="secondary"
+                    className="h-7 px-2.5 gap-1.5 bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 hover:bg-green-500/15 transition-colors font-medium"
+                  >
+                    <CopyIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span className="text-xs">{formatCopyCount(copyCount)}</span>
+                  </UnifiedBadge>
+                </div>
               )}
 
               {/* Rating badge - shows average rating and count */}
@@ -268,6 +301,7 @@ export const ConfigCard = memo(
                 </Button>
               )}
 
+              {/* Bookmark button */}
               <BookmarkButton contentType={item.category || 'agents'} contentSlug={item.slug} />
 
               {behavior.showCopyButton && (

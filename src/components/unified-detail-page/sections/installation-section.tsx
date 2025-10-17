@@ -14,7 +14,6 @@
  * @see lib/config/custom-renderers.tsx - Custom hook renderer
  */
 
-import { Badge } from '@/src/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -22,6 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { Copy } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
@@ -86,9 +86,9 @@ export function InstallationSection({
                   <div className={'space-y-1 text-sm'}>
                     {Object.entries(installation.claudeCode.configPath).map(([location, path]) => (
                       <div key={location} className={UI_CLASSES.FLEX_GAP_2}>
-                        <Badge variant="outline" className="capitalize">
+                        <UnifiedBadge variant="base" style="outline" className="capitalize">
                           {location}
-                        </Badge>
+                        </UnifiedBadge>
                         <code className="text-xs bg-muted px-1 py-0.5 rounded">{String(path)}</code>
                       </div>
                     ))}
@@ -120,9 +120,9 @@ export function InstallationSection({
                     {Object.entries(installation.claudeDesktop.configPath).map(
                       ([platform, path]) => (
                         <div key={platform} className={UI_CLASSES.FLEX_GAP_2}>
-                          <Badge variant="outline" className="capitalize">
+                          <UnifiedBadge variant="base" style="outline" className="capitalize">
                             {platform}
-                          </Badge>
+                          </UnifiedBadge>
                           <code className="text-xs bg-muted px-1 py-0.5 rounded">
                             {String(path)}
                           </code>

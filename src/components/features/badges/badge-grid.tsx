@@ -21,7 +21,6 @@
 import { Info, Lock, Star } from 'lucide-react';
 import { memo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { Badge } from '@/src/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -35,6 +34,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/ui/tooltip';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { toggleBadgeFeatured } from '@/src/lib/actions/badges.actions';
 import {
   BADGE_RARITY_COLORS,
@@ -166,9 +166,13 @@ const BadgeCard = memo(function BadgeCard({
         </div>
 
         {/* Rarity Badge */}
-        <Badge variant="outline" className={cn('text-xs capitalize', rarityColors.text)}>
+        <UnifiedBadge
+          variant="base"
+          style="outline"
+          className={cn('text-xs capitalize', rarityColors.text)}
+        >
           {rarity}
-        </Badge>
+        </UnifiedBadge>
 
         {/* Earned Date */}
         <p className="text-xs text-muted-foreground">

@@ -17,8 +17,8 @@ import { CopyLLMsButton } from '@/src/components/shared/copy-llms-button';
 import { CopyMarkdownButton } from '@/src/components/shared/copy-markdown-button';
 import { DownloadMarkdownButton } from '@/src/components/shared/download-markdown-button';
 import type { CopyType } from '@/src/components/shared/post-copy-email-modal';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { ArrowLeft, Copy } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
@@ -142,12 +142,12 @@ export function DetailHeaderActions({
       <div className={'flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6'}>
         <div className="flex-1">
           <div className={'flex items-center gap-3 mb-4'}>
-            <Badge variant="secondary" className={'text-xs font-medium'}>
+            <UnifiedBadge variant="base" style="secondary" className={'text-xs font-medium'}>
               {typeName}
-            </Badge>
-            <Badge variant="outline" className="text-xs">
+            </UnifiedBadge>
+            <UnifiedBadge variant="base" style="outline" className="text-xs">
               {category}
-            </Badge>
+            </UnifiedBadge>
           </div>
 
           <h1 className={'text-4xl font-bold tracking-tight mb-4'}>{displayTitle}</h1>

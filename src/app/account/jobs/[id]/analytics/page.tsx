@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -84,9 +84,13 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
         <CardHeader>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <CardTitle>Listing Details</CardTitle>
-            <Badge className={getStatusColor(job.status ?? 'draft')} variant="outline">
+            <UnifiedBadge
+              variant="base"
+              style="outline"
+              className={getStatusColor(job.status ?? 'draft')}
+            >
               {job.status ?? 'draft'}
-            </Badge>
+            </UnifiedBadge>
           </div>
         </CardHeader>
         <CardContent>

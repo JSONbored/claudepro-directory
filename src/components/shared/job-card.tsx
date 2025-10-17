@@ -3,9 +3,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from '@/src/lib/icons';
 import type { JobCardProps } from '@/src/lib/schemas/component.schema';
 import { BADGE_COLORS, type JobType, UI_CLASSES } from '@/src/lib/ui-constants';
@@ -21,10 +21,10 @@ export const JobCard = memo(({ job }: JobCardProps) => {
     <Card className={`${UI_CLASSES.CARD_GRADIENT_HOVER} relative`}>
       {job.featured && (
         <div className={'absolute -top-2 -right-2 z-10'}>
-          <Badge className="bg-accent text-accent-foreground">
+          <UnifiedBadge variant="base" style="default" className="bg-accent text-accent-foreground">
             <Star className="h-3 w-3 mr-1" />
             Featured
-          </Badge>
+          </UnifiedBadge>
         </div>
       )}
 
@@ -74,8 +74,14 @@ export const JobCard = memo(({ job }: JobCardProps) => {
           </div>
 
           <div className={'flex flex-col items-end gap-2'}>
-            <Badge className={getTypeColor(job.type)}>{job.type.replace('-', ' ')}</Badge>
-            {job.remote && <Badge variant="secondary">Remote</Badge>}
+            <UnifiedBadge variant="base" style="default" className={getTypeColor(job.type)}>
+              {job.type.replace('-', ' ')}
+            </UnifiedBadge>
+            {job.remote && (
+              <UnifiedBadge variant="base" style="secondary">
+                Remote
+              </UnifiedBadge>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -86,14 +92,14 @@ export const JobCard = memo(({ job }: JobCardProps) => {
         <div className="mb-4">
           <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
             {job.tags.slice(0, 4).map((tag) => (
-              <Badge key={tag} variant="outline" className="text-xs">
+              <UnifiedBadge key={tag} variant="base" style="outline" className="text-xs">
                 {tag}
-              </Badge>
+              </UnifiedBadge>
             ))}
             {job.tags.length > 4 && (
-              <Badge variant="outline" className="text-xs">
+              <UnifiedBadge variant="base" style="outline" className="text-xs">
                 +{job.tags.length - 4} more
-              </Badge>
+              </UnifiedBadge>
             )}
           </div>
         </div>

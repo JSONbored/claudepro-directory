@@ -6,12 +6,15 @@
  * Reusable copy-to-clipboard button for card components.
  * Provides consistent behavior with toast notifications and analytics tracking.
  *
+ * **Architecture**: Client-only component with no server dependencies.
+ * Email capture is handled at a higher level (app/layout level), not here.
+ *
  * Used in: ConfigCard, CollectionCard
  */
 
+import { useState } from 'react';
+import { trackCopy } from '#lib/actions/track-view';
 import { Button } from '@/src/components/ui/button';
-import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
-import { trackCopy } from '@/src/lib/actions/track-view';
 import { Check, Copy } from '@/src/lib/icons';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -30,35 +33,26 @@ export interface CardCopyActionProps {
   componentName: string;
 }
 
-export function CardCopyAction({ url, category, slug, title, componentName }: CardCopyActionProps) {
-  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
-  const { copied, copy } = useCopyWithEmailCapture({
-    emailContext: {
-      copyType: 'link',
-      category,
-      slug,
-      ...(referrer && { referrer }),
-    },
-    onSuccess: () => {
+export function CardCopyAction({ url, category, slug, title }: CardCopyActionProps) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+
       // Track copy action for analytics (silent fail)
       trackCopy({ category, slug }).catch(() => {
         // Silent fail - don't break UX
       });
 
       toasts.success.linkCopied();
-    },
-    onError: () => {
+    } catch (error) {
       toasts.error.copyFailed('link');
-    },
-    context: {
-      component: componentName,
-      action: 'copy-link',
-    },
-  });
-
-  const handleCopy = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    await copy(url);
+    }
   };
 
   return (

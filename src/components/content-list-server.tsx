@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/src/components/content-search-client';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ExternalLink, HelpCircle } from '@/src/lib/icons';
 import type {
@@ -52,7 +52,7 @@ function ContentHeroSection<T extends UnifiedContentItem>({
           <ul className={'flex flex-wrap justify-center gap-2 mb-8 list-none'}>
             {displayBadges.map((badge, idx) => (
               <li key={badge.text || `badge-${idx}`}>
-                <Badge variant={idx === 0 ? 'secondary' : 'outline'}>
+                <UnifiedBadge variant="base" style={idx === 0 ? 'secondary' : 'outline'}>
                   {badge.icon &&
                     (() => {
                       if (typeof badge.icon === 'string') {
@@ -64,7 +64,7 @@ function ContentHeroSection<T extends UnifiedContentItem>({
                       return <BadgeIcon className="h-3 w-3 mr-1" aria-hidden="true" />;
                     })()}
                   {badge.text}
-                </Badge>
+                </UnifiedBadge>
               </li>
             ))}
           </ul>

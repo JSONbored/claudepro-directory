@@ -2,8 +2,8 @@
 
 import { memo, useId } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
-import { Badge } from '@/src/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { Clock, Star, TrendingUp } from '@/src/lib/icons';
 import type { TrendingContentProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -66,13 +66,14 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
               trending.map((item: UnifiedContentItem, index: number) => (
                 <li key={item.slug} className="relative">
                   {index < 3 && (
-                    <Badge
+                    <UnifiedBadge
                       className={'absolute -top-2 -right-2 z-10'}
-                      variant="default"
+                      variant="base"
+                      style="default"
                       aria-label={`Rank ${index + 1}`}
                     >
                       #{index + 1}
-                    </Badge>
+                    </UnifiedBadge>
                   )}
                   <ConfigCard
                     item={{ ...item, position: index } as UnifiedContentItem}

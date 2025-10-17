@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -11,6 +10,7 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { Separator } from '@/src/components/ui/separator';
+import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import { trackView } from '@/src/lib/actions/track-view';
 import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -138,7 +138,9 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-2`}>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <h1 className="text-3xl font-bold">{collection.name}</h1>
-                <Badge variant="outline">Public</Badge>
+                <UnifiedBadge variant="base" style="outline">
+                  Public
+                </UnifiedBadge>
               </div>
               {isOwner && (
                 <Link href={`/account/library/${collection.slug}`}>
@@ -184,9 +186,9 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                         </div>
                         <div className="flex-1">
                           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                            <Badge variant="outline" className="capitalize">
+                            <UnifiedBadge variant="base" style="outline" className="capitalize">
                               {item.content_type}
-                            </Badge>
+                            </UnifiedBadge>
                             <CardTitle className="text-lg">{item.content_slug}</CardTitle>
                           </div>
                           {item.notes && (
