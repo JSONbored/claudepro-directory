@@ -18,7 +18,8 @@ aiOptimized: true
 citationReady: true
 ---
 
-<TLDRSummary>
+<UnifiedContentBlock
+  variant="tldr">
   Master MCP server development for Claude Desktop. Build production-ready integrations in 60 minutes. Connect databases, APIs, and custom tools using TypeScript or Python with the Model Context Protocol.
 </TLDRSummary>
 
@@ -354,8 +355,9 @@ Track custom metrics measuring business-specific outcomes effectively. Response 
 
 ## Best Practices Summary
 
-<FeatureGrid
-  practices={[
+<UnifiedContentBlock
+  variant="feature-grid"
+  features={[
     {
       title: "Security-First Design",
       description: "Implement OAuth 2.1 with PKCE mandatory. Validate all inputs preventing injection attacks. Audit tool invocations comprehensively.",
@@ -372,7 +374,7 @@ Track custom metrics measuring business-specific outcomes effectively. Response 
       icon: "check-circle"
     },
     {
-      title: "Performance Monitoring", 
+      title: "Performance Monitoring",
       description: "Track response times continuously. Monitor memory usage patterns. Alert on degradation immediately.",
       icon: "chart-line"
     },
@@ -457,7 +459,8 @@ Implement progress indicators keeping users informed continuously. Stream partia
 
 ## Quick Reference
 
-<QuickReference
+<UnifiedContentBlock
+  variant="quick-reference"
   title="MCP Development Cheat Sheet"
   description="Essential commands and configurations for MCP server development"
   items={[

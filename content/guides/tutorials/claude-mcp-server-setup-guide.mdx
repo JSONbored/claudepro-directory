@@ -23,7 +23,8 @@ aiOptimized: true
 citationReady: true
 ---
 
-<TLDRSummary
+<UnifiedContentBlock
+  variant="tldr"
   content="MCP (Model Context Protocol) servers enable Claude Desktop to interact with external tools and systems. This guide provides a complete walkthrough for setting up MCP servers, from installation to advanced configuration, with practical examples and troubleshooting tips."
   keyPoints={[
     "Install Claude Desktop and Node.js as prerequisites",
@@ -87,7 +88,8 @@ Before setting up MCP servers, ensure your system meets these requirements:
 
 ## Popular MCP Servers and Their Use Cases
 
-<FeatureGrid
+<UnifiedContentBlock
+  variant="feature-grid"
   title="Essential MCP Servers for Different Workflows"
   items={[
     {
@@ -225,7 +227,8 @@ server.connect(process.stdin, process.stdout);`
   Optimizing your MCP servers can significantly improve Claude Desktop's responsiveness and reduce resource usage.
 </InfoBox>
 
-<QuickReference
+<UnifiedContentBlock
+  variant="quick-reference"
   title="MCP Server Best Practices"
   columns={2}
   items={[
@@ -240,7 +243,8 @@ server.connect(process.stdin, process.stdout);`
 
 ## Security Considerations
 
-<ExpertQuote
+<UnifiedContentBlock
+  variant="expert-quote"
   quote="Security should be your top priority when configuring MCP servers. Never hardcode API keys or credentials directly in configuration files. Use environment variables or secure credential stores instead."
   author="Security Team"
   role="Claude Pro Directory"
@@ -248,7 +252,8 @@ server.connect(process.stdin, process.stdout);`
 
 ### Security Checklist
 
-<QuickReference
+<UnifiedContentBlock
+  variant="quick-reference"
   title="Essential Security Measures"
   items={[
     { label: "API Key Storage", value: "Use environment variables, never hardcode" },

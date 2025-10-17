@@ -26,13 +26,8 @@ import type {
   mdxLinkPropsSchema,
 } from '@/src/lib/schemas/shared.schema';
 // Import lightweight components (always loaded)
-import { CaseStudy } from '../content/case-study';
-import { FeatureGrid } from '../content/feature-grid';
-import { TLDRSummary } from '../content/tldr-summary';
+import { UnifiedContentBlock } from '../content/unified-content-block';
 import { Checklist } from '../interactive/checklist';
-import { ContentTabs as Tabs } from '../interactive/content-tabs';
-import { ExpertQuote } from '../interactive/expert-quote';
-import { QuickReference } from '../interactive/quick-reference';
 // ARCHITECTURAL MODERNIZATION: Removed setPageMetadata import
 // OLD: Module-level state pattern (anti-pattern for client components)
 // NEW: Direct prop passing via component wrapper (see SmartRelatedContent below)
@@ -196,20 +191,15 @@ const components = {
   UnifiedContentBox,
 
   // Other content components
-  CaseStudy,
+  UnifiedContentBlock,
   Checklist,
   CodeGroup,
   ComparisonTable,
   DiagnosticFlow,
   ErrorTable,
-  ExpertQuote,
-  FeatureGrid,
   MetricsDisplay,
-  QuickReference,
   SmartRelatedContent,
   StepByStepGuide,
-  Tabs,
-  TLDRSummary,
 };
 
 function MDXRendererComponent(props: MDXRendererProps) {

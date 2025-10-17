@@ -20,7 +20,8 @@ citationReady: true
 
 import { Callout, InfoBox, Accordion, StepByStepGuide, CodeGroup, ComparisonTable, AIOptimizedFAQ, FeatureGrid, Tabs, QuickReference, SmartRelatedContent } from '@/components/MDXComponents';
 
-<TLDRSummary>
+<UnifiedContentBlock
+  variant="tldr">
 **Quick Fix:** Claude Code processes can consume 120GB RAM within 60 minutes. Clear context with `/clear` every 40 messages. Configure memory limits to 4096MB. Monitor RAM usage actively. Keep CLAUDE.md files under 5KB for optimal performance.
 </TLDRSummary>
 
@@ -316,7 +317,8 @@ Configuration changes require Claude restart for activation. Adjust values based
 
 Optimal Claude Code performance demands specific hardware minimums. Systems need 16GB RAM for basic operations. Large projects require 32GB for smooth performance. Modern multi-core processors handle operations efficiently. SSD storage improves file operation speed significantly.
 
-<FeatureGrid
+<UnifiedContentBlock
+  variant="feature-grid"
   features={[
     {
       icon: "💾",
@@ -425,7 +427,8 @@ claude doctor --repair`
 
 ## Common Root Causes
 
-<FeatureGrid
+<UnifiedContentBlock
+  variant="feature-grid"
   features={[
     {
       title: "Unbounded Memory Growth",
@@ -488,7 +491,8 @@ Successful Claude Code usage requires systematic approaches. Implement daily mai
 
 Session management follows lifecycle patterns. Start with minimal essential context loading. Add specific files only when needed. Compact context before reaching 80% capacity. Save summaries before clearing for continuity.
 
-<QuickReference
+<UnifiedContentBlock
+  variant="quick-reference"
   title="Daily Optimization Checklist"
   items={[
     { label: "Morning", value: "Clear previous session, load fresh CLAUDE.md" },
