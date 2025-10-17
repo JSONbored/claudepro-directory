@@ -82,6 +82,28 @@ export function formatCopyCount(count: number): string {
 }
 
 /**
+ * Checks if content is new (0-7 days old)
+ * Used to display "NEW" badge on recent content across the site
+ *
+ * @param dateAdded - ISO date string of when content was added
+ * @returns True if content is 0-7 days old
+ *
+ * @example
+ * isNewContent('2025-10-15') // true (if today is 2025-10-16)
+ * isNewContent('2025-10-01') // false (if today is 2025-10-16)
+ * isNewContent(undefined) // false
+ */
+export function isNewContent(dateAdded?: string): boolean {
+  if (!dateAdded) return false;
+
+  const now = Date.now();
+  const added = new Date(dateAdded).getTime();
+  const daysOld = (now - added) / (1000 * 60 * 60 * 24);
+
+  return daysOld >= 0 && daysOld <= 7;
+}
+
+/**
  * Generates display title with proper formatting
  * Handles acronyms and special cases (API, MCP, AI, etc.)
  *

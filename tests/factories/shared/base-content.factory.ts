@@ -38,7 +38,7 @@
 
 import { faker } from '@faker-js/faker';
 import { Factory } from 'fishery';
-import type { UsageExample } from '@/src/lib/schemas/content/shared.schema';
+import type { UsageExample } from '@/src/lib/schemas/shared.schema';
 import { usageExampleFactory } from './usage-example.factory';
 
 /**

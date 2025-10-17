@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { BadgeGrid } from '@/src/components/features/badges/badge-grid';
+import { ReputationBreakdown } from '@/src/components/features/reputation/reputation-breakdown';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -10,7 +12,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { getPublicUserBadges } from '@/src/lib/actions/badges.actions';
+import { getUserReputation } from '@/src/lib/actions/reputation.actions';
 import { FolderOpen, Globe, MessageSquare, Users } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { createClient } from '@/src/lib/supabase/server';
@@ -90,6 +95,24 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
       .single();
 
     isFollowing = !!data;
+  }
+
+  // Check if current user is the profile owner
+  const isOwner = currentUser?.id === profile.id;
+
+  // Fetch reputation breakdown and badges
+  let reputationData = null;
+  let userBadges: Awaited<ReturnType<typeof getPublicUserBadges>> = [];
+
+  try {
+    reputationData = await getUserReputation(profile.id);
+    userBadges = await getPublicUserBadges(profile.id, { featuredOnly: false });
+  } catch (error) {
+    logger.error(
+      'Failed to fetch reputation/badges for profile',
+      error instanceof Error ? error : new Error(String(error)),
+      { profileId: profile.id }
+    );
   }
 
   return (
@@ -178,21 +201,31 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Stats sidebar */}
           <div className="space-y-4">
+            {/* Reputation Breakdown */}
+            {reputationData && (
+              <ReputationBreakdown
+                breakdown={reputationData.breakdown}
+                showDetails={true}
+                showProgress={true}
+              />
+            )}
+
+            {/* Quick Stats Card */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">Activity</CardTitle>
+                <CardTitle className="text-sm">Activity Stats</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Reputation</span>
-                  <Badge variant="secondary">{profile.reputation_score || 0}</Badge>
-                </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Posts</span>
                   <Badge variant="secondary">{posts?.length || 0}</Badge>
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Tier</span>
+                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Collections</span>
+                  <Badge variant="secondary">{collections?.length || 0}</Badge>
+                </div>
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Account Tier</span>
                   <Badge variant={profile.tier === 'pro' ? 'default' : 'secondary'}>
                     {profile.tier
                       ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
@@ -308,6 +341,14 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 </div>
               )}
             </div>
+
+            {/* Badges Section */}
+            {userBadges.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold mb-4">Badges</h2>
+                <BadgeGrid badges={userBadges} canEdit={isOwner} featuredOnly={false} />
+              </div>
+            )}
           </div>
         </div>
       </section>

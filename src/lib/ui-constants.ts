@@ -94,6 +94,14 @@ export const UI_CLASSES = {
   CODE_BLOCK_TAB_ACTIVE: 'text-primary border-primary',
   CODE_BLOCK_TAB_INACTIVE: 'text-muted-foreground border-transparent hover:text-foreground',
   CODE_BLOCK_GROUP_WRAPPER: 'relative group my-6',
+
+  /**
+   * Responsive Card Layouts
+   * Mobile-first design with progressive enhancement
+   */
+  CARD_BADGE_CONTAINER: 'flex flex-wrap gap-1 sm:gap-2 mb-4',
+  CARD_FOOTER_RESPONSIVE: 'flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between',
+  CARD_METADATA_BADGES: 'flex items-center gap-1 text-xs flex-wrap sm:flex-nowrap',
 } as const;
 
 /**

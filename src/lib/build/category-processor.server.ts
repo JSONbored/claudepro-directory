@@ -2,7 +2,7 @@
  * Category Content Processor
  *
  * Modern 2025 build utilities for content processing.
- * Consolidates common patterns from build-content.ts and generate-static-apis.ts.
+ * Consolidates common patterns from build-content.ts.
  *
  * Performance characteristics:
  * - Parallel processing with configurable batching

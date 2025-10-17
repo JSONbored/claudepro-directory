@@ -416,6 +416,33 @@ function buildEventConfig(): Record<EventName, EventConfig> {
       enabled: true,
     },
 
+    // PWA / App Installation
+    [EVENTS.PWA_INSTALLABLE]: {
+      description: 'PWA install prompt available to user',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.PWA_PROMPT_ACCEPTED]: {
+      description: 'User accepted PWA install prompt',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.PWA_PROMPT_DISMISSED]: {
+      description: 'User dismissed PWA install prompt',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.PWA_INSTALLED]: {
+      description: 'PWA successfully installed to home screen',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.PWA_LAUNCHED]: {
+      description: 'App launched in standalone mode (from home screen)',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+
     // Error Tracking
     [EVENTS.ERROR_OCCURRED]: {
       description: 'Error occurred',
@@ -814,6 +841,29 @@ ${payloads.join('\n\n')}
     category?: string;
   };
 
+  [EVENTS.PWA_INSTALLABLE]: {
+    platform: string;
+    user_agent?: string;
+  };
+
+  [EVENTS.PWA_PROMPT_ACCEPTED]: {
+    platform: string;
+  };
+
+  [EVENTS.PWA_PROMPT_DISMISSED]: {
+    platform: string;
+  };
+
+  [EVENTS.PWA_INSTALLED]: {
+    platform: string;
+    timestamp: string;
+  };
+
+  [EVENTS.PWA_LAUNCHED]: {
+    platform: string;
+    timestamp: string;
+  };
+
   [EVENTS.ERROR_OCCURRED]: {
     error_type: string;
     error_code?: string;
@@ -1050,6 +1100,13 @@ ${generateEventSection('DOWNLOAD MARKDOWN EVENTS (Category-specific)', categorie
   EMAIL_SUBSCRIBED_HOMEPAGE: 'email_subscribed_homepage',
   EMAIL_SUBSCRIBED_MODAL: 'email_subscribed_modal',
   EMAIL_SUBSCRIBED_CONTENT_PAGE: 'email_subscribed_content_page',
+
+  // PWA / App Installation
+  PWA_INSTALLABLE: 'pwa_installable',
+  PWA_PROMPT_ACCEPTED: 'pwa_prompt_accepted',
+  PWA_PROMPT_DISMISSED: 'pwa_prompt_dismissed',
+  PWA_INSTALLED: 'pwa_installed',
+  PWA_LAUNCHED: 'pwa_launched',
 
   // Error Tracking
   ERROR_OCCURRED: 'error_occurred',

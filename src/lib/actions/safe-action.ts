@@ -63,7 +63,7 @@ const actionMetadataSchema = z.object({
     description: 'Unique name for the action (e.g., trackView, trackCopy)',
   }),
   category: z
-    .enum(['analytics', 'form', 'content', 'user', 'admin'])
+    .enum(['analytics', 'form', 'content', 'user', 'admin', 'reputation'])
     .optional()
     .meta({ description: 'Action category for grouping' }),
   rateLimit: z
@@ -297,6 +297,14 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
     data: { user },
     error,
   } = await supabase.auth.getUser();
+
+  logger.info('authedAction getUser result', {
+    hasUser: !!user,
+    userId: user?.id ?? 'none',
+    hasError: !!error,
+    errorMessage: error?.message ?? 'none',
+    actionName: metadata?.actionName ?? 'unknown',
+  });
 
   if (error || !user) {
     // Extract client IP and path for security monitoring

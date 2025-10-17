@@ -120,6 +120,9 @@ const noseconeConfig = {
         'https://*.vercel-scripts.com', // Vercel analytics
         'https://vercel.live', // Vercel toolbar
         'https://api.github.com', // GitHub API
+        'https://*.supabase.co', // Supabase Auth API (OAuth callbacks)
+        'https://accounts.google.com', // Google OAuth (if enabled)
+        'https://github.com', // GitHub OAuth
         ...(env.VERCEL_ENV === 'preview'
           ? ([
               'ws://localhost:*',
@@ -400,6 +403,27 @@ export async function middleware(request: NextRequest) {
     );
   }
 
+  // OAuth callback - apply minimal middleware (security headers only, no rate limiting)
+  // This prevents middleware from interfering with cookie setting during OAuth flow
+  if (pathname.startsWith('/auth/callback')) {
+    logger.info('Middleware OAuth callback detected', {
+      pathname,
+      cookieCount: request.cookies.getAll().length,
+    });
+
+    const noseconeResponse = await noseconeMiddleware();
+
+    if (isDevelopment) {
+      const duration = performance.now() - startTime;
+      logger.debug('Middleware execution (OAuth callback)', {
+        path: sanitizePathForLogging(pathname),
+        duration: `${duration.toFixed(2)}ms`,
+      });
+    }
+
+    return noseconeResponse;
+  }
+
   // Skip Arcjet for Next.js RSC prefetch requests (legitimate browser behavior)
   const isRSCRequest = pathname.includes('_rsc=') || request.headers.get('rsc') === '1';
   if (isRSCRequest) {
@@ -637,7 +661,7 @@ export const config = {
      * - favicon.ico (favicon file)
      * - robots.txt (robots file)
      * - sitemap.xml (sitemap file)
-     * - manifest (PWA manifest - Next.js generates from src/app/manifest.ts)
+     * - manifest.webmanifest (PWA manifest - Next.js generates from src/app/manifest.ts)
      * - .well-known (well-known files for verification)
      * - /js/ (public JavaScript files)
      * - /scripts/ (public script files - service workers, etc.)
@@ -645,6 +669,6 @@ export const config = {
      * - 863ad0a5c1124f59a060aa77f0861518.txt (IndexNow key file)
      * - *.png, *.jpg, *.jpeg, *.gif, *.webp, *.svg, *.ico (image files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest|service-worker.js|offline.html|\\.well-known|scripts/|863ad0a5c1124f59a060aa77f0861518\\.txt|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest\\.webmanifest|service-worker.js|offline.html|\\.well-known|scripts/|863ad0a5c1124f59a060aa77f0861518\\.txt|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
   ],
 };
