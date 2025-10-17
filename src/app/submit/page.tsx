@@ -1,6 +1,6 @@
 import Link from 'next/link';
+import { SubmitFormClient } from '@/src/components/forms/submit-form-client';
 import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
-import { SubmitFormClient } from '@/src/components/submit/submit-form-client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { UnifiedBadge } from '@/src/components/ui/unified-badge';
 import {

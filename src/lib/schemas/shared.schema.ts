@@ -34,74 +34,81 @@ import {
  * Content Categories
  * Used across: analytics, content, content-generation, related-content, static-api
  *
- * IMPORTANT: This schema is now DERIVED from UNIFIED_CATEGORY_REGISTRY.
- * Do NOT manually add categories here - add them to the registry instead.
+ * IMPORTANT: ContentCategory type is imported from category-config.ts (single source of truth).
+ * Do NOT manually add categories here - add them to UNIFIED_CATEGORY_REGISTRY instead.
  *
  * Subcategories (like guide types: tutorials, comparisons, etc.) are NOT
  * top-level categories and should NOT be listed here.
  */
 
-// Import registry to derive schema from
-// NOTE: This creates a circular dependency that TypeScript handles gracefully
-// Alternative: Move this file or use a separate types-only export
-let UNIFIED_CATEGORY_REGISTRY_KEYS: readonly string[] = [];
-try {
-  // Dynamic import to break circular dependency at runtime
-  const registry = require('@/src/lib/config/category-config');
-  UNIFIED_CATEGORY_REGISTRY_KEYS = Object.keys(registry.UNIFIED_CATEGORY_REGISTRY);
-} catch {
-  // Fallback for build/test environments where registry isn't available yet
-  UNIFIED_CATEGORY_REGISTRY_KEYS = [
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
-    'skills',
-    'collections',
-    'guides',
-    'jobs',
-    'changelog',
-  ];
-}
+/**
+ * ContentCategory - Single source of truth for all content categories
+ *
+ * ARCHITECTURE: Defined in shared.schema.ts (schema layer) to avoid circular dependencies.
+ * category-config.ts imports this type, not the other way around.
+ */
+export const CONTENT_CATEGORIES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const;
 
-// Derive schema from registry keys (single source of truth)
+export type ContentCategory = (typeof CONTENT_CATEGORIES)[number];
+
+/**
+ * Zod schema for content categories
+ */
 export const contentCategorySchema = z
-  .enum(UNIFIED_CATEGORY_REGISTRY_KEYS as [string, ...string[]])
-  .describe('All valid content categories - derived from UNIFIED_CATEGORY_REGISTRY');
+  .enum(CONTENT_CATEGORIES)
+  .describe('All valid content categories - single source of truth');
 
-// Subset schema for cacheable categories (used by Redis caching)
-// Derived from registry where generateFullContent === true
+/**
+ * Cacheable categories - subset that supports Redis caching (generateFullContent=true)
+ * These categories have full content generated at build time
+ */
+export const CACHEABLE_CATEGORIES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+] as const;
+
 export const cacheableCategorySchema = z
-  .enum(
-    UNIFIED_CATEGORY_REGISTRY_KEYS.filter((key) => {
-      try {
-        const registry = require('@/src/lib/config/category-config');
-        return registry.UNIFIED_CATEGORY_REGISTRY[key]?.generateFullContent === true;
-      } catch {
-        // Fallback: assume these categories have full content
-        return [
-          'agents',
-          'mcp',
-          'rules',
-          'commands',
-          'hooks',
-          'statuslines',
-          'skills',
-          'guides',
-          'collections',
-          'changelog',
-        ].includes(key);
-      }
-    }) as [string, ...string[]]
-  )
+  .enum(CACHEABLE_CATEGORIES)
   .describe('Content categories that support Redis caching (where generateFullContent=true)');
 
-export type ContentCategory = z.infer<typeof contentCategorySchema>;
+/**
+ * Guide Subcategories - Used ONLY for organizing guides under /guides route
+ *
+ * ARCHITECTURE: These are NOT categories. They are subcategories under 'guides'.
+ * - Route: /guides/tutorials/... NOT /tutorials/...
+ * - When storing/tracking: Use category='guides', NOT category='tutorials'
+ * - Analytics: Track as guides, with optional subcategory metadata
+ * - Bookmarks: Use category='guides', with optional subcategory in slug
+ */
+export const GUIDE_SUBCATEGORIES = [
+  'tutorials',
+  'comparisons',
+  'workflows',
+  'use-cases',
+  'troubleshooting',
+] as const;
 
-// REMOVED: getAllContentCategories() - No longer needed
-// Use: Object.keys(UNIFIED_CATEGORY_REGISTRY) from category-config.ts instead
+export type GuideSubcategory = (typeof GUIDE_SUBCATEGORIES)[number];
+
+export const guideSubcategorySchema = z.enum(GUIDE_SUBCATEGORIES);
 
 /**
  * Content Types

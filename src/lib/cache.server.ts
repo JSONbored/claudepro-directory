@@ -3054,12 +3054,10 @@ class CacheInvalidationService {
    * Get related categories for cross-category invalidation
    */
   private getRelatedCategories(category: ContentCategory): ContentCategory[] {
+    // NOTE: Subcategories (tutorials, workflows, etc.) are NOT categories
+    // They are under 'guides' and should not be tracked separately
     const relationships: Record<string, ContentCategory[]> = {
-      tutorials: ['workflows', 'use-cases'],
-      comparisons: ['tutorials', 'troubleshooting'],
-      workflows: ['tutorials', 'use-cases'],
-      'use-cases': ['tutorials', 'workflows'],
-      troubleshooting: ['tutorials', 'comparisons'],
+      guides: ['agents', 'mcp'],
       agents: ['commands', 'rules'],
       mcp: ['agents', 'hooks'],
       rules: ['agents', 'commands'],

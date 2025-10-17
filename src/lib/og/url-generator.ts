@@ -11,6 +11,7 @@ import { APP_CONFIG } from '@/src/lib/constants';
 
 /**
  * OpenGraph image dimensions
+ * Standard social media dimensions (1200x630)
  */
 export const OG_IMAGE_DIMENSIONS = {
   width: 1200,

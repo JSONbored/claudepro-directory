@@ -26,6 +26,7 @@ import {
   extractMetadata,
   getBuildCategoryConfig,
 } from '@/src/lib/config/category-config';
+import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { logger } from '@/src/lib/logger';
 import { generateSlugFromFilename } from '@/src/lib/schemas/content-generation.schema';
 import { slugToTitle } from '@/src/lib/utils';
@@ -212,27 +213,49 @@ async function processContentFile<T extends ContentType>(
       }
     }
 
-    // Production-grade: Parse JSON with validation using safeParse
+    // Parse based on file type
     const rawJsonSchema = z
       .object({})
       .passthrough()
-      .describe('Raw JSON content schema with passthrough for unknown fields');
+      .describe('Raw content schema with passthrough for unknown fields');
 
     let parsedData: z.infer<typeof rawJsonSchema>;
+    const isMdx = file.endsWith('.mdx');
+
     try {
-      // safeParse handles JSON.parse + Zod validation in one secure operation
-      parsedData = safeParse(content, rawJsonSchema, {
-        strategy: ParseStrategy.VALIDATED_JSON,
-      });
+      if (isMdx) {
+        // Parse MDX frontmatter for guides
+        const { frontmatter, content: mdxContent } = parseMDXFrontmatter(content);
+
+        // Extract subcategory from file path (e.g., "tutorials/guide.mdx" → "tutorials")
+        const subcategory = file.includes('/') ? file.split('/')[0] : undefined;
+
+        // Convert MDX frontmatter to match guide schema
+        parsedData = {
+          ...frontmatter,
+          content: mdxContent,
+          category: 'guides', // All MDX files are guides
+          subcategory,
+          // Fallback: dateAdded is required by base schema, use dateUpdated or current date
+          dateAdded: frontmatter.dateUpdated || new Date().toISOString().split('T')[0],
+        };
+      } else {
+        // safeParse handles JSON.parse + Zod validation in one secure operation
+        parsedData = safeParse(content, rawJsonSchema, {
+          strategy: ParseStrategy.VALIDATED_JSON,
+        });
+      }
     } catch (parseError) {
       throw new Error(
-        `JSON parse error: ${parseError instanceof Error ? parseError.message : String(parseError)}`
+        `${isMdx ? 'MDX' : 'JSON'} parse error: ${parseError instanceof Error ? parseError.message : String(parseError)}`
       );
     }
 
     // Auto-generate slug from filename if missing
     if (!parsedData.slug) {
-      parsedData.slug = generateSlugFromFilename(file);
+      // For MDX files with subdirectories, remove subdir prefix
+      const filenameOnly = file.includes('/') ? file.split('/')[1] : file;
+      parsedData.slug = generateSlugFromFilename(filenameOnly || file);
     }
 
     // Auto-generate title from slug if missing
@@ -347,33 +370,65 @@ async function processCategoryFiles<T extends ContentType>(
   // Read directory
   const files = await readdir(categoryDir);
 
-  // Security: Filter for valid JSON files only
+  // Security: Filter for valid content files (JSON or MDX for guides)
   // Prevents execution of other file types and excludes templates
-  const jsonFiles = files.filter(
-    (f) =>
-      f.endsWith('.json') &&
-      !f.includes('..') &&
-      !f.startsWith('.') &&
-      !f.includes('template') &&
-      /^[a-zA-Z0-9\-_]+\.json$/.test(f)
-  );
+  let contentFiles: string[];
 
-  logger.info(`Processing ${jsonFiles.length} ${config.name} files`);
+  if (config.id === 'guides') {
+    // For guides: Look for MDX files in subdirectories
+    const subdirs = ['tutorials', 'comparisons', 'workflows', 'use-cases', 'troubleshooting'];
+    contentFiles = [];
+
+    for (const subdir of subdirs) {
+      const subdirPath = join(categoryDir, subdir);
+      try {
+        const subdirFiles = await readdir(subdirPath);
+        const mdxFiles = subdirFiles
+          .filter(
+            (f) =>
+              f.endsWith('.mdx') &&
+              !f.includes('..') &&
+              !f.startsWith('.') &&
+              !f.includes('template') &&
+              /^[a-zA-Z0-9\-_]+\.mdx$/.test(f)
+          )
+          .map((f) => `${subdir}/${f}`); // Prefix with subdir for routing
+        contentFiles.push(...mdxFiles);
+      } catch (error) {
+        // Subdirectory doesn't exist or can't be read - skip it
+        logger.debug(
+          `Skipping subdirectory ${subdir}: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+  } else {
+    // For other categories: Look for JSON files
+    contentFiles = files.filter(
+      (f) =>
+        f.endsWith('.json') &&
+        !f.includes('..') &&
+        !f.startsWith('.') &&
+        !f.includes('template') &&
+        /^[a-zA-Z0-9\-_]+\.json$/.test(f)
+    );
+  }
+
+  logger.info(`Processing ${contentFiles.length} ${config.name} files`);
 
   // Process files in parallel batches for optimal CPU utilization
   const results: FileProcessResult<T>[] = [];
   const batchSize = config.buildConfig.batchSize;
 
-  for (let i = 0; i < jsonFiles.length; i += batchSize) {
-    const batch = jsonFiles.slice(i, i + batchSize);
+  for (let i = 0; i < contentFiles.length; i += batchSize) {
+    const batch = contentFiles.slice(i, i + batchSize);
     const batchResults = await batchMap(batch, (file) =>
       processContentFile<T>(file, contentDir, config, cache)
     );
     results.push(...batchResults);
 
     // Log progress for long-running builds
-    if (jsonFiles.length > 50 && (i + batchSize) % 50 === 0) {
-      logger.info(`Processed ${i + batchSize}/${jsonFiles.length} ${config.name} files`);
+    if (contentFiles.length > 50 && (i + batchSize) % 50 === 0) {
+      logger.info(`Processed ${i + batchSize}/${contentFiles.length} ${config.name} files`);
     }
   }
 

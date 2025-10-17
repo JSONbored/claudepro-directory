@@ -57,7 +57,9 @@ export interface MetadataDerivationRule {
 
 /**
  * Category-specific metadata derivation rules
- * Maps each of the 14 content categories to its derivation logic
+ * Maps each content category to its derivation logic
+ *
+ * NOTE: Subcategories (tutorials, workflows, etc.) are handled by the 'guides' rule
  */
 export const CATEGORY_METADATA_RULES: Record<ContentCategory, MetadataDerivationRule> = {
   // Core content types
@@ -128,6 +130,7 @@ export const CATEGORY_METADATA_RULES: Record<ContentCategory, MetadataDerivation
   },
 
   // SEO content types
+  // Guides category - handles all guide subcategories (tutorials, workflows, etc.)
   guides: {
     category: 'guides',
     titleField: 'title',
@@ -135,54 +138,6 @@ export const CATEGORY_METADATA_RULES: Record<ContentCategory, MetadataDerivation
     keywordsField: 'keywords',
     schemaType: 'Article',
     useArticleSchema: true,
-  },
-  tutorials: {
-    category: 'tutorials',
-    titleField: 'title',
-    descriptionField: 'description',
-    keywordsField: 'keywords',
-    schemaType: 'Article',
-    useArticleSchema: true,
-  },
-  comparisons: {
-    category: 'comparisons',
-    titleField: 'title',
-    descriptionField: 'description',
-    keywordsField: 'keywords',
-    schemaType: 'Article',
-    useArticleSchema: true,
-  },
-  workflows: {
-    category: 'workflows',
-    titleField: 'title',
-    descriptionField: 'description',
-    keywordsField: 'keywords',
-    schemaType: 'Article',
-    useArticleSchema: true,
-  },
-  'use-cases': {
-    category: 'use-cases',
-    titleField: 'title',
-    descriptionField: 'description',
-    keywordsField: 'keywords',
-    schemaType: 'Article',
-    useArticleSchema: true,
-  },
-  troubleshooting: {
-    category: 'troubleshooting',
-    titleField: 'title',
-    descriptionField: 'description',
-    keywordsField: 'keywords',
-    schemaType: 'Article',
-    useArticleSchema: true,
-  },
-  categories: {
-    category: 'categories',
-    titleField: 'title',
-    descriptionField: 'description',
-    keywordsField: 'keywords',
-    schemaType: 'WebPage',
-    useArticleSchema: false,
   },
 
   // Special types

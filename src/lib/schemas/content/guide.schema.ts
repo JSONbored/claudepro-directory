@@ -75,16 +75,16 @@ export const guideContentSchema = z.object({
   // Inherit all base content metadata fields using shape destructuring (Zod v4 best practice)
   ...baseContentMetadataSchema.shape,
 
-  // Guide-specific required fields (category discriminator)
-  category: z.enum([
+  // Guide category - MUST be 'guides' (architecture fix: subcategories are NOT categories)
+  category: z.literal('guides'),
+
+  // Guide subcategory - required for routing and organization
+  subcategory: z.enum([
     'tutorials', // tutorial-template.mdx
     'comparisons', // comparison-template.mdx
     'troubleshooting', // troubleshooting-template.mdx
     'use-cases', // use-case-template.mdx
     'workflows', // workflow-template.mdx
-    'categories', // category-template.mdx
-    'collections', // collection-template.mdx
-    'guides', // General guide category
   ]),
 
   // Override: title is required for guides (not optional like in base)

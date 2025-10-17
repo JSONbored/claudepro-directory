@@ -124,7 +124,7 @@ export const METADATA_QUALITY_RULES = {
   openGraph: {
     imageWidth: 1200,
     imageHeight: 630,
-    aspectRatio: 1.91,
+    aspectRatio: 1.91, // 1200/630 = 1.9048 (standard OG aspect ratio)
   },
 } as const;
 

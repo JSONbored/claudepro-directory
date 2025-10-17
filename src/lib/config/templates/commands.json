@@ -1,0 +1,11 @@
+[
+  {
+    "type": "command",
+    "id": "refactor-code",
+    "name": "Refactor Code",
+    "commandContent": "---\ndescription: Refactor code for better readability and maintainability\nmodel: claude-3-5-sonnet-20241022\n---\n\nAnalyze the provided code and suggest refactorings to improve:\n1. Code readability and clarity\n2. Maintainability and extensibility\n3. Performance and efficiency\n4. Adherence to best practices\n\nProvide specific examples and explain the benefits of each refactoring.",
+    "description": "Refactoring assistant for code quality",
+    "category": "Development",
+    "tags": "refactor, code-quality, improvement"
+  }
+]

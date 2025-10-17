@@ -684,6 +684,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'author',
       'tags',
       'category',
+      'subcategory',
       'dateAdded',
       'source',
       'keywords',

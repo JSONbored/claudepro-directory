@@ -91,8 +91,8 @@ jobs:
             exit 1
           fi
 
-          # Validate category is valid
-          if [[ ! "$category" =~ ^(agents|mcp|rules|commands|hooks|statuslines|collections|skills|guides|tutorials|comparisons|workflows|use-cases|troubleshooting|categories)$ ]]; then
+          # Validate category is valid (subcategories like tutorials, comparisons are under guides)
+          if [[ ! "$category" =~ ^(agents|mcp|rules|commands|hooks|statuslines|collections|skills|guides|jobs|changelog)$ ]]; then
             echo "ERROR: Invalid category '$category' in $file"
             exit 1
           fi

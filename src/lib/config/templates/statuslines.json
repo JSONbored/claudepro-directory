@@ -1,0 +1,26 @@
+[
+  {
+    "type": "statusline",
+    "id": "git-branch-status",
+    "name": "Git Branch & Status",
+    "description": "Displays current git branch, dirty status, and commit count",
+    "category": "Git",
+    "tags": "git, branch, status, version-control",
+    "statuslineScript": "#!/usr/bin/env bash\n# Git Branch & Status Statusline\n# Displays branch name, dirty status, and commit count\n\nread -r input\n\n# Check if we're in a git repository\nif ! git rev-parse --git-dir > /dev/null 2>&1; then\n  echo \"Not a git repo\"\n  exit 0\nfi\n\n# Get current branch\nbranch=$(git branch --show-current 2>/dev/null || echo \"detached\")\n\n# Check for uncommitted changes\nif git diff-index --quiet HEAD -- 2>/dev/null; then\n  dirty=\"\"\nelse\n  dirty=\" *\"\nfi\n\n# Get commit count ahead/behind remote\nahead_behind=$(git rev-list --left-right --count @{upstream}...HEAD 2>/dev/null)\nif [[ -n \"$ahead_behind\" ]]; then\n  behind=$(echo \"$ahead_behind\" | cut -f1)\n  ahead=$(echo \"$ahead_behind\" | cut -f2)\n  if [[ \"$ahead\" -gt 0 ]] || [[ \"$behind\" -gt 0 ]]; then\n    diff=\" (↑$ahead ↓$behind)\"\n  else\n    diff=\"\"\n  fi\nelse\n  diff=\"\"\nfi\n\necho \"⎇ $branch$dirty$diff\"\nexit 0",
+    "statuslineType": "custom",
+    "refreshInterval": "5000",
+    "position": "left"
+  },
+  {
+    "type": "statusline",
+    "id": "resource-monitor",
+    "name": "System Resource Monitor",
+    "description": "Monitors CPU and memory usage for the current project",
+    "category": "System",
+    "tags": "monitoring, performance, system, resources",
+    "statuslineScript": "#!/usr/bin/env bash\n# Resource Monitor Statusline\n# Displays CPU and memory usage\n\nread -r input\n\n# Get CPU usage (macOS)\nif [[ \"$(uname)\" == \"Darwin\" ]]; then\n  cpu=$(ps -A -o %cpu | awk '{s+=$1} END {printf \"%.0f\", s}')\n  mem=$(ps -A -o %mem | awk '{s+=$1} END {printf \"%.0f\", s}')\nelse\n  # Linux fallback\n  cpu=$(top -bn1 | grep \"Cpu(s)\" | sed \"s/.*, *\\([0-9.]*\\)%* id.*/\\1/\" | awk '{print 100 - $1}')\n  mem=$(free | grep Mem | awk '{printf \"%.0f\", $3/$2 * 100.0}')\nfi\n\n# Color coding based on usage\nif [[ \"$cpu\" -gt 80 ]] || [[ \"$mem\" -gt 80 ]]; then\n  status=\"⚠️\"\nelif [[ \"$cpu\" -gt 60 ]] || [[ \"$mem\" -gt 60 ]]; then\n  status=\"⚡\"\nelse\n  status=\"✓\"\nfi\n\necho \"$status CPU: ${cpu}% MEM: ${mem}%\"\nexit 0",
+    "statuslineType": "extended",
+    "refreshInterval": "2000",
+    "position": "right"
+  }
+]

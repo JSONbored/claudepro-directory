@@ -639,7 +639,8 @@ function BookmarkButton({
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  // Validate content type
+  // Validate content type - only actual categories, NOT subcategories
+  // Subcategories (tutorials, workflows, etc.) should be bookmarked as 'guides'
   const VALID_CATEGORIES: readonly ContentCategory[] = [
     'agents',
     'mcp',
@@ -648,15 +649,10 @@ function BookmarkButton({
     'hooks',
     'statuslines',
     'guides',
-    'tutorials',
-    'comparisons',
-    'workflows',
-    'use-cases',
-    'troubleshooting',
-    'categories',
     'collections',
     'jobs',
     'changelog',
+    'skills',
   ];
 
   const isValidCategory = (value: string): value is ContentCategory => {

@@ -39,6 +39,7 @@
  */
 
 import { useEffect } from 'react';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -50,13 +51,13 @@ import { useEffect } from 'react';
 export type UnifiedTrackerProps =
   | {
       variant: 'view';
-      category: string;
+      category: ContentCategory;
       slug: string;
       delay?: number; // Optional delay in ms (default: 1000ms)
     }
   | {
       variant: 'page-view';
-      category: string;
+      category: ContentCategory;
       slug: string;
       sourcePage?: string;
       delay?: number; // Optional delay in ms (default: 0ms)
