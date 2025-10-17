@@ -22,7 +22,7 @@ import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { TypeBadge } from '@/src/components/ui/config-badge';
 import { BorderBeam } from '@/src/components/ui/magic/border-beam';
-import { NewBadge } from '@/src/components/ui/new-indicator';
+import { NewIndicator } from '@/src/components/ui/new-indicator';
 import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
 import {
   Award,
@@ -40,7 +40,6 @@ import {
   formatCopyCount,
   formatViewCount,
   getContentItemUrl,
-  isNewContent,
 } from '@/src/lib/utils/content.utils';
 
 export const ConfigCard = memo(
@@ -186,8 +185,8 @@ export const ConfigCard = memo(
                 />
               )}
 
-              {/* New badge - 0-7 days old content */}
-              {isNewContent(item.dateAdded) && <NewBadge variant="default" />}
+              {/* New indicator - 0-7 days old content (server-computed) */}
+              {item.isNew && <NewIndicator label="New content" className="ml-0.5" />}
             </>
           )}
           renderMetadataBadges={() => (

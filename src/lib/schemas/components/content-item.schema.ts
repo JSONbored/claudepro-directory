@@ -58,6 +58,12 @@ export const unifiedContentItemSchema = z
       .string()
       .optional()
       .describe('ISO date string when content was added to the directory'), // Optional for guides
+    isNew: z
+      .boolean()
+      .optional()
+      .describe(
+        'Server-computed flag indicating if content is new (0-7 days old). Computed at load time for performance.'
+      ),
     tags: stringArray
       .optional()
       .describe('List of keywords or topics for categorization and search'), // Required in individual schemas, but optional here for flexibility
