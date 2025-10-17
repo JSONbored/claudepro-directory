@@ -44,17 +44,7 @@ interface ItemWithData extends CollectionItemReference {
   data: UnifiedContentItem;
 }
 
-/**
- * Category display names for grouping
- */
-const CATEGORY_NAMES: Record<string, string> = {
-  agents: 'AI Agents',
-  mcp: 'MCP Servers',
-  rules: 'Rules',
-  commands: 'Commands',
-  hooks: 'Hooks',
-  statuslines: 'Statuslines',
-};
+import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 
 /**
  * Collection Detail View Props
@@ -172,8 +162,9 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
               ([category, items]) => (
                 <div key={category}>
                   <h3 className="text-lg font-semibold text-foreground mb-4">
-                    {CATEGORY_NAMES[category as keyof typeof CATEGORY_NAMES] || category} (
-                    {items.length})
+                    {UNIFIED_CATEGORY_REGISTRY[category as keyof typeof UNIFIED_CATEGORY_REGISTRY]
+                      ?.pluralTitle || category}{' '}
+                    ({items.length})
                   </h3>
                   <div className="grid gap-4 sm:grid-cols-1">
                     {items.map((item: ItemWithData) =>

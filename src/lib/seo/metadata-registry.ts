@@ -292,16 +292,7 @@ export const METADATA_DEFAULTS = {
 const SITE_NAME = METADATA_DEFAULTS.siteName; // "Claude Pro Directory" (20 chars)
 const SEPARATOR = METADATA_DEFAULTS.separator; // " - " (3 chars)
 
-/**
- * Category display names for content routes
- * Dynamically derived from unified category registry - zero manual maintenance
- * Used in content-tier titles: {name} - {category} - Claude Pro Directory
- */
 import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
-
-export const CATEGORY_NAMES: Record<string, string> = Object.fromEntries(
-  Object.entries(UNIFIED_CATEGORY_REGISTRY).map(([key, config]) => [key, config.pluralTitle])
-) as Record<string, string>;
 
 /**
  * Smart title truncation that preserves word boundaries
@@ -353,7 +344,9 @@ export function smartTruncate(title: string, maxLength: number): string {
  * // → "Technical Documentation - AI Agents - Claude Pro Directory" (59 chars)
  */
 export function buildContentTitle(contentName: string, category: string): string {
-  const categoryDisplay = CATEGORY_NAMES[category] || category;
+  const categoryDisplay =
+    UNIFIED_CATEGORY_REGISTRY[category as keyof typeof UNIFIED_CATEGORY_REGISTRY]?.pluralTitle ||
+    category;
 
   // Calculate overhead: " - {category} - Claude Pro Directory"
   const overhead = SEPARATOR.length + categoryDisplay.length + SEPARATOR.length + SITE_NAME.length;

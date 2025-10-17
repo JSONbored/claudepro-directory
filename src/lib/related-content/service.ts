@@ -169,10 +169,10 @@ class RelatedContentService {
     try {
       // Load from metadata loaders (already lazy-loaded and cached)
       const { metadataLoader } = await import('@/src/lib/content/lazy-content-loaders');
-      const { getAllBuildCategoryConfigs } = await import('@/src/lib/config/category-config');
+      const { UNIFIED_CATEGORY_REGISTRY } = await import('@/src/lib/config/category-config');
 
       // Get all category metadata keys
-      const categoryKeys = getAllBuildCategoryConfigs().map((config) => {
+      const categoryKeys = Object.values(UNIFIED_CATEGORY_REGISTRY).map((config) => {
         const varName = config.id.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
         return `${varName}Metadata` as const;
       });

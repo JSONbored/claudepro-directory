@@ -14,8 +14,8 @@
  * @see lib/config/category-config.ts - Unified category configuration
  */
 
-import type { BuildCategoryId } from '@/src/lib/config/category-config';
-import { getAllBuildCategoryConfigs } from '@/src/lib/config/category-config';
+import type { CategoryId } from '@/src/lib/config/category-config';
+import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 import { BatchLazyLoader } from '@/src/lib/utils/integration.utils';
 
 /**
@@ -25,12 +25,12 @@ import { BatchLazyLoader } from '@/src/lib/utils/integration.utils';
  * @param categoryId - Category identifier
  * @returns Loader function for metadata
  */
-function createMetadataLoaderFactory(categoryId: BuildCategoryId) {
+function createMetadataLoaderFactory(categoryId: CategoryId) {
   const varName = categoryId.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
 
   // Explicit imports for Vite static analysis
   // Vite requires the static part of dynamic imports to be analyzable
-  const loaderMap: Record<BuildCategoryId, () => Promise<any>> = {
+  const loaderMap: Record<CategoryId, () => Promise<any>> = {
     agents: () => import('@/generated/agents-metadata'),
     mcp: () => import('@/generated/mcp-metadata'),
     commands: () => import('@/generated/commands-metadata'),
@@ -57,9 +57,9 @@ function createMetadataLoaderFactory(categoryId: BuildCategoryId) {
  */
 export const metadataLoader = new BatchLazyLoader(
   Object.fromEntries(
-    getAllBuildCategoryConfigs().map((config) => {
+    Object.values(UNIFIED_CATEGORY_REGISTRY).map((config) => {
       const varName = config.id.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
-      return [`${varName}Metadata`, createMetadataLoaderFactory(config.id as BuildCategoryId)];
+      return [`${varName}Metadata`, createMetadataLoaderFactory(config.id)];
     })
   ),
   {

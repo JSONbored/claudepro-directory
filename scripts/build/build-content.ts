@@ -28,9 +28,8 @@ import {
 } from '../../src/lib/build/category-processor.server.js';
 import { onBuildComplete } from '../../src/lib/cache.server.js';
 import {
-  BUILD_CATEGORY_CONFIGS,
-  type BuildCategoryId,
-  getAllBuildCategoryConfigs,
+  type CategoryId,
+  UNIFIED_CATEGORY_REGISTRY,
 } from '../../src/lib/config/category-config.js';
 import { logger } from '../../src/lib/logger.js';
 import type { ContentStats } from '../../src/lib/schemas/content/content-types.js';
@@ -77,8 +76,8 @@ function getSchemaPathFromTypeName(typeName: string): string {
  * @param metadata - Metadata items
  * @returns TypeScript file content
  */
-function generateMetadataFile(categoryId: BuildCategoryId, metadata: readonly unknown[]): string {
-  const config = BUILD_CATEGORY_CONFIGS[categoryId];
+function generateMetadataFile(categoryId: CategoryId, metadata: readonly unknown[]): string {
+  const config = UNIFIED_CATEGORY_REGISTRY[categoryId];
   const varName = categoryId.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
   const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
   const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
@@ -88,7 +87,7 @@ function generateMetadataFile(categoryId: BuildCategoryId, metadata: readonly un
 
   return `/**
  * Auto-generated metadata file
- * Category: ${config.name}
+ * Category: ${config.pluralTitle}
  * Generated: ${new Date().toISOString()}
  *
  * DO NOT EDIT MANUALLY
@@ -117,15 +116,15 @@ export function get${capitalizedSingular}MetadataBySlug(slug: string): ${capital
  * @param items - Full content items
  * @returns TypeScript file content
  */
-function generateFullContentFile(categoryId: BuildCategoryId, items: readonly unknown[]): string {
-  const config = BUILD_CATEGORY_CONFIGS[categoryId];
+function generateFullContentFile(categoryId: CategoryId, items: readonly unknown[]): string {
+  const config = UNIFIED_CATEGORY_REGISTRY[categoryId];
   const varName = categoryId.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
   const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
   const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
 
   return `/**
  * Auto-generated full content file
- * Category: ${config.name}
+ * Category: ${config.pluralTitle}
  * Generated: ${new Date().toISOString()}
  *
  * DO NOT EDIT MANUALLY
@@ -154,7 +153,7 @@ export type ${capitalizedSingular}Full = typeof ${varName}Full[number];
  * @returns TypeScript file content
  */
 function generateIndexFile(contentStats: ContentStats): string {
-  const categories = Object.keys(BUILD_CATEGORY_CONFIGS) as BuildCategoryId[];
+  const categories = Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[];
 
   return `/**
  * Auto-generated content index
@@ -245,24 +244,24 @@ async function main(): Promise<void> {
     }
 
     // Build all categories in parallel using modern config system
-    const categoryConfigs = getAllBuildCategoryConfigs();
+    const categoryConfigs = Object.values(UNIFIED_CATEGORY_REGISTRY);
     logger.info(`Building ${categoryConfigs.length} categories in parallel...\n`);
 
     const buildResults = await Promise.all(
-      (Object.keys(BUILD_CATEGORY_CONFIGS) as BuildCategoryId[]).map((id) =>
+      (Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[]).map((id) =>
         buildCategory(CONTENT_DIR, id, cache)
       )
     );
 
     // Generate TypeScript files for each category
-    // MODERNIZATION: contentStats populated dynamically from BUILD_CATEGORY_CONFIGS (registry-driven)
+    // MODERNIZATION: contentStats populated dynamically from UNIFIED_CATEGORY_REGISTRY (registry-driven)
     const contentStats: Record<string, number> = {};
     let totalFiles = 0;
     let totalValid = 0;
     let totalInvalid = 0;
 
     for (const result of buildResults) {
-      const config = BUILD_CATEGORY_CONFIGS[result.category];
+      const config = UNIFIED_CATEGORY_REGISTRY[result.category];
 
       // Track statistics
       totalFiles += result.metrics.filesProcessed;
@@ -281,7 +280,7 @@ async function main(): Promise<void> {
       await writeBuildOutput(fullPath, fullContent);
 
       logger.success(
-        `✓ ${config.name}: ${result.metrics.filesValid} valid, ${result.metrics.filesInvalid} invalid (${result.metrics.processingTimeMs.toFixed(0)}ms)`
+        `✓ ${config.pluralTitle}: ${result.metrics.filesValid} valid, ${result.metrics.filesInvalid} invalid (${result.metrics.processingTimeMs.toFixed(0)}ms)`
       );
     }
 

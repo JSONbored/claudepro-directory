@@ -319,13 +319,3 @@ export const SCHEMA_ORG = {
     description: SEO_CONFIG.defaultDescription,
   },
 } as const;
-
-/**
- * OpenGraph Image Configuration
- * Standard image dimensions for social media sharing
- * Moved from src/lib/constants.ts for better organization
- */
-export const OG_IMAGE_SIZE = {
-  width: 1200,
-  height: 630,
-} as const;

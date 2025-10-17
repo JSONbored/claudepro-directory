@@ -17,8 +17,9 @@ export type SortingOptions = z.infer<typeof sortingOptionsSchema>;
 const viewDataMapSchema = z.record(z.string(), z.number());
 export type ViewDataMap = z.infer<typeof viewDataMapSchema>;
 
-// Simple synchronous sorting functions for backward compatibility
-// Moved from sorting.ts
+/**
+ * Core sorting functions for content items
+ */
 export function sortByPopularity<T extends ContentItem>(items: readonly T[] | T[]): T[] {
   return [...items].sort(
     (a, b) =>

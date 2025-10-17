@@ -76,10 +76,9 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
       {/* Grid layout - responsive columns */}
       <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
         {validMetrics.map((metric, index) => {
-          // Support both new and old formats
-          const metricLabel = metric.label || metric.metric || `Metric ${index + 1}`;
-          const metricValue = metric.value || metric.improvement || metric.after || 'N/A';
-          const metricChange = metric.change || (metric.before ? `From: ${metric.before}` : '');
+          const metricLabel = metric.label || `Metric ${index + 1}`;
+          const metricValue = metric.value;
+          const metricChange = metric.change || '';
           const deltaType =
             metric.trend === 'up' ? 'increase' : metric.trend === 'down' ? 'decrease' : 'unchanged';
 

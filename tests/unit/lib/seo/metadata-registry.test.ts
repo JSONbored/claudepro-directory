@@ -8,10 +8,10 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 import {
   buildContentTitle,
   buildPageTitle,
-  CATEGORY_NAMES,
   METADATA_DEFAULTS,
   smartTruncate,
 } from '@/src/lib/seo/metadata-registry';
@@ -85,7 +85,7 @@ describe('metadata-registry', () => {
       expect(result).toContain(METADATA_DEFAULTS.siteName);
     });
 
-    it('should preserve category display names from CATEGORY_NAMES', () => {
+    it('should preserve category display names from UNIFIED_CATEGORY_REGISTRY', () => {
       const result = buildContentTitle('Test Agent', 'agents');
       expect(result).toContain('AI Agents');
 
@@ -133,7 +133,7 @@ describe('metadata-registry', () => {
 
   describe('Category Overhead Calculations', () => {
     it('should calculate correct overhead for AI Agents', () => {
-      const categoryDisplay = CATEGORY_NAMES.agents;
+      const categoryDisplay = UNIFIED_CATEGORY_REGISTRY.agents.pluralTitle;
       const overhead =
         METADATA_DEFAULTS.separator.length +
         categoryDisplay.length +
@@ -146,7 +146,7 @@ describe('metadata-registry', () => {
     });
 
     it('should calculate correct overhead for MCP', () => {
-      const categoryDisplay = CATEGORY_NAMES.mcp;
+      const categoryDisplay = UNIFIED_CATEGORY_REGISTRY.mcp.pluralTitle;
       const overhead =
         METADATA_DEFAULTS.separator.length +
         categoryDisplay.length +
@@ -159,7 +159,7 @@ describe('metadata-registry', () => {
     });
 
     it('should calculate correct overhead for Rules', () => {
-      const categoryDisplay = CATEGORY_NAMES.rules;
+      const categoryDisplay = UNIFIED_CATEGORY_REGISTRY.rules.pluralTitle;
       const overhead =
         METADATA_DEFAULTS.separator.length +
         categoryDisplay.length +
@@ -172,7 +172,7 @@ describe('metadata-registry', () => {
     });
 
     it('should calculate correct overhead for Commands', () => {
-      const categoryDisplay = CATEGORY_NAMES.commands;
+      const categoryDisplay = UNIFIED_CATEGORY_REGISTRY.commands.pluralTitle;
       const overhead =
         METADATA_DEFAULTS.separator.length +
         categoryDisplay.length +
@@ -185,7 +185,7 @@ describe('metadata-registry', () => {
     });
 
     it('should calculate correct overhead for Hooks', () => {
-      const categoryDisplay = CATEGORY_NAMES.hooks;
+      const categoryDisplay = UNIFIED_CATEGORY_REGISTRY.hooks.pluralTitle;
       const overhead =
         METADATA_DEFAULTS.separator.length +
         categoryDisplay.length +
@@ -198,7 +198,7 @@ describe('metadata-registry', () => {
     });
 
     it('should calculate correct overhead for Statuslines', () => {
-      const categoryDisplay = CATEGORY_NAMES.statuslines;
+      const categoryDisplay = UNIFIED_CATEGORY_REGISTRY.statuslines.pluralTitle;
       const overhead =
         METADATA_DEFAULTS.separator.length +
         categoryDisplay.length +
@@ -224,7 +224,7 @@ describe('metadata-registry', () => {
     });
 
     it('should calculate correct overhead for Collections', () => {
-      const categoryDisplay = CATEGORY_NAMES.collections;
+      const categoryDisplay = UNIFIED_CATEGORY_REGISTRY.collections.pluralTitle;
       const overhead =
         METADATA_DEFAULTS.separator.length +
         categoryDisplay.length +

@@ -18,13 +18,9 @@ import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { z } from 'zod';
 import {
-  type BuildCategoryConfig,
-  type BuildCategoryId,
-  type BuildMetrics,
-  type CategoryBuildResult,
+  type CategoryId,
   type ContentType,
-  extractMetadata,
-  getBuildCategoryConfig,
+  UNIFIED_CATEGORY_REGISTRY,
 } from '@/src/lib/config/category-config';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { logger } from '@/src/lib/logger';
@@ -33,6 +29,56 @@ import { slugToTitle } from '@/src/lib/utils';
 import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
 import { generateDisplayTitle } from '@/src/lib/utils/content.utils';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
+
+/**
+ * Build category configuration type (for generic usage in category-processor)
+ * Moved from category-config.ts - only used by build system
+ */
+export interface BuildCategoryConfig<T extends ContentType = ContentType> {
+  readonly id: CategoryId;
+  readonly pluralTitle: string;
+  readonly schema: z.ZodType<T>;
+  readonly typeName: string;
+  readonly generateFullContent: boolean;
+  readonly metadataFields: ReadonlyArray<string>;
+  readonly buildConfig: {
+    readonly batchSize: number;
+    readonly enableCache: boolean;
+    readonly cacheTTL: number;
+  };
+  readonly apiConfig: {
+    readonly generateStaticAPI: boolean;
+    readonly includeTrending: boolean;
+    readonly maxItemsPerResponse: number;
+  };
+}
+
+/**
+ * Performance metrics for build operations
+ * Moved from category-config.ts - only used by build system
+ */
+export interface BuildMetrics {
+  readonly category: CategoryId;
+  readonly filesProcessed: number;
+  readonly filesValid: number;
+  readonly filesInvalid: number;
+  readonly processingTimeMs: number;
+  readonly cacheHitRate: number;
+  readonly peakMemoryMB: number;
+}
+
+/**
+ * Build result with metrics
+ * Moved from category-config.ts - only used by build system
+ */
+export interface CategoryBuildResult {
+  readonly category: CategoryId;
+  readonly success: boolean;
+  readonly items: readonly ContentType[];
+  readonly metadata: readonly Record<string, unknown>[];
+  readonly metrics: BuildMetrics;
+  readonly errors: readonly Error[];
+}
 
 /**
  * Build cache schema (Zod) for runtime validation
@@ -101,6 +147,29 @@ function validateSecurePath(filePath: string, allowedDir: string): void {
  */
 function computeContentHash(content: string): string {
   return crypto.createHash('sha256').update(content, 'utf-8').digest('hex');
+}
+
+/**
+ * Extract metadata fields from content based on config
+ * Moved from category-config.ts - only used here
+ *
+ * @param content - Content item to extract metadata from
+ * @param config - Category configuration with metadataFields
+ * @returns Record of metadata field values
+ */
+function extractMetadata(
+  content: ContentType,
+  config: (typeof UNIFIED_CATEGORY_REGISTRY)[CategoryId]
+): Record<string, unknown> {
+  const metadata: Record<string, unknown> = {};
+
+  for (const field of config.metadataFields) {
+    if (Object.hasOwn(content, field)) {
+      metadata[field as string] = content[field as keyof ContentType];
+    }
+  }
+
+  return metadata;
 }
 
 /**
@@ -290,18 +359,10 @@ async function processContentFile<T extends ContentType>(
       // Calculate max title length for this category (based on metadata-registry.ts pattern)
       const SITE_NAME = 'Claude Pro Directory'; // 20 chars
       const SEPARATOR = ' - '; // 3 chars
-      const CATEGORY_NAMES: Record<string, string> = {
-        agents: 'AI Agents',
-        mcp: 'MCP',
-        rules: 'Rules',
-        commands: 'Commands',
-        hooks: 'Hooks',
-        statuslines: 'Statuslines',
-        guides: 'Guides',
-        collections: 'Collections',
-      };
 
-      const categoryDisplay = CATEGORY_NAMES[category] || category;
+      const categoryDisplay =
+        UNIFIED_CATEGORY_REGISTRY[category as keyof typeof UNIFIED_CATEGORY_REGISTRY]
+          ?.pluralTitle || category;
       const overhead =
         SEPARATOR.length + categoryDisplay.length + SEPARATOR.length + SITE_NAME.length;
       const maxContentLength = 60 - overhead;
@@ -413,7 +474,7 @@ async function processCategoryFiles<T extends ContentType>(
     );
   }
 
-  logger.info(`Processing ${contentFiles.length} ${config.name} files`);
+  logger.info(`Processing ${contentFiles.length} ${config.pluralTitle} files`);
 
   // Process files in parallel batches for optimal CPU utilization
   const results: FileProcessResult<T>[] = [];
@@ -428,7 +489,7 @@ async function processCategoryFiles<T extends ContentType>(
 
     // Log progress for long-running builds
     if (contentFiles.length > 50 && (i + batchSize) % 50 === 0) {
-      logger.info(`Processed ${i + batchSize}/${contentFiles.length} ${config.name} files`);
+      logger.info(`Processed ${i + batchSize}/${contentFiles.length} ${config.pluralTitle} files`);
     }
   }
 
@@ -452,13 +513,13 @@ async function processCategoryFiles<T extends ContentType>(
  */
 export async function buildCategory(
   contentDir: string,
-  categoryId: BuildCategoryId,
+  categoryId: CategoryId,
   cache: BuildCache | null
 ): Promise<CategoryBuildResult> {
   const startTime = performance.now();
   const startMemory = process.memoryUsage().heapUsed;
 
-  const config = getBuildCategoryConfig(categoryId);
+  const config = UNIFIED_CATEGORY_REGISTRY[categoryId];
 
   try {
     // Process all files with type-safe generic
@@ -490,7 +551,7 @@ export async function buildCategory(
     };
 
     logger.success(
-      `Built ${config.name}: ${metrics.filesValid}/${metrics.filesProcessed} valid (${metrics.processingTimeMs.toFixed(0)}ms, ${metrics.peakMemoryMB.toFixed(1)}MB)`
+      `Built ${config.pluralTitle}: ${metrics.filesValid}/${metrics.filesProcessed} valid (${metrics.processingTimeMs.toFixed(0)}ms, ${metrics.peakMemoryMB.toFixed(1)}MB)`
     );
 
     return {

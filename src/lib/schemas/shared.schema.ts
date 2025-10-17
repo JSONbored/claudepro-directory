@@ -466,16 +466,9 @@ const metricDataSchema = z
     value: componentValueString.describe('Current metric value'),
     change: shortString.optional().describe('Change amount or percentage'),
     trend: z.enum(['up', 'down', 'neutral', '+']).optional().describe('Trend direction indicator'),
-    // Support legacy healthcare guide format
-    metric: shortString.optional().describe('Legacy: alternative metric name field'),
-    before: componentValueString.optional().describe('Legacy: metric value before improvement'),
-    after: componentValueString.optional().describe('Legacy: metric value after improvement'),
-    improvement: componentValueString
-      .optional()
-      .describe('Legacy: improvement percentage or amount'),
     description: mediumString.optional().describe('Optional metric description'),
   })
-  .describe('Individual metric data with value, trend, and legacy format support');
+  .describe('Individual metric data with value and trend');
 
 export const metricsDisplayPropsSchema = z
   .object({

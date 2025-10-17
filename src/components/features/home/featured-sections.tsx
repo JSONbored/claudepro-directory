@@ -14,7 +14,10 @@ import { type FC, memo, useMemo } from 'react';
 import { ConfigCard } from '@/src/components/cards/config-card';
 import { UnifiedCardGrid } from '@/src/components/cards/unified-card-grid';
 import { Button } from '@/src/components/ui/button';
-import { CATEGORY_CONFIGS, HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
+import {
+  HOMEPAGE_FEATURED_CATEGORIES,
+  UNIFIED_CATEGORY_REGISTRY,
+} from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Briefcase, ExternalLink } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
@@ -78,7 +81,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories }) =>
       {/* Dynamically render featured sections based on HOMEPAGE_FEATURED_CATEGORIES */}
       {HOMEPAGE_FEATURED_CATEGORIES.map((categorySlug) => {
         const items = categories[categorySlug];
-        const config = CATEGORY_CONFIGS[categorySlug];
+        const config = UNIFIED_CATEGORY_REGISTRY[categorySlug];
 
         // Skip if no config or no items for this category
         if (!(config && items)) {

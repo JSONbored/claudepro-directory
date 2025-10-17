@@ -18,7 +18,9 @@ import {
   shortString,
 } from './primitives/base-strings';
 
-// Type alias for backwards compatibility and convenience
+/**
+ * Primary content item type - represents any content item across all categories
+ */
 export type ContentItem = UnifiedContentItem;
 
 /**

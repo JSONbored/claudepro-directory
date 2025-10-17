@@ -67,8 +67,8 @@ import { UnifiedDetailPage } from '@/src/components/unified-detail-page';
 import { CollectionDetailView } from '@/src/components/unified-detail-page/collection-detail-view';
 import { statsRedis } from '@/src/lib/cache.server';
 import {
-  getCategoryConfig,
   isValidCategory,
+  UNIFIED_CATEGORY_REGISTRY,
   VALID_CATEGORIES,
 } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -164,9 +164,16 @@ export async function generateMetadata({
 }) {
   const { category, slug } = await params;
 
+  // Validate category at compile time
+  if (!isValidCategory(category)) {
+    return generatePageMetadata('/:category/:slug', {
+      params: { category, slug },
+    });
+  }
+
   // Load item and category config for metadata generation
   const itemMeta = await getContentBySlug(category, slug);
-  const config = getCategoryConfig(category);
+  const config = UNIFIED_CATEGORY_REGISTRY[category];
 
   return generatePageMetadata('/:category/:slug', {
     params: { category, slug },
@@ -234,7 +241,7 @@ export default async function DetailPage({
     notFound();
   }
 
-  const config = getCategoryConfig(category);
+  const config = UNIFIED_CATEGORY_REGISTRY[category];
   if (!config) {
     notFound();
   }

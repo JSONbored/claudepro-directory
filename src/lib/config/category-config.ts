@@ -181,40 +181,6 @@ export interface UnifiedCategoryConfig<T extends ContentType = ContentType> {
 }
 
 /**
- * Legacy CategoryConfig interface for backward compatibility
- * @deprecated Use UnifiedCategoryConfig instead
- */
-export interface CategoryConfig {
-  title: string;
-  pluralTitle: string;
-  description: string;
-  icon: LucideIcon;
-  keywords: string;
-  metaDescription: string;
-  listPage: {
-    searchPlaceholder: string;
-    badges: Array<{
-      icon?: string;
-      text: string | ((count: number) => string);
-    }>;
-    emptyStateMessage?: string;
-  };
-  detailPage: {
-    displayConfig: boolean;
-    configFormat: 'json' | 'multi' | 'hook';
-    sections?: Array<{
-      id: string;
-      title: string;
-      order: number;
-      customRenderer?: string;
-    }>;
-  };
-  urlSlug: string;
-  contentLoader: string;
-  [key: string]: unknown;
-}
-
-/**
  * ============================================
  * UNIFIED CATEGORY REGISTRY - SINGLE SOURCE OF TRUTH
  * ============================================
@@ -819,84 +785,6 @@ export type UnifiedCategoryConfigValue = (typeof UNIFIED_CATEGORY_REGISTRY)[Cate
 
 /**
  * ============================================
- * DERIVED EXPORTS (Backward Compatibility)
- * ============================================
- *
- * These maintain existing APIs while using the unified registry internally.
- * Legacy code continues working unchanged.
- */
-
-/**
- * Legacy CATEGORY_CONFIGS export
- * Derives UI-only fields from unified registry for backward compatibility
- */
-export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = Object.fromEntries(
-  Object.entries(UNIFIED_CATEGORY_REGISTRY).map(([key, config]) => [
-    key,
-    {
-      title: config.title,
-      pluralTitle: config.pluralTitle,
-      description: config.description,
-      icon: config.icon,
-      keywords: config.keywords,
-      metaDescription: config.metaDescription,
-      listPage: config.listPage,
-      detailPage: config.detailPage,
-      urlSlug: config.urlSlug,
-      contentLoader: config.contentLoader,
-    },
-  ])
-) as Record<string, CategoryConfig>;
-
-/**
- * BUILD_CATEGORY_CONFIGS export
- * Derives build-only fields from unified registry
- * Replaces the old build-category-config.ts file (now deprecated)
- */
-export const BUILD_CATEGORY_CONFIGS = Object.fromEntries(
-  Object.entries(UNIFIED_CATEGORY_REGISTRY).map(([key, config]) => [
-    key,
-    {
-      id: config.id,
-      name: config.pluralTitle,
-      schema: config.schema,
-      typeName: config.typeName,
-      generateFullContent: config.generateFullContent,
-      metadataFields: config.metadataFields,
-      buildConfig: config.buildConfig,
-      apiConfig: config.apiConfig,
-    },
-  ])
-) as Record<
-  string,
-  {
-    id: ContentCategory;
-    name: string;
-    schema: z.ZodType<ContentType>;
-    typeName: string;
-    generateFullContent: boolean;
-    metadataFields: ReadonlyArray<string>;
-    buildConfig: {
-      batchSize: number;
-      enableCache: boolean;
-      cacheTTL: number;
-    };
-    apiConfig: {
-      generateStaticAPI: boolean;
-      includeTrending: boolean;
-      maxItemsPerResponse: number;
-    };
-  }
->;
-
-/**
- * Type-safe build category ID union
- * @deprecated Import CategoryId instead (they're now the same)
- */
-export type BuildCategoryId = CategoryId;
-
-/**
- * ============================================
  * HELPER FUNCTIONS
  * ============================================
  */
@@ -908,57 +796,10 @@ export const VALID_CATEGORIES = Object.keys(UNIFIED_CATEGORY_REGISTRY);
 
 /**
  * Get category config by URL slug
+ * Returns unified category configuration from UNIFIED_CATEGORY_REGISTRY
  */
-export function getCategoryConfig(slug: string): CategoryConfig | null {
-  return CATEGORY_CONFIGS[slug] || null;
-}
-
-/**
- * Get unified category config by URL slug (includes build metadata)
- */
-export function getUnifiedCategoryConfig(slug: string): UnifiedCategoryConfigValue | null {
+export function getCategoryConfig(slug: string): UnifiedCategoryConfigValue | null {
   return UNIFIED_CATEGORY_REGISTRY[slug as CategoryId] || null;
-}
-
-/**
- * Get build category config (build-specific fields only)
- * Replaces getBuildCategoryConfig from old build-category-config.ts
- */
-export function getBuildCategoryConfig<T extends CategoryId>(
-  categoryId: T
-): (typeof BUILD_CATEGORY_CONFIGS)[T] {
-  const config = BUILD_CATEGORY_CONFIGS[categoryId];
-  if (!config) {
-    throw new Error(`Unknown category ID: ${categoryId}`);
-  }
-  return config;
-}
-
-/**
- * Get all build category configs as array
- * Replaces getAllBuildCategoryConfigs from old build-category-config.ts
- */
-export function getAllBuildCategoryConfigs(): Array<(typeof BUILD_CATEGORY_CONFIGS)[CategoryId]> {
-  return Object.values(BUILD_CATEGORY_CONFIGS);
-}
-
-/**
- * Extract metadata from content item
- * Moved from build-category-config.ts for consolidation
- */
-export function extractMetadata(
-  content: ContentType,
-  config: (typeof BUILD_CATEGORY_CONFIGS)[CategoryId]
-): Record<string, unknown> {
-  const metadata: Record<string, unknown> = {};
-
-  for (const field of config.metadataFields) {
-    if (Object.hasOwn(content, field)) {
-      metadata[field as string] = content[field as keyof ContentType];
-    }
-  }
-
-  return metadata;
 }
 
 /**
@@ -1050,57 +891,4 @@ export function getCategoryStatsConfig(): readonly CategoryStatsConfig[] {
       delay: index * 100, // Stagger animations by 100ms
     };
   });
-}
-
-/**
- * ============================================
- * RE-EXPORTED TYPES (from old build-category-config.ts)
- * ============================================
- */
-
-/**
- * Build category configuration type (for generic usage in category-processor)
- */
-export interface BuildCategoryConfig<T extends ContentType = ContentType> {
-  readonly id: ContentCategory;
-  readonly name: string;
-  readonly schema: z.ZodType<T>;
-  readonly typeName: string;
-  readonly generateFullContent: boolean;
-  readonly metadataFields: ReadonlyArray<string>;
-  readonly buildConfig: {
-    readonly batchSize: number;
-    readonly enableCache: boolean;
-    readonly cacheTTL: number;
-  };
-  readonly apiConfig: {
-    readonly generateStaticAPI: boolean;
-    readonly includeTrending: boolean;
-    readonly maxItemsPerResponse: number;
-  };
-}
-
-/**
- * Performance metrics for build operations
- */
-export interface BuildMetrics {
-  readonly category: CategoryId;
-  readonly filesProcessed: number;
-  readonly filesValid: number;
-  readonly filesInvalid: number;
-  readonly processingTimeMs: number;
-  readonly cacheHitRate: number;
-  readonly peakMemoryMB: number;
-}
-
-/**
- * Build result with metrics
- */
-export interface CategoryBuildResult {
-  readonly category: CategoryId;
-  readonly success: boolean;
-  readonly items: readonly ContentType[];
-  readonly metadata: readonly Record<string, unknown>[];
-  readonly metrics: BuildMetrics;
-  readonly errors: readonly Error[];
 }
