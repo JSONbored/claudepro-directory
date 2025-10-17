@@ -11,7 +11,7 @@
  * ```
  */
 
-import { ProductionCodeBlock } from '@/src/components/ui/production-code-block';
+import { ProductionCodeBlock } from '@/src/components/content/production-code-block';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 
 export interface CodeBlockServerProps {

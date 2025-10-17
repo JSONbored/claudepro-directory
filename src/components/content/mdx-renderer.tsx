@@ -2,18 +2,11 @@ import Image from 'next/image';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { memo } from 'react';
 import { z } from 'zod';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { UnifiedContentBox } from '@/src/components/domain/unified-content-box';
-import { ErrorBoundary } from '@/src/components/infra/error-boundary';
-import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/alert';
-import { Button } from '@/src/components/primitives/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/card';
+import { Checklist } from '@/src/components/content/checklist';
+// ARCHITECTURAL MODERNIZATION: Removed setPageMetadata import
+// OLD: Module-level state pattern (anti-pattern for client components)
+// NEW: Direct prop passing via component wrapper (see SmartRelatedContent below)
+import { CodeGroupServer as CodeGroup } from '@/src/components/content/code-group-server';
 // Import all MDX components from consolidated file
 import {
   // Lazy-loaded heavy components (code-split with React.lazy)
@@ -28,7 +21,19 @@ import {
   MetricsDisplay,
   SmartRelatedContent,
   StepByStepGuide,
-} from '@/src/components/ui/mdx-components';
+} from '@/src/components/content/mdx-components';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedContentBox } from '@/src/components/domain/unified-content-box';
+import { ErrorBoundary } from '@/src/components/infra/error-boundary';
+import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/alert';
+import { Button } from '@/src/components/primitives/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/primitives/card';
 import { mdxOptions } from '@/src/lib/content/mdx-config';
 import type {
   mdxElementPropsSchema,
@@ -38,11 +43,6 @@ import type {
 } from '@/src/lib/schemas/shared.schema';
 // Import lightweight components (always loaded)
 import { UnifiedContentBlock } from '../content/unified-content-block';
-import { Checklist } from '../interactive/checklist';
-// ARCHITECTURAL MODERNIZATION: Removed setPageMetadata import
-// OLD: Module-level state pattern (anti-pattern for client components)
-// NEW: Direct prop passing via component wrapper (see SmartRelatedContent below)
-import { CodeGroupServer as CodeGroup } from '../template/code-group-server';
 
 // Props schemas for MDX components are imported from shared.schema
 

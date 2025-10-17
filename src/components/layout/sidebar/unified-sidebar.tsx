@@ -16,6 +16,7 @@
 
 import Link from 'next/link';
 import { memo, useEffect, useState } from 'react';
+import { CategoryNavigationCard } from '@/src/components/content/unified-detail-page/sidebar/category-navigation-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
@@ -26,7 +27,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/primitives/tooltip';
-import { CategoryNavigationCard } from '@/src/components/unified-detail-page/sidebar/category-navigation-card';
 import { ROUTES } from '@/src/lib/constants/routes';
 import {
   BookOpen,

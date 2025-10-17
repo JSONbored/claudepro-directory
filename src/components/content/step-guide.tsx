@@ -15,10 +15,10 @@
  * - Correct usage: Server components can import server-only code
  */
 
+import { ProductionCodeBlock } from '@/src/components/content/production-code-block';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedContentBox } from '@/src/components/domain/unified-content-box';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import { ProductionCodeBlock } from '@/src/components/ui/production-code-block';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import { Zap } from '@/src/lib/icons';
 import { type StepByStepGuideProps, stepGuidePropsSchema } from '@/src/lib/schemas/shared.schema';

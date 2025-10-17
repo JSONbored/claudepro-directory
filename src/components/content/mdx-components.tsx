@@ -294,7 +294,7 @@ const DiagnosticFlowSkeleton = () => (
  * Replaces next/dynamic for modern code splitting
  */
 const LazyRelatedContentClient = lazy(() =>
-  import('../smart-related-content/related-content-client').then((m) => ({
+  import('./smart-related-content/related-content-client').then((m) => ({
     default: m.RelatedContentClient,
   }))
 );
@@ -318,7 +318,7 @@ const LazyDiagnosticFlow = lazy(() =>
 );
 
 const LazyStepByStepGuide = lazy(() =>
-  import('../template/step-guide').then((m) => ({
+  import('./step-guide').then((m) => ({
     default: m.StepByStepGuide,
   }))
 );

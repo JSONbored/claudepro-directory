@@ -19,9 +19,9 @@
  * @see components/unified-detail-page.tsx - Original 685-line implementation
  */
 
+import { UnifiedContentSection } from '@/src/components/content/unified-content-section';
 import { UnifiedReview } from '@/src/components/domain/unified-review';
 import { InlineEmailCTA } from '@/src/components/growth/inline-email-cta';
-import { UnifiedContentSection } from '@/src/components/pages/unified-content-section';
 import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';

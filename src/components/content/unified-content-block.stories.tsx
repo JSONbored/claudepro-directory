@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { UnifiedContentBlock } from './unified-content-block';
+import { UnifiedContentBlock } from '@/src/components/content/unified-content-block';
 
 /**
  * UnifiedContentBlock Storybook Stories
