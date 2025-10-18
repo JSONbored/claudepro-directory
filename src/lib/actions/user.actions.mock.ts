@@ -27,3 +27,29 @@ export async function addBookmark() {
 export async function removeBookmark() {
   return { success: true, message: 'Bookmark removed (mock)' };
 }
+
+/**
+ * Mock: Update user profile
+ * @returns Success response with mock data
+ */
+export async function updateProfile() {
+  // Simulate async operation
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  return {
+    data: { success: true },
+    serverError: undefined,
+  };
+}
+
+/**
+ * Mock: Refresh profile data from OAuth provider
+ * @returns Success response with mock data
+ */
+export async function refreshProfileFromOAuth() {
+  // Simulate async operation
+  await new Promise((resolve) => setTimeout(resolve, 800));
+  return {
+    data: { success: true },
+    serverError: undefined,
+  };
+}
