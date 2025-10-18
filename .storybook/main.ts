@@ -121,6 +121,7 @@ const config: StorybookConfig = {
         // Server Actions (Next.js 'use server')
         '#lib/actions/user': path.resolve(__dirname, '../src/lib/actions/user.actions.mock.ts'),
         '#lib/actions/track-view': path.resolve(__dirname, '../src/lib/actions/track-view.mock.ts'),
+        '#lib/actions/badges': path.resolve(__dirname, '../src/lib/actions/badges.actions.mock.ts'),
         '#lib/actions/business': path.resolve(__dirname, '../src/lib/actions/business.actions.mock.ts'),
         '#lib/actions/markdown': path.resolve(__dirname, '../src/lib/actions/markdown-actions.mock.ts'),
         '#lib/actions/email-capture': path.resolve(__dirname, '../src/lib/actions/email-capture.mock.ts'),

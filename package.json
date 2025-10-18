@@ -32,6 +32,10 @@
       "storybook": "./src/lib/actions/track-view.mock.ts",
       "default": "./src/lib/actions/track-view.ts"
     },
+    "#lib/actions/badges": {
+      "storybook": "./src/lib/actions/badges.actions.mock.ts",
+      "default": "./src/lib/actions/badges.actions.ts"
+    },
     "#lib/actions/business": {
       "storybook": "./src/lib/actions/business.actions.mock.ts",
       "default": "./src/lib/actions/business.actions.ts"

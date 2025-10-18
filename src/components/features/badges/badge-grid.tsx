@@ -21,6 +21,7 @@
 import { Info, Lock, Star } from 'lucide-react';
 import { memo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { toggleBadgeFeatured } from '#lib/actions/badges';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import {
   Card,
@@ -35,7 +36,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/primitives/tooltip';
-import { toggleBadgeFeatured } from '@/src/lib/actions/badges.actions';
 import {
   BADGE_RARITY_COLORS,
   BADGE_REGISTRY,
