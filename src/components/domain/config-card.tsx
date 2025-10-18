@@ -18,8 +18,8 @@ import { BaseCard } from '@/src/components/domain/base-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedButton } from '@/src/components/domain/unified-button';
 import { UnifiedReview } from '@/src/components/domain/unified-review';
+import { BorderBeam } from '@/src/components/magic/border-beam';
 import { Button } from '@/src/components/primitives/button';
-import { BorderBeam } from '@/src/components/ui/magic/border-beam';
 import {
   Award,
   Copy as CopyIcon,

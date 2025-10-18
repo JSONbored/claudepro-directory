@@ -25,8 +25,7 @@ import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders
 // Lazy load animations to improve LCP (40-60 KB saved from initial bundle)
 // RollingText uses Framer Motion and impacts homepage First Load
 const RollingText = dynamic(
-  () =>
-    import('@/src/components/ui/magic/rolling-text').then((mod) => ({ default: mod.RollingText })),
+  () => import('@/src/components/magic/rolling-text').then((mod) => ({ default: mod.RollingText })),
   {
     loading: () => <span className="text-accent">enthusiasts</span>, // Fallback text
   }
@@ -34,7 +33,7 @@ const RollingText = dynamic(
 
 // Meteors animation (decorative only, not critical)
 const Meteors = dynamic(
-  () => import('@/src/components/ui/magic/meteors').then((mod) => ({ default: mod.Meteors })),
+  () => import('@/src/components/magic/meteors').then((mod) => ({ default: mod.Meteors })),
   {
     loading: () => null, // No loading state needed for decorative animation
   }
