@@ -13,7 +13,6 @@
 
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useId, useState } from 'react';
-import { getSearchEvent } from '#lib/analytics/event-mapper';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
@@ -28,7 +27,6 @@ import {
   SelectValue,
 } from '@/src/components/primitives/select';
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
-import { trackEvent } from '@/src/lib/analytics/tracker';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/schemas/component.schema';
 import { sanitizers } from '@/src/lib/security/validators-sync';
@@ -90,14 +88,21 @@ export function UnifiedSearch({
       // Track search event with context-specific analytics (only for non-empty queries)
       if (sanitized && sanitized.length > 0) {
         const category = pathname?.split('/')[1] || 'global';
-        const eventName = getSearchEvent(category);
 
-        trackEvent(eventName, {
-          query: sanitized.substring(0, 100), // Truncate for privacy
-          results_count: resultCount,
-          filters_applied: activeFilterCount > 0,
-          time_to_results: 0, // Could add performance timing if needed
-        });
+        // Dynamic imports to avoid server-only module issues in Storybook
+        Promise.all([import('#lib/analytics/event-mapper'), import('#lib/analytics/tracker')])
+          .then(([{ getSearchEvent }, { trackEvent }]) => {
+            const eventName = getSearchEvent(category);
+            trackEvent(eventName, {
+              query: sanitized.substring(0, 100), // Truncate for privacy
+              results_count: resultCount,
+              filters_applied: activeFilterCount > 0,
+              time_to_results: 0, // Could add performance timing if needed
+            });
+          })
+          .catch(() => {
+            // Silent fail in Storybook - analytics not critical for component rendering
+          });
       }
     }, 300);
 
