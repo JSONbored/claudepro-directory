@@ -312,7 +312,7 @@ const LazyComparisonTable = lazy(() =>
 );
 
 const LazyDiagnosticFlow = lazy(() =>
-  import('../troubleshooting/diagnostic-flow').then((m) => ({
+  import('../tools/troubleshooting/diagnostic-flow').then((m) => ({
     default: m.DiagnosticFlow,
   }))
 );
@@ -324,7 +324,7 @@ const LazyStepByStepGuide = lazy(() =>
 );
 
 const LazyErrorTable = lazy(() =>
-  import('../troubleshooting/error-table').then((m) => ({
+  import('../tools/troubleshooting/error-table').then((m) => ({
     default: m.ErrorTable,
   }))
 );
