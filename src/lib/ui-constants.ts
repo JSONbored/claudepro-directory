@@ -556,3 +556,28 @@ export const ICON_NAME_MAP = {
   // Fallback for unknown icons
   'help-circle': HelpCircle,
 } as const;
+
+/**
+ * Get Responsive Grid Class
+ *
+ * Utility function to generate responsive grid className based on column count.
+ * Consolidates repeated grid logic from content-type-field-renderer.
+ *
+ * @param columns - Number of columns (2 or 3)
+ * @returns Responsive grid className string
+ *
+ * @example
+ * ```tsx
+ * <div className={getResponsiveGridClass(2)}>
+ *   <FormField ... />
+ *   <FormField ... />
+ * </div>
+ * ```
+ */
+export function getResponsiveGridClass(columns: 2 | 3): string {
+  if (columns === 3) {
+    return 'grid grid-cols-1 sm:grid-cols-3 gap-4';
+  }
+  // Default to 2 columns
+  return 'grid grid-cols-1 sm:grid-cols-2 gap-4';
+}

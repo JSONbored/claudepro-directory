@@ -9,9 +9,8 @@ import { useState, useTransition } from 'react';
 import { refreshProfileFromOAuth, updateProfile } from '#lib/actions/user';
 import { FormField } from '@/src/components/forms/utilities/form-field';
 import { ListItemManager } from '@/src/components/forms/utilities/list-item-manager';
+import { ToggleField } from '@/src/components/forms/utilities/toggle-field';
 import { Button } from '@/src/components/primitives/button';
-import { Label } from '@/src/components/primitives/label';
-import { Switch } from '@/src/components/primitives/switch';
 import type { ProfileData } from '@/src/lib/schemas/profile.schema';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -157,37 +156,27 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
 
       {/* Privacy & Notifications */}
       <div className="space-y-4 pt-2">
-        <div className="flex items-center justify-between">
-          <div>
-            <Label>Public profile</Label>
-            <p className="text-xs text-muted-foreground mt-1">Allow others to view your profile</p>
-          </div>
-          <Switch
-            checked={isPublic}
-            onCheckedChange={(checked) => {
-              setIsPublic(!!checked);
-              setHasChanges(true);
-            }}
-            aria-label="Toggle public profile visibility"
-          />
-        </div>
+        <ToggleField
+          label="Public profile"
+          description="Allow others to view your profile"
+          checked={isPublic}
+          onCheckedChange={(checked) => {
+            setIsPublic(!!checked);
+            setHasChanges(true);
+          }}
+          ariaLabel="Toggle public profile visibility"
+        />
 
-        <div className="flex items-center justify-between">
-          <div>
-            <Label>Email on new followers</Label>
-            <p className="text-xs text-muted-foreground mt-1">
-              Send me an email when someone follows me
-            </p>
-          </div>
-          <Switch
-            checked={followEmail}
-            onCheckedChange={(checked) => {
-              setFollowEmail(!!checked);
-              setHasChanges(true);
-            }}
-            aria-label="Toggle follower email notifications"
-          />
-        </div>
+        <ToggleField
+          label="Email on new followers"
+          description="Send me an email when someone follows me"
+          checked={followEmail}
+          onCheckedChange={(checked) => {
+            setFollowEmail(!!checked);
+            setHasChanges(true);
+          }}
+          ariaLabel="Toggle follower email notifications"
+        />
       </div>
 
       {/* Form Actions */}

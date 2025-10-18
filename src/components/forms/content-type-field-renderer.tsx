@@ -27,6 +27,7 @@ import type {
   FieldDefinition,
   GridColumn,
 } from '@/src/lib/config/form-field-config';
+import { getResponsiveGridClass } from '@/src/lib/ui-constants';
 
 // ============================================================================
 // GRID LAYOUT SYSTEM
@@ -264,16 +265,9 @@ export function ContentTypeFieldRenderer({ config, formId }: ContentTypeFieldRen
         const groupKey = group[0]?.name || 'group';
 
         // Determine grid class based on field types
-        let gridClass = '';
-        if (hasMultipleFields) {
-          if (gridType === 'half') {
-            gridClass = 'grid grid-cols-1 sm:grid-cols-2 gap-4';
-          } else if (gridType === 'third') {
-            gridClass = 'grid grid-cols-1 sm:grid-cols-3 gap-4';
-          } else {
-            gridClass = 'grid grid-cols-1 sm:grid-cols-2 gap-4'; // Default fallback
-          }
-        }
+        const gridClass = hasMultipleFields
+          ? getResponsiveGridClass(gridType === 'third' ? 3 : 2)
+          : '';
 
         return (
           <div key={groupKey} className={gridClass || ''}>

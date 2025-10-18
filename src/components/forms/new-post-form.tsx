@@ -1,5 +1,6 @@
 'use client';
 
+import { useTransition } from 'react';
 import { FormField } from '@/src/components/forms/utilities/form-field';
 import { Button } from '@/src/components/primitives/button';
 import {
@@ -10,14 +11,30 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { ROUTES } from '@/src/lib/constants/routes';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface NewPostFormProps {
-  onSubmit: (formData: FormData) => void;
+  onSubmit: (formData: FormData) => Promise<void>;
 }
 
 export function NewPostForm({ onSubmit }: NewPostFormProps) {
+  const [isPending, startTransition] = useTransition();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    startTransition(async () => {
+      try {
+        const formData = new FormData(e.currentTarget);
+        await onSubmit(formData);
+      } catch (error) {
+        toasts.error.fromError(error, 'Failed to create post');
+      }
+    });
+  };
+
   return (
-    <form action={onSubmit}>
+    <form onSubmit={handleSubmit}>
       <Card>
         <CardHeader>
           <CardTitle>Post Details</CardTitle>
@@ -52,8 +69,10 @@ export function NewPostForm({ onSubmit }: NewPostFormProps) {
           />
 
           <div className="flex gap-4">
-            <Button type="submit">Create Post</Button>
-            <Button type="button" variant="outline" asChild>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? 'Creating...' : 'Create Post'}
+            </Button>
+            <Button type="button" variant="outline" asChild disabled={isPending}>
               <a href={ROUTES.BOARD}>Cancel</a>
             </Button>
           </div>
