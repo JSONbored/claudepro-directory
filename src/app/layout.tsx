@@ -18,14 +18,14 @@ import { Toaster } from 'sonner';
 import { FooterNewsletterBar } from '@/src/components/features/growth/footer-newsletter-bar';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { PerformanceOptimizer } from '@/src/components/infra/performance-optimizer';
+import { PostCopyEmailProvider } from '@/src/components/infra/providers/post-copy-email-provider';
 import { PwaInstallTracker } from '@/src/components/infra/pwa-install-tracker';
+import { OrganizationStructuredData } from '@/src/components/infra/structured-data/organization-schema';
 import { AnnouncementBanner } from '@/src/components/layout/announcement-banner';
 import { Footer } from '@/src/components/layout/footer';
 import { Navigation } from '@/src/components/layout/navigation';
-import { PostCopyEmailProvider } from '@/src/components/providers/post-copy-email-provider';
 import { StructuredData } from '@/src/components/shared/structured-data';
 import { UmamiScript } from '@/src/components/shared/umami-script';
-import { OrganizationStructuredData } from '@/src/components/structured-data/organization-schema';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 

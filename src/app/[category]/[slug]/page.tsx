@@ -62,9 +62,9 @@
 import { notFound } from 'next/navigation';
 import { UnifiedDetailPage } from '@/src/components/content/unified-detail-page';
 import { CollectionDetailView } from '@/src/components/content/unified-detail-page/collection-detail-view';
+import { BreadcrumbSchema } from '@/src/components/infra/structured-data/breadcrumb-schema';
+import { UnifiedStructuredData } from '@/src/components/infra/structured-data/unified-structured-data';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
-import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
-import { UnifiedStructuredData } from '@/src/components/structured-data/unified-structured-data';
 import { statsRedis } from '@/src/lib/cache.server';
 import {
   isValidCategory,

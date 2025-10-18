@@ -8,12 +8,12 @@ import { z } from 'zod';
 import { MDXRenderer } from '@/src/components/content/mdx-renderer';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { InlineEmailCTA } from '@/src/components/features/growth/inline-email-cta';
+import { MDXContentProvider } from '@/src/components/infra/providers/mdx-content-provider';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 // Removed unused import: CategoryGuidesPage
 import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent } from '@/src/components/primitives/card';
-import { MDXContentProvider } from '@/src/components/providers/mdx-content-provider';
 import { contentCache, statsRedis } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
