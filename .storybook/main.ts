@@ -136,16 +136,16 @@ const config: StorybookConfig = {
         '#lib/analytics/events/related-content': path.resolve(__dirname, '../src/lib/analytics/events/related-content.mock.ts'),
 
         // Providers
-        '#lib/providers/post-copy-email': path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.mock.tsx'),
+        '#lib/providers/post-copy-email': path.resolve(__dirname, '../src/components/infra/providers/post-copy-email-provider.mock.tsx'),
 
         // Providers and utilities (need absolute path aliases for @/ imports)
         // CRITICAL: Must include ALL possible resolution paths
-        '@/src/components/providers/post-copy-email-provider': path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.mock.tsx'),
-        '@/src/components/providers/post-copy-email-provider.tsx': path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.mock.tsx'),
-        '/src/components/providers/post-copy-email-provider': path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.mock.tsx'),
-        '/src/components/providers/post-copy-email-provider.tsx': path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.mock.tsx'),
-        [path.resolve(__dirname, '../src/components/providers/post-copy-email-provider')]: path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.mock.tsx'),
-        [path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.tsx')]: path.resolve(__dirname, '../src/components/providers/post-copy-email-provider.mock.tsx'),
+        '@/src/components/infra/providers/post-copy-email-provider': path.resolve(__dirname, '../src/components/infra/providers/post-copy-email-provider.mock.tsx'),
+        '@/src/components/infra/providers/post-copy-email-provider.tsx': path.resolve(__dirname, '../src/components/infra/providers/post-copy-email-provider.mock.tsx'),
+        '/src/components/infra/providers/post-copy-email-provider': path.resolve(__dirname, '../src/components/infra/providers/post-copy-email-provider.mock.tsx'),
+        '/src/components/infra/providers/post-copy-email-provider.tsx': path.resolve(__dirname, '../src/components/infra/providers/post-copy-email-provider.mock.tsx'),
+        [path.resolve(__dirname, '../src/components/infra/providers/post-copy-email-provider')]: path.resolve(__dirname, '../src/components/infra/providers/post-copy-email-provider.mock.tsx'),
+        [path.resolve(__dirname, '../src/components/infra/providers/post-copy-email-provider.tsx')]: path.resolve(__dirname, '../src/components/infra/providers/post-copy-email-provider.mock.tsx'),
 
         // Server Infrastructure (Node.js modules)
         // CRITICAL: Must include ALL path variants (absolute, @/ alias, with/without .ts)

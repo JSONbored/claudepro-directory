@@ -26,7 +26,7 @@ import '../src/app/globals.css';
 import { VIEWPORT_PRESETS, BREAKPOINTS } from '../src/lib/ui-constants.storybook';
 
 // Import PostCopyEmailProvider mock for unified-button stories
-import { PostCopyEmailProvider } from '../src/components/providers/post-copy-email-provider.mock';
+import { PostCopyEmailProvider } from '../src/components/infra/providers/post-copy-email-provider.mock';
 
 /**
  * Global Decorator: Wraps all stories with ThemeProvider and PostCopyEmailProvider

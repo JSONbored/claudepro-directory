@@ -53,8 +53,8 @@
       "default": "./src/lib/supabase/client.ts"
     },
     "#lib/providers/post-copy-email": {
-      "storybook": "./src/components/providers/post-copy-email-provider.mock.tsx",
-      "default": "./src/components/providers/post-copy-email-provider.tsx"
+      "storybook": "./src/components/infra/providers/post-copy-email-provider.mock.tsx",
+      "default": "./src/components/infra/providers/post-copy-email-provider.tsx"
     },
     "#lib/analytics/tracker": {
       "storybook": "./src/lib/analytics/tracker.mock.ts",
