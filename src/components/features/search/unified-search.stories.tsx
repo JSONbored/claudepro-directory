@@ -941,10 +941,10 @@ export const MobileViewport: Story = {
     resultCount: 12,
     showFilters: true,
   },
+  globals: {
+    viewport: { value: 'mobile1' },
+  },
   parameters: {
-    viewport: {
-      defaultViewport: 'mobile1',
-    },
     docs: {
       description: {
         story: `
@@ -976,10 +976,10 @@ export const TabletViewport: Story = {
     resultCount: 12,
     showFilters: true,
   },
+  globals: {
+    viewport: { value: 'tablet' },
+  },
   parameters: {
-    viewport: {
-      defaultViewport: 'tablet',
-    },
     docs: {
       description: {
         story: 'Search on tablet with optimized layout (2-column filter grid).',
@@ -1026,5 +1026,45 @@ Empty content directory or initial load before data fetched.
         `,
       },
     },
+  },
+};
+
+/**
+ * MobileSmall: Small Mobile Viewport (320px)
+ * Tests component on smallest modern mobile devices
+ */
+export const MobileSmall: Story = {
+  globals: {
+    viewport: { value: 'mobile1' },
+  },
+};
+
+/**
+ * MobileLarge: Large Mobile Viewport (414px)
+ * Tests component on larger modern mobile devices
+ */
+export const MobileLarge: Story = {
+  globals: {
+    viewport: { value: 'mobile2' },
+  },
+};
+
+/**
+ * DarkTheme: Dark Mode Theme
+ * Tests component appearance in dark mode
+ */
+export const DarkTheme: Story = {
+  globals: {
+    theme: 'dark',
+  },
+};
+
+/**
+ * LightTheme: Light Mode Theme
+ * Tests component appearance in light mode
+ */
+export const LightTheme: Story = {
+  globals: {
+    theme: 'light',
   },
 };

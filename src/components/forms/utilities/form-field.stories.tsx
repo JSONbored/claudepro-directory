@@ -507,7 +507,7 @@ export const FormWithValidation: Story = {
 export const MobileViewport: Story = {
   parameters: {
     viewport: {
-      defaultViewport: 'mobile1',
+      defaultViewport: 'mobile',
     },
   },
   render: () => (
@@ -575,4 +575,44 @@ export const TabletViewport: Story = {
       </div>
     </div>
   ),
+};
+
+/**
+ * MobileSmall: Small Mobile Viewport (320px)
+ * Tests component on smallest modern mobile devices
+ */
+export const MobileSmall: Story = {
+  globals: {
+    viewport: { value: 'mobile1' },
+  },
+};
+
+/**
+ * MobileLarge: Large Mobile Viewport (414px)
+ * Tests component on larger modern mobile devices
+ */
+export const MobileLarge: Story = {
+  globals: {
+    viewport: { value: 'mobile2' },
+  },
+};
+
+/**
+ * DarkTheme: Dark Mode Theme
+ * Tests component appearance in dark mode
+ */
+export const DarkTheme: Story = {
+  globals: {
+    theme: 'dark',
+  },
+};
+
+/**
+ * LightTheme: Light Mode Theme
+ * Tests component appearance in light mode
+ */
+export const LightTheme: Story = {
+  globals: {
+    theme: 'light',
+  },
 };

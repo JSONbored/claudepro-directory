@@ -604,10 +604,10 @@ export const MobileViewport: Story = {
   args: {
     profile: filledProfile,
   },
+  globals: {
+    viewport: { value: 'mobile1' },
+  },
   parameters: {
-    viewport: {
-      defaultViewport: 'mobile1',
-    },
     docs: {
       description: {
         story: `
@@ -631,10 +631,10 @@ export const TabletViewport: Story = {
   args: {
     profile: filledProfile,
   },
+  globals: {
+    viewport: { value: 'tablet' },
+  },
   parameters: {
-    viewport: {
-      defaultViewport: 'tablet',
-    },
     docs: {
       description: {
         story: 'Form layout on tablet with optimized spacing.',
@@ -690,5 +690,45 @@ export const AllVariantsComparison: Story = {
         story: 'Side-by-side comparison of all major profile variants.',
       },
     },
+  },
+};
+
+/**
+ * MobileSmall: Small Mobile Viewport (320px)
+ * Tests component on smallest modern mobile devices
+ */
+export const MobileSmall: Story = {
+  globals: {
+    viewport: { value: 'mobile1' },
+  },
+};
+
+/**
+ * MobileLarge: Large Mobile Viewport (414px)
+ * Tests component on larger modern mobile devices
+ */
+export const MobileLarge: Story = {
+  globals: {
+    viewport: { value: 'mobile2' },
+  },
+};
+
+/**
+ * DarkTheme: Dark Mode Theme
+ * Tests component appearance in dark mode
+ */
+export const DarkTheme: Story = {
+  globals: {
+    theme: 'dark',
+  },
+};
+
+/**
+ * LightTheme: Light Mode Theme
+ * Tests component appearance in light mode
+ */
+export const LightTheme: Story = {
+  globals: {
+    theme: 'light',
   },
 };

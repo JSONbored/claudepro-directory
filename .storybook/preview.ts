@@ -15,8 +15,9 @@
  * @see https://storybook.js.org/docs/nextjs/configure/overview#configure-story-rendering
  */
 
-import type { Preview } from '@storybook/nextjs';
-import { ThemeProvider } from 'next-themes';
+import type { Preview, Decorator } from '@storybook/react';
+import { useEffect } from 'react';
+import { ThemeProvider, useTheme } from 'next-themes';
 import React from 'react';
 
 // Import Tailwind CSS styles
@@ -29,27 +30,60 @@ import { VIEWPORT_PRESETS, BREAKPOINTS } from '../src/lib/ui-constants.storybook
 import { PostCopyEmailProvider } from '../src/components/infra/providers/post-copy-email-provider.mock';
 
 /**
+ * Theme Sync Component
+ * Syncs Storybook toolbar theme selection with next-themes
+ * Receives theme from decorator via props instead of useGlobals
+ */
+const ThemeSync = ({ children, theme: toolbarTheme }: { children: React.ReactNode; theme?: string }) => {
+  const { setTheme } = useTheme();
+
+  useEffect(() => {
+    if (toolbarTheme && (toolbarTheme === 'light' || toolbarTheme === 'dark' || toolbarTheme === 'system')) {
+      setTheme(toolbarTheme);
+    }
+  }, [toolbarTheme, setTheme]);
+
+  return React.createElement(React.Fragment, {}, children);
+};
+
+/**
  * Global Decorator: Wraps all stories with ThemeProvider and PostCopyEmailProvider
  * Provides dark mode support and email capture context to all components
  *
+ * CRITICAL FIX: Changed attribute from 'class' to 'data-theme' to match production
+ * Production uses: document.documentElement.setAttribute('data-theme', newTheme)
+ * TailwindCSS reads: [data-theme='dark'] for dark mode styles
+ *
  * Note: Using createElement instead of JSX for Storybook SWC compatibility
  */
-const withThemeProvider = (Story: React.ComponentType) => {
+const withThemeProvider: Decorator = (Story, context) => {
+  // Get theme from story-level globals (overrides toolbar) or toolbar selection
+  // Story-level globals take priority to allow theme variant stories to work
+  const storyGlobals = context.parameters?.globals as { theme?: string } | undefined;
+  const toolbarTheme = context.globals.theme as string | undefined;
+  const effectiveTheme = storyGlobals?.theme || toolbarTheme;
+
   return React.createElement(
     ThemeProvider,
     {
-      attribute: 'class',
-      defaultTheme: 'system',
+      attribute: 'data-theme',       // FIXED: Was 'class', now matches production
+      defaultTheme: effectiveTheme || 'dark',  // Use effective theme or default to dark
       enableSystem: true,
       disableTransitionOnChange: false,
+      storageKey: 'storybook-theme',  // Separate from production storage
+      forcedTheme: effectiveTheme,      // Force the theme (story-level or toolbar)
     },
     React.createElement(
-      PostCopyEmailProvider,
-      {},
+      ThemeSync,
+      { theme: effectiveTheme },
       React.createElement(
-        'div',
-        { className: 'min-h-screen bg-background text-foreground' },
-        React.createElement(Story)
+        PostCopyEmailProvider,
+        {},
+        React.createElement(
+          'div',
+          { className: 'min-h-screen bg-background text-foreground' },
+          React.createElement(Story)
+        )
       )
     )
   );
@@ -147,12 +181,20 @@ const preview: Preview = {
      */
     viewport: {
       viewports: {
-        // Mobile Viewports
-        mobile: {
-          name: `Mobile (${BREAKPOINTS.mobile}px)`,
+        // Mobile Viewports (matching Storybook MINIMAL_VIEWPORTS standard)
+        mobile1: {
+          name: 'Small mobile',
           styles: {
-            width: `${BREAKPOINTS.mobile}px`,
+            width: '320px',
             height: '568px',
+          },
+          type: 'mobile',
+        },
+        mobile2: {
+          name: 'Large mobile',
+          styles: {
+            width: '414px',
+            height: '896px',
           },
           type: 'mobile',
         },
@@ -173,12 +215,12 @@ const preview: Preview = {
           type: 'mobile',
         },
 
-        // Tablet Viewports
+        // Tablet Viewports (matching Storybook MINIMAL_VIEWPORTS standard)
         tablet: {
-          name: `Tablet (${BREAKPOINTS.tablet}px)`,
+          name: 'Tablet',
           styles: {
-            width: `${BREAKPOINTS.tablet}px`,
-            height: '1024px',
+            width: '834px',
+            height: '1112px',
           },
           type: 'tablet',
         },
@@ -265,14 +307,17 @@ const preview: Preview = {
   /**
    * Global Types
    * Define toolbar items
+   *
+   * FIXED: Changed defaultValue from 'light' to 'dark' to match site default
+   * This toolbar now controls the ThemeProvider via ThemeSync component
    */
   globalTypes: {
     theme: {
       description: 'Global theme for components',
-      defaultValue: 'light',
+      defaultValue: 'dark',  // FIXED: Match site default (dark mode)
       toolbar: {
         title: 'Theme',
-        icon: 'circlehollow',
+        icon: 'circle',  // FIXED: dark icon for dark default
         items: [
           { value: 'light', icon: 'circlehollow', title: 'Light' },
           { value: 'dark', icon: 'circle', title: 'Dark' },

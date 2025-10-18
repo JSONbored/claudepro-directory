@@ -169,18 +169,18 @@ Compact navigation state after scrolling past 20px threshold.
 };
 
 /**
- * MOBILE VIEWPORT
- * Navigation on mobile devices with sheet menu
+ * MOBILE SMALL (320px)
+ * Navigation on small mobile devices with sheet menu
  */
-export const Mobile: Story = {
+export const MobileSmall: Story = {
+  globals: {
+    viewport: { value: 'mobile1' },
+  },
   parameters: {
-    viewport: {
-      defaultViewport: 'mobile1',
-    },
     docs: {
       description: {
         story: `
-Mobile navigation with sheet-based menu.
+Small mobile navigation (320px) with sheet-based menu.
 
 **Mobile Features:**
 - Hamburger menu button
@@ -201,14 +201,47 @@ Mobile navigation with sheet-based menu.
 };
 
 /**
+ * MOBILE LARGE (414px)
+ * Navigation on large mobile devices with sheet menu
+ */
+export const MobileLarge: Story = {
+  globals: {
+    viewport: { value: 'mobile2' },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Large mobile navigation (414px) with sheet-based menu.
+
+**Mobile Features:**
+- Hamburger menu button
+- Full-screen sheet overlay
+- Stacked navigation links
+- Large touch targets (h-16)
+- More horizontal space for content
+- Social action buttons (Discord, GitHub, Theme)
+- Swipe to close support
+
+**Touch Optimization:**
+- Minimum 44x44px touch targets
+- Active state scaling (scale-[0.95])
+- Extra space for better UX
+        `,
+      },
+    },
+  },
+};
+
+/**
  * TABLET VIEWPORT
  * Navigation on tablet devices
  */
 export const Tablet: Story = {
+  globals: {
+    viewport: { value: 'tablet' },
+  },
   parameters: {
-    viewport: {
-      defaultViewport: 'tablet',
-    },
     docs: {
       description: {
         story: `
@@ -230,10 +263,10 @@ Tablet navigation showing responsive breakpoints.
  * Navigation on large desktop screens
  */
 export const DesktopWide: Story = {
+  globals: {
+    viewport: { value: 'desktop' },
+  },
   parameters: {
-    viewport: {
-      defaultViewport: 'desktop',
-    },
     docs: {
       description: {
         story: `
@@ -377,7 +410,7 @@ Navigation with "New" badge on Skills link.
  */
 export const DarkTheme: Story = {
   parameters: {
-    backgrounds: { default: 'dark' },
+    globals: { theme: 'dark' },
     docs: {
       description: {
         story: `
@@ -401,7 +434,7 @@ Navigation optimized for dark theme.
  */
 export const LightTheme: Story = {
   parameters: {
-    backgrounds: { default: 'light' },
+    globals: { theme: 'light' },
     docs: {
       description: {
         story: `
