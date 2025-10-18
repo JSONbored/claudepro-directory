@@ -114,6 +114,8 @@
     "validate:titles": "tsx scripts/validation/verify-titles.ts",
     "validate:titles:quick": "tsx scripts/validation/verify-titles.ts --quick",
     "validate:llmstxt": "tsx scripts/validation/validate-llmstxt.ts",
+    "validate:metadata": "tsx scripts/validation/validate-metadata.ts",
+    "validate:metadata:quick": "tsx scripts/validation/validate-metadata.ts --quick",
     "prepare": "command -v lefthook >/dev/null 2>&1 && LEFTHOOK_CONFIG=config/tools/lefthook.yml lefthook install && rm -f lefthook.yml || echo 'Skipping lefthook install (not available)'",
     "analyze:architecture": "npx skott --displayMode=webapp",
     "analyze:unused": "npx knip -c config/tools/knip.json",

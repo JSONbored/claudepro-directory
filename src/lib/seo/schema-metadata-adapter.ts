@@ -8,14 +8,15 @@
  * - Configuration-driven: Metadata rules derived from UNIFIED_CATEGORY_REGISTRY
  * - Schema-first: Metadata generated from content schemas (NO manual duplication)
  * - Dynamic: New categories automatically get optimized metadata
- * - Validated: All output passes Zod validation (50-60 char titles, 150-160 char descriptions)
+ * - Validated: All output passes Zod validation (53-60 char titles, 150-160 char descriptions)
  * - AI-optimized: Year mentions, freshness signals, optimal keyword density
  *
- * October 2025 Standards:
- * - Title: 50-60 chars (Google optimal)
- * - Description: 150-160 chars (AI engines prefer this)
+ * October 2025 Standards (Optimized):
+ * - Title: 53-60 chars (optimized for keyword density within Google ~600px limit)
+ * - Description: 150-160 chars (Google ~920px desktop, ~680px mobile)
  * - Keywords: 3-10 keywords, max 30 chars each
- * - Canonical: HTTPS, no trailing slash
+ * - Canonical: HTTPS, no trailing slash (except homepage)
+ * - Separator: Hyphens (-) not pipes (|) for 2025 SEO best practices
  *
  * @see lib/config/category-config.ts - Single source of truth for categories
  * @module lib/seo/schema-metadata-adapter

@@ -19,12 +19,11 @@ import { APP_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import { generateOGImageUrl, OG_IMAGE_DIMENSIONS } from '@/src/lib/og/url-generator';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
-import type { MetadataContext, RouteMetadata, TitleConfig } from '@/src/lib/seo/metadata-registry';
-import {
-  applyAIOptimization,
-  METADATA_DEFAULTS,
-  METADATA_REGISTRY,
-} from '@/src/lib/seo/metadata-registry';
+import type { MetadataContext } from '@/src/lib/seo/metadata-registry';
+import { METADATA_DEFAULTS } from '@/src/lib/seo/metadata-registry';
+import { getTemplate } from '@/src/lib/seo/metadata-templates';
+import { extractContext } from '@/src/lib/seo/pattern-matcher';
+import { classifyRoute } from '@/src/lib/seo/route-classifier';
 import { deriveMetadataFromSchema } from '@/src/lib/seo/schema-metadata-adapter';
 
 // ============================================
@@ -138,112 +137,6 @@ function generateFallbackMetadata(route: string, context?: MetadataContext): Met
   };
 }
 
-/**
- * Convert ValidatedMetadata to Next.js Metadata format
- * Adds author, article schema, and other enhancements based on config
- */
-function convertToNextMetadata(
-  validated: ValidatedMetadata,
-  route: string,
-  config: RouteMetadata,
-  context?: MetadataContext
-): Metadata {
-  const metadata: Metadata = {
-    title: validated.title,
-    description: validated.description,
-    ...(validated.keywords &&
-      validated.keywords.length > 0 && { keywords: validated.keywords.join(', ') }),
-    alternates: {
-      canonical: validated.canonicalUrl,
-      types:
-        route === '/:category/:slug' && context?.params?.category && context?.params?.slug
-          ? {
-              'text/plain': `/${context.params.category}/${context.params.slug}/llms.txt`,
-            }
-          : undefined,
-    },
-    openGraph: {
-      title: validated.openGraph.title,
-      description: validated.openGraph.description,
-      type: validated.openGraph.type,
-      url: validated.canonicalUrl,
-      siteName: METADATA_DEFAULTS.siteName,
-      images: [
-        {
-          url: validated.openGraph.image.url,
-          width: validated.openGraph.image.width,
-          height: validated.openGraph.image.height,
-          alt: validated.openGraph.image.alt,
-          type: 'image/webp',
-        },
-      ],
-    },
-    twitter: validated.twitter
-      ? {
-          card: validated.twitter.card,
-          title: validated.twitter.title,
-          description: validated.twitter.description,
-          images: [
-            {
-              url: validated.openGraph.image.url,
-              width: validated.openGraph.image.width,
-              height: validated.openGraph.image.height,
-              alt: validated.twitter.title,
-            },
-          ],
-        }
-      : undefined,
-    robots: validated.robots
-      ? {
-          index: validated.robots.index,
-          follow: validated.robots.follow,
-          googleBot: {
-            index: validated.robots.index,
-            follow: validated.robots.follow,
-            'max-video-preview': -1,
-            'max-image-preview': 'large',
-            'max-snippet': -1,
-          },
-        }
-      : {
-          index: true,
-          follow: true,
-          googleBot: {
-            index: true,
-            follow: true,
-            'max-video-preview': -1,
-            'max-image-preview': 'large',
-            'max-snippet': -1,
-          },
-        },
-  };
-
-  // Add author if specified and available in context
-  if (config.structuredData.author && context?.item?.author) {
-    metadata.authors = [{ name: context.item.author }];
-  }
-
-  // Add published/modified dates for Article schema
-  if (config.aiOptimization?.useArticleSchema && context?.item) {
-    const ogMetadata = metadata.openGraph as Record<string, unknown>;
-    ogMetadata.type = 'article';
-
-    if (context.item.dateAdded) {
-      ogMetadata.publishedTime = context.item.dateAdded;
-    }
-
-    if (context.item.lastModified) {
-      ogMetadata.modifiedTime = context.item.lastModified;
-    }
-
-    if (context.item.author) {
-      ogMetadata.authors = [context.item.author];
-    }
-  }
-
-  return metadata;
-}
-
 // ============================================
 // SCHEMA DERIVATION HELPERS
 // ============================================
@@ -336,6 +229,187 @@ function generateSmartDefaultMetadata(route: string, context?: MetadataContext):
 }
 
 // ============================================
+// SHARED METADATA BUILDER (DRY)
+// ============================================
+
+/**
+ * Metadata Components - Input for shared builder
+ *
+ * Single source of truth for metadata content (title, description, keywords).
+ * Builder handles the rest (URLs, OpenGraph, Twitter, validation, conversion).
+ */
+interface MetadataComponents {
+  /** Page title (required) */
+  title: string;
+  /** Meta description (required) */
+  description: string;
+  /** SEO keywords (optional) */
+  keywords?: string[];
+  /** OpenGraph type (default: 'website') */
+  openGraphType?: 'website' | 'article';
+  /** Twitter card type (default: 'summary_large_image') */
+  twitterCard?: 'summary' | 'summary_large_image';
+  /** Robots directives (default: { index: true, follow: true }) */
+  robots?: {
+    index?: boolean;
+    follow?: boolean;
+    noarchive?: boolean;
+    nosnippet?: boolean;
+  };
+}
+
+/**
+ * Build complete Next.js Metadata object from components
+ *
+ * **SINGLE SOURCE OF TRUTH** for metadata object construction.
+ * Both pattern-based and registry-based generation use this builder.
+ *
+ * **What this function does:**
+ * 1. Builds canonical URL
+ * 2. Generates OG image URL
+ * 3. Constructs raw metadata object (OpenGraph, Twitter, etc.)
+ * 4. Validates metadata
+ * 5. Converts to Next.js Metadata format
+ *
+ * **What callers provide:**
+ * - Title, description, keywords (the content)
+ * - Route and context (for URLs)
+ *
+ * **Synchronous**: No async operations, optimal for Next.js metadata generation
+ *
+ * @param components - Metadata content components
+ * @param route - Route path for URL generation
+ * @param context - Optional context for dynamic data
+ * @returns Next.js Metadata object
+ *
+ * @example
+ * ```typescript
+ * // Pattern-based usage
+ * const template = getTemplate(pattern);
+ * const metadata = buildMetadataObject({
+ *   title: template.title(context),
+ *   description: template.description(context),
+ *   keywords: template.keywords(context),
+ * }, route, context);
+ *
+ * // Registry-based usage
+ * const metadata = buildMetadataObject({
+ *   title: config.title,
+ *   description: config.description,
+ *   keywords: config.keywords,
+ *   openGraphType: config.openGraph.type,
+ * }, route, context);
+ * ```
+ */
+function buildMetadataObject(
+  components: MetadataComponents,
+  route: string,
+  context?: MetadataContext
+): Metadata {
+  const {
+    title,
+    description,
+    keywords,
+    openGraphType = 'website',
+    twitterCard = 'summary_large_image',
+    robots,
+  } = components;
+
+  // Build canonical URL
+  const canonicalUrl = buildCanonicalUrl(route, context);
+
+  // Generate OG image URL
+  const pathForOG = new URL(canonicalUrl).pathname;
+  const ogImageUrl = generateOGImageUrl(pathForOG);
+
+  // Build raw metadata object for validation
+  // ValidatedMetadata robots requires ONLY { index: boolean, follow: boolean }
+  const rawMetadata: Partial<ValidatedMetadata> = {
+    title,
+    description,
+    ...(keywords && keywords.length > 0 && { keywords }),
+    canonicalUrl,
+    openGraph: {
+      title,
+      description,
+      type: openGraphType,
+      image: {
+        url: ogImageUrl,
+        width: OG_IMAGE_DIMENSIONS.width,
+        height: OG_IMAGE_DIMENSIONS.height,
+        alt: title,
+      },
+    },
+    twitter: {
+      card: twitterCard,
+      title,
+      description,
+    },
+    robots: robots
+      ? {
+          index: robots.index ?? true,
+          follow: robots.follow ?? true,
+        }
+      : undefined,
+  };
+
+  // Validate metadata (throws in dev, returns null in prod on failure)
+  const validated = validateMetadata(rawMetadata, route);
+
+  // If validation failed in production, use fallback
+  if (!validated) {
+    return generateFallbackMetadata(route, context);
+  }
+
+  // Build complete Next.js Metadata object
+  const metadata: Metadata = {
+    title: validated.title,
+    description: validated.description,
+    ...(validated.keywords &&
+      validated.keywords.length > 0 && { keywords: validated.keywords.join(', ') }),
+    alternates: {
+      canonical: validated.canonicalUrl,
+    },
+    openGraph: {
+      title: validated.openGraph.title,
+      description: validated.openGraph.description,
+      type: validated.openGraph.type,
+      url: validated.canonicalUrl,
+      siteName: METADATA_DEFAULTS.siteName,
+      images: [
+        {
+          url: validated.openGraph.image.url,
+          width: validated.openGraph.image.width,
+          height: validated.openGraph.image.height,
+          alt: validated.openGraph.image.alt,
+        },
+      ],
+    },
+    twitter: validated.twitter
+      ? {
+          card: validated.twitter.card,
+          title: validated.twitter.title,
+          description: validated.twitter.description,
+          images: [validated.openGraph.image.url],
+        }
+      : {
+          card: twitterCard,
+          title,
+          description,
+          images: [validated.openGraph.image.url],
+        },
+    robots: validated.robots
+      ? validated.robots
+      : {
+          index: true,
+          follow: true,
+        },
+  };
+
+  return metadata;
+}
+
+// ============================================
 // MAIN METADATA GENERATOR
 // ============================================
 
@@ -375,136 +449,56 @@ export function generatePageMetadata(route: string, context?: MetadataContext): 
     }
   }
 
-  // TIER 2: Get metadata config from registry
-  const config = METADATA_REGISTRY[route as keyof typeof METADATA_REGISTRY];
+  // TIER 1.5: Try pattern-based generation (NEW - October 2025)
+  // Classify route and attempt template-based metadata generation
+  const classification = classifyRoute(route);
 
-  if (!config) {
-    // TIER 3: Smart defaults for unknown routes
-    return generateSmartDefaultMetadata(route, context);
+  // PHASE 3A-3E: All patterns active (migration complete!)
+  // Pattern system activated for:
+  // - CATEGORY routes (Phase 3A, confidence ≥ 0.9)
+  // - CONTENT_DETAIL routes (Phase 3B, confidence ≥ 0.9)
+  // - STATIC routes (Phase 3C, confidence ≥ 0.5 - fallback classification)
+  // - ACCOUNT routes (Phase 3D, confidence ≥ 1.0)
+  // - USER_PROFILE routes (Phase 3E, confidence ≥ 1.0)
+  // - TOOL routes (Phase 3E, confidence ≥ 1.0)
+  // - AUTH routes (Phase 3E, confidence ≥ 1.0)
+  const isCategoryPattern =
+    classification.pattern === 'CATEGORY' && classification.confidence >= 0.9;
+  const isContentDetailPattern =
+    classification.pattern === 'CONTENT_DETAIL' && classification.confidence >= 0.9;
+  const isStaticPattern = classification.pattern === 'STATIC' && classification.confidence >= 0.5;
+  const isAccountPattern = classification.pattern === 'ACCOUNT' && classification.confidence >= 1.0;
+  const isUserProfilePattern =
+    classification.pattern === 'USER_PROFILE' && classification.confidence >= 1.0;
+  const isToolPattern = classification.pattern === 'TOOL' && classification.confidence >= 1.0;
+  const isAuthPattern = classification.pattern === 'AUTH' && classification.confidence >= 1.0;
+  const activatePattern =
+    isCategoryPattern ||
+    isContentDetailPattern ||
+    isStaticPattern ||
+    isAccountPattern ||
+    isUserProfilePattern ||
+    isToolPattern ||
+    isAuthPattern;
+
+  if (activatePattern) {
+    logger.info(`🎯 Attempting pattern-based generation for ${route}`, {
+      pattern: classification.pattern,
+      confidence: classification.confidence,
+    });
+
+    // Generate metadata from pattern (throws on error - no silent fallback)
+    const patternMetadata = generateMetadataFromPattern(route, context?.params, context?.item);
+
+    logger.info(`✅ Pattern-based metadata generated for ${route}`, {
+      pattern: classification.pattern,
+    });
+    return patternMetadata;
   }
 
-  // Build title
-  const title = resolveTitle(config.title, context);
-
-  // Resolve description (may be function or string)
-  const description = resolveValue(config.description, context);
-
-  // Resolve keywords (may be function or array)
-  const keywords = config.keywords ? resolveValue(config.keywords, context) : undefined;
-
-  // Build canonical URL
-  const canonicalUrl = buildCanonicalUrl(route, context);
-
-  // Extract path from canonical URL for OG image generation
-  // generateOGImageUrl expects a path (e.g., "/agents") not a full URL
-  const pathForOG = new URL(canonicalUrl).pathname;
-
-  // OpenGraph metadata - all routes now have this defined with proper type widening
-  const ogConfig = config.openGraph as {
-    title?: string;
-    description?: string;
-    type: 'website' | 'article';
-  };
-  const ogTitle = ogConfig.title || title;
-  const ogDescription = ogConfig.description || description;
-  const ogType = ogConfig.type;
-
-  // Twitter Card metadata - all routes now have this defined with proper type widening
-  const twitterConfig = config.twitter as {
-    title?: string;
-    description?: string;
-    card: 'summary' | 'summary_large_image';
-  };
-  const twitterTitle = twitterConfig.title || title;
-  const twitterDescription = twitterConfig.description || description;
-  const twitterCard = twitterConfig.card;
-
-  // Build raw metadata object for validation
-  // Use extracted path instead of full canonical URL
-  const ogImageUrl = generateOGImageUrl(pathForOG);
-
-  const rawMetadata: Partial<ValidatedMetadata> = {
-    title,
-    description,
-    ...(keywords && { keywords }), // Only add if defined - exactOptionalPropertyTypes requires explicit undefined handling
-    canonicalUrl,
-    openGraph: {
-      title: ogTitle,
-      description: ogDescription,
-      type: ogType,
-      image: {
-        url: ogImageUrl,
-        width: OG_IMAGE_DIMENSIONS.width,
-        height: OG_IMAGE_DIMENSIONS.height,
-        alt: ogTitle,
-      },
-    },
-    twitter: {
-      card: twitterCard,
-      title: twitterTitle,
-      description: twitterDescription,
-    },
-    robots:
-      'robots' in config && config.robots
-        ? config.robots
-        : {
-            index: true,
-            follow: true,
-          },
-  };
-
-  // Validate metadata (throws in dev, returns null in prod on failure)
-  const validated = validateMetadata(rawMetadata, route);
-
-  // If validation failed in production, use fallback
-  if (!validated) {
-    return generateFallbackMetadata(route, context);
-  }
-
-  // Apply AI optimization if enabled
-  let optimizedMetadata = validated;
-  if (config.aiOptimization) {
-    optimizedMetadata = applyAIOptimization(
-      validated,
-      config.aiOptimization,
-      context
-    ) as ValidatedMetadata;
-  }
-
-  // Convert validated metadata to Next.js format
-  return convertToNextMetadata(optimizedMetadata, route, config, context);
-}
-
-/**
- * Resolve title from configuration
- * Handles both static strings and dynamic title functions
- *
- * **PERFORMANCE**: Fully synchronous - no async overhead
- * Production-safe type checking with proper function resolution
- * Compatible with exactOptionalPropertyTypes: true
- */
-function resolveTitle(titleConfig: TitleConfig, context?: MetadataContext): string {
-  // Title is now either a string or a function that returns a string
-  if (typeof titleConfig === 'function') {
-    return titleConfig(context);
-  }
-
-  // It's a static string
-  return titleConfig as string;
-}
-
-/**
- * Resolve a value that may be a function or a direct value
- * **PERFORMANCE**: Fully synchronous - no async/Promise overhead
- */
-function resolveValue<T>(
-  value: T | ((context?: MetadataContext) => T),
-  context?: MetadataContext
-): T {
-  if (typeof value === 'function') {
-    return (value as (context?: MetadataContext) => T)(context);
-  }
-  return value;
+  // TIER 2: Smart defaults for unknown routes (fallback only)
+  // All 41 routes now use pattern system - this is only for edge cases
+  return generateSmartDefaultMetadata(route, context);
 }
 
 /**
@@ -543,6 +537,100 @@ function buildCanonicalUrl(route: string, context?: MetadataContext): string {
   }
 
   return `${APP_CONFIG.url}${path}`;
+}
+
+/**
+ * Generate metadata using pattern-based architecture
+ *
+ * **Enterprise Pattern-Based Metadata Generation (October 2025)**
+ *
+ * Uses route classification and templates to generate metadata automatically.
+ * This is the NEW system that eliminates manual route configuration.
+ *
+ * **Architecture:**
+ * 1. Classify route into one of 8 patterns
+ * 2. Extract context data for the pattern
+ * 3. Get template for the pattern
+ * 4. Generate metadata from template + context
+ * 5. Build complete Next.js Metadata object
+ *
+ * **Performance:** Fully synchronous for optimal build-time optimization
+ *
+ * @param route - Route path (e.g., '/', '/agents', '/agents/code-reviewer')
+ * @param params - Optional dynamic route params
+ * @param item - Optional content item data (for content detail pages)
+ * @returns Next.js Metadata object
+ *
+ * @example
+ * ```typescript
+ * // HOMEPAGE pattern
+ * export const metadata = generateMetadataFromPattern('/');
+ *
+ * // CATEGORY pattern
+ * export function generateMetadata({ params }) {
+ *   return generateMetadataFromPattern(`/${params.category}`, { category: params.category });
+ * }
+ *
+ * // CONTENT_DETAIL pattern
+ * export async function generateMetadata({ params }) {
+ *   const item = await getContentBySlug(params.category, params.slug);
+ *   return generateMetadataFromPattern(
+ *     `/${params.category}/${params.slug}`,
+ *     { category: params.category, slug: params.slug },
+ *     item
+ *   );
+ * }
+ * ```
+ */
+export function generateMetadataFromPattern(
+  route: string,
+  params?: Record<string, string | string[]>,
+  item?: unknown
+): Metadata {
+  // Step 1: Classify the route
+  const classification = classifyRoute(route);
+
+  logger.info(`🔍 Route classified as ${classification.pattern}`, {
+    route,
+    pattern: classification.pattern,
+    confidence: classification.confidence,
+  });
+
+  // Step 2: Extract context for this pattern
+  const context = extractContext(classification, params || {}, item);
+
+  // Step 3: Get template for this pattern
+  const template = getTemplate(classification.pattern);
+
+  // Step 4: Generate metadata content from template
+  const title = template.title(context);
+  const description = template.description(context);
+  const keywords = template.keywords(context);
+
+  // Step 5: Build metadata using shared builder (DRY)
+  const metadata = buildMetadataObject(
+    {
+      title,
+      description,
+      keywords,
+      openGraphType: 'website',
+      twitterCard: 'summary_large_image',
+      robots: {
+        index: true,
+        follow: true,
+      },
+    },
+    route,
+    context
+  );
+
+  logger.info(`✅ Metadata generated for ${route}`, {
+    pattern: classification.pattern,
+    titleLength: metadata.title ? String(metadata.title).length : 0,
+    descLength: metadata.description?.length || 0,
+  });
+
+  return metadata;
 }
 
 /**

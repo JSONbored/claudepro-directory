@@ -581,7 +581,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     colorScheme: 'emerald-500',
     keywords: 'Claude skills, document processing, pdf, docx, pptx, xlsx, how-to, examples',
     metaDescription:
-      'Practical Claude Skills for October 2025: PDF/DOCX/PPTX/XLSX workflows with exact dependencies, copy-pasteable code examples, and troubleshooting.',
+      'Practical Claude Skills for October 2025: PDF/DOCX/PPTX/XLSX workflows with exact dependencies, copy-pasteable code examples, and troubleshooting guides.',
     schema: skillContentSchema,
     typeName: 'SkillContent',
     generateFullContent: true,
@@ -639,7 +639,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     keywords:
       'Claude guides, tutorials, comparisons, workflows, use cases, troubleshooting, best practices',
     metaDescription:
-      'Expert Claude guides for October 2025: In-depth tutorials, feature comparisons, workflow automation, use case examples, and troubleshooting solutions.',
+      'Expert Claude guides for October 2025: In-depth tutorials, feature comparisons, workflow automation, use case examples, troubleshooting, and best practices.',
     schema: guideContentSchema,
     typeName: 'GuideContent',
     generateFullContent: true,
@@ -698,7 +698,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     colorScheme: 'indigo-500',
     keywords: 'AI jobs, Claude jobs, prompt engineering, AI development, remote AI jobs',
     metaDescription:
-      'AI job board for October 2025: Claude-related positions, prompt engineering roles, AI development opportunities. Remote and on-site positions.',
+      'AI job board for October 2025: Claude-related positions, prompt engineering roles, AI development opportunities. Remote and on-site positions available.',
     schema: jobSchema,
     typeName: 'Job',
     generateFullContent: false,
@@ -749,7 +749,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     colorScheme: 'slate-500',
     keywords: 'changelog, updates, new features, improvements, release notes',
     metaDescription:
-      'Claude Pro Directory changelog for October 2025: Latest features, improvements, bug fixes, and platform updates.',
+      'Claude Pro Directory changelog for October 2025: Latest features, improvements, bug fixes, platform updates, new integrations, and performance enhancements.',
     schema: guideContentSchema, // Reuse guide schema (changelog is markdown content)
     typeName: 'GuideContent',
     generateFullContent: true,

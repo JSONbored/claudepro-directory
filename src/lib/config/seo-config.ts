@@ -2,18 +2,18 @@
  * SEO Configuration
  * Centralized SEO constants for title optimization, metadata validation, and structured data
  *
- * October 2025 Standards:
- * - Title: 55-60 chars (Google optimal)
- * - Description: 150-160 chars (AI engines prefer concise)
+ * October 2025 Standards (Optimized):
+ * - Title: 53-60 chars (optimized for keyword density within Google ~600px limit)
+ * - Description: 150-160 chars (Google ~920px desktop, ~680px mobile)
  * - Keywords: 3-10 keywords, max 30 chars each
  * - Canonical: HTTPS, no trailing slash (except homepage)
  * - AI Optimization: Year mentions, freshness signals
  *
  * Title Generation Architecture:
- * All page titles generated via metadata-registry.ts helpers:
- * - buildPageTitle(): Static pages (homepage, trending, etc.)
- * - buildContentTitle(): Content pages with smart truncation
- * - smartTruncate(): Word-boundary-aware title truncation
+ * All page titles generated via pattern-based system (metadata-templates.ts):
+ * - 8 route patterns with dedicated templates
+ * - Enterprise smart truncation/padding for descriptions
+ * - 100% pattern coverage (all 41 routes)
  *
  * Consolidation: Moved from src/lib/constants.ts
  * - SEO_CONFIG (core SEO settings)
@@ -65,9 +65,9 @@ export const SUFFIX_LENGTHS = {
 export const MAX_TITLE_LENGTH = 60;
 
 /**
- * Optimal title range for SEO
+ * Optimal title range for SEO (2025 Optimized: 53-60 chars for keyword density)
  */
-export const OPTIMAL_MIN = 55;
+export const OPTIMAL_MIN = 53;
 export const OPTIMAL_MAX = 60;
 
 /**
