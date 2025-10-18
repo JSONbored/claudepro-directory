@@ -9,7 +9,7 @@ import fs from 'fs/promises';
 import type { Metadata } from 'next';
 import path from 'path';
 import { ContentListServer } from '@/src/components/content-list-server';
-import { InlineEmailCTA } from '@/src/components/features/growth/inline-email-cta';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { statsRedis } from '@/src/lib/cache.server';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { logger } from '@/src/lib/logger';
@@ -137,7 +137,8 @@ export default async function GuidesPage() {
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
-        <InlineEmailCTA
+        <UnifiedNewsletterCapture
+          source="content_page"
           variant="hero"
           context="guides-page"
           headline="Join 1,000+ Claude Power Users"

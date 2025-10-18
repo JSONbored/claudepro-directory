@@ -11,11 +11,10 @@
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { FormField } from '@/src/components/forms/utilities/form-field';
 import { Button } from '@/src/components/primitives/button';
 import { Checkbox } from '@/src/components/primitives/checkbox';
-import { Input } from '@/src/components/primitives/input';
 import { Label } from '@/src/components/primitives/label';
-import { Textarea } from '@/src/components/primitives/textarea';
 import { createCollection, updateCollection } from '@/src/lib/actions/content.actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -47,10 +46,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
   const [isPending, startTransition] = useTransition();
   const [selectedBookmarks, setSelectedBookmarks] = useState<string[]>([]);
 
-  // Generate unique IDs for form fields
-  const nameId = useId();
-  const slugId = useId();
-  const descriptionId = useId();
+  // Generate unique ID for checkbox (FormField auto-generates IDs for other fields)
   const isPublicId = useId();
 
   // Form state
@@ -131,55 +127,44 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Collection Name */}
-      <div className="space-y-2">
-        <Label htmlFor={nameId}>
-          Collection Name <span className="text-destructive">*</span>
-        </Label>
-        <Input
-          id={nameId}
-          type="text"
-          placeholder="My Awesome Collection"
-          value={name}
-          onChange={(e) => handleNameChange(e.target.value)}
-          maxLength={100}
-          required
-          disabled={isPending}
-        />
-        <p className={'text-xs text-muted-foreground'}>{name.length}/100 characters</p>
-      </div>
+      <FormField
+        variant="input"
+        label="Collection Name"
+        type="text"
+        placeholder="My Awesome Collection"
+        value={name}
+        onChange={(e) => handleNameChange(e.target.value)}
+        maxLength={100}
+        showCharCount
+        required
+        disabled={isPending}
+      />
 
       {/* Collection Slug */}
-      <div className="space-y-2">
-        <Label htmlFor={slugId}>Slug</Label>
-        <Input
-          id={slugId}
-          type="text"
-          placeholder="my-awesome-collection"
-          value={slug}
-          onChange={(e) => setSlug(e.target.value.toLowerCase())}
-          maxLength={100}
-          pattern="[a-z0-9-]+"
-          disabled={isPending}
-        />
-        <p className={'text-xs text-muted-foreground'}>
-          Used in URL. Leave empty to auto-generate from name.
-        </p>
-      </div>
+      <FormField
+        variant="input"
+        label="Slug"
+        type="text"
+        placeholder="my-awesome-collection"
+        value={slug}
+        onChange={(e) => setSlug(e.target.value.toLowerCase())}
+        maxLength={100}
+        disabled={isPending}
+        description="Used in URL. Leave empty to auto-generate from name."
+      />
 
       {/* Description */}
-      <div className="space-y-2">
-        <Label htmlFor={descriptionId}>Description</Label>
-        <Textarea
-          id={descriptionId}
-          placeholder="Describe what this collection is about..."
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          maxLength={500}
-          rows={3}
-          disabled={isPending}
-        />
-        <p className={'text-xs text-muted-foreground'}>{description.length}/500 characters</p>
-      </div>
+      <FormField
+        variant="textarea"
+        label="Description"
+        placeholder="Describe what this collection is about..."
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        maxLength={500}
+        showCharCount
+        rows={3}
+        disabled={isPending}
+      />
 
       {/* Public Toggle */}
       <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} rounded-lg border p-4`}>

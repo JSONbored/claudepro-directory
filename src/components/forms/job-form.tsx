@@ -7,8 +7,9 @@
  * Follows patterns from existing forms and react-hook-form integration
  */
 
-import { useId, useState, useTransition } from 'react';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { useState, useTransition } from 'react';
+import { FormField } from '@/src/components/forms/utilities/form-field';
+import { ListItemManager } from '@/src/components/forms/utilities/list-item-manager';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -17,8 +18,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { Input } from '@/src/components/primitives/input';
-import { Label } from '@/src/components/primitives/label';
 import {
   Select,
   SelectContent,
@@ -26,7 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/primitives/select';
-import { Textarea } from '@/src/components/primitives/textarea';
 import { ROUTES } from '@/src/lib/constants/routes';
 import type { CreateJobInput } from '@/src/lib/schemas/content/job.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -45,26 +43,6 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
   const [tags, setTags] = useState<string[]>(initialData?.tags || []);
   const [requirements, setRequirements] = useState<string[]>(initialData?.requirements || []);
   const [benefits, setBenefits] = useState<string[]>(initialData?.benefits || []);
-  const [currentTag, setCurrentTag] = useState('');
-  const [currentRequirement, setCurrentRequirement] = useState('');
-  const [currentBenefit, setCurrentBenefit] = useState('');
-
-  // Generate unique IDs for form fields
-  const titleId = useId();
-  const companyId = useId();
-  const typeId = useId();
-  const workplaceId = useId();
-  const locationId = useId();
-  const experienceId = useId();
-  const categoryId = useId();
-  const salaryId = useId();
-  const descriptionId = useId();
-  const requirementInputId = useId();
-  const benefitInputId = useId();
-  const tagInputId = useId();
-  const linkId = useId();
-  const contactEmailId = useId();
-  const companyLogoId = useId();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -115,39 +93,6 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
     });
   };
 
-  const addTag = () => {
-    if (currentTag && !tags.includes(currentTag) && tags.length < 10) {
-      setTags([...tags, currentTag]);
-      setCurrentTag('');
-    }
-  };
-
-  const removeTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag));
-  };
-
-  const addRequirement = () => {
-    if (currentRequirement && requirements.length < 20) {
-      setRequirements([...requirements, currentRequirement]);
-      setCurrentRequirement('');
-    }
-  };
-
-  const removeRequirement = (index: number) => {
-    setRequirements(requirements.filter((_, i) => i !== index));
-  };
-
-  const addBenefit = () => {
-    if (currentBenefit && benefits.length < 20) {
-      setBenefits([...benefits, currentBenefit]);
-      setCurrentBenefit('');
-    }
-  };
-
-  const removeBenefit = (index: number) => {
-    setBenefits(benefits.filter((_, i) => i !== index));
-  };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Basic Info */}
@@ -157,130 +102,111 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           <CardDescription>Basic information about the position</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor={titleId}>Job Title *</Label>
-            <Input
-              id={titleId}
-              name="title"
-              defaultValue={initialData?.title}
-              required
-              placeholder="e.g., Senior AI Engineer"
-            />
-          </div>
+          <FormField
+            variant="input"
+            label="Job Title"
+            name="title"
+            {...(initialData?.title && { defaultValue: initialData.title })}
+            required
+            placeholder="e.g., Senior AI Engineer"
+          />
 
-          <div>
-            <Label htmlFor={companyId}>Company *</Label>
-            <Input
-              id={companyId}
-              name="company"
-              defaultValue={initialData?.company}
+          <FormField
+            variant="input"
+            label="Company"
+            name="company"
+            {...(initialData?.company && { defaultValue: initialData.company })}
+            required
+            placeholder="e.g., Acme Corp"
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              variant="select"
+              label="Employment Type"
+              name="type"
+              defaultValue={initialData?.type || 'full-time'}
               required
-              placeholder="e.g., Acme Corp"
-            />
+            >
+              <SelectItem value="full-time">Full Time</SelectItem>
+              <SelectItem value="part-time">Part Time</SelectItem>
+              <SelectItem value="contract">Contract</SelectItem>
+              <SelectItem value="internship">Internship</SelectItem>
+              <SelectItem value="freelance">Freelance</SelectItem>
+            </FormField>
+
+            <FormField
+              variant="select"
+              label="Workplace"
+              name="workplace"
+              defaultValue={initialData?.workplace || 'Remote'}
+              required
+            >
+              <SelectItem value="Remote">Remote</SelectItem>
+              <SelectItem value="On site">On site</SelectItem>
+              <SelectItem value="Hybrid">Hybrid</SelectItem>
+            </FormField>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor={typeId}>Employment Type *</Label>
-              <Select name="type" defaultValue={initialData?.type || 'full-time'}>
-                <SelectTrigger id={typeId}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="full-time">Full Time</SelectItem>
-                  <SelectItem value="part-time">Part Time</SelectItem>
-                  <SelectItem value="contract">Contract</SelectItem>
-                  <SelectItem value="internship">Internship</SelectItem>
-                  <SelectItem value="freelance">Freelance</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor={workplaceId}>Workplace *</Label>
-              <Select name="workplace" defaultValue={initialData?.workplace || 'Remote'}>
-                <SelectTrigger id={workplaceId}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Remote">Remote</SelectItem>
-                  <SelectItem value="On site">On site</SelectItem>
-                  <SelectItem value="Hybrid">Hybrid</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor={locationId}>Location</Label>
-              <Input
-                id={locationId}
-                name="location"
-                defaultValue={initialData?.location || ''}
-                placeholder="e.g., San Francisco, CA"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor={experienceId}>Experience Level</Label>
-              <Select name="experience" defaultValue={initialData?.experience || ''}>
-                <SelectTrigger id={experienceId}>
-                  <SelectValue placeholder="Select level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Entry">Entry Level</SelectItem>
-                  <SelectItem value="Mid">Mid Level</SelectItem>
-                  <SelectItem value="Senior">Senior</SelectItem>
-                  <SelectItem value="Lead">Lead</SelectItem>
-                  <SelectItem value="Executive">Executive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor={categoryId}>Category *</Label>
-              <Select name="category" defaultValue={initialData?.category || 'engineering'}>
-                <SelectTrigger id={categoryId}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="engineering">Engineering</SelectItem>
-                  <SelectItem value="design">Design</SelectItem>
-                  <SelectItem value="product">Product</SelectItem>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="sales">Sales</SelectItem>
-                  <SelectItem value="support">Support</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor={salaryId}>Salary Range</Label>
-              <Input
-                id={salaryId}
-                name="salary"
-                defaultValue={initialData?.salary || ''}
-                placeholder="e.g., $120k - $180k"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor={descriptionId}>Job Description *</Label>
-            <Textarea
-              id={descriptionId}
-              name="description"
-              defaultValue={initialData?.description}
-              required
-              rows={6}
-              placeholder="Describe the role, responsibilities, and what makes this opportunity great..."
-              className="resize-none"
+            <FormField
+              variant="input"
+              label="Location"
+              name="location"
+              defaultValue={initialData?.location || ''}
+              placeholder="e.g., San Francisco, CA"
             />
-            <p className={'text-xs text-muted-foreground mt-1'}>Minimum 50 characters</p>
+
+            <FormField
+              variant="select"
+              label="Experience Level"
+              name="experience"
+              defaultValue={initialData?.experience || ''}
+              placeholder="Select level"
+            >
+              <SelectItem value="Entry">Entry Level</SelectItem>
+              <SelectItem value="Mid">Mid Level</SelectItem>
+              <SelectItem value="Senior">Senior</SelectItem>
+              <SelectItem value="Lead">Lead</SelectItem>
+              <SelectItem value="Executive">Executive</SelectItem>
+            </FormField>
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              variant="select"
+              label="Category"
+              name="category"
+              defaultValue={initialData?.category || 'engineering'}
+              required
+            >
+              <SelectItem value="engineering">Engineering</SelectItem>
+              <SelectItem value="design">Design</SelectItem>
+              <SelectItem value="product">Product</SelectItem>
+              <SelectItem value="marketing">Marketing</SelectItem>
+              <SelectItem value="sales">Sales</SelectItem>
+              <SelectItem value="support">Support</SelectItem>
+            </FormField>
+
+            <FormField
+              variant="input"
+              label="Salary Range"
+              name="salary"
+              defaultValue={initialData?.salary || ''}
+              placeholder="e.g., $120k - $180k"
+            />
+          </div>
+
+          <FormField
+            variant="textarea"
+            label="Job Description"
+            name="description"
+            {...(initialData?.description && { defaultValue: initialData.description })}
+            required
+            rows={6}
+            placeholder="Describe the role, responsibilities, and what makes this opportunity great..."
+            description="Minimum 50 characters"
+          />
         </CardContent>
       </Card>
 
@@ -290,49 +216,15 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           <CardTitle>Requirements</CardTitle>
           <CardDescription>Skills and qualifications needed</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor={requirementInputId}>Add Requirement</Label>
-            <div className={UI_CLASSES.FLEX_GAP_2}>
-              <Input
-                id={requirementInputId}
-                value={currentRequirement}
-                onChange={(e) => setCurrentRequirement(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addRequirement();
-                  }
-                }}
-                placeholder="e.g., 5+ years of Python experience"
-              />
-              <Button type="button" onClick={addRequirement} variant="outline">
-                Add
-              </Button>
-            </div>
-          </div>
-
-          {requirements.length > 0 && (
-            <div className="space-y-2">
-              {requirements.map((req) => (
-                <div
-                  key={req}
-                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-2 border rounded`}
-                >
-                  <span className="text-sm">{req}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeRequirement(requirements.indexOf(req))}
-                    aria-label={`Remove requirement: ${req}`}
-                  >
-                    ×
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
+        <CardContent>
+          <ListItemManager
+            variant="list"
+            label="Add Requirement"
+            items={requirements}
+            onChange={setRequirements}
+            placeholder="e.g., 5+ years of Python experience"
+            maxItems={20}
+          />
         </CardContent>
       </Card>
 
@@ -342,45 +234,16 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           <CardTitle>Benefits (Optional)</CardTitle>
           <CardDescription>Perks and benefits offered</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor={benefitInputId}>Add Benefit</Label>
-            <div className={UI_CLASSES.FLEX_GAP_2}>
-              <Input
-                id={benefitInputId}
-                value={currentBenefit}
-                onChange={(e) => setCurrentBenefit(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addBenefit();
-                  }
-                }}
-                placeholder="e.g., Health insurance, 401k, Remote work"
-              />
-              <Button type="button" onClick={addBenefit} variant="outline">
-                Add
-              </Button>
-            </div>
-          </div>
-
-          {benefits.length > 0 && (
-            <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-              {benefits.map((benefit) => (
-                <UnifiedBadge key={benefit} variant="base" style="secondary">
-                  {benefit}
-                  <button
-                    type="button"
-                    onClick={() => removeBenefit(benefits.indexOf(benefit))}
-                    className="ml-1 hover:text-destructive"
-                    aria-label={`Remove benefit: ${benefit}`}
-                  >
-                    ×
-                  </button>
-                </UnifiedBadge>
-              ))}
-            </div>
-          )}
+        <CardContent>
+          <ListItemManager
+            variant="badge"
+            label="Add Benefit"
+            items={benefits}
+            onChange={setBenefits}
+            placeholder="e.g., Health insurance, 401k, Remote work"
+            maxItems={20}
+            badgeStyle="secondary"
+          />
         </CardContent>
       </Card>
 
@@ -390,49 +253,19 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           <CardTitle>Tags *</CardTitle>
           <CardDescription>Keywords for search (minimum 1, maximum 10)</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor={tagInputId}>Add Tag</Label>
-            <div className={UI_CLASSES.FLEX_GAP_2}>
-              <Input
-                id={tagInputId}
-                value={currentTag}
-                onChange={(e) => setCurrentTag(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addTag();
-                  }
-                }}
-                placeholder="e.g., AI, Python, Remote"
-              />
-              <Button type="button" onClick={addTag} variant="outline" disabled={tags.length >= 10}>
-                Add
-              </Button>
-            </div>
-          </div>
-
-          {tags.length > 0 && (
-            <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-              {tags.map((tag) => (
-                <UnifiedBadge key={tag} variant="base" style="outline">
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => removeTag(tag)}
-                    className="ml-1 hover:text-destructive"
-                    aria-label={`Remove tag: ${tag}`}
-                  >
-                    ×
-                  </button>
-                </UnifiedBadge>
-              ))}
-            </div>
-          )}
-
-          {tags.length === 0 && (
-            <p className={'text-xs text-destructive'}>At least one tag is required</p>
-          )}
+        <CardContent>
+          <ListItemManager
+            variant="badge"
+            label="Add Tag"
+            items={tags}
+            onChange={setTags}
+            placeholder="e.g., AI, Python, Remote"
+            minItems={1}
+            maxItems={10}
+            noDuplicates
+            showCounter
+            badgeStyle="outline"
+          />
         </CardContent>
       </Card>
 
@@ -443,39 +276,33 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           <CardDescription>How candidates can apply</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor={linkId}>Application URL *</Label>
-            <Input
-              id={linkId}
-              name="link"
-              type="url"
-              defaultValue={initialData?.link}
-              required
-              placeholder="https://company.com/careers/apply"
-            />
-          </div>
+          <FormField
+            variant="input"
+            label="Application URL"
+            name="link"
+            type="url"
+            {...(initialData?.link && { defaultValue: initialData.link })}
+            required
+            placeholder="https://company.com/careers/apply"
+          />
 
-          <div>
-            <Label htmlFor={contactEmailId}>Contact Email</Label>
-            <Input
-              id={contactEmailId}
-              name="contact_email"
-              type="email"
-              defaultValue={initialData?.contact_email || ''}
-              placeholder="jobs@company.com"
-            />
-          </div>
+          <FormField
+            variant="input"
+            label="Contact Email"
+            name="contact_email"
+            type="email"
+            defaultValue={initialData?.contact_email || ''}
+            placeholder="jobs@company.com"
+          />
 
-          <div>
-            <Label htmlFor={companyLogoId}>Company Logo URL</Label>
-            <Input
-              id={companyLogoId}
-              name="company_logo"
-              type="url"
-              defaultValue={initialData?.company_logo || ''}
-              placeholder="https://company.com/logo.png"
-            />
-          </div>
+          <FormField
+            variant="input"
+            label="Company Logo URL"
+            name="company_logo"
+            type="url"
+            defaultValue={initialData?.company_logo || ''}
+            placeholder="https://company.com/logo.png"
+          />
         </CardContent>
       </Card>
 

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { InlineEmailCTA } from '@/src/components/features/growth/inline-email-cta';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { SubmitFormClient } from '@/src/components/forms/submit-form-client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import {
@@ -240,7 +240,8 @@ export default async function SubmitPage() {
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
-        <InlineEmailCTA
+        <UnifiedNewsletterCapture
+          source="content_page"
           variant="hero"
           context="submit-page"
           headline="Join 1,000+ Claude Power Users"

@@ -7,7 +7,7 @@ import path from 'path';
 import { z } from 'zod';
 import { MDXRenderer } from '@/src/components/content/mdx-renderer';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { InlineEmailCTA } from '@/src/components/features/growth/inline-email-cta';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { MDXContentProvider } from '@/src/components/infra/providers/mdx-content-provider';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 // Removed unused import: CategoryGuidesPage
@@ -446,7 +446,12 @@ export default async function SEOGuidePage({
                 </Card>
 
                 {/* Email CTA - End of guide */}
-                <InlineEmailCTA variant="inline" context="guide-end" category="guides" />
+                <UnifiedNewsletterCapture
+                  source="content_page"
+                  variant="inline"
+                  context="guide-end"
+                  category="guides"
+                />
               </div>
 
               {/* Sidebar */}

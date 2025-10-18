@@ -18,8 +18,8 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import {
   type CopyType,
-  PostCopyEmailModal,
-} from '@/src/components/features/growth/post-copy-email-modal';
+  UnifiedNewsletterCapture,
+} from '@/src/components/features/growth/unified-newsletter-capture';
 
 /**
  * Modal context data structure
@@ -49,12 +49,12 @@ interface PostCopyEmailContextValue {
 /**
  * LocalStorage key for tracking dismissals
  */
-const STORAGE_KEY = 'post-copy-email-modal-dismissed';
+const STORAGE_KEY = 'unified-newsletter-capture-dismissed';
 
 /**
  * Session storage key for tracking if shown this session
  */
-const SESSION_KEY = 'post-copy-email-modal-shown';
+const SESSION_KEY = 'unified-newsletter-capture-shown';
 
 /**
  * Create context with undefined default (must use provider)
@@ -145,7 +145,9 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
     <PostCopyEmailContext.Provider value={{ showModal, hasShownThisSession }}>
       {children}
       {modalContext && (
-        <PostCopyEmailModal
+        <UnifiedNewsletterCapture
+          variant="modal"
+          source="modal"
           open={isOpen}
           onOpenChange={handleOpenChange}
           copyType={modalContext.copyType}

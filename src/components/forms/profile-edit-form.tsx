@@ -5,17 +5,14 @@
  * Form for editing user profile information
  */
 
-import { useId, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { refreshProfileFromOAuth, updateProfile } from '#lib/actions/user';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { FormField } from '@/src/components/forms/utilities/form-field';
+import { ListItemManager } from '@/src/components/forms/utilities/list-item-manager';
 import { Button } from '@/src/components/primitives/button';
-import { Input } from '@/src/components/primitives/input';
 import { Label } from '@/src/components/primitives/label';
 import { Switch } from '@/src/components/primitives/switch';
-import { Textarea } from '@/src/components/primitives/textarea';
-import { X } from '@/src/lib/icons';
 import type { ProfileData } from '@/src/lib/schemas/profile.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface ProfileEditFormProps {
@@ -25,14 +22,6 @@ interface ProfileEditFormProps {
 export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const [isPending, startTransition] = useTransition();
   const [hasChanges, setHasChanges] = useState(false);
-
-  // Generate unique IDs for form fields
-  const nameId = useId();
-  const bioId = useId();
-  const workId = useId();
-  const websiteId = useId();
-  const socialXId = useId();
-  const interestsId = useId();
 
   // Form state
   const [name, setName] = useState(profile.name || '');
@@ -51,7 +40,6 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
     }
     return [];
   });
-  const [newInterest, setNewInterest] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,35 +65,6 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
     });
   };
 
-  const handleAddInterest = () => {
-    const trimmed = newInterest.trim();
-    if (!trimmed) return;
-
-    if (interests.length >= 10) {
-      toasts.error.validation('Maximum 10 interests allowed');
-      return;
-    }
-
-    if (interests.includes(trimmed)) {
-      toasts.error.validation('Interest already added');
-      return;
-    }
-
-    if (trimmed.length > 30) {
-      toasts.error.validation('Interest must be less than 30 characters');
-      return;
-    }
-
-    setInterests([...interests, trimmed]);
-    setNewInterest('');
-    setHasChanges(true);
-  };
-
-  const handleRemoveInterest = (interest: string) => {
-    setInterests(interests.filter((i) => i !== interest));
-    setHasChanges(true);
-  };
-
   const handleFieldChange = () => {
     setHasChanges(true);
   };
@@ -113,127 +72,88 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Name */}
-      <div className="space-y-2">
-        <Label htmlFor={nameId}>Name *</Label>
-        <Input
-          id={nameId}
-          value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-            handleFieldChange();
-          }}
-          placeholder="Your name"
-          maxLength={100}
-          required
-        />
-      </div>
+      <FormField
+        variant="input"
+        label="Name"
+        value={name}
+        onChange={(e) => {
+          setName(e.target.value);
+          handleFieldChange();
+        }}
+        placeholder="Your name"
+        maxLength={100}
+        required
+      />
 
       {/* Bio */}
-      <div className="space-y-2">
-        <Label htmlFor={bioId}>Bio</Label>
-        <Textarea
-          id={bioId}
-          value={bio}
-          onChange={(e) => {
-            setBio(e.target.value);
-            handleFieldChange();
-          }}
-          placeholder="Tell us about yourself..."
-          maxLength={500}
-          rows={4}
-        />
-        <p className="text-xs text-muted-foreground">{bio.length}/500 characters</p>
-      </div>
+      <FormField
+        variant="textarea"
+        label="Bio"
+        value={bio}
+        onChange={(e) => {
+          setBio(e.target.value);
+          handleFieldChange();
+        }}
+        placeholder="Tell us about yourself..."
+        maxLength={500}
+        showCharCount
+        rows={4}
+      />
 
       {/* Work */}
-      <div className="space-y-2">
-        <Label htmlFor={workId}>Work</Label>
-        <Input
-          id={workId}
-          value={work}
-          onChange={(e) => {
-            setWork(e.target.value);
-            handleFieldChange();
-          }}
-          placeholder="e.g., Software Engineer at Company"
-          maxLength={100}
-        />
-      </div>
+      <FormField
+        variant="input"
+        label="Work"
+        value={work}
+        onChange={(e) => {
+          setWork(e.target.value);
+          handleFieldChange();
+        }}
+        placeholder="e.g., Software Engineer at Company"
+        maxLength={100}
+      />
 
       {/* Website */}
-      <div className="space-y-2">
-        <Label htmlFor={websiteId}>Website</Label>
-        <Input
-          id={websiteId}
-          type="url"
-          value={website}
-          onChange={(e) => {
-            setWebsite(e.target.value);
-            handleFieldChange();
-          }}
-          placeholder="https://yourwebsite.com"
-        />
-      </div>
+      <FormField
+        variant="input"
+        label="Website"
+        type="url"
+        value={website}
+        onChange={(e) => {
+          setWebsite(e.target.value);
+          handleFieldChange();
+        }}
+        placeholder="https://yourwebsite.com"
+      />
 
       {/* X/Twitter Link */}
-      <div className="space-y-2">
-        <Label htmlFor={socialXId}>X / Twitter</Label>
-        <Input
-          id={socialXId}
-          type="url"
-          value={socialXLink}
-          onChange={(e) => {
-            setSocialXLink(e.target.value);
-            handleFieldChange();
-          }}
-          placeholder="https://x.com/yourhandle"
-        />
-      </div>
+      <FormField
+        variant="input"
+        label="X / Twitter"
+        type="url"
+        value={socialXLink}
+        onChange={(e) => {
+          setSocialXLink(e.target.value);
+          handleFieldChange();
+        }}
+        placeholder="https://x.com/yourhandle"
+      />
 
       {/* Interests/Tags */}
-      <div className="space-y-2">
-        <Label htmlFor={interestsId}>Interests & Skills</Label>
-        <div className="flex gap-2">
-          <Input
-            id={interestsId}
-            value={newInterest}
-            onChange={(e) => setNewInterest(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                handleAddInterest();
-              }
-            }}
-            placeholder="Add an interest..."
-            maxLength={30}
-          />
-          <Button type="button" onClick={handleAddInterest} variant="outline">
-            Add
-          </Button>
-        </div>
-
-        {/* Display interests */}
-        {interests.length > 0 && (
-          <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-3`}>
-            {interests.map((interest) => (
-              <UnifiedBadge key={interest} variant="base" style="secondary" className="gap-1 pr-1">
-                {interest}
-                <button
-                  type="button"
-                  onClick={() => handleRemoveInterest(interest)}
-                  className="ml-1 hover:text-destructive"
-                  aria-label={`Remove ${interest}`}
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </UnifiedBadge>
-            ))}
-          </div>
-        )}
-        <p className="text-xs text-muted-foreground">
-          {interests.length}/10 interests (press Enter or click Add)
-        </p>
-      </div>
+      <ListItemManager
+        variant="badge"
+        label="Interests & Skills"
+        items={interests}
+        onChange={setInterests}
+        onFieldChange={handleFieldChange}
+        placeholder="Add an interest..."
+        maxItems={10}
+        maxLength={30}
+        noDuplicates
+        showCounter
+        badgeStyle="secondary"
+        description="Press Enter or click Add"
+      />
 
       {/* Privacy & Notifications */}
       <div className="space-y-4 pt-2">

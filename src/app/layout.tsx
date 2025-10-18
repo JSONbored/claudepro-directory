@@ -15,7 +15,7 @@ import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
 import './globals.css';
 import { Toaster } from 'sonner';
-import { FooterNewsletterBar } from '@/src/components/features/growth/footer-newsletter-bar';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { PerformanceOptimizer } from '@/src/components/infra/performance-optimizer';
 import { PostCopyEmailProvider } from '@/src/components/infra/providers/post-copy-email-provider';
@@ -188,7 +188,7 @@ export default async function RootLayout({
               </div>
             </ErrorBoundary>
             <Toaster />
-            <FooterNewsletterBar />
+            <UnifiedNewsletterCapture variant="footer-bar" source="footer" />
           </PostCopyEmailProvider>
         </ThemeProvider>
         <PerformanceOptimizer />

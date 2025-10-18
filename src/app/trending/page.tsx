@@ -9,7 +9,7 @@ import {
   statuslines,
 } from '@/generated/content';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { InlineEmailCTA } from '@/src/components/features/growth/inline-email-cta';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { TrendingContent } from '@/src/components/shared/trending-content';
 import { statsRedis } from '@/src/lib/cache.server';
 import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
@@ -243,7 +243,8 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
 
       {/* Email CTA - Moved to footer section to match homepage pattern */}
       <section className={'container mx-auto px-4 py-12'}>
-        <InlineEmailCTA
+        <UnifiedNewsletterCapture
+          source="content_page"
           variant="hero"
           context="trending-page"
           headline="Never Miss Trending Tools"

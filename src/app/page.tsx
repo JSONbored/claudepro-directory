@@ -17,7 +17,7 @@
 
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
-import { InlineEmailCTA } from '@/src/components/features/growth/inline-email-cta';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { HomePageClient } from '@/src/components/features/home';
 import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
@@ -295,8 +295,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       {/* Email CTA - Streams independently */}
       <section className={'container mx-auto px-4 py-12'}>
         <Suspense fallback={null}>
-          <InlineEmailCTA
+          <UnifiedNewsletterCapture
             variant="hero"
+            source="homepage"
             context="homepage"
             headline="Join 1,000+ Claude Power Users"
             description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."

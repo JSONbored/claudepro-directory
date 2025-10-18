@@ -25,7 +25,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
-import { InlineEmailCTA } from '@/src/components/features/growth/inline-email-cta';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { ChangelogBlogStructuredData } from '@/src/components/infra/structured-data/changelog-structured-data';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { ArrowLeft } from '@/src/lib/icons';
@@ -115,7 +115,8 @@ export default async function ChangelogPage() {
 
         {/* Email CTA - Footer section (matching homepage pattern) */}
         <section className={'mx-auto px-4 py-12'}>
-          <InlineEmailCTA
+          <UnifiedNewsletterCapture
+            source="content_page"
             variant="hero"
             context="changelog-page"
             headline="Join 1,000+ Claude Power Users"

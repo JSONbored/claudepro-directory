@@ -21,7 +21,7 @@
 
 import { UnifiedContentSection } from '@/src/components/content/unified-content-section';
 import { UnifiedReview } from '@/src/components/domain/unified-review';
-import { InlineEmailCTA } from '@/src/components/features/growth/inline-email-cta';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
@@ -439,7 +439,12 @@ export async function UnifiedDetailPage({
             </div>
 
             {/* Email CTA - Inline variant */}
-            <InlineEmailCTA variant="inline" context="content-detail" category={item.category} />
+            <UnifiedNewsletterCapture
+              source="content_page"
+              variant="inline"
+              context="content-detail"
+              category={item.category}
+            />
           </div>
 
           {/* Sidebar */}

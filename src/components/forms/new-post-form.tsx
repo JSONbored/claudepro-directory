@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { FormField } from '@/src/components/forms/utilities/form-field';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -9,9 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { Input } from '@/src/components/primitives/input';
-import { Label } from '@/src/components/primitives/label';
-import { Textarea } from '@/src/components/primitives/textarea';
 import { ROUTES } from '@/src/lib/constants/routes';
 
 interface NewPostFormProps {
@@ -19,10 +16,6 @@ interface NewPostFormProps {
 }
 
 export function NewPostForm({ onSubmit }: NewPostFormProps) {
-  const titleId = useId();
-  const urlId = useId();
-  const contentId = useId();
-
   return (
     <form action={onSubmit}>
       <Card>
@@ -31,36 +24,32 @@ export function NewPostForm({ onSubmit }: NewPostFormProps) {
           <CardDescription>Include either a URL, text content, or both</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor={titleId}>Title *</Label>
-            <Input
-              id={titleId}
-              name="title"
-              required
-              placeholder="What's this about?"
-              maxLength={300}
-            />
-          </div>
+          <FormField
+            variant="input"
+            label="Title"
+            name="title"
+            placeholder="What's this about?"
+            maxLength={300}
+            required
+          />
 
-          <div>
-            <Label htmlFor={urlId}>URL (optional)</Label>
-            <Input id={urlId} name="url" type="url" placeholder="https://example.com/article" />
-            <p className={'text-xs text-muted-foreground mt-1'}>
-              Share a link to an article, project, or resource
-            </p>
-          </div>
+          <FormField
+            variant="input"
+            label="URL (optional)"
+            name="url"
+            type="url"
+            placeholder="https://example.com/article"
+            description="Share a link to an article, project, or resource"
+          />
 
-          <div>
-            <Label htmlFor={contentId}>Content (optional)</Label>
-            <Textarea
-              id={contentId}
-              name="content"
-              rows={8}
-              placeholder="Share your thoughts, ask a question, or provide context..."
-              maxLength={5000}
-              className="resize-none"
-            />
-          </div>
+          <FormField
+            variant="textarea"
+            label="Content (optional)"
+            name="content"
+            rows={8}
+            placeholder="Share your thoughts, ask a question, or provide context..."
+            maxLength={5000}
+          />
 
           <div className="flex gap-4">
             <Button type="submit">Create Post</Button>
