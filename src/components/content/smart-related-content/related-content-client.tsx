@@ -21,11 +21,11 @@
  */
 
 import { useEffect, useState } from 'react';
+import { relatedContentService } from '#lib/related-content/service';
 import { BaseCard } from '@/src/components/domain/base-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { Sparkles } from '@/src/lib/icons';
-import { relatedContentService } from '@/src/lib/related-content/service';
 import type {
   RelatedContentItem,
   SmartRelatedContentProps,

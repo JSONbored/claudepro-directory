@@ -80,6 +80,10 @@
       "storybook": "./src/lib/analytics/events/related-content.mock.ts",
       "default": "./src/lib/analytics/events/related-content.ts"
     },
+    "#lib/related-content/service": {
+      "storybook": "./src/lib/related-content/service.mock.ts",
+      "default": "./src/lib/related-content/service.ts"
+    },
     "#lib/env-client": {
       "storybook": "./src/lib/env-client.mock.ts",
       "default": "./src/lib/env-client.ts"
