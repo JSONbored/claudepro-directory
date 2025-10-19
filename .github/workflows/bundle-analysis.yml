@@ -23,6 +23,34 @@ permissions:
   pull-requests: write
 
 jobs:
+  # Check if base branch build is cached
+  check-base-cache:
+    name: Check Base Branch Cache
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      cache-hit: ${{ steps.cache.outputs.cache-hit }}
+      base-sha: ${{ steps.get-sha.outputs.sha }}
+
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.base_ref }}
+          fetch-depth: 1
+
+      - name: Get base branch SHA
+        id: get-sha
+        run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Check for cached base build
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: base-build-cache/
+          key: base-build-${{ steps.get-sha.outputs.sha }}
+          lookup-only: true
+
   # Build PR branch using reusable workflow
   build-pr:
     name: Build PR Branch
@@ -31,21 +59,45 @@ jobs:
       cache-key-suffix: 'bundle-pr'
       upload-artifact: true
 
-  # Build base branch using reusable workflow
+  # Build base branch using reusable workflow (only if not cached)
   build-base:
     name: Build Base Branch
+    needs: [check-base-cache]
+    if: needs.check-base-cache.outputs.cache-hit != 'true'
     uses: ./.github/workflows/build-reusable.yml
     with:
       cache-key-suffix: 'bundle-base'
       upload-artifact: true
       checkout-ref: ${{ github.base_ref }}
 
+  # Cache base branch build for future PRs
+  cache-base:
+    name: Cache Base Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [check-base-cache, build-base]
+    if: needs.check-base-cache.outputs.cache-hit != 'true' && needs.build-base.result == 'success'
+
+    steps:
+      - name: Download base build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build-base.outputs.artifact-name }}
+          path: base-build-cache/
+
+      - name: Cache base build
+        uses: actions/cache/save@v4
+        with:
+          path: base-build-cache/
+          key: base-build-${{ needs.check-base-cache.outputs.base-sha }}
+
   # Analyze and compare bundle sizes
   analyze:
     name: Analyze & Compare
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [build-pr, build-base]
+    needs: [check-base-cache, build-pr, build-base]
+    if: always() && needs.build-pr.result == 'success' && (needs.build-base.result == 'success' || needs.check-base-cache.outputs.cache-hit == 'true')
 
     steps:
       - name: Checkout PR branch
@@ -85,17 +137,29 @@ jobs:
           ref: ${{ github.base_ref }}
           clean: false
 
-      - name: Download base build artifact
+      - name: Restore base build from cache (if cached)
+        if: needs.check-base-cache.outputs.cache-hit == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: base-build-cache/
+          key: base-build-${{ needs.check-base-cache.outputs.base-sha }}
+
+      - name: Download base build artifact (if freshly built)
+        if: needs.check-base-cache.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build-base.outputs.artifact-name }}
-          path: .next-base
+          path: base-build-cache/
 
       - name: Move base build to analysis location
         run: |
           rm -rf .next
-          mv .next-base/.next .next
-          echo "✅ Base build restored for analysis"
+          mv base-build-cache/.next .next
+          if [ "${{ needs.check-base-cache.outputs.cache-hit }}" = "true" ]; then
+            echo "✅ Base build restored from cache (no rebuild needed)"
+          else
+            echo "✅ Base build restored from fresh build"
+          fi
 
       - name: Analyze base bundle
         run: npx -y nextjs-bundle-analysis@0.8.0

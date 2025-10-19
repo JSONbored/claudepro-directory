@@ -22,9 +22,10 @@
     "public/scripts/service-worker-init.js",
     "public/service-worker.js",
     "config/tools/progress-reporter.ts",
+    "config/tools/playwright.config.ts",
     "next-env.d.ts"
   ],
   "ignoreBinaries": ["skott", "madge"],
   "entry": ["src/app/**/*.{ts,tsx}", "src/middleware.ts", "scripts/**/*.ts"],
-  "project": ["**/*.{ts,tsx}"]
+  "project": ["**/*.{ts,tsx}", "!config/tools/playwright.config.ts"]
 }

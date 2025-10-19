@@ -1,6 +1,14 @@
 name: Dead Code Detection
 
 on:
+  # Weekly schedule (Mondays at 3am UTC)
+  schedule:
+    - cron: '0 3 * * 1'
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+  # Only on PRs when Knip config or source files change
   pull_request:
     branches: [main, dev]
     paths:
@@ -9,9 +17,6 @@ on:
       - 'package.json'
       - 'tsconfig.json'
       - 'config/tools/knip.json'
-  push:
-    branches: [main]
-  workflow_dispatch:
 
 jobs:
   detect-dead-code:
