@@ -17,6 +17,9 @@
 
 import { existsSync, readdirSync } from 'fs';
 import { join } from 'path';
+import type { ChangelogMetadata } from '@/generated/changelog-metadata';
+import type { GuideMetadata } from '@/generated/guides-metadata';
+import type { JobMetadata } from '@/generated/jobs-metadata';
 import { parseChangelog } from '@/src/lib/changelog/parser';
 import { APP_CONFIG, CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '@/src/lib/constants';
 import { getJobs } from '@/src/lib/data/jobs';
@@ -37,17 +40,29 @@ export interface SitemapUrl {
  * Metadata required for URL generation
  *
  * NOTE: Uses minimal metadata types from generated files (Pick<> subsets for performance)
- * All metadata exports include: slug, category, dateAdded (at minimum)
+ * All metadata exports include: slug (required), category/dateAdded (optional, varies by type)
+ *
+ * Updated: Now includes all 11 categories (agents, changelog, collections, commands,
+ * guides, hooks, jobs, mcp, rules, skills, statuslines)
+ *
+ * Field variations:
+ * - Standard content (agents, mcp, etc.): slug, category, dateAdded
+ * - Changelog: slug, dateAdded (no category - uses special routing)
+ * - Guides: slug, category, subcategory, dateAdded
+ * - Jobs: slug, posted_at (no category or dateAdded - from Supabase)
  */
 export interface UrlGeneratorMetadata {
   agentsMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
+  changelogMetadata: ChangelogMetadata[]; // Uses generated type (slug, title, description, dateAdded)
   collectionsMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
   commandsMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
+  guidesMetadata: GuideMetadata[]; // Uses generated type (includes subcategory)
   hooksMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
+  jobsMetadata: JobMetadata[]; // Uses generated type (Supabase schema with id, posted_at, etc.)
   mcpMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
   rulesMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
-  statuslinesMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
   skillsMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
+  statuslinesMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
 }
 
 /**

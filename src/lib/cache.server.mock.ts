@@ -10,9 +10,15 @@
 
 // Export all cache functions as no-ops for Storybook
 export const getCachedData = async () => null;
-export const setCachedData = async () => {};
-export const invalidateCache = async () => {};
-export const warmCache = async () => {};
+export const setCachedData = async () => {
+  // No-op for Storybook
+};
+export const invalidateCache = async () => {
+  // No-op for Storybook
+};
+export const warmCache = async () => {
+  // No-op for Storybook
+};
 
 // Export any other cache utilities as no-ops
 export default {

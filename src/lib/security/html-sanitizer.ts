@@ -47,6 +47,7 @@ async function initializePurify() {
   // Dynamic import to prevent module-level JSDOM instantiation
   const { JSDOM } = await import('jsdom');
   const window = new JSDOM('').window;
+  // biome-ignore lint/suspicious/noExplicitAny: JSDOM window type incompatible with DOMPurify's expected type
   purify = createDOMPurify(window as any);
   /**
    * Add security hook to enforce script tag removal

@@ -25,6 +25,7 @@
  * @module scripts/generate-events
  */
 
+import { execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -68,22 +69,32 @@ function categoryToKeySuffix(categoryId: string): string {
  * MODERNIZATION: Pure registry-driven - all categories from UNIFIED_CATEGORY_REGISTRY
  */
 function generateTypes(categories: CategoryId[]): string {
-  const categoryUnion = categories.map((c) => `'${c}'`).join(' | ');
+  // Format union type with each member on new line (Biome style)
+  const categoryUnion = categories.map((c) => `  | '${c}'`).join('\n');
 
-  // Build suffix mapping cases for singular forms
+  // Build suffix mapping cases with cascading indentation (Biome style)
+  // Each level adds 2 spaces, final `: never` matches deepest nesting
   const suffixCases = categories
-    .map((cat) => {
+    .map((cat, index) => {
       const suffix = categoryToSuffix(cat);
-      return `  T extends '${cat}' ? '${suffix}' :`;
+      const indent = '  '.repeat(index);
+      if (index === 0) {
+        return `T extends '${cat}'\n  ? '${suffix}'`;
+      }
+      return `${indent}: T extends '${cat}'\n${indent}  ? '${suffix}'`;
     })
     .join('\n');
+
+  // Calculate final indent for `: never` to match deepest nesting level
+  const finalIndent = '  '.repeat(categories.length - 1);
 
   return `/**
  * Category IDs that have analytics events
  * Auto-generated from UNIFIED_CATEGORY_REGISTRY
  * MODERNIZATION: Single source of truth - all 11 categories included
  */
-type AnalyticsCategory = ${categoryUnion};
+type AnalyticsCategory =
+${categoryUnion};
 
 /**
  * Category event suffix mapping (for singular forms)
@@ -93,9 +104,8 @@ type AnalyticsCategory = ${categoryUnion};
  * - guides → guide
  * - mcp → mcp (unchanged)
  */
-type CategorySuffix<T extends string> =
-${suffixCases}
-  never;
+type CategorySuffix<T extends string> = ${suffixCases}
+${finalIndent}  : never;
 
 /**
  * TypeScript template literal types for dynamic event generation
@@ -1104,7 +1114,15 @@ function main() {
 
   writeFileSync(outputPath, content, 'utf-8');
 
+  // Auto-format with Biome to ensure consistent formatting
+  try {
+    execSync(`npx biome format --write ${outputPath}`, { stdio: 'pipe' });
+  } catch {
+    console.warn(`⚠️  Auto-formatting failed for: ${outputPath}`);
+  }
+
   console.log(`✅ Generated unified file: ${outputPath}`);
+
   console.log(
     '🌳 Tree-shakeable: EVENTS (~2KB) + getEventConfig() (~4KB lazy) + EventPayloads (0KB types)'
   );

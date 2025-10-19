@@ -184,14 +184,16 @@ export type ContentGenerationRegistry = Partial<Record<CategoryId, ContentGenera
 /**
  * Export unified configuration-driven system
  */
-export * from './category-config';
 export { CATEGORY_CONFIG } from './category-config';
-export * from './discovery/trend-detection';
-export * from './quality/seo-standards';
-export * from './validation/category-validators';
-export * from './validation/generic-validator';
+export { detectTrendingTopics } from './discovery/trend-detection';
+export { SEO_STANDARDS } from './quality/seo-standards';
+export { validateCategoryContent } from './validation/category-validators';
 /**
  * Quick access to validation and formatting
  * (Now works for ALL categories, not just statuslines)
  */
-export { formatValidationReport, validateContent } from './validation/generic-validator';
+export {
+  formatValidationReport,
+  validateContent,
+  validateGenericContent,
+} from './validation/generic-validator';

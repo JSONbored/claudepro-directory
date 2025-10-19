@@ -377,6 +377,7 @@ export function validateContext(
     }
 
     // Production: Log and return null for graceful degradation
+    // biome-ignore lint/suspicious/noConsole: Production error logging required for debugging SEO validation failures
     console.error(`[${source}] Invalid MetadataContext (using fallback):`, errors);
     return null;
   }
@@ -426,13 +427,19 @@ export function validateTemplateOutput(
     }
 
     // Production: Log with enhanced context for debugging
-    const outputObj = typeof output === 'object' && output !== null ? (output as any) : {};
+    const outputObj =
+      typeof output === 'object' && output !== null ? (output as Record<string, unknown>) : {};
+    const title = typeof outputObj.title === 'string' ? outputObj.title : 'Unknown';
+    // biome-ignore lint/suspicious/noConsole: Production error logging required for debugging template validation failures
     console.error(`[Template:${pattern}] Invalid output (using fallback):`, {
       errors,
       keywords: outputObj.keywords || 'N/A',
-      title: outputObj.title?.substring(0, 60) || 'Unknown',
+      title: title.substring(0, 60),
       keywordLengths: Array.isArray(outputObj.keywords)
-        ? outputObj.keywords.map((k: string) => `"${k}" (${k?.length || 0})`)
+        ? outputObj.keywords.map((k: unknown) => {
+            const keyword = String(k);
+            return `"${keyword}" (${keyword.length})`;
+          })
         : 'N/A',
     });
     return null;
@@ -474,6 +481,7 @@ export function validateClassification(
     }
 
     // Production: Log and return null for graceful degradation
+    // biome-ignore lint/suspicious/noConsole: Production error logging required for debugging route classification failures
     console.error(`[classifyRoute] Invalid classification for ${route} (using fallback):`, errors);
     return null;
   }

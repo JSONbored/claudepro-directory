@@ -30,6 +30,7 @@ function createMetadataLoaderFactory(categoryId: CategoryId) {
 
   // Explicit imports for Vite static analysis
   // Vite requires the static part of dynamic imports to be analyzable
+  // biome-ignore lint/suspicious/noExplicitAny: Dynamic imports return varying module structures per category
   const loaderMap: Record<CategoryId, () => Promise<any>> = {
     agents: () => import('@/generated/agents-metadata'),
     mcp: () => import('@/generated/mcp-metadata'),

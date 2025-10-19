@@ -29,6 +29,7 @@
  *   npm run generate:categories --dry   # Preview without writing
  */
 
+import { execSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -133,13 +134,13 @@ function generateUIConstantsCategories(
   registry: Record<string, { colorScheme?: string; label?: string }>,
   categoryIds: string[]
 ): string {
-  // Generate badge colors from colorScheme
+  // Generate badge colors from colorScheme (2-space indentation for Biome)
   const badgeColorEntries = categoryIds
     .map((id) => {
       const config = registry[id];
       const colorScheme = config?.colorScheme || 'primary';
 
-      return `    ${id}: 'bg-${colorScheme}/20 text-${colorScheme} border-${colorScheme}/30',`;
+      return `  ${id}: 'bg-${colorScheme}/20 text-${colorScheme} border-${colorScheme}/30',`;
     })
     .join('\n');
 
@@ -283,6 +284,14 @@ function writeGeneratedFile(filePath: string, content: string, isDryRun: boolean
   }
 
   writeFileSync(filePath, content, 'utf-8');
+
+  // Auto-format with Biome to ensure consistent formatting
+  try {
+    execSync(`npx biome format --write ${filePath}`, { stdio: 'pipe' });
+  } catch {
+    // Formatting failed but file was generated
+  }
+
   console.log(`✅ Generated: ${filePath}`);
 }
 

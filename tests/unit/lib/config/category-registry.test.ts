@@ -151,8 +151,8 @@ describe('UNIFIED_CATEGORY_REGISTRY - Build-Time Validation', () => {
         // Either plural contains singular, or they're intentionally different
         const isPlural =
           pluralLower.includes(titleLower) ||
-          pluralLower === titleLower + 's' ||
-          pluralLower === titleLower + 'es';
+          pluralLower === `${titleLower}s` ||
+          pluralLower === `${titleLower}es`;
 
         // If not standard plural, that's okay (e.g., "Command" -> "Commands" is fine)
         expect(
