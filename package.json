@@ -208,7 +208,6 @@
     "cmdk": "^1.1.1",
     "devalue": "^5.4.1",
     "dompurify": "^3.3.0",
-    "framer-motion": "^12.23.24",
     "fumadocs-openapi": "^9.5.1",
     "fumadocs-ui": "^15.8.5",
     "fuzzysort": "^3.1.0",

@@ -523,8 +523,18 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
         return ['claude', 'content', getCurrentYear()];
       }
 
-      const item = context.item as { tags?: string[]; keywords?: string[] };
-      return item.tags || item.keywords || ['claude', 'content', getCurrentYear()];
+      const item = context.item as { tags?: string[]; keywords?: string[]; category?: string };
+
+      // Guides have separate SEO keywords field for long-tail phrases
+      // Always use short tags for meta keywords (SEO best practice: max 30 chars per keyword)
+      if (item.category === 'guides') {
+        return item.tags || ['claude', 'guides', getCurrentYear()];
+      }
+
+      // For other content types, prefer tags, fallback to keywords, then defaults
+      // Filter any keywords >30 chars to pass validation (shouldn't happen, but defensive)
+      const source = item.tags || item.keywords || ['claude', 'content', getCurrentYear()];
+      return source.filter((k) => k.length <= 30);
     },
     validation: STANDARD_VALIDATION,
   },

@@ -216,8 +216,8 @@ export const FAQ_GENERATION_RULES = {
    */
   hooks: {
     enabled: true,
-    minQuestions: 3,
-    maxQuestions: 4,
+    minQuestions: 4,
+    maxQuestions: 5,
     focusAreas: [
       'execution_timing',
       'event_handling',
@@ -247,8 +247,8 @@ export const FAQ_GENERATION_RULES = {
    */
   rules: {
     enabled: true,
-    minQuestions: 3,
-    maxQuestions: 4,
+    minQuestions: 4,
+    maxQuestions: 5,
     focusAreas: [
       'rule_application',
       'scope_boundaries',
@@ -278,8 +278,8 @@ export const FAQ_GENERATION_RULES = {
    */
   statuslines: {
     enabled: true,
-    minQuestions: 2,
-    maxQuestions: 3,
+    minQuestions: 4,
+    maxQuestions: 5,
     focusAreas: [
       'display_rendering',
       'configuration_environment',
@@ -307,7 +307,7 @@ export const FAQ_GENERATION_RULES = {
    */
   skills: {
     enabled: true,
-    minQuestions: 3,
+    minQuestions: 4,
     maxQuestions: 5,
     focusAreas: [
       'skill_activation',
@@ -336,62 +336,88 @@ export const FAQ_GENERATION_RULES = {
   },
 
   /**
-   * Agents - Disabled (no troubleshooting field in schema)
+   * Agents - AI agent configuration issues
    */
   agents: {
-    enabled: false,
-    minQuestions: 0,
-    maxQuestions: 0,
-    focusAreas: [],
-    exampleQuestions: [],
+    enabled: true,
+    minQuestions: 4,
+    maxQuestions: 5,
+    focusAreas: [
+      'configuration_environment',
+      'execution_timing',
+      'common_errors',
+      'state_management',
+      'debugging_logs',
+    ],
+    exampleQuestions: [
+      'Agent not responding or timing out during execution',
+      'Configuration parameters not applying as expected',
+      'Temperature/maxTokens settings not having desired effect',
+      'Agent behavior inconsistent with prompt instructions',
+    ],
     seo: {
-      generateSchema: false,
-      optimizeForAI: false,
-      priorityBoost: false,
+      generateSchema: true,
+      optimizeForAI: true,
+      priorityBoost: true,
     },
     performance: {
-      batchSize: 0,
-      enableCache: false,
+      batchSize: 10,
+      enableCache: true,
     },
   },
 
   /**
-   * Commands - Disabled (no troubleshooting field in schema)
+   * Commands - Slash command execution issues
    */
   commands: {
-    enabled: false,
-    minQuestions: 0,
-    maxQuestions: 0,
-    focusAreas: [],
-    exampleQuestions: [],
+    enabled: true,
+    minQuestions: 4,
+    maxQuestions: 5,
+    focusAreas: [
+      'execution_timing',
+      'configuration_environment',
+      'permissions_access',
+      'common_errors',
+      'debugging_logs',
+    ],
+    exampleQuestions: [
+      'Command not found or not executing when triggered',
+      'Arguments not parsing correctly in slash command',
+      'Command conflicts with other registered commands',
+      'Permission errors when running command scripts',
+    ],
     seo: {
-      generateSchema: false,
-      optimizeForAI: false,
-      priorityBoost: false,
+      generateSchema: true,
+      optimizeForAI: true,
+      priorityBoost: true,
     },
     performance: {
-      batchSize: 0,
-      enableCache: false,
+      batchSize: 10,
+      enableCache: true,
     },
   },
 
   /**
-   * Collections - Disabled (no troubleshooting field in schema)
+   * Collections - Bundle compatibility and setup issues
    */
   collections: {
-    enabled: false,
-    minQuestions: 0,
-    maxQuestions: 0,
-    focusAreas: [],
-    exampleQuestions: [],
+    enabled: true,
+    minQuestions: 4,
+    maxQuestions: 5,
+    focusAreas: ['installation_setup', 'prerequisites', 'compatibility', 'common_errors'],
+    exampleQuestions: [
+      'Items in collection not compatible with each other',
+      'Installation order causing dependency conflicts',
+      'Missing prerequisites for collection components',
+    ],
     seo: {
-      generateSchema: false,
-      optimizeForAI: false,
+      generateSchema: true,
+      optimizeForAI: true,
       priorityBoost: false,
     },
     performance: {
-      batchSize: 0,
-      enableCache: false,
+      batchSize: 10,
+      enableCache: true,
     },
   },
 

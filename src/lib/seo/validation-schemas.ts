@@ -425,8 +425,16 @@ export function validateTemplateOutput(
       );
     }
 
-    // Production: Log and return null for graceful degradation
-    console.error(`[Template:${pattern}] Invalid output (using fallback):`, errors);
+    // Production: Log with enhanced context for debugging
+    const outputObj = typeof output === 'object' && output !== null ? (output as any) : {};
+    console.error(`[Template:${pattern}] Invalid output (using fallback):`, {
+      errors,
+      keywords: outputObj.keywords || 'N/A',
+      title: outputObj.title?.substring(0, 60) || 'Unknown',
+      keywordLengths: Array.isArray(outputObj.keywords)
+        ? outputObj.keywords.map((k: string) => `"${k}" (${k?.length || 0})`)
+        : 'N/A',
+    });
     return null;
   }
 
