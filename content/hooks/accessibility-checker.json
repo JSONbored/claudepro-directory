@@ -32,6 +32,28 @@
     "Color contrast validation for design systems",
     "Screen reader compatibility testing"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook executes on non-HTML files wasting resources",
+      "solution": "Verify file extension check works: grep 'html' hook-file. Ensure matcher filters to .html files only. Add extension validation before processing."
+    },
+    {
+      "issue": "Axe-core not found but script expects it installed",
+      "solution": "Install globally: npm i -g @axe-core/cli. Or add fallback checks in script. Verify command availability: which axe. Add installation to project setup docs."
+    },
+    {
+      "issue": "PostToolUse hook runs after Write but no output shown",
+      "solution": "Check stderr redirection in hook script. Verify echo statements use >&2 for user feedback. Test with: bash hook-file <<< '{\"tool_name\":\"write\"}'."
+    },
+    {
+      "issue": "Hook captures stdin but file_path extraction fails",
+      "solution": "Debug jq parsing: echo \"$INPUT\" | jq -r '.tool_input.file_path'. Verify JSON structure matches expected format. Add fallback paths for nested inputs."
+    },
+    {
+      "issue": "Accessibility violations detected but build continues",
+      "solution": "Change exit 0 to exit 1 on violations if blocking desired. Add violation count threshold. Use jq to filter critical issues: jq 'select(.impact==\"critical\")'."
+    }
+  ],
   "documentationUrl": "https://www.w3.org/WAI/WCAG21/quickref/",
   "source": "community"
 }

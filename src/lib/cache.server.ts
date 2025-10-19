@@ -24,9 +24,19 @@
  * - LRU eviction for fallback storage
  */
 
-import { brotliCompressSync, brotliDecompressSync, gunzipSync, gzipSync } from 'node:zlib';
+import { promisify } from 'node:util';
+import { brotliCompress, brotliDecompress, gunzip, gzip } from 'node:zlib';
+import { unstable_cache } from 'next/cache';
+
+// PERFORMANCE: Use async compression to avoid blocking event loop
+const brotliCompressAsync = promisify(brotliCompress);
+const brotliDecompressAsync = promisify(brotliDecompress);
+const gzipAsync = promisify(gzip);
+const gunzipAsync = promisify(gunzip);
+
 import { Redis } from '@upstash/redis';
 import { z } from 'zod';
+import { getAllCategoryIds } from '@/src/lib/config/category-config';
 import { metadataLoader } from '@/src/lib/content/lazy-content-loaders';
 import { logger } from '@/src/lib/logger';
 import { relatedContentService } from '@/src/lib/related-content/service';
@@ -46,7 +56,7 @@ import { validateCacheKey, validateTTL } from '@/src/lib/schemas/primitives/api-
 import { stringArray } from '@/src/lib/schemas/primitives/base-arrays';
 import { nonNegativeInt, positiveInt } from '@/src/lib/schemas/primitives/base-numbers';
 import { isoDatetimeString, nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 import { ParseStrategy, safeParse, safeStringify } from '@/src/lib/utils/data.utils';
 
@@ -233,11 +243,9 @@ class RedisClientManager {
     failedOperations: 0,
   };
 
-  // In-memory fallback storage with LRU-like eviction
-  private fallbackStorage = new Map<
-    string,
-    { value: string; expiry: number; size: number; lastAccess: number }
-  >();
+  // In-memory fallback storage with LRU eviction using Map insertion order
+  // PERFORMANCE: Map maintains insertion order, eliminating need for lastAccess timestamp
+  private fallbackStorage = new Map<string, { value: string; expiry: number; size: number }>();
   private fallbackCleanupInterval: NodeJS.Timeout | null = null;
   private fallbackMemoryBytes = 0;
   // ENV-configurable memory limit with validation and observability
@@ -305,23 +313,22 @@ class RedisClientManager {
 
   /**
    * Evict least recently used entries when memory limit is exceeded
+   * PERFORMANCE: O(n) iteration using Map insertion order instead of O(n log n) sort
    */
   private evictLRU(): void {
     const maxBytes = this.MAX_FALLBACK_MEMORY_MB * 1024 * 1024;
 
     if (this.fallbackMemoryBytes <= maxBytes) return;
 
-    // Sort entries by last access time (oldest first)
-    const entries = Array.from(this.fallbackStorage.entries()).sort(
-      (a, b) => a[1].lastAccess - b[1].lastAccess
-    );
-
+    // OPTIMIZATION: Map maintains insertion order - oldest entries are first
+    // No need to sort, just iterate and delete until under threshold
     let evicted = 0;
     let bytesFreed = 0;
+    const targetBytes = maxBytes * 0.8; // Stop at 80% capacity
 
-    // Evict oldest entries until we're under the limit
-    for (const [key, data] of entries) {
-      if (this.fallbackMemoryBytes <= maxBytes * 0.8) break; // Stop at 80% capacity
+    // Iterate in insertion order (oldest first)
+    for (const [key, data] of this.fallbackStorage) {
+      if (this.fallbackMemoryBytes <= targetBytes) break;
 
       this.fallbackStorage.delete(key);
       this.fallbackMemoryBytes -= data.size;
@@ -479,8 +486,8 @@ class RedisClientManager {
       this.fallbackMemoryBytes -= oldData.size;
     }
 
-    // Add new entry
-    this.fallbackStorage.set(key, { value, expiry, size, lastAccess: now });
+    // Add new entry (inserted at end of Map - most recently added)
+    this.fallbackStorage.set(key, { value, expiry, size });
     this.fallbackMemoryBytes += size;
 
     // Memory pressure monitoring (throttled to max 1 warning per minute)
@@ -512,8 +519,10 @@ class RedisClientManager {
       return null;
     }
 
-    // Update last access time for LRU
-    data.lastAccess = Date.now();
+    // PERFORMANCE: Move to end of Map to mark as recently used (LRU via insertion order)
+    // Delete and re-insert to update position without copying data
+    this.fallbackStorage.delete(key);
+    this.fallbackStorage.set(key, data);
 
     return data.value;
   }
@@ -1101,12 +1110,13 @@ export class CacheService {
 
   /**
    * Compress data using gzip or brotli if it exceeds threshold
+   * PERFORMANCE: Async compression to avoid blocking Node.js event loop
    */
-  private compressData(data: string): {
+  private async compressData(data: string): Promise<{
     data: string;
     compressed: boolean;
     algorithm: CompressionAlgorithm;
-  } {
+  }> {
     if (!this.config.enableCompression || data.length < this.config.compressionThreshold) {
       return { data, compressed: false, algorithm: 'none' };
     }
@@ -1118,13 +1128,13 @@ export class CacheService {
       const algorithm = this.config.compressionAlgorithm;
 
       if (algorithm === 'brotli') {
-        compressedBuffer = brotliCompressSync(buffer, {
+        compressedBuffer = await brotliCompressAsync(buffer, {
           params: {
             11: 4, // BROTLI_PARAM_QUALITY (4 = balanced speed/compression)
           },
         });
       } else if (algorithm === 'gzip') {
-        compressedBuffer = gzipSync(buffer, { level: 6 }); // Level 6 = balanced
+        compressedBuffer = await gzipAsync(buffer, { level: 6 }); // Level 6 = balanced
       } else {
         return { data, compressed: false, algorithm: 'none' };
       }
@@ -1158,12 +1168,13 @@ export class CacheService {
 
   /**
    * Decompress data using the specified algorithm
+   * PERFORMANCE: Async decompression to avoid blocking Node.js event loop
    */
-  private decompressData(
+  private async decompressData(
     data: string,
     compressed: boolean,
     algorithm: CompressionAlgorithm = 'brotli'
-  ): string {
+  ): Promise<string> {
     if (!compressed || algorithm === 'none') return data;
 
     try {
@@ -1172,9 +1183,9 @@ export class CacheService {
       let decompressedBuffer: Buffer;
 
       if (algorithm === 'brotli') {
-        decompressedBuffer = brotliDecompressSync(buffer);
+        decompressedBuffer = await brotliDecompressAsync(buffer);
       } else if (algorithm === 'gzip') {
-        decompressedBuffer = gunzipSync(buffer);
+        decompressedBuffer = await gunzipAsync(buffer);
       } else {
         return data;
       }
@@ -1191,8 +1202,9 @@ export class CacheService {
 
   /**
    * Serialize cache entry with compression
+   * PERFORMANCE: Async to support non-blocking compression
    */
-  private serializeEntry<T>(value: T, ttl: number): string {
+  private async serializeEntry<T>(value: T, ttl: number): Promise<string> {
     const serialized = JSON.stringify(value);
 
     // Validate size before compression
@@ -1202,7 +1214,7 @@ export class CacheService {
       );
     }
 
-    const { data: compressedData, compressed, algorithm } = this.compressData(serialized);
+    const { data: compressedData, compressed, algorithm } = await this.compressData(serialized);
 
     const entry: CacheEntry = {
       value: compressedData,
@@ -1222,8 +1234,9 @@ export class CacheService {
   /**
    * Deserialize cache entry with decompression
    * Uses devalue for XSS-safe, type-preserving deserialization
+   * PERFORMANCE: Async to support non-blocking decompression
    */
-  private deserializeEntry<T>(data: string): T | null {
+  private async deserializeEntry<T>(data: string): Promise<T | null> {
     try {
       // Parse cache entry structure with validation
       const entry = safeParse(data, cacheEntrySchema, {
@@ -1237,7 +1250,7 @@ export class CacheService {
       }
 
       // Decompress value if needed
-      const decompressed = this.decompressData(
+      const decompressed = await this.decompressData(
         String(entry.value),
         entry.compressed,
         entry.algorithm
@@ -1281,7 +1294,7 @@ export class CacheService {
       );
 
       if (result) {
-        const value = this.deserializeEntry<T>(String(result));
+        const value = await this.deserializeEntry<T>(String(result));
         if (value !== null) {
           this.stats.hits++;
 
@@ -1437,7 +1450,7 @@ export class CacheService {
     const validatedTTL = validateTTL(ttl || this.config.defaultTTL);
 
     try {
-      const serialized = this.serializeEntry(value, validatedTTL);
+      const serialized = await this.serializeEntry(value, validatedTTL);
 
       const result = await redisClient.executeOperation(
         async (redis) => {
@@ -1577,25 +1590,27 @@ export class CacheService {
         'cache_getMany'
       );
 
-      // Deserialize results
-      values.forEach((value, index) => {
-        const key = keys[index];
-        if (!key) return; // Guard against undefined keys
+      // Deserialize results in parallel
+      await Promise.all(
+        values.map(async (value, index) => {
+          const key = keys[index];
+          if (!key) return; // Guard against undefined keys
 
-        if (value) {
-          const deserialized = this.deserializeEntry<T>(String(value));
-          if (deserialized !== null) {
-            this.stats.hits++;
-            results.set(key, deserialized);
+          if (value) {
+            const deserialized = await this.deserializeEntry<T>(String(value));
+            if (deserialized !== null) {
+              this.stats.hits++;
+              results.set(key, deserialized);
+            } else {
+              this.stats.misses++;
+              results.set(key, null);
+            }
           } else {
             this.stats.misses++;
             results.set(key, null);
           }
-        } else {
-          this.stats.misses++;
-          results.set(key, null);
-        }
-      });
+        })
+      );
 
       if (this.config.enableLogging) {
         logger.debug(`Cache getMany for ${keys.length} keys, ${results.size} hits`);
@@ -1627,19 +1642,21 @@ export class CacheService {
     if (entries.length === 0) return results;
 
     try {
-      // Serialize all entries first
-      const serializedEntries = entries.map(({ key, value, ttl }) => {
-        const fullKey = this.generateKey(key);
-        const validatedTTL = validateTTL(ttl || this.config.defaultTTL);
-        const serialized = this.serializeEntry(value, validatedTTL);
-        return {
-          fullKey,
-          key,
-          serialized,
-          ttl: validatedTTL,
-          size: serialized.length,
-        };
-      });
+      // Serialize all entries first (in parallel for performance)
+      const serializedEntries = await Promise.all(
+        entries.map(async ({ key, value, ttl }) => {
+          const fullKey = this.generateKey(key);
+          const validatedTTL = validateTTL(ttl || this.config.defaultTTL);
+          const serialized = await this.serializeEntry(value, validatedTTL);
+          return {
+            fullKey,
+            key,
+            serialized,
+            ttl: validatedTTL,
+            size: serialized.length,
+          };
+        })
+      );
 
       // Use Promise.all to leverage auto-pipelining
       const setResults = await redisClient.executeOperation(
@@ -2017,22 +2034,29 @@ export const statsRedis = {
       'getViewCount'
     ),
 
-  getViewCounts: async (items: Array<{ category: string; slug: string }>) => {
-    if (!items.length) return {};
-    const keys = items.map((i) => `views:${i.category}:${i.slug}`);
-    const counts = await redis(
-      async (c) => await c.mget<(number | null)[]>(...keys),
-      () => new Array(items.length).fill(0) as (number | null)[],
-      'getViewCounts'
-    );
-    return items.reduce(
-      (acc, item, i) => {
-        acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
-        return acc;
-      },
-      {} as Record<string, number>
-    );
-  },
+  getViewCounts: unstable_cache(
+    async (items: Array<{ category: string; slug: string }>) => {
+      if (!items.length) return {};
+      const keys = items.map((i) => `views:${i.category}:${i.slug}`);
+      const counts = await redis(
+        async (c) => await c.mget<(number | null)[]>(...keys),
+        () => new Array(items.length).fill(0) as (number | null)[],
+        'getViewCounts'
+      );
+      return items.reduce(
+        (acc, item, i) => {
+          acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
+    },
+    ['view-counts'],
+    {
+      revalidate: 600,
+      tags: ['stats', 'view-counts'],
+    }
+  ),
 
   /**
    * Get daily view counts for multiple items (optimized MGET batch operation)
@@ -2043,39 +2067,56 @@ export const statsRedis = {
   ): Promise<Record<string, number>> => {
     if (!items.length) return {};
     const targetDate = date || new Date().toISOString().split('T')[0];
-    const keys = items.map((i) => `views:daily:${i.category}:${i.slug}:${targetDate}`);
 
-    const counts = await redis(
-      async (c) => await c.mget<(number | null)[]>(...keys),
-      () => new Array(items.length).fill(0) as (number | null)[],
-      'getDailyViewCounts'
-    );
+    return unstable_cache(
+      async () => {
+        const keys = items.map((i) => `views:daily:${i.category}:${i.slug}:${targetDate}`);
 
-    return items.reduce(
-      (acc, item, i) => {
-        acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
-        return acc;
+        const counts = await redis(
+          async (c) => await c.mget<(number | null)[]>(...keys),
+          () => new Array(items.length).fill(0) as (number | null)[],
+          'getDailyViewCounts'
+        );
+
+        return items.reduce(
+          (acc, item, i) => {
+            acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
+            return acc;
+          },
+          {} as Record<string, number>
+        );
       },
-      {} as Record<string, number>
-    );
+      [`daily-view-counts-${targetDate}-${items.map((i) => `${i.category}:${i.slug}`).join(',')}`],
+      {
+        revalidate: 300,
+        tags: ['stats', 'daily-view-counts'],
+      }
+    )();
   },
 
-  getTrending: async (cat: string, limit = 10) => {
-    const q = popularItemsQuerySchema.parse({ category: cat, limit });
-    const items = await redis(
-      async (c) =>
-        await c.zrange(`trending:${q.category}:weekly`, Date.now() - 604800000, Date.now(), {
-          byScore: true,
-          rev: true,
-          withScores: false,
-          offset: 0,
-          count: q.limit,
-        }),
-      () => [],
-      'getTrending'
-    );
-    return z.array(z.string()).parse(items || []);
-  },
+  getTrending: unstable_cache(
+    async (cat: string, limit = 10) => {
+      const q = popularItemsQuerySchema.parse({ category: cat, limit });
+      const items = await redis(
+        async (c) =>
+          await c.zrange(`trending:${q.category}:weekly`, Date.now() - 604800000, Date.now(), {
+            byScore: true,
+            rev: true,
+            withScores: false,
+            offset: 0,
+            count: q.limit,
+          }),
+        () => [],
+        'getTrending'
+      );
+      return z.array(z.string()).parse(items || []);
+    },
+    ['trending'],
+    {
+      revalidate: 600,
+      tags: ['stats', 'trending'],
+    }
+  ),
 
   getPopular: async (cat: string, limit = 10) => {
     const q = popularItemsQuerySchema.parse({ category: cat, limit });
@@ -2112,35 +2153,35 @@ export const statsRedis = {
       'getCopyCount'
     ),
 
-  getCopyCounts: async (items: Array<{ category: string; slug: string }>) => {
-    if (!items.length) return {};
-    const keys = items.map((i) => `copies:${i.category}:${i.slug}`);
-    const counts = await redis(
-      async (c) => await c.mget<(number | null)[]>(...keys),
-      () => new Array(items.length).fill(0) as (number | null)[],
-      'getCopyCounts'
-    );
-    return items.reduce(
-      (acc, item, i) => {
-        acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
-        return acc;
-      },
-      {} as Record<string, number>
-    );
-  },
+  getCopyCounts: unstable_cache(
+    async (items: Array<{ category: string; slug: string }>) => {
+      if (!items.length) return {};
+      const keys = items.map((i) => `copies:${i.category}:${i.slug}`);
+      const counts = await redis(
+        async (c) => await c.mget<(number | null)[]>(...keys),
+        () => new Array(items.length).fill(0) as (number | null)[],
+        'getCopyCounts'
+      );
+      return items.reduce(
+        (acc, item, i) => {
+          acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
+    },
+    ['copy-counts'],
+    {
+      revalidate: 600,
+      tags: ['stats', 'copy-counts'],
+    }
+  ),
 
   cleanupOldTrending: () =>
     redis(
       async (c) => {
-        const cats = [
-          'agents',
-          'mcp',
-          'rules',
-          'commands',
-          'hooks',
-          'statuslines',
-          'collections',
-        ] as const;
+        // Auto-generated from UNIFIED_CATEGORY_REGISTRY
+        const cats = getAllCategoryIds();
         await Promise.all(
           cats.map((cat) =>
             c.zremrangebyscore(
@@ -2219,13 +2260,11 @@ export const statsRedis = {
     if (!items.length) return [];
 
     try {
-      // Batch fetch both counts in parallel
       const [viewCounts, copyCounts] = await batchFetch([
         statsRedis.getViewCounts(items),
         statsRedis.getCopyCounts(items),
       ]);
 
-      // Merge both counts with items
       return items.map((item) => ({
         ...item,
         viewCount: viewCounts[`${item.category}:${item.slug}`] || 0,
@@ -2236,8 +2275,39 @@ export const statsRedis = {
         'Failed to enrich with all counts',
         error instanceof Error ? error : new Error(String(error))
       );
-      // Return items without counts on error
       return items.map((item) => ({ ...item, viewCount: 0, copyCount: 0 }));
+    }
+  },
+
+  enrichMultipleDatasets: async <T extends { category: string; slug: string }>(
+    datasets: T[][]
+  ): Promise<Array<(T & { viewCount: number; copyCount: number })[]>> => {
+    if (!datasets.length) return [];
+
+    const allItems = datasets.flat();
+    if (!allItems.length) return datasets.map(() => []);
+
+    try {
+      const [viewCounts, copyCounts] = await batchFetch([
+        statsRedis.getViewCounts(allItems),
+        statsRedis.getCopyCounts(allItems),
+      ]);
+
+      return datasets.map((dataset) =>
+        dataset.map((item) => ({
+          ...item,
+          viewCount: viewCounts[`${item.category}:${item.slug}`] || 0,
+          copyCount: copyCounts[`${item.category}:${item.slug}`] || 0,
+        }))
+      );
+    } catch (error) {
+      logger.error(
+        'Failed to enrich multiple datasets',
+        error instanceof Error ? error : new Error(String(error))
+      );
+      return datasets.map((dataset) =>
+        dataset.map((item) => ({ ...item, viewCount: 0, copyCount: 0 }))
+      );
     }
   },
 };
@@ -2378,17 +2448,8 @@ const CACHE_WARMER_LIMITS = {
   MAX_COMMON_QUERIES: 100,
 } as const;
 
-const warmableCategorySchema = z.enum([
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'collections',
-  'guides',
-  'jobs',
-]);
+// Auto-generated from UNIFIED_CATEGORY_REGISTRY
+const warmableCategorySchema = z.enum(getAllCategoryIds() as [string, ...string[]]);
 
 const cacheWarmerPopularItemSchema = z.object({
   slug: nonEmptyString
@@ -2467,35 +2528,23 @@ class CacheWarmer {
     try {
       logger.info('Starting cache warming for popular content');
 
-      // Lazy load metadata only when needed
-      const [
-        agentsMetadata,
-        mcpMetadata,
-        rulesMetadata,
-        commandsMetadata,
-        hooksMetadata,
-        statuslinesMetadata,
-        collectionsMetadata,
-      ] = await batchFetch([
-        metadataLoader.get('agentsMetadata'),
-        metadataLoader.get('mcpMetadata'),
-        metadataLoader.get('rulesMetadata'),
-        metadataLoader.get('commandsMetadata'),
-        metadataLoader.get('hooksMetadata'),
-        metadataLoader.get('statuslinesMetadata'),
-        metadataLoader.get('collectionsMetadata'),
-      ]);
+      // Auto-generated from UNIFIED_CATEGORY_REGISTRY - dynamically loads all categories
+      const allCategoryIds = getAllCategoryIds();
 
-      // Get popular items from each category
-      const categories = [
-        { name: 'agents' as WarmableCategory, items: agentsMetadata },
-        { name: 'mcp' as WarmableCategory, items: mcpMetadata },
-        { name: 'rules' as WarmableCategory, items: rulesMetadata },
-        { name: 'commands' as WarmableCategory, items: commandsMetadata },
-        { name: 'hooks' as WarmableCategory, items: hooksMetadata },
-        { name: 'statuslines' as WarmableCategory, items: statuslinesMetadata },
-        { name: 'collections' as WarmableCategory, items: collectionsMetadata },
-      ];
+      // Build loader keys dynamically (converts 'agents' → 'agentsMetadata')
+      const loaderKeys = allCategoryIds.map((id) => {
+        const varName = id.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+        return `${varName}Metadata`;
+      });
+
+      // Lazy load metadata for all categories
+      const metadataResults = await batchFetch(loaderKeys.map((key) => metadataLoader.get(key)));
+
+      // Combine category IDs with their loaded metadata
+      const categories = allCategoryIds.map((id, index) => ({
+        name: id as WarmableCategory,
+        items: metadataResults[index],
+      }));
 
       // Validate categories
       const validatedCategories = categories.map((cat) => categoryMetadataSchema.parse(cat));
@@ -2604,15 +2653,13 @@ class CacheWarmer {
   private async warmRelatedContent(): Promise<void> {
     try {
       // Pre-calculate related content for top pages
+      // Auto-generated from UNIFIED_CATEGORY_REGISTRY
       const topPages = [
-        { path: '/', category: 'agents' as WarmableCategory },
-        { path: '/agents', category: 'agents' as WarmableCategory },
-        { path: '/mcp', category: 'mcp' as WarmableCategory },
-        { path: '/rules', category: 'rules' as WarmableCategory },
-        { path: '/commands', category: 'commands' as WarmableCategory },
-        { path: '/hooks', category: 'hooks' as WarmableCategory },
-        { path: '/statuslines', category: 'statuslines' as WarmableCategory },
-        { path: '/collections', category: 'collections' as WarmableCategory },
+        { path: '/', category: 'agents' as WarmableCategory }, // Homepage uses agents as default
+        ...getAllCategoryIds().map((id) => ({
+          path: `/${id}`,
+          category: id as WarmableCategory,
+        })),
       ];
 
       // Validate pages
@@ -2924,7 +2971,7 @@ class CacheInvalidationService {
    * Invalidate caches when content is updated
    */
   async invalidateContentCaches(
-    category: ContentCategory,
+    category: CategoryId,
     slug: string,
     options: {
       invalidateRelated?: boolean;
@@ -3004,7 +3051,7 @@ class CacheInvalidationService {
   /**
    * Find cache keys that might contain the updated content
    */
-  private async findRelatedCacheKeys(category: ContentCategory, slug: string): Promise<string[]> {
+  private async findRelatedCacheKeys(category: CategoryId, slug: string): Promise<string[]> {
     const keys: string[] = [];
 
     // Get related categories that might include this content
@@ -3053,13 +3100,11 @@ class CacheInvalidationService {
   /**
    * Get related categories for cross-category invalidation
    */
-  private getRelatedCategories(category: ContentCategory): ContentCategory[] {
-    const relationships: Record<string, ContentCategory[]> = {
-      tutorials: ['workflows', 'use-cases'],
-      comparisons: ['tutorials', 'troubleshooting'],
-      workflows: ['tutorials', 'use-cases'],
-      'use-cases': ['tutorials', 'workflows'],
-      troubleshooting: ['tutorials', 'comparisons'],
+  private getRelatedCategories(category: CategoryId): CategoryId[] {
+    // NOTE: Subcategories (tutorials, workflows, etc.) are NOT categories
+    // They are under 'guides' and should not be tracked separately
+    const relationships: Record<string, CategoryId[]> = {
+      guides: ['agents', 'mcp'],
       agents: ['commands', 'rules'],
       mcp: ['agents', 'hooks'],
       rules: ['agents', 'commands'],

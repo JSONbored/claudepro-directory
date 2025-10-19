@@ -16,16 +16,28 @@
  * @module lib/analytics/event-mapper
  */
 
-import type { EventName } from '@/src/lib/analytics/events.constants';
-import { EVENTS } from '@/src/lib/analytics/events.constants';
-import { getAllCategoryIds } from '@/src/lib/config/category-config';
-import type { ContentCategory as SharedContentCategory } from '@/src/lib/schemas/shared.schema';
+import { EVENTS, type EventName } from '@/src/lib/analytics/events.constants';
+import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+import type { CategoryId } from '@/src/lib/config/category-types';
 
 /**
- * Content categories supported by the event mapper
- * Extends shared ContentCategory to include aliases (mcp-servers)
+ * Normalize category aliases to official CategoryId
+ * Handles backward compatibility for deprecated aliases
+ *
+ * @param category - Category ID or alias (e.g., 'mcp-servers')
+ * @returns Official CategoryId from UNIFIED_CATEGORY_REGISTRY
  */
-export type ContentCategory = SharedContentCategory | 'mcp-servers';
+function normalizeCategoryId(category: string): CategoryId | null {
+  // Handle backward compatibility alias
+  if (category === 'mcp-servers') return 'mcp';
+
+  // Validate against official registry
+  if (category in UNIFIED_CATEGORY_REGISTRY) {
+    return category as CategoryId;
+  }
+
+  return null;
+}
 
 /**
  * Action types for event mapping
@@ -36,6 +48,16 @@ export type EventAction =
   | 'copy_code'
   | 'copy_markdown'
   | 'download_markdown';
+
+/**
+ * ============================================
+ * STATIC EVENTS IMPORT
+ * ============================================
+ *
+ * EVENTS is now statically imported at top level.
+ * This works in Storybook because event-mapper is mocked via subpath imports.
+ * The mock file never imports EVENTS, so no circular dependency occurs.
+ */
 
 /**
  * ============================================
@@ -61,11 +83,12 @@ function categoryToEventSuffix(categoryId: string): string {
 }
 
 /**
- * Build event mappings dynamically from registry
+ * Build event mappings dynamically from category registry
  * Automatically handles all categories - zero manual maintenance
+ * Derives from UNIFIED_CATEGORY_REGISTRY (single source of truth)
  */
 function buildEventMappings(): Record<EventAction, Record<string, EventName>> {
-  const categories = getAllCategoryIds();
+  const categories = Object.keys(UNIFIED_CATEGORY_REGISTRY);
 
   const contentViewMap: Record<string, EventName> = {};
   const searchMap: Record<string, EventName> = { global: EVENTS.SEARCH_GLOBAL };
@@ -86,27 +109,22 @@ function buildEventMappings(): Record<EventAction, Record<string, EventName>> {
     // Map to actual event constants if they exist
     if (contentViewKey in EVENTS) {
       contentViewMap[categoryId] = EVENTS[contentViewKey] as EventName;
-      contentViewMap['mcp-servers'] = EVENTS[contentViewKey] as EventName; // Alias
     }
 
     if (searchKey in EVENTS) {
       searchMap[categoryId] = EVENTS[searchKey] as EventName;
-      searchMap['mcp-servers'] = EVENTS[searchKey] as EventName; // Alias
     }
 
     if (copyCodeKey in EVENTS) {
       copyCodeMap[categoryId] = EVENTS[copyCodeKey] as EventName;
-      copyCodeMap['mcp-servers'] = EVENTS[copyCodeKey] as EventName; // Alias
     }
 
     if (copyMarkdownKey in EVENTS) {
       copyMarkdownMap[categoryId] = EVENTS[copyMarkdownKey] as EventName;
-      copyMarkdownMap['mcp-servers'] = EVENTS[copyMarkdownKey] as EventName; // Alias
     }
 
     if (downloadMarkdownKey in EVENTS) {
       downloadMarkdownMap[categoryId] = EVENTS[downloadMarkdownKey] as EventName;
-      downloadMarkdownMap['mcp-servers'] = EVENTS[downloadMarkdownKey] as EventName; // Alias
     }
   }
 
@@ -127,27 +145,42 @@ function buildEventMappings(): Record<EventAction, Record<string, EventName>> {
 
 /**
  * Event mapping configuration
- * Auto-generated from category registry - zero manual maintenance
+ * Lazy-loaded to avoid module initialization errors in Storybook
+ * Auto-generated from category schema - zero manual maintenance
  */
-const EVENT_MAPPINGS: Record<EventAction, Record<string, EventName>> = buildEventMappings();
+let EVENT_MAPPINGS: Record<EventAction, Record<string, EventName>> | null = null;
+
+function getEventMappings(): Record<EventAction, Record<string, EventName>> {
+  if (!EVENT_MAPPINGS) {
+    EVENT_MAPPINGS = buildEventMappings();
+  }
+  return EVENT_MAPPINGS;
+}
 
 /**
  * Fallback events for when category is not found
- * Use generic agent events as fallback
+ * Lazy-loaded to avoid circular dependency with EVENTS in Storybook
  */
-const FALLBACK_EVENTS: Record<EventAction, EventName> = {
-  content_view: EVENTS.CONTENT_VIEW_AGENT,
-  search: EVENTS.SEARCH_GLOBAL,
-  copy_code: EVENTS.COPY_CODE_AGENT,
-  copy_markdown: EVENTS.COPY_MARKDOWN_AGENT,
-  download_markdown: EVENTS.DOWNLOAD_MARKDOWN_AGENT,
-};
+let FALLBACK_EVENTS: Record<EventAction, EventName> | null = null;
+
+function getFallbackEvents(): Record<EventAction, EventName> {
+  if (!FALLBACK_EVENTS) {
+    FALLBACK_EVENTS = {
+      content_view: EVENTS.CONTENT_VIEW_AGENT,
+      search: EVENTS.SEARCH_GLOBAL,
+      copy_code: EVENTS.COPY_CODE_AGENT,
+      copy_markdown: EVENTS.COPY_MARKDOWN_AGENT,
+      download_markdown: EVENTS.DOWNLOAD_MARKDOWN_AGENT,
+    };
+  }
+  return FALLBACK_EVENTS;
+}
 
 /**
  * Get event name for a specific action and content category
  *
  * @param action - The action type (view, search, copy, etc.)
- * @param category - The content category (agents, mcp, commands, etc.)
+ * @param category - The content category (agents, mcp, commands, etc.) or alias (mcp-servers)
  * @returns The specific EventName for tracking
  *
  * @example
@@ -158,18 +191,27 @@ const FALLBACK_EVENTS: Record<EventAction, EventName> = {
  * const event = getEventForCategory('search', 'mcp');
  * // Returns: EVENTS.SEARCH_MCP
  *
+ * const event = getEventForCategory('search', 'mcp-servers');
+ * // Returns: EVENTS.SEARCH_MCP (normalized)
+ *
  * const event = getEventForCategory('copy_code', 'unknown');
- * // Returns: EVENTS.COPY_CODE_OTHER (fallback)
+ * // Returns: EVENTS.COPY_CODE_AGENT (fallback)
  * ```
  */
 export function getEventForCategory(action: EventAction, category: string): EventName {
-  const actionMap = EVENT_MAPPINGS[action];
+  const mappings = getEventMappings();
+  const fallbacks = getFallbackEvents();
+  const actionMap = mappings[action];
 
   if (!actionMap) {
-    return FALLBACK_EVENTS[action] || EVENTS.SEARCH_GLOBAL;
+    return fallbacks[action] || EVENTS.SEARCH_GLOBAL;
   }
 
-  return actionMap[category] || FALLBACK_EVENTS[action];
+  // Normalize category (handles aliases like 'mcp-servers' → 'mcp')
+  const normalizedCategory = normalizeCategoryId(category);
+  const lookupCategory = normalizedCategory || category;
+
+  return actionMap[lookupCategory] || fallbacks[action];
 }
 
 /**
@@ -271,7 +313,8 @@ export function getDownloadMarkdownEvent(category: string): EventName {
  * ```
  */
 export function isValidCategory(action: EventAction, category: string): boolean {
-  const actionMap = EVENT_MAPPINGS[action];
+  const mappings = getEventMappings();
+  const actionMap = mappings[action];
   return actionMap ? category in actionMap : false;
 }
 
@@ -288,6 +331,7 @@ export function isValidCategory(action: EventAction, category: string): boolean 
  * ```
  */
 export function getValidCategories(action: EventAction): string[] {
-  const actionMap = EVENT_MAPPINGS[action];
+  const mappings = getEventMappings();
+  const actionMap = mappings[action];
   return actionMap ? Object.keys(actionMap) : [];
 }

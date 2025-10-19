@@ -10,7 +10,8 @@ keywords:
   - "claude 4 implementation tutorial"
 dateUpdated: "2025-09-24"
 author: "Claude Pro Directory"
-category: "tutorials"
+category: "guides"
+subcategory: "tutorials"
 tags:
   - "tutorial"
   - "advanced"
@@ -24,7 +25,8 @@ aiOptimized: true
 citationReady: true
 ---
 
-<TLDRSummary
+<UnifiedContentBlock
+  variant="tldr"
   content="This tutorial teaches you to implement Claude 4's extended thinking API with up to 500K token reasoning chains in 25 minutes. You'll learn thinking budget optimization that cuts costs by 60%, build multi-hour coding workflows achieving 74.5% SWE-bench accuracy, and master the hybrid reasoning model that outperforms GPT-5 in sustained tasks. Perfect for developers and AI engineers who want to leverage Claude's most advanced 2025 feature for complex problem-solving."
   keyPoints={[
     "Implement extended thinking API with Python/JavaScript - achieve 74.5% coding accuracy",
@@ -36,7 +38,7 @@ citationReady: true
 
 Master Claude 4's revolutionary extended thinking API that enables reasoning chains up to 500K tokens. By completion, you'll have a production-ready implementation achieving 74.5% accuracy on complex coding tasks and understand how companies like GitHub, Cursor, and Replit leverage this technology for 54% productivity gains. This guide includes 6 practical examples, 8 code samples, and 4 real-world production patterns.
 
-<Callout type="info" title="Tutorial Requirements">
+<UnifiedContentBox contentType="callout" type="info" title="Tutorial Requirements">
 **Prerequisites:** Basic API knowledge, Python or JavaScript experience
 
 **Time Required:** 25 minutes active work
@@ -48,7 +50,8 @@ Master Claude 4's revolutionary extended thinking API that enables reasoning cha
 
 ## What You'll Learn
 
-<FeatureGrid
+<UnifiedContentBlock
+  variant="feature-grid"
   title="Learning Outcomes"
   description="Skills and knowledge you'll master in this tutorial"
   features={[
@@ -193,7 +196,7 @@ batch_responses = client.batch.create(
 
 Understanding these concepts ensures you can adapt this tutorial to your specific needs and troubleshoot issues effectively.
 
-<Accordion
+<UnifiedContentBox contentType="accordion"
   title="Core Concepts Deep Dive"
   description="Essential knowledge for mastering extended thinking"
   items={[
@@ -462,7 +465,7 @@ workflow:
 
 ## Troubleshooting Guide
 
-<Callout type="warning" title="Common Issues and Solutions">
+<UnifiedContentBox contentType="callout" type="warning" title="Common Issues and Solutions">
 **Issue 1: "Rate limit exceeded after 2 complex prompts"**
 
 **Solution:** Upgrade from Pro ($20) to Max tier ($100-200/month). Pro tier aggressively limits extended thinking requests. This fixes token allocation restrictions and prevents workflow interruptions.
@@ -478,7 +481,7 @@ workflow:
 
 ## Advanced Techniques
 
-<Callout type="tip" title="Professional Tips">
+<UnifiedContentBox contentType="callout" type="tip" title="Professional Tips">
 **Performance Optimization:** Combine Sonnet 4 for routine tasks with selective Opus 4.1 deployment reduces costs by 60-70% while maintaining output quality. GitHub and Cursor use this hybrid approach.
 
 **Security Best Practice:** Always preserve thinking blocks in multi-turn conversations for audit trails. Never modify or reorder thinking sequences as this causes API validation errors.
@@ -488,7 +491,8 @@ workflow:
 
 ## Validation and Testing
 
-<FeatureGrid
+<UnifiedContentBlock
+  variant="feature-grid"
   title="Success Criteria"
   description="How to verify your implementation works correctly"
   features={[
@@ -518,7 +522,7 @@ workflow:
 
 ## Next Steps and Learning Path
 
-<AIOptimizedFAQ
+<UnifiedContentBox contentType="faq"
   title="Continue Your Learning Journey"
   description="Common questions about advancing from this tutorial"
   questions={[
@@ -547,7 +551,8 @@ workflow:
 
 ## Quick Reference
 
-<QuickReference
+<UnifiedContentBlock
+  variant="quick-reference"
   title="Extended Thinking Cheat Sheet"
   description="Essential commands and configurations from this tutorial"
   items={[
@@ -591,7 +596,7 @@ workflow:
 
 ---
 
-<Callout type="success" title="Tutorial Complete!">
+<UnifiedContentBox contentType="callout" type="success" title="Tutorial Complete!">
 **Congratulations!** You've mastered Claude 4's extended thinking API and can now build production systems achieving 74.5% coding accuracy.
 
 **What you achieved:**

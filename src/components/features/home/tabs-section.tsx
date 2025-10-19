@@ -16,11 +16,14 @@
 
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
-import { ConfigCard } from '@/src/components/features/content/config-card';
-import { InfiniteScrollGrid } from '@/src/components/shared/infinite-scroll-grid';
-import { Button } from '@/src/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
-import { CATEGORY_CONFIGS, HOMEPAGE_TAB_CATEGORIES } from '@/src/lib/config/category-config';
+import { ConfigCard } from '@/src/components/domain/config-card';
+import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
+import { Button } from '@/src/components/primitives/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
+import {
+  HOMEPAGE_TAB_CATEGORIES,
+  UNIFIED_CATEGORY_REGISTRY,
+} from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 
@@ -49,7 +52,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
           let displayName = tab.charAt(0).toUpperCase() + tab.slice(1);
 
           if (tab !== 'all' && tab !== 'community') {
-            const config = CATEGORY_CONFIGS[tab];
+            const config = UNIFIED_CATEGORY_REGISTRY[tab];
             if (config) {
               displayName = config.pluralTitle;
             }
@@ -68,19 +71,21 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
         const categoryName =
           tab === 'all'
             ? 'configurations'
-            : CATEGORY_CONFIGS[tab]?.pluralTitle?.toLowerCase() || tab;
+            : UNIFIED_CATEGORY_REGISTRY[tab]?.pluralTitle?.toLowerCase() || tab;
 
         return (
           <TabsContent key={tab} value={tab} className="space-y-6">
-            <InfiniteScrollGrid<UnifiedContentItem>
+            <UnifiedCardGrid
               items={filteredResults}
-              gap={24}
+              variant="normal"
+              infiniteScroll
               batchSize={30}
-              renderItem={(item: UnifiedContentItem) => (
+              emptyMessage={`No ${categoryName} found. Try adjusting your filters.`}
+              ariaLabel={`${categoryName} results`}
+              keyExtractor={(item) => item.slug}
+              renderCard={(item: UnifiedContentItem) => (
                 <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
               )}
-              emptyMessage={`No ${categoryName} found. Try adjusting your filters.`}
-              keyExtractor={(item: UnifiedContentItem) => item.slug}
             />
           </TabsContent>
         );

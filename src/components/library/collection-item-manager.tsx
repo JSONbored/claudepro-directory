@@ -10,23 +10,23 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { Button } from '@/src/components/primitives/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
-import { Separator } from '@/src/components/ui/separator';
+} from '@/src/components/primitives/select';
+import { Separator } from '@/src/components/primitives/separator';
 import {
   addItemToCollection,
   removeItemFromCollection,
   reorderCollectionItems,
 } from '@/src/lib/actions/content.actions';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@/src/lib/icons';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -83,7 +83,7 @@ export function CollectionItemManager({
       try {
         const result = await addItemToCollection({
           collection_id: collectionId,
-          content_type: bookmark.content_type as ContentCategory,
+          content_type: bookmark.content_type as CategoryId,
           content_slug: bookmark.content_slug,
           order: items.length, // Add to end
         });
@@ -204,9 +204,9 @@ export function CollectionItemManager({
                 availableToAdd.map((bookmark) => (
                   <SelectItem key={bookmark.id} value={bookmark.id}>
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                      <Badge variant="outline" className="text-xs capitalize">
+                      <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                         {bookmark.content_type}
-                      </Badge>
+                      </UnifiedBadge>
                       {bookmark.content_slug}
                     </div>
                   </SelectItem>
@@ -273,9 +273,9 @@ export function CollectionItemManager({
               {/* Content Info */}
               <div className="flex-1">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <Badge variant="outline" className="text-xs capitalize">
+                  <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                     {item.content_type}
-                  </Badge>
+                  </UnifiedBadge>
                   <span className="text-sm font-medium">{item.content_slug}</span>
                 </div>
                 {item.notes && <p className={'text-xs text-muted-foreground mt-1'}>{item.notes}</p>}

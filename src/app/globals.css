@@ -1300,6 +1300,104 @@
       transform: scale(1);
     }
   }
+
+  /* ========================================
+     VIEW TRANSITIONS API - CARD → DETAIL PAGE MORPHING
+     Baseline support as of October 2025
+     ======================================== */
+
+  /**
+   * Smooth Card → Detail Page Morphing Animation
+   *
+   * Creates seamless transitions when navigating from card to detail page
+   * - Progressive enhancement: Works everywhere, enhanced where supported
+   * - Respects prefers-reduced-motion
+   * - Shared element transitions using view-transition-name
+   * - Smooth scale and fade animations
+   *
+   * Browser Support (Q4 2025):
+   * - ✅ Chrome 111+ (same-document transitions)
+   * - ✅ Edge 111+ (same-document transitions)
+   * - ✅ Firefox 144+ (same-document transitions)
+   * - ✅ Safari 18+ (same-document transitions)
+   *
+   * Usage:
+   * - Cards set view-transition-name: config-card-{slug}
+   * - Detail pages match with same transition name
+   * - navigateWithTransition() handles the API call
+   *
+   * Animation Flow:
+   * 1. Old view (card) scales down and fades out
+   * 2. New view (detail) scales up and fades in
+   * 3. Shared elements morph smoothly between states
+   */
+  @supports (view-transition-name: none) {
+    /* Root transition: Subtle cross-fade for layout context */
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation-duration: 350ms;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Shared element transitions: Smooth morphing for cards
+     * Applies to all view-transition elements (cards, images, etc.)
+     * CSS wildcards in pseudo-elements are not supported by optimizers
+     */
+    ::view-transition-group(*),
+    ::view-transition-image-pair(*) {
+      animation-duration: 400ms;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Old view (card): Scale down and fade out */
+    ::view-transition-old(*) {
+      animation-duration: 400ms;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+      animation-name: card-shrink-fade-out;
+      mix-blend-mode: normal;
+    }
+
+    /* New view (detail page): Scale up and fade in */
+    ::view-transition-new(*) {
+      animation-duration: 400ms;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+      animation-name: card-grow-fade-in;
+      mix-blend-mode: normal;
+    }
+  }
+
+  /* Card shrink and fade out animation */
+  @keyframes card-shrink-fade-out {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+
+  /* Card grow and fade in animation */
+  @keyframes card-grow-fade-in {
+    from {
+      opacity: 0;
+      transform: scale(1.05);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Respect prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      animation-duration: 1ms !important;
+      animation-delay: 0s !important;
+    }
+  }
 }
 
 /* ========================================
@@ -1510,6 +1608,11 @@
 
 .animate-gridMove {
   animation: gridMove 20s linear infinite;
+}
+
+.animate-border-beam {
+  animation: border-beam linear infinite;
+  animation-duration: var(--duration);
 }
 
 /* Text Roll Animation - Apple Hello Effect */

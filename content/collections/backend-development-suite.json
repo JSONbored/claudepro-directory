@@ -60,5 +60,27 @@
   "compatibility": {
     "claudeDesktop": true,
     "claudeCode": true
-  }
+  },
+  "troubleshooting": [
+    {
+      "issue": "Multiple agents provide conflicting architectural recommendations",
+      "solution": "Install backend-architect-agent first to establish system design. Database and API agents will follow architectural decisions. Enable only one agent at a time when designing new components."
+    },
+    {
+      "issue": "AWS MCP server version incompatible with agent-generated code",
+      "solution": "Verify aws-services-mcp-server supports AWS SDK v3. Check package.json for @aws-sdk version compatibility with generated code. Update MCP server to latest version matching SDK requirements."
+    },
+    {
+      "issue": "Database agent schema conflicts with API Builder endpoints",
+      "solution": "Follow installationOrder: install database-specialist-agent before api-builder-agent. Database agent sets schema first, API agent generates compatible endpoints matching established design."
+    },
+    {
+      "issue": "Missing AWS credentials prevent MCP server initialization",
+      "solution": "Configure AWS credentials first: run aws configure or set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY. Verify with aws sts get-caller-identity then install aws-services-mcp-server."
+    },
+    {
+      "issue": "Collection items require different Node.js versions",
+      "solution": "All items require Node 18+. Verify with node --version before installation. Use nvm to switch versions: nvm use 18. Reinstall entire collection after activating correct Node version."
+    }
+  ]
 }

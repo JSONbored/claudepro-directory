@@ -45,6 +45,14 @@
     {
       "issue": "grep or cut command not found",
       "solution": "These are standard POSIX utilities. Install coreutils package: apt install coreutils (Linux) or ensure busybox is installed (embedded systems)."
+    },
+    {
+      "issue": "JSON parsing breaks when Claude Code changes output format",
+      "solution": "grep/cut parsing is fragile. Switch to jq-based statusline or use awk: awk 'BEGIN { FS=\"\\\"\"; RS=\",\" }; { if ($2 == \"model\") {print $4} }' for robust parsing."
+    },
+    {
+      "issue": "HOME not preserved when running script with sudo",
+      "solution": "Use sudo -H to set HOME or sudo -E to preserve variables. Add HOME to env_keep in /etc/sudoers for persistent fix. Test: sudo -H bash script.sh."
     }
   ],
   "source": "community"

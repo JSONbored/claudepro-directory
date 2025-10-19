@@ -32,5 +32,27 @@
     "Changelog automation and project tracking",
     "Development workflow documentation integration"
   ],
+  "troubleshooting": [
+    {
+      "issue": "TypeDoc generation fails with 'unable to resolve entry point' configuration error",
+      "solution": "Create tsconfig.json with explicit include paths or add 'entryPoints' to typedoc.json config. Use 'npx typedoc --entryPoints src/index.ts' to specify entry point directly in command."
+    },
+    {
+      "issue": "CHANGELOG.md grows unbounded as every session appends duplicate timestamp entries",
+      "solution": "Implement changelog rotation by keeping only last 50 entries or use date-based sections. Archive old entries to CHANGELOG.archive.md when main file exceeds size threshold like 10KB."
+    },
+    {
+      "issue": "Documentation generation completes but docs directory remains empty after stop hook",
+      "solution": "Check documentation tool exit codes and stderr output for generation failures. Ensure write permissions on docs directory and verify sufficient disk space for generated HTML and asset files."
+    },
+    {
+      "issue": "Sphinx autodoc fails to import modules during documentation build process",
+      "solution": "Add project root to PYTHONPATH in hook script: 'export PYTHONPATH=\"${PYTHONPATH}:$(pwd)\"'. Install project dependencies in documentation build environment before running sphinx-build command."
+    },
+    {
+      "issue": "Hook execution timeout when building large documentation sets on session stop",
+      "solution": "Move heavy documentation builds to separate CI job instead of stop hook. Use lightweight generators like pdoc for stop hook, reserving Sphinx or comprehensive builds for scheduled documentation updates."
+    }
+  ],
   "source": "community"
 }

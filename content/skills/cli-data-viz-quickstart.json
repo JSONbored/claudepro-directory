@@ -33,6 +33,22 @@
     {
       "issue": "Fonts missing in headless mode",
       "solution": "Install system fonts or specify a font path for rendering."
+    },
+    {
+      "issue": "Skill activation fails with ModuleNotFoundError for matplotlib",
+      "solution": "Run pip install matplotlib seaborn pandas in Code Interpreter environment. Verify Python 3.11+ is active. Restart Claude Desktop after installation."
+    },
+    {
+      "issue": "Chart export produces blank PNG files or corrupted images",
+      "solution": "Call plt.tight_layout() before plt.savefig(). Set explicit figure size: plt.figure(figsize=(10,6)). Use bbox_inches='tight' parameter in savefig()."
+    },
+    {
+      "issue": "Data visualization skill not appearing in available skills list",
+      "solution": "Enable Code Interpreter in Claude Desktop settings under Features. Upload data file (CSV/JSON) to conversation first to trigger skill recognition and activation."
+    },
+    {
+      "issue": "Interactive plotly charts fail to render with JavaScript errors",
+      "solution": "Save as standalone HTML with plotly.offline.plot(include_plotlyjs='cdn'). Ensure output HTML file has proper DOCTYPE and charset UTF-8 declaration."
     }
   ],
   "documentationUrl": "https://matplotlib.org/",

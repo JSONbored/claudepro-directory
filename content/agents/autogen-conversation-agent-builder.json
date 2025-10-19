@@ -28,5 +28,27 @@
     "Designing customer support automation with intelligent agent routing",
     "Developing code review systems with specialized expert agents"
   ],
+  "troubleshooting": [
+    {
+      "issue": "AutoGen v0.4 agents not receiving messages in cross-language setup",
+      "solution": "Verify runtime.subscribe() includes correct topic_type and agent_type. Check message serialization matches schema between Python and .NET. Enable OpenTelemetry tracing to debug message flow. Ensure SingleThreadedAgentRuntime is properly initialized."
+    },
+    {
+      "issue": "Group chat conversation terminating prematurely before task completion",
+      "solution": "Increase max_turns parameter in team.run() configuration. Review TerminationCondition logic for premature exits. Add explicit task completion signals in agent responses. Monitor conversation state with logging to identify early termination triggers."
+    },
+    {
+      "issue": "AssistantAgent function calling not invoking registered tools correctly",
+      "solution": "Verify tool function signatures match AutoGen expected format with async def. Check model_client supports function calling with tools parameter. Add proper docstrings for tool discovery. Test tools independently before integration."
+    },
+    {
+      "issue": "RoundRobinGroupChat agents speaking out of turn causing conversation chaos",
+      "solution": "Switch to SelectorGroupChat for dynamic speaker selection based on relevance. Implement custom speaker_selection_method with turn-taking logic. Add conversation state management to track previous speakers. Configure max_consecutive_auto_reply limits."
+    },
+    {
+      "issue": "Agent responses contain hallucinated information not grounded in context",
+      "solution": "Lower temperature to 0.2-0.3 in model_client configuration. Add explicit context retrieval tools for fact-checking. Implement RAG pattern with vector database for grounded responses. Use system_message to emphasize factual accuracy requirements."
+    }
+  ],
   "source": "community"
 }

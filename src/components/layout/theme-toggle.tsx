@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Switch } from '@/src/components/ui/switch';
+import { Switch } from '@/src/components/primitives/switch';
 import { useViewTransition } from '@/src/hooks/use-view-transition';
 import { Moon, Sun } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

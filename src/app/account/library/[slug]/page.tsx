@@ -1,16 +1,16 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { CollectionItemManager } from '@/src/components/library/collection-item-manager';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ArrowLeft, Edit, Share2 } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -84,9 +84,9 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
               <h1 className="text-3xl font-bold">{collection.name}</h1>
               {collection.is_public && (
-                <Badge variant="outline" className="text-xs">
+                <UnifiedBadge variant="base" style="outline" className="text-xs">
                   Public
-                </Badge>
+                </UnifiedBadge>
               )}
             </div>
             {collection.description && (

@@ -20,6 +20,7 @@
  */
 
 import { WeeklyDigest } from '@/src/emails/templates/weekly-digest';
+import { getAllCategoryIds } from '@/src/lib/config/category-config';
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { createApiRoute } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
@@ -75,37 +76,23 @@ const route = createApiRoute({
           weekEnd: weekEnd.toISOString().split('T')[0] ?? '',
         });
 
-        // Load all content for each category
-        const [rules, mcp, agents, commands, hooks, statuslines, collections] = await batchFetch([
-          getContentByCategory('rules'),
-          getContentByCategory('mcp'),
-          getContentByCategory('agents'),
-          getContentByCategory('commands'),
-          getContentByCategory('hooks'),
-          getContentByCategory('statuslines'),
-          getContentByCategory('collections'),
-        ]);
+        // Load all content for each category - Auto-generated from UNIFIED_CATEGORY_REGISTRY
+        const allCategoryIds = getAllCategoryIds();
+        const categoryContents = await batchFetch(
+          allCategoryIds.map((categoryId) => getContentByCategory(categoryId))
+        );
 
-        logger.info('Content loaded', {
-          rules: rules.length,
-          mcp: mcp.length,
-          agents: agents.length,
-          commands: commands.length,
-          hooks: hooks.length,
-          statuslines: statuslines.length,
-          collections: collections.length,
-        });
+        // Combine category IDs with their loaded content
+        const categories = allCategoryIds.map((categoryId, index) => ({
+          name: categoryId,
+          items: categoryContents[index] || [], // Default to empty array if undefined
+        }));
 
-        // Calculate featured for each category
-        const categories = [
-          { name: 'rules', items: rules },
-          { name: 'mcp', items: mcp },
-          { name: 'agents', items: agents },
-          { name: 'commands', items: commands },
-          { name: 'hooks', items: hooks },
-          { name: 'statuslines', items: statuslines },
-          { name: 'collections', items: collections },
-        ];
+        // Log content counts
+        const contentCounts = Object.fromEntries(
+          categories.map((cat) => [cat.name, cat.items.length])
+        );
+        logger.info('Content loaded', contentCounts);
 
         const featuredResults: Array<{
           category: string;

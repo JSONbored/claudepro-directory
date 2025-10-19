@@ -13,25 +13,23 @@
 
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useId, useState } from 'react';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
-import { ErrorBoundary } from '@/src/components/shared/error-boundary';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
-import { Collapsible, CollapsibleContent } from '@/src/components/ui/collapsible';
-import { Input } from '@/src/components/ui/input';
+import { ErrorBoundary } from '@/src/components/infra/error-boundary';
+import { Button } from '@/src/components/primitives/button';
+import { Collapsible, CollapsibleContent } from '@/src/components/primitives/collapsible';
+import { Input } from '@/src/components/primitives/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
+} from '@/src/components/primitives/select';
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
-import { getSearchEvent } from '@/src/lib/analytics/event-mapper';
-import { trackEvent } from '@/src/lib/analytics/tracker';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/schemas/component.schema';
-import { sanitizers } from '@/src/lib/security/validators';
+import { sanitizers } from '@/src/lib/security/validators-sync';
 
 import { cn } from '@/src/lib/utils';
 
@@ -90,14 +88,21 @@ export function UnifiedSearch({
       // Track search event with context-specific analytics (only for non-empty queries)
       if (sanitized && sanitized.length > 0) {
         const category = pathname?.split('/')[1] || 'global';
-        const eventName = getSearchEvent(category);
 
-        trackEvent(eventName, {
-          query: sanitized.substring(0, 100), // Truncate for privacy
-          results_count: resultCount,
-          filters_applied: activeFilterCount > 0,
-          time_to_results: 0, // Could add performance timing if needed
-        });
+        // Dynamic imports to avoid server-only module issues in Storybook
+        Promise.all([import('#lib/analytics/event-mapper'), import('#lib/analytics/tracker')])
+          .then(([{ getSearchEvent }, { trackEvent }]) => {
+            const eventName = getSearchEvent(category);
+            trackEvent(eventName, {
+              query: sanitized.substring(0, 100), // Truncate for privacy
+              results_count: resultCount,
+              filters_applied: activeFilterCount > 0,
+              time_to_results: 0, // Could add performance timing if needed
+            });
+          })
+          .catch(() => {
+            // Silent fail in Storybook - analytics not critical for component rendering
+          });
       }
     }, 300);
 
@@ -203,13 +208,14 @@ export function UnifiedSearch({
                 <Filter className="h-4 w-4" aria-hidden="true" />
                 <span>Filter</span>
                 {activeFilterCount > 0 && (
-                  <Badge
-                    variant="secondary"
+                  <UnifiedBadge
+                    variant="base"
+                    style="secondary"
                     className="ml-1 px-1.5 py-0 h-5"
                     aria-label={`${activeFilterCount} active filters`}
                   >
                     {activeFilterCount}
-                  </Badge>
+                  </UnifiedBadge>
                 )}
                 {isFilterOpen ? (
                   <ChevronUp className="h-3 w-3 ml-1" aria-hidden="true" />

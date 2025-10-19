@@ -72,5 +72,32 @@
   "compatibility": {
     "claudeDesktop": true,
     "claudeCode": true
-  }
+  },
+  "troubleshooting": [
+    {
+      "issue": "Code complexity monitor triggers false alerts constantly",
+      "solution": "Configure thresholds in hook settings: cyclomatic_complexity: 15, cognitive_complexity: 20. Add exceptions for generated code in .complexityignore file.",
+      "category": "installation_setup"
+    },
+    {
+      "issue": "Auto-save backup conflicts with Git version control system",
+      "solution": "Set backup directory outside Git repo in hook config: backup_path: '../backups'. Add backup_path to .gitignore. Schedule cleanup for backups older than 7 days.",
+      "category": "compatibility"
+    },
+    {
+      "issue": "Code reviewer agent and production auditor rules disagree",
+      "solution": "Production auditor takes precedence for deployment decisions. Use reviewer agent for development phase. Configure agent to defer to auditor rules.",
+      "category": "common_errors"
+    },
+    {
+      "issue": "Generate-tests command fails: missing test framework setup",
+      "solution": "Install test dependencies: npm install -D jest @types/jest ts-jest. Initialize config: npx jest --init. Ensure package.json has test script defined.",
+      "category": "prerequisites"
+    },
+    {
+      "issue": "Collection slows down Claude responses significantly",
+      "solution": "Disable hooks during development: set enabled: false for complexity monitor and backup. Re-enable before commits. Use agent/rules only for reviews.",
+      "category": "common_errors"
+    }
+  ]
 }

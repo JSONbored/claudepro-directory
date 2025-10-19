@@ -35,5 +35,27 @@
     },
     "scriptContent": "#!/bin/bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\nTOOL_ACTION=$(echo \"$INPUT\" | jq -r '.tool_action // \"unknown\"')\n\necho \"📊 Real-time Activity Tracker - Logging activity...\"\n\n# Create .claude directory if it doesn't exist\nmkdir -p .claude\n\n# Create daily activity log\nACTIVITY_LOG=\".claude/activity-$(date +%Y%m%d).log\"\nACTIVITY_JSON=\".claude/activity-$(date +%Y%m%d).json\"\n\n# Current timestamp\nTIMESTAMP=$(date --iso-8601=seconds 2>/dev/null || date -Iseconds 2>/dev/null || date)\n\n# Log in human-readable format\necho \"[$TIMESTAMP] Tool: $TOOL_NAME | File: $FILE_PATH | Action: $TOOL_ACTION\" >> \"$ACTIVITY_LOG\"\n\n# Log in JSON format for programmatic analysis\ncat >> \"$ACTIVITY_JSON\" << EOF\n{\n  \"timestamp\": \"$TIMESTAMP\",\n  \"tool_name\": \"$TOOL_NAME\",\n  \"file_path\": \"$FILE_PATH\",\n  \"action\": \"$TOOL_ACTION\",\n  \"session_id\": \"$(date +%Y%m%d_%H%M%S)_$$\"\n},\nEOF\n\n# Keep only last 100 entries in activity log to prevent it from growing too large\nif [ -f \"$ACTIVITY_LOG\" ]; then\n    tail -n 100 \"$ACTIVITY_LOG\" > \"$ACTIVITY_LOG.tmp\" && mv \"$ACTIVITY_LOG.tmp\" \"$ACTIVITY_LOG\"\nfi\n\n# Keep only last 100 entries in JSON log\nif [ -f \"$ACTIVITY_JSON\" ]; then\n    tail -n 100 \"$ACTIVITY_JSON\" > \"$ACTIVITY_JSON.tmp\" && mv \"$ACTIVITY_JSON.tmp\" \"$ACTIVITY_JSON\"\nfi\n\n# Activity statistics\nif [ -f \"$ACTIVITY_LOG\" ]; then\n    TOTAL_ACTIVITIES=$(wc -l < \"$ACTIVITY_LOG\")\n    echo \"📈 Session Activity Count: $TOTAL_ACTIVITIES\"\n    \n    # Show recent activity summary\n    echo \"🕒 Recent Activities:\"\n    tail -n 3 \"$ACTIVITY_LOG\" | while read -r line; do\n        echo \"  • $line\"\n    done\n    \n    # File operation summary\n    WRITE_COUNT=$(grep -c \"Write\\|Edit\" \"$ACTIVITY_LOG\" 2>/dev/null || echo 0)\n    read_COUNT=$(grep -c \"Read\" \"$ACTIVITY_LOG\" 2>/dev/null || echo 0)\n    \n    echo \"📊 Today's Summary:\"\n    echo \"  • Write/Edit operations: $WRITE_COUNT\"\n    echo \"  • Read operations: $READ_COUNT\"\nfi\n\n# Weekly activity archive (every Sunday)\nif [ \"$(date +%u)\" = \"7\" ]; then\n    ARCHIVE_DIR=\".claude/archive/$(date +%Y-%m)\"\n    mkdir -p \"$ARCHIVE_DIR\"\n    \n    # Move old logs to archive\n    find .claude -name \"activity-*.log\" -mtime +7 -exec mv {} \"$ARCHIVE_DIR/\" \\;\n    find .claude -name \"activity-*.json\" -mtime +7 -exec mv {} \"$ARCHIVE_DIR/\" \\;\n    \n    echo \"📦 Weekly archive created in $ARCHIVE_DIR\"\nfi\n\necho \"✅ Activity logged to $ACTIVITY_LOG\"\n\nexit 0"
   },
+  "troubleshooting": [
+    {
+      "issue": "Activity logs show incorrect timestamps or 'unknown' dates",
+      "solution": "ISO-8601 date varies by platform. Replace 'date --iso-8601=seconds' with portable: 'date -u +\"%Y-%m-%dT%H:%M:%SZ\"'. Works on both Linux and macOS without fallback."
+    },
+    {
+      "issue": "JSON activity log is malformed with trailing commas",
+      "solution": "Each append adds trailing comma creating invalid JSON. Wrap in array: initialize with '[', append without trailing comma, close ']' on end. Or rebuild: 'jq -s . file.json'."
+    },
+    {
+      "issue": "Weekly archive triggers fail on macOS (date +%u returns wrong day)",
+      "solution": "macOS date lacks %u for weekday. Replace with: 'if [ \"$(date +%w)\" = \"0\" ]; then' (Sunday=0). Or use portable: '[ $(date +%A) = \"Sunday\" ]' for name-based check."
+    },
+    {
+      "issue": "Session IDs duplicate when multiple Claude instances run simultaneously",
+      "solution": "Current session_id uses timestamp+PID but PID can conflict. Add random suffix: \"$(date +%Y%m%d_%H%M%S)_$$_$RANDOM\" or use UUID: \"$(uuidgen 2>/dev/null || echo $RANDOM$RANDOM)\"."
+    },
+    {
+      "issue": "Log files locked causing permission denied errors on write",
+      "solution": "Concurrent writes from parallel Claude sessions. Use flock: '(flock -x 200; echo \"..\" >> log; ) 200>/var/lock/activity.lock' for atomic append operations."
+    }
+  ],
   "source": "community"
 }

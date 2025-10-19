@@ -1,15 +1,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Building, ExternalLink, Plus, Star } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -49,11 +49,13 @@ export default async function CompaniesPage() {
             </p>
 
             <div className={'flex justify-center gap-2 mb-8'}>
-              <Badge variant="secondary">
+              <UnifiedBadge variant="base" style="secondary">
                 <Building className="h-3 w-3 mr-1" />
                 {companies?.length || 0} Companies
-              </Badge>
-              <Badge variant="outline">Verified Profiles</Badge>
+              </UnifiedBadge>
+              <UnifiedBadge variant="base" style="outline">
+                Verified Profiles
+              </UnifiedBadge>
             </div>
 
             <Button variant="outline" asChild>
@@ -90,10 +92,10 @@ export default async function CompaniesPage() {
               <Card key={company.id} className={UI_CLASSES.CARD_GRADIENT_HOVER}>
                 {company.featured && (
                   <div className="absolute -top-2 -right-2 z-10">
-                    <Badge className="bg-accent text-accent-foreground">
+                    <UnifiedBadge variant="base" className="bg-accent text-accent-foreground">
                       <Star className="h-3 w-3 mr-1" />
                       Featured
-                    </Badge>
+                    </UnifiedBadge>
                   </div>
                 )}
 
@@ -131,9 +133,9 @@ export default async function CompaniesPage() {
 
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     {company.size && (
-                      <Badge variant="outline" className="text-xs">
+                      <UnifiedBadge variant="base" style="outline" className="text-xs">
                         {company.size} employees
-                      </Badge>
+                      </UnifiedBadge>
                     )}
 
                     {company.website && (
@@ -153,7 +155,8 @@ export default async function CompaniesPage() {
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
-        <InlineEmailCTA
+        <UnifiedNewsletterCapture
+          source="content_page"
           variant="hero"
           context="companies-page"
           headline="Join 1,000+ Claude Power Users"

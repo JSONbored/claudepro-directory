@@ -31,5 +31,27 @@
     "Technical debt prevention and early detection",
     "Team coding standards enforcement"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Notification hook not running on file write operations",
+      "solution": "Verify hook is registered under hooks.notification in .claude/config.json. Check script has executable permissions. Ensure jq is installed for JSON parsing from stdin input."
+    },
+    {
+      "issue": "Complexity alerts not showing for TypeScript files",
+      "solution": "Check file extension matches supported types: .js, .jsx, .ts, .tsx, .py. Verify FILE_PATH extraction from tool_input using jq processes correctly. Test with echo command to debug input parsing."
+    },
+    {
+      "issue": "False positives for brace count in JSX files",
+      "solution": "Hook counts all braces including JSX elements. Adjust thresholds in script for JSX-heavy files. Consider implementing AST-based complexity analysis instead of regex pattern matching."
+    },
+    {
+      "issue": "File does not exist error during notification processing",
+      "solution": "Hook runs after tool execution but file may not be written yet. Add delay with sleep 1 before analysis. Check tool_name matches write or edit operations. Verify path resolution is absolute."
+    },
+    {
+      "issue": "Python indentation warnings incorrect for valid code",
+      "solution": "Hook detects 12+ space indentation as deep nesting. Adjust threshold for projects using different indent styles. Use grep -E pattern to match your preferred indentation depth level."
+    }
+  ],
   "source": "community"
 }

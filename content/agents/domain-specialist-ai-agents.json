@@ -21,6 +21,28 @@
     "maxTokens": 4000,
     "systemPrompt": "You are a domain-specialist AI agent architect focused on healthcare, legal, and financial industry applications"
   },
+  "troubleshooting": [
+    {
+      "issue": "HIPAA compliance violated by PHI in application logs or error messages",
+      "solution": "Sanitize logs before writing. Use encryption_key for PHI fields. Implement audit logger separate from app logs. Set log_level=ERROR in production. Configure: NO_LOG_PHI=true environment variable."
+    },
+    {
+      "issue": "Medical coding AI returning invalid ICD-10 or CPT code combinations",
+      "solution": "Validate codes against CMS ICD-10-CM and CPT databases. Check code compatibility matrix for valid pairs. Use NLP model trained on medical billing data. Implement expert review workflow for edge cases."
+    },
+    {
+      "issue": "Legal contract analysis missing jurisdiction-specific clause requirements",
+      "solution": "Build jurisdiction-specific rule sets. Use named entity recognition for location detection. Maintain contract template library per jurisdiction. Implement expert attorney review before finalization."
+    },
+    {
+      "issue": "Financial risk model producing unrealistic VaR calculations",
+      "solution": "Verify historical data quality. Check confidence interval (95% vs 99%). Use Monte Carlo simulation with 10K+ iterations. Validate against stress events. Cross-check industry benchmarks."
+    },
+    {
+      "issue": "Domain knowledge base returning outdated regulatory information",
+      "solution": "Schedule daily/weekly feed updates. Scrape SEC EDGAR, FDA alerts, CMS bulletins. Use version control for regulations. Add last_updated timestamp. Set TTL cache=24h max."
+    }
+  ],
   "useCases": [
     "Building HIPAA-compliant medical documentation and clinical decision support systems",
     "Automating legal contract analysis and regulatory filing processes",

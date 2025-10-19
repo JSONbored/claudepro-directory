@@ -34,5 +34,27 @@
     "Go codebase quality assurance with integrated static analysis",
     "Dependency security and vulnerability management"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook fails to find go.mod in nested module subdirectories",
+      "solution": "Script walks up directories but may hit root before finding go.mod. Ensure MODULE_DIR search starts from FILE_PATH directory: cd $(dirname \"$FILE_PATH\") before the while loop to guarantee proper traversal."
+    },
+    {
+      "issue": "Go mod tidy hangs when network unavailable for dependency downloads",
+      "solution": "Add timeout to go commands: timeout 30s go mod tidy to prevent infinite hangs. Set GOPROXY=off to use only local cache, or configure module cache directory with GOMODCACHE for offline operation."
+    },
+    {
+      "issue": "Workspace sync errors when go.work references missing modules",
+      "solution": "Script runs 'go work sync' without validation. Add existence checks: go work edit -json | jq -r '.Use[].DiskPath' | while read dir; do [ -d \"$dir\" ] || echo \"Missing: $dir\"; done before syncing."
+    },
+    {
+      "issue": "PostToolUse timing causes stale go.sum checksums on rapid changes",
+      "solution": "Hook runs after each write but go.sum updates may lag. Add explicit go.sum validation: go mod verify before tidy: if verification fails, run go mod tidy -v to refresh checksums and rebuild module graph."
+    },
+    {
+      "issue": "Context lost when cd changes directory breaking relative path access",
+      "solution": "Script changes to MODULE_DIR but hook execution happens per-file. Store original: ORIG_DIR=$(pwd) and restore after: cd \"$ORIG_DIR\" or use absolute paths: FILE_ABS=$(realpath \"$FILE_PATH\") throughout script."
+    }
+  ],
   "source": "community"
 }

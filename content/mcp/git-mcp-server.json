@@ -66,20 +66,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Ensure you're in a Git repository directory",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Not a Git repository error when accessing features",
+      "solution": "Navigate to Git repository root directory before using MCP server. Run git status locally to verify directory is initialized. Initialize repository with git init if needed."
     },
     {
-      "issue": "Check that Claude has read access to repository files",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Permission denied accessing repository files",
+      "solution": "Run ls -l on repository directory to check user has read permissions. Verify MCP server process user matches repository owner. Add user to appropriate group if needed: sudo usermod -a -G."
     },
     {
-      "issue": "Verify Git is installed and accessible from command line",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Git command not found or unavailable error",
+      "solution": "Install Git: sudo apt install git (Linux) or brew install git (macOS). Verify installation: git --version. Ensure Git binary is in system PATH environment variable."
     },
     {
-      "issue": "Restart Claude Desktop after configuration changes",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Cannot read commits or repository history",
+      "solution": "Verify .git directory exists and isn't corrupted. Check repository permissions allow read access. Run git fsck to check repository integrity. Clone fresh copy if repository is corrupted."
     }
   ],
   "examples": [

@@ -4,6 +4,7 @@
  */
 
 import type { AgentContent } from '@/src/lib/schemas/content/agent.schema';
+import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
 import type { CommandContent } from '@/src/lib/schemas/content/command.schema';
 import type { HookContent } from '@/src/lib/schemas/content/hook.schema';
 import type { McpContent } from '@/src/lib/schemas/content/mcp.schema';
@@ -28,6 +29,7 @@ import { getContentItemUrl, transformMcpConfigForDisplay } from '@/src/lib/utils
  */
 export type UnifiedContent =
   | ({ category: 'agents' } & AgentContent)
+  | ({ category: 'collections' } & CollectionContent)
   | ({ category: 'commands' } & CommandContent)
   | ({ category: 'hooks' } & HookContent)
   | ({ category: 'mcp' } & McpContent)
@@ -57,6 +59,12 @@ export function isCommandContent(
   return item.category === 'commands';
 }
 
+export function isCollectionContent(
+  item: UnifiedContent
+): item is CollectionContent & { category: 'collections' } {
+  return item.category === 'collections';
+}
+
 export function isHookContent(item: UnifiedContent): item is HookContent & { category: 'hooks' } {
   return item.category === 'hooks';
 }
@@ -82,6 +90,25 @@ export function isSkillContent(
 }
 
 /**
+ * Type guard to check if content has troubleshooting field
+ * Used for FAQPage schema generation
+ */
+export function hasContentTroubleshooting(item: UnifiedContent): item is (
+  | AgentContent
+  | CollectionContent
+  | CommandContent
+  | HookContent
+  | McpContent
+  | RuleContent
+  | SkillContent
+  | StatuslineContent
+) & {
+  troubleshooting: Array<{ issue: string; solution: string }>;
+} {
+  return 'troubleshooting' in item && Array.isArray(item.troubleshooting);
+}
+
+/**
  * Configuration for schema generation per content type
  */
 export interface SchemaGenerationConfig {
@@ -100,7 +127,7 @@ export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGeneration
     generateSourceCode: true,
     generateHowTo: true,
     generateCreativeWork: true,
-    generateFAQ: false,
+    generateFAQ: true, // Agents now have troubleshooting field
     generateBreadcrumb: true,
     generateSpeakable: true,
   },
@@ -109,7 +136,16 @@ export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGeneration
     generateSourceCode: true,
     generateHowTo: true,
     generateCreativeWork: false,
-    generateFAQ: false,
+    generateFAQ: true, // Commands now have troubleshooting field
+    generateBreadcrumb: true,
+    generateSpeakable: false,
+  },
+  collections: {
+    generateApplication: false,
+    generateSourceCode: false,
+    generateHowTo: true,
+    generateCreativeWork: true,
+    generateFAQ: true, // Collections now have troubleshooting field
     generateBreadcrumb: true,
     generateSpeakable: false,
   },
@@ -118,7 +154,7 @@ export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGeneration
     generateSourceCode: true,
     generateHowTo: true,
     generateCreativeWork: false,
-    generateFAQ: false,
+    generateFAQ: true, // Hooks have troubleshooting field
     generateBreadcrumb: true,
     generateSpeakable: false,
   },
@@ -127,7 +163,7 @@ export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGeneration
     generateSourceCode: true,
     generateHowTo: true,
     generateCreativeWork: false,
-    generateFAQ: true,
+    generateFAQ: true, // MCP has troubleshooting field
     generateBreadcrumb: true,
     generateSpeakable: false,
   },
@@ -136,7 +172,7 @@ export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGeneration
     generateSourceCode: false,
     generateHowTo: true,
     generateCreativeWork: true,
-    generateFAQ: false,
+    generateFAQ: true, // Rules have troubleshooting field
     generateBreadcrumb: true,
     generateSpeakable: true,
   },
@@ -145,7 +181,7 @@ export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGeneration
     generateSourceCode: true,
     generateHowTo: true,
     generateCreativeWork: false,
-    generateFAQ: false,
+    generateFAQ: true, // Statuslines have troubleshooting field
     generateBreadcrumb: true,
     generateSpeakable: false,
   },
@@ -203,6 +239,7 @@ export const STRUCTURED_DATA_RULES: Record<UnifiedContent['category'], Structure
       sourceCode: true,
       creativeWork: true,
       howTo: true,
+      faq: true,
       breadcrumb: true,
       speakable: true,
     },
@@ -225,6 +262,7 @@ export const STRUCTURED_DATA_RULES: Record<UnifiedContent['category'], Structure
     schemaTypes: {
       sourceCode: true,
       howTo: true,
+      faq: true,
       breadcrumb: true,
     },
     extractors: {
@@ -241,6 +279,35 @@ export const STRUCTURED_DATA_RULES: Record<UnifiedContent['category'], Structure
       creativeWorkDescription: () => 'Command template',
     },
     categoryDisplayName: 'Commands',
+  },
+  collections: {
+    schemaTypes: {
+      howTo: true,
+      creativeWork: true,
+      faq: true,
+      breadcrumb: true,
+      collectionPage: true,
+    },
+    extractors: {
+      applicationSubCategory: () => 'Configuration Collection',
+      keywords: (item) => [
+        'Claude Collection',
+        'Configuration Bundle',
+        'Setup Package',
+        item.category,
+        'Claude',
+        ...(item.tags || []),
+      ],
+      requirements: (item) => {
+        const base = ['Claude Desktop or Claude Code'];
+        return isCollectionContent(item) && item.prerequisites
+          ? [...base, ...item.prerequisites]
+          : base;
+      },
+      configuration: () => undefined,
+      creativeWorkDescription: () => 'Curated collection of configurations',
+    },
+    categoryDisplayName: 'Collections',
   },
   hooks: {
     schemaTypes: {
@@ -460,12 +527,7 @@ export function generateAllSchemasForContent(item: UnifiedContent): SchemaObject
   }
 
   // 5. FAQPage Schema
-  if (
-    rules.schemaTypes.faq &&
-    isMcpContent(item) &&
-    item.troubleshooting &&
-    item.troubleshooting.length > 0
-  ) {
+  if (rules.schemaTypes.faq && hasContentTroubleshooting(item) && item.troubleshooting.length > 0) {
     schemas.push(
       buildFAQPage(item.slug, item.category, displayName, item.troubleshooting as FAQItem[])
     );

@@ -18,9 +18,12 @@
 import type { MetadataRoute } from 'next';
 // Import metadata from generated files (build-time)
 import { agentsMetadata } from '@/generated/agents-metadata';
+import { changelogMetadata } from '@/generated/changelog-metadata';
 import { collectionsMetadata } from '@/generated/collections-metadata';
 import { commandsMetadata } from '@/generated/commands-metadata';
+import { guidesMetadata } from '@/generated/guides-metadata';
 import { hooksMetadata } from '@/generated/hooks-metadata';
+import { jobsMetadata } from '@/generated/jobs-metadata';
 import { mcpMetadata } from '@/generated/mcp-metadata';
 import { rulesMetadata } from '@/generated/rules-metadata';
 import { skillsMetadata } from '@/generated/skills-metadata';
@@ -45,13 +48,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const sitemapUrls = await generateAllSiteUrls(
     {
       agentsMetadata,
+      changelogMetadata,
       collectionsMetadata,
       commandsMetadata,
+      guidesMetadata,
       hooksMetadata,
+      jobsMetadata,
       mcpMetadata,
       rulesMetadata,
-      statuslinesMetadata,
       skillsMetadata,
+      statuslinesMetadata,
     },
     {
       baseUrl,

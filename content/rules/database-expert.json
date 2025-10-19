@@ -11,6 +11,28 @@
     "maxTokens": 8000,
     "systemPrompt": "You are a database expert focused on optimal data design, performance, and scalability"
   },
+  "troubleshooting": [
+    {
+      "issue": "Query optimization rules not applying to ORM-generated queries",
+      "solution": "Add ORM configuration files to rule scope including Prisma schema and TypeORM entities. Configure triggers for query builder patterns. Include migration files for comprehensive review."
+    },
+    {
+      "issue": "PostgreSQL-specific rules conflicting with MongoDB document design guidance",
+      "solution": "Create database-type-specific rule scopes using file path patterns. Set NoSQL rules with override priority for document database files. Use explicit database type identifiers in configuration."
+    },
+    {
+      "issue": "Schema migration best practices not enforced during database changes",
+      "solution": "Add migration file patterns to rule scope including numbered migrations and rollback scripts. Configure triggers for schema modification keywords. Verify rule applies during creation and review."
+    },
+    {
+      "issue": "Performance tuning suggestions missing for slow query troubleshooting",
+      "solution": "Enable rule for SQL query files and database troubleshooting contexts. Add performance keywords to triggers. Include EXPLAIN plan analysis in scope to provide optimization guidance."
+    },
+    {
+      "issue": "Rule not providing NoSQL-specific guidance for document modeling",
+      "solution": "Configure separate rule contexts for relational and document databases. Add NoSQL file patterns like MongoDB schemas and DynamoDB definitions. Include document keywords to trigger NoSQL patterns."
+    }
+  ],
   "githubUrl": "https://github.com/postgres/postgres",
   "documentationUrl": "https://www.postgresql.org/docs/",
   "source": "community",

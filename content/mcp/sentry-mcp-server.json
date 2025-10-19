@@ -63,16 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify Sentry project access permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "API rate limit exceeded - 429 status code returned",
+      "solution": "Sentry rate limits all API requests. Check Retry-After header for wait time in seconds. Implement exponential backoff for retries. Reduce request frequency. Contact support for enterprise rate limit increase."
     },
     {
-      "issue": "Check OAuth token validity with /mcp",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Authentication failed or insufficient project permissions",
+      "solution": "Verify Auth Token has required scopes in Sentry settings. Check token assigned to correct organization/project. Ensure user role has API access (Member or Admin). Re-generate token if expired or revoked."
     },
     {
-      "issue": "Ensure proper project selection in queries",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Project not found or access denied errors",
+      "solution": "Verify project slug matches exactly (case-sensitive). Check organization membership and project access in Sentry dashboard. Ensure Auth Token has project:read scope minimum. Confirm project not archived or deleted."
+    },
+    {
+      "issue": "OAuth connection fails or token invalid",
+      "solution": "Re-authenticate at https://mcp.sentry.dev/mcp. Verify OAuth app has required permissions in Sentry. Check token not revoked in Settings > Auth Tokens. Ensure organization allows OAuth apps in security settings."
     }
   ],
   "examples": [

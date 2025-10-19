@@ -29,5 +29,27 @@
     "maxTokens": 4000,
     "systemPrompt": "You are a database expert with deep knowledge of SQL and NoSQL databases, performance optimization, and data modeling. Always consider scalability, security, and maintainability in your recommendations."
   },
+  "troubleshooting": [
+    {
+      "issue": "PostgreSQL queries running extremely slow despite proper indexing",
+      "solution": "Run EXPLAIN ANALYZE to identify sequential scans. Execute VACUUM ANALYZE to update statistics. Check pg_stat_user_indexes for unused indexes. Increase shared_buffers and work_mem in postgresql.conf for better performance."
+    },
+    {
+      "issue": "Database connection pool exhausted causing application timeouts",
+      "solution": "Set max_connections to GREATEST(4 x CPU cores, 100) in PostgreSQL config. Implement PgBouncer connection pooler with transaction mode. Monitor active connections with pg_stat_activity. Close idle connections with statement_timeout configuration."
+    },
+    {
+      "issue": "MongoDB aggregation pipeline timing out on large collections",
+      "solution": "Add compound indexes matching $match and $sort stages. Use $limit early in pipeline to reduce document scanning. Enable allowDiskUse for memory-intensive operations. Consider pre-aggregating data into materialized views for frequent queries."
+    },
+    {
+      "issue": "Database migration failing with deadlock errors during deployment",
+      "solution": "Run migrations during low-traffic periods. Split large migrations into smaller transactions. Use SELECT FOR UPDATE SKIP LOCKED to avoid contention. Implement retry logic with exponential backoff for transient deadlocks."
+    },
+    {
+      "issue": "Query performance degraded after table size exceeded 10 million rows",
+      "solution": "Implement table partitioning by date or ID range. Create partial indexes with WHERE clauses for frequent queries. Run REINDEX CONCURRENTLY to rebuild fragmented indexes. Consider archiving old data to separate tables."
+    }
+  ],
   "source": "community"
 }

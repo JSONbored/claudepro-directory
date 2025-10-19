@@ -105,6 +105,95 @@ export const baseUsageExampleSchema = z
   );
 
 /**
+ * Discovery Metadata Schema
+ *
+ * MANDATORY: Evidence of discovery research before content creation.
+ * This schema enforces the discovery workflow and prevents content creation
+ * based on assumptions rather than validated trends and gaps.
+ *
+ * Discovery Fields:
+ * - researchDate: When discovery research was conducted
+ * - trendingSources: Minimum 2 trending sources researched with evidence
+ * - keywordResearch: Keyword validation data (volume, competition)
+ * - gapAnalysis: Content gap justification
+ * - approvalRationale: Why this topic was chosen (min 100 chars)
+ *
+ * Workflow:
+ * 1. discover_trending_topics → Find trending topics from 2+ sources
+ * 2. keyword_research → Validate search demand and competition
+ * 3. gap_analysis → Identify what gap this fills vs existing content
+ * 4. User approval → Get explicit approval before drafting
+ *
+ * This field is REQUIRED (not optional) to enforce discovery-first workflow.
+ */
+export const discoveryMetadataSchema = z
+  .object({
+    researchDate: isoDateString.describe('ISO 8601 date when discovery research was conducted'),
+    trendingSources: z
+      .array(
+        z.object({
+          source: nonEmptyString
+            .max(100)
+            .describe('Source name (github_trending, reddit_programming, hackernews, dev_to)'),
+          evidence: nonEmptyString
+            .max(500)
+            .describe(
+              'What was found (trending repo name, popular thread title, article headline, etc.)'
+            ),
+          url: optionalUrlString.describe(
+            'Optional link to evidence (GitHub repo, Reddit thread, etc.)'
+          ),
+          relevanceScore: z
+            .enum(['high', 'medium', 'low'])
+            .optional()
+            .describe('How relevant this source is to the content gap'),
+        })
+      )
+      .min(2)
+      .max(10)
+      .describe('Minimum 2 trending sources researched (max 10 for thoroughness)'),
+    keywordResearch: z
+      .object({
+        primaryKeywords: z
+          .array(nonEmptyString)
+          .min(1)
+          .max(10)
+          .describe('Primary keywords researched (1-10)'),
+        searchVolume: z
+          .enum(['low', 'medium', 'high', 'unknown'])
+          .describe('Estimated search volume/demand for this topic'),
+        competitionLevel: z
+          .enum(['low', 'medium', 'high', 'unknown'])
+          .describe('Competition level for this topic'),
+      })
+      .describe('Keyword validation data from search trends'),
+    gapAnalysis: z
+      .object({
+        existingContent: z
+          .array(nonEmptyString)
+          .max(20)
+          .describe('List of existing content slugs covering similar topics'),
+        identifiedGap: nonEmptyString
+          .min(50)
+          .max(500)
+          .describe('Clear description of what content gap this fills'),
+        priority: z.enum(['high', 'medium', 'low']).describe('Priority level for filling this gap'),
+      })
+      .describe(
+        'Content gap justification showing what existing content exists and what gap remains'
+      ),
+    approvalRationale: nonEmptyString
+      .min(100)
+      .max(500)
+      .describe(
+        'Why this specific topic was chosen over alternatives (must be 100-500 chars). Required user approval.'
+      ),
+  })
+  .describe(
+    'REQUIRED: Discovery research evidence. Content cannot be created without proof of trending sources, keyword research, gap analysis, and user approval. Enforces discovery-first workflow.'
+  );
+
+/**
  * Base Content Metadata Schema
  *
  * Shared metadata fields used across all content types:
@@ -122,6 +211,7 @@ export const baseUsageExampleSchema = z
  * - documentationUrl: Optional external documentation link
  * - features: Optional list of features
  * - useCases: Optional list of use cases
+ * - discoveryMetadata: REQUIRED discovery research evidence
  *
  * Usage: Use shape destructuring to compose content schemas
  * ```typescript
@@ -180,9 +270,14 @@ export const baseContentMetadataSchema = z
       .max(10)
       .optional()
       .describe('Optional array of usage examples with code snippets (max 10 examples per config)'),
+    discoveryMetadata: discoveryMetadataSchema
+      .optional()
+      .describe(
+        'Optional discovery research evidence. When provided, must contain proof of trending sources, keyword validation, gap analysis, and user approval rationale.'
+      ),
   })
   .describe(
-    'Base content metadata schema shared across all content types (agents, commands, rules, mcp, hooks, guides). Provides standard fields for slug, description, author, dates, tags, content body, and usage examples.'
+    'Base content metadata schema shared across all content types (agents, commands, rules, mcp, hooks, guides). Provides standard fields for slug, description, author, dates, tags, content body, usage examples, and optional discovery research evidence.'
   );
 
 /**
@@ -324,3 +419,4 @@ export type BaseConfiguration = z.infer<typeof baseConfigurationSchema>;
 export type BaseInstallation = z.infer<typeof baseInstallationSchema>;
 export type BaseTroubleshooting = z.infer<typeof baseTroubleshootingSchema>;
 export type BaseUsageExample = z.infer<typeof baseUsageExampleSchema>;
+export type DiscoveryMetadata = z.infer<typeof discoveryMetadataSchema>;

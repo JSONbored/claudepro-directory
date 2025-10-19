@@ -5,15 +5,15 @@ import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import path from 'path';
 import { z } from 'zod';
+import { MDXRenderer } from '@/src/components/content/mdx-renderer';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { MDXContentProvider } from '@/src/components/infra/providers/mdx-content-provider';
+import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 // Removed unused import: CategoryGuidesPage
 import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar';
-import { MDXContentProvider } from '@/src/components/providers/mdx-content-provider';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
-import { MDXRenderer } from '@/src/components/shared/mdx-renderer';
-import { ViewTracker } from '@/src/components/shared/view-tracker';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent } from '@/src/components/ui/card';
+import { Button } from '@/src/components/primitives/button';
+import { Card, CardContent } from '@/src/components/primitives/card';
 import { contentCache, statsRedis } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
@@ -22,7 +22,6 @@ import { ArrowLeft, BookOpen, Calendar, Eye, FileText, Tag, Users, Zap } from '@
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { GuideItemWithCategory } from '@/src/lib/utils/content.utils';
 
 /**
  * ISR Configuration - Guide detail pages
@@ -104,70 +103,6 @@ async function getSEOPageData(category: string, slug: string): Promise<SEOPageDa
     },
     24 * 60 * 60 // Cache for 24 hours
   );
-}
-
-// Unused function - kept for future potential use
-// @ts-expect-error - Function intentionally unused, kept for future use
-async function _getCategoryGuides(category: string): Promise<GuideItemWithCategory[]> {
-  const cacheKey = `category-guides:${category}`;
-
-  const guides = await contentCache.cacheWithRefresh(
-    cacheKey,
-    async () => {
-      const guidesList: GuideItemWithCategory[] = [];
-
-      try {
-        const dir = path.join(process.cwd(), 'content', 'guides', category);
-
-        // Read directory directly - catch will handle if it doesn't exist
-        const files = await fs.readdir(dir);
-
-        for (const file of files) {
-          if (file.endsWith('.mdx')) {
-            try {
-              const content = await fs.readFile(path.join(dir, file), 'utf-8');
-              const { frontmatter } = parseMDXFrontmatter(content);
-
-              guidesList.push({
-                title: frontmatter.title || file.replace('.mdx', ''),
-                description: frontmatter.description || '',
-                slug: `/guides/${category}/${file.replace('.mdx', '')}`,
-                category,
-                dateUpdated: frontmatter.dateUpdated || '',
-                frontmatter: {
-                  title: frontmatter.title || file.replace('.mdx', ''),
-                  description: frontmatter.description || '',
-                },
-              });
-            } catch {
-              // Skip files that fail to parse
-            }
-          }
-        }
-      } catch {
-        // Directory doesn't exist
-      }
-
-      return guidesList;
-    },
-    4 * 60 * 60 // Cache for 4 hours
-  );
-
-  // Enrich with view counts from Redis
-  const enriched = await statsRedis.enrichWithViewCounts(
-    guides.map((guide) => ({
-      ...guide,
-      category: 'guides' as const,
-      slug: guide.slug.replace('/guides/', ''), // e.g., "tutorials/desktop-mcp-setup"
-    }))
-  );
-
-  // Restore original category field and slug format
-  return enriched.map((guide, index) => ({
-    ...guide,
-    category,
-    slug: guides[index]?.slug || guide.slug,
-  }));
 }
 
 async function getRelatedGuides(
@@ -453,9 +388,9 @@ export default async function SEOGuidePage({
 
                 {/* Metadata */}
                 <div className={`flex flex-wrap gap-4 ${UI_CLASSES.TEXT_SM_MUTED}`}>
-                  <Badge variant="secondary">
+                  <UnifiedBadge variant="base" style="secondary">
                     {category ? categoryLabels[category] || category : 'Guide'}
-                  </Badge>
+                  </UnifiedBadge>
                   {data.dateUpdated && (
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <Calendar className="h-4 w-4" />
@@ -463,13 +398,14 @@ export default async function SEOGuidePage({
                     </div>
                   )}
                   {viewCount > 0 && (
-                    <Badge
-                      variant="secondary"
+                    <UnifiedBadge
+                      variant="base"
+                      style="secondary"
                       className="h-7 px-2.5 gap-1.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
                     >
                       <Eye className="h-3.5 w-3.5" aria-hidden="true" />
                       <span className="text-xs">{formatViewCount(viewCount)}</span>
-                    </Badge>
+                    </UnifiedBadge>
                   )}
                 </div>
 
@@ -477,10 +413,10 @@ export default async function SEOGuidePage({
                 {data.keywords && data.keywords.length > 0 && (
                   <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4`}>
                     {data.keywords.map((keyword: string) => (
-                      <Badge key={keyword} variant="outline">
+                      <UnifiedBadge key={keyword} variant="base" style="outline">
                         <Tag className="h-3 w-3 mr-1" />
                         {keyword}
-                      </Badge>
+                      </UnifiedBadge>
                     ))}
                   </div>
                 )}
@@ -510,7 +446,12 @@ export default async function SEOGuidePage({
                 </Card>
 
                 {/* Email CTA - End of guide */}
-                <InlineEmailCTA variant="inline" context="guide-end" category="guides" />
+                <UnifiedNewsletterCapture
+                  source="content_page"
+                  variant="inline"
+                  context="guide-end"
+                  category="guides"
+                />
               </div>
 
               {/* Sidebar */}
@@ -531,7 +472,7 @@ export default async function SEOGuidePage({
         </div>
 
         {/* Track guide views for trending analytics */}
-        <ViewTracker category="guides" slug={guideSlug} />
+        <UnifiedTracker variant="view" category="guides" slug={guideSlug} />
       </>
     );
   } catch (error: unknown) {

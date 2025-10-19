@@ -63,16 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Check Canva Pro access requirements",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Rate limit error when exporting designs",
+      "solution": "Design Export API allows 10 requests per 10 seconds. Wait for time window to reset before retrying. Implement request queuing with 1-second delays between exports to stay within limits."
     },
     {
-      "issue": "Verify team permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Authentication fails with 401 signature verification error",
+      "solution": "Verify your OAuth 2.0 implementation ensures tokens refresh correctly. Check that access token hasn't expired and regenerate from Canva Developer Console if needed."
     },
     {
-      "issue": "Monitor storage limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Cannot add elements to design - hitting rate limit",
+      "solution": "Native Element API allows 20 requests per 10 seconds. Batch element additions where possible and add 500ms delays between individual add operations to avoid throttling."
+    },
+    {
+      "issue": "Designs not accessible or permission denied errors",
+      "solution": "Verify your Canva Pro subscription is active and your account has proper team permissions. Check OAuth scope includes design read/write access and re-authenticate if necessary."
     }
   ],
   "examples": [

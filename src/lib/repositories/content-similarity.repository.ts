@@ -14,12 +14,15 @@
  * @module repositories/content-similarity
  */
 
+import { isValidCategory } from '@/src/lib/config/category-config';
 import { UI_CONFIG } from '@/src/lib/constants';
+import { logger } from '@/src/lib/logger';
 import {
   CachedRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import type { Database } from '@/src/types/database.types';
 
@@ -34,10 +37,15 @@ export type ContentSimilarityInsert =
 export type ContentSimilarityUpdate =
   Database['public']['Tables']['content_similarities']['Update'];
 
-/** Similarity result with metadata */
+/**
+ * Similarity result with metadata
+ *
+ * @property content_type - Properly typed as CategoryId (not string)
+ * This eliminates the need for type casts in consumers
+ */
 export interface SimilarityResult {
   content_slug: string;
-  content_type: string;
+  content_type: CategoryId;
   similarity_score: number;
   similarity_factors?: Record<string, unknown>;
   calculated_at: string;
@@ -62,7 +70,7 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
   async findById(id: string): Promise<RepositoryResult<ContentSimilarity | null>> {
     return this.executeOperation('findById', async () => {
       const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
+      const cached = this.getFromCache<ContentSimilarity>(cacheKey);
       if (cached) return cached;
 
       const supabase = await createClient();
@@ -307,11 +315,8 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
     return this.executeOperation('findSimilarContent', async (): Promise<SimilarityResult[]> => {
       if (!(options?.offset || options?.limit || options?.minScore)) {
         const cacheKey = this.getCacheKey('content', `${contentType}:${contentSlug}`);
-        const cached = this.getFromCache(cacheKey);
-        if (cached)
-          return Array.isArray(cached)
-            ? (cached as unknown as SimilarityResult[])
-            : ([cached] as unknown as SimilarityResult[]);
+        const cached = this.getFromCache<SimilarityResult[]>(cacheKey);
+        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -349,26 +354,38 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
 
       // Transform to SimilarityResult format
       const results: SimilarityResult[] =
-        data?.map((sim) => {
-          const result: SimilarityResult = {
-            content_slug: sim.content_b_slug,
-            content_type: sim.content_b_type,
-            similarity_score: sim.similarity_score,
-            calculated_at: sim.calculated_at,
-          };
-          if (
-            typeof sim.similarity_factors === 'object' &&
-            sim.similarity_factors !== null &&
-            !Array.isArray(sim.similarity_factors)
-          ) {
-            result.similarity_factors = sim.similarity_factors as Record<string, unknown>;
-          }
-          return result;
-        }) || [];
+        data
+          ?.map((sim) => {
+            // Validate category type from database
+            if (!isValidCategory(sim.content_b_type)) {
+              logger.warn('Invalid category type in similarity data', {
+                content_b_type: sim.content_b_type,
+                content_a_slug: sim.content_a_slug,
+                content_b_slug: sim.content_b_slug,
+              });
+              return null;
+            }
+
+            const result: SimilarityResult = {
+              content_slug: sim.content_b_slug,
+              content_type: sim.content_b_type, // TypeScript now knows this is CategoryId
+              similarity_score: sim.similarity_score,
+              calculated_at: sim.calculated_at,
+            };
+            if (
+              typeof sim.similarity_factors === 'object' &&
+              sim.similarity_factors !== null &&
+              !Array.isArray(sim.similarity_factors)
+            ) {
+              result.similarity_factors = sim.similarity_factors as Record<string, unknown>;
+            }
+            return result;
+          })
+          .filter((r): r is SimilarityResult => r !== null) || [];
 
       if (!(options?.offset || options?.limit || options?.minScore) && results.length > 0) {
         const cacheKey = this.getCacheKey('content', `${contentType}:${contentSlug}`);
-        this.setCache(cacheKey, results as unknown as ContentSimilarity);
+        this.setCache(cacheKey, results);
       }
 
       return results;
@@ -419,40 +436,56 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
 
       // Combine results
       const forwardResults: SimilarityResult[] =
-        result1.data?.map((sim) => {
-          const result: SimilarityResult = {
-            content_slug: sim.content_b_slug,
-            content_type: sim.content_b_type,
-            similarity_score: sim.similarity_score,
-            calculated_at: sim.calculated_at,
-          };
-          if (
-            typeof sim.similarity_factors === 'object' &&
-            sim.similarity_factors !== null &&
-            !Array.isArray(sim.similarity_factors)
-          ) {
-            result.similarity_factors = sim.similarity_factors as Record<string, unknown>;
-          }
-          return result;
-        }) || [];
+        result1.data
+          ?.map((sim) => {
+            if (!isValidCategory(sim.content_b_type)) {
+              logger.warn('Invalid category in forward similarity', {
+                content_b_type: sim.content_b_type,
+              });
+              return null;
+            }
+            const result: SimilarityResult = {
+              content_slug: sim.content_b_slug,
+              content_type: sim.content_b_type,
+              similarity_score: sim.similarity_score,
+              calculated_at: sim.calculated_at,
+            };
+            if (
+              typeof sim.similarity_factors === 'object' &&
+              sim.similarity_factors !== null &&
+              !Array.isArray(sim.similarity_factors)
+            ) {
+              result.similarity_factors = sim.similarity_factors as Record<string, unknown>;
+            }
+            return result;
+          })
+          .filter((r): r is SimilarityResult => r !== null) || [];
 
       const reverseResults: SimilarityResult[] =
-        result2.data?.map((sim) => {
-          const result: SimilarityResult = {
-            content_slug: sim.content_a_slug,
-            content_type: sim.content_a_type,
-            similarity_score: sim.similarity_score,
-            calculated_at: sim.calculated_at,
-          };
-          if (
-            typeof sim.similarity_factors === 'object' &&
-            sim.similarity_factors !== null &&
-            !Array.isArray(sim.similarity_factors)
-          ) {
-            result.similarity_factors = sim.similarity_factors as Record<string, unknown>;
-          }
-          return result;
-        }) || [];
+        result2.data
+          ?.map((sim) => {
+            if (!isValidCategory(sim.content_a_type)) {
+              logger.warn('Invalid category in reverse similarity', {
+                content_a_type: sim.content_a_type,
+              });
+              return null;
+            }
+            const result: SimilarityResult = {
+              content_slug: sim.content_a_slug,
+              content_type: sim.content_a_type,
+              similarity_score: sim.similarity_score,
+              calculated_at: sim.calculated_at,
+            };
+            if (
+              typeof sim.similarity_factors === 'object' &&
+              sim.similarity_factors !== null &&
+              !Array.isArray(sim.similarity_factors)
+            ) {
+              result.similarity_factors = sim.similarity_factors as Record<string, unknown>;
+            }
+            return result;
+          })
+          .filter((r): r is SimilarityResult => r !== null) || [];
 
       const allResults = [...forwardResults, ...reverseResults];
 

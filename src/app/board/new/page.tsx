@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
-import { NewPostForm } from '@/src/components/board/new-post-form';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { NewPostForm } from '@/src/components/forms/new-post-form';
 import { createPost } from '@/src/lib/actions/content.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
@@ -41,7 +41,8 @@ export default function NewPostPage() {
 
         {/* Email CTA - Footer section (matching homepage pattern) */}
         <section className={'mx-auto px-4 py-12'}>
-          <InlineEmailCTA
+          <UnifiedNewsletterCapture
+            source="content_page"
             variant="hero"
             context="board-new-page"
             headline="Join 1,000+ Claude Power Users"

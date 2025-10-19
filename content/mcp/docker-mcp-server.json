@@ -74,24 +74,24 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify Docker daemon is running and accessible",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Permission denied connecting to Docker daemon socket",
+      "solution": "Add your user to docker group: sudo usermod -a -G docker $USER, then log out and back in. Alternatively, run sudo systemctl start docker to ensure daemon is running."
     },
     {
-      "issue": "Check Docker socket permissions (/var/run/docker.sock)",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Cannot connect to Docker daemon - connection refused",
+      "solution": "Start Docker daemon: sudo systemctl start docker (Linux) or launch Docker Desktop (Mac/Windows). Verify daemon is running: docker ps. Check DOCKER_HOST environment variable points to correct socket."
     },
     {
-      "issue": "Ensure Docker API version compatibility",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Error: /var/run/docker.sock has wrong permissions",
+      "solution": "Run sudo chmod 666 /var/run/docker.sock (temporary fix) or add user to docker group (permanent). Verify socket file exists: ls -l /var/run/docker.sock."
     },
     {
-      "issue": "Validate registry credentials and network access",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Docker API version mismatch error",
+      "solution": "Set DOCKER_API_VERSION environment variable to match your Docker version. Run docker version to check API version. Update MCP server config with correct API version (e.g., 1.43)."
     },
     {
-      "issue": "Monitor container resource usage and limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Container operations fail with authentication errors",
+      "solution": "Run docker login to authenticate with registry. Verify registry credentials are correct. For private registries, ensure network access and check firewall rules don't block Docker registry ports."
     }
   ],
   "examples": [

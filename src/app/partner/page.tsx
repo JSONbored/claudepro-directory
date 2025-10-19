@@ -1,14 +1,14 @@
 import Link from 'next/link';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import {
@@ -37,10 +37,10 @@ export default function PartnerPage() {
     <div className={'container mx-auto px-4 py-12'}>
       {/* Header */}
       <div className={'max-w-4xl mx-auto text-center mb-16'}>
-        <Badge variant="outline" className="mb-6">
+        <UnifiedBadge variant="base" style="outline" className="mb-6">
           <Handshake className="h-3 w-3 mr-1" />
           Partnership & Advertising
-        </Badge>
+        </UnifiedBadge>
         <h1 className={'text-4xl md:text-5xl font-bold mb-6'}>Grow Your Business With Us</h1>
         <p className={'text-xl text-muted-foreground'}>
           Connect with thousands of Claude AI professionals and showcase your tools, services, and
@@ -67,9 +67,9 @@ export default function PartnerPage() {
                 </p>
               </div>
             </div>
-            <Badge className="bg-primary/10 text-primary border-primary/20">
+            <UnifiedBadge variant="base" className="bg-primary/10 text-primary border-primary/20">
               Early Partner Discount
-            </Badge>
+            </UnifiedBadge>
           </div>
         </CardContent>
       </Card>
@@ -90,9 +90,9 @@ export default function PartnerPage() {
               <div className="p-3 bg-blue-500/10 rounded-lg">
                 <Briefcase className="h-6 w-6 text-blue-500" />
               </div>
-              <Badge variant="outline" className="bg-blue-500/5">
+              <UnifiedBadge variant="base" style="outline" className="bg-blue-500/5">
                 Popular
-              </Badge>
+              </UnifiedBadge>
             </div>
             <CardTitle className="text-2xl">Job Listings</CardTitle>
             <CardDescription className="text-base">
@@ -184,9 +184,9 @@ Best regards,
               <div className="p-3 bg-purple-500/10 rounded-lg">
                 <Megaphone className="h-6 w-6 text-purple-500" />
               </div>
-              <Badge variant="outline" className="bg-purple-500/5">
+              <UnifiedBadge variant="base" style="outline" className="bg-purple-500/5">
                 High Impact
-              </Badge>
+              </UnifiedBadge>
             </div>
             <CardTitle className="text-2xl">Sponsored Placements</CardTitle>
             <CardDescription className="text-base">
@@ -426,7 +426,8 @@ Best regards,
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
-        <InlineEmailCTA
+        <UnifiedNewsletterCapture
+          source="content_page"
           variant="hero"
           context="partner-page"
           headline="Join 1,000+ Claude Power Users"

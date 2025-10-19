@@ -1,14 +1,14 @@
 import Link from 'next/link';
-import { JobActions } from '@/src/components/jobs/job-actions';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedButton } from '@/src/components/domain/unified-button';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { getUserJobs } from '@/src/lib/actions/business.actions';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
@@ -27,9 +27,17 @@ export default async function MyJobsPage() {
 
   const getPlanBadge = (plan: string) => {
     if (plan === 'premium')
-      return <Badge className="bg-purple-500/10 text-purple-400">Premium</Badge>;
+      return (
+        <UnifiedBadge variant="base" className="bg-purple-500/10 text-purple-400">
+          Premium
+        </UnifiedBadge>
+      );
     if (plan === 'featured')
-      return <Badge className="bg-blue-500/10 text-blue-400">Featured</Badge>;
+      return (
+        <UnifiedBadge variant="base" className="bg-blue-500/10 text-blue-400">
+          Featured
+        </UnifiedBadge>
+      );
     return null;
   };
 
@@ -74,9 +82,13 @@ export default async function MyJobsPage() {
                 <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                   <div className="flex-1">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                      <Badge className={getStatusColor(job.status ?? 'draft')} variant="outline">
+                      <UnifiedBadge
+                        variant="base"
+                        style="outline"
+                        className={getStatusColor(job.status ?? 'draft')}
+                      >
                         {job.status ?? 'draft'}
-                      </Badge>
+                      </UnifiedBadge>
                       {getPlanBadge(job.plan ?? 'standard')}
                     </div>
                     <CardTitle className="mt-2">{job.title}</CardTitle>
@@ -121,7 +133,15 @@ export default async function MyJobsPage() {
                     </Button>
                   )}
 
-                  <JobActions jobId={job.id} currentStatus={job.status ?? 'draft'} />
+                  {(job.status === 'active' || job.status === 'paused') && (
+                    <UnifiedButton
+                      variant="job-toggle"
+                      jobId={job.id}
+                      currentStatus={job.status ?? 'draft'}
+                    />
+                  )}
+
+                  <UnifiedButton variant="job-delete" jobId={job.id} />
                 </div>
               </CardContent>
             </Card>

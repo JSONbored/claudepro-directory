@@ -1,15 +1,15 @@
 import Link from 'next/link';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
-import { Avatar, AvatarFallback } from '@/src/components/ui/avatar';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { Avatar, AvatarFallback } from '@/src/components/primitives/avatar';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { MessageSquare, Plus, TrendingUp, User as UserIcon } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -60,11 +60,13 @@ export default async function BoardPage() {
             </p>
 
             <div className={'flex justify-center gap-2 mb-8'}>
-              <Badge variant="secondary">
+              <UnifiedBadge variant="base" style="secondary">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 Trending Discussions
-              </Badge>
-              <Badge variant="outline">Community Driven</Badge>
+              </UnifiedBadge>
+              <UnifiedBadge variant="base" style="outline">
+                Community Driven
+              </UnifiedBadge>
             </div>
 
             <Button asChild>
@@ -126,9 +128,9 @@ export default async function BoardPage() {
                         {post.vote_count > 0 && (
                           <>
                             <span>•</span>
-                            <Badge variant="secondary" className="text-xs">
+                            <UnifiedBadge variant="base" style="secondary" className="text-xs">
                               {post.vote_count} {post.vote_count === 1 ? 'vote' : 'votes'}
-                            </Badge>
+                            </UnifiedBadge>
                           </>
                         )}
                         {post.comment_count > 0 && (
@@ -152,7 +154,8 @@ export default async function BoardPage() {
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
-        <InlineEmailCTA
+        <UnifiedNewsletterCapture
+          source="content_page"
           variant="hero"
           context="board-page"
           headline="Join 1,000+ Claude Power Users"

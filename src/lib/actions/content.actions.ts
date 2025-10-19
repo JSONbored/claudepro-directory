@@ -33,7 +33,7 @@ import { reviewRepository } from '@/src/lib/repositories/review.repository';
 import { userInteractionRepository } from '@/src/lib/repositories/user-interaction.repository';
 import { voteRepository } from '@/src/lib/repositories/vote.repository';
 import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives/base-strings';
-import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
+import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
 
 // =====================================================
 // COLLECTION SCHEMAS
@@ -59,7 +59,7 @@ const collectionSchema = z.object({
 
 const collectionItemSchema = z.object({
   collection_id: z.string().uuid('Invalid collection ID'),
-  content_type: contentCategorySchema,
+  content_type: categoryIdSchema,
   content_slug: nonEmptyString
     .max(200, 'Content slug is too long')
     .regex(
@@ -86,7 +86,7 @@ const reorderItemsSchema = z.object({
 // =====================================================
 
 const reviewInputSchema = z.object({
-  content_type: contentCategorySchema,
+  content_type: categoryIdSchema,
   content_slug: nonEmptyString
     .max(200, 'Content slug is too long')
     .regex(
@@ -131,7 +131,7 @@ const helpfulVoteSchema = z.object({
 });
 
 const getReviewsSchema = z.object({
-  content_type: contentCategorySchema,
+  content_type: categoryIdSchema,
   content_slug: nonEmptyString.max(200),
   sort_by: z.enum(['recent', 'helpful', 'rating_high', 'rating_low']).default('recent'),
   limit: z.number().int().min(1).max(100).default(20),
@@ -535,47 +535,19 @@ export async function getCollectionWithItems(collectionId: string) {
 
 /**
  * Get a public collection by user slug and collection slug
+ * Optimized: Single JOIN query batches user lookup, collection lookup, and items fetch
  */
 export async function getPublicCollectionBySlug(userSlug: string, collectionSlug: string) {
-  const { createClient } = await import('@/src/lib/supabase/server');
-  const supabase = await createClient();
-
-  // First get the user (still needs direct query as users table has no repository yet)
-  const { data: userData, error: userError } = await supabase
-    .from('users')
-    .select('id')
-    .eq('slug', userSlug)
-    .single();
-
-  if (userError || !userData) {
-    throw new Error('User not found');
-  }
-
-  // Get collection by user and slug
-  const collectionResult = await collectionRepository.findByUserAndSlug(
-    userData.id,
+  const result = await collectionRepository.findPublicByUserSlugAndCollectionSlug(
+    userSlug,
     collectionSlug
   );
 
-  if (!(collectionResult.success && collectionResult.data)) {
-    throw new Error(collectionResult.error || 'Collection not found');
+  if (!(result.success && result.data)) {
+    throw new Error(result.error || 'Collection not found');
   }
 
-  // Verify collection is public
-  if (!collectionResult.data.is_public) {
-    throw new Error('Collection not found');
-  }
-
-  // Get items
-  const itemsResult = await collectionRepository.getItems(collectionResult.data.id, {
-    sortBy: 'order',
-    sortOrder: 'asc',
-  });
-
-  return {
-    ...collectionResult.data,
-    items: itemsResult.success ? itemsResult.data || [] : [],
-  };
+  return result.data;
 }
 
 // ============================================
@@ -1022,7 +994,7 @@ export const getAggregateRating = rateLimitedAction
   })
   .schema(
     z.object({
-      content_type: contentCategorySchema,
+      content_type: categoryIdSchema,
       content_slug: nonEmptyString.max(200),
     })
   )

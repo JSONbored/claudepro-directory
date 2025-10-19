@@ -1,8 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
-import { Announcement, AnnouncementTag, AnnouncementTitle } from '@/src/components/ui/announcement';
+import { useEffect, useState } from 'react';
+import {
+  Announcement,
+  AnnouncementTag,
+  AnnouncementTitle,
+} from '@/src/components/primitives/announcement';
 import { getActiveAnnouncement } from '@/src/config/announcements';
 import { useAnnouncementDismissal } from '@/src/hooks/use-announcement-dismissal';
 import {
@@ -45,6 +49,7 @@ type IconName = keyof typeof ICON_MAP;
  * - Keyboard navigation (Escape to dismiss)
  * - Reduced motion support
  * - Touch-friendly dismiss button (44x44px minimum)
+ * - SSR-safe with client-side hydration (prevents flash)
  *
  * Usage: Include once in root layout above navigation.
  *
@@ -67,6 +72,14 @@ export function AnnouncementBanner() {
   // Get dismissal state for this announcement
   const { isDismissed, dismiss } = useAnnouncementDismissal(announcement?.id || '');
 
+  // Client-side hydration state to prevent SSR mismatch
+  // Banner only renders after client-side mount to avoid flash
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Keyboard navigation: Escape key dismisses announcement
   useEffect(() => {
     if (!announcement?.dismissible) return;
@@ -81,6 +94,11 @@ export function AnnouncementBanner() {
     return () => window.removeEventListener('keydown', handleEscape);
   }, [announcement, dismiss]);
 
+  // Don't render until mounted (prevents hydration mismatch)
+  if (!isMounted) {
+    return null;
+  }
+
   // Don't render if no announcement or already dismissed
   if (!announcement || isDismissed) {
     return null;
@@ -89,12 +107,23 @@ export function AnnouncementBanner() {
   // Get icon component if specified
   const IconComponent = announcement.icon ? ICON_MAP[announcement.icon as IconName] : null;
 
+  /**
+   * Z-Index Hierarchy:
+   * - z-[100]: Skip-to-content link (highest priority - accessibility)
+   * - z-[60]:  Announcement banner (above navigation, below skip link)
+   * - z-50:    Navigation, dialogs, sheets, dropdowns
+   * - z-10:    Component-level overlays (badges, cards)
+   *
+   * Note: Navigation uses `sticky top-0 z-50 contain-layout` which creates
+   * a new stacking context. Without explicit z-index, the announcement would
+   * be visually obscured by navigation's stacking context.
+   */
   return (
     <section
       aria-label="Site announcement"
       aria-live="polite"
       aria-atomic="true"
-      className="w-full pt-2 px-3 pb-2 hidden md:block"
+      className="w-full pt-2 px-3 pb-2 hidden md:block relative z-[60]"
     >
       {/* Rounded pill container */}
       <div className="container mx-auto">

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import { Search } from '@/src/lib/icons';
 
 interface SearchTriggerProps {

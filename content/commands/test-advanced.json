@@ -12,6 +12,28 @@
   },
   "githubUrl": "https://github.com/claudepro/advanced-test-generator",
   "documentationUrl": "https://docs.claude.ai/commands/test",
+  "troubleshooting": [
+    {
+      "issue": "Generated tests fail with 'module not found' or import path errors",
+      "solution": "Verify test framework installed: npm list jest vitest. Check tsconfig.json paths mapping. Update imports to match project structure. Run: npm test --verbose."
+    },
+    {
+      "issue": "Property-based tests timeout or generate too many test cases",
+      "solution": "Reduce fc.assert numRuns parameter to 50-100. Add timeout: jest.setTimeout(10000). Constrain input generators: fc.string({ maxLength: 100 })."
+    },
+    {
+      "issue": "Mock setup complex or generated mocks don't match real implementation",
+      "solution": "Use --integration for real dependencies. Verify mock return types match actual. Update mocks: vi.mocked(fn).mockImplementation(realFn). Check mock calls order."
+    },
+    {
+      "issue": "Mutation testing score low despite high code coverage percentage",
+      "solution": "Add boundary value tests for conditionals. Test error paths and edge cases. Use --mutation flag to identify weak assertions. Verify test quality not just coverage."
+    },
+    {
+      "issue": "Test suite memory leaks crash CI with out-of-memory errors",
+      "solution": "Increase Node.js memory: NODE_OPTIONS=--max-old-space-size=4096. Use --detectLeaks flag. Clear timers in afterEach. Run tests in isolation: --maxWorkers=1."
+    }
+  ],
   "source": "community",
   "slug": "test-advanced"
 }

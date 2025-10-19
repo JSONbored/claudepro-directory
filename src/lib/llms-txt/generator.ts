@@ -134,7 +134,7 @@ function generateFooter(url?: string): string {
  *
  * @example
  * ```ts
- * const llmsTxt = await generateLLMsTxt({
+ * const llmsTxt = generateLLMsTxt({
  *   slug: "github-mcp-server",
  *   title: "GitHub MCP Server",
  *   description: "Official GitHub MCP server...",

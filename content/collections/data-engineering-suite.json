@@ -71,5 +71,27 @@
   "compatibility": {
     "claudeDesktop": true,
     "claudeCode": true
-  }
+  },
+  "troubleshooting": [
+    {
+      "issue": "AWS MCP server auth conflicts with Airtable MCP credentials",
+      "solution": "Configure separate credential stores for each MCP server. Use AWS_PROFILE env var for aws-services-mcp-server, AIRTABLE_API_KEY for airtable-mcp-server. Keep credentials in different config files."
+    },
+    {
+      "issue": "Database agent and rules provide contradicting optimization advice",
+      "solution": "Install database-expert rules before database-specialist-agent. Agent will defer to rules for best practices. Update rules file to match your database engine (PostgreSQL, MySQL, etc.)."
+    },
+    {
+      "issue": "MCP servers fail to initialize due to missing AWS SDK dependencies",
+      "solution": "Install AWS SDK before MCP servers: npm install @aws-sdk/client-rds @aws-sdk/client-dynamodb @aws-sdk/client-s3. Then reinstall aws-services-mcp-server to detect installed SDKs."
+    },
+    {
+      "issue": "Optimize command incompatible with database agent's schema format",
+      "solution": "Ensure database-specialist-agent and optimize command use same schema definition format. Install agent first to establish format, then install optimize command to inherit conventions."
+    },
+    {
+      "issue": "Collection setup fails without proper AWS region configuration",
+      "solution": "Set AWS_REGION environment variable before installing MCP servers: export AWS_REGION=us-east-1. Configure region in Claude Code settings under MCP server preferences. Restart Claude after setting."
+    }
+  ]
 }

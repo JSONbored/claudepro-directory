@@ -10,21 +10,30 @@
  */
 
 import { z } from 'zod';
-import { baseContentMetadataSchema } from '@/src/lib/schemas/content/base-content.schema';
+import {
+  baseContentMetadataSchema,
+  baseTroubleshootingSchema,
+} from '@/src/lib/schemas/content/base-content.schema';
 import { limitedMediumStringArray } from '@/src/lib/schemas/primitives/base-arrays';
 import { mediumString, shortString } from '@/src/lib/schemas/primitives/base-strings';
+import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Collection Item Reference Schema
  *
  * References a specific content item by category and slug.
  * Build-time validation ensures all referenced items exist.
+ *
+ * MODERNIZATION: Now supports ALL categories from UNIFIED_CATEGORY_REGISTRY except 'collections' itself
+ * (prevents circular dependencies). This allows collections to reference skills, guides, jobs, changelog.
  */
 const collectionItemReferenceSchema = z
   .object({
-    category: z
-      .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'])
-      .describe('Content category of the referenced item'),
+    category: categoryIdSchema
+      .refine((cat) => cat !== 'collections', {
+        message: 'Collections cannot reference other collections (prevents circular dependencies)',
+      })
+      .describe('Content category of the referenced item (any category except collections)'),
     slug: shortString.describe('Unique slug identifier of the referenced item'),
     reason: mediumString
       .optional()
@@ -128,9 +137,15 @@ export const collectionContentSchema = z
       .describe(
         'Optional platform compatibility information. Defaults to supporting both Claude Desktop and Claude Code.'
       ),
+
+    troubleshooting: z
+      .array(baseTroubleshootingSchema)
+      .max(20)
+      .optional()
+      .describe('Optional array of common issues and solutions (max 20)'),
   })
   .describe(
-    'Collection content schema for organized bundles of related configurations. Collections enable sharing multiple content items (agents, MCP servers, commands, etc.) together as a unified, curated package. Inherits base content metadata and adds collection-specific fields for item references, installation guidance, and compatibility.'
+    'Collection content schema for organized bundles of related configurations. Collections enable sharing multiple content items (agents, MCP servers, commands, etc.) together as a unified, curated package. Inherits base content metadata and adds collection-specific fields for item references, installation guidance, compatibility, and troubleshooting.'
   );
 
 export type CollectionContent = z.infer<typeof collectionContentSchema>;

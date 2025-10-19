@@ -33,6 +33,28 @@
     "Maintain up-to-date API reference docs",
     "Integration with Swagger UI for live documentation"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook triggers but file path pattern match fails",
+      "solution": "Debug path detection: echo \"$FILE_PATH\" | grep -E 'routes|controllers|api'. Verify directory structure matches expected patterns. Add custom paths to case statement."
+    },
+    {
+      "issue": "swagger-jsdoc command not found during execution",
+      "solution": "Install dependencies: npm i -D swagger-jsdoc. Verify swaggerDef.js exists in project root. Check node_modules/.bin is in PATH. Use npx for local binaries."
+    },
+    {
+      "issue": "Documentation generates but writes to wrong location",
+      "solution": "Create docs/api directory: mkdir -p ./docs/api. Verify write permissions on output paths. Check current working directory in hook context: pwd >&2."
+    },
+    {
+      "issue": "PostToolUse fires on all edits not just API files",
+      "solution": "Enhance path filtering in script. Use stricter regex: [[ \"$FILE_PATH\" =~ (routes|api)/.*\\.(ts|js)$ ]]. Add early exit for non-matching paths."
+    },
+    {
+      "issue": "Hook processes file but npx commands timeout silently",
+      "solution": "Remove 2>/dev/null to see actual errors. Add timeout wrapper: timeout 30s npx command. Check for hanging processes: ps aux | grep jsdoc. Verify npm registry access."
+    }
+  ],
   "documentationUrl": "https://swagger.io/docs/",
   "source": "community"
 }

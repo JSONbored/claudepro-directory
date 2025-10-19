@@ -14,5 +14,27 @@
   "githubUrl": "https://github.com/vercel/next.js",
   "documentationUrl": "https://react.dev/reference/rsc/server-components",
   "source": "community",
-  "seoTitle": "React Server Components Expert for Claude"
+  "seoTitle": "React Server Components Expert for Claude",
+  "troubleshooting": [
+    {
+      "issue": "Cannot use hooks in Server Components",
+      "solution": "Server Components are async functions without hooks. Extract client logic to separate files with 'use client'. Pass server data as props to Client Components. Use Server Actions for mutations instead of useState."
+    },
+    {
+      "issue": "Props serialization errors with RSC",
+      "solution": "Only pass serializable data (JSON-compatible) to Client Components. No functions, classes, or Dates. Convert dates to ISO strings. Use Server Actions for callbacks. Check for circular references in objects."
+    },
+    {
+      "issue": "Suspense boundaries not streaming properly",
+      "solution": "Ensure async components return JSX immediately with Suspense wrapping slow fetches. Use Promise.all for parallel requests. Check that fetch cache config allows streaming. Verify headers sent before first byte with generateMetadata."
+    },
+    {
+      "issue": "Server Actions throwing CSRF errors",
+      "solution": "Enable CSRF protection in middleware with proper token validation. Use Next.js built-in protection with cookies().set secure flags. Ensure actions use POST method. Check that formAction or server-side invocation includes auth headers."
+    },
+    {
+      "issue": "Context not working across Server/Client boundary",
+      "solution": "Create Client Component wrapper with 'use client' for context provider. Pass server-fetched data as props to provider. Don't use context in Server Components - use props. Import context hook only in Client Components."
+    }
+  ]
 }

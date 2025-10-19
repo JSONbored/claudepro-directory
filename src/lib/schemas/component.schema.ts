@@ -4,6 +4,8 @@
  *
  * SHA-2100: Removed ui-props.schema.ts (177 lines of unused runtime validation)
  * Extracted only the ConfigCardProps type that's actually used
+ *
+ * MODERNIZATION: All category types now derived from CategoryId (registry-driven)
  */
 
 import { z } from 'zod';
@@ -12,6 +14,7 @@ import type { TrendingContentItem } from '@/src/lib/trending/calculator.server';
 import type { UnifiedContentItem } from './components/content-item.schema';
 import type { HomePageClientProps } from './components/page-props.schema';
 import type { SortOption } from './content-filter.schema';
+import { type CategoryId, categoryIdSchema } from './shared.schema';
 
 /**
  * Config card component props (extracted from deleted ui-props.schema.ts)
@@ -23,6 +26,29 @@ export interface ConfigCardProps {
   showCategory?: boolean;
   showActions?: boolean;
   className?: string;
+  /**
+   * Optional render function for sponsored wrapper
+   * Only kept for backwards compatibility with BaseCard
+   * (Will be removed once all consumers are migrated to direct SponsoredTracker usage)
+   */
+  renderSponsoredWrapper?: (
+    children: React.ReactNode,
+    sponsoredId: string,
+    targetUrl: string,
+    position?: number
+  ) => React.ReactNode;
+  /**
+   * Enable mobile swipe gestures
+   * Swipe right → Copy, Swipe left → Bookmark
+   * @default false
+   */
+  enableSwipeGestures?: boolean;
+  /**
+   * Enable View Transitions API for smooth page morphing
+   * Progressive enhancement - works where supported, instant elsewhere
+   * @default false
+   */
+  useViewTransitions?: boolean;
 }
 
 // Re-export commonly used types from ./components
@@ -62,7 +88,7 @@ export interface ErrorFallbackProps {
 
 // JobCard component props
 export interface JobCardProps {
-  job: import('@/src/lib/schemas/content/content-types').JobContent;
+  job: import('@/src/lib/schemas/content/job.schema').JobContent;
 }
 
 // UnifiedSearch component props
@@ -96,18 +122,13 @@ export interface TrendingContentProps {
 
 /**
  * View tracker props
+ * DEPRECATED: Use UnifiedTrackerProps from unified-tracker.tsx instead
+ * Kept for backwards compatibility during migration
  */
 const viewTrackerPropsSchema = z.object({
-  category: z.enum([
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'guides',
-    'changelog',
-    'skills',
-  ]),
+  category: categoryIdSchema.describe(
+    'Content category for view tracking (derived from UNIFIED_CATEGORY_REGISTRY)'
+  ),
   slug: nonEmptyString.max(200),
 });
 
@@ -121,7 +142,7 @@ export type ContentListServerProps<T extends UnifiedContentItem = UnifiedContent
   description: string;
   icon: string;
   items: readonly T[] | T[];
-  type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides' | 'skills';
+  type: CategoryId;
   searchPlaceholder?: string;
   badges?: Array<{
     icon?: string | React.ComponentType<{ className?: string }>;
@@ -135,7 +156,7 @@ export type ContentListServerProps<T extends UnifiedContentItem = UnifiedContent
 export type RelatedConfigsProps<T extends UnifiedContentItem = UnifiedContentItem> = {
   configs: T[];
   title?: string;
-  type?: 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' | 'guides' | 'skills';
+  type?: CategoryId;
 };
 
 /**
@@ -154,7 +175,7 @@ export type FloatingSearchSidebarProps = {
  */
 export type ContentSearchClientProps<T extends UnifiedContentItem = UnifiedContentItem> = {
   items: readonly T[] | T[];
-  type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides' | 'skills';
+  type: CategoryId;
   searchPlaceholder: string;
   title: string;
   icon: string;
@@ -166,7 +187,7 @@ export type ContentSearchClientProps<T extends UnifiedContentItem = UnifiedConte
 export type ContentSidebarProps<T extends UnifiedContentItem = UnifiedContentItem> = {
   item: T;
   relatedItems: T[];
-  type: import('./shared.schema').ContentCategory;
+  type: import('./shared.schema').CategoryId;
   typeName: string;
 };
 

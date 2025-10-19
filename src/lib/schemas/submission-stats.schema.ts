@@ -1,11 +1,14 @@
 /**
  * Submission Stats Schemas
  * Zod validation for submission statistics and leaderboard data
+ *
+ * MODERNIZATION: Uses registry-driven categoryIdSchema for content_type validation
  */
 
 import { z } from 'zod';
 import { nonNegativeInt } from './primitives/base-numbers';
 import { nonEmptyString } from './primitives/base-strings';
+import { categoryIdSchema } from './shared.schema';
 
 /**
  * Submission statistics schema
@@ -20,13 +23,14 @@ export type SubmissionStats = z.infer<typeof submissionStatsSchema>;
 
 /**
  * Recent merged submission schema
+ * MODERNIZATION: content_type now registry-driven (supports all 11 categories)
  */
 export const recentMergedSchema = z.object({
   id: z.string().uuid().describe('Submission ID'),
   content_name: nonEmptyString.describe('Name of the submitted content'),
-  content_type: z
-    .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'])
-    .describe('Type of content'),
+  content_type: categoryIdSchema.describe(
+    'Type of content (derived from UNIFIED_CATEGORY_REGISTRY)'
+  ),
   merged_at: z.string().datetime().describe('When the submission was merged'),
   user: z
     .object({

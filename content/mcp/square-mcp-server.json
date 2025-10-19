@@ -63,16 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Check merchant account status",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Rate limit exceeded - 429 RATE_LIMITED error returned",
+      "solution": "Square doesn't publish specific rate limits but throttles high request volumes. Implement exponential backoff for retries. Reduce request frequency. Batch operations where possible. Contact support if legitimate traffic blocked."
     },
     {
-      "issue": "Verify location permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Authentication failed - UNAUTHORIZED error using wrong environment",
+      "solution": "Production: https://connect.squareup.com/v2. Sandbox: https://connect.squareupsandbox.com/v2. Use correct access token for environment from Developer Console. Verify application ID matches environment. Check token not expired or revoked."
     },
     {
-      "issue": "Test in sandbox mode before production",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Sandbox limitations - payment method not supported",
+      "solution": "Sandbox only supports credit/debit card payments. Afterpay, Cash App Pay, Google Pay, Apple Pay not available in Sandbox. Test payment flows in production with real cards after Sandbox validation."
+    },
+    {
+      "issue": "Location permissions insufficient for operation",
+      "solution": "Verify merchant account has active location enabled. Check access token has permissions for specific location ID. Ensure user role allows API operations. Review location settings in Square Dashboard."
     }
   ],
   "examples": [

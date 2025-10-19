@@ -57,7 +57,7 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
   async findById(id: string): Promise<RepositoryResult<Follower | null>> {
     return this.executeOperation('findById', async () => {
       const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
+      const cached = this.getFromCache<Follower>(cacheKey);
       if (cached) return cached;
 
       const supabase = await createClient();
@@ -285,8 +285,8 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
     return this.executeOperation('getFollowers', async () => {
       if (!(options?.offset || options?.limit)) {
         const cacheKey = this.getCacheKey('followers', userId);
-        const cached = this.getFromCache(cacheKey);
-        if (cached) return Array.isArray(cached) ? cached : [cached];
+        const cached = this.getFromCache<Follower[]>(cacheKey);
+        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -315,7 +315,7 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
 
       if (!(options?.offset || options?.limit) && data) {
         const cacheKey = this.getCacheKey('followers', userId);
-        this.setCache(cacheKey, data as unknown as Follower);
+        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -332,8 +332,8 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
     return this.executeOperation('getFollowing', async () => {
       if (!(options?.offset || options?.limit)) {
         const cacheKey = this.getCacheKey('following', userId);
-        const cached = this.getFromCache(cacheKey);
-        if (cached) return Array.isArray(cached) ? cached : [cached];
+        const cached = this.getFromCache<Follower[]>(cacheKey);
+        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -362,7 +362,7 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
 
       if (!(options?.offset || options?.limit) && data) {
         const cacheKey = this.getCacheKey('following', userId);
-        this.setCache(cacheKey, data as unknown as Follower);
+        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -375,8 +375,8 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
   async isFollowing(followerId: string, followingId: string): Promise<RepositoryResult<boolean>> {
     return this.executeOperation('isFollowing', async () => {
       const cacheKey = this.getCacheKey('is-following', `${followerId}:${followingId}`);
-      const cached = this.getFromCache(cacheKey);
-      if (cached !== undefined) return Boolean(cached);
+      const cached = this.getFromCache<boolean>(cacheKey);
+      if (cached !== null && cached !== undefined) return cached;
 
       const supabase = await createClient();
       const { data, error } = await supabase
@@ -391,7 +391,7 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
       }
 
       const isFollowing = !!data;
-      this.setCache(cacheKey, isFollowing as unknown as Follower);
+      this.setCache(cacheKey, isFollowing);
 
       return isFollowing;
     });
@@ -403,8 +403,8 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
   async getStats(userId: string): Promise<RepositoryResult<FollowerStats>> {
     return this.executeOperation('getStats', async () => {
       const cacheKey = this.getCacheKey('stats', userId);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached as unknown as FollowerStats;
+      const cached = this.getFromCache<FollowerStats>(cacheKey);
+      if (cached) return cached;
 
       const supabase = await createClient();
 
@@ -433,7 +433,7 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
         following_count: followingCount || 0,
       };
 
-      this.setCache(cacheKey, stats as unknown as Follower);
+      this.setCache(cacheKey, stats);
 
       return stats;
     });

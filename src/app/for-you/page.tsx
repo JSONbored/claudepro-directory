@@ -10,8 +10,8 @@
  */
 
 import { redirect } from 'next/navigation';
-import { ForYouFeedClient } from '@/src/components/personalization/for-you-feed-client';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { ForYouFeedClient } from '@/src/components/features/personalization/for-you-feed-client';
 import { getForYouFeed } from '@/src/lib/actions/analytics.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
@@ -59,7 +59,8 @@ export default async function ForYouPage() {
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
-        <InlineEmailCTA
+        <UnifiedNewsletterCapture
+          source="content_page"
           variant="hero"
           context="for-you-page"
           headline="Join 1,000+ Claude Power Users"

@@ -33,5 +33,27 @@
     "Team education and awareness about performance best practices",
     "Performance regression prevention with immediate alerts"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook runs on every file save slowing workflow",
+      "solution": "Use matchers to limit to specific file types or directories, or add file size check: `if [ \"$FILE_SIZE\" -lt 10000 ]; then exit 0; fi` to skip small files under 10KB and reduce overhead."
+    },
+    {
+      "issue": "False positives for nested loop warnings",
+      "solution": "Adjust COMPLEX_CYCLOMATIC threshold or refine the regex pattern `grep -E 'for.*{[^}]*for.*{[^}]*for'` to exclude specific comment patterns or multi-line structures that trigger false matches."
+    },
+    {
+      "issue": "Performance thresholds not matching project",
+      "solution": "Customize thresholds at script top: set LARGE_FILE_THRESHOLD=200000 for larger projects, LARGE_FUNCTION_LINES=100 for verbose codebases, or LONG_TIMER_MS=10000 for intentional delays."
+    },
+    {
+      "issue": "Cannot access file path from stdin JSON input",
+      "solution": "Ensure jq is installed for JSON parsing. The hook reads: `FILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')`. Verify INPUT has valid JSON structure."
+    },
+    {
+      "issue": "Memory leak warnings appear without cleanup",
+      "solution": "Hook detects addEventListener without removeEventListener. Add cleanup: `useEffect(() => { el.addEventListener('click', fn); return () => el.removeEventListener('click', fn); }, []);`"
+    }
+  ],
   "source": "community"
 }

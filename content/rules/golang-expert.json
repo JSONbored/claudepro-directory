@@ -11,6 +11,28 @@
     "maxTokens": 8000,
     "systemPrompt": "You are a Go expert focused on writing idiomatic, performant, and maintainable Go code"
   },
+  "troubleshooting": [
+    {
+      "issue": "Concurrency patterns not suggested for goroutine code",
+      "solution": "Add Go file patterns (.go) with goroutine keywords like channel, select, and sync in triggers. Configure scope for concurrent programming contexts and race condition debugging."
+    },
+    {
+      "issue": "Rule not recognizing Go test files for best practices",
+      "solution": "Include *_test.go file patterns in scope with test function triggers. Add testing keywords like TestTable, benchmark, and assert. Configure context for table-driven test guidance."
+    },
+    {
+      "issue": "Project structure recommendations missing for new packages",
+      "solution": "Add Go module files (go.mod) and package directories to scope. Configure triggers for package organization keywords cmd/, internal/, and pkg/. Enable during project initialization."
+    },
+    {
+      "issue": "Error handling patterns not enforced in error returns",
+      "solution": "Configure triggers for error handling keywords including error wrapping, fmt.Errorf, and custom error types. Add scope for functions returning errors with debugging context guidance."
+    },
+    {
+      "issue": "Performance optimization advice conflicts with code clarity",
+      "solution": "Set context-based override priorities favoring readability in development and performance in production. Use scope boundaries for hot path optimization with profiling triggers."
+    }
+  ],
   "githubUrl": "https://github.com/golang/go",
   "documentationUrl": "https://go.dev/doc/",
   "source": "community",

@@ -3,16 +3,16 @@
  * Provides a simple, consistent API for tracking events across the application
  */
 
+import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
-import { env, isDevelopment, isProduction } from '@/src/lib/schemas/env.schema';
 import type { EventName, EventPayload, EventPayloads } from './events.constants';
 import { getEventConfig } from './events.constants';
 import { isUmamiAvailable } from './umami';
 
-// Environment checks using validated env schema
+// Environment checks using client-safe helpers
 const IS_PRODUCTION = isProduction;
 const IS_DEVELOPMENT = isDevelopment;
-const ENABLE_DEBUG = env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true';
+const ENABLE_DEBUG = process.env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true';
 
 /**
  * Basic payload sanitization to remove PII

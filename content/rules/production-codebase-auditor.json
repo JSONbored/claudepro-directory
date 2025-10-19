@@ -86,5 +86,27 @@
     "Architecture patterns and best practices",
     "Performance optimization",
     "Open-source security"
+  ],
+  "troubleshooting": [
+    {
+      "issue": "Audit reports focus too heavily on Zod validation",
+      "solution": "Rule prioritizes input validation security by design. To broaden scope, request 'Audit for architecture patterns and dead code' to shift focus from validation to code quality and consolidation."
+    },
+    {
+      "issue": "Rule conflicts with existing security-auditor rule",
+      "solution": "Production auditor is comprehensive (security + quality + architecture). Security-auditor focuses on vulnerabilities only. Use production auditor for full audits, security-auditor for pen-testing."
+    },
+    {
+      "issue": "Not detecting duplicate code across my codebase",
+      "solution": "Specify file patterns explicitly: 'Find duplicate code in src/components/*.tsx with >80% similarity'. Rule needs scope boundaries to perform deep similarity analysis across large codebases."
+    },
+    {
+      "issue": "Audit misses framework-specific anti-patterns",
+      "solution": "Combine with framework rules (react-expert, nextjs-expert). Production auditor provides general patterns - framework rules add context for specialized anti-pattern detection in React/Next.js."
+    },
+    {
+      "issue": "How to track audit findings across sessions?",
+      "solution": "Request 'Generate audit baseline report with metrics'. Save output, then run 'Compare current state to baseline' in future sessions. Rule can track LOC reduction and security gap improvements."
+    }
   ]
 }

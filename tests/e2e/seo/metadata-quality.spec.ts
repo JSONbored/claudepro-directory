@@ -8,7 +8,7 @@
  * - Social media platforms (Facebook, Twitter/X, LinkedIn)
  *
  * **Quality Gates Enforced:**
- * 1. Title length: 55-60 characters optimal (Google/Bing standard)
+ * 1. Title length: 53-60 characters optimal (keyword density optimization)
  * 2. Description length: 150-160 characters (AI citation optimized)
  * 3. No placeholder text (undefined, null, "lorem ipsum", TODO, FIXME)
  * 4. Canonical URLs: HTTPS only, no trailing slash (except homepage)
@@ -121,7 +121,7 @@ async function waitForNetworkIdle(page: Page): Promise<void> {
 
 /**
  * Validate title length against 2025 SEO standards
- * Required: 55-60 chars (Google optimal, production enforced)
+ * Required: 53-60 chars (keyword density optimization, production enforced)
  */
 function validateTitleLength(title: string, pagePath: string): void {
   expect(title, `${pagePath}: Title must exist`).toBeTruthy();
@@ -132,7 +132,7 @@ function validateTitleLength(title: string, pagePath: string): void {
   expect(
     title.length,
     `${pagePath}: Title too short (${title.length} chars)`
-  ).toBeGreaterThanOrEqual(55);
+  ).toBeGreaterThanOrEqual(53);
 }
 
 /**

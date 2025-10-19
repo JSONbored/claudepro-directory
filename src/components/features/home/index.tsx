@@ -23,20 +23,23 @@
  * Result: Clean, maintainable, production-grade architecture
  */
 
+import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { memo, useCallback, useMemo, useState } from 'react';
 import {
   LazyFeaturedSections,
   LazySearchSection,
   LazyTabsSection,
 } from '@/src/components/features/home/lazy-homepage-sections';
-import { HomepageStatsSkeleton } from '@/src/components/ui/loading-skeleton';
-import { NumberTicker } from '@/src/components/ui/magic/number-ticker';
+import { NumberTicker } from '@/src/components/magic/number-ticker';
+import { HomepageStatsSkeleton, Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { useSearch } from '@/src/hooks/use-search';
 import {
   getCategoryStatsConfig,
   HOMEPAGE_FEATURED_CATEGORIES,
 } from '@/src/lib/config/category-config';
+import { ROUTES } from '@/src/lib/constants/routes';
 import type { HomePageClientProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -47,7 +50,7 @@ const UnifiedSearch = dynamic(
     })),
   {
     ssr: false,
-    loading: () => <div className={'h-14 bg-muted/50 rounded-lg animate-pulse'} />,
+    loading: () => <Skeleton size="xl" width="3xl" className="h-14" />,
   }
 );
 
@@ -138,20 +141,50 @@ function HomePageClientComponent({
           />
 
           {/* Quick Stats - Below Search Bar */}
-          {/* Modern 2025 Architecture: Configuration-Driven Stats Display */}
+          {/* Modern 2025 Architecture: Configuration-Driven Stats Display with Motion.dev */}
+          {/* Hidden on mobile (< 768px) to save space, shown on tablet+ */}
           {stats ? (
             <div
               className={
-                'flex flex-wrap justify-center gap-4 lg:gap-6 text-xs lg:text-sm text-muted-foreground mt-6'
+                'hidden md:flex flex-wrap justify-center gap-2 lg:gap-3 text-xs lg:text-sm text-muted-foreground mt-6'
               }
             >
-              {getCategoryStatsConfig().map(({ categoryId, icon: Icon, displayText, delay }) => (
-                <div key={categoryId} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <Icon className="h-4 w-4" aria-hidden="true" />
-                  <NumberTicker value={stats[categoryId] || 0} duration={1500} delay={delay} />{' '}
-                  {displayText}
-                </div>
-              ))}
+              {getCategoryStatsConfig().map(({ categoryId, icon: Icon, displayText, delay }) => {
+                // Get category route from ROUTES constant
+                const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
+
+                return (
+                  <Link
+                    key={categoryId}
+                    href={categoryRoute}
+                    className="group"
+                    aria-label={`View all ${displayText}`}
+                  >
+                    <motion.div
+                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} px-2 py-1 rounded-md border border-transparent transition-colors cursor-pointer`}
+                      whileHover={{
+                        scale: 1.05,
+                        y: -2,
+                        borderColor: 'hsl(var(--accent) / 0.3)',
+                        backgroundColor: 'hsl(var(--accent) / 0.05)',
+                        transition: { type: 'spring', stiffness: 400, damping: 15 },
+                      }}
+                      whileTap={{
+                        scale: 0.98,
+                        transition: { type: 'spring', stiffness: 400, damping: 15 },
+                      }}
+                    >
+                      <Icon
+                        className="h-4 w-4 transition-colors group-hover:text-accent"
+                        aria-hidden="true"
+                      />
+                      <span className="transition-colors group-hover:text-foreground">
+                        <NumberTicker value={stats[categoryId] || 0} delay={delay} /> {displayText}
+                      </span>
+                    </motion.div>
+                  </Link>
+                );
+              })}
             </div>
           ) : (
             <HomepageStatsSkeleton className="mt-6" />
@@ -167,11 +200,10 @@ function HomePageClientComponent({
           onClearSearch={handleClearSearch}
         />
 
-        {/* Featured Content Sections - Only show when not searching */}
-        {/* Use weekly featured (algorithm-selected) if available, otherwise fall back to static alphabetical */}
+        {/* Featured Content Sections - Render immediately (above the fold) */}
         {!isSearching && <LazyFeaturedSections categories={featuredByCategory || initialData} />}
 
-        {/* Tabs Section - Only show when not searching - TanStack Virtual */}
+        {/* Tabs Section - Render immediately (above the fold) */}
         {!isSearching && (
           <LazyTabsSection
             activeTab={activeTab}

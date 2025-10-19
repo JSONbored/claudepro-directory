@@ -1,7 +1,17 @@
 /**
- * HTML Sanitizer
- * Production-grade HTML sanitization using isomorphic-dompurify
+ * HTML Sanitizer - Server-Only
+ * Production-grade HTML sanitization using DOMPurify + JSDOM
  * Part of unified lib/security/ module
+ *
+ * Architecture Change (2025-10-18):
+ * - BEFORE: isomorphic-dompurify (37 packages, works client + server)
+ * - AFTER: dompurify + jsdom (server-only, smaller bundle)
+ *
+ * Why Server-Only:
+ * - All sanitization happens server-side (validators, markdown processing)
+ * - Zero client-side usage found in codebase audit
+ * - Removes 37 unnecessary packages from bundle
+ * - Better performance (no isomorphic overhead)
  *
  * Security: Uses battle-tested DOMPurify library instead of custom regex patterns
  * which are vulnerable to bypasses and edge cases (CodeQL warnings).
@@ -11,97 +21,79 @@
  * - Prevents multi-character sanitization bypasses (e.g., <scr<script>ipt>)
  * - Actively maintained by Cure53 security firm
  * - Used by Google, Microsoft, and other major companies
- * - Works in both browser and Node.js environments (isomorphic-dompurify)
  */
 
-// Lazy import DOMPurify to avoid build-time issues with Next.js Turbopack
-// DOMPurify uses browser/Node APIs that cannot be statically analyzed during build
-let _purify: ReturnType<typeof import('isomorphic-dompurify').default> | null = null;
-let _purifyPromise: Promise<ReturnType<typeof import('isomorphic-dompurify').default>> | null =
-  null;
+import createDOMPurify from 'dompurify';
 
-async function getDOMPurify() {
-  // Return existing promise if initialization is in progress
-  if (_purifyPromise) {
-    return _purifyPromise;
+/**
+ * LAZY-LOADED DOMPurify Instance
+ *
+ * CRITICAL: JSDOM and DOMPurify are initialized on-demand rather than at module load time
+ * to prevent ES module import issues during middleware startup on Vercel.
+ *
+ * Issue: jsdom has ES module dependencies (parse5) that cannot be require()'d
+ * Solution: Lazy load only when sanitization is actually needed (server-side operations)
+ *
+ * This prevents MIDDLEWARE_INVOCATION_FAILED errors on Vercel deployments.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: DOMPurify expects specific Window interface that JSDOM provides
+let purify: any = null;
+
+async function initializePurify() {
+  if (purify) {
+    return purify;
   }
 
-  // Return existing instance if already initialized
-  if (_purify) {
-    return _purify;
-  }
-
-  // Start new initialization
-  _purifyPromise = (async () => {
-    try {
-      const createDOMPurify = (await import('isomorphic-dompurify')).default;
-      const purify = createDOMPurify();
-
-      // Only add hooks if purify is properly initialized
-      if (purify && typeof purify.addHook === 'function') {
-        /**
-         * Add security hook to enforce script tag removal
-         * This provides defense-in-depth beyond FORBID_TAGS
-         */
-        purify.addHook('uponSanitizeElement', (node, data) => {
-          // Forcibly remove script and style tags
-          if (data.tagName === 'script' || data.tagName === 'style') {
-            // Use parentNode.removeChild for compatibility
-            if (node.parentNode) {
-              node.parentNode.removeChild(node);
-            }
-          }
-        });
-
-        /**
-         * Add security hook to sanitize dangerous URL protocols in attributes
-         * Blocks data:, javascript:, vbscript:, and URL-encoded variants
-         */
-        purify.addHook('afterSanitizeAttributes', (node) => {
-          // Check all attributes that can contain URLs
-          const urlAttributes = [
-            'href',
-            'src',
-            'action',
-            'formaction',
-            'data',
-            'poster',
-            'xlink:href',
-          ];
-
-          for (const attr of urlAttributes) {
-            if (node.hasAttribute(attr)) {
-              const value = node.getAttribute(attr) || '';
-              const lowerValue = value.toLowerCase();
-
-              // Block dangerous protocols (including URL-encoded variants)
-              const isDangerous =
-                lowerValue.includes('javascript:') ||
-                lowerValue.includes('data:') ||
-                lowerValue.includes('vbscript:') ||
-                lowerValue.includes('java%0a') || // URL-encoded newline
-                lowerValue.includes('java%0d') || // URL-encoded carriage return
-                lowerValue.includes('data%3a') || // URL-encoded colon
-                lowerValue.includes('%6a%61%76%61'); // URL-encoded "java"
-
-              if (isDangerous) {
-                node.removeAttribute(attr);
-              }
-            }
-          }
-        });
+  // Dynamic import to prevent module-level JSDOM instantiation
+  const { JSDOM } = await import('jsdom');
+  const window = new JSDOM('').window;
+  // biome-ignore lint/suspicious/noExplicitAny: JSDOM window type incompatible with DOMPurify's expected type
+  purify = createDOMPurify(window as any);
+  /**
+   * Add security hook to enforce script tag removal
+   * This provides defense-in-depth beyond FORBID_TAGS
+   */
+  purify.addHook('uponSanitizeElement', (node: Node, data: { tagName: string }) => {
+    // Forcibly remove script and style tags
+    if (data.tagName === 'script' || data.tagName === 'style') {
+      // Use parentNode.removeChild for compatibility
+      if (node.parentNode) {
+        node.parentNode.removeChild(node);
       }
-
-      _purify = purify;
-      return purify;
-    } catch (error) {
-      // Reset promise on error so retry is possible
-      _purifyPromise = null;
-      throw error;
     }
-  })();
+  });
 
-  return _purifyPromise;
+  /**
+   * Add security hook to sanitize dangerous URL protocols in attributes
+   * Blocks data:, javascript:, vbscript:, and URL-encoded variants
+   */
+  purify.addHook('afterSanitizeAttributes', (node: Element) => {
+    // Check all attributes that can contain URLs
+    const urlAttributes = ['href', 'src', 'action', 'formaction', 'data', 'poster', 'xlink:href'];
+
+    for (const attr of urlAttributes) {
+      if (node.hasAttribute(attr)) {
+        const value = node.getAttribute(attr) || '';
+        const lowerValue = value.toLowerCase();
+
+        // Block dangerous protocols (including URL-encoded variants)
+        const isDangerous =
+          lowerValue.includes('javascript:') ||
+          lowerValue.includes('data:') ||
+          lowerValue.includes('vbscript:') ||
+          lowerValue.includes('java%0a') || // URL-encoded newline
+          lowerValue.includes('java%0d') || // URL-encoded carriage return
+          lowerValue.includes('data%3a') || // URL-encoded colon
+          lowerValue.includes('%6a%61%76%61'); // URL-encoded "java"
+
+        if (isDangerous) {
+          node.removeAttribute(attr);
+        }
+      }
+    }
+  });
+
+  return purify;
 }
 
 /**
@@ -136,14 +128,14 @@ export interface DOMPurifyConfig {
  * ```ts
  * import { DOMPurify } from '@/src/lib/security/html-sanitizer';
  *
- * // Strip all HTML tags
- * const clean = DOMPurify.sanitize(userInput, {
+ * // Strip all HTML tags (ASYNC now due to lazy loading)
+ * const clean = await DOMPurify.sanitize(userInput, {
  *   ALLOWED_TAGS: [],
  *   KEEP_CONTENT: true,
  * });
  *
  * // Allow specific tags only
- * const html = DOMPurify.sanitize(content, {
+ * const html = await DOMPurify.sanitize(content, {
  *   ALLOWED_TAGS: ['p', 'br', 'strong', 'em'],
  *   ALLOWED_ATTR: ['href', 'target'],
  * });
@@ -163,8 +155,7 @@ export const DOMPurify = {
    * @returns Sanitized HTML string
    */
   async sanitize(html: string, config?: DOMPurifyConfig): Promise<string> {
-    const purify = await getDOMPurify();
-
+    const purifyInstance = await initializePurify();
     // Apply secure defaults
     const secureDefaults: DOMPurifyConfig = {
       // Block dangerous protocols, allow safe ones
@@ -183,7 +174,7 @@ export const DOMPurify = {
       FORBID_ATTR: [...(config?.FORBID_ATTR || [])],
     };
 
-    return purify.sanitize(html, finalConfig) as string;
+    return purifyInstance.sanitize(html, finalConfig) as string;
   },
 
   /**
@@ -193,16 +184,16 @@ export const DOMPurify = {
    * @returns Plain text with all HTML removed
    */
   async sanitizeToText(html: string): Promise<string> {
-    const purify = await getDOMPurify();
+    const purifyInstance = await initializePurify();
 
     // First pass: remove script/style tags and their content
-    const withoutScripts = purify.sanitize(html, {
+    const withoutScripts = purifyInstance.sanitize(html, {
       FORBID_TAGS: ['script', 'style'],
       KEEP_CONTENT: false, // Don't keep script content!
     });
 
     // Second pass: strip remaining HTML but keep text
-    return purify.sanitize(withoutScripts, {
+    return purifyInstance.sanitize(withoutScripts, {
       ALLOWED_TAGS: [],
       KEEP_CONTENT: true,
     }) as string;
@@ -214,8 +205,8 @@ export const DOMPurify = {
    * @returns true if DOMPurify is supported, false otherwise
    */
   async isSupported(): Promise<boolean> {
-    const purify = await getDOMPurify();
-    return purify.isSupported;
+    const purifyInstance = await initializePurify();
+    return purifyInstance.isSupported;
   },
 };
 

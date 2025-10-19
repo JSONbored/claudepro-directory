@@ -321,80 +321,19 @@ export const UI_CLASSES = {
 export type UIClassKey = keyof typeof UI_CLASSES;
 
 /**
- * Content Card Behavior Configuration - Configuration-Driven
+ * Content Card Behavior Configuration - AUTO-GENERATED
  *
- * Auto-generates default behaviors for all categories in registry.
- * Special cases (guides, collections) override as needed.
+ * Note: CARD_BEHAVIORS is now imported directly from ui-constants-categories.ts
+ * to avoid barrel file anti-pattern. Import from source:
  *
- * Modern 2025 Architecture:
- * - Configuration-driven: Default behaviors derived from UNIFIED_CATEGORY_REGISTRY
- * - Tree-shakeable: Only imported configurations included in bundle
- * - Type-safe: Enforces valid content types at compile time
- *
- * @see lib/config/category-config.ts - Single source of truth for categories
- *
- * @example
  * ```typescript
- * const behavior = CARD_BEHAVIORS[item.category] || CARD_BEHAVIORS.default;
- * if (behavior.showCopyButton) {
- *   // Render copy button
- * }
+ * import { CARD_BEHAVIORS } from '@/src/lib/ui-constants-categories';
  * ```
+ *
+ * @see src/lib/ui-constants-categories.ts - Auto-generated category behaviors
+ * @see scripts/build/generate-category-artifacts.ts - Generation script
  */
-import { getAllCategoryIds } from '@/src/lib/config/category-config';
-
-// Default behavior template for config-based categories
-const DEFAULT_CONFIG_BEHAVIOR = {
-  showCopyButton: true,
-  showViewCount: true,
-  showCopyCount: true,
-  showRating: true,
-  showFeaturedBadge: true,
-} as const;
-
-// Default behavior template for guide-like categories
-const DEFAULT_GUIDE_BEHAVIOR = {
-  showCopyButton: false,
-  showViewCount: true,
-  showCopyCount: false,
-  showRating: true,
-  showFeaturedBadge: true,
-} as const;
-
-// Build behaviors dynamically from registry
-const derivedBehaviors = Object.fromEntries(
-  getAllCategoryIds().map((categoryId) => [categoryId, DEFAULT_CONFIG_BEHAVIOR])
-);
-
-export const CARD_BEHAVIORS = {
-  // Default for unknown categories
-  default: DEFAULT_CONFIG_BEHAVIOR,
-
-  // Registry categories (auto-derived)
-  ...derivedBehaviors,
-
-  // Guide categories (educational content - not copyable)
-  guides: DEFAULT_GUIDE_BEHAVIOR,
-  tutorials: DEFAULT_GUIDE_BEHAVIOR,
-  workflows: DEFAULT_GUIDE_BEHAVIOR,
-  comparisons: DEFAULT_GUIDE_BEHAVIOR,
-  'use-cases': DEFAULT_GUIDE_BEHAVIOR,
-  troubleshooting: DEFAULT_GUIDE_BEHAVIOR,
-
-  // Special case overrides
-  collections: {
-    showCopyButton: true,
-    showViewCount: true,
-    showCopyCount: true,
-    showRating: false, // Collections don't have ratings (yet)
-    showFeaturedBadge: false, // Collections have their own type badges
-  },
-} as const;
-
-/**
- * Type-safe card behavior keys
- */
-export type CardBehaviorKey = keyof typeof CARD_BEHAVIORS;
+export type { CardBehaviorKey } from './ui-constants-categories';
 
 /**
  * Badge Color Constants
@@ -404,7 +343,12 @@ export type CardBehaviorKey = keyof typeof CARD_BEHAVIORS;
  * Usage: Replace inline badge color objects with these constants
  * Before: const colors = { 'full-time': 'bg-green-500/10...' }
  * After: className={BADGE_COLORS.jobType['full-time']}
+ *
+ * Note: Category badge colors are auto-generated from UNIFIED_CATEGORY_REGISTRY
+ * @see src/lib/ui-constants-categories.ts
  */
+import { CATEGORY_BADGE_COLORS } from './ui-constants-categories';
+
 export const BADGE_COLORS = {
   /**
    * Job type badge colors
@@ -464,28 +408,11 @@ export const BADGE_COLORS = {
   },
 
   /**
-   * Content category badge colors - Configuration-Driven
-   * Auto-derived from colorScheme in unified category registry
-   * Used in: DetailSidebar category badges
+   * Content category badge colors - AUTO-GENERATED
+   * Generated from UNIFIED_CATEGORY_REGISTRY colorScheme values at build time
+   * @see src/lib/ui-constants-categories.ts - Auto-generated from registry
    */
-  category: (() => {
-    // Note: Using require() for module-level initialization (import would be hoisted)
-    // Type is safe because UNIFIED_CATEGORY_REGISTRY has strict typing
-    const { UNIFIED_CATEGORY_REGISTRY } = require('@/src/lib/config/category-config') as {
-      UNIFIED_CATEGORY_REGISTRY: Record<string, { colorScheme: string; [key: string]: unknown }>;
-    };
-    const colors: Record<string, string> = {
-      default: 'bg-primary/20 text-primary border-primary/30',
-    };
-
-    // Auto-generate badge colors from registry colorScheme
-    for (const [key, config] of Object.entries(UNIFIED_CATEGORY_REGISTRY)) {
-      const color = config.colorScheme.replace('-500', ''); // Extract base color
-      colors[key] = `bg-${color}-500/20 text-${color}-500 border-${color}-500/30`;
-    }
-
-    return colors;
-  })(),
+  category: CATEGORY_BADGE_COLORS,
 
   /**
    * Submission status badge colors (SHA-3146)
@@ -552,3 +479,28 @@ export const ICON_NAME_MAP = {
   // Fallback for unknown icons
   'help-circle': HelpCircle,
 } as const;
+
+/**
+ * Get Responsive Grid Class
+ *
+ * Utility function to generate responsive grid className based on column count.
+ * Consolidates repeated grid logic from content-type-field-renderer.
+ *
+ * @param columns - Number of columns (2 or 3)
+ * @returns Responsive grid className string
+ *
+ * @example
+ * ```tsx
+ * <div className={getResponsiveGridClass(2)}>
+ *   <FormField ... />
+ *   <FormField ... />
+ * </div>
+ * ```
+ */
+export function getResponsiveGridClass(columns: 2 | 3): string {
+  if (columns === 3) {
+    return 'grid grid-cols-1 sm:grid-cols-3 gap-4';
+  }
+  // Default to 2 columns
+  return 'grid grid-cols-1 sm:grid-cols-2 gap-4';
+}

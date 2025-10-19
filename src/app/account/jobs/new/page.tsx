@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { JobForm } from '@/src/components/jobs/job-form';
+import { JobForm } from '@/src/components/forms/job-form';
 import { createJob } from '@/src/lib/actions/business.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 

@@ -2,9 +2,10 @@
 
 import dynamic from 'next/dynamic';
 import { memo } from 'react';
-import { ConfigCard } from '@/src/components/features/content/config-card';
-import { ErrorBoundary } from '@/src/components/shared/error-boundary';
-import { InfiniteScrollGrid } from '@/src/components/shared/infinite-scroll-grid';
+import { ConfigCard } from '@/src/components/domain/config-card';
+import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
+import { ErrorBoundary } from '@/src/components/infra/error-boundary';
+import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { useLocalSearch } from '@/src/hooks/use-search';
 
 const UnifiedSearch = dynamic(
@@ -14,7 +15,7 @@ const UnifiedSearch = dynamic(
     })),
   {
     ssr: false,
-    loading: () => <div className={'h-14 bg-muted/50 rounded-lg animate-pulse'} />,
+    loading: () => <Skeleton size="xl" width="3xl" className="h-14" />,
   }
 );
 
@@ -68,15 +69,17 @@ function ContentSearchClientComponent<T extends UnifiedContentItem>({
       {/* Infinite Scroll Grid Results */}
       {filteredItems.length > 0 ? (
         <ErrorBoundary>
-          <InfiniteScrollGrid<T>
+          <UnifiedCardGrid
             items={filteredItems}
-            gap={24}
+            variant="normal"
+            infiniteScroll
             batchSize={30}
-            renderItem={(item: T) => (
+            emptyMessage={`No ${title.toLowerCase()} found`}
+            ariaLabel="Search results"
+            keyExtractor={(item) => item.slug}
+            renderCard={(item) => (
               <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
             )}
-            emptyMessage={`No ${title.toLowerCase()} found`}
-            keyExtractor={(item: T) => item.slug}
           />
         </ErrorBoundary>
       ) : (

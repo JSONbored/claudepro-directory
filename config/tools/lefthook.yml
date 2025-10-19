@@ -53,19 +53,37 @@ pre-commit:
         fi
       fail_text: "❌ Technical debt check failed. Fix issues or update baseline after cleanup."
 
-    # 2. Content Validation (only when content files change)
+    # 2. Auto-generate README when content changes
+    readme-generation:
+      glob: "content/**/*.json"
+      run: |
+        echo "📝 Regenerating README from content files..."
+        npm run generate:readme
+        git add README.md
+      fail_text: "❌ README generation failed."
+
+    # 3. Content Validation (only when content files change)
     content-validation:
       glob: "content/**/*.json"
       run: npm run validate:content
       fail_text: "❌ Content validation failed. Check your JSON files."
 
-    # 3. SEO Validation (only when MDX content changes)
+    # 4. SEO Validation (only when MDX content changes)
     seo-validation:
       glob: "content/**/*.mdx"
       run: npm run validate:seo
       fail_text: "❌ SEO validation failed. Fix H1 tags, titles, and descriptions."
 
-    # 4. Run tests ONLY for changed files (smart, not strict)
+    # 5. Metadata Validation (when metadata-related files change)
+    # Uses new pattern-based validation system (October 2025)
+    metadata-validation:
+      glob: "src/lib/seo/**/*.ts"
+      run: |
+        echo "🔍 Validating metadata with pattern system..."
+        npm run validate:metadata:quick
+      fail_text: "❌ Metadata validation failed. Check titles (53-60 chars) and descriptions (150-160 chars)."
+
+    # 6. Run tests ONLY for changed files (smart, not strict)
     # Uses lefthook 1.13+ file filtering for better performance
     test-changed:
       glob: "{src,tests}/**/*.{ts,tsx}"
@@ -122,13 +140,14 @@ pre-push:
         npm run build
       fail_text: "❌ Build failed. Fix errors before pushing."
 
-    # 3. Metadata validation for ALL pages (optional, skippable with LEFTHOOK_EXCLUDE)
-    # Validates every page in sitemap for proper SEO metadata
+    # 3. E2E Metadata validation for ALL pages (optional, skippable with LEFTHOOK_EXCLUDE)
+    # Validates every page in sitemap via Playwright E2E tests
     # Automatically uses PORT env var from your dev server
-    metadata-validation:
+    # NOTE: Pre-commit uses pattern-based validation (validate:metadata:quick)
+    e2e-metadata-validation:
       run: |
-        echo "🔍 Validating metadata for all sitemap pages..."
-        echo "   (Skip with: LEFTHOOK_EXCLUDE=metadata-validation git push)"
+        echo "🔍 Validating metadata for all sitemap pages (E2E)..."
+        echo "   (Skip with: LEFTHOOK_EXCLUDE=e2e-metadata-validation git push)"
         npm run test:e2e:metadata || echo "⚠️  Metadata validation failed (not blocking - fix before production deploy)"
       fail_text: "⚠️  Metadata validation has failures (not blocking)."
 

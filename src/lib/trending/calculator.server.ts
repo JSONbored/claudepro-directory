@@ -33,6 +33,7 @@ import { z } from 'zod';
 import { statsRedis } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 
 /**
@@ -581,32 +582,22 @@ async function getActiveSponsored(): Promise<
 
 /**
  * Batch trending calculation for multiple categories
- * Now includes sponsored content injection
+ *
+ * **ARCHITECTURAL FIX**: Modernized to use Partial<Record<CategoryId, UnifiedContentItem[]>>
+ * instead of hardcoded object type. This makes it registry-driven and eliminates the need
+ * to manually update type signatures when adding new categories.
+ *
+ * Now includes sponsored content injection.
  */
 export async function getBatchTrendingData(
-  contentByCategory: {
-    agents: UnifiedContentItem[];
-    mcp: UnifiedContentItem[];
-    rules: UnifiedContentItem[];
-    commands: UnifiedContentItem[];
-    hooks: UnifiedContentItem[];
-    statuslines?: UnifiedContentItem[];
-    collections?: UnifiedContentItem[];
-    skills?: UnifiedContentItem[];
-  },
+  contentByCategory: Partial<Record<CategoryId, UnifiedContentItem[]>>,
   options?: { includeSponsored?: boolean }
 ) {
   // Combine all content for batch Redis query
-  const allContent = [
-    ...contentByCategory.agents,
-    ...contentByCategory.mcp,
-    ...contentByCategory.rules,
-    ...contentByCategory.commands,
-    ...contentByCategory.hooks,
-    ...(contentByCategory.statuslines || []),
-    ...(contentByCategory.collections || []),
-    ...(contentByCategory.skills || []),
-  ];
+  // **ARCHITECTURAL FIX**: Dynamic iteration over all provided categories instead of hardcoded list
+  const allContent = Object.values(contentByCategory)
+    .flat()
+    .filter(Boolean) as UnifiedContentItem[];
 
   // Run all calculations in parallel (including sponsored fetch)
   const [trending, popular, recent, sponsored] = await batchFetch([

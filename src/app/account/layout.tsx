@@ -1,9 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { SignOutButton } from '@/src/components/auth/auth-buttons';
-import { Button } from '@/src/components/ui/button';
-import { Card } from '@/src/components/ui/card';
+import { UnifiedButton } from '@/src/components/domain/unified-button';
+import { Button } from '@/src/components/primitives/button';
+import { Card } from '@/src/components/primitives/card';
 import {
   Activity,
   Bookmark,
@@ -19,13 +19,30 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
+
+  // Auth protection: Check if user is authenticated (moved from middleware for better performance)
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
 
-  // Double-check auth (middleware should already handle this)
-  if (!user) {
+  // Handle auth errors or missing user
+  if (userError || !user) {
     redirect('/login');
+  }
+
+  // Session refresh: Refresh tokens that expire within 1 hour to prevent unexpected logouts
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (session?.expires_at) {
+    const expiresIn = session.expires_at - Math.floor(Date.now() / 1000);
+
+    if (expiresIn < 3600) {
+      // Less than 1 hour until expiration - refresh the session
+      await supabase.auth.refreshSession();
+    }
   }
 
   // Get user profile data
@@ -73,7 +90,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
                 View Profile
               </Link>
             )}
-            <SignOutButton />
+            <UnifiedButton variant="auth-signout" />
           </div>
         </div>
       </div>

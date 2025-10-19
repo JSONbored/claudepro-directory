@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { CollectionForm } from '@/src/components/library/collection-form';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { CollectionForm } from '@/src/components/forms/collection-form';
+import { Button } from '@/src/components/primitives/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { ArrowLeft } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';

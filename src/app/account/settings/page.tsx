@@ -1,17 +1,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  ProfileEditForm,
-  RefreshProfileButton,
-} from '@/src/components/features/profile/profile-edit-form';
-import { Button } from '@/src/components/ui/button';
+import { ProfileEditForm, RefreshProfileButton } from '@/src/components/forms/profile-edit-form';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { RefreshCw } from '@/src/lib/icons';
 import type { ProfileData } from '@/src/lib/schemas/profile.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

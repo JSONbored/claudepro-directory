@@ -28,5 +28,27 @@
     "maxTokens": 8000,
     "systemPrompt": "You are a debugging expert focused on systematic problem-solving and root cause analysis"
   },
-  "source": "community"
+  "source": "community",
+  "troubleshooting": [
+    {
+      "issue": "Agent times out analyzing large codebases without completing analysis",
+      "solution": "Reduce analysis scope using --scope flag to target specific modules or functions. Break large analysis into smaller chunks by directory or component."
+    },
+    {
+      "issue": "Temperature setting not applying, responses still too creative",
+      "solution": "Verify configuration.temperature in agent JSON is 0.3 or lower. Clear agent cache and restart Claude Desktop to apply new settings."
+    },
+    {
+      "issue": "Memory profiling fails with 'heap snapshot not supported' error",
+      "solution": "Enable --inspect flag when running Node.js applications. For browser debugging, ensure Chrome DevTools Memory tab is accessible and heap snapshots are permitted."
+    },
+    {
+      "issue": "Race condition detection misses concurrent async operations",
+      "solution": "Add explicit logging with timestamps before and after async calls. Use RaceConditionDetector.trackOperation() wrapper to monitor overlapping execution windows."
+    },
+    {
+      "issue": "Debugging output missing crucial state information at breakpoints",
+      "solution": "Configure systemPrompt to explicitly request state dumps. Add console.table() for objects and arrays. Enable --verbose mode to capture intermediate variable states."
+    }
+  ]
 }

@@ -14,18 +14,18 @@
  */
 
 import { useId } from 'react';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
-import { Label } from '@/src/components/ui/label';
-import { ScrollArea } from '@/src/components/ui/scroll-area';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { Button } from '@/src/components/primitives/button';
+import { Label } from '@/src/components/primitives/label';
+import { ScrollArea } from '@/src/components/primitives/scroll-area';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
-import { Slider } from '@/src/components/ui/slider';
+} from '@/src/components/primitives/select';
+import { Slider } from '@/src/components/primitives/slider';
 import type { FilterState } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -202,14 +202,10 @@ export function SearchFilterPanel({
             >
               <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
                 {availableTags.map((tag) => (
-                  <Badge
+                  <button
                     key={tag}
-                    variant={filters.tags?.includes(tag) ? 'default' : 'outline'}
-                    className={'cursor-pointer transition-all duration-200 hover:bg-accent/10'}
                     onClick={() => onToggleTag(tag)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
+                    onKeyDown={(e: React.KeyboardEvent) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         onToggleTag(tag);
@@ -217,9 +213,17 @@ export function SearchFilterPanel({
                     }}
                     aria-pressed={filters.tags?.includes(tag)}
                     aria-label={`${filters.tags?.includes(tag) ? 'Remove' : 'Add'} ${tag} tag filter`}
+                    type="button"
+                    className="cursor-pointer transition-all duration-200"
                   >
-                    {tag}
-                  </Badge>
+                    <UnifiedBadge
+                      variant="base"
+                      style={filters.tags?.includes(tag) ? 'default' : 'outline'}
+                      className="hover:bg-accent/10"
+                    >
+                      {tag}
+                    </UnifiedBadge>
+                  </button>
                 ))}
               </div>
             </ScrollArea>

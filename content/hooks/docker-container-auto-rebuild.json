@@ -32,6 +32,28 @@
     "Multi-service application development with Docker Compose",
     "Continuous integration for containerized applications"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Docker build fails with 'daemon not running' despite Docker Desktop being active",
+      "solution": "Verify Docker socket accessibility with 'docker info' command. Restart Docker daemon or add user to docker group on Linux: 'sudo usermod -aG docker $USER' then log out and back in."
+    },
+    {
+      "issue": "Hook triggers rebuild but uses wrong Dockerfile when multiple exist in project",
+      "solution": "Specify Dockerfile path explicitly using 'docker build -f $FILE_PATH' instead of relying on directory context. Detect Dockerfile name pattern and use as -f argument for targeted builds."
+    },
+    {
+      "issue": "Docker Compose rebuild hangs indefinitely when services have dependency conflicts",
+      "solution": "Add --no-cache flag to force clean rebuild: 'docker-compose build --no-cache'. Stop running containers first with 'docker-compose down' before rebuild to prevent port and resource conflicts."
+    },
+    {
+      "issue": "Build context too large error when .dockerignore changes not respected in hook",
+      "solution": "Ensure .dockerignore is in same directory as Dockerfile being built. Docker reads .dockerignore from build context root, not from Dockerfile directory if using -f flag with different path."
+    },
+    {
+      "issue": "Hook exits successfully but image not updated with latest changes after rebuild",
+      "solution": "Verify Docker build cache invalidation by checking layer hashes in build output. Add COPY instruction for modified files or use 'docker build --pull --no-cache' to force complete rebuild without cache."
+    }
+  ],
   "documentationUrl": "https://docs.docker.com/compose/",
   "source": "community"
 }

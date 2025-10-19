@@ -22,5 +22,27 @@
   },
   "requirements": ["Bash shell", "jq", "Nerd Font installed", "Git"],
   "preview": " snnt  156k  main ",
+  "troubleshooting": [
+    {
+      "issue": "Nerd Font glyphs showing as boxes or missing symbols",
+      "solution": "Install Nerd Font and configure terminal. Test: echo -e ' '. Set font to 'FiraCode Nerd Font Mono' or 'MesloLGS NF'. Run fc-cache -fv to refresh cache."
+    },
+    {
+      "issue": "Git status shows '(detached)' instead of branch name",
+      "solution": "You're in detached HEAD state (normal for commit checkouts). Run git branch -q to see state. Checkout branch: git checkout main or create: git checkout -b feature-name."
+    },
+    {
+      "issue": "Git icons not rendering correctly in VS Code terminal",
+      "solution": "Add to settings.json: \"terminal.integrated.fontFamily\": \"'FiraCode Nerd Font Mono'\". Restart VS Code. If issues persist, install: sudo apt install fonts-symbola."
+    },
+    {
+      "issue": "Statusline displays incorrectly after git operations",
+      "solution": "Increase refreshInterval if statusline lags git state. Use git status --porcelain for reliable scripting. Verify read access: test -r .git && echo OK."
+    },
+    {
+      "issue": "Model name abbreviation too aggressive or unclear",
+      "solution": "Modify sed patterns to preserve model info. Script shortens 'claude-sonnet-4-5' to 'snnt'. Keep full name by removing: | sed 's/sonnet/snnt/' line."
+    }
+  ],
   "source": "community"
 }

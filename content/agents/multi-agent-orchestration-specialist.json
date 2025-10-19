@@ -28,5 +28,27 @@
     "Creating stateful workflows with persistent memory across agent interactions",
     "Orchestrating hybrid systems combining graph-based and conversation-based agents"
   ],
-  "source": "community"
+  "source": "community",
+  "troubleshooting": [
+    {
+      "issue": "LangGraph state transitions failing with cyclic dependency errors",
+      "solution": "Define StateGraph with explicit node order. Use conditional edges with return values. Avoid circular END node references. Debug with: graph.get_graph().draw_mermaid() to visualize flow."
+    },
+    {
+      "issue": "CrewAI agents not communicating results between sequential tasks",
+      "solution": "Use Crew task context propagation. Set task.context=[previous_task] to pass outputs. Verify agent role definitions. Check: crew.kickoff() returns final task output. Enable verbose=True for debugging."
+    },
+    {
+      "issue": "Multi-agent orchestration stuck in infinite loop or deadlock",
+      "solution": "Add max_iterations limit to graph. Implement timeout with asyncio.wait_for(). Use checkpoint persistence to resume. Set: recursion_limit=50 in graph config. Monitor state transitions with logging."
+    },
+    {
+      "issue": "Agent coordination failing with inconsistent shared state updates",
+      "solution": "Use centralized StateManager with locking. Implement atomic state transitions. Serialize updates with queue. For LangGraph: use CompiledStateGraph.update_state(). Enable state versioning for rollback."
+    },
+    {
+      "issue": "Memory overflow when processing large agent conversation histories",
+      "solution": "Use sliding window for context (last 10 messages). Summarize old messages. Store full history in DB. Set max_tokens per agent. Clear with: agent.memory.clear() after tasks."
+    }
+  ]
 }

@@ -37,7 +37,7 @@ export type UserBadgeWithBadge = {
   id: string;
   badge_id: string;
   earned_at: string;
-  featured: boolean;
+  featured: boolean | null;
   badges: {
     slug: string;
     name: string;
@@ -78,7 +78,7 @@ export class UserBadgeRepository extends CachedRepository<UserBadge, string> {
   async findById(id: string): Promise<RepositoryResult<UserBadge | null>> {
     return this.executeOperation('findById', async () => {
       const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
+      const cached = this.getFromCache<UserBadge>(cacheKey);
       if (cached) return cached;
 
       const supabase = await createClient();
@@ -338,7 +338,7 @@ export class UserBadgeRepository extends CachedRepository<UserBadge, string> {
         throw new Error(`Failed to fetch user badges with details: ${error.message}`);
       }
 
-      return (data as unknown as UserBadgeWithBadge[]) || [];
+      return data || [];
     });
   }
 
@@ -406,7 +406,7 @@ export class UserBadgeRepository extends CachedRepository<UserBadge, string> {
         throw new Error(`Failed to find recently earned badges: ${error.message}`);
       }
 
-      return (data as unknown as BadgeEarnedItem[]) || [];
+      return data || [];
     });
   }
 
@@ -471,7 +471,7 @@ export class UserBadgeRepository extends CachedRepository<UserBadge, string> {
         throw new Error(`Failed to fetch featured badges: ${error.message}`);
       }
 
-      return (data as unknown as UserBadgeWithBadge[]) || [];
+      return data || [];
     });
   }
 

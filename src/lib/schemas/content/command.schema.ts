@@ -10,6 +10,7 @@ import {
   baseConfigurationSchema,
   baseContentMetadataSchema,
   baseInstallationSchema,
+  baseTroubleshootingSchema,
 } from '@/src/lib/schemas/content/base-content.schema';
 import { optionalGithubUrl } from '@/src/lib/schemas/primitives/base-strings';
 
@@ -47,10 +48,17 @@ export const commandContentSchema = z
       .optional()
       .describe('Optional platform-specific installation instructions'),
 
+    // Troubleshooting guidance
+    troubleshooting: z
+      .array(baseTroubleshootingSchema)
+      .max(20)
+      .optional()
+      .describe('Optional array of common issues and solutions (max 20)'),
+
     // argumentTypes and frontmatterOptions removed - unused fields
   })
   .describe(
-    'Command content schema for Claude Code slash commands. Inherits base content metadata and adds command-specific fields including configuration, installation, and examples.'
+    'Command content schema for Claude Code slash commands. Inherits base content metadata and adds command-specific fields including configuration, installation, troubleshooting, and examples.'
   );
 
 export type CommandContent = z.infer<typeof commandContentSchema>;

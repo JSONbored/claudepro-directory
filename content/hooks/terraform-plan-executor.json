@@ -24,6 +24,28 @@
     "Validate provider configurations and credentials",
     "Generate infrastructure change reports"
   ],
+  "troubleshooting": [
+    {
+      "issue": "terraform init fails with 'backend configuration changed' error",
+      "solution": "Run terraform init -reconfigure to update backend configuration. Use terraform init -migrate-state to migrate existing state. Check backend {} block in .tf files matches current state location."
+    },
+    {
+      "issue": "Plan execution triggers on .tfvars edits but fails with missing vars",
+      "solution": "Pass variable file explicitly: terraform plan -var-file=\"$TF_FILE\" if .tfvars file. Add conditional: [[ \"$TF_FILE\" == *.tfvars ]] && PLAN_ARGS=\"-var-file=$TF_FILE\". Ensure terraform.tfvars is in same directory."
+    },
+    {
+      "issue": "Hook changes to wrong directory breaking subsequent operations",
+      "solution": "Save original directory: ORIG_DIR=$(pwd) before cd \"$TF_DIR\". Always return: cd \"$ORIG_DIR\" || exit 1 at script end. Use pushd/popd for safer directory stack management."
+    },
+    {
+      "issue": "terraform validate fails when run from subdirectory with modules",
+      "solution": "Always run from root module directory. Find root: while [ ! -f .terraform.lock.hcl ] && [ $(pwd) != / ]; do cd ..; done. Run terraform init before validate when .terraform/ missing."
+    },
+    {
+      "issue": "Plan shows destroy actions when only formatting was changed",
+      "solution": "This indicates state drift or provider version change. Run terraform refresh before plan. Check provider version constraints in required_providers block. Review .terraform.lock.hcl for version updates."
+    }
+  ],
   "configuration": {
     "hookConfig": {
       "hooks": {

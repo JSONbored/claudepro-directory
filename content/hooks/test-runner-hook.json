@@ -33,6 +33,28 @@
     "Parallel test execution for faster builds",
     "Pre-commit test validation"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Tests run on every file save slowing down",
+      "solution": "Add file extension filter or test file detection: `if [[ \"$FILE_PATH\" == *test* ]] || [[ \"$FILE_PATH\" == *spec* ]]; then exit 0; fi` to skip running tests when editing test files themselves."
+    },
+    {
+      "issue": "Jest testPathPattern not finding related tests",
+      "solution": "Pattern matches test file paths not source. Use `--findRelatedTests` instead: `npm test -- --findRelatedTests=\"$FILE_PATH\"` which finds tests importing the changed file through dependency graph."
+    },
+    {
+      "issue": "Hook runs tests twice with both Jest and Vitest",
+      "solution": "Detection uses `npm list jest` which may find both. Add explicit priority: `if npm list jest &> /dev/null; then run_jest; exit 0; elif npm list vitest ...` to prevent fallthrough."
+    },
+    {
+      "issue": "Python tests fail to locate test directory",
+      "solution": "Hook looks for `${FILE_PATH%.*}_test.py` and `test_*.py`. For pytest, use explicit discovery: `pytest --collect-only \"$DIR\" 2>/dev/null | grep \"test session starts\"` to verify test detection."
+    },
+    {
+      "issue": "Go tests timeout on large module changes",
+      "solution": "Add timeout flag and scope: `go test -timeout 30s \"${DIR}\" 2>/dev/null` instead of `${DIR}/...` which tests all subpackages. Or use `go test -short` for quick tests only during development."
+    }
+  ],
   "documentationUrl": "https://jestjs.io/docs/getting-started",
   "source": "community"
 }

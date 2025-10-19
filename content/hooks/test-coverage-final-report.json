@@ -24,6 +24,28 @@
     "Document testing status for project stakeholders",
     "Ensure adequate testing before deployment"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Jest coverage reports zero percent despite passing tests",
+      "solution": "collectCoverage disabled or wrong paths in jest.config.js. Verify: 'collectCoverage: true, collectCoverageFrom: [\"src/**/*.{js,ts}\"]'. Or force: 'npm test -- --coverage --collectCoverageFrom=\"src/**\"'."
+    },
+    {
+      "issue": "Coverage summary JSON parsing fails with jq errors",
+      "solution": "coverage-summary.json missing or malformed. Check exists: '[ -f coverage/coverage-summary.json ]' before jq. Generate: add 'coverageReporters: [\"json-summary\", \"html\"]' to jest.config.js."
+    },
+    {
+      "issue": "Python pytest-cov not found despite pytest installation",
+      "solution": "Separate package required. Install: 'pip install pytest-cov coverage'. Verify: 'pytest --version' shows cov plugin. Or use coverage.py: 'coverage run -m pytest; coverage report'."
+    },
+    {
+      "issue": "Rust tarpaulin installation fails with compilation errors",
+      "solution": "Requires nightly Rust and specific deps. Use Docker: 'docker run --rm -v $PWD:/volume xd009642/tarpaulin cargo tarpaulin'. Or alternative: 'cargo install cargo-llvm-cov' for stable Rust."
+    },
+    {
+      "issue": "HTML report links show file:// protocol not opening in browser",
+      "solution": "Terminal doesn't hyperlink file:// URLs. Add open command: 'echo \"Open: coverage/index.html\"; open coverage/index.html 2>/dev/null || xdg-open coverage/index.html' auto-launching browser."
+    }
+  ],
   "configuration": {
     "hookConfig": {
       "hooks": {

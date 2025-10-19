@@ -31,5 +31,27 @@
     "CI/CD integration for development artifacts",
     "Remote work safety net for unsaved changes"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Stop hook not triggering when Claude session ends",
+      "solution": "Verify hook script is executable with chmod +x and registered in .claude/config.json. Check hook script path matches config. Ensure session ends cleanly without force quit."
+    },
+    {
+      "issue": "AWS S3 backup fails with permission denied error",
+      "solution": "Configure AWS_BACKUP_BUCKET environment variable in .env file. Verify AWS credentials with aws s3 ls. Check IAM permissions allow s3:PutObject action on target bucket."
+    },
+    {
+      "issue": "Git diff returns no modified files despite changes",
+      "solution": "Ensure files are tracked by git. Run git status to verify changes exist. Stage files with git add if needed. Check hook runs after file operations complete, not during."
+    },
+    {
+      "issue": "Backup archive creation hangs on large file sets",
+      "solution": "Use .gitignore to exclude node_modules and build artifacts from git tracking. Consider implementing file size filtering in hook script. Add timeout parameter to tar command."
+    },
+    {
+      "issue": "Multiple cloud providers configured but rclone used",
+      "solution": "Hook tries AWS S3 first, then Google Cloud, then rclone. Check AWS_BACKUP_BUCKET and GCS_BACKUP_BUCKET variables are set. Verify aws or gcloud CLI tools are in PATH and authenticated."
+    }
+  ],
   "source": "community"
 }

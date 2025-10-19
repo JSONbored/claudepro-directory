@@ -8,20 +8,21 @@
  * - Configuration-driven: Metadata rules derived from UNIFIED_CATEGORY_REGISTRY
  * - Schema-first: Metadata generated from content schemas (NO manual duplication)
  * - Dynamic: New categories automatically get optimized metadata
- * - Validated: All output passes Zod validation (50-60 char titles, 150-160 char descriptions)
+ * - Validated: All output passes Zod validation (53-60 char titles, 150-160 char descriptions)
  * - AI-optimized: Year mentions, freshness signals, optimal keyword density
  *
- * October 2025 Standards:
- * - Title: 50-60 chars (Google optimal)
- * - Description: 150-160 chars (AI engines prefer this)
+ * October 2025 Standards (Optimized):
+ * - Title: 53-60 chars (optimized for keyword density within Google ~600px limit)
+ * - Description: 150-160 chars (Google ~920px desktop, ~680px mobile)
  * - Keywords: 3-10 keywords, max 30 chars each
- * - Canonical: HTTPS, no trailing slash
+ * - Canonical: HTTPS, no trailing slash (except homepage)
+ * - Separator: Hyphens (-) not pipes (|) for 2025 SEO best practices
  *
  * @see lib/config/category-config.ts - Single source of truth for categories
  * @module lib/seo/schema-metadata-adapter
  */
 
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 
 // ============================================
 // TYPE DEFINITIONS
@@ -33,7 +34,7 @@ import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
  */
 export interface MetadataDerivationRule {
   /** Content category this rule applies to */
-  category: ContentCategory;
+  category: CategoryId;
 
   /** How to derive the title from schema */
   titleField: string | ((schema: Record<string, unknown>) => string);
@@ -57,9 +58,11 @@ export interface MetadataDerivationRule {
 
 /**
  * Category-specific metadata derivation rules
- * Maps each of the 14 content categories to its derivation logic
+ * Maps each content category to its derivation logic
+ *
+ * NOTE: Subcategories (tutorials, workflows, etc.) are handled by the 'guides' rule
  */
-export const CATEGORY_METADATA_RULES: Record<ContentCategory, MetadataDerivationRule> = {
+export const CATEGORY_METADATA_RULES: Record<CategoryId, MetadataDerivationRule> = {
   // Core content types
   agents: {
     category: 'agents',
@@ -128,6 +131,7 @@ export const CATEGORY_METADATA_RULES: Record<ContentCategory, MetadataDerivation
   },
 
   // SEO content types
+  // Guides category - handles all guide subcategories (tutorials, workflows, etc.)
   guides: {
     category: 'guides',
     titleField: 'title',
@@ -135,54 +139,6 @@ export const CATEGORY_METADATA_RULES: Record<ContentCategory, MetadataDerivation
     keywordsField: 'keywords',
     schemaType: 'Article',
     useArticleSchema: true,
-  },
-  tutorials: {
-    category: 'tutorials',
-    titleField: 'title',
-    descriptionField: 'description',
-    keywordsField: 'keywords',
-    schemaType: 'Article',
-    useArticleSchema: true,
-  },
-  comparisons: {
-    category: 'comparisons',
-    titleField: 'title',
-    descriptionField: 'description',
-    keywordsField: 'keywords',
-    schemaType: 'Article',
-    useArticleSchema: true,
-  },
-  workflows: {
-    category: 'workflows',
-    titleField: 'title',
-    descriptionField: 'description',
-    keywordsField: 'keywords',
-    schemaType: 'Article',
-    useArticleSchema: true,
-  },
-  'use-cases': {
-    category: 'use-cases',
-    titleField: 'title',
-    descriptionField: 'description',
-    keywordsField: 'keywords',
-    schemaType: 'Article',
-    useArticleSchema: true,
-  },
-  troubleshooting: {
-    category: 'troubleshooting',
-    titleField: 'title',
-    descriptionField: 'description',
-    keywordsField: 'keywords',
-    schemaType: 'Article',
-    useArticleSchema: true,
-  },
-  categories: {
-    category: 'categories',
-    titleField: 'title',
-    descriptionField: 'description',
-    keywordsField: 'keywords',
-    schemaType: 'WebPage',
-    useArticleSchema: false,
   },
 
   // Special types
@@ -216,7 +172,7 @@ export const CATEGORY_METADATA_RULES: Record<ContentCategory, MetadataDerivation
  * Routes to category-specific derivation function
  */
 export function deriveMetadataFromSchema(
-  category: ContentCategory,
+  category: CategoryId,
   schema: Record<string, unknown>
 ): { title: string; description: string; keywords: string[] } | null {
   const rule = CATEGORY_METADATA_RULES[category];

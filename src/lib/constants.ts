@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod';
+import { getAllCategoryIds } from '@/src/lib/config/category-config';
 
 /**
  * Application Information Schema
@@ -111,59 +112,17 @@ export const CLAUDE_CONFIG = claudeConfigSchema.parse({
 });
 
 /**
- * Content Categories Schema (leveraging existing schema)
+ * Content Categories
+ * **ARCHITECTURAL FIX**: Removed CONTENT_CATEGORIES and SEO_CATEGORIES constants (outdated)
+ * Use UNIFIED_CATEGORY_REGISTRY from category-config.ts as single source of truth instead
  */
-import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
-
-// CONSOLIDATION: Use complete category list from centralized schema instead of partial list
-// This eliminates the type mismatch between constants and actual categories used
-export const CONTENT_CATEGORIES = {
-  // Core content types (have dedicated directories in /content)
-  agents: 'agents',
-  mcp: 'mcp',
-  rules: 'rules',
-  commands: 'commands',
-  hooks: 'hooks',
-  statuslines: 'statuslines',
-  skills: 'skills',
-  // SEO content types (in /seo directory)
-  guides: 'guides',
-  tutorials: 'tutorials',
-  comparisons: 'comparisons',
-  workflows: 'workflows',
-  'use-cases': 'use-cases',
-  troubleshooting: 'troubleshooting',
-  categories: 'categories',
-  collections: 'collections',
-  // Special types
-  jobs: 'jobs',
-} as const;
-
-// Validate each category exists in the centralized schema
-Object.values(CONTENT_CATEGORIES).forEach((category) => {
-  contentCategorySchema.parse(category);
-});
 
 // CONSOLIDATION: Export unified main content categories for splitting logic
-export const MAIN_CONTENT_CATEGORIES = [
-  'hooks',
-  'mcp',
-  'commands',
-  'rules',
-  'agents',
-  'statuslines',
-  'collections',
-  'skills',
-] as const;
+// **ARCHITECTURAL FIX**: Now dynamically generated from UNIFIED_CATEGORY_REGISTRY
+// Auto-generated from UNIFIED_CATEGORY_REGISTRY - single source of truth
+export const MAIN_CONTENT_CATEGORIES = getAllCategoryIds() as readonly string[];
 
-// CONSOLIDATION: Export SEO categories for better organization
-export const SEO_CATEGORIES = [
-  'tutorials',
-  'comparisons',
-  'workflows',
-  'use-cases',
-  'troubleshooting',
-] as const;
+// **ARCHITECTURAL FIX**: Removed unused SEO_CATEGORIES (guide subcategories, not top-level categories)
 
 /**
  * Content Directory Paths Schema
@@ -178,6 +137,7 @@ const contentPathsSchema = z.object({
   hooks: z.string().startsWith('content/'),
   statuslines: z.string().startsWith('content/'),
   collections: z.string().startsWith('content/'),
+  skills: z.string().startsWith('content/'),
 
   // MDX guide content types (new structure)
   guides: z.string().startsWith('content/'),
@@ -198,6 +158,7 @@ export const CONTENT_PATHS = contentPathsSchema.parse({
   hooks: 'content/hooks',
   statuslines: 'content/statuslines',
   collections: 'content/collections',
+  skills: 'content/skills',
 
   // MDX guide content (new structure)
   guides: 'content/guides',

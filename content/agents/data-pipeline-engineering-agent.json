@@ -28,5 +28,27 @@
     "Designing scalable data lake architectures with medallion pattern",
     "Setting up change data capture for real-time database replication"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Airflow DAG tasks failing with retry exhausted after transient errors",
+      "solution": "Configure exponential backoff with retry_exponential_backoff parameter. Set max_retry_delay to prevent excessive wait times. Implement on_failure_callback for custom retry logic. Use rescheduling instead of retrying for long-running tasks."
+    },
+    {
+      "issue": "Apache Kafka consumer lag growing causing data processing delays",
+      "solution": "Increase consumer group parallelism by adding more consumer instances. Optimize batch processing with max_poll_records tuning. Enable consumer auto-commit with reduced interval. Monitor offset lag with Prometheus kafka_consumergroup_lag metric."
+    },
+    {
+      "issue": "dbt incremental models not detecting new records in source tables",
+      "solution": "Verify incremental_strategy merge configuration in model config. Check unique_key matches source table primary key. Run dbt run --full-refresh to reset incremental state. Ensure is_incremental macro conditions are correct."
+    },
+    {
+      "issue": "Great Expectations validation suite failing on legitimate data variations",
+      "solution": "Adjust expectation thresholds with mostly parameter for partial compliance. Use row_condition to filter validation scope. Implement custom expectations for domain-specific rules. Review validation results in Data Docs and refine expectations."
+    },
+    {
+      "issue": "S3 data lake query performance slow despite partitioning strategy",
+      "solution": "Verify partition pruning works with EXPLAIN query plan. Convert to columnar format like Parquet for better compression. Create Glue catalog partitions with MSCK REPAIR TABLE. Use file compaction to reduce small file overhead."
+    }
+  ],
   "source": "community"
 }

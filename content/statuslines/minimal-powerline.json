@@ -47,6 +47,14 @@
     {
       "issue": "jq command not found error",
       "solution": "Install jq: brew install jq (macOS), apt install jq (Linux), or download from https://jqlang.github.io/jq/"
+    },
+    {
+      "issue": "tput colors shows 8 but terminal supports 256 colors",
+      "solution": "Set TERM explicitly: export TERM=xterm-256color. Test: env TERM=xterm-256color tput colors (should show 256). For tmux/screen use TERM=screen-256color."
+    },
+    {
+      "issue": "Powerline separators misaligned or cut off at edges",
+      "solution": "Install Powerline-patched font from github.com/powerline/fonts. U+E0B0-U+E0B3 require patched fonts. For VS Code, enable GPU acceleration for better rendering."
     }
   ],
   "documentationUrl": "https://github.com/powerline/powerline",

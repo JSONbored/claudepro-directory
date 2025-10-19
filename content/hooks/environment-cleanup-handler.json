@@ -33,5 +33,27 @@
     "Multi-language project artifact cleanup",
     "Docker container development environment cleanup"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Stop hook doesn't execute when Claude terminates unexpectedly",
+      "solution": "Stop hooks only run on graceful shutdown. For crash scenarios, use OS-level cleanup via trap signals or systemd service cleanup. Add trap 'cleanup_function' EXIT SIGTERM SIGINT to shell sessions for broader coverage."
+    },
+    {
+      "issue": "Docker cleanup fails with permission denied on daemon socket",
+      "solution": "Script checks 'docker info' but may lack permissions. Ensure user in docker group: sudo usermod -aG docker $USER or skip docker cleanup gracefully: docker image prune -f 2>/dev/null || echo 'Skipping docker cleanup'."
+    },
+    {
+      "issue": "NPM cache verify hangs indefinitely blocking hook completion",
+      "solution": "Network issues can stall npm operations. Add timeout: timeout 10s npm cache verify or use npm cache verify --offline to avoid network calls. Set NPM_CONFIG_CACHE to control cache directory location."
+    },
+    {
+      "issue": "Find commands fail with 'too many arguments' on large directories",
+      "solution": "Large directory trees exceed ARG_MAX limits. Replace find ... -delete with: find . -name '*.tmp' -print0 | xargs -0 rm -f to handle arguments in batches safely using null delimiter for paths with spaces."
+    },
+    {
+      "issue": "Du command for cache size calculation hangs on network mounts",
+      "solution": "Script checks ~/.npm and other user dirs which may be on slow filesystems. Add timeout: timeout 5s du -sh \"$cache_dir\" or skip network paths: df \"$cache_dir\" | grep -q nfs && continue to avoid stalling."
+    }
+  ],
   "source": "community"
 }

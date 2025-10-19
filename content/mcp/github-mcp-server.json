@@ -73,24 +73,24 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify GitHub token has appropriate repository permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "API rate limit exceeded: 5000 requests per hour hit",
+      "solution": "Personal access tokens have 5,000 requests/hour limit. Wait for hourly reset or use GitHub App with 15,000/hour limit for Enterprise Cloud. Check X-RateLimit-Reset header for reset time."
     },
     {
-      "issue": "Check token validity and expiration date",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "HTTP 401 unauthorized error with valid token",
+      "solution": "Regenerate personal access token from GitHub Settings > Developer Settings. Verify token includes repo scope for repository access. Check token hasn't expired and update GITHUB_PERSONAL_ACCESS_TOKEN in config."
     },
     {
-      "issue": "Ensure repository access and correct spelling",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "403 forbidden when accessing organization repos",
+      "solution": "Authorize token for SSO if organization requires it. Go to GitHub Settings > Applications > Personal Access Tokens, click Configure SSO, and authorize organization. Verify you have repo access."
     },
     {
-      "issue": "Monitor API rate limits and usage",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Repository not found or access denied error",
+      "solution": "Verify repository name spelling: owner/repo-name format. Check you have read permissions to repository. For private repos, ensure token has repo scope, not just public_repo."
     },
     {
-      "issue": "Restart Claude Desktop after configuration changes",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Cannot create or update files - permission error",
+      "solution": "Verify token has repo write permissions. Check repository isn't archived or locked. For organization repos, confirm you have push access and branch protection rules allow commits."
     }
   ],
   "examples": [

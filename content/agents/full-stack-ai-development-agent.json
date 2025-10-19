@@ -28,5 +28,27 @@
     "Generating comprehensive test suites automatically",
     "Optimizing full-stack performance with AI-driven database indexes"
   ],
-  "source": "community"
+  "source": "community",
+  "troubleshooting": [
+    {
+      "issue": "Type safety broken between frontend TypeScript and backend API responses",
+      "solution": "Generate types with openapi-typescript. Use tRPC for end-to-end type safety. Validate runtime with zod. Run: npm run codegen to sync. Set strict:true in tsconfig.json."
+    },
+    {
+      "issue": "AI code generation producing syntactically correct but logically flawed code",
+      "solution": "Add unit tests for validation. Use Claude with function calling for structured output. Implement code review. Test with: npm test before commit. Set temperature=0.2."
+    },
+    {
+      "issue": "Full-stack hot reload breaking after AI-generated code changes",
+      "solution": "Restart dev server after schema changes. Clear build cache with: rm -rf .next/cache. Check for circular imports. Verify webpack config allows new file types. Use: next dev --turbo for faster rebuilds."
+    },
+    {
+      "issue": "Database migrations failing after AI-generated schema modifications",
+      "solution": "Review migration first. Use reversible up/down migrations. Test on staging. Run: npx prisma migrate diff to preview. Backup DB before migrate. Handle data transformations."
+    },
+    {
+      "issue": "AI assistant context window exceeded causing incomplete responses",
+      "solution": "Chunk large files into segments. Use RAG for codebase. Implement sliding window for history. Set max_tokens=4000 for responses. Summarize old context to save tokens."
+    }
+  ]
 }

@@ -63,16 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Check workspace access permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "OAuth authentication fails or connection times out",
+      "solution": "Remove ~/.mcp-auth directory with `rm -rf ~/.mcp-auth` and re-authenticate. Verify SSE URL https://mcp.asana.com/sse is accessible. Logout and re-login to Asana account if errors persist."
     },
     {
-      "issue": "Verify OAuth connection with /mcp",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Insufficient permissions to create or modify tasks",
+      "solution": "Verify workspace role is Member or higher (not Guest). Check project permissions allow task creation. Contact workspace admin to upgrade access level if needed."
     },
     {
-      "issue": "Monitor API rate limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Rate limit exceeded during bulk task operations",
+      "solution": "Free tier: 150 req/min limit. Paid tier: 1,500 req/min. Batch operations into groups of 10-20 tasks. Implement delays between batches. Check Retry-After header in 429 responses."
+    },
+    {
+      "issue": "Tasks not appearing or data appears stale",
+      "solution": "Run tools/list command to refresh available endpoints. Restart MCP client connection. Verify you're querying correct workspace - switch workspaces if accessing wrong data."
     }
   ],
   "examples": [

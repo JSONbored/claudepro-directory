@@ -2,7 +2,7 @@
   "name": "claudepro-directory",
   "private": true,
   "sideEffects": false,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A community-driven directory of Claude configurations including agents, MCP servers, rules, commands, and hooks",
   "author": "JSONbored",
   "license": "MIT",
@@ -23,15 +23,96 @@
     "node": ">=22.0.0",
     "npm": ">=10.0.0"
   },
+  "imports": {
+    "#lib/actions/user": {
+      "storybook": "./src/lib/actions/user.actions.mock.ts",
+      "default": "./src/lib/actions/user.actions.ts"
+    },
+    "#lib/actions/track-view": {
+      "storybook": "./src/lib/actions/track-view.mock.ts",
+      "default": "./src/lib/actions/track-view.ts"
+    },
+    "#lib/actions/badges": {
+      "storybook": "./src/lib/actions/badges.actions.mock.ts",
+      "default": "./src/lib/actions/badges.actions.ts"
+    },
+    "#lib/actions/business": {
+      "storybook": "./src/lib/actions/business.actions.mock.ts",
+      "default": "./src/lib/actions/business.actions.ts"
+    },
+    "#lib/actions/markdown": {
+      "storybook": "./src/lib/actions/markdown-actions.mock.ts",
+      "default": "./src/lib/actions/markdown-actions.ts"
+    },
+    "#lib/actions/email-capture": {
+      "storybook": "./src/lib/actions/email-capture.mock.ts",
+      "default": "./src/lib/actions/email-capture.ts"
+    },
+    "#lib/actions/content": {
+      "storybook": "./src/lib/actions/content.actions.mock.ts",
+      "default": "./src/lib/actions/content.actions.ts"
+    },
+    "#lib/actions/newsletter-signup": {
+      "storybook": "./src/lib/actions/newsletter-signup.mock.ts",
+      "default": "./src/lib/actions/newsletter-signup.ts"
+    },
+    "#lib/supabase/client": {
+      "storybook": "./src/lib/supabase/client.mock.ts",
+      "default": "./src/lib/supabase/client.ts"
+    },
+    "#lib/providers/post-copy-email": {
+      "storybook": "./src/components/infra/providers/post-copy-email-provider.mock.tsx",
+      "default": "./src/components/infra/providers/post-copy-email-provider.tsx"
+    },
+    "#lib/analytics/tracker": {
+      "storybook": "./src/lib/analytics/tracker.mock.ts",
+      "default": "./src/lib/analytics/tracker.ts"
+    },
+    "#lib/analytics/event-mapper": {
+      "storybook": "./src/lib/analytics/event-mapper.mock.js",
+      "default": "./src/lib/analytics/event-mapper.ts"
+    },
+    "#lib/analytics/events.constants": {
+      "storybook": "./src/lib/analytics/events.constants.mock.ts",
+      "default": "./src/lib/analytics/events.constants.ts"
+    },
+    "#lib/analytics/events/related-content": {
+      "storybook": "./src/lib/analytics/events/related-content.mock.ts",
+      "default": "./src/lib/analytics/events/related-content.ts"
+    },
+    "#lib/related-content/service": {
+      "storybook": "./src/lib/related-content/service.mock.ts",
+      "default": "./src/lib/related-content/service.ts"
+    },
+    "#lib/env-client": {
+      "storybook": "./src/lib/env-client.mock.ts",
+      "default": "./src/lib/env-client.ts"
+    },
+    "#lib/schemas/env": {
+      "storybook": "./src/lib/schemas/env.schema.mock.ts",
+      "default": "./src/lib/schemas/env.schema.ts"
+    }
+  },
   "scripts": {
     "dev": "npm run build:content && npm run generate:service-worker && next dev --turbopack",
-    "build": "npm run generate:events && npm run build:content && npm run generate:service-worker && npm run generate:openapi && npm run build:api-docs && next build --turbopack",
+    "build": "npm run generate:categories && npm run generate:events && npm run build:content && npm run generate:service-worker && npm run generate:openapi && npm run build:api-docs && next build --turbopack",
     "build:analyze": "TURBOPACK_STATS=1 npm run build",
     "build:content": "tsx scripts/build/build-content.ts",
     "build:api-docs": "tsx scripts/build/generate-fumadocs-api.ts",
     "generate:service-worker": "tsx scripts/build/generate-service-worker.ts",
     "generate:openapi": "tsx scripts/build/generate-openapi.ts",
-    "generate:types": "vercel env pull .env.local --yes && supabase gen types typescript --db-url \"$POSTGRES_URL_NON_POOLING\" --schema public > src/types/database.types.ts && rm .env.local",
+    "generate:readme": "tsx scripts/build/generate-readme.ts",
+    "generate:routes": "tsx scripts/build/generate-routes.ts",
+    "generate:routes:check": "tsx scripts/build/generate-routes.ts --check",
+    "generate:routes:dry": "tsx scripts/build/generate-routes.ts --dry",
+    "generate:types": "tsx scripts/build/generate-db-types.ts",
+    "generate:types:force": "tsx scripts/build/generate-db-types.ts --force",
+    "generate:categories": "tsx scripts/build/generate-category-artifacts.ts",
+    "generate:categories:check": "tsx scripts/build/generate-category-artifacts.ts --check",
+    "generate:categories:dry": "tsx scripts/build/generate-category-artifacts.ts --dry",
+    "changelog:generate": "tsx scripts/changelog/generate-entry.ts",
+    "changelog:generate:dry": "tsx scripts/changelog/generate-entry.ts --dry-run",
+    "changelog:generate:branch": "tsx scripts/changelog/generate-entry.ts --branch",
     "warm:cache": "tsx scripts/utilities/warm-cache.ts",
     "warm:cache:dry": "tsx scripts/utilities/warm-cache.ts --dry-run",
     "indexnow:submit": "tsx scripts/utilities/submit-indexnow.ts",
@@ -40,14 +121,20 @@
     "lint": "ultracite check",
     "format": "ultracite fix",
     "email:dev": "email dev --dir src/emails --port 3001",
-    "validate:content": "tsx scripts/validation/validate-content.ts",
-    "validate:seo": "tsx scripts/validation/validate-seo.ts",
-    "validate:seo:fix": "tsx scripts/validation/validate-seo.ts --fix",
+    "validate": "tsx scripts/validation/validate.ts",
+    "validate:all": "tsx scripts/validation/validate.ts",
+    "validate:quick": "tsx scripts/validation/validate.ts --quick",
+    "validate:fix": "tsx scripts/validation/validate.ts --fix",
+    "validate:content": "tsx scripts/validation/validate.ts --type=content",
+    "validate:seo": "tsx scripts/validation/validate.ts --type=seo",
+    "validate:seo:fix": "tsx scripts/validation/validate.ts --type=seo --fix",
     "optimize:titles": "tsx scripts/validation/optimize-titles.ts",
     "optimize:titles:dry": "tsx scripts/validation/optimize-titles.ts --dry-run",
-    "validate:titles": "tsx scripts/validation/verify-titles.ts",
-    "validate:titles:quick": "tsx scripts/validation/verify-titles.ts --quick",
-    "validate:llmstxt": "tsx scripts/validation/validate-llmstxt.ts",
+    "validate:titles": "tsx scripts/validation/validate.ts --type=titles",
+    "validate:titles:quick": "tsx scripts/validation/validate.ts --type=titles --quick",
+    "validate:llmstxt": "tsx scripts/validation/validate.ts --type=llmstxt",
+    "validate:metadata": "tsx scripts/validation/validate.ts --type=metadata",
+    "validate:metadata:quick": "tsx scripts/validation/validate.ts --type=metadata --quick",
     "prepare": "command -v lefthook >/dev/null 2>&1 && LEFTHOOK_CONFIG=config/tools/lefthook.yml lefthook install && rm -f lefthook.yml || echo 'Skipping lefthook install (not available)'",
     "analyze:architecture": "npx skott --displayMode=webapp",
     "analyze:unused": "npx knip -c config/tools/knip.json",
@@ -61,6 +148,9 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
+    "coverage:track": "vitest run --coverage && tsx scripts/testing/track-coverage.ts",
+    "coverage:baseline": "vitest run --coverage && tsx scripts/testing/track-coverage.ts --baseline",
+    "coverage:report": "tsx scripts/testing/track-coverage.ts --report",
     "test:e2e": "playwright test --config=config/tools/playwright.config.ts",
     "test:e2e:ui": "playwright test --config=config/tools/playwright.config.ts --ui",
     "test:e2e:debug": "playwright test --config=config/tools/playwright.config.ts --debug",
@@ -77,7 +167,9 @@
     "tech-debt:baseline": "config/tools/tech-debt/tracker.sh baseline",
     "tech-debt:check": "config/tools/tech-debt/tracker.sh check",
     "tech-debt:report": "config/tools/tech-debt/tracker.sh report",
-    "generate:events": "tsx scripts/build/generate-events.ts"
+    "generate:events": "tsx scripts/build/generate-events.ts",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@arcjet/next": "^1.0.0-beta.13",
@@ -105,6 +197,7 @@
     "@supabase/supabase-js": "^2.75.0",
     "@tailwindcss/postcss": "^4.1.14",
     "@types/he": "^1.2.3",
+    "@types/jsdom": "^27.0.0",
     "@types/node": "^24.7.2",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
@@ -115,14 +208,15 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "devalue": "^5.4.1",
-    "framer-motion": "^12.23.24",
+    "dompurify": "^3.3.0",
     "fumadocs-openapi": "^9.5.1",
     "fumadocs-ui": "^15.8.5",
     "fuzzysort": "^3.1.0",
     "he": "^1.2.0",
-    "isomorphic-dompurify": "^2.28.0",
+    "jsdom": "^27.0.1",
     "lucide-react": "^0.545.0",
     "marked": "^16.4.0",
+    "motion": "^12.23.24",
     "next": "15.5.5",
     "next-mdx-remote": "^5.0.0",
     "next-safe-action": "^8.0.11",
@@ -146,13 +240,20 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
     "@biomejs/biome": "2.2.6",
+    "@chromatic-com/storybook": "^4.1.1",
     "@faker-js/faker": "^10.1.0",
     "@lhci/cli": "^0.15.1",
     "@next/bundle-analyzer": "^15.5.5",
     "@playwright/test": "^1.56.0",
+    "@storybook/addon-a11y": "^9.1.12",
+    "@storybook/addon-docs": "^9.1.12",
+    "@storybook/addon-links": "^9.1.12",
+    "@storybook/nextjs": "^9.1.12",
+    "@storybook/nextjs-vite": "^9.1.12",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/dompurify": "^3.0.5",
     "@vitejs/plugin-react": "^5.0.4",
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
@@ -166,6 +267,7 @@
     "knip": "^5.65.0",
     "lefthook": "^1.13.6",
     "msw": "^2.11.5",
+    "storybook": "^9.1.12",
     "ultracite": "^5.6.4",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"

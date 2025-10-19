@@ -39,12 +39,24 @@
   },
   "troubleshooting": [
     {
-      "issue": "Weird characters or extra header row",
-      "solution": "Use encoding='utf-8-sig' and header=None with manual names when needed."
+      "issue": "Weird characters or BOM appearing in first column name",
+      "solution": "Use encoding='utf-8-sig' when reading CSV to strip byte order mark, or manually rename columns after load with df.columns."
     },
     {
-      "issue": "MemoryError on large files",
-      "solution": "Use chunksize in read_csv or convert to Parquet and process incrementally."
+      "issue": "MemoryError when loading large CSV or Excel files",
+      "solution": "Use chunksize parameter in read_csv to process incrementally, or convert to Parquet format first for more efficient handling."
+    },
+    {
+      "issue": "Excel file opens but all values are NaN or None",
+      "solution": "Install openpyxl engine with pip install openpyxl, then use pd.read_excel('file.xlsx', engine='openpyxl')."
+    },
+    {
+      "issue": "Date columns imported as strings instead of datetime objects",
+      "solution": "Use parse_dates parameter: pd.read_csv('file.csv', parse_dates=['date_column']) or convert post-load with pd.to_datetime()."
+    },
+    {
+      "issue": "DtypeWarning about mixed types in columns when reading CSV",
+      "solution": "Specify dtype explicitly with dtype={'column': str} or use dtype=str for all, then convert types after inspection."
     }
   ],
   "documentationUrl": "https://pandas.pydata.org/",

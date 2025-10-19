@@ -2,12 +2,15 @@
  * Middleware Validation Schemas
  * Production-grade validation for HTTP requests and middleware operations
  * Ensures request integrity and security validation
+ *
+ * MODERNIZATION: Uses registry-driven categoryIdSchema for category validation
  */
 
 import { z } from 'zod';
 import { nonNegativeInt, positiveInt } from './primitives/base-numbers';
 import { nonEmptyString } from './primitives/base-strings';
 import { parseContentType } from './primitives/sanitization-transforms';
+import { categoryIdSchema } from './shared.schema';
 
 /**
  * Security constants for middleware
@@ -106,13 +109,17 @@ const httpContentTypeSchema = z
 
 /**
  * Static asset paths
+ * OPTIMIZATION: Using string methods instead of regex for better performance
  */
 export const staticAssetSchema = z
   .string()
   .refine(
     (path) =>
+      // Next.js internal routes
       path.startsWith('/_next/static') ||
       path.startsWith('/_next/image') ||
+      path.startsWith('/_vercel/') ||
+      // Root static files
       path === '/favicon.ico' ||
       path === '/robots.txt' ||
       path === '/sitemap.xml' ||
@@ -121,7 +128,22 @@ export const staticAssetSchema = z
       path === '/manifest' ||
       path === '/service-worker.js' ||
       path === '/offline.html' ||
-      /\.(png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)$/.test(path),
+      // Public directories
+      path.startsWith('/css/') ||
+      path.startsWith('/js/') ||
+      path.startsWith('/scripts/') ||
+      // File extensions (using endsWith for better performance than regex)
+      path.endsWith('.png') ||
+      path.endsWith('.jpg') ||
+      path.endsWith('.jpeg') ||
+      path.endsWith('.gif') ||
+      path.endsWith('.webp') ||
+      path.endsWith('.svg') ||
+      path.endsWith('.ico') ||
+      path.endsWith('.woff') ||
+      path.endsWith('.woff2') ||
+      path.endsWith('.ttf') ||
+      path.endsWith('.eot'),
     'Not a valid static asset path'
   )
   .describe('Path to static assets including Next.js resources, images, and common web files');
@@ -191,6 +213,7 @@ export const requestValidationSchema = z
 
 /**
  * Search query validation
+ * MODERNIZATION: category now registry-driven (supports all 11 categories + 'all')
  */
 export const searchQueryValidationSchema = z
   .object({
@@ -201,9 +224,9 @@ export const searchQueryValidationSchema = z
       .optional()
       .describe('Search query string with alphanumeric and basic punctuation only (max 500 chars)'),
     category: z
-      .enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks', 'guides'])
+      .union([z.literal('all'), categoryIdSchema])
       .optional()
-      .describe('Content category to filter search results'),
+      .describe('Content category to filter search results (all categories from registry + "all")'),
     page: positiveInt
       .max(1000)
       .optional()

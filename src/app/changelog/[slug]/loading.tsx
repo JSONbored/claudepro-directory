@@ -5,8 +5,8 @@
  * Shows placeholder content matching the layout of the detail page.
  */
 
-import { Skeleton } from '@/src/components/ui/loading-skeleton';
-import { Separator } from '@/src/components/ui/separator';
+import { Skeleton } from '@/src/components/primitives/loading-skeleton';
+import { Separator } from '@/src/components/primitives/separator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export default function ChangelogEntryLoading() {
@@ -16,7 +16,7 @@ export default function ChangelogEntryLoading() {
       <Skeleton size="sm" width="xs" />
 
       {/* Header Skeleton */}
-      <header className="space-y-4 pb-6 animate-pulse">
+      <header className="space-y-4 pb-6">
         {/* Date */}
         <div className={'flex items-center gap-3'}>
           <Skeleton size="sm" width="xs" />
@@ -38,7 +38,7 @@ export default function ChangelogEntryLoading() {
       {/* Content Skeleton */}
       <div className="space-y-6">
         {/* TL;DR Box */}
-        <div className="rounded-lg border p-4 animate-pulse">
+        <div className="rounded-lg border p-4">
           <Skeleton size="sm" width="xs" className="mb-2" />
           <Skeleton size="sm" width="3xl" />
         </div>
@@ -51,7 +51,7 @@ export default function ChangelogEntryLoading() {
         </div>
 
         {/* Content Paragraphs */}
-        <div className="space-y-4 animate-pulse">
+        <div className="space-y-4">
           <Skeleton size="md" width="3xl" />
           <Skeleton size="sm" width="3xl" />
           <Skeleton size="sm" width="5/6" />
@@ -62,7 +62,7 @@ export default function ChangelogEntryLoading() {
         {/* Section Headers */}
         <div className="space-y-6">
           {[...Array(3)].map((_, i) => (
-            <div key={`section-${i + 1}`} className="space-y-3 animate-pulse">
+            <div key={`section-${i + 1}`} className="space-y-3">
               <Skeleton size="lg" width="sm" />
               <Skeleton size="sm" width="3xl" />
               <Skeleton size="sm" width="5/6" />

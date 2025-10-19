@@ -63,16 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify Socket account access",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Rate limit exceeded - 429 Too Many Requests error",
+      "solution": "Rate limit: 600 requests/minute. Implement random exponential backoff for retries. Space out API calls to stay under 10 req/second average. Contact support@socket.dev to request rate limit increase for organization."
     },
     {
-      "issue": "Check package manager support",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Authentication failed or API key invalid",
+      "solution": "Provide API token via HTTP Basic auth with token as username, blank password. Use Authorization: Bearer YOUR_API_KEY header format. Verify API key in Socket Dashboard settings. Generate new key if expired or compromised."
     },
     {
-      "issue": "Review scan permissions and scope",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Package scan failed or unsupported package manager",
+      "solution": "Socket supports npm, PyPI, Go modules, Maven, and Packagist. Verify package.json or requirements.txt format valid. Check package exists in registry. Review scan output for specific error messages."
+    },
+    {
+      "issue": "SBOM export or security report generation errors",
+      "solution": "Verify account has access to SBOM export features. Check report snapshot hash authentication (SHA2). Ensure sufficient permissions for license policy management. Review API response for specific error details."
     }
   ],
   "examples": [

@@ -11,9 +11,13 @@
 
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
-import { ConfigCard } from '@/src/components/features/content/config-card';
-import { Button } from '@/src/components/ui/button';
-import { CATEGORY_CONFIGS, HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
+import { ConfigCard } from '@/src/components/domain/config-card';
+import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
+import { Button } from '@/src/components/primitives/button';
+import {
+  HOMEPAGE_FEATURED_CATEGORIES,
+  UNIFIED_CATEGORY_REGISTRY,
+} from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Briefcase, ExternalLink } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
@@ -49,17 +53,13 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
             View all <ExternalLink className="h-4 w-4" />
           </Link>
         </div>
-        <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
-          {featuredItems.map((item) => (
-            <ConfigCard
-              key={item.slug}
-              item={item}
-              variant="default"
-              showCategory={true}
-              showActions={true}
-            />
-          ))}
-        </div>
+        <UnifiedCardGrid
+          items={featuredItems}
+          cardComponent={ConfigCard}
+          variant="normal"
+          ariaLabel={`Featured ${title}`}
+          prefetchCount={3}
+        />
       </div>
     );
   }
@@ -81,7 +81,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories }) =>
       {/* Dynamically render featured sections based on HOMEPAGE_FEATURED_CATEGORIES */}
       {HOMEPAGE_FEATURED_CATEGORIES.map((categorySlug) => {
         const items = categories[categorySlug];
-        const config = CATEGORY_CONFIGS[categorySlug];
+        const config = UNIFIED_CATEGORY_REGISTRY[categorySlug];
 
         // Skip if no config or no items for this category
         if (!(config && items)) {

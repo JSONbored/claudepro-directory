@@ -29,8 +29,24 @@
   },
   "troubleshooting": [
     {
-      "issue": "No matches due to log format differences",
-      "solution": "Adjust patterns for your log format; test with small samples first."
+      "issue": "ripgrep finds no matches in logs with known content",
+      "solution": "Check for encoding issues, try case-insensitive search with -i flag, test regex pattern with small sample first using rg -A 2."
+    },
+    {
+      "issue": "Timestamps in multiple formats causing incorrect sorting",
+      "solution": "Parse all timestamps to Unix epoch or ISO 8601 format first, then sort numerically before building timeline."
+    },
+    {
+      "issue": "ripgrep regex pattern not matching expected lines",
+      "solution": "Use rg --pcre2 for Perl-compatible regex, or simplify patterns and test with rg -o to show only matched parts."
+    },
+    {
+      "issue": "jq command fails with parse error on log JSON",
+      "solution": "Use jq -R for raw input if logs are line-delimited JSON, not pure JSON array; try jq -s for slurp mode on multiple objects."
+    },
+    {
+      "issue": "Log correlation fails across microservices with different IDs",
+      "solution": "Map correlation IDs in preprocessing step: create lookup table linking request_id, trace_id, correlation_id before timeline merge."
     }
   ],
   "documentationUrl": "https://github.com/BurntSushi/ripgrep",

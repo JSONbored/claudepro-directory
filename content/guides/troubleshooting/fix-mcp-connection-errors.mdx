@@ -10,7 +10,8 @@ keywords:
   - "error -32000 claude desktop"
 dateUpdated: "2025-09-22"
 author: "Claude Pro Directory"
-category: "troubleshooting"
+category: "guides"
+subcategory: "troubleshooting"
 tags:
   - "troubleshooting"
   - "mcp-servers"
@@ -24,7 +25,8 @@ aiOptimized: true
 citationReady: true
 ---
 
-<TLDRSummary 
+<UnifiedContentBlock
+  variant="tldr" 
   content="Quick fix for MCP server error -32000: Use cmd wrapper on Windows for npx commands. This issue commonly affects Windows users when Claude Desktop cannot execute commands directly. Complete resolution typically takes 5-10 minutes."
   keyPoints={[
     "Wrap Windows commands with 'cmd /c' - immediate resolution",
@@ -36,7 +38,7 @@ citationReady: true
 
 Experiencing MCP server disconnection error -32000 with Claude Desktop? This comprehensive guide provides proven solutions based on community reports and official Anthropic support resources. The issue typically manifests as garbled text messages, immediate disconnections, or server disconnect notifications.
 
-<Callout type="error" title="Problem Summary">
+<UnifiedContentBox contentType="callout" type="error" title="Problem Summary">
 **Error:** Server disconnected. error -32000  
 **Symptoms:** Garbled messages, immediate disconnection, server fails to start  
 **Impact:** All MCP server functionality disabled  
@@ -77,7 +79,7 @@ Experiencing MCP server disconnection error -32000 with Claude Desktop? This com
 
 ## Detailed Diagnostics
 
-<Accordion
+<UnifiedContentBox contentType="accordion"
   title="Comprehensive Problem Analysis"
   description="In-depth diagnostic procedures for complex cases"
   items={[
@@ -236,7 +238,7 @@ grep -i "error\\|failed\\|disconnect" ~/Library/Logs/Claude/mcp*.log
             ]}
           />
           
-          <Callout type="warning" title="Configuration Best Practices">
+          <UnifiedContentBox contentType="callout" type="warning" title="Configuration Best Practices">
           **Use absolute paths:** Prevents ambiguity and version conflicts
           
           **Platform-specific wrappers:** Windows requires cmd /c for npx execution
@@ -256,7 +258,7 @@ grep -i "error\\|failed\\|disconnect" ~/Library/Logs/Claude/mcp*.log
           <h4>Clean Reset Procedure</h4>
           <p>Complete reset resolves corrupted npm cache issues and dependency conflicts. Required when configuration fixes fail repeatedly.</p>
           
-          <Callout type="error" title="Important: Data Backup">
+          <UnifiedContentBox contentType="callout" type="error" title="Important: Data Backup">
           **Before proceeding:** Export any custom MCP server configurations
           
           **Backup Command:** `cp -r ~/.mcp-servers ~/Desktop/mcp-backup`
@@ -375,7 +377,7 @@ else:
             ]}
           />
           
-          <Callout type="tip" title="Advanced Troubleshooting Tips">
+          <UnifiedContentBox contentType="callout" type="tip" title="Advanced Troubleshooting Tips">
           **Use MCP Inspector:** Interactive debugging tool for protocol inspection
           
           **Monitor stderr output:** All debug info must go to stderr, not stdout
@@ -388,7 +390,8 @@ else:
 
 ## Root Cause Analysis
 
-<FeatureGrid
+<UnifiedContentBlock
+  variant="feature-grid"
   title="Common Root Causes"
   description="Understanding why this issue occurs based on support analysis"
   features={[
@@ -418,7 +421,7 @@ else:
 
 ## Prevention Strategies
 
-<Callout type="success" title="Prevent Future Occurrences">
+<UnifiedContentBox contentType="callout" type="success" title="Prevent Future Occurrences">
 **Use absolute paths always:** Full paths in configurations prevent ambiguity
 
 **Redirect server logs to stderr:** console.error() instead of console.log() prevents stream pollution
@@ -428,7 +431,7 @@ else:
 
 ## Alternative Solutions
 
-<Accordion
+<UnifiedContentBox contentType="accordion"
   title="When Standard Fixes Don't Work"
   description="Alternative approaches for persistent or unusual cases"
   items={[
@@ -484,7 +487,7 @@ export HTTPS_PROXY=http://proxy.company.com:8080
           
           <p>Community-developed wrapper scripts handle environment inconsistencies automatically. Available at github.com/modelcontextprotocol/community-solutions repository.</p>
           
-          <Callout type="warning" title="Community Solution Disclaimer">
+          <UnifiedContentBox contentType="callout" type="warning" title="Community Solution Disclaimer">
           These solutions are community-contributed and verified by MCP maintainers. Test in development environment before production use.
           </Callout>
         </div>
@@ -495,7 +498,8 @@ export HTTPS_PROXY=http://proxy.company.com:8080
 
 ## When to Escalate
 
-<FeatureGrid
+<UnifiedContentBlock
+  variant="feature-grid"
   title="Escalation Criteria"
   description="When to seek additional help based on official support guidelines"
   features={[
@@ -558,7 +562,7 @@ export HTTPS_PROXY=http://proxy.company.com:8080
 
 ## Frequently Asked Questions
 
-<AIOptimizedFAQ 
+<UnifiedContentBox contentType="faq" 
   title="Common Troubleshooting Questions"
   description="Answers to frequently asked questions about this issue"
   questions={[
@@ -591,7 +595,7 @@ export HTTPS_PROXY=http://proxy.company.com:8080
 
 ---
 
-<Callout type="success" title="Issue Resolved?">
+<UnifiedContentBox contentType="callout" type="success" title="Issue Resolved?">
 **Problem solved?** Great! Consider implementing absolute paths and stderr logging to prevent recurrence.
 
 **Still having issues?** Join our [community](/community) for additional support or file a GitHub issue at github.com/modelcontextprotocol/issues.

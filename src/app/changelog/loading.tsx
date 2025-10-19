@@ -5,7 +5,7 @@
  * Shows placeholder cards matching the layout of ChangelogCard components.
  */
 
-import { PageHeaderSkeleton, Skeleton } from '@/src/components/ui/loading-skeleton';
+import { PageHeaderSkeleton, Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export default function ChangelogLoading() {
@@ -22,7 +22,7 @@ export default function ChangelogLoading() {
       </div>
 
       {/* Category Filter Skeleton */}
-      <div className="grid w-full lg:w-auto lg:grid-flow-col gap-1 animate-pulse">
+      <div className="grid w-full lg:w-auto lg:grid-flow-col gap-1">
         {[...Array(7)].map((_, i) => (
           <Skeleton key={`tab-${i + 1}`} size="lg" width="lg" rounded="md" />
         ))}
@@ -31,10 +31,7 @@ export default function ChangelogLoading() {
       {/* Changelog Cards Skeleton */}
       <div className="space-y-6">
         {[...Array(6)].map((_, i) => (
-          <div
-            key={`changelog-skeleton-${i + 1}`}
-            className="rounded-lg border bg-card p-6 animate-pulse"
-          >
+          <div key={`changelog-skeleton-${i + 1}`} className="rounded-lg border bg-card p-6">
             <div className={'flex items-center gap-2 mb-3'}>
               <Skeleton size="sm" width="xs" />
               <Skeleton size="sm" width="sm" />

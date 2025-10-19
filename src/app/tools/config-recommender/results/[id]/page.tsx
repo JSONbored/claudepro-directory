@@ -174,7 +174,7 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
             We encountered an error while generating your recommendations. Please try again.
           </p>
           <a
-            href={ROUTES.CONFIG_RECOMMENDER}
+            href={ROUTES.TOOLS_CONFIG_RECOMMENDER}
             className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
           >
             Start Over

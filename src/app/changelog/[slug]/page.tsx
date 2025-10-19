@@ -25,11 +25,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ChangelogContent } from '@/src/components/changelog/changelog-content';
-import { ViewTracker } from '@/src/components/shared/view-tracker';
-import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
-import { ChangelogArticleStructuredData } from '@/src/components/structured-data/changelog-structured-data';
-import { Separator } from '@/src/components/ui/separator';
+import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
+import { BreadcrumbSchema } from '@/src/components/infra/structured-data/breadcrumb-schema';
+import { ChangelogArticleStructuredData } from '@/src/components/infra/structured-data/changelog-structured-data';
+import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
+import { Separator } from '@/src/components/primitives/separator';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -103,28 +103,24 @@ export default async function ChangelogEntryPage({
     return (
       <>
         {/* View Tracker - Track page views */}
-        <ViewTracker category="changelog" slug={entry.slug} />
+        <UnifiedTracker variant="view" category="changelog" slug={entry.slug} />
 
         {/* Structured Data - TechArticle Schema */}
         <ChangelogArticleStructuredData entry={entry} />
 
         {/* Breadcrumb Schema - SEO optimization */}
-        {
-          await (
-            <BreadcrumbSchema
-              items={[
-                {
-                  name: 'Changelog',
-                  url: `${APP_CONFIG.url}/changelog`,
-                },
-                {
-                  name: entry.title,
-                  url: `${APP_CONFIG.url}/changelog/${entry.slug}`,
-                },
-              ]}
-            />
-          )
-        }
+        <BreadcrumbSchema
+          items={[
+            {
+              name: 'Changelog',
+              url: `${APP_CONFIG.url}/changelog`,
+            },
+            {
+              name: entry.title,
+              url: `${APP_CONFIG.url}/changelog/${entry.slug}`,
+            },
+          ]}
+        />
 
         <article className="container max-w-4xl py-8 space-y-8">
           {/* Navigation */}

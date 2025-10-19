@@ -43,6 +43,28 @@
       }
     }
   },
+  "troubleshooting": [
+    {
+      "issue": "Memory usage calculation fails on macOS systems",
+      "solution": "Hook uses free command which is Linux-only. On macOS, install free via brew install free or modify hook to use vm_stat | grep 'Pages active' for memory statistics instead."
+    },
+    {
+      "issue": "bc command not found error on minimal systems",
+      "solution": "Install bc for floating-point arithmetic (apt-get install bc or brew install bc). Alternatively, modify memory comparison to use integer math with awk instead of bc -l for percentage checks."
+    },
+    {
+      "issue": "Lighthouse or Artillery tools not detected",
+      "solution": "Install globally with npm install -g lighthouse @artillery/core or install locally and modify hook to check npx lighthouse and npx artillery instead of direct commands."
+    },
+    {
+      "issue": "Hook shows same performance data every run",
+      "solution": "This is a stop hook providing system snapshot at session end. For continuous monitoring, integrate with dedicated APM tools or add timestamped logging to track changes over multiple sessions."
+    },
+    {
+      "issue": "Load average shows very high values but system responsive",
+      "solution": "Load average is relative to CPU core count. Value of 8 is normal for 8-core system. Divide load average by core count (sysctl -n hw.ncpu on macOS, nproc on Linux) for actual load percentage."
+    }
+  ],
   "documentationUrl": "https://web.dev/vitals/",
   "source": "community"
 }

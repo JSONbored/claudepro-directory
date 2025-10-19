@@ -4,6 +4,8 @@
  * Extracted for DRY principle and easier maintenance
  */
 
+import { VALID_CATEGORIES } from '@/src/lib/config/category-types';
+
 /**
  * Security-focused regex patterns for strict validation
  */
@@ -14,8 +16,8 @@ export const VALIDATION_PATTERNS = {
   // Strict slug format (URL-safe)
   SLUG: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
 
-  // Content type validation (exact match)
-  CONTENT_TYPE: /^(agents|mcp|rules|commands|hooks|statuslines|collections|skills)\.json$/,
+  // Content type validation (exact match) - Auto-generated from UNIFIED_CATEGORY_REGISTRY
+  CONTENT_TYPE: new RegExp(`^(${VALID_CATEGORIES.join('|')})\\.json$`),
 
   // File extensions (security-focused)
   SAFE_FILE_EXT: /^[a-zA-Z0-9_-]+\.(json|md|txt|yaml|yml)$/i,

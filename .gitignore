@@ -55,6 +55,9 @@ content/api-docs/*.mdx
 .eslintcache
 *.tsbuildinfo
 coverage/
+.coverage-baseline.json
+.coverage-history.json
+.db-schema-hash
 .vitest/
 .parcel-cache/
 .turbo/
@@ -96,3 +99,6 @@ lefthook.yml
 # Technical debt tracking (personal baseline, not committed)
 config/tools/tech-debt/.baseline.json
 config/tools/tech-debt/.history.json
+
+*storybook.log
+storybook-static

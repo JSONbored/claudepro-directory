@@ -29,5 +29,27 @@
     "maxTokens": 4000,
     "systemPrompt": "You are a frontend development expert with deep knowledge of modern JavaScript frameworks, UI/UX principles, and web performance. Always prioritize user experience and accessibility."
   },
+  "troubleshooting": [
+    {
+      "issue": "React hooks useEffect running infinitely causing browser freeze",
+      "solution": "Add all dependencies to useEffect dependency array. Use useCallback to memoize function references. Run with StrictMode disabled temporarily to debug. Check for object/array references causing re-renders."
+    },
+    {
+      "issue": "Redux Toolkit state updates not triggering component re-renders",
+      "solution": "Verify useSelector return value changes reference. Use shallowEqual for object comparisons. Check Redux DevTools for state mutations. Ensure reducers return new state objects not mutating existing state."
+    },
+    {
+      "issue": "CSS modules not applying styles in Next.js 15 production build",
+      "solution": "Rename files to .module.css extension. Check next.config.js has cssModules enabled. Clear .next build folder and rebuild. Verify import syntax uses styles object not direct class names."
+    },
+    {
+      "issue": "React Server Components throwing hydration mismatch errors",
+      "solution": "Separate client-only code with 'use client' directive. Avoid date/random generation in server components. Use suppressHydrationWarning for intentional mismatches. Check for SSR/client localStorage access conflicts."
+    },
+    {
+      "issue": "Lazy loaded components causing layout shift and poor Core Web Vitals",
+      "solution": "Add skeleton loaders matching component dimensions. Use React.lazy with Suspense fallback. Preload critical components with rel=preload. Implement loading state with explicit height/width to reserve space."
+    }
+  ],
   "source": "community"
 }

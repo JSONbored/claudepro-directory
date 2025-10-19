@@ -63,20 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify workspace access rights",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "HTTP 429 rate limit exceeded error",
+      "solution": "Implement exponential backoff with increasing delays between retries. Monitor rate limit headers in API responses. Distribute requests over time rather than burst operations to stay within limits."
     },
     {
-      "issue": "Check recording permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Cannot access bug recordings or debug data",
+      "solution": "Verify workspace permissions grant access to recordings. Check your account role has viewer or higher permissions. Ensure recording ID is correct and recording hasn't been deleted."
     },
     {
-      "issue": "Monitor storage usage",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Console logs or network data incomplete",
+      "solution": "Verify Jam browser extension was active during bug recording. Check privacy settings don't block sensitive data capture. Ensure user had console open when error occurred for complete logs."
     },
     {
-      "issue": "Test playback functionality",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Video playback fails or shows blank screen",
+      "solution": "Check browser supports video format and codecs. Verify recording completed successfully and wasn't interrupted. Clear browser cache and retry. Contact Jam support if corruption suspected."
     }
   ],
   "examples": [

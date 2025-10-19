@@ -86,28 +86,24 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify AWS credentials are properly configured",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "AWS credentials not found or authentication failure",
+      "solution": "Run `aws configure` to set access keys. Verify AWS_PROFILE matches profile in ~/.aws/credentials. Test with `aws sts get-caller-identity` command to confirm authentication."
     },
     {
-      "issue": "Check IAM permissions for required AWS services",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "IAM permissions denied for specific AWS service operations",
+      "solution": "Attach required IAM policy (AmazonEC2FullAccess, AmazonS3FullAccess, etc). Use AWS Policy Simulator to test permissions. Verify principal has necessary actions in IAM policy document."
     },
     {
-      "issue": "Ensure AWS region is correctly set",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Resources not found - wrong AWS region configured",
+      "solution": "Verify AWS_REGION environment variable matches resource location (us-east-1, eu-west-1, etc). Update with `aws configure set region REGION_NAME`. Check region in AWS Console matches CLI."
     },
     {
-      "issue": "Monitor AWS API rate limits and quotas",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "CloudFormation template validation errors or syntax issues",
+      "solution": "Validate with `aws cloudformation validate-template --template-body file://template.yaml`. Check resource types match AWS documentation exactly. Verify parameter types and AllowedValues constraints."
     },
     {
-      "issue": "Validate CloudFormation template syntax",
-      "solution": "Check the documentation for detailed troubleshooting steps."
-    },
-    {
-      "issue": "Check VPC and subnet configurations",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "API throttling or RequestLimitExceeded errors",
+      "solution": "Implement exponential backoff for retries (wait 2^n seconds). Reduce concurrent requests to max 10. Request service quota increase at AWS Service Quotas console for sustained high usage."
     }
   ],
   "examples": [

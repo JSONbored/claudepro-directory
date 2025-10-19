@@ -5,7 +5,7 @@
  */
 
 import { z } from 'zod';
-import { batchMap } from '@/src/lib/utils/batch.utils';
+import { type CategoryId, VALID_CATEGORIES } from '@/src/lib/config/category-types';
 import { DOMPurify } from './html-sanitizer';
 import { VALIDATION_PATTERNS } from './patterns';
 
@@ -73,7 +73,7 @@ export const baseSchemas = {
     .string()
     .regex(VALIDATION_PATTERNS.CONTENT_TYPE, 'Invalid content type')
     .describe(
-      'Content category identifier. Valid values: agents, mcp, rules, commands, hooks, statuslines, collections, skills.'
+      'Content category identifier with .json extension. Auto-validated against UNIFIED_CATEGORY_REGISTRY categories.'
     ),
 
   // Search query with sanitization
@@ -180,16 +180,7 @@ export const apiSchemas = {
     .object({
       q: baseSchemas.searchQuery,
       category: z
-        .enum([
-          'agents',
-          'mcp',
-          'rules',
-          'commands',
-          'hooks',
-          'statuslines',
-          'collections',
-          'skills',
-        ])
+        .enum(VALID_CATEGORIES)
         .optional()
         .describe('Filter search results by content category'),
       page: baseSchemas.page,
@@ -209,18 +200,7 @@ export const apiSchemas = {
   cacheWarmParams: z
     .object({
       types: z
-        .array(
-          z.enum([
-            'agents',
-            'mcp',
-            'rules',
-            'commands',
-            'hooks',
-            'statuslines',
-            'collections',
-            'skills',
-          ])
-        )
+        .array(z.enum(VALID_CATEGORIES))
         .optional()
         .describe('Array of content types to warm cache for (omit for all types)'),
       force: z
@@ -353,7 +333,7 @@ export const validation = {
  */
 async function stripHtmlTags(str: string): Promise<string> {
   // Use DOMPurify to strip all HTML tags while keeping text content
-  return await DOMPurify.sanitize(str, {
+  return DOMPurify.sanitize(str, {
     ALLOWED_TAGS: [], // Strip all HTML tags
     ALLOWED_ATTR: [], // Strip all attributes
     KEEP_CONTENT: true, // Keep text content between tags
@@ -423,27 +403,13 @@ export const sanitizers = {
   /**
    * Validate and sanitize category input
    * Ensures only valid categories are accepted
+   * Auto-validated against UNIFIED_CATEGORY_REGISTRY
    */
   sanitizeCategory: async (category: string): Promise<string | null> => {
-    const validCategories = [
-      'agents',
-      'mcp',
-      'rules',
-      'commands',
-      'hooks',
-      'statuslines',
-      'collections',
-      'skills',
-      'tutorials',
-      'comparisons',
-      'workflows',
-      'use-cases',
-      'troubleshooting',
-    ];
-
     const sanitized = (await sanitizers.sanitizeFormInput(category, 50)).toLowerCase();
 
-    if (validCategories.includes(sanitized)) {
+    // Validate against UNIFIED_CATEGORY_REGISTRY (via VALID_CATEGORIES)
+    if (VALID_CATEGORIES.includes(sanitized as CategoryId)) {
       return sanitized;
     }
 
@@ -455,7 +421,10 @@ export const sanitizers = {
    * Ensures each tag is safe and valid
    */
   sanitizeTags: async (tags: string[]): Promise<string[]> => {
-    const sanitizedTags = await batchMap(tags, (tag) => sanitizers.sanitizeFormInput(tag, 50));
+    // Inline Promise.all mapping (was batchMap) - removed batch.utils dependency
+    const sanitizedTags = await Promise.all(
+      tags.map((tag) => sanitizers.sanitizeFormInput(tag, 50))
+    );
     return sanitizedTags.filter((tag) => tag.length > 0 && tag.length <= 50).slice(0, 20); // Limit to 20 tags
   },
 

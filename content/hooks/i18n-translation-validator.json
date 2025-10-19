@@ -34,5 +34,27 @@
     "Localization project coordination with missing translation detection",
     "Cross-platform app development with unified translation standards"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook validates non-i18n JSON files in directories with similar names",
+      "solution": "Strengthen path detection: [[ \"$FILE_PATH\" =~ /(locales|i18n|lang|translations)/ ]] || exit 0. Check for translation-specific keys like locale/language markers before running full validation."
+    },
+    {
+      "issue": "Missing keys detection fails when base file uses nested structure",
+      "solution": "Use jq to flatten nested keys: jq -r 'paths(scalars) as $p | $p | join(\".\")' to get dot notation paths. Compare flattened key lists instead of top-level keys only for accurate missing key detection."
+    },
+    {
+      "issue": "Validation shows false positives for orphaned keys in locale-specific translations",
+      "solution": "Some translations legitimately have locale-specific keys (e.g., currency formats, date patterns). Add whitelist patterns or check key prefixes like 'locale.' to skip cultural adaptation keys from orphan detection."
+    },
+    {
+      "issue": "Completeness percentage incorrectly calculated for multi-level nested JSON",
+      "solution": "Script uses top-level key count but should count leaf nodes: jq '[paths(scalars)] | length'. Ensure both base and current files are counted at same nesting level for accurate percentage."
+    },
+    {
+      "issue": "Hook crashes with 'command not found: abs' on DIFF_PERCENT calculation",
+      "solution": "Bash doesn't have abs() function. Replace with: DIFF_PERCENT=$(( (TOTAL_KEYS - OTHER_KEY_COUNT) < 0 ? (OTHER_KEY_COUNT - TOTAL_KEYS) : (TOTAL_KEYS - OTHER_KEY_COUNT) )) or use bc: echo \"scale=0; sqrt(($A-$B)^2)\" | bc."
+    }
+  ],
   "source": "community"
 }

@@ -29,8 +29,24 @@
   },
   "troubleshooting": [
     {
-      "issue": "Fonts or rendering differ across OS",
-      "solution": "Embed fonts or use a containerized conversion with consistent fonts."
+      "issue": "Fonts or rendering differ between Windows and macOS",
+      "solution": "Embed fonts in the DOCX file or use containerized conversion (Docker with LibreOffice) to ensure consistent rendering."
+    },
+    {
+      "issue": "ModuleNotFoundError when trying to import python-docx",
+      "solution": "Install with pip install python-docx (note the hyphen), but import as 'import docx' without hyphen in Python code."
+    },
+    {
+      "issue": "Tables or images appear in wrong position after editing",
+      "solution": "Use explicit positioning with add_picture(width=Inches(2)) and table insertion after specific paragraphs, not floating objects."
+    },
+    {
+      "issue": "Cannot open generated DOCX file - corruption error",
+      "solution": "Ensure proper document structure: always save with doc.save(), avoid manual XML manipulation, validate sections are closed."
+    },
+    {
+      "issue": "AttributeError: Document has no attribute 'add_heading'",
+      "solution": "You're using wrong import. Use 'from docx import Document' not docxtpl. For templates use DocxTemplate, for new docs use Document."
     }
   ],
   "documentationUrl": "https://docxtpl.readthedocs.io/",

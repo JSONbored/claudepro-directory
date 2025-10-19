@@ -14,5 +14,27 @@
   "githubUrl": "https://github.com/facebook/react",
   "documentationUrl": "https://react.dev/reference/react",
   "source": "community",
-  "seoTitle": "React 19 Concurrent Features Specialist for Claude"
+  "seoTitle": "React 19 Concurrent Features Specialist for Claude",
+  "troubleshooting": [
+    {
+      "issue": "Rule suggests React 19 features for older versions",
+      "solution": "This rule assumes React 19+. For React 18, use() and useOptimistic aren't available - request 'Use React 18 compatible patterns' to get useTransition/useDeferredValue without newer hooks."
+    },
+    {
+      "issue": "Conflicts with Next.js performance architect rule",
+      "solution": "Both rules are complementary. Concurrent features rule covers React hooks (useTransition, Suspense); Next.js rule adds caching/routing. Use together for full-stack Next.js 15 + React 19 expertise."
+    },
+    {
+      "issue": "Suspense boundaries causing hydration mismatches",
+      "solution": "Check server/client component boundaries. Ask 'Debug Suspense hydration error' - rule verifies async components are Server Components and client boundaries use 'use client' directive correctly."
+    },
+    {
+      "issue": "useTransition not preventing UI blocking as expected",
+      "solution": "Verify expensive computation is inside startTransition callback. Request 'Review transition implementation' - rule checks urgent updates (inputs) are outside, non-urgent renders inside."
+    },
+    {
+      "issue": "How to verify concurrent rendering is working?",
+      "solution": "Ask 'Explain concurrent rendering behavior in this component' - rule analyzes transition usage, deferred values, and Suspense boundaries to confirm non-blocking rendering is properly configured."
+    }
+  ]
 }

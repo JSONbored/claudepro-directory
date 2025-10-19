@@ -25,6 +25,28 @@
     "Support both .ts and .tsx files",
     "Integration with existing TypeScript projects"
   ],
+  "troubleshooting": [
+    {
+      "issue": "tsc --noEmit checks entire project instead of single file",
+      "solution": "TypeScript follows imports checking dependencies. Add --skipLibCheck: 'tsc --noEmit --skipLibCheck \"$FILE_PATH\"' or use --isolatedModules for single-file validation without imports."
+    },
+    {
+      "issue": "Compilation fails with module resolution errors for node_modules",
+      "solution": "Missing @types packages or wrong moduleResolution. Install types: 'npm install --save-dev @types/node @types/react'. Set tsconfig: '\"moduleResolution\": \"node\"' or \"bundler\"."
+    },
+    {
+      "issue": "Hook shows success but VSCode still displays type errors",
+      "solution": "Different TS versions between CLI and editor. Check: 'npx tsc --version' vs VSCode version. Sync: install workspace TS: 'npm install --save-dev typescript@latest'. Restart VSCode."
+    },
+    {
+      "issue": "'any' type detection misses implicit any from missing type annotations",
+      "solution": "grep pattern only finds explicit ': any'. Enable noImplicitAny in tsconfig.json. Or check tsc output: parse 'implicitly has an any type' from compilation errors for complete detection."
+    },
+    {
+      "issue": "Project-wide health check freezes on large monorepos",
+      "solution": "Full tsc scans thousands of files. Skip or timeout: 'timeout 10 npx tsc --noEmit >/dev/null 2>&1' with exit code check. Or remove: comment out project compilation section."
+    }
+  ],
   "configuration": {
     "hookConfig": {
       "hooks": {

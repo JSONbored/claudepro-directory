@@ -54,5 +54,27 @@
   "compatibility": {
     "claudeDesktop": true,
     "claudeCode": true
-  }
+  },
+  "troubleshooting": [
+    {
+      "issue": "API Builder agent conflicts with existing test framework",
+      "solution": "Install items in the specified order: api-builder-agent first, then docs, generate-tests, debug. Run npm ls to verify no peer dependency conflicts between generated code and test framework."
+    },
+    {
+      "issue": "Documentation generation fails after installing debug command",
+      "solution": "Ensure all items share compatible Node.js versions. Check package.json engines field across agent and commands. Reinstall docs command after verifying Node 18+ is active."
+    },
+    {
+      "issue": "Missing test dependencies when using generate-tests command",
+      "solution": "Install testing framework before collection setup. Run npm install jest @types/jest or your preferred test runner. Then reinstall generate-tests command to detect framework."
+    },
+    {
+      "issue": "Installation order not followed causing endpoint conflicts",
+      "solution": "Uninstall all collection items using Claude Code settings. Reinstall strictly following installationOrder array: api-builder-agent, docs, generate-tests, debug. Restart Claude after each."
+    },
+    {
+      "issue": "Debug command cannot trace requests from API Builder agent",
+      "solution": "Enable request logging in API Builder agent settings first. Install debug command last to allow proper hook integration. Verify both items are enabled in Claude Code preferences."
+    }
+  ]
 }

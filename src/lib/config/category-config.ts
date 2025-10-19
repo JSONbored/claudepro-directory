@@ -11,27 +11,43 @@
  * - Tree-shakeable: Only imported categories included in bundle
  * - Validated: Zod schemas ensure correctness
  *
- * Used by:
+ * Registry Modernization (October 2025):
+ * ✅ ALL hardcoded category arrays eliminated across codebase
+ * ✅ Scripts now use getAllCategoryIds() for dynamic category discovery
+ * ✅ Service worker updated with all 11 categories (was missing jobs, changelog)
+ * ✅ Event generation fully registry-driven (removed ADDITIONAL_CONTENT_TYPES)
+ * ✅ Validation scripts modernized with dynamic metadata loading
+ * ✅ Build systems completely registry-driven (zero hardcoded paths)
+ *
+ * Current Categories (11):
+ * - agents, mcp, commands, rules, hooks, statuslines
+ * - collections, skills, guides, jobs, changelog
+ *
+ * Used by 50+ files:
  * - app/[category]/page.tsx (list pages)
  * - app/[category]/[slug]/page.tsx (detail pages)
- * - scripts/build-content.ts (build-time processing)
+ * - scripts/build/*.ts (build-time code generation)
+ * - scripts/validation/*.ts (content validation)
  * - lib/content-loaders.ts (dynamic content loading)
  * - lib/seo/* (metadata generation)
- * - lib/analytics/* (event mapping)
- * - And 30+ more locations (all auto-derived)
+ * - lib/analytics/* (event mapping & tracking)
+ * - public/service-worker.js (offline caching)
+ * - And 40+ more locations (all auto-derived)
  *
  * TO ADD A NEW CATEGORY:
  * 1. Add entry to UNIFIED_CATEGORY_REGISTRY below
  * 2. Create schema file: src/lib/schemas/content/{category}.schema.ts
  * 3. Add content: content/{category}/*.json
  * 4. Run: npm run build:content
- * That's it! Everything else auto-updates.
+ * That's it! Everything else auto-updates (scripts, routes, analytics, caching).
  */
 
 import type { z } from 'zod';
 import {
   BookOpen,
+  Briefcase,
   Code,
+  FileText,
   Layers,
   type LucideIcon,
   Sparkles,
@@ -47,7 +63,9 @@ import {
   type CommandContent,
   commandContentSchema,
 } from '@/src/lib/schemas/content/command.schema';
+import { type GuideContent, guideContentSchema } from '@/src/lib/schemas/content/guide.schema';
 import { type HookContent, hookContentSchema } from '@/src/lib/schemas/content/hook.schema';
+import { type Job, jobSchema } from '@/src/lib/schemas/content/job.schema';
 import { type McpContent, mcpContentSchema } from '@/src/lib/schemas/content/mcp.schema';
 import { type RuleContent, ruleContentSchema } from '@/src/lib/schemas/content/rule.schema';
 import { type SkillContent, skillContentSchema } from '@/src/lib/schemas/content/skill.schema';
@@ -55,8 +73,6 @@ import {
   type StatuslineContent,
   statuslineContentSchema,
 } from '@/src/lib/schemas/content/statusline.schema';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
-
 /**
  * Content type discriminated union
  * Modern TypeScript pattern for type-safe content handling
@@ -69,7 +85,9 @@ export type ContentType =
   | RuleContent
   | StatuslineContent
   | CollectionContent
-  | SkillContent;
+  | SkillContent
+  | GuideContent
+  | Job;
 
 /**
  * Unified Category Configuration Interface
@@ -82,10 +100,13 @@ export type ContentType =
  * - All properties remain strongly typed
  * - Used by build scripts, UI components, SEO, analytics, and more
  */
-export interface UnifiedCategoryConfig<T extends ContentType = ContentType> {
+export interface UnifiedCategoryConfig<
+  T extends ContentType = ContentType,
+  TId extends string = string,
+> {
   // ===== IDENTITY =====
-  /** Category identifier (must match ContentCategory type) */
-  readonly id: ContentCategory;
+  /** Category identifier - type-safe literal from UNIFIED_CATEGORY_REGISTRY keys */
+  readonly id: TId;
 
   // ===== DISPLAY PROPERTIES =====
   title: string; // Singular display name
@@ -161,40 +182,6 @@ export interface UnifiedCategoryConfig<T extends ContentType = ContentType> {
 }
 
 /**
- * Legacy CategoryConfig interface for backward compatibility
- * @deprecated Use UnifiedCategoryConfig instead
- */
-export interface CategoryConfig {
-  title: string;
-  pluralTitle: string;
-  description: string;
-  icon: LucideIcon;
-  keywords: string;
-  metaDescription: string;
-  listPage: {
-    searchPlaceholder: string;
-    badges: Array<{
-      icon?: string;
-      text: string | ((count: number) => string);
-    }>;
-    emptyStateMessage?: string;
-  };
-  detailPage: {
-    displayConfig: boolean;
-    configFormat: 'json' | 'multi' | 'hook';
-    sections?: Array<{
-      id: string;
-      title: string;
-      order: number;
-      customRenderer?: string;
-    }>;
-  };
-  urlSlug: string;
-  contentLoader: string;
-  [key: string]: unknown;
-}
-
-/**
  * ============================================
  * UNIFIED CATEGORY REGISTRY - SINGLE SOURCE OF TRUTH
  * ============================================
@@ -207,7 +194,7 @@ export interface CategoryConfig {
  */
 export const UNIFIED_CATEGORY_REGISTRY = {
   agents: {
-    id: 'agents' as ContentCategory,
+    id: 'agents',
     title: 'AI Agent',
     pluralTitle: 'AI Agents',
     description:
@@ -262,7 +249,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   mcp: {
-    id: 'mcp' as ContentCategory,
+    id: 'mcp',
     title: 'MCP Server',
     pluralTitle: 'MCP Servers',
     description:
@@ -313,7 +300,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   commands: {
-    id: 'commands' as ContentCategory,
+    id: 'commands',
     title: 'Command',
     pluralTitle: 'Commands',
     description:
@@ -364,7 +351,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   rules: {
-    id: 'rules' as ContentCategory,
+    id: 'rules',
     title: 'Rule',
     pluralTitle: 'Rules',
     description: "Custom rules to guide Claude's behavior and responses in your projects.",
@@ -414,7 +401,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   hooks: {
-    id: 'hooks' as ContentCategory,
+    id: 'hooks',
     title: 'Hook',
     pluralTitle: 'Hooks',
     description: 'Event-driven automation hooks that trigger during Claude Code operations.',
@@ -464,7 +451,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   statuslines: {
-    id: 'statuslines' as ContentCategory,
+    id: 'statuslines',
     title: 'Statusline',
     pluralTitle: 'Statuslines',
     description:
@@ -525,7 +512,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   collections: {
-    id: 'collections' as ContentCategory,
+    id: 'collections',
     title: 'Collection',
     pluralTitle: 'Collections',
     description:
@@ -585,7 +572,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
   },
 
   skills: {
-    id: 'skills' as ContentCategory,
+    id: 'skills',
     title: 'Skill',
     pluralTitle: 'Skills',
     description:
@@ -594,7 +581,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     colorScheme: 'emerald-500',
     keywords: 'Claude skills, document processing, pdf, docx, pptx, xlsx, how-to, examples',
     metaDescription:
-      'Practical Claude Skills for October 2025: PDF/DOCX/PPTX/XLSX workflows with exact dependencies, copy-pasteable code examples, and troubleshooting.',
+      'Practical Claude Skills for October 2025: PDF/DOCX/PPTX/XLSX workflows with exact dependencies, copy-pasteable code examples, and troubleshooting guides.',
     schema: skillContentSchema,
     typeName: 'SkillContent',
     generateFullContent: true,
@@ -640,6 +627,154 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     urlSlug: 'skills',
     contentLoader: 'skills',
   },
+
+  guides: {
+    id: 'guides',
+    title: 'Guide',
+    pluralTitle: 'Guides',
+    description:
+      'Comprehensive guides, tutorials, comparisons, and workflows for Claude. SEO-optimized content covering best practices, use cases, and troubleshooting.',
+    icon: FileText,
+    colorScheme: 'blue-500',
+    keywords:
+      'Claude guides, tutorials, comparisons, workflows, use cases, troubleshooting, best practices',
+    metaDescription:
+      'Expert Claude guides for October 2025: In-depth tutorials, feature comparisons, workflow automation, use case examples, troubleshooting, and best practices.',
+    schema: guideContentSchema,
+    typeName: 'GuideContent',
+    generateFullContent: true,
+    metadataFields: [
+      'slug',
+      'title',
+      'seoTitle',
+      'description',
+      'author',
+      'tags',
+      'category',
+      'subcategory',
+      'dateAdded',
+      'source',
+      'keywords',
+      'difficulty',
+      'readingTime',
+    ] as const,
+    buildConfig: {
+      batchSize: 10,
+      enableCache: true,
+      cacheTTL: 5 * 60 * 1000,
+    },
+    apiConfig: {
+      generateStaticAPI: true,
+      includeTrending: true,
+      maxItemsPerResponse: 1000,
+    },
+    listPage: {
+      searchPlaceholder: 'Search guides...',
+      badges: [
+        { icon: 'file-text', text: (count: number) => `${count} Guides Available` },
+        { text: 'SEO Optimized' },
+        { text: 'Expert Content' },
+      ],
+    },
+    detailPage: {
+      displayConfig: false,
+      configFormat: 'json' as const,
+      sections: [
+        { id: 'content', title: 'Guide Content', order: 1 },
+        { id: 'related', title: 'Related Guides', order: 2 },
+      ],
+    },
+    urlSlug: 'guides',
+    contentLoader: 'guides',
+  },
+
+  jobs: {
+    id: 'jobs',
+    title: 'Job',
+    pluralTitle: 'Jobs',
+    description:
+      'AI and Claude-related job listings. Find opportunities in AI development, prompt engineering, and Claude integration.',
+    icon: Briefcase,
+    colorScheme: 'indigo-500',
+    keywords: 'AI jobs, Claude jobs, prompt engineering, AI development, remote AI jobs',
+    metaDescription:
+      'AI job board for October 2025: Claude-related positions, prompt engineering roles, AI development opportunities. Remote and on-site positions available.',
+    schema: jobSchema,
+    typeName: 'Job',
+    generateFullContent: false,
+    metadataFields: [
+      'id',
+      'slug',
+      'title',
+      'company',
+      'location',
+      'type',
+      'remote',
+      'salary',
+      'posted_at',
+    ] as const,
+    buildConfig: {
+      batchSize: 20,
+      enableCache: true,
+      cacheTTL: 2 * 60 * 1000,
+    },
+    apiConfig: {
+      generateStaticAPI: true,
+      includeTrending: false,
+      maxItemsPerResponse: 100,
+    },
+    listPage: {
+      searchPlaceholder: 'Search jobs...',
+      badges: [
+        { icon: 'briefcase', text: (count: number) => `${count} Open Positions` },
+        { text: 'Remote Available' },
+        { text: 'Updated Daily' },
+      ],
+    },
+    detailPage: {
+      displayConfig: false,
+      configFormat: 'json' as const,
+    },
+    urlSlug: 'jobs',
+    contentLoader: 'jobs',
+  },
+
+  changelog: {
+    id: 'changelog',
+    title: 'Changelog',
+    pluralTitle: 'Changelog',
+    description:
+      'Product updates, new features, and improvements to the Claude Pro Directory platform.',
+    icon: FileText,
+    colorScheme: 'slate-500',
+    keywords: 'changelog, updates, new features, improvements, release notes',
+    metaDescription:
+      'Claude Pro Directory changelog for October 2025: Latest features, improvements, bug fixes, platform updates, new integrations, and performance enhancements.',
+    schema: guideContentSchema, // Reuse guide schema (changelog is markdown content)
+    typeName: 'GuideContent',
+    generateFullContent: true,
+    metadataFields: ['slug', 'title', 'description', 'dateAdded'] as const,
+    buildConfig: {
+      batchSize: 5,
+      enableCache: true,
+      cacheTTL: 10 * 60 * 1000,
+    },
+    apiConfig: {
+      generateStaticAPI: false,
+      includeTrending: false,
+      maxItemsPerResponse: 50,
+    },
+    listPage: {
+      searchPlaceholder: 'Search changelog...',
+      badges: [{ icon: 'file-text', text: 'Release History' }, { text: 'Product Updates' }],
+    },
+    detailPage: {
+      displayConfig: false,
+      configFormat: 'json' as const,
+    },
+    urlSlug: 'changelog',
+    contentLoader: 'changelog',
+  },
 } as const satisfies Record<string, UnifiedCategoryConfig>;
 
 /**
@@ -651,146 +786,35 @@ export type UnifiedCategoryConfigValue = (typeof UNIFIED_CATEGORY_REGISTRY)[Cate
 
 /**
  * ============================================
- * DERIVED EXPORTS (Backward Compatibility)
- * ============================================
- *
- * These maintain existing APIs while using the unified registry internally.
- * Legacy code continues working unchanged.
- */
-
-/**
- * Legacy CATEGORY_CONFIGS export
- * Derives UI-only fields from unified registry for backward compatibility
- */
-export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = Object.fromEntries(
-  Object.entries(UNIFIED_CATEGORY_REGISTRY).map(([key, config]) => [
-    key,
-    {
-      title: config.title,
-      pluralTitle: config.pluralTitle,
-      description: config.description,
-      icon: config.icon,
-      keywords: config.keywords,
-      metaDescription: config.metaDescription,
-      listPage: config.listPage,
-      detailPage: config.detailPage,
-      urlSlug: config.urlSlug,
-      contentLoader: config.contentLoader,
-    },
-  ])
-) as Record<string, CategoryConfig>;
-
-/**
- * BUILD_CATEGORY_CONFIGS export
- * Derives build-only fields from unified registry
- * Replaces the old build-category-config.ts file (now deprecated)
- */
-export const BUILD_CATEGORY_CONFIGS = Object.fromEntries(
-  Object.entries(UNIFIED_CATEGORY_REGISTRY).map(([key, config]) => [
-    key,
-    {
-      id: config.id,
-      name: config.pluralTitle,
-      schema: config.schema,
-      typeName: config.typeName,
-      generateFullContent: config.generateFullContent,
-      metadataFields: config.metadataFields,
-      buildConfig: config.buildConfig,
-      apiConfig: config.apiConfig,
-    },
-  ])
-) as Record<
-  string,
-  {
-    id: ContentCategory;
-    name: string;
-    schema: z.ZodType<ContentType>;
-    typeName: string;
-    generateFullContent: boolean;
-    metadataFields: ReadonlyArray<string>;
-    buildConfig: {
-      batchSize: number;
-      enableCache: boolean;
-      cacheTTL: number;
-    };
-    apiConfig: {
-      generateStaticAPI: boolean;
-      includeTrending: boolean;
-      maxItemsPerResponse: number;
-    };
-  }
->;
-
-/**
- * Type-safe build category ID union
- * @deprecated Import CategoryId instead (they're now the same)
- */
-export type BuildCategoryId = CategoryId;
-
-/**
- * ============================================
  * HELPER FUNCTIONS
  * ============================================
  */
 
 /**
  * Get valid category slugs for routing validation
+ *
+ * @architecture DERIVED FROM REGISTRY
+ * Uses Object.keys() to dynamically extract category IDs from UNIFIED_CATEGORY_REGISTRY.
+ * TypeScript types this as string[] by default, but we know these are CategoryId values.
+ *
+ * This is the ONE acceptable cast in the entire system because:
+ * 1. Object.keys() ALWAYS returns the registry keys
+ * 2. CategoryId is derived from registry keys via `keyof typeof UNIFIED_CATEGORY_REGISTRY`
+ * 3. Therefore the cast is safe by construction - the runtime value matches the type
+ *
+ * All other code should use isValidCategory() type guard or iterate this array - NO OTHER CASTS.
  */
-export const VALID_CATEGORIES = Object.keys(UNIFIED_CATEGORY_REGISTRY);
+export const VALID_CATEGORIES = Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[];
 
 /**
  * Get category config by URL slug
+ * Returns unified category configuration from UNIFIED_CATEGORY_REGISTRY
  */
-export function getCategoryConfig(slug: string): CategoryConfig | null {
-  return CATEGORY_CONFIGS[slug] || null;
-}
-
-/**
- * Get unified category config by URL slug (includes build metadata)
- */
-export function getUnifiedCategoryConfig(slug: string): UnifiedCategoryConfigValue | null {
-  return UNIFIED_CATEGORY_REGISTRY[slug as CategoryId] || null;
-}
-
-/**
- * Get build category config (build-specific fields only)
- * Replaces getBuildCategoryConfig from old build-category-config.ts
- */
-export function getBuildCategoryConfig<T extends CategoryId>(
-  categoryId: T
-): (typeof BUILD_CATEGORY_CONFIGS)[T] {
-  const config = BUILD_CATEGORY_CONFIGS[categoryId];
-  if (!config) {
-    throw new Error(`Unknown category ID: ${categoryId}`);
+export function getCategoryConfig(slug: string): UnifiedCategoryConfigValue | null {
+  if (!isValidCategory(slug)) {
+    return null;
   }
-  return config;
-}
-
-/**
- * Get all build category configs as array
- * Replaces getAllBuildCategoryConfigs from old build-category-config.ts
- */
-export function getAllBuildCategoryConfigs(): Array<(typeof BUILD_CATEGORY_CONFIGS)[CategoryId]> {
-  return Object.values(BUILD_CATEGORY_CONFIGS);
-}
-
-/**
- * Extract metadata from content item
- * Moved from build-category-config.ts for consolidation
- */
-export function extractMetadata(
-  content: ContentType,
-  config: (typeof BUILD_CATEGORY_CONFIGS)[CategoryId]
-): Record<string, unknown> {
-  const metadata: Record<string, unknown> = {};
-
-  for (const field of config.metadataFields) {
-    if (Object.hasOwn(content, field)) {
-      metadata[field as string] = content[field as keyof ContentType];
-    }
-  }
-
-  return metadata;
+  return UNIFIED_CATEGORY_REGISTRY[slug];
 }
 
 /**
@@ -802,10 +826,17 @@ export function isValidCategory(category: string): category is CategoryId {
 
 /**
  * Get all category IDs as array
+ *
+ * @returns Array of all category IDs from UNIFIED_CATEGORY_REGISTRY
+ *
+ * @architecture Just returns VALID_CATEGORIES (which is Object.keys(registry))
  */
 export function getAllCategoryIds(): CategoryId[] {
-  return Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[];
+  return VALID_CATEGORIES;
 }
+
+// REMOVED: Registry validation check - no longer needed
+// Schema is now derived from registry, so they're always in sync by definition
 
 /**
  * Homepage-specific category configurations
@@ -876,57 +907,4 @@ export function getCategoryStatsConfig(): readonly CategoryStatsConfig[] {
       delay: index * 100, // Stagger animations by 100ms
     };
   });
-}
-
-/**
- * ============================================
- * RE-EXPORTED TYPES (from old build-category-config.ts)
- * ============================================
- */
-
-/**
- * Build category configuration type (for generic usage in category-processor)
- */
-export interface BuildCategoryConfig<T extends ContentType = ContentType> {
-  readonly id: ContentCategory;
-  readonly name: string;
-  readonly schema: z.ZodType<T>;
-  readonly typeName: string;
-  readonly generateFullContent: boolean;
-  readonly metadataFields: ReadonlyArray<string>;
-  readonly buildConfig: {
-    readonly batchSize: number;
-    readonly enableCache: boolean;
-    readonly cacheTTL: number;
-  };
-  readonly apiConfig: {
-    readonly generateStaticAPI: boolean;
-    readonly includeTrending: boolean;
-    readonly maxItemsPerResponse: number;
-  };
-}
-
-/**
- * Performance metrics for build operations
- */
-export interface BuildMetrics {
-  readonly category: CategoryId;
-  readonly filesProcessed: number;
-  readonly filesValid: number;
-  readonly filesInvalid: number;
-  readonly processingTimeMs: number;
-  readonly cacheHitRate: number;
-  readonly peakMemoryMB: number;
-}
-
-/**
- * Build result with metrics
- */
-export interface CategoryBuildResult {
-  readonly category: CategoryId;
-  readonly success: boolean;
-  readonly items: readonly ContentType[];
-  readonly metadata: readonly Record<string, unknown>[];
-  readonly metrics: BuildMetrics;
-  readonly errors: readonly Error[];
 }

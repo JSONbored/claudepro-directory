@@ -63,20 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Check Zap status (on/off)",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Task limit exceeded or Zap throttled without clear error",
+      "solution": "Check Dashboard > Usage for daily/monthly task quotas. Each action counts as one task. Zaps throttled if exceeding plan limits or burst thresholds. Add Delay after Queue step to manage rate. Upgrade plan for higher limits."
     },
     {
-      "issue": "Verify app connections",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "API rate limit errors from connected apps",
+      "solution": "Check app-specific API usage limits in Zap History. Batch tasks where possible. Implement delays between steps (Delay action). Upgrade app plan if hitting external service limits. Use webhooks instead of polling triggers."
     },
     {
-      "issue": "Monitor task usage limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Zap fails with authentication or connection errors",
+      "solution": "Use Zap History to inspect failed tasks and error codes. Reauthenticate accounts if credentials expired. Check app connection status in My Apps. Verify OAuth redirect URLs correct. Test connection with sample trigger."
     },
     {
-      "issue": "Review error logs",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Data formatting or missing field errors in multi-step Zaps",
+      "solution": "Check payloads in Zap History for missing/malformed data. Use Formatter to transform data between steps. Verify required fields mapped correctly. Test each step individually. Enable detailed logging for debugging."
     }
   ],
   "examples": [

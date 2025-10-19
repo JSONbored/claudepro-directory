@@ -28,5 +28,27 @@
     "Automating resource allocation based on usage pattern analysis",
     "Continuous security scanning with intelligent vulnerability prioritization"
   ],
+  "troubleshooting": [
+    {
+      "issue": "AI anomaly detection model producing excessive false positive alerts",
+      "solution": "Retrain baseline model with larger historical dataset including edge cases. Adjust contamination parameter in IsolationForest to 0.05-0.1 range. Implement alert suppression with time-based windowing. Use ensemble methods combining multiple detection algorithms."
+    },
+    {
+      "issue": "Self-healing automation triggering unintended cascading service restarts",
+      "solution": "Add circuit breaker to limit remediation attempts per time window. Implement dependency graph to prevent simultaneous service disruptions. Use canary validation before full remediation rollout. Configure human-in-the-loop approval for critical services."
+    },
+    {
+      "issue": "GitHub Actions CI pipeline failing with AI test selection missing critical tests",
+      "solution": "Fallback to full test suite when git diff exceeds threshold. Include integration tests in AI selection algorithm training data. Monitor test failure rates and retrain selection model monthly. Add manual override flag for comprehensive test runs."
+    },
+    {
+      "issue": "Prometheus metrics causing memory spikes in AI prediction service",
+      "solution": "Implement metric downsampling with recording rules for historical data. Use streaming algorithms instead of loading full datasets. Configure memory limits in deployment with resource.limits.memory. Add garbage collection tuning with GOGC environment variable."
+    },
+    {
+      "issue": "Container vulnerability scanner blocking deployments for low-risk CVEs",
+      "solution": "Configure Trivy severity threshold to HIGH and CRITICAL only. Whitelist known false positives in .trivyignore file. Implement risk scoring based on exploit availability and network exposure. Set up scheduled scans instead of blocking pipelines."
+    }
+  ],
   "source": "community"
 }

@@ -14,5 +14,27 @@
   "githubUrl": "https://github.com/vercel/next.js",
   "documentationUrl": "https://nextjs.org/docs",
   "source": "community",
-  "seoTitle": "Next.js 15 Performance Architect for Claude"
+  "seoTitle": "Next.js 15 Performance Architect for Claude",
+  "troubleshooting": [
+    {
+      "issue": "Rule applies performance patterns to non-Next.js apps",
+      "solution": "This rule is Next.js 15-specific with Turbopack, PPR, and App Router patterns. For vanilla React or other frameworks, use react-expert or framework-specific rules instead."
+    },
+    {
+      "issue": "Conflicts with React Server Components expert rule",
+      "solution": "Both rules complement each other. Performance architect focuses on caching/optimization; RSC expert covers component patterns. Use together for full Next.js 15 expertise - no override needed."
+    },
+    {
+      "issue": "Not getting Turbopack-specific optimizations",
+      "solution": "Mention 'Turbopack' or 'build performance' explicitly. Rule assumes Turbopack by default in Next.js 15 but can provide webpack configs if you specify legacy bundler usage."
+    },
+    {
+      "issue": "PPR patterns suggested when I'm not using experimental",
+      "solution": "Partial Prerendering requires experimental_ppr flag. Ask 'Is PPR enabled in my config?' - rule checks context and suggests stable alternatives if PPR isn't configured in your setup."
+    },
+    {
+      "issue": "How to verify performance optimizations are applied?",
+      "solution": "Request 'Audit current caching strategy and Web Vitals setup' to see active optimizations. Rule analyzes fetch calls, image usage, and Suspense boundaries for performance verification."
+    }
+  ]
 }

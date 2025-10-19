@@ -15,17 +15,17 @@ import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
 import './globals.css';
 import { Toaster } from 'sonner';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { ErrorBoundary } from '@/src/components/infra/error-boundary';
+import { PerformanceOptimizer } from '@/src/components/infra/performance-optimizer';
+import { PostCopyEmailProvider } from '@/src/components/infra/providers/post-copy-email-provider';
+import { PwaInstallTracker } from '@/src/components/infra/pwa-install-tracker';
+import { OrganizationStructuredData } from '@/src/components/infra/structured-data/organization-schema';
 import { AnnouncementBanner } from '@/src/components/layout/announcement-banner';
 import { Footer } from '@/src/components/layout/footer';
 import { Navigation } from '@/src/components/layout/navigation';
-import { PostCopyEmailProvider } from '@/src/components/providers/post-copy-email-provider';
-import { ErrorBoundary } from '@/src/components/shared/error-boundary';
-import { FooterNewsletterBar } from '@/src/components/shared/footer-newsletter-bar';
-import { PerformanceOptimizer } from '@/src/components/shared/performance-optimizer';
-import { PwaInstallTracker } from '@/src/components/shared/pwa-install-tracker';
 import { StructuredData } from '@/src/components/shared/structured-data';
 import { UmamiScript } from '@/src/components/shared/umami-script';
-import { OrganizationStructuredData } from '@/src/components/structured-data/organization-schema';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
@@ -188,7 +188,7 @@ export default async function RootLayout({
               </div>
             </ErrorBoundary>
             <Toaster />
-            <FooterNewsletterBar />
+            <UnifiedNewsletterCapture variant="footer-bar" source="footer" />
           </PostCopyEmailProvider>
         </ThemeProvider>
         <PerformanceOptimizer />

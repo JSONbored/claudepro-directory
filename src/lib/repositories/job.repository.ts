@@ -457,7 +457,7 @@ export class JobRepository extends CachedRepository<Job, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data as unknown as Job);
+        this.setCache(cacheKey, data);
       }
 
       return data || [];

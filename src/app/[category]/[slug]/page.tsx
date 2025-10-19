@@ -60,16 +60,15 @@
  */
 
 import { notFound } from 'next/navigation';
-import { PageViewTracker } from '@/src/components/shared/page-view-tracker';
-import { ViewTracker } from '@/src/components/shared/view-tracker';
-import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
-import { UnifiedStructuredData } from '@/src/components/structured-data/unified-structured-data';
-import { UnifiedDetailPage } from '@/src/components/unified-detail-page';
-import { CollectionDetailView } from '@/src/components/unified-detail-page/collection-detail-view';
+import { UnifiedDetailPage } from '@/src/components/content/unified-detail-page';
+import { CollectionDetailView } from '@/src/components/content/unified-detail-page/collection-detail-view';
+import { BreadcrumbSchema } from '@/src/components/infra/structured-data/breadcrumb-schema';
+import { UnifiedStructuredData } from '@/src/components/infra/structured-data/unified-structured-data';
+import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 import { statsRedis } from '@/src/lib/cache.server';
 import {
-  getCategoryConfig,
   isValidCategory,
+  UNIFIED_CATEGORY_REGISTRY,
   VALID_CATEGORIES,
 } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -82,7 +81,6 @@ import {
 import { logger } from '@/src/lib/logger';
 import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { batchFetch } from '@/src/lib/utils/batch.utils';
 
 /**
  * Dynamic Rendering (No ISR)
@@ -151,9 +149,9 @@ export async function generateStaticParams() {
  * @example
  * // For /agents/code-reviewer-agent route:
  * // {
- * //   title: "Code Reviewer Agent - AI Agent | Claude Pro Directory",
+ * //   title: "Code Reviewer Agent - Agents - Claude Pro Directory",
  * //   description: "Specialized agent for reviewing code quality...",
- * //   keywords: "code review, AI agent, Claude Code",
+ * //   keywords: ["code", "review", "ai", "agent", "claude"],
  * //   openGraph: { title, description, type: 'article', ... },
  * //   twitter: { card: 'summary_large_image', ... }
  * // }
@@ -165,9 +163,16 @@ export async function generateMetadata({
 }) {
   const { category, slug } = await params;
 
+  // Validate category at compile time
+  if (!isValidCategory(category)) {
+    return generatePageMetadata('/:category/:slug', {
+      params: { category, slug },
+    });
+  }
+
   // Load item and category config for metadata generation
   const itemMeta = await getContentBySlug(category, slug);
-  const config = getCategoryConfig(category);
+  const config = UNIFIED_CATEGORY_REGISTRY[category];
 
   return generatePageMetadata('/:category/:slug', {
     params: { category, slug },
@@ -235,7 +240,7 @@ export default async function DetailPage({
     notFound();
   }
 
-  const config = getCategoryConfig(category);
+  const config = UNIFIED_CATEGORY_REGISTRY[category];
   if (!config) {
     notFound();
   }
@@ -254,15 +259,12 @@ export default async function DetailPage({
     notFound();
   }
 
-  // Parallel fetch: Load full content, related items, and view count simultaneously (30-40ms gain)
-  // Using batchFetch for type-safe parallel execution instead of sequential awaits
-  const [fullItem, relatedItemsData, viewCount] = await batchFetch([
-    getFullContentBySlug(category, slug),
-    getRelatedContent(category, slug, 3),
-    statsRedis.getViewCount(category, slug),
-  ] as const);
-
+  // Optimized fetch strategy: Load critical content first, stream supplementary data
+  // Main content is loaded immediately for fastest initial render
+  const fullItem = await getFullContentBySlug(category, slug);
   const itemData = fullItem || itemMeta;
+
+  // Related items and view count will be streamed via Suspense boundaries
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles
@@ -271,34 +273,23 @@ export default async function DetailPage({
   if (category === 'collections') {
     return (
       <>
-        <ViewTracker
-          category={
-            category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides' | 'skills'
-          }
-          slug={slug}
+        <UnifiedTracker variant="view" category={category} slug={slug} />
+        <UnifiedTracker variant="page-view" category={category} slug={slug} />
+        <UnifiedStructuredData
+          item={itemData as Parameters<typeof UnifiedStructuredData>[0]['item']}
         />
-        <PageViewTracker category={category} slug={slug} />
-        {
-          await UnifiedStructuredData({
-            item: itemData as Parameters<typeof UnifiedStructuredData>[0]['item'],
-          })
-        }
-        {
-          await (
-            <BreadcrumbSchema
-              items={[
-                {
-                  name: config.title || category,
-                  url: `${APP_CONFIG.url}/${category}`,
-                },
-                {
-                  name: itemData.displayTitle || itemData.title || slug,
-                  url: `${APP_CONFIG.url}/${category}/${slug}`,
-                },
-              ]}
-            />
-          )
-        }
+        <BreadcrumbSchema
+          items={[
+            {
+              name: config.title || category,
+              url: `${APP_CONFIG.url}/${category}`,
+            },
+            {
+              name: itemData.displayTitle || itemData.title || slug,
+              url: `${APP_CONFIG.url}/${category}/${slug}`,
+            },
+          ]}
+        />
         <CollectionDetailView collection={itemData as CollectionContent} />
       </>
     );
@@ -307,35 +298,28 @@ export default async function DetailPage({
   // Default rendering: All other categories use UnifiedDetailPage
   return (
     <>
-      <ViewTracker
-        category={
-          category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides' | 'skills'
-        }
-        slug={slug}
+      <UnifiedTracker variant="view" category={category} slug={slug} />
+      <UnifiedTracker variant="page-view" category={category} slug={slug} />
+      <UnifiedStructuredData
+        item={itemData as Parameters<typeof UnifiedStructuredData>[0]['item']}
       />
-      <PageViewTracker category={category} slug={slug} />
-      {
-        await UnifiedStructuredData({
-          item: itemData as Parameters<typeof UnifiedStructuredData>[0]['item'],
-        })
-      }
-      {
-        await (
-          <BreadcrumbSchema
-            items={[
-              {
-                name: config.title || category,
-                url: `${APP_CONFIG.url}/${category}`,
-              },
-              {
-                name: itemData.displayTitle || itemData.title || slug,
-                url: `${APP_CONFIG.url}/${category}/${slug}`,
-              },
-            ]}
-          />
-        )
-      }
-      <UnifiedDetailPage item={itemData} relatedItems={relatedItemsData} viewCount={viewCount} />
+      <BreadcrumbSchema
+        items={[
+          {
+            name: config.title || category,
+            url: `${APP_CONFIG.url}/${category}`,
+          },
+          {
+            name: itemData.displayTitle || itemData.title || slug,
+            url: `${APP_CONFIG.url}/${category}/${slug}`,
+          },
+        ]}
+      />
+      <UnifiedDetailPage
+        item={itemData}
+        relatedItemsPromise={getRelatedContent(category, slug, 3)}
+        viewCountPromise={statsRedis.getViewCount(category, slug)}
+      />
     </>
   );
 }

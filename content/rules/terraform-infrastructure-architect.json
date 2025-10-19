@@ -14,5 +14,27 @@
   "githubUrl": "https://github.com/hashicorp/terraform",
   "documentationUrl": "https://www.terraform.io/docs",
   "source": "community",
-  "seoTitle": "Terraform Infrastructure Architect for Claude"
+  "seoTitle": "Terraform Infrastructure Architect for Claude",
+  "troubleshooting": [
+    {
+      "issue": "State lock acquisition timeout errors",
+      "solution": "Check DynamoDB table for stuck locks with LockID entries. Force-unlock with terraform force-unlock <LOCK_ID> after confirming no concurrent runs. Implement lock expiration with TTL. Verify IAM permissions for state bucket and lock table."
+    },
+    {
+      "issue": "Module source reference not resolving",
+      "solution": "Use explicit version constraints with source = 'registry/module' version = '~> 1.0'. Clear module cache with rm -rf .terraform/modules. For local modules, verify relative paths. Check network access for registry.terraform.io."
+    },
+    {
+      "issue": "Provider version conflicts across modules",
+      "solution": "Define required_providers in root module with version constraints. Use terraform providers lock to generate lockfile. Run terraform init -upgrade to update. Check module compatibility matrix in documentation."
+    },
+    {
+      "issue": "Sensitive values appearing in logs/state",
+      "solution": "Mark variables with sensitive = true. Use nonsensitive() only when safe. Enable encryption for state backend (S3 with KMS). Configure .gitignore for *.tfvars. Review state file for leaked credentials and rotate if found."
+    },
+    {
+      "issue": "Drift detection showing unexpected changes",
+      "solution": "Run terraform refresh to sync state with reality. Use lifecycle ignore_changes for externally modified attributes. Check for manual console changes. Implement drift detection automation with terraform plan -detailed-exitcode in CI."
+    }
+  ]
 }

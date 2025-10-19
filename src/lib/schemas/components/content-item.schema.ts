@@ -2,6 +2,8 @@
  * Master Component Content Schema
  * This creates a unified interface for components that includes ALL possible properties
  * from all content types, with proper optional handling for TypeScript strict mode
+ *
+ * MODERNIZATION: Uses registry-driven categoryIdSchema throughout
  */
 
 import { z } from 'zod';
@@ -14,6 +16,7 @@ import {
   mcpServerTypeSchema,
   statuslineTypeSchema,
 } from '@/src/lib/schemas/primitives/content-enums';
+import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Unified content item schema for components
@@ -25,28 +28,9 @@ export const unifiedContentItemSchema = z
     // Base properties (common to all content types)
     slug: z.string().describe('Unique URL-friendly identifier for the content item'),
     description: z.string().describe('Brief summary or overview of the content item'),
-    category: z
-      .enum([
-        'agents',
-        'mcp',
-        'rules',
-        'commands',
-        'hooks',
-        'skills',
-        'guides',
-        'jobs',
-        'statuslines',
-        // Guide subcategories from guide.schema.ts
-        'tutorials',
-        'comparisons',
-        'troubleshooting',
-        'use-cases',
-        'workflows',
-        'categories',
-        'collections',
-        'changelog',
-      ])
-      .describe('Content type category or subcategory for classification and filtering'),
+    category: categoryIdSchema.describe(
+      'Content type category for classification and filtering. Derived from UNIFIED_CATEGORY_REGISTRY.'
+    ),
     subcategory: z
       .enum(['tutorials', 'comparisons', 'workflows', 'use-cases', 'troubleshooting'])
       .optional()
@@ -107,6 +91,22 @@ export const unifiedContentItemSchema = z
       .enum(['community', 'official', 'verified', 'claudepro'])
       .optional()
       .describe('Origin or verification status of the content'),
+
+    // Related content specific properties (added for RelatedContentItem compatibility)
+    score: z.number().optional().describe('Relevance score for related content matching (0-100)'),
+    matchType: z
+      .string()
+      .optional()
+      .describe(
+        'Type of matching algorithm used for related content (e.g., same_category, tag_match, keyword_match, trending)'
+      ),
+    matchDetails: z
+      .object({
+        matchedTags: stringArray.describe('Tags that matched with source content'),
+        matchedKeywords: stringArray.describe('Keywords that matched with source content'),
+      })
+      .optional()
+      .describe('Detailed match information for related content'),
 
     // Features and capabilities
     features: stringArray.optional().describe('List of key features or capabilities provided'),
@@ -295,9 +295,9 @@ export const unifiedContentItemSchema = z
     items: z
       .array(
         z.object({
-          category: z
-            .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'])
-            .describe('Content category of the referenced item'),
+          category: categoryIdSchema.describe(
+            'Content category of the referenced item (registry-driven, supports all 11 categories)'
+          ),
           slug: z.string().describe('URL slug of the referenced item'),
           reason: z.string().optional().describe('Why this item is included in the collection'),
         })

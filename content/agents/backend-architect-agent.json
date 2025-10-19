@@ -28,5 +28,27 @@
     "Creating secure multi-tenant SaaS backend infrastructures",
     "Optimizing database performance for high-traffic applications"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Microservices experiencing cascading failures across service mesh",
+      "solution": "Implement circuit breaker pattern with Hystrix or Resilience4j. Add retry limits with exponential backoff. Configure health checks in nginx upstream blocks. Deploy bulkhead isolation to prevent resource exhaustion."
+    },
+    {
+      "issue": "Docker containers running out of memory in production environment",
+      "solution": "Set memory limits in docker-compose.yml with deploy.resources. Monitor with docker stats and identify memory leaks. Increase NODE_OPTIONS --max-old-space-size for Node.js. Configure swap limits to prevent OOM killer."
+    },
+    {
+      "issue": "RabbitMQ message queue experiencing high latency and dropped messages",
+      "solution": "Increase prefetch_count to process messages in batches. Add dead letter exchange for failed messages. Configure message TTL and queue length limits. Scale consumers horizontally with auto-ack disabled."
+    },
+    {
+      "issue": "API gateway rate limiting blocking legitimate traffic during peak hours",
+      "solution": "Implement token bucket algorithm with burst capacity. Configure separate rate limits per user tier in nginx limit_req_zone. Add Redis-based distributed rate limiting. Monitor with Prometheus and adjust thresholds dynamically."
+    },
+    {
+      "issue": "Kubernetes pods failing readiness probes causing rolling deployment failures",
+      "solution": "Increase initialDelaySeconds to allow app startup time. Verify /health endpoint returns 200 status. Check livenessProbe timeoutSeconds matches app response time. Review pod logs with kubectl logs for startup errors."
+    }
+  ],
   "source": "community"
 }

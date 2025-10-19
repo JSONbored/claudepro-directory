@@ -1,11 +1,11 @@
-import { ActivityTimeline } from '@/src/components/features/profile/activity-timeline';
+import { ActivityTimeline } from '@/src/components/features/reputation/activity-timeline';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { getActivitySummary, getActivityTimeline } from '@/src/lib/actions/user.actions';
 import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

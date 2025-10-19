@@ -2,18 +2,26 @@
  * SEO Configuration
  * Centralized SEO constants for title optimization, metadata validation, and structured data
  *
- * October 2025 Standards:
- * - Title: 55-60 chars (Google optimal)
- * - Description: 150-160 chars (AI engines prefer concise)
+ * October 2025 Standards (Research-Driven):
+ * - Title: 53-60 chars optimal, 61-65 chars acceptable (see research below)
+ * - Description: 150-160 chars (Google ~920px desktop, ~680px mobile)
  * - Keywords: 3-10 keywords, max 30 chars each
  * - Canonical: HTTPS, no trailing slash (except homepage)
  * - AI Optimization: Year mentions, freshness signals
  *
+ * SEO 2025 Research Findings (Title Length):
+ * - Too short (< 53 chars): Rewritten 96% of time, lower CTR, wastes space
+ * - Optimal (53-60 chars): Rewritten only 40% of time, best CTR
+ * - Acceptable (61-65 chars): Better than too short, preserves semantic meaning
+ * - Too long (> 70 chars): Rewritten 100% of time, truncated in SERPs
+ * - Ranking Impact: None (Google uses HTML title for ranking, not displayed version)
+ * - User Experience: Complete words > strict character limits (avoid "Configuratio...")
+ *
  * Title Generation Architecture:
- * All page titles generated via metadata-registry.ts helpers:
- * - buildPageTitle(): Static pages (homepage, trending, etc.)
- * - buildContentTitle(): Content pages with smart truncation
- * - smartTruncate(): Word-boundary-aware title truncation
+ * All page titles generated via pattern-based system (metadata-templates.ts):
+ * - 8 route patterns with dedicated templates
+ * - Enterprise smart truncation/padding for descriptions
+ * - 100% pattern coverage (all 41 routes)
  *
  * Consolidation: Moved from src/lib/constants.ts
  * - SEO_CONFIG (core SEO settings)
@@ -28,12 +36,12 @@ import { z } from 'zod';
  * Suffix lengths for each category
  * Format: " - {Category} - Claude Pro Directory"
  *
- * Dynamically calculated from unified category registry where possible.
- * Non-registry categories (guides subcategories, jobs, changelog) remain hardcoded.
+ * Fully derived from UNIFIED_CATEGORY_REGISTRY (single source of truth).
+ * All categories are calculated dynamically from registry.pluralTitle.
  */
 import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 
 const SITE_NAME = 'Claude Pro Directory'; // 20 chars
 const SEPARATOR = ' - '; // 3 chars
@@ -43,8 +51,8 @@ function calculateSuffixLength(categoryDisplayName: string): number {
   return SEPARATOR.length + categoryDisplayName.length + SEPARATOR.length + SITE_NAME.length;
 }
 
-// Derive suffix lengths from registry and merge with non-registry categories
-export const SUFFIX_LENGTHS: Record<ContentCategory, number> = {
+// Derive suffix lengths from registry - fully registry-driven
+export const SUFFIX_LENGTHS = {
   // Core content types (derived from registry)
   agents: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.agents.pluralTitle),
   mcp: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.mcp.pluralTitle),
@@ -54,20 +62,10 @@ export const SUFFIX_LENGTHS: Record<ContentCategory, number> = {
   statuslines: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.statuslines.pluralTitle),
   collections: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.collections.pluralTitle),
   skills: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.skills.pluralTitle),
-
-  // SEO content types (not in main registry)
-  guides: calculateSuffixLength('Guides'),
-  tutorials: calculateSuffixLength('Tutorials'),
-  comparisons: calculateSuffixLength('Comparisons'),
-  workflows: calculateSuffixLength('Workflows'),
-  'use-cases': calculateSuffixLength('Use Cases'),
-  troubleshooting: calculateSuffixLength('Troubleshooting'),
-  categories: calculateSuffixLength('Categories'),
-
-  // Special types
-  jobs: calculateSuffixLength('Jobs'),
-  changelog: calculateSuffixLength('Changelog'),
-} as const;
+  guides: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.guides.pluralTitle),
+  jobs: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.jobs.pluralTitle),
+  changelog: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.changelog.pluralTitle),
+} as const satisfies Record<CategoryId, number>;
 
 /**
  * Maximum total title length (SEO best practice)
@@ -75,9 +73,9 @@ export const SUFFIX_LENGTHS: Record<ContentCategory, number> = {
 export const MAX_TITLE_LENGTH = 60;
 
 /**
- * Optimal title range for SEO
+ * Optimal title range for SEO (2025 Optimized: 53-60 chars for keyword density)
  */
-export const OPTIMAL_MIN = 55;
+export const OPTIMAL_MIN = 53;
 export const OPTIMAL_MAX = 60;
 
 /**
@@ -87,44 +85,41 @@ export const MIN_ENHANCEMENT_GAIN = 3;
 
 /**
  * Maximum available characters for base title (before suffix) per category
+ * Fully derived from UNIFIED_CATEGORY_REGISTRY
  */
-export const MAX_BASE_TITLE_LENGTH: Record<ContentCategory, number> = {
+export const MAX_BASE_TITLE_LENGTH = {
   // Core content types
-  agents: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.agents, // 28 chars
-  mcp: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.mcp, // 31 chars (most room)
-  rules: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.rules, // 29 chars
-  commands: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.commands, // 26 chars
-  hooks: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.hooks, // 29 chars
-  statuslines: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.statuslines, // 23 chars
-  collections: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.collections, // 23 chars
-  skills: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.skills, // 28 chars
-
-  // SEO content types
-  guides: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.guides, // 28 chars
-  tutorials: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.tutorials, // 25 chars
-  comparisons: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.comparisons, // 23 chars
-  workflows: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.workflows, // 25 chars
-  'use-cases': MAX_TITLE_LENGTH - SUFFIX_LENGTHS['use-cases'], // 24 chars
-  troubleshooting: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.troubleshooting, // 19 chars
-  categories: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.categories, // 24 chars
-
-  // Special types
-  jobs: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.jobs, // 30 chars
-  changelog: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.changelog, // 25 chars
-} as const;
+  agents: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.agents,
+  mcp: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.mcp,
+  rules: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.rules,
+  commands: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.commands,
+  hooks: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.hooks,
+  statuslines: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.statuslines,
+  collections: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.collections,
+  skills: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.skills,
+  guides: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.guides,
+  jobs: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.jobs,
+  changelog: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.changelog,
+} as const satisfies Record<CategoryId, number>;
 
 // ============================================
 // METADATA QUALITY RULES & VALIDATION
 // ============================================
 
 /**
- * Metadata Quality Rules (2025 SEO Standards)
+ * Metadata Quality Rules (2025 SEO Standards - Research-Driven)
  * Used for compile-time and runtime validation
+ *
+ * Title Length Strategy:
+ * - Optimal: 53-60 chars (40% rewrite rate, best CTR)
+ * - Extended: 61-65 chars (acceptable for semantic preservation)
+ * - Validation enforces 53-65 range (strict min, flexible max for complete words)
  */
 export const METADATA_QUALITY_RULES = {
   title: {
-    minLength: 55, // Required: 55-60 chars (Google optimal)
-    maxLength: 60, // Required: 55-60 chars (Google optimal)
+    minLength: 53, // Strict: Below 53 chars has 96% rewrite rate (too short is worse)
+    maxLength: 60, // Optimal: 53-60 chars (40% rewrite rate, best CTR)
+    extendedMaxLength: 65, // Acceptable: 61-65 chars (preserves complete words, better than too short)
   },
   description: {
     minLength: 150, // Required: 150-160 chars (SEO and AI optimal)
@@ -143,7 +138,7 @@ export const METADATA_QUALITY_RULES = {
   openGraph: {
     imageWidth: 1200,
     imageHeight: 630,
-    aspectRatio: 1.91,
+    aspectRatio: 1.91, // 1200/630 = 1.9048 (standard OG aspect ratio)
   },
 } as const;
 
@@ -161,11 +156,11 @@ export const validatedMetadataSchema = z.object({
     .string()
     .min(
       METADATA_QUALITY_RULES.title.minLength,
-      `Title must be ${METADATA_QUALITY_RULES.title.minLength}-${METADATA_QUALITY_RULES.title.maxLength} characters for SEO`
+      `Title must be ${METADATA_QUALITY_RULES.title.minLength}-${METADATA_QUALITY_RULES.title.extendedMaxLength} characters for SEO (${METADATA_QUALITY_RULES.title.minLength}-${METADATA_QUALITY_RULES.title.maxLength} optimal)`
     )
     .max(
-      METADATA_QUALITY_RULES.title.maxLength,
-      `Title must be ${METADATA_QUALITY_RULES.title.minLength}-${METADATA_QUALITY_RULES.title.maxLength} characters for SEO`
+      METADATA_QUALITY_RULES.title.extendedMaxLength,
+      `Title must be ${METADATA_QUALITY_RULES.title.minLength}-${METADATA_QUALITY_RULES.title.extendedMaxLength} characters (exceeds extended max for semantic preservation)`
     )
     .refine((title) => !/[<>{}]/.test(title), {
       message: 'Title contains invalid HTML characters',
@@ -232,8 +227,16 @@ export const validatedMetadataSchema = z.object({
 
   openGraph: z
     .object({
-      title: z.string().min(55).max(60).describe('OpenGraph title'),
-      description: z.string().min(150).max(160).describe('OpenGraph description'),
+      title: z
+        .string()
+        .min(METADATA_QUALITY_RULES.title.minLength)
+        .max(METADATA_QUALITY_RULES.title.extendedMaxLength)
+        .describe('OpenGraph title (53-60 optimal, 61-65 acceptable)'),
+      description: z
+        .string()
+        .min(METADATA_QUALITY_RULES.description.minLength)
+        .max(METADATA_QUALITY_RULES.description.maxLength)
+        .describe('OpenGraph description'),
       image: z
         .object({
           url: z.string().url().describe('Image URL'),
@@ -253,8 +256,16 @@ export const validatedMetadataSchema = z.object({
   twitter: z
     .object({
       card: z.enum(['summary', 'summary_large_image']).describe('Twitter card type'),
-      title: z.string().min(55).max(60).describe('Twitter title'),
-      description: z.string().min(150).max(160).describe('Twitter description'),
+      title: z
+        .string()
+        .min(METADATA_QUALITY_RULES.title.minLength)
+        .max(METADATA_QUALITY_RULES.title.extendedMaxLength)
+        .describe('Twitter title (53-60 optimal, 61-65 acceptable)'),
+      description: z
+        .string()
+        .min(METADATA_QUALITY_RULES.description.minLength)
+        .max(METADATA_QUALITY_RULES.description.maxLength)
+        .describe('Twitter description'),
     })
     .optional()
     .describe('Twitter Card metadata'),
@@ -337,14 +348,4 @@ export const SCHEMA_ORG = {
     url: APP_CONFIG.url,
     description: SEO_CONFIG.defaultDescription,
   },
-} as const;
-
-/**
- * OpenGraph Image Configuration
- * Standard image dimensions for social media sharing
- * Moved from src/lib/constants.ts for better organization
- */
-export const OG_IMAGE_SIZE = {
-  width: 1200,
-  height: 630,
 } as const;

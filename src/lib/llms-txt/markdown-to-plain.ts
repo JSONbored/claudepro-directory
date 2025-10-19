@@ -12,17 +12,7 @@
 import { decode } from 'he';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
-
-// Lazy import DOMPurify to avoid build-time issues with Next.js Turbopack
-// DOMPurify uses browser APIs that cannot be statically analyzed during build
-let _DOMPurify: typeof import('isomorphic-dompurify').default | null = null;
-async function getDOMPurify() {
-  if (!_DOMPurify) {
-    const module = await import('isomorphic-dompurify');
-    _DOMPurify = module.default;
-  }
-  return _DOMPurify;
-}
+import { DOMPurify } from '@/src/lib/security/html-sanitizer';
 
 /**
  * Schema for markdown content input
@@ -177,18 +167,11 @@ function convertListItem(line: string): string {
  * ```
  */
 async function stripHtmlTags(text: string): Promise<string> {
-  // Step 1: Lazy load DOMPurify to avoid build-time issues
-  const DOMPurify = await getDOMPurify();
-
-  // Step 2: Sanitize HTML with DOMPurify (removes ALL scripts, events, dangerous attributes)
-  // ALLOWED_TAGS: [] strips ALL tags while KEEP_CONTENT: true preserves text content
-  const sanitized = DOMPurify.sanitize(text, {
-    ALLOWED_TAGS: [], // Strip ALL HTML tags (including <script>, <img>, <iframe>, etc.)
-    KEEP_CONTENT: true, // Keep text content only
+  const sanitized = await DOMPurify.sanitize(text, {
+    ALLOWED_TAGS: [],
+    KEEP_CONTENT: true,
   });
 
-  // Step 3: Decode HTML entities properly (one-pass decode prevents double-unescaping)
-  // decode() safely handles: &nbsp; &amp; &lt; &gt; &quot; &#39; and all other entities
   return decode(sanitized);
 }
 
@@ -226,7 +209,7 @@ function normalizeWhitespace(text: string): string {
  *
  * @example
  * ```ts
- * const plainText = await markdownToPlainText(`
+ * const plainText = markdownToPlainText(`
  * # My Document
  *
  * This is a [link](https://example.com).

@@ -8,7 +8,8 @@ keywords:
   - "Claude Code operating slowly"
 dateUpdated: "2025-09-22"
 author: "Claude Pro Directory"
-category: "troubleshooting"
+category: "guides"
+subcategory: "troubleshooting"
 tags: ["claude-code", "performance", "memory-leak", "optimization", "debugging", "context-window"]
 readingTime: "8 min"
 difficulty: "intermediate"
@@ -20,11 +21,12 @@ citationReady: true
 
 import { Callout, InfoBox, Accordion, StepByStepGuide, CodeGroup, ComparisonTable, AIOptimizedFAQ, FeatureGrid, Tabs, QuickReference, SmartRelatedContent } from '@/components/MDXComponents';
 
-<TLDRSummary>
+<UnifiedContentBlock
+  variant="tldr">
 **Quick Fix:** Claude Code processes can consume 120GB RAM within 60 minutes. Clear context with `/clear` every 40 messages. Configure memory limits to 4096MB. Monitor RAM usage actively. Keep CLAUDE.md files under 5KB for optimal performance.
 </TLDRSummary>
 
-<InfoBox type="error" title="Critical Performance Issue">
+<UnifiedContentBox contentType="infobox" type="error" title="Critical Performance Issue">
 Claude Code experiences severe memory leaks causing system crashes. RAM usage grows from 300MB to 120GB within one hour. This affects macOS, Linux, and WSL2 environments. Immediate action prevents complete system failure.
 </InfoBox>
 
@@ -34,7 +36,7 @@ Claude Code memory issues manifest through predictable patterns. Your system sho
 
 Performance degradation follows three distinct phases. Initial phase shows minor lag in command responses. Intermediate phase brings noticeable delays exceeding 5 seconds. Critical phase freezes all Claude operations completely. Each phase requires different intervention strategies.
 
-<Accordion
+<UnifiedContentBox contentType="accordion"
   title="Quick Diagnosis Steps"
   description="Identify your specific performance issue"
   items={[
@@ -316,7 +318,8 @@ Configuration changes require Claude restart for activation. Adjust values based
 
 Optimal Claude Code performance demands specific hardware minimums. Systems need 16GB RAM for basic operations. Large projects require 32GB for smooth performance. Modern multi-core processors handle operations efficiently. SSD storage improves file operation speed significantly.
 
-<FeatureGrid
+<UnifiedContentBlock
+  variant="feature-grid"
   features={[
     {
       icon: "💾",
@@ -345,7 +348,7 @@ Optimal Claude Code performance demands specific hardware minimums. Systems need
 
 Complex issues require systematic diagnostic approaches. Performance problems often combine multiple root causes. Advanced techniques identify hidden bottlenecks effectively. Proper diagnosis reduces resolution time by 70%. These methods work across all platforms consistently.
 
-<Accordion
+<UnifiedContentBox contentType="accordion"
   title="Advanced Diagnostic Techniques"
   description="Deep-dive troubleshooting for persistent issues"
   items={[
@@ -425,7 +428,8 @@ claude doctor --repair`
 
 ## Common Root Causes
 
-<FeatureGrid
+<UnifiedContentBlock
+  variant="feature-grid"
   features={[
     {
       title: "Unbounded Memory Growth",
@@ -453,7 +457,7 @@ claude doctor --repair`
 
 ## Prevention Strategies
 
-<Callout type="success" title="Prevent Future Occurrences">
+<UnifiedContentBox contentType="callout" type="success" title="Prevent Future Occurrences">
 **Proactive Context Management:** Run /compact every 40 messages systematically - Reduces memory usage by 60%
 
 **Session Hygiene:** Clear context between unrelated tasks immediately - Prevents 70% of overflow issues  
@@ -463,7 +467,7 @@ claude doctor --repair`
 
 ## Alternative Solutions
 
-<Accordion
+<UnifiedContentBox contentType="accordion"
   title="When Standard Fixes Don't Work"
   description="Alternative approaches for persistent or unusual cases"
   items={[
@@ -488,7 +492,8 @@ Successful Claude Code usage requires systematic approaches. Implement daily mai
 
 Session management follows lifecycle patterns. Start with minimal essential context loading. Add specific files only when needed. Compact context before reaching 80% capacity. Save summaries before clearing for continuity.
 
-<QuickReference
+<UnifiedContentBlock
+  variant="quick-reference"
   title="Daily Optimization Checklist"
   items={[
     { label: "Morning", value: "Clear previous session, load fresh CLAUDE.md" },
@@ -532,7 +537,7 @@ done`
 
 ## AIOptimizedFAQ
 
-<AIOptimizedFAQ
+<UnifiedContentBox contentType="faq"
   faqs={[
     {
       question: "Why does Claude Code consume 120GB of RAM?",
@@ -563,7 +568,7 @@ done`
 
 ---
 
-<Callout type="success" title="Issue Resolved?">
+<UnifiedContentBox contentType="callout" type="success" title="Issue Resolved?">
 **Problem solved?** Great! Implement daily /compact routines to prevent recurrence.
 
 **Still having issues?** Join our [community](/community) for additional support or check Anthropic's status page.

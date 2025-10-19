@@ -62,20 +62,24 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify Figma Desktop is running before connecting",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Invalid sessionId error from MCP endpoint",
+      "solution": "Change transport type from sse to http in MCP config. Remove old config: claude mcp remove figma-dev-mode-mcp-server, then re-add with http transport at http://127.0.0.1:3845/mcp."
     },
     {
-      "issue": "Check that Dev Mode is enabled in Figma",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "HTTP 404 error: MCP server not responding",
+      "solution": "Ensure Figma Desktop app is running and Dev Mode MCP Server is active. Check Figma preferences to verify MCP Server is enabled. Restart Figma Desktop if server doesn't appear."
     },
     {
-      "issue": "Ensure port 3845 is not blocked by firewall",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Connection failed: invalid request body error",
+      "solution": "Verify you're using http transport, not sse. Update config URL to http://127.0.0.1:3845/mcp. Check request format matches MCP protocol specification for initialize request."
     },
     {
-      "issue": "Delete old SSE endpoints at port 3845 if they exist",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Cannot access assets - 404 on asset requests",
+      "solution": "MCP Server can't serve assets directly from browser. Access assets through Claude Code or configured MCP client. Verify file is open in Figma Desktop and permissions allow export."
+    },
+    {
+      "issue": "WSL users cannot connect to local MCP server",
+      "solution": "Figma MCP binds only to 127.0.0.1 which WSL can't access. Use Windows-native Claude Code installation or configure port forwarding from WSL to Windows host for 127.0.0.1:3845."
     }
   ],
   "examples": [

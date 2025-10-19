@@ -25,6 +25,7 @@
  * @module scripts/generate-events
  */
 
+import { execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -37,12 +38,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 /**
- * Additional content types not in main category registry
- */
-const ADDITIONAL_CONTENT_TYPES = ['guide'] as const;
-
-/**
  * Get all category IDs from registry
+ * MODERNIZATION: Single source of truth - all categories come from UNIFIED_CATEGORY_REGISTRY
  */
 function getAllCategories(): CategoryId[] {
   return Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[];
@@ -69,85 +66,81 @@ function categoryToKeySuffix(categoryId: string): string {
 
 /**
  * Generate TypeScript type definitions for template literals
+ * MODERNIZATION: Pure registry-driven - all categories from UNIFIED_CATEGORY_REGISTRY
  */
 function generateTypes(categories: CategoryId[]): string {
-  const categoryUnion = categories.map((c) => `'${c}'`).join(' | ');
-  const additionalUnion = ADDITIONAL_CONTENT_TYPES.map((c) => `'${c}'`).join(' | ');
+  // Format union type with each member on new line (Biome style)
+  const categoryUnion = categories.map((c) => `  | '${c}'`).join('\n');
 
-  // Build suffix mapping cases
+  // Build suffix mapping cases with cascading indentation (Biome style)
+  // Each level adds 2 spaces, final `: never` matches deepest nesting
   const suffixCases = categories
-    .map((cat) => {
+    .map((cat, index) => {
       const suffix = categoryToSuffix(cat);
-      return `  T extends '${cat}' ? '${suffix}' :`;
+      const indent = '  '.repeat(index);
+      if (index === 0) {
+        return `T extends '${cat}'\n  ? '${suffix}'`;
+      }
+      return `${indent}: T extends '${cat}'\n${indent}  ? '${suffix}'`;
     })
     .join('\n');
 
-  const additionalSuffixCases = ADDITIONAL_CONTENT_TYPES.map((type) => {
-    return `  T extends '${type}' ? '${type}' :`;
-  }).join('\n');
+  // Calculate final indent for `: never` to match deepest nesting level
+  const finalIndent = '  '.repeat(categories.length - 1);
 
   return `/**
  * Category IDs that have analytics events
  * Auto-generated from UNIFIED_CATEGORY_REGISTRY
+ * MODERNIZATION: Single source of truth - all 11 categories included
  */
-type AnalyticsCategory = ${categoryUnion};
-
-/**
- * Additional content types (not in main category registry)
- */
-type AdditionalContentType = ${additionalUnion};
+type AnalyticsCategory =
+${categoryUnion};
 
 /**
  * Category event suffix mapping (for singular forms)
- * Auto-generated transformation rules
+ * Auto-generated transformation rules:
+ * - agents → agent
+ * - statuslines → statusline
+ * - guides → guide
+ * - mcp → mcp (unchanged)
  */
-type CategorySuffix<T extends string> =
-${suffixCases}
-${additionalSuffixCases}
-  never;
+type CategorySuffix<T extends string> = ${suffixCases}
+${finalIndent}  : never;
 
 /**
  * TypeScript template literal types for dynamic event generation
  * These types ensure compile-time validation of all event names
+ * MODERNIZATION: 100% registry-driven, zero hardcoded categories
  */
 type ContentViewEvent<T extends AnalyticsCategory> = \`content_view_\${CategorySuffix<T>}\`;
-type RelatedClickEvent<T extends AnalyticsCategory | AdditionalContentType> = \`related_click_from_\${CategorySuffix<T>}\`;
-type RelatedViewEvent<T extends AnalyticsCategory | AdditionalContentType> = \`related_view_on_\${CategorySuffix<T>}\`;
-type SearchEvent<T extends AnalyticsCategory | 'guides'> = \`search_\${T}\`;
-type CopyCodeEvent<T extends AnalyticsCategory | AdditionalContentType> = \`copy_code_\${CategorySuffix<T>}\`;
-type CopyMarkdownEvent<T extends AnalyticsCategory | AdditionalContentType> = \`copy_markdown_\${CategorySuffix<T>}\`;
-type DownloadMarkdownEvent<T extends AnalyticsCategory | AdditionalContentType> = \`download_markdown_\${CategorySuffix<T>}\`;`;
+type RelatedClickEvent<T extends AnalyticsCategory> = \`related_click_from_\${CategorySuffix<T>}\`;
+type RelatedViewEvent<T extends AnalyticsCategory> = \`related_view_on_\${CategorySuffix<T>}\`;
+type SearchEvent<T extends AnalyticsCategory> = \`search_\${T}\`;
+type CopyCodeEvent<T extends AnalyticsCategory> = \`copy_code_\${CategorySuffix<T>}\`;
+type CopyMarkdownEvent<T extends AnalyticsCategory> = \`copy_markdown_\${CategorySuffix<T>}\`;
+type DownloadMarkdownEvent<T extends AnalyticsCategory> = \`download_markdown_\${CategorySuffix<T>}\`;`;
 }
 
 /**
  * Generate event constants for a specific event type
+ * MODERNIZATION: Pure registry-driven - no additional types needed
  */
 function generateEventSection(
   title: string,
   categories: CategoryId[],
   prefix: string,
   type: string,
-  includeAdditional = false,
   useFullCategoryId = false // For SEARCH events, use full category ID instead of suffix
 ): string {
   const events: string[] = [];
 
-  // Generate for main categories
+  // Generate events for all registry categories
   for (const cat of categories) {
     const keySuffix = useFullCategoryId ? cat.toUpperCase() : categoryToKeySuffix(cat);
     const valueSuffix = useFullCategoryId ? cat : categoryToSuffix(cat);
     const key = `${prefix}_${keySuffix}`;
     const value = `${prefix.toLowerCase()}_${valueSuffix}`;
     events.push(`  ${key}: '${value}' as ${type}<'${cat}'>,`);
-  }
-
-  // Generate for additional types if needed
-  if (includeAdditional) {
-    for (const additional of ADDITIONAL_CONTENT_TYPES) {
-      const keySuffix = additional.toUpperCase();
-      const value = `${prefix.toLowerCase()}_${additional}`;
-      events.push(`  ${prefix}_${keySuffix}: '${value}' as ${type}<'${additional}'>,`);
-    }
   }
 
   return `  // ============================================
@@ -630,46 +623,6 @@ function generateEventPayloads(categories: CategoryId[]): string {
   };`);
   }
 
-  // Add guide-specific events
-  payloads.push(`  [EVENTS.SEARCH_GUIDES]: {
-    query: string;
-    results_count: number;
-    filters_applied: boolean;
-    time_to_results: number;
-  };`);
-
-  payloads.push(`  [EVENTS.COPY_CODE_GUIDE]: {
-    slug: string;
-    content_length: number;
-    language?: string;
-  };`);
-
-  payloads.push(`  [EVENTS.COPY_MARKDOWN_GUIDE]: {
-    slug: string;
-    include_metadata: boolean;
-    include_footer: boolean;
-    content_length: number;
-  };`);
-
-  payloads.push(`  [EVENTS.DOWNLOAD_MARKDOWN_GUIDE]: {
-    slug: string;
-    filename: string;
-    file_size: number;
-  };`);
-
-  payloads.push(`  [EVENTS.RELATED_CLICK_FROM_GUIDE]: {
-    target_slug: string;
-    target_category: string;
-    position: number;
-    match_score: number;
-    match_type: string;
-  };`);
-
-  payloads.push(`  [EVENTS.RELATED_VIEW_ON_GUIDE]: {
-    items_shown: number;
-    cache_hit: boolean;
-  };`);
-
   return `/**
  * ============================================
  * EVENT PAYLOAD TYPE DEFINITIONS
@@ -1047,18 +1000,17 @@ ${generateTypes(categories)}
 export const EVENTS = {
 ${generateEventSection('CONTENT VIEW EVENTS (Category-specific)', categories, 'CONTENT_VIEW', 'ContentViewEvent')}
 
-${generateEventSection('RELATED CONTENT CLICK EVENTS (Category-specific)', categories, 'RELATED_CLICK_FROM', 'RelatedClickEvent', true)}
+${generateEventSection('RELATED CONTENT CLICK EVENTS (Category-specific)', categories, 'RELATED_CLICK_FROM', 'RelatedClickEvent')}
 
-${generateEventSection('RELATED CONTENT VIEW EVENTS (Category-specific)', categories, 'RELATED_VIEW_ON', 'RelatedViewEvent', true)}
+${generateEventSection('RELATED CONTENT VIEW EVENTS (Category-specific)', categories, 'RELATED_VIEW_ON', 'RelatedViewEvent')}
 
-${generateEventSection('SEARCH EVENTS (Category-specific)', categories, 'SEARCH', 'SearchEvent', false, true)}
-  SEARCH_GUIDES: 'search_guides' as SearchEvent<'guides'>,
+${generateEventSection('SEARCH EVENTS (Category-specific)', categories, 'SEARCH', 'SearchEvent', true)}
 
-${generateEventSection('COPY CODE EVENTS (Category-specific)', categories, 'COPY_CODE', 'CopyCodeEvent', true)}
+${generateEventSection('COPY CODE EVENTS (Category-specific)', categories, 'COPY_CODE', 'CopyCodeEvent')}
 
-${generateEventSection('COPY MARKDOWN EVENTS (Category-specific)', categories, 'COPY_MARKDOWN', 'CopyMarkdownEvent', true)}
+${generateEventSection('COPY MARKDOWN EVENTS (Category-specific)', categories, 'COPY_MARKDOWN', 'CopyMarkdownEvent')}
 
-${generateEventSection('DOWNLOAD MARKDOWN EVENTS (Category-specific)', categories, 'DOWNLOAD_MARKDOWN', 'DownloadMarkdownEvent', true)}
+${generateEventSection('DOWNLOAD MARKDOWN EVENTS (Category-specific)', categories, 'DOWNLOAD_MARKDOWN', 'DownloadMarkdownEvent')}
 
   // ============================================
   // CORE EVENTS (Non-category-specific)
@@ -1162,7 +1114,15 @@ function main() {
 
   writeFileSync(outputPath, content, 'utf-8');
 
+  // Auto-format with Biome to ensure consistent formatting
+  try {
+    execSync(`npx biome format --write ${outputPath}`, { stdio: 'pipe' });
+  } catch {
+    console.warn(`⚠️  Auto-formatting failed for: ${outputPath}`);
+  }
+
   console.log(`✅ Generated unified file: ${outputPath}`);
+
   console.log(
     '🌳 Tree-shakeable: EVENTS (~2KB) + getEventConfig() (~4KB lazy) + EventPayloads (0KB types)'
   );

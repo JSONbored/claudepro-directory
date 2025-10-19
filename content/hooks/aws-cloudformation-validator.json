@@ -32,6 +32,28 @@
     "Development workflow validation for cloud resources",
     "Compliance checking against AWS best practices"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook recognizes CloudFormation file but cfn-lint fails",
+      "solution": "Install cfn-lint: pip install cfn-lint. Verify Python environment active: which python. Check template syntax with: cfn-lint --version. Review cfn-lint logs without 2>&1."
+    },
+    {
+      "issue": "AWS CLI validation requires credentials unexpectedly",
+      "solution": "Use cfn-lint for offline validation instead. Or configure AWS credentials: aws configure. Use IAM role with minimal permissions. Skip AWS CLI fallback if credentials unavailable."
+    },
+    {
+      "issue": "Template passes validation but hook shows failure message",
+      "solution": "Check exit code handling in script. Capture command output: OUTPUT=$(cfn-lint file) && echo success. Review conditional logic for success detection. Debug with: set -x in script."
+    },
+    {
+      "issue": "Hook processes YAML files that aren't CloudFormation",
+      "solution": "Strengthen template detection regex. Check file content for AWSTemplateFormatVersion key: grep -q AWSTemplateFormatVersion file. Add explicit template marker in filename convention."
+    },
+    {
+      "issue": "PostToolUse timing causes validation on incomplete writes",
+      "solution": "Verify file write completed before validation. Add small sleep: sleep 0.5 before validation. Check file size: [ -s \"$FILE_PATH\" ]. Use file lock detection if available."
+    }
+  ],
   "documentationUrl": "https://aws.amazon.com/cloudformation/",
   "source": "community"
 }

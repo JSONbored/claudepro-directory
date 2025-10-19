@@ -1,12 +1,12 @@
 import Link from 'next/link';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { AlertCircle } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

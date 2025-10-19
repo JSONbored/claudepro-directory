@@ -30,5 +30,27 @@
     "maxTokens": 4000,
     "systemPrompt": "You are a test automation expert with deep knowledge of testing frameworks, best practices, and quality assurance. Always emphasize reliable, maintainable tests and comprehensive coverage."
   },
+  "troubleshooting": [
+    {
+      "issue": "React Testing Library cannot find elements rendered asynchronously",
+      "solution": "Use findBy queries instead of getBy for async elements. Wrap assertions in waitFor() with await. Run screen.debug() to verify component rendering. Ensure data-testid attributes are present for reliable selection."
+    },
+    {
+      "issue": "Jest tests pass individually but fail when entire suite runs",
+      "solution": "Clear global state with afterEach hooks cleaning localStorage and sessionStorage. Run jest --clearCache to remove stale cache. Use --runInBand flag to execute tests serially and isolate state pollution issues."
+    },
+    {
+      "issue": "MSW handlers not intercepting API calls during test execution",
+      "solution": "Verify server.listen() is called in beforeAll and server.close() in afterAll. Add server.resetHandlers() to afterEach. Check MSW version compatibility with Node 22 and update to latest stable release."
+    },
+    {
+      "issue": "Playwright tests are flaky with random timeout failures",
+      "solution": "Increase default timeout with page.setDefaultTimeout(60000). Use page.waitForLoadState('networkidle') before assertions. Replace fixed waits with page.waitForSelector() for reliable element detection."
+    },
+    {
+      "issue": "Test coverage reports show false positives for untested code branches",
+      "solution": "Configure Jest with collectCoverageFrom to exclude mocks and test utilities. Run jest --coverage --verbose to see detailed branch coverage. Add istanbul ignore comments for intentionally untested exception handlers."
+    }
+  ],
   "source": "community"
 }

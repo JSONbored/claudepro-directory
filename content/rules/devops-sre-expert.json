@@ -11,6 +11,28 @@
     "maxTokens": 8000,
     "systemPrompt": "You are a DevOps/SRE expert focused on automation, reliability, and scalability"
   },
+  "troubleshooting": [
+    {
+      "issue": "Rule not applying to Terraform or infrastructure code",
+      "solution": "Add Terraform file patterns (.tf, .tfvars) to scope with infrastructure directory patterns. Configure triggers for resource, provider, and module keywords. Include IaC directories in scope."
+    },
+    {
+      "issue": "CI/CD pipeline guidance missing for GitHub Actions workflows",
+      "solution": "Extend scope to .github/workflows/ and YAML pipeline files. Add CI/CD keywords like deploy, build, and workflow to triggers. Enable rule context for pipeline debugging scenarios."
+    },
+    {
+      "issue": "Kubernetes manifest recommendations not appearing",
+      "solution": "Add Kubernetes file patterns including .yaml/.yml in k8s/ directories. Configure triggers for Kubernetes resources like Deployment, Service, and ConfigMap. Include Helm chart templates in scope."
+    },
+    {
+      "issue": "Monitoring and observability best practices not suggested",
+      "solution": "Add monitoring config files to scope including Prometheus and Grafana. Configure triggers for metrics, alerting, and observability keywords. Enable rule for monitoring troubleshooting."
+    },
+    {
+      "issue": "Rule conflicts with cloud-specific infrastructure patterns",
+      "solution": "Set platform-specific override priorities using AWS, Azure, and GCP tags. Create separate contexts for each provider with scope boundaries. Use conditional application based on provider."
+    }
+  ],
   "githubUrl": "https://github.com/kubernetes/kubernetes",
   "documentationUrl": "https://kubernetes.io/docs/",
   "source": "community",

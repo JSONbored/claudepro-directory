@@ -33,6 +33,28 @@
     "Maintain consistent code formatting across team",
     "Validate commit message conventions"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook blocks all git commits even when validation passes",
+      "solution": "Ensure script exits with exit 0 on success. Check that matchers pattern ['git'] doesn't intercept non-commit git commands like status or diff which should bypass validation."
+    },
+    {
+      "issue": "npm run lint fails with 'script not found' error",
+      "solution": "Add existence check before running: [ -f package.json ] && grep -q '\"lint\"' package.json before npm run lint. Provide fallback or skip linting gracefully if unavailable."
+    },
+    {
+      "issue": "Prettier check prevents commits due to formatting differences",
+      "solution": "Auto-fix formatting instead of blocking: prettier --write $STAGED_FILES && git add $STAGED_FILES. Alternatively, set --warn-only flag to log issues without exit code."
+    },
+    {
+      "issue": "Test suite runs entire test set causing slow commit times",
+      "solution": "Run only tests related to changed files: npm test -- --findRelatedTests $STAGED_FILES. Add timeout: npm test -- --maxWorkers=2 --bail for faster feedback."
+    },
+    {
+      "issue": "Hook rejects large files but files are already in history",
+      "solution": "Check if file is new vs modified: git diff --cached --diff-filter=A to detect additions only. Skip size check for existing tracked files to avoid retroactive enforcement."
+    }
+  ],
   "documentationUrl": "https://pre-commit.com/",
   "source": "community"
 }

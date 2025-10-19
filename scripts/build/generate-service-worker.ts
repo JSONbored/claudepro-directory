@@ -528,8 +528,8 @@ async function generateServiceWorker() {
     logger.info(`📦 Found ${categoryIds.length} categories: ${categoryIds.join(', ')}`);
 
     // Generate content routes array
+    // MODERNIZATION: All categories from registry, no special cases
     const contentRoutes = categoryIds.map((id) => `"/${id}"`);
-    contentRoutes.push('"/guides"'); // Add guides (non-category route)
 
     // Generate category pattern for detail pages
     const categoryPattern = categoryIds.join('|');

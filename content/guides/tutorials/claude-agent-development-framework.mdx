@@ -10,7 +10,8 @@ keywords:
   - "claude agent framework guide"
 dateUpdated: "2025-09-23"
 author: "Claude Pro Directory"
-category: "tutorials"
+category: "guides"
+subcategory: "tutorials"
 tags:
   - "tutorial"
   - "advanced"
@@ -24,7 +25,8 @@ aiOptimized: true
 citationReady: true
 ---
 
-<TLDRSummary
+<UnifiedContentBlock
+  variant="tldr"
   content="This tutorial teaches you to build production-ready Claude autonomous agents achieving 90.2% performance improvements through multi-agent orchestration in 30 minutes. You'll learn subagents implementation with isolated 200K token contexts, orchestrator-worker patterns reducing costs to $0.045 per task, and deployment strategies achieving 99.95% uptime. Perfect for developers wanting to leverage Claude 4's 74.5% SWE-bench scores and July 2025 sub-agent capabilities."
   keyPoints={[
     "Multi-agent orchestration - achieve 90.2% better performance than single agents",
@@ -36,7 +38,7 @@ citationReady: true
 
 Master Claude agent development with this comprehensive framework proven to deliver 90.2% performance improvements through multi-agent orchestration. By completion, you'll have built a production-ready autonomous agent system using Claude 4's revolutionary capabilities, implemented the 3 Amigo pattern reducing development time to 3 hours, and deployed with enterprise monitoring achieving 99.95% uptime. This guide includes 15 practical examples, production-tested code samples, and real-world implementations from Lindy AI's 10x growth and Anthropic's internal 2-3x productivity gains.
 
-<Callout type="info" title="Tutorial Requirements">
+<UnifiedContentBox contentType="callout" type="info" title="Tutorial Requirements">
 **Prerequisites:** Basic Python/JavaScript, API experience, Claude account<br />
 **Time Required:** 30 minutes active work<br />
 **Tools Needed:** Claude API key, MCP server, Docker (optional)<br />
@@ -45,7 +47,8 @@ Master Claude agent development with this comprehensive framework proven to deli
 
 ## What You'll Learn
 
-<FeatureGrid
+<UnifiedContentBlock
+  variant="feature-grid"
   title="Claude Agent Development Outcomes"
   description="Skills and capabilities you'll master in this tutorial"
   features={[
@@ -457,7 +460,7 @@ print('Response time: %.2fs' % metrics['avg_response_time'])`,
 
 Understanding these concepts ensures you can adapt this tutorial to your specific needs and troubleshoot issues effectively.
 
-<Accordion
+<UnifiedContentBox contentType="accordion"
   title="Core Claude Agent Development Concepts"
   description="Essential knowledge for mastering autonomous agents"
   items={[
@@ -1032,7 +1035,7 @@ if __name__ == "__main__":
 
 ## Troubleshooting Guide
 
-<Callout type="warning" title="Common Issues and Solutions">
+<UnifiedContentBox contentType="callout" type="warning" title="Common Issues and Solutions">
 **Issue 1: 429 Rate Limit Errors with Multi-Agent Systems**<br />
 **Solution:** Implement exponential backoff with jitter (2^attempt seconds + 10% random). Use token bucket algorithm limiting to 50 RPM for Tier 1. This reduces 429 errors by 95%.
 
@@ -1048,7 +1051,7 @@ if __name__ == "__main__":
 
 ## Advanced Techniques
 
-<Callout type="tip" title="Professional Tips">
+<UnifiedContentBox contentType="callout" type="tip" title="Professional Tips">
 **Performance Optimization:** Parallel subagent execution reduces task time by 90% for research. Spawn 3-20 agents dynamically based on complexity. Monitor token usage per agent to identify optimization opportunities.
 
 **Security Best Practice:** Always implement least privilege for agent tools. Use MCP bearer tokens with granular authorization. Audit all agent actions with complete trails. Never expose API keys in agent contexts.
@@ -1060,7 +1063,8 @@ if __name__ == "__main__":
 
 ## Validation and Testing
 
-<FeatureGrid
+<UnifiedContentBlock
+  variant="feature-grid"
   title="Production Validation Criteria"
   description="Verify your autonomous agent implementation works correctly"
   features={[
@@ -1090,7 +1094,7 @@ if __name__ == "__main__":
 
 ## Next Steps and Learning Path
 
-<AIOptimizedFAQ
+<UnifiedContentBox contentType="faq"
   title="Continue Your Claude Agent Development Journey"
   description="Common questions about advancing your autonomous agent skills"
   questions={[
@@ -1119,7 +1123,8 @@ if __name__ == "__main__":
 
 ## Quick Reference
 
-<QuickReference
+<UnifiedContentBlock
+  variant="quick-reference"
   title="Claude Agent Development Cheat Sheet"
   description="Essential commands and patterns for autonomous agents"
   items={[
@@ -1163,7 +1168,7 @@ if __name__ == "__main__":
 
 ---
 
-<Callout type="success" title="Tutorial Complete!">
+<UnifiedContentBox contentType="callout" type="success" title="Tutorial Complete!">
 **Congratulations!** You've mastered Claude autonomous agent development and can now build multi-agent systems achieving 90.2% performance improvements.
 
 **What you achieved:**

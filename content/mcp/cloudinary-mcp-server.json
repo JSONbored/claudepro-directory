@@ -74,20 +74,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Check account storage limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "HTTP 420 rate limited error on Admin API requests",
+      "solution": "Admin API limits: Free plan 500/hour, Paid 2000/hour. Wait for hourly reset or upgrade plan. Use Retry-After header to time your next request. Upload API has no rate limits."
     },
     {
-      "issue": "Verify transformation quotas",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "HTTP 401 authentication required error",
+      "solution": "Verify CLOUDINARY_CLOUD_NAME, API_KEY, and API_SECRET are correctly set. Check signed URLs for add-ons or Strict Transformation mode. Regenerate credentials from Cloudinary Console if authentication fails."
     },
     {
-      "issue": "Monitor bandwidth usage",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Image transformation fails or returns errors",
+      "solution": "Verify transformation parameters are valid and supported. Check account tier for transformation quota limits. Ensure URL is properly signed for Strict Transformations mode if enabled."
     },
     {
-      "issue": "Test URL signing configuration",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Upload fails with file too large error",
+      "solution": "Check file size against your account tier limits (typically 10-100MB). For larger files, use chunked uploads. Verify network connectivity and increase timeout settings for large files."
     }
   ],
   "examples": [

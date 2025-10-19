@@ -63,16 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Ensure pages are shared with the integration",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Rate limit reached - 429 error with rate_limited code",
+      "solution": "Rate limit: 3 requests/second average per integration. Implement 350ms delay between requests. Use burst capacity sparingly. Back off exponentially on 429 errors. Check Retry-After header."
     },
     {
-      "issue": "Check workspace permissions for the connection",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Page or database not accessible - integration permissions",
+      "solution": "Share page/database with integration explicitly in Notion. Click Share > Add connection > select your integration. Verify integration has read/write permissions. Check parent page sharing settings."
     },
     {
-      "issue": "Verify OAuth connection status with /mcp command",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "OAuth authentication fails or bad gateway error",
+      "solution": "Re-authenticate at https://mcp.notion.com/mcp. Verify workspace allows integrations (not Guest workspace). Check internet connectivity. Restart MCP client if persistent 502 errors occur."
+    },
+    {
+      "issue": "API returns empty results or stale data from queries",
+      "solution": "Verify query filters match exact database property names (case-sensitive). Check integration has access to specific database. Refresh integration permissions. Use property IDs instead of names for reliability."
     }
   ],
   "examples": [

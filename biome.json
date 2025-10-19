@@ -174,6 +174,24 @@
         "noParameterAssign": "error",
         "noParameterProperties": "off",
         "noRestrictedGlobals": "off",
+        "noRestrictedImports": {
+          "options": {
+            "patterns": [
+              {
+                "group": ["**/*.server", "**/*.server.ts", "**/*.server.tsx"],
+                "message": "⛔ Server-only files (*.server.ts) should not be imported. Use client-safe alternatives or inline code."
+              },
+              {
+                "group": ["**/lib/utils/batch.utils"],
+                "message": "⛔ batch.utils imports cache.server → node:zlib (breaks browser). Use Promise.all directly instead."
+              },
+              {
+                "group": ["**/lib/security/validators", "**/lib/security/validators.ts"],
+                "message": "⛔ validators.ts is server-only (async DOMPurify). Use @/src/lib/security/validators-sync for client components."
+              }
+            ]
+          }
+        },
         "noShoutyConstants": "warn",
         "noUnusedTemplateLiteral": "error",
         "noUselessElse": "error",
@@ -303,6 +321,25 @@
                 "ignoreRestSiblings": true
               }
             }
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "src/app/**/*.ts",
+        "src/app/**/*.tsx",
+        "src/lib/**/*.server.ts",
+        "src/lib/**/*.server.tsx",
+        "src/components/template/code-group-server.tsx",
+        "src/components/template/step-guide.tsx",
+        "src/components/unified-detail-page/collection-detail-view.tsx",
+        "src/components/unified-detail-page/sections/configuration-section.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": "off"
           }
         }
       }

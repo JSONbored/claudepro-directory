@@ -30,15 +30,17 @@
  * @see Linear Issues: SHA-3026, SHA-3027, SHA-3028, SHA-3029, SHA-3030, SHA-3031, SHA-3032
  */
 
+import { motion, useScroll, useTransform } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedButton } from '@/src/components/domain/unified-button';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
-import { GitHubStarsButton } from '@/src/components/layout/github-stars-button';
 import { NavigationCommandMenu } from '@/src/components/layout/navigation-command-menu';
 import { ThemeToggle } from '@/src/components/layout/theme-toggle';
 import { UserMenu } from '@/src/components/layout/user-menu';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/src/components/primitives/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,9 +49,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/src/components/ui/dropdown-menu';
-import { NewIndicator } from '@/src/components/ui/new-indicator';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/ui/sheet';
+} from '@/src/components/primitives/dropdown-menu';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/primitives/sheet';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 import { useSearchShortcut } from '@/src/hooks/use-search-shortcut';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
@@ -68,13 +69,12 @@ interface NavLinkProps {
 const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkProps) => {
   const active = isActive(href);
 
-  // Only spread onClick if it's defined to avoid exactOptionalPropertyTypes issues
   const linkProps = {
     href,
+    prefetch: true,
     className: `group relative px-2 py-1 text-sm font-medium transition-colors duration-200 ${
       active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
     } ${className}`,
-    // WCAG 2.1 AA: Indicate current page for screen readers
     ...(active && { 'aria-current': 'page' as const }),
     ...(onClick && { onClick }),
   };
@@ -82,7 +82,6 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   return (
     <Link {...linkProps}>
       {children}
-      {/* Animated underline */}
       <span
         className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all duration-300 ${
           active ? 'w-full' : 'w-0 group-hover:w-full'
@@ -100,6 +99,12 @@ export const Navigation = () => {
 
   // Global search keyboard shortcut (⌘K / Ctrl+K)
   useSearchShortcut();
+
+  // Motion.dev scroll-based animations (Phase 1.5 - October 2025)
+  const { scrollY } = useScroll();
+  const backdropBlur = useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(12px)']);
+  const navOpacity = useTransform(scrollY, [0, 50], [0.95, 1]);
+  const logoScale = useTransform(scrollY, [0, 100], [1, 0.9]);
 
   // SHA-2088: Optimized scroll handler with threshold check and rAF debouncing
   // Only updates state when crossing 20px threshold (prevents 98% of unnecessary re-renders)
@@ -149,16 +154,16 @@ export const Navigation = () => {
       {/* Global Command Menu (⌘K) */}
       <NavigationCommandMenu />
 
-      <header
-        className={
-          'sticky top-0 z-50 w-full pt-1 px-3 pb-3 transition-all duration-300 will-change-transform contain-layout'
-        }
+      <motion.header
+        className="sticky top-0 z-50 w-full pt-1 px-3 pb-3 will-change-transform contain-layout"
+        style={{ opacity: navOpacity }}
       >
         <div className="container mx-auto">
-          <nav
-            className={`rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 ${
+          <motion.nav
+            className={`rounded-2xl border border-border/50 bg-card/95 shadow-lg hover:shadow-xl transition-shadow duration-300 ${
               isScrolled ? 'shadow-xl' : ''
             }`}
+            style={{ backdropFilter: backdropBlur }}
             aria-label="Main navigation container"
           >
             <div className="px-3 md:px-4">
@@ -167,17 +172,20 @@ export const Navigation = () => {
                   isScrolled ? 'h-11 md:h-12' : 'h-14 md:h-16'
                 }`}
               >
-                {/* Logo */}
+                {/* Logo with Motion.dev scale animation */}
                 <Link
                   href={ROUTES.HOME}
-                  className={'flex items-center gap-2 min-w-0 flex-shrink'}
+                  prefetch={true}
+                  className="flex items-center gap-2 min-w-0 flex-shrink"
                   aria-label="Claude Pro Directory - Go to homepage"
                 >
-                  <LogoIcon
-                    className={`transition-all duration-300 flex-shrink-0 hidden xl:block ${
-                      isScrolled ? 'h-6 w-6' : 'h-8 w-8'
-                    }`}
-                  />
+                  <motion.div style={{ scale: logoScale }}>
+                    <LogoIcon
+                      className={`transition-all duration-300 flex-shrink-0 hidden xl:block ${
+                        isScrolled ? 'h-6 w-6' : 'h-8 w-8'
+                      }`}
+                    />
+                  </motion.div>
                   <span
                     className={`font-medium text-foreground transition-all duration-300 hidden xl:inline ${
                       isScrolled ? 'text-base' : 'text-lg'
@@ -202,7 +210,7 @@ export const Navigation = () => {
                       {link.isNew ? (
                         <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
                           {link.label}
-                          <NewIndicator label={`New: ${link.label}`} />
+                          <UnifiedBadge variant="new-indicator" label={`New: ${link.label}`} />
                         </span>
                       ) : (
                         link.label
@@ -236,6 +244,7 @@ export const Navigation = () => {
                                   <DropdownMenuItem key={link.href} asChild>
                                     <Link
                                       href={link.href}
+                                      prefetch={true}
                                       className={
                                         'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg hover:bg-accent/10 hover:scale-[1.02] transition-all duration-200 group'
                                       }
@@ -276,6 +285,7 @@ export const Navigation = () => {
                       <DropdownMenuItem asChild>
                         <Link
                           href={ROUTES.SUBMIT}
+                          prefetch={true}
                           className={
                             'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg bg-accent/5 hover:bg-accent/10 hover:scale-[1.01] transition-all duration-200 group'
                           }
@@ -344,7 +354,7 @@ export const Navigation = () => {
                     <DiscordIcon className="h-4 w-4" />
                   </Button>
 
-                  <GitHubStarsButton className={'hidden md:flex'} />
+                  <UnifiedButton variant="github-stars" className={'hidden md:flex'} />
 
                   <UserMenu className={'hidden md:flex'} />
 
@@ -391,7 +401,10 @@ export const Navigation = () => {
                                   {link.isNew ? (
                                     <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                                       {link.label}
-                                      <NewIndicator label={`New: ${link.label}`} />
+                                      <UnifiedBadge
+                                        variant="new-indicator"
+                                        label={`New: ${link.label}`}
+                                      />
                                     </span>
                                   ) : (
                                     link.label
@@ -476,9 +489,9 @@ export const Navigation = () => {
                 </div>
               </div>
             </div>
-          </nav>
+          </motion.nav>
         </div>
-      </header>
+      </motion.header>
     </>
   );
 };

@@ -63,16 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify Stripe account permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Rate limit exceeded - 429 Too Many Requests error",
+      "solution": "Rate limits: 100 req/sec live mode, 25 req/sec test mode. Check RateLimit-Remaining header in responses. Implement exponential backoff for retries. Use webhooks instead of polling. Batch operations where possible."
     },
     {
-      "issue": "Check test vs live mode configuration",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Test mode vs live mode object mismatch",
+      "solution": "Test and live mode objects completely separate. Use sk_test_ keys for test mode, sk_live_ for production. Verify API key matches intended environment. Check Dashboard mode toggle matches code environment."
     },
     {
-      "issue": "Ensure webhook endpoints are configured correctly",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Webhook delivery failures or retry exhaustion",
+      "solution": "Live mode: Stripe retries 3 days with exponential backoff. Test mode: 3 retries over few hours. Ensure endpoint returns 200 status quickly. Check webhook signing secret matches. Review endpoint logs for errors."
+    },
+    {
+      "issue": "Authentication failed or API key invalid",
+      "solution": "Verify API key starts with sk_test_ or sk_live_ prefix. Check key not revoked in Stripe Dashboard. Ensure correct publishable/secret key pair. Re-generate keys if compromised. Use restricted keys for limited scopes."
     }
   ],
   "examples": [

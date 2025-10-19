@@ -11,15 +11,21 @@
  * - Sign in/out functionality
  * - WCAG AA accessibility compliant
  *
+ * Enhanced with Motion.dev (Phase 1.5 - October 2025):
+ * - Avatar scale animation on hover
+ * - Cascade animations (uses DropdownMenu stagger)
+ * - Smooth spring physics
+ *
  * @module components/layout/user-menu
  */
 
 import type { User } from '@supabase/supabase-js';
+import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
-import { Button } from '@/src/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/avatar';
+import { Button } from '@/src/components/primitives/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +33,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/src/components/ui/dropdown-menu';
+} from '@/src/components/primitives/dropdown-menu';
+import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { Activity, BookOpen, LogOut, Settings, User as UserIcon } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -99,7 +106,7 @@ export function UserMenu({ className }: UserMenuProps) {
   if (loading) {
     return (
       <div className={`flex items-center ${className}`}>
-        <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
+        <Skeleton size="lg" width="lg" rounded="full" className="h-8 w-8" />
       </div>
     );
   }
@@ -140,18 +147,24 @@ export function UserMenu({ className }: UserMenuProps) {
     <div className={className}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="relative h-8 w-8 rounded-full p-0 hover:ring-2 hover:ring-accent/30"
-            aria-label={`User menu for ${displayName}`}
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
           >
-            <Avatar className="h-8 w-8">
-              {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName || 'User avatar'} />}
-              <AvatarFallback className="bg-accent/20 text-accent font-semibold text-sm">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-          </Button>
+            <Button
+              variant="ghost"
+              className="relative h-8 w-8 rounded-full p-0 hover:ring-2 hover:ring-accent/30"
+              aria-label={`User menu for ${displayName}`}
+            >
+              <Avatar className="h-8 w-8">
+                {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName || 'User avatar'} />}
+                <AvatarFallback className="bg-accent/20 text-accent font-semibold text-sm">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+          </motion.div>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent className="w-56" align="end" forceMount>

@@ -11,6 +11,28 @@
     "maxTokens": 8000,
     "systemPrompt": "You are a Kubernetes DevSecOps engineer focused on secure, automated, production-ready deployments"
   },
+  "troubleshooting": [
+    {
+      "issue": "Pod security standards not enforced in manifest reviews",
+      "solution": "Add Kubernetes YAML patterns to scope with security context triggers. Configure keywords for securityContext, runAsNonRoot, and capabilities. Enable for pod policy validation and audits."
+    },
+    {
+      "issue": "RBAC configuration guidance missing for service accounts",
+      "solution": "Include RBAC manifest patterns (Role, RoleBinding, ServiceAccount) in scope. Add triggers for permission keywords verbs, resources, and apiGroups. Configure for least-privilege reviews."
+    },
+    {
+      "issue": "GitOps workflow recommendations not appearing for ArgoCD",
+      "solution": "Add ArgoCD Application manifests and Kustomize patterns to scope. Configure triggers for syncPolicy, automated deployments, and GitOps keywords. Enable for deployment troubleshooting."
+    },
+    {
+      "issue": "Network policy security advice conflicts with service mesh rules",
+      "solution": "Set priority overrides favoring network policy for traditional networking and service mesh for traffic management. Use scope boundaries to separate policy types with Istio context."
+    },
+    {
+      "issue": "Secret management patterns not suggested for sensitive data",
+      "solution": "Configure triggers for Secret, ExternalSecrets, and SealedSecrets patterns. Add scope for secret operators and encryption keywords. Enable during security audits and credential rotation."
+    }
+  ],
   "githubUrl": "https://github.com/kubernetes/kubernetes",
   "documentationUrl": "https://kubernetes.io/docs/concepts/security/",
   "source": "community",

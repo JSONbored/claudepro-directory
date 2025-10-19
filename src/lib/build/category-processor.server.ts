@@ -18,20 +18,67 @@ import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { z } from 'zod';
 import {
-  type BuildCategoryConfig,
-  type BuildCategoryId,
-  type BuildMetrics,
-  type CategoryBuildResult,
+  type CategoryId,
   type ContentType,
-  extractMetadata,
-  getBuildCategoryConfig,
+  UNIFIED_CATEGORY_REGISTRY,
 } from '@/src/lib/config/category-config';
+import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { logger } from '@/src/lib/logger';
 import { generateSlugFromFilename } from '@/src/lib/schemas/content-generation.schema';
 import { slugToTitle } from '@/src/lib/utils';
 import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
 import { generateDisplayTitle } from '@/src/lib/utils/content.utils';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
+
+/**
+ * Build category configuration type (for generic usage in category-processor)
+ * Moved from category-config.ts - only used by build system
+ */
+export interface BuildCategoryConfig<T extends ContentType = ContentType> {
+  readonly id: CategoryId;
+  readonly pluralTitle: string;
+  readonly schema: z.ZodType<T>;
+  readonly typeName: string;
+  readonly generateFullContent: boolean;
+  readonly metadataFields: ReadonlyArray<string>;
+  readonly buildConfig: {
+    readonly batchSize: number;
+    readonly enableCache: boolean;
+    readonly cacheTTL: number;
+  };
+  readonly apiConfig: {
+    readonly generateStaticAPI: boolean;
+    readonly includeTrending: boolean;
+    readonly maxItemsPerResponse: number;
+  };
+}
+
+/**
+ * Performance metrics for build operations
+ * Moved from category-config.ts - only used by build system
+ */
+export interface BuildMetrics {
+  readonly category: CategoryId;
+  readonly filesProcessed: number;
+  readonly filesValid: number;
+  readonly filesInvalid: number;
+  readonly processingTimeMs: number;
+  readonly cacheHitRate: number;
+  readonly peakMemoryMB: number;
+}
+
+/**
+ * Build result with metrics
+ * Moved from category-config.ts - only used by build system
+ */
+export interface CategoryBuildResult {
+  readonly category: CategoryId;
+  readonly success: boolean;
+  readonly items: readonly ContentType[];
+  readonly metadata: readonly Record<string, unknown>[];
+  readonly metrics: BuildMetrics;
+  readonly errors: readonly Error[];
+}
 
 /**
  * Build cache schema (Zod) for runtime validation
@@ -100,6 +147,29 @@ function validateSecurePath(filePath: string, allowedDir: string): void {
  */
 function computeContentHash(content: string): string {
   return crypto.createHash('sha256').update(content, 'utf-8').digest('hex');
+}
+
+/**
+ * Extract metadata fields from content based on config
+ * Moved from category-config.ts - only used here
+ *
+ * @param content - Content item to extract metadata from
+ * @param config - Category configuration with metadataFields
+ * @returns Record of metadata field values
+ */
+function extractMetadata(
+  content: ContentType,
+  config: (typeof UNIFIED_CATEGORY_REGISTRY)[CategoryId]
+): Record<string, unknown> {
+  const metadata: Record<string, unknown> = {};
+
+  for (const field of config.metadataFields) {
+    if (Object.hasOwn(content, field)) {
+      metadata[field as string] = content[field as keyof ContentType];
+    }
+  }
+
+  return metadata;
 }
 
 /**
@@ -212,27 +282,49 @@ async function processContentFile<T extends ContentType>(
       }
     }
 
-    // Production-grade: Parse JSON with validation using safeParse
+    // Parse based on file type
     const rawJsonSchema = z
       .object({})
       .passthrough()
-      .describe('Raw JSON content schema with passthrough for unknown fields');
+      .describe('Raw content schema with passthrough for unknown fields');
 
     let parsedData: z.infer<typeof rawJsonSchema>;
+    const isMdx = file.endsWith('.mdx');
+
     try {
-      // safeParse handles JSON.parse + Zod validation in one secure operation
-      parsedData = safeParse(content, rawJsonSchema, {
-        strategy: ParseStrategy.VALIDATED_JSON,
-      });
+      if (isMdx) {
+        // Parse MDX frontmatter for guides
+        const { frontmatter, content: mdxContent } = parseMDXFrontmatter(content);
+
+        // Extract subcategory from file path (e.g., "tutorials/guide.mdx" → "tutorials")
+        const subcategory = file.includes('/') ? file.split('/')[0] : undefined;
+
+        // Convert MDX frontmatter to match guide schema
+        parsedData = {
+          ...frontmatter,
+          content: mdxContent,
+          category: 'guides', // All MDX files are guides
+          subcategory,
+          // Fallback: dateAdded is required by base schema, use dateUpdated or current date
+          dateAdded: frontmatter.dateUpdated || new Date().toISOString().split('T')[0],
+        };
+      } else {
+        // safeParse handles JSON.parse + Zod validation in one secure operation
+        parsedData = safeParse(content, rawJsonSchema, {
+          strategy: ParseStrategy.VALIDATED_JSON,
+        });
+      }
     } catch (parseError) {
       throw new Error(
-        `JSON parse error: ${parseError instanceof Error ? parseError.message : String(parseError)}`
+        `${isMdx ? 'MDX' : 'JSON'} parse error: ${parseError instanceof Error ? parseError.message : String(parseError)}`
       );
     }
 
     // Auto-generate slug from filename if missing
     if (!parsedData.slug) {
-      parsedData.slug = generateSlugFromFilename(file);
+      // For MDX files with subdirectories, remove subdir prefix
+      const filenameOnly = file.includes('/') ? file.split('/')[1] : file;
+      parsedData.slug = generateSlugFromFilename(filenameOnly || file);
     }
 
     // Auto-generate title from slug if missing
@@ -267,18 +359,10 @@ async function processContentFile<T extends ContentType>(
       // Calculate max title length for this category (based on metadata-registry.ts pattern)
       const SITE_NAME = 'Claude Pro Directory'; // 20 chars
       const SEPARATOR = ' - '; // 3 chars
-      const CATEGORY_NAMES: Record<string, string> = {
-        agents: 'AI Agents',
-        mcp: 'MCP',
-        rules: 'Rules',
-        commands: 'Commands',
-        hooks: 'Hooks',
-        statuslines: 'Statuslines',
-        guides: 'Guides',
-        collections: 'Collections',
-      };
 
-      const categoryDisplay = CATEGORY_NAMES[category] || category;
+      const categoryDisplay =
+        UNIFIED_CATEGORY_REGISTRY[category as keyof typeof UNIFIED_CATEGORY_REGISTRY]
+          ?.pluralTitle || category;
       const overhead =
         SEPARATOR.length + categoryDisplay.length + SEPARATOR.length + SITE_NAME.length;
       const maxContentLength = 60 - overhead;
@@ -347,33 +431,65 @@ async function processCategoryFiles<T extends ContentType>(
   // Read directory
   const files = await readdir(categoryDir);
 
-  // Security: Filter for valid JSON files only
+  // Security: Filter for valid content files (JSON or MDX for guides)
   // Prevents execution of other file types and excludes templates
-  const jsonFiles = files.filter(
-    (f) =>
-      f.endsWith('.json') &&
-      !f.includes('..') &&
-      !f.startsWith('.') &&
-      !f.includes('template') &&
-      /^[a-zA-Z0-9\-_]+\.json$/.test(f)
-  );
+  let contentFiles: string[];
 
-  logger.info(`Processing ${jsonFiles.length} ${config.name} files`);
+  if (config.id === 'guides') {
+    // For guides: Look for MDX files in subdirectories
+    const subdirs = ['tutorials', 'comparisons', 'workflows', 'use-cases', 'troubleshooting'];
+    contentFiles = [];
+
+    for (const subdir of subdirs) {
+      const subdirPath = join(categoryDir, subdir);
+      try {
+        const subdirFiles = await readdir(subdirPath);
+        const mdxFiles = subdirFiles
+          .filter(
+            (f) =>
+              f.endsWith('.mdx') &&
+              !f.includes('..') &&
+              !f.startsWith('.') &&
+              !f.includes('template') &&
+              /^[a-zA-Z0-9\-_]+\.mdx$/.test(f)
+          )
+          .map((f) => `${subdir}/${f}`); // Prefix with subdir for routing
+        contentFiles.push(...mdxFiles);
+      } catch (error) {
+        // Subdirectory doesn't exist or can't be read - skip it
+        logger.debug(
+          `Skipping subdirectory ${subdir}: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+  } else {
+    // For other categories: Look for JSON files
+    contentFiles = files.filter(
+      (f) =>
+        f.endsWith('.json') &&
+        !f.includes('..') &&
+        !f.startsWith('.') &&
+        !f.includes('template') &&
+        /^[a-zA-Z0-9\-_]+\.json$/.test(f)
+    );
+  }
+
+  logger.info(`Processing ${contentFiles.length} ${config.pluralTitle} files`);
 
   // Process files in parallel batches for optimal CPU utilization
   const results: FileProcessResult<T>[] = [];
   const batchSize = config.buildConfig.batchSize;
 
-  for (let i = 0; i < jsonFiles.length; i += batchSize) {
-    const batch = jsonFiles.slice(i, i + batchSize);
+  for (let i = 0; i < contentFiles.length; i += batchSize) {
+    const batch = contentFiles.slice(i, i + batchSize);
     const batchResults = await batchMap(batch, (file) =>
       processContentFile<T>(file, contentDir, config, cache)
     );
     results.push(...batchResults);
 
     // Log progress for long-running builds
-    if (jsonFiles.length > 50 && (i + batchSize) % 50 === 0) {
-      logger.info(`Processed ${i + batchSize}/${jsonFiles.length} ${config.name} files`);
+    if (contentFiles.length > 50 && (i + batchSize) % 50 === 0) {
+      logger.info(`Processed ${i + batchSize}/${contentFiles.length} ${config.pluralTitle} files`);
     }
   }
 
@@ -397,13 +513,13 @@ async function processCategoryFiles<T extends ContentType>(
  */
 export async function buildCategory(
   contentDir: string,
-  categoryId: BuildCategoryId,
+  categoryId: CategoryId,
   cache: BuildCache | null
 ): Promise<CategoryBuildResult> {
   const startTime = performance.now();
   const startMemory = process.memoryUsage().heapUsed;
 
-  const config = getBuildCategoryConfig(categoryId);
+  const config = UNIFIED_CATEGORY_REGISTRY[categoryId];
 
   try {
     // Process all files with type-safe generic
@@ -435,7 +551,7 @@ export async function buildCategory(
     };
 
     logger.success(
-      `Built ${config.name}: ${metrics.filesValid}/${metrics.filesProcessed} valid (${metrics.processingTimeMs.toFixed(0)}ms, ${metrics.peakMemoryMB.toFixed(1)}MB)`
+      `Built ${config.pluralTitle}: ${metrics.filesValid}/${metrics.filesProcessed} valid (${metrics.processingTimeMs.toFixed(0)}ms, ${metrics.peakMemoryMB.toFixed(1)}MB)`
     );
 
     return {

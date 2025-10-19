@@ -41,7 +41,7 @@
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content-list-server';
 import { statsRedis } from '@/src/lib/cache.server';
-import { getCategoryConfig, isValidCategory } from '@/src/lib/config/category-config';
+import { isValidCategory, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -116,12 +116,19 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;
 
-  // Load category config for metadata generation
-  const categoryConfig = getCategoryConfig(category);
+  // Validate category and load config
+  if (!isValidCategory(category)) {
+    return generatePageMetadata('/:category', {
+      params: { category },
+      category,
+    });
+  }
+
+  const categoryConfig = UNIFIED_CATEGORY_REGISTRY[category];
 
   return generatePageMetadata('/:category', {
     params: { category },
-    categoryConfig: categoryConfig || undefined,
+    categoryConfig,
     category,
   });
 }
@@ -157,7 +164,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   }
 
   // Get category configuration
-  const config = getCategoryConfig(category);
+  const config = UNIFIED_CATEGORY_REGISTRY[category];
   if (!config) {
     notFound();
   }
@@ -169,15 +176,22 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   const items = await statsRedis.enrichWithAllCounts(
     itemsData.map((item) => ({
       ...item,
-      category: category as typeof item.category,
+      category,
     }))
   );
 
   // Process badges (handle dynamic count badges)
-  const badges = config.listPage.badges.map((badge) => ({
-    ...(badge.icon && { icon: badge.icon }),
-    text: typeof badge.text === 'function' ? badge.text(items.length) : badge.text,
-  }));
+  const badges = config.listPage.badges.map((badge) => {
+    const processed: { icon?: string; text: string } = {
+      text: typeof badge.text === 'function' ? badge.text(items.length) : badge.text,
+    };
+
+    if ('icon' in badge && badge.icon) {
+      processed.icon = badge.icon;
+    }
+
+    return processed;
+  });
 
   logger.info('Category page rendered', {
     category,
@@ -190,7 +204,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
       description={config.description}
       icon={config.icon.displayName?.toLowerCase() || 'sparkles'}
       items={items}
-      type={category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides' | 'skills'}
+      type={category} // MODERNIZATION: No cast needed - category already CategoryId from route params
       searchPlaceholder={config.listPage.searchPlaceholder}
       badges={badges}
     />

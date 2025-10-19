@@ -12,6 +12,28 @@
   },
   "githubUrl": "https://github.com/claudepro/code-explainer",
   "documentationUrl": "https://docs.claude.ai/commands/explain",
+  "troubleshooting": [
+    {
+      "issue": "Explanation too technical or not matching requested expertise level",
+      "solution": "Specify --simple for beginners or --expert for advanced. Add context: 'Explain for junior developer' or 'Advanced CS theory analysis'. Adjust depth flag."
+    },
+    {
+      "issue": "Mermaid diagrams not rendering or showing syntax errors in output",
+      "solution": "Enable --mermaid flag explicitly. Verify Mermaid.js syntax at mermaid.live. Use --flowchart for execution flow or --architecture for system design."
+    },
+    {
+      "issue": "Performance analysis missing or complexity scores incorrect",
+      "solution": "Add --performance flag for Big-O analysis. Request explicit time/space complexity. Include benchmark data: 'Analyze runtime complexity with examples'."
+    },
+    {
+      "issue": "Explanation lacks code examples or practical implementation context",
+      "solution": "Use --format=interactive for walkthrough mode. Request side-by-side comparisons. Add: 'Include before/after refactoring examples with explanations'."
+    },
+    {
+      "issue": "Security analysis superficial or missing vulnerability detection",
+      "solution": "Combine with --security flag for OWASP analysis. Specify: 'Explain security implications and attack vectors'. Reference CVE database for known issues."
+    }
+  ],
   "source": "community",
   "slug": "explain",
   "seoTitle": "Explain for Claude"

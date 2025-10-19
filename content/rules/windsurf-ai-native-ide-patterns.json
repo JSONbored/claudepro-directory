@@ -14,5 +14,27 @@
   "githubUrl": "https://github.com/codeium/windsurf",
   "documentationUrl": "https://docs.codeium.com/windsurf",
   "source": "community",
-  "seoTitle": "Windsurf AI-Native IDE Patterns for Claude"
+  "seoTitle": "Windsurf AI-Native IDE Patterns for Claude",
+  "troubleshooting": [
+    {
+      "issue": "Cascade not detecting related files",
+      "solution": "Explicitly select files in sidebar with Cmd/Ctrl+Click before opening Cascade. Use file references in prompts like 'Update /path/to/file.ts and related types'. Check that workspace has proper .gitignore and file indexing is complete."
+    },
+    {
+      "issue": "Multi-file refactoring making inconsistent changes",
+      "solution": "Provide specific scope in prompt: 'Refactor across these 3 files maintaining existing patterns in /lib/utils'. Use Flow session for coordinated changes. Review generated changes before accepting. Add examples of desired patterns to prompt."
+    },
+    {
+      "issue": "Type imports not auto-suggested by Cascade",
+      "solution": "Ensure TypeScript is properly configured with paths in tsconfig.json. Run 'TypeScript: Restart TS Server' command. Check that files are in workspace scope. Use explicit import hints in prompts when needed."
+    },
+    {
+      "issue": "Flow collaboration session not syncing",
+      "solution": "Check network connectivity and firewall settings for Windsurf servers. Verify all collaborators on same Windsurf version. Restart Flow session if stale. Use explicit file references to ensure context is shared."
+    },
+    {
+      "issue": "Cascade generating code not matching project patterns",
+      "solution": "Reference existing pattern files in prompts: 'Follow patterns in /components/ui/button.tsx'. Add project style guide to workspace docs. Use 'Explain this pattern' first to ensure Cascade understands context. Provide code examples in prompt."
+    }
+  ]
 }

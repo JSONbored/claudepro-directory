@@ -271,15 +271,9 @@ async function main(): Promise<void> {
     logger.log('DRY RUN MODE - No files will be modified');
   }
 
-  const categories: ContentCategory[] = [
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
-    'collections',
-  ];
+  // MODERNIZATION: All categories from UNIFIED_CATEGORY_REGISTRY
+  const { getAllCategoryIds } = await import('../../src/lib/config/category-config.js');
+  const categories = getAllCategoryIds() as ContentCategory[];
 
   const allStats: OptimizationStats = {
     total: 0,

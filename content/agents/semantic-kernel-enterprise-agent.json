@@ -21,6 +21,28 @@
     "maxTokens": 4000,
     "systemPrompt": "You are a Microsoft Semantic Kernel enterprise specialist focused on Azure-native AI applications with governance and security"
   },
+  "troubleshooting": [
+    {
+      "issue": "Azure OpenAI rate limit 429 errors during high-volume requests",
+      "solution": "Built-in retry with exponential backoff (3 attempts). Add Microsoft.Extensions.Http.Resilience for custom retry. Increase TPM quota in Azure Portal or implement request queue."
+    },
+    {
+      "issue": "Plugin functions not being auto-invoked by AI model",
+      "solution": "Set FunctionChoiceBehavior.Auto() in PromptExecutionSettings. Verify plugin with kernel.Plugins.Add(). Use clear function descriptions. Ensure model supports tools (gpt-4, not gpt-3.5-turbo-instruct)."
+    },
+    {
+      "issue": "KeyError when invoking plugin or function name not recognized",
+      "solution": "Verify plugin/function names match exactly (case-sensitive). Run: pip install --upgrade semantic-kernel. Check kernel.plugins property. Use [KernelFunction] attribute for C# registration."
+    },
+    {
+      "issue": "Resource not found 404 error connecting to Azure OpenAI endpoint",
+      "solution": "Verify deployment name matches Azure Portal exactly. Check endpoint format: https://RESOURCE.openai.azure.com/. Confirm API key from correct resource. Test with: az cognitiveservices account show."
+    },
+    {
+      "issue": "High token usage with large plugin datasets or function schemas",
+      "solution": "Minimize function descriptions. Paginate dataset responses. Enable semantic caching with Azure Redis. Use summary functions vs full retrieval. Monitor: ChatHistory.Count property."
+    }
+  ],
   "useCases": [
     "Building enterprise AI applications with Azure OpenAI and managed identity",
     "Implementing plugin-based architectures with governance and audit controls",

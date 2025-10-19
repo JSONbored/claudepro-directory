@@ -69,16 +69,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Ensure API key has necessary permissions for your operations",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Authentication failed with 401 Unauthorized error",
+      "solution": "Verify Personal Access Token at https://airtable.com/account has correct scopes. Ensure token grants access to specific base. Check AIRTABLE_API_KEY environment variable matches your PAT."
     },
     {
-      "issue": "Check rate limits (5 requests/second) if experiencing throttling",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Rate limit exceeded - 5 requests per second throttling",
+      "solution": "Implement 200ms delay between requests (5 req/sec limit). Use batch endpoints to update 10 records per request. Consider batching to achieve 50 updates/second maximum throughput."
     },
     {
-      "issue": "Verify base and table IDs are correct in your requests",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Base or table not found with 404 error",
+      "solution": "Verify base ID starts with 'app' prefix. Check table name is exact case-sensitive match. Confirm PAT has base-level permissions granted at https://airtable.com/account."
+    },
+    {
+      "issue": "Field validation errors when creating or updating records",
+      "solution": "Match field types exactly (text, number, single select, etc). Provide all required fields. Use GET request to table schema to verify field names, types, and validation rules."
     }
   ],
   "examples": [

@@ -39,6 +39,22 @@
     {
       "issue": "Broken links after re-organization",
       "solution": "Regenerate slugs and run a link validator; ensure relative paths are correct."
+    },
+    {
+      "issue": "Remark/unified plugins throwing 'Cannot read property' errors",
+      "solution": "Ensure plugin order is correct: parse → transform plugins → stringify. Check unified() pipeline sequence and plugin compatibility."
+    },
+    {
+      "issue": "Frontmatter YAML parsing fails with special characters in values",
+      "solution": "Quote YAML values containing colons, brackets, or special chars. Use remark-frontmatter with yaml-safe mode enabled."
+    },
+    {
+      "issue": "PDF export cuts off code blocks or loses syntax highlighting",
+      "solution": "Use Playwright with explicit page breaks. Install prism.js or highlight.js for code styling, set print CSS media queries."
+    },
+    {
+      "issue": "TOC anchor links not working after Markdown-to-HTML conversion",
+      "solution": "Use remark-slug to generate consistent heading IDs, then remark-toc with 'tight' option. Ensure heading hierarchy is valid."
     }
   ],
   "documentationUrl": "https://github.com/remarkjs/remark",

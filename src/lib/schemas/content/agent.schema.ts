@@ -10,6 +10,7 @@ import { z } from 'zod';
 import {
   baseConfigurationSchema,
   baseContentMetadataSchema,
+  baseTroubleshootingSchema,
 } from '@/src/lib/schemas/content/base-content.schema';
 
 /**
@@ -41,9 +42,14 @@ export const agentContentSchema = z
       .passthrough()
       .optional()
       .describe('Optional complex installation object with platform-specific setup instructions'), // Complex installation object - allows any properties while maintaining type safety
+    troubleshooting: z
+      .array(baseTroubleshootingSchema)
+      .max(20)
+      .optional()
+      .describe('Optional array of common issues and solutions (max 20)'),
   })
   .describe(
-    'Agent content schema for AI assistant configurations. Inherits base content metadata and adds agent-specific fields including AI model settings and installation instructions.'
+    'Agent content schema for AI assistant configurations. Inherits base content metadata and adds agent-specific fields including AI model settings, installation instructions, and troubleshooting guidance.'
   );
 
 export type AgentContent = z.infer<typeof agentContentSchema>;

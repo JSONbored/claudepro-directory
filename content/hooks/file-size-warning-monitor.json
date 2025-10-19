@@ -34,5 +34,27 @@
     "Asset optimization for web applications",
     "CI/CD pipeline size validation"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook triggers warnings for legitimate large binary files",
+      "solution": "Create size threshold overrides in .claude/hook-config.json: THRESHOLD_OVERRIDES={'*.wasm': 10485760}. Add file extension exclusions for known large asset types."
+    },
+    {
+      "issue": "File size calculation fails on Windows with stat errors",
+      "solution": "Use PowerShell fallback for Windows: (Get-Item $FILE_PATH).Length. Add platform detection: if [[ $OSTYPE == 'msys' ]], use alternative stat format or wc -c."
+    },
+    {
+      "issue": "Git size comparison shows incorrect previous version size",
+      "solution": "Check if file is staged vs committed: use git show :\"$FILE_PATH\" for staged, git show HEAD:\"$FILE_PATH\" for committed. Handle new files with [ -z $PREV_SIZE ] check."
+    },
+    {
+      "issue": "Hook slows down every file write operation significantly",
+      "solution": "Add file size pre-check before running full analysis: skip hook if size < 100KB. Use matcher filters: matchers: ['write'] only, exclude 'edit' for incremental changes."
+    },
+    {
+      "issue": "Image dimension detection with identify command fails",
+      "solution": "Check if ImageMagick installed: command -v identify || skip dimension check. Use alternative: file command for basic image info without requiring external dependencies."
+    }
+  ],
   "source": "community"
 }

@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
-import { SubmitFormClient } from '@/src/components/submit/submit-form-client';
-import { Badge } from '@/src/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { SubmitFormClient } from '@/src/components/forms/submit-form-client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import {
   getRecentMerged,
   getSubmissionStats,
@@ -150,9 +150,9 @@ export default async function SubmitPage() {
                     <div className="flex-1 min-w-0">
                       <p className={'text-sm font-medium truncate'}>{submission.content_name}</p>
                       <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mt-1 flex-wrap`}>
-                        <Badge variant="outline" className="text-xs">
+                        <UnifiedBadge variant="base" style="outline" className="text-xs">
                           {TYPE_LABELS[submission.content_type]}
-                        </Badge>
+                        </UnifiedBadge>
                         {submission.user && (
                           <span className={'text-xs text-muted-foreground'}>
                             by{' '}
@@ -240,7 +240,8 @@ export default async function SubmitPage() {
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
-        <InlineEmailCTA
+        <UnifiedNewsletterCapture
+          source="content_page"
           variant="hero"
           context="submit-page"
           headline="Join 1,000+ Claude Power Users"

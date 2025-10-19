@@ -32,5 +32,27 @@
     "Maintaining edit history without git commits",
     "Protection during bulk file operations"
   ],
+  "troubleshooting": [
+    {
+      "issue": "PreToolUse hook runs but backup directory not created",
+      "solution": "Verify mkdir permissions in project root. Check disk space: df -h. Ensure script runs with correct CWD: pwd >&2 in hook. Create .backups manually if needed."
+    },
+    {
+      "issue": "Backup created but original file modification fails after",
+      "solution": "PreToolUse only creates backup, doesn't block edits. Check subsequent tool execution logs. Verify hook exits with 0 (non-blocking). Review tool output for actual edit errors."
+    },
+    {
+      "issue": "Timestamp collisions when editing same file rapidly",
+      "solution": "Add milliseconds to timestamp: date +%Y%m%d_%H%M%S_%N. Or use hash suffix: ${TIMESTAMP}_$(md5sum file | cut -c1-8). Implement collision detection and retry logic."
+    },
+    {
+      "issue": "Hook backs up new files that don't exist yet on Write",
+      "solution": "Verify [ -f \"$FILE_PATH\" ] check works correctly. Check TOOL_NAME to distinguish edit vs write: if [[ \"$TOOL_NAME\" == \"edit\" ]]. Skip backup for new file creation."
+    },
+    {
+      "issue": "Backup directory grows unbounded filling disk space",
+      "solution": "Add retention policy: find .backups -mtime +30 -delete. Implement backup rotation script. Use git for versioning instead. Add size limit checks before creating backups."
+    }
+  ],
   "source": "community"
 }

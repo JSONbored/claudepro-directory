@@ -65,5 +65,32 @@
   "compatibility": {
     "claudeDesktop": true,
     "claudeCode": false
-  }
+  },
+  "troubleshooting": [
+    {
+      "issue": "Asana and ClickUp MCP servers conflict when both enabled",
+      "solution": "Choose one project management tool. Edit claude_desktop_config.json to comment out the unused server. Restart Claude Desktop to apply changes.",
+      "category": "compatibility"
+    },
+    {
+      "issue": "Canva MCP server fails with 'API key not found' error",
+      "solution": "Generate Canva API token at canva.com/developers. Add to config: CANVA_API_KEY=token. Verify token has design.read and design.write scopes.",
+      "category": "installation_setup"
+    },
+    {
+      "issue": "Cloudinary media uploads fail after Canva integration",
+      "solution": "Set unique output directories for each service. Configure Canva uploads to /canva and Cloudinary to /cloudinary in respective MCP server settings.",
+      "category": "common_errors"
+    },
+    {
+      "issue": "Missing Node.js dependencies for all MCP servers in bundle",
+      "solution": "Install Node.js 18+ from nodejs.org. Run npm install -g @modelcontextprotocol/server-* for each MCP server. Verify with node --version.",
+      "category": "prerequisites"
+    },
+    {
+      "issue": "Collection items installed but not appearing in Claude",
+      "solution": "Verify installation order: project management first, then media tools. Check claude_desktop_config.json syntax. Restart Claude Desktop completely.",
+      "category": "installation_setup"
+    }
+  ]
 }

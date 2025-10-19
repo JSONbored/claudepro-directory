@@ -12,6 +12,28 @@
   },
   "githubUrl": "https://github.com/mintlify/mint",
   "documentationUrl": "https://mintlify.com/docs",
+  "troubleshooting": [
+    {
+      "issue": "OpenAPI spec with misspelled 'openapi' field prevents API reference generation",
+      "solution": "Verify 'openapi' metadata field spelling matches OpenAPI document exactly. Ensure HTTP method and path match spec. Check for trailing slash differences."
+    },
+    {
+      "issue": "API reference pages missing from navigation after OpenAPI import",
+      "solution": "Remove x-hidden: true from OpenAPI operations. Validate OpenAPI spec for errors at editor.swagger.io. Convert OpenAPI 2.0 to 3.0+ format."
+    },
+    {
+      "issue": "MDX component syntax errors breaking documentation build process",
+      "solution": "Enable AI syntax fixes in Settings > Editor. Check malformed components: proper closing tags, valid props. Use Mintlify web editor syntax validation."
+    },
+    {
+      "issue": "Duplicate file and navigation entry causing 'operation already exists' error",
+      "solution": "Delete MDX file if operation in navigation (e.g., remove get-users.mdx when 'GET /users' in mint.json). Use one source per endpoint only."
+    },
+    {
+      "issue": "Authentication playground not showing securitySchemes from OpenAPI spec",
+      "solution": "Define securitySchemes in components section. Add security field to operations. Configure bearerAuth, apiKey, or OAuth2 in OpenAPI document properly."
+    }
+  ],
   "source": "community",
   "slug": "mintlify-docs",
   "seoTitle": "Mintlify Documentation Generator for Claude"

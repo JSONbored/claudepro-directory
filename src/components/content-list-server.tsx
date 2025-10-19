@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/src/components/content-search-client';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { LazySection } from '@/src/components/infra/lazy-section';
+import { Button } from '@/src/components/primitives/button';
+import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ExternalLink, HelpCircle } from '@/src/lib/icons';
 import type {
@@ -52,7 +54,7 @@ function ContentHeroSection<T extends UnifiedContentItem>({
           <ul className={'flex flex-wrap justify-center gap-2 mb-8 list-none'}>
             {displayBadges.map((badge, idx) => (
               <li key={badge.text || `badge-${idx}`}>
-                <Badge variant={idx === 0 ? 'secondary' : 'outline'}>
+                <UnifiedBadge variant="base" style={idx === 0 ? 'secondary' : 'outline'}>
                   {badge.icon &&
                     (() => {
                       if (typeof badge.icon === 'string') {
@@ -64,7 +66,7 @@ function ContentHeroSection<T extends UnifiedContentItem>({
                       return <BadgeIcon className="h-3 w-3 mr-1" aria-hidden="true" />;
                     })()}
                   {badge.text}
-                </Badge>
+                </UnifiedBadge>
               </li>
             ))}
           </ul>
@@ -87,11 +89,11 @@ function ContentHeroSection<T extends UnifiedContentItem>({
 
 function ContentSearchSkeleton() {
   return (
-    <div className={'w-full space-y-4 animate-pulse'}>
-      <div className={'h-12 bg-card/50 rounded-lg'} />
+    <div className={'w-full space-y-4'}>
+      <Skeleton size="xl" width="3xl" />
       <div className={'flex gap-2 justify-end'}>
-        <div className={'h-10 w-24 bg-card/50 rounded-lg'} />
-        <div className={'h-10 w-20 bg-card/50 rounded-lg'} />
+        <Skeleton size="lg" width="sm" />
+        <Skeleton size="lg" width="xs" />
       </div>
     </div>
   );
@@ -133,15 +135,20 @@ export function ContentListServer<T extends UnifiedContentItem>({
         </Suspense>
       </section>
 
-      {/* Email CTA - Footer section (matching homepage pattern) */}
+      {/* Email CTA - Footer section (matching homepage pattern) with fade-in animation */}
       <section className={'container mx-auto px-4 py-12'}>
-        <InlineEmailCTA
-          variant="hero"
-          context="category-page"
-          category={type}
-          headline={'Join 1,000+ Claude Power Users'}
-          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
-        />
+        <Suspense fallback={null}>
+          <LazySection variant="fade-in" delay={0.15}>
+            <UnifiedNewsletterCapture
+              source="content_page"
+              variant="hero"
+              context="category-page"
+              category={type}
+              headline={'Join 1,000+ Claude Power Users'}
+              description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+            />
+          </LazySection>
+        </Suspense>
       </section>
     </div>
   );

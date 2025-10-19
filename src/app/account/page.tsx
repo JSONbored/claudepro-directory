@@ -1,11 +1,11 @@
-import { Badge } from '@/src/components/ui/badge';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Bookmark, Calendar } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -75,11 +75,15 @@ export default async function AccountDashboard() {
             <CardTitle className="text-sm">Tier</CardTitle>
           </CardHeader>
           <CardContent>
-            <Badge variant={profile?.tier === 'pro' ? 'default' : 'secondary'} className="mt-2">
+            <UnifiedBadge
+              variant="base"
+              style={profile?.tier === 'pro' ? 'default' : 'secondary'}
+              className="mt-2"
+            >
               {profile?.tier
                 ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
                 : 'Free'}
-            </Badge>
+            </UnifiedBadge>
             <p className={'text-xs text-muted-foreground mt-2'}>Membership level</p>
           </CardContent>
         </Card>

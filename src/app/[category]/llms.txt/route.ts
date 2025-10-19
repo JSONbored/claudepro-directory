@@ -7,7 +7,7 @@
  */
 
 import type { NextRequest } from 'next/server';
-import { getCategoryConfig, isValidCategory } from '@/src/lib/config/category-config';
+import { isValidCategory, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
@@ -70,7 +70,7 @@ export async function GET(
     }
 
     // Get category configuration and content
-    const config = getCategoryConfig(category);
+    const config = UNIFIED_CATEGORY_REGISTRY[category];
 
     // Handle case where config is not found (should never happen with validation above)
     if (!config) {

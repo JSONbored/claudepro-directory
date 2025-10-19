@@ -11,7 +11,7 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from '@/src/components/ui/command';
+} from '@/src/components/primitives/command';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**

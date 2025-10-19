@@ -34,5 +34,27 @@
     "Frontend refactoring projects with comprehensive test coverage",
     "Team collaboration with consistent snapshot management workflows"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook runs tests for every file change even non-test files",
+      "solution": "Detection too broad (matches all .js/.ts). Add matchers: 'matchers': ['write:**/*.{test,spec}.{js,ts,jsx,tsx}', 'edit:**/*.{test,spec}.{js,ts,jsx,tsx}'] to trigger only on test files."
+    },
+    {
+      "issue": "Jest runs entire test suite instead of component-specific tests",
+      "solution": "testNamePattern with component name unreliable. Use --testPathPattern: '$TEST_COMMAND -- --testPathPattern=\"$COMPONENT_NAME\" --watchAll=false'. Targets files not test descriptions."
+    },
+    {
+      "issue": "Parallel test execution with --maxWorkers causes race conditions",
+      "solution": "No worker limit causes resource exhaustion. Add '--maxWorkers=2': '$TEST_COMMAND -- --testPathPattern=\"$TEST_PATTERN\" --maxWorkers=2 --watchAll=false' for stable CI execution."
+    },
+    {
+      "issue": "Snapshot update creates duplicate snapshot files after renaming",
+      "solution": "Old snapshots persist when components renamed. Run cleanup: 'npm test -- --updateSnapshot --clearCache' deleting unused snapshots. Or manually remove from __snapshots__ directory."
+    },
+    {
+      "issue": "git diff threshold (10 lines) triggers updates for minor changes",
+      "solution": "Conservative threshold causes excessive updates. Increase: 'if [ \"$LINES_CHANGED\" -gt 50 ]; then' for major changes only. Or check specific files: test if modified file is component."
+    }
+  ],
   "source": "community"
 }

@@ -9,12 +9,11 @@ import fs from 'fs/promises';
 import type { Metadata } from 'next';
 import path from 'path';
 import { ContentListServer } from '@/src/components/content-list-server';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { statsRedis } from '@/src/lib/cache.server';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**
@@ -66,11 +65,15 @@ async function getAllGuides(): Promise<UnifiedContentItem[]> {
           // IMPORTANT: Set category='guides' with subcategory field
           // This allows proper URL construction via getContentItemUrl() helper
           // URLs: /guides/{subcategory}/{slug} where subcategory is tutorials, comparisons, etc.
+          //
+          // CRITICAL: slug must include subcategory prefix for Redis key matching
+          // Redis keys: views:guides:{category}/{slug}
+          // Example: views:guides:tutorials/desktop-mcp-setup
           guides.push({
             title: frontmatter.title || filename,
             description: frontmatter.description || '',
-            slug: filename, // Just the filename, not the full path
-            category: 'guides' as ContentCategory, // Always 'guides' for parent category
+            slug: `${category}/${filename}`, // Include subcategory for Redis key matching
+            category: 'guides' as CategoryId, // Always 'guides' for parent category
             subcategory: category as
               | 'tutorials'
               | 'comparisons'
@@ -134,16 +137,7 @@ export default async function GuidesPage() {
           { text: 'Community Driven' },
         ]}
       />
-
-      {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className={'container mx-auto px-4 py-12'}>
-        <InlineEmailCTA
-          variant="hero"
-          context="guides-page"
-          headline="Join 1,000+ Claude Power Users"
-          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
-        />
-      </section>
+      {/* Newsletter CTA already included in ContentListServer component */}
     </>
   );
 }

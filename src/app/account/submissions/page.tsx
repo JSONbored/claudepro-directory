@@ -1,13 +1,13 @@
 import Link from 'next/link';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { Button } from '@/src/components/primitives/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { getUserSubmissions } from '@/src/lib/actions/business.actions';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from '@/src/lib/icons';
@@ -34,10 +34,10 @@ export default async function SubmissionsPage() {
       BADGE_COLORS.submissionStatus.pending;
 
     return (
-      <Badge variant="outline" className={colorClass}>
+      <UnifiedBadge variant="base" style="outline" className={colorClass}>
         <Icon className="h-3 w-3 mr-1" />
         {variant.label}
-      </Badge>
+      </UnifiedBadge>
     );
   };
 
@@ -96,9 +96,9 @@ export default async function SubmissionsPage() {
                   <div className="flex-1">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                       {getStatusBadge(submission.status)}
-                      <Badge variant="outline" className="text-xs">
+                      <UnifiedBadge variant="base" style="outline" className="text-xs">
                         {getTypeLabel(submission.content_type)}
-                      </Badge>
+                      </UnifiedBadge>
                     </div>
                     <CardTitle className="mt-2">{submission.content_name}</CardTitle>
                     <CardDescription className="mt-1">

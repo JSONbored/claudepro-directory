@@ -34,5 +34,27 @@
     "Team performance awareness and improvement tracking",
     "Production readiness assessment with comprehensive performance analysis"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook timeout reached before benchmarks complete execution",
+      "solution": "Increase timeout in hookConfig: timeout: 300000 for 5 minutes. Reduce benchmark scope by skipping slow tests. Use timeout 120s wrapper around individual benchmark commands to prevent single test blocking."
+    },
+    {
+      "issue": "npm run benchmark fails with 'script not found' in package.json",
+      "solution": "Check script existence: jq -e '.scripts.benchmark' package.json before execution. Add fallback: if ! jq -e '.scripts.benchmark' package.json; then echo 'No benchmark script'; exit 0; fi. Skip gracefully instead of failing."
+    },
+    {
+      "issue": "Lighthouse audit fails with 'No Chrome installation found'",
+      "solution": "Install Chrome/Chromium: brew install chromium on macOS or apt-get install chromium-browser on Linux. Set CHROME_PATH environment variable. Use --chrome-flags='--headless --no-sandbox' for CI environments."
+    },
+    {
+      "issue": "Historical comparison crashes with jq parse errors on old reports",
+      "solution": "Validate JSON before parsing: jq empty \"$REPORT_FILE\" 2>/dev/null || continue. Handle malformed reports gracefully. Add schema version field to new reports: {\"schema_version\": \"1.0\", ...}."
+    },
+    {
+      "issue": "Stop hook runs benchmarks even when session ends with errors",
+      "solution": "Check exit status context if available. Add conditional execution: [ -f .benchmark-enabled ] || exit 0. Create .benchmark-enabled flag only when user explicitly requests benchmarking to avoid unnecessary runs."
+    }
+  ],
   "source": "community"
 }

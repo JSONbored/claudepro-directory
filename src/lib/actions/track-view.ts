@@ -5,14 +5,14 @@ import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { statsRedis } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
-import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
+import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
 
 /**
  * Tracking parameters schema for view and copy events
  */
 const trackingParamsSchema = z.object({
-  category: contentCategorySchema,
+  category: categoryIdSchema,
   slug: nonEmptyString
     .max(200, 'Content slug is too long')
     .regex(

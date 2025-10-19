@@ -66,5 +66,32 @@
   "compatibility": {
     "claudeDesktop": true,
     "claudeCode": true
-  }
+  },
+  "troubleshooting": [
+    {
+      "issue": "AWS MCP server fails: 'Credentials not configured' error",
+      "solution": "Run aws configure to set credentials. Ensure AWS_REGION, AWS_ACCESS_KEY_ID, and AWS_SECRET_ACCESS_KEY are in environment or ~/.aws/credentials file.",
+      "category": "prerequisites"
+    },
+    {
+      "issue": "CloudFormation validator conflicts with AWS services MCP",
+      "solution": "Install validator hook after AWS MCP server. Update config order: MCP servers first, then hooks. Restart to reinitialize hook dependency chain.",
+      "category": "installation_setup"
+    },
+    {
+      "issue": "Backend architect agent and AWS rules give contradictory advice",
+      "solution": "Prioritize AWS cloud architect rule for AWS-specific patterns. Use backend architect for general design. Set rule precedence in config hierarchy.",
+      "category": "compatibility"
+    },
+    {
+      "issue": "AWS CLI version 1.x incompatible with MCP server features",
+      "solution": "Upgrade to AWS CLI v2: curl https://awscli.amazonaws.com/install | bash. Verify with aws --version. MCP server requires CLI v2.0+ for SSO support.",
+      "category": "prerequisites"
+    },
+    {
+      "issue": "Permission errors when validator checks CloudFormation templates",
+      "solution": "Grant IAM permissions: cloudformation:ValidateTemplate and cloudformation:DescribeStacks. Add to AWS user/role policy, then restart validator hook.",
+      "category": "common_errors"
+    }
+  ]
 }

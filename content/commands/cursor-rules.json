@@ -12,6 +12,28 @@
   },
   "githubUrl": "https://github.com/cursor-ai/cursor",
   "documentationUrl": "https://cursor.sh/docs",
+  "troubleshooting": [
+    {
+      "issue": "Cursor AI ignores rules defined in .cursorrules file after enabling",
+      "solution": "Restart Cursor IDE to reload .cursorrules from root. Verify checkbox in Settings > Cursor Settings > Rules is enabled. Limit file to 2000 tokens max."
+    },
+    {
+      "issue": "Generated rules file too large causing AI context window overflow",
+      "solution": "Keep rules under 2000 tokens. Focus on critical patterns only. Split complex projects into multiple focused .cursorrules files per subdirectory."
+    },
+    {
+      "issue": "Rules applied inconsistently across different code generations",
+      "solution": "Use explicit constraints with examples. Reference rules file in first prompt: 'Follow .cursorrules exactly'. Verify Settings > Rules checkbox enabled."
+    },
+    {
+      "issue": "Migration from .cursorrules to new .cursor/*.mdc system fails",
+      "solution": "Create .cursor/rules directory with .mdc files (Rule Type: Always). Use .cursor/index.mdc for main rules. Set dynamic rules for context-aware activation only."
+    },
+    {
+      "issue": "Vague cursor rules generating inconsistent or unexpected code outputs",
+      "solution": "Make rules specific and actionable with explicit examples. Avoid ambiguous instructions. Use 'always use X' or 'never use Y' format with code samples."
+    }
+  ],
   "source": "community",
   "slug": "cursor-rules",
   "seoTitle": "Cursor Rules Generator for Claude"

@@ -12,6 +12,28 @@
   },
   "githubUrl": "https://github.com/claudepro/security-auditor",
   "documentationUrl": "https://docs.claude.ai/commands/security",
+  "troubleshooting": [
+    {
+      "issue": "Security scan reports false positives for safe dependencies or patterns",
+      "solution": "Use --vulnerability with CVE cross-reference. Verify OWASP database version. Whitelist known-safe patterns in .securityignore. Update vulnerability database."
+    },
+    {
+      "issue": "Compliance audit fails for GDPR/HIPAA without specific violation details",
+      "solution": "Add --compliance=GDPR flag explicitly. Request detailed violation mapping. Run: /security --compliance --format=report for section-by-section breakdown."
+    },
+    {
+      "issue": "Penetration testing recommendations too generic or not actionable",
+      "solution": "Enable --penetration with --deep scan level. Provide codebase context. Specify threat model: --stride for STRIDE framework analysis with attack trees."
+    },
+    {
+      "issue": "Hardcoded secrets detected but cannot locate in large codebase",
+      "solution": "Use --format=sarif for IDE integration. Search specific patterns: grep -r 'API_KEY' src/. Export to JSON: --format=json | jq '.secrets[].location'."
+    },
+    {
+      "issue": "Deep scan times out on large codebases with no progress indicator",
+      "solution": "Use --surface for quick scan first. Enable verbose logging: /security --deep --verbose. Exclude large directories: --exclude=node_modules,dist."
+    }
+  ],
   "source": "community",
   "slug": "security"
 }

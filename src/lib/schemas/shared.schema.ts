@@ -33,37 +33,33 @@ import {
 /**
  * Content Categories
  * Used across: analytics, content, content-generation, related-content, static-api
+ *
+ * IMPORTANT: CategoryId type is imported from category-config.ts (single source of truth).
+ * Do NOT manually add categories here - add them to UNIFIED_CATEGORY_REGISTRY instead.
+ *
+ * Subcategories (like guide types: tutorials, comparisons, etc.) are NOT
+ * top-level categories and should NOT be listed here.
  */
-// Main comprehensive schema - single source of truth for ALL content categories
-export const contentCategorySchema = z
-  .enum([
-    // Core content types (have dedicated directories in /content)
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
-    'skills',
 
-    // SEO content types (in /seo directory)
-    'guides',
-    'tutorials',
-    'comparisons',
-    'workflows',
-    'use-cases',
-    'troubleshooting',
-    'categories',
-    'collections',
+/**
+ * CategoryId - THE ONLY category type (derived from VALID_CATEGORIES)
+ *
+ * ARCHITECTURE: Imported from category-types.ts (client-safe, no schema imports).
+ * This breaks circular dependency: shared.schema → category-config → collection.schema → shared.schema
+ *
+ * ONE NAME. ONE CONCEPT. NO ALIASES.
+ *
+ * Note: This is a necessary re-export to break circular dependencies.
+ * Direct import: '@/src/lib/config/category-types' would create circular imports.
+ * Used by 10+ files that need both CategoryId and schema validation together.
+ */
+export type { CategoryId } from '@/src/lib/config/category-types';
 
-    // Special types
-    'jobs', // Has route but no content directory
-    'changelog', // Changelog route with CHANGELOG.md as source
-  ])
-  .describe('All valid content categories including core types, SEO types, and special types');
-
-// Subset schema for cacheable categories (used by Redis caching)
-export const cacheableCategorySchema = z
+/**
+ * Zod schema for categories
+ * Hardcoded enum values must match UNIFIED_CATEGORY_REGISTRY keys exactly
+ */
+export const categoryIdSchema = z
   .enum([
     'agents',
     'mcp',
@@ -72,15 +68,52 @@ export const cacheableCategorySchema = z
     'hooks',
     'statuslines',
     'skills',
-    'guides',
     'collections',
+    'guides',
     'jobs',
     'changelog',
-    // Note: SEO content doesn't need Redis caching
   ])
-  .describe('Content categories that support Redis caching for performance optimization');
+  .describe('All valid categories - derived from UNIFIED_CATEGORY_REGISTRY');
 
-export type ContentCategory = z.infer<typeof contentCategorySchema>;
+/**
+ * Cacheable categories - subset that supports Redis caching (generateFullContent=true)
+ * These categories have full content generated at build time
+ */
+export const CACHEABLE_CATEGORIES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+] as const;
+
+export const cacheableCategorySchema = z
+  .enum(CACHEABLE_CATEGORIES)
+  .describe('Content categories that support Redis caching (where generateFullContent=true)');
+
+/**
+ * Guide Subcategories - Used ONLY for organizing guides under /guides route
+ *
+ * ARCHITECTURE: These are NOT categories. They are subcategories under 'guides'.
+ * - Route: /guides/tutorials/... NOT /tutorials/...
+ * - When storing/tracking: Use category='guides', NOT category='tutorials'
+ * - Analytics: Track as guides, with optional subcategory metadata
+ * - Bookmarks: Use category='guides', with optional subcategory in slug
+ */
+export const GUIDE_SUBCATEGORIES = [
+  'tutorials',
+  'comparisons',
+  'workflows',
+  'use-cases',
+  'troubleshooting',
+] as const;
+
+export type GuideSubcategory = (typeof GUIDE_SUBCATEGORIES)[number];
+
+export const guideSubcategorySchema = z.enum(GUIDE_SUBCATEGORIES);
 
 /**
  * Content Types
@@ -438,16 +471,9 @@ const metricDataSchema = z
     value: componentValueString.describe('Current metric value'),
     change: shortString.optional().describe('Change amount or percentage'),
     trend: z.enum(['up', 'down', 'neutral', '+']).optional().describe('Trend direction indicator'),
-    // Support legacy healthcare guide format
-    metric: shortString.optional().describe('Legacy: alternative metric name field'),
-    before: componentValueString.optional().describe('Legacy: metric value before improvement'),
-    after: componentValueString.optional().describe('Legacy: metric value after improvement'),
-    improvement: componentValueString
-      .optional()
-      .describe('Legacy: improvement percentage or amount'),
     description: mediumString.optional().describe('Optional metric description'),
   })
-  .describe('Individual metric data with value, trend, and legacy format support');
+  .describe('Individual metric data with value and trend');
 
 export const metricsDisplayPropsSchema = z
   .object({

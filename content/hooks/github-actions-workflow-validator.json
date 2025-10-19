@@ -35,6 +35,28 @@
     "Development workflow optimization and performance",
     "Team collaboration and workflow standardization"
   ],
+  "troubleshooting": [
+    {
+      "issue": "actionlint not found but validation still runs",
+      "solution": "Hook falls back to yamllint or Python YAML parser automatically. Install actionlint with brew install actionlint on macOS or download from GitHub releases for comprehensive validation."
+    },
+    {
+      "issue": "False positives for deprecated actions warning",
+      "solution": "Update the OUTDATED_ACTIONS array in the hook script to exclude specific action patterns. Use version pinning with commit SHAs instead of version tags to avoid warnings."
+    },
+    {
+      "issue": "Hook fails on pull_request_target workflows",
+      "solution": "This is a security warning, not failure. Review pull_request_target usage carefully and ensure proper checkout action configuration with explicit ref parameter for untrusted code."
+    },
+    {
+      "issue": "YAML validation passes but workflow fails in GitHub",
+      "solution": "Install actionlint for GitHub-specific validation beyond YAML syntax. Check for GitHub Actions context variables, expression syntax, and action version compatibility issues."
+    },
+    {
+      "issue": "Performance suggestions appear for optimized workflows",
+      "solution": "Suggestions are recommendations, not errors. Customize the hook script to skip specific checks by commenting out sections or adjust thresholds in the performance validation logic."
+    }
+  ],
   "documentationUrl": "https://docs.github.com/en/actions",
   "source": "community"
 }

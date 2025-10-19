@@ -65,20 +65,24 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify Box enterprise access and permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Getting HTTP 429 error with rate limit exceeded message",
+      "solution": "Reduce request frequency to stay under 1,000 API calls per minute per user (16.67 calls/second). Implement exponential backoff using the retry-after header value returned in the 429 response."
     },
     {
-      "issue": "Check folder permissions for specific directories",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Search operations failing across enterprise",
+      "solution": "Enterprise has 12 searches per second limit total. Distribute search requests across all apps, add delays between searches, or contact Box support to increase quota for your business plan."
     },
     {
-      "issue": "Monitor API quotas and rate limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Upload operations timing out or failing",
+      "solution": "Verify you're staying under 4 uploads per second per user limit. Queue upload requests with proper throttling, check network connectivity, and ensure files meet size requirements for your account tier."
     },
     {
-      "issue": "Ensure proper authentication token status",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Authentication fails with invalid token errors",
+      "solution": "Regenerate your Box API access token from Box Developer Console. Verify token hasn't expired and includes correct scopes (read, write, delete) required for your operations."
+    },
+    {
+      "issue": "Cannot access specific folders or files",
+      "solution": "Verify your Box account has appropriate folder permissions set. Check enterprise admin settings for content access restrictions and ensure your API token has necessary permissions for target directories."
     }
   ],
   "examples": [

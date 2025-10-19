@@ -17,26 +17,18 @@
 
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { HomePageClient } from '@/src/components/features/home';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
+import { LazySection } from '@/src/components/infra/lazy-section';
+import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
-import { LoadingSkeleton } from '@/src/components/ui/loading-skeleton';
 
 // Lazy load animations to improve LCP (40-60 KB saved from initial bundle)
 // RollingText uses Framer Motion and impacts homepage First Load
 const RollingText = dynamic(
-  () =>
-    import('@/src/components/ui/magic/rolling-text').then((mod) => ({ default: mod.RollingText })),
+  () => import('@/src/components/magic/rolling-text').then((mod) => ({ default: mod.RollingText })),
   {
     loading: () => <span className="text-accent">enthusiasts</span>, // Fallback text
-  }
-);
-
-// Meteors animation (decorative only, not critical)
-const Meteors = dynamic(
-  () => import('@/src/components/ui/magic/meteors').then((mod) => ({ default: mod.Meteors })),
-  {
-    loading: () => null, // No loading state needed for decorative animation
   }
 );
 
@@ -246,21 +238,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     <div className={'min-h-screen bg-background'}>
       {/* Hero + Search Section */}
       <div className="relative overflow-hidden">
-        {/* Meteors Background Layer - Constrained to viewport height */}
-        <div className="absolute inset-0 max-h-screen pointer-events-none z-[1]">
-          <Meteors
-            number={20}
-            minDelay={0}
-            maxDelay={3}
-            minDuration={3}
-            maxDuration={8}
-            angle={35}
-          />
-        </div>
-
         {/* Static Hero Section - Server Rendered - Streams immediately */}
-        <section className={'relative z-10 border-b border-border/50'} aria-label="Homepage hero">
-          {/* Content Layer - Above meteors */}
+        <section className={'relative border-b border-border/50'} aria-label="Homepage hero">
+          {/* Content Layer */}
           <div className={'relative container mx-auto px-4 py-10 sm:py-16 lg:py-24'}>
             <div className={'text-center max-w-4xl mx-auto'}>
               <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 text-foreground tracking-tight">
@@ -286,22 +266,25 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </section>
 
         {/* Content Section - Streams independently after hero */}
-        <div className={'relative z-10'}>
+        <div className={'relative'}>
           <Suspense fallback={<LoadingSkeleton />}>
             <HomeContentSection searchQuery={initialSearchQuery} />
           </Suspense>
         </div>
       </div>
 
-      {/* Email CTA - Streams independently */}
+      {/* Email CTA - Beautiful fade-in with spring physics */}
       <section className={'container mx-auto px-4 py-12'}>
         <Suspense fallback={null}>
-          <InlineEmailCTA
-            variant="hero"
-            context="homepage"
-            headline="Join 1,000+ Claude Power Users"
-            description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
-          />
+          <LazySection variant="fade-in" delay={0.15}>
+            <UnifiedNewsletterCapture
+              variant="hero"
+              source="homepage"
+              context="homepage"
+              headline="Join 1,000+ Claude Power Users"
+              description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+            />
+          </LazySection>
         </Suspense>
       </section>
     </div>

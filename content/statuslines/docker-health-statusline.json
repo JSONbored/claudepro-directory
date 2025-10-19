@@ -1,0 +1,98 @@
+{
+  "slug": "docker-health-statusline",
+  "title": "Docker Health Statusline",
+  "seoTitle": "Claude Code Docker Statusline - Container Health Monitoring",
+  "description": "Docker statusline configuration for Claude Code CLI. Features real-time health monitoring, color-coded indicators, and container tracking. Production-ready.",
+  "author": "Claude Pro Directory",
+  "dateAdded": "2025-10-19",
+  "tags": [
+    "docker",
+    "statusline",
+    "monitoring",
+    "health-check",
+    "containers",
+    "CLI",
+    "claude-code",
+    "devops"
+  ],
+  "category": "statuslines",
+  "statuslineType": "rich",
+  "configuration": {
+    "format": "bash",
+    "refreshInterval": 2000,
+    "position": "left",
+    "colorScheme": "docker-blue"
+  },
+  "content": "#!/bin/bash\n\n# Docker Health Statusline\n# Real-time container health monitoring for Claude Code CLI\n\n# Get running containers count\nrunning=$(docker ps -q 2>/dev/null | wc -l | tr -d ' ')\n\n# Get total containers\ntotal=$(docker ps -a -q 2>/dev/null | wc -l | tr -d ' ')\n\n# Get unhealthy containers\nunhealthy=$(docker ps --filter health=unhealthy -q 2>/dev/null | wc -l | tr -d ' ')\n\n# Color codes\nGREEN='\\033[0;32m'\nYELLOW='\\033[1;33m'\nRED='\\033[0;31m'\nBLUE='\\033[0;34m'\nNC='\\033[0m' # No Color\n\n# Status indicator\nif [ \"$unhealthy\" -gt 0 ]; then\n    status=\"${RED}●${NC}\"\nelif [ \"$running\" -eq 0 ]; then\n    status=\"${YELLOW}○${NC}\"\nelse\n    status=\"${GREEN}●${NC}\"\nfi\n\n# Display statusline\necho -e \"${BLUE}🐳${NC} ${status} ${running}/${total}\"\n",
+  "installation": {
+    "claudeCode": {
+      "steps": [
+        "Save the script to ~/.claude/statusline-docker.sh",
+        "Make it executable: chmod +x ~/.claude/statusline-docker.sh",
+        "Add to ~/.claude/statusline.json with format: \"bash\" and script path",
+        "Set refreshInterval to 2000ms for real-time updates",
+        "Restart Claude Code CLI to apply changes"
+      ],
+      "configPath": {
+        "macos": "~/.claude/statusline.json",
+        "linux": "~/.claude/statusline.json",
+        "windows": "%USERPROFILE%\\.claude\\statusline.json"
+      },
+      "configFormat": "json"
+    },
+    "requirements": [
+      "Docker Engine installed and running",
+      "Bash shell (bash 4.0+)",
+      "Docker CLI accessible in PATH",
+      "User permissions to run docker commands"
+    ]
+  },
+  "troubleshooting": [
+    {
+      "issue": "Statusline shows 0/0 containers even when containers are running",
+      "solution": "Verify Docker daemon is running with 'docker ps'. Check user has permissions to access Docker socket. On Linux, add user to docker group with 'sudo usermod -aG docker $USER' and restart terminal."
+    },
+    {
+      "issue": "Colors not displaying correctly in statusline output",
+      "solution": "Ensure terminal supports ANSI color codes. Set TERM=xterm-256color in shell profile. Verify colorScheme setting in statusline.json matches terminal capabilities."
+    },
+    {
+      "issue": "Statusline causing performance lag or high CPU usage",
+      "solution": "Increase refreshInterval to 3000-5000ms in configuration. Reduce docker ps query frequency. Consider caching container count between refresh cycles for better performance."
+    },
+    {
+      "issue": "Health check status not updating or always showing healthy",
+      "solution": "Confirm containers have HEALTHCHECK defined in Dockerfile or docker-compose.yml. Verify docker version supports health checks (17.05+). Run 'docker inspect CONTAINER' to check health configuration."
+    }
+  ],
+  "preview": "🐳 ● 3/5",
+  "features": [
+    "Real-time container count display (running/total)",
+    "Color-coded health status indicators (green=healthy, yellow=stopped, red=unhealthy)",
+    "Docker whale emoji for visual identification",
+    "Lightweight bash implementation with minimal overhead",
+    "Automatic unhealthy container detection",
+    "Configurable refresh interval (default 2000ms)"
+  ],
+  "useCases": [
+    "Monitoring Docker container health during development",
+    "Quick visual confirmation of running containers",
+    "DevOps workflows requiring constant container status awareness",
+    "Multi-container application development with health checks"
+  ],
+  "documentationUrl": "https://docs.docker.com/reference/cli/docker/container/stats/",
+  "examples": [
+    {
+      "title": "Basic Installation",
+      "language": "bash",
+      "code": "# Save script\ncat > ~/.claude/statusline-docker.sh << 'EOF'\n#!/bin/bash\nrunning=$(docker ps -q 2>/dev/null | wc -l | tr -d ' ')\ntotal=$(docker ps -a -q 2>/dev/null | wc -l | tr -d ' ')\necho -e \"🐳 ${running}/${total}\"\nEOF\n\n# Make executable\nchmod +x ~/.claude/statusline-docker.sh",
+      "description": "Quick installation for basic container count display"
+    },
+    {
+      "title": "With Health Check Monitoring",
+      "language": "bash",
+      "code": "# Enhanced version with health checks\n#!/bin/bash\nrunning=$(docker ps -q | wc -l | tr -d ' ')\nunhealthy=$(docker ps --filter health=unhealthy -q | wc -l | tr -d ' ')\n\nif [ \"$unhealthy\" -gt 0 ]; then\n    echo -e \"🐳 \\033[0;31m●\\033[0m ${running} (${unhealthy} unhealthy)\"\nelse\n    echo -e \"🐳 \\033[0;32m●\\033[0m ${running}\"\nfi",
+      "description": "Advanced version with health status monitoring and alerts"
+    }
+  ]
+}

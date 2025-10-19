@@ -12,6 +12,28 @@
   },
   "githubUrl": "https://github.com/claudepro/documentation-generator",
   "documentationUrl": "https://docs.claude.ai/commands/docs",
+  "troubleshooting": [
+    {
+      "issue": "Generated API documentation missing authentication or security headers",
+      "solution": "Add --api flag with security schemas. Define securitySchemes in OpenAPI spec components. Include authentication examples: Bearer tokens, API keys."
+    },
+    {
+      "issue": "Documentation build fails with 'invalid format' or syntax errors",
+      "solution": "Specify --format=markdown explicitly. Validate JSDoc/docstring syntax. Run linter on source code before doc generation. Check template compatibility."
+    },
+    {
+      "issue": "Code examples in generated docs outdated or not language-specific",
+      "solution": "Use --examples flag with language specification. Update source JSDoc with @example blocks. Include multiple language variants: TypeScript, Python, curl."
+    },
+    {
+      "issue": "Interactive documentation explorer not rendering or returning 404 errors",
+      "solution": "Enable --interactive flag. Deploy to static host or localhost server. Verify OpenAPI spec paths match routes. Check CORS headers for API access."
+    },
+    {
+      "issue": "Swagger UI auto-generation ignores @swagger JSDoc annotations completely",
+      "solution": "Install swagger-jsdoc package: npm i swagger-jsdoc swagger-ui-express. Configure swaggerJsdoc options with APIs glob pattern. Verify JSDoc syntax validity."
+    }
+  ],
   "source": "community",
   "slug": "docs",
   "seoTitle": "Docs for Claude"

@@ -81,24 +81,24 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify Redis server is running and accessible",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Connection refused or Redis server not accessible",
+      "solution": "Verify Redis running with redis-cli ping (should return PONG). Check URL format: redis://localhost:6379/0 or redis://user:password@host:port/db. Confirm network allows port 6379. Test with redis-cli -u URL command."
     },
     {
-      "issue": "Check Redis connection URL format",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "NOAUTH Authentication required error",
+      "solution": "Add password to connection URL: redis://:password@host:6379. Use AUTH command or configure ACL username. Verify requirepass in redis.conf matches. Check ACL user exists with ACL LIST command."
     },
     {
-      "issue": "Ensure proper Redis ACL permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "NOPERM user has no permissions to run command or access key",
+      "solution": "Grant permissions with ACL SETUSER username +@all ~*. Check ACL rules with ACL GETUSER username. Ensure user has +@read +@write categories. Verify key patterns allow access with ~key:* syntax."
     },
     {
-      "issue": "Confirm network connectivity to Redis instance",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "ACL authentication failed or WRONGPASS invalid password",
+      "solution": "Verify password matches ACL user with ACL GETUSER. Check ACL file loaded correctly (restart Redis after editing). Ensure user not flagged nopass without valid passwords. View security events with ACL LOG."
     },
     {
-      "issue": "Validate SSL certificates if using TLS",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "TLS/SSL connection error or certificate validation failed",
+      "solution": "Use rediss:// (note double 's') for TLS connections. Add tls=true parameter to URL. Verify Redis built with TLS support (redis-server --version). Check certificates match CA and have correct permissions."
     }
   ],
   "examples": [

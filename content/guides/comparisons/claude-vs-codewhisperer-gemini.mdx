@@ -10,7 +10,8 @@ keywords:
   - "claude alternatives aws development"
 dateUpdated: "2025-09-22"
 author: "Claude Pro Directory"
-category: "comparisons"
+category: "guides"
+subcategory: "comparisons"
 tags:
   - "comparison"
   - "cloud-development"
@@ -24,11 +25,12 @@ aiOptimized: true
 citationReady: true
 ---
 
-<TLDRSummary 
+<UnifiedContentBlock
+  variant="tldr"
   content="Comprehensive comparison of Claude Code, Amazon Q Developer (formerly CodeWhisperer), and Google Gemini Code Assist for cloud development. We analyzed platform integration, AWS features, pricing, and real performance metrics to help you choose the best AI coding assistant for your cloud infrastructure needs."
   keyPoints={[
     "Amazon Q Developer - Deep AWS integration with 250+ services - $19/month",
-    "Google Gemini Code - 180,000 free completions monthly - $19/month Standard", 
+    "Google Gemini Code - 180,000 free completions monthly - $19/month Standard",
     "Claude Code - Superior multi-cloud support and code quality - $40-200/month",
     "Q Developer wins for AWS-only teams based on native integration and pricing"
   ]}
@@ -36,7 +38,7 @@ citationReady: true
 
 Choosing the right AI assistant for cloud development impacts productivity and costs. This comparison examines Claude Code, Amazon Q Developer, and Google Gemini Code Assist based on real-world implementations, benchmarks, and enterprise deployments. Each platform shows distinct strengths across AWS services, multi-cloud support, and pricing models.
 
-<Callout type="info" title="Comparison Overview">
+<UnifiedContentBox contentType="callout" type="info" title="Comparison Overview">
 **Tools Compared:** Claude Code, Amazon Q Developer, Google Gemini Code Assist  
 **Use Case Focus:** AWS and cloud infrastructure development  
 **Comparison Date:** September 2025  
@@ -98,7 +100,8 @@ Choosing the right AI assistant for cloud development impacts productivity and c
           <p>Amazon Q Developer (formerly CodeWhisperer) provides deep AWS integration across 250+ services. Released in 2022, it focuses on AWS-native development with enterprise security features.</p>
           
           <h4>Key Strengths</h4>
-          <FeatureGrid
+          <UnifiedContentBlock
+            variant="feature-grid"
             features={[
               {
                 title: "Native Lambda Integration",
@@ -106,7 +109,7 @@ Choosing the right AI assistant for cloud development impacts productivity and c
                 badge: "Strength"
               },
               {
-                title: "Security Scanning", 
+                title: "Security Scanning",
                 description: "Built-in OWASP Top 10 vulnerability detection with one-click remediation",
                 badge: "Security"
               },
@@ -120,7 +123,7 @@ Choosing the right AI assistant for cloud development impacts productivity and c
           />
           
           <h4>Limitations</h4>
-          <Callout type="warning" title="Known Limitations">
+          <UnifiedContentBox contentType="callout" type="warning" title="Known Limitations">
           **Multi-cloud support:** Limited capabilities outside AWS ecosystem
           
           **Transformation limits:** 4,000 lines monthly shared across organization at Pro tier
@@ -147,7 +150,8 @@ Choosing the right AI assistant for cloud development impacts productivity and c
           <p>Google Gemini Code Assist offers a 1-million token context window with strong GCP integration. Launched in 2024, it specializes in Kubernetes and container orchestration.</p>
           
           <h4>Key Strengths</h4>
-          <FeatureGrid
+          <UnifiedContentBlock
+            variant="feature-grid"
             features={[
               {
                 title: "Generous Free Tier",
@@ -155,7 +159,7 @@ Choosing the right AI assistant for cloud development impacts productivity and c
                 badge: "Value"
               },
               {
-                title: "Large Context Window", 
+                title: "Large Context Window",
                 description: "1 million tokens enables understanding entire cloud architectures",
                 badge: "Performance"
               },
@@ -169,7 +173,7 @@ Choosing the right AI assistant for cloud development impacts productivity and c
           />
           
           <h4>Limitations</h4>
-          <Callout type="warning" title="Areas for Improvement">
+          <UnifiedContentBox contentType="callout" type="warning" title="Areas for Improvement">
           **Performance delays:** Users report 10+ second response times for complex queries
           
           **AWS support:** Lacks understanding of AWS-specific patterns and optimizations
@@ -196,7 +200,8 @@ Choosing the right AI assistant for cloud development impacts productivity and c
           <p>Claude Code delivers superior code quality with multi-cloud flexibility and agentic capabilities. Available through terminal-first interface with 200,000-token context.</p>
           
           <h4>Key Strengths</h4>
-          <FeatureGrid
+          <UnifiedContentBlock
+            variant="feature-grid"
             features={[
               {
                 title: "Code Quality Leadership",
@@ -218,7 +223,7 @@ Choosing the right AI assistant for cloud development impacts productivity and c
           />
           
           <h4>Limitations</h4>
-          <Callout type="warning" title="Considerations">
+          <UnifiedContentBox contentType="callout" type="warning" title="Considerations">
           **Premium pricing:** $40-200 monthly significantly exceeds competitor pricing
           
           **Terminal-only:** CLI interface may alienate GUI-preferring developers
@@ -241,7 +246,7 @@ Choosing the right AI assistant for cloud development impacts productivity and c
 
 ## Performance Benchmarks
 
-<Callout type="info" title="Benchmark Methodology">
+<UnifiedContentBox contentType="callout" type="info" title="Benchmark Methodology">
 **Testing Period:** Analysis of recent deployments and benchmarks
 
 **Test Environment:** AWS Lambda, EC2, GCP Cloud Functions, Azure Functions  
@@ -281,7 +286,7 @@ Choosing the right AI assistant for cloud development impacts productivity and c
 
 ## Use Case Analysis
 
-<Accordion
+<UnifiedContentBox contentType="accordion"
   title="Detailed Use Case Breakdown"
   description="Which tool performs best for specific scenarios"
   items={[
@@ -300,7 +305,7 @@ Choosing the right AI assistant for cloud development impacts productivity and c
           
           <p><strong>Winner:</strong> Amazon Q Developer - Native AWS integration provides unmatched serverless development efficiency</p>
           
-          <Callout type="tip" title="Key Insight">
+          <UnifiedContentBox contentType="callout" type="tip" title="Key Insight">
           Q Developer automatically generates minimal IAM policies and cold-start optimizations that save hours of manual configuration.
           </Callout>
         </div>
@@ -338,7 +343,8 @@ Choosing the right AI assistant for cloud development impacts productivity and c
 
 ## Real User Experiences
 
-<ExpertQuote
+<UnifiedContentBlock
+  variant="expert-quote"
   quote="Claude Code has helped us generate numerous internal AI tools. The platform has reduced our software release times while maintaining code quality."
   author="Engineering Team"
   title="Development Lead"
@@ -346,7 +352,7 @@ Choosing the right AI assistant for cloud development impacts productivity and c
   rating={5}
 />
 
-<Callout type="success" title="User Feedback Summary">
+<UnifiedContentBox contentType="callout" type="success" title="User Feedback Summary">
 **Survey Source:** Enterprise deployment analysis
 **Sample Size:** Large-scale developer survey
 **Top Satisfaction Factors:** Q Developer AWS integration, Gemini free tier, Claude code quality  
@@ -355,7 +361,8 @@ Choosing the right AI assistant for cloud development impacts productivity and c
 
 ## Decision Framework
 
-<FeatureGrid
+<UnifiedContentBlock
+  variant="feature-grid"
   title="Choose Based on Your Needs"
   description="Decision criteria to help select the right tool"
   features={[
@@ -365,7 +372,7 @@ Choosing the right AI assistant for cloud development impacts productivity and c
       badge: "AWS Teams"
     },
     {
-      title: "Choose Gemini Code Assist If:", 
+      title: "Choose Gemini Code Assist If:",
       description: "Google Cloud primary • Cost-sensitive team • Need 180K free completions • Kubernetes heavy",
       badge: "GCP Users"
     },
@@ -425,7 +432,7 @@ Choosing the right AI assistant for cloud development impacts productivity and c
 
 ## Migration Considerations
 
-<Callout type="warning" title="Switching Costs and Considerations">
+<UnifiedContentBox contentType="callout" type="warning" title="Switching Costs and Considerations">
 **Data Export:** Q Developer and Claude support code export; Gemini requires manual extraction  
 **Training Impact:** Teams need 1-2 weeks adapting to new platforms based on surveys  
 **Integration Changes:** AWS tools require minimal changes for Q Developer adoption  
@@ -434,11 +441,12 @@ Choosing the right AI assistant for cloud development impacts productivity and c
 
 ## Final Recommendation
 
-<TLDRSummary 
+<UnifiedContentBlock
+  variant="tldr"
   content="Based on comprehensive analysis comparing Claude Code, Amazon Q Developer, and Google Gemini Code Assist, our recommendation for AWS-focused teams is Amazon Q Developer. This choice provides native AWS integration, built-in security scanning, and reasonable pricing while addressing cloud development requirements effectively."
   keyPoints={[
     "AWS-only teams: Q Developer delivers unmatched native integration at $19/month",
-    "Multi-cloud enterprises: Claude justifies premium with superior quality and flexibility", 
+    "Multi-cloud enterprises: Claude justifies premium with superior quality and flexibility",
     "Budget-conscious teams: Gemini's 180,000 free completions provide exceptional value",
     "Hybrid approach: Many organizations combine tools for optimal results"
   ]}
@@ -446,7 +454,7 @@ Choosing the right AI assistant for cloud development impacts productivity and c
 
 ## Frequently Asked Questions
 
-<AIOptimizedFAQ 
+<UnifiedContentBox contentType="faq" 
   title="Common Comparison Questions"
   description="Answers to frequently asked questions about choosing between these tools"
   questions={[
@@ -481,7 +489,7 @@ Choosing the right AI assistant for cloud development impacts productivity and c
 
 ---
 
-<Callout type="success" title="Make Your Decision">
+<UnifiedContentBox contentType="callout" type="success" title="Make Your Decision">
 **Ready to choose?** Use this comparison data to evaluate which tool best fits your cloud development needs. 
 
 **Need more specific guidance?** Join our [community](/community) to discuss your requirements with users of all three platforms.

@@ -1,12 +1,12 @@
 'use client';
 
 import { memo, useId } from 'react';
-import { ConfigCard } from '@/src/components/features/content/config-card';
-import { Badge } from '@/src/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
+import { ConfigCard } from '@/src/components/domain/config-card';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import { Clock, Star, TrendingUp } from '@/src/lib/icons';
 import type { TrendingContentProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Trending Content Component
@@ -55,35 +55,33 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
           <h2 id={trendingHeadingId} className={'text-2xl font-bold mb-4'}>
             Trending This Week
           </h2>
-          <ul className={UI_CLASSES.GRID_RESPONSIVE_LIST}>
-            {trending.length === 0 ? (
-              <li className="col-span-full text-center py-12">
-                <p className="text-muted-foreground text-lg">
-                  No trending content available yet. Check back soon!
-                </p>
-              </li>
-            ) : (
-              trending.map((item: UnifiedContentItem, index: number) => (
-                <li key={item.slug} className="relative">
-                  {index < 3 && (
-                    <Badge
-                      className={'absolute -top-2 -right-2 z-10'}
-                      variant="default"
-                      aria-label={`Rank ${index + 1}`}
-                    >
-                      #{index + 1}
-                    </Badge>
-                  )}
-                  <ConfigCard
-                    item={{ ...item, position: index } as UnifiedContentItem}
-                    variant="default"
-                    showCategory={true}
-                    showActions={false}
-                  />
-                </li>
-              ))
+          <UnifiedCardGrid
+            items={trending}
+            variant="list"
+            emptyMessage="No trending content available yet. Check back soon!"
+            ariaLabel="Trending content"
+            prefetchCount={3}
+            renderCard={(item, index) => (
+              <div key={item.slug} className="relative">
+                {index < 3 && (
+                  <UnifiedBadge
+                    className={'absolute -top-2 -right-2 z-10'}
+                    variant="base"
+                    style="default"
+                    aria-label={`Rank ${index + 1}`}
+                  >
+                    #{index + 1}
+                  </UnifiedBadge>
+                )}
+                <ConfigCard
+                  item={{ ...item, position: index } as UnifiedContentItem}
+                  variant="default"
+                  showCategory={true}
+                  showActions={false}
+                />
+              </div>
             )}
-          </ul>
+          />
         </div>
       </TabsContent>
 
@@ -97,26 +95,22 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
           <h2 id={popularHeadingId} className={'text-2xl font-bold mb-4'}>
             Most Popular
           </h2>
-          <ul className={UI_CLASSES.GRID_RESPONSIVE_LIST}>
-            {popular.length === 0 ? (
-              <li className="col-span-full text-center py-12">
-                <p className="text-muted-foreground text-lg">
-                  No popular content available yet. Check back soon!
-                </p>
-              </li>
-            ) : (
-              popular.map((item, index) => (
-                <li key={item.slug}>
-                  <ConfigCard
-                    item={{ ...item, position: index } as UnifiedContentItem}
-                    variant="default"
-                    showCategory={true}
-                    showActions={false}
-                  />
-                </li>
-              ))
+          <UnifiedCardGrid
+            items={popular}
+            variant="list"
+            emptyMessage="No popular content available yet. Check back soon!"
+            ariaLabel="Popular content"
+            prefetchCount={3}
+            renderCard={(item, index) => (
+              <ConfigCard
+                key={item.slug}
+                item={{ ...item, position: index } as UnifiedContentItem}
+                variant="default"
+                showCategory={true}
+                showActions={false}
+              />
             )}
-          </ul>
+          />
         </div>
       </TabsContent>
 
@@ -130,26 +124,22 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
           <h2 id={recentHeadingId} className={'text-2xl font-bold mb-4'}>
             Recently Added
           </h2>
-          <ul className={UI_CLASSES.GRID_RESPONSIVE_LIST}>
-            {recent.length === 0 ? (
-              <li className="col-span-full text-center py-12">
-                <p className="text-muted-foreground text-lg">
-                  No recent content available yet. Check back soon!
-                </p>
-              </li>
-            ) : (
-              recent.map((item, index) => (
-                <li key={item.slug}>
-                  <ConfigCard
-                    item={{ ...item, position: index } as UnifiedContentItem}
-                    variant="default"
-                    showCategory={true}
-                    showActions={false}
-                  />
-                </li>
-              ))
+          <UnifiedCardGrid
+            items={recent}
+            variant="list"
+            emptyMessage="No recent content available yet. Check back soon!"
+            ariaLabel="Recent content"
+            prefetchCount={3}
+            renderCard={(item, index) => (
+              <ConfigCard
+                key={item.slug}
+                item={{ ...item, position: index } as UnifiedContentItem}
+                variant="default"
+                showCategory={true}
+                showActions={false}
+              />
             )}
-          </ul>
+          />
         </div>
       </TabsContent>
     </Tabs>

@@ -11,7 +11,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
 import { CheckCircle } from '@/src/lib/icons';
 import {
   type ComparisonTableProps,

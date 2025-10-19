@@ -11,6 +11,28 @@
     "maxTokens": 8000,
     "systemPrompt": "You are an AI prompt engineering expert focused on effective communication with coding AI assistants"
   },
+  "troubleshooting": [
+    {
+      "issue": "Rule not applying to prompt-related files in project context",
+      "solution": "Verify .claud erules or .cursorrules exists in project root. Check file scope configuration includes relevant file patterns. Use explicit context references in prompts to trigger rule application."
+    },
+    {
+      "issue": "Multiple prompt engineering rules conflicting with coding standards",
+      "solution": "Set higher priority in rule configuration or use override directive. Specify which rule should take precedence for prompt context. Consolidate conflicting patterns into single unified rule."
+    },
+    {
+      "issue": "Context window management guidance not being applied consistently",
+      "solution": "Enable rule for conversation-level context. Check that maxTokens configuration allows full rule content. Use context refresh prompts explicitly when rule guidance seems lost during long sessions."
+    },
+    {
+      "issue": "Rule suggestions for TDD patterns ignored in code generation",
+      "solution": "Combine with language-specific rules for better enforcement. Explicitly request TDD approach in initial prompt. Verify rule scope includes test files and implementation files in same context."
+    },
+    {
+      "issue": "Debugging prompt patterns not accessible when troubleshooting errors",
+      "solution": "Add error-context triggers to rule scope configuration. Include explicit debugging keywords in prompts. Check rule is active in current project scope using context verification commands."
+    }
+  ],
   "githubUrl": "https://github.com/anthropics/prompt-eng-interactive-tutorial",
   "documentationUrl": "https://docs.anthropic.com/claude/docs/prompt-engineering",
   "source": "community",

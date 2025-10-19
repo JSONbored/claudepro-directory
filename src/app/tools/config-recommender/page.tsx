@@ -18,16 +18,16 @@
  */
 
 import type { Metadata } from 'next';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
-import { QuizForm } from '@/src/components/tools/recommender/quiz-form';
-import { Badge } from '@/src/components/ui/badge';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
+} from '@/src/components/primitives/card';
+import { QuizForm } from '@/src/components/tools/recommender/quiz-form';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -45,10 +45,14 @@ export default function ConfigRecommenderPage() {
       <section className={'relative py-16 px-4 overflow-hidden'}>
         <div className={'container mx-auto text-center max-w-4xl'}>
           {/* Badge */}
-          <Badge variant="outline" className={'mb-6 border-primary/20 bg-accent/5 text-primary'}>
+          <UnifiedBadge
+            variant="base"
+            style="outline"
+            className={'mb-6 border-primary/20 bg-accent/5 text-primary'}
+          >
             <Sparkles className="h-3 w-3 mr-1" aria-hidden="true" />
             AI-Powered Recommendations
-          </Badge>
+          </UnifiedBadge>
 
           {/* Title */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
@@ -63,17 +67,17 @@ export default function ConfigRecommenderPage() {
 
           {/* Stats */}
           <div className={'flex flex-wrap justify-center gap-3'}>
-            <Badge variant="secondary" className="text-sm">
+            <UnifiedBadge variant="base" style="secondary" className="text-sm">
               <Clock className="h-3 w-3 mr-1" aria-hidden="true" />2 minutes
-            </Badge>
-            <Badge variant="secondary" className="text-sm">
+            </UnifiedBadge>
+            <UnifiedBadge variant="base" style="secondary" className="text-sm">
               <Target className="h-3 w-3 mr-1" aria-hidden="true" />
               147+ configs analyzed
-            </Badge>
-            <Badge variant="secondary" className="text-sm">
+            </UnifiedBadge>
+            <UnifiedBadge variant="base" style="secondary" className="text-sm">
               <Zap className="h-3 w-3 mr-1" aria-hidden="true" />
               Instant results
-            </Badge>
+            </UnifiedBadge>
           </div>
         </div>
       </section>
@@ -200,7 +204,8 @@ export default function ConfigRecommenderPage() {
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
-        <InlineEmailCTA
+        <UnifiedNewsletterCapture
+          source="content_page"
           variant="hero"
           context="config-recommender-page"
           headline="Join 1,000+ Claude Power Users"

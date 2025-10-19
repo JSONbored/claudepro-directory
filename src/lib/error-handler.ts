@@ -761,7 +761,9 @@ export function createApiRoute<P = unknown, Q = unknown, H = unknown, B = unknow
       const url = new URL(request.url);
 
       // Resolve params from Next.js 15 Promise-based context
-      const resolvedParams = await context.params.catch(() => ({}) as P);
+      // Handle both routes WITH params (Promise) and WITHOUT params (undefined)
+      const resolvedParams =
+        context.params !== undefined ? await context.params.catch(() => ({}) as P) : ({} as P);
 
       // Request ID
       const headerRequestId = request.headers.get('x-request-id');

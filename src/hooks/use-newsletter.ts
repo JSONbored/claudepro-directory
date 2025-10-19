@@ -23,10 +23,9 @@
 'use client';
 
 import { useCallback, useState, useTransition } from 'react';
-import { subscribeToNewsletter } from '@/src/lib/actions/newsletter-signup';
-import type { EventName } from '@/src/lib/analytics/events.constants';
-import { EVENTS } from '@/src/lib/analytics/events.constants';
-import { trackEvent } from '@/src/lib/analytics/tracker';
+import { subscribeToNewsletter } from '#lib/actions/newsletter-signup';
+import type { EventName } from '#lib/analytics/events.constants';
+import { trackEvent } from '#lib/analytics/tracker';
 import { logger } from '@/src/lib/logger';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -37,8 +36,11 @@ export type NewsletterSource = 'footer' | 'homepage' | 'modal' | 'content_page' 
 
 /**
  * Get location-specific email subscription event based on source
+ * Uses dynamic import for Storybook compatibility
  */
-function getEmailSubscriptionEvent(source: NewsletterSource): EventName {
+async function getEmailSubscriptionEvent(source: NewsletterSource): Promise<EventName> {
+  const { EVENTS } = await import('#lib/analytics/events.constants');
+
   const eventMap: Record<NewsletterSource, EventName> = {
     footer: EVENTS.EMAIL_SUBSCRIBED_FOOTER,
     homepage: EVENTS.EMAIL_SUBSCRIBED_HOMEPAGE,
@@ -236,7 +238,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
           }
 
           // Track successful subscription with location-specific event
-          const eventName = getEmailSubscriptionEvent(source);
+          const eventName = await getEmailSubscriptionEvent(source);
           trackEvent(eventName, {
             ...(result.data.contactId && { contact_id: result.data.contactId }),
             ...(referrer && { referrer }),

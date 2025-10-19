@@ -72,22 +72,6 @@ export type SubmissionActivity = {
 
 export type Activity = PostActivity | CommentActivity | VoteActivity | SubmissionActivity;
 
-// Supabase query result types
-type CommentWithPost = {
-  id: string;
-  content: string;
-  post_id: string;
-  created_at: string;
-  posts: { title: string } | null;
-};
-
-type VoteWithPost = {
-  id: string;
-  post_id: string;
-  created_at: string;
-  posts: { title: string } | null;
-};
-
 // =====================================================
 // REPOSITORY IMPLEMENTATION
 // =====================================================
@@ -108,7 +92,7 @@ export class ActivityRepository extends CachedRepository<ActivitySummary, string
   async getSummary(userId: string): Promise<RepositoryResult<ActivitySummary>> {
     return this.executeOperation('getSummary', async () => {
       const cacheKey = this.getCacheKey('summary', userId);
-      const cached = this.getFromCache(cacheKey);
+      const cached = this.getFromCache<ActivitySummary>(cacheKey);
       if (cached) return cached;
 
       const supabase = await createClient();
@@ -181,7 +165,7 @@ export class ActivityRepository extends CachedRepository<ActivitySummary, string
       };
 
       // Cache the result
-      this.setCache(cacheKey, summary as unknown as ActivitySummary);
+      this.setCache(cacheKey, summary);
 
       return summary;
     });
@@ -256,7 +240,7 @@ export class ActivityRepository extends CachedRepository<ActivitySummary, string
 
         if (comments) {
           activities.push(
-            ...(comments as unknown as CommentWithPost[]).map(
+            ...comments.map(
               (comment): CommentActivity => ({
                 id: comment.id,
                 type: 'comment',
@@ -286,7 +270,7 @@ export class ActivityRepository extends CachedRepository<ActivitySummary, string
 
         if (votes) {
           activities.push(
-            ...(votes as unknown as VoteWithPost[]).map(
+            ...votes.map(
               (vote): VoteActivity => ({
                 id: vote.id,
                 type: 'vote',

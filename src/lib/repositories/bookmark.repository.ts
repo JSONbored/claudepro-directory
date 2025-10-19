@@ -315,7 +315,7 @@ export class BookmarkRepository extends CachedRepository<Bookmark, string> {
       // Cache if no pagination
       if (!(options?.offset || options?.limit) && data) {
         const cacheKey = this.getCacheKey('user', userId);
-        this.setCache(cacheKey, data as unknown as Bookmark);
+        this.setCache(cacheKey, data);
       }
 
       return data || [];

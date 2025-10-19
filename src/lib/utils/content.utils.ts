@@ -20,8 +20,22 @@
 
 import { z } from 'zod';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
-import { transforms } from '@/src/lib/security/validators';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
+
+// REMOVED: import { transforms } from '@/src/lib/security/validators';
+// Reason: validators.ts → batch.utils.ts → cache.server.ts → node:zlib (breaks browser/Storybook)
+// Solution: Inline normalizeSlug function here to avoid server dependency chain
+
+/**
+ * Normalize slug to URL-safe format
+ * Inlined from validators.ts to avoid server dependencies in browser code
+ */
+const normalizeSlug = (value: string): string =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '');
 
 /**
  * Guide subcategory type
@@ -238,7 +252,7 @@ function sanitizeFilename(input: string | undefined): string {
 
   // Use existing production slug normalization as base
   // This handles: lowercase, trim, spaces→hyphens, removes non-alphanumeric except hyphens
-  const normalized = transforms.normalizeSlug(input);
+  const normalized = normalizeSlug(input);
 
   // Additional filename-specific security
   // Remove any remaining path separators and control characters
@@ -744,7 +758,7 @@ export function isGuideSubcategory(value: unknown): value is GuideSubcategory {
  * // Returns: "/guides/tutorials/setup"
  */
 export function getContentItemUrl(item: {
-  category: ContentCategory;
+  category: CategoryId;
   slug: string;
   subcategory?: string | null | undefined;
 }): string {

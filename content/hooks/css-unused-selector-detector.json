@@ -32,5 +32,27 @@
     "CSS bundle size reduction in production builds",
     "Maintenance of clean, lean stylesheets"
   ],
+  "troubleshooting": [
+    {
+      "issue": "PurgeCSS not detecting any unused selectors in CSS",
+      "solution": "Verify content paths match your project structure. Update --content patterns to include all HTML/JSX/TSX files. Check PurgeCSS config safelist if critical selectors are protected."
+    },
+    {
+      "issue": "PostToolUse hook only runs for write, not edit operations",
+      "solution": "Add both matchers to hook config: matchers: ['write', 'edit']. Verify tool_name extraction from stdin matches expected values. Test with echo to debug tool input parsing."
+    },
+    {
+      "issue": "css-analysis directory not created or files missing",
+      "solution": "Check write permissions in project root. Ensure mkdir -p succeeds without errors. Verify PurgeCSS output path is writable. Check disk space if directory creation fails silently."
+    },
+    {
+      "issue": "PurgeCSS removes critical CSS framework classes",
+      "solution": "Add safelist patterns to PurgeCSS config for framework classes. Use safelist: [/^btn-/, /^nav-/] syntax. Consider extracting framework CSS to separate file excluded from purging."
+    },
+    {
+      "issue": "No output generated message despite PurgeCSS success",
+      "solution": "Check PURGED_FILE path construction matches PurgeCSS output. Verify basename command extracts correct filename. Ensure output directory exists before PurgeCSS runs with mkdir -p."
+    }
+  ],
   "source": "community"
 }

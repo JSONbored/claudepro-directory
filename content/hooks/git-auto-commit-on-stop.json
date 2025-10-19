@@ -33,5 +33,27 @@
     "CI/CD integration with automated commits",
     "Project milestone and progress documentation"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook creates commits even when no meaningful changes made",
+      "solution": "git status --porcelain check shows temp files. Update .gitignore excluding: '.DS_Store', '.swp', 'node_modules/'. Or add file count threshold: 'if [ \"$MODIFIED_FILES\" -lt 2 ]; then exit 0; fi'."
+    },
+    {
+      "issue": "Sensitive files (.env) committed despite pattern detection warnings",
+      "solution": "Pattern match non-blocking by design. Add hard block: 'if [ \"$SENSITIVE_FOUND\" = true ]; then exit 1; fi' before git add. Or use git-secrets: 'git secrets --scan' pre-commit."
+    },
+    {
+      "issue": "Auto-commit fails with empty commit message or malformed body",
+      "solution": "COMMIT_BODY uses cat with EOF delimiter requiring proper quoting. Replace with: 'git commit -m \"Auto-commit: $TIMESTAMP\" -m \"Files: $FILES_CHANGED\" -m \"Branch: $CURRENT_BRANCH\"' avoiding heredoc issues."
+    },
+    {
+      "issue": "SKIP_AUTO_COMMIT environment variable ignored when set",
+      "solution": "Variable not exported to subprocess. Use: 'export SKIP_AUTO_COMMIT=true' before Claude session. Or add to shell profile: 'echo \"export SKIP_AUTO_COMMIT=true\" >> ~/.bashrc'. Verify: 'env | grep SKIP'."
+    },
+    {
+      "issue": "Statistics show zero insertions/deletions despite file changes",
+      "solution": "git diff --stat fails on binary files or first commit. Add: '--ignore-all-space --ignore-blank-lines' flags. Or use: 'git diff --numstat | awk \"{add+=$1; del+=$2} END {print add, del}\"' for accurate counts."
+    }
+  ],
   "source": "community"
 }

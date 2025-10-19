@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { BreadcrumbSchema } from '@/src/components/infra/structured-data/breadcrumb-schema';
+import { Button } from '@/src/components/primitives/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { jobs } from '@/src/lib/data/jobs';
@@ -87,22 +87,18 @@ export default async function JobPage({ params }: PageProps) {
   return (
     <>
       {/* Breadcrumb Schema - SEO optimization */}
-      {
-        await (
-          <BreadcrumbSchema
-            items={[
-              {
-                name: 'Jobs',
-                url: `${APP_CONFIG.url}/jobs`,
-              },
-              {
-                name: job.title,
-                url: `${APP_CONFIG.url}/jobs/${job.slug}`,
-              },
-            ]}
-          />
-        )
-      }
+      <BreadcrumbSchema
+        items={[
+          {
+            name: 'Jobs',
+            url: `${APP_CONFIG.url}/jobs`,
+          },
+          {
+            name: job.title,
+            url: `${APP_CONFIG.url}/jobs/${job.slug}`,
+          },
+        ]}
+      />
 
       <div className={'min-h-screen bg-background'}>
         {/* Header */}
@@ -153,9 +149,9 @@ export default async function JobPage({ params }: PageProps) {
               {/* Tags */}
               <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
                 {job.tags.map((skill) => (
-                  <Badge key={skill} variant="secondary">
+                  <UnifiedBadge key={skill} variant="base" style="secondary">
                     {skill}
-                  </Badge>
+                  </UnifiedBadge>
                 ))}
               </div>
             </div>

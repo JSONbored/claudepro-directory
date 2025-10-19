@@ -12,6 +12,28 @@
   },
   "githubUrl": "https://github.com/claudepro/refactor-command",
   "documentationUrl": "https://docs.claude.ai/commands/refactor",
+  "troubleshooting": [
+    {
+      "issue": "Refactoring breaks tests or changes functional behavior unexpectedly",
+      "solution": "Use --test-first to run tests before and after. Enable --dry-run to preview changes. Create git commit before refactoring: git commit -am 'pre-refactor'."
+    },
+    {
+      "issue": "Modernize flag introduces breaking changes or incompatible syntax",
+      "solution": "Specify language version explicitly: --javascript --es2020. Check Node.js/browser target compatibility. Use --interactive to approve each modernization."
+    },
+    {
+      "issue": "Refactored code fails linting or type checking after transformation",
+      "solution": "Run linter before refactoring: npm run lint. Enable --backup to preserve original. Fix type errors: tsc --noEmit before applying changes."
+    },
+    {
+      "issue": "Command fails with parse errors on valid source code files",
+      "solution": "Verify language version matches codebase: check package.json engines. Update parser: npm update @babel/parser. Use --language flag explicitly for mixed-syntax files."
+    },
+    {
+      "issue": "Large codebase refactoring times out or consumes excessive memory",
+      "solution": "Process files incrementally: /refactor src/module1 first. Increase Node.js memory: NODE_OPTIONS=--max-old-space-size=4096. Use --exclude for node_modules."
+    }
+  ],
   "source": "community",
   "slug": "refactor"
 }

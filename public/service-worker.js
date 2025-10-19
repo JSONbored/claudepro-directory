@@ -42,8 +42,8 @@ const urlsToCache = [
 ];
 
 // Content routes that should be cached for offline browsing
-// Auto-generated from UNIFIED_CATEGORY_REGISTRY
-// Categories: agents, mcp, commands, rules, hooks, statuslines, collections, skills
+// Auto-generated from UNIFIED_CATEGORY_REGISTRY (11 categories)
+// Categories: agents, mcp, commands, rules, hooks, statuslines, collections, skills, guides, jobs, changelog
 const CONTENT_ROUTES = [
   "/agents",
   "/mcp",
@@ -54,6 +54,8 @@ const CONTENT_ROUTES = [
   "/collections",
   "/skills",
   "/guides",
+  "/jobs",
+  "/changelog",
 ];
 
 // Install event - cache initial resources
@@ -147,7 +149,7 @@ self.addEventListener("fetch", (event) => {
   } else if (
     CONTENT_ROUTES.some((route) => url.pathname.startsWith(route)) ||
     url.pathname.match(
-      /\/(agents|mcp|commands|rules|hooks|statuslines|collections|skills|guides)\/[^/]+$/,
+      /\/(agents|mcp|commands|rules|hooks|statuslines|collections|skills|guides|jobs|changelog)\/[^/]+$/,
     )
   ) {
     // Content pages: Stale while revalidate for fresh content

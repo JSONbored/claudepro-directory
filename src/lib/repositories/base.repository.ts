@@ -174,9 +174,14 @@ export abstract class BaseRepository<T, ID = string> implements IRepository<T, I
 /**
  * Cache-enabled Repository Base
  * Extends BaseRepository with caching capabilities
+ *
+ * ARCHITECTURE: Cache is type-safe per-operation via generics
+ * - Can cache entities (T), arrays (T[]), booleans, stats objects, etc.
+ * - NO type casts needed - specify type at call site
+ * - Each operation knows exactly what type it's caching
  */
 export abstract class CachedRepository<T, ID = string> extends BaseRepository<T, ID> {
-  protected cache = new Map<string, { data: T; timestamp: number }>();
+  protected cache = new Map<string, { data: unknown; timestamp: number }>();
   protected readonly cacheTTL: number;
 
   constructor(repositoryName: string, cacheTTL = 5 * 60 * 1000) {
@@ -186,8 +191,16 @@ export abstract class CachedRepository<T, ID = string> extends BaseRepository<T,
 
   /**
    * Get from cache if available and not expired
+   *
+   * @param key - Cache key
+   * @returns Cached data of type TCached, or null if not found/expired
+   *
+   * @example
+   * const user = this.getFromCache<User>('user:123');
+   * const users = this.getFromCache<User[]>('users:all');
+   * const exists = this.getFromCache<boolean>('exists:123');
    */
-  protected getFromCache(key: string): T | null {
+  protected getFromCache<TCached = T>(key: string): TCached | null {
     const cached = this.cache.get(key);
     if (!cached) return null;
 
@@ -197,13 +210,21 @@ export abstract class CachedRepository<T, ID = string> extends BaseRepository<T,
       return null;
     }
 
-    return cached.data;
+    return cached.data as TCached;
   }
 
   /**
    * Set cache entry
+   *
+   * @param key - Cache key
+   * @param data - Data to cache (any type)
+   *
+   * @example
+   * this.setCache('user:123', user);  // T
+   * this.setCache('users:all', users);  // T[]
+   * this.setCache('exists:123', true);  // boolean
    */
-  protected setCache(key: string, data: T): void {
+  protected setCache<TCached = T>(key: string, data: TCached): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),

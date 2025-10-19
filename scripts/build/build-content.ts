@@ -27,10 +27,10 @@ import {
   writeBuildOutput,
 } from '../../src/lib/build/category-processor.server.js';
 import { onBuildComplete } from '../../src/lib/cache.server.js';
+import { getAllChangelogEntries } from '../../src/lib/changelog/loader.js';
 import {
-  BUILD_CATEGORY_CONFIGS,
-  type BuildCategoryId,
-  getAllBuildCategoryConfigs,
+  type CategoryId,
+  UNIFIED_CATEGORY_REGISTRY,
 } from '../../src/lib/config/category-config.js';
 import { logger } from '../../src/lib/logger.js';
 import type { ContentStats } from '../../src/lib/schemas/content/content-types.js';
@@ -77,8 +77,8 @@ function getSchemaPathFromTypeName(typeName: string): string {
  * @param metadata - Metadata items
  * @returns TypeScript file content
  */
-function generateMetadataFile(categoryId: BuildCategoryId, metadata: readonly unknown[]): string {
-  const config = BUILD_CATEGORY_CONFIGS[categoryId];
+function generateMetadataFile(categoryId: CategoryId, metadata: readonly unknown[]): string {
+  const config = UNIFIED_CATEGORY_REGISTRY[categoryId];
   const varName = categoryId.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
   const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
   const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
@@ -88,7 +88,7 @@ function generateMetadataFile(categoryId: BuildCategoryId, metadata: readonly un
 
   return `/**
  * Auto-generated metadata file
- * Category: ${config.name}
+ * Category: ${config.pluralTitle}
  * Generated: ${new Date().toISOString()}
  *
  * DO NOT EDIT MANUALLY
@@ -117,15 +117,15 @@ export function get${capitalizedSingular}MetadataBySlug(slug: string): ${capital
  * @param items - Full content items
  * @returns TypeScript file content
  */
-function generateFullContentFile(categoryId: BuildCategoryId, items: readonly unknown[]): string {
-  const config = BUILD_CATEGORY_CONFIGS[categoryId];
+function generateFullContentFile(categoryId: CategoryId, items: readonly unknown[]): string {
+  const config = UNIFIED_CATEGORY_REGISTRY[categoryId];
   const varName = categoryId.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
   const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
   const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
 
   return `/**
  * Auto-generated full content file
- * Category: ${config.name}
+ * Category: ${config.pluralTitle}
  * Generated: ${new Date().toISOString()}
  *
  * DO NOT EDIT MANUALLY
@@ -154,7 +154,7 @@ export type ${capitalizedSingular}Full = typeof ${varName}Full[number];
  * @returns TypeScript file content
  */
 function generateIndexFile(contentStats: ContentStats): string {
-  const categories = Object.keys(BUILD_CATEGORY_CONFIGS) as BuildCategoryId[];
+  const categories = Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[];
 
   return `/**
  * Auto-generated content index
@@ -245,24 +245,101 @@ async function main(): Promise<void> {
     }
 
     // Build all categories in parallel using modern config system
-    const categoryConfigs = getAllBuildCategoryConfigs();
+    const categoryConfigs = Object.values(UNIFIED_CATEGORY_REGISTRY);
     logger.info(`Building ${categoryConfigs.length} categories in parallel...\n`);
 
     const buildResults = await Promise.all(
-      (Object.keys(BUILD_CATEGORY_CONFIGS) as BuildCategoryId[]).map((id) =>
+      (Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[]).map((id) =>
         buildCategory(CONTENT_DIR, id, cache)
       )
     );
 
     // Generate TypeScript files for each category
-    const contentStats: Record<string, number> = { guides: 0 }; // guides handled separately
+    // MODERNIZATION: contentStats populated dynamically from UNIFIED_CATEGORY_REGISTRY (registry-driven)
+    const contentStats: Record<string, number> = {};
     let totalFiles = 0;
     let totalValid = 0;
     let totalInvalid = 0;
 
     for (const result of buildResults) {
-      const config = BUILD_CATEGORY_CONFIGS[result.category];
+      const config = UNIFIED_CATEGORY_REGISTRY[result.category];
 
+      // Special handling for changelog: parse from CHANGELOG.md instead of content files
+      if (result.category === 'changelog') {
+        try {
+          logger.info('📋 Parsing changelog from CHANGELOG.md...');
+          const changelogEntries = await getAllChangelogEntries();
+
+          // Transform changelog entries to metadata format
+          // Expected: { slug, title, description, dateAdded }
+          const changelogMetadata = changelogEntries.map((entry) => ({
+            slug: entry.slug,
+            title: entry.title,
+            description: entry.tldr || entry.title,
+            dateAdded: entry.date,
+          }));
+
+          // Transform to full content format (matching GuideContent schema)
+          // Changelog uses GuideContent schema but has different source data
+          // Map changelog entries to GuideContent-compatible structure
+          const changelogFullContent = changelogEntries.map((entry) => ({
+            // Required base fields
+            slug: entry.slug,
+            title: entry.title,
+            description: entry.tldr || entry.title,
+            author: 'ClaudePro Directory',
+            dateAdded: entry.date,
+            tags: ['changelog', 'updates'],
+            content: entry.content,
+
+            // Required Guide-specific fields
+            category: 'guides' as const,
+            subcategory: 'use-cases' as const, // Changelog as use-case documentation
+            keywords: ['changelog', 'updates', 'features', 'improvements', 'release notes'],
+
+            // Optional but commonly expected fields
+            source: 'claudepro' as const,
+            displayTitle: entry.title,
+          }));
+
+          // Update statistics
+          contentStats[result.category] = changelogEntries.length;
+
+          // Generate metadata file
+          const metadataPath = join(GENERATED_DIR, `${result.category}-metadata.ts`);
+          const metadataContent = generateMetadataFile(result.category, changelogMetadata);
+          await writeBuildOutput(metadataPath, metadataContent);
+
+          // Generate full content file
+          const fullPath = join(GENERATED_DIR, `${result.category}-full.ts`);
+          const fullContent = generateFullContentFile(result.category, changelogFullContent);
+          await writeBuildOutput(fullPath, fullContent);
+
+          logger.success(
+            `✓ ${config.pluralTitle}: ${changelogEntries.length} entries from CHANGELOG.md`
+          );
+        } catch (error) {
+          logger.error(
+            'Failed to parse changelog from CHANGELOG.md',
+            error instanceof Error ? error : new Error(String(error))
+          );
+
+          // Fall back to empty changelog
+          contentStats[result.category] = 0;
+          const metadataPath = join(GENERATED_DIR, `${result.category}-metadata.ts`);
+          const metadataContent = generateMetadataFile(result.category, []);
+          await writeBuildOutput(metadataPath, metadataContent);
+
+          const fullPath = join(GENERATED_DIR, `${result.category}-full.ts`);
+          const fullContent = generateFullContentFile(result.category, []);
+          await writeBuildOutput(fullPath, fullContent);
+
+          logger.warn(`⚠ ${config.pluralTitle}: Using empty fallback due to parse error`);
+        }
+        continue; // Skip normal processing for changelog
+      }
+
+      // Normal processing for all other categories
       // Track statistics
       totalFiles += result.metrics.filesProcessed;
       totalValid += result.metrics.filesValid;
@@ -280,7 +357,7 @@ async function main(): Promise<void> {
       await writeBuildOutput(fullPath, fullContent);
 
       logger.success(
-        `✓ ${config.name}: ${result.metrics.filesValid} valid, ${result.metrics.filesInvalid} invalid (${result.metrics.processingTimeMs.toFixed(0)}ms)`
+        `✓ ${config.pluralTitle}: ${result.metrics.filesValid} valid, ${result.metrics.filesInvalid} invalid (${result.metrics.processingTimeMs.toFixed(0)}ms)`
       );
     }
 

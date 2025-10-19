@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { Button } from '@/src/components/primitives/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Github, MessageCircle, MessageSquare, Twitter, Users } from '@/src/lib/icons';
@@ -20,10 +20,14 @@ export default function CommunityPage() {
       <section className={'relative py-24 px-4 overflow-hidden'}>
         <div className={'container mx-auto text-center'}>
           <div className={'max-w-3xl mx-auto'}>
-            <Badge variant="outline" className={'mb-6 border-accent/20 bg-accent/5 text-accent'}>
+            <UnifiedBadge
+              variant="base"
+              style="outline"
+              className={'mb-6 border-accent/20 bg-accent/5 text-accent'}
+            >
               <Users className="h-3 w-3 mr-1 text-accent" />
               Community
-            </Badge>
+            </UnifiedBadge>
 
             <h1 className={'text-4xl md:text-6xl font-bold mb-6'}>Join the Claude Community</h1>
 
@@ -140,7 +144,8 @@ export default function CommunityPage() {
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
-        <InlineEmailCTA
+        <UnifiedNewsletterCapture
+          source="content_page"
           variant="hero"
           context="community-page"
           headline="Join 1,000+ Claude Power Users"
