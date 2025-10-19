@@ -535,47 +535,19 @@ export async function getCollectionWithItems(collectionId: string) {
 
 /**
  * Get a public collection by user slug and collection slug
+ * Optimized: Single JOIN query batches user lookup, collection lookup, and items fetch
  */
 export async function getPublicCollectionBySlug(userSlug: string, collectionSlug: string) {
-  const { createClient } = await import('@/src/lib/supabase/server');
-  const supabase = await createClient();
-
-  // First get the user (still needs direct query as users table has no repository yet)
-  const { data: userData, error: userError } = await supabase
-    .from('users')
-    .select('id')
-    .eq('slug', userSlug)
-    .single();
-
-  if (userError || !userData) {
-    throw new Error('User not found');
-  }
-
-  // Get collection by user and slug
-  const collectionResult = await collectionRepository.findByUserAndSlug(
-    userData.id,
+  const result = await collectionRepository.findPublicByUserSlugAndCollectionSlug(
+    userSlug,
     collectionSlug
   );
 
-  if (!(collectionResult.success && collectionResult.data)) {
-    throw new Error(collectionResult.error || 'Collection not found');
+  if (!(result.success && result.data)) {
+    throw new Error(result.error || 'Collection not found');
   }
 
-  // Verify collection is public
-  if (!collectionResult.data.is_public) {
-    throw new Error('Collection not found');
-  }
-
-  // Get items
-  const itemsResult = await collectionRepository.getItems(collectionResult.data.id, {
-    sortBy: 'order',
-    sortOrder: 'asc',
-  });
-
-  return {
-    ...collectionResult.data,
-    items: itemsResult.success ? itemsResult.data || [] : [],
-  };
+  return result.data;
 }
 
 // ============================================

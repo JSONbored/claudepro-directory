@@ -3,6 +3,7 @@ import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/src/components/content-search-client';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { LazySection } from '@/src/components/infra/lazy-section';
 import { Button } from '@/src/components/primitives/button';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ExternalLink, HelpCircle } from '@/src/lib/icons';
@@ -133,16 +134,20 @@ export function ContentListServer<T extends UnifiedContentItem>({
         </Suspense>
       </section>
 
-      {/* Email CTA - Footer section (matching homepage pattern) */}
+      {/* Email CTA - Footer section (matching homepage pattern) with fade-in animation */}
       <section className={'container mx-auto px-4 py-12'}>
-        <UnifiedNewsletterCapture
-          source="content_page"
-          variant="hero"
-          context="category-page"
-          category={type}
-          headline={'Join 1,000+ Claude Power Users'}
-          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
-        />
+        <Suspense fallback={null}>
+          <LazySection variant="fade-in" delay={0.15}>
+            <UnifiedNewsletterCapture
+              source="content_page"
+              variant="hero"
+              context="category-page"
+              category={type}
+              headline={'Join 1,000+ Claude Power Users'}
+              description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+            />
+          </LazySection>
+        </Suspense>
       </section>
     </div>
   );

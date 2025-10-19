@@ -26,8 +26,9 @@
  * @module components/ui/unified-card-grid
  */
 
+import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
@@ -75,6 +76,9 @@ interface BaseGridProps {
   ariaLabel?: string;
   /** Function to extract unique key from item (default: uses slug) */
   keyExtractor?: (item: UnifiedContentItem, index: number) => string | number;
+
+  /** Number of items to prefetch for faster navigation (default: 0) */
+  prefetchCount?: number;
 }
 
 /**
@@ -170,7 +174,22 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
     loading = false,
     ariaLabel,
     keyExtractor,
+    prefetchCount = 0,
   } = props;
+
+  const router = useRouter();
+
+  // Prefetch top N items for faster navigation
+  useEffect(() => {
+    if (prefetchCount > 0 && items.length > 0) {
+      const itemsToPrefetch = items.slice(0, prefetchCount);
+      itemsToPrefetch.forEach((item) => {
+        const path = `/${item.category}/${item.slug}`;
+        router.prefetch(path);
+      });
+    }
+  }, [items, prefetchCount, router]);
+
   // Infinite scroll hook (only used when infiniteScroll=true)
   const { displayCount, isLoading, hasMore, sentinelRef } = useInfiniteScroll({
     totalItems: items.length,
@@ -188,21 +207,21 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
   // Empty state
   if (items.length === 0 && !loading) {
     return (
-      <output className="flex items-center justify-center py-12" aria-live="polite">
+      <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
         <p className="text-lg text-muted-foreground">{emptyMessage}</p>
-      </output>
+      </div>
     );
   }
 
   // Loading state (initial load)
   if (loading) {
     return (
-      <output className="flex items-center justify-center py-12" aria-live="polite">
+      <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
         <div className="flex items-center gap-2">
-          <output className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           <p className="text-sm text-muted-foreground">{loadingMessage}</p>
         </div>
-      </output>
+      </div>
     );
   }
 
@@ -227,7 +246,7 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
 
       {/* Infinite scroll sentinel (only shown when enabled and hasMore) */}
       {infiniteScroll && hasMore && (
-        <output
+        <div
           ref={sentinelRef}
           className="flex items-center justify-center py-8"
           style={{ minHeight: '100px' }}
@@ -237,11 +256,11 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
           {isLoading && (
             <div className="flex items-center gap-2">
               {/* Spinner - shadcn design pattern */}
-              <output className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               <p className="text-sm text-muted-foreground">{loadingMessage}</p>
             </div>
           )}
-        </output>
+        </div>
       )}
     </section>
   );

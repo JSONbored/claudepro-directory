@@ -58,6 +58,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
           cardComponent={ConfigCard}
           variant="normal"
           ariaLabel={`Featured ${title}`}
+          prefetchCount={3}
         />
       </div>
     );

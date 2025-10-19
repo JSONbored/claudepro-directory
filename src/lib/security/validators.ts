@@ -331,9 +331,9 @@ export const validation = {
  * - Actively maintained and used by major companies
  * - No performance issues with complex patterns
  */
-async function stripHtmlTags(str: string): Promise<string> {
+function stripHtmlTags(str: string): string {
   // Use DOMPurify to strip all HTML tags while keeping text content
-  return await DOMPurify.sanitize(str, {
+  return DOMPurify.sanitize(str, {
     ALLOWED_TAGS: [], // Strip all HTML tags
     ALLOWED_ATTR: [], // Strip all attributes
     KEEP_CONTENT: true, // Keep text content between tags

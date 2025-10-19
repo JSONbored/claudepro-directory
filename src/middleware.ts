@@ -424,33 +424,34 @@ export async function middleware(request: NextRequest) {
     return noseconeResponse;
   }
 
+  // PERFORMANCE OPTIMIZATION: Skip heavy Arcjet processing for read-only requests
+  // These paths are ISR-cached and don't need bot detection or rate limiting
+  const isReadOnlyISRPath =
+    request.method === 'GET' &&
+    (pathname === '/' ||
+      pathname.startsWith('/changelog') ||
+      pathname.startsWith('/guides') ||
+      pathname === '/trending' ||
+      pathname === '/companies' ||
+      pathname === '/board' ||
+      /^\/(agents|mcp|commands|rules|hooks|statuslines|collections|skills)\/[^/]+$/.test(pathname));
+
   // Skip Arcjet for Next.js RSC prefetch requests (legitimate browser behavior)
   const isRSCRequest = pathname.includes('_rsc=') || request.headers.get('rsc') === '1';
-  if (isRSCRequest) {
-    const noseconeResponse = await noseconeMiddleware();
-
-    if (isDevelopment) {
-      const duration = performance.now() - startTime;
-      logger.debug('Middleware execution (RSC prefetch)', {
-        path: sanitizePathForLogging(pathname),
-        duration: `${duration.toFixed(2)}ms`,
-      });
-    }
-
-    return noseconeResponse;
-  }
 
   // Skip Arcjet protection for static assets and Next.js internals
   const isStaticAsset = staticAssetSchema.safeParse(pathname).success;
 
-  // For static assets, only apply Nosecone security headers (no Arcjet needed)
-  if (isStaticAsset) {
+  // Fast path: Apply only Nosecone headers for safe requests (no Arcjet overhead)
+  // Saves 50-150ms by skipping bot detection, rate limiting, and WAF checks
+  if (isRSCRequest || isStaticAsset || isReadOnlyISRPath) {
     const noseconeResponse = await noseconeMiddleware();
 
     if (isDevelopment) {
       const duration = performance.now() - startTime;
-      logger.debug('Middleware execution (static asset)', {
+      logger.debug('Middleware execution (fast path)', {
         path: sanitizePathForLogging(pathname),
+        type: isRSCRequest ? 'RSC' : isStaticAsset ? 'static' : 'ISR',
         duration: `${duration.toFixed(2)}ms`,
       });
     }

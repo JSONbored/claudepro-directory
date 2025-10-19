@@ -30,6 +30,7 @@ import {
   LazySearchSection,
   LazyTabsSection,
 } from '@/src/components/features/home/lazy-homepage-sections';
+import { LazySection } from '@/src/components/infra/lazy-section';
 import { NumberTicker } from '@/src/components/magic/number-ticker';
 import { HomepageStatsSkeleton } from '@/src/components/primitives/loading-skeleton';
 import { useSearch } from '@/src/hooks/use-search';
@@ -167,17 +168,22 @@ function HomePageClientComponent({
           onClearSearch={handleClearSearch}
         />
 
-        {/* Featured Content Sections - Only show when not searching */}
-        {/* Use weekly featured (algorithm-selected) if available, otherwise fall back to static alphabetical */}
-        {!isSearching && <LazyFeaturedSections categories={featuredByCategory || initialData} />}
-
-        {/* Tabs Section - Only show when not searching - TanStack Virtual */}
+        {/* Featured Content Sections - Beautiful slide-up with spring physics */}
         {!isSearching && (
-          <LazyTabsSection
-            activeTab={activeTab}
-            filteredResults={filteredResults}
-            onTabChange={handleTabChange}
-          />
+          <LazySection variant="slide-up" delay={0.1}>
+            <LazyFeaturedSections categories={featuredByCategory || initialData} />
+          </LazySection>
+        )}
+
+        {/* Tabs Section - Smooth scale animation with spring bounce */}
+        {!isSearching && (
+          <LazySection variant="scale" delay={0.2}>
+            <LazyTabsSection
+              activeTab={activeTab}
+              filteredResults={filteredResults}
+              onTabChange={handleTabChange}
+            />
+          </LazySection>
         )}
       </section>
     </>

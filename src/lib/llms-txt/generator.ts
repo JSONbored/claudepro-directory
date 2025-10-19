@@ -134,7 +134,7 @@ function generateFooter(url?: string): string {
  *
  * @example
  * ```ts
- * const llmsTxt = await generateLLMsTxt({
+ * const llmsTxt = generateLLMsTxt({
  *   slug: "github-mcp-server",
  *   title: "GitHub MCP Server",
  *   description: "Official GitHub MCP server...",
@@ -145,10 +145,7 @@ function generateFooter(url?: string): string {
  * });
  * ```
  */
-export async function generateLLMsTxt(
-  item: LLMsTxtItem,
-  options?: Partial<LLMsTxtOptions>
-): Promise<string> {
+export function generateLLMsTxt(item: LLMsTxtItem, options?: Partial<LLMsTxtOptions>): string {
   try {
     // Validate input
     const validatedItem = llmsTxtItemSchema.parse(item);
@@ -207,7 +204,7 @@ export async function generateLLMsTxt(
       sections.push('');
 
       // Convert markdown to plain text
-      const plainText = await markdownToPlainText(validatedItem.content, opts.markdownOptions);
+      const plainText = markdownToPlainText(validatedItem.content, opts.markdownOptions);
 
       // Sanitize if requested
       let finalContent = plainText;

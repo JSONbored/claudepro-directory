@@ -68,13 +68,12 @@ interface NavLinkProps {
 const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkProps) => {
   const active = isActive(href);
 
-  // Only spread onClick if it's defined to avoid exactOptionalPropertyTypes issues
   const linkProps = {
     href,
+    prefetch: true,
     className: `group relative px-2 py-1 text-sm font-medium transition-colors duration-200 ${
       active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
     } ${className}`,
-    // WCAG 2.1 AA: Indicate current page for screen readers
     ...(active && { 'aria-current': 'page' as const }),
     ...(onClick && { onClick }),
   };
@@ -82,7 +81,6 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   return (
     <Link {...linkProps}>
       {children}
-      {/* Animated underline */}
       <span
         className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all duration-300 ${
           active ? 'w-full' : 'w-0 group-hover:w-full'
@@ -170,6 +168,7 @@ export const Navigation = () => {
                 {/* Logo */}
                 <Link
                   href={ROUTES.HOME}
+                  prefetch={true}
                   className={'flex items-center gap-2 min-w-0 flex-shrink'}
                   aria-label="Claude Pro Directory - Go to homepage"
                 >
@@ -236,6 +235,7 @@ export const Navigation = () => {
                                   <DropdownMenuItem key={link.href} asChild>
                                     <Link
                                       href={link.href}
+                                      prefetch={true}
                                       className={
                                         'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg hover:bg-accent/10 hover:scale-[1.02] transition-all duration-200 group'
                                       }
@@ -276,6 +276,7 @@ export const Navigation = () => {
                       <DropdownMenuItem asChild>
                         <Link
                           href={ROUTES.SUBMIT}
+                          prefetch={true}
                           className={
                             'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg bg-accent/5 hover:bg-accent/10 hover:scale-[1.01] transition-all duration-200 group'
                           }

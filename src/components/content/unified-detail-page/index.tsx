@@ -1,34 +1,44 @@
 /**
- * Unified Detail Page - Server-First Architecture (SHA-2083 v2)
+ * Unified Detail Page - Server-First Architecture with Streaming SSR (SHA-2083 v3)
  *
  * REPLACES: Lazy-loaded client components with server components
- * NEW STRUCTURE: Server-first rendering with minimal client interactivity
+ * NEW STRUCTURE: Server-first rendering with Suspense streaming for optimal performance
  *
  * Architecture:
  * - Server Components: All static rendering (metadata, sections, sidebar cards)
  * - Client Components: Only interactive elements (header buttons, config tabs, sidebar nav)
- * - No lazy loading: Direct imports for faster initial render
- * - No Suspense boundaries: Server rendering eliminates loading states
+ * - Suspense Boundaries: Stream slow data (related items, view counts, reviews)
+ * - Progressive Enhancement: Show main content immediately, stream supplementary data
  *
  * Performance Benefits:
  * - 40-50% reduction in client JavaScript bundle
- * - Faster initial page load (less hydration)
+ * - Faster Time to First Byte (TTFB) - main content renders immediately
+ * - Progressive streaming reduces perceived load time
  * - Better SEO (fully server-rendered)
  * - Reduced memory footprint in browser
  *
  * @see components/unified-detail-page.tsx - Original 685-line implementation
  */
 
+import { Suspense } from 'react';
 import { UnifiedContentSection } from '@/src/components/content/unified-content-section';
 import { UnifiedReview } from '@/src/components/domain/unified-review';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
+import { detectLanguage } from '@/src/lib/content/language-detection';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { getDisplayTitle } from '@/src/lib/utils';
+import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
+import {
+  generateFilename,
+  generateHookFilename,
+  generateMultiFormatFilename,
+  transformMcpConfigForDisplay,
+} from '@/src/lib/utils/content.utils';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 import { DetailSidebar } from './sidebar/detail-sidebar';
@@ -37,12 +47,55 @@ export interface UnifiedDetailPageProps {
   item: UnifiedContentItem;
   relatedItems?: UnifiedContentItem[];
   viewCount?: number;
+  relatedItemsPromise?: Promise<UnifiedContentItem[]>;
+  viewCountPromise?: Promise<number>;
+}
+
+/**
+ * Async component to stream view count metadata
+ */
+async function ViewCountMetadata({
+  item,
+  viewCountPromise,
+}: {
+  item: UnifiedContentItem;
+  viewCountPromise: Promise<number>;
+}) {
+  const viewCount = await viewCountPromise;
+  return <DetailMetadata item={item} viewCount={viewCount} />;
+}
+
+/**
+ * Async component to stream sidebar with related items
+ */
+async function SidebarWithRelated({
+  item,
+  relatedItemsPromise,
+  config,
+}: {
+  item: UnifiedContentItem;
+  relatedItemsPromise: Promise<UnifiedContentItem[]>;
+  config: {
+    typeName: string;
+    metadata?:
+      | {
+          categoryLabel?: string;
+          showGitHubLink?: boolean;
+          githubPathPrefix?: string;
+        }
+      | undefined;
+  };
+}) {
+  const relatedItems = await relatedItemsPromise;
+  return <DetailSidebar item={item} relatedItems={relatedItems} config={config} />;
 }
 
 export async function UnifiedDetailPage({
   item,
   relatedItems = [],
   viewCount,
+  relatedItemsPromise,
+  viewCountPromise,
 }: UnifiedDetailPageProps) {
   // Get configuration for this content type (Server Component - no hooks)
   const config = getContentTypeConfig(item.category);
@@ -106,14 +159,7 @@ export async function UnifiedDetailPage({
   // ============================================================================
   // Architecture: Page-level async processing (data layer) → Client components (presentation layer)
   // Benefits: Parallel processing, testable components, proper separation of concerns
-
-  // Import async utilities at top of data processing section
-  const { detectLanguage } = await import('@/src/lib/content/language-detection');
-  const { generateFilename, generateMultiFormatFilename, generateHookFilename } = await import(
-    '@/src/lib/utils/content.utils'
-  );
-  const { batchMap, batchFetch } = await import('@/src/lib/utils/batch.utils');
-  const { transformMcpConfigForDisplay } = await import('@/src/lib/utils/content.utils');
+  // PERFORMANCE: All utilities imported at module level (no dynamic import overhead)
 
   // Pre-process content highlighting (ContentSection data)
   const contentData = await (async () => {
@@ -315,8 +361,14 @@ export async function UnifiedDetailPage({
       {/* Header - Client component for interactivity */}
       <DetailHeader displayTitle={displayTitle} item={item} config={config} />
 
-      {/* Metadata - Server rendered */}
-      <DetailMetadata item={item} viewCount={viewCount} />
+      {/* Metadata - Stream view count if promise provided */}
+      {viewCountPromise ? (
+        <Suspense fallback={<DetailMetadata item={item} viewCount={undefined} />}>
+          <ViewCountMetadata item={item} viewCountPromise={viewCountPromise} />
+        </Suspense>
+      ) : (
+        <DetailMetadata item={item} viewCount={viewCount} />
+      )}
 
       {/* Main content */}
       <div className="container mx-auto px-4 py-8">
@@ -447,16 +499,40 @@ export async function UnifiedDetailPage({
             />
           </div>
 
-          {/* Sidebar */}
+          {/* Sidebar - Stream related items if promise provided */}
           <aside className="lg:sticky lg:top-24 lg:self-start space-y-6">
-            <DetailSidebar
-              item={item}
-              relatedItems={relatedItems}
-              config={{
-                typeName: config.typeName,
-                metadata: config.metadata,
-              }}
-            />
+            {relatedItemsPromise ? (
+              <Suspense
+                fallback={
+                  <DetailSidebar
+                    item={item}
+                    relatedItems={[]}
+                    config={{
+                      typeName: config.typeName,
+                      metadata: config.metadata,
+                    }}
+                  />
+                }
+              >
+                <SidebarWithRelated
+                  item={item}
+                  relatedItemsPromise={relatedItemsPromise}
+                  config={{
+                    typeName: config.typeName,
+                    metadata: config.metadata,
+                  }}
+                />
+              </Suspense>
+            ) : (
+              <DetailSidebar
+                item={item}
+                relatedItems={relatedItems}
+                config={{
+                  typeName: config.typeName,
+                  metadata: config.metadata,
+                }}
+              />
+            )}
           </aside>
         </div>
       </div>

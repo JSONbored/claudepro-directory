@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import {
   agents,
   collections,
@@ -10,6 +11,7 @@ import {
 } from '@/generated/content';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { LazySection } from '@/src/components/infra/lazy-section';
 import { TrendingContent } from '@/src/components/shared/trending-content';
 import { statsRedis } from '@/src/lib/cache.server';
 import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
@@ -23,7 +25,7 @@ import {
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { getBatchTrendingData } from '@/src/lib/trending/calculator.server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { batchFetch, batchLoadContent } from '@/src/lib/utils/batch.utils';
+import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 // Generate metadata from centralized registry
 export const metadata = generatePageMetadata('/trending');
@@ -170,13 +172,8 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
 
   const { trending, popular, recent, totalCount } = await getTrendingData(params);
 
-  // Enrich all tabs with copy counts from Redis (parallel batch operations)
-  // Using batchFetch for type-safe tuple preservation
-  const [enrichedTrending, enrichedPopular, enrichedRecent] = await batchFetch([
-    statsRedis.enrichWithAllCounts(trending),
-    statsRedis.enrichWithAllCounts(popular),
-    statsRedis.enrichWithAllCounts(recent),
-  ] as const);
+  const [enrichedTrending = [], enrichedPopular = [], enrichedRecent = []] =
+    await statsRedis.enrichMultipleDatasets([trending, popular, recent]);
 
   // This is a server component, so we'll use a static ID
   const pageTitleId = 'trending-page-title';
@@ -229,27 +226,35 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
         </div>
       </section>
 
-      {/* Trending Content */}
+      {/* Trending Content - Slide up animation for below-fold */}
       <section
         className={'container mx-auto px-4 py-16'}
         aria-label="Trending configurations content"
       >
-        <TrendingContent
-          trending={enrichedTrending}
-          popular={enrichedPopular}
-          recent={enrichedRecent}
-        />
+        <Suspense fallback={null}>
+          <LazySection variant="slide-up" delay={0.1}>
+            <TrendingContent
+              trending={enrichedTrending}
+              popular={enrichedPopular}
+              recent={enrichedRecent}
+            />
+          </LazySection>
+        </Suspense>
       </section>
 
-      {/* Email CTA - Moved to footer section to match homepage pattern */}
+      {/* Email CTA - Fade in animation */}
       <section className={'container mx-auto px-4 py-12'}>
-        <UnifiedNewsletterCapture
-          source="content_page"
-          variant="hero"
-          context="trending-page"
-          headline="Never Miss Trending Tools"
-          description="Get weekly updates on what's hot in the Claude community. No spam, unsubscribe anytime."
-        />
+        <Suspense fallback={null}>
+          <LazySection variant="fade-in" delay={0.15}>
+            <UnifiedNewsletterCapture
+              source="content_page"
+              variant="hero"
+              context="trending-page"
+              headline="Never Miss Trending Tools"
+              description="Get weekly updates on what's hot in the Claude community. No spam, unsubscribe anytime."
+            />
+          </LazySection>
+        </Suspense>
       </section>
     </div>
   );

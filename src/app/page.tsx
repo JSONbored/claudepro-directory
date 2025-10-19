@@ -19,6 +19,7 @@ import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { HomePageClient } from '@/src/components/features/home';
+import { LazySection } from '@/src/components/infra/lazy-section';
 import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 
@@ -292,16 +293,18 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </div>
       </div>
 
-      {/* Email CTA - Streams independently */}
+      {/* Email CTA - Beautiful fade-in with spring physics */}
       <section className={'container mx-auto px-4 py-12'}>
         <Suspense fallback={null}>
-          <UnifiedNewsletterCapture
-            variant="hero"
-            source="homepage"
-            context="homepage"
-            headline="Join 1,000+ Claude Power Users"
-            description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
-          />
+          <LazySection variant="fade-in" delay={0.15}>
+            <UnifiedNewsletterCapture
+              variant="hero"
+              source="homepage"
+              context="homepage"
+              headline="Join 1,000+ Claude Power Users"
+              description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+            />
+          </LazySection>
         </Suspense>
       </section>
     </div>

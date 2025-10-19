@@ -562,22 +562,83 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
   }
 
   /**
-   * Get collection with items
+   * Get collection with items (optimized with single JOIN query)
    */
   async findByIdWithItems(id: string): Promise<RepositoryResult<CollectionWithItems | null>> {
     return this.executeOperation('findByIdWithItems', async () => {
-      const collectionResult = await this.findById(id);
-      if (!(collectionResult.success && collectionResult.data)) {
-        return null;
+      const cacheKey = this.getCacheKey('with-items', id);
+      const cached = this.getFromCache<CollectionWithItems>(cacheKey);
+      if (cached) return cached;
+
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from('user_collections')
+        .select(
+          `
+          *,
+          items:collection_items(*)
+        `
+        )
+        .eq('id', id)
+        .order('order', { referencedTable: 'collection_items', ascending: true })
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return null;
+        }
+        throw new Error(`Failed to find collection with items: ${error.message}`);
       }
 
-      const itemsResult = await this.getItems(id);
-      const items = itemsResult.success ? itemsResult.data : [];
+      if (data) {
+        this.setCache(cacheKey, data);
+      }
 
-      return {
-        ...collectionResult.data,
-        items: items || [],
-      };
+      return data;
+    });
+  }
+
+  /**
+   * Get public collection with items by user slug and collection slug
+   * Optimized with single JOIN query (batches user lookup, collection lookup, and items fetch)
+   */
+  async findPublicByUserSlugAndCollectionSlug(
+    userSlug: string,
+    collectionSlug: string
+  ): Promise<RepositoryResult<CollectionWithItems | null>> {
+    return this.executeOperation('findPublicByUserSlugAndCollectionSlug', async () => {
+      const cacheKey = this.getCacheKey('public-user-slug', `${userSlug}:${collectionSlug}`);
+      const cached = this.getFromCache<CollectionWithItems>(cacheKey);
+      if (cached) return cached;
+
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from('user_collections')
+        .select(
+          `
+          *,
+          items:collection_items(*),
+          user:users!user_collections_user_id_fkey(slug)
+        `
+        )
+        .eq('slug', collectionSlug)
+        .eq('is_public', true)
+        .eq('users.slug', userSlug)
+        .order('order', { referencedTable: 'collection_items', ascending: true })
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return null;
+        }
+        throw new Error(`Failed to find public collection: ${error.message}`);
+      }
+
+      if (data) {
+        this.setCache(cacheKey, data);
+      }
+
+      return data;
     });
   }
 }

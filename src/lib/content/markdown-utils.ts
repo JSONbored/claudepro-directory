@@ -218,7 +218,7 @@ export async function markdownToSafeHtml(
     };
 
     // Sanitize HTML - the result is a string when not using RETURN_DOM
-    let sanitizedHtml = (await DOMPurify.sanitize(rawHtml, purifyConfig)) as string;
+    let sanitizedHtml = DOMPurify.sanitize(rawHtml, purifyConfig) as string;
 
     // Post-process for additional security
     if (sanitizeOptions.enforceNoFollow || sanitizeOptions.enforceNoOpener) {

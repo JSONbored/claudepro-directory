@@ -81,7 +81,6 @@ import {
 import { logger } from '@/src/lib/logger';
 import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { batchFetch } from '@/src/lib/utils/batch.utils';
 
 /**
  * Dynamic Rendering (No ISR)
@@ -260,15 +259,12 @@ export default async function DetailPage({
     notFound();
   }
 
-  // Parallel fetch: Load full content, related items, and view count simultaneously (30-40ms gain)
-  // Using batchFetch for type-safe parallel execution instead of sequential awaits
-  const [fullItem, relatedItemsData, viewCount] = await batchFetch([
-    getFullContentBySlug(category, slug),
-    getRelatedContent(category, slug, 3),
-    statsRedis.getViewCount(category, slug),
-  ] as const);
-
+  // Optimized fetch strategy: Load critical content first, stream supplementary data
+  // Main content is loaded immediately for fastest initial render
+  const fullItem = await getFullContentBySlug(category, slug);
   const itemData = fullItem || itemMeta;
+
+  // Related items and view count will be streamed via Suspense boundaries
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles
@@ -319,7 +315,11 @@ export default async function DetailPage({
           },
         ]}
       />
-      <UnifiedDetailPage item={itemData} relatedItems={relatedItemsData} viewCount={viewCount} />
+      <UnifiedDetailPage
+        item={itemData}
+        relatedItemsPromise={getRelatedContent(category, slug, 3)}
+        viewCountPromise={statsRedis.getViewCount(category, slug)}
+      />
     </>
   );
 }

@@ -60,6 +60,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
             variant="list"
             emptyMessage="No trending content available yet. Check back soon!"
             ariaLabel="Trending content"
+            prefetchCount={3}
             renderCard={(item, index) => (
               <div key={item.slug} className="relative">
                 {index < 3 && (
@@ -99,6 +100,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
             variant="list"
             emptyMessage="No popular content available yet. Check back soon!"
             ariaLabel="Popular content"
+            prefetchCount={3}
             renderCard={(item, index) => (
               <ConfigCard
                 key={item.slug}
@@ -127,6 +129,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
             variant="list"
             emptyMessage="No recent content available yet. Check back soon!"
             ariaLabel="Recent content"
+            prefetchCount={3}
             renderCard={(item, index) => (
               <ConfigCard
                 key={item.slug}

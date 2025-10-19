@@ -12,17 +12,7 @@
 import { decode } from 'he';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
-
-// Lazy import DOMPurify to avoid build-time issues with Next.js Turbopack
-// DOMPurify uses browser APIs that cannot be statically analyzed during build
-let _DOMPurify: typeof import('isomorphic-dompurify').default | null = null;
-async function getDOMPurify() {
-  if (!_DOMPurify) {
-    const module = await import('isomorphic-dompurify');
-    _DOMPurify = module.default;
-  }
-  return _DOMPurify;
-}
+import { DOMPurify } from '@/src/lib/security/html-sanitizer';
 
 /**
  * Schema for markdown content input
@@ -176,19 +166,12 @@ function convertListItem(line: string): string {
  * stripHtmlTags('<p>Text</p>') // "Text" (tags stripped)
  * ```
  */
-async function stripHtmlTags(text: string): Promise<string> {
-  // Step 1: Lazy load DOMPurify to avoid build-time issues
-  const DOMPurify = await getDOMPurify();
-
-  // Step 2: Sanitize HTML with DOMPurify (removes ALL scripts, events, dangerous attributes)
-  // ALLOWED_TAGS: [] strips ALL tags while KEEP_CONTENT: true preserves text content
+function stripHtmlTags(text: string): string {
   const sanitized = DOMPurify.sanitize(text, {
-    ALLOWED_TAGS: [], // Strip ALL HTML tags (including <script>, <img>, <iframe>, etc.)
-    KEEP_CONTENT: true, // Keep text content only
+    ALLOWED_TAGS: [],
+    KEEP_CONTENT: true,
   });
 
-  // Step 3: Decode HTML entities properly (one-pass decode prevents double-unescaping)
-  // decode() safely handles: &nbsp; &amp; &lt; &gt; &quot; &#39; and all other entities
   return decode(sanitized);
 }
 
@@ -226,7 +209,7 @@ function normalizeWhitespace(text: string): string {
  *
  * @example
  * ```ts
- * const plainText = await markdownToPlainText(`
+ * const plainText = markdownToPlainText(`
  * # My Document
  *
  * This is a [link](https://example.com).
@@ -243,10 +226,10 @@ function normalizeWhitespace(text: string): string {
  * // • Item 2
  * ```
  */
-export async function markdownToPlainText(
+export function markdownToPlainText(
   markdown: string,
   options?: Partial<ConversionOptions>
-): Promise<PlainTextOutput> {
+): PlainTextOutput {
   try {
     // Validate input
     const validatedMarkdown = markdownInputSchema.parse(markdown);
@@ -256,7 +239,7 @@ export async function markdownToPlainText(
 
     // Strip HTML if requested
     if (opts.removeHtml) {
-      text = await stripHtmlTags(text);
+      text = stripHtmlTags(text);
     }
 
     // Process line by line
@@ -372,6 +355,6 @@ export async function markdownToPlainText(
  * @param markdown - Raw markdown content
  * @returns Plain text with default conversion settings
  */
-export async function quickConvert(markdown: string): Promise<string> {
+export function quickConvert(markdown: string): string {
   return markdownToPlainText(markdown);
 }
