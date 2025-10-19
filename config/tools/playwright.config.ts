@@ -23,6 +23,7 @@
  */
 
 import { defineConfig, devices } from '@playwright/test';
+import { BREAKPOINTS, VIEWPORT_PRESETS } from '@/src/lib/ui-constants';
 
 // Inline constants to avoid Knip path resolution issues
 const BREAKPOINTS = {
