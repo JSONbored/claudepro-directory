@@ -259,10 +259,7 @@ const MetricsSkeleton = () => (
     <Skeleton size="md" width="sm" />
     <div className={'grid-cols-2 grid gap-4 md:grid-cols-4'}>
       {[1, 2, 3, 4].map((i) => (
-        <div
-          key={`metric-skeleton-${i}`}
-          className={'bg-card/50 rounded-lg p-4 space-y-2 animate-pulse'}
-        >
+        <div key={`metric-skeleton-${i}`} className={'bg-card/50 rounded-lg p-4 space-y-2'}>
           <Skeleton size="lg" width="1/2" />
           <Skeleton size="sm" width="3xl" />
         </div>

@@ -13,13 +13,17 @@
  * - Easier to maintain and extend
  */
 
-import { memo } from 'react';
+import { useRouter } from 'next/navigation';
+import { memo, useCallback } from 'react';
 import { BaseCard } from '@/src/components/domain/base-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedButton } from '@/src/components/domain/unified-button';
 import { UnifiedReview } from '@/src/components/domain/unified-review';
 import { BorderBeam } from '@/src/components/magic/border-beam';
 import { Button } from '@/src/components/primitives/button';
+import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
+import { addBookmark } from '@/src/lib/actions/user.actions';
+import { type CategoryId, VALID_CATEGORIES } from '@/src/lib/config/category-config';
 import {
   Award,
   Copy as CopyIcon,
@@ -29,10 +33,12 @@ import {
   Layers,
   Sparkles,
 } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
 import { BADGE_COLORS, CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { formatCopyCount, formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 export const ConfigCard = memo(
   ({
@@ -41,13 +47,65 @@ export const ConfigCard = memo(
     showCategory = true,
     showActions = true,
     renderSponsoredWrapper,
+    enableSwipeGestures = false, // Enable mobile swipe gestures (copy/bookmark)
+    useViewTransitions = true, // Enable smooth page morphing with View Transitions API (Baseline as of October 2025)
   }: ConfigCardProps) => {
     const displayTitle = getDisplayTitle(item);
     const targetPath = getContentItemUrl(item);
+    const router = useRouter();
+    const { copy } = useCopyToClipboard({
+      context: {
+        component: 'ConfigCard',
+        action: 'swipe_copy',
+      },
+    });
 
     // Get behavior configuration for this content type
     const behavior =
       CARD_BEHAVIORS[item.category as keyof typeof CARD_BEHAVIORS] || CARD_BEHAVIORS.default;
+
+    // Swipe gesture handlers for mobile quick actions
+    const handleSwipeRightCopy = useCallback(async () => {
+      const url = `${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`;
+      await copy(url);
+      toasts.success.copied();
+    }, [targetPath, copy]);
+
+    const handleSwipeLeftBookmark = useCallback(async () => {
+      // Validate category
+      if (!VALID_CATEGORIES.includes(item.category as CategoryId)) {
+        logger.error('Invalid content type for bookmark', new Error('Invalid content type'), {
+          contentType: item.category,
+          contentSlug: item.slug,
+        });
+        toasts.error.fromError(new Error(`Invalid content type: ${item.category}`));
+        return;
+      }
+
+      const validatedCategory = item.category as CategoryId;
+
+      try {
+        const result = await addBookmark({
+          content_type: validatedCategory,
+          content_slug: item.slug,
+        });
+
+        if (result?.data?.success) {
+          toasts.success.bookmarkAdded();
+          router.refresh();
+        }
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('signed in')) {
+          toasts.error.authRequired();
+        } else {
+          toasts.error.actionFailed('bookmark');
+        }
+        logger.error('Failed to add bookmark via swipe', error as Error, {
+          contentType: validatedCategory,
+          contentSlug: item.slug,
+        });
+      }
+    }, [item.category, item.slug, router]);
 
     // Extract sponsored metadata - UnifiedContentItem already includes these properties
     const { isSponsored, sponsoredId, sponsorTier, position, viewCount } = item;
@@ -107,6 +165,13 @@ export const ConfigCard = memo(
           {...(sponsoredId && { sponsoredId })}
           {...(position !== undefined && { position })}
           {...(renderSponsoredWrapper && { renderSponsoredWrapper })}
+          // Mobile swipe gestures
+          enableSwipeGestures={enableSwipeGestures}
+          onSwipeRight={handleSwipeRightCopy}
+          onSwipeLeft={handleSwipeLeftBookmark}
+          // View transitions for smooth page morphing
+          useViewTransitions={useViewTransitions}
+          viewTransitionSlug={item.slug}
           // Custom render slots
           renderTopBadges={() => (
             <>

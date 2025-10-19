@@ -5,6 +5,7 @@ import { memo } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
+import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { useLocalSearch } from '@/src/hooks/use-search';
 
 const UnifiedSearch = dynamic(
@@ -14,7 +15,7 @@ const UnifiedSearch = dynamic(
     })),
   {
     ssr: false,
-    loading: () => <div className={'h-14 bg-muted/50 rounded-lg animate-pulse'} />,
+    loading: () => <Skeleton size="xl" width="3xl" className="h-14" />,
   }
 );
 

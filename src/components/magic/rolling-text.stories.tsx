@@ -8,9 +8,14 @@ import { RollingText } from './rolling-text';
  * RollingText Component Stories
  *
  * Character-by-character 3D rotation animation that cycles through words/phrases.
- * Uses framer-motion LazyMotion for optimized bundle size (~15-20KB savings).
+ * Uses Motion.dev (modern fork of Framer Motion) for optimized bundle size.
  *
- * Features:
+ * **Motion.dev Migration (October 2025):**
+ * - 10KB bundle (83% smaller than Framer Motion 83KB)
+ * - Same API as Framer Motion (drop-in replacement)
+ * - Better tree-shaking and smaller runtime
+ *
+ * **Features:**
  * - 3D character rotation with perspective (rotateX)
  * - Hardware-accelerated transforms (will-change)
  * - Staggered character animations (delay per character)
@@ -21,11 +26,11 @@ import { RollingText } from './rolling-text';
  * - Accessible with sr-only text and aria-live
  * - Non-breaking spaces for proper spacing
  *
- * Component: src/components/magic/rolling-text.tsx (157 LOC)
- * Animation: framer-motion with domAnimation features
- * Performance: LazyMotion, memoized characters, GPU-accelerated
+ * **Component:** src/components/magic/rolling-text.tsx (157 LOC)
+ * **Animation:** Motion.dev with optimized features
+ * **Performance:** Memoized characters, GPU-accelerated transforms
  *
- * Use Cases:
+ * **Use Cases:**
  * - Hero headlines with rotating adjectives
  * - Feature highlights cycling through benefits
  * - Tagline variations

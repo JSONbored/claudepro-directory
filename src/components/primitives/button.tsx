@@ -63,7 +63,9 @@ const Button = ({
 
   // Skip animations if asChild (for Link wrappers, etc.)
   if (asChild) {
-    return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+    return (
+      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
+    );
   }
 
   // Button element

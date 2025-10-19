@@ -2,10 +2,13 @@
  * Border Beam Component
  * Animated beam of light that travels along the border of its container
  *
- * Inspired by Magic UI - simplified implementation without framer-motion
- * Uses pure CSS animations for performance
+ * Rewritten with Motion.dev for universal browser compatibility
+ * Previous CSS offset-path implementation had limited browser support
  */
 
+'use client';
+
+import { motion } from 'motion/react';
 import { cn } from '@/src/lib/utils';
 
 interface BorderBeamProps {
@@ -56,26 +59,90 @@ export function BorderBeam({
 }: BorderBeamProps) {
   return (
     <div
-      style={
-        {
-          '--size': `${size}px`,
-          '--duration': `${duration}s`,
-          '--delay': `${delay}s`,
-          '--color-from': colorFrom,
-          '--color-to': colorTo,
-          '--border-width': `${borderWidth}px`,
-        } as React.CSSProperties
-      }
       className={cn(
-        'pointer-events-none absolute inset-0 rounded-[inherit] [border:calc(var(--border-width)*1px)_solid_transparent]',
-        // Mask for beam effect
-        '[mask-clip:padding-box,border-box] [mask-composite:intersect] [mask:linear-gradient(transparent,transparent),linear-gradient(white,white)]',
-        // Animated gradient that travels around the border
-        'after:absolute after:aspect-square after:w-[calc(var(--size)*1px)] after:animate-border-beam after:[animation-delay:var(--delay)] after:[background:linear-gradient(to_left,var(--color-from),var(--color-to),transparent)]',
-        // Position beam to start from top
-        'after:[offset-anchor:90%_50%] after:[offset-path:rect(0_auto_auto_0_round_calc(var(--size)*1px))]',
+        'pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]',
         className
       )}
-    />
+    >
+      {/* Top border beam */}
+      <motion.div
+        className="absolute h-[2px]"
+        style={{
+          top: 0,
+          left: 0,
+          width: `${size}px`,
+          height: `${borderWidth}px`,
+          background: `linear-gradient(to right, ${colorFrom}, ${colorTo}, transparent)`,
+        }}
+        initial={{ x: 0 }}
+        animate={{ x: '100vw' }}
+        transition={{
+          duration,
+          delay,
+          repeat: Number.POSITIVE_INFINITY,
+          ease: 'linear',
+        }}
+      />
+
+      {/* Right border beam */}
+      <motion.div
+        className="absolute w-[2px]"
+        style={{
+          top: 0,
+          right: 0,
+          width: `${borderWidth}px`,
+          height: `${size}px`,
+          background: `linear-gradient(to bottom, ${colorFrom}, ${colorTo}, transparent)`,
+        }}
+        initial={{ y: 0 }}
+        animate={{ y: '100vh' }}
+        transition={{
+          duration,
+          delay: delay + duration / 4,
+          repeat: Number.POSITIVE_INFINITY,
+          ease: 'linear',
+        }}
+      />
+
+      {/* Bottom border beam */}
+      <motion.div
+        className="absolute h-[2px]"
+        style={{
+          bottom: 0,
+          right: 0,
+          width: `${size}px`,
+          height: `${borderWidth}px`,
+          background: `linear-gradient(to left, ${colorFrom}, ${colorTo}, transparent)`,
+        }}
+        initial={{ x: 0 }}
+        animate={{ x: '-100vw' }}
+        transition={{
+          duration,
+          delay: delay + duration / 2,
+          repeat: Number.POSITIVE_INFINITY,
+          ease: 'linear',
+        }}
+      />
+
+      {/* Left border beam */}
+      <motion.div
+        className="absolute w-[2px]"
+        style={{
+          bottom: 0,
+          left: 0,
+          width: `${borderWidth}px`,
+          height: `${size}px`,
+          background: `linear-gradient(to top, ${colorFrom}, ${colorTo}, transparent)`,
+        }}
+        initial={{ y: 0 }}
+        animate={{ y: '-100vh' }}
+        transition={{
+          duration,
+          delay: delay + (duration * 3) / 4,
+          repeat: Number.POSITIVE_INFINITY,
+          ease: 'linear',
+        }}
+      />
+    </div>
   );
 }

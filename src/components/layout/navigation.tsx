@@ -30,6 +30,7 @@
  * @see Linear Issues: SHA-3026, SHA-3027, SHA-3028, SHA-3029, SHA-3030, SHA-3031, SHA-3032
  */
 
+import { motion, useScroll, useTransform } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -99,6 +100,12 @@ export const Navigation = () => {
   // Global search keyboard shortcut (⌘K / Ctrl+K)
   useSearchShortcut();
 
+  // Motion.dev scroll-based animations (Phase 1.5 - October 2025)
+  const { scrollY } = useScroll();
+  const backdropBlur = useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(12px)']);
+  const navOpacity = useTransform(scrollY, [0, 50], [0.95, 1]);
+  const logoScale = useTransform(scrollY, [0, 100], [1, 0.9]);
+
   // SHA-2088: Optimized scroll handler with threshold check and rAF debouncing
   // Only updates state when crossing 20px threshold (prevents 98% of unnecessary re-renders)
   useEffect(() => {
@@ -147,16 +154,16 @@ export const Navigation = () => {
       {/* Global Command Menu (⌘K) */}
       <NavigationCommandMenu />
 
-      <header
-        className={
-          'sticky top-0 z-50 w-full pt-1 px-3 pb-3 transition-all duration-300 will-change-transform contain-layout'
-        }
+      <motion.header
+        className="sticky top-0 z-50 w-full pt-1 px-3 pb-3 will-change-transform contain-layout"
+        style={{ opacity: navOpacity }}
       >
         <div className="container mx-auto">
-          <nav
-            className={`rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 ${
+          <motion.nav
+            className={`rounded-2xl border border-border/50 bg-card/95 shadow-lg hover:shadow-xl transition-shadow duration-300 ${
               isScrolled ? 'shadow-xl' : ''
             }`}
+            style={{ backdropFilter: backdropBlur }}
             aria-label="Main navigation container"
           >
             <div className="px-3 md:px-4">
@@ -165,18 +172,20 @@ export const Navigation = () => {
                   isScrolled ? 'h-11 md:h-12' : 'h-14 md:h-16'
                 }`}
               >
-                {/* Logo */}
+                {/* Logo with Motion.dev scale animation */}
                 <Link
                   href={ROUTES.HOME}
                   prefetch={true}
-                  className={'flex items-center gap-2 min-w-0 flex-shrink'}
+                  className="flex items-center gap-2 min-w-0 flex-shrink"
                   aria-label="Claude Pro Directory - Go to homepage"
                 >
-                  <LogoIcon
-                    className={`transition-all duration-300 flex-shrink-0 hidden xl:block ${
-                      isScrolled ? 'h-6 w-6' : 'h-8 w-8'
-                    }`}
-                  />
+                  <motion.div style={{ scale: logoScale }}>
+                    <LogoIcon
+                      className={`transition-all duration-300 flex-shrink-0 hidden xl:block ${
+                        isScrolled ? 'h-6 w-6' : 'h-8 w-8'
+                      }`}
+                    />
+                  </motion.div>
                   <span
                     className={`font-medium text-foreground transition-all duration-300 hidden xl:inline ${
                       isScrolled ? 'text-base' : 'text-lg'
@@ -480,9 +489,9 @@ export const Navigation = () => {
                 </div>
               </div>
             </div>
-          </nav>
+          </motion.nav>
         </div>
-      </header>
+      </motion.header>
     </>
   );
 };

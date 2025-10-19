@@ -27,6 +27,7 @@
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 import { memo } from 'react';
+import { SwipeableCardWrapper } from '@/src/components/domain/swipeable-card-wrapper';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { SponsoredTracker } from '@/src/components/features/sponsored/sponsored-tracker';
 import {
@@ -39,6 +40,7 @@ import {
 import { type UseCardNavigationOptions, useCardNavigation } from '@/src/hooks/use-card-navigation';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { getViewTransitionStyle } from '@/src/lib/utils/view-transitions.utils';
 
 /**
  * Props for BaseCard component
@@ -183,6 +185,37 @@ export interface BaseCardProps {
    * @default false
    */
   compactMode?: boolean;
+
+  /**
+   * Enable swipe gestures on mobile
+   * Swipe right → Copy, Swipe left → Bookmark
+   * Auto-detects mobile, respects prefers-reduced-motion
+   * @default false
+   */
+  enableSwipeGestures?: boolean;
+
+  /**
+   * Callback for swipe right gesture (usually copy action)
+   */
+  onSwipeRight?: () => void | Promise<void>;
+
+  /**
+   * Callback for swipe left gesture (usually bookmark action)
+   */
+  onSwipeLeft?: () => void | Promise<void>;
+
+  /**
+   * Enable View Transitions API for smooth page morphing
+   * Progressive enhancement - works where supported, instant navigation elsewhere
+   * @default false
+   */
+  useViewTransitions?: boolean;
+
+  /**
+   * Unique slug for view transition naming
+   * Used to create stable view-transition-name for card → detail morphing
+   */
+  viewTransitionSlug?: string;
 }
 
 /**
@@ -228,14 +261,20 @@ export const BaseCard = memo(
     className,
     topAccent = false,
     compactMode = false,
+    enableSwipeGestures = false,
+    onSwipeRight,
+    onSwipeLeft,
+    useViewTransitions = false,
+    viewTransitionSlug,
   }: BaseCardProps) => {
     const navigationParam: string | UseCardNavigationOptions | undefined =
       disableNavigation || !targetPath
         ? undefined
-        : onBeforeNavigate
+        : onBeforeNavigate || useViewTransitions
           ? {
               path: targetPath,
               onBeforeNavigate,
+              useViewTransitions,
             }
           : targetPath;
 
@@ -247,10 +286,17 @@ export const BaseCard = memo(
     const visibleTags = tags?.slice(0, maxVisibleTags);
     const overflowCount = tags && tags.length > maxVisibleTags ? tags.length - maxVisibleTags : 0;
 
+    // View transition style for smooth page morphing
+    const viewTransitionStyle =
+      useViewTransitions && viewTransitionSlug
+        ? getViewTransitionStyle('card', viewTransitionSlug)
+        : undefined;
+
     // Card content wrapper - conditionally render with or without motion animations
     const cardElement = (
       <Card
         className={`${disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? 'p-6' : ''} ${variant === 'review' ? 'p-4 rounded-lg border' : ''} ${compactMode ? 'p-4' : ''} ${className || ''} relative`}
+        style={viewTransitionStyle}
         onClick={disableNavigation ? undefined : handleCardClick}
         role="article"
         aria-label={ariaLabel}
@@ -378,7 +424,7 @@ export const BaseCard = memo(
     );
 
     // Wrap card with motion animations if navigation is enabled
-    const cardContent = disableNavigation ? (
+    const motionCard = disableNavigation ? (
       cardElement
     ) : (
       <motion.div
@@ -394,6 +440,19 @@ export const BaseCard = memo(
       >
         {cardElement}
       </motion.div>
+    );
+
+    // Optionally wrap with swipeable gestures for mobile quick actions
+    const cardContent = enableSwipeGestures ? (
+      <SwipeableCardWrapper
+        onSwipeRight={onSwipeRight}
+        onSwipeLeft={onSwipeLeft}
+        enableGestures={enableSwipeGestures}
+      >
+        {motionCard}
+      </SwipeableCardWrapper>
+    ) : (
+      motionCard
     );
 
     // Wrap in sponsored tracker if this is sponsored content

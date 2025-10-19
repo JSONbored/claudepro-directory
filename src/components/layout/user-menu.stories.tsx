@@ -30,8 +30,8 @@ import { UserMenu } from './user-menu';
  *
  * Three States:
  * 1. **Loading** (initial mount):
- *    - Animated pulse skeleton (8x8 rounded circle)
- *    - bg-muted with animate-pulse
+ *    - Skeleton component with shimmer effect (8x8 rounded circle)
+ *    - Premium directional shimmer wave animation
  *    - Shows while auth state is being determined
  *
  * 2. **Signed Out** (user = null):
@@ -139,15 +139,15 @@ export const Default: Story = {};
  *
  * Visual:
  * - 8x8 rounded circle
- * - bg-muted background
- * - animate-pulse animation
+ * - Skeleton component with shimmer effect
+ * - Directional wave animation (premium Motion.dev)
  *
  * Code:
  * ```tsx
  * if (loading) {
  *   return (
  *     <div className="flex items-center">
- *       <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
+ *       <Skeleton size="lg" width="lg" rounded="full" className="h-8 w-8" />
  *     </div>
  *   );
  * }
@@ -778,7 +778,7 @@ export const ComponentRenderTest: Story = {
   play: async ({ canvasElement, step }) => {
     await step('Check component renders in valid state', async () => {
       // Component should render in one of three states
-      const hasLoadingSkeleton = canvasElement.querySelector('.animate-pulse');
+      const hasLoadingSkeleton = canvasElement.querySelector('.skeleton');
       const hasSignInButton = canvasElement.querySelector('[aria-label="Sign in"]');
       const hasUserMenu = canvasElement.querySelector('button[aria-label*="User menu"]');
 
@@ -797,18 +797,18 @@ export const LoadingSkeletonTest: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Tests loading skeleton appears with pulse animation and correct sizing.',
+        story: 'Tests loading skeleton appears with shimmer animation and correct sizing.',
       },
     },
   },
   play: async ({ canvasElement, step }) => {
     await step('Check for loading skeleton (if in loading state)', async () => {
-      const skeleton = canvasElement.querySelector('.animate-pulse');
+      const skeleton = canvasElement.querySelector('.skeleton');
       if (skeleton) {
-        // Should have rounded-full and bg-muted classes
+        // Should have rounded-full class and shimmer animation
         const classList = Array.from(skeleton.classList);
         await expect(classList).toContain('rounded-full');
-        await expect(classList).toContain('bg-muted');
+        await expect(classList).toContain('skeleton');
       }
     });
   },

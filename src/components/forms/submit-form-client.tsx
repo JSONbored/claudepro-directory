@@ -11,6 +11,7 @@
  * - Mobile: Single column, optimized spacing
  */
 
+import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useId, useState, useTransition } from 'react';
 import { z } from 'zod';
@@ -383,7 +384,17 @@ export function SubmitFormClient() {
               >
                 {isPending ? (
                   <>
-                    <Github className="mr-2 h-4 w-4 animate-pulse" />
+                    <motion.div
+                      className="mr-2"
+                      animate={{ opacity: [1, 0.5, 1] }}
+                      transition={{
+                        duration: 1,
+                        repeat: Number.POSITIVE_INFINITY,
+                        ease: 'easeInOut',
+                      }}
+                    >
+                      <Github className="h-4 w-4" />
+                    </motion.div>
                     Creating PR...
                   </>
                 ) : (

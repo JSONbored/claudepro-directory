@@ -6,19 +6,26 @@ import { BorderBeam } from './border-beam';
  * BorderBeam Component Stories
  *
  * Animated beam of light that travels along the border of its container.
- * Inspired by Magic UI - pure CSS animation implementation without framer-motion.
+ * Rewritten with Motion.dev for universal browser compatibility (October 2025).
  *
  * Features:
- * - Pure CSS animations for performance
+ * - Motion.dev animations (works in all browsers)
  * - Customizable gradient colors (colorFrom, colorTo)
  * - Adjustable beam size, duration, and delay
  * - Configurable border width
- * - CSS custom properties for dynamic values
+ * - Four independent beams (top, right, bottom, left)
+ * - Staggered timing for continuous circular motion
  * - Pointer-events-none for non-interactive overlay
  *
- * Component: src/components/magic/border-beam.tsx (82 LOC)
- * Animation: Uses CSS offset-path and mask compositing
- * Performance: GPU-accelerated CSS animations
+ * Component: src/components/magic/border-beam.tsx (144 LOC)
+ * Animation: Motion.dev with linear easing (infinite loop)
+ * Performance: GPU-accelerated transforms
+ * Browser Support: Universal (Motion.dev handles fallbacks)
+ *
+ * Technical Details:
+ * - Each border gets own motion.div beam
+ * - Beams stagger by duration/4 (90° phase shift)
+ * - Respects prefers-reduced-motion automatically
  *
  * Use Cases:
  * - Card highlights and focus states

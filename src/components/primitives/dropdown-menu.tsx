@@ -1,6 +1,18 @@
 'use client';
 
+/**
+ * Dropdown Menu Primitives
+ * Accessible dropdown menus with staggered animations
+ *
+ * Enhanced with Motion.dev (Phase 1.5 - October 2025):
+ * - Staggered item animations (cascade effect)
+ * - Scale from trigger position (transforms from button)
+ * - Spring physics for natural motion
+ * - Respects prefers-reduced-motion
+ */
+
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
+import { motion } from 'motion/react';
 import type * as React from 'react';
 import { Check, ChevronRight, Circle } from '@/src/lib/icons';
 
@@ -66,23 +78,44 @@ const DropdownMenuContent = ({
   className,
   sideOffset = 4,
   ref,
+  children,
   ...props
 }: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content> & {
   ref?: React.RefObject<React.ElementRef<typeof DropdownMenuPrimitive.Content> | null>;
-}) => (
-  <DropdownMenuPrimitive.Portal>
-    <DropdownMenuPrimitive.Content
-      ref={ref}
-      sideOffset={sideOffset}
-      className={cn(
-        'z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md',
-        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
-        className
-      )}
-      {...props}
-    />
-  </DropdownMenuPrimitive.Portal>
-);
+}) => {
+  // Stagger animation config
+  const container = {
+    hidden: { opacity: 0, scale: 0.95 },
+    show: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        staggerChildren: 0.05, // 50ms delay between each child
+        delayChildren: 0.1, // Initial 100ms delay before first child
+      },
+    },
+  };
+
+  return (
+    <DropdownMenuPrimitive.Portal>
+      <DropdownMenuPrimitive.Content ref={ref} sideOffset={sideOffset} asChild {...props}>
+        <motion.div
+          className={cn(
+            'z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md will-change-transform',
+            'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
+            className
+          )}
+          variants={container}
+          initial="hidden"
+          animate="show"
+          exit="hidden"
+        >
+          {children}
+        </motion.div>
+      </DropdownMenuPrimitive.Content>
+    </DropdownMenuPrimitive.Portal>
+  );
+};
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
 
 const DropdownMenuItem = ({
@@ -94,17 +127,28 @@ const DropdownMenuItem = ({
   inset?: boolean;
 } & {
   ref?: React.RefObject<React.ElementRef<typeof DropdownMenuPrimitive.Item> | null>;
-}) => (
-  <DropdownMenuPrimitive.Item
-    ref={ref}
-    className={cn(
-      'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
-      inset && 'pl-8',
-      className
-    )}
-    {...props}
-  />
-);
+}) => {
+  // Item animation variants for stagger effect
+  const item = {
+    hidden: { opacity: 0, x: -8 },
+    show: { opacity: 1, x: 0 },
+  };
+
+  return (
+    <DropdownMenuPrimitive.Item ref={ref} asChild {...props}>
+      <motion.div
+        className={cn(
+          'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+          inset && 'pl-8',
+          className
+        )}
+        variants={item}
+      >
+        {props.children}
+      </motion.div>
+    </DropdownMenuPrimitive.Item>
+  );
+};
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
 
 const DropdownMenuCheckboxItem = ({

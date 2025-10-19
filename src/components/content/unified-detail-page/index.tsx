@@ -39,6 +39,7 @@ import {
   generateMultiFormatFilename,
   transformMcpConfigForDisplay,
 } from '@/src/lib/utils/content.utils';
+import { getViewTransitionStyle } from '@/src/lib/utils/view-transitions.utils';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 import { DetailSidebar } from './sidebar/detail-sidebar';
@@ -371,7 +372,10 @@ export async function UnifiedDetailPage({
       )}
 
       {/* Main content */}
-      <div className="container mx-auto px-4 py-8">
+      <div
+        className="container mx-auto px-4 py-8"
+        style={getViewTransitionStyle('card', item.slug)}
+      >
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Primary content */}
           <div className="lg:col-span-2 space-y-8">

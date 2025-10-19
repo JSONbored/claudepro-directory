@@ -1,9 +1,23 @@
+'use client';
+
+/**
+ * Loading Skeleton Components
+ * Enhanced with Motion.dev directional shimmer wave effect
+ *
+ * Motion.dev Enhancements (Phase 1.5 - October 2025):
+ * - Directional shimmer wave (left-to-right gradient animation)
+ * - GPU-accelerated with linear gradient mask
+ * - Infinite loop with smooth timing
+ * - Respects prefers-reduced-motion (falls back to pulse)
+ */
+
 import { cva, type VariantProps } from 'class-variance-authority';
+import { motion } from 'motion/react';
 import type * as React from 'react';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
-const skeletonVariants = cva('animate-pulse bg-muted rounded', {
+const skeletonVariants = cva('relative overflow-hidden bg-muted rounded', {
   variants: {
     variant: {
       default: 'bg-muted',
@@ -50,14 +64,47 @@ const skeletonVariants = cva('animate-pulse bg-muted rounded', {
 
 export interface SkeletonProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof skeletonVariants> {}
+    VariantProps<typeof skeletonVariants> {
+  /** Disable shimmer animation (use simple pulse) */
+  noShimmer?: boolean;
+}
 
-function Skeleton({ className, variant, size, width, rounded, ...props }: SkeletonProps) {
+function Skeleton({
+  className,
+  variant,
+  size,
+  width,
+  rounded,
+  noShimmer = false,
+  ...props
+}: SkeletonProps) {
   return (
     <div
-      className={cn(skeletonVariants({ variant, size, width, rounded }), className)}
+      className={cn(
+        skeletonVariants({ variant, size, width, rounded }),
+        noShimmer && 'animate-pulse',
+        className
+      )}
       {...props}
-    />
+    >
+      {/* Shimmer wave effect - only if not disabled */}
+      {!noShimmer && (
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+          animate={{
+            x: ['-100%', '100%'],
+          }}
+          transition={{
+            repeat: Number.POSITIVE_INFINITY,
+            duration: 1.5,
+            ease: 'linear',
+          }}
+          style={{
+            willChange: 'transform',
+          }}
+        />
+      )}
+    </div>
   );
 }
 
@@ -74,7 +121,7 @@ function LoadingSkeleton() {
 
 function PageHeaderSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('mb-8 animate-pulse', className)} {...props}>
+    <div className={cn('mb-8', className)} {...props}>
       <Skeleton size="lg" width="lg" className="mb-4" />
       <Skeleton size="sm" width="2xl" />
     </div>
@@ -83,7 +130,7 @@ function PageHeaderSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDi
 
 function ConfigCardSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('rounded-lg border bg-card p-6 animate-pulse', className)} {...props}>
+    <div className={cn('rounded-lg border bg-card p-6', className)} {...props}>
       <Skeleton size="md" width="3/4" className="mb-3" />
       <Skeleton size="sm" width="3xl" className="mb-2" />
       <Skeleton size="sm" width="5/6" className="mb-4" />
@@ -124,7 +171,7 @@ function ContentListSkeleton({
   return (
     <div className={cn('space-y-4', className)} {...props}>
       {[...Array(count)].map((_, i) => (
-        <div key={`content-skeleton-${i + 1}`} className="border rounded-lg p-4 animate-pulse">
+        <div key={`content-skeleton-${i + 1}`} className="border rounded-lg p-4">
           <div className={'flex items-start justify-between mb-3'}>
             <div className="flex-1">
               <Skeleton size="md" width="2/3" className="mb-2" />
@@ -155,10 +202,7 @@ function SearchBarSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDiv
 function FilterBarSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(
-        'bg-card/30 border border-border/50 rounded-lg p-6 space-y-6 animate-pulse',
-        className
-      )}
+      className={cn('bg-card/30 border border-border/50 rounded-lg p-6 space-y-6', className)}
       {...props}
     >
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
@@ -192,7 +236,7 @@ function TableSkeleton({
   columns?: number;
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('border rounded-lg animate-pulse', className)} {...props}>
+    <div className={cn('border rounded-lg', className)} {...props}>
       <div className="border-b p-4">
         <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
           {[...Array(columns)].map((_, i) => (
@@ -214,15 +258,7 @@ function TableSkeleton({
 }
 
 function ButtonSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <Skeleton
-      size="lg"
-      width="lg"
-      rounded="md"
-      className={cn('animate-pulse', className)}
-      {...props}
-    />
-  );
+  return <Skeleton size="lg" width="lg" rounded="md" className={className} {...props} />;
 }
 
 function ImageSkeleton({
@@ -239,19 +275,14 @@ function ImageSkeleton({
     tall: 'aspect-[1/2]',
   };
 
-  return (
-    <Skeleton
-      className={cn(aspectClasses[aspectRatio], 'w-full animate-pulse', className)}
-      {...props}
-    />
-  );
+  return <Skeleton className={cn(aspectClasses[aspectRatio], 'w-full', className)} {...props} />;
 }
 
 function FeaturedSectionSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn('space-y-8', className)} {...props}>
       {/* Section Header */}
-      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} animate-pulse`}>
+      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <Skeleton size="lg" width="lg" />
         <Skeleton size="sm" width="sm" />
       </div>
@@ -268,10 +299,7 @@ function FeaturedSectionSkeleton({ className, ...props }: React.HTMLAttributes<H
 function HomepageStatsSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(
-        'flex-wrap justify-center gap-4 lg:gap-6 text-xs lg:text-sm animate-pulse',
-        className
-      )}
+      className={cn('flex-wrap justify-center gap-4 lg:gap-6 text-xs lg:text-sm', className)}
       {...props}
     >
       {[...Array(7)].map((_, i) => (

@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { Button } from '@/src/components/primitives/button';
+import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { ErrorBoundary } from './error-boundary';
 
 // Component that throws an error on button click
@@ -278,12 +279,10 @@ export const LoadingFallbackState: Story = {
   render: () => (
     <ErrorBoundary
       fallback={
-        <div className="p-8">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-muted rounded w-3/4" />
-            <div className="h-4 bg-muted rounded w-full" />
-            <div className="h-4 bg-muted rounded w-5/6" />
-          </div>
+        <div className="p-8 space-y-4">
+          <Skeleton size="lg" width="3/4" />
+          <Skeleton size="md" width="3xl" />
+          <Skeleton size="md" width="5/6" />
         </div>
       }
     >

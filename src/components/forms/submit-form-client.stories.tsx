@@ -519,7 +519,7 @@ export const ExamplesArrayInputIntegration: Story = {
  * Visual Changes:
  * - Submit button disabled
  * - Button text: "Creating PR..."
- * - Github icon pulsing (animate-pulse)
+ * - Github icon with Motion.dev fade animation (opacity pulse)
  * - User cannot interact with form
  */
 export const SubmissionPendingState: Story = {

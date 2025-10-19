@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import { FeaturedSectionSkeleton } from '@/src/components/primitives/loading-skeleton';
+import { FeaturedSectionSkeleton, Skeleton } from '@/src/components/primitives/loading-skeleton';
 
 /**
  * Lazy-loaded FeaturedSections with skeleton loading state
@@ -38,9 +38,9 @@ export const LazyTabsSection = dynamic(
     loading: () => (
       <div className="space-y-8">
         {/* Tabs skeleton */}
-        <div className="flex gap-2 p-1 bg-muted rounded-lg animate-pulse">
+        <div className="flex gap-2 p-1 bg-muted rounded-lg">
           {[...Array(7)].map((_, i) => (
-            <div key={`tab-skeleton-${i + 1}`} className="h-10 bg-background rounded-md flex-1" />
+            <Skeleton key={`tab-skeleton-${i + 1}`} size="lg" width="3xl" className="flex-1" />
           ))}
         </div>
         {/* Content skeleton */}

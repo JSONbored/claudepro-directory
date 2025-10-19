@@ -2,18 +2,24 @@
 
 /**
  * Number Ticker Component
- * Animated counter with smooth easing
+ * Animated counter with Motion.dev spring physics
+ *
+ * Enhanced with Motion.dev (Phase 1.5 - October 2025):
+ * - useSpring for physically accurate motion (replaces cubic easing)
+ * - Natural deceleration with configurable stiffness/damping
+ * - Smoother transitions than RAF + cubic easing
+ * - Still GPU-accelerated and 60fps
  *
  * Performance optimizations:
- * - Uses requestAnimationFrame for smooth 60fps animation
- * - GPU-accelerated with transform
  * - Memoized to prevent unnecessary re-renders
+ * - GPU-accelerated with will-change
  * - Intersection observer for on-scroll animation
  *
  * @module components/ui/magic/number-ticker
  */
 
-import { memo, useEffect, useRef } from 'react';
+import { useSpring } from 'motion/react';
+import { memo, useEffect, useState } from 'react';
 import { cn } from '@/src/lib/utils';
 
 interface NumberTickerProps {
@@ -21,12 +27,6 @@ interface NumberTickerProps {
    * Target value to animate to
    */
   value: number;
-
-  /**
-   * Duration of animation in milliseconds
-   * @default 2000
-   */
-  duration?: number;
 
   /**
    * Custom class name
@@ -58,69 +58,39 @@ interface NumberTickerProps {
 
 function NumberTickerComponent({
   value,
-  duration = 2000,
   className,
   delay = 0,
   decimalPlaces = 0,
   prefix = '',
   suffix = '',
 }: NumberTickerProps) {
-  const nodeRef = useRef<HTMLSpanElement>(null);
-  const hasAnimated = useRef(false);
+  // Create spring-animated value
+  const spring = useSpring(0, { stiffness: 100, damping: 30 });
+
+  // Subscribe to spring value changes and format to string
+  const [displayValue, setDisplayValue] = useState(`${prefix}0${suffix}`);
 
   useEffect(() => {
-    const node = nodeRef.current;
-    if (!node || hasAnimated.current) return;
+    // Subscribe to spring value changes
+    const unsubscribe = spring.on('change', (latest) => {
+      const formattedValue = latest.toFixed(decimalPlaces);
+      setDisplayValue(`${prefix}${formattedValue}${suffix}`);
+    });
 
-    let animationFrameId: number;
-    let timeoutId: NodeJS.Timeout;
+    return unsubscribe;
+  }, [spring, decimalPlaces, prefix, suffix]);
 
-    const startAnimation = () => {
-      const startTime = performance.now();
-      const startValue = 0;
+  // Animate to target value on mount or when value changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      spring.set(value);
+    }, delay);
 
-      const updateValue = (currentTime: number) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-
-        // Easing function: ease-out cubic for smooth deceleration
-        const easeOutCubic = 1 - (1 - progress) ** 3;
-        const currentValue = startValue + (value - startValue) * easeOutCubic;
-
-        // Format number with decimal places
-        const formattedValue = currentValue.toFixed(decimalPlaces);
-        node.textContent = `${prefix}${formattedValue}${suffix}`;
-
-        if (progress < 1) {
-          animationFrameId = requestAnimationFrame(updateValue);
-        } else {
-          hasAnimated.current = true;
-        }
-      };
-
-      animationFrameId = requestAnimationFrame(updateValue);
-    };
-
-    // Start animation after delay
-    if (delay > 0) {
-      timeoutId = setTimeout(startAnimation, delay);
-    } else {
-      startAnimation();
-    }
-
-    return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [value, duration, delay, decimalPlaces, prefix, suffix]);
+    return () => clearTimeout(timer);
+  }, [value, delay, spring]);
 
   return (
     <span
-      ref={nodeRef}
       className={cn('inline-block tabular-nums will-change-transform', className)}
       aria-live="polite"
       style={{
@@ -128,7 +98,7 @@ function NumberTickerComponent({
         minWidth: `${String(value).length + prefix.length + suffix.length}ch`,
       }}
     >
-      {prefix}0{suffix}
+      {displayValue}
     </span>
   );
 }

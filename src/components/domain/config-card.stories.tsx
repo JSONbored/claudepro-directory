@@ -99,6 +99,22 @@ const meta = {
         type: { summary: '() => void' },
       },
     },
+    enableSwipeGestures: {
+      control: 'boolean',
+      description: 'Enable mobile swipe gestures (swipe right: copy, swipe left: bookmark)',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: false },
+      },
+    },
+    useViewTransitions: {
+      control: 'boolean',
+      description: 'Enable View Transitions API for smooth page morphing (Baseline Q4 2025)',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: true },
+      },
+    },
   },
 } satisfies Meta<typeof ConfigCard>;
 

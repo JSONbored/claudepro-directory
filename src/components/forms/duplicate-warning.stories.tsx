@@ -36,7 +36,7 @@ import { DuplicateWarning } from './duplicate-warning';
  * 2. **Checking** (checking = true):
  *    - "Checking for duplicates..." text
  *    - text-sm text-muted-foreground
- *    - animate-pulse animation
+ *    - Motion.dev opacity fade animation (smooth pulse)
  *    - Shows briefly while debounced value is being processed
  *
  * 3. **Warning** (warning = string):
@@ -157,7 +157,7 @@ export const Default: Story = {
  * Visual:
  * - "Checking for duplicates..." text
  * - text-sm text-muted-foreground
- * - animate-pulse animation
+ * - Motion.dev opacity fade animation (smooth pulse)
  *
  * Note: This state is transient (500ms debounce)
  * and difficult to capture in static story.
@@ -171,7 +171,7 @@ export const CheckingState: Story = {
     docs: {
       description: {
         story:
-          'Checking state with pulse animation. Shows while debounced value is being processed (500ms delay).',
+          'Checking state with Motion.dev fade animation. Shows while debounced value is being processed (500ms delay).',
       },
     },
   },

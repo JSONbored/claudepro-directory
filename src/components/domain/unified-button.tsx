@@ -36,6 +36,7 @@
  * @module components/ui/unified-button
  */
 
+import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useState, useTransition } from 'react';
@@ -614,8 +615,15 @@ function CopyLLMsButton({
       {showIcon &&
         (isSuccess ? (
           <Check className="h-4 w-4" />
+        ) : isLoading ? (
+          <motion.div
+            animate={{ opacity: [1, 0.5, 1] }}
+            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
+          >
+            <Sparkles className="h-4 w-4" />
+          </motion.div>
         ) : (
-          <Sparkles className={cn('h-4 w-4', isLoading && 'animate-pulse')} />
+          <Sparkles className="h-4 w-4" />
         ))}
       {size !== 'icon' && <span>{isSuccess ? 'Copied!' : isLoading ? 'Loading...' : label}</span>}
     </Button>
@@ -1142,7 +1150,12 @@ function AsyncActionButton({
         (isSuccess ? (
           <Check className="h-4 w-4" aria-hidden="true" />
         ) : isLoading ? (
-          <Icon className="h-4 w-4 animate-pulse" aria-hidden="true" />
+          <motion.div
+            animate={{ opacity: [1, 0.5, 1] }}
+            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
+          >
+            <Icon className="h-4 w-4" aria-hidden="true" />
+          </motion.div>
         ) : (
           <Icon className="h-4 w-4" aria-hidden="true" />
         ))}

@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/alert';
 import { AlertTriangle } from '@/src/lib/icons';
@@ -74,9 +75,13 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
 
   if (checking) {
     return (
-      <div className={'text-sm text-muted-foreground animate-pulse'}>
+      <motion.div
+        className={'text-sm text-muted-foreground'}
+        animate={{ opacity: [1, 0.5, 1] }}
+        transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
+      >
         Checking for duplicates...
-      </div>
+      </motion.div>
     );
   }
 

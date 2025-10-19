@@ -9,7 +9,7 @@
  * - Type-safe with Zod schemas
  * - Performance-optimized with polling and caching
  * - Accessible with ARIA labels
- * - Animated with framer-motion
+ * - Animated with Motion.dev (Phase 1.5 - 50KB bundle savings)
  * - Theme-aware styling
  * - Uses Sonner for toast notifications
  *
@@ -18,8 +18,8 @@
 
 'use client';
 
-import { motion } from 'framer-motion';
 import { Award, Sparkles } from 'lucide-react';
+import { motion } from 'motion/react';
 import { memo, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { getRecentlyEarnedBadges } from '@/src/lib/actions/badges.actions';

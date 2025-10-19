@@ -37,6 +37,18 @@ export interface ConfigCardProps {
     targetUrl: string,
     position?: number
   ) => React.ReactNode;
+  /**
+   * Enable mobile swipe gestures
+   * Swipe right → Copy, Swipe left → Bookmark
+   * @default false
+   */
+  enableSwipeGestures?: boolean;
+  /**
+   * Enable View Transitions API for smooth page morphing
+   * Progressive enhancement - works where supported, instant elsewhere
+   * @default false
+   */
+  useViewTransitions?: boolean;
 }
 
 // Re-export commonly used types from ./components

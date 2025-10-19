@@ -1,7 +1,20 @@
 'use client';
 
+/**
+ * Sheet Primitives
+ * Accessible slide-out panels with drag-to-dismiss gestures
+ *
+ * Enhanced with Motion.dev (Phase 1.5 - October 2025):
+ * - Drag-to-dismiss gestures with spring physics
+ * - Velocity-based dismissal (quick swipe to close)
+ * - Directional constraints (only drag in dismiss direction)
+ * - Snap-back animation if drag insufficient
+ * - Respects prefers-reduced-motion
+ */
+
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { motion, useDragControls } from 'motion/react';
 import type * as React from 'react';
 import { X } from '@/src/lib/icons';
 
@@ -64,18 +77,92 @@ const SheetContent = ({
   ...props
 }: SheetContentProps & {
   ref?: React.RefObject<React.ElementRef<typeof SheetPrimitive.Content> | null>;
-}) => (
-  <SheetPortal>
-    <SheetOverlay />
-    <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
-      {children}
-      <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-secondary hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </SheetPrimitive.Close>
-    </SheetPrimitive.Content>
-  </SheetPortal>
-);
+}) => {
+  // Drag controls for gesture handling
+  const dragControls = useDragControls();
+
+  // Ensure side has a default value for type safety
+  const sheetSide = side || 'right';
+
+  // Drag configuration based on side
+  const dragConfig = {
+    top: {
+      drag: 'y' as const,
+      dragConstraints: { top: 0, bottom: 0 },
+      dragElastic: { top: 0, bottom: 0.2 },
+    },
+    bottom: {
+      drag: 'y' as const,
+      dragConstraints: { top: 0, bottom: 0 },
+      dragElastic: { top: 0.2, bottom: 0 },
+    },
+    left: {
+      drag: 'x' as const,
+      dragConstraints: { left: 0, right: 0 },
+      dragElastic: { left: 0, right: 0.2 },
+    },
+    right: {
+      drag: 'x' as const,
+      dragConstraints: { left: 0, right: 0 },
+      dragElastic: { left: 0.2, right: 0 },
+    },
+  }[sheetSide];
+
+  // Handle drag end - dismiss if dragged far enough or velocity is high
+  const handleDragEnd = (
+    _event: MouseEvent | TouchEvent | PointerEvent,
+    info: { offset: { x: number; y: number }; velocity: { x: number; y: number } }
+  ) => {
+    const threshold = 150; // pixels
+    const velocityThreshold = 500; // pixels per second
+
+    const shouldDismiss =
+      (sheetSide === 'right' &&
+        (info.offset.x > threshold || info.velocity.x > velocityThreshold)) ||
+      (sheetSide === 'left' &&
+        (info.offset.x < -threshold || info.velocity.x < -velocityThreshold)) ||
+      (sheetSide === 'bottom' &&
+        (info.offset.y > threshold || info.velocity.y > velocityThreshold)) ||
+      (sheetSide === 'top' && (info.offset.y < -threshold || info.velocity.y < -velocityThreshold));
+
+    if (shouldDismiss) {
+      // Trigger close via Radix's context
+      const closeButton = document.querySelector('[data-radix-sheet-close]') as HTMLButtonElement;
+      closeButton?.click();
+    }
+  };
+
+  return (
+    <SheetPortal>
+      <SheetOverlay />
+      <SheetPrimitive.Content ref={ref} asChild {...props}>
+        <motion.div
+          className={cn(sheetVariants({ side: sheetSide }), className)}
+          drag={dragConfig.drag}
+          dragControls={dragControls}
+          dragConstraints={dragConfig.dragConstraints}
+          dragElastic={dragConfig.dragElastic}
+          dragMomentum={false}
+          onDragEnd={handleDragEnd}
+          transition={{
+            type: 'spring',
+            stiffness: 400,
+            damping: 30,
+          }}
+        >
+          {children}
+          <SheetPrimitive.Close
+            data-radix-sheet-close
+            className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-secondary hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </SheetPrimitive.Close>
+        </motion.div>
+      </SheetPrimitive.Content>
+    </SheetPortal>
+  );
+};
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (

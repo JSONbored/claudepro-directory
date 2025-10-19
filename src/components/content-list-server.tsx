@@ -5,6 +5,7 @@ import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { LazySection } from '@/src/components/infra/lazy-section';
 import { Button } from '@/src/components/primitives/button';
+import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ExternalLink, HelpCircle } from '@/src/lib/icons';
 import type {
@@ -88,11 +89,11 @@ function ContentHeroSection<T extends UnifiedContentItem>({
 
 function ContentSearchSkeleton() {
   return (
-    <div className={'w-full space-y-4 animate-pulse'}>
-      <div className={'h-12 bg-card/50 rounded-lg'} />
+    <div className={'w-full space-y-4'}>
+      <Skeleton size="xl" width="3xl" />
       <div className={'flex gap-2 justify-end'}>
-        <div className={'h-10 w-24 bg-card/50 rounded-lg'} />
-        <div className={'h-10 w-20 bg-card/50 rounded-lg'} />
+        <Skeleton size="lg" width="sm" />
+        <Skeleton size="lg" width="xs" />
       </div>
     </div>
   );

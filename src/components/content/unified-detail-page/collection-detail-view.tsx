@@ -25,6 +25,7 @@
 import { Suspense } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
+import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { getContentBySlug } from '@/src/lib/content/content-loaders';
 import { AlertTriangle, CheckCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -36,6 +37,7 @@ import type {
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchMap } from '@/src/lib/utils/batch.utils';
+import { getViewTransitionStyle } from '@/src/lib/utils/view-transitions.utils';
 
 /**
  * Item with loaded content data
@@ -107,7 +109,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
   });
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-12" style={getViewTransitionStyle('card', collection.slug)}>
       {/* Prerequisites Section */}
       {collection.prerequisites && collection.prerequisites.length > 0 && (
         <Card>
@@ -142,18 +144,9 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
         <Suspense
           fallback={
             <output className="space-y-6" aria-busy="true" aria-label="Loading collection items">
-              <div
-                className="h-48 rounded-lg border border-border bg-card/50 animate-pulse"
-                aria-hidden="true"
-              />
-              <div
-                className="h-48 rounded-lg border border-border bg-card/50 animate-pulse"
-                aria-hidden="true"
-              />
-              <div
-                className="h-48 rounded-lg border border-border bg-card/50 animate-pulse"
-                aria-hidden="true"
-              />
+              <Skeleton size="xl" width="3xl" className="h-48" />
+              <Skeleton size="xl" width="3xl" className="h-48" />
+              <Skeleton size="xl" width="3xl" className="h-48" />
             </output>
           }
         >

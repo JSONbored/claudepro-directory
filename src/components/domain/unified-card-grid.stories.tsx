@@ -17,6 +17,15 @@ import { UnifiedCardGrid } from './unified-card-grid';
  * - Configuration-driven with type-safe generics
  * - Supports ConfigCard, BaseCard, or custom render functions
  * - Optional infinite scroll with useInfiniteScroll hook
+ * - Motion.dev staggered entrance animations (Phase 1.3 - October 2025)
+ *
+ * **Motion.dev Staggered Animations:**
+ * - Container fade-in on mount
+ * - Cards stagger with 50ms delay between each
+ * - Cards slide up 20px with spring physics
+ * - Delay: 100ms before first card animates
+ * - Physics: stiffness 100, damping 15 (slow, smooth bounce)
+ * - Respects prefers-reduced-motion automatically
  *
  * **Variants:**
  * - `normal`: 3-column responsive grid (gap-6)
