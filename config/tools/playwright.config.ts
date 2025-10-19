@@ -25,6 +25,21 @@
 import { defineConfig, devices } from '@playwright/test';
 import { BREAKPOINTS, VIEWPORT_PRESETS } from '@/src/lib/ui-constants';
 
+// Inline constants to avoid Knip path resolution issues
+const BREAKPOINTS = {
+  mobile: 320,
+  tablet: 768,
+  desktop: 1024,
+  wide: 1280,
+  ultra: 1920,
+};
+
+const VIEWPORT_PRESETS = {
+  ipadPortrait: { width: 768, height: 1024 },
+  laptop: { width: 1280, height: 800 },
+  desktop1080p: { width: 1920, height: 1080 },
+};
+
 /**
  * Determine if running in CI environment
  */
