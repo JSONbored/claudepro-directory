@@ -27,6 +27,7 @@ import {
   writeBuildOutput,
 } from '../../src/lib/build/category-processor.server.js';
 import { onBuildComplete } from '../../src/lib/cache.server.js';
+import { getAllChangelogEntries } from '../../src/lib/changelog/loader.js';
 import {
   type CategoryId,
   UNIFIED_CATEGORY_REGISTRY,
@@ -263,6 +264,82 @@ async function main(): Promise<void> {
     for (const result of buildResults) {
       const config = UNIFIED_CATEGORY_REGISTRY[result.category];
 
+      // Special handling for changelog: parse from CHANGELOG.md instead of content files
+      if (result.category === 'changelog') {
+        try {
+          logger.info('📋 Parsing changelog from CHANGELOG.md...');
+          const changelogEntries = await getAllChangelogEntries();
+
+          // Transform changelog entries to metadata format
+          // Expected: { slug, title, description, dateAdded }
+          const changelogMetadata = changelogEntries.map((entry) => ({
+            slug: entry.slug,
+            title: entry.title,
+            description: entry.tldr || entry.title,
+            dateAdded: entry.date,
+          }));
+
+          // Transform to full content format (matching GuideContent schema)
+          // Changelog uses GuideContent schema but has different source data
+          // Map changelog entries to GuideContent-compatible structure
+          const changelogFullContent = changelogEntries.map((entry) => ({
+            // Required base fields
+            slug: entry.slug,
+            title: entry.title,
+            description: entry.tldr || entry.title,
+            author: 'ClaudePro Directory',
+            dateAdded: entry.date,
+            tags: ['changelog', 'updates'],
+            content: entry.content,
+
+            // Required Guide-specific fields
+            category: 'guides' as const,
+            subcategory: 'use-cases' as const, // Changelog as use-case documentation
+            keywords: ['changelog', 'updates', 'features', 'improvements', 'release notes'],
+
+            // Optional but commonly expected fields
+            source: 'claudepro' as const,
+            displayTitle: entry.title,
+          }));
+
+          // Update statistics
+          contentStats[result.category] = changelogEntries.length;
+
+          // Generate metadata file
+          const metadataPath = join(GENERATED_DIR, `${result.category}-metadata.ts`);
+          const metadataContent = generateMetadataFile(result.category, changelogMetadata);
+          await writeBuildOutput(metadataPath, metadataContent);
+
+          // Generate full content file
+          const fullPath = join(GENERATED_DIR, `${result.category}-full.ts`);
+          const fullContent = generateFullContentFile(result.category, changelogFullContent);
+          await writeBuildOutput(fullPath, fullContent);
+
+          logger.success(
+            `✓ ${config.pluralTitle}: ${changelogEntries.length} entries from CHANGELOG.md`
+          );
+        } catch (error) {
+          logger.error(
+            'Failed to parse changelog from CHANGELOG.md',
+            error instanceof Error ? error : new Error(String(error))
+          );
+
+          // Fall back to empty changelog
+          contentStats[result.category] = 0;
+          const metadataPath = join(GENERATED_DIR, `${result.category}-metadata.ts`);
+          const metadataContent = generateMetadataFile(result.category, []);
+          await writeBuildOutput(metadataPath, metadataContent);
+
+          const fullPath = join(GENERATED_DIR, `${result.category}-full.ts`);
+          const fullContent = generateFullContentFile(result.category, []);
+          await writeBuildOutput(fullPath, fullContent);
+
+          logger.warn(`⚠ ${config.pluralTitle}: Using empty fallback due to parse error`);
+        }
+        continue; // Skip normal processing for changelog
+      }
+
+      // Normal processing for all other categories
       // Track statistics
       totalFiles += result.metrics.filesProcessed;
       totalValid += result.metrics.filesValid;

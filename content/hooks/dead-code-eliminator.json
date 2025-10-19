@@ -5,7 +5,7 @@
   "author": "JSONbored",
   "dateAdded": "2025-10-19",
   "tags": ["code-quality", "cleanup", "optimization", "refactoring", "automation"],
-  "hookType": "OnSessionStop",
+  "hookType": "SessionEnd",
   "features": [
     "Unused import detection and removal across multiple languages",
     "Dead code path identification using static analysis",
@@ -17,7 +17,7 @@
   "configuration": {
     "hookConfig": {
       "hooks": {
-        "onSessionStop": {
+        "sessionEnd": {
           "script": "./.claude/hooks/dead-code-eliminator.sh"
         }
       }
@@ -33,7 +33,7 @@
   ],
   "troubleshooting": [
     {
-      "issue": "OnSessionStop hook runs but no dead code report generated",
+      "issue": "SessionEnd hook runs but no dead code report generated",
       "solution": "Check .claude/reports directory permissions and disk space. Verify jq command available for JSON parsing. Run manually to see stderr output: bash .claude/hooks/dead-code-eliminator.sh."
     },
     {
