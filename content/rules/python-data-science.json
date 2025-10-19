@@ -13,5 +13,27 @@
   },
   "githubUrl": "https://github.com/pandas-dev/pandas",
   "documentationUrl": "https://pandas.pydata.org/docs/",
-  "source": "community"
+  "source": "community",
+  "troubleshooting": [
+    {
+      "issue": "Rule applies data science patterns to web backend",
+      "solution": "This rule focuses on data analysis, ML pipelines, and statistical computing. For Flask/FastAPI web development, use Python web framework rules instead of data science expert."
+    },
+    {
+      "issue": "Conflicts with general Python best practices rule",
+      "solution": "Data science rule adds domain-specific patterns (vectorization, reproducibility, EDA). General Python rule covers syntax/style. Use together - data science rule extends, doesn't override."
+    },
+    {
+      "issue": "Not getting PyTorch/TensorFlow deep learning code",
+      "solution": "Mention 'deep learning', 'neural networks', or specific framework (PyTorch/TensorFlow) in prompt. Rule defaults to classical ML (scikit-learn) - be explicit for deep learning patterns."
+    },
+    {
+      "issue": "Code uses Pandas when Polars would be faster",
+      "solution": "Request 'Use Polars for performance-critical operations' explicitly. Rule defaults to Pandas (ubiquitous) - specify Polars/Vaex for large datasets or memory-constrained environments."
+    },
+    {
+      "issue": "How to verify reproducibility of analysis code?",
+      "solution": "Ask 'Check reproducibility of this analysis pipeline' - rule verifies random seeds, versioned dependencies, and deterministic operations. Ensures analysis can be replicated across environments."
+    }
+  ]
 }

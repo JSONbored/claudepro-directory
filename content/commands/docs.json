@@ -30,24 +30,8 @@
       "solution": "Enable --interactive flag. Deploy to static host or localhost server. Verify OpenAPI spec paths match routes. Check CORS headers for API access."
     },
     {
-      "issue": "Documentation missing critical sections like error handling or tutorials",
-      "solution": "Add --tutorials flag for step-by-step guides. Document error codes in OpenAPI responses. Use --all for comprehensive suite including user guides."
-    },
-    {
       "issue": "Swagger UI auto-generation ignores @swagger JSDoc annotations completely",
       "solution": "Install swagger-jsdoc package: npm i swagger-jsdoc swagger-ui-express. Configure swaggerJsdoc options with APIs glob pattern. Verify JSDoc syntax validity."
-    },
-    {
-      "issue": "OpenAPI 3.1 spec validation fails during documentation generation",
-      "solution": "Use OpenAPI 3.0.x for compatibility with most tools. Validate spec at openapis.org validator. Check JSON schema references match specification version."
-    },
-    {
-      "issue": "Generated documentation lacks response examples or schema definitions",
-      "solution": "Add examples to OpenAPI responses section. Define schemas in components with sample data. Use --with-examples flag for auto-generated code samples."
-    },
-    {
-      "issue": "PDF or static HTML export missing styling or broken formatting",
-      "solution": "Use --format=pdf with template parameter. Install wkhtmltopdf or puppeteer for PDF rendering. Verify CSS paths resolve correctly for static exports."
     }
   ],
   "source": "community",

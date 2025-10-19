@@ -24,7 +24,7 @@
     "Document testing status for project stakeholders",
     "Ensure adequate testing before deployment"
   ],
-  "faqTroubleshooting": [
+  "troubleshooting": [
     {
       "issue": "Jest coverage reports zero percent despite passing tests",
       "solution": "collectCoverage disabled or wrong paths in jest.config.js. Verify: 'collectCoverage: true, collectCoverageFrom: [\"src/**/*.{js,ts}\"]'. Or force: 'npm test -- --coverage --collectCoverageFrom=\"src/**\"'."

@@ -34,5 +34,27 @@
     "Container and microservices memory monitoring",
     "CI/CD pipeline resource usage tracking and optimization"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Memory percentage calculation shows values over 100% or negative",
+      "solution": "MemAvailable fallback calculation adds cached memory twice. For older Linux: 'USED_MEMORY_KB=$((TOTAL_MEMORY_KB - FREE_MEMORY_KB))' excluding buffers/cache. Or upgrade kernel to 3.14+ with MemAvailable support."
+    },
+    {
+      "issue": "macOS vm_stat parsing fails showing zero memory usage",
+      "solution": "PAGE_SIZE extraction fails when format changes. Hardcode: 'PAGE_SIZE=4096' (Intel) or 'PAGE_SIZE=16384' (Apple Silicon M1/M2). Or use: 'sysctl hw.pagesize | awk '{print $2}''."
+    },
+    {
+      "issue": "pgrep returns processes from other users causing inflated dev memory",
+      "solution": "pgrep matches all users. Restrict: 'pgrep -u $USER -f \"$process\"' showing only current user's processes. Or filter: 'ps -u $USER -o pid,comm,rss' for ownership validation."
+    },
+    {
+      "issue": "Docker stats command hangs indefinitely when containers unhealthy",
+      "solution": "docker stats --no-stream blocks on slow containers. Add timeout: 'timeout 5 docker stats --no-stream' or skip: 'docker stats --no-stream --format json 2>/dev/null | head -n 1' limiting output."
+    },
+    {
+      "issue": "Hook execution time exceeds timeout (5000ms) on large systems",
+      "solution": "Process enumeration slow with 100+ dev processes. Increase timeout: '\"timeout\": 10000' in hookConfig. Or limit: 'pgrep -f \"$process\" | head -20' checking only top processes."
+    }
+  ],
   "source": "community"
 }

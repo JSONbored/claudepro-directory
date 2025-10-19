@@ -32,22 +32,6 @@
     {
       "issue": "Security analysis superficial or missing vulnerability detection",
       "solution": "Combine with --security flag for OWASP analysis. Specify: 'Explain security implications and attack vectors'. Reference CVE database for known issues."
-    },
-    {
-      "issue": "Mermaid chart VS Code plugin not auto-generating diagrams from code",
-      "solution": "Start GitHub Copilot Chat and mention @mermaid-chart for AI diagram generation. Update plugin to August 2025+ version. Enable AI features in extension settings."
-    },
-    {
-      "issue": "Explanation generates generic content without codebase-specific insights",
-      "solution": "Provide file paths or code snippets directly. Use --dependencies flag for relationship analysis. Request: 'Explain how X integrates with project architecture'."
-    },
-    {
-      "issue": "UML or sequence diagrams missing key interactions or components",
-      "solution": "Use --sequence flag for interaction flows. Specify scope: 'Include all function calls and async operations'. Add --uml for class relationships and inheritance."
-    },
-    {
-      "issue": "Explanation formatting breaks when outputting slides or presentation mode",
-      "solution": "Use --format=slides with explicit section headers. Limit diagrams to one per slide. Verify Markdown compatibility with reveal.js or similar presentation tools."
     }
   ],
   "source": "community",

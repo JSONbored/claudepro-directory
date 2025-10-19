@@ -24,7 +24,7 @@
     "Ensure application quality before commits",
     "Monitor UI consistency during development"
   ],
-  "faqTroubleshooting": [
+  "troubleshooting": [
     {
       "issue": "Playwright tests fail with 'browser not found' errors",
       "solution": "Browsers not installed after @playwright/test install. Run: 'npx playwright install' downloading Chromium/Firefox/WebKit. Or specific: 'npx playwright install chromium' for single browser."

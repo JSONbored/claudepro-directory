@@ -34,7 +34,7 @@
     "Code review process enforcement",
     "Repository governance and compliance"
   ],
-  "faqTroubleshooting": [
+  "troubleshooting": [
     {
       "issue": "Hook blocks edits even when FORCE_ALLOW_PROTECTED_EDIT set to true",
       "solution": "Environment variable not exported to hook subprocess. Use: 'export FORCE_ALLOW_PROTECTED_EDIT=true' before command. Or add to .bashrc/.zshrc for session-wide availability."

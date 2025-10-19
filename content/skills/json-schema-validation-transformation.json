@@ -29,8 +29,24 @@
   },
   "troubleshooting": [
     {
-      "issue": "$ref resolution errors",
-      "solution": "Provide absolute refs or use a loader for multi-file schemas."
+      "issue": "Schema $ref resolution fails with 'can't resolve reference'",
+      "solution": "Use absolute URIs for external refs or configure Ajv with custom schema loader using addSchema() for multi-file schemas."
+    },
+    {
+      "issue": "Validation passes but TypeScript complains about types",
+      "solution": "Use json-schema-to-typescript to generate types from schema, ensuring runtime validation matches compile-time types."
+    },
+    {
+      "issue": "additionalProperties: false causes valid data to fail",
+      "solution": "Check for extra fields in input data or relax schema with additionalProperties: true; use removeAdditional option in Ajv."
+    },
+    {
+      "issue": "Format validation fails for valid dates or URIs",
+      "solution": "Install ajv-formats package and enable: import addFormats from 'ajv-formats'; addFormats(ajv) for standard format validators."
+    },
+    {
+      "issue": "Ajv throws 'strict mode: unknown keyword' error",
+      "solution": "Disable strict mode with new Ajv({strict: false}) or add custom keywords using ajv.addKeyword() for non-standard properties."
     }
   ],
   "documentationUrl": "https://ajv.js.org/",

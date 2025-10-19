@@ -18,10 +18,6 @@
       "solution": "Use --test-first to run tests before and after. Enable --dry-run to preview changes. Create git commit before refactoring: git commit -am 'pre-refactor'."
     },
     {
-      "issue": "Extract function refactoring creates functions with too many parameters",
-      "solution": "Combine with --extract-constant for magic values. Use parameter objects for 4+ params. Apply --simplify to reduce complexity before extraction."
-    },
-    {
       "issue": "Modernize flag introduces breaking changes or incompatible syntax",
       "solution": "Specify language version explicitly: --javascript --es2020. Check Node.js/browser target compatibility. Use --interactive to approve each modernization."
     },
@@ -30,28 +26,12 @@
       "solution": "Run linter before refactoring: npm run lint. Enable --backup to preserve original. Fix type errors: tsc --noEmit before applying changes."
     },
     {
-      "issue": "Performance refactoring degrades speed or increases memory usage",
-      "solution": "Add --performance flag with benchmarks. Compare before/after metrics. Use profiler to verify optimizations. Revert with backup if performance worsens."
-    },
-    {
       "issue": "Command fails with parse errors on valid source code files",
       "solution": "Verify language version matches codebase: check package.json engines. Update parser: npm update @babel/parser. Use --language flag explicitly for mixed-syntax files."
     },
     {
-      "issue": "Automated refactoring creates duplicate or conflicting imports",
-      "solution": "Enable --organize-imports to deduplicate after refactoring. Run prettier or eslint --fix. Configure .refactor.json with autoImport: true setting."
-    },
-    {
       "issue": "Large codebase refactoring times out or consumes excessive memory",
       "solution": "Process files incrementally: /refactor src/module1 first. Increase Node.js memory: NODE_OPTIONS=--max-old-space-size=4096. Use --exclude for node_modules."
-    },
-    {
-      "issue": "Inline refactoring removes necessary abstraction or readability",
-      "solution": "Review with --interactive mode before applying. Preserve functions called 3+ times. Use --complexity-threshold=10 to prevent over-inlining. Manual review critical."
-    },
-    {
-      "issue": "Refactoring config file .refactor.json ignored or not loading",
-      "solution": "Verify JSON syntax: npx jsonlint .refactor.json. Check file location in project root. Explicitly pass config: /refactor --config=.refactor.json."
     }
   ],
   "source": "community",

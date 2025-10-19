@@ -76,6 +76,5 @@
       "issue": "Debug command cannot trace requests from API Builder agent",
       "solution": "Enable request logging in API Builder agent settings first. Install debug command last to allow proper hook integration. Verify both items are enabled in Claude Code preferences."
     }
-  ],
-  "source": "community"
+  ]
 }

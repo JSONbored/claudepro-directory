@@ -25,7 +25,7 @@
     "Support both .ts and .tsx files",
     "Integration with existing TypeScript projects"
   ],
-  "faqTroubleshooting": [
+  "troubleshooting": [
     {
       "issue": "tsc --noEmit checks entire project instead of single file",
       "solution": "TypeScript follows imports checking dependencies. Add --skipLibCheck: 'tsc --noEmit --skipLibCheck \"$FILE_PATH\"' or use --isolatedModules for single-file validation without imports."

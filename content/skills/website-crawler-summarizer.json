@@ -37,6 +37,22 @@
     {
       "issue": "Blocked by anti-bot",
       "solution": "Reduce concurrency, add polite delays, and avoid sensitive endpoints."
+    },
+    {
+      "issue": "BeautifulSoup returning None for elements that visibly exist on page",
+      "solution": "Content may be JavaScript-rendered. Use Playwright or Puppeteer to render DOM. Check if element is in iframe or shadow DOM."
+    },
+    {
+      "issue": "UnicodeDecodeError or mojibake characters in extracted content",
+      "solution": "Detect charset from HTTP headers or meta tags. Use response.encoding='utf-8' or chardet library. Specify parser='lxml' explicitly."
+    },
+    {
+      "issue": "Playwright crawl timing out or consuming excessive memory with multiple pages",
+      "solution": "Close browser contexts after each page. Use browser.newContext() per session. Set timeout limits and enable headless mode."
+    },
+    {
+      "issue": "Readability extraction missing article content or extracting wrong sections",
+      "solution": "Try different parsers (lxml, html.parser, html5lib). Manually specify article CSS selector as fallback if auto-detect fails."
     }
   ],
   "documentationUrl": "https://github.com/mozilla/readability",

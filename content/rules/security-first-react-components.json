@@ -14,5 +14,27 @@
   "githubUrl": "https://github.com/OWASP/CheatSheetSeries",
   "documentationUrl": "https://owasp.org/www-project-top-ten/",
   "source": "community",
-  "seoTitle": "Security-First React Components for Claude"
+  "seoTitle": "Security-First React Components for Claude",
+  "troubleshooting": [
+    {
+      "issue": "CSP blocking inline scripts/styles",
+      "solution": "Use nonce-based CSP with middleware injection. Generate unique nonce per request with nanoid. Apply nonce to Script components and style tags. Configure 'strict-dynamic' for script-src. Avoid 'unsafe-inline' in production."
+    },
+    {
+      "issue": "DOMPurify not sanitizing correctly",
+      "solution": "Use isomorphic-dompurify for SSR compatibility. Configure ALLOWED_TAGS/ATTR restrictively. Enable RETURN_DOM_FRAGMENT: false. Add SAFE_FOR_TEMPLATES: false. Test with OWASP XSS vectors to verify sanitization."
+    },
+    {
+      "issue": "URL validation bypassed with edge cases",
+      "solution": "Use URL constructor for parsing, not regex. Check protocol whitelist ['http:', 'https:', 'mailto:']. Validate against javascript:, data:, vbscript: protocols. Test with //evil.com (protocol-relative URLs). Use rel='noopener noreferrer' for external links."
+    },
+    {
+      "issue": "Server Actions missing authentication",
+      "solution": "Add auth check at start of every action with await auth() or session validation. Return 401/403 errors for unauthorized access. Validate user ownership of resources. Use Zod schemas for input validation before DB operations."
+    },
+    {
+      "issue": "CSRF tokens not working with forms",
+      "solution": "Enable Next.js built-in CSRF with cookies().set() in middleware. Use POST method for mutations. Include token in hidden input or header. Verify SameSite=Lax on session cookies. Check that requests include Origin/Referer headers."
+    }
+  ]
 }

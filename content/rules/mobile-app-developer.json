@@ -13,5 +13,27 @@
   },
   "githubUrl": "https://github.com/flutter/flutter",
   "documentationUrl": "https://developer.apple.com/documentation/",
-  "source": "community"
+  "source": "community",
+  "troubleshooting": [
+    {
+      "issue": "Rule applies to both web and mobile projects",
+      "solution": "This rule focuses exclusively on mobile development (iOS, Android, React Native, Flutter). For web-specific React patterns, use react-expert or nextjs rules instead."
+    },
+    {
+      "issue": "Conflicts with React 19 concurrent features rule",
+      "solution": "Mobile rule focuses on React Native/native mobile patterns. For Next.js/web concurrent features, React 19 rule takes precedence. Use both when building full-stack mobile+web apps."
+    },
+    {
+      "issue": "Not seeing SwiftUI or Kotlin code suggestions",
+      "solution": "Explicitly mention the target platform (iOS/SwiftUI, Android/Kotlin) in your prompt. Rule adapts to context - specify 'iOS native' or 'Android native' for platform-specific code."
+    },
+    {
+      "issue": "Rule suggests React Native when I need Flutter",
+      "solution": "Mention 'Flutter' or 'Dart' in your request. Rule covers both cross-platform frameworks - be explicit about which one you're using to get framework-specific patterns and best practices."
+    },
+    {
+      "issue": "How do I debug which mobile patterns are active?",
+      "solution": "Ask Claude 'What mobile development patterns are you currently using?' to see active framework context (SwiftUI, Compose, React Native, or Flutter). Helps verify correct platform focus."
+    }
+  ]
 }

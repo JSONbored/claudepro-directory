@@ -49,5 +49,23 @@
   "compatibility": {
     "claudeDesktop": true,
     "claudeCode": true
-  }
+  },
+  "troubleshooting": [
+    {
+      "issue": "Collection items fail to load with 'missing component' errors",
+      "solution": "Verify all items exist in respective category folders (agents/, commands/). Install missing components individually first, then activate collection."
+    },
+    {
+      "issue": "Prerequisites check passes but debugging features still unavailable",
+      "solution": "Ensure application logs are accessible and readable. Check development environment PATH includes debugger tools. Restart IDE after installing dependencies."
+    },
+    {
+      "issue": "Debugging agent and debug command conflict causing duplicate output",
+      "solution": "Use agent for systematic analysis, command for quick fixes. Disable one component temporarily if conflicts persist. Check configuration.systemPrompt doesn't overlap."
+    },
+    {
+      "issue": "Installation order not followed, components incompatible after setup",
+      "solution": "Remove all collection items and reinstall in specified order: debugging-assistant-agent, debug, explain. Clear Claude cache between installations."
+    }
+  ]
 }

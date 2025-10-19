@@ -14,5 +14,27 @@
   "githubUrl": "https://github.com/microsoft/TypeScript",
   "documentationUrl": "https://www.typescriptlang.org/docs/handbook/2/basic-types.html",
   "source": "community",
-  "seoTitle": "TypeScript 5.x Strict Mode Expert for Claude"
+  "seoTitle": "TypeScript 5.x Strict Mode Expert for Claude",
+  "troubleshooting": [
+    {
+      "issue": "noUncheckedIndexedAccess causing type errors",
+      "solution": "Access array elements returns T | undefined with this flag. Use optional chaining array?.[0] or explicit bounds checking with if (index < array.length). Consider using .at() method for safer access."
+    },
+    {
+      "issue": "strictNullChecks breaking existing code",
+      "solution": "Enable incrementally with skipLibCheck: false first. Use non-null assertion (!) sparingly. Add explicit null checks with if (value !== null). Use optional chaining and nullish coalescing operators for clean code."
+    },
+    {
+      "issue": "Template literal type inference too narrow",
+      "solution": "Use explicit type annotations for wider types. Add as const for literal types. Use generic constraints with extends string. Check that template literals maintain string literal union instead of widening to string."
+    },
+    {
+      "issue": "ESLint rules conflicting with TypeScript",
+      "solution": "Use @typescript-eslint/parser and plugin, not standard ESLint rules. Disable conflicting rules like no-unused-vars in favor of @typescript-eslint/no-unused-vars. Set parserOptions.project to enable type-aware linting."
+    },
+    {
+      "issue": "Type guards not narrowing correctly",
+      "solution": "Ensure predicates return 'value is Type' not boolean. Use typeof, instanceof, or 'in' operator for reliable narrowing. Avoid complex conditionals that TypeScript can't follow. Check discriminated union with literal types."
+    }
+  ]
 }

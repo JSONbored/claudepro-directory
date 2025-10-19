@@ -13,5 +13,27 @@
   },
   "githubUrl": "https://github.com/vercel/next.js",
   "documentationUrl": "https://nextjs.org/docs",
-  "source": "community"
+  "source": "community",
+  "troubleshooting": [
+    {
+      "issue": "Rule not applying React 19 patterns",
+      "solution": "Verify you're on React 19+ and Next.js 15+. Check package.json dependencies and update if needed. The rule requires 'use client' directives for hooks and modern RSC patterns."
+    },
+    {
+      "issue": "Server Components throwing client-side errors",
+      "solution": "Ensure async components are server-only, not marked with 'use client'. Move useState/useEffect to separate Client Components. Check that you're importing from 'react' not 'react-dom'."
+    },
+    {
+      "issue": "Performance optimizations not working",
+      "solution": "Enable React Compiler in next.config.js with experimental.reactCompiler. Verify Turbopack usage in dev mode. Check that dynamic imports use proper loading states with Suspense boundaries."
+    },
+    {
+      "issue": "Type errors with Server Actions",
+      "solution": "Add 'use server' directive at top of action files. Ensure return types are serializable (no functions/classes). Use Zod for input validation and proper TypeScript inference with formData."
+    },
+    {
+      "issue": "Rule conflicts with existing Next.js patterns",
+      "solution": "This rule prioritizes App Router over Pages Router. Migrate incrementally using route groups. Update getServerSideProps to async Server Components. Convert API routes to Route Handlers or Server Actions."
+    }
+  ]
 }

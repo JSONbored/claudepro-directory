@@ -11,6 +11,24 @@
     "maxTokens": 8000,
     "systemPrompt": "You are an expert API designer focused on creating scalable, secure, and developer-friendly APIs"
   },
+  "troubleshooting": [
+    {
+      "issue": "Rule not enforcing OpenAPI schema validation in API routes",
+      "solution": "Add API route file patterns to rule scope. Verify rule is active for TypeScript/JavaScript API files. Use explicit OpenAPI validation keywords in comments to trigger application."
+    },
+    {
+      "issue": "REST conventions conflicting with GraphQL schema design rules",
+      "solution": "Create separate rule scopes for REST and GraphQL using file path patterns. Set override priority for GraphQL-specific files to prevent REST rule interference across contexts."
+    },
+    {
+      "issue": "Security best practices not applied to new endpoint implementations",
+      "solution": "Enable rule for all API-related file patterns including middleware and controllers. Add security keywords to rule triggers. Verify authentication patterns are in scope."
+    },
+    {
+      "issue": "Versioning strategy recommendations ignored during API refactoring",
+      "solution": "Configure rule to trigger on version-related file changes. Add explicit versioning check in pre-commit hooks. Include version migration patterns in rule context for consistency."
+    }
+  ],
   "githubUrl": "https://github.com/OAI/OpenAPI-Specification",
   "documentationUrl": "https://swagger.io/specification/",
   "source": "community",

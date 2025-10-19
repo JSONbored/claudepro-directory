@@ -30,28 +30,8 @@
       "solution": "Constrain generators with domain rules. Add validators: fc.string().filter(isValidEmail). Specify --property-based with business logic constraints explicitly."
     },
     {
-      "issue": "Generated mocks too complex or don't reflect actual API behavior",
-      "solution": "Use --tdd for test-driven approach with real implementations. Simplify mocks: extract common mock data to fixtures. Verify mock signatures match actual functions."
-    },
-    {
-      "issue": "Test generation creates duplicate test cases or redundant assertions",
-      "solution": "Review generated suite for overlaps. Use --deduplicate flag if available. Consolidate similar tests with parameterized testing: test.each() or @pytest.mark.parametrize."
-    },
-    {
       "issue": "E2E tests timeout waiting for UI elements or API responses",
       "solution": "Increase timeout: jest.setTimeout(30000) for async operations. Add explicit waits: await waitFor(() => expect(element).toBeInTheDocument()). Use --e2e with retry logic."
-    },
-    {
-      "issue": "Security tests flag safe code patterns as vulnerabilities",
-      "solution": "Whitelist known-safe patterns in test config. Use --security with context: specify auth library. Review false positives with security team before suppressing."
-    },
-    {
-      "issue": "Performance tests fail inconsistently with variable execution times",
-      "solution": "Run multiple iterations: average results over 10+ runs. Disable background processes. Use --performance with threshold ranges not exact values: expect(time).toBeLessThan(100)."
-    },
-    {
-      "issue": "BDD scenario generation produces non-executable Gherkin syntax",
-      "solution": "Validate Gherkin with linter: npm run gherkin-lint. Use --bdd with step definition templates. Ensure Given/When/Then map to existing step implementations."
     }
   ],
   "source": "community",

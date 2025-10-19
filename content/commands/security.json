@@ -30,28 +30,8 @@
       "solution": "Use --format=sarif for IDE integration. Search specific patterns: grep -r 'API_KEY' src/. Export to JSON: --format=json | jq '.secrets[].location'."
     },
     {
-      "issue": "Security report missing severity scores or prioritization guidance",
-      "solution": "Request CVSS scores explicitly. Add --risk-assessment for quantitative analysis. Use --format=executive for stakeholder summary with priority matrix."
-    },
-    {
-      "issue": "Automated scans flag default configurations as vulnerable incorrectly",
-      "solution": "Specify framework context: --infrastructure=vercel for edge runtime. Whitelist secure defaults in config. Update scanner rules: npm update security-rules."
-    },
-    {
-      "issue": "SARIF output not compatible with CI/CD security dashboard tools",
-      "solution": "Verify SARIF schema version: --format=sarif --version=2.1.0. Use converter: sarif-multitool transform. Check GitHub Advanced Security compatibility."
-    },
-    {
-      "issue": "Security audit parameters not loading from configuration file",
-      "solution": "Validate .security-config.json syntax with linter. Place in project root or specify: /security --config=/path/to/config.json. Check file permissions."
-    },
-    {
       "issue": "Deep scan times out on large codebases with no progress indicator",
       "solution": "Use --surface for quick scan first. Enable verbose logging: /security --deep --verbose. Exclude large directories: --exclude=node_modules,dist."
-    },
-    {
-      "issue": "Authentication security check incorrectly flags JWT implementation",
-      "solution": "Provide auth context: specify JWT library used. Review --authentication output for false positives. Verify secret strength meets NIST standards: 256+ bits."
     }
   ],
   "source": "community",

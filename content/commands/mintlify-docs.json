@@ -30,24 +30,8 @@
       "solution": "Delete MDX file if operation in navigation (e.g., remove get-users.mdx when 'GET /users' in mint.json). Use one source per endpoint only."
     },
     {
-      "issue": "Generated documentation lacks interactive examples or code snippets",
-      "solution": "Add --with-examples flag to generation command. Include CodeGroup components in MDX. Specify multiple language examples in OpenAPI x-code-samples."
-    },
-    {
-      "issue": "Mintlify scraper fails to autogenerate pages from valid OpenAPI spec",
-      "solution": "Validate OpenAPI at validator.swagger.io for format errors. Ensure paths field populated with operations. Use OpenAPI 3.0+ YAML or JSON format only."
-    },
-    {
       "issue": "Authentication playground not showing securitySchemes from OpenAPI spec",
       "solution": "Define securitySchemes in components section. Add security field to operations. Configure bearerAuth, apiKey, or OAuth2 in OpenAPI document properly."
-    },
-    {
-      "issue": "OpenAPI file path in mint.json navigation returns 404 or not found",
-      "solution": "Place openapi.yaml in same directory as api-reference folder. Use correct relative path in mint.json. Verify file extension matches (.yaml or .json)."
-    },
-    {
-      "issue": "Hosted OpenAPI URL in mint.json fails with CORS or network error",
-      "solution": "Enable CORS headers on OpenAPI URL host. Use HTTPS URLs only. Test URL accessibility: curl -I <url>. Verify OpenAPI hosted endpoint returns valid spec."
     }
   ],
   "source": "community",

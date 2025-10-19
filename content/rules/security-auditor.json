@@ -14,5 +14,27 @@
   },
   "githubUrl": "https://github.com/OWASP/Top10",
   "documentationUrl": "https://owasp.org/www-project-top-ten/",
-  "source": "community"
+  "source": "community",
+  "troubleshooting": [
+    {
+      "issue": "Rule not catching known vulnerabilities",
+      "solution": "Update OWASP dependency check databases with latest CVE feeds. Run semgrep with --config=auto for latest rules. Verify SAST/DAST tools are configured correctly in CI/CD pipeline with proper auth tokens."
+    },
+    {
+      "issue": "False positives in security scans",
+      "solution": "Create allowlist files for known safe patterns. Configure tool-specific ignore rules (.semgrepignore, snyk ignore). Document security exceptions with ticket references. Tune detection rules to project context."
+    },
+    {
+      "issue": "Rule enforcing security blocks deployment",
+      "solution": "Implement security gates as warnings not blockers initially. Use graduated severity levels (critical blocks, high warns). Create security champion review process. Set up exception workflow with time-bound waivers."
+    },
+    {
+      "issue": "Authentication patterns not validated",
+      "solution": "Add JWT verification checks with jose/jsonwebtoken libraries. Implement OAuth2/OIDC flow validation. Check session management against OWASP guidelines. Verify MFA implementation with security testing frameworks."
+    },
+    {
+      "issue": "Infrastructure security misconfigurations",
+      "solution": "Run terraform validate and tfsec/checkov on IaC. Enable AWS Config Rules or Azure Policy. Scan container images with trivy/grype. Review firewall rules and network policies against least privilege principle."
+    }
+  ]
 }

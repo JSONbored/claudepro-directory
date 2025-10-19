@@ -40,8 +40,24 @@
   },
   "troubleshooting": [
     {
-      "issue": "Garbled output on low-contrast scans",
-      "solution": "Apply adaptive thresholding and increase DPI via resampling before OCR."
+      "issue": "Garbled or incorrect text from low-contrast scans",
+      "solution": "Apply OpenCV adaptive thresholding with cv2.THRESH_BINARY + cv2.THRESH_OTSU, or increase DPI via resampling before OCR."
+    },
+    {
+      "issue": "TesseractNotFoundError when running pytesseract",
+      "solution": "Install Tesseract OCR binary separately: apt-get install tesseract-ocr or brew install tesseract, then set path if needed."
+    },
+    {
+      "issue": "OCR returns empty string for valid image with text",
+      "solution": "Check image preprocessing: convert to grayscale, apply binarization, ensure correct page segmentation mode (--psm) parameter."
+    },
+    {
+      "issue": "Numbers confused with letters (0 vs O, 1 vs l)",
+      "solution": "Use config='--psm 6 --oem 3 -c tessedit_char_whitelist=0123456789' to restrict character set for numeric-only fields."
+    },
+    {
+      "issue": "Non-English text recognition fails or returns gibberish",
+      "solution": "Install language data with apt-get install tesseract-ocr-[lang] or brew install tesseract-lang, then use lang='fra' parameter."
     }
   ],
   "documentationUrl": "https://tesseract-ocr.github.io/",

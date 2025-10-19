@@ -5,7 +5,7 @@
 # Claude Pro Directory
 
 **Discover and share the best Claude configurations**
-198+ expert rules, powerful MCP servers, specialized agents, automation hooks, and more.
+206+ expert rules, powerful MCP servers, specialized agents, automation hooks, and more.
 
 [![Mentioned in Awesome Claude Code](https://awesome.re/mentioned-badge.svg)](https://github.com/hesreallyhim/awesome-claude-code)
 
@@ -17,7 +17,7 @@
 
 ## 🎯 What is Claude Pro Directory?
 
-**Stop starting from scratch.** A searchable collection of 198+ pre-built Claude configurations with instant setup, task-specific optimization, and weekly community updates.
+**Stop starting from scratch.** A searchable collection of 206+ pre-built Claude configurations with instant setup, task-specific optimization, and weekly community updates.
 
 Whether you need Claude to review code like a senior engineer, write like a professional author, or analyze data like a scientist - find it in seconds, copy, and start using.
 
@@ -49,7 +49,7 @@ See our [Contributing Guide](.github/CONTRIBUTING.md) for detailed instructions.
 
 Browse all available Claude configurations by category:
 
-## 🤖 Agents (20)
+## 🤖 Agents (21)
 
 Specialized AI personas for specific development workflows and expert assistance
 
@@ -60,6 +60,7 @@ Specialized AI personas for specific development workflows and expert assistance
 - **[Backend Architect Agent](https://claudepro.directory/agents/backend-architect-agent)** - Expert backend architect specializing in scalable system design, microservices, API development, and infrastructure planning
 - **[Cloud Infrastructure Architect Agent](https://claudepro.directory/agents/cloud-infrastructure-architect-agent)** - Multi-cloud infrastructure specialist focused on AWS, GCP, and Azure architecture, cost optimization, disaster recovery, high availability, and cloud-native design patterns
 - **[Code Reviewer Agent](https://claudepro.directory/agents/code-reviewer-agent)** - Expert code reviewer that provides thorough, constructive feedback on code quality, security, performance, and best practices
+- **[Codebase Migration Refactoring Agent](https://claudepro.directory/agents/codebase-migration-refactoring-agent)** - AI agent specialized in large-scale codebase migrations and behavior-preserving refactoring. Handles framework upgrades, library migrations, legacy code modernization, and systematic refactoring for Claude Code.
 - **[Data Pipeline Engineering Agent](https://claudepro.directory/agents/data-pipeline-engineering-agent)** - Modern data pipeline specialist focused on real-time streaming, ETL/ELT orchestration, data quality validation, and scalable data infrastructure with Apache Airflow, dbt, and cloud-native tools
 - **[Database Specialist Agent](https://claudepro.directory/agents/database-specialist-agent)** - Expert database architect and optimizer specializing in SQL, NoSQL, performance tuning, and data modeling
 - **[Debugging Assistant Agent](https://claudepro.directory/agents/debugging-assistant-agent)** - Advanced debugging agent that helps identify, analyze, and resolve software bugs with systematic troubleshooting methodologies
@@ -119,7 +120,7 @@ Model Context Protocol servers for extending Claude's capabilities
 - **[Workato Mcp Server](https://claudepro.directory/mcp/workato-mcp-server)** - Access any application, workflows, or data via Workato's integration platform
 - **[Zapier Mcp Server](https://claudepro.directory/mcp/zapier-mcp-server)** - Connect to nearly 8,000 apps through Zapier's automation platform
 
-## 🪝 Hooks (60)
+## 🪝 Hooks (65)
 
 Event-driven automation scripts that run on specific triggers
 
@@ -134,11 +135,16 @@ Event-driven automation scripts that run on specific triggers
 - **[Css Unused Selector Detector](https://claudepro.directory/hooks/css-unused-selector-detector)** - Detects unused CSS selectors when stylesheets are modified to keep CSS lean
 - **[Database Connection Cleanup](https://claudepro.directory/hooks/database-connection-cleanup)** - Closes all database connections and cleans up resources when session ends
 - **[Database Migration Runner](https://claudepro.directory/hooks/database-migration-runner)** - Automated database migration management with rollback capabilities, validation, and multi-environment support
+- **[Database Query Performance Logger](https://claudepro.directory/hooks/database-query-performance-logger)** - Monitors and logs database query performance metrics with slow query detection, N+1 analysis, and optimization suggestions
+- **[Dead Code Eliminator](https://claudepro.directory/hooks/dead-code-eliminator)** - Automatically detects and removes unused code, imports, and dependencies with safe deletion verification and rollback support
 - **[Dependency Security Audit On Stop](https://claudepro.directory/hooks/dependency-security-audit-on-stop)** - Performs a comprehensive security audit of all dependencies when session ends
+- **[Dependency Security Scanner](https://claudepro.directory/hooks/dependency-security-scanner)** - Real-time vulnerability scanning for dependencies with automated CVE detection, severity assessment, and patch recommendations
 - **[Dependency Update Checker](https://claudepro.directory/hooks/dependency-update-checker)** - Automatically checks for outdated dependencies and suggests updates with security analysis
 - **[Discord Activity Notifier](https://claudepro.directory/hooks/discord-activity-notifier)** - Sends development activity updates to Discord channel for team collaboration
 - **[Docker Container Auto Rebuild](https://claudepro.directory/hooks/docker-container-auto-rebuild)** - Automatically rebuilds Docker containers when Dockerfile or docker-compose.yml files are modified
+- **[Docker Image Security Scanner](https://claudepro.directory/hooks/docker-image-security-scanner)** - Comprehensive Docker image vulnerability scanning with layer analysis, base image recommendations, and security best practices enforcement
 - **[Documentation Auto Generator On Stop](https://claudepro.directory/hooks/documentation-auto-generator-on-stop)** - Automatically generates or updates project documentation when session ends
+- **[Documentation Coverage Checker](https://claudepro.directory/hooks/documentation-coverage-checker)** - Automated documentation coverage analysis with missing docstring detection, API documentation validation, and completeness scoring
 - **[Documentation Generator](https://claudepro.directory/hooks/documentation-generator)** - Automatically generates and updates project documentation from code comments, README files, and API definitions
 - **[Environment Cleanup Handler](https://claudepro.directory/hooks/environment-cleanup-handler)** - Cleans up temporary files, caches, and resources when Claude session ends
 - **[Environment Variable Validator](https://claudepro.directory/hooks/environment-variable-validator)** - Validates environment variables, checks for required vars, and ensures proper configuration across environments
@@ -205,13 +211,14 @@ Quick-action slash commands for common development tasks
 - **[V0 Generate](https://claudepro.directory/commands/v0-generate)** - Generate production-ready React components from natural language using V0.dev patterns with shadcn/ui, TailwindCSS, and TypeScript
 - **[Zod Audit](https://claudepro.directory/commands/zod-audit)** - Production codebase auditor specialized in Zod schema validation coverage, security vulnerability detection, and dead code elimination
 
-## 📜 Rules (22)
+## 📜 Rules (23)
 
 Custom instructions and guidelines for specialized AI behaviors
 
 - **[Ai Prompt Engineering Expert](https://claudepro.directory/rules/ai-prompt-engineering-expert)** - Expert in AI prompt engineering with focus on coding tasks, test-driven development patterns, iterative refinement, and context management for optimal AI assistance
 - **[Api Design Expert](https://claudepro.directory/rules/api-design-expert)** - Transform Claude into a comprehensive API design specialist focused on RESTful APIs, GraphQL, OpenAPI, and modern API architecture patterns
 - **[Aws Cloud Architect](https://claudepro.directory/rules/aws-cloud-architect)** - Expert AWS architect with deep knowledge of cloud services, best practices, and Well-Architected Framework
+- **[Biome Strict Linting Rules](https://claudepro.directory/rules/biome-strict-linting-rules)** - Biome linting rules configuration for code quality validation. Strict enforcement, custom overrides, VCS integration, and automated fixes for TypeScript.
 - **[Code Review Expert](https://claudepro.directory/rules/code-review-expert)** - Comprehensive code review rules for thorough analysis and constructive feedback
 - **[Database Expert](https://claudepro.directory/rules/database-expert)** - Transform Claude into a database specialist with expertise in SQL, NoSQL, database design, optimization, and modern data architectures
 - **[Devops Sre Expert](https://claudepro.directory/rules/devops-sre-expert)** - Transform Claude into a DevOps/SRE specialist with expertise in cloud infrastructure, CI/CD, monitoring, and automation
@@ -258,10 +265,11 @@ Task-focused capability guides and specialized expertise
 - **[Windsurf AI-Native Collaborative Development](https://claudepro.directory/skills/windsurf-collaborative-development)** - Master collaborative AI-assisted development with Windsurf IDE's Cascade AI, multi-file context awareness, and Flow patterns for team workflows.
 - **[Zod Schema Validator](https://claudepro.directory/skills/zod-schema-validator)** - Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference.
 
-## 💻 Statuslines (10)
+## 💻 Statuslines (11)
 
 Custom status bar displays for your Claude development environment
 
+- **[Docker Health Statusline](https://claudepro.directory/statuslines/docker-health-statusline)** - Docker statusline configuration for Claude Code CLI. Features real-time health monitoring, color-coded indicators, and container tracking. Production-ready.
 - **[Git Status Statusline](https://claudepro.directory/statuslines/git-status-statusline)** - Git-focused statusline showing branch, dirty status, ahead/behind indicators, and stash count alongside Claude session info
 - **[Mcp Server Status Monitor](https://claudepro.directory/statuslines/mcp-server-status-monitor)** - Real-time MCP server monitoring statusline showing connected servers, active tools, and performance metrics for Claude Code MCP integration
 - **[Minimal Powerline](https://claudepro.directory/statuslines/minimal-powerline)** - Clean, performance-optimized statusline with Powerline glyphs showing model, directory, and token count

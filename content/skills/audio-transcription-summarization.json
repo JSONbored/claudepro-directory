@@ -50,6 +50,18 @@
     {
       "issue": "High WER for noisy audio",
       "solution": "Downmix to mono, apply noise reduction, and use a larger model."
+    },
+    {
+      "issue": "Whisper model download fails with SSL certificate verification error",
+      "solution": "Set SSL_CERT_FILE environment variable to system certificate bundle. Alternative: use --model-dir to specify pre-downloaded model location."
+    },
+    {
+      "issue": "Code Interpreter not enabled, skill activation fails silently",
+      "solution": "Open Claude Desktop Settings, enable Code Interpreter under Features tab. Restart Claude Desktop application to activate skill execution environment."
+    },
+    {
+      "issue": "Transcription timestamps drift out of sync with actual audio timing",
+      "solution": "Use --language flag to specify correct language explicitly. Re-encode audio at constant frame rate with: ffmpeg -i input.mp3 -ar 16000 -ac 1 output.wav"
     }
   ],
   "documentationUrl": "https://github.com/openai/whisper",

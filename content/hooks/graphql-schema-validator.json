@@ -34,7 +34,7 @@
     "Automated schema quality assurance in CI/CD pipelines",
     "Team collaboration with schema versioning and backup management"
   ],
-  "faqTroubleshooting": [
+  "troubleshooting": [
     {
       "issue": "Hook triggers on non-GraphQL files despite .graphql extension check",
       "solution": "Tighten matchers to specific paths: 'matchers': ['write:.*\\\\.(graphql|gql)$', 'edit:.*schema.*']. Prevents false positives on files with 'schema' in non-GraphQL contexts."

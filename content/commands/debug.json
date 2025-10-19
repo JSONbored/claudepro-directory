@@ -14,5 +14,27 @@
   "documentationUrl": "https://docs.claude.ai/commands/debug",
   "source": "community",
   "slug": "debug",
-  "seoTitle": "Debug for Claude"
+  "seoTitle": "Debug for Claude",
+  "troubleshooting": [
+    {
+      "issue": "Command fails to execute when triggered with /debug in chat",
+      "solution": "Verify command file exists in .claude/commands/debug.json. Restart Claude Desktop and check file permissions are readable (chmod 644)."
+    },
+    {
+      "issue": "Permission denied errors when analyzing node_modules or system files",
+      "solution": "Use --scope flag to exclude protected directories. Run with explicit file paths instead of wildcard patterns. Check file ownership and permissions."
+    },
+    {
+      "issue": "Interactive mode freezes waiting for input that never appears",
+      "solution": "Avoid --interactive flag in automated workflows. Use --automated mode instead. Check terminal supports interactive prompts if using CLI directly."
+    },
+    {
+      "issue": "Fix suggestions apply incorrect line numbers in modified files",
+      "solution": "Commit or stash changes before running /debug. Ensure working directory is clean. Re-run analysis after applying first set of fixes to get accurate line numbers."
+    },
+    {
+      "issue": "Temperature configuration overrides not taking effect during execution",
+      "solution": "Set temperature in configuration object within debug.json file. Default is 0.2. Restart Claude Desktop after changing configuration.temperature value."
+    }
+  ]
 }

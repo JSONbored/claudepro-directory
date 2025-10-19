@@ -11,6 +11,28 @@
     "maxTokens": 8000,
     "systemPrompt": "You are an AWS Solutions Architect expert with deep knowledge of all AWS services and best practices"
   },
+  "troubleshooting": [
+    {
+      "issue": "Well-Architected Framework principles not applied to infrastructure code",
+      "solution": "Add CDK and CloudFormation file patterns to rule scope. Configure triggers for infrastructure-as-code files. Include AWS-specific keywords in comments to activate rule guidance."
+    },
+    {
+      "issue": "Security rules conflicting with serverless architecture recommendations",
+      "solution": "Create override scope for Lambda and serverless patterns. Set serverless-specific security rules with higher priority. Use file path matching to distinguish serverless resources."
+    },
+    {
+      "issue": "Cost optimization suggestions not triggered during resource provisioning",
+      "solution": "Enable rule for all resource definition files including Terraform and CDK. Add cost-related triggers to configuration. Verify scope includes pricing and resource sizing decisions."
+    },
+    {
+      "issue": "Multi-region patterns not suggested when designing disaster recovery setup",
+      "solution": "Configure rule to activate on availability and resilience keywords. Include disaster recovery file patterns in scope. Add explicit DR context triggers for high-availability architectures."
+    },
+    {
+      "issue": "Rule guidance unavailable when debugging CloudFormation stack failures",
+      "solution": "Add CloudFormation error debugging to rule context triggers. Enable rule for troubleshooting sessions using error-specific keywords. Verify rule is active during stack operations."
+    }
+  ],
   "githubUrl": "https://github.com/aws/aws-cdk",
   "documentationUrl": "https://docs.aws.amazon.com/",
   "source": "community"

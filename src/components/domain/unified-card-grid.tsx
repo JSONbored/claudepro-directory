@@ -255,22 +255,9 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
           const cardContent: ReactNode =
             'renderCard' in props ? props.renderCard(item, index) : <ConfigCard item={item} />;
 
-          // Wrap in motion.div for stagger effect + error boundary for safety
-          return (
-            <motion.div
-              key={key}
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: {
-                  opacity: 1,
-                  y: 0,
-                  transition: { type: 'spring', stiffness: 100, damping: 15 },
-                },
-              }}
-            >
-              <ErrorBoundary>{cardContent}</ErrorBoundary>
-            </motion.div>
-          );
+          // Wrap in error boundary for safety
+          // Parent grid handles stagger animation - no per-card wrapper needed
+          return <ErrorBoundary key={key}>{cardContent}</ErrorBoundary>;
         })}
       </motion.div>
 

@@ -34,7 +34,7 @@
     "Frontend refactoring projects with comprehensive test coverage",
     "Team collaboration with consistent snapshot management workflows"
   ],
-  "faqTroubleshooting": [
+  "troubleshooting": [
     {
       "issue": "Hook runs tests for every file change even non-test files",
       "solution": "Detection too broad (matches all .js/.ts). Add matchers: 'matchers': ['write:**/*.{test,spec}.{js,ts,jsx,tsx}', 'edit:**/*.{test,spec}.{js,ts,jsx,tsx}'] to trigger only on test files."
@@ -44,16 +44,8 @@
       "solution": "testNamePattern with component name unreliable. Use --testPathPattern: '$TEST_COMMAND -- --testPathPattern=\"$COMPONENT_NAME\" --watchAll=false'. Targets files not test descriptions."
     },
     {
-      "issue": "Snapshot updates succeed but git shows no changes to .snap files",
-      "solution": "Tests pass without snapshots if no toMatchSnapshot() exists. Verify test contains snapshot assertions. Hook reports success but nothing updates. Add snapshot existence check first."
-    },
-    {
       "issue": "Parallel test execution with --maxWorkers causes race conditions",
       "solution": "No worker limit causes resource exhaustion. Add '--maxWorkers=2': '$TEST_COMMAND -- --testPathPattern=\"$TEST_PATTERN\" --maxWorkers=2 --watchAll=false' for stable CI execution."
-    },
-    {
-      "issue": "Orphaned snapshot detection produces false positives",
-      "solution": "Basename matching fails with nested structures. Use Jest's built-in: replace custom logic with '$TEST_COMMAND -- --updateSnapshot' handling orphans via jest.config coverage patterns."
     },
     {
       "issue": "Snapshot update creates duplicate snapshot files after renaming",
@@ -62,14 +54,6 @@
     {
       "issue": "git diff threshold (10 lines) triggers updates for minor changes",
       "solution": "Conservative threshold causes excessive updates. Increase: 'if [ \"$LINES_CHANGED\" -gt 50 ]; then' for major changes only. Or check specific files: test if modified file is component."
-    },
-    {
-      "issue": "Yarn/pnpm detection fails defaulting to npm test commands",
-      "solution": "Lock file checks work but commands don't run. Verify command exists: 'command -v yarn' before setting TEST_COMMAND. Add: 'TEST_COMMAND=$(command -v yarn && echo \"yarn\" || echo \"npm\")'."
-    },
-    {
-      "issue": "Backup snapshots not created before updates causing data loss",
-      "solution": "Script lacks pre-update backup. Add: 'cp __snapshots__/*.snap __snapshots__/backup-$(date +%s)/' before running --updateSnapshot. Restore with timestamp if updates incorrect."
     }
   ],
   "source": "community"

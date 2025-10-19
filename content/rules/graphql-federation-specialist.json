@@ -11,6 +11,28 @@
     "maxTokens": 8000,
     "systemPrompt": "You are a GraphQL Federation expert specializing in microservices architecture and Apollo Federation"
   },
+  "troubleshooting": [
+    {
+      "issue": "Federation directives not recognized in schema files",
+      "solution": "Add GraphQL schema patterns (.graphql, .gql) to scope including subgraph schemas. Configure triggers for federation directives @key, @external, and @requires for composition validation."
+    },
+    {
+      "issue": "Gateway configuration guidance missing for Apollo setup",
+      "solution": "Include gateway config files and Apollo setup patterns in scope. Add triggers for supergraph, IntrospectAndCompose, and gateway keywords. Enable for initialization and debugging contexts."
+    },
+    {
+      "issue": "Entity resolution patterns not suggested for reference resolvers",
+      "solution": "Add resolver file patterns with __resolveReference triggers. Configure scope for TypeScript/JavaScript implementations. Enable guidance for entity federation and cross-subgraph queries."
+    },
+    {
+      "issue": "Performance optimization advice conflicts with federation principles",
+      "solution": "Set federation-specific override priorities for query planning and batching. Use scope boundaries separating gateway and subgraph rules. Add DataLoader and caching keywords to triggers."
+    },
+    {
+      "issue": "Subgraph composition errors not providing clear guidance",
+      "solution": "Configure triggers for composition keywords including schema conflicts, type extensions, and @shareable. Add Rover CLI patterns to scope for schema check and publish workflows."
+    }
+  ],
   "githubUrl": "https://github.com/apollographql/federation",
   "documentationUrl": "https://www.apollographql.com/docs/federation/",
   "source": "community",

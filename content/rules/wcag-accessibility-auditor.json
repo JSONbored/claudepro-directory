@@ -14,5 +14,27 @@
   "githubUrl": "https://github.com/w3c/wcag",
   "documentationUrl": "https://www.w3.org/WAI/WCAG22/quickref/",
   "source": "community",
-  "seoTitle": "WCAG 2.2 Accessibility Auditor for Claude"
+  "seoTitle": "WCAG 2.2 Accessibility Auditor for Claude",
+  "troubleshooting": [
+    {
+      "issue": "Axe violations not caught in automated tests",
+      "solution": "Run AxeBuilder with .withTags(['wcag2aa', 'wcag21aa', 'wcag22aa']) for comprehensive coverage. Test dynamic content after interactions. Check that tests run on multiple viewport sizes. Include user flows, not just page loads."
+    },
+    {
+      "issue": "Focus trap not working in modal",
+      "solution": "Query focusable elements with selector including [tabindex]:not([tabindex='-1']). Handle Shift+Tab for reverse navigation. Focus first element on open, restore previous focus on close. Add Escape key handler to exit trap."
+    },
+    {
+      "issue": "Screen reader announcing incorrect content",
+      "solution": "Use semantic HTML (button, nav, main) over div with ARIA. Check aria-label overrides visible text. Verify aria-live regions have role='alert' or 'status'. Test with NVDA/JAWS, not just VoiceOver. Remove aria-hidden from interactive elements."
+    },
+    {
+      "issue": "Color contrast failing at 4.5:1 threshold",
+      "solution": "Use contrast checker tools (WebAIM, Axe DevTools) during design. Calculate ratios with WCAG formula: (L1 + 0.05) / (L2 + 0.05). Large text (18pt+) needs only 3:1. Check contrast in both light and dark modes."
+    },
+    {
+      "issue": "Keyboard navigation skipping elements",
+      "solution": "Ensure interactive elements have tabindex='0' or are naturally focusable (button, a, input). Remove tabindex='-1' from reachable elements. Check CSS display:none or visibility:hidden hiding content. Verify focus indicators are visible with outline or box-shadow."
+    }
+  ]
 }

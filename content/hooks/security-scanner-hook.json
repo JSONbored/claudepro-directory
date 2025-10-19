@@ -36,7 +36,7 @@
     "Secrets and credential leak prevention"
   ],
   "documentationUrl": "https://owasp.org/www-project-top-ten/",
-  "faqTroubleshooting": [
+  "troubleshooting": [
     {
       "issue": "truffleHog reports false positives on test data and mock credentials",
       "solution": "Entropy detection flags dummy data. Create .trufflehogignore: add patterns like 'test/**' or '**/fixtures/*'. Or use --exclude: 'truffleHog --exclude test/ --regex' filtering paths."
