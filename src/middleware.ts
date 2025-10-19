@@ -1,4 +1,4 @@
-import arcjet, { detectBot, fixedWindow, shield, tokenBucket } from '@arcjet/next';
+import arcjet, { detectBot, shield, tokenBucket } from '@arcjet/next';
 import * as nosecone from '@nosecone/next';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
@@ -53,22 +53,58 @@ const aj = arcjet({
       ],
     }),
 
-    // Rate limiting - general API protection with token bucket
+    // Rate limiting - token bucket algorithm (better than fixed window)
+    // OPTIMIZATION: Using ONLY tokenBucket (removed fixedWindow to eliminate duplicate evaluation)
+    // Token bucket allows burst traffic while maintaining average rate limits
+    // Prevents thundering herd issues that can occur with fixed window algorithms
     tokenBucket({
       mode: isDevelopment ? 'DRY_RUN' : 'LIVE',
       refillRate: 60, // 60 tokens
       interval: 60, // per 60 seconds (1 minute)
       capacity: 120, // burst capacity of 120 tokens
     }),
-
-    // Fixed window rate limiting for aggressive protection
-    fixedWindow({
-      mode: isDevelopment ? 'DRY_RUN' : 'LIVE',
-      window: '1m', // 1 minute window
-      max: 100, // max 100 requests per window
-    }),
   ],
 });
+
+// OPTIMIZATION: Pre-compute CSP arrays at module level for better performance
+// Eliminates runtime array spread operations
+const BASE_SCRIPT_SRC = [
+  ...(nosecone.defaults.contentSecurityPolicy.directives.scriptSrc || []),
+  "'strict-dynamic'", // Allow nonce-based scripts to load additional scripts
+  'https://umami.claudepro.directory', // Umami analytics
+  'https://*.vercel-scripts.com', // Vercel analytics
+  'https://vercel.live', // Vercel toolbar
+] as const;
+
+const DEV_SCRIPT_SRC = [...BASE_SCRIPT_SRC, "'unsafe-eval'"] as const; // HMR/hot reload
+
+const IMG_SRC = [
+  ...(nosecone.defaults.contentSecurityPolicy.directives.imgSrc || []),
+  'https://github.com',
+  'https://*.githubusercontent.com',
+  'https://claudepro.directory',
+  'https://www.claudepro.directory',
+] as const;
+
+const BASE_CONNECT_SRC = [
+  ...(nosecone.defaults.contentSecurityPolicy.directives.connectSrc || []),
+  'wss://*.vercel.app', // WebSocket for HMR in preview
+  'wss://*.vercel-scripts.com', // Vercel live reload
+  'https://umami.claudepro.directory', // Umami analytics
+  'https://*.vercel-scripts.com', // Vercel analytics
+  'https://vercel.live', // Vercel toolbar
+  'https://api.github.com', // GitHub API
+  'https://*.supabase.co', // Supabase Auth API (OAuth callbacks)
+  'https://accounts.google.com', // Google OAuth (if enabled)
+  'https://github.com', // GitHub OAuth
+] as const;
+
+const PREVIEW_CONNECT_SRC = [
+  ...BASE_CONNECT_SRC,
+  'ws://localhost:*',
+  'wss://localhost:*',
+  ...(env.VERCEL_URL ? [`wss://${env.VERCEL_URL}`] : []),
+] as const;
 
 // Nosecone security headers configuration
 // PRODUCTION CSP STRATEGY (2025 Best Practices with Nonces):
@@ -90,47 +126,10 @@ const noseconeConfig = {
       // Start with Nosecone's secure defaults (includes nonce support)
       ...nosecone.defaults.contentSecurityPolicy.directives,
 
-      // Extend scriptSrc to add our trusted sources while keeping nonce + strict-dynamic
-      // Nosecone's defaults include: nonce() only (strict-dynamic added manually above)
-      // We're adding our analytics and development tools
-      scriptSrc: [
-        ...(nosecone.defaults.contentSecurityPolicy.directives.scriptSrc || []),
-        "'strict-dynamic'", // Allow nonce-based scripts to load additional scripts
-        ...(isDevelopment ? (["'unsafe-eval'"] as const) : []), // HMR/hot reload in development only
-        'https://umami.claudepro.directory', // Umami analytics
-        'https://*.vercel-scripts.com', // Vercel analytics
-        'https://vercel.live', // Vercel toolbar
-      ],
-
-      // Extend imgSrc with our domains
-      imgSrc: [
-        ...(nosecone.defaults.contentSecurityPolicy.directives.imgSrc || []),
-        'https://github.com',
-        'https://*.githubusercontent.com',
-        'https://claudepro.directory',
-        'https://www.claudepro.directory',
-      ],
-
-      // Extend connectSrc for analytics and APIs
-      connectSrc: [
-        ...(nosecone.defaults.contentSecurityPolicy.directives.connectSrc || []),
-        'wss://*.vercel.app', // WebSocket for HMR in preview
-        'wss://*.vercel-scripts.com', // Vercel live reload
-        'https://umami.claudepro.directory', // Umami analytics
-        'https://*.vercel-scripts.com', // Vercel analytics
-        'https://vercel.live', // Vercel toolbar
-        'https://api.github.com', // GitHub API
-        'https://*.supabase.co', // Supabase Auth API (OAuth callbacks)
-        'https://accounts.google.com', // Google OAuth (if enabled)
-        'https://github.com', // GitHub OAuth
-        ...(env.VERCEL_ENV === 'preview'
-          ? ([
-              'ws://localhost:*',
-              'wss://localhost:*',
-              ...(env.VERCEL_URL ? [`wss://${env.VERCEL_URL}`] : []),
-            ] as const)
-          : []),
-      ],
+      // Use pre-computed arrays for better performance
+      scriptSrc: isDevelopment ? DEV_SCRIPT_SRC : BASE_SCRIPT_SRC,
+      imgSrc: IMG_SRC,
+      connectSrc: env.VERCEL_ENV === 'preview' ? PREVIEW_CONNECT_SRC : BASE_CONNECT_SRC,
 
       // CSRF Protection: Restrict form submissions to same-origin only
       // This prevents forms from submitting to external domains (CSRF attack vector)
@@ -491,9 +490,9 @@ export async function middleware(request: NextRequest) {
 
   try {
     const results = await Promise.allSettled([
-      aj.protect(request, { requested: 1 }), // ~20-30ms
+      aj.protect(request, { requested: 1 }), // ~20-30ms (or <1ms if cached with local decisions)
       getNoseconeHeaders(), // ~1-2ms (cached)
-    ]); // Total: ~20-30ms (concurrent execution)
+    ]); // Total: ~20-30ms (concurrent execution, or <1ms for cached blocks)
 
     // Check Arcjet result (fail-closed: deny on error)
     if (results[0].status === 'rejected') {
@@ -631,26 +630,29 @@ export async function middleware(request: NextRequest) {
 
 // Matcher configuration to exclude static assets and improve performance
 // This prevents middleware from running on static files, images, and Next.js internal routes
+// CRITICAL: Regex must have leading slashes for directory exclusions to work correctly in production
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - _next/* (all Next.js internal routes including static, image, webpack HMR)
-     * - _vercel/* (Vercel internal endpoints: analytics, insights, speed-insights)
-     * - favicon.ico (favicon file)
-     * - robots.txt (robots file)
-     * - sitemap.xml (sitemap file)
-     * - manifest.webmanifest (PWA manifest - Next.js generates from src/app/manifest.ts)
-     * - service-worker.js (service worker file)
-     * - offline.html (offline fallback page)
-     * - .well-known/* (well-known files for verification)
-     * - scripts/* (public script files - service workers, etc.)
-     * - css/* (public CSS files)
-     * - js/* (public JavaScript files)
-     * - 863ad0a5c1124f59a060aa77f0861518.txt (IndexNow key file)
+     * - /_next/* (all Next.js internal routes including static, image, webpack HMR)
+     * - /_vercel/* (Vercel internal endpoints: analytics, insights, speed-insights)
+     * - /favicon.ico (favicon file)
+     * - /robots.txt (robots file)
+     * - /sitemap* (sitemap files)
+     * - /manifest* (PWA manifest files)
+     * - /service-worker.js (service worker file)
+     * - /offline.html (offline fallback page)
+     * - /.well-known/* (well-known files for verification)
+     * - /scripts/* (public script files)
+     * - /css/* (public CSS files)
+     * - /js/* (public JavaScript files)
+     * - /863ad0a5c1124f59a060aa77f0861518.txt (IndexNow key file)
      * - *.png, *.jpg, *.jpeg, *.gif, *.webp, *.svg, *.ico (image files)
      * - *.woff, *.woff2, *.ttf, *.eot (font files)
+     *
+     * IMPORTANT: All path exclusions must have leading / to work correctly in Vercel production
      */
-    '/((?!_next|_vercel|favicon.ico|robots.txt|sitemap|manifest|service-worker|offline|scripts/|css/|js/|\\.well-known|863ad0a5c1124f59a060aa77f0861518\\.txt|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff|woff2|ttf|eot)$).*)',
+    '/((?!_next/|_vercel/|favicon\\.ico|robots\\.txt|sitemap|manifest|service-worker|offline|/scripts/|/css/|/js/|\\.well-known/|863ad0a5c1124f59a060aa77f0861518\\.txt)(?!.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff|woff2|ttf|eot)$).*)',
   ],
 };
