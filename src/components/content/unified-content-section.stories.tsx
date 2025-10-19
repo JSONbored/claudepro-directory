@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from 'storybook/test';
-import { AlertTriangle, Settings, Zap } from '@/src/lib/icons';
 import { UnifiedContentSection } from './unified-content-section';
 
 /**
@@ -90,7 +89,7 @@ export const BulletsFeatures: Story = {
       'Mobile-optimized responsive layout',
       'SEO-friendly with structured data markup',
     ],
-    icon: Zap,
+    category: 'statuslines',
     bulletColor: 'primary',
   },
   parameters: {
@@ -116,7 +115,7 @@ export const BulletsRequirements: Story = {
       'React 18.0 or higher',
       'Next.js 14.0 or higher',
     ],
-    icon: AlertTriangle,
+    category: 'mcp',
     bulletColor: 'orange',
   },
   parameters: {
@@ -137,7 +136,7 @@ export const BulletsMono: Story = {
     title: 'Environment Variables',
     description: 'Required configuration keys',
     items: ['NEXT_PUBLIC_API_URL', 'DATABASE_URL', 'AUTH_SECRET', 'REDIS_URL'],
-    icon: Settings,
+    category: 'hooks',
     bulletColor: 'accent',
     textVariant: 'mono',
   },

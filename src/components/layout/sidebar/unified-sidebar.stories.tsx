@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { UnifiedSidebar } from './unified-sidebar';
 
 /**

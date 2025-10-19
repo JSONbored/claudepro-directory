@@ -399,7 +399,7 @@ export async function UnifiedDetailPage({
                 title="Features"
                 description="Key capabilities and functionality"
                 items={features}
-                icon={config.icon}
+                category={item.category}
                 bulletColor="primary"
               />
             )}
@@ -411,7 +411,7 @@ export async function UnifiedDetailPage({
                 title="Requirements"
                 description="Prerequisites and dependencies"
                 items={requirements}
-                icon={config.icon}
+                category={item.category}
                 bulletColor="orange"
               />
             )}
@@ -453,7 +453,7 @@ export async function UnifiedDetailPage({
                 title="Use Cases"
                 description="Common scenarios and applications"
                 items={useCases}
-                icon={config.icon}
+                category={item.category}
                 bulletColor="accent"
               />
             )}
@@ -465,7 +465,7 @@ export async function UnifiedDetailPage({
                 title="Security Best Practices"
                 description="Important security considerations"
                 items={item.security as string[]}
-                icon={config.icon}
+                category={item.category}
                 bulletColor="orange"
               />
             )}

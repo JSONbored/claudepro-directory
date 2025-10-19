@@ -66,12 +66,44 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import type { LucideIcon } from '@/src/lib/icons';
-import { Copy } from '@/src/lib/icons';
+import {
+  Bookmark,
+  BookOpen,
+  Bot,
+  Briefcase,
+  Code,
+  Copy,
+  FileText,
+  type LucideIcon,
+  Package,
+  Rocket,
+  Sparkles,
+  Terminal,
+  Zap,
+} from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+
+/**
+ * Category to icon mapping for client-side resolution
+ * This prevents passing React components across server/client boundary
+ */
+const CATEGORY_ICONS: Record<CategoryId, LucideIcon> = {
+  agents: Sparkles,
+  mcp: Package,
+  commands: Terminal,
+  rules: FileText,
+  hooks: Code,
+  statuslines: Zap,
+  collections: Bookmark,
+  skills: Rocket,
+  guides: BookOpen,
+  jobs: Briefcase,
+  changelog: Bot,
+};
 
 /**
  * Discriminated union for all 6 section variants
@@ -83,7 +115,7 @@ export type UnifiedContentSectionProps =
       title: string;
       description?: string;
       items: string[];
-      icon: LucideIcon;
+      category: CategoryId;
       bulletColor?: 'primary' | 'accent' | 'orange' | 'red' | 'green' | 'blue';
       textVariant?: 'default' | 'mono';
       className?: string;
@@ -206,13 +238,16 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
       title,
       description,
       items,
-      icon: Icon,
+      category,
       bulletColor = 'primary',
       textVariant = 'default',
       className,
     } = props;
 
     if (items.length === 0) return null;
+
+    // Resolve icon from category on client side
+    const Icon = CATEGORY_ICONS[category];
 
     const bulletClass = BULLET_COLORS[bulletColor];
     const textClass = textVariant === 'mono' ? 'font-mono text-xs' : 'text-sm';

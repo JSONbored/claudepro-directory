@@ -4,6 +4,9 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 import type { FilterState } from '@/src/lib/schemas/component.schema';
 import { UnifiedSearch } from './unified-search';
 
+// Default empty filters for stories
+const defaultFilters: FilterState = {};
+
 /**
  * Unified Search Stories
  *
