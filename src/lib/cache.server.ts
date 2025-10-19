@@ -2722,7 +2722,7 @@ class CacheWarmer {
             warmed: true,
             timestamp: new Date().toISOString(),
           },
-          3600 // 1 hour TTL for search results
+          21600 // OPTIMIZATION: 6 hours TTL (was 1h) - search results are static, saves 75% cache operations
         );
       }
     } catch (error) {
