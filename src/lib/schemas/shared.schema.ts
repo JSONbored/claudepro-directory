@@ -48,9 +48,12 @@ import {
  * This breaks circular dependency: shared.schema → category-config → collection.schema → shared.schema
  *
  * ONE NAME. ONE CONCEPT. NO ALIASES.
+ *
+ * Note: This is a necessary re-export to break circular dependencies.
+ * Direct import: '@/src/lib/config/category-types' would create circular imports.
+ * Used by 10+ files that need both CategoryId and schema validation together.
  */
 export type { CategoryId } from '@/src/lib/config/category-types';
-export { VALID_CATEGORIES } from '@/src/lib/config/category-types';
 
 /**
  * Zod schema for categories

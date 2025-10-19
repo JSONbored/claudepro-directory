@@ -215,10 +215,10 @@ function selectOptimalTitle(formulas: string[]): string {
     const lastSpace = truncated.lastIndexOf(' ');
     if (lastSpace > OPTIMAL_MAX - TITLE_WORD_BOUNDARY_BUFFER) {
       // If we have a reasonable word boundary, use it
-      return truncated.substring(0, lastSpace) + '...';
+      return `${truncated.substring(0, lastSpace)}...`;
     }
     // Otherwise hard truncate
-    return truncated + '...';
+    return `${truncated}...`;
   }
 
   return baseTitle;
@@ -340,14 +340,10 @@ function smartDescriptionPadding(rawDescription: string, categoryName: string): 
       const lastSpace = fallbackPadded
         .substring(0, DESC_MAX - TITLE_ELLIPSIS_LENGTH)
         .lastIndexOf(' ');
-      return (
-        fallbackPadded.substring(
-          0,
-          lastSpace > DESC_MIN - DESC_WORD_BOUNDARY_MIN
-            ? lastSpace
-            : DESC_MAX - TITLE_ELLIPSIS_LENGTH
-        ) + '...'
-      );
+      return `${fallbackPadded.substring(
+        0,
+        lastSpace > DESC_MIN - DESC_WORD_BOUNDARY_MIN ? lastSpace : DESC_MAX - TITLE_ELLIPSIS_LENGTH
+      )}...`;
     }
 
     return fallbackPadded;
@@ -449,7 +445,7 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
       const config = context.categoryConfig;
       const defaultKeywords = ['claude', 'ai', getCurrentYear()];
 
-      if (!(config && config.keywords)) {
+      if (!config?.keywords) {
         return defaultKeywords;
       }
 
@@ -592,13 +588,13 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
           const padded = baseDesc + padding;
 
           if (padded.length > DESC_MAX) {
-            return baseDesc + ' Discover curated lists of tools and resources for AI development.';
+            return `${baseDesc} Discover curated lists of tools and resources for AI development.`;
           }
           return padded;
         }
 
         // Too long - truncate (unlikely)
-        return baseDesc.substring(0, DESC_MAX - TITLE_ELLIPSIS_LENGTH) + '...';
+        return `${baseDesc.substring(0, DESC_MAX - TITLE_ELLIPSIS_LENGTH)}...`;
       }
 
       // Main profile page - use smart padding system
@@ -639,14 +635,12 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
           const lastSpace = fallback
             .substring(0, DESC_MAX - TITLE_ELLIPSIS_LENGTH)
             .lastIndexOf(' ');
-          return (
-            fallback.substring(
-              0,
-              lastSpace > DESC_MIN - DESC_WORD_BOUNDARY_MIN
-                ? lastSpace
-                : DESC_MAX - TITLE_ELLIPSIS_LENGTH
-            ) + '...'
-          );
+          return `${fallback.substring(
+            0,
+            lastSpace > DESC_MIN - DESC_WORD_BOUNDARY_MIN
+              ? lastSpace
+              : DESC_MAX - TITLE_ELLIPSIS_LENGTH
+          )}...`;
         }
 
         return fallback;
@@ -654,14 +648,10 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
 
       // Too long - smart truncation at word boundary
       const lastSpace = baseDesc.substring(0, DESC_MAX - TITLE_ELLIPSIS_LENGTH).lastIndexOf(' ');
-      return (
-        baseDesc.substring(
-          0,
-          lastSpace > DESC_MIN - DESC_WORD_BOUNDARY_MIN
-            ? lastSpace
-            : DESC_MAX - TITLE_ELLIPSIS_LENGTH
-        ) + '...'
-      );
+      return `${baseDesc.substring(
+        0,
+        lastSpace > DESC_MIN - DESC_WORD_BOUNDARY_MIN ? lastSpace : DESC_MAX - TITLE_ELLIPSIS_LENGTH
+      )}...`;
     },
     keywords: (context) => {
       const profile = context.profile as { interests?: string[] } | undefined;

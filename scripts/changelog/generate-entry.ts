@@ -155,24 +155,33 @@ function parseArgs(): GenerateOptions {
   const args = process.argv.slice(2);
   const options: GenerateOptions = {};
 
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
+  // Use iterator to properly handle argument values
+  const argsIterator = args[Symbol.iterator]();
+  let current = argsIterator.next();
+
+  while (!current.done) {
+    const arg = current.value;
 
     switch (arg) {
       case '--branch':
-        options.branch = args[++i];
+        current = argsIterator.next();
+        options.branch = current.value;
         break;
       case '--since':
-        options.since = args[++i];
+        current = argsIterator.next();
+        options.since = current.value;
         break;
       case '--until':
-        options.until = args[++i];
+        current = argsIterator.next();
+        options.until = current.value;
         break;
       case '--title':
-        options.title = args[++i];
+        current = argsIterator.next();
+        options.title = current.value;
         break;
       case '--tag':
-        options.tag = args[++i];
+        current = argsIterator.next();
+        options.tag = current.value;
         break;
       case '--dry-run':
       case '--dry':
@@ -188,6 +197,8 @@ function parseArgs(): GenerateOptions {
         showHelp();
         process.exit(1);
     }
+
+    current = argsIterator.next();
   }
 
   return options;

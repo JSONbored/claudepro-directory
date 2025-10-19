@@ -226,11 +226,7 @@ describe('Unified Content Validation', () => {
       const validContent = createValidContent(category);
       const result = validateContent(validContent, category, config.schema, config.validation);
 
-      if (!result.valid) {
-        console.log(`VALIDATION ERRORS for ${category}:`, result.errors);
-        console.log(`VALIDATION WARNINGS for ${category}:`, result.warnings);
-      }
-
+      // Test framework will show errors automatically on failure
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);
       expect(result.data).toBeDefined();
@@ -304,7 +300,7 @@ describe('Unified Content Validation', () => {
   describe('SEO Validation (Generic)', () => {
     it.each(testableCategories)(
       'should validate SEO metadata correctly for %s',
-      (category, config) => {
+      (category, _config) => {
         const content = createValidContent(category);
         const result = validateContentSEO(
           {
@@ -353,7 +349,7 @@ describe('Unified Content Validation', () => {
       if (!statuslineConfig) throw new Error('Statusline config not found');
 
       const statusline = createValidContent('statuslines');
-      delete statusline.preview;
+      statusline.preview = undefined;
 
       const result = validateContent(
         statusline,

@@ -13,13 +13,22 @@
  */
 
 /**
+ * OAuth options type for Supabase signInWithOAuth
+ * Minimal type definition for mock - real type comes from @supabase/supabase-js
+ */
+type SignInWithOAuthOptions = {
+  provider: string;
+  options?: Record<string, unknown>;
+};
+
+/**
  * Mock Supabase client factory
  * Returns a mock client with no-op auth methods
  */
 export function createClient() {
   return {
     auth: {
-      signInWithOAuth: async (_options: any) => {
+      signInWithOAuth: async (_options: SignInWithOAuthOptions) => {
         return { data: null, error: null };
       },
       signOut: async () => {

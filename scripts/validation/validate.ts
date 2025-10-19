@@ -14,13 +14,13 @@
  */
 
 import { parseArgs } from 'node:util';
-import { formatCIResults } from './core/formatter';
-import { ValidationRunner } from './core/runner';
-import { ContentValidator } from './validators/content-validator';
-import { LLMSTxtValidator } from './validators/llmstxt-validator';
-import { MetadataValidator } from './validators/metadata-validator';
-import { SEOValidator } from './validators/seo-validator';
-import { TitleValidator } from './validators/title-validator';
+import { formatCIResults } from './core/formatter.js';
+import { ValidationRunner } from './core/runner.js';
+import { ContentValidator } from './validators/content-validator.js';
+import { LLMSTxtValidator } from './validators/llmstxt-validator.js';
+import { MetadataValidator } from './validators/metadata-validator.js';
+import { SEOValidator } from './validators/seo-validator.js';
+import { TitleValidator } from './validators/title-validator.js';
 
 // ============================================================================
 // Parse CLI Arguments

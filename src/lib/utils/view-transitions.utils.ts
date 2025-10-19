@@ -112,13 +112,11 @@ export function navigateWithTransition(
         window.location.href = url;
       }
     });
-  } else {
+  } else if (router) {
     // Fallback (shouldn't reach here due to check above, but safety)
-    if (router) {
-      router.push(url);
-    } else {
-      window.location.href = url;
-    }
+    router.push(url);
+  } else {
+    window.location.href = url;
   }
 }
 

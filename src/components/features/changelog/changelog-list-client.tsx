@@ -82,11 +82,11 @@ export function ChangelogListClient({ entries }: ChangelogListClientProps) {
       {/* Filtered Entries List */}
       <TabsContent value={activeCategory} className="mt-6">
         {filteredEntries.length === 0 ? (
-          <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
+          <output className="flex items-center justify-center py-12" aria-live="polite">
             <p className="text-lg text-muted-foreground">
               No changelog entries found for {activeCategory.toLowerCase()} category.
             </p>
-          </div>
+          </output>
         ) : (
           <div className="grid grid-cols-1 gap-6">
             {filteredEntries.map((entry) => {

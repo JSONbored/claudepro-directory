@@ -182,18 +182,18 @@ export interface ContentGenerationRules {
 export type ContentGenerationRegistry = Partial<Record<CategoryId, ContentGenerationRules>>;
 
 /**
- * Export unified configuration-driven system
+ * Note: All concrete exports removed to avoid barrel file anti-pattern.
+ * This file now only exports types and interfaces.
+ *
+ * Import directly from source files:
+ * - import { CATEGORY_CONFIG } from '@/config/content/category-config';
+ * - import { detectTrendingTopics } from '@/config/content/discovery/trend-detection';
+ * - import { SEO_STANDARDS } from '@/config/content/quality/seo-standards';
+ * - import { validateCategoryContent } from '@/config/content/validation/category-validators';
  */
-export { CATEGORY_CONFIG } from './category-config';
-export { detectTrendingTopics } from './discovery/trend-detection';
-export { SEO_STANDARDS } from './quality/seo-standards';
-export { validateCategoryContent } from './validation/category-validators';
 /**
- * Quick access to validation and formatting
- * (Now works for ALL categories, not just statuslines)
+ * Validation and formatting utilities moved to avoid barrel file anti-pattern.
+ *
+ * Import directly from source:
+ * - import { formatValidationReport, validateContent, validateGenericContent } from '@/config/content/validation/generic-validator';
  */
-export {
-  formatValidationReport,
-  validateContent,
-  validateGenericContent,
-} from './validation/generic-validator';

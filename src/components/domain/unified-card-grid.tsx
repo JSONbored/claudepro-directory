@@ -209,21 +209,21 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
   // Empty state
   if (items.length === 0 && !loading) {
     return (
-      <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
+      <output className="flex items-center justify-center py-12" aria-live="polite">
         <p className="text-lg text-muted-foreground">{emptyMessage}</p>
-      </div>
+      </output>
     );
   }
 
   // Loading state (initial load)
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
+      <output className="flex items-center justify-center py-12" aria-live="polite">
         <div className="flex items-center gap-2">
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           <p className="text-sm text-muted-foreground">{loadingMessage}</p>
         </div>
-      </div>
+      </output>
     );
   }
 

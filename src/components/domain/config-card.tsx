@@ -35,7 +35,8 @@ import {
 } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
-import { BADGE_COLORS, CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { CARD_BEHAVIORS } from '@/src/lib/ui-constants-categories';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { formatCopyCount, formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';

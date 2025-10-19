@@ -232,7 +232,8 @@ class MockRelatedContentService {
     await new Promise((resolve) => setTimeout(resolve, this.mockDelay));
 
     // Determine which mock data set to return based on input
-    let items: RelatedContentItem[] = mockRelatedItems.default;
+    // Note: Declared without initialization - assigned in all branches below
+    let items: RelatedContentItem[];
 
     // Check for specific scenarios in exclude array (test pattern)
     if (input.exclude?.includes('__EMPTY__')) {

@@ -323,13 +323,17 @@ export type UIClassKey = keyof typeof UI_CLASSES;
 /**
  * Content Card Behavior Configuration - AUTO-GENERATED
  *
- * Re-exported from auto-generated ui-constants-categories.ts.
- * Generated from UNIFIED_CATEGORY_REGISTRY at build time.
+ * Note: CARD_BEHAVIORS is now imported directly from ui-constants-categories.ts
+ * to avoid barrel file anti-pattern. Import from source:
+ *
+ * ```typescript
+ * import { CARD_BEHAVIORS } from '@/src/lib/ui-constants-categories';
+ * ```
  *
  * @see src/lib/ui-constants-categories.ts - Auto-generated category behaviors
  * @see scripts/build/generate-category-artifacts.ts - Generation script
  */
-export { CARD_BEHAVIORS, type CardBehaviorKey } from './ui-constants-categories';
+export type { CardBehaviorKey } from './ui-constants-categories';
 
 /**
  * Badge Color Constants

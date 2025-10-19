@@ -35,6 +35,7 @@ import { METADATA_TEMPLATES } from '@/src/lib/seo/metadata-templates';
 import type { RouteClassification, RoutePattern } from '@/src/lib/seo/route-classifier';
 import { classifyRoute } from '@/src/lib/seo/route-classifier';
 import { validateClassification } from '@/src/lib/seo/validation-schemas';
+import { cliReporter } from '@/src/lib/utils/cli-reporter';
 
 /**
  * Route Discovery Result
@@ -300,66 +301,76 @@ export async function scanRoutes(appDir?: string): Promise<RouteScanReport> {
 /**
  * Generate human-readable report
  *
- * Formats route scan report as console output for debugging/CI.
+ * Formats route scan report as CLI output for debugging/CI.
+ * Uses production-safe process.stdout via cliReporter utility.
  *
  * @param report - Route scan report
  */
 export function printReport(report: RouteScanReport): void {
-  console.log('=== ROUTE SCANNER REPORT ===\n');
-  console.log(`Scanned: ${report.metadata.appDirectory}`);
-  console.log(`Duration: ${report.metadata.scanDurationMs}ms`);
-  console.log(`Total Routes: ${report.totalRoutes}\n`);
+  const cli = cliReporter;
 
-  console.log('Routes by Pattern:');
+  cli.header('ROUTE SCANNER REPORT');
+  cli.info(`Scanned: ${report.metadata.appDirectory}`);
+  cli.info(`Duration: ${report.metadata.scanDurationMs}ms`);
+  cli.info(`Total Routes: ${report.totalRoutes}`);
+  cli.newline();
+
+  cli.info('Routes by Pattern:');
   for (const [pattern, routes] of Object.entries(report.routesByPattern)) {
-    console.log(`  ${pattern.padEnd(20)} ${routes.length} routes`);
+    cli.indent(`${pattern.padEnd(20)} ${routes.length} routes`);
 
     // Show first 3 routes as examples
     if (routes.length > 0) {
       routes.slice(0, 3).forEach((route) => {
         const confidenceIcon = route.classification.confidence === 1.0 ? '✓' : '⚠';
         const dynamicIcon = route.isDynamic ? '[D]' : '   ';
-        console.log(
-          `    ${confidenceIcon} ${dynamicIcon} ${route.route} (${route.classification.confidence.toFixed(1)})`
+        cli.indent(
+          `  ${confidenceIcon} ${dynamicIcon} ${route.route} (${route.classification.confidence.toFixed(1)})`,
+          4
         );
       });
 
       if (routes.length > 3) {
-        console.log(`    ... and ${routes.length - 3} more`);
+        cli.indent(`  ... and ${routes.length - 3} more`, 4);
       }
     }
   }
 
   // Validation section
-  console.log('\n=== VALIDATION ===\n');
+  cli.newline();
+  cli.header('VALIDATION');
+  cli.newline();
 
   if (report.validation.missingTemplates.length > 0) {
-    console.log('❌ Missing Templates:');
-    report.validation.missingTemplates.forEach((pattern) => {
-      console.log(`  - ${pattern}`);
-    });
+    cli.error('Missing Templates:');
+    for (const pattern of report.validation.missingTemplates) {
+      cli.listItem(pattern);
+    }
   } else {
-    console.log('✅ All patterns have templates');
+    cli.success('All patterns have templates');
   }
 
   if (report.validation.lowConfidenceRoutes.length > 0) {
-    console.log(`\n⚠️  Low Confidence Routes (${report.validation.lowConfidenceRoutes.length}):`);
-    report.validation.lowConfidenceRoutes.forEach((route) => {
-      console.log(`  - ${route.route} (confidence: ${route.classification.confidence})`);
-      console.log(`    Pattern: ${route.classification.pattern}`);
-    });
+    cli.newline();
+    cli.warning(`Low Confidence Routes (${report.validation.lowConfidenceRoutes.length}):`);
+    for (const route of report.validation.lowConfidenceRoutes) {
+      cli.listItem(`${route.route} (confidence: ${route.classification.confidence})`);
+      cli.indent(`Pattern: ${route.classification.pattern}`, 4);
+    }
   } else {
-    console.log('✅ All routes classified with high confidence');
+    cli.success('All routes classified with high confidence');
   }
 
   if (report.validation.reviewNeeded.length > 0) {
-    console.log(`\n📋 Routes Needing Review (${report.validation.reviewNeeded.length}):`);
-    report.validation.reviewNeeded.forEach((route) => {
+    cli.newline();
+    cli.info(`📋 Routes Needing Review (${report.validation.reviewNeeded.length}):`);
+    for (const route of report.validation.reviewNeeded) {
       const reason =
         route.classification.confidence < 1.0 ? 'low confidence' : 'deep nested dynamic route';
-      console.log(`  - ${route.route} (${reason})`);
-    });
+      cli.listItem(`${route.route} (${reason})`);
+    }
   }
 
-  console.log('\n' + '='.repeat(60));
+  cli.newline();
+  cli.divider(60);
 }

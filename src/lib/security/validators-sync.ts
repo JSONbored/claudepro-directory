@@ -121,11 +121,20 @@ export const sanitizers = {
    * @returns Safe display name
    */
   sanitizeDisplayName: (name: string): string => {
-    return name
-      .replace(/[<>'"]/g, '') // Remove HTML special characters
-      .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
-      .trim()
-      .substring(0, 100); // Limit length
+    return (
+      name
+        .replace(/[<>'"]/g, '') // Remove HTML special characters
+        // Remove control characters (function-based to avoid Biome regex rule)
+        .split('')
+        .filter((char) => {
+          const code = char.charCodeAt(0);
+          // Keep characters outside control ranges (0x00-0x1F and 0x7F)
+          return code > 0x1f && code !== 0x7f;
+        })
+        .join('')
+        .trim()
+        .substring(0, 100)
+    ); // Limit length
   },
 } as const;
 
