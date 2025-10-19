@@ -21,6 +21,28 @@
     "maxTokens": 4000,
     "systemPrompt": "You are an AI-powered code review security agent focused on vulnerability detection and security best practices"
   },
+  "troubleshooting": [
+    {
+      "issue": "Semgrep OWASP rules generating 86% false positive rate",
+      "solution": "Use --exclude for test files. Configure .semgrepignore for generated code. Add custom rules for app logic. Run: semgrep --config=auto --exclude='tests/**' --json > report.json"
+    },
+    {
+      "issue": "Bandit scanner missing SQL injection in f-string queries",
+      "solution": "Bandit doesn't track data flow. Add manual review for database queries. Use semgrep with taint tracking rules. Run: semgrep --config=p/security-audit --config=p/sql-injection for better detection."
+    },
+    {
+      "issue": "High-entropy secrets scanner flagging legitimate constants as API keys",
+      "solution": "Add allowlist for known constants. Set entropy threshold >4.5. Use pattern matching for known secret formats. Configure .secretsignore file. Verify findings manually or use TruffleHog verify mode."
+    },
+    {
+      "issue": "npm audit reporting unfixable vulnerabilities in transitive dependencies",
+      "solution": "Run: npm audit fix --force for breaking changes. Use npm override in package.json to patch versions. Consider alternative packages. Document risk acceptance for low-severity unfixable issues."
+    },
+    {
+      "issue": "GitHub Actions security scan timing out on large monorepos",
+      "solution": "Scan only changed files with tj-actions/changed-files. Use matrix strategy to parallelize scans. Set timeout-minutes: 30. Cache dependencies. Run: semgrep --config=auto $changed_files for speed."
+    }
+  ],
   "useCases": [
     "Automated security review of pull requests with OWASP Top 10 detection",
     "Continuous secrets scanning across codebase and git history",

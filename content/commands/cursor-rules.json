@@ -12,6 +12,44 @@
   },
   "githubUrl": "https://github.com/cursor-ai/cursor",
   "documentationUrl": "https://cursor.sh/docs",
+  "troubleshooting": [
+    {
+      "issue": "Cursor AI ignores rules defined in .cursorrules file after enabling",
+      "solution": "Restart Cursor IDE to reload .cursorrules from root. Verify checkbox in Settings > Cursor Settings > Rules is enabled. Limit file to 2000 tokens max."
+    },
+    {
+      "issue": ".cursorrules file not recognized or context lost during long sessions",
+      "solution": "Place .cursorrules in project root directory. Start new conversation when AI loses context. Add project-specific constraints at conversation start."
+    },
+    {
+      "issue": "Generated rules file too large causing AI context window overflow",
+      "solution": "Keep rules under 2000 tokens. Focus on critical patterns only. Split complex projects into multiple focused .cursorrules files per subdirectory."
+    },
+    {
+      "issue": "Rules applied inconsistently across different code generations",
+      "solution": "Use explicit constraints with examples. Reference rules file in first prompt: 'Follow .cursorrules exactly'. Verify Settings > Rules checkbox enabled."
+    },
+    {
+      "issue": "Team global rules conflict with project-specific .cursorrules settings",
+      "solution": "Project .cursorrules override team rules. Check Cursor dashboard for global rules. Explicitly document priority: project rules take precedence in file header."
+    },
+    {
+      "issue": "Migration from .cursorrules to new .cursor/*.mdc system fails",
+      "solution": "Create .cursor/rules directory with .mdc files (Rule Type: Always). Use .cursor/index.mdc for main rules. Set dynamic rules for context-aware activation only."
+    },
+    {
+      "issue": "Rules exceed 500-line recommended limit causing degraded performance",
+      "solution": "Refactor verbose rules into concise actionable directives. Keep under 500 lines for optimal AI performance. Prioritize specific patterns over general guidelines."
+    },
+    {
+      "issue": "Vague cursor rules generating inconsistent or unexpected code outputs",
+      "solution": "Make rules specific and actionable with explicit examples. Avoid ambiguous instructions. Use 'always use X' or 'never use Y' format with code samples."
+    },
+    {
+      "issue": "Framework-specific rules not triggering for Next.js or React projects",
+      "solution": "Specify framework at file top: 'This is a Next.js 15 project with React 19'. Include tech stack declaration. Add framework-specific patterns with examples."
+    }
+  ],
   "source": "community",
   "slug": "cursor-rules",
   "seoTitle": "Cursor Rules Generator for Claude"

@@ -32,6 +32,28 @@
     "Multi-language project documentation consistency",
     "README and project documentation enhancement"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook runs on every file edit causing slow workflows",
+      "solution": "Refine matchers to specific extensions: ['write:*.js', 'write:*.ts', 'edit:*.md', 'edit:README*']. Use postToolUse with targeted matchers instead of wildcard to reduce unnecessary executions."
+    },
+    {
+      "issue": "JSDoc generation fails with 'npx jsdoc not found' error",
+      "solution": "Check jsdoc availability before running: npx jsdoc --version &> /dev/null before generation. Add npm install -g jsdoc to project setup or include in package.json devDependencies."
+    },
+    {
+      "issue": "Documentation tools timeout on large codebases",
+      "solution": "Add timeout limits to each tool execution: timeout 60s npx jsdoc. Process individual files instead of entire directories. Consider incremental documentation generation for changed files only."
+    },
+    {
+      "issue": "TypeDoc fails with module resolution errors in TypeScript",
+      "solution": "Ensure tsconfig.json exists with proper module settings. Run TypeDoc from project root: npx typedoc --tsconfig ./tsconfig.json. Check for conflicting TypeScript versions between project and TypeDoc."
+    },
+    {
+      "issue": "Python pdoc generation creates no output for modules",
+      "solution": "Verify module has __init__.py if package. Use absolute imports and check PYTHONPATH. Run pdoc with explicit module paths: pdoc --html --output-dir ./docs mymodule rather than file paths."
+    }
+  ],
   "documentationUrl": "https://jsdoc.app/",
   "source": "community"
 }

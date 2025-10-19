@@ -34,5 +34,27 @@
     "SEO optimization by understanding application route structure",
     "Migration planning and route inventory management"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook reports no Next.js project despite valid setup",
+      "solution": "Verify package.json contains 'next' dependency and run from project root. The hook checks both /pages and /app directories, and /src variants. Ensure at least one routing directory exists."
+    },
+    {
+      "issue": "Route map JSON has trailing commas or invalid format",
+      "solution": "The sed command to remove trailing commas may fail on macOS. Update to use 'sed -i \"\" ' syntax for BSD sed, or install GNU sed with 'brew install gnu-sed'. Validate output with jq."
+    },
+    {
+      "issue": "API routes not detected in App Router structure",
+      "solution": "Ensure API routes use route.js/ts naming convention in App Router. The hook scans for /api/ path segments and route.* files. Pages Router uses pages/api/ directory structure."
+    },
+    {
+      "issue": "Dynamic routes show incorrect parameter extraction",
+      "solution": "The hook identifies brackets in paths but doesn't parse parameter names. Use the generated nextjs-routes.json for accurate mapping. Review file paths in the 'file' property for exact parameter structure."
+    },
+    {
+      "issue": "Hook runs on every file change causing performance issues",
+      "solution": "The hook processes all files in pages/ or app/ directories. For large projects, consider adding file type filtering (*.tsx, *.jsx only) or exclude non-route files like components and utilities."
+    }
+  ],
   "source": "community"
 }

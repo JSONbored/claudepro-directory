@@ -35,6 +35,28 @@
     "Production deployment safety validation",
     "CI/CD pipeline configuration validation"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook triggers on every file write, slowing development",
+      "solution": "Narrow matchers to specific .env files only: matchers: ['write:.env*', 'edit:.env*'] in hookConfig to reduce unnecessary validations and improve performance."
+    },
+    {
+      "issue": "False positives for weak secrets in development environments",
+      "solution": "Add NODE_ENV check in script to skip strict secret length validation for development. Use conditional logic: if NODE_ENV != production, bypass warnings."
+    },
+    {
+      "issue": "Hook fails to detect environment files in nested directories",
+      "solution": "Update file path matching regex to include subdirectories: [[ \"$FILE_PATH\" == */.env* ]] and find .env files recursively for comprehensive validation."
+    },
+    {
+      "issue": "Cross-environment comparison reports too many false differences",
+      "solution": "Filter comparison to only critical variables (DB, API keys, secrets). Exclude dev-only vars like DEBUG or LOCAL_DEV_PORT from consistency checks to reduce noise."
+    },
+    {
+      "issue": "Script exits with errors preventing file saves entirely",
+      "solution": "Change validation errors to warnings with exit 0 instead of exit 1. Log issues to stderr for review but allow operations to complete without blocking development."
+    }
+  ],
   "documentationUrl": "https://12factor.net/config",
   "source": "community"
 }

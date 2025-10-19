@@ -34,5 +34,27 @@
     "Go codebase quality assurance with integrated static analysis",
     "Dependency security and vulnerability management"
   ],
+  "faq": [
+    {
+      "issue": "Hook fails to find go.mod in nested module subdirectories",
+      "solution": "Script walks up directories but may hit root before finding go.mod. Ensure MODULE_DIR search starts from FILE_PATH directory: cd $(dirname \"$FILE_PATH\") before the while loop to guarantee proper traversal."
+    },
+    {
+      "issue": "Go mod tidy hangs when network unavailable for dependency downloads",
+      "solution": "Add timeout to go commands: timeout 30s go mod tidy to prevent infinite hangs. Set GOPROXY=off to use only local cache, or configure module cache directory with GOMODCACHE for offline operation."
+    },
+    {
+      "issue": "Workspace sync errors when go.work references missing modules",
+      "solution": "Script runs 'go work sync' without validation. Add existence checks: go work edit -json | jq -r '.Use[].DiskPath' | while read dir; do [ -d \"$dir\" ] || echo \"Missing: $dir\"; done before syncing."
+    },
+    {
+      "issue": "Hook output variable DEPS_BEFORE shows zero despite dependencies existing",
+      "solution": "Command 'go list -m all | wc -l | xargs' may fail silently. Use explicit error handling: DEPS_BEFORE=$(go list -m all 2>/dev/null | wc -l) || DEPS_BEFORE=0 to ensure fallback on errors."
+    },
+    {
+      "issue": "Govulncheck warnings treated as failures blocking development",
+      "solution": "Script shows warnings but doesn't block. To make non-blocking, capture exit code: govulncheck ./... || true instead of if/else. Use GOVULNDB to configure vulnerability database source or disable in dev environments."
+    }
+  ],
   "source": "community"
 }

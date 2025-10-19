@@ -27,5 +27,27 @@
     "temperature": 0.8,
     "maxTokens": 4000
   },
+  "troubleshooting": [
+    {
+      "issue": "Color contrast fails WCAG 2.1 AA 4.5:1 ratio requirement",
+      "solution": "Use WebAIM Contrast Checker to test ratios. For normal text require 4.5:1 minimum, large text 3:1. Use darker shades or increase luminosity difference. Verify with automated WAVE or Axe tools."
+    },
+    {
+      "issue": "Figma design tokens out of sync with code implementation",
+      "solution": "Use Style Dictionary to automate token export. Set up CI/CD pipeline to generate tokens from Figma API. Store tokens in Git, version control changes. Run: npx token-transformer tokens.json output/"
+    },
+    {
+      "issue": "Mobile layout breaks at specific device widths not in breakpoints",
+      "solution": "Use fluid layouts with flexbox/grid instead of fixed pixels. Set mobile-first base styles, add min-width media queries. Test at 320px, 375px, 768px, 1024px, 1440px. Use: clamp() for fluid sizing."
+    },
+    {
+      "issue": "ARIA labels missing on interactive form elements causing screen reader errors",
+      "solution": "Add aria-label to inputs without visible labels. Use aria-labelledby for associated label IDs. Set aria-required='true' for required fields. Validate with: axe DevTools browser extension."
+    },
+    {
+      "issue": "Design system components render inconsistently across browsers",
+      "solution": "Add CSS normalize/reset stylesheet. Use autoprefixer for vendor prefixes. Test in Chrome, Firefox, Safari, Edge. Set box-sizing: border-box globally. Validate: browserstack.com cross-browser test."
+    }
+  ],
   "source": "community"
 }

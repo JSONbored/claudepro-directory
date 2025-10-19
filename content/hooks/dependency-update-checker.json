@@ -32,6 +32,28 @@
     "Multi-language project dependency management",
     "Safe update strategy recommendations"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook triggers on every file write but only dependency files should activate it",
+      "solution": "Verify matchers array includes only 'write' and 'edit' tools. Add file path validation in script header to exit early when FILE_PATH doesn't match dependency file patterns."
+    },
+    {
+      "issue": "npm outdated command returns empty output despite outdated packages existing",
+      "solution": "Run 'npm update --dry-run' instead of 'npm outdated' to see available updates. Check npm cache with 'npm cache verify' and clear if corrupted using 'npm cache clean --force'."
+    },
+    {
+      "issue": "Hook execution floods stderr with security warnings during rapid file edits",
+      "solution": "Add debouncing by storing last check timestamp in temp file. Skip audit if less than 5 minutes elapsed since previous check to reduce noise during active development sessions."
+    },
+    {
+      "issue": "jq command not found error prevents hook from parsing tool input JSON",
+      "solution": "Install jq JSON processor using package manager: 'brew install jq' on macOS, 'apt-get install jq' on Ubuntu. Verify installation with 'jq --version' before testing hook again."
+    },
+    {
+      "issue": "Python safety check fails in virtual environments with permission errors",
+      "solution": "Activate correct virtual environment before running hook or detect venv using VIRTUAL_ENV variable. Install safety in project venv rather than globally: 'pip install safety' within activated environment."
+    }
+  ],
   "documentationUrl": "https://docs.npmjs.com/cli/v8/commands/npm-audit",
   "source": "community"
 }

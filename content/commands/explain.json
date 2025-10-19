@@ -12,6 +12,44 @@
   },
   "githubUrl": "https://github.com/claudepro/code-explainer",
   "documentationUrl": "https://docs.claude.ai/commands/explain",
+  "troubleshooting": [
+    {
+      "issue": "Explanation too technical or not matching requested expertise level",
+      "solution": "Specify --simple for beginners or --expert for advanced. Add context: 'Explain for junior developer' or 'Advanced CS theory analysis'. Adjust depth flag."
+    },
+    {
+      "issue": "Mermaid diagrams not rendering or showing syntax errors in output",
+      "solution": "Enable --mermaid flag explicitly. Verify Mermaid.js syntax at mermaid.live. Use --flowchart for execution flow or --architecture for system design."
+    },
+    {
+      "issue": "Performance analysis missing or complexity scores incorrect",
+      "solution": "Add --performance flag for Big-O analysis. Request explicit time/space complexity. Include benchmark data: 'Analyze runtime complexity with examples'."
+    },
+    {
+      "issue": "Explanation lacks code examples or practical implementation context",
+      "solution": "Use --format=interactive for walkthrough mode. Request side-by-side comparisons. Add: 'Include before/after refactoring examples with explanations'."
+    },
+    {
+      "issue": "Security analysis superficial or missing vulnerability detection",
+      "solution": "Combine with --security flag for OWASP analysis. Specify: 'Explain security implications and attack vectors'. Reference CVE database for known issues."
+    },
+    {
+      "issue": "Mermaid chart VS Code plugin not auto-generating diagrams from code",
+      "solution": "Start GitHub Copilot Chat and mention @mermaid-chart for AI diagram generation. Update plugin to August 2025+ version. Enable AI features in extension settings."
+    },
+    {
+      "issue": "Explanation generates generic content without codebase-specific insights",
+      "solution": "Provide file paths or code snippets directly. Use --dependencies flag for relationship analysis. Request: 'Explain how X integrates with project architecture'."
+    },
+    {
+      "issue": "UML or sequence diagrams missing key interactions or components",
+      "solution": "Use --sequence flag for interaction flows. Specify scope: 'Include all function calls and async operations'. Add --uml for class relationships and inheritance."
+    },
+    {
+      "issue": "Explanation formatting breaks when outputting slides or presentation mode",
+      "solution": "Use --format=slides with explicit section headers. Limit diagrams to one per slide. Verify Markdown compatibility with reveal.js or similar presentation tools."
+    }
+  ],
   "source": "community",
   "slug": "explain",
   "seoTitle": "Explain for Claude"

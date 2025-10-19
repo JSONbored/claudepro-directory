@@ -29,5 +29,23 @@
     "Code architecture evaluation for maintainability and scalability"
   ],
   "documentationUrl": "https://google.github.io/eng-practices/review/",
+  "troubleshooting": [
+    {
+      "issue": "Agent provides generic feedback instead of specific actionable suggestions",
+      "solution": "Include file paths and line numbers in your request. Run agent with --verbose flag to see detailed analysis. Provide code context with function signatures and import statements for better specificity."
+    },
+    {
+      "issue": "Code review recommendations conflict with project linting rules",
+      "solution": "Share your .eslintrc.json or biome.json config file with the agent. Add project-specific style guide as context. Run npx eslint --print-config to identify rule conflicts and align agent guidance."
+    },
+    {
+      "issue": "Agent misses critical security vulnerabilities in authentication code",
+      "solution": "Explicitly request security-focused review with --security flag. Provide authentication flow context and user role definitions. Use specialized security analysis tools like Snyk or SonarQube in combination with agent review."
+    },
+    {
+      "issue": "Performance suggestions are not applicable to current tech stack",
+      "solution": "Specify your exact framework versions (React 19, Node 22, etc.) in the request. Include package.json dependencies for context. Request framework-specific optimization patterns aligned with 2025 best practices."
+    }
+  ],
   "source": "community"
 }

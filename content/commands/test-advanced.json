@@ -12,6 +12,48 @@
   },
   "githubUrl": "https://github.com/claudepro/advanced-test-generator",
   "documentationUrl": "https://docs.claude.ai/commands/test",
+  "troubleshooting": [
+    {
+      "issue": "Generated tests fail with 'module not found' or import path errors",
+      "solution": "Verify test framework installed: npm list jest vitest. Check tsconfig.json paths mapping. Update imports to match project structure. Run: npm test --verbose."
+    },
+    {
+      "issue": "Property-based tests timeout or generate too many test cases",
+      "solution": "Reduce fc.assert numRuns parameter to 50-100. Add timeout: jest.setTimeout(10000). Constrain input generators: fc.string({ maxLength: 100 })."
+    },
+    {
+      "issue": "Mock setup complex or generated mocks don't match real implementation",
+      "solution": "Use --integration for real dependencies. Verify mock return types match actual. Update mocks: vi.mocked(fn).mockImplementation(realFn). Check mock calls order."
+    },
+    {
+      "issue": "Mutation testing score low despite high code coverage percentage",
+      "solution": "Add boundary value tests for conditionals. Test error paths and edge cases. Use --mutation flag to identify weak assertions. Verify test quality not just coverage."
+    },
+    {
+      "issue": "Visual regression tests failing due to rendering inconsistencies",
+      "solution": "Use --visual with fixed viewport sizes. Disable animations in test environment. Update snapshots: npm test -- -u. Run in Docker for consistent rendering."
+    },
+    {
+      "issue": "Snapshot tests break on every CI run with formatting differences",
+      "solution": "Normalize snapshots with --no-inline-snapshots. Configure prettier consistently: npx prettier --write **/*.snap. Use toMatchInlineSnapshot for stability."
+    },
+    {
+      "issue": "Fast-check property tests detect incompetent mutants or type errors",
+      "solution": "Add type constraints to generators: fc.integer().filter(n => n > 0). Use fc.pre() for preconditions. Constrain infinite problem space with bounded generators."
+    },
+    {
+      "issue": "Performance baseline tests fail with inconsistent timing measurements",
+      "solution": "Run benchmarks with --baseline multiple times for average. Disable CPU throttling. Use performance.mark() API. Isolate tests: --runInBand for sequential execution."
+    },
+    {
+      "issue": "Accessibility tests with jest-axe report too many violations to fix",
+      "solution": "Start with critical issues: filter by impact level. Fix incrementally: test one component at a time. Configure axe rules: exclude low-priority ARIA violations."
+    },
+    {
+      "issue": "Test suite memory leaks crash CI with out-of-memory errors",
+      "solution": "Increase Node.js memory: NODE_OPTIONS=--max-old-space-size=4096. Use --detectLeaks flag. Clear timers in afterEach. Run tests in isolation: --maxWorkers=1."
+    }
+  ],
   "source": "community",
   "slug": "test-advanced"
 }

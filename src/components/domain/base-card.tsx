@@ -13,6 +13,7 @@
  * - Sponsored content tracking support
  * - Full accessibility (ARIA labels, keyboard navigation)
  * - Performance optimized with React.memo
+ * - Motion.dev hover/tap animations (Phase 1.1 - October 2025)
  *
  * Architecture:
  * - Composition over inheritance (render props pattern)
@@ -23,6 +24,7 @@
  * @module components/shared/base-card
  */
 
+import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 import { memo } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -245,7 +247,8 @@ export const BaseCard = memo(
     const visibleTags = tags?.slice(0, maxVisibleTags);
     const overflowCount = tags && tags.length > maxVisibleTags ? tags.length - maxVisibleTags : 0;
 
-    const cardContent = (
+    // Card content wrapper - conditionally render with or without motion animations
+    const cardElement = (
       <Card
         className={`${disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? 'p-6' : ''} ${variant === 'review' ? 'p-4 rounded-lg border' : ''} ${compactMode ? 'p-4' : ''} ${className || ''} relative`}
         onClick={disableNavigation ? undefined : handleCardClick}
@@ -372,6 +375,25 @@ export const BaseCard = memo(
           </div>
         </CardContent>
       </Card>
+    );
+
+    // Wrap card with motion animations if navigation is enabled
+    const cardContent = disableNavigation ? (
+      cardElement
+    ) : (
+      <motion.div
+        whileHover={{
+          scale: 1.02,
+          y: -4,
+          transition: { type: 'spring', stiffness: 400, damping: 25 },
+        }}
+        whileTap={{
+          scale: 0.98,
+          transition: { type: 'spring', stiffness: 400, damping: 25 },
+        }}
+      >
+        {cardElement}
+      </motion.div>
     );
 
     // Wrap in sponsored tracker if this is sponsored content

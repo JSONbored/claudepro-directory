@@ -28,5 +28,27 @@
     "Architecting cloud-native applications with serverless and containers",
     "Conducting Well-Architected Framework reviews and remediation"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Terraform state lock errors preventing infrastructure deployments",
+      "solution": "Use terraform force-unlock with lock ID from error message. Configure lock timeouts with -lock-timeout=15m flag. Verify DynamoDB table permissions for S3 backend. Ensure state file isn't replicated across regions causing conflicts."
+    },
+    {
+      "issue": "AWS Lambda functions experiencing cold start latency over 3 seconds",
+      "solution": "Enable provisioned concurrency for critical functions. Reduce deployment package size by removing unused dependencies. Use ARM64 architecture for better price-performance. Implement SnapStart for Java functions or warm-up events."
+    },
+    {
+      "issue": "Multi-cloud networking connectivity failing between AWS and GCP VPCs",
+      "solution": "Verify VPN tunnel status and IPsec configuration on both sides. Check route tables have correct CIDR propagation. Ensure security groups and firewall rules allow cross-cloud traffic. Test with traceroute and tcpdump for packet inspection."
+    },
+    {
+      "issue": "CloudFormation stack rollback failing leaving resources in inconsistent state",
+      "solution": "Use ContinueUpdateRollback API with resources to skip. Check stack events for specific resource failure reasons. Set DeletionPolicy Retain on critical resources. Execute manual resource cleanup and stack delete if necessary."
+    },
+    {
+      "issue": "Kubernetes autoscaler not scaling pods despite high CPU utilization",
+      "solution": "Verify metrics-server is running with kubectl top nodes. Check HPA configuration targets match pod resource requests. Ensure cluster-autoscaler has permissions to modify node groups. Review --horizontal-pod-autoscaler-sync-period timing settings."
+    }
+  ],
   "source": "community"
 }

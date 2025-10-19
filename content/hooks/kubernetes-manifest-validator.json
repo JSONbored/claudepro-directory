@@ -34,5 +34,27 @@
     "Security policy enforcement and compliance validation",
     "Infrastructure as Code quality assurance and best practices"
   ],
+  "troubleshooting": [
+    {
+      "issue": "kubectl dry-run fails with 'no configuration found' error",
+      "solution": "Check kubectl context: kubectl config current-context. Set context if missing: kubectl config use-context <context-name>. For validation without cluster, use --dry-run=client instead of --dry-run=server."
+    },
+    {
+      "issue": "Validation detects Kubernetes manifest in non-k8s YAML files",
+      "solution": "Strengthen detection logic: grep -q '^apiVersion:.*v1' && grep -q '^kind: (Pod|Deployment|Service)'. Skip YAML files in non-k8s directories: [[ \"$FILE_PATH\" =~ /k8s/|/manifests/|/deploy/ ]] || exit 0."
+    },
+    {
+      "issue": "Multi-document YAML causes validation to check only first resource",
+      "solution": "Use kubectl apply --dry-run for all documents. Split YAML: csplit -z \"$FILE_PATH\" '/^---$/' '{*}' && for f in xx*; do kubectl apply --dry-run=client -f $f; done. Handle --- document separators properly."
+    },
+    {
+      "issue": "Security context warnings trigger on valid init containers",
+      "solution": "Check container type before warning: grep -A5 'initContainers:' to identify init containers. Init containers may legitimately need privileged access. Add context-aware checks for runAsNonRoot based on container type."
+    },
+    {
+      "issue": "Hook exits with error preventing further operations after validation",
+      "solution": "Change exit strategy: collect validation errors but exit 0 for warnings. Use: [ \"$ERRORS\" -gt 0 ] && echo 'Validation errors' >&2 || exit 0. Only fail on critical errors, warn on best practices."
+    }
+  ],
   "source": "community"
 }

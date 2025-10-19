@@ -32,6 +32,28 @@
     "Support multiple programming languages in the same project",
     "Reduce code review friction by handling formatting automatically"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Formatter runs but changes get overwritten immediately",
+      "solution": "Check for competing hooks or watchers. Verify PostToolUse timing - runs after file write completes. Add debouncing if multiple formatters conflict. Review hook execution order."
+    },
+    {
+      "issue": "Prettier config ignored and default settings applied",
+      "solution": "Verify .prettierrc exists in project root or ancestor directories. Check config search path: prettier --find-config-path file.js. Set explicit config: prettier --config path."
+    },
+    {
+      "issue": "Hook matches multiedit but only formats first file",
+      "solution": "Check if FILE_PATH is array in multiedit context. Parse all paths: jq -r '.tool_input.edits[].file_path'. Loop through each file for formatting."
+    },
+    {
+      "issue": "Formatter executable found but exits with permission denied",
+      "solution": "Verify formatter binary permissions: ls -la $(which prettier). Install locally: npm i -D prettier. Use npx to ensure correct binary: npx prettier --write file."
+    },
+    {
+      "issue": "Silent failures with no feedback on format errors",
+      "solution": "Remove 2>/dev/null to expose stderr. Capture exit codes: prettier --write file || echo \"Failed: $?\" >&2. Add --loglevel debug for verbose output."
+    }
+  ],
   "documentationUrl": "https://prettier.io/docs/en/",
   "source": "community"
 }

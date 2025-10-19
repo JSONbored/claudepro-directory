@@ -28,5 +28,27 @@
   ],
   "requirements": ["Bash shell", "jq JSON processor", "Claude Code with MCP support"],
   "preview": "🔌 MCP 3 servers │ 12 tools │ filesystem,git,database",
+  "troubleshooting": [
+    {
+      "issue": "Statusline shows 'MCP disconnected' despite configured servers",
+      "solution": "Verify servers are actually connected: run 'claude mcp list' to check server status. Ensure servers are properly configured in ~/.mcp.json and restart Claude Code if needed."
+    },
+    {
+      "issue": "Server count shows 0 but MCP servers are running in terminal",
+      "solution": "Check that MCP context data is accessible. Verify Claude Code version supports MCP statusline API. Run 'claude mcp get [server-name]' to verify individual server status."
+    },
+    {
+      "issue": "Tool count incorrect or not updating",
+      "solution": "This indicates silent tool registration failure. Run '/mcp' in Claude Code to verify tool registration. Restart connected servers if tools remain unavailable despite connection."
+    },
+    {
+      "issue": "MCP server startup failures or connection timeouts",
+      "solution": "Launch with --mcp-debug flag. Check logs: ~/Library/Logs/Claude/mcp.log (macOS). Verify server.connect() is called and transport listener is active."
+    },
+    {
+      "issue": "JSON-RPC errors like 'Method not found' or invalid JSON",
+      "solution": "Server may not support prompts/list or resources/list, or writes non-JSON to stdout. Ensure JSON-RPC 2.0 compliance. Use MCP Inspector for interactive testing."
+    }
+  ],
   "source": "community"
 }

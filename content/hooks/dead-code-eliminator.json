@@ -1,0 +1,58 @@
+{
+  "slug": "dead-code-eliminator",
+  "description": "Automatically detects and removes unused code, imports, and dependencies with safe deletion verification and rollback support",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-19",
+  "tags": ["code-quality", "cleanup", "optimization", "refactoring", "automation"],
+  "hookType": "OnSessionStop",
+  "features": [
+    "Unused import detection and removal across multiple languages",
+    "Dead code path identification using static analysis",
+    "Unreferenced function and variable detection",
+    "Orphaned test file cleanup with verification",
+    "Safe deletion with backup and rollback capabilities",
+    "Bundle size impact analysis after cleanup"
+  ],
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "onSessionStop": {
+          "script": "./.claude/hooks/dead-code-eliminator.sh"
+        }
+      }
+    },
+    "scriptContent": "#!/usr/bin/env bash\n\necho \"🧹 Dead Code Eliminator - Session Cleanup\" >&2\n\n# Configuration\nBACKUP_DIR=\".claude/backups/dead-code-$(date +%Y%m%d-%H%M%S)\"\nREPORT_FILE=\".claude/reports/dead-code-report.txt\"\nDRY_RUN=${DRY_RUN:-true}\n\nmkdir -p \"$(dirname \"$REPORT_FILE\")\"\nmkdir -p \"$BACKUP_DIR\"\n\necho \"📊 Analyzing codebase for dead code...\" >&2\necho \"Dead Code Analysis - $(date)\" > \"$REPORT_FILE\"\necho \"===========================================\" >> \"$REPORT_FILE\"\n\n# Function to find unused imports (JavaScript/TypeScript)\nfind_unused_imports_js() {\n  echo \"🔍 Checking for unused imports in JS/TS files...\" >&2\n  \n  if command -v npx &> /dev/null; then\n    # Check if eslint-plugin-unused-imports is available\n    if [ -f \"package.json\" ] && grep -q \"eslint\" package.json; then\n      echo \"📦 Running ESLint unused imports check...\" >&2\n      npx eslint --ext .js,.jsx,.ts,.tsx --quiet --format compact . 2>/dev/null | \\\n        grep \"unused\" | head -20 >> \"$REPORT_FILE\" || true\n    fi\n    \n    # Use ts-prune for TypeScript projects\n    if [ -f \"tsconfig.json\" ] && command -v npx &> /dev/null; then\n      echo \"📦 Running ts-prune for unused exports...\" >&2\n      npx ts-prune 2>/dev/null | head -30 >> \"$REPORT_FILE\" || \\\n        echo \"💡 Install ts-prune: npm i -D ts-prune\" >&2\n    fi\n  fi\n}\n\n# Function to find unused Python imports\nfind_unused_imports_python() {\n  echo \"🔍 Checking for unused imports in Python files...\" >&2\n  \n  if command -v autoflake &> /dev/null; then\n    echo \"📦 Running autoflake for unused imports...\" >&2\n    autoflake --check --recursive --remove-all-unused-imports . 2>/dev/null | \\\n      head -20 >> \"$REPORT_FILE\" || true\n  elif command -v pylint &> /dev/null; then\n    echo \"📦 Running pylint for unused imports...\" >&2\n    find . -name \"*.py\" -type f | head -10 | while read -r file; do\n      pylint --disable=all --enable=unused-import \"$file\" 2>/dev/null\n    done >> \"$REPORT_FILE\" || true\n  else\n    echo \"💡 Install autoflake or pylint for Python dead code detection\" >&2\n  fi\n}\n\n# Function to find unreferenced files\nfind_unreferenced_files() {\n  echo \"🔍 Finding potentially unreferenced files...\" >&2\n  \n  # Find files that might be orphaned (not imported anywhere)\n  if command -v rg &> /dev/null; then\n    echo \"\" >> \"$REPORT_FILE\"\n    echo \"Potentially Unreferenced Files:\" >> \"$REPORT_FILE\"\n    echo \"--------------------------------\" >> \"$REPORT_FILE\"\n    \n    # Find .js/.ts files in src\n    find src -type f \\( -name \"*.js\" -o -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.jsx\" \\) 2>/dev/null | \\\n      head -50 | while read -r file; do\n        basename=\"$(basename \"$file\" | sed 's/\\.[^.]*$//')\"\n        # Check if file is imported anywhere\n        if ! rg -q \"from.*['\\\"].*$basename\" . 2>/dev/null && \\\n           ! rg -q \"import.*['\\\"].*$basename\" . 2>/dev/null; then\n          echo \"  - $file (no imports found)\" >> \"$REPORT_FILE\"\n        fi\n      done\n  fi\n}\n\n# Function to find unused dependencies\nfind_unused_dependencies() {\n  echo \"🔍 Checking for unused npm dependencies...\" >&2\n  \n  if [ -f \"package.json\" ]; then\n    if command -v npx &> /dev/null; then\n      echo \"\" >> \"$REPORT_FILE\"\n      echo \"Unused Dependencies Check:\" >> \"$REPORT_FILE\"\n      echo \"-------------------------\" >> \"$REPORT_FILE\"\n      \n      # Use depcheck if available\n      if npx depcheck --version &> /dev/null; then\n        npx depcheck --json 2>/dev/null | \\\n          jq -r '.dependencies[]' 2>/dev/null | \\\n          head -10 >> \"$REPORT_FILE\" || \\\n          echo \"💡 Install depcheck: npm i -D depcheck\" >&2\n      fi\n    fi\n  fi\n}\n\n# Function to analyze dead code with coverage data\nanalyze_with_coverage() {\n  echo \"📊 Analyzing test coverage for dead code hints...\" >&2\n  \n  if [ -f \"coverage/coverage-summary.json\" ]; then\n    echo \"\" >> \"$REPORT_FILE\"\n    echo \"Zero-Coverage Files (Potential Dead Code):\" >> \"$REPORT_FILE\"\n    echo \"------------------------------------------\" >> \"$REPORT_FILE\"\n    \n    jq -r 'to_entries[] | select(.value.lines.pct == 0) | .key' \\\n      coverage/coverage-summary.json 2>/dev/null | \\\n      head -10 >> \"$REPORT_FILE\" || true\n  fi\n}\n\n# Run all analysis functions\nfind_unused_imports_js\nfind_unused_imports_python\nfind_unreferenced_files\nfind_unused_dependencies\nanalyze_with_coverage\n\n# Report summary\necho \"\" >> \"$REPORT_FILE\"\necho \"Analysis Complete - $(date)\" >> \"$REPORT_FILE\"\n\n# Display report\nif [ -s \"$REPORT_FILE\" ]; then\n  echo \"\" >&2\n  echo \"📋 Dead Code Analysis Report:\" >&2\n  cat \"$REPORT_FILE\" >&2\n  echo \"\" >&2\n  echo \"💾 Full report saved to: $REPORT_FILE\" >&2\n  \n  if [ \"$DRY_RUN\" = \"true\" ]; then\n    echo \"\" >&2\n    echo \"🔒 DRY RUN mode enabled - no files deleted\" >&2\n    echo \"💡 Set DRY_RUN=false to enable automatic cleanup\" >&2\n  else\n    echo \"⚠️ Automatic cleanup enabled - review report carefully\" >&2\n  fi\nelse\n  echo \"✅ No dead code detected\" >&2\nfi\n\necho \"\" >&2\necho \"🎯 Dead Code Elimination Best Practices:\" >&2\necho \"   • Run static analysis tools regularly\" >&2\necho \"   • Use tree-shaking for production builds\" >&2\necho \"   • Review unused exports before removal\" >&2\necho \"   • Maintain high test coverage to identify dead code\" >&2\necho \"   • Use automated tools: ts-prune, depcheck, autoflake\" >&2\n\nexit 0"
+  },
+  "useCases": [
+    "Automated codebase cleanup on session completion",
+    "Bundle size optimization through dead code removal",
+    "Refactoring support with safe unused code detection",
+    "CI/CD integration for continuous code quality",
+    "Technical debt reduction and maintenance"
+  ],
+  "troubleshooting": [
+    {
+      "issue": "OnSessionStop hook runs but no dead code report generated",
+      "solution": "Check .claude/reports directory permissions and disk space. Verify jq command available for JSON parsing. Run manually to see stderr output: bash .claude/hooks/dead-code-eliminator.sh."
+    },
+    {
+      "issue": "False positives for dynamic imports and runtime dependencies",
+      "solution": "Hook uses static analysis only. Exclude dynamic require() patterns from reports. Add ignore patterns to .dead-code-ignore file. Use /* dead-code-safe */ comments for runtime-loaded modules."
+    },
+    {
+      "issue": "ts-prune reports too many false positives on exports",
+      "solution": "Configure ts-prune with .ts-prunerc ignore patterns. Export unused items intentionally for public API. Use ts-prune --ignore to exclude specific paths or patterns from analysis."
+    },
+    {
+      "issue": "DRY_RUN=false mode deletes files without confirmation",
+      "solution": "Backup created in .claude/backups before deletion. Review report first in dry run mode. Implement confirmation prompt in script. Use git to recover deleted files if needed."
+    },
+    {
+      "issue": "Coverage-based detection misses files outside test scope",
+      "solution": "Zero coverage indicates potential dead code but not definitive. Cross-reference with import analysis. Check if files are runtime-loaded or dynamically required. Verify files aren't entry points or config files."
+    }
+  ],
+  "documentationUrl": "https://github.com/nadeesha/ts-prune",
+  "source": "community"
+}

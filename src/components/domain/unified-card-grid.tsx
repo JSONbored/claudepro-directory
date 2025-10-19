@@ -11,6 +11,7 @@
  * - Optional infinite scroll using existing useInfiniteScroll hook
  * - Built-in analytics tracking with dynamic imports (UnifiedButton pattern)
  * - Type-safe generics for any content type
+ * - Motion.dev staggered animations (Phase 1.3 - October 2025)
  *
  * **Consolidates:**
  * - TrendingContent, ChangelogList, RelatedContent, FeaturedSections,
@@ -26,6 +27,7 @@
  * @module components/ui/unified-card-grid
  */
 
+import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { memo, useEffect } from 'react';
@@ -230,8 +232,22 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
 
   return (
     <section className={className} aria-label={ariaLabel}>
-      {/* CSS Grid - responsive columns */}
-      <div className={gridClassName}>
+      {/* CSS Grid - responsive columns with staggered animations */}
+      <motion.div
+        className={gridClassName}
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: { opacity: 0 },
+          visible: {
+            opacity: 1,
+            transition: {
+              staggerChildren: 0.05, // 50ms delay between each card
+              delayChildren: 0.1,
+            },
+          },
+        }}
+      >
         {displayedItems.map((item, index) => {
           const key = getKey(item, index);
 
@@ -239,10 +255,24 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
           const cardContent: ReactNode =
             'renderCard' in props ? props.renderCard(item, index) : <ConfigCard item={item} />;
 
-          // Wrap in error boundary for safety
-          return <ErrorBoundary key={key}>{cardContent}</ErrorBoundary>;
+          // Wrap in motion.div for stagger effect + error boundary for safety
+          return (
+            <motion.div
+              key={key}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { type: 'spring', stiffness: 100, damping: 15 },
+                },
+              }}
+            >
+              <ErrorBoundary>{cardContent}</ErrorBoundary>
+            </motion.div>
+          );
         })}
-      </div>
+      </motion.div>
 
       {/* Infinite scroll sentinel (only shown when enabled and hasMore) */}
       {infiniteScroll && hasMore && (

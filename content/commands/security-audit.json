@@ -23,6 +23,48 @@
   },
   "githubUrl": "https://github.com/claudepro/security-audit-agents",
   "documentationUrl": "https://docs.claude.ai/commands/security-audit",
+  "troubleshooting": [
+    {
+      "issue": "Audit reports overwhelm with 100 agents producing excessive output",
+      "solution": "Use scope filters: /security-audit security for focused analysis. Request executive summary only. Filter by priority: Critical and High issues first."
+    },
+    {
+      "issue": "Free tier resource optimization recommendations not specific enough",
+      "solution": "Specify service explicitly: 'Optimize Upstash Redis within free tier limits'. Request concrete configuration changes. Include current usage metrics for context."
+    },
+    {
+      "issue": "Category scores lack justification or improvement roadmap unclear",
+      "solution": "Request detailed scoring breakdown per category. Add: 'Explain each deduction with examples'. Use --all for comprehensive implementation roadmap with timelines."
+    },
+    {
+      "issue": "Audit misses project-specific security risks in public repository",
+      "solution": "Provide threat context: 'Public repo with API keys in .env.example'. Specify deployment: Vercel Edge Functions. Request supply chain analysis explicitly."
+    },
+    {
+      "issue": "Performance regression detection shows false positives or outdated data",
+      "solution": "Establish baseline metrics first. Run Core Web Vitals test separately. Provide historical data: 'Previous Lighthouse score: 95'. Update dependency cache before audit."
+    },
+    {
+      "issue": "Sub-agents produce conflicting recommendations across categories",
+      "solution": "Request consolidated report: 'Merge overlapping findings from security and infrastructure agents'. Prioritize by business impact. Review contradictions manually."
+    },
+    {
+      "issue": "CVSS scoring inconsistent with project's actual threat model",
+      "solution": "Provide deployment context: 'Internal tool vs public SaaS'. Adjust scoring with --threat-model=public-repo. Request contextualized risk assessment per environment."
+    },
+    {
+      "issue": "Compliance agent flags issues that don't apply to project jurisdiction",
+      "solution": "Specify regulatory scope: /security-audit --compliance=GDPR,CCPA. Exclude irrelevant frameworks. Document compliance exceptions in project README."
+    },
+    {
+      "issue": "Audit completion time exceeds token limits for large codebases",
+      "solution": "Run incremental audits by scope: security first, then performance. Use --quick for overview. Process high-risk areas separately: /security-audit src/auth."
+    },
+    {
+      "issue": "Resource optimization suggestions break existing functionality",
+      "solution": "Test recommendations in staging first. Request backward compatibility checks. Use --dry-run equivalent: ask for impact analysis before applying changes."
+    }
+  ],
   "source": "claudepro",
   "slug": "security-audit"
 }

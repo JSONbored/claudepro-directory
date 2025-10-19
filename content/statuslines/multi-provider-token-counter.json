@@ -48,6 +48,14 @@
     {
       "issue": "Colors not working",
       "solution": "Ensure TERM environment variable supports colors: echo $TERM should show 'xterm-256color' or similar"
+    },
+    {
+      "issue": "Model detection fails for new AI models or versions",
+      "solution": "Add patterns to detection logic. Common: claude-* (Opus/Sonnet/Haiku), gpt-* (4o/4.1/o3), gemini-* (2.0/2.5-pro), grok-* (3/4). Update with [[ \"$model\" == *\"pattern\"* ]]."
+    },
+    {
+      "issue": "Percentage calculation precision too low or rounded values",
+      "solution": "Increase bc scale for decimals. Current: scale=1. Use: awk \"BEGIN {printf \\\"%.2f\\\", ($tokens / $limit) * 100}\" for two decimals. Higher scale slows execution."
     }
   ],
   "documentationUrl": "https://docs.anthropic.com/claude/docs/models-overview",

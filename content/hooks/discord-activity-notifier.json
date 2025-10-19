@@ -31,6 +31,28 @@
     "Automated project activity logging",
     "Integration with team chat workflows"
   ],
+  "troubleshooting": [
+    {
+      "issue": "DISCORD_WEBHOOK_URL environment variable not available in hook execution context",
+      "solution": "Export webhook URL in shell profile (.bashrc/.zshrc) or add to Claude Code config. Test with 'echo $DISCORD_WEBHOOK_URL' in hook script to verify environment variable persists."
+    },
+    {
+      "issue": "Discord webhook returns HTTP 400 with 'invalid JSON body' error message",
+      "solution": "Validate PAYLOAD JSON structure before sending with 'echo $PAYLOAD | jq' command. Ensure special characters in file names are properly escaped within JSON string values."
+    },
+    {
+      "issue": "Notifications flood Discord channel during rapid-fire Edit or MultiEdit operations",
+      "solution": "Add rate limiting by checking notification count per minute using temporary file counter. Skip notification if threshold exceeded, or batch multiple operations into single embed with field array."
+    },
+    {
+      "issue": "Git branch detection fails when hook runs in detached HEAD state",
+      "solution": "Add fallback to display commit SHA instead of branch name when 'git branch --show-current' returns empty. Use 'git describe --tags --always' for readable detached HEAD representation."
+    },
+    {
+      "issue": "Timestamp format incompatible with Discord embed RFC3339 requirement causes validation errors",
+      "solution": "Ensure 'date -u +%Y-%m-%dT%H:%M:%S.000Z' command generates UTC ISO 8601 format. Use gdate on macOS if BSD date lacks proper UTC formatting support: 'brew install coreutils'."
+    }
+  ],
   "documentationUrl": "https://discord.com/developers/docs/resources/webhook",
   "source": "community"
 }

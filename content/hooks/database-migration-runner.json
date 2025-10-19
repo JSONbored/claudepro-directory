@@ -32,6 +32,28 @@
     "Migration validation and rollback safety",
     "Database versioning and change tracking"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook detects migration file but framework check fails",
+      "solution": "Verify package.json contains knex, sequelize, or typeorm dependency. Run npm install to ensure frameworks are installed. Check npx command availability and node_modules/.bin in PATH."
+    },
+    {
+      "issue": "Knex migration status shows no pending despite new files",
+      "solution": "Run npx knex migrate:list to verify migration discovery. Check migration file naming follows timestamp pattern. Ensure knexfile.js configuration points to correct migrations directory."
+    },
+    {
+      "issue": "PostToolUse hook triggers on non-migration SQL files",
+      "solution": "Refine file path pattern matching to exclude seed/query files. Add migration directory check: [[ $FILE_PATH == *migrations/* ]]. Update matchers to prevent false positives."
+    },
+    {
+      "issue": "Destructive operation warning for safe rollback scripts",
+      "solution": "Hook warns on DROP/DELETE/TRUNCATE in any context. Add migration safety comments to suppress warnings. Consider splitting destructive down migrations into separate reviewed files."
+    },
+    {
+      "issue": "Django migration detection fails in virtual environment",
+      "solution": "Activate virtualenv before hook runs: source venv/bin/activate in shell config. Use absolute python path from which python. Ensure manage.py is executable and in project root."
+    }
+  ],
   "documentationUrl": "https://knexjs.org/guide/migrations.html",
   "source": "community"
 }

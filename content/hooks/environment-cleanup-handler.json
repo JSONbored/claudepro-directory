@@ -33,5 +33,47 @@
     "Multi-language project artifact cleanup",
     "Docker container development environment cleanup"
   ],
+  "faq": [
+    {
+      "issue": "Stop hook doesn't execute when Claude terminates unexpectedly",
+      "solution": "Stop hooks only run on graceful shutdown. For crash scenarios, use OS-level cleanup via trap signals or systemd service cleanup. Add trap 'cleanup_function' EXIT SIGTERM SIGINT to shell sessions for broader coverage."
+    },
+    {
+      "issue": "Docker cleanup fails with permission denied on daemon socket",
+      "solution": "Script checks 'docker info' but may lack permissions. Ensure user in docker group: sudo usermod -aG docker $USER or skip docker cleanup gracefully: docker image prune -f 2>/dev/null || echo 'Skipping docker cleanup'."
+    },
+    {
+      "issue": "NPM cache verify hangs indefinitely blocking hook completion",
+      "solution": "Network issues can stall npm operations. Add timeout: timeout 10s npm cache verify or use npm cache verify --offline to avoid network calls. Set NPM_CONFIG_CACHE to control cache directory location."
+    },
+    {
+      "issue": "Find commands fail with 'too many arguments' on large directories",
+      "solution": "Large directory trees exceed ARG_MAX limits. Replace find ... -delete with: find . -name '*.tmp' -print0 | xargs -0 rm -f to handle arguments in batches safely using null delimiter for paths with spaces."
+    },
+    {
+      "issue": "Cleanup removes legitimate .log files needed for debugging sessions",
+      "solution": "Aggressive *.log deletion can remove important logs. Add time-based filtering: find . -name '*.log' -mtime +7 -delete to only remove week-old logs, or exclude specific directories: -not -path './important-logs/*'."
+    },
+    {
+      "issue": "Stop hook timing varies causing incomplete cleanup on fast exits",
+      "solution": "Stop hooks trigger on shutdown but process may terminate mid-execution. Use background jobs: cleanup_task & with wait to ensure completion, or add set -e and trap 'cleanup_complete_marker' EXIT for verification logging."
+    },
+    {
+      "issue": "Safe_remove function wc output includes whitespace breaking counts",
+      "solution": "Command 'wc -l | xargs' used to trim whitespace but may fail on BSD vs GNU. Use: wc -l | tr -d ' ' or awk '{print $1}' for reliable numeric extraction across platforms without xargs dependency."
+    },
+    {
+      "issue": "Du command for cache size calculation hangs on network mounts",
+      "solution": "Script checks ~/.npm and other user dirs which may be on slow filesystems. Add timeout: timeout 5s du -sh \"$cache_dir\" or skip network paths: df \"$cache_dir\" | grep -q nfs && continue to avoid stalling."
+    },
+    {
+      "issue": "Find exec with rm -rf on __pycache__ fails to increment counter",
+      "solution": "Using -exec rm -rf {} + deletes directories but count happens before deletion. Store paths first: DIRS=$(find . -type d -name '__pycache__') then loop: echo \"$DIRS\" | while read d; do rm -rf \"$d\"; done for accurate counting."
+    },
+    {
+      "issue": "Stderr redirection to >&2 lost when hook output captured by CI/CD",
+      "solution": "Stop hooks often run in contexts where stderr is redirected. Ensure both streams visible: echo messages to stdout and stderr: msg() { echo \"$1\" | tee /dev/stderr; } or use explicit log file: >>/tmp/cleanup.log."
+    }
+  ],
   "source": "community"
 }

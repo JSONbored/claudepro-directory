@@ -33,5 +33,27 @@
     "Docker container log monitoring",
     "Framework-specific error pattern detection"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook runs continuously causing terminal spam",
+      "solution": "Add sleep interval or debounce logic to notification hook: sleep 60 between checks. Reduce LOG_LINES_TO_CHECK to 50 for faster processing with less output."
+    },
+    {
+      "issue": "Docker container log checks fail with permission denied",
+      "solution": "Ensure user is in docker group: sudo usermod -aG docker $USER and restart session. Alternatively, skip Docker checks: remove docker logs section from script."
+    },
+    {
+      "issue": "Log file pattern matching misses framework-specific logs",
+      "solution": "Add custom log paths to LOG_DIRS array: LOG_DIRS+=('build/logs' '.next/logs'). Extend file patterns: find with -name '*.out' -o -name 'app*.log' for comprehensive coverage."
+    },
+    {
+      "issue": "Error rate threshold alerts for normal warning messages",
+      "solution": "Separate ERROR_PATTERNS from WARNING_PATTERNS in severity classification. Only count fatal+error toward threshold, exclude warnings: TOTAL_ERRORS=$((fatal_count + error_count))."
+    },
+    {
+      "issue": "Hook performance degrades with many large log files",
+      "solution": "Limit file search depth: find . -maxdepth 2 instead of recursive. Increase LOG_LINES_TO_CHECK interval but reduce file count: head -5 on find results for performance."
+    }
+  ],
   "source": "community"
 }

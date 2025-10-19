@@ -21,6 +21,28 @@
     "maxTokens": 8000,
     "systemPrompt": "You are an API development expert focused on creating robust, scalable, and well-designed APIs"
   },
+  "troubleshooting": [
+    {
+      "issue": "Express rate limiter not working correctly with reverse proxy setup",
+      "solution": "Set app.set('trust proxy', 1) to trust X-Forwarded-For header. Verify proxy passes real IP. Use rate-limit-redis for distributed rate limiting. Test: curl -H 'X-Forwarded-For: test' endpoint."
+    },
+    {
+      "issue": "GraphQL N+1 query problem causing performance degradation",
+      "solution": "Implement DataLoader for batch loading. Add field-level caching with Redis. Use query complexity analysis to limit depth. Configure: createComplexityLimitRule(1000). Monitor with Apollo Studio."
+    },
+    {
+      "issue": "FastAPI async routes blocking on synchronous database calls",
+      "solution": "Use async database driver (asyncpg for PostgreSQL). Wrap sync calls with: await run_in_threadpool(sync_function). Use databases library for async SQL. Check: async def route() declaration syntax."
+    },
+    {
+      "issue": "OpenAPI/Swagger docs not reflecting actual API endpoint parameters",
+      "solution": "Use JSDoc for Express or Pydantic for FastAPI. Run: npx swagger-jsdoc -d config.js routes/*.js -o swagger.json. Validate: npx @apidevtools/swagger-cli validate swagger.json."
+    },
+    {
+      "issue": "API authentication JWT tokens expiring too quickly causing user frustration",
+      "solution": "Implement refresh token pattern with 7-day expiry. Set access token TTL=15min, refresh token TTL=7d. Store refresh token in httpOnly cookie. Add /auth/refresh endpoint for token renewal."
+    }
+  ],
   "useCases": [
     "Building enterprise-grade REST APIs with comprehensive security",
     "Designing GraphQL schemas for complex data relationships",

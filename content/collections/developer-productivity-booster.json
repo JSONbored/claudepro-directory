@@ -71,5 +71,27 @@
   "compatibility": {
     "claudeDesktop": false,
     "claudeCode": true
-  }
+  },
+  "troubleshooting": [
+    {
+      "issue": "Auto-formatter hook conflicts with git-smart-commit command",
+      "solution": "Install auto-code-formatter-hook before git-smart-commit. Configure formatter exclusions in .prettierignore or similar. Ensure both use same formatter version to prevent conflicting reformats."
+    },
+    {
+      "issue": "Statuslines not displaying after installing all hooks first",
+      "solution": "Install hooks first, then statuslines, then commands per installationOrder. Restart Claude Code after installing statuslines. Check View > Statusline is enabled in preferences."
+    },
+    {
+      "issue": "Auto-save-backup interferes with git-status-statusline updates",
+      "solution": "Configure auto-save-backup to ignore .git directory. Add .git/** to backup exclusions. Ensure git-status-statusline polling interval allows backup completion between updates."
+    },
+    {
+      "issue": "Missing code formatter binary prevents hook from executing",
+      "solution": "Install formatter globally: npm install -g prettier or pip install black. Verify formatter command available in PATH: which prettier. Then reinstall auto-code-formatter-hook."
+    },
+    {
+      "issue": "Session timer statusline conflicts with git status display",
+      "solution": "Both statuslines can coexist. Configure statusline layout in Claude Code settings: place session-timer-statusline on left, git-status-statusline on right. Restart after configuration change."
+    }
+  ]
 }

@@ -31,5 +31,27 @@
     "Resource monitoring and management",
     "Multi-database environment cleanup"
   ],
+  "troubleshooting": [
+    {
+      "issue": "PostgreSQL connections not terminated despite hook execution",
+      "solution": "Verify psql client is in PATH and can connect without password. Check pg_hba.conf allows local connections. Ensure user has permission to query pg_stat_activity and call pg_terminate_backend."
+    },
+    {
+      "issue": "Stop hook runs but database processes still detected",
+      "solution": "Hook reports connections but doesn't stop database servers. Use pgrep to verify process detection works. Check connection cleanup SQL executes successfully. Monitor stderr for command errors."
+    },
+    {
+      "issue": "Idle connection count shows zero despite active sessions",
+      "solution": "Check state filter in pg_stat_activity query matches your PostgreSQL version. Verify 5-minute threshold is appropriate for your workflow. Use psql directly to debug query results."
+    },
+    {
+      "issue": "MySQL processlist command fails with access denied",
+      "solution": "Grant PROCESS privilege to MySQL user. Run GRANT PROCESS ON *.* TO 'user'@'localhost'. Verify mysql client connects with correct credentials from .env or environment variables."
+    },
+    {
+      "issue": "MongoDB connection check fails with authentication error",
+      "solution": "Use mongosh for MongoDB 5+ or mongo for older versions. Configure connection string with credentials. Check authentication database matches user creation. Verify network access if using remote MongoDB."
+    }
+  ],
   "source": "community"
 }

@@ -12,6 +12,44 @@
   },
   "githubUrl": "https://github.com/vercel/v0",
   "documentationUrl": "https://v0.dev/docs",
+  "troubleshooting": [
+    {
+      "issue": "shadcn/ui installation fails with React 19 peer dependency conflict",
+      "solution": "Use npm install --legacy-peer-deps or pnpm add with --force flag. Update to shadcn/ui canary for React 19 support. Override react-is dependency."
+    },
+    {
+      "issue": "Generated components show TypeScript errors with Next.js 15 types",
+      "solution": "Update @types/react and @types/react-dom to latest. Set typescript: strict: false temporarily. Verify Next.js 15.5+ with React 19.1 compatibility."
+    },
+    {
+      "issue": "@radix-ui packages throwing version mismatch during component generation",
+      "solution": "Install Radix packages with: npm --legacy-peer-deps i @radix-ui/react-dialog. Update all @radix-ui/* to latest versions. Check compatibility table."
+    },
+    {
+      "issue": "Form or Command components incompatible with React 19 and Next 15",
+      "solution": "Use npx --legacy-peer-deps v0 add [component-id] for installation. Update react-hook-form to v7.54+. Verify Zod schema compatibility with latest."
+    },
+    {
+      "issue": "Generated component missing proper 'use client' directives or RSC errors",
+      "solution": "Add 'use client' to interactive components manually. Verify hooks usage requires client directive. Check Server Component vs Client Component architecture."
+    },
+    {
+      "issue": "v0.dev component installation requires --legacy-peer-deps every time",
+      "solution": "Switch to pnpm or yarn for better peer dependency handling. Use pnpm add or yarn add without extra flags. Update package.json engines field for React 19."
+    },
+    {
+      "issue": "TailwindCSS v4 classes not applying to generated shadcn components",
+      "solution": "Verify tailwind.config.ts includes component paths in content array. Run npx tailwindcss init to regenerate config. Check @import rules in globals.css."
+    },
+    {
+      "issue": "Framer Motion animations causing hydration errors in Next.js 15",
+      "solution": "Wrap animated components with 'use client' directive at file top. Use LazyMotion for reduced bundle size. Check MotionConfig compatibility with React 19."
+    },
+    {
+      "issue": "Generated forms not validating with Zod schemas or react-hook-form",
+      "solution": "Update @hookform/resolvers to latest for Zod v3 support. Verify zodResolver import from @hookform/resolvers/zod. Check schema.parse vs schema.safeParse usage."
+    }
+  ],
   "source": "community",
   "slug": "v0-generate",
   "seoTitle": "V0 Component Generator for Claude"

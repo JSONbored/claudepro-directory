@@ -24,6 +24,28 @@
     "Alert team to significant file modifications",
     "Coordinate development activities across team members"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Notifications fail with 'invalid_payload' error from Slack",
+      "solution": "Escape special characters in JSON payload. Use jq to construct payload: jq -n --arg msg \"$MESSAGE\" '{text: $msg}' | curl -d @- $SLACK_WEBHOOK_URL. Avoid shell variable expansion inside JSON strings."
+    },
+    {
+      "issue": "Hook causes timeout on every tool execution slowing workflow",
+      "solution": "Run curl in background with & to avoid blocking: (curl --max-time 3 \"$SLACK_WEBHOOK_URL\" &) >/dev/null 2>&1. Add exit 0 immediately after background execution. Reduce timeout from 5s to 3s."
+    },
+    {
+      "issue": "Slack webhook returns HTTP 410 'url_verification_failed'",
+      "solution": "Webhook URL expired or was revoked. Generate new webhook at https://api.slack.com/messaging/webhooks. Update SLACK_WEBHOOK_URL environment variable. Check workspace permissions for incoming webhooks."
+    },
+    {
+      "issue": "Git branch detection fails showing 'unknown' for detached HEAD",
+      "solution": "Add fallback to commit SHA: BRANCH=$(git branch --show-current || git rev-parse --short HEAD || echo 'unknown'). Handle detached HEAD state gracefully with descriptive label like 'detached@SHA'."
+    },
+    {
+      "issue": "Notification spam floods channel during rapid file operations",
+      "solution": "Implement debouncing with timestamp check: LAST_NOTIFY=$(cat /tmp/slack_last 2>/dev/null || echo 0); NOW=$(date +%s); [ $((NOW - LAST_NOTIFY)) -lt 10 ] && exit 0. Skip notifications within 10s window."
+    }
+  ],
   "configuration": {
     "hookConfig": {
       "hooks": {

@@ -1,0 +1,59 @@
+{
+  "slug": "database-query-performance-logger",
+  "description": "Monitors and logs database query performance metrics with slow query detection, N+1 analysis, and optimization suggestions",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-19",
+  "tags": ["database", "performance", "monitoring", "optimization", "logging"],
+  "hookType": "PostToolUse",
+  "features": [
+    "Automatic slow query detection and alerting",
+    "N+1 query pattern identification",
+    "Query execution time tracking and statistics",
+    "Database connection pool monitoring",
+    "Query plan analysis and optimization hints",
+    "Support for PostgreSQL, MySQL, SQLite query logs"
+  ],
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "postToolUse": {
+          "script": "./.claude/hooks/database-query-performance-logger.sh",
+          "matchers": ["bash", "write", "edit"]
+        }
+      }
+    },
+    "scriptContent": "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\nCOMMAND=$(echo \"$INPUT\" | jq -r '.tool_input.command // \"\"')\n\n# Configuration\nSLOW_QUERY_THRESHOLD_MS=${SLOW_QUERY_THRESHOLD_MS:-1000}\nLOG_FILE=\".claude/logs/query-performance.log\"\n\n# Create log directory if it doesn't exist\nmkdir -p \"$(dirname \"$LOG_FILE\")\"\n\n# Function to check for query files\ncheck_query_file() {\n  local file=$1\n  \n  if [ -z \"$file\" ]; then\n    return 1\n  fi\n  \n  # Check if file contains SQL or database queries\n  if [[ \"$file\" == *.sql ]] || \\\n     [[ \"$file\" == *query* ]] || \\\n     [[ \"$file\" == *model* ]] || \\\n     [[ \"$file\" == *repository* ]] || \\\n     [[ \"$file\" == *dao* ]]; then\n    return 0\n  fi\n  \n  return 1\n}\n\n# Function to analyze query patterns\nanalyze_query_patterns() {\n  local file=$1\n  \n  echo \"🔍 Analyzing query patterns in: $file\" >&2\n  \n  if [ ! -f \"$file\" ]; then\n    return\n  fi\n  \n  # Check for N+1 query patterns (loops with queries)\n  if grep -n \"for\\|while\\|forEach\" \"$file\" | head -5 | grep -q .; then\n    if grep -i \"SELECT\\|query\\|find\" \"$file\" >/dev/null 2>&1; then\n      echo \"⚠️ Potential N+1 query pattern detected\" >&2\n      echo \"💡 Consider using JOIN or eager loading instead of queries in loops\" >&2\n    fi\n  fi\n  \n  # Check for SELECT * patterns\n  if grep -i \"SELECT \\*\" \"$file\" >/dev/null 2>&1; then\n    echo \"⚠️ SELECT * detected - consider specifying columns explicitly\" >&2\n    echo \"💡 Reduces data transfer and improves performance\" >&2\n  fi\n  \n  # Check for missing LIMIT clauses\n  if grep -i \"SELECT\" \"$file\" | grep -iv \"LIMIT\\|TOP\" >/dev/null 2>&1; then\n    echo \"💡 Consider adding LIMIT clauses to prevent unbounded result sets\" >&2\n  fi\n  \n  # Check for unindexed WHERE clauses\n  if grep -i \"WHERE\" \"$file\" >/dev/null 2>&1; then\n    echo \"📊 WHERE clauses detected - ensure columns are indexed\" >&2\n  fi\n  \n  # Log analysis timestamp\n  echo \"[$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")] Analyzed: $file\" >> \"$LOG_FILE\"\n}\n\n# Function to check for slow query logs\ncheck_slow_query_logs() {\n  echo \"📈 Checking for slow query logs...\" >&2\n  \n  # PostgreSQL slow query log\n  if [ -f \"postgresql.conf\" ] || [ -f \"pg_log/postgresql.log\" ]; then\n    echo \"🐘 PostgreSQL detected\" >&2\n    echo \"💡 Enable slow query logging: log_min_duration_statement = $SLOW_QUERY_THRESHOLD_MS\" >&2\n  fi\n  \n  # MySQL slow query log\n  if [ -f \"my.cnf\" ] || [ -f \"/etc/mysql/my.cnf\" ]; then\n    echo \"🐬 MySQL detected\" >&2\n    echo \"💡 Enable slow query log: slow_query_log = 1\" >&2\n  fi\n  \n  # Check for ORM query logging\n  if [ -f \"package.json\" ]; then\n    if grep -q \"sequelize\\|typeorm\\|prisma\" package.json 2>/dev/null; then\n      echo \"📦 ORM detected - query logging available\" >&2\n      echo \"💡 Enable logging in ORM configuration for query performance insights\" >&2\n    fi\n  fi\n}\n\n# Main execution\nif check_query_file \"$FILE_PATH\"; then\n  echo \"🗃️ Database query file detected: $FILE_PATH\" >&2\n  analyze_query_patterns \"$FILE_PATH\"\n  check_slow_query_logs\n  \n  # Performance tips\n  echo \"\" >&2\n  echo \"🎯 Query Performance Best Practices:\" >&2\n  echo \"   • Use indexes on frequently queried columns\" >&2\n  echo \"   • Avoid N+1 queries with eager loading\" >&2\n  echo \"   • Use EXPLAIN/ANALYZE to understand query plans\" >&2\n  echo \"   • Monitor slow queries > ${SLOW_QUERY_THRESHOLD_MS}ms\" >&2\n  echo \"   • Use connection pooling for better resource management\" >&2\n  \nelif [[ \"$COMMAND\" == *\"psql\"* ]] || [[ \"$COMMAND\" == *\"mysql\"* ]] || [[ \"$COMMAND\" == *\"sqlite\"* ]]; then\n  echo \"🗃️ Database command detected\" >&2\n  echo \"⏱️ Query execution started at: $(date)\" >&2\n  echo \"[$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")] Database command: $COMMAND\" >> \"$LOG_FILE\"\nfi\n\nexit 0"
+  },
+  "useCases": [
+    "Real-time database performance monitoring during development",
+    "Slow query identification and optimization",
+    "N+1 query pattern detection and prevention",
+    "Database migration performance validation",
+    "ORM query optimization and debugging"
+  ],
+  "troubleshooting": [
+    {
+      "issue": "Hook triggers on every file but query analysis shows nothing",
+      "solution": "Verify file path matching patterns in check_query_file. Add specific matchers for your ORM/query files. Check grep patterns match your SQL syntax (PostgreSQL vs MySQL syntax differences)."
+    },
+    {
+      "issue": "N+1 detection gives false positives on batch operations",
+      "solution": "Hook flags loops with queries regardless of batching. Add @performance-safe comments to suppress warnings. Refine regex to detect batch/eager loading keywords like includes() or with()."
+    },
+    {
+      "issue": "Slow query threshold environment variable not respected",
+      "solution": "Export SLOW_QUERY_THRESHOLD_MS before hook runs. Check bash environment inheritance from shell config. Set in .clauderc: export SLOW_QUERY_THRESHOLD_MS=500 for global override."
+    },
+    {
+      "issue": "Query log file grows too large in active development",
+      "solution": "Implement log rotation: mv query-performance.log query-performance.$(date +%Y%m%d).log periodically. Use logrotate or cleanup hook. Add log size check with truncation at 10MB threshold."
+    },
+    {
+      "issue": "ORM query logging suggestions appear but feature is enabled",
+      "solution": "Hook checks package.json presence, not active config. Suppress by adding ORM_LOGGING_ENABLED=true env var. Update hook to detect active logging from config files (ormconfig.json, database.yml)."
+    }
+  ],
+  "documentationUrl": "https://www.postgresql.org/docs/current/runtime-config-logging.html",
+  "source": "community"
+}

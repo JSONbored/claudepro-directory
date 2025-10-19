@@ -29,5 +29,27 @@
     "maxTokens": 4000,
     "systemPrompt": "You are a performance optimization expert with deep knowledge of frontend, backend, and infrastructure performance. Always provide measurable, actionable optimization strategies."
   },
+  "troubleshooting": [
+    {
+      "issue": "INP score above 200ms despite optimizing JavaScript execution",
+      "solution": "Replace FID optimization with INP-focused approach. Run: npm audit for third-party scripts. Remove non-critical JS, use async loading, implement code splitting with dynamic imports."
+    },
+    {
+      "issue": "Redis connection pool timeout errors under high load",
+      "solution": "Set pool size 10-50 connections, PoolTimeout 30s max. Add keepalive interval <10min. Use singleton ConnectionMultiplexer. Verify: redis-cli INFO clients shows active connections."
+    },
+    {
+      "issue": "Node.js heap memory continuously grows beyond 512MB threshold",
+      "solution": "Run with --inspect flag, take heap snapshots via Chrome DevTools. Compare snapshots to find retained objects. Force GC with global.gc(). Check event listeners and timers are properly cleared."
+    },
+    {
+      "issue": "Core Web Vitals LCP exceeds 2.5 seconds on mobile devices",
+      "solution": "Optimize largest image with next-gen formats (WebP/AVIF). Add fetchpriority='high' to LCP element. Implement lazy loading for below-fold images. Verify CDN cache hit ratio >90%."
+    },
+    {
+      "issue": "Database query performance degrades after connection pool exhaustion",
+      "solution": "Set max pool size to 20, idleTimeout 30s, connectionTimeout 2s. Log slow queries >100ms. Add query result caching with Redis TTL 300s. Run EXPLAIN ANALYZE to optimize slow queries."
+    }
+  ],
   "source": "community"
 }

@@ -1,5 +1,19 @@
+/**
+ * Button Component
+ *
+ * shadcn/ui button primitive with Motion.dev micro-interactions (Phase 1.2 - October 2025)
+ *
+ * Features:
+ * - Hover scale effect (desktop)
+ * - Tap feedback (mobile)
+ * - Spring physics for natural feel
+ * - Respects disabled state
+ * - Works with all variants (default, destructive, outline, secondary, ghost, link)
+ */
+
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { motion } from 'motion/react';
 import type * as React from 'react';
 
 import { cn } from '@/src/lib/utils';
@@ -41,11 +55,42 @@ const Button = ({
   variant,
   size,
   asChild = false,
+  disabled = false,
   ref,
   ...props
 }: ButtonProps & { ref?: React.RefObject<HTMLButtonElement | null> }) => {
   const Comp = asChild ? Slot : 'button';
-  return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+
+  // Skip animations if asChild (for Link wrappers, etc.)
+  if (asChild) {
+    return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+  }
+
+  // Button element
+  const buttonElement = (
+    <Comp
+      className={cn(buttonVariants({ variant, size, className }))}
+      ref={ref}
+      disabled={disabled}
+      {...props}
+    />
+  );
+
+  // Wrap with motion animations if button is enabled
+  if (disabled) {
+    return <div style={{ display: 'inline-block' }}>{buttonElement}</div>;
+  }
+
+  return (
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+      style={{ display: 'inline-block' }}
+    >
+      {buttonElement}
+    </motion.div>
+  );
 };
 Button.displayName = 'Button';
 

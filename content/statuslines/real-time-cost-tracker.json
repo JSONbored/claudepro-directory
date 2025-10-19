@@ -21,5 +21,23 @@
   },
   "requirements": ["Bash", "jq", "bc calculator"],
   "preview": "💵 $0.0234 │ 7,800 tokens",
+  "troubleshooting": [
+    {
+      "issue": "Cost calculation shows wrong decimal format with comma separator",
+      "solution": "Set LC_NUMERIC=C at script start to enforce dot decimal separator. Some locales default to comma, breaking bc. Add: export LC_NUMERIC=C before math operations."
+    },
+    {
+      "issue": "Pricing appears outdated or incorrect for current AI models",
+      "solution": "Update price_per_m values. Claude Sonnet 4 is $3/M (2025), GPT-4o is $3/$10, Gemini 1.5 Pro is $3.50/M. Verify at provider docs before updating script."
+    },
+    {
+      "issue": "bc: command not found when running cost calculations",
+      "solution": "Install bc calculator: brew install bc (macOS), apt install bc (Ubuntu/Debian). Required for floating-point arithmetic in bash scripts."
+    },
+    {
+      "issue": "Cost displays as $0.0000 despite high token usage",
+      "solution": "Check printf precision: use %.4f for micro-dollars. Verify tokens populated: echo $tokens. If zero, test JSON parsing: echo \"$input\" | jq '.session.totalTokens'."
+    }
+  ],
   "source": "community"
 }

@@ -34,5 +34,27 @@
     "Automated schema quality assurance in CI/CD pipelines",
     "Team collaboration with schema versioning and backup management"
   ],
+  "faqTroubleshooting": [
+    {
+      "issue": "Hook triggers on non-GraphQL files despite .graphql extension check",
+      "solution": "Tighten matchers to specific paths: 'matchers': ['write:.*\\\\.(graphql|gql)$', 'edit:.*schema.*']. Prevents false positives on files with 'schema' in non-GraphQL contexts."
+    },
+    {
+      "issue": "graphql-inspector installation fails during hook execution",
+      "solution": "Pre-install globally: 'npm install -g @graphql-inspector/cli'. Hook's mid-execution installs timeout. Add installation check at project setup instead of runtime."
+    },
+    {
+      "issue": "Breaking change detection misses field type modifications",
+      "solution": "Requires valid schemas. If backup corrupted, create fresh: 'cp schema.graphql schema.graphql.backup'. Verify parsing with 'npx graphql-inspector validate' before comparison."
+    },
+    {
+      "issue": "Backup files accumulate despite cleanup logic (10 file limit)",
+      "solution": "Cleanup misses timestamped backups in .graphql_backups/. Add: 'find .graphql_backups -name \"*.backup\" -type f | sort -r | tail -n +11 | xargs rm -f' to retention."
+    },
+    {
+      "issue": "Diff output shows false positives for unchanged schemas",
+      "solution": "graphql-inspector is whitespace-sensitive. Run 'prettier --write **/*.graphql' before comparisons. Add normalization: format both schemas with GraphQL formatter before diff."
+    }
+  ],
   "source": "community"
 }

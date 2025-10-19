@@ -34,5 +34,27 @@
     "CI/CD integration with automated JSON validation",
     "Multi-environment configuration consistency validation"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook runs on schema files causing validation loops",
+      "solution": "The script excludes *.schema.json and *schema*.json files by default. Ensure your schema files follow this naming convention to prevent recursive validation."
+    },
+    {
+      "issue": "AJV validation fails with module not found error",
+      "solution": "Install AJV globally with 'npm install -g ajv-cli' or ensure npx can access it in your project's node_modules. The hook falls back to basic checks if unavailable."
+    },
+    {
+      "issue": "Schema discovery fails for custom directory structures",
+      "solution": "Add a '$schema' property to your JSON file pointing to the schema location, or place schemas in ./schema/, ./schemas/, or ./json-schemas/ directories with .schema.json suffix."
+    },
+    {
+      "issue": "Large JSON files cause hook timeout or slowness",
+      "solution": "For files over 10MB, consider splitting into smaller files or using streaming validation. The hook warns about large files but still validates them with basic syntax checks."
+    },
+    {
+      "issue": "Validation passes but schema compatibility warnings appear",
+      "solution": "Check the '$schema' version in your schema file. The hook reports version mismatches. Update schemas to use compatible JSON Schema draft versions (draft-07 recommended)."
+    }
+  ],
   "source": "community"
 }

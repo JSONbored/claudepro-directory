@@ -32,5 +32,27 @@
     "Security compliance reporting",
     "Multi-language project security auditing"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Security audit report files accumulate in project root directory",
+      "solution": "Configure REPORT_FILE path to use dedicated logs directory, or add security-audit-*.log pattern to .gitignore to prevent repository clutter from timestamp-based audit files."
+    },
+    {
+      "issue": "Stop hook executes before dependencies finish installing or updating",
+      "solution": "Ensure package manager operations complete before session ends. Hook runs after Claude stops, so install commands in active session won't conflict with audit timing."
+    },
+    {
+      "issue": "npm audit hangs indefinitely when network connectivity issues occur",
+      "solution": "Set npm config registry timeout with 'npm config set timeout 30000' or add timeout wrapper around audit commands to prevent hook from blocking session termination."
+    },
+    {
+      "issue": "Safety scanner for Python fails with 'database not found' error message",
+      "solution": "Update safety vulnerability database using 'safety check --update-db' command. Install latest version with 'pip install --upgrade safety' to ensure compatibility with current database schema."
+    },
+    {
+      "issue": "Audit severity level flags not recognized by older package manager versions",
+      "solution": "Update npm to version 6.1.0+ for --audit-level flag support. For older versions, remove --audit-level parameter and parse full audit output using grep for severity filtering."
+    }
+  ],
   "source": "community"
 }
