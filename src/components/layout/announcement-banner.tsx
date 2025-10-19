@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Announcement,
   AnnouncementTag,
@@ -49,6 +49,7 @@ type IconName = keyof typeof ICON_MAP;
  * - Keyboard navigation (Escape to dismiss)
  * - Reduced motion support
  * - Touch-friendly dismiss button (44x44px minimum)
+ * - SSR-safe with client-side hydration (prevents flash)
  *
  * Usage: Include once in root layout above navigation.
  *
@@ -71,6 +72,14 @@ export function AnnouncementBanner() {
   // Get dismissal state for this announcement
   const { isDismissed, dismiss } = useAnnouncementDismissal(announcement?.id || '');
 
+  // Client-side hydration state to prevent SSR mismatch
+  // Banner only renders after client-side mount to avoid flash
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Keyboard navigation: Escape key dismisses announcement
   useEffect(() => {
     if (!announcement?.dismissible) return;
@@ -84,6 +93,11 @@ export function AnnouncementBanner() {
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [announcement, dismiss]);
+
+  // Don't render until mounted (prevents hydration mismatch)
+  if (!isMounted) {
+    return null;
+  }
 
   // Don't render if no announcement or already dismissed
   if (!announcement || isDismissed) {

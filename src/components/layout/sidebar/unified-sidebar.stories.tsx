@@ -89,7 +89,7 @@ type Story = StoryObj<typeof meta>;
 /**
  * Mock trending guides data
  */
-const mockTrendingGuides = [
+const _mockTrendingGuides = [
   {
     title: 'Getting Started with Claude AI',
     slug: '/guides/use-cases/getting-started',
@@ -120,7 +120,7 @@ const mockTrendingGuides = [
 /**
  * Mock recent guides data
  */
-const mockRecentGuides = [
+const _mockRecentGuides = [
   {
     title: 'Getting Started with Claude',
     slug: '/guides/use-cases/getting-started',

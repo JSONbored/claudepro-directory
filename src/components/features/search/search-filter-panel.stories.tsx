@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import type { FilterState } from '@/src/lib/schemas/component.schema';
 import { SearchFilterPanel } from './search-filter-panel';
 
 /**
@@ -116,17 +115,17 @@ export const Default: Story = {
     availableAuthors: ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve'],
     availableCategories: ['Agents', 'MCP Servers', 'Guides'],
     activeFilterCount: 0,
-    onFilterChange: (key, value) => {
-      console.log('Filter changed:', key, value);
+    onFilterChange: (_key, _value) => {
+      // No-op for Storybook
     },
-    onToggleTag: (tag) => {
-      console.log('Tag toggled:', tag);
+    onToggleTag: (_tag) => {
+      // No-op for Storybook
     },
     onClearFilters: () => {
-      console.log('Clear all filters');
+      // No-op for Storybook
     },
     onApplyFilters: () => {
-      console.log('Apply filters');
+      // No-op for Storybook
     },
     showActions: true,
   },
@@ -168,17 +167,17 @@ export const ActiveFilters: Story = {
     availableAuthors: ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve'],
     availableCategories: ['Agents', 'MCP Servers', 'Guides'],
     activeFilterCount: 5,
-    onFilterChange: (key, value) => {
-      console.log('Filter changed:', key, value);
+    onFilterChange: (_key, _value) => {
+      // No-op for Storybook
     },
-    onToggleTag: (tag) => {
-      console.log('Tag toggled:', tag);
+    onToggleTag: (_tag) => {
+      // No-op for Storybook
     },
     onClearFilters: () => {
-      console.log('Clear all filters');
+      // No-op for Storybook
     },
     onApplyFilters: () => {
-      console.log('Apply filters');
+      // No-op for Storybook
     },
     showActions: true,
   },
@@ -201,17 +200,17 @@ export const CategoryFilterOnly: Story = {
     availableAuthors: [],
     availableCategories: ['Agents', 'MCP Servers', 'Guides', 'Rules', 'Commands', 'Hooks'],
     activeFilterCount: 1,
-    onFilterChange: (key, value) => {
-      console.log('Filter changed:', key, value);
+    onFilterChange: (_key, _value) => {
+      // No-op for Storybook
     },
-    onToggleTag: (tag) => {
-      console.log('Tag toggled:', tag);
+    onToggleTag: (_tag) => {
+      // No-op for Storybook
     },
     onClearFilters: () => {
-      console.log('Clear all filters');
+      // No-op for Storybook
     },
     onApplyFilters: () => {
-      console.log('Apply filters');
+      // No-op for Storybook
     },
     showActions: true,
   },
@@ -234,17 +233,17 @@ export const AuthorFilterOnly: Story = {
     availableAuthors: ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace'],
     availableCategories: [],
     activeFilterCount: 1,
-    onFilterChange: (key, value) => {
-      console.log('Filter changed:', key, value);
+    onFilterChange: (_key, _value) => {
+      // No-op for Storybook
     },
-    onToggleTag: (tag) => {
-      console.log('Tag toggled:', tag);
+    onToggleTag: (_tag) => {
+      // No-op for Storybook
     },
     onClearFilters: () => {
-      console.log('Clear all filters');
+      // No-op for Storybook
     },
     onApplyFilters: () => {
-      console.log('Apply filters');
+      // No-op for Storybook
     },
     showActions: true,
   },
@@ -267,17 +266,17 @@ export const DateRangeFilter: Story = {
     availableAuthors: [],
     availableCategories: [],
     activeFilterCount: 1,
-    onFilterChange: (key, value) => {
-      console.log('Filter changed:', key, value);
+    onFilterChange: (_key, _value) => {
+      // No-op for Storybook
     },
-    onToggleTag: (tag) => {
-      console.log('Tag toggled:', tag);
+    onToggleTag: (_tag) => {
+      // No-op for Storybook
     },
     onClearFilters: () => {
-      console.log('Clear all filters');
+      // No-op for Storybook
     },
     onApplyFilters: () => {
-      console.log('Apply filters');
+      // No-op for Storybook
     },
     showActions: true,
   },
@@ -303,17 +302,17 @@ export const PopularitySlider: Story = {
     availableAuthors: [],
     availableCategories: [],
     activeFilterCount: 1,
-    onFilterChange: (key, value) => {
-      console.log('Filter changed:', key, value);
+    onFilterChange: (_key, _value) => {
+      // No-op for Storybook
     },
-    onToggleTag: (tag) => {
-      console.log('Tag toggled:', tag);
+    onToggleTag: (_tag) => {
+      // No-op for Storybook
     },
     onClearFilters: () => {
-      console.log('Clear all filters');
+      // No-op for Storybook
     },
     onApplyFilters: () => {
-      console.log('Apply filters');
+      // No-op for Storybook
     },
     showActions: true,
   },
@@ -372,17 +371,17 @@ export const TagSelection: Story = {
     availableAuthors: [],
     availableCategories: [],
     activeFilterCount: 5,
-    onFilterChange: (key, value) => {
-      console.log('Filter changed:', key, value);
+    onFilterChange: (_key, _value) => {
+      // No-op for Storybook
     },
-    onToggleTag: (tag) => {
-      console.log('Tag toggled:', tag);
+    onToggleTag: (_tag) => {
+      // No-op for Storybook
     },
     onClearFilters: () => {
-      console.log('Clear all filters');
+      // No-op for Storybook
     },
     onApplyFilters: () => {
-      console.log('Apply filters');
+      // No-op for Storybook
     },
     showActions: true,
   },
@@ -411,13 +410,17 @@ export const WithoutActions: Story = {
     availableCategories: ['Agents', 'MCP Servers', 'Guides'],
     activeFilterCount: 2,
     onFilterChange: (key, value) => {
-      console.log('Filter changed:', key, value);
+      // Mock handler - no implementation needed for display-only story
+      // Consume parameters to satisfy linter without using underscore prefixes
+      const _ = { key, value };
     },
     onToggleTag: (tag) => {
-      console.log('Tag toggled:', tag);
+      // Mock handler - no implementation needed for display-only story
+      // Consume parameter to satisfy linter without using underscore prefix
+      const _ = tag;
     },
     onClearFilters: () => {
-      console.log('Clear all filters');
+      // Mock handler - no implementation needed for display-only story
     },
     showActions: false, // Hides Apply/Clear/Cancel buttons
   },
@@ -445,20 +448,20 @@ export const WithCancelButton: Story = {
     availableAuthors: ['Alice', 'Bob'],
     availableCategories: ['Agents', 'MCP Servers', 'Guides'],
     activeFilterCount: 2,
-    onFilterChange: (key, value) => {
-      console.log('Filter changed:', key, value);
+    onFilterChange: (_key, _value) => {
+      // No-op for Storybook
     },
-    onToggleTag: (tag) => {
-      console.log('Tag toggled:', tag);
+    onToggleTag: (_tag) => {
+      // No-op for Storybook
     },
     onClearFilters: () => {
-      console.log('Clear all filters');
+      // No-op for Storybook
     },
     onApplyFilters: () => {
-      console.log('Apply filters');
+      // No-op for Storybook
     },
     onCancel: () => {
-      console.log('Cancel and close');
+      // No-op for Storybook
     },
     showActions: true,
   },
@@ -479,17 +482,17 @@ export const EmptyState: Story = {
     availableAuthors: [],
     availableCategories: [],
     activeFilterCount: 0,
-    onFilterChange: (key, value) => {
-      console.log('Filter changed:', key, value);
+    onFilterChange: (_key, _value) => {
+      // No-op for Storybook
     },
-    onToggleTag: (tag) => {
-      console.log('Tag toggled:', tag);
+    onToggleTag: (_tag) => {
+      // No-op for Storybook
     },
     onClearFilters: () => {
-      console.log('Clear all filters');
+      // No-op for Storybook
     },
     onApplyFilters: () => {
-      console.log('Apply filters');
+      // No-op for Storybook
     },
     showActions: true,
   },
@@ -544,17 +547,17 @@ export const AllFiltersMaxed: Story = {
     availableAuthors: ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve'],
     availableCategories: ['Agents', 'MCP Servers', 'Guides', 'Rules', 'Commands'],
     activeFilterCount: 13,
-    onFilterChange: (key, value) => {
-      console.log('Filter changed:', key, value);
+    onFilterChange: (_key, _value) => {
+      // No-op for Storybook
     },
-    onToggleTag: (tag) => {
-      console.log('Tag toggled:', tag);
+    onToggleTag: (_tag) => {
+      // No-op for Storybook
     },
     onClearFilters: () => {
-      console.log('Clear all filters');
+      // No-op for Storybook
     },
     onApplyFilters: () => {
-      console.log('Apply filters');
+      // No-op for Storybook
     },
     showActions: true,
   },
@@ -575,17 +578,17 @@ export const SingleTag: Story = {
     availableAuthors: [],
     availableCategories: [],
     activeFilterCount: 1,
-    onFilterChange: (key, value) => {
-      console.log('Filter changed:', key, value);
+    onFilterChange: (_key, _value) => {
+      // No-op for Storybook
     },
-    onToggleTag: (tag) => {
-      console.log('Tag toggled:', tag);
+    onToggleTag: (_tag) => {
+      // No-op for Storybook
     },
     onClearFilters: () => {
-      console.log('Clear all filters');
+      // No-op for Storybook
     },
     onApplyFilters: () => {
-      console.log('Apply filters');
+      // No-op for Storybook
     },
     showActions: true,
   },
@@ -615,17 +618,17 @@ export const LongNames: Story = {
       'Modern Full-Stack Web Development Workflows',
     ],
     activeFilterCount: 2,
-    onFilterChange: (key, value) => {
-      console.log('Filter changed:', key, value);
+    onFilterChange: (_key, _value) => {
+      // No-op for Storybook
     },
-    onToggleTag: (tag) => {
-      console.log('Tag toggled:', tag);
+    onToggleTag: (_tag) => {
+      // No-op for Storybook
     },
     onClearFilters: () => {
-      console.log('Clear all filters');
+      // No-op for Storybook
     },
     onApplyFilters: () => {
-      console.log('Apply filters');
+      // No-op for Storybook
     },
     showActions: true,
   },
@@ -672,7 +675,7 @@ export const CategoryFilterInteractionTest: Story = {
       },
     },
   },
-  play: async ({ args, canvasElement, step }) => {
+  play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
 
     await step('Verify category select is present', async () => {
@@ -826,7 +829,7 @@ export const DateRangeFilterTest: Story = {
       },
     },
   },
-  play: async ({ args, canvasElement, step }) => {
+  play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
 
     await step('Verify date range filter is present', async () => {
@@ -855,7 +858,7 @@ export const PopularitySliderTest: Story = {
       },
     },
   },
-  play: async ({ args, canvasElement, step }) => {
+  play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
 
     await step('Verify popularity slider is present', async () => {

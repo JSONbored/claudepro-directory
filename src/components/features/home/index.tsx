@@ -32,7 +32,6 @@ import {
   LazySearchSection,
   LazyTabsSection,
 } from '@/src/components/features/home/lazy-homepage-sections';
-import { LazySection } from '@/src/components/infra/lazy-section';
 import { NumberTicker } from '@/src/components/magic/number-ticker';
 import { HomepageStatsSkeleton, Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { useSearch } from '@/src/hooks/use-search';
@@ -143,10 +142,11 @@ function HomePageClientComponent({
 
           {/* Quick Stats - Below Search Bar */}
           {/* Modern 2025 Architecture: Configuration-Driven Stats Display with Motion.dev */}
+          {/* Hidden on mobile (< 768px) to save space, shown on tablet+ */}
           {stats ? (
             <div
               className={
-                'flex flex-wrap justify-center gap-4 lg:gap-6 text-xs lg:text-sm text-muted-foreground mt-6'
+                'hidden md:flex flex-wrap justify-center gap-4 lg:gap-6 text-xs lg:text-sm text-muted-foreground mt-6'
               }
             >
               {getCategoryStatsConfig().map(({ categoryId, icon: Icon, displayText, delay }) => {
@@ -161,7 +161,7 @@ function HomePageClientComponent({
                     aria-label={`View all ${displayText}`}
                   >
                     <motion.div
-                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} px-3 py-2 rounded-lg border border-transparent transition-colors cursor-pointer`}
+                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} px-2 py-1 rounded-md border border-transparent transition-colors cursor-pointer`}
                       whileHover={{
                         scale: 1.05,
                         y: -2,
@@ -200,22 +200,16 @@ function HomePageClientComponent({
           onClearSearch={handleClearSearch}
         />
 
-        {/* Featured Content Sections - Beautiful slide-up with spring physics */}
-        {!isSearching && (
-          <LazySection variant="slide-up" delay={0.1}>
-            <LazyFeaturedSections categories={featuredByCategory || initialData} />
-          </LazySection>
-        )}
+        {/* Featured Content Sections - Render immediately (above the fold) */}
+        {!isSearching && <LazyFeaturedSections categories={featuredByCategory || initialData} />}
 
-        {/* Tabs Section - Smooth scale animation with spring bounce */}
+        {/* Tabs Section - Render immediately (above the fold) */}
         {!isSearching && (
-          <LazySection variant="scale" delay={0.2}>
-            <LazyTabsSection
-              activeTab={activeTab}
-              filteredResults={filteredResults}
-              onTabChange={handleTabChange}
-            />
-          </LazySection>
+          <LazyTabsSection
+            activeTab={activeTab}
+            filteredResults={filteredResults}
+            onTabChange={handleTabChange}
+          />
         )}
       </section>
     </>

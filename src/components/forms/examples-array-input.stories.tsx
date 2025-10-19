@@ -283,7 +283,7 @@ export const JavaScriptExample: Story = {
       {
         id: 'js',
         title: 'JavaScript Function',
-        code: 'function greet(name) {\n  return `Hello, ${name}!`;\n}',
+        code: 'function greet(name) {\n  return `Hello, $' + '{name}!`;\n}',
         language: 'javascript',
         description: 'Simple greeting function',
       },

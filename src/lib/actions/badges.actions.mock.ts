@@ -18,13 +18,11 @@
  * @returns Success response with mock data
  */
 export async function toggleBadgeFeatured(input: { badgeId: string; featured: boolean }) {
-  console.log('Mock toggleBadgeFeatured called with:', input);
-
-  // Simulate async operation
+  // Mock implementation - simulate async operation
   await new Promise((resolve) => setTimeout(resolve, 500));
 
   return {
-    data: { success: true },
+    data: { success: true, badgeId: input.badgeId, featured: input.featured },
     serverError: undefined,
   };
 }

@@ -69,6 +69,7 @@ Main navigation component with comprehensive accessibility support and keyboard 
       <div className="min-h-screen bg-background">
         <Story />
         {/* Mock main content for skip link target */}
+        {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility pattern */}
         <main id="main-content" className="container mx-auto px-4 py-8">
           <div className="space-y-8">
             <section className="bg-card border border-border rounded-lg p-6">
@@ -85,15 +86,17 @@ Main navigation component with comprehensive accessibility support and keyboard 
             </section>
 
             {/* Spacer for scroll demonstration */}
-            {Array.from({ length: 10 }).map((_, i) => (
-              <section key={i} className="bg-card border border-border rounded-lg p-6">
-                <h3 className="text-xl font-semibold mb-2">Content Section {i + 1}</h3>
-                <p className="text-muted-foreground">
-                  Scroll down to see the navigation bar transform. The navigation becomes more
-                  compact when scrolled past 20px.
-                </p>
-              </section>
-            ))}
+            {Array.from({ length: 10 }, (_, i) => ({ id: `section-${i}`, number: i + 1 })).map(
+              (section) => (
+                <section key={section.id} className="bg-card border border-border rounded-lg p-6">
+                  <h3 className="text-xl font-semibold mb-2">Content Section {section.number}</h3>
+                  <p className="text-muted-foreground">
+                    Scroll down to see the navigation bar transform. The navigation becomes more
+                    compact when scrolled past 20px.
+                  </p>
+                </section>
+              )
+            )}
           </div>
         </main>
       </div>
@@ -510,7 +513,7 @@ export const LogoLinkTest: Story = {
     },
   },
   play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
+    const _canvas = within(canvasElement);
 
     await step('Verify logo link is present', async () => {
       // Logo should link to homepage

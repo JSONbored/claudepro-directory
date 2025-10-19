@@ -181,7 +181,9 @@ export const WithErrorHandling: Story = {
  */
 export const TitleRequired: Story = {
   args: {
-    onSubmit: async (_formData) => {},
+    onSubmit: async (_formData) => {
+      // No-op for Storybook
+    },
   },
   parameters: {
     docs: {
@@ -201,7 +203,9 @@ export const TitleRequired: Story = {
  */
 export const URLOptional: Story = {
   args: {
-    onSubmit: async (_formData) => {},
+    onSubmit: async (_formData) => {
+      // No-op for Storybook
+    },
   },
   parameters: {
     docs: {
@@ -220,7 +224,9 @@ export const URLOptional: Story = {
  */
 export const ContentOptional: Story = {
   args: {
-    onSubmit: async (_formData) => {},
+    onSubmit: async (_formData) => {
+      // No-op for Storybook
+    },
   },
   parameters: {
     docs: {
@@ -239,7 +245,9 @@ export const ContentOptional: Story = {
  */
 export const URLValidation: Story = {
   args: {
-    onSubmit: async (_formData) => {},
+    onSubmit: async (_formData) => {
+      // No-op for Storybook
+    },
   },
   parameters: {
     docs: {

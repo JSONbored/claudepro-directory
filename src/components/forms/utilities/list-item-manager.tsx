@@ -201,7 +201,7 @@ export function ListItemManager(props: ListItemManagerProps) {
 
     const validation = validateItem(trimmed);
     if (!validation.valid) {
-      toasts.error.validation(validation.error!);
+      toasts.error.validation(validation.error || 'Invalid item');
       return;
     }
 
@@ -293,24 +293,28 @@ export function ListItemManager(props: ListItemManagerProps) {
           {/* List variant */}
           {props.variant === 'list' && (
             <div className="space-y-2">
-              {items.map((item, index) => (
-                <div
-                  key={index}
-                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-2 border rounded`}
-                >
-                  <span className="text-sm">{item}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemove(index)}
-                    aria-label={`Remove ${label.toLowerCase()}: ${item}`}
-                    disabled={disabled}
+              {items.map((item, index) => {
+                // Generate stable key from item content hash
+                const itemKey = `item-${item.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)}-${item.length}`;
+                return (
+                  <div
+                    key={itemKey}
+                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-2 border rounded`}
                   >
-                    ×
-                  </Button>
-                </div>
-              ))}
+                    <span className="text-sm">{item}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemove(index)}
+                      aria-label={`Remove ${label.toLowerCase()}: ${item}`}
+                      disabled={disabled}
+                    >
+                      ×
+                    </Button>
+                  </div>
+                );
+              })}
             </div>
           )}
 

@@ -13,21 +13,34 @@
  */
 
 /**
+ * Helper to consume parameters and satisfy linters without underscore prefixes
+ */
+function noop(..._args: unknown[]): void {
+  // Intentionally empty - consumes parameters to satisfy TypeScript/Biome
+}
+
+/**
  * Mock: Track related content view event
  */
 export const trackRelatedContentView = (
-  _sourcePage: string,
-  _itemsShown: number,
-  _cacheHit: boolean
-): void => {};
+  sourcePage: string,
+  itemsShown: number,
+  cacheHit: boolean
+): void => {
+  // No-op mock for Storybook - real implementation in related-content.ts
+  noop(sourcePage, itemsShown, cacheHit);
+};
 
 /**
  * Mock: Track related content click event
  */
 export const trackRelatedContentClick = (
-  _sourcePage: string,
-  _targetPage: string,
-  _position: number,
-  _matchScore: number,
-  _matchType = 'unknown'
-): void => {};
+  sourcePage: string,
+  targetPage: string,
+  position: number,
+  matchScore: number,
+  matchType = 'unknown'
+): void => {
+  // No-op mock for Storybook - real implementation in related-content.ts
+  noop(sourcePage, targetPage, position, matchScore, matchType);
+};

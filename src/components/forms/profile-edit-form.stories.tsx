@@ -758,7 +758,7 @@ export const ValidateRequiredFieldsInteraction: Story = {
     });
 
     await step('Verify required field indicator', async () => {
-      const nameLabel = canvas.getByText(/name/i);
+      const _nameLabel = canvas.getByText(/name/i);
       // Required asterisk should be present in the label
       const requiredIndicator = canvas.getByText('*');
       await expect(requiredIndicator).toBeInTheDocument();

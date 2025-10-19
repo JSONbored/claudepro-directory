@@ -310,7 +310,7 @@ export const FooterStructureTest: Story = {
     },
   },
   play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
+    const _canvas = within(canvasElement);
 
     await step('Verify footer element is rendered', async () => {
       const footer = canvasElement.querySelector('footer');

@@ -612,8 +612,8 @@ function ModalVariant({
             session_copy_count: 1,
           });
         })
-        .catch((error) => {
-          console.error('Failed to track email modal shown:', error);
+        .catch(() => {
+          // Analytics tracking failure is non-critical - silently fail
         });
     }
   }, [open, copyType]);
@@ -697,8 +697,8 @@ function ModalVariant({
             time_shown_ms: timeShown,
           });
         })
-        .catch((error) => {
-          console.error('Failed to track email modal dismissed:', error);
+        .catch(() => {
+          // Analytics tracking failure is non-critical - silently fail
         });
     }
 
@@ -718,8 +718,8 @@ function ModalVariant({
             time_shown_ms: timeShown,
           });
         })
-        .catch((error) => {
-          console.error('Failed to track email modal dismissed:', error);
+        .catch(() => {
+          // Analytics tracking failure is non-critical - silently fail
         });
     }
 

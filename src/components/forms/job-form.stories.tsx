@@ -137,8 +137,7 @@ type Story = StoryObj<typeof meta>;
 /**
  * Mock submit handler - simulates async job creation
  */
-const mockOnSubmit = async (data: unknown) => {
-  console.log('Job submission:', data);
+const mockOnSubmit = async (_data: unknown) => {
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 800));
   return { success: true };
@@ -147,8 +146,7 @@ const mockOnSubmit = async (data: unknown) => {
 /**
  * Mock submit handler - simulates payment required flow
  */
-const mockOnSubmitPaymentRequired = async (data: unknown) => {
-  console.log('Job submission (payment required):', data);
+const mockOnSubmitPaymentRequired = async (_data: unknown) => {
   await new Promise((resolve) => setTimeout(resolve, 800));
   return { success: true, requiresPayment: true };
 };

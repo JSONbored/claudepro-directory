@@ -201,17 +201,17 @@ type Story = StoryObj<typeof meta>;
  */
 
 /**
- * Mock search handler - logs search query
+ * Mock search handler - no-op for Storybook
  */
-const mockOnSearch = (query: string) => {
-  console.log('Search query:', query);
+const mockOnSearch = (_query: string) => {
+  // No-op: Storybook mock handler
 };
 
 /**
- * Mock filters change handler - logs filter state
+ * Mock filters change handler - no-op for Storybook
  */
-const mockOnFiltersChange = (filters: FilterState) => {
-  console.log('Filters changed:', filters);
+const mockOnFiltersChange = (_filters: FilterState) => {
+  // No-op: Storybook mock handler
 };
 
 /**
@@ -901,7 +901,7 @@ export const InteractiveDemo: Story = {
       } else {
         setResultCount(50); // Reset to default
       }
-      console.log('Search:', query);
+      // Search executed
     };
 
     const handleFiltersChange = (newFilters: FilterState) => {
@@ -911,7 +911,7 @@ export const InteractiveDemo: Story = {
         (key) => key !== 'sort' && newFilters[key as keyof FilterState]
       ).length;
       setResultCount(Math.max(5, 50 - filterCount * 8)); // Fewer results with more filters
-      console.log('Filters:', newFilters);
+      // Filters updated
     };
 
     return (
@@ -1138,7 +1138,7 @@ export const SearchInputInteraction: Story = {
       },
     },
   },
-  play: async ({ args, canvasElement, step }) => {
+  play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
 
     await step('Find search input', async () => {
@@ -1221,7 +1221,7 @@ export const SortSelectInteraction: Story = {
       },
     },
   },
-  play: async ({ args, canvasElement, step }) => {
+  play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
 
     await step('Find sort dropdown', async () => {

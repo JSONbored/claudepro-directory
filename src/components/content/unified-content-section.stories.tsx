@@ -465,7 +465,7 @@ export const AllVariantsComparison: Story = {
           variant="bullets"
           title="Features"
           items={['Feature 1', 'Feature 2', 'Feature 3']}
-          icon={Zap}
+          category="statuslines"
           bulletColor="primary"
         />
       </div>
@@ -522,11 +522,8 @@ export const BulletsVariantTest: Story = {
     variant: 'bullets',
     title: 'Test Bullets Section',
     description: 'Test description for bullets',
-    bullets: [
-      { text: 'Bullet point 1' },
-      { text: 'Bullet point 2' },
-      { text: 'Bullet point 3', icon: Zap },
-    ],
+    items: ['Bullet point 1', 'Bullet point 2', 'Bullet point 3'],
+    category: 'statuslines',
   },
   parameters: {
     docs: {
@@ -672,8 +669,8 @@ export const SectionIconTest: Story = {
     variant: 'bullets',
     title: 'Section with Icon',
     description: 'Testing icon display',
-    icon: Settings,
-    bullets: [{ text: 'Test bullet' }],
+    category: 'hooks',
+    items: ['Test bullet'],
   },
   parameters: {
     docs: {
