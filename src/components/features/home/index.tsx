@@ -146,7 +146,7 @@ function HomePageClientComponent({
           {stats ? (
             <div
               className={
-                'hidden md:flex flex-wrap justify-center gap-4 lg:gap-6 text-xs lg:text-sm text-muted-foreground mt-6'
+                'hidden md:flex flex-wrap justify-center gap-2 lg:gap-3 text-xs lg:text-sm text-muted-foreground mt-6'
               }
             >
               {getCategoryStatsConfig().map(({ categoryId, icon: Icon, displayText, delay }) => {
@@ -161,7 +161,7 @@ function HomePageClientComponent({
                     aria-label={`View all ${displayText}`}
                   >
                     <motion.div
-                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} px-2 py-1 rounded-md border border-transparent transition-colors cursor-pointer`}
+                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} px-2 py-1 rounded-md border border-transparent transition-colors cursor-pointer`}
                       whileHover={{
                         scale: 1.05,
                         y: -2,

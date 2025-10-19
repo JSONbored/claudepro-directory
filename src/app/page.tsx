@@ -32,14 +32,6 @@ const RollingText = dynamic(
   }
 );
 
-// Meteors animation (decorative only, not critical)
-const Meteors = dynamic(
-  () => import('@/src/components/magic/meteors').then((mod) => ({ default: mod.Meteors })),
-  {
-    loading: () => null, // No loading state needed for decorative animation
-  }
-);
-
 import { statsRedis } from '@/src/lib/cache.server';
 import { type CategoryId, getAllCategoryIds } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
@@ -246,21 +238,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     <div className={'min-h-screen bg-background'}>
       {/* Hero + Search Section */}
       <div className="relative overflow-hidden">
-        {/* Meteors Background Layer - Constrained to viewport height */}
-        <div className="absolute inset-0 max-h-screen pointer-events-none z-[1]">
-          <Meteors
-            number={20}
-            minDelay={0}
-            maxDelay={3}
-            minDuration={3}
-            maxDuration={8}
-            angle={35}
-          />
-        </div>
-
         {/* Static Hero Section - Server Rendered - Streams immediately */}
-        <section className={'relative z-10 border-b border-border/50'} aria-label="Homepage hero">
-          {/* Content Layer - Above meteors */}
+        <section className={'relative border-b border-border/50'} aria-label="Homepage hero">
+          {/* Content Layer */}
           <div className={'relative container mx-auto px-4 py-10 sm:py-16 lg:py-24'}>
             <div className={'text-center max-w-4xl mx-auto'}>
               <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 text-foreground tracking-tight">
@@ -286,7 +266,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </section>
 
         {/* Content Section - Streams independently after hero */}
-        <div className={'relative z-10'}>
+        <div className={'relative'}>
           <Suspense fallback={<LoadingSkeleton />}>
             <HomeContentSection searchQuery={initialSearchQuery} />
           </Suspense>
