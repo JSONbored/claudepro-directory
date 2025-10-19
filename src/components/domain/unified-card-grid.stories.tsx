@@ -520,8 +520,6 @@ export const GridStructureTest: Story = {
     },
   },
   play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
-
     await step('Verify grid container is rendered', async () => {
       const gridContainer = canvasElement.querySelector('[class*="grid"]');
       await expect(gridContainer).toBeInTheDocument();
@@ -553,8 +551,6 @@ export const CardClickTest: Story = {
     },
   },
   play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
-
     await step('Verify cards are clickable', async () => {
       const firstCard = canvasElement.querySelector('a[href]');
       await expect(firstCard).toBeInTheDocument();
@@ -588,8 +584,6 @@ export const EmptyStateTest: Story = {
     },
   },
   play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
-
     await step('Verify empty state message is shown', async () => {
       // Empty state should show message or empty div
       const container = canvasElement.querySelector('[class*="grid"]');
@@ -617,8 +611,6 @@ export const LoadingStateTest: Story = {
     },
   },
   play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
-
     await step('Verify loading skeletons are shown', async () => {
       // Loading state should show skeleton elements
       const skeletons = canvasElement.querySelectorAll('[class*="animate"]');
@@ -645,8 +637,6 @@ export const VariantSwitchingTest: Story = {
     },
   },
   play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
-
     await step('Verify grid is rendered', async () => {
       const gridContainer = canvasElement.querySelector('[class*="grid"]');
       await expect(gridContainer).toBeInTheDocument();

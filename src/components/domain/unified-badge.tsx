@@ -307,12 +307,20 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     if (props.isActive) {
       return (
         <div
+          role="button"
+          tabIndex={0}
           className={cn(
             'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-all duration-200',
             'cursor-pointer bg-accent text-accent-foreground shadow-lg shadow-primary/25',
             props.className
           )}
           onClick={handleClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleClick?.();
+            }
+          }}
         >
           {props.tag}
           {props.onRemove && (
@@ -334,12 +342,20 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
 
     return (
       <div
+        role="button"
+        tabIndex={0}
         className={cn(
           'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-all duration-200',
           'cursor-pointer hover:bg-accent/10 hover:border-accent/30 border-muted-foreground/20 text-muted-foreground hover:text-accent',
           props.className
         )}
         onClick={handleClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick?.();
+          }
+        }}
       >
         {props.tag}
         {props.onRemove && (

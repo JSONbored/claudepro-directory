@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod';
+import { getAllCategoryIds } from '@/src/lib/config/category-config';
 
 /**
  * Application Information Schema
@@ -117,20 +118,9 @@ export const CLAUDE_CONFIG = claudeConfigSchema.parse({
  */
 
 // CONSOLIDATION: Export unified main content categories for splitting logic
-// **ARCHITECTURAL FIX**: Added guides, jobs, changelog to match UNIFIED_CATEGORY_REGISTRY
-export const MAIN_CONTENT_CATEGORIES = [
-  'hooks',
-  'mcp',
-  'commands',
-  'rules',
-  'agents',
-  'statuslines',
-  'collections',
-  'skills',
-  'guides',
-  'jobs',
-  'changelog',
-] as const;
+// **ARCHITECTURAL FIX**: Now dynamically generated from UNIFIED_CATEGORY_REGISTRY
+// Auto-generated from UNIFIED_CATEGORY_REGISTRY - single source of truth
+export const MAIN_CONTENT_CATEGORIES = getAllCategoryIds() as readonly string[];
 
 // **ARCHITECTURAL FIX**: Removed unused SEO_CATEGORIES (guide subcategories, not top-level categories)
 
@@ -147,6 +137,7 @@ const contentPathsSchema = z.object({
   hooks: z.string().startsWith('content/'),
   statuslines: z.string().startsWith('content/'),
   collections: z.string().startsWith('content/'),
+  skills: z.string().startsWith('content/'),
 
   // MDX guide content types (new structure)
   guides: z.string().startsWith('content/'),
@@ -167,6 +158,7 @@ export const CONTENT_PATHS = contentPathsSchema.parse({
   hooks: 'content/hooks',
   statuslines: 'content/statuslines',
   collections: 'content/collections',
+  skills: 'content/skills',
 
   // MDX guide content (new structure)
   guides: 'content/guides',

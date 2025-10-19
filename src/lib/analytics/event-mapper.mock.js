@@ -82,5 +82,18 @@ export function isValidCategory(_action, _category) {
  * @returns {string[]}
  */
 export function getValidCategories(_action) {
-  return ['agents', 'mcp', 'commands', 'rules', 'hooks', 'statuslines', 'guides'];
+  // All 11 categories from UNIFIED_CATEGORY_REGISTRY
+  return [
+    'agents',
+    'mcp',
+    'commands',
+    'rules',
+    'hooks',
+    'statuslines',
+    'collections',
+    'skills',
+    'guides',
+    'jobs',
+    'changelog',
+  ];
 }

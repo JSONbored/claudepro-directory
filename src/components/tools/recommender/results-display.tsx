@@ -173,7 +173,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             Share Results
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link href={ROUTES.CONFIG_RECOMMENDER} className="gap-2">
+            <Link href={ROUTES.TOOLS_CONFIG_RECOMMENDER} className="gap-2">
               <RefreshCw className="h-4 w-4" />
               Start Over
             </Link>

@@ -47,6 +47,7 @@ import { usePostCopyEmail } from '#lib/providers/post-copy-email';
 import { createClient } from '#lib/supabase/client';
 import { Button } from '@/src/components/primitives/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
+import { type CategoryId, VALID_CATEGORIES } from '@/src/lib/config/category-types';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import {
   ArrowLeft,
@@ -66,7 +67,6 @@ import {
   Trash,
 } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -639,30 +639,14 @@ function BookmarkButton({
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  // Validate content type - only actual categories, NOT subcategories
+  // Note: Validate content type - only actual categories, NOT subcategories
   // Subcategories (tutorials, workflows, etc.) should be bookmarked as 'guides'
-  const VALID_CATEGORIES: readonly CategoryId[] = [
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
-    'guides',
-    'collections',
-    'jobs',
-    'changelog',
-    'skills',
-  ];
-
-  const isValidCategory = (value: string): value is CategoryId => {
-    return VALID_CATEGORIES.includes(value as CategoryId);
-  };
 
   const handleToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (!isValidCategory(contentType)) {
+    // Validate category - early return if invalid
+    if (!VALID_CATEGORIES.includes(contentType as CategoryId)) {
       logger.error('Invalid content type', new Error('Invalid content type'), {
         contentType,
         contentSlug,
@@ -671,11 +655,14 @@ function BookmarkButton({
       return;
     }
 
+    // Safe to cast after validation
+    const validatedCategory = contentType as CategoryId;
+
     startTransition(async () => {
       try {
         if (isBookmarked) {
           const result = await removeBookmark({
-            content_type: contentType,
+            content_type: validatedCategory,
             content_slug: contentSlug,
           });
 
@@ -685,7 +672,7 @@ function BookmarkButton({
           }
         } else {
           const result = await addBookmark({
-            content_type: contentType,
+            content_type: validatedCategory,
             content_slug: contentSlug,
           });
 

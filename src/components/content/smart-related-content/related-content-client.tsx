@@ -141,7 +141,9 @@ export function RelatedContentClient({
       }
     };
 
-    void fetchRelatedContent();
+    fetchRelatedContent().catch(() => {
+      // Silent failure - error already handled in fetchRelatedContent
+    });
   }, [pathname, currentTags, currentKeywords, featured, exclude, limit]);
 
   // Track view when component loads (dynamic import for Storybook)

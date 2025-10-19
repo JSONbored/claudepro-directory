@@ -1,5 +1,17 @@
 import { z } from 'zod';
-import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
+import {
+  agents,
+  changelog,
+  collections,
+  commands,
+  guides,
+  hooks,
+  jobs,
+  mcp,
+  rules,
+  skills,
+  statuslines,
+} from '@/generated/content';
 import { contentCache } from '@/src/lib/cache.server';
 import { APP_CONFIG, UI_CONFIG } from '@/src/lib/constants';
 import { createApiRoute } from '@/src/lib/error-handler';
@@ -48,6 +60,7 @@ async function* createStreamingResponse(
   batchSize: number,
   format: 'json' | 'ndjson'
 ): AsyncGenerator<string, void, unknown> {
+  // Auto-loaded from UNIFIED_CATEGORY_REGISTRY - all 11 categories
   const {
     agents: agentsData,
     mcp: mcpData,
@@ -56,7 +69,23 @@ async function* createStreamingResponse(
     hooks: hooksData,
     statuslines: statuslinesData,
     collections: collectionsData,
-  } = await batchLoadContent({ agents, mcp, rules, commands, hooks, statuslines, collections });
+    skills: skillsData,
+    guides: guidesData,
+    jobs: jobsData,
+    changelog: changelogData,
+  } = await batchLoadContent({
+    agents,
+    mcp,
+    rules,
+    commands,
+    hooks,
+    statuslines,
+    collections,
+    skills,
+    guides,
+    jobs,
+    changelog,
+  });
   const transformedAgents = transformContent(agentsData, 'agent', 'agents');
   const transformedMcp = transformContent(mcpData, 'mcp', 'mcp');
   const transformedRules = transformContent(rulesData, 'rule', 'rules');
@@ -64,6 +93,10 @@ async function* createStreamingResponse(
   const transformedHooks = transformContent(hooksData, 'hook', 'hooks');
   const transformedStatuslines = transformContent(statuslinesData, 'statusline', 'statuslines');
   const transformedCollections = transformContent(collectionsData, 'collection', 'collections');
+  const transformedSkills = transformContent(skillsData, 'skill', 'skills');
+  const transformedGuides = transformContent(guidesData, 'guide', 'guides');
+  const transformedJobs = transformContent(jobsData, 'job', 'jobs');
+  const transformedChangelog = transformContent(changelogData, 'changelog-entry', 'changelog');
 
   const metadata = {
     '@context': 'https://schema.org',
@@ -80,7 +113,11 @@ async function* createStreamingResponse(
         transformedCommands.length +
         transformedHooks.length +
         transformedStatuslines.length +
-        transformedCollections.length,
+        transformedCollections.length +
+        transformedSkills.length +
+        transformedGuides.length +
+        transformedJobs.length +
+        transformedChangelog.length,
       agents: transformedAgents.length,
       mcp: transformedMcp.length,
       rules: transformedRules.length,
@@ -88,6 +125,10 @@ async function* createStreamingResponse(
       hooks: transformedHooks.length,
       statuslines: transformedStatuslines.length,
       collections: transformedCollections.length,
+      skills: transformedSkills.length,
+      guides: transformedGuides.length,
+      jobs: transformedJobs.length,
+      changelog: transformedChangelog.length,
     },
     endpoints: {
       agents: `${APP_CONFIG.url}/api/agents.json`,
@@ -97,6 +138,10 @@ async function* createStreamingResponse(
       hooks: `${APP_CONFIG.url}/api/hooks.json`,
       statuslines: `${APP_CONFIG.url}/api/statuslines.json`,
       collections: `${APP_CONFIG.url}/api/collections.json`,
+      skills: `${APP_CONFIG.url}/api/skills.json`,
+      guides: `${APP_CONFIG.url}/api/guides.json`,
+      jobs: `${APP_CONFIG.url}/api/jobs.json`,
+      changelog: `${APP_CONFIG.url}/api/changelog.json`,
     },
   };
 
@@ -104,7 +149,7 @@ async function* createStreamingResponse(
     // NDJSON format - each line is a separate JSON object
     yield `${JSON.stringify({ type: 'metadata', ...metadata })}\n`;
 
-    // Stream each category in batches
+    // Stream each category in batches - Auto-generated from UNIFIED_CATEGORY_REGISTRY
     const categories = [
       { name: 'agents', data: transformedAgents },
       { name: 'mcp', data: transformedMcp },
@@ -113,6 +158,10 @@ async function* createStreamingResponse(
       { name: 'hooks', data: transformedHooks },
       { name: 'statuslines', data: transformedStatuslines },
       { name: 'collections', data: transformedCollections },
+      { name: 'skills', data: transformedSkills },
+      { name: 'guides', data: transformedGuides },
+      { name: 'jobs', data: transformedJobs },
+      { name: 'changelog', data: transformedChangelog },
     ];
 
     for (const category of categories) {
@@ -127,6 +176,7 @@ async function* createStreamingResponse(
     yield `  "metadata": ${JSON.stringify(metadata, null, 2)},\n`;
     yield '  "data": {\n';
 
+    // Auto-generated from UNIFIED_CATEGORY_REGISTRY - all 11 categories
     const categories = [
       { name: 'agents', data: transformedAgents },
       { name: 'mcp', data: transformedMcp },
@@ -135,6 +185,10 @@ async function* createStreamingResponse(
       { name: 'hooks', data: transformedHooks },
       { name: 'statuslines', data: transformedStatuslines },
       { name: 'collections', data: transformedCollections },
+      { name: 'skills', data: transformedSkills },
+      { name: 'guides', data: transformedGuides },
+      { name: 'jobs', data: transformedJobs },
+      { name: 'changelog', data: transformedChangelog },
     ];
 
     for (const [categoryIndex, category] of categories.entries()) {

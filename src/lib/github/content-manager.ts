@@ -7,23 +7,11 @@
  */
 
 import { z } from 'zod';
+import { CONTENT_PATHS } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import type { ConfigSubmissionData } from '@/src/lib/schemas/form.schema';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import { fileExists, listFiles } from './client';
-
-/**
- * Content type to directory mapping
- */
-export const CONTENT_PATHS = {
-  agents: 'content/agents',
-  mcp: 'content/mcp',
-  rules: 'content/rules',
-  commands: 'content/commands',
-  hooks: 'content/hooks',
-  statuslines: 'content/statuslines',
-  skills: 'content/skills',
-} as const;
 
 /**
  * Reserved slug words that should not be used

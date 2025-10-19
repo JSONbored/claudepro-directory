@@ -444,7 +444,9 @@ export const TagWithRemove: Story = {
     onClick: () => {
       // Intentional no-op for demonstration
     },
-    onRemove: () => {},
+    onRemove: () => {
+      /* Intentional no-op for demonstration */
+    },
   },
 };
 
@@ -613,14 +615,32 @@ export const AllBadgeVariants: Story = {
       <div>
         <h3 className="text-sm font-semibold mb-2">Tag Badges</h3>
         <div className="flex flex-wrap gap-2">
-          <UnifiedBadge variant="tag" tag="React" isActive={false} onClick={() => {}} />
-          <UnifiedBadge variant="tag" tag="TypeScript" isActive onClick={() => {}} />
+          <UnifiedBadge
+            variant="tag"
+            tag="React"
+            isActive={false}
+            onClick={() => {
+              /* Intentional no-op for demonstration */
+            }}
+          />
+          <UnifiedBadge
+            variant="tag"
+            tag="TypeScript"
+            isActive
+            onClick={() => {
+              /* Intentional no-op for demonstration */
+            }}
+          />
           <UnifiedBadge
             variant="tag"
             tag="Next.js"
             isActive
-            onClick={() => {}}
-            onRemove={() => {}}
+            onClick={() => {
+              /* Intentional no-op for demonstration */
+            }}
+            onRemove={() => {
+              /* Intentional no-op for demonstration */
+            }}
           />
         </div>
       </div>
@@ -681,7 +701,14 @@ export const TypeSafetyExample: Story = {
         <UnifiedBadge variant="category" category="mcp">
           MCP
         </UnifiedBadge>
-        <UnifiedBadge variant="tag" tag="React" isActive onClick={() => {}} />
+        <UnifiedBadge
+          variant="tag"
+          tag="React"
+          isActive
+          onClick={() => {
+            /* Intentional no-op for demonstration */
+          }}
+        />
       </div>
     </div>
   ),

@@ -27,6 +27,7 @@
 import { brotliCompressSync, brotliDecompressSync, gunzipSync, gzipSync } from 'node:zlib';
 import { Redis } from '@upstash/redis';
 import { z } from 'zod';
+import { getAllCategoryIds } from '@/src/lib/config/category-config';
 import { metadataLoader } from '@/src/lib/content/lazy-content-loaders';
 import { logger } from '@/src/lib/logger';
 import { relatedContentService } from '@/src/lib/related-content/service';
@@ -2132,15 +2133,8 @@ export const statsRedis = {
   cleanupOldTrending: () =>
     redis(
       async (c) => {
-        const cats = [
-          'agents',
-          'mcp',
-          'rules',
-          'commands',
-          'hooks',
-          'statuslines',
-          'collections',
-        ] as const;
+        // Auto-generated from UNIFIED_CATEGORY_REGISTRY
+        const cats = getAllCategoryIds();
         await Promise.all(
           cats.map((cat) =>
             c.zremrangebyscore(
@@ -2378,17 +2372,8 @@ const CACHE_WARMER_LIMITS = {
   MAX_COMMON_QUERIES: 100,
 } as const;
 
-const warmableCategorySchema = z.enum([
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'collections',
-  'guides',
-  'jobs',
-]);
+// Auto-generated from UNIFIED_CATEGORY_REGISTRY
+const warmableCategorySchema = z.enum(getAllCategoryIds() as [string, ...string[]]);
 
 const cacheWarmerPopularItemSchema = z.object({
   slug: nonEmptyString
@@ -2467,35 +2452,23 @@ class CacheWarmer {
     try {
       logger.info('Starting cache warming for popular content');
 
-      // Lazy load metadata only when needed
-      const [
-        agentsMetadata,
-        mcpMetadata,
-        rulesMetadata,
-        commandsMetadata,
-        hooksMetadata,
-        statuslinesMetadata,
-        collectionsMetadata,
-      ] = await batchFetch([
-        metadataLoader.get('agentsMetadata'),
-        metadataLoader.get('mcpMetadata'),
-        metadataLoader.get('rulesMetadata'),
-        metadataLoader.get('commandsMetadata'),
-        metadataLoader.get('hooksMetadata'),
-        metadataLoader.get('statuslinesMetadata'),
-        metadataLoader.get('collectionsMetadata'),
-      ]);
+      // Auto-generated from UNIFIED_CATEGORY_REGISTRY - dynamically loads all categories
+      const allCategoryIds = getAllCategoryIds();
 
-      // Get popular items from each category
-      const categories = [
-        { name: 'agents' as WarmableCategory, items: agentsMetadata },
-        { name: 'mcp' as WarmableCategory, items: mcpMetadata },
-        { name: 'rules' as WarmableCategory, items: rulesMetadata },
-        { name: 'commands' as WarmableCategory, items: commandsMetadata },
-        { name: 'hooks' as WarmableCategory, items: hooksMetadata },
-        { name: 'statuslines' as WarmableCategory, items: statuslinesMetadata },
-        { name: 'collections' as WarmableCategory, items: collectionsMetadata },
-      ];
+      // Build loader keys dynamically (converts 'agents' → 'agentsMetadata')
+      const loaderKeys = allCategoryIds.map((id) => {
+        const varName = id.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+        return `${varName}Metadata`;
+      });
+
+      // Lazy load metadata for all categories
+      const metadataResults = await batchFetch(loaderKeys.map((key) => metadataLoader.get(key)));
+
+      // Combine category IDs with their loaded metadata
+      const categories = allCategoryIds.map((id, index) => ({
+        name: id as WarmableCategory,
+        items: metadataResults[index],
+      }));
 
       // Validate categories
       const validatedCategories = categories.map((cat) => categoryMetadataSchema.parse(cat));
@@ -2604,15 +2577,13 @@ class CacheWarmer {
   private async warmRelatedContent(): Promise<void> {
     try {
       // Pre-calculate related content for top pages
+      // Auto-generated from UNIFIED_CATEGORY_REGISTRY
       const topPages = [
-        { path: '/', category: 'agents' as WarmableCategory },
-        { path: '/agents', category: 'agents' as WarmableCategory },
-        { path: '/mcp', category: 'mcp' as WarmableCategory },
-        { path: '/rules', category: 'rules' as WarmableCategory },
-        { path: '/commands', category: 'commands' as WarmableCategory },
-        { path: '/hooks', category: 'hooks' as WarmableCategory },
-        { path: '/statuslines', category: 'statuslines' as WarmableCategory },
-        { path: '/collections', category: 'collections' as WarmableCategory },
+        { path: '/', category: 'agents' as WarmableCategory }, // Homepage uses agents as default
+        ...getAllCategoryIds().map((id) => ({
+          path: `/${id}`,
+          category: id as WarmableCategory,
+        })),
       ];
 
       // Validate pages

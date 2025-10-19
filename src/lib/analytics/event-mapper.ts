@@ -18,13 +18,26 @@
 
 import { EVENTS, type EventName } from '@/src/lib/analytics/events.constants';
 import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
-import type { CategoryId as SharedCategoryId } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId } from '@/src/lib/config/category-types';
 
 /**
- * Content categories supported by the event mapper
- * Extends shared CategoryId to include aliases (mcp-servers)
+ * Normalize category aliases to official CategoryId
+ * Handles backward compatibility for deprecated aliases
+ *
+ * @param category - Category ID or alias (e.g., 'mcp-servers')
+ * @returns Official CategoryId from UNIFIED_CATEGORY_REGISTRY
  */
-export type CategoryId = SharedCategoryId | 'mcp-servers';
+function normalizeCategoryId(category: string): CategoryId | null {
+  // Handle backward compatibility alias
+  if (category === 'mcp-servers') return 'mcp';
+
+  // Validate against official registry
+  if (category in UNIFIED_CATEGORY_REGISTRY) {
+    return category as CategoryId;
+  }
+
+  return null;
+}
 
 /**
  * Action types for event mapping
@@ -96,27 +109,22 @@ function buildEventMappings(): Record<EventAction, Record<string, EventName>> {
     // Map to actual event constants if they exist
     if (contentViewKey in EVENTS) {
       contentViewMap[categoryId] = EVENTS[contentViewKey] as EventName;
-      contentViewMap['mcp-servers'] = EVENTS[contentViewKey] as EventName; // Alias
     }
 
     if (searchKey in EVENTS) {
       searchMap[categoryId] = EVENTS[searchKey] as EventName;
-      searchMap['mcp-servers'] = EVENTS[searchKey] as EventName; // Alias
     }
 
     if (copyCodeKey in EVENTS) {
       copyCodeMap[categoryId] = EVENTS[copyCodeKey] as EventName;
-      copyCodeMap['mcp-servers'] = EVENTS[copyCodeKey] as EventName; // Alias
     }
 
     if (copyMarkdownKey in EVENTS) {
       copyMarkdownMap[categoryId] = EVENTS[copyMarkdownKey] as EventName;
-      copyMarkdownMap['mcp-servers'] = EVENTS[copyMarkdownKey] as EventName; // Alias
     }
 
     if (downloadMarkdownKey in EVENTS) {
       downloadMarkdownMap[categoryId] = EVENTS[downloadMarkdownKey] as EventName;
-      downloadMarkdownMap['mcp-servers'] = EVENTS[downloadMarkdownKey] as EventName; // Alias
     }
   }
 
@@ -172,7 +180,7 @@ function getFallbackEvents(): Record<EventAction, EventName> {
  * Get event name for a specific action and content category
  *
  * @param action - The action type (view, search, copy, etc.)
- * @param category - The content category (agents, mcp, commands, etc.)
+ * @param category - The content category (agents, mcp, commands, etc.) or alias (mcp-servers)
  * @returns The specific EventName for tracking
  *
  * @example
@@ -183,8 +191,11 @@ function getFallbackEvents(): Record<EventAction, EventName> {
  * const event = getEventForCategory('search', 'mcp');
  * // Returns: EVENTS.SEARCH_MCP
  *
+ * const event = getEventForCategory('search', 'mcp-servers');
+ * // Returns: EVENTS.SEARCH_MCP (normalized)
+ *
  * const event = getEventForCategory('copy_code', 'unknown');
- * // Returns: EVENTS.COPY_CODE_OTHER (fallback)
+ * // Returns: EVENTS.COPY_CODE_AGENT (fallback)
  * ```
  */
 export function getEventForCategory(action: EventAction, category: string): EventName {
@@ -196,7 +207,11 @@ export function getEventForCategory(action: EventAction, category: string): Even
     return fallbacks[action] || EVENTS.SEARCH_GLOBAL;
   }
 
-  return actionMap[category] || fallbacks[action];
+  // Normalize category (handles aliases like 'mcp-servers' → 'mcp')
+  const normalizedCategory = normalizeCategoryId(category);
+  const lookupCategory = normalizedCategory || category;
+
+  return actionMap[lookupCategory] || fallbacks[action];
 }
 
 /**

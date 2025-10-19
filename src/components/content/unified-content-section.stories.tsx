@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, within } from 'storybook/test';
 import { AlertTriangle, Settings, Zap } from '@/src/lib/icons';
 import { UnifiedContentSection } from './unified-content-section';
 
@@ -617,8 +617,6 @@ export const ConfigurationJSONTest: Story = {
     },
   },
   play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
-
     await step('Verify configuration content is displayed', async () => {
       // JSON should be rendered as code
       const config = canvasElement.querySelector('pre, code');

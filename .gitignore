@@ -55,6 +55,9 @@ content/api-docs/*.mdx
 .eslintcache
 *.tsbuildinfo
 coverage/
+.coverage-baseline.json
+.coverage-history.json
+.db-schema-hash
 .vitest/
 .parcel-cache/
 .turbo/

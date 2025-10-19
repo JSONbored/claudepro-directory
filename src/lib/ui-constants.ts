@@ -321,89 +321,15 @@ export const UI_CLASSES = {
 export type UIClassKey = keyof typeof UI_CLASSES;
 
 /**
- * Content Card Behavior Configuration - Configuration-Driven
+ * Content Card Behavior Configuration - AUTO-GENERATED
  *
- * Auto-generates default behaviors for all categories in registry.
- * Special cases (guides, collections) override as needed.
+ * Re-exported from auto-generated ui-constants-categories.ts.
+ * Generated from UNIFIED_CATEGORY_REGISTRY at build time.
  *
- * Modern 2025 Architecture:
- * - Configuration-driven: Default behaviors derived from UNIFIED_CATEGORY_REGISTRY
- * - Tree-shakeable: Only imported configurations included in bundle
- * - Type-safe: Enforces valid content types at compile time
- *
- * @see lib/config/category-config.ts - Single source of truth for categories
- *
- * @example
- * ```typescript
- * const behavior = CARD_BEHAVIORS[item.category] || CARD_BEHAVIORS.default;
- * if (behavior.showCopyButton) {
- *   // Render copy button
- * }
- * ```
+ * @see src/lib/ui-constants-categories.ts - Auto-generated category behaviors
+ * @see scripts/build/generate-category-artifacts.ts - Generation script
  */
-// REMOVED: import from category-config to prevent server code in browser
-// Previously: import { getAllCategoryIds, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
-//
-// Architecture Decision: Hardcode category IDs here instead of importing from category-config
-// to avoid pulling server-side dependencies into browser bundles (Storybook compatibility).
-// These values are static configuration and don't change at runtime.
-
-// Default behavior template for config-based categories
-const DEFAULT_CONFIG_BEHAVIOR = {
-  showCopyButton: true,
-  showViewCount: true,
-  showCopyCount: true,
-  showRating: true,
-  showFeaturedBadge: true,
-} as const;
-
-// Default behavior template for guide-like categories
-const DEFAULT_GUIDE_BEHAVIOR = {
-  showCopyButton: false,
-  showViewCount: true,
-  showCopyCount: false,
-  showRating: true,
-  showFeaturedBadge: true,
-} as const;
-
-// Static list of category IDs (matches UNIFIED_CATEGORY_REGISTRY keys)
-// Update this list when adding new categories to category-config.ts
-const CATEGORY_IDS = ['agents', 'hooks', 'mcps', 'rules', 'skills'] as const;
-
-// Build behaviors statically
-const derivedBehaviors = Object.fromEntries(
-  CATEGORY_IDS.map((categoryId) => [categoryId, DEFAULT_CONFIG_BEHAVIOR])
-);
-
-export const CARD_BEHAVIORS = {
-  // Default for unknown categories
-  default: DEFAULT_CONFIG_BEHAVIOR,
-
-  // Registry categories (static)
-  ...derivedBehaviors,
-
-  // Guide categories (educational content - not copyable)
-  guides: DEFAULT_GUIDE_BEHAVIOR,
-  tutorials: DEFAULT_GUIDE_BEHAVIOR,
-  workflows: DEFAULT_GUIDE_BEHAVIOR,
-  comparisons: DEFAULT_GUIDE_BEHAVIOR,
-  'use-cases': DEFAULT_GUIDE_BEHAVIOR,
-  troubleshooting: DEFAULT_GUIDE_BEHAVIOR,
-
-  // Special case overrides
-  collections: {
-    showCopyButton: true,
-    showViewCount: true,
-    showCopyCount: true,
-    showRating: false, // Collections don't have ratings (yet)
-    showFeaturedBadge: false, // Collections have their own type badges
-  },
-} as const;
-
-/**
- * Type-safe card behavior keys
- */
-export type CardBehaviorKey = keyof typeof CARD_BEHAVIORS;
+export { CARD_BEHAVIORS, type CardBehaviorKey } from './ui-constants-categories';
 
 /**
  * Badge Color Constants
@@ -413,7 +339,12 @@ export type CardBehaviorKey = keyof typeof CARD_BEHAVIORS;
  * Usage: Replace inline badge color objects with these constants
  * Before: const colors = { 'full-time': 'bg-green-500/10...' }
  * After: className={BADGE_COLORS.jobType['full-time']}
+ *
+ * Note: Category badge colors are auto-generated from UNIFIED_CATEGORY_REGISTRY
+ * @see src/lib/ui-constants-categories.ts
  */
+import { CATEGORY_BADGE_COLORS } from './ui-constants-categories';
+
 export const BADGE_COLORS = {
   /**
    * Job type badge colors
@@ -473,23 +404,11 @@ export const BADGE_COLORS = {
   },
 
   /**
-   * Content category badge colors - Static Configuration
-   * Hardcoded from category-config.ts colorScheme values for browser compatibility
-   * Update when adding new categories to category-config.ts
-   * Used in: DetailSidebar category badges
+   * Content category badge colors - AUTO-GENERATED
+   * Generated from UNIFIED_CATEGORY_REGISTRY colorScheme values at build time
+   * @see src/lib/ui-constants-categories.ts - Auto-generated from registry
    */
-  category: {
-    default: 'bg-primary/20 text-primary border-primary/30',
-    // From UNIFIED_CATEGORY_REGISTRY colorScheme mappings:
-    agents: 'bg-purple-500/20 text-purple-500 border-purple-500/30',
-    mcp: 'bg-green-500/20 text-green-500 border-green-500/30',
-    commands: 'bg-orange-500/20 text-orange-500 border-orange-500/30',
-    rules: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
-    hooks: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
-    statuslines: 'bg-cyan-500/20 text-cyan-500 border-cyan-500/30',
-    collections: 'bg-indigo-500/20 text-indigo-500 border-indigo-500/30',
-    skills: 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30',
-  },
+  category: CATEGORY_BADGE_COLORS,
 
   /**
    * Submission status badge colors (SHA-3146)

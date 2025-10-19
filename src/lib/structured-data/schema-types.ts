@@ -82,6 +82,22 @@ export function isSkillContent(
 }
 
 /**
+ * Type guard to check if content has troubleshooting field
+ * Used for FAQPage schema generation
+ */
+export function hasContentTroubleshooting(item: UnifiedContent): item is (
+  | McpContent
+  | RuleContent
+  | StatuslineContent
+  | HookContent
+  | SkillContent
+) & {
+  troubleshooting: Array<{ issue: string; solution: string }>;
+} {
+  return 'troubleshooting' in item && Array.isArray(item.troubleshooting);
+}
+
+/**
  * Configuration for schema generation per content type
  */
 export interface SchemaGenerationConfig {
@@ -100,7 +116,7 @@ export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGeneration
     generateSourceCode: true,
     generateHowTo: true,
     generateCreativeWork: true,
-    generateFAQ: false,
+    generateFAQ: false, // Agents don't have troubleshooting field
     generateBreadcrumb: true,
     generateSpeakable: true,
   },
@@ -109,7 +125,7 @@ export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGeneration
     generateSourceCode: true,
     generateHowTo: true,
     generateCreativeWork: false,
-    generateFAQ: false,
+    generateFAQ: false, // Commands don't have troubleshooting field
     generateBreadcrumb: true,
     generateSpeakable: false,
   },
@@ -118,7 +134,7 @@ export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGeneration
     generateSourceCode: true,
     generateHowTo: true,
     generateCreativeWork: false,
-    generateFAQ: false,
+    generateFAQ: true, // Hooks have troubleshooting field
     generateBreadcrumb: true,
     generateSpeakable: false,
   },
@@ -127,7 +143,7 @@ export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGeneration
     generateSourceCode: true,
     generateHowTo: true,
     generateCreativeWork: false,
-    generateFAQ: true,
+    generateFAQ: true, // MCP has troubleshooting field
     generateBreadcrumb: true,
     generateSpeakable: false,
   },
@@ -136,7 +152,7 @@ export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGeneration
     generateSourceCode: false,
     generateHowTo: true,
     generateCreativeWork: true,
-    generateFAQ: false,
+    generateFAQ: true, // Rules have troubleshooting field
     generateBreadcrumb: true,
     generateSpeakable: true,
   },
@@ -145,7 +161,7 @@ export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGeneration
     generateSourceCode: true,
     generateHowTo: true,
     generateCreativeWork: false,
-    generateFAQ: false,
+    generateFAQ: true, // Statuslines have troubleshooting field
     generateBreadcrumb: true,
     generateSpeakable: false,
   },
@@ -460,12 +476,7 @@ export function generateAllSchemasForContent(item: UnifiedContent): SchemaObject
   }
 
   // 5. FAQPage Schema
-  if (
-    rules.schemaTypes.faq &&
-    isMcpContent(item) &&
-    item.troubleshooting &&
-    item.troubleshooting.length > 0
-  ) {
+  if (rules.schemaTypes.faq && hasContentTroubleshooting(item) && item.troubleshooting.length > 0) {
     schemas.push(
       buildFAQPage(item.slug, item.category, displayName, item.troubleshooting as FAQItem[])
     );

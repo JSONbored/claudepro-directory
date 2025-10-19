@@ -800,7 +800,10 @@ export const AllLazyComponents: StoryObj = {
  * Tests CopyableHeading renders with copy button
  */
 export const CopyableHeadingTest: Story = {
-  render: () => <CopyableHeading id="test-heading">Test Heading Content</CopyableHeading>,
+  render: () => {
+    const headingId = useId();
+    return <CopyableHeading id={headingId}>Test Heading Content</CopyableHeading>;
+  },
   parameters: {
     docs: {
       description: {

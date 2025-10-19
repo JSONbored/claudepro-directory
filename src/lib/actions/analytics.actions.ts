@@ -49,7 +49,6 @@ import {
   userAffinitiesResponseSchema,
 } from '@/src/lib/schemas/personalization.schema';
 import { type QuizAnswers, quizAnswersSchema } from '@/src/lib/schemas/recommender.schema';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
@@ -392,14 +391,15 @@ export const getSimilarConfigs = rateLimitedAction
 
       if (similarities && similarities.length > 0) {
         // Return pre-computed similarities
+        // Note: sim.content_type is already CategoryId (validated by repository.isValidCategory)
         const response: SimilarConfigsResponse = {
           similar_items: similarities.map((sim) => ({
             slug: toContentId(sim.content_slug),
             title: sim.content_slug, // Will be enriched by client
             description: '',
-            category: sim.content_type as CategoryId,
+            category: sim.content_type, // Already CategoryId from SimilarityResult interface
             url: getContentItemUrl({
-              category: sim.content_type as CategoryId,
+              category: sim.content_type, // Already CategoryId from SimilarityResult interface
               slug: sim.content_slug,
             }),
             score: Math.round(sim.similarity_score * 100),

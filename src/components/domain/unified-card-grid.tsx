@@ -188,21 +188,21 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
   // Empty state
   if (items.length === 0 && !loading) {
     return (
-      <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
+      <output className="flex items-center justify-center py-12" aria-live="polite">
         <p className="text-lg text-muted-foreground">{emptyMessage}</p>
-      </div>
+      </output>
     );
   }
 
   // Loading state (initial load)
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
+      <output className="flex items-center justify-center py-12" aria-live="polite">
         <div className="flex items-center gap-2">
           <output className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           <p className="text-sm text-muted-foreground">{loadingMessage}</p>
         </div>
-      </div>
+      </output>
     );
   }
 
@@ -227,11 +227,10 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
 
       {/* Infinite scroll sentinel (only shown when enabled and hasMore) */}
       {infiniteScroll && hasMore && (
-        <div
+        <output
           ref={sentinelRef}
           className="flex items-center justify-center py-8"
           style={{ minHeight: '100px' }}
-          role="status"
           aria-live="polite"
           aria-busy={isLoading}
         >
@@ -242,7 +241,7 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
               <p className="text-sm text-muted-foreground">{loadingMessage}</p>
             </div>
           )}
-        </div>
+        </output>
       )}
     </section>
   );

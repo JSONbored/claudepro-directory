@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { type CategoryId, VALID_CATEGORIES } from '@/src/lib/config/category-types';
 import { DOMPurify } from './html-sanitizer';
 import { VALIDATION_PATTERNS } from './patterns';
 
@@ -72,7 +73,7 @@ export const baseSchemas = {
     .string()
     .regex(VALIDATION_PATTERNS.CONTENT_TYPE, 'Invalid content type')
     .describe(
-      'Content category identifier. Valid values: agents, mcp, rules, commands, hooks, statuslines, collections, skills.'
+      'Content category identifier with .json extension. Auto-validated against UNIFIED_CATEGORY_REGISTRY categories.'
     ),
 
   // Search query with sanitization
@@ -179,16 +180,7 @@ export const apiSchemas = {
     .object({
       q: baseSchemas.searchQuery,
       category: z
-        .enum([
-          'agents',
-          'mcp',
-          'rules',
-          'commands',
-          'hooks',
-          'statuslines',
-          'collections',
-          'skills',
-        ])
+        .enum(VALID_CATEGORIES)
         .optional()
         .describe('Filter search results by content category'),
       page: baseSchemas.page,
@@ -208,18 +200,7 @@ export const apiSchemas = {
   cacheWarmParams: z
     .object({
       types: z
-        .array(
-          z.enum([
-            'agents',
-            'mcp',
-            'rules',
-            'commands',
-            'hooks',
-            'statuslines',
-            'collections',
-            'skills',
-          ])
-        )
+        .array(z.enum(VALID_CATEGORIES))
         .optional()
         .describe('Array of content types to warm cache for (omit for all types)'),
       force: z
@@ -422,27 +403,13 @@ export const sanitizers = {
   /**
    * Validate and sanitize category input
    * Ensures only valid categories are accepted
+   * Auto-validated against UNIFIED_CATEGORY_REGISTRY
    */
   sanitizeCategory: async (category: string): Promise<string | null> => {
-    const validCategories = [
-      'agents',
-      'mcp',
-      'rules',
-      'commands',
-      'hooks',
-      'statuslines',
-      'collections',
-      'skills',
-      'tutorials',
-      'comparisons',
-      'workflows',
-      'use-cases',
-      'troubleshooting',
-    ];
-
     const sanitized = (await sanitizers.sanitizeFormInput(category, 50)).toLowerCase();
 
-    if (validCategories.includes(sanitized)) {
+    // Validate against UNIFIED_CATEGORY_REGISTRY (via VALID_CATEGORIES)
+    if (VALID_CATEGORIES.includes(sanitized as CategoryId)) {
       return sanitized;
     }
 

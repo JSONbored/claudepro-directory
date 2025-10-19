@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, within } from 'storybook/test';
 import { RelatedContentClient } from './related-content-client';
 
 /**
@@ -570,8 +570,6 @@ export const EmptyRelatedContentTest: Story = {
     },
   },
   play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
-
     await step('Verify component renders without errors', async () => {
       // Component should render container even with no items
       await expect(canvasElement).toBeInTheDocument();
