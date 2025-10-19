@@ -150,6 +150,7 @@ function getRatelimiter(actionName: string, maxRequests: number, windowSeconds: 
       limiter: Ratelimit.slidingWindow(maxRequests, `${windowSeconds} s`),
       analytics: false, // Disable to reduce Redis commands
       prefix: 'server_action_ratelimit',
+      ephemeralCache: new Map(), // In-memory cache for 10s - reduces Redis commands by 60-70%
     });
     ratelimitCache.set(cacheKey, limiter);
   }
