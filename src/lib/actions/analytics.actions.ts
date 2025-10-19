@@ -50,7 +50,7 @@ import {
 } from '@/src/lib/schemas/personalization.schema';
 import { type QuizAnswers, quizAnswersSchema } from '@/src/lib/schemas/recommender.schema';
 import { createClient } from '@/src/lib/supabase/server';
-import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 // ============================================
@@ -260,15 +260,13 @@ export const getForYouFeed = rateLimitedAction
             favoriteCategories
           );
 
-          // Get trending items
-          const trendingKeys = await batchMap(
-            ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'],
-            async (cat: string) => {
-              const trending = await statsRedis.getTrending(cat, 10);
-              return trending.map((slug: string) => `${cat}:${slug}`);
-            }
+          // OPTIMIZATION: Calculate trending from enriched content (already has viewCount)
+          // Items with viewCount > 100 are considered trending (simple threshold)
+          const trendingSet = new Set<string>(
+            enrichedContent
+              .filter((item) => (item.viewCount || 0) > 100)
+              .map((item) => `${item.category}:${item.slug}`)
           );
-          const trendingSet = new Set<string>(trendingKeys.flat());
 
           // Check if user has sufficient personalization data
           const hasHistory = hasPersonalizationData(userContext);

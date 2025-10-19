@@ -1,7 +1,8 @@
 import { z } from 'zod';
-import { contentCache, statsRedis } from '@/src/lib/cache.server';
+import { contentCache } from '@/src/lib/cache.server';
 import { UI_CONFIG } from '@/src/lib/constants';
 import { CACHE_CONFIG } from '@/src/lib/constants/cache';
+import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { createApiRoute } from '@/src/lib/error-handler';
 import { rateLimiters } from '@/src/lib/rate-limiter.server';
 import {
@@ -10,7 +11,7 @@ import {
   cursorPaginationQuerySchema,
   decodeCursor,
 } from '@/src/lib/schemas/primitives/cursor-pagination.schema';
-import { viewCountService } from '@/src/lib/services/view-count.server';
+import { getBatchTrendingData } from '@/src/lib/trending/calculator.server';
 
 export const runtime = 'nodejs';
 
@@ -89,15 +90,12 @@ const route = createApiRoute({
       try {
         const cached = await contentCache.getAPIResponse<TrendingGuidesResponse>(cacheKey);
         if (cached) {
-          // Compute lightweight metadata for headers (do not mutate cached body)
-          const totalCount = (await statsRedis.getTrending(category, 100)).length;
-
           return okRaw(cached, {
             sMaxAge: 300, // 5 minutes (API revalidation)
             staleWhileRevalidate: 86400,
             cacheHit: true,
             additionalHeaders: {
-              'X-Total-Count': String(totalCount),
+              'X-Total-Count': String(cached.meta.total),
               'X-Has-More': String(cached.hasMore),
             },
           });
@@ -108,30 +106,28 @@ const route = createApiRoute({
         });
       }
 
-      const allTrendingSlugs = await statsRedis.getTrending(category, 100);
-      const paginatedSlugs = allTrendingSlugs.slice(startIndex, startIndex + fetchLimit);
-      const hasMore = paginatedSlugs.length > limit;
-      const trendingSlugs = hasMore ? paginatedSlugs.slice(0, limit) : paginatedSlugs;
-
-      const viewCountRequests = trendingSlugs.map((slug) => ({ category, slug }));
-      const viewCounts = await viewCountService.getBatchViewCounts(viewCountRequests);
-
-      const trendingGuides = trendingSlugs.map((slug, index) => {
-        const viewCountKey = `${category}:${slug}`;
-        const viewCountResult = viewCounts[viewCountKey];
-        const absoluteIndex = startIndex + index;
-
-        return {
-          slug,
-          title: slug
-            .split('-')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' '),
-          url: `/guides/${category}/${slug}`,
-          views: viewCountResult?.views || 0,
-          rank: absoluteIndex + 1,
-        };
+      // OPTIMIZATION: Use new trending calculator (calculates from view counters)
+      // Load content for this category
+      const guides = await getContentByCategory('guides');
+      
+      // Calculate trending using Redis view counts
+      const trendingData = await getBatchTrendingData({
+        guides: guides.map((item) => ({ ...item, category: 'guides' as const })),
       });
+
+      // Extract trending items and paginate
+      const allTrending = trendingData.trending;
+      const paginatedItems = allTrending.slice(startIndex, startIndex + fetchLimit);
+      const hasMore = paginatedItems.length > limit;
+      const trendingItems = hasMore ? paginatedItems.slice(0, limit) : paginatedItems;
+
+      const trendingGuides = trendingItems.map((item, index) => ({
+        slug: item.slug,
+        title: item.title,
+        url: `/guides/${category}/${item.slug}`,
+        views: item.viewCount || 0,
+        rank: startIndex + index + 1,
+      }));
 
       const pagination = createPaginationMeta(trendingGuides, limit, hasMore, (item) =>
         createCursor(startIndex + trendingGuides.indexOf(item) + 1)
@@ -158,7 +154,7 @@ const route = createApiRoute({
         staleWhileRevalidate: 86400,
         cacheHit: false,
         additionalHeaders: {
-          'X-Total-Count': String(allTrendingSlugs.length),
+          'X-Total-Count': String(allTrending.length),
           'X-Has-More': String(pagination.hasMore),
         },
       });
