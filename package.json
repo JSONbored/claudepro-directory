@@ -2,7 +2,7 @@
   "name": "claudepro-directory",
   "private": true,
   "sideEffects": false,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A community-driven directory of Claude configurations including agents, MCP servers, rules, commands, and hooks",
   "author": "JSONbored",
   "license": "MIT",
