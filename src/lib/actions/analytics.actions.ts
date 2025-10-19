@@ -50,7 +50,7 @@ import {
 } from '@/src/lib/schemas/personalization.schema';
 import { type QuizAnswers, quizAnswersSchema } from '@/src/lib/schemas/recommender.schema';
 import { createClient } from '@/src/lib/supabase/server';
-import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 // ============================================

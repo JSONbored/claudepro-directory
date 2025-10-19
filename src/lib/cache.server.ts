@@ -48,8 +48,6 @@ import {
   cacheCategorySchema,
   cacheInvalidationResultSchema,
   cacheKeyParamsSchema,
-  parseRedisZRangeResponse,
-  popularItemsQuerySchema,
 } from '@/src/lib/schemas/cache.schema';
 import { isProduction } from '@/src/lib/schemas/env.schema';
 import { validateCacheKey, validateTTL } from '@/src/lib/schemas/primitives/api-cache-primitives';

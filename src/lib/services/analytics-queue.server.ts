@@ -11,7 +11,6 @@
  */
 
 import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/cache.server';
 
 /**
  * Queue entry for tracking events
