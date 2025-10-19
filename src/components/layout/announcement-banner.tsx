@@ -107,12 +107,23 @@ export function AnnouncementBanner() {
   // Get icon component if specified
   const IconComponent = announcement.icon ? ICON_MAP[announcement.icon as IconName] : null;
 
+  /**
+   * Z-Index Hierarchy:
+   * - z-[100]: Skip-to-content link (highest priority - accessibility)
+   * - z-[60]:  Announcement banner (above navigation, below skip link)
+   * - z-50:    Navigation, dialogs, sheets, dropdowns
+   * - z-10:    Component-level overlays (badges, cards)
+   *
+   * Note: Navigation uses `sticky top-0 z-50 contain-layout` which creates
+   * a new stacking context. Without explicit z-index, the announcement would
+   * be visually obscured by navigation's stacking context.
+   */
   return (
     <section
       aria-label="Site announcement"
       aria-live="polite"
       aria-atomic="true"
-      className="w-full pt-2 px-3 pb-2 hidden md:block"
+      className="w-full pt-2 px-3 pb-2 hidden md:block relative z-[60]"
     >
       {/* Rounded pill container */}
       <div className="container mx-auto">
