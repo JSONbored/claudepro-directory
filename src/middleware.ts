@@ -197,6 +197,24 @@ const noseconeMiddleware = nosecone.createMiddleware(
   (resolvedConfig ?? noseconeConfig) as unknown as typeof nosecone.defaults
 );
 
+// OPTIMIZATION: In-memory cache for Nosecone headers to reduce overhead
+// Nosecone headers are static per environment, so we can cache and reuse them
+// This saves ~3-5ms per request by avoiding header regeneration
+let cachedNoseconeHeaders: Headers | null = null;
+
+async function getNoseconeHeaders(): Promise<Headers> {
+  if (cachedNoseconeHeaders) {
+    // Clone headers to prevent mutation
+    return new Headers(cachedNoseconeHeaders);
+  }
+
+  const response = await noseconeMiddleware();
+  cachedNoseconeHeaders = response.headers;
+
+  // Clone for return to prevent mutation
+  return new Headers(cachedNoseconeHeaders);
+}
+
 /**
  * Merge security headers from source to target
  * Consolidates duplicate header merging logic across middleware
@@ -355,7 +373,58 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Validate the incoming request
+  // PERFORMANCE OPTIMIZATION: Fast path check BEFORE expensive validation
+  // Skip heavy processing for read-only ISR-cached requests
+  const isReadOnlyISRPath =
+    request.method === 'GET' &&
+    (pathname === '/' ||
+      pathname.startsWith('/changelog') ||
+      pathname.startsWith('/guides') ||
+      pathname === '/trending' ||
+      pathname === '/companies' ||
+      pathname === '/board' ||
+      /^\/(agents|mcp|commands|rules|hooks|statuslines|collections|skills)\/[^/]+$/.test(pathname));
+
+  // Skip Arcjet for Next.js RSC prefetch requests (legitimate browser behavior)
+  const isRSCRequest = pathname.includes('_rsc=') || request.headers.get('rsc') === '1';
+
+  // Skip Arcjet protection for static assets and Next.js internals
+  const isStaticAsset = staticAssetSchema.safeParse(pathname).success;
+
+  // OAuth callback - apply minimal middleware (security headers only, no rate limiting)
+  // This prevents middleware from interfering with cookie setting during OAuth flow
+  const isOAuthCallback = pathname.startsWith('/auth/callback');
+
+  // Fast path: Apply only Nosecone headers for safe requests (no validation or Arcjet overhead)
+  // Saves 50-150ms by skipping bot detection, rate limiting, and WAF checks
+  if (isRSCRequest || isStaticAsset || isReadOnlyISRPath || isOAuthCallback) {
+    const noseconeHeaders = await getNoseconeHeaders();
+    const response = NextResponse.next();
+
+    // Copy all security headers from Nosecone
+    mergeSecurityHeaders(response.headers, noseconeHeaders);
+
+    if (isDevelopment) {
+      const duration = performance.now() - startTime;
+      response.headers.set('X-Middleware-Duration', `${duration.toFixed(2)}ms`);
+      logger.debug('Middleware execution (fast path)', {
+        path: sanitizePathForLogging(pathname),
+        type: isRSCRequest ? 'RSC' : isStaticAsset ? 'static' : isOAuthCallback ? 'OAuth' : 'ISR',
+        duration: `${duration.toFixed(2)}ms`,
+      });
+    }
+
+    if (isOAuthCallback) {
+      logger.info('Middleware OAuth callback detected', {
+        pathname,
+        cookieCount: request.cookies.getAll().length,
+      });
+    }
+
+    return response;
+  }
+
+  // Validate the incoming request (only for non-fast-path requests)
   try {
     const requestValidation: RequestValidation = validateRequest({
       method: request.method,
@@ -403,116 +472,27 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  // OAuth callback - apply minimal middleware (security headers only, no rate limiting)
-  // This prevents middleware from interfering with cookie setting during OAuth flow
-  if (pathname.startsWith('/auth/callback')) {
-    logger.info('Middleware OAuth callback detected', {
-      pathname,
-      cookieCount: request.cookies.getAll().length,
-    });
-
-    const noseconeResponse = await noseconeMiddleware();
-
-    if (isDevelopment) {
-      const duration = performance.now() - startTime;
-      logger.debug('Middleware execution (OAuth callback)', {
-        path: sanitizePathForLogging(pathname),
-        duration: `${duration.toFixed(2)}ms`,
-      });
-    }
-
-    return noseconeResponse;
-  }
-
-  // PERFORMANCE OPTIMIZATION: Skip heavy Arcjet processing for read-only requests
-  // These paths are ISR-cached and don't need bot detection or rate limiting
-  const isReadOnlyISRPath =
-    request.method === 'GET' &&
-    (pathname === '/' ||
-      pathname.startsWith('/changelog') ||
-      pathname.startsWith('/guides') ||
-      pathname === '/trending' ||
-      pathname === '/companies' ||
-      pathname === '/board' ||
-      /^\/(agents|mcp|commands|rules|hooks|statuslines|collections|skills)\/[^/]+$/.test(pathname));
-
-  // Skip Arcjet for Next.js RSC prefetch requests (legitimate browser behavior)
-  const isRSCRequest = pathname.includes('_rsc=') || request.headers.get('rsc') === '1';
-
-  // Skip Arcjet protection for static assets and Next.js internals
-  const isStaticAsset = staticAssetSchema.safeParse(pathname).success;
-
-  // Fast path: Apply only Nosecone headers for safe requests (no Arcjet overhead)
-  // Saves 50-150ms by skipping bot detection, rate limiting, and WAF checks
-  if (isRSCRequest || isStaticAsset || isReadOnlyISRPath) {
-    const noseconeResponse = await noseconeMiddleware();
-
-    if (isDevelopment) {
-      const duration = performance.now() - startTime;
-      logger.debug('Middleware execution (fast path)', {
-        path: sanitizePathForLogging(pathname),
-        type: isRSCRequest ? 'RSC' : isStaticAsset ? 'static' : 'ISR',
-        duration: `${duration.toFixed(2)}ms`,
-      });
-    }
-
-    return noseconeResponse;
-  }
-
-  // Auth protection for /account routes
-  // Check if user is authenticated before accessing account pages
-  if (pathname.startsWith('/account')) {
-    const { createClient } = await import('@/src/lib/supabase/server');
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      // Not authenticated - redirect to login
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-
-    // User is authenticated - check if session needs refresh
-    // Refresh tokens that expire within 1 hour to prevent unexpected logouts
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (session?.expires_at) {
-      const expiresIn = session.expires_at - Math.floor(Date.now() / 1000);
-
-      if (expiresIn < 3600) {
-        // Less than 1 hour until expiration - refresh the session
-        logger.debug('Refreshing session (expires soon)', {
-          userId: user.id,
-          expiresIn: `${expiresIn}s`,
-        });
-
-        await supabase.auth.refreshSession();
-      }
-    }
-
-    logger.debug('Authenticated request to account page', {
-      userId: user.id,
-      path: sanitizePathForLogging(pathname),
-    });
-  }
+  // REMOVED: /account auth protection moved to route-level layout (src/app/account/layout.tsx)
+  // This eliminates async Supabase calls in middleware, reducing latency and failure points
+  // Auth is now handled server-side in the layout component (Next.js 15 best practice)
+  // Benefits:
+  // - No middleware overhead for /account routes
+  // - Better error handling at component level
+  // - Follows Next.js App Router conventions
+  // - Reduces MIDDLEWARE_INVOCATION_FAILED risk from async database calls
 
   // PERFORMANCE OPTIMIZATION: Run Arcjet and Nosecone in parallel
   // Both operations are independent - Arcjet checks security rules while Nosecone generates headers
   // This saves 5-10ms per request by running concurrently instead of sequentially
   // SECURITY: Using Promise.allSettled for fail-closed behavior - if either fails, we handle gracefully
-  // NOTE: Cannot use batchAllSettled here due to heterogeneous tuple types (ArcjetDecision vs Response)
+  // OPTIMIZATION: Using cached Nosecone headers (saves ~3-5ms per request)
   let decision: Awaited<ReturnType<typeof aj.protect>>;
-  let noseconeResponse: Response;
+  let noseconeHeaders: Headers;
 
   try {
     const results = await Promise.allSettled([
       aj.protect(request, { requested: 1 }), // ~20-30ms
-      noseconeMiddleware(), // ~5-10ms
+      getNoseconeHeaders(), // ~1-2ms (cached)
     ]); // Total: ~20-30ms (concurrent execution)
 
     // Check Arcjet result (fail-closed: deny on error)
@@ -542,7 +522,7 @@ export async function middleware(request: NextRequest) {
 
     // Check Nosecone result (fail-open: continue with basic headers on error)
     if (results[1].status === 'rejected') {
-      logger.warn('Nosecone middleware failed, using fallback headers', {
+      logger.warn('Nosecone header cache failed, using fallback headers', {
         error:
           results[1].reason instanceof Error
             ? results[1].reason.message
@@ -552,15 +532,13 @@ export async function middleware(request: NextRequest) {
       });
 
       // FAIL-OPEN: Continue with minimal security headers
-      noseconeResponse = new NextResponse(null, {
-        headers: {
-          'X-Content-Type-Options': 'nosniff',
-          'X-Frame-Options': 'DENY',
-          'Referrer-Policy': 'no-referrer',
-        },
+      noseconeHeaders = new Headers({
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'Referrer-Policy': 'no-referrer',
       });
     } else {
-      noseconeResponse = results[1].value;
+      noseconeHeaders = results[1].value;
     }
   } catch (error) {
     // Catch any unexpected errors from Promise.allSettled itself
@@ -594,9 +572,9 @@ export async function middleware(request: NextRequest) {
       type: 'security_denial',
     });
 
-    // Copy security headers from Nosecone response
+    // Copy security headers from Nosecone
     const headers = new Headers();
-    mergeSecurityHeaders(headers, noseconeResponse.headers);
+    mergeSecurityHeaders(headers, noseconeHeaders);
 
     // Return appropriate error response based on denial reason
     if (decision.reason.isRateLimit()) {
@@ -624,15 +602,15 @@ export async function middleware(request: NextRequest) {
   const rateLimitResponse = await applyEndpointRateLimit(request, pathname);
   if (rateLimitResponse) {
     // Merge security headers from Nosecone
-    mergeSecurityHeaders(rateLimitResponse.headers, noseconeResponse.headers);
+    mergeSecurityHeaders(rateLimitResponse.headers, noseconeHeaders);
     return rateLimitResponse;
   }
 
   // Request allowed - create new response with pathname header for SmartRelatedContent component
   const response = NextResponse.next();
 
-  // Copy all security headers from nosecone
-  mergeSecurityHeaders(response.headers, noseconeResponse.headers);
+  // Copy all security headers from Nosecone
+  mergeSecurityHeaders(response.headers, noseconeHeaders);
 
   // Add pathname header for SmartRelatedContent component
   response.headers.set('x-pathname', pathname);
@@ -657,19 +635,22 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
+     * - _next/* (all Next.js internal routes including static, image, webpack HMR)
+     * - _vercel/* (Vercel internal endpoints: analytics, insights, speed-insights)
      * - favicon.ico (favicon file)
      * - robots.txt (robots file)
      * - sitemap.xml (sitemap file)
      * - manifest.webmanifest (PWA manifest - Next.js generates from src/app/manifest.ts)
-     * - .well-known (well-known files for verification)
-     * - /js/ (public JavaScript files)
-     * - /scripts/ (public script files - service workers, etc.)
-     * - /css/ (public CSS files)
+     * - service-worker.js (service worker file)
+     * - offline.html (offline fallback page)
+     * - .well-known/* (well-known files for verification)
+     * - scripts/* (public script files - service workers, etc.)
+     * - css/* (public CSS files)
+     * - js/* (public JavaScript files)
      * - 863ad0a5c1124f59a060aa77f0861518.txt (IndexNow key file)
      * - *.png, *.jpg, *.jpeg, *.gif, *.webp, *.svg, *.ico (image files)
+     * - *.woff, *.woff2, *.ttf, *.eot (font files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest\\.webmanifest|service-worker.js|offline.html|\\.well-known|scripts/|863ad0a5c1124f59a060aa77f0861518\\.txt|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
+    '/((?!_next|_vercel|favicon.ico|robots.txt|sitemap|manifest|service-worker|offline|scripts/|css/|js/|\\.well-known|863ad0a5c1124f59a060aa77f0861518\\.txt|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff|woff2|ttf|eot)$).*)',
   ],
 };

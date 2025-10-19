@@ -1339,22 +1339,30 @@
       animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    /* Shared element transitions: Smooth morphing for cards */
-    ::view-transition-old(config-card-*),
-    ::view-transition-new(config-card-*) {
+    /* Shared element transitions: Smooth morphing for cards
+     * Applies to all view-transition elements (cards, images, etc.)
+     * CSS wildcards in pseudo-elements are not supported by optimizers
+     */
+    ::view-transition-group(*),
+    ::view-transition-image-pair(*) {
       animation-duration: 400ms;
       animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-      mix-blend-mode: normal;
     }
 
     /* Old view (card): Scale down and fade out */
-    ::view-transition-old(config-card-*) {
+    ::view-transition-old(*) {
+      animation-duration: 400ms;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
       animation-name: card-shrink-fade-out;
+      mix-blend-mode: normal;
     }
 
     /* New view (detail page): Scale up and fade in */
-    ::view-transition-new(config-card-*) {
+    ::view-transition-new(*) {
+      animation-duration: 400ms;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
       animation-name: card-grow-fade-in;
+      mix-blend-mode: normal;
     }
   }
 

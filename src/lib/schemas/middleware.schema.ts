@@ -109,13 +109,17 @@ const httpContentTypeSchema = z
 
 /**
  * Static asset paths
+ * OPTIMIZATION: Using string methods instead of regex for better performance
  */
 export const staticAssetSchema = z
   .string()
   .refine(
     (path) =>
+      // Next.js internal routes
       path.startsWith('/_next/static') ||
       path.startsWith('/_next/image') ||
+      path.startsWith('/_vercel/') ||
+      // Root static files
       path === '/favicon.ico' ||
       path === '/robots.txt' ||
       path === '/sitemap.xml' ||
@@ -124,7 +128,22 @@ export const staticAssetSchema = z
       path === '/manifest' ||
       path === '/service-worker.js' ||
       path === '/offline.html' ||
-      /\.(png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)$/.test(path),
+      // Public directories
+      path.startsWith('/css/') ||
+      path.startsWith('/js/') ||
+      path.startsWith('/scripts/') ||
+      // File extensions (using endsWith for better performance than regex)
+      path.endsWith('.png') ||
+      path.endsWith('.jpg') ||
+      path.endsWith('.jpeg') ||
+      path.endsWith('.gif') ||
+      path.endsWith('.webp') ||
+      path.endsWith('.svg') ||
+      path.endsWith('.ico') ||
+      path.endsWith('.woff') ||
+      path.endsWith('.woff2') ||
+      path.endsWith('.ttf') ||
+      path.endsWith('.eot'),
     'Not a valid static asset path'
   )
   .describe('Path to static assets including Next.js resources, images, and common web files');
