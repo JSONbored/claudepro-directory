@@ -63,20 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify account tier limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Authentication error: could not authenticate user",
+      "solution": "Verify OAuth credentials are valid in invideo account settings. Check username and password are correct if using basic auth. Ensure account isn't locked and re-authenticate if needed."
     },
     {
-      "issue": "Check available storage space",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Video export or rendering queue taking too long",
+      "solution": "Check rendering queue status in invideo dashboard. Large videos take longer to process. Verify your account tier supports requested video length and quality. Contact support if queue is stuck."
     },
     {
-      "issue": "Monitor rendering queue status",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Storage limit exceeded when uploading media",
+      "solution": "Check storage usage in invideo account settings. Delete unused videos to free space. Upgrade account tier for higher storage limits. Compress media files before upload to save space."
     },
     {
-      "issue": "Ensure media format compatibility",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Unsupported media format error on upload",
+      "solution": "Verify media files are in supported formats (MP4, MOV for video; JPG, PNG for images). Convert unsupported formats using video converter. Check file isn't corrupted before uploading."
     }
   ],
   "examples": [

@@ -72,16 +72,24 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify API token permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "HTTP 429 error: API rate limit exceeded for 5 minutes",
+      "solution": "Cloudflare global rate limit is 1,200 requests per 5 minutes. Wait for 5-minute window to reset. Distribute API calls across time and implement request throttling to stay under 4 requests per second."
     },
     {
-      "issue": "Check zone access rights",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Rate limit API error: decoding not yet implemented",
+      "solution": "Add Content-Type: application/json header to your API request. Verify request body is properly formatted JSON and includes all required parameters for the endpoint."
     },
     {
-      "issue": "Monitor API quota usage",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Error: ratelimit.api.not_entitled for Enterprise features",
+      "solution": "Contact your Cloudflare Account Team to enable Enterprise rate limiting features. Verify your account tier supports advanced rate limiting or migrate to Ruleset Engine API."
+    },
+    {
+      "issue": "Authentication error: token permission insufficient",
+      "solution": "Verify API token has Firewall Services Write permission for rate limiting. Check token hasn't expired and regenerate from Cloudflare dashboard if needed. Use Bearer authentication, not email/key pair."
+    },
+    {
+      "issue": "Cannot configure rate limits or firewall rules",
+      "solution": "Ensure API token has correct zone and account-level permissions. Verify you're using Ruleset Engine API (not deprecated Rate Limiting API) and check account tier supports feature."
     }
   ],
   "examples": [

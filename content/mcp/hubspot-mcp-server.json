@@ -63,16 +63,24 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Check HubSpot account permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "HTTP 429 error: rate limit exceeded on API calls",
+      "solution": "OAuth apps limited to 110 requests per 10 seconds per account. Wait for rate limit window to reset. Implement throttling with max 11 requests/second to stay within burst limit."
     },
     {
-      "issue": "Verify OAuth connection status",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Search API hitting rate limit with only few requests",
+      "solution": "Search endpoints limited to 4 requests per second per token. Add 250ms delays between search operations. Consider caching search results to reduce API calls."
     },
     {
-      "issue": "Monitor API rate limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "HTTP 401 unauthorized - OAuth token invalid",
+      "solution": "Check access token expiration (look at expires_in parameter). Re-authenticate to get new OAuth token. Verify token has correct scopes for HubSpot API access (contacts, deals, etc)."
+    },
+    {
+      "issue": "HTTP 403 forbidden when accessing CRM objects",
+      "solution": "Verify OAuth token has required scopes. Contacts access needed for contacts, content access for deals. Check account permissions in HubSpot settings and re-authenticate with correct scopes."
+    },
+    {
+      "issue": "Error rate exceeds 5% causing marketplace issues",
+      "solution": "Reduce failed requests by implementing proper error handling. Validate input before API calls. Check API responses and fix 4xx errors in your code to lower error rate below 5%."
     }
   ],
   "examples": [

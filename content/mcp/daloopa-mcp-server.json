@@ -63,20 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify subscription level access",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Authentication error: API key invalid or missing",
+      "solution": "Add Authorization header with your API key to all requests. Contact Daloopa sales team to obtain or regenerate API key. Verify key is copied correctly without extra spaces or line breaks."
     },
     {
-      "issue": "Check data availability for companies",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Company data not found or unavailable",
+      "solution": "Verify ticker symbol is correct and company is in Daloopa coverage universe. Check your subscription tier includes access to requested company data. Contact Daloopa support for coverage questions."
     },
     {
-      "issue": "Monitor API rate limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Financial metrics missing for specific periods",
+      "solution": "Confirm company has filed SEC documents for requested period. Check data availability dates for your subscription tier. Verify quarter/year format matches API requirements (e.g., Q1 2024)."
     },
     {
-      "issue": "Validate ticker symbols",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "API requests timing out or running slowly",
+      "solution": "Reduce payload size by limiting fields returned in response. Implement pagination for large datasets. Check network connectivity and consider caching frequently accessed data locally."
     }
   ],
   "examples": [

@@ -72,20 +72,24 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify kubeconfig file is valid and accessible",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Unauthorized: server has asked for client credentials",
+      "solution": "Verify kubeconfig file is correctly configured at ~/.kube/config. Check IAM entity is authenticated by cluster. Run kubectl config view to verify context and credentials are set properly."
     },
     {
-      "issue": "Check kubectl connectivity to cluster",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Connection refused: localhost:8080 error",
+      "solution": "Set KUBECONFIG environment variable to correct path. Export KUBECONFIG=~/.kube/config or specify in MCP server config. Verify kubeconfig file exists and has valid cluster endpoint, not localhost:8080."
     },
     {
-      "issue": "Ensure proper RBAC permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "RBAC permission denied for cluster operations",
+      "solution": "Verify your user has appropriate RBAC permissions. Check if IAM principal needs system:masters group for admin access. For EKS, use access entries with API or API_AND_CONFIG_MAP authentication mode."
     },
     {
-      "issue": "Confirm cluster is running and reachable",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "kubectl version incompatibility with cluster",
+      "solution": "Ensure kubectl version within ±1 minor version of cluster. For Kubernetes 1.29 cluster, use kubectl 1.28-1.30. Run kubectl version to check client and server versions. Update kubectl if needed."
+    },
+    {
+      "issue": "TLS certificate errors or chain of trust invalid",
+      "solution": "Check certificate hasn't expired: kubectl config view --raw. Verify CA certificate in kubeconfig matches cluster CA. For EKS, regenerate kubeconfig: aws eks update-kubeconfig --name cluster-name."
     }
   ],
   "examples": [

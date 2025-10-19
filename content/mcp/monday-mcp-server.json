@@ -63,16 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify workspace access rights",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "API rate limit exceeded - 429 error code returned",
+      "solution": "Rate limit: 10,000,000 complexity points/minute per account. Check Retry-After header in response to see wait time. Reduce query complexity or split operations into smaller batches."
     },
     {
-      "issue": "Check board permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "OAuth authentication fails or workspace access denied",
+      "solution": "Verify workspace permissions allow API access. Re-authenticate at https://mcp.monday.com/sse. Check account has Member role (not Guest). Contact workspace admin to grant API permissions."
     },
     {
-      "issue": "Monitor API rate limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "GraphQL query complexity calculation too high",
+      "solution": "Reduce nested fields in queries. Limit items per query to 50-100. Check monday.com developer docs for complexity calculation. Split complex queries into multiple simpler requests."
+    },
+    {
+      "issue": "Board or item permissions insufficient for operation",
+      "solution": "Verify your account has write permissions to specific board. Check board sharing settings allow modifications. Contact board owner to upgrade access level if read-only."
     }
   ],
   "examples": [

@@ -63,20 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify account type (business/personal)",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Rate limit reached - 429 RATE_LIMIT_REACHED error",
+      "solution": "PayPal doesn't publish rate limits but blocks anomalous traffic. Use webhooks instead of polling. Cache OAuth tokens (valid 8 hours). Implement exponential backoff on 429 errors. Contact support if legitimate traffic blocked."
     },
     {
-      "issue": "Check API permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Authentication failed - 401 Unauthorized error",
+      "solution": "Verify API credentials match environment (sandbox vs live). Check client ID and secret are correct. Generate new OAuth token if expired (8 hour lifetime). Use https://api-m.sandbox.paypal.com for sandbox testing."
     },
     {
-      "issue": "Monitor rate limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Sandbox vs production environment confusion",
+      "solution": "Sandbox URL: https://api-m.sandbox.paypal.com. Production URL: https://api-m.paypal.com. Use separate API credentials for each environment. Test all operations in sandbox before going live."
     },
     {
-      "issue": "Test in sandbox environment first",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Insufficient permissions for refund or transaction operation",
+      "solution": "Verify PayPal account is Business account (not Personal). Check API app has required scopes enabled in developer dashboard. Ensure transaction is eligible for refund (not expired). Review account restrictions."
     }
   ],
   "examples": [

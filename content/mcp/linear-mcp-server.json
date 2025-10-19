@@ -63,16 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Use /mcp command to re-authenticate if needed",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "OAuth access token expired - 401 Unauthorized error",
+      "solution": "Access tokens expire after 24 hours. Re-authenticate to get new token with refresh token enabled (default for OAuth apps created after Oct 1, 2025). Token refreshes automatically in compliant clients."
     },
     {
-      "issue": "Check Linear workspace permissions for your account",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Rate limit exceeded - RATELIMITED error code returned",
+      "solution": "API key auth: 1,500 requests/hour, 250K complexity points/hour. Unauthenticated: 60 req/hour. Implement exponential backoff. Use webhooks instead of polling. Contact support for temporary limit increase."
     },
     {
-      "issue": "Verify network connectivity to Linear servers",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "GraphQL query complexity limit exceeded - 10,000 points",
+      "solution": "Single query cannot exceed 10,000 complexity points. Reduce query depth or split into multiple smaller queries. Remove unnecessary nested fields. Check query complexity in Linear docs."
+    },
+    {
+      "issue": "Insufficient workspace permissions for operation",
+      "solution": "Verify your Linear account has Member or Admin role (not Guest). Check workspace settings for user permissions. Contact workspace admin to upgrade role if needed."
     }
   ],
   "examples": [

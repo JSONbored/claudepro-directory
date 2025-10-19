@@ -63,16 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Check Netlify account status and limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Build minutes quota exceeded - site paused",
+      "solution": "Starter plan: 300 build minutes/month. Check usage at app.netlify.com under team settings. Upgrade plan for more minutes. Site auto-resumes next billing cycle or upgrade immediately."
     },
     {
-      "issue": "Verify site permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "API rate limit exceeded during deployment",
+      "solution": "GitHub API limit: 60 req/hour unauthenticated. Authorize Netlify app with GitHub for higher limit. Reduce file count in deployments. Use .gitignore to exclude unnecessary files from builds."
     },
     {
-      "issue": "Monitor build minutes usage",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "OAuth authentication fails or permissions denied",
+      "solution": "Re-authenticate at https://netlify-mcp.netlify.app/mcp. Verify account has team member role with deploy permissions. Check site access settings allow API operations. Logout and login to refresh token."
+    },
+    {
+      "issue": "Environment variable not available during build",
+      "solution": "Add variables in site settings under Build & deploy > Environment. Use exact key names (case-sensitive). Redeploy site after adding variables. Check build logs for variable loading confirmation."
     }
   ],
   "examples": [

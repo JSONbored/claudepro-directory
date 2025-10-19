@@ -66,20 +66,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify Node.js is installed and accessible",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Permission denied when accessing files or directories",
+      "solution": "Verify filesystem server has read/write permissions to target directories. Run ls -l to check ownership and permissions. Use absolute paths in ALLOWED_DIRS config, not relative paths."
     },
     {
-      "issue": "Check Claude has read/write access to specified directories",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Directory not allowed error from MCP server",
+      "solution": "Add directory to allowed directories in MCP server config args. Use absolute path: npx -y @modelcontextprotocol/server-filesystem /absolute/path/to/directory. Restart Claude Desktop after config change."
     },
     {
-      "issue": "Ensure directory paths exist and are correctly specified",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "MCP server fails to start or connect",
+      "solution": "Verify Node.js is installed: run node --version (requires v14+). Check Claude Desktop config syntax is valid JSON. Ensure no other process is using same MCP server instance."
     },
     {
-      "issue": "Restart Claude Desktop after configuration changes",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "File operations fail or return no results",
+      "solution": "Confirm target files exist in allowed directories. Check file paths are absolute and accessible. Verify filesystem server process is running via Claude Desktop logs or MCP status."
     }
   ],
   "examples": [

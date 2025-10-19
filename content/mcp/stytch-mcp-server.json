@@ -63,20 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify project access permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Rate limit exceeded - 429 error returned",
+      "solution": "Stytch enforces rate limits per endpoint. Check error response for Retry-After header. Implement exponential backoff for retries. Review rate limits docs for specific endpoint limits. Contact support for increase requests."
     },
     {
-      "issue": "Check environment (test/live) configuration",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Invalid redirect URL or scheme error",
+      "solution": "Add redirect URL in Stytch Dashboard under redirect_urls. Use https:// for production (http:// only for localhost loopback). Verify URL exact match (case-sensitive). Check no duplicate redirect URLs configured."
     },
     {
-      "issue": "Review redirect URL configuration",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Misconfigured client or redirect URL not allowed",
+      "solution": "Ensure client has valid redirect_urls in Dashboard. Public clients require proper scheme (https or http loopback only). Localhost restrictions apply to certain clients. Verify client ID matches project."
     },
     {
-      "issue": "Monitor API rate limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Authentication failed or project access denied",
+      "solution": "Verify API keys match environment (test vs live). Check project_id and secret from Stytch Dashboard. Ensure user has project access permissions. Re-generate API keys if compromised. Review project security settings."
     }
   ],
   "examples": [

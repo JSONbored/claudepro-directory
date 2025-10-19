@@ -63,20 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Check Vercel account permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Build quota exceeded or deployment fails from quota limits",
+      "solution": "Check quota usage at vercel.com/dashboard/usage. Plans have specific build time/memory limits. Upgrade plan for higher quotas. Optimize build scripts to reduce time. Review vercel.com/docs/limits for plan limits."
     },
     {
-      "issue": "Verify project access rights",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Deployment fails with missing environment variables",
+      "solution": "Add environment variables in Project Settings > Environment Variables. Set correct environment scope (Production/Preview/Development). Redeploy after adding variables. Check .env.local not committed to git."
     },
     {
-      "issue": "Monitor build quota usage",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "API rate limit errors from third-party services",
+      "solution": "Implement rate limiting with Vercel WAF. Use Vercel KV/Redis for rate limit tracking. Check third-party API quotas not exceeded. Add delays between API calls. Use edge functions for caching."
     },
     {
-      "issue": "Check domain verification status",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Authentication failed or insufficient project permissions",
+      "solution": "Verify Vercel API token has required scopes. Check team membership and project access in Dashboard. Use team tokens for shared projects. Re-authenticate OAuth connection. Ensure token not expired or revoked."
     }
   ],
   "examples": [

@@ -63,16 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify account access level",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Rate limit reached: log in or use your apiToken error",
+      "solution": "Pass HF_TOKEN in requests to authenticate. Get token from Hugging Face Settings > Access Tokens. Add Authorization: Bearer YOUR_TOKEN header to all API requests to avoid free tier limits."
     },
     {
-      "issue": "Check API token validity",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Persistent rate limiting despite no recent usage",
+      "solution": "Rate limits are per 5-minute windows across all request types. Check your Billing page for current rate limit status across three buckets. Wait for 5-minute window reset or upgrade to PRO/Enterprise."
     },
     {
-      "issue": "Monitor rate limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Inference API returns authentication errors",
+      "solution": "Serverless Inference API requires authentication. Add your HF token to requests. For heavy usage, switch to Inference Endpoints which provides dedicated resources and higher limits."
+    },
+    {
+      "issue": "Cannot access models or datasets - permission error",
+      "solution": "Verify your account has access to requested model or dataset. For gated models, accept terms on model page. Check model visibility settings and ensure you're authenticated with correct token."
     }
   ],
   "examples": [

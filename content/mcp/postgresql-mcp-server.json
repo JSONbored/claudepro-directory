@@ -66,24 +66,24 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify connection string format and database accessibility",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Connection refused or database not accessible",
+      "solution": "Verify PostgreSQL is running with pg_isready command. Check connection string format: postgresql://user:password@host:port/database. Test with psql command first. Verify firewall allows connections on port 5432."
     },
     {
-      "issue": "Check username/password in connection string",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "SSL connection error - wrong version number or verify failed",
+      "solution": "Add sslmode parameter: postgresql://host/db?sslmode=require. Verify PostgreSQL supports TLS version (check pg_config --configure). Use sslmode=disable for local dev only. Check certificate matches CA in ssl_ca_file."
     },
     {
-      "issue": "Add SSL mode if required by your database",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Authentication failed for user or password rejected",
+      "solution": "Verify username/password in connection string exact match. Check pg_hba.conf allows connection method (md5, scram-sha-256). Ensure user exists with GRANT SELECT permissions. Test auth with psql -U username -d database."
     },
     {
-      "issue": "Ensure database user has SELECT permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Certificate authentication failed - CN mismatch",
+      "solution": "Verify certificate CN matches PostgreSQL username exactly. Configure pg_ident.conf for username mapping if needed. Check ssl_cert_file and ssl_key_file permissions (owned by postgres user). Ensure client cert trusted by server CA."
     },
     {
-      "issue": "Test connection from command line first",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Permission denied on table or schema access error",
+      "solution": "Grant SELECT permissions: GRANT SELECT ON ALL TABLES IN SCHEMA public TO username. Verify read-only user has pg_read_all_data role. Check schema permissions with \\dp command in psql. Ensure user connected to correct database."
     }
   ],
   "examples": [

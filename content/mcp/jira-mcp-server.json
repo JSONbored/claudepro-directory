@@ -63,16 +63,24 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify site access permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "HTTP 429 rate limit error starting November 2025",
+      "solution": "Atlassian enforces rate limits on API tokens from Nov 22, 2025. Check Retry-After and X-RateLimit-Reset headers. Implement caching, pagination, and webhooks to reduce API calls below token limits."
     },
     {
-      "issue": "Check OAuth token status with /mcp",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Free app rate limiting starting August 2025",
+      "solution": "Free apps rate limited from Aug 18, 2025, burst limits from Aug 28. Upgrade to paid tier for higher limits. Implement jitter on scheduled tasks and optimize JQL queries to reduce calls."
     },
     {
-      "issue": "Ensure project visibility settings",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "OAuth token authentication failed or expired",
+      "solution": "Re-authenticate via OAuth flow to get new token. Verify token hasn't been revoked in Atlassian admin settings. Check token scope includes required permissions for Jira and Confluence access."
+    },
+    {
+      "issue": "Cannot access project or issues - permission denied",
+      "solution": "Verify your Atlassian account has project access. Check project visibility settings allow API access. Ensure OAuth scope includes appropriate permissions (read:jira-work, write:jira-work)."
+    },
+    {
+      "issue": "JQL search queries returning no results or errors",
+      "solution": "Validate JQL syntax is correct using Jira's JQL builder. Check field names match custom field IDs. Verify search permissions for projects in query. Use /rest/api/3/search with proper authentication."
     }
   ],
   "examples": [

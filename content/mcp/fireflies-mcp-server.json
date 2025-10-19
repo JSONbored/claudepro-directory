@@ -63,20 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Check workspace permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Too many requests error with code 429",
+      "solution": "Free/Pro plans: 50 requests/day limit. Business/Enterprise: 60 requests/minute. Check retryAfter timestamp in error response. Wait specified time before retry or upgrade plan for higher limits."
     },
     {
-      "issue": "Verify meeting access rights",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Invalid API key or authentication failed error",
+      "solution": "Add Authorization header with Bearer YOUR_API_KEY format. Verify API key hasn't expired in Fireflies settings. Check for typos and regenerate key if authentication continues to fail."
     },
     {
-      "issue": "Monitor storage limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Cannot access meeting transcripts or recordings",
+      "solution": "Verify workspace permissions grant access to meetings. Check meeting privacy settings allow API access. Ensure your account has viewer or higher role for target meetings in Fireflies workspace."
     },
     {
-      "issue": "Test transcript quality",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Transcripts incomplete or missing sections",
+      "solution": "Check audio quality of original recording. Verify storage limits haven't been exceeded for your plan tier. Review transcript settings for language and accuracy preferences in Fireflies workspace."
     }
   ],
   "examples": [

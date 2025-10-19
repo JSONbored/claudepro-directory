@@ -63,16 +63,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Check workspace access permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "HTTP 429 Too Many Requests - rate limit hit",
+      "solution": "Private apps: 10,000 calls/min per app, 25,000/min per workspace. Public apps same limits. Check X-RateLimit-Reset header for reset time. Implement exponential backoff when approaching X-RateLimit-Remaining threshold."
     },
     {
-      "issue": "Verify team member permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "HTTP 401 Unauthorized - authentication failed",
+      "solution": "Verify API key is valid and copied correctly from Intercom settings. Check Authorization header format: Bearer YOUR_API_KEY. Regenerate API key from Intercom Developer Hub if authentication fails."
     },
     {
-      "issue": "Monitor API rate limits",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Cannot access conversations or customer data",
+      "solution": "Verify workspace permissions grant access to conversations. Check team member role has necessary permissions. For private apps, confirm OAuth scope includes required access (read_conversations, write_conversations)."
+    },
+    {
+      "issue": "Webhook requests timing out or failing",
+      "solution": "Note: rate limits apply only to REST API, not webhooks. Verify webhook endpoint is accessible and responds within 15 seconds. Check webhook signature for security validation."
     }
   ],
   "examples": [

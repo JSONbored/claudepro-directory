@@ -60,20 +60,20 @@
   ],
   "troubleshooting": [
     {
-      "issue": "Verify API key permissions in ClickUp",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Getting HTTP 429 with rate limit exceeded errors",
+      "solution": "ClickUp limits to 100 requests per minute per token. Check X-RateLimit-Reset header for reset time. Implement exponential backoff and wait specified seconds before retry."
     },
     {
-      "issue": "Check Team ID accuracy in configuration",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "OAuth error: team not authorized for access token",
+      "solution": "Re-authenticate to authorize workspace access. Verify OAuth scope includes required permissions and check if user revoked authorization. Generate new API token from ClickUp settings if needed."
     },
     {
-      "issue": "Ensure user has space access permissions",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Authorization token missing in header error",
+      "solution": "Add Authorization header with your API key to all requests. Format: Authorization: YOUR_API_KEY. Verify token is correctly copied from ClickUp API settings without extra spaces."
     },
     {
-      "issue": "Monitor rate limits for API calls",
-      "solution": "Check the documentation for detailed troubleshooting steps."
+      "issue": "Cannot access tasks or spaces - permission denied",
+      "solution": "Verify your ClickUp account has access to target spaces and lists. Check workspace admin settings and ensure API token has necessary permissions for workspace and spaces."
     }
   ],
   "examples": [
