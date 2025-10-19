@@ -1,7 +1,7 @@
 # Changelog
 ## 2025-10-18 - Pattern-Based SEO Metadata Architecture
 
-**TL;DR:** Migrated from 1,600+ lines of legacy metadata code to a modern pattern-based architecture with template-driven metadata generation. All 41 routes now use 8 reusable patterns, achieving 100% coverage with titles (55-60 chars) and descriptions (150-160 chars) optimized for October 2025 SEO standards and AI search engines.
+**TL;DR:** Migrated from 1,600+ lines of legacy metadata code to a modern pattern-based architecture with template-driven metadata generation. All 41 routes now use 8 reusable patterns, achieving 100% coverage with titles (53-60 chars) and descriptions (150-160 chars) optimized for October 2025 SEO standards and AI search engines.
 
 ### What Changed
 
@@ -14,7 +14,7 @@ Replaced legacy metadata registry system with enterprise-grade pattern-based arc
 - **Route Scanner** - Static analysis tool to discover all application routes without runtime overhead
 - **Metadata Templates** - Centralized templates with smart truncation/padding for SEO compliance
 - **Unified Validation** - New `validate:metadata` script consolidating title/description validation with pattern system integration
-- **October 2025 SEO Standards** - Title: 55-60 chars (keyword density), Description: 150-160 chars (AI-optimized), Keywords: 3-10 max
+- **October 2025 SEO Standards** - Title: 53-60 chars (keyword density), Description: 150-160 chars (AI-optimized), Keywords: 3-10 max
 
 ### Changed
 

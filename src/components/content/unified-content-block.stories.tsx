@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { UnifiedContentBlock } from '@/src/components/content/unified-content-block';
 
 /**
@@ -489,52 +490,286 @@ export const AllVariants: Story = {
   ),
 };
 
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Case Study Variant Test
+ * Tests case study variant renders all sections correctly
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const CaseStudyVariantTest: Story = {
+  args: {
+    variant: 'case-study',
+    company: 'Test Company',
+    industry: 'Technology',
+    challenge: 'Challenge description for testing',
+    solution: 'Solution description for testing',
+    results: 'Results achieved for testing',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests case study variant displays company, challenge, solution, and results.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify company name is displayed', async () => {
+      const company = canvas.getByText(/test company/i);
+      await expect(company).toBeInTheDocument();
+    });
+
+    await step('Verify challenge section is displayed', async () => {
+      const challenge = canvas.getByText(/challenge description/i);
+      await expect(challenge).toBeInTheDocument();
+    });
+
+    await step('Verify solution section is displayed', async () => {
+      const solution = canvas.getByText(/solution description/i);
+      await expect(solution).toBeInTheDocument();
+    });
+
+    await step('Verify results section is displayed', async () => {
+      const results = canvas.getByText(/results achieved/i);
+      await expect(results).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Feature Grid Variant Test
+ * Tests feature grid variant renders features correctly
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const FeatureGridVariantTest: Story = {
+  args: {
+    variant: 'feature-grid',
+    title: 'Test Features',
+    features: [
+      { title: 'Feature 1', description: 'Description 1', icon: 'Check' },
+      { title: 'Feature 2', description: 'Description 2', icon: 'Star' },
+      { title: 'Feature 3', description: 'Description 3', icon: 'Zap' },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests feature grid variant displays title and feature cards.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify grid title is displayed', async () => {
+      const title = canvas.getByText(/test features/i);
+      await expect(title).toBeInTheDocument();
+    });
+
+    await step('Verify all feature titles are displayed', async () => {
+      const feature1 = canvas.getByText(/feature 1/i);
+      const feature2 = canvas.getByText(/feature 2/i);
+      const feature3 = canvas.getByText(/feature 3/i);
+
+      await expect(feature1).toBeInTheDocument();
+      await expect(feature2).toBeInTheDocument();
+      await expect(feature3).toBeInTheDocument();
+    });
+
+    await step('Verify feature descriptions are displayed', async () => {
+      const desc1 = canvas.getByText(/description 1/i);
+      const desc2 = canvas.getByText(/description 2/i);
+      const desc3 = canvas.getByText(/description 3/i);
+
+      await expect(desc1).toBeInTheDocument();
+      await expect(desc2).toBeInTheDocument();
+      await expect(desc3).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * TLDR Variant Test
+ * Tests TLDR variant renders summary and key points
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const TLDRVariantTest: Story = {
+  args: {
+    variant: 'tldr',
+    summary: 'Test summary content for quick overview',
+    keyPoints: ['Key point 1', 'Key point 2', 'Key point 3'],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests TLDR variant displays summary and key takeaways.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify summary is displayed', async () => {
+      const summary = canvas.getByText(/test summary content/i);
+      await expect(summary).toBeInTheDocument();
+    });
+
+    await step('Verify all key points are displayed', async () => {
+      const point1 = canvas.getByText(/key point 1/i);
+      const point2 = canvas.getByText(/key point 2/i);
+      const point3 = canvas.getByText(/key point 3/i);
+
+      await expect(point1).toBeInTheDocument();
+      await expect(point2).toBeInTheDocument();
+      await expect(point3).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
+ * Expert Quote Variant Test
+ * Tests expert quote variant renders quote and attribution
  */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+export const ExpertQuoteVariantTest: Story = {
+  args: {
+    variant: 'expert-quote',
+    quote: 'This is a test expert quote for validation',
+    author: 'Test Author',
+    role: 'Senior Engineer',
+    company: 'Test Corp',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests expert quote variant displays quote, author, role, and company.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify quote text is displayed', async () => {
+      const quote = canvas.getByText(/this is a test expert quote/i);
+      await expect(quote).toBeInTheDocument();
+    });
+
+    await step('Verify author name is displayed', async () => {
+      const author = canvas.getByText(/test author/i);
+      await expect(author).toBeInTheDocument();
+    });
+
+    await step('Verify role is displayed', async () => {
+      const role = canvas.getByText(/senior engineer/i);
+      await expect(role).toBeInTheDocument();
+    });
+
+    await step('Verify company is displayed', async () => {
+      const company = canvas.getByText(/test corp/i);
+      await expect(company).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
+ * Quick Reference Variant Test
+ * Tests quick reference variant renders reference table
  */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+export const QuickReferenceVariantTest: Story = {
+  args: {
+    variant: 'quick-reference',
+    title: 'Test Commands',
+    items: [
+      { label: 'Command 1', description: 'Description 1' },
+      { label: 'Command 2', description: 'Description 2' },
+      { label: 'Command 3', description: 'Description 3' },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Tests quick reference variant displays reference table with labels and descriptions.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify reference title is displayed', async () => {
+      const title = canvas.getByText(/test commands/i);
+      await expect(title).toBeInTheDocument();
+    });
+
+    await step('Verify all command labels are displayed', async () => {
+      const cmd1 = canvas.getByText(/command 1/i);
+      const cmd2 = canvas.getByText(/command 2/i);
+      const cmd3 = canvas.getByText(/command 3/i);
+
+      await expect(cmd1).toBeInTheDocument();
+      await expect(cmd2).toBeInTheDocument();
+      await expect(cmd3).toBeInTheDocument();
+    });
+
+    await step('Verify all descriptions are displayed', async () => {
+      const desc1 = canvas.getByText(/description 1/i);
+      const desc2 = canvas.getByText(/description 2/i);
+      const desc3 = canvas.getByText(/description 3/i);
+
+      await expect(desc1).toBeInTheDocument();
+      await expect(desc2).toBeInTheDocument();
+      await expect(desc3).toBeInTheDocument();
+    });
+  },
+};
+
+/**
+ * Content Tabs Variant Test
+ * Tests content tabs variant renders tabs and content
+ */
+export const ContentTabsVariantTest: Story = {
+  args: {
+    variant: 'content-tabs',
+    tabs: [
+      { value: 'tab1', label: 'Tab 1', content: <div>Tab 1 Content</div> },
+      { value: 'tab2', label: 'Tab 2', content: <div>Tab 2 Content</div> },
+      { value: 'tab3', label: 'Tab 3', content: <div>Tab 3 Content</div> },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests content tabs variant displays tab labels and tab content switching.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify all tab labels are displayed', async () => {
+      const tab1 = canvas.getByRole('tab', { name: /tab 1/i });
+      const tab2 = canvas.getByRole('tab', { name: /tab 2/i });
+      const tab3 = canvas.getByRole('tab', { name: /tab 3/i });
+
+      await expect(tab1).toBeInTheDocument();
+      await expect(tab2).toBeInTheDocument();
+      await expect(tab3).toBeInTheDocument();
+    });
+
+    await step('Verify initial tab content is displayed', async () => {
+      // First tab should be active by default
+      const content = canvas.getByText(/tab 1 content/i);
+      await expect(content).toBeInTheDocument();
+    });
+
+    await step('Click Tab 2 to switch content', async () => {
+      const tab2 = canvas.getByRole('tab', { name: /tab 2/i });
+      await userEvent.click(tab2);
+    });
+
+    await step('Verify Tab 2 content is displayed after click', async () => {
+      const content = canvas.getByText(/tab 2 content/i);
+      await expect(content).toBeInTheDocument();
+    });
   },
 };

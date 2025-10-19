@@ -2,6 +2,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { Button } from '@/src/components/primitives/button';
 import { ErrorBoundary } from './error-boundary';
 
@@ -220,52 +221,245 @@ export const MultipleComponents: Story = {
   ),
 };
 
+// ============================================================================
+// COMPONENT STATES
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Error Recovery State
+ * Tests error boundary recovery when error is cleared
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const ErrorRecoveryState: Story = {
+  render: () => {
+    function RecoverableError() {
+      const [hasError, setHasError] = useState(false);
+
+      return (
+        <div className="p-8 space-y-4">
+          <h2 className="text-2xl font-bold mb-4">Error Recovery Demo</h2>
+          <div className="space-x-2">
+            <Button onClick={() => setHasError(true)} variant="destructive">
+              Trigger Error
+            </Button>
+            <Button onClick={() => setHasError(false)} variant="outline">
+              Reset Component
+            </Button>
+          </div>
+          <ErrorBoundary key={hasError ? 'error' : 'success'}>
+            <ThrowErrorComponent shouldThrow={hasError} />
+          </ErrorBoundary>
+        </div>
+      );
+    }
+
+    return <RecoverableError />;
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Error boundary with recovery mechanism. Key prop changes force remount.
+
+**Recovery Pattern:**
+- Trigger error with "Trigger Error" button
+- Reset component with "Reset Component" button
+- Key prop change forces ErrorBoundary remount
+        `,
+      },
+    },
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Loading Fallback State
+ * Tests error boundary with loading skeleton fallback
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const LoadingFallbackState: Story = {
+  render: () => (
+    <ErrorBoundary
+      fallback={
+        <div className="p-8">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-muted rounded w-3/4" />
+            <div className="h-4 bg-muted rounded w-full" />
+            <div className="h-4 bg-muted rounded w-5/6" />
+          </div>
+        </div>
+      }
+    >
+      <ThrowErrorComponent shouldThrow={true} />
+    </ErrorBoundary>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Error boundary with skeleton loading fallback. Useful for graceful degradation during errors.',
+      },
+    },
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * Empty State After Error
+ * Tests error boundary showing empty state instead of error UI
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const EmptyStateAfterError: Story = {
+  render: () => (
+    <ErrorBoundary
+      fallback={
+        <div className="p-8 text-center">
+          <div className="max-w-md mx-auto">
+            <h3 className="text-lg font-semibold mb-2">No Content Available</h3>
+            <p className="text-muted-foreground mb-4">
+              The content you're looking for could not be loaded at this time.
+            </p>
+            <Button onClick={() => window.location.reload()}>Reload Page</Button>
+          </div>
+        </div>
+      }
+    >
+      <ThrowErrorComponent shouldThrow={true} />
+    </ErrorBoundary>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Error boundary showing user-friendly empty state instead of technical error details.',
+      },
+    },
+  },
+};
+
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
+/**
+ * Error Trigger Interaction Test
+ * Tests interactive error triggering via button click
+ */
+export const ErrorTriggerInteraction: Story = {
+  render: () => <ErrorTrigger />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests error boundary activation via user interaction.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify initial state shows success message', async () => {
+      const successMessage = canvas.getByText(/component loaded successfully/i);
+      await expect(successMessage).toBeInTheDocument();
+    });
+
+    await step('Click "Trigger Error" button', async () => {
+      const triggerButton = canvas.getByRole('button', { name: /trigger error/i });
+      await userEvent.click(triggerButton);
+    });
+
+    await step('Verify error boundary fallback UI appears', async () => {
+      // Error boundary should catch the error and show fallback
+      // Note: Storybook may suppress errors in test mode
+      const successMessage = canvas.queryByText(/component loaded successfully/i);
+      // Success message should be gone after error
+      await expect(successMessage).not.toBeInTheDocument();
+    });
   },
 };
 
 /**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
+ * Nested Boundary Isolation Test
+ * Tests that error in one boundary doesn't affect others
  */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+export const NestedBoundaryIsolation: Story = {
+  render: () => (
+    <div className="p-8 space-y-4">
+      <h2 className="text-2xl font-bold mb-4">Isolation Test</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <ErrorBoundary>
+          <div className="p-4 border rounded-lg">
+            <h3 className="font-semibold mb-2" data-testid="section-1-title">
+              Section 1 (Working)
+            </h3>
+            <p className="text-muted-foreground">This section is working fine.</p>
+          </div>
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <div className="p-4 border rounded-lg">
+            <h3 className="font-semibold mb-2" data-testid="section-2-title">
+              Section 2 (Error)
+            </h3>
+            <ThrowErrorComponent shouldThrow={true} />
+          </div>
+        </ErrorBoundary>
+      </div>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Tests that errors are isolated to their boundary - other sections continue working.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify Section 1 is still working', async () => {
+      const section1 = canvas.getByTestId('section-1-title');
+      await expect(section1).toBeInTheDocument();
+      await expect(section1).toHaveTextContent('Section 1 (Working)');
+    });
+
+    await step('Verify Section 2 title is present (boundary contains error)', async () => {
+      // Section 2 boundary should catch its error without affecting Section 1
+      const section2 = canvas.getByTestId('section-2-title');
+      await expect(section2).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
+ * Custom Fallback Rendering Test
+ * Tests custom fallback component rendering
  */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+export const CustomFallbackRendering: Story = {
+  render: () => (
+    <ErrorBoundary
+      fallback={
+        <div data-testid="custom-fallback" className="p-8 border rounded-lg">
+          <h2 className="text-xl font-bold mb-2">Custom Error Handler</h2>
+          <p className="text-muted-foreground">This is a custom fallback UI.</p>
+        </div>
+      }
+    >
+      <ThrowErrorComponent shouldThrow={true} />
+    </ErrorBoundary>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests rendering of custom fallback component instead of default error UI.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify custom fallback is rendered', async () => {
+      const customFallback = canvas.getByTestId('custom-fallback');
+      await expect(customFallback).toBeInTheDocument();
+    });
+
+    await step('Verify custom fallback contains expected text', async () => {
+      const customHeading = canvas.getByText(/custom error handler/i);
+      await expect(customHeading).toBeInTheDocument();
+    });
   },
 };

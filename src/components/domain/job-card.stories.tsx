@@ -1,6 +1,7 @@
 'use client';
 
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { JobCard } from './job-card';
 
 const meta = {
@@ -19,7 +20,31 @@ const meta = {
   argTypes: {
     job: {
       control: 'object',
-      description: 'Job data object',
+      description: 'Job listing data object',
+      table: {
+        type: { summary: 'Job' },
+      },
+    },
+    onCardClick: {
+      action: 'cardClicked',
+      description: 'Callback when job card is clicked',
+      table: {
+        type: { summary: '() => void' },
+      },
+    },
+    onApplyClick: {
+      action: 'applyClicked',
+      description: 'Callback when Apply button is clicked',
+      table: {
+        type: { summary: '() => void' },
+      },
+    },
+    enableBookmark: {
+      control: 'boolean',
+      description: 'Enable bookmark functionality',
+      table: {
+        type: { summary: 'boolean' },
+      },
     },
   },
 } satisfies Meta<typeof JobCard>;
@@ -356,52 +381,346 @@ export const GridLayout: Story = {
   ),
 };
 
+// ============================================================================
+// COMPONENT STATES
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Loading State - Skeleton/Placeholder
+ * Shows job card in loading state while data is being fetched
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const LoadingState: Story = {
+  args: {
+    job: {
+      slug: 'loading',
+      title: 'Loading...',
+      company: 'Loading Company',
+      companyLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=loading',
+      location: 'Loading...',
+      type: 'full-time',
+      remote: false,
+      description: 'Job details are currently loading. Please wait.',
+      tags: [],
+      postedAt: new Date(),
+      applyUrl: '#',
+      featured: false,
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Loading/Skeleton State** - Job card shown while data is being fetched.
+
+**Features:**
+- Placeholder text for title, company, location
+- No tags or salary information
+- Used during async job listing loading
+
+**Use Cases:**
+- Initial page load for job board
+- Infinite scroll loading more jobs
+- Search results loading state
+
+**Implementation Note:** Production should use dedicated skeleton component with animated loading placeholders.
+        `,
+      },
+    },
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Empty State - No Jobs Available
+ * Shows when job search/filter returns no results
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const EmptyState: Story = {
+  args: {
+    job: {
+      slug: 'empty',
+      title: 'No Jobs Found',
+      company: 'Try Different Filters',
+      companyLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=empty',
+      location: 'N/A',
+      type: 'full-time',
+      remote: false,
+      description:
+        'No jobs match your current search criteria. Try adjusting your filters or browse all available positions.',
+      tags: [],
+      postedAt: new Date(),
+      applyUrl: '#',
+      featured: false,
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Empty State** - Shown when job search returns no matches.
+
+**Features:**
+- Helpful messaging to guide user
+- Clear call-to-action in description
+- No featured badge or salary
+
+**Use Cases:**
+- Search returns no matches
+- Filtered job board has no results
+- New job category with no postings yet
+        `,
+      },
+    },
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * Expired Job - Past Application Deadline
+ * Shows job that is no longer accepting applications
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const ExpiredJob: Story = {
+  args: {
+    job: {
+      slug: 'expired-job',
+      title: 'Senior Backend Engineer',
+      company: 'Expired Corp',
+      companyLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=expired',
+      location: 'Seattle, WA',
+      type: 'full-time',
+      remote: true,
+      salary: '$140k - $180k',
+      description:
+        'This position is no longer accepting applications. The application deadline has passed.',
+      tags: ['Backend', 'Go', 'Kubernetes', 'PostgreSQL'],
+      postedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000), // 60 days ago
+      applyUrl: '#',
+      featured: false,
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Expired Job State** - Job posting that is no longer accepting applications.
+
+**Features:**
+- Posted date shows "60 days ago" (or older)
+- Description indicates expired status
+- Apply button could be disabled (implementation-specific)
+
+**Use Cases:**
+- Jobs past application deadline
+- Filled positions still showing in archive
+- Historical job listings for reference
+        `,
+      },
+    },
+  },
+};
+
+// ============================================================================
+// PLAY FUNCTION TESTS - INTERACTIVE TESTING
+// ============================================================================
+
+/**
+ * Card Click Interaction
+ * Tests job card navigation on click
+ */
+export const CardClickInteraction: Story = {
+  args: {
+    job: {
+      slug: 'test-job',
+      title: 'Test Engineer Position',
+      company: 'Test Company',
+      companyLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=test',
+      location: 'Remote',
+      type: 'full-time',
+      remote: true,
+      salary: '$120k - $160k',
+      description: 'Click this job card to test navigation behavior.',
+      tags: ['Testing', 'QA', 'Automation'],
+      postedAt: new Date(),
+      applyUrl: 'https://example.com/apply',
+      featured: false,
+    },
+    onCardClick: fn(),
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify job card is rendered', async () => {
+      const card = canvas.getByRole('article');
+      await expect(card).toBeInTheDocument();
+    });
+
+    await step('Verify job title is visible', async () => {
+      const title = canvas.getByText(/test engineer position/i);
+      await expect(title).toBeVisible();
+    });
+
+    await step('Click the job card', async () => {
+      const card = canvas.getByRole('article');
+      await userEvent.click(card);
+    });
+
+    await step('Verify onCardClick was called', async () => {
+      await expect(args.onCardClick).toHaveBeenCalledTimes(1);
+    });
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Interactive Test**: Job card click navigation.
+
+**Test Steps:**
+1. Verify job card renders with article role
+2. Verify job title is visible
+3. Click the card element
+4. Verify \`onCardClick\` callback was invoked
+
+**Validates:**
+- Job card renders with proper structure
+- Click handler fires correctly
+- Navigation callback system works
+- Accessibility (article role)
+        `,
+      },
+    },
   },
 };
 
 /**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
+ * Apply Button Interaction
+ * Tests Apply button click isolation (doesn't trigger card click)
  */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+export const ApplyButtonInteraction: Story = {
+  args: {
+    job: {
+      slug: 'apply-test-job',
+      title: 'Frontend Developer',
+      company: 'Apply Test Co',
+      companyLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=applytest',
+      location: 'New York, NY',
+      type: 'full-time',
+      remote: false,
+      salary: '$130k - $170k',
+      description: 'Test that Apply button works independently of card click.',
+      tags: ['React', 'TypeScript', 'CSS'],
+      postedAt: new Date(),
+      applyUrl: 'https://example.com/apply',
+      featured: false,
+    },
+    onCardClick: fn(), // Should NOT be called when clicking Apply
+    onApplyClick: fn(),
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify Apply button is rendered', async () => {
+      const applyButton = canvas.getByRole('button', { name: /apply/i });
+      await expect(applyButton).toBeInTheDocument();
+    });
+
+    await step('Click Apply button', async () => {
+      const applyButton = canvas.getByRole('button', { name: /apply/i });
+      await userEvent.click(applyButton);
+    });
+
+    await step('Verify onApplyClick was called', async () => {
+      await expect(args.onApplyClick).toHaveBeenCalledTimes(1);
+    });
+
+    await step('Verify card navigation was NOT triggered', async () => {
+      // onCardClick should NOT have been called (stopPropagation works)
+      await expect(args.onCardClick).not.toHaveBeenCalled();
+    });
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Interactive Test**: Apply button click isolation.
+
+**Test Steps:**
+1. Verify Apply button renders
+2. Click Apply button
+3. Verify \`onApplyClick\` callback was invoked
+4. Verify card navigation was NOT triggered (stopPropagation works)
+
+**Validates:**
+- Apply button renders correctly
+- \`e.stopPropagation()\` prevents card click when clicking Apply
+- Users can apply without triggering card navigation
+- Event bubbling is properly managed
+
+**Pattern:** Apply button MUST call \`e.stopPropagation()\` to prevent card navigation.
+        `,
+      },
+    },
   },
 };
 
 /**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
+ * Keyboard Navigation Interaction
+ * Tests keyboard accessibility for job card
  */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+export const KeyboardNavigationInteraction: Story = {
+  args: {
+    job: {
+      slug: 'keyboard-test-job',
+      title: 'Accessibility Engineer',
+      company: 'A11y Company',
+      companyLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=a11y',
+      location: 'Remote',
+      type: 'full-time',
+      remote: true,
+      salary: '$140k - $180k',
+      description: 'Use Tab to focus, then press Enter to navigate.',
+      tags: ['Accessibility', 'WCAG', 'ARIA'],
+      postedAt: new Date(),
+      applyUrl: 'https://example.com/apply',
+      featured: false,
+    },
+    onCardClick: fn(),
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Focus the job card with keyboard', async () => {
+      const card = canvas.getByRole('article');
+      card.focus();
+      await expect(card).toHaveFocus();
+    });
+
+    await step('Press Enter key to navigate', async () => {
+      const card = canvas.getByRole('article');
+      await userEvent.type(card, '{Enter}');
+    });
+
+    await step('Verify onCardClick was called', async () => {
+      await expect(args.onCardClick).toHaveBeenCalled();
+    });
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Interactive Test**: Keyboard navigation (Enter/Space).
+
+**Test Steps:**
+1. Focus the job card using keyboard (tabIndex=0)
+2. Verify card receives focus
+3. Press Enter key
+4. Verify navigation callback fires
+
+**Validates:**
+- Job card is keyboard focusable
+- Enter/Space key handlers work
+- ARIA roles are correct (article)
+- Full keyboard accessibility compliance
+
+**Accessibility:** Meets WCAG 2.1 AA standards for keyboard navigation.
+        `,
+      },
+    },
   },
 };

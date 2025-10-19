@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { Navigation } from './navigation';
 
 /**
@@ -162,127 +163,19 @@ Compact navigation state after scrolling past 20px threshold.
       },
     },
   },
-  play: async () => {
-    // Simulate scroll to trigger compact state
-    window.scrollTo({ top: 100, behavior: 'instant' });
-  },
-};
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
 
-/**
- * MOBILE SMALL (320px)
- * Navigation on small mobile devices with sheet menu
- */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: `
-Small mobile navigation (320px) with sheet-based menu.
+    await step('Scroll page to trigger compact state', async () => {
+      window.scrollTo({ top: 100, behavior: 'instant' });
+      // Wait for scroll state to update
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    });
 
-**Mobile Features:**
-- Hamburger menu button
-- Full-screen sheet overlay
-- Stacked navigation links
-- Large touch targets (h-16)
-- Social action buttons (Discord, GitHub, Theme)
-- Swipe to close support
-
-**Touch Optimization:**
-- Minimum 44x44px touch targets
-- Active state scaling (scale-[0.95])
-- Visual feedback on interactions
-        `,
-      },
-    },
-  },
-};
-
-/**
- * MOBILE LARGE (414px)
- * Navigation on large mobile devices with sheet menu
- */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: `
-Large mobile navigation (414px) with sheet-based menu.
-
-**Mobile Features:**
-- Hamburger menu button
-- Full-screen sheet overlay
-- Stacked navigation links
-- Large touch targets (h-16)
-- More horizontal space for content
-- Social action buttons (Discord, GitHub, Theme)
-- Swipe to close support
-
-**Touch Optimization:**
-- Minimum 44x44px touch targets
-- Active state scaling (scale-[0.95])
-- Extra space for better UX
-        `,
-      },
-    },
-  },
-};
-
-/**
- * TABLET VIEWPORT
- * Navigation on tablet devices
- */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: `
-Tablet navigation showing responsive breakpoints.
-
-**Tablet Behavior:**
-- Partial desktop navigation visible
-- Some items may collapse to "More" menu
-- Touch-optimized interactions
-- Responsive logo sizing
-        `,
-      },
-    },
-  },
-};
-
-/**
- * DESKTOP WIDE
- * Navigation on large desktop screens
- */
-export const DesktopWide: Story = {
-  globals: {
-    viewport: { value: 'desktop' },
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: `
-Full desktop navigation with all features visible.
-
-**Desktop Features:**
-- Full logo with text
-- All primary navigation links
-- "More" dropdown with mega menu
-- Search trigger with shortcut hint
-- Social links
-- User menu (when authenticated)
-- Theme toggle
-        `,
-      },
-    },
+    await step('Verify navigation is present after scroll', async () => {
+      const nav = canvas.getByRole('navigation');
+      await expect(nav).toBeInTheDocument();
+    });
   },
 };
 
@@ -348,14 +241,21 @@ Navigation with "More" dropdown menu opened.
       },
     },
   },
-  play: async ({ canvasElement }) => {
-    // Note: Actual interaction would require Storybook interactions addon
-    // This is a visual demonstration
-    const moreButton = canvasElement.querySelector('button[aria-label*="More"]');
-    if (moreButton instanceof HTMLElement) {
-      // In real implementation, would trigger click here
-      // moreButton.click();
-    }
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify navigation is rendered', async () => {
+      const nav = canvas.getByRole('navigation');
+      await expect(nav).toBeInTheDocument();
+    });
+
+    await step('Look for "More" dropdown trigger', async () => {
+      // More button may be in desktop navigation
+      const moreButton = canvasElement.querySelector('button[aria-label*="More"]');
+      if (moreButton) {
+        await expect(moreButton).toBeInTheDocument();
+      }
+    });
   },
 };
 
@@ -398,54 +298,6 @@ Navigation with "New" badge on Skills link.
 - Accessible label for screen readers
 - Configuration-driven (isNew: true)
 - Auto-managed via navigation config
-        `,
-      },
-    },
-  },
-};
-
-/**
- * DARK THEME
- * Navigation in dark mode
- */
-export const DarkTheme: Story = {
-  parameters: {
-    globals: { theme: 'dark' },
-    docs: {
-      description: {
-        story: `
-Navigation optimized for dark theme.
-
-**Dark Theme Features:**
-- Card background with backdrop blur
-- Border opacity adjustments
-- Muted text colors with proper contrast
-- Enhanced shadow in scrolled state
-- Theme toggle shows light icon
-        `,
-      },
-    },
-  },
-};
-
-/**
- * LIGHT THEME
- * Navigation in light mode
- */
-export const LightTheme: Story = {
-  parameters: {
-    globals: { theme: 'light' },
-    docs: {
-      description: {
-        story: `
-Navigation optimized for light theme.
-
-**Light Theme Features:**
-- Light card background
-- Adjusted border colors
-- Dark text for readability
-- Subtle shadows
-- Theme toggle shows dark icon
         `,
       },
     },
@@ -531,5 +383,184 @@ without jank or layout thrashing.
         `,
       },
     },
+  },
+};
+
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
+/**
+ * Navigation Links Test
+ * Tests primary navigation links are rendered
+ */
+export const NavigationLinksTest: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests that primary navigation links are rendered correctly.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify navigation is rendered', async () => {
+      const nav = canvas.getByRole('navigation');
+      await expect(nav).toBeInTheDocument();
+    });
+
+    await step('Verify primary navigation links are present', async () => {
+      // Look for common navigation links
+      const links = canvas.getAllByRole('link');
+      await expect(links.length).toBeGreaterThan(0);
+    });
+  },
+};
+
+/**
+ * Skip to Main Content Test
+ * Tests accessibility skip link functionality
+ */
+export const SkipToMainContentTest: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests skip to main content link for keyboard accessibility (WCAG 2.1 AA).',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify skip to main content link is present', async () => {
+      const skipLink = canvas.getByText(/skip to main content/i);
+      await expect(skipLink).toBeInTheDocument();
+    });
+
+    await step('Verify skip link has correct href', async () => {
+      const skipLink = canvas.getByText(/skip to main content/i);
+      await expect(skipLink).toHaveAttribute('href', '#main-content');
+    });
+  },
+};
+
+/**
+ * Search Trigger Test
+ * Tests search trigger button rendering
+ */
+export const SearchTriggerTest: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests search trigger button with keyboard shortcut hint.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify search trigger is present', async () => {
+      // Look for search button or input
+      const searchButton = canvas.getByRole('button', { name: /search/i });
+      await expect(searchButton).toBeInTheDocument();
+    });
+
+    await step('Verify keyboard shortcut hint is shown', async () => {
+      // Look for ⌘K or Ctrl+K hint
+      const shortcutHint = canvas.getByText(/⌘K|Ctrl.*K/i);
+      await expect(shortcutHint).toBeInTheDocument();
+    });
+  },
+};
+
+/**
+ * Theme Toggle Test
+ * Tests theme toggle button rendering
+ */
+export const ThemeToggleTest: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests theme toggle button for dark/light mode switching.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify theme toggle button is present', async () => {
+      // Look for theme toggle button
+      const themeButton = canvas.getByRole('button', { name: /theme|toggle.*mode/i });
+      await expect(themeButton).toBeInTheDocument();
+    });
+  },
+};
+
+/**
+ * Logo Link Test
+ * Tests navigation logo link to homepage
+ */
+export const LogoLinkTest: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests navigation logo links to homepage.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify logo link is present', async () => {
+      // Logo should link to homepage
+      const logoLink = canvasElement.querySelector('a[href="/"]');
+      await expect(logoLink).toBeInTheDocument();
+    });
+
+    await step('Verify logo link has accessible label', async () => {
+      const logoLink = canvasElement.querySelector('a[href="/"]');
+      if (logoLink) {
+        const ariaLabel = logoLink.getAttribute('aria-label');
+        await expect(ariaLabel).toBeTruthy();
+      }
+    });
+  },
+};
+
+/**
+ * Scroll State Change Test
+ * Tests navigation state changes on scroll
+ */
+export const ScrollStateChangeTest: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests navigation compact state activation after scrolling past 20px threshold.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify navigation is in default state initially', async () => {
+      const nav = canvas.getByRole('navigation');
+      await expect(nav).toBeInTheDocument();
+    });
+
+    await step('Scroll to 100px to trigger compact state', async () => {
+      window.scrollTo({ top: 100, behavior: 'instant' });
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    });
+
+    await step('Verify navigation is still present after scroll', async () => {
+      const nav = canvas.getByRole('navigation');
+      await expect(nav).toBeInTheDocument();
+    });
+
+    await step('Scroll back to top', async () => {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    });
   },
 };

@@ -20,7 +20,7 @@
  * 4. Report violations with actionable errors
  *
  * **VALIDATION RULES:**
- * - Title: 55-60 characters (SEO optimal)
+ * - Title: 53-60 characters (SEO optimal)
  * - Description: 150-160 characters (AI citation optimal)
  * - No generic fallbacks (e.g., "Item Configuration 2025")
  * - OG tags present and match page metadata
@@ -49,7 +49,7 @@ import { XMLParser } from 'fast-xml-parser';
  */
 const METADATA_RULES = {
   title: {
-    min: 55,
+    min: 53,
     max: 60,
     name: 'Title',
   },

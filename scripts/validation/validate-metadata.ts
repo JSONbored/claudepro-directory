@@ -13,7 +13,7 @@
  * Features:
  * - ✅ Route discovery via route-scanner.ts (100% coverage)
  * - ✅ Pattern-based metadata generation (all 8 patterns)
- * - ✅ Title validation (55-60 chars, SEO-optimized)
+ * - ✅ Title validation (53-60 chars, SEO-optimized)
  * - ✅ Description validation (150-160 chars, AI-optimized)
  * - ✅ Keywords validation (3-10 keywords, max 30 chars each)
  * - ✅ OpenGraph metadata validation
@@ -25,7 +25,7 @@
  * - ✅ Production logger integration
  *
  * October 2025 SEO Standards:
- * - Title: 55-60 chars (keyword density optimization)
+ * - Title: 53-60 chars (keyword density optimization)
  * - Description: 150-160 chars (Google desktop ~920px, mobile ~680px)
  * - Keywords: 3-10 keywords, max 30 chars each
  * - Separator: Hyphens (-) not pipes (|)
@@ -195,7 +195,7 @@ async function validateRouteMetadata(
 
     const metadata = generatePageMetadata(route, context);
 
-    // 1. Validate title (55-60 chars)
+    // 1. Validate title (53-60 chars)
     if (metadata.title) {
       const title = String(metadata.title);
       const titleLength = title.length;

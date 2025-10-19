@@ -72,7 +72,7 @@ pre-commit:
       run: |
         echo "🔍 Validating metadata with pattern system..."
         npm run validate:metadata:quick
-      fail_text: "❌ Metadata validation failed. Check titles (55-60 chars) and descriptions (150-160 chars)."
+      fail_text: "❌ Metadata validation failed. Check titles (53-60 chars) and descriptions (150-160 chars)."
 
     # 5. Run tests ONLY for changed files (smart, not strict)
     # Uses lefthook 1.13+ file filtering for better performance

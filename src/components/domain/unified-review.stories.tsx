@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { UnifiedReview } from './unified-review';
 
 /**
@@ -59,6 +60,106 @@ const meta = {
     },
   },
   tags: ['autodocs'],
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['form', 'section', 'histogram', 'rating-interactive', 'rating-compact'],
+      description: 'Review component variant',
+      table: {
+        type: { summary: 'string' },
+        defaultValue: { summary: 'form' },
+      },
+    },
+    // Form & Section variant props
+    contentType: {
+      control: 'select',
+      options: ['agents', 'mcp', 'commands', 'rules', 'hooks', 'guides'],
+      description: 'Type of content being reviewed',
+      if: { arg: 'variant', oneOf: ['form', 'section'] },
+    },
+    contentSlug: {
+      control: 'text',
+      description: 'Slug of the content being reviewed',
+      if: { arg: 'variant', oneOf: ['form', 'section'] },
+    },
+    // Form variant specific props
+    existingReview: {
+      control: 'object',
+      description: 'Existing review data for editing (optional)',
+      if: { arg: 'variant', eq: 'form' },
+    },
+    onSuccess: {
+      action: 'success',
+      description: 'Callback when review submitted successfully',
+      if: { arg: 'variant', eq: 'form' },
+    },
+    onCancel: {
+      action: 'cancel',
+      description: 'Callback when cancel button clicked',
+      if: { arg: 'variant', eq: 'form' },
+    },
+    // Section variant props
+    currentUserId: {
+      control: 'text',
+      description: 'Current user ID for edit/delete permissions',
+      if: { arg: 'variant', eq: 'section' },
+    },
+    // Histogram variant props
+    distribution: {
+      control: 'object',
+      description: 'Star rating distribution object (1-5 stars)',
+      if: { arg: 'variant', eq: 'histogram' },
+    },
+    totalReviews: {
+      control: 'number',
+      description: 'Total number of reviews',
+      if: { arg: 'variant', eq: 'histogram' },
+    },
+    averageRating: {
+      control: { type: 'range', min: 0, max: 5, step: 0.1 },
+      description: 'Average rating value',
+      if: { arg: 'variant', eq: 'histogram' },
+    },
+    // Rating-interactive variant props
+    value: {
+      control: { type: 'range', min: 0, max: 5, step: 1 },
+      description: 'Current rating value',
+      if: { arg: 'variant', eq: 'rating-interactive' },
+    },
+    max: {
+      control: { type: 'range', min: 5, max: 10, step: 1 },
+      description: 'Maximum star rating',
+      if: { arg: 'variant', eq: 'rating-interactive' },
+    },
+    onChange: {
+      action: 'rating-changed',
+      description: 'Callback when rating changes',
+      if: { arg: 'variant', eq: 'rating-interactive' },
+    },
+    showValue: {
+      control: 'boolean',
+      description: 'Show numeric rating value',
+      if: { arg: 'variant', eq: 'rating-interactive' },
+    },
+    // Rating-compact variant props
+    average: {
+      control: { type: 'range', min: 0, max: 5, step: 0.1 },
+      description: 'Average rating to display',
+      if: { arg: 'variant', eq: 'rating-compact' },
+    },
+    count: {
+      control: 'number',
+      description: 'Number of reviews',
+      if: { arg: 'variant', eq: 'rating-compact' },
+    },
+    // Shared props for rating variants
+    size: {
+      control: 'select',
+      options: ['sm', 'md', 'lg'],
+      description: 'Star size',
+      if: { arg: 'variant', oneOf: ['rating-interactive', 'rating-compact'] },
+    },
+  },
 } satisfies Meta<typeof UnifiedReview>;
 
 export default meta;
@@ -512,52 +613,268 @@ export const AllVariantsComparison: Story = {
   },
 };
 
+// ============================================================================
+// COMPONENT STATES
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Form Validation Error State
+ * Tests validation UX when form submission fails due to missing rating
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const ValidationErrorState: Story = {
+  args: {
+    variant: 'form',
+    contentType: 'agents',
+    contentSlug: 'example-agent',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Form in validation error state. Rating is required - submission without rating shows error.
+
+**Error Scenarios:**
+- No rating selected (required field)
+- Review text exceeds 2000 character limit
+        `,
+      },
+    },
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Form Success State
+ * Shows successful review submission
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const SuccessState: Story = {
+  args: {
+    variant: 'form',
+    contentType: 'mcp',
+    contentSlug: 'example-mcp-server',
+    onSuccess: fn(),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Form after successful review submission. The onSuccess callback is triggered.
+
+**Success Behaviors:**
+- Form resets after submission
+- onSuccess callback called with review data
+- User feedback (toast/redirect handled by parent)
+        `,
+      },
+    },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Select 5-star rating', async () => {
+      const stars = canvas.getAllByRole('button', { name: /star/i });
+      await userEvent.click(stars[4]); // Click 5th star
+    });
+
+    await step('Enter review text', async () => {
+      const textarea = canvas.getByPlaceholderText(/share your experience/i);
+      await userEvent.type(textarea, 'Excellent MCP server! Highly recommended.');
+    });
+
+    await step('Submit form', async () => {
+      const submitButton = canvas.getByRole('button', { name: /submit review/i });
+      await userEvent.click(submitButton);
+    });
+
+    await step('Verify onSuccess callback was triggered', async () => {
+      await expect(args.onSuccess).toHaveBeenCalledTimes(1);
+    });
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * Empty Review Section State
+ * Tests empty state when no reviews exist for content
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const EmptyReviewSection: Story = {
+  args: {
+    variant: 'section',
+    contentType: 'commands',
+    contentSlug: 'new-command',
+    currentUserId: 'user-123',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Review section in empty state - no reviews yet for this content.
+
+**Empty State Features:**
+- Call-to-action message encouraging first review
+- Histogram shows 0 reviews across all ratings
+- Review list shows empty state message
+        `,
+      },
+    },
+  },
+};
+
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
+/**
+ * Star Rating Interaction Test
+ * Tests interactive star rating click behavior
+ */
+export const StarRatingInteraction: Story = {
+  args: {
+    variant: 'rating-interactive',
+    value: 0,
+    onChange: fn(),
+    size: 'lg',
+    showValue: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests star rating interaction - click stars to change rating.',
+      },
+    },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Click 3rd star to set rating to 3', async () => {
+      const stars = canvas.getAllByRole('button', { name: /star/i });
+      await userEvent.click(stars[2]); // Click 3rd star
+    });
+
+    await step('Verify onChange callback was called with rating 3', async () => {
+      await expect(args.onChange).toHaveBeenCalledWith(3);
+    });
+
+    await step('Click 5th star to set rating to 5', async () => {
+      const stars = canvas.getAllByRole('button', { name: /star/i });
+      await userEvent.click(stars[4]); // Click 5th star
+    });
+
+    await step('Verify onChange callback was called with rating 5', async () => {
+      await expect(args.onChange).toHaveBeenCalledWith(5);
+    });
   },
 };
 
 /**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
+ * Review Text Validation Test
+ * Tests character limit validation for review text
  */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+export const ReviewTextValidation: Story = {
+  args: {
+    variant: 'form',
+    contentType: 'agents',
+    contentSlug: 'example-agent',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests review text validation - character counter and max 2000 chars.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Select 4-star rating (required)', async () => {
+      const stars = canvas.getAllByRole('button', { name: /star/i });
+      await userEvent.click(stars[3]); // Click 4th star
+    });
+
+    await step('Type review text', async () => {
+      const textarea = canvas.getByPlaceholderText(/share your experience/i);
+      await userEvent.type(textarea, 'This is a test review with some text content.');
+    });
+
+    await step('Verify character counter is displayed', async () => {
+      const characterCount = canvas.getByText(/\d+\s*\/\s*2000/i);
+      await expect(characterCount).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
+ * Form Cancel Interaction Test
+ * Tests cancel button behavior in edit mode
  */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+export const FormCancelInteraction: Story = {
+  args: {
+    variant: 'form',
+    contentType: 'mcp',
+    contentSlug: 'example-mcp-server',
+    existingReview: {
+      id: 'review-123',
+      rating: 4,
+      review_text: 'Existing review text',
+    },
+    onCancel: fn(),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests cancel button in edit mode - should trigger onCancel callback.',
+      },
+    },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Click Cancel button', async () => {
+      const cancelButton = canvas.getByRole('button', { name: /cancel/i });
+      await userEvent.click(cancelButton);
+    });
+
+    await step('Verify onCancel callback was triggered', async () => {
+      await expect(args.onCancel).toHaveBeenCalledTimes(1);
+    });
+  },
+};
+
+/**
+ * Histogram Bar Click Test
+ * Tests interaction with histogram bars
+ */
+export const HistogramInteraction: Story = {
+  args: {
+    variant: 'histogram',
+    distribution: {
+      5: 45,
+      4: 30,
+      3: 15,
+      2: 5,
+      1: 5,
+    },
+    totalReviews: 100,
+    averageRating: 4.2,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests histogram bar hover/click interactions.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify histogram bars are rendered', async () => {
+      // Check that rating distribution is displayed
+      const fiveStarLabel = canvas.getByText(/5/);
+      await expect(fiveStarLabel).toBeInTheDocument();
+    });
+
+    await step('Verify percentage calculations are shown', async () => {
+      // 45 out of 100 = 45%
+      const percentage = canvas.getByText(/45%/);
+      await expect(percentage).toBeInTheDocument();
+    });
   },
 };

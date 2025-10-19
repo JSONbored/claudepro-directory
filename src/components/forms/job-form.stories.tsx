@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { JobForm } from './job-form';
 
 /**
@@ -99,6 +100,27 @@ const meta = {
     submitLabel: {
       control: 'text',
       description: 'Label for submit button',
+      table: {
+        type: { summary: 'string' },
+        defaultValue: { summary: 'Create Job Listing' },
+      },
+    },
+    initialData: {
+      control: 'object',
+      description: 'Initial job data for editing (undefined for new job)',
+      table: {
+        type: { summary: 'EditJobInput | undefined' },
+      },
+    },
+    onSubmit: {
+      action: 'submitted',
+      description: 'Form submission callback',
+      table: {
+        type: {
+          summary:
+            '(data: CreateJobInput | EditJobInput) => Promise<{success: boolean, requiresPayment?: boolean}>',
+        },
+      },
     },
   },
 } satisfies Meta<typeof JobForm>;
@@ -983,36 +1005,44 @@ Interactive demo with all features.
   },
 };
 
-/**
- * ==============================================================================
- * RESPONSIVE VARIANTS
- * ==============================================================================
- */
+// ============================================================================
+// COMPONENT STATES
+// ============================================================================
 
 /**
- * Mobile Viewport - Form Layout
+ * Error State - Form Submission Failed
+ * Shows form with validation errors after failed submission
  */
-export const MobileViewport: Story = {
+export const ErrorState: Story = {
   args: {
-    initialData: completeJob,
+    initialData: {
+      ...emptyJob,
+      title: '', // Empty required field
+      company: '', // Empty required field
+    } as any,
     onSubmit: mockOnSubmit,
-    submitLabel: 'Update Job',
-  },
-  globals: {
-    viewport: { value: 'mobile1' },
+    submitLabel: 'Create Job',
   },
   parameters: {
     docs: {
       description: {
         story: `
-Job form on mobile viewport.
+**Error State** - Form with validation errors displayed.
 
-**Responsive Behavior:**
-- Cards stack vertically
-- Grid columns become single column
-- Full-width inputs
-- Touch-optimized buttons
-- Scrollable sections
+**Error Scenarios:**
+- Empty required fields (title, company, description)
+- Missing tags array (min 1 required)
+- Missing requirements array (min 1 required)
+- Invalid URL format (application link)
+- Invalid email format (contact email)
+
+**Validation Feedback:**
+- Browser native validation for required fields
+- Client-side array validation (tags, requirements)
+- Submit button disabled until arrays populated
+- Toast notification for server errors
+
+**Note:** Real implementation shows error toast and highlights invalid fields.
         `,
       },
     },
@@ -1020,21 +1050,180 @@ Job form on mobile viewport.
 };
 
 /**
- * Tablet Viewport - Form Layout
+ * Success State - Form Saved Successfully
+ * Shows form after successful submission with confirmation
  */
-export const TabletViewport: Story = {
+export const SuccessState: Story = {
   args: {
     initialData: completeJob,
     onSubmit: mockOnSubmit,
     submitLabel: 'Update Job',
   },
-  globals: {
-    viewport: { value: 'tablet' },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Success State** - Form after successful save operation.
+
+**Success Indicators:**
+- Toast notification (success message)
+- Submit button returns to default state
+- Form shows latest saved values
+- Redirect to /account/jobs (in production)
+
+**Success Flow:**
+1. User clicks "Update Job" button
+2. \`isPending\` state shows "Saving..." (800ms simulated delay)
+3. Server action completes successfully
+4. Success toast appears
+5. Redirect to job management page
+
+**Note:** Real implementation redirects to job detail page or job list.
+        `,
+      },
+    },
+  },
+};
+
+// ============================================================================
+// PLAY FUNCTION TESTS - INTERACTIVE TESTING
+// ============================================================================
+
+/**
+ * Multi-step Field Validation
+ * Tests filling required fields across multiple sections
+ */
+export const MultiStepFieldValidation: Story = {
+  args: {
+    onSubmit: fn(),
+    submitLabel: 'Create Job',
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Fill Job Details section', async () => {
+      const titleInput = canvas.getByLabelText(/job title/i);
+      await userEvent.type(titleInput, 'Senior Full-Stack Engineer');
+      await expect(titleInput).toHaveValue('Senior Full-Stack Engineer');
+
+      const companyInput = canvas.getByLabelText(/company name/i);
+      await userEvent.type(companyInput, 'TechCorp');
+      await expect(companyInput).toHaveValue('TechCorp');
+    });
+
+    await step('Fill Description field (min 50 chars)', async () => {
+      const descTextarea = canvas.getByLabelText(/job description/i);
+      await userEvent.type(
+        descTextarea,
+        'We are seeking an experienced full-stack engineer to join our growing team and help build cutting-edge products.'
+      );
+      await expect(descTextarea.value.length).toBeGreaterThanOrEqual(50);
+    });
+
+    await step('Add requirement item', async () => {
+      const reqInput = canvas.getByPlaceholderText(/e\.g\., 5\+ years/i);
+      await userEvent.type(reqInput, '5+ years of experience');
+      const addButton = canvas.getAllByRole('button', { name: /add/i })[0];
+      await userEvent.click(addButton);
+    });
+
+    await step('Add tag item', async () => {
+      const tagInput = canvas.getByPlaceholderText(/e\.g\., typescript/i);
+      await userEvent.type(tagInput, 'typescript');
+      const addButtons = canvas.getAllByRole('button', { name: /add/i });
+      await userEvent.click(addButtons[addButtons.length - 1]);
+    });
+
+    await step('Fill application link', async () => {
+      const linkInput = canvas.getByLabelText(/application link/i);
+      await userEvent.type(linkInput, 'https://techcorp.com/careers/apply');
+      await expect(linkInput).toHaveValue('https://techcorp.com/careers/apply');
+    });
   },
   parameters: {
     docs: {
       description: {
-        story: 'Job form on tablet with optimized spacing.',
+        story: `
+**Interactive Test**: Multi-step form field validation.
+
+**Test Steps:**
+1. Fill Job Details (title, company)
+2. Fill description (min 50 chars validation)
+3. Add requirement item to requirements array
+4. Add tag item to tags array
+5. Fill application link (URL validation)
+
+**Validates:**
+- Text input interactions across sections
+- Textarea character validation
+- Dynamic array management (add items)
+- Submit button enables when all required fields filled
+- Multi-section form navigation
+        `,
+      },
+    },
+  },
+};
+
+/**
+ * Form Submission Flow
+ * Tests complete form submission with all callbacks
+ */
+export const FormSubmissionFlow: Story = {
+  args: {
+    initialData: completeJob,
+    onSubmit: fn(),
+    submitLabel: 'Update Job',
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Modify job title', async () => {
+      const titleInput = canvas.getByLabelText(/job title/i);
+      await userEvent.clear(titleInput);
+      await userEvent.type(titleInput, 'Updated Job Title');
+      await expect(titleInput).toHaveValue('Updated Job Title');
+    });
+
+    await step('Click Submit button', async () => {
+      const submitButton = canvas.getByRole('button', { name: /update job/i });
+      await expect(submitButton).toBeEnabled();
+      await userEvent.click(submitButton);
+    });
+
+    await step('Verify onSubmit was called', async () => {
+      await expect(args.onSubmit).toHaveBeenCalledTimes(1);
+    });
+
+    await step('Verify Submit button shows pending state', async () => {
+      // Button should show "Saving..." or be disabled during transition
+      const buttons = canvas.getAllByRole('button');
+      const submitButton = buttons.find(
+        (btn) => btn.textContent?.includes('Saving') || btn.textContent?.includes('Update Job')
+      );
+      await expect(submitButton).toBeInTheDocument();
+    });
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Interactive Test**: Complete form submission flow.
+
+**Test Steps:**
+1. Modify job title field
+2. Click Submit button
+3. Verify \`onSubmit\` callback was invoked
+4. Verify pending state during async operation
+
+**Validates:**
+- Form submission triggers correctly
+- \`onSubmit\` callback receives form data
+- Pending state shows during async operation
+- \`useTransition\` hook works properly
+
+**Note:** Real implementation would navigate to job detail page after success.
+        `,
       },
     },
   },
@@ -1086,45 +1275,5 @@ export const AllPlansComparison: Story = {
         story: 'Side-by-side comparison of all three job listing plans.',
       },
     },
-  },
-};
-
-/**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
- */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
-  },
-};
-
-/**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
- */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
-  },
-};
-
-/**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
- */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
-  },
-};
-
-/**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
- */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
   },
 };

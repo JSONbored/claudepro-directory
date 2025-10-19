@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { Checklist } from './checklist';
 
 /**
@@ -446,52 +447,120 @@ export const AllCompleted: Story = {
   },
 };
 
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Checklist Items Rendering Test
+ * Tests checklist renders all items with checkboxes
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const ChecklistItemsRenderingTest: Story = {
+  args: {
+    title: 'Test Checklist',
+    items: [
+      { task: 'Task 1', completed: true },
+      { task: 'Task 2', completed: false },
+      { task: 'Task 3', completed: false },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests checklist displays all items with proper completion states.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify checklist title is displayed', async () => {
+      const title = canvas.getByText(/test checklist/i);
+      await expect(title).toBeInTheDocument();
+    });
+
+    await step('Verify all task items are displayed', async () => {
+      const task1 = canvas.getByText(/task 1/i);
+      const task2 = canvas.getByText(/task 2/i);
+      const task3 = canvas.getByText(/task 3/i);
+
+      await expect(task1).toBeInTheDocument();
+      await expect(task2).toBeInTheDocument();
+      await expect(task3).toBeInTheDocument();
+    });
+
+    await step('Verify checkboxes are rendered', async () => {
+      const checkboxes = canvas.getAllByRole('checkbox');
+      await expect(checkboxes.length).toBe(3);
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Completion Status Test
+ * Tests checklist shows completed and incomplete items differently
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const CompletionStatusTest: Story = {
+  args: {
+    title: 'Mixed Status Checklist',
+    items: [
+      { task: 'Completed task', completed: true },
+      { task: 'Incomplete task', completed: false },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests completed items are visually distinct from incomplete items.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify both tasks are displayed', async () => {
+      const completedTask = canvas.getByText(/completed task/i);
+      const incompleteTask = canvas.getByText(/incomplete task/i);
+
+      await expect(completedTask).toBeInTheDocument();
+      await expect(incompleteTask).toBeInTheDocument();
+    });
+
+    await step('Verify checkboxes reflect completion status', async () => {
+      const checkboxes = canvas.getAllByRole('checkbox');
+      await expect(checkboxes[0]).toBeChecked();
+      await expect(checkboxes[1]).not.toBeChecked();
+    });
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * Empty Checklist Test
+ * Tests checklist handles empty items array gracefully
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const EmptyChecklistTest: Story = {
+  args: {
+    title: 'Empty Checklist',
+    items: [],
   },
-};
-
-/**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
- */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests checklist renders correctly with no items.',
+      },
+    },
   },
-};
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
 
-/**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
- */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+    await step('Verify title is displayed', async () => {
+      const title = canvas.getByText(/empty checklist/i);
+      await expect(title).toBeInTheDocument();
+    });
+
+    await step('Verify no checkboxes are rendered', async () => {
+      const checkboxes = canvas.queryAllByRole('checkbox');
+      await expect(checkboxes.length).toBe(0);
+    });
   },
 };

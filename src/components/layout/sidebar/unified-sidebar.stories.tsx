@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { UnifiedSidebar } from './unified-sidebar';
 
 /**
@@ -494,9 +495,19 @@ Shown when API fails or no data is available yet.
       },
     },
   },
-  play: async ({ canvasElement }) => {
-    // In real implementation, would mock API to return no data
-    // For now, this story will show loading state then fall back to empty
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify search bar is present', async () => {
+      const searchInput = canvas.getByPlaceholderText(/search guides/i);
+      await expect(searchInput).toBeInTheDocument();
+    });
+
+    await step('Verify category navigation is present', async () => {
+      // Category navigation should always be visible
+      const navigation = canvas.getByRole('navigation');
+      await expect(navigation).toBeInTheDocument();
+    });
   },
 };
 
@@ -529,64 +540,6 @@ Loading state while fetching trending guides from API.
 **API Integration:**
 Fetches from \`/api/guides/trending?category=guides&limit=5\`
         `,
-      },
-    },
-  },
-};
-
-/**
- * ==============================================================================
- * RESPONSIVE VARIANTS
- * ==============================================================================
- */
-
-/**
- * Mobile Viewport - Sidebar Behavior
- */
-export const MobileViewport: Story = {
-  args: {
-    mode: 'content',
-    contentData: mockContentData,
-    relatedGuides: mockRelatedGuides,
-    currentCategory: 'use-cases',
-  },
-  globals: {
-    viewport: { value: 'mobile1' },
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: `
-Sidebar on mobile viewport.
-
-**Responsive Behavior:**
-- Full-width sticky sidebar
-- Scrollable content
-- Touch-optimized interactions
-- Category icons may wrap
-        `,
-      },
-    },
-  },
-};
-
-/**
- * Tablet Viewport
- */
-export const TabletViewport: Story = {
-  args: {
-    mode: 'content',
-    contentData: mockContentData,
-    relatedGuides: mockRelatedGuides,
-    currentCategory: 'use-cases',
-  },
-  globals: {
-    viewport: { value: 'tablet' },
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Sidebar on tablet viewport with optimized spacing.',
       },
     },
   },
@@ -675,42 +628,176 @@ Interactive demo with all features enabled.
   },
 };
 
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Search Interaction Test
+ * Tests search input functionality
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const SearchInteraction: Story = {
+  args: {
+    mode: 'category',
+    currentCategory: 'use-cases',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests search bar interaction and filtering behavior.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Type search query into search bar', async () => {
+      const searchInput = canvas.getByPlaceholderText(/search guides/i);
+      await userEvent.type(searchInput, 'automation');
+    });
+
+    await step('Verify search query is entered', async () => {
+      const searchInput = canvas.getByPlaceholderText(/search guides/i);
+      await expect(searchInput).toHaveValue('automation');
+    });
+
+    await step('Clear search query', async () => {
+      const searchInput = canvas.getByPlaceholderText(/search guides/i);
+      await userEvent.clear(searchInput);
+      await expect(searchInput).toHaveValue('');
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Category Navigation Test
+ * Tests category selection and active state
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const CategoryNavigationTest: Story = {
+  args: {
+    mode: 'unified',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests category navigation with icon buttons.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify category navigation is rendered', async () => {
+      const navigation = canvas.getByRole('navigation');
+      await expect(navigation).toBeInTheDocument();
+    });
+
+    await step('Verify category buttons are present', async () => {
+      // Look for category buttons (use-cases, tutorials, workflows, collections)
+      const buttons = canvas.getAllByRole('link');
+      await expect(buttons.length).toBeGreaterThan(0);
+    });
   },
 };
 
 /**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
+ * Content Mode TOC Test
+ * Tests table of contents rendering in content mode
  */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+export const ContentModeTOCTest: Story = {
+  args: {
+    mode: 'content',
+    contentData: mockContentData,
+    relatedGuides: mockRelatedGuides,
+    currentCategory: 'use-cases',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests table of contents generation from content headings.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify table of contents is rendered', async () => {
+      // Look for TOC section heading
+      const tocHeading = canvas.getByText(/on this page|table of contents/i);
+      await expect(tocHeading).toBeInTheDocument();
+    });
+
+    await step('Verify TOC links are generated from content headings', async () => {
+      // TOC should include headings from mockContentData
+      const introLink = canvas.getByText(/introduction/i);
+      await expect(introLink).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
+ * Related Guides Test
+ * Tests related guides section in content mode
  */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+export const RelatedGuidesTest: Story = {
+  args: {
+    mode: 'content',
+    contentData: mockContentData,
+    relatedGuides: mockRelatedGuides,
+    currentCategory: 'use-cases',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests related guides rendering and links.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify related guides section is rendered', async () => {
+      const relatedHeading = canvas.getByText(/related guides/i);
+      await expect(relatedHeading).toBeInTheDocument();
+    });
+
+    await step('Verify related guide links are present', async () => {
+      // Check for first related guide from mockRelatedGuides
+      const firstGuide = canvas.getByText(/introduction to mcp servers/i);
+      await expect(firstGuide).toBeInTheDocument();
+    });
+  },
+};
+
+/**
+ * Mode Switching Test
+ * Tests different mode variants rendering different features
+ */
+export const ModeSwitchingTest: Story = {
+  args: {
+    mode: 'category',
+    currentCategory: 'tutorials',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests that different modes show appropriate features.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify category mode shows trending section', async () => {
+      // Category mode should show trending guides
+      const trendingHeading = canvas.getByText(/trending|popular/i);
+      await expect(trendingHeading).toBeInTheDocument();
+    });
+
+    await step('Verify category mode does NOT show TOC (content-only feature)', async () => {
+      // TOC should only appear in content mode
+      const tocHeading = canvas.queryByText(/on this page|table of contents/i);
+      await expect(tocHeading).not.toBeInTheDocument();
+    });
   },
 };

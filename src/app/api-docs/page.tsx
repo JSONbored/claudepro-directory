@@ -12,7 +12,8 @@
  * - Code examples for common operations
  *
  * SEO:
- * - Title: "API Documentation | ClaudePro Directory API"
+ * - Pattern-based metadata generation (STATIC template)
+ * - Title: "API Documentation for Claude Pro Directory Platform 2025" (53-60 chars)
  * - Indexed by search engines and AI crawlers (GPTBot, ClaudeBot, Perplexity)
  * - RFC 9727 compliant (/.well-known/api-catalog)
  *
@@ -20,19 +21,14 @@
  * @see {@link /public/openapi.json OpenAPI 3.1.0 Specification}
  */
 
-import type { Metadata } from 'next';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**
  * Page metadata for API documentation landing page
- *
- * @type {Metadata}
+ * Generated via pattern-based SEO system (STATIC template)
  */
-export const metadata: Metadata = {
-  title: 'Overview',
-  description:
-    'Claude Pro Directory REST API: Access 150+ open-source configurations via JSON endpoints. Includes agents, MCP servers, commands, hooks, search, and analytics with CORS.',
-};
+export const metadata = generatePageMetadata('/api-docs');
 
 /**
  * API Documentation Landing Page Component

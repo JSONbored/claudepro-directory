@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { Footer } from './footer';
 
 /**
@@ -93,142 +94,6 @@ type Story = StoryObj<typeof meta>;
  * - AI-optimized content link with Sparkles icon
  */
 export const Default: Story = {};
-
-/**
- * Mobile Small: 1-Column Stacked Layout (320px)
- *
- * Footer on small mobile viewport (320px - iPhone SE size).
- * All sections stack vertically for optimal mobile readability.
- *
- * Layout:
- * - About section (top)
- * - Quick Links section (middle)
- * - AI & Resources section (bottom)
- * - Bottom bar (copyright + AI link, stacked)
- *
- * Touch Optimization:
- * - Links have adequate spacing for touch targets
- * - Social icons maintain 44x44px minimum size
- * - Transitions smooth for tap interactions
- */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Footer on small mobile (320px). Tests layout on smallest modern mobile devices with stacked vertical layout.',
-      },
-    },
-  },
-};
-
-/**
- * Mobile Large: 1-Column Stacked Layout (414px)
- *
- * Footer on large mobile viewport (414px - iPhone Pro Max size).
- * All sections stack vertically with slightly more breathing room than small mobile.
- *
- * Layout:
- * - About section (top)
- * - Quick Links section (middle)
- * - AI & Resources section (bottom)
- * - Bottom bar (copyright + AI link, stacked)
- *
- * Touch Optimization:
- * - Links have adequate spacing for touch targets
- * - Social icons maintain 44x44px minimum size
- * - Extra horizontal space for better touch targets
- */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Footer on large mobile (414px). Tests layout on larger modern mobile devices with more horizontal space.',
-      },
-    },
-  },
-};
-
-/**
- * Tablet: 2-Column + Wrap Layout
- *
- * Footer on tablet viewport with 2-column grid.
- * Third column wraps to new row on smaller tablets.
- *
- * Layout (sm breakpoint):
- * - Row 1: About | Quick Links
- * - Row 2: AI & Resources (spans full width or wraps)
- *
- * Responsive Behavior:
- * - Uses GRID_RESPONSIVE_3 utility class
- * - Adapts between 1, 2, and 3 columns based on breakpoints
- */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Footer on tablet devices showing 2-column layout with responsive wrapping.',
-      },
-    },
-  },
-};
-
-/**
- * Dark Theme
- *
- * Footer in dark mode with adjusted colors.
- * Demonstrates theme compatibility and contrast ratios.
- *
- * Dark Theme Features:
- * - Border: border-border/50 (semi-transparent)
- * - Background: bg-background/95 with backdrop-blur
- * - Text: text-muted-foreground with hover:text-foreground
- * - Social icons maintain proper contrast
- * - Open Source badge with accent colors
- */
-export const DarkTheme: Story = {
-  parameters: {
-    globals: { theme: 'dark' },
-    docs: {
-      description: {
-        story: 'Footer optimized for dark theme with proper contrast ratios and color adjustments.',
-      },
-    },
-  },
-};
-
-/**
- * Light Theme
- *
- * Footer in light mode.
- * Shows default light theme styling with optimal readability.
- *
- * Light Theme Features:
- * - Clean border separation
- * - Muted text with good contrast
- * - Hover states darken text to foreground
- * - Social icons clearly visible
- */
-export const LightTheme: Story = {
-  parameters: {
-    globals: { theme: 'light' },
-    docs: {
-      description: {
-        story: 'Footer in light theme showing clean, readable design with proper contrast.',
-      },
-    },
-  },
-};
 
 /**
  * Focus States
@@ -425,5 +290,249 @@ export const AllLinksFunctional: Story = {
           'All footer links are properly configured using ROUTES and SOCIAL_LINKS constants. Click links to verify routing.',
       },
     },
+  },
+};
+
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
+/**
+ * Footer Structure Test
+ * Tests basic footer structure and semantic HTML
+ */
+export const FooterStructureTest: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests footer semantic HTML structure and main sections.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify footer element is rendered', async () => {
+      const footer = canvasElement.querySelector('footer');
+      await expect(footer).toBeInTheDocument();
+    });
+
+    await step('Verify footer has border-t styling', async () => {
+      const footer = canvasElement.querySelector('footer');
+      await expect(footer).toHaveClass('border-t');
+    });
+  },
+};
+
+/**
+ * Navigation Links Test
+ * Tests all footer navigation links are present
+ */
+export const NavigationLinksTest: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests that all footer navigation links are rendered correctly.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify Quick Links section exists', async () => {
+      const quickLinksHeading = canvas.getByText(/quick links/i);
+      await expect(quickLinksHeading).toBeInTheDocument();
+    });
+
+    await step('Verify Guides link is present', async () => {
+      const guidesLink = canvas.getByRole('link', { name: /guides/i });
+      await expect(guidesLink).toBeInTheDocument();
+    });
+
+    await step('Verify Changelog link is present', async () => {
+      const changelogLink = canvas.getByRole('link', { name: /changelog/i });
+      await expect(changelogLink).toBeInTheDocument();
+    });
+
+    await step('Verify Community link is present', async () => {
+      const communityLink = canvas.getByRole('link', { name: /community/i });
+      await expect(communityLink).toBeInTheDocument();
+    });
+  },
+};
+
+/**
+ * Social Links Test
+ * Tests GitHub and Discord social links
+ */
+export const SocialLinksTest: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests social media links (GitHub, Discord) with proper attributes.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify GitHub link is present', async () => {
+      const githubLink = canvas.getByRole('link', { name: /github/i });
+      await expect(githubLink).toBeInTheDocument();
+    });
+
+    await step('Verify GitHub link has correct attributes', async () => {
+      const githubLink = canvas.getByRole('link', { name: /github/i });
+      await expect(githubLink).toHaveAttribute('target', '_blank');
+      await expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer');
+    });
+
+    await step('Verify Discord link is present', async () => {
+      const discordLink = canvas.getByRole('link', { name: /discord/i });
+      await expect(discordLink).toBeInTheDocument();
+    });
+
+    await step('Verify Discord link has correct attributes', async () => {
+      const discordLink = canvas.getByRole('link', { name: /discord/i });
+      await expect(discordLink).toHaveAttribute('target', '_blank');
+      await expect(discordLink).toHaveAttribute('rel', 'noopener noreferrer');
+    });
+  },
+};
+
+/**
+ * LLMs.txt Links Test
+ * Tests both LLMs.txt discovery links
+ */
+export const LLMsTxtLinksTest: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests LLMs.txt links for AI discoverability (llmstxt.org specification).',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify primary LLMs.txt link in AI & Resources section', async () => {
+      // Look for LLMs.txt link
+      const llmsTxtLinks = canvas.getAllByRole('link', { name: /llms\.txt|ai.optimized/i });
+      await expect(llmsTxtLinks.length).toBeGreaterThan(0);
+    });
+
+    await step('Verify LLMs.txt links point to correct route', async () => {
+      const llmsTxtLinks = canvas.getAllByRole('link', { name: /llms\.txt|ai.optimized/i });
+      for (const link of llmsTxtLinks) {
+        const href = link.getAttribute('href');
+        await expect(href).toContain('llms.txt');
+      }
+    });
+  },
+};
+
+/**
+ * Open Source Badge Test
+ * Tests Open Source badge rendering
+ */
+export const OpenSourceBadgeTest: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests Open Source badge in About section.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify Open Source badge is present', async () => {
+      const badge = canvas.getByText(/open source/i);
+      await expect(badge).toBeInTheDocument();
+    });
+  },
+};
+
+/**
+ * Copyright Year Test
+ * Tests auto-calculated copyright year
+ */
+export const CopyrightYearTest: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests that copyright year is automatically calculated to current year.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify copyright notice is present', async () => {
+      const copyright = canvas.getByText(/©/);
+      await expect(copyright).toBeInTheDocument();
+    });
+
+    await step('Verify current year is displayed', async () => {
+      const currentYear = new Date().getFullYear().toString();
+      const yearText = canvas.getByText(new RegExp(currentYear));
+      await expect(yearText).toBeInTheDocument();
+    });
+  },
+};
+
+/**
+ * AI Resources Section Test
+ * Tests AI & Resources section links
+ */
+export const AIResourcesSectionTest: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests AI & Resources section with LLMs.txt, API Docs, and Partner links.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify AI & Resources heading is present', async () => {
+      const heading = canvas.getByText(/ai.*resources|resources/i);
+      await expect(heading).toBeInTheDocument();
+    });
+
+    await step('Verify API Docs link is present', async () => {
+      const apiDocsLink = canvas.getByRole('link', { name: /api.*docs|documentation/i });
+      await expect(apiDocsLink).toBeInTheDocument();
+    });
+  },
+};
+
+/**
+ * Responsive Grid Test
+ * Tests 3-column responsive grid layout
+ */
+export const ResponsiveGridTest: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests footer uses responsive 3-column grid layout.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify footer has grid layout', async () => {
+      // Footer should have a grid container
+      const gridContainer = canvasElement.querySelector('[class*="grid"]');
+      await expect(gridContainer).toBeInTheDocument();
+    });
+
+    await step('Verify multiple sections are present', async () => {
+      // Should have About, Quick Links, and AI & Resources sections
+      const headings = canvas.getAllByRole('heading', { level: 3 });
+      await expect(headings.length).toBeGreaterThanOrEqual(2);
+    });
   },
 };

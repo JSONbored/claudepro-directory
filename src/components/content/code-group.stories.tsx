@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { CodeGroup } from './code-group';
 
 /**
@@ -542,52 +543,147 @@ export const EmptyExamples: Story = {
   },
 };
 
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Tab Labels Test
+ * Tests code group renders all tab labels
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const TabLabelsTest: Story = {
+  args: {
+    title: 'Test Code Examples',
+    description: 'Testing tab labels',
+    examples: [
+      { label: 'JavaScript', language: 'javascript', code: 'console.log("test1")' },
+      { label: 'TypeScript', language: 'typescript', code: 'console.log("test2")' },
+      { label: 'Python', language: 'python', code: 'print("test3")' },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests code group displays all tab labels correctly.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify all tab labels are displayed', async () => {
+      const jsTab = canvas.getByRole('tab', { name: /javascript/i });
+      const tsTab = canvas.getByRole('tab', { name: /typescript/i });
+      const pyTab = canvas.getByRole('tab', { name: /python/i });
+
+      await expect(jsTab).toBeInTheDocument();
+      await expect(tsTab).toBeInTheDocument();
+      await expect(pyTab).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Tab Switching Test
+ * Tests clicking tabs switches displayed code
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const TabSwitchingTest: Story = {
+  args: {
+    title: 'Tab Switching Demo',
+    examples: [
+      { label: 'Example 1', language: 'javascript', code: 'const example1 = true;' },
+      { label: 'Example 2', language: 'typescript', code: 'const example2: boolean = true;' },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests tab interaction switches visible code content.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify initial tab content is displayed', async () => {
+      const code = canvas.getByText(/example1/i);
+      await expect(code).toBeInTheDocument();
+    });
+
+    await step('Click second tab', async () => {
+      const tab2 = canvas.getByRole('tab', { name: /example 2/i });
+      await userEvent.click(tab2);
+    });
+
+    await step('Verify second tab content is displayed', async () => {
+      const code = canvas.getByText(/example2/i);
+      await expect(code).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * Code Syntax Highlighting Test
+ * Tests code blocks render with syntax highlighting
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const SyntaxHighlightingTest: Story = {
+  args: {
+    title: 'Syntax Highlighting',
+    examples: [
+      {
+        label: 'JavaScript',
+        language: 'javascript',
+        code: 'function test() {\n  return "hello";\n}',
+      },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests code blocks render with proper syntax highlighting.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify code content is displayed', async () => {
+      const code = canvas.getByText(/function test/i);
+      await expect(code).toBeInTheDocument();
+    });
+
+    await step('Verify code block is rendered', async () => {
+      // Code should be in a pre or code element
+      const codeBlock = canvasElement.querySelector('pre, code');
+      await expect(codeBlock).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
+ * Copy Button Test
+ * Tests code blocks have copy functionality
  */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+export const CopyButtonTest: Story = {
+  args: {
+    title: 'Copy Button Demo',
+    examples: [{ label: 'Code', language: 'javascript', code: 'const test = 123;' }],
   },
-};
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests code blocks include copy button for easy copying.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
 
-/**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
- */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+    await step('Verify copy button is rendered', async () => {
+      // Should have a copy button
+      const buttons = canvas.getAllByRole('button');
+      // At least one button (copy or tab)
+      await expect(buttons.length).toBeGreaterThan(0);
+    });
   },
 };

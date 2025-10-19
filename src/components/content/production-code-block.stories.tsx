@@ -1,6 +1,7 @@
 'use client';
 
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { ProductionCodeBlock } from './production-code-block';
 
 const meta = {
@@ -426,52 +427,100 @@ export const ExpandCollapseDemo: Story = {
   },
 };
 
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Code Rendering Test
+ * Tests code block renders code content
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const CodeRenderingTest: Story = {
+  args: {
+    code: 'const greeting = "Hello, World!";\nconsole.log(greeting);',
+    language: 'javascript',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests code block displays code content correctly.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify code content is displayed', async () => {
+      const code = canvas.getByText(/const greeting/i);
+      await expect(code).toBeInTheDocument();
+    });
+
+    await step('Verify code block element is rendered', async () => {
+      const codeBlock = canvasElement.querySelector('pre, code');
+      await expect(codeBlock).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Copy Button Test
+ * Tests copy button is rendered and accessible
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const CopyButtonRenderTest: Story = {
+  args: {
+    code: 'npm install package-name',
+    language: 'bash',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests copy button renders for easy code copying.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify copy button is rendered', async () => {
+      const copyButton = canvas.getByRole('button', { name: /copy/i });
+      await expect(copyButton).toBeInTheDocument();
+    });
+
+    await step('Verify code content is displayed', async () => {
+      const code = canvas.getByText(/npm install/i);
+      await expect(code).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * Language Label Test
+ * Tests language label displays correctly
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const LanguageLabelTest: Story = {
+  args: {
+    code: 'function example() { return true; }',
+    language: 'typescript',
+    showLanguage: true,
   },
-};
-
-/**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
- */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests language label displays when showLanguage is true.',
+      },
+    },
   },
-};
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
 
-/**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
- */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+    await step('Verify language label is displayed', async () => {
+      const langLabel = canvas.getByText(/typescript/i);
+      await expect(langLabel).toBeInTheDocument();
+    });
+
+    await step('Verify code content is displayed', async () => {
+      const code = canvas.getByText(/function example/i);
+      await expect(code).toBeInTheDocument();
+    });
   },
 };

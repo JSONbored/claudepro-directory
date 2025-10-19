@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Bookmark, Copy, ExternalLink, Eye, Github } from '@/src/lib/icons';
@@ -73,18 +74,122 @@ Composition-based architecture with customizable render slots:
       control: 'select',
       options: ['default', 'detailed', 'review', 'changelog'],
       description: 'Visual variant of the card',
+      table: {
+        type: { summary: "'default' | 'detailed' | 'review' | 'changelog'" },
+        defaultValue: { summary: 'default' },
+      },
+    },
+    displayTitle: {
+      control: 'text',
+      description: 'Display title for the card',
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    description: {
+      control: 'text',
+      description: 'Card description text (optional)',
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    author: {
+      control: 'text',
+      description: 'Author name',
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    source: {
+      control: 'select',
+      options: ['official', 'partner', 'community', 'verified', 'experimental', 'other'],
+      description: 'Content source badge',
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    tags: {
+      control: 'object',
+      description: 'Array of tags to display',
+      table: {
+        type: { summary: 'string[]' },
+      },
+    },
+    maxVisibleTags: {
+      control: 'number',
+      description: 'Maximum tags before "+N more" badge',
+      table: {
+        type: { summary: 'number' },
+        defaultValue: { summary: 4 },
+      },
     },
     showActions: {
       control: 'boolean',
       description: 'Show action buttons',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: true },
+      },
     },
     showAuthor: {
       control: 'boolean',
       description: 'Show author in footer',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: true },
+      },
     },
     disableNavigation: {
       control: 'boolean',
       description: 'Disable card click navigation',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: false },
+      },
+    },
+    topAccent: {
+      control: 'boolean',
+      description: 'Show subtle top border accent for related content',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: false },
+      },
+    },
+    compactMode: {
+      control: 'boolean',
+      description: 'Compact mode with tighter spacing',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: false },
+      },
+    },
+    isSponsored: {
+      control: 'boolean',
+      description: 'Whether this is sponsored content',
+      table: {
+        type: { summary: 'boolean' },
+      },
+    },
+    targetPath: {
+      control: 'text',
+      description: 'Target path for card navigation',
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    ariaLabel: {
+      control: 'text',
+      description: 'ARIA label for accessibility',
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    onBeforeNavigate: {
+      action: 'beforeNavigate',
+      description: 'Callback before navigation',
+      table: {
+        type: { summary: '() => void' },
+      },
     },
   },
 } satisfies Meta<typeof BaseCard>;
@@ -940,52 +1045,261 @@ export const RelatedContentStyle: Story = {
   },
 };
 
+// ============================================================================
+// COMPONENT STATES
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Loading State - Skeleton/Placeholder
+ * Shows card in loading state with skeleton UI
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const LoadingState: Story = {
+  args: {
+    displayTitle: 'Loading...',
+    description: 'Content is currently loading. This card shows skeleton/placeholder UI.',
+    ariaLabel: 'Loading card - skeleton state',
+    disableNavigation: true, // No navigation during load
+    showActions: false, // No actions during load
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Loading/Skeleton State** - Card shown while content is being fetched.
+
+**Features:**
+- Disabled navigation (non-interactive)
+- No action buttons
+- Placeholder text for title/description
+- Useful for async data loading scenarios
+
+**Use Cases:**
+- Initial page load
+- Infinite scroll loading more cards
+- Lazy-loaded content sections
+
+**Implementation Note:** For production, consider using dedicated skeleton component with animated placeholders.
+        `,
+      },
+    },
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Empty State - No Content
+ * Shows card when there's no content to display
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const EmptyState: Story = {
+  args: {
+    displayTitle: 'No Results Found',
+    description: "Try adjusting your search criteria or filters to find what you're looking for.",
+    ariaLabel: 'Empty state card - no results',
+    disableNavigation: true,
+    showActions: false,
+    showAuthor: false,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Empty State** - Shown when search/filter returns no results.
+
+**Features:**
+- Helpful messaging to guide user
+- No navigation (not a real card)
+- No actions or author info
+- Clear call-to-action in description
+
+**Use Cases:**
+- Search returns no matches
+- Filtered view has no items
+- Category has no content yet
+        `,
+      },
+    },
+  },
+};
+
+// ============================================================================
+// PLAY FUNCTION TESTS - INTERACTIVE TESTING
+// ============================================================================
+
+/**
+ * Card Click Interaction
+ * Tests card navigation on click
+ */
+export const CardClickInteraction: Story = {
+  args: {
+    displayTitle: 'Clickable Card',
+    description: 'Click this card to test navigation behavior.',
+    author: 'Test Team',
+    tags: ['interactive', 'click', 'test'],
+    ariaLabel: 'Clickable card for testing navigation',
+    targetPath: '/example/click-test',
+    onBeforeNavigate: fn(), // Spy function
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify card is rendered', async () => {
+      const card = canvas.getByRole('article', { name: /clickable card/i });
+      await expect(card).toBeInTheDocument();
+    });
+
+    await step('Click the card', async () => {
+      const card = canvas.getByRole('article', { name: /clickable card/i });
+      await userEvent.click(card);
+    });
+
+    await step('Verify onBeforeNavigate was called', async () => {
+      await expect(args.onBeforeNavigate).toHaveBeenCalledTimes(1);
+    });
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Interactive Test**: Card click navigation.
+
+**Test Steps:**
+1. Verify card is rendered with correct ARIA label
+2. Click the card element
+3. Verify \`onBeforeNavigate\` callback was invoked
+
+**Validates:**
+- Card renders with proper accessibility
+- Click handler fires correctly
+- Navigation callback system works
+- \`useCardNavigation\` hook integration
+        `,
+      },
+    },
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * Keyboard Navigation Interaction
+ * Tests keyboard accessibility (Enter and Space keys)
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const KeyboardNavigationInteraction: Story = {
+  args: {
+    displayTitle: 'Keyboard Accessible Card',
+    description: 'Use Tab to focus, then press Enter or Space to navigate.',
+    author: 'Accessibility Team',
+    tags: ['a11y', 'keyboard', 'accessible'],
+    ariaLabel: 'Keyboard accessible card for testing',
+    targetPath: '/example/keyboard-test',
+    onBeforeNavigate: fn(),
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Focus the card with keyboard', async () => {
+      const card = canvas.getByRole('article', { name: /keyboard accessible/i });
+      card.focus();
+      await expect(card).toHaveFocus();
+    });
+
+    await step('Press Enter key to navigate', async () => {
+      const card = canvas.getByRole('article', { name: /keyboard accessible/i });
+      await userEvent.type(card, '{Enter}');
+    });
+
+    await step('Verify onBeforeNavigate was called', async () => {
+      await expect(args.onBeforeNavigate).toHaveBeenCalled();
+    });
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Interactive Test**: Keyboard navigation (Enter/Space).
+
+**Test Steps:**
+1. Focus the card using keyboard (tabIndex=0)
+2. Verify card receives focus
+3. Press Enter key
+4. Verify navigation callback fires
+
+**Validates:**
+- Card is keyboard focusable (tabIndex=0)
+- Enter/Space key handlers work
+- ARIA roles and labels are correct
+- Full keyboard accessibility compliance
+
+**Accessibility:** Meets WCAG 2.1 AA standards for keyboard navigation.
+        `,
+      },
+    },
   },
 };
 
 /**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
+ * Action Button Interaction
+ * Tests action button clicks (stopPropagation)
  */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+export const ActionButtonInteraction: Story = {
+  args: {
+    displayTitle: 'Card with Action Buttons',
+    description: "Test that action buttons don't trigger card navigation.",
+    author: 'UX Team',
+    tags: ['buttons', 'actions', 'interaction'],
+    ariaLabel: 'Card with action buttons for testing',
+    targetPath: '/example/actions-test',
+    showActions: true,
+    onBeforeNavigate: fn(), // Should NOT be called when clicking actions
+    renderActions: () => (
+      <>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0"
+          onClick={fn()} // Spy on button click
+          aria-label="Test action button"
+        >
+          <Github className="h-3 w-3" />
+        </Button>
+      </>
+    ),
   },
-};
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
 
-/**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
- */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+    await step('Verify action button is rendered', async () => {
+      const actionButton = canvas.getByLabelText(/test action button/i);
+      await expect(actionButton).toBeInTheDocument();
+    });
+
+    await step('Click the action button', async () => {
+      const actionButton = canvas.getByLabelText(/test action button/i);
+      await userEvent.click(actionButton);
+    });
+
+    await step('Verify card navigation was NOT triggered', async () => {
+      // onBeforeNavigate should NOT have been called (stopPropagation works)
+      await expect(args.onBeforeNavigate).not.toHaveBeenCalled();
+    });
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Interactive Test**: Action button click isolation.
+
+**Test Steps:**
+1. Verify action button renders in card footer
+2. Click the action button
+3. Verify card navigation was NOT triggered (event.stopPropagation works)
+
+**Validates:**
+- Action buttons render correctly
+- \`e.stopPropagation()\` prevents card click
+- Users can interact with actions without navigating
+- Event bubbling is properly managed
+
+**Pattern:** All action buttons MUST call \`e.stopPropagation()\` to prevent card navigation.
+        `,
+      },
+    },
   },
 };

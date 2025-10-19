@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { AlertTriangle, Settings, Zap } from '@/src/lib/icons';
 import { UnifiedContentSection } from './unified-content-section';
 
@@ -509,52 +510,193 @@ export const AllVariantsComparison: Story = {
   },
 };
 
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Bullets Variant Test
+ * Tests bullets variant renders title, description, and bullet points
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const BulletsVariantTest: Story = {
+  args: {
+    variant: 'bullets',
+    title: 'Test Bullets Section',
+    description: 'Test description for bullets',
+    bullets: [
+      { text: 'Bullet point 1' },
+      { text: 'Bullet point 2' },
+      { text: 'Bullet point 3', icon: Zap },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests bullets variant displays title, description, and all bullet points.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify section title is displayed', async () => {
+      const title = canvas.getByText(/test bullets section/i);
+      await expect(title).toBeInTheDocument();
+    });
+
+    await step('Verify section description is displayed', async () => {
+      const description = canvas.getByText(/test description for bullets/i);
+      await expect(description).toBeInTheDocument();
+    });
+
+    await step('Verify all bullet points are displayed', async () => {
+      const bullet1 = canvas.getByText(/bullet point 1/i);
+      const bullet2 = canvas.getByText(/bullet point 2/i);
+      const bullet3 = canvas.getByText(/bullet point 3/i);
+
+      await expect(bullet1).toBeInTheDocument();
+      await expect(bullet2).toBeInTheDocument();
+      await expect(bullet3).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Content Variant Test
+ * Tests content variant renders title, description, and HTML content
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const ContentVariantTest: Story = {
+  args: {
+    variant: 'content',
+    title: 'Test Content Section',
+    description: 'Test description for content',
+    html: '<p>This is test HTML content.</p><p>Second paragraph.</p>',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests content variant displays title, description, and HTML content.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify section title is displayed', async () => {
+      const title = canvas.getByText(/test content section/i);
+      await expect(title).toBeInTheDocument();
+    });
+
+    await step('Verify section description is displayed', async () => {
+      const description = canvas.getByText(/test description for content/i);
+      await expect(description).toBeInTheDocument();
+    });
+
+    await step('Verify HTML content is rendered', async () => {
+      const htmlContent = canvas.getByText(/this is test html content/i);
+      await expect(htmlContent).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * Configuration Variant Test (JSON Format)
+ * Tests configuration variant with JSON format
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const ConfigurationJSONTest: Story = {
+  args: {
+    variant: 'configuration',
+    format: 'json',
+    html: '{"key": "value", "setting": "enabled"}',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests configuration variant displays JSON configuration.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify configuration content is displayed', async () => {
+      // JSON should be rendered as code
+      const config = canvasElement.querySelector('pre, code');
+      await expect(config).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
+ * Examples Variant Test
+ * Tests examples variant renders title and example items
  */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+export const ExamplesVariantTest: Story = {
+  args: {
+    variant: 'examples',
+    title: 'Test Examples',
+    description: 'Example usage scenarios',
+    examples: [
+      { title: 'Example 1', code: 'console.log("test 1")' },
+      { title: 'Example 2', code: 'console.log("test 2")' },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests examples variant displays title and code examples.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify section title is displayed', async () => {
+      const title = canvas.getByText(/test examples/i);
+      await expect(title).toBeInTheDocument();
+    });
+
+    await step('Verify example titles are displayed', async () => {
+      const example1 = canvas.getByText(/example 1/i);
+      const example2 = canvas.getByText(/example 2/i);
+
+      await expect(example1).toBeInTheDocument();
+      await expect(example2).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
+ * Section Icon Test
+ * Tests section with custom icon
  */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+export const SectionIconTest: Story = {
+  args: {
+    variant: 'bullets',
+    title: 'Section with Icon',
+    description: 'Testing icon display',
+    icon: Settings,
+    bullets: [{ text: 'Test bullet' }],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests section displays custom icon alongside title.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify section title is displayed', async () => {
+      const title = canvas.getByText(/section with icon/i);
+      await expect(title).toBeInTheDocument();
+    });
+
+    await step('Verify icon is rendered', async () => {
+      // Icon should be an SVG element
+      const icons = canvasElement.querySelectorAll('svg');
+      await expect(icons.length).toBeGreaterThan(0);
+    });
   },
 };

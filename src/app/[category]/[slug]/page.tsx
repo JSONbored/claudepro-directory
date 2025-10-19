@@ -150,9 +150,9 @@ export async function generateStaticParams() {
  * @example
  * // For /agents/code-reviewer-agent route:
  * // {
- * //   title: "Code Reviewer Agent - AI Agent | Claude Pro Directory",
+ * //   title: "Code Reviewer Agent - Agents - Claude Pro Directory",
  * //   description: "Specialized agent for reviewing code quality...",
- * //   keywords: "code review, AI agent, Claude Code",
+ * //   keywords: ["code", "review", "ai", "agent", "claude"],
  * //   openGraph: { title, description, type: 'article', ... },
  * //   twitter: { card: 'summary_large_image', ... }
  * // }

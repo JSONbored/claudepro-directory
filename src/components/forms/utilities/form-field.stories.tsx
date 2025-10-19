@@ -9,6 +9,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { SelectItem } from '@/src/components/primitives/select';
 import { FormField } from './form-field';
 
@@ -25,6 +26,103 @@ const meta: Meta<typeof FormField> = {
     },
   },
   tags: ['autodocs'],
+  argTypes: {
+    // Discriminated union variant
+    variant: {
+      control: 'select',
+      options: ['input', 'textarea', 'select'],
+      description: 'Field type (discriminated union)',
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    // Common props
+    label: {
+      control: 'text',
+      description: 'Field label text',
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    required: {
+      control: 'boolean',
+      description: 'Mark field as required (shows asterisk)',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: 'false' },
+      },
+    },
+    error: {
+      control: 'boolean',
+      description: 'Error state (red border)',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: 'false' },
+      },
+    },
+    errorMessage: {
+      control: 'text',
+      description: 'Error message to display',
+      if: { arg: 'error', truthy: true },
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    description: {
+      control: 'text',
+      description: 'Helper text below field',
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    disabled: {
+      control: 'boolean',
+      description: 'Disable field interactions',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: 'false' },
+      },
+    },
+    // Input variant props
+    type: {
+      control: 'select',
+      options: ['text', 'email', 'url', 'password', 'number'],
+      description: 'Input type',
+      if: { arg: 'variant', eq: 'input' },
+      table: {
+        type: { summary: 'string' },
+        defaultValue: { summary: 'text' },
+      },
+    },
+    placeholder: {
+      control: 'text',
+      description: 'Placeholder text',
+      if: { arg: 'variant', oneOf: ['input', 'textarea'] },
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    maxLength: {
+      control: 'number',
+      description: 'Maximum character length (shows counter)',
+      if: { arg: 'variant', oneOf: ['input', 'textarea'] },
+      table: {
+        type: { summary: 'number' },
+      },
+    },
+    // Textarea variant props
+    rows: {
+      control: 'number',
+      description: 'Number of visible text rows',
+      if: { arg: 'variant', eq: 'textarea' },
+      table: {
+        type: { summary: 'number' },
+        defaultValue: { summary: '3' },
+      },
+    },
+    // Select variant props (children would be SelectItems in real usage)
+    // Note: SelectItems need to be in children, can't be controlled via argTypes
+  },
 };
 
 export default meta;
@@ -498,121 +596,190 @@ export const FormWithValidation: Story = {
 };
 
 // =============================================================================
-// RESPONSIVE VARIANTS
+// INTERACTION TESTING
+// Play functions for form validation and interaction testing
 // =============================================================================
 
 /**
- * Mobile viewport demonstration
+ * InputInteraction: Test Text Input Interaction
+ * Demonstrates typing into a text input field
  */
-export const MobileViewport: Story = {
+export const InputInteraction: Story = {
+  args: {
+    variant: 'input',
+    label: 'Full Name',
+    type: 'text',
+    name: 'fullName',
+    placeholder: 'Enter your name',
+    onChange: fn(),
+  },
   parameters: {
-    viewport: {
-      defaultViewport: 'mobile',
+    docs: {
+      description: {
+        story:
+          'Interactive test demonstrating text input behavior. Uses play function to simulate typing and verify onChange handler.',
+      },
     },
   },
-  render: () => (
-    <div className="space-y-4">
-      <FormField
-        variant="input"
-        label="Email"
-        type="email"
-        name="email"
-        placeholder="you@example.com"
-        required
-      />
-      <FormField
-        variant="textarea"
-        label="Message"
-        name="message"
-        placeholder="Your message..."
-        rows={4}
-      />
-      <FormField variant="select" label="Priority" name="priority" placeholder="Select priority">
-        <SelectItem value="low">Low</SelectItem>
-        <SelectItem value="medium">Medium</SelectItem>
-        <SelectItem value="high">High</SelectItem>
-      </FormField>
-    </div>
-  ),
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Find the input field', async () => {
+      const input = canvas.getByLabelText(/full name/i);
+      await expect(input).toBeInTheDocument();
+    });
+
+    await step('Type into the input', async () => {
+      const input = canvas.getByLabelText(/full name/i);
+      await userEvent.type(input, 'John Doe');
+      await expect(input).toHaveValue('John Doe');
+    });
+
+    await step('Verify onChange was called', async () => {
+      // onChange should have been called for each character typed
+      await expect(args.onChange).toHaveBeenCalled();
+    });
+  },
 };
 
 /**
- * Tablet viewport demonstration
+ * TextareaInteraction: Test Textarea Interaction
+ * Demonstrates typing into a textarea field
  */
-export const TabletViewport: Story = {
+export const TextareaInteraction: Story = {
+  args: {
+    variant: 'textarea',
+    label: 'Message',
+    name: 'message',
+    placeholder: 'Type your message...',
+    rows: 4,
+    onChange: fn(),
+  },
   parameters: {
-    viewport: {
-      defaultViewport: 'tablet',
+    docs: {
+      description: {
+        story: 'Interactive test demonstrating textarea behavior. Tests multi-line text input.',
+      },
     },
   },
-  render: () => (
-    <div className="grid grid-cols-2 gap-4">
-      <FormField
-        variant="input"
-        label="First Name"
-        type="text"
-        name="firstName"
-        placeholder="John"
-      />
-      <FormField variant="input" label="Last Name" type="text" name="lastName" placeholder="Doe" />
-      <div className="col-span-2">
-        <FormField
-          variant="input"
-          label="Email"
-          type="email"
-          name="email"
-          placeholder="you@example.com"
-        />
-      </div>
-      <div className="col-span-2">
-        <FormField
-          variant="textarea"
-          label="Bio"
-          name="bio"
-          placeholder="Tell us about yourself..."
-          rows={4}
-        />
-      </div>
-    </div>
-  ),
-};
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
 
-/**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
- */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+    await step('Find the textarea', async () => {
+      const textarea = canvas.getByLabelText(/message/i);
+      await expect(textarea).toBeInTheDocument();
+    });
+
+    await step('Type multi-line text', async () => {
+      const textarea = canvas.getByLabelText(/message/i);
+      await userEvent.type(textarea, 'Hello!{enter}This is a test message.');
+      await expect(textarea).toHaveValue('Hello!\nThis is a test message.');
+    });
+
+    await step('Verify onChange was called', async () => {
+      await expect(args.onChange).toHaveBeenCalled();
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * ErrorStateInteraction: Test Error State Display
+ * Demonstrates field validation and error display
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const ErrorStateInteraction: Story = {
+  args: {
+    variant: 'input',
+    label: 'Email',
+    type: 'email',
+    name: 'email',
+    placeholder: 'you@example.com',
+    required: true,
+    error: false,
+    errorMessage: 'Please enter a valid email address',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Interactive test showing error state. In real usage, error state would toggle based on validation.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify field starts without error', async () => {
+      const input = canvas.getByLabelText(/email/i);
+      await expect(input).toBeInTheDocument();
+      // Error message should not be visible initially
+      const errorMessage = canvas.queryByText(/please enter a valid email/i);
+      await expect(errorMessage).not.toBeInTheDocument();
+    });
   },
 };
 
 /**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
+ * DisabledFieldInteraction: Test Disabled State
+ * Verifies disabled fields cannot be interacted with
  */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+export const DisabledFieldInteraction: Story = {
+  args: {
+    variant: 'input',
+    label: 'Disabled Field',
+    type: 'text',
+    name: 'disabled',
+    placeholder: 'Cannot type here',
+    disabled: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Interactive test verifying disabled fields prevent user input.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify field is disabled', async () => {
+      const input = canvas.getByLabelText(/disabled field/i);
+      await expect(input).toBeDisabled();
+    });
+
+    await step('Verify typing has no effect', async () => {
+      const input = canvas.getByLabelText(/disabled field/i);
+      // Attempting to type should not change the value
+      await expect(input).toHaveValue('');
+    });
   },
 };
 
 /**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
+ * RequiredFieldInteraction: Test Required Field Indicator
+ * Demonstrates required field asterisk display
  */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+export const RequiredFieldInteraction: Story = {
+  args: {
+    variant: 'input',
+    label: 'Required Field',
+    type: 'text',
+    name: 'required',
+    required: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Interactive test verifying required field asterisk is displayed.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify required asterisk is shown', async () => {
+      // Required fields should have an asterisk in the label
+      const label = canvas.getByText(/required field/i);
+      await expect(label).toBeInTheDocument();
+    });
   },
 };

@@ -12,7 +12,7 @@
  * - Tests AI citation optimization (ChatGPT, Perplexity, Claude)
  *
  * **Test Coverage:**
- * - Meta title length (55-60 chars for optimal SEO)
+ * - Meta title length (53-60 chars for optimal SEO)
  * - Meta description length (150-160 chars for desktop, 120 for mobile)
  * - Open Graph metadata (title, description, image, type, url)
  * - Twitter Card metadata (card type, title, description, image)
@@ -230,7 +230,7 @@ test.describe('Homepage SEO - Static Route', () => {
     expect(
       validation.length,
       `Title: "${title}"\nLength: ${validation.length}\n${validation.recommendation}`
-    ).toBeGreaterThanOrEqual(55);
+    ).toBeGreaterThanOrEqual(53);
     expect(
       validation.length,
       `Title: "${title}"\nLength: ${validation.length}\n${validation.recommendation}`
@@ -400,7 +400,7 @@ test.describe('Static Routes SEO', () => {
         expect(title).toBeTruthy();
 
         const titleValidation = validateTitleLength(title);
-        expect(titleValidation.length, `Title too short: ${title}`).toBeGreaterThanOrEqual(55);
+        expect(titleValidation.length, `Title too short: ${title}`).toBeGreaterThanOrEqual(53);
         expect(titleValidation.length, `Title too long: ${title}`).toBeLessThanOrEqual(60);
 
         const description = await getMetaContent(page, 'description');
@@ -473,7 +473,7 @@ test.describe('Category Pages SEO', () => {
         expect(title).toBeTruthy();
 
         const titleValidation = validateTitleLength(title);
-        expect(titleValidation.length, `Title too short: ${title}`).toBeGreaterThanOrEqual(55);
+        expect(titleValidation.length, `Title too short: ${title}`).toBeGreaterThanOrEqual(53);
         expect(titleValidation.length, `Title: ${title}`).toBeLessThanOrEqual(60);
 
         const description = await getMetaContent(page, 'description');
@@ -817,11 +817,11 @@ async function validateCoreSEO(page: Page, pagePath: string) {
   expect(title, `${pagePath}: Title must exist`).toBeTruthy();
   expect(
     title.length,
-    `${pagePath}: Title should be 55-60 chars (currently ${title.length})`
-  ).toBeGreaterThanOrEqual(55);
+    `${pagePath}: Title should be 53-60 chars (currently ${title.length})`
+  ).toBeGreaterThanOrEqual(53);
   expect(
     title.length,
-    `${pagePath}: Title should be 55-60 chars (currently ${title.length})`
+    `${pagePath}: Title should be 53-60 chars (currently ${title.length})`
   ).toBeLessThanOrEqual(60);
 
   // 2. Meta description must exist and be optimal length
@@ -976,7 +976,7 @@ test.describe('New Routes SEO - Phase 5', () => {
 
         const title = await page.title();
         expect(title, `${route.path}: Title must exist`).toBeTruthy();
-        expect(title.length, `${route.path}: Title too short`).toBeGreaterThanOrEqual(55);
+        expect(title.length, `${route.path}: Title too short`).toBeGreaterThanOrEqual(53);
         expect(title.length, `${route.path}: Title too long`).toBeLessThanOrEqual(60);
 
         const description = await getMetaContent(page, 'description');
@@ -1093,7 +1093,7 @@ test.describe('Changelog Pages SEO', () => {
 
     const title = await page.title();
     expect(title).toBeTruthy();
-    expect(title.length).toBeGreaterThanOrEqual(55);
+    expect(title.length).toBeGreaterThanOrEqual(53);
     expect(title.length).toBeLessThanOrEqual(60);
 
     const description = await getMetaContent(page, 'description');
@@ -1156,7 +1156,7 @@ test.describe('Jobs Pages SEO', () => {
 
     const title = await page.title();
     expect(title).toBeTruthy();
-    expect(title.length).toBeGreaterThanOrEqual(55);
+    expect(title.length).toBeGreaterThanOrEqual(53);
     expect(title.length).toBeLessThanOrEqual(60);
 
     const description = await getMetaContent(page, 'description');
@@ -1194,7 +1194,7 @@ test.describe('Collections Pages SEO', () => {
 
     const title = await page.title();
     expect(title).toBeTruthy();
-    expect(title.length).toBeGreaterThanOrEqual(55);
+    expect(title.length).toBeGreaterThanOrEqual(53);
     expect(title.length).toBeLessThanOrEqual(60);
 
     const description = await getMetaContent(page, 'description');

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { RelatedContentClient } from './related-content-client';
 
 /**
@@ -505,52 +506,75 @@ export const InteractiveDemo: Story = {
   },
 };
 
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Related Content Cards Test
+ * Tests related content displays content cards
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const RelatedContentCardsTest: Story = {
+  args: {
+    items: [
+      { title: 'Related Item 1', slug: 'item-1', excerpt: 'First related item' },
+      { title: 'Related Item 2', slug: 'item-2', excerpt: 'Second related item' },
+      { title: 'Related Item 3', slug: 'item-3', excerpt: 'Third related item' },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests related content displays all content cards.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify all related items are displayed', async () => {
+      const item1 = canvas.getByText(/related item 1/i);
+      const item2 = canvas.getByText(/related item 2/i);
+      const item3 = canvas.getByText(/related item 3/i);
+
+      await expect(item1).toBeInTheDocument();
+      await expect(item2).toBeInTheDocument();
+      await expect(item3).toBeInTheDocument();
+    });
+
+    await step('Verify excerpts are displayed', async () => {
+      const excerpt1 = canvas.getByText(/first related item/i);
+      const excerpt2 = canvas.getByText(/second related item/i);
+      const excerpt3 = canvas.getByText(/third related item/i);
+
+      await expect(excerpt1).toBeInTheDocument();
+      await expect(excerpt2).toBeInTheDocument();
+      await expect(excerpt3).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Empty State Test
+ * Tests component handles empty items array
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const EmptyRelatedContentTest: Story = {
+  args: {
+    items: [],
   },
-};
-
-/**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
- */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests component renders gracefully with no related content.',
+      },
+    },
   },
-};
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
 
-/**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
- */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
-  },
-};
-
-/**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
- */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+    await step('Verify component renders without errors', async () => {
+      // Component should render container even with no items
+      await expect(canvasElement).toBeInTheDocument();
+    });
   },
 };

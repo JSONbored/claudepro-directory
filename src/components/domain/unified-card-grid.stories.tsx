@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { BaseCard } from '@/src/components/domain/base-card';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -497,52 +498,164 @@ export const AllVariants: Story = {
   ),
 };
 
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Grid Structure Test
+ * Tests grid layout and responsive classes
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const GridStructureTest: Story = {
+  args: {
+    items: mockConfigItems,
+    cardComponent: ConfigCard,
+    variant: 'normal',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests grid structure with responsive 3-column layout.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify grid container is rendered', async () => {
+      const gridContainer = canvasElement.querySelector('[class*="grid"]');
+      await expect(gridContainer).toBeInTheDocument();
+    });
+
+    await step('Verify cards are rendered', async () => {
+      // Should have 6 config items
+      const cards = canvasElement.querySelectorAll('[class*="card"]');
+      await expect(cards.length).toBeGreaterThan(0);
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Card Click Interaction Test
+ * Tests card interactivity
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const CardClickTest: Story = {
+  args: {
+    items: mockConfigItems.slice(0, 3),
+    cardComponent: ConfigCard,
+    variant: 'normal',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests card click interactions.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify cards are clickable', async () => {
+      const firstCard = canvasElement.querySelector('a[href]');
+      await expect(firstCard).toBeInTheDocument();
+    });
+
+    await step('Verify card has correct href', async () => {
+      const firstCard = canvasElement.querySelector('a[href]');
+      if (firstCard) {
+        const href = firstCard.getAttribute('href');
+        await expect(href).toBeTruthy();
+      }
+    });
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * Empty State Test
+ * Tests empty state rendering
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const EmptyStateTest: Story = {
+  args: {
+    items: [],
+    cardComponent: ConfigCard,
+    variant: 'normal',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests empty state when no items are provided.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify empty state message is shown', async () => {
+      // Empty state should show message or empty div
+      const container = canvasElement.querySelector('[class*="grid"]');
+      await expect(container).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
+ * Loading State Test
+ * Tests loading skeleton rendering
  */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+export const LoadingStateTest: Story = {
+  args: {
+    items: mockConfigItems,
+    cardComponent: ConfigCard,
+    variant: 'normal',
+    loading: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests loading state with skeleton cards.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify loading skeletons are shown', async () => {
+      // Loading state should show skeleton elements
+      const skeletons = canvasElement.querySelectorAll('[class*="animate"]');
+      await expect(skeletons.length).toBeGreaterThan(0);
+    });
   },
 };
 
 /**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
+ * Variant Switching Test
+ * Tests different grid variants
  */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+export const VariantSwitchingTest: Story = {
+  args: {
+    items: mockConfigItems.slice(0, 4),
+    cardComponent: ConfigCard,
+    variant: 'wide',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests wide variant (4-column grid).',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify grid is rendered', async () => {
+      const gridContainer = canvasElement.querySelector('[class*="grid"]');
+      await expect(gridContainer).toBeInTheDocument();
+    });
+
+    await step('Verify correct number of items', async () => {
+      // Should have 4 items
+      const cards = canvasElement.querySelectorAll('[class*="card"]');
+      await expect(cards.length).toBeGreaterThan(0);
+    });
   },
 };

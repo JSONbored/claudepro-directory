@@ -19,6 +19,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { useId } from 'react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import {
   // Lazy-loaded components (code-split)
   ComparisonTable,
@@ -790,52 +791,113 @@ export const AllLazyComponents: StoryObj = {
   },
 };
 
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Copyable Heading Test
+ * Tests CopyableHeading renders with copy button
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const CopyableHeadingTest: Story = {
+  render: () => <CopyableHeading id="test-heading">Test Heading Content</CopyableHeading>,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests CopyableHeading displays heading text and copy button.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify heading text is displayed', async () => {
+      const heading = canvas.getByText(/test heading content/i);
+      await expect(heading).toBeInTheDocument();
+    });
+
+    await step('Verify copy button is rendered', async () => {
+      // Copy button should be a button element
+      const buttons = canvas.getAllByRole('button');
+      await expect(buttons.length).toBeGreaterThan(0);
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Copyable Code Block Test
+ * Tests CopyableCodeBlock renders code with copy functionality
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const CopyableCodeBlockTest: Story = {
+  render: () => (
+    <CopyableCodeBlock className="language-javascript">
+      console.log('Test code block');
+    </CopyableCodeBlock>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests CopyableCodeBlock displays code and copy button.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify code content is displayed', async () => {
+      const code = canvas.getByText(/console\.log/i);
+      await expect(code).toBeInTheDocument();
+    });
+
+    await step('Verify copy button is rendered', async () => {
+      const buttons = canvas.getAllByRole('button');
+      await expect(buttons.length).toBeGreaterThan(0);
+    });
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * Comparison Table Test
+ * Tests ComparisonTable renders headers and rows
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const ComparisonTableTest: Story = {
+  render: () => (
+    <ComparisonTable
+      headers={['Feature', 'Option A', 'Option B']}
+      rows={[
+        ['Speed', 'Fast', 'Faster'],
+        ['Price', '$10', '$20'],
+      ]}
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests ComparisonTable displays headers and comparison data.',
+      },
+    },
   },
-};
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
 
-/**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
- */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
-  },
-};
+    await step('Verify table headers are displayed', async () => {
+      const feature = canvas.getByText(/feature/i);
+      const optionA = canvas.getByText(/option a/i);
+      const optionB = canvas.getByText(/option b/i);
 
-/**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
- */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+      await expect(feature).toBeInTheDocument();
+      await expect(optionA).toBeInTheDocument();
+      await expect(optionB).toBeInTheDocument();
+    });
+
+    await step('Verify table data is displayed', async () => {
+      const speed = canvas.getByText(/speed/i);
+      const fast = canvas.getByText(/fast/i);
+      const faster = canvas.getByText(/faster/i);
+
+      await expect(speed).toBeInTheDocument();
+      await expect(fast).toBeInTheDocument();
+      await expect(faster).toBeInTheDocument();
+    });
   },
 };

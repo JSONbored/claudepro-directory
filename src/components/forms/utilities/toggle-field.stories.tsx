@@ -271,46 +271,6 @@ export const Accessibility: Story = {
 };
 
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
- */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
-  },
-};
-
-/**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
- */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
-  },
-};
-
-/**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
- */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
-  },
-};
-
-/**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
- */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
-  },
-};
-
-/**
  * LightTheme: Light Mode Theme
  * Tests component appearance in light mode
  */

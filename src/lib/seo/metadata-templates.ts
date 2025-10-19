@@ -9,7 +9,7 @@
  * **Architecture:**
  * - Single Source of Truth: Uses UNIFIED_CATEGORY_REGISTRY for all category data
  * - Schema-First: Derives metadata from content schemas (no duplication)
- * - Validation-First: All templates enforce 55-60 char titles, 150-160 char descriptions
+ * - Validation-First: All templates enforce 53-60 char titles, 150-160 char descriptions
  * - Type-Safe: Full TypeScript support with proper MetadataContext typing
  *
  * **Template System:**
@@ -76,6 +76,100 @@ const STANDARD_VALIDATION = {
   minKeywords: 3,
 };
 
+// ============================================
+// SHARED DESCRIPTION UTILITIES
+// ============================================
+
+/**
+ * Smart Description Padding/Truncation
+ *
+ * Enterprise-grade utility for ensuring descriptions meet SEO standards (150-160 chars).
+ * Used by CATEGORY, CONTENT_DETAIL, and other patterns requiring description normalization.
+ *
+ * **Strategy:**
+ * 1. If description already in range (150-160 chars) → return as-is
+ * 2. If too short → apply multi-tier padding to reach 150-160 chars
+ * 3. If too long → smart truncate at word boundary with ellipsis
+ *
+ * **Padding Tiers:**
+ * - 5 padding options sorted by length (shortest to longest)
+ * - Algorithm selects shortest padding that fits target range
+ * - Fallback: use longest padding + truncate if needed
+ *
+ * @param rawDescription - Original description (any length)
+ * @param categoryName - Category name for padding context (e.g., "Agents", "MCP Servers")
+ * @returns SEO-optimized description (150-160 chars guaranteed)
+ *
+ * @example
+ * ```typescript
+ * smartDescriptionPadding("Short description.", "Agents")
+ * // Returns: "Short description. Browse Agents on Claude Pro Directory - ..."
+ *
+ * smartDescriptionPadding("Already perfect length description...", "MCP")
+ * // Returns: "Already perfect length description..." (no changes)
+ *
+ * smartDescriptionPadding("Very long description that exceeds...", "Rules")
+ * // Returns: "Very long description that..." (truncated at word boundary)
+ * ```
+ */
+function smartDescriptionPadding(rawDescription: string, categoryName: string): string {
+  const DESC_MIN = METADATA_QUALITY_RULES.description.minLength;
+  const DESC_MAX = METADATA_QUALITY_RULES.description.maxLength;
+
+  // Case 1: Description already in optimal range (150-160 chars) - return as-is
+  if (rawDescription.length >= DESC_MIN && rawDescription.length <= DESC_MAX) {
+    return rawDescription;
+  }
+
+  // Case 2: Description too short - add intelligent padding
+  if (rawDescription.length < DESC_MIN) {
+    // Multi-tier padding strategy to reach 150-160 chars
+    // Sorted by length (shortest to longest) to find optimal fit
+    const paddings = [
+      ` Browse ${categoryName} on ${APP_CONFIG.name} - curated resources for AI development and automation.`, // ~97 chars
+      ` Explore ${categoryName} on ${APP_CONFIG.name} - community tools, guides, and best practices for Claude AI.`, // ~104 chars
+      ` Discover ${categoryName} on ${APP_CONFIG.name} - open-source community resources for developers and AI enthusiasts.`, // ~111 chars
+      ` Browse ${categoryName} on ${APP_CONFIG.name} - community-curated resources for Claude AI development and automation workflows.`, // ~129 chars
+      ` Explore ${categoryName} on ${APP_CONFIG.name} - community-curated resources, tools, guides, and best practices for Claude AI development, automation workflows, and productivity enhancement.`, // ~187 chars (for very short descriptions)
+    ];
+
+    // Try each padding to find one that fits 150-160 range
+    for (const padding of paddings) {
+      const padded = rawDescription + padding;
+      if (padded.length >= DESC_MIN && padded.length <= DESC_MAX) {
+        return padded;
+      }
+    }
+
+    // Fallback: Use longest padding and truncate if needed
+    const fallbackPadded = rawDescription + paddings[paddings.length - 1];
+    if (fallbackPadded.length > DESC_MAX) {
+      // Truncate the padded result at word boundary
+      const lastSpace = fallbackPadded.substring(0, DESC_MAX - 3).lastIndexOf(' ');
+      return (
+        fallbackPadded.substring(0, lastSpace > DESC_MIN - 10 ? lastSpace : DESC_MAX - 3) + '...'
+      );
+    }
+
+    return fallbackPadded;
+  }
+
+  // Case 3: Description too long - smart truncation at word boundary
+  const ellipsis = '...';
+  let truncated = rawDescription.substring(0, DESC_MAX - ellipsis.length);
+  const lastSpace = truncated.lastIndexOf(' ');
+
+  // Only use word boundary if it's reasonably close to target (within 20 chars)
+  if (lastSpace > DESC_MAX - 20) {
+    truncated = truncated.substring(0, lastSpace) + ellipsis;
+  } else {
+    // No good word boundary, hard truncate
+    truncated = rawDescription.substring(0, DESC_MAX - ellipsis.length) + ellipsis;
+  }
+
+  return truncated;
+}
+
 /**
  * Metadata Templates Registry
  *
@@ -89,9 +183,9 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
    * Static metadata - never changes
    */
   HOMEPAGE: {
-    title: () => '${APP_CONFIG.name} - MCP Servers, AI Agents & Configs',
+    title: () => `${APP_CONFIG.name} - MCP Servers, AI Agents & Configs`,
     description: () =>
-      'Discover and share the best Claude configurations. Explore expert rules, browse powerful MCP servers, find specialized agents and commands, and connect with the community.',
+      'Discover Claude configurations in October 2025. Explore expert rules, MCP servers, AI agents, commands, hooks, and statuslines for Claude development.',
     keywords: () => ['claude ai', 'mcp servers', 'ai agents', 'configurations', '2025'],
     validation: STANDARD_VALIDATION,
   },
@@ -105,7 +199,7 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
     title: (context): string => {
       const config = context.categoryConfig;
       if (!config) {
-        return 'Browse Content - ${APP_CONFIG.name}';
+        return `Browse Content - ${APP_CONFIG.name}`;
       }
 
       // Dynamic title generation using category data (53-60 chars for keyword density)
@@ -114,22 +208,25 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
       const keywordsArray = keywords.split(',').map((k) => k.trim());
       const kw1 = keywordsArray[0] || 'content';
       const kw2 = keywordsArray[1] || kw1;
-      const kw3 = keywordsArray[2] || kw2;
 
       // Try multiple formula variations to find one that fits optimal range
+      // Prioritize formulas with "Claude" and "2025" for brand consistency and freshness signals
+      // Include longer formulas for short category names (e.g., "Mcps" = 4 chars needs 53+ chars)
       const formulas = [
-        `Browse ${config.pluralTitle} for Claude - Community Directory`,
-        `Browse ${config.pluralTitle} - ${kw1} - Community Directory`,
-        `${config.pluralTitle} - ${kw1} & ${kw2} - Community Directory`,
-        `Explore ${config.pluralTitle} - ${kw1} & ${kw2} - Directory`,
-        `${config.pluralTitle} - ${kw1}, ${kw2} & ${kw3} - Directory`,
-        `Browse ${config.pluralTitle} - ${kw1} Community Directory`,
-        `Explore ${config.pluralTitle} for Claude - ${kw1} Directory`,
+        `Browse ${config.pluralTitle} - ${kw1} for Claude AI - Directory 2025`,
+        `Explore ${config.pluralTitle} - ${kw1} for Claude AI - Directory 2025`,
+        `Browse ${config.pluralTitle} for Claude AI - Community Directory 2025`,
+        `Explore ${config.pluralTitle} for Claude AI - Community Directory 2025`,
+        `${config.pluralTitle} for Claude - Community Directory 2025`,
+        `Explore ${config.pluralTitle} for Claude - ${kw1} Directory 2025`,
+        `Browse ${config.pluralTitle} for Claude - ${kw1} Directory 2025`,
+        `Explore ${config.pluralTitle} for Claude - Community Directory 2025`,
+        `Browse ${config.pluralTitle} for Claude - Community Directory 2025`,
+        `Explore ${config.pluralTitle} for Claude - Community 2025`,
+        `Browse ${config.pluralTitle} for Claude - Community 2025`,
+        `Explore ${config.pluralTitle} for Claude - Directory 2025`,
+        `Browse ${config.pluralTitle} for Claude - Directory 2025`,
         `${config.pluralTitle} for Claude - ${kw1} & ${kw2} Directory`,
-        `Browse ${config.pluralTitle} - ${kw1} & ${kw2} Directory`,
-        `Explore ${config.pluralTitle} - ${kw1}, ${kw2} Directory`,
-        `${config.pluralTitle} for Claude - ${kw1} Directory`,
-        `Browse ${config.pluralTitle} for Claude - ${kw1}`,
       ];
 
       // Find first formula that fits optimal range (uses seo-config constants)
@@ -156,25 +253,41 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
     },
     description: (context) => {
       const config = context.categoryConfig;
+      const fallback =
+        'Browse Claude AI configurations and resources for October 2025. Find tools, plugins, and setups to enhance your development workflow.';
+
       if (!config) {
-        return 'Browse Claude AI configurations and resources for October 2025. Find tools, plugins, and setups to enhance your development workflow.';
+        return fallback;
       }
 
-      // Use metaDescription from category config (already optimized for 150-160 chars)
-      // Type guard: Fallback if metaDescription is not defined
-      return (
-        config.metaDescription ||
-        'Browse Claude AI configurations and resources for October 2025. Find tools, plugins, and setups to enhance your development workflow.'
-      );
+      // Get metaDescription from category config
+      const rawDescription = config.metaDescription || fallback;
+      const categoryName = config.pluralTitle || 'content';
+
+      // Use shared smart padding/truncation utility
+      return smartDescriptionPadding(rawDescription, categoryName);
     },
     keywords: (context) => {
       const config = context.categoryConfig;
+      const defaultKeywords = ['claude', 'ai', '2025'];
+
       if (!(config && config.keywords)) {
-        return ['claude', 'ai', '2025'];
+        return defaultKeywords;
       }
 
       // Parse comma-separated keywords from category config
-      return config.keywords.split(',').map((k) => k.trim());
+      const parsedKeywords = config.keywords
+        .split(',')
+        .map((k) => k.trim())
+        .filter(Boolean);
+
+      // Ensure minimum 3 keywords by padding with defaults
+      if (parsedKeywords.length < 3) {
+        const needed = 3 - parsedKeywords.length;
+        return [...parsedKeywords, ...defaultKeywords.slice(0, needed)];
+      }
+
+      return parsedKeywords;
     },
     validation: STANDARD_VALIDATION,
   },
@@ -188,7 +301,7 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
   CONTENT_DETAIL: {
     title: (context) => {
       if (!context.item) {
-        return 'Content - ${APP_CONFIG.name}';
+        return `Content - ${APP_CONFIG.name}`;
       }
 
       // Prioritize seoTitle (optimized for length), then title/name
@@ -202,13 +315,40 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
       const categoryConfig = context.categoryConfig;
       const categoryName = categoryConfig?.title || 'Content';
 
-      // Complete title format: "Item - Category - ${APP_CONFIG.name}" (53-60 chars)
-      // Uses hyphen separators (2025 SEO best practice)
-      return `${displayTitle} - ${categoryName} - ${APP_CONFIG.name}`;
+      // Try multiple title formats to achieve 53-60 char optimal range
+      const formulas = [
+        `${displayTitle} - ${categoryName} - ${APP_CONFIG.name}`,
+        `${displayTitle} - ${categoryName} for Claude - ${APP_CONFIG.name}`,
+        `${displayTitle} - ${categoryName} Template - ${APP_CONFIG.name}`,
+        `${displayTitle} - ${categoryName} Config - ${APP_CONFIG.name}`,
+      ];
+
+      // Find first formula that fits optimal range
+      for (const formula of formulas) {
+        if (formula.length >= OPTIMAL_MIN && formula.length <= OPTIMAL_MAX) {
+          return formula;
+        }
+      }
+
+      // Fallback: Use base formula and truncate if needed
+      const baseTitle = `${displayTitle} - ${categoryName} - ${APP_CONFIG.name}`;
+      if (baseTitle.length > OPTIMAL_MAX) {
+        // Truncate displayTitle to fit (keep category and site name)
+        const suffix = ` - ${categoryName} - ${APP_CONFIG.name}`;
+        const maxDisplayLength = OPTIMAL_MAX - suffix.length;
+        const truncatedDisplay = displayTitle.substring(0, maxDisplayLength);
+        return `${truncatedDisplay} - ${categoryName} - ${APP_CONFIG.name}`;
+      }
+
+      // Title is too short - pad with year for freshness signal
+      if (baseTitle.length < OPTIMAL_MIN) {
+        return `${displayTitle} - ${categoryName} 2025 - ${APP_CONFIG.name}`;
+      }
+
+      return baseTitle;
     },
     description: (context) => {
-      const fallback =
-        'View content details on ${APP_CONFIG.name}. Discover configurations, guides, and resources for Claude AI development workflow.';
+      const fallback = `View content details on ${APP_CONFIG.name}. Discover configurations, guides, and resources for Claude AI development workflow.`;
 
       if (!context.item) {
         return fallback;
@@ -216,67 +356,10 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
 
       const item = context.item as { description?: string };
       const rawDescription = item.description || fallback;
+      const categoryName = context.categoryConfig?.pluralTitle || 'content';
 
-      // Smart truncation/padding to 150-160 chars (SEO optimal)
-      // Enterprise pattern: Dynamic adjustment to meet SEO requirements
-      const DESC_MIN = METADATA_QUALITY_RULES.description.minLength;
-      const DESC_MAX = METADATA_QUALITY_RULES.description.maxLength;
-
-      // Case 1: Description already in optimal range (150-160 chars)
-      if (rawDescription.length >= DESC_MIN && rawDescription.length <= DESC_MAX) {
-        return rawDescription;
-      }
-
-      // Case 2: Description too short - add intelligent padding
-      if (rawDescription.length < DESC_MIN) {
-        const categoryName = context.categoryConfig?.pluralTitle || 'content';
-
-        // Multi-tier padding strategy to reach 150-160 chars
-        // Sorted by length (shortest to longest) to find optimal fit
-        const paddings = [
-          ` Browse ${categoryName} on ${APP_CONFIG.name} - curated resources for AI development and automation.`, // ~97 chars
-          ` Explore ${categoryName} on ${APP_CONFIG.name} - community tools, guides, and best practices for Claude AI.`, // ~104 chars
-          ` Discover ${categoryName} on ${APP_CONFIG.name} - open-source community resources for developers and AI enthusiasts.`, // ~111 chars
-          ` Browse ${categoryName} on ${APP_CONFIG.name} - community-curated resources for Claude AI development and automation workflows.`, // ~129 chars
-          ` Explore ${categoryName} on ${APP_CONFIG.name} - community-curated resources, tools, guides, and best practices for Claude AI development, automation workflows, and productivity enhancement.`, // ~187 chars (for very short descriptions)
-        ];
-
-        // Try each padding to find one that fits 150-160 range
-        for (const padding of paddings) {
-          const padded = rawDescription + padding;
-          if (padded.length >= DESC_MIN && padded.length <= DESC_MAX) {
-            return padded;
-          }
-        }
-
-        // Fallback: Use longest padding and truncate if needed
-        const fallbackPadded = rawDescription + paddings[paddings.length - 1];
-        if (fallbackPadded.length > DESC_MAX) {
-          // Truncate the padded result
-          const lastSpace = fallbackPadded.substring(0, DESC_MAX - 3).lastIndexOf(' ');
-          return (
-            fallbackPadded.substring(0, lastSpace > DESC_MIN - 10 ? lastSpace : DESC_MAX - 3) +
-            '...'
-          );
-        }
-
-        return fallbackPadded;
-      }
-
-      // Case 3: Description too long - smart truncation at word boundary
-      const ellipsis = '...';
-      let truncated = rawDescription.substring(0, DESC_MAX - ellipsis.length);
-      const lastSpace = truncated.lastIndexOf(' ');
-
-      // Only use word boundary if it's reasonably close to target (within 20 chars)
-      if (lastSpace > DESC_MAX - 20) {
-        truncated = truncated.substring(0, lastSpace) + ellipsis;
-      } else {
-        // No good boundary, hard truncate
-        truncated = rawDescription.substring(0, DESC_MAX - ellipsis.length) + ellipsis;
-      }
-
-      return truncated;
+      // Use shared smart padding/truncation utility
+      return smartDescriptionPadding(rawDescription, categoryName);
     },
     keywords: (context) => {
       if (!context.item) {
@@ -419,84 +502,74 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
 
       // Map routes to complete SEO-optimized titles (53-60 chars)
       const accountTitles: Record<string, string> = {
-        '/account': 'Account Dashboard - ${APP_CONFIG.name} Platform 2025',
-        '/account/activity': 'Activity History - ${APP_CONFIG.name} Account Dashboard',
-        '/account/bookmarks': 'My Bookmarks - Saved Claude Configs - ${APP_CONFIG.name}',
-        '/account/jobs': 'My Job Postings - ${APP_CONFIG.name} Account Dashboard',
-        '/account/jobs/new': 'Create Job Posting - ${APP_CONFIG.name} Platform 2025',
-        '/account/library': 'My Library - Claude Collections - ${APP_CONFIG.name}',
-        '/account/library/new': 'Create Collection - ${APP_CONFIG.name} Library 2025',
-        '/account/settings': 'Account Settings - ${APP_CONFIG.name} Profile Manager',
-        '/account/sponsorships': 'My Sponsorships - ${APP_CONFIG.name} Account Dashboard',
-        '/account/submissions': 'My Submissions - ${APP_CONFIG.name} Account Dashboard',
+        '/account': `Account Dashboard - ${APP_CONFIG.name} Platform 2025`,
+        '/account/activity': `Activity History - ${APP_CONFIG.name} Account Dashboard`,
+        '/account/bookmarks': `My Bookmarks - Saved Claude Configs - ${APP_CONFIG.name}`,
+        '/account/jobs': `My Job Postings - ${APP_CONFIG.name} Account Dashboard`,
+        '/account/jobs/new': `Create Job Posting - ${APP_CONFIG.name} Platform 2025`,
+        '/account/library': `My Library - Claude Collections - ${APP_CONFIG.name}`,
+        '/account/library/new': `Create Collection - ${APP_CONFIG.name} Library 2025`,
+        '/account/settings': `Account Settings - ${APP_CONFIG.name} Profile Manager`,
+        '/account/sponsorships': `My Sponsorships - ${APP_CONFIG.name} Account Dashboard`,
+        '/account/submissions': `My Submissions - ${APP_CONFIG.name} Account Dashboard`,
       };
 
       // Handle dynamic routes with pattern matching
       if (route.includes('/jobs/') && route.includes('/edit')) {
-        return 'Edit Job Posting - ${APP_CONFIG.name} Account Dashboard';
+        return `Edit Job Posting - ${APP_CONFIG.name} Account Dashboard`;
       }
       if (route.includes('/jobs/') && route.includes('/analytics')) {
-        return 'Job Analytics - ${APP_CONFIG.name} Account Dashboard 2025';
+        return `Job Analytics - ${APP_CONFIG.name} Account Dashboard 2025`;
       }
       if (route.includes('/library/') && route.includes('/edit')) {
-        return 'Edit Collection - ${APP_CONFIG.name} Library Manager';
+        return `Edit Collection - ${APP_CONFIG.name} Library Manager`;
       }
       if (route.includes('/library/') && route.match(/\/library\/[^/]+$/)) {
-        return 'Collection Details - ${APP_CONFIG.name} Library Manager';
+        return `Collection Details - ${APP_CONFIG.name} Library Manager`;
       }
       if (route.includes('/sponsorships/') && route.includes('/analytics')) {
-        return 'Sponsorship Analytics - ${APP_CONFIG.name} Dashboard';
+        return `Sponsorship Analytics - ${APP_CONFIG.name} Dashboard`;
       }
 
-      return accountTitles[route] || 'My Account - ${APP_CONFIG.name} Platform 2025';
+      return accountTitles[route] || `My Account - ${APP_CONFIG.name} Platform 2025`;
     },
     description: (context) => {
       const route = context.route || '/account';
 
       // Map routes to complete SEO-optimized descriptions (150-160 chars)
       const accountDescriptions: Record<string, string> = {
-        '/account':
-          'Manage your ${APP_CONFIG.name} account dashboard in October 2025. View activity, saved content, submissions, and manage your Claude development profile.',
-        '/account/activity':
-          'View your activity history on ${APP_CONFIG.name} in October 2025. Track your interactions, contributions, and engagement with the Claude developer community.',
-        '/account/bookmarks':
-          'Access your saved Claude configurations and bookmarks on ${APP_CONFIG.name}. Organize favorite tools, guides, and resources for quick access in 2025.',
-        '/account/jobs':
-          'Manage your job postings on ${APP_CONFIG.name} in October 2025. View analytics, edit listings, and connect with Claude developers seeking opportunities.',
-        '/account/jobs/new':
-          'Create a new job posting on ${APP_CONFIG.name} in October 2025. Reach thousands of Claude developers and AI professionals in the developer community.',
-        '/account/library':
-          'Manage your Claude configuration collections on ${APP_CONFIG.name} in October 2025. Organize, share, and discover curated lists for AI development workflows.',
-        '/account/library/new':
-          'Create a new collection on ${APP_CONFIG.name} in October 2025. Organize Claude configurations, tools, and resources into shareable curated lists today.',
-        '/account/settings':
-          'Update your ${APP_CONFIG.name} account settings in October 2025. Manage profile information, preferences, notifications, and privacy settings today.',
-        '/account/sponsorships':
-          'View your sponsorships on ${APP_CONFIG.name} in October 2025. Track sponsored content performance, analytics, and engagement with Claude developers.',
-        '/account/submissions':
-          'Manage your submitted Claude configurations on ${APP_CONFIG.name} in October 2025. View status, edit submissions, and track community engagement on content.',
+        '/account': `Manage your ${APP_CONFIG.name} account dashboard in October 2025. View activity, saved content, submissions, and manage your Claude development profile.`,
+        '/account/activity': `View your activity history on ${APP_CONFIG.name} in October 2025. Track your interactions, contributions, and engagement with the Claude developer community.`,
+        '/account/bookmarks': `Access your saved Claude configurations and bookmarks on ${APP_CONFIG.name}. Organize favorite tools, guides, and resources for quick access in 2025.`,
+        '/account/jobs': `Manage your job postings on ${APP_CONFIG.name} in October 2025. View analytics, edit listings, and connect with Claude developers seeking opportunities.`,
+        '/account/jobs/new': `Create a new job posting on ${APP_CONFIG.name} in October 2025. Reach thousands of Claude developers and AI professionals in the developer community.`,
+        '/account/library': `Manage your Claude configuration collections on ${APP_CONFIG.name} in October 2025. Organize, share, and discover curated lists for AI development workflows.`,
+        '/account/library/new': `Create a new collection on ${APP_CONFIG.name} in October 2025. Organize Claude configurations, tools, and resources into shareable curated lists today.`,
+        '/account/settings': `Update your ${APP_CONFIG.name} account settings in October 2025. Manage profile information, preferences, notifications, and privacy settings today.`,
+        '/account/sponsorships': `View your sponsorships on ${APP_CONFIG.name} in October 2025. Track sponsored content performance, analytics, and engagement with Claude developers.`,
+        '/account/submissions': `Manage your submitted Claude configurations on ${APP_CONFIG.name} in October 2025. View status, edit submissions, and track community engagement on content.`,
       };
 
       // Handle dynamic routes with pattern matching
       if (route.includes('/jobs/') && route.includes('/edit')) {
-        return 'Edit your job posting on ${APP_CONFIG.name} in October 2025. Update details, requirements, and description to attract Claude AI developers and professionals.';
+        return `Edit your job posting on ${APP_CONFIG.name} in October 2025. Update details, requirements, and description to attract Claude AI developers and professionals.`;
       }
       if (route.includes('/jobs/') && route.includes('/analytics')) {
-        return 'View job posting analytics on ${APP_CONFIG.name} in October 2025. Track views, applications, and engagement metrics for your developer job listing today.';
+        return `View job posting analytics on ${APP_CONFIG.name} in October 2025. Track views, applications, and engagement metrics for your developer job listing today.`;
       }
       if (route.includes('/library/') && route.includes('/edit')) {
-        return 'Edit your collection on ${APP_CONFIG.name} in October 2025. Update title, description, and configurations in your curated list of Claude resources today.';
+        return `Edit your collection on ${APP_CONFIG.name} in October 2025. Update title, description, and configurations in your curated list of Claude resources today.`;
       }
       if (route.includes('/library/') && route.match(/\/library\/[^/]+$/)) {
-        return 'View collection details on ${APP_CONFIG.name} in October 2025. Browse curated Claude configurations, tools, and resources organized for development workflows.';
+        return `View collection details on ${APP_CONFIG.name} in October 2025. Browse curated Claude configurations, tools, and resources organized for development workflows.`;
       }
       if (route.includes('/sponsorships/') && route.includes('/analytics')) {
-        return 'View sponsorship analytics on ${APP_CONFIG.name} in October 2025. Track performance metrics, engagement, and ROI for your sponsored Claude developer content.';
+        return `View sponsorship analytics on ${APP_CONFIG.name} in October 2025. Track performance metrics, engagement, and ROI for your sponsored Claude developer content.`;
       }
 
       return (
         accountDescriptions[route] ||
-        'Manage your ${APP_CONFIG.name} account in October 2025. Update settings, view activity, and organize your Claude configurations for AI development workflows.'
+        `Manage your ${APP_CONFIG.name} account in October 2025. Update settings, view activity, and organize your Claude configurations for AI development workflows.`
       );
     },
     keywords: () => ['claude', 'account', 'dashboard', 'profile', '2025'],
@@ -514,12 +587,12 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
 
       if (route.includes('config-recommender')) {
         if (route.includes('results')) {
-          return 'Your Claude Config Recommendations - ${APP_CONFIG.name}';
+          return `Your Claude Config Recommendations - ${APP_CONFIG.name}`;
         }
-        return 'Claude Configuration Recommender - ${APP_CONFIG.name}';
+        return `Claude Configuration Recommender - ${APP_CONFIG.name}`;
       }
 
-      return 'Claude Tools & Utilities 2025 - ${APP_CONFIG.name}';
+      return `Claude Tools & Utilities 2025 - ${APP_CONFIG.name}`;
     },
     description: (context) => {
       const route = context.route || '';
@@ -548,27 +621,27 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
   /**
    * STATIC Pattern
    * Routes: /trending, /search, /for-you, etc. (11 routes)
-   * Static metadata per route (complete titles, 55-60 chars)
+   * Static metadata per route (complete titles, 53-60 chars)
    */
   STATIC: {
     title: (context) => {
       const route = context.route || '/';
 
       const staticTitles: Record<string, string> = {
-        '/search': 'Search Claude Configs & Resources - ${APP_CONFIG.name}',
-        '/trending': 'Trending Claude Configurations 2025 - ${APP_CONFIG.name}',
+        '/search': `Search Claude Configs & Resources - ${APP_CONFIG.name}`,
+        '/trending': `Trending Claude AI Configurations - ${APP_CONFIG.name}`,
         '/for-you': 'For You - Personalized Claude Recommendations 2025 Directory',
-        '/partner': 'Partner with ${APP_CONFIG.name} - Sponsorship Options 2025',
-        '/community': 'Claude Community & Discussions 2025 - ${APP_CONFIG.name}',
-        '/login': 'Login to ${APP_CONFIG.name} - Account Dashboard Access',
-        '/companies': 'Companies Using Claude AI in 2025 - ${APP_CONFIG.name}',
-        '/api-docs': 'API Documentation for ${APP_CONFIG.name} Platform 2025',
-        '/submit': 'Submit Claude Content 2025 - ${APP_CONFIG.name} Platform',
-        '/board': 'Claude Community Board 2025 - ${APP_CONFIG.name} Forum',
-        '/board/new': 'Create Post - ${APP_CONFIG.name} Community Board 2025',
+        '/partner': `Partner with ${APP_CONFIG.name} - Sponsorship Options 2025`,
+        '/community': `Claude Community & Discussions 2025 - ${APP_CONFIG.name}`,
+        '/login': `Login to ${APP_CONFIG.name} - Account Dashboard Access`,
+        '/companies': `Companies Using Claude AI in 2025 - ${APP_CONFIG.name}`,
+        '/api-docs': `API Documentation for ${APP_CONFIG.name} Platform 2025`,
+        '/submit': `Submit Claude Content 2025 - ${APP_CONFIG.name} Platform`,
+        '/board': `Claude Community Board 2025 - ${APP_CONFIG.name} Forum`,
+        '/board/new': `Create Post - ${APP_CONFIG.name} Community Board 2025`,
       };
 
-      return staticTitles[route] || '${APP_CONFIG.name}';
+      return staticTitles[route] || `${APP_CONFIG.name} - Browse AI Resources & Tools 2025`;
     },
     description: (context) => {
       const route = context.route || '/';
@@ -580,22 +653,17 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
           'Discover popular and trending Claude configurations based on community engagement. Stay updated with what developers are using and loving in October 2025.',
         '/for-you':
           'Personalized Claude configuration recommendations based on your interests and usage patterns. Discover content tailored for your workflow needs in 2025.',
-        '/partner':
-          'Partner with ${APP_CONFIG.name} to showcase tools and reach thousands of Claude developers. Explore sponsorship opportunities and partnership options.',
+        '/partner': `Partner with ${APP_CONFIG.name} in 2025 to showcase tools and reach thousands of Claude developers. Explore sponsorship opportunities and partnership options.`,
         '/community':
           'Join the Claude developer community in October 2025. Share configurations, discuss best practices, connect with developers building the future of AI systems.',
-        '/login':
-          'Login to ${APP_CONFIG.name} to save configurations, create collections, submit content, and engage with the Claude developer community in October 2025.',
+        '/login': `Login to ${APP_CONFIG.name} to save configurations, create collections, submit content, and engage with the Claude developer community in October 2025.`,
         '/companies':
           'Discover companies using Claude AI for development, automation, and productivity in October 2025. Learn how organizations leverage Claude for operations.',
-        '/api-docs':
-          'API documentation for ${APP_CONFIG.name} in October 2025. Integrate our catalog of configurations into your tools and workflows with RESTful endpoints.',
-        '/submit':
-          'Submit your Claude configurations to ${APP_CONFIG.name}. Share agents, MCP servers, commands, rules, and tools with the developer community in 2025.',
+        '/api-docs': `API documentation for ${APP_CONFIG.name} in October 2025. Integrate our catalog of configurations into your tools and workflows with RESTful endpoints.`,
+        '/submit': `Submit your Claude configurations to ${APP_CONFIG.name}. Share agents, MCP servers, commands, rules, and tools with the developer community in 2025.`,
         '/board':
           'Community discussion board for Claude developers in October 2025. Ask questions, share insights, connect with other developers building with AI systems.',
-        '/board/new':
-          'Create a new post on the ${APP_CONFIG.name} community board in October 2025. Share your questions, insights, or configurations with the community now.',
+        '/board/new': `Create a new post on the ${APP_CONFIG.name} community board in October 2025. Share your questions, insights, or configurations with the community now.`,
       };
 
       return (
@@ -618,9 +686,9 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
    * Error page - no indexing (SEO-optimized 53-60 chars, 150-160 chars)
    */
   AUTH: {
-    title: () => 'Authentication Error - ${APP_CONFIG.name} Platform 2025',
+    title: () => `Authentication Error - ${APP_CONFIG.name} Platform 2025`,
     description: () =>
-      'There was an error with your authentication request on ${APP_CONFIG.name}. Please try again or contact support if the problem persists in October 2025.',
+      `There was an error with your authentication request on ${APP_CONFIG.name}. Please try again or contact support if the problem persists in October 2025.`,
     keywords: () => ['claude', 'auth', 'error', 'login', 'authentication'],
     validation: STANDARD_VALIDATION,
   },

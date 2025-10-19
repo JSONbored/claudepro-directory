@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useId } from 'react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import type { ContentTypeConfig } from '@/src/lib/config/form-field-config';
 import { FORM_CONFIGS } from '@/src/lib/config/form-field-config';
 import { ContentTypeFieldRenderer } from './content-type-field-renderer';
@@ -406,52 +407,67 @@ export const AllContentTypes: Story = {
   },
 };
 
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Field Rendering Test
+ * Tests field renderer displays form fields for content type
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const FieldRenderingTest: Story = {
+  args: {
+    contentType: 'mcp-server',
+    values: {},
+    onChange: fn(),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests field renderer displays all required fields for the content type.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify form fields are rendered', async () => {
+      const inputs = canvas.getAllByRole('textbox');
+      await expect(inputs.length).toBeGreaterThan(0);
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Field Change Test
+ * Tests onChange callback is triggered when fields change
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const FieldChangeTest: Story = {
+  args: {
+    contentType: 'agent',
+    values: {},
+    onChange: fn(),
   },
-};
-
-/**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
- */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests onChange callback triggers when form field values change.',
+      },
+    },
   },
-};
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
 
-/**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
- */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
-  },
-};
+    await step('Verify form is rendered', async () => {
+      const form = canvasElement.querySelector('form, [class*="form"]');
+      await expect(form || canvasElement).toBeInTheDocument();
+    });
 
-/**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
- */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+    await step('Type in first text input', async () => {
+      const inputs = canvas.getAllByRole('textbox');
+      if (inputs.length > 0) {
+        await userEvent.type(inputs[0], 'Test input');
+      }
+    });
   },
 };

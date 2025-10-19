@@ -181,9 +181,9 @@ export function classifyRoute(route: string): RouteClassification {
     };
   }
 
-  // PRIORITY 6: Dynamic [category] segment - Single segment
-  // Handles: /[category] (Next.js catch-all category route)
-  if (segments.length === 1 && segments[0] === '[category]') {
+  // PRIORITY 6: Dynamic category patterns - Single segment
+  // Handles: /[category], /:category (Next.js dynamic routes)
+  if (segments.length === 1 && (segments[0] === '[category]' || segments[0] === ':category')) {
     return {
       pattern: 'CATEGORY',
       confidence: 1.0,
@@ -208,16 +208,25 @@ export function classifyRoute(route: string): RouteClassification {
     }
   }
 
-  // PRIORITY 8: Dynamic [category]/[slug] pattern - Two segments
-  // Handles: /[category]/[slug] (Next.js catch-all content detail route)
-  if (segments.length === 2 && segments[0] === '[category]' && segments[1] === '[slug]') {
-    return {
-      pattern: 'CONTENT_DETAIL',
-      confidence: 1.0,
-      segments,
-      isDynamic: true,
-      route: normalizedRoute,
-    };
+  // PRIORITY 8: Dynamic patterns - Two segments
+  // Handles: /[category]/[slug], /:category/:slug (Next.js dynamic routes)
+  if (segments.length === 2) {
+    const firstSeg = segments[0];
+    const secondSeg = segments[1];
+
+    // Match [category]/[slug] or :category/:slug patterns
+    if (
+      (firstSeg === '[category]' || firstSeg === ':category') &&
+      (secondSeg === '[slug]' || secondSeg === ':slug')
+    ) {
+      return {
+        pattern: 'CONTENT_DETAIL',
+        confidence: 1.0,
+        segments,
+        isDynamic: true,
+        route: normalizedRoute,
+      };
+    }
   }
 
   // PRIORITY 9: Category validation - Two segments (content detail pages)

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { UnifiedBadge } from './unified-badge';
 
 const meta = {
@@ -14,6 +15,186 @@ const meta = {
     },
   },
   tags: ['autodocs'],
+  argTypes: {
+    // Discriminated union variant selector
+    variant: {
+      control: 'select',
+      options: [
+        'base',
+        'category',
+        'source',
+        'status',
+        'sponsored',
+        'tag',
+        'new-indicator',
+        'new-badge',
+      ],
+      description: 'Badge variant type (discriminated union)',
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    // Base variant props
+    style: {
+      control: 'select',
+      options: ['default', 'secondary', 'destructive', 'outline'],
+      description: 'Visual style for base variant',
+      if: { arg: 'variant', eq: 'base' },
+      table: {
+        type: { summary: 'string' },
+        defaultValue: { summary: 'default' },
+      },
+    },
+    // Category variant props
+    category: {
+      control: 'select',
+      options: [
+        'rules',
+        'mcp',
+        'agents',
+        'commands',
+        'hooks',
+        'statuslines',
+        'collections',
+        'guides',
+        'skills',
+      ],
+      description: 'Content category type',
+      if: { arg: 'variant', eq: 'category' },
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    // Source variant props
+    source: {
+      control: 'select',
+      options: ['official', 'partner', 'community', 'verified', 'experimental', 'other'],
+      description: 'Content source type',
+      if: { arg: 'variant', eq: 'source' },
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    // Status variant props
+    status: {
+      control: 'select',
+      options: ['active', 'trending', 'new', 'updated', 'deprecated'],
+      description: 'Content status',
+      if: { arg: 'variant', eq: 'status' },
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    // Sponsored variant props
+    tier: {
+      control: 'select',
+      options: ['featured', 'promoted', 'spotlight', 'sponsored'],
+      description: 'Sponsorship tier',
+      if: { arg: 'variant', eq: 'sponsored' },
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    showIcon: {
+      control: 'boolean',
+      description: 'Show icon in sponsored badge',
+      if: { arg: 'variant', eq: 'sponsored' },
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: 'true' },
+      },
+    },
+    // Tag variant props
+    tag: {
+      control: 'text',
+      description: 'Tag label text',
+      if: { arg: 'variant', eq: 'tag' },
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    isActive: {
+      control: 'boolean',
+      description: 'Tag active state (visual highlight)',
+      if: { arg: 'variant', eq: 'tag' },
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: 'false' },
+      },
+    },
+    onClick: {
+      action: 'clicked',
+      description: 'Tag click handler',
+      if: { arg: 'variant', eq: 'tag' },
+      table: {
+        type: { summary: '() => void' },
+      },
+    },
+    onRemove: {
+      action: 'removed',
+      description: 'Tag remove handler (shows X button)',
+      if: { arg: 'variant', eq: 'tag' },
+      table: {
+        type: { summary: '() => void' },
+      },
+    },
+    // New indicator props
+    label: {
+      control: 'text',
+      description: 'Tooltip label for new indicator',
+      if: { arg: 'variant', eq: 'new-indicator' },
+      table: {
+        type: { summary: 'string' },
+        defaultValue: { summary: 'New' },
+      },
+    },
+    side: {
+      control: 'select',
+      options: ['top', 'right', 'bottom', 'left'],
+      description: 'Tooltip position',
+      if: { arg: 'variant', eq: 'new-indicator' },
+      table: {
+        type: { summary: 'string' },
+        defaultValue: { summary: 'top' },
+      },
+    },
+    delayDuration: {
+      control: 'number',
+      description: 'Tooltip delay in milliseconds',
+      if: { arg: 'variant', eq: 'new-indicator' },
+      table: {
+        type: { summary: 'number' },
+        defaultValue: { summary: '300' },
+      },
+    },
+    // New badge props
+    badgeVariant: {
+      control: 'select',
+      options: ['default', 'outline'],
+      description: 'Badge style variant',
+      if: { arg: 'variant', eq: 'new-badge' },
+      table: {
+        type: { summary: 'string' },
+        defaultValue: { summary: 'default' },
+      },
+    },
+    // Common props
+    children: {
+      control: 'text',
+      description: 'Badge content text',
+      if: { arg: 'variant', oneOf: ['base', 'category', 'source', 'status', 'new-badge'] },
+      table: {
+        type: { summary: 'ReactNode' },
+      },
+    },
+    className: {
+      control: 'text',
+      description: 'Additional CSS classes',
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+  },
 } satisfies Meta<typeof UnifiedBadge>;
 
 export default meta;
@@ -508,52 +689,165 @@ export const TypeSafetyExample: Story = {
   },
 };
 
+// ============================================================================
+// INTERACTION TESTING
+// Play functions for interactive tag variant
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * TagClickInteraction: Test Tag Click Handler
+ * Demonstrates clicking an interactive tag badge
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const TagClickInteraction: Story = {
+  args: {
+    variant: 'tag',
+    tag: 'Interactive Tag',
+    onClick: fn(),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Interactive test demonstrating tag click behavior. Uses play function to simulate clicking the tag and verify the onClick handler is called.',
+      },
+    },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify tag is rendered', async () => {
+      const tagButton = canvas.getByRole('button', { name: /interactive tag/i });
+      await expect(tagButton).toBeInTheDocument();
+    });
+
+    await step('Click the tag', async () => {
+      const tagButton = canvas.getByRole('button', { name: /interactive tag/i });
+      await userEvent.click(tagButton);
+    });
+
+    await step('Verify onClick was called', async () => {
+      await expect(args.onClick).toHaveBeenCalledTimes(1);
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * TagRemoveInteraction: Test Tag Remove Handler
+ * Demonstrates removing a tag with the X button
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const TagRemoveInteraction: Story = {
+  args: {
+    variant: 'tag',
+    tag: 'Removable Tag',
+    onRemove: fn(),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Interactive test demonstrating tag removal. When onRemove is provided, an X button appears that can be clicked to remove the tag.',
+      },
+    },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify tag and remove button are rendered', async () => {
+      const tagElement = canvas.getByText(/removable tag/i);
+      await expect(tagElement).toBeInTheDocument();
+
+      // Find the remove button (X icon)
+      const removeButton = canvas.getByRole('button', { name: /remove/i });
+      await expect(removeButton).toBeInTheDocument();
+    });
+
+    await step('Click the remove button', async () => {
+      const removeButton = canvas.getByRole('button', { name: /remove/i });
+      await userEvent.click(removeButton);
+    });
+
+    await step('Verify onRemove was called', async () => {
+      await expect(args.onRemove).toHaveBeenCalledTimes(1);
+    });
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * TagActiveStateToggle: Test Tag Active State
+ * Demonstrates toggling tag active state via click
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const TagActiveStateToggle: Story = {
+  args: {
+    variant: 'tag',
+    tag: 'Toggle Me',
+    isActive: false,
+    onClick: fn(),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Interactive test showing tag active state toggle. Tags with onClick handlers can be clicked to toggle their active state (visual highlight).',
+      },
+    },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify tag initial state (inactive)', async () => {
+      const tagButton = canvas.getByRole('button', { name: /toggle me/i });
+      await expect(tagButton).toBeInTheDocument();
+      // Note: In real implementation, would check for active class
+    });
+
+    await step('Click to activate tag', async () => {
+      const tagButton = canvas.getByRole('button', { name: /toggle me/i });
+      await userEvent.click(tagButton);
+    });
+
+    await step('Verify onClick was called', async () => {
+      await expect(args.onClick).toHaveBeenCalledTimes(1);
+    });
   },
 };
 
 /**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
+ * TagKeyboardInteraction: Test Tag Keyboard Accessibility
+ * Tests tag interaction via keyboard (Enter/Space)
  */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+export const TagKeyboardInteraction: Story = {
+  args: {
+    variant: 'tag',
+    tag: 'Keyboard Accessible',
+    onClick: fn(),
   },
-};
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Interactive test demonstrating keyboard accessibility for tag badges. Tests activation via Enter and Space keys for WCAG compliance.',
+      },
+    },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
 
-/**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
- */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+    await step('Tab to focus the tag', async () => {
+      await userEvent.tab();
+      const tagButton = canvas.getByRole('button', { name: /keyboard accessible/i });
+      await expect(tagButton).toHaveFocus();
+    });
+
+    await step('Activate with Enter key', async () => {
+      await userEvent.keyboard('{Enter}');
+      await expect(args.onClick).toHaveBeenCalledTimes(1);
+    });
+
+    await step('Activate with Space key', async () => {
+      const tagButton = canvas.getByRole('button', { name: /keyboard accessible/i });
+      tagButton.focus();
+      await userEvent.keyboard(' ');
+      await expect(args.onClick).toHaveBeenCalledTimes(2);
+    });
   },
 };

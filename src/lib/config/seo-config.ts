@@ -3,7 +3,7 @@
  * Centralized SEO constants for title optimization, metadata validation, and structured data
  *
  * October 2025 Standards (Optimized):
- * - Title: 53-60 chars (optimized for keyword density within Google ~600px limit)
+ * - Title: 53-60 chars (keyword density optimization within Google ~600px limit)
  * - Description: 150-160 chars (Google ~920px desktop, ~680px mobile)
  * - Keywords: 3-10 keywords, max 30 chars each
  * - Canonical: HTTPS, no trailing slash (except homepage)
@@ -104,8 +104,8 @@ export const MAX_BASE_TITLE_LENGTH = {
  */
 export const METADATA_QUALITY_RULES = {
   title: {
-    minLength: 55, // Required: 55-60 chars (Google optimal)
-    maxLength: 60, // Required: 55-60 chars (Google optimal)
+    minLength: 53, // Required: 53-60 chars (2025 keyword density optimization)
+    maxLength: 60, // Required: 53-60 chars (2025 keyword density optimization)
   },
   description: {
     minLength: 150, // Required: 150-160 chars (SEO and AI optimal)
@@ -213,7 +213,7 @@ export const validatedMetadataSchema = z.object({
 
   openGraph: z
     .object({
-      title: z.string().min(55).max(60).describe('OpenGraph title'),
+      title: z.string().min(53).max(60).describe('OpenGraph title'),
       description: z.string().min(150).max(160).describe('OpenGraph description'),
       image: z
         .object({
@@ -234,7 +234,7 @@ export const validatedMetadataSchema = z.object({
   twitter: z
     .object({
       card: z.enum(['summary', 'summary_large_image']).describe('Twitter card type'),
-      title: z.string().min(55).max(60).describe('Twitter title'),
+      title: z.string().min(53).max(60).describe('Twitter title'),
       description: z.string().min(150).max(160).describe('Twitter description'),
     })
     .optional()

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { ProfileEditForm, RefreshProfileButton } from './profile-edit-form';
 
 /**
@@ -88,6 +89,22 @@ const meta = {
     },
   },
   tags: ['autodocs'],
+  argTypes: {
+    profile: {
+      control: 'object',
+      description: 'User profile data object with all fields',
+      table: {
+        type: { summary: 'ProfileWithInterests' },
+      },
+    },
+    onCancel: {
+      action: 'cancelled',
+      description: 'Cancel button callback',
+      table: {
+        type: { summary: '() => void' },
+      },
+    },
+  },
 } satisfies Meta<typeof ProfileEditForm>;
 
 export default meta;
@@ -597,27 +614,34 @@ Allows users to re-sync profile data from OAuth provider (GitHub, Google, etc.).
  * ==============================================================================
  */
 
+// ============================================================================
+// COMPONENT STATES
+// ============================================================================
+
 /**
- * Mobile Viewport - Form Layout
+ * Error State - Form Submission Failed
+ * Shows form with validation errors after failed submission
  */
-export const MobileViewport: Story = {
+export const ErrorState: Story = {
   args: {
-    profile: filledProfile,
-  },
-  globals: {
-    viewport: { value: 'mobile1' },
+    profile: {
+      ...emptyProfile,
+      name: '', // Empty name should show error
+    },
   },
   parameters: {
     docs: {
       description: {
         story: `
-Profile edit form on mobile viewport.
+Form with validation errors displayed.
 
-**Responsive Behavior:**
-- Full-width form fields
-- Touch-optimized inputs
-- Interest tags wrap to multiple lines
-- Save/Cancel buttons stack or flex-wrap
+**Error Scenarios:**
+- Empty required fields (name)
+- Invalid URL formats (website, social links)
+- Too many interests (>10)
+- Interest too long (>30 chars)
+
+**Note:** Real implementation would show error messages below fields and toast notification.
         `,
       },
     },
@@ -625,19 +649,213 @@ Profile edit form on mobile viewport.
 };
 
 /**
- * Tablet Viewport - Form Layout
+ * Success State - Form Saved Successfully
+ * Shows form after successful save with confirmation
  */
-export const TabletViewport: Story = {
+export const SuccessState: Story = {
   args: {
     profile: filledProfile,
-  },
-  globals: {
-    viewport: { value: 'tablet' },
   },
   parameters: {
     docs: {
       description: {
-        story: 'Form layout on tablet with optimized spacing.',
+        story: `
+Form after successful save operation.
+
+**Success Indicators:**
+- Toast notification (success message)
+- Save button returns to disabled state
+- Form shows latest saved values
+
+**Note:** Real implementation would show success toast and potentially redirect.
+        `,
+      },
+    },
+  },
+};
+
+// ============================================================================
+// PLAY FUNCTION TESTS - INTERACTIVE TESTING
+// ============================================================================
+
+/**
+ * Fill Form Fields Interaction
+ * Tests typing into form fields (name, bio, work)
+ */
+export const FillFormFieldsInteraction: Story = {
+  args: {
+    profile: minimalProfile,
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Type into name field', async () => {
+      const nameInput = canvas.getByLabelText(/name/i);
+      await userEvent.clear(nameInput);
+      await userEvent.type(nameInput, 'Alex Chen Updated');
+      await expect(nameInput).toHaveValue('Alex Chen Updated');
+    });
+
+    await step('Type into bio field', async () => {
+      const bioTextarea = canvas.getByLabelText(/bio/i);
+      await userEvent.type(
+        bioTextarea,
+        'Full-stack developer passionate about building great products.'
+      );
+      await expect(bioTextarea).toHaveValue(
+        'Full-stack developer passionate about building great products.'
+      );
+    });
+
+    await step('Type into work field', async () => {
+      const workInput = canvas.getByLabelText(/work/i);
+      await userEvent.type(workInput, 'Senior Developer at TechCorp');
+      await expect(workInput).toHaveValue('Senior Developer at TechCorp');
+    });
+
+    await step('Verify Save button becomes enabled', async () => {
+      const saveButton = canvas.getByRole('button', { name: /save changes/i });
+      await expect(saveButton).toBeEnabled();
+    });
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Interactive Test**: Fill form fields and verify Save button enables.
+
+**Test Steps:**
+1. Clear and type into name field
+2. Type into bio field (multiline textarea)
+3. Type into work field
+4. Verify Save button is enabled after changes
+
+**Validates:**
+- Form field interactions work correctly
+- Change tracking enables Save button
+- Text input and textarea function properly
+        `,
+      },
+    },
+  },
+};
+
+/**
+ * Validate Required Fields Interaction
+ * Tests form validation for required fields
+ */
+export const ValidateRequiredFieldsInteraction: Story = {
+  args: {
+    profile: filledProfile,
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Clear required name field', async () => {
+      const nameInput = canvas.getByLabelText(/name/i);
+      await userEvent.clear(nameInput);
+      await expect(nameInput).toHaveValue('');
+    });
+
+    await step('Verify required field indicator', async () => {
+      const nameLabel = canvas.getByText(/name/i);
+      // Required asterisk should be present in the label
+      const requiredIndicator = canvas.getByText('*');
+      await expect(requiredIndicator).toBeInTheDocument();
+    });
+
+    await step('Type valid name back', async () => {
+      const nameInput = canvas.getByLabelText(/name/i);
+      await userEvent.type(nameInput, 'Sarah Johnson');
+      await expect(nameInput).toHaveValue('Sarah Johnson');
+    });
+
+    await step('Verify Save button is enabled', async () => {
+      const saveButton = canvas.getByRole('button', { name: /save changes/i });
+      await expect(saveButton).toBeEnabled();
+    });
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Interactive Test**: Validate required field handling.
+
+**Test Steps:**
+1. Clear required name field
+2. Verify required field indicator (asterisk)
+3. Type valid name back
+4. Verify Save button is enabled
+
+**Validates:**
+- Required field indicators are present
+- Form validation for empty required fields
+- Save button state changes based on form validity
+        `,
+      },
+    },
+  },
+};
+
+/**
+ * Successful Submission Interaction
+ * Tests complete form submission flow
+ */
+export const SuccessfulSubmissionInteraction: Story = {
+  args: {
+    profile: filledProfile,
+    onCancel: fn(),
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Modify bio field', async () => {
+      const bioTextarea = canvas.getByLabelText(/bio/i);
+      await userEvent.clear(bioTextarea);
+      await userEvent.type(bioTextarea, 'Updated bio for testing submission flow.');
+      await expect(bioTextarea).toHaveValue('Updated bio for testing submission flow.');
+    });
+
+    await step('Click Save button', async () => {
+      const saveButton = canvas.getByRole('button', { name: /save changes/i });
+      await expect(saveButton).toBeEnabled();
+      await userEvent.click(saveButton);
+    });
+
+    await step('Verify Save button shows pending state', async () => {
+      // Button should show "Saving..." during transition
+      const savingButton = canvas.getByRole('button', {
+        name: /saving|save changes/i,
+      });
+      await expect(savingButton).toBeInTheDocument();
+    });
+
+    await step('Test Cancel button callback', async () => {
+      const cancelButton = canvas.getByRole('button', { name: /cancel/i });
+      await userEvent.click(cancelButton);
+      await expect(args.onCancel).toHaveBeenCalledTimes(1);
+    });
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Interactive Test**: Complete form submission flow.
+
+**Test Steps:**
+1. Modify bio field to trigger form changes
+2. Click Save button
+3. Verify pending state ("Saving...")
+4. Test Cancel button callback
+
+**Validates:**
+- Form submission triggers correctly
+- Pending state shows during async operation
+- Cancel callback is invoked
+- \`useTransition\` hook works properly
+
+**Note:** Real implementation would call \`updateProfile\` server action.
+        `,
       },
     },
   },
@@ -690,45 +908,5 @@ export const AllVariantsComparison: Story = {
         story: 'Side-by-side comparison of all major profile variants.',
       },
     },
-  },
-};
-
-/**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
- */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
-  },
-};
-
-/**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
- */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
-  },
-};
-
-/**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
- */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
-  },
-};
-
-/**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
- */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
   },
 };

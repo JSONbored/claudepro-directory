@@ -11,6 +11,7 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { UnifiedContentBox } from './unified-content-box';
 
 const meta: Meta<typeof UnifiedContentBox> = {
@@ -26,6 +27,86 @@ const meta: Meta<typeof UnifiedContentBox> = {
     },
   },
   tags: ['autodocs'],
+  argTypes: {
+    contentType: {
+      control: 'select',
+      options: ['accordion', 'faq', 'infobox', 'callout'],
+      description: 'Content box type (discriminated union)',
+      table: {
+        type: { summary: "'accordion' | 'faq' | 'infobox' | 'callout'" },
+      },
+    },
+    // Accordion-specific props
+    title: {
+      control: 'text',
+      description: 'Title/heading for the content box',
+      if: { arg: 'contentType', neq: 'callout' },
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    description: {
+      control: 'text',
+      description: 'Description text (accordion/FAQ only)',
+      if: { arg: 'contentType', oneOf: ['accordion', 'faq'] },
+      table: {
+        type: { summary: 'string' },
+      },
+    },
+    allowMultiple: {
+      control: 'boolean',
+      description: 'Allow multiple accordion items to be open simultaneously',
+      if: { arg: 'contentType', eq: 'accordion' },
+      table: {
+        type: { summary: 'boolean' },
+      },
+    },
+    items: {
+      control: 'object',
+      description: 'Accordion items array',
+      if: { arg: 'contentType', eq: 'accordion' },
+      table: {
+        type: { summary: 'AccordionItem[]' },
+      },
+    },
+    // FAQ-specific props
+    questions: {
+      control: 'object',
+      description: 'FAQ questions array with JSON-LD structured data',
+      if: { arg: 'contentType', eq: 'faq' },
+      table: {
+        type: { summary: 'FAQQuestion[]' },
+      },
+    },
+    // InfoBox-specific props
+    variant: {
+      control: 'select',
+      options: ['default', 'important', 'success', 'warning', 'info'],
+      description: 'Visual variant for info box',
+      if: { arg: 'contentType', eq: 'infobox' },
+      table: {
+        type: { summary: "'default' | 'important' | 'success' | 'warning' | 'info'" },
+      },
+    },
+    children: {
+      control: 'text',
+      description: 'Content for infobox or callout',
+      if: { arg: 'contentType', oneOf: ['infobox', 'callout'] },
+      table: {
+        type: { summary: 'ReactNode' },
+      },
+    },
+    // Callout-specific props
+    type: {
+      control: 'select',
+      options: ['info', 'warning', 'error', 'success', 'tip'],
+      description: 'Alert type for callout',
+      if: { arg: 'contentType', eq: 'callout' },
+      table: {
+        type: { summary: "'info' | 'warning' | 'error' | 'success' | 'tip'" },
+      },
+    },
+  },
 };
 
 export default meta;
@@ -426,52 +507,275 @@ export const AllVariantsShowcase: Story = {
   ),
 };
 
+// ============================================================================
+// COMPONENT STATES
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Empty State - No Content
+ * Shows content box with empty/minimal data
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const EmptyAccordion: Story = {
+  name: 'Empty: Accordion (No Items)',
+  args: {
+    contentType: 'accordion',
+    title: 'No Items Available',
+    description: 'There are no items to display at this time.',
+    allowMultiple: false,
+    items: [],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Empty State** - Accordion with no items.
+
+**Use Cases:**
+- Content not yet loaded
+- No FAQ items configured
+- Empty search/filter results
+
+**Behavior:**
+- Shows title and description
+- No collapsible items rendered
+- Graceful empty state handling
+
+**Implementation Note:** Production should show helpful message or CTA when empty.
+        `,
+      },
+    },
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Empty FAQ - No Questions
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const EmptyFAQ: Story = {
+  name: 'Empty: FAQ (No Questions)',
+  args: {
+    contentType: 'faq',
+    title: 'Frequently Asked Questions',
+    description: 'No questions have been added yet.',
+    questions: [],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Empty State** - FAQ with no questions.
+
+**Features:**
+- Shows title and description
+- No question/answer pairs
+- JSON-LD structured data still valid (empty array)
+
+**Use Cases:**
+- FAQ not yet populated
+- Content loading state
+- Filtered view with no matches
+        `,
+      },
+    },
+  },
+};
+
+// ============================================================================
+// PLAY FUNCTION TESTS - INTERACTIVE TESTING
+// ============================================================================
+
+/**
+ * Accordion Interaction
+ * Tests accordion expand/collapse functionality
+ */
+export const AccordionInteraction: Story = {
+  name: 'Test: Accordion Interaction',
+  args: {
+    contentType: 'accordion',
+    title: 'Interactive Accordion',
+    description: 'Click items to expand/collapse',
+    allowMultiple: false,
+    items: [
+      {
+        title: 'First Item',
+        content: 'This is the first item content.',
+        defaultOpen: false,
+      },
+      {
+        title: 'Second Item',
+        content: 'This is the second item content.',
+        defaultOpen: false,
+      },
+      {
+        title: 'Third Item',
+        content: 'This is the third item content.',
+        defaultOpen: false,
+      },
+    ],
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify accordion title is rendered', async () => {
+      const title = canvas.getByText(/interactive accordion/i);
+      await expect(title).toBeInTheDocument();
+    });
+
+    await step('Click first accordion item to expand', async () => {
+      const firstButton = canvas.getByRole('button', { name: /first item/i });
+      await userEvent.click(firstButton);
+    });
+
+    await step('Verify first item content is visible', async () => {
+      const firstContent = canvas.getByText(/this is the first item content/i);
+      await expect(firstContent).toBeVisible();
+    });
+
+    await step('Click second accordion item', async () => {
+      const secondButton = canvas.getByRole('button', { name: /second item/i });
+      await userEvent.click(secondButton);
+    });
+
+    await step('Verify first item collapsed (allowMultiple=false)', async () => {
+      // When allowMultiple is false, clicking second should close first
+      const firstContent = canvas.queryByText(/this is the first item content/i);
+      // Content should be hidden or not in document
+      expect(firstContent).not.toBeVisible();
+    });
+
+    await step('Verify second item content is visible', async () => {
+      const secondContent = canvas.getByText(/this is the second item content/i);
+      await expect(secondContent).toBeVisible();
+    });
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Interactive Test**: Accordion expand/collapse behavior.
+
+**Test Steps:**
+1. Verify accordion title renders
+2. Click first item to expand
+3. Verify first item content is visible
+4. Click second item to expand
+5. Verify first item collapsed (allowMultiple=false)
+6. Verify second item content is visible
+
+**Validates:**
+- Accordion button click handlers work
+- Content expands/collapses correctly
+- Single-open mode (\`allowMultiple=false\`) enforces only one open
+- ARIA attributes for accessibility
+- Keyboard navigation (Enter/Space)
+        `,
+      },
+    },
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * Multi-Open Accordion Interaction
+ * Tests accordion with allowMultiple=true
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const MultiOpenAccordionInteraction: Story = {
+  name: 'Test: Multi-Open Accordion',
+  args: {
+    contentType: 'accordion',
+    title: 'Multi-Open Accordion',
+    description: 'Multiple items can be open simultaneously',
+    allowMultiple: true,
+    items: [
+      {
+        title: 'Step 1',
+        content: 'First step instructions.',
+        defaultOpen: false,
+      },
+      {
+        title: 'Step 2',
+        content: 'Second step instructions.',
+        defaultOpen: false,
+      },
+    ],
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Click first accordion item', async () => {
+      const firstButton = canvas.getByRole('button', { name: /step 1/i });
+      await userEvent.click(firstButton);
+    });
+
+    await step('Click second accordion item', async () => {
+      const secondButton = canvas.getByRole('button', { name: /step 2/i });
+      await userEvent.click(secondButton);
+    });
+
+    await step('Verify both items are visible (allowMultiple=true)', async () => {
+      const firstContent = canvas.getByText(/first step instructions/i);
+      const secondContent = canvas.getByText(/second step instructions/i);
+      await expect(firstContent).toBeVisible();
+      await expect(secondContent).toBeVisible();
+    });
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Interactive Test**: Multi-open accordion behavior.
+
+**Test Steps:**
+1. Click first item to expand
+2. Click second item to expand
+3. Verify both items remain visible simultaneously
+
+**Validates:**
+- \`allowMultiple=true\` allows multiple open items
+- Both contents are visible at same time
+- Independent expand/collapse state
+        `,
+      },
+    },
   },
 };
 
 /**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
+ * InfoBox Variant Switching
+ * Tests different info box variants
  */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+export const InfoBoxVariantTest: Story = {
+  name: 'Test: InfoBox Variants',
+  args: {
+    contentType: 'infobox',
+    variant: 'info',
+    title: 'Info Box Title',
+    children: 'This is an info box with dynamic variant switching.',
   },
-};
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Visual Test**: InfoBox variant styles.
 
-/**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
- */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+**Variants to Test:**
+- default: Neutral gray styling
+- important: Red/warning styling
+- success: Green success styling
+- warning: Yellow/amber warning styling
+- info: Blue informational styling
+
+**Use Controls Panel** to switch between variants and observe:
+- Icon changes (Info, CheckCircle, AlertTriangle, Star)
+- Background color changes
+- Border color changes
+- Text color changes
+
+**Validates:**
+- Visual consistency across variants
+- Proper icon mapping
+- Accessible color contrast
+- Schema.org Note microdata
+        `,
+      },
+    },
   },
 };

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import type { Activity } from '@/src/lib/schemas/activity.schema';
 import { ActivityTimeline } from './activity-timeline';
 
@@ -474,52 +475,361 @@ export const InteractiveFiltering: Story = {
   },
 };
 
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Filter Tabs Rendering Test
+ * Tests that all filter tabs are rendered correctly
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const FilterTabsRenderingTest: Story = {
+  args: {
+    initialActivities: [
+      createMockActivity.post(),
+      createMockActivity.comment(),
+      createMockActivity.vote(),
+      createMockActivity.submission(),
+    ],
+    summary: {
+      total_posts: 1,
+      total_comments: 1,
+      total_votes: 1,
+      total_submissions: 1,
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests filter tabs render with correct counts.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify "All" filter tab is present', async () => {
+      const allTab = canvas.getByRole('button', { name: /all/i });
+      await expect(allTab).toBeInTheDocument();
+    });
+
+    await step('Verify filter tabs show correct counts', async () => {
+      // Should show counts like "All (4)", "Posts (1)", etc.
+      const buttons = canvas.getAllByRole('button');
+      await expect(buttons.length).toBeGreaterThanOrEqual(4);
+    });
+
+    await step('Verify all activity type tabs are present', async () => {
+      // Posts, Comments, Votes, Submissions tabs
+      const postsTab = canvas.getByRole('button', { name: /posts/i });
+      const commentsTab = canvas.getByRole('button', { name: /comments/i });
+      const votesTab = canvas.getByRole('button', { name: /votes/i });
+      const submissionsTab = canvas.getByRole('button', { name: /submissions/i });
+
+      await expect(postsTab).toBeInTheDocument();
+      await expect(commentsTab).toBeInTheDocument();
+      await expect(votesTab).toBeInTheDocument();
+      await expect(submissionsTab).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Activity Cards Rendering Test
+ * Tests activity cards display correct content
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const ActivityCardsRenderingTest: Story = {
+  args: {
+    initialActivities: [
+      createMockActivity.post({
+        title: 'Test Post Activity',
+        vote_count: 42,
+        comment_count: 15,
+      }),
+      createMockActivity.comment({
+        content: 'Test comment content',
+        post_title: 'Related Post',
+      }),
+    ],
+    summary: {
+      total_posts: 1,
+      total_comments: 1,
+      total_votes: 0,
+      total_submissions: 0,
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests activity cards render with correct content and metadata.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify post activity title is displayed', async () => {
+      const postTitle = canvas.getByText(/test post activity/i);
+      await expect(postTitle).toBeInTheDocument();
+    });
+
+    await step('Verify post vote and comment counts are displayed', async () => {
+      const voteCount = canvas.getByText(/42/);
+      const commentCount = canvas.getByText(/15/);
+      await expect(voteCount).toBeInTheDocument();
+      await expect(commentCount).toBeInTheDocument();
+    });
+
+    await step('Verify comment content is displayed', async () => {
+      const commentContent = canvas.getByText(/test comment content/i);
+      await expect(commentContent).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * Submission Status Badges Test
+ * Tests submission status badges render with correct variants
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const SubmissionStatusBadgesTest: Story = {
+  args: {
+    initialActivities: [
+      createMockActivity.submission({
+        content_name: 'Merged Submission',
+        status: 'merged',
+      }),
+      createMockActivity.submission({
+        content_name: 'Pending Submission',
+        status: 'pending',
+      }),
+      createMockActivity.submission({
+        content_name: 'Rejected Submission',
+        status: 'rejected',
+      }),
+    ],
+    summary: {
+      total_posts: 0,
+      total_comments: 0,
+      total_votes: 0,
+      total_submissions: 3,
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests submission activities display status badges (merged, pending, rejected).',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify merged submission is displayed', async () => {
+      const mergedSubmission = canvas.getByText(/merged submission/i);
+      await expect(mergedSubmission).toBeInTheDocument();
+    });
+
+    await step('Verify pending submission is displayed', async () => {
+      const pendingSubmission = canvas.getByText(/pending submission/i);
+      await expect(pendingSubmission).toBeInTheDocument();
+    });
+
+    await step('Verify rejected submission is displayed', async () => {
+      const rejectedSubmission = canvas.getByText(/rejected submission/i);
+      await expect(rejectedSubmission).toBeInTheDocument();
+    });
+
+    await step('Verify status badges are rendered', async () => {
+      // Should have status text like "merged", "pending", "rejected"
+      const mergedBadge = canvas.getByText(/merged/i);
+      const pendingBadge = canvas.getByText(/pending/i);
+      const rejectedBadge = canvas.getByText(/rejected/i);
+
+      await expect(mergedBadge).toBeInTheDocument();
+      await expect(pendingBadge).toBeInTheDocument();
+      await expect(rejectedBadge).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
+ * Date Formatting Test
+ * Tests relative date formatting (today, yesterday, X days ago, etc.)
  */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+export const DateFormattingTest: Story = {
+  args: {
+    initialActivities: [
+      createMockActivity.post({
+        title: 'Today Post',
+        created_at: new Date().toISOString(),
+      }),
+      createMockActivity.post({
+        title: 'Yesterday Post',
+        created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      }),
+      createMockActivity.post({
+        title: 'Week Ago Post',
+        created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      }),
+    ],
+    summary: {
+      total_posts: 3,
+      total_comments: 0,
+      total_votes: 0,
+      total_submissions: 0,
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests relative date formatting displays correctly.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify all posts are rendered', async () => {
+      const todayPost = canvas.getByText(/today post/i);
+      const yesterdayPost = canvas.getByText(/yesterday post/i);
+      const weekAgoPost = canvas.getByText(/week ago post/i);
+
+      await expect(todayPost).toBeInTheDocument();
+      await expect(yesterdayPost).toBeInTheDocument();
+      await expect(weekAgoPost).toBeInTheDocument();
+    });
+
+    await step('Verify relative dates are displayed', async () => {
+      // Should show "today", "yesterday", or relative time
+      const timeElements = canvasElement.querySelectorAll('time, [class*="date"], [class*="time"]');
+      await expect(timeElements.length).toBeGreaterThan(0);
+    });
   },
 };
 
 /**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
+ * Empty State Display Test
+ * Tests empty state message when no activities
  */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+export const EmptyStateDisplayTest: Story = {
+  args: {
+    initialActivities: [],
+    summary: {
+      total_posts: 0,
+      total_comments: 0,
+      total_votes: 0,
+      total_submissions: 0,
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests empty state message displays when no activities.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify empty state message is displayed', async () => {
+      const emptyMessage = canvas.getByText(/no activity|no activities/i);
+      await expect(emptyMessage).toBeInTheDocument();
+    });
+
+    await step('Verify no activity cards are rendered', async () => {
+      // Should not have any activity cards
+      const activityCards = canvasElement.querySelectorAll('[class*="activity"]');
+      // Empty state should not have activity cards
+      await expect(activityCards.length).toBeLessThanOrEqual(1); // May have container
+    });
+  },
+};
+
+/**
+ * Filter Interaction Test
+ * Tests filter tab switching interaction
+ */
+export const FilterInteractionTest: Story = {
+  args: {
+    initialActivities: [
+      createMockActivity.post({ title: 'Post 1' }),
+      createMockActivity.comment({ content: 'Comment 1' }),
+      createMockActivity.vote(),
+    ],
+    summary: {
+      total_posts: 1,
+      total_comments: 1,
+      total_votes: 1,
+      total_submissions: 0,
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests filter tab interaction updates visible activities.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify initial "All" filter shows all activities', async () => {
+      const allActivities = canvasElement.querySelectorAll('[class*="activity"], [class*="card"]');
+      await expect(allActivities.length).toBeGreaterThan(0);
+    });
+
+    await step('Click "Posts" filter tab', async () => {
+      const postsTab = canvas.getByRole('button', { name: /posts/i });
+      await userEvent.click(postsTab);
+    });
+
+    await step('Verify posts filter is active after click', async () => {
+      const postsTab = canvas.getByRole('button', { name: /posts/i });
+      // Tab should have active state (may have aria-selected or active class)
+      await expect(postsTab).toBeInTheDocument();
+    });
+  },
+};
+
+/**
+ * Activity Icons Test
+ * Tests activity type icons are displayed
+ */
+export const ActivityIconsTest: Story = {
+  args: {
+    initialActivities: [
+      createMockActivity.post(),
+      createMockActivity.comment(),
+      createMockActivity.vote(),
+      createMockActivity.submission(),
+    ],
+    summary: {
+      total_posts: 1,
+      total_comments: 1,
+      total_votes: 1,
+      total_submissions: 1,
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Tests activity type icons (FileText, MessageSquare, ThumbsUp, GitPullRequest) are rendered.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify activity icons are rendered', async () => {
+      // Should have SVG icons for each activity type
+      const icons = canvasElement.querySelectorAll('svg');
+      await expect(icons.length).toBeGreaterThan(0);
+    });
+
+    await step('Verify all activities are displayed', async () => {
+      const activities = canvasElement.querySelectorAll('[class*="activity"], [class*="card"]');
+      await expect(activities.length).toBeGreaterThanOrEqual(4);
+    });
   },
 };

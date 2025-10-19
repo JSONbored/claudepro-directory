@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import type { ReputationBreakdown as ReputationBreakdownType } from '@/src/lib/config/reputation.config';
 import { ReputationBreakdown } from './reputation-breakdown';
 
@@ -763,56 +764,6 @@ Full reputation display on user profile page.
  */
 
 /**
- * Mobile Viewport - Compact Layout
- */
-export const MobileViewport: Story = {
-  args: {
-    breakdown: regularBreakdown,
-    showDetails: true,
-    showProgress: true,
-  },
-  globals: {
-    viewport: { value: 'mobile1' },
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: `
-Reputation breakdown on mobile viewport.
-
-**Responsive Behavior:**
-- Full-width card
-- Activity grid stacks to single column
-- Chart adjusts to container width
-- Touch-friendly collapsible section
-        `,
-      },
-    },
-  },
-};
-
-/**
- * Tablet Viewport - Medium Layout
- */
-export const TabletViewport: Story = {
-  args: {
-    breakdown: expertBreakdown,
-    showDetails: true,
-    showProgress: true,
-  },
-  globals: {
-    viewport: { value: 'tablet' },
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Reputation breakdown on tablet with optimized spacing.',
-      },
-    },
-  },
-};
-
-/**
  * ==============================================================================
  * EDGE CASES
  * ==============================================================================
@@ -890,42 +841,166 @@ User who just reached new tier milestone.
   },
 };
 
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Reputation Display Test
+ * Tests reputation score and tier badge rendering
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const ReputationDisplayTest: Story = {
+  args: {
+    breakdown: {
+      from_posts: 30,
+      from_votes_received: 20,
+      from_comments: 10,
+      from_submissions: 50,
+      total: 110,
+    },
+    showDetails: true,
+    showProgress: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests reputation total and tier badge display.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify total reputation score is displayed', async () => {
+      const totalScore = canvas.getByText(/110/);
+      await expect(totalScore).toBeInTheDocument();
+    });
+
+    await step('Verify tier badge is shown', async () => {
+      // Should show Contributor tier (50-199)
+      const tierBadge = canvas.getByText(/contributor/i);
+      await expect(tierBadge).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Progress Bar Test
+ * Tests next tier progress bar rendering
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const ProgressBarTest: Story = {
+  args: {
+    breakdown: {
+      from_posts: 50,
+      from_votes_received: 30,
+      from_comments: 10,
+      from_submissions: 0,
+      total: 90,
+    },
+    showDetails: true,
+    showProgress: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests progress bar to next tier.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify progress bar is rendered', async () => {
+      const progressBar = canvasElement.querySelector('[role="progressbar"]');
+      await expect(progressBar).toBeInTheDocument();
+    });
+
+    await step('Verify next tier information is shown', async () => {
+      // Should show progress to Regular tier (200)
+      const nextTier = canvas.getByText(/regular|next/i);
+      await expect(nextTier).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
+ * Activity Breakdown Test
+ * Tests detailed activity breakdown rendering
  */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+export const ActivityBreakdownTest: Story = {
+  args: {
+    breakdown: {
+      from_posts: 40,
+      from_votes_received: 25,
+      from_comments: 8,
+      from_submissions: 50,
+      total: 123,
+    },
+    showDetails: true,
+    showProgress: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests activity breakdown chart and values.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify posts activity is shown', async () => {
+      const posts = canvas.getByText(/posts|40/i);
+      await expect(posts).toBeInTheDocument();
+    });
+
+    await step('Verify votes activity is shown', async () => {
+      const votes = canvas.getByText(/votes|25/i);
+      await expect(votes).toBeInTheDocument();
+    });
+
+    await step('Verify submissions activity is shown', async () => {
+      const submissions = canvas.getByText(/submissions|50/i);
+      await expect(submissions).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
+ * Tier Icons Test
+ * Tests tier icon rendering
  */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+export const TierIconsTest: Story = {
+  args: {
+    breakdown: {
+      from_posts: 100,
+      from_votes_received: 50,
+      from_comments: 25,
+      from_submissions: 100,
+      total: 275,
+    },
+    showDetails: true,
+    showProgress: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests tier icon display (Regular tier: 💎).',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify tier name is shown', async () => {
+      // Regular tier (200-499)
+      const tierName = canvas.getByText(/regular/i);
+      await expect(tierName).toBeInTheDocument();
+    });
+
+    await step('Verify total score matches tier', async () => {
+      const totalScore = canvas.getByText(/275/);
+      await expect(totalScore).toBeInTheDocument();
+    });
   },
 };

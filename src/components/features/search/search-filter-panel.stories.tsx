@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import type { FilterState } from '@/src/lib/schemas/component.schema';
 import { SearchFilterPanel } from './search-filter-panel';
 
@@ -649,52 +650,225 @@ export const InteractiveDemo: Story = {
   },
 };
 
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Category Filter Interaction Test
+ * Tests category selection dropdown
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const CategoryFilterInteractionTest: Story = {
+  args: {
+    filters: {},
+    availableCategories: ['Agents', 'MCP Servers', 'Guides'],
+    onFilterChange: fn(),
+    showActions: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests category filter dropdown selection.',
+      },
+    },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify category select is present', async () => {
+      // Look for category label or select trigger
+      const categoryLabel = canvas.getByText(/category/i);
+      await expect(categoryLabel).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Tag Selection Test
+ * Tests tag toggle functionality
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const TagSelectionTest: Story = {
+  args: {
+    filters: {},
+    availableTags: ['typescript', 'react', 'nextjs', 'testing'],
+    onToggleTag: fn(),
+    showActions: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests tag selection and toggle behavior.',
+      },
+    },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify tags section is present', async () => {
+      const tagsLabel = canvas.getByText(/tags/i);
+      await expect(tagsLabel).toBeInTheDocument();
+    });
+
+    await step('Verify tag badges are rendered', async () => {
+      // Tags should be rendered as clickable badges
+      const typescriptTag = canvas.getByText(/typescript/i);
+      await expect(typescriptTag).toBeInTheDocument();
+    });
+
+    await step('Click typescript tag', async () => {
+      const typescriptTag = canvas.getByText(/typescript/i);
+      await userEvent.click(typescriptTag);
+    });
+
+    await step('Verify onToggleTag callback was called', async () => {
+      await expect(args.onToggleTag).toHaveBeenCalledWith('typescript');
+    });
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * Clear Filters Test
+ * Tests clear filters button functionality
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const ClearFiltersTest: Story = {
+  args: {
+    filters: {
+      category: 'Agents',
+      tags: ['typescript', 'react'],
+    },
+    availableCategories: ['Agents', 'MCP Servers'],
+    availableTags: ['typescript', 'react', 'nextjs'],
+    activeFilterCount: 3,
+    onClearFilters: fn(),
+    showActions: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests clear filters button with active filters.',
+      },
+    },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify Clear button is present and enabled', async () => {
+      const clearButton = canvas.getByRole('button', { name: /clear/i });
+      await expect(clearButton).toBeInTheDocument();
+      await expect(clearButton).not.toBeDisabled();
+    });
+
+    await step('Click Clear button', async () => {
+      const clearButton = canvas.getByRole('button', { name: /clear/i });
+      await userEvent.click(clearButton);
+    });
+
+    await step('Verify onClearFilters callback was called', async () => {
+      await expect(args.onClearFilters).toHaveBeenCalledTimes(1);
+    });
   },
 };
 
 /**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
+ * Apply Filters Test
+ * Tests apply filters button functionality
  */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+export const ApplyFiltersTest: Story = {
+  args: {
+    filters: {
+      category: 'Guides',
+    },
+    availableCategories: ['Agents', 'MCP Servers', 'Guides'],
+    activeFilterCount: 1,
+    onApplyFilters: fn(),
+    showActions: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests apply filters button click.',
+      },
+    },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify Apply button is present', async () => {
+      const applyButton = canvas.getByRole('button', { name: /apply/i });
+      await expect(applyButton).toBeInTheDocument();
+    });
+
+    await step('Click Apply button', async () => {
+      const applyButton = canvas.getByRole('button', { name: /apply/i });
+      await userEvent.click(applyButton);
+    });
+
+    await step('Verify onApplyFilters callback was called', async () => {
+      await expect(args.onApplyFilters).toHaveBeenCalledTimes(1);
+    });
   },
 };
 
 /**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
+ * Date Range Filter Test
+ * Tests date range selection
  */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+export const DateRangeFilterTest: Story = {
+  args: {
+    filters: {},
+    onFilterChange: fn(),
+    showActions: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests date range filter dropdown.',
+      },
+    },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify date range filter is present', async () => {
+      const dateLabel = canvas.getByText(/date.*range|posted/i);
+      await expect(dateLabel).toBeInTheDocument();
+    });
+  },
+};
+
+/**
+ * Popularity Slider Test
+ * Tests popularity range slider
+ */
+export const PopularitySliderTest: Story = {
+  args: {
+    filters: {
+      popularity: [25, 75],
+    },
+    onFilterChange: fn(),
+    showActions: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests popularity range slider with active range.',
+      },
+    },
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify popularity slider is present', async () => {
+      const popularityLabel = canvas.getByText(/popularity|rating/i);
+      await expect(popularityLabel).toBeInTheDocument();
+    });
+
+    await step('Verify slider range values are displayed', async () => {
+      // Slider should show min/max values
+      const minValue = canvas.getByText(/25/);
+      const maxValue = canvas.getByText(/75/);
+      await expect(minValue).toBeInTheDocument();
+      await expect(maxValue).toBeInTheDocument();
+    });
   },
 };

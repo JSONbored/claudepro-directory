@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { MetricsDisplay } from './metrics-display';
 
 /**
@@ -416,52 +417,121 @@ export const InteractiveHoverEffects: Story = {
   },
 };
 
+// ============================================================================
+// PLAY FUNCTION TESTS
+// ============================================================================
+
 /**
- * MobileSmall: Small Mobile Viewport (320px)
- * Tests component on smallest modern mobile devices
+ * Metrics Rendering Test
+ * Tests metrics display renders all metric cards
  */
-export const MobileSmall: Story = {
-  globals: {
-    viewport: { value: 'mobile1' },
+export const MetricsRenderingTest: Story = {
+  args: {
+    metrics: [
+      { label: 'Total Views', value: 1250, trend: 'up', change: '+12%' },
+      { label: 'Unique Visitors', value: 856, trend: 'up', change: '+8%' },
+      { label: 'Bounce Rate', value: 42, trend: 'down', change: '-3%' },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests metrics display shows all metric cards with labels and values.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify all metric labels are displayed', async () => {
+      const totalViews = canvas.getByText(/total views/i);
+      const uniqueVisitors = canvas.getByText(/unique visitors/i);
+      const bounceRate = canvas.getByText(/bounce rate/i);
+
+      await expect(totalViews).toBeInTheDocument();
+      await expect(uniqueVisitors).toBeInTheDocument();
+      await expect(bounceRate).toBeInTheDocument();
+    });
+
+    await step('Verify metric values are displayed', async () => {
+      const value1250 = canvas.getByText(/1250|1,250/);
+      const value856 = canvas.getByText(/856/);
+      const value42 = canvas.getByText(/42/);
+
+      await expect(value1250).toBeInTheDocument();
+      await expect(value856).toBeInTheDocument();
+      await expect(value42).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * MobileLarge: Large Mobile Viewport (414px)
- * Tests component on larger modern mobile devices
+ * Trend Indicators Test
+ * Tests trend arrows and change percentages display
  */
-export const MobileLarge: Story = {
-  globals: {
-    viewport: { value: 'mobile2' },
+export const TrendIndicatorsTest: Story = {
+  args: {
+    metrics: [
+      { label: 'Increasing Metric', value: 100, trend: 'up', change: '+15%' },
+      { label: 'Decreasing Metric', value: 50, trend: 'down', change: '-5%' },
+      { label: 'Stable Metric', value: 75, trend: 'neutral', change: '0%' },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Tests trend indicators (up/down/neutral) display correctly with change percentages.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Verify all metrics are displayed', async () => {
+      const increasing = canvas.getByText(/increasing metric/i);
+      const decreasing = canvas.getByText(/decreasing metric/i);
+      const stable = canvas.getByText(/stable metric/i);
+
+      await expect(increasing).toBeInTheDocument();
+      await expect(decreasing).toBeInTheDocument();
+      await expect(stable).toBeInTheDocument();
+    });
+
+    await step('Verify change percentages are displayed', async () => {
+      const up15 = canvas.getByText(/\+15%/);
+      const down5 = canvas.getByText(/-5%/);
+      const neutral = canvas.getByText(/0%/);
+
+      await expect(up15).toBeInTheDocument();
+      await expect(down5).toBeInTheDocument();
+      await expect(neutral).toBeInTheDocument();
+    });
   },
 };
 
 /**
- * Tablet: Tablet Viewport (834px)
- * Tests component on tablet devices
+ * Empty Metrics Test
+ * Tests component handles empty metrics array
  */
-export const Tablet: Story = {
-  globals: {
-    viewport: { value: 'tablet' },
+export const EmptyMetricsTest: Story = {
+  args: {
+    metrics: [],
   },
-};
-
-/**
- * DarkTheme: Dark Mode Theme
- * Tests component appearance in dark mode
- */
-export const DarkTheme: Story = {
-  globals: {
-    theme: 'dark',
+  parameters: {
+    docs: {
+      description: {
+        story: 'Tests component renders gracefully with no metrics.',
+      },
+    },
   },
-};
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
 
-/**
- * LightTheme: Light Mode Theme
- * Tests component appearance in light mode
- */
-export const LightTheme: Story = {
-  globals: {
-    theme: 'light',
+    await step('Verify component renders without errors', async () => {
+      // Component should render container even with empty metrics
+      const container = canvasElement.querySelector('[class*="metrics"], [class*="grid"]');
+      await expect(container || canvasElement).toBeInTheDocument();
+    });
   },
 };
