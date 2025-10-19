@@ -213,7 +213,7 @@ export async function GET(
       };
 
       // Generate llms.txt content with FULL content included
-      const llmsTxt = generateLLMsTxt(llmsItem, {
+      const llmsTxt = await generateLLMsTxt(llmsItem, {
         includeMetadata: true,
         includeDescription: true,
         includeTags: true,
@@ -255,7 +255,7 @@ export async function GET(
     };
 
     // Generate llms.txt content with full details
-    const llmsTxt = generateLLMsTxt(llmsItem, {
+    const llmsTxt = await generateLLMsTxt(llmsItem, {
       includeMetadata: true,
       includeDescription: true,
       includeTags: true,

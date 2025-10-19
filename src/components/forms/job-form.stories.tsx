@@ -1016,10 +1016,9 @@ Interactive demo with all features.
 export const ErrorState: Story = {
   args: {
     initialData: {
-      ...emptyJob,
       title: '', // Empty required field
       company: '', // Empty required field
-    } as any,
+    },
     onSubmit: mockOnSubmit,
     submitLabel: 'Create Job',
   },

@@ -2,7 +2,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { userEvent, within } from 'storybook/test';
 import { Button } from '@/src/components/primitives/button';
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { ErrorBoundary } from './error-boundary';

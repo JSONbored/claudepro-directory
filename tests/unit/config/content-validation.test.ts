@@ -54,7 +54,7 @@ const getDescriptionForCategory = (category: CategoryId): string => {
  *
  * Generates valid test content for each category.
  */
-const createValidContent = (category: CategoryId): any => {
+const createValidContent = (category: CategoryId): Record<string, unknown> => {
   const baseContent = {
     slug: `test-${category}`,
     description: getDescriptionForCategory(category),

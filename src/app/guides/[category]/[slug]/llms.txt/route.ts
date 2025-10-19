@@ -164,7 +164,7 @@ export async function GET(
     };
 
     // Generate llms.txt content
-    const llmsTxt = generateLLMsTxt(llmsItem, {
+    const llmsTxt = await generateLLMsTxt(llmsItem, {
       includeMetadata: true,
       includeDescription: true,
       includeTags: true,

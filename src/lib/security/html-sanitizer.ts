@@ -24,23 +24,35 @@
  */
 
 import createDOMPurify from 'dompurify';
-import { JSDOM } from 'jsdom';
-
-// Create single JSDOM instance for DOMPurify
-const window = new JSDOM('').window;
-// biome-ignore lint/suspicious/noExplicitAny: DOMPurify expects specific Window interface that JSDOM provides
-const purify = createDOMPurify(window as any);
 
 /**
- * Initialize DOMPurify with security hooks
- * This runs once at module load time
+ * LAZY-LOADED DOMPurify Instance
+ *
+ * CRITICAL: JSDOM and DOMPurify are initialized on-demand rather than at module load time
+ * to prevent ES module import issues during middleware startup on Vercel.
+ *
+ * Issue: jsdom has ES module dependencies (parse5) that cannot be require()'d
+ * Solution: Lazy load only when sanitization is actually needed (server-side operations)
+ *
+ * This prevents MIDDLEWARE_INVOCATION_FAILED errors on Vercel deployments.
  */
-function initializePurify() {
+// biome-ignore lint/suspicious/noExplicitAny: DOMPurify expects specific Window interface that JSDOM provides
+let purify: any = null;
+
+async function initializePurify() {
+  if (purify) {
+    return purify;
+  }
+
+  // Dynamic import to prevent module-level JSDOM instantiation
+  const { JSDOM } = await import('jsdom');
+  const window = new JSDOM('').window;
+  purify = createDOMPurify(window as any);
   /**
    * Add security hook to enforce script tag removal
    * This provides defense-in-depth beyond FORBID_TAGS
    */
-  purify.addHook('uponSanitizeElement', (node, data) => {
+  purify.addHook('uponSanitizeElement', (node: Node, data: { tagName: string }) => {
     // Forcibly remove script and style tags
     if (data.tagName === 'script' || data.tagName === 'style') {
       // Use parentNode.removeChild for compatibility
@@ -54,7 +66,7 @@ function initializePurify() {
    * Add security hook to sanitize dangerous URL protocols in attributes
    * Blocks data:, javascript:, vbscript:, and URL-encoded variants
    */
-  purify.addHook('afterSanitizeAttributes', (node) => {
+  purify.addHook('afterSanitizeAttributes', (node: Element) => {
     // Check all attributes that can contain URLs
     const urlAttributes = ['href', 'src', 'action', 'formaction', 'data', 'poster', 'xlink:href'];
 
@@ -79,10 +91,9 @@ function initializePurify() {
       }
     }
   });
-}
 
-// Initialize hooks once
-initializePurify();
+  return purify;
+}
 
 /**
  * DOMPurify configuration type
@@ -116,14 +127,14 @@ export interface DOMPurifyConfig {
  * ```ts
  * import { DOMPurify } from '@/src/lib/security/html-sanitizer';
  *
- * // Strip all HTML tags (synchronous now!)
- * const clean = DOMPurify.sanitize(userInput, {
+ * // Strip all HTML tags (ASYNC now due to lazy loading)
+ * const clean = await DOMPurify.sanitize(userInput, {
  *   ALLOWED_TAGS: [],
  *   KEEP_CONTENT: true,
  * });
  *
  * // Allow specific tags only
- * const html = DOMPurify.sanitize(content, {
+ * const html = await DOMPurify.sanitize(content, {
  *   ALLOWED_TAGS: ['p', 'br', 'strong', 'em'],
  *   ALLOWED_ATTR: ['href', 'target'],
  * });
@@ -142,7 +153,8 @@ export const DOMPurify = {
    * @param config - DOMPurify configuration options
    * @returns Sanitized HTML string
    */
-  sanitize(html: string, config?: DOMPurifyConfig): string {
+  async sanitize(html: string, config?: DOMPurifyConfig): Promise<string> {
+    const purifyInstance = await initializePurify();
     // Apply secure defaults
     const secureDefaults: DOMPurifyConfig = {
       // Block dangerous protocols, allow safe ones
@@ -161,7 +173,7 @@ export const DOMPurify = {
       FORBID_ATTR: [...(config?.FORBID_ATTR || [])],
     };
 
-    return purify.sanitize(html, finalConfig) as string;
+    return purifyInstance.sanitize(html, finalConfig) as string;
   },
 
   /**
@@ -170,15 +182,17 @@ export const DOMPurify = {
    * @param html - The HTML string to sanitize
    * @returns Plain text with all HTML removed
    */
-  sanitizeToText(html: string): string {
+  async sanitizeToText(html: string): Promise<string> {
+    const purifyInstance = await initializePurify();
+
     // First pass: remove script/style tags and their content
-    const withoutScripts = purify.sanitize(html, {
+    const withoutScripts = purifyInstance.sanitize(html, {
       FORBID_TAGS: ['script', 'style'],
       KEEP_CONTENT: false, // Don't keep script content!
     });
 
     // Second pass: strip remaining HTML but keep text
-    return purify.sanitize(withoutScripts, {
+    return purifyInstance.sanitize(withoutScripts, {
       ALLOWED_TAGS: [],
       KEEP_CONTENT: true,
     }) as string;
@@ -189,8 +203,9 @@ export const DOMPurify = {
    *
    * @returns true if DOMPurify is supported, false otherwise
    */
-  isSupported(): boolean {
-    return purify.isSupported;
+  async isSupported(): Promise<boolean> {
+    const purifyInstance = await initializePurify();
+    return purifyInstance.isSupported;
   },
 };
 

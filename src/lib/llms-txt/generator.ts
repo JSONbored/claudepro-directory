@@ -145,7 +145,10 @@ function generateFooter(url?: string): string {
  * });
  * ```
  */
-export function generateLLMsTxt(item: LLMsTxtItem, options?: Partial<LLMsTxtOptions>): string {
+export async function generateLLMsTxt(
+  item: LLMsTxtItem,
+  options?: Partial<LLMsTxtOptions>
+): Promise<string> {
   try {
     // Validate input
     const validatedItem = llmsTxtItemSchema.parse(item);
@@ -204,7 +207,7 @@ export function generateLLMsTxt(item: LLMsTxtItem, options?: Partial<LLMsTxtOpti
       sections.push('');
 
       // Convert markdown to plain text
-      const plainText = markdownToPlainText(validatedItem.content, opts.markdownOptions);
+      const plainText = await markdownToPlainText(validatedItem.content, opts.markdownOptions);
 
       // Sanitize if requested
       let finalContent = plainText;

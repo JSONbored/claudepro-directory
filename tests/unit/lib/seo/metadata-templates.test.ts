@@ -19,7 +19,6 @@ import type { MetadataContext } from '@/src/lib/seo/metadata-registry';
 import {
   getTemplate,
   METADATA_TEMPLATES,
-  type MetadataTemplate,
   validateTemplateMetadata,
 } from '@/src/lib/seo/metadata-templates';
 import type { RoutePattern } from '@/src/lib/seo/route-classifier';

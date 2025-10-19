@@ -710,13 +710,17 @@ function ModalVariant({
     if (!open && showTime) {
       const timeShown = Date.now() - showTime;
 
-      import('#lib/analytics/events.constants').then(({ EVENTS }) => {
-        trackEvent(EVENTS.EMAIL_MODAL_DISMISSED, {
-          trigger_source: 'post_copy',
-          dismissal_method: 'close_button',
-          time_shown_ms: timeShown,
+      import('#lib/analytics/events.constants')
+        .then(({ EVENTS }) => {
+          trackEvent(EVENTS.EMAIL_MODAL_DISMISSED, {
+            trigger_source: 'post_copy',
+            dismissal_method: 'close_button',
+            time_shown_ms: timeShown,
+          });
+        })
+        .catch((error) => {
+          console.error('Failed to track email modal dismissed:', error);
         });
-      });
     }
 
     onOpenChange(open);

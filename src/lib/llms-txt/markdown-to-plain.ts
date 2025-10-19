@@ -166,8 +166,8 @@ function convertListItem(line: string): string {
  * stripHtmlTags('<p>Text</p>') // "Text" (tags stripped)
  * ```
  */
-function stripHtmlTags(text: string): string {
-  const sanitized = DOMPurify.sanitize(text, {
+async function stripHtmlTags(text: string): Promise<string> {
+  const sanitized = await DOMPurify.sanitize(text, {
     ALLOWED_TAGS: [],
     KEEP_CONTENT: true,
   });
@@ -226,10 +226,10 @@ function normalizeWhitespace(text: string): string {
  * // • Item 2
  * ```
  */
-export function markdownToPlainText(
+export async function markdownToPlainText(
   markdown: string,
   options?: Partial<ConversionOptions>
-): PlainTextOutput {
+): Promise<PlainTextOutput> {
   try {
     // Validate input
     const validatedMarkdown = markdownInputSchema.parse(markdown);
@@ -239,7 +239,7 @@ export function markdownToPlainText(
 
     // Strip HTML if requested
     if (opts.removeHtml) {
-      text = stripHtmlTags(text);
+      text = await stripHtmlTags(text);
     }
 
     // Process line by line
@@ -355,6 +355,6 @@ export function markdownToPlainText(
  * @param markdown - Raw markdown content
  * @returns Plain text with default conversion settings
  */
-export function quickConvert(markdown: string): string {
+export async function quickConvert(markdown: string): Promise<string> {
   return markdownToPlainText(markdown);
 }
