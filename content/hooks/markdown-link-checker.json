@@ -34,5 +34,27 @@
     "Static site generation with automated link verification",
     "Multi-language documentation consistency validation"
   ],
+  "troubleshooting": [
+    {
+      "issue": "Hook times out on markdown files with many links",
+      "solution": "Increase timeout in markdown-link-check config from 30s to 60s. Reduce retryCount from 3 to 1 for faster failures. Use --quiet flag or limit external link checking to critical links only."
+    },
+    {
+      "issue": "False positives for localhost or development URLs",
+      "solution": "Add localhost patterns to ignorePatterns in .markdown-link-check.json config. Hook creates temp config with common exclusions but customize project config for development server URLs."
+    },
+    {
+      "issue": "Anchor validation fails for generated heading IDs",
+      "solution": "Heading ID generation varies by markdown processor. Update anchor cleaning logic in hook to match your tool's slug generation (GitHub uses lowercase with dashes, Jekyll may differ)."
+    },
+    {
+      "issue": "Image links show as broken but files exist",
+      "solution": "Check path resolution relative to markdown file location. Hook resolves paths from file directory, not repo root. Use absolute paths from repo root with leading slash for consistency."
+    },
+    {
+      "issue": "External link validation causes rate limiting errors",
+      "solution": "Enable retryOn429 in config and increase timeout. Add rate-limited domains to ignorePatterns temporarily. Consider running full external validation in CI only, not on every file edit."
+    }
+  ],
   "source": "community"
 }

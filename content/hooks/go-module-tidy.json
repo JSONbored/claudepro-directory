@@ -34,7 +34,7 @@
     "Go codebase quality assurance with integrated static analysis",
     "Dependency security and vulnerability management"
   ],
-  "faq": [
+  "troubleshooting": [
     {
       "issue": "Hook fails to find go.mod in nested module subdirectories",
       "solution": "Script walks up directories but may hit root before finding go.mod. Ensure MODULE_DIR search starts from FILE_PATH directory: cd $(dirname \"$FILE_PATH\") before the while loop to guarantee proper traversal."
@@ -48,12 +48,12 @@
       "solution": "Script runs 'go work sync' without validation. Add existence checks: go work edit -json | jq -r '.Use[].DiskPath' | while read dir; do [ -d \"$dir\" ] || echo \"Missing: $dir\"; done before syncing."
     },
     {
-      "issue": "Hook output variable DEPS_BEFORE shows zero despite dependencies existing",
-      "solution": "Command 'go list -m all | wc -l | xargs' may fail silently. Use explicit error handling: DEPS_BEFORE=$(go list -m all 2>/dev/null | wc -l) || DEPS_BEFORE=0 to ensure fallback on errors."
+      "issue": "PostToolUse timing causes stale go.sum checksums on rapid changes",
+      "solution": "Hook runs after each write but go.sum updates may lag. Add explicit go.sum validation: go mod verify before tidy: if verification fails, run go mod tidy -v to refresh checksums and rebuild module graph."
     },
     {
-      "issue": "Govulncheck warnings treated as failures blocking development",
-      "solution": "Script shows warnings but doesn't block. To make non-blocking, capture exit code: govulncheck ./... || true instead of if/else. Use GOVULNDB to configure vulnerability database source or disable in dev environments."
+      "issue": "Context lost when cd changes directory breaking relative path access",
+      "solution": "Script changes to MODULE_DIR but hook execution happens per-file. Store original: ORIG_DIR=$(pwd) and restore after: cd \"$ORIG_DIR\" or use absolute paths: FILE_ABS=$(realpath \"$FILE_PATH\") throughout script."
     }
   ],
   "source": "community"

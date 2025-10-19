@@ -36,5 +36,27 @@
     "Secrets and credential leak prevention"
   ],
   "documentationUrl": "https://owasp.org/www-project-top-ten/",
+  "faqTroubleshooting": [
+    {
+      "issue": "truffleHog reports false positives on test data and mock credentials",
+      "solution": "Entropy detection flags dummy data. Create .trufflehogignore: add patterns like 'test/**' or '**/fixtures/*'. Or use --exclude: 'truffleHog --exclude test/ --regex' filtering paths."
+    },
+    {
+      "issue": "Semgrep download/install hangs during first hook execution",
+      "solution": "Hook waits for semgrep auto-install timing out. Pre-install: 'pip install semgrep' or 'brew install semgrep'. Add timeout: 'timeout 30 semgrep --config=auto' preventing indefinite hangs."
+    },
+    {
+      "issue": "npm audit returns non-zero exit code failing hook on dev dependencies",
+      "solution": "Audit treats dev warnings as errors. Filter severity: 'npm audit --audit-level=high --production' ignoring dev deps. Or suppress exit: 'npm audit || echo \"Vulnerabilities logged\"'."
+    },
+    {
+      "issue": "Bandit scans entire project instead of modified FILE_PATH",
+      "solution": "Command targets single file but imports scan. Add --skip-imports: 'bandit \"$FILE_PATH\" -ll --skip B404' focusing on direct code. Or scope: 'bandit -r $(dirname \"$FILE_PATH\")' directory-level."
+    },
+    {
+      "issue": "Security scans add 30+ seconds to every file save operation",
+      "solution": "Sequential scans without caching. Run async: append '&' to each scan, wait at end. Or cache: 'if [ \"$(stat -c %Y \"$FILE_PATH\")\" -lt 60 ]; then exit; fi' skipping recent scans."
+    }
+  ],
   "source": "community"
 }

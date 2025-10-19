@@ -55,6 +55,22 @@
     {
       "issue": "bc command errors: 'command not found' during metrics calculation",
       "solution": "Install bc: 'brew install bc' (macOS) or 'apt-get install bc' (Linux). Or replace with awk: 'awk \"BEGIN {printf \\\"%.2f\\\", $FILES_MODIFIED * 3600 / $SESSION_DURATION}\"'."
+    },
+    {
+      "issue": "Historical comparison fails: 'PREV_SESSION' variable empty",
+      "solution": "First run or cleanup removed prior sessions. Script needs minimum 2 session files. Skip comparison or adjust retention: change 'head -n -30' to 'head -n -50' keeping more history."
+    },
+    {
+      "issue": "JSON metrics file has invalid format breaking parsers",
+      "solution": "Script appends without validation. Variables with special chars break JSON. Escape values: use jq for generation: 'jq -n --arg id \"$SESSION_ID\" '{session: {id: $id}}' > \"$METRICS_FILE\"'."
+    },
+    {
+      "issue": "Productivity calculations show zero or negative values",
+      "solution": "Division by zero when SESSION_DURATION=0. Add check: 'if [ \"$SESSION_DURATION\" -lt 60 ]; then SESSION_DURATION=60; fi' setting minimum 1-minute before calculations."
+    },
+    {
+      "issue": "Activity count always shows zero from .claude logs",
+      "solution": "Log pattern mismatch or empty logs. Verify log format: check '.claude/*.log' exists and contains data. Replace 'cat {} \\;' with 'wc -l {}' for accurate line counts."
     }
   ],
   "source": "community"

@@ -55,6 +55,22 @@
     {
       "issue": "Session IDs duplicate when multiple Claude instances run simultaneously",
       "solution": "Current session_id uses timestamp+PID but PID can conflict. Add random suffix: \"$(date +%Y%m%d_%H%M%S)_$$_$RANDOM\" or use UUID: \"$(uuidgen 2>/dev/null || echo $RANDOM$RANDOM)\"."
+    },
+    {
+      "issue": "File operation summary shows zero counts despite activity",
+      "solution": "grep case-sensitive search misses variations. Use case-insensitive: 'grep -ic \"write\\|edit\" \"$ACTIVITY_LOG\"' or normalize tool names on write to lowercase for consistent matching."
+    },
+    {
+      "issue": "Archive directory grows unbounded consuming disk space",
+      "solution": "No cleanup for monthly archives. Add retention: 'find .claude/archive -type d -mtime +180 -exec rm -rf {} \\;' removing archives older than 6 months from archive creation."
+    },
+    {
+      "issue": "Activity log missing entries for certain tool invocations",
+      "solution": "stdin parse fails if jq missing or INPUT empty. Add validation: 'if [ -z \"$INPUT\" ] || ! command -v jq; then exit 0; fi' before parsing. Install jq as dependency."
+    },
+    {
+      "issue": "Log files locked causing permission denied errors on write",
+      "solution": "Concurrent writes from parallel Claude sessions. Use flock: '(flock -x 200; echo \"..\" >> log; ) 200>/var/lock/activity.lock' for atomic append operations."
     }
   ],
   "source": "community"

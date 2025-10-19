@@ -24,6 +24,28 @@
     "Ensure application quality before commits",
     "Monitor UI consistency during development"
   ],
+  "faqTroubleshooting": [
+    {
+      "issue": "Playwright tests fail with 'browser not found' errors",
+      "solution": "Browsers not installed after @playwright/test install. Run: 'npx playwright install' downloading Chromium/Firefox/WebKit. Or specific: 'npx playwright install chromium' for single browser."
+    },
+    {
+      "issue": "Component name grep returns no tests despite matching test files",
+      "solution": "--grep searches test descriptions not filenames. Use --testPathPattern: 'npx playwright test --testPathPattern=\"$PAGE_NAME\"' or combine: '--grep \"$PAGE_NAME\" --testPathPattern=\".*\"'."
+    },
+    {
+      "issue": "E2E tests fail when run via hook but pass manually",
+      "solution": "Hook lacks env variables or server not running. Check baseURL: set in playwright.config.ts. Or start server: add 'npm run dev &' before tests with cleanup: 'kill $!' after."
+    },
+    {
+      "issue": "Hook triggers on every .tsx save running slow E2E tests",
+      "solution": "No file type filtering. Restrict matchers: 'matchers': ['write:**/*.spec.{ts,js}', 'edit:**/*.spec.{ts,js}'] running only on test file changes. Or add path check excluding components."
+    },
+    {
+      "issue": "Smoke tests run instead of specific component tests showing wrong results",
+      "solution": "Fallback triggers on grep failure. Add existence check: 'if ! npx playwright test --list --grep \"$PAGE_NAME\" | grep -q .; then exit 0; fi' before running. Skip fallback if no matches."
+    }
+  ],
   "configuration": {
     "hookConfig": {
       "hooks": {

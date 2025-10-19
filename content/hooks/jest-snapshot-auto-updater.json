@@ -54,6 +54,22 @@
     {
       "issue": "Orphaned snapshot detection produces false positives",
       "solution": "Basename matching fails with nested structures. Use Jest's built-in: replace custom logic with '$TEST_COMMAND -- --updateSnapshot' handling orphans via jest.config coverage patterns."
+    },
+    {
+      "issue": "Snapshot update creates duplicate snapshot files after renaming",
+      "solution": "Old snapshots persist when components renamed. Run cleanup: 'npm test -- --updateSnapshot --clearCache' deleting unused snapshots. Or manually remove from __snapshots__ directory."
+    },
+    {
+      "issue": "git diff threshold (10 lines) triggers updates for minor changes",
+      "solution": "Conservative threshold causes excessive updates. Increase: 'if [ \"$LINES_CHANGED\" -gt 50 ]; then' for major changes only. Or check specific files: test if modified file is component."
+    },
+    {
+      "issue": "Yarn/pnpm detection fails defaulting to npm test commands",
+      "solution": "Lock file checks work but commands don't run. Verify command exists: 'command -v yarn' before setting TEST_COMMAND. Add: 'TEST_COMMAND=$(command -v yarn && echo \"yarn\" || echo \"npm\")'."
+    },
+    {
+      "issue": "Backup snapshots not created before updates causing data loss",
+      "solution": "Script lacks pre-update backup. Add: 'cp __snapshots__/*.snap __snapshots__/backup-$(date +%s)/' before running --updateSnapshot. Restore with timestamp if updates incorrect."
     }
   ],
   "source": "community"

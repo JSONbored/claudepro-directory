@@ -34,5 +34,27 @@
     "Code review process enforcement",
     "Repository governance and compliance"
   ],
+  "faqTroubleshooting": [
+    {
+      "issue": "Hook blocks edits even when FORCE_ALLOW_PROTECTED_EDIT set to true",
+      "solution": "Environment variable not exported to hook subprocess. Use: 'export FORCE_ALLOW_PROTECTED_EDIT=true' before command. Or add to .bashrc/.zshrc for session-wide availability."
+    },
+    {
+      "issue": "Protected branch pattern matching fails for release/* branches",
+      "solution": "Bash pattern requires proper glob: use 'case \"$CURRENT_BRANCH\" in release/*) IS_PROTECTED=true;;' instead of [[ match. Or use regex: '[[ \"$CURRENT_BRANCH\" =~ ^release/ ]]'."
+    },
+    {
+      "issue": "Custom protected branches from PROTECTED_BRANCHES_LIST ignored",
+      "solution": "CSV parsing expects exact format. Ensure no spaces: 'main,staging,prod' not 'main, staging, prod'. Or handle: 'IFS=',' read -ra CUSTOM | tr -d ' '' stripping whitespace."
+    },
+    {
+      "issue": "Branch detection fails in detached HEAD state showing empty branch",
+      "solution": "git rev-parse --abbrev-ref returns 'HEAD' when detached. Add check: 'if [ \"$CURRENT_BRANCH\" = \"HEAD\" ]; then echo \"Detached HEAD allowed\"; exit 0; fi' before protection logic."
+    },
+    {
+      "issue": "Suggested branch names contain special characters breaking git commands",
+      "solution": "Filename with spaces/slashes creates invalid branch names. Sanitize: 'SUGGESTED=$(echo \"$BASE_NAME\" | tr ' /' '-' | tr -cd 'a-zA-Z0-9-')' removing unsafe characters before suggestion."
+    }
+  ],
   "source": "community"
 }

@@ -33,5 +33,23 @@
     "CI/CD pipeline bundle size validation",
     "Framework-agnostic build output analysis"
   ],
+  "troubleshooting": [
+    {
+      "issue": "No build output detected even after running build",
+      "solution": "Hook searches standard directories (dist, build, out, .next). Check your build output location in package.json or framework config and add custom directory to BUILD_DIRS array in hook script."
+    },
+    {
+      "issue": "Build command runs but fails silently in hook",
+      "solution": "Check /tmp/build_output.log for error details. Ensure build script in package.json doesn't require interactive prompts. Add --no-interactive or CI=true environment variable to build command."
+    },
+    {
+      "issue": "Bundle size calculation includes development files",
+      "solution": "Hook analyzes build output directories only. Ensure your build process excludes source maps, test files, and dev dependencies. Check if framework outputs dev builds to different directory."
+    },
+    {
+      "issue": "Gzip compression analysis shows N/A or fails",
+      "solution": "Install bc command for compression ratio calculation (brew install bc on macOS). Ensure gzip is available in PATH. Large bundles may timeout in compression analysis, skip for files over 100MB."
+    }
+  ],
   "source": "community"
 }

@@ -55,6 +55,22 @@
     {
       "issue": "Report directory cleanup removes current session's report file",
       "solution": "Sort bug: 'find | sort | head -n -30' removes newest alphabetically. Fix with time sort: 'find .claude-reports -type f -printf \"%T@ %p\\\\n\" | sort -n | head -n -30 | cut -d\" \" -f2-'."
+    },
+    {
+      "issue": "LOC estimation returns 'unknown' for multi-language projects",
+      "solution": "tail -1 fails when no files match patterns. Add validation: 'TOTAL_LOC=$(... | tail -1 | awk '{print $1}'); TOTAL_LOC=${TOTAL_LOC:-0}' defaulting to zero on failure."
+    },
+    {
+      "issue": "Diff statistics show empty output despite uncommitted changes",
+      "solution": "git diff excludes untracked files. Combine: 'git diff --stat; git diff --cached --stat' for staged. Or use: 'git diff HEAD --stat' showing all uncommitted modifications."
+    },
+    {
+      "issue": "Test file count inaccurate with nested test directories",
+      "solution": "find without depth limit includes node_modules. Add exclusion: 'find . -name \"*.test.*\" -not -path \"*/node_modules/*\" -not -path \"*/vendor/*\"' for accurate counts."
+    },
+    {
+      "issue": "Report file overwritten when multiple sessions end simultaneously",
+      "solution": "SESSION_ID uses timestamp without uniqueness guarantee. Add PID: 'session-$(date +%Y%m%d_%H%M%S)_$$' or use mktemp: 'REPORT_FILE=$(mktemp .claude-reports/session-XXXXXX.log)'."
     }
   ],
   "source": "community"
