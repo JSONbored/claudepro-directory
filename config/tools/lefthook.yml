@@ -53,19 +53,28 @@ pre-commit:
         fi
       fail_text: "❌ Technical debt check failed. Fix issues or update baseline after cleanup."
 
-    # 2. Content Validation (only when content files change)
+    # 2. Auto-generate README when content changes
+    readme-generation:
+      glob: "content/**/*.json"
+      run: |
+        echo "📝 Regenerating README from content files..."
+        npm run generate:readme
+        git add README.md
+      fail_text: "❌ README generation failed."
+
+    # 3. Content Validation (only when content files change)
     content-validation:
       glob: "content/**/*.json"
       run: npm run validate:content
       fail_text: "❌ Content validation failed. Check your JSON files."
 
-    # 3. SEO Validation (only when MDX content changes)
+    # 4. SEO Validation (only when MDX content changes)
     seo-validation:
       glob: "content/**/*.mdx"
       run: npm run validate:seo
       fail_text: "❌ SEO validation failed. Fix H1 tags, titles, and descriptions."
 
-    # 4. Metadata Validation (when metadata-related files change)
+    # 5. Metadata Validation (when metadata-related files change)
     # Uses new pattern-based validation system (October 2025)
     metadata-validation:
       glob: "src/lib/seo/**/*.ts"
@@ -74,7 +83,7 @@ pre-commit:
         npm run validate:metadata:quick
       fail_text: "❌ Metadata validation failed. Check titles (53-60 chars) and descriptions (150-160 chars)."
 
-    # 5. Run tests ONLY for changed files (smart, not strict)
+    # 6. Run tests ONLY for changed files (smart, not strict)
     # Uses lefthook 1.13+ file filtering for better performance
     test-changed:
       glob: "{src,tests}/**/*.{ts,tsx}"

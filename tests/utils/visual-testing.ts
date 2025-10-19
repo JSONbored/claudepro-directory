@@ -206,7 +206,7 @@ export async function capturePageSnapshot(
   const {
     fullPage = true,
     animations = 'disabled',
-    maxDiffPixelRatio = 0.01, // 1% tolerance
+    _maxDiffPixelRatio = 0.01, // 1% tolerance
     timeout = 30000,
     ...restOptions
   } = options;
@@ -535,7 +535,9 @@ export async function percySnapshotStable(
   try {
     const percySnapshot = await import('@percy/playwright');
     await percySnapshot.default(page, name, options);
-  } catch {}
+  } catch {
+    // Intentionally ignore Percy import errors in non-Percy environments
+  }
 }
 
 // =============================================================================

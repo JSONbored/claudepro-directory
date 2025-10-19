@@ -30,9 +30,11 @@
 
 import { readdir } from 'node:fs/promises';
 import { join, relative } from 'node:path';
+import { logger } from '@/src/lib/logger';
 import { METADATA_TEMPLATES } from '@/src/lib/seo/metadata-templates';
 import type { RouteClassification, RoutePattern } from '@/src/lib/seo/route-classifier';
 import { classifyRoute } from '@/src/lib/seo/route-classifier';
+import { validateClassification } from '@/src/lib/seo/validation-schemas';
 
 /**
  * Route Discovery Result
@@ -156,7 +158,20 @@ async function discoverRoutes(directory: string, appDir: string): Promise<Discov
       } else if (entry.isFile() && entry.name === 'page.tsx') {
         // Found a page.tsx file
         const route = filePathToRoute(fullPath, appDir);
-        const classification = classifyRoute(route);
+        const rawClassification = classifyRoute(route);
+
+        // Validate classification result (fail fast in dev/test)
+        const classification = validateClassification(rawClassification, route);
+
+        // Production: Skip invalid routes with warning
+        if (!classification) {
+          logger.warn('Route scanner skipped invalid classification', {
+            operation: 'discoverRoutes',
+            route,
+            filePath: fullPath,
+          });
+          continue;
+        }
 
         routes.push({
           filePath: fullPath,
@@ -167,7 +182,26 @@ async function discoverRoutes(directory: string, appDir: string): Promise<Discov
       }
     }
   } catch (error) {
-    console.error(`Error scanning directory ${directory}:`, error);
+    // Structured error logging with context
+    logger.error(
+      'Route scanner failed to read directory',
+      error instanceof Error ? error : String(error),
+      {
+        operation: 'discoverRoutes',
+        directory,
+      }
+    );
+
+    // Dev/Test: Throw to fail fast and catch issues immediately
+    if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+      throw new Error(
+        `Route scanner failed for directory ${directory}:\n${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+
+    // Production: Return empty array for graceful degradation
+    // This allows the build to continue even if one directory fails
+    return [];
   }
 
   return routes;

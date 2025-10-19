@@ -43,11 +43,8 @@ jobs:
     - name: Validate content schema
       if: steps.changed.outputs.any_changed == 'true'
       run: |
-        echo "Validating changed content files..."
-        for file in ${{ steps.changed.outputs.all_changed_files }}; do
-          echo "Validating $file"
-          npx tsx scripts/validate-content.ts "$file"
-        done
+        echo "Validating changed content files with unified validation system..."
+        npm run validate -- --type=content --ci
 
     - name: Check content metadata
       if: steps.changed.outputs.any_changed == 'true'

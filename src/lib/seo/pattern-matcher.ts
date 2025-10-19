@@ -27,8 +27,10 @@
  */
 
 import { isValidCategory, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+import { logger } from '@/src/lib/logger';
 import type { MetadataContext } from '@/src/lib/seo/metadata-registry';
 import type { RouteClassification } from '@/src/lib/seo/route-classifier';
+import { validateContext } from '@/src/lib/seo/validation-schemas';
 
 /**
  * Extract metadata context for a classified route
@@ -76,10 +78,36 @@ export function extractContext(
   const { pattern, route } = classification;
 
   // Base context (all patterns)
-  const context: MetadataContext = {
+  const rawContext: MetadataContext = {
     route,
     params,
   };
+
+  // Validate route classification (defensive programming)
+  if (!classification.route || classification.route.trim() === '') {
+    logger.error('Invalid route classification: empty route', undefined, {
+      operation: 'extractContext',
+      pattern,
+    });
+    throw new Error('extractContext: Invalid classification - route is required');
+  }
+
+  if (classification.confidence < 0 || classification.confidence > 1) {
+    logger.error(
+      'Invalid route classification: confidence out of range',
+      undefined,
+      {
+        operation: 'extractContext',
+        pattern,
+      },
+      {
+        confidence: classification.confidence,
+      }
+    );
+    throw new Error(
+      `extractContext: Invalid classification - confidence must be 0-1, got ${classification.confidence}`
+    );
+  }
 
   // Pattern-specific context extraction
   switch (pattern) {
@@ -94,8 +122,20 @@ export function extractContext(
         route.split('/').filter(Boolean)[0];
 
       if (categoryId && isValidCategory(categoryId)) {
-        context.categoryConfig = UNIFIED_CATEGORY_REGISTRY[categoryId];
-        context.category = categoryId;
+        const categoryConfig = UNIFIED_CATEGORY_REGISTRY[categoryId];
+        // Defensive: Verify registry actually has this category
+        if (!categoryConfig) {
+          logger.error('Category exists but missing from UNIFIED_CATEGORY_REGISTRY', undefined, {
+            operation: 'extractContext',
+            pattern: 'CATEGORY',
+            categoryId,
+          });
+          throw new Error(
+            `extractContext: Category '${categoryId}' is valid but missing from UNIFIED_CATEGORY_REGISTRY`
+          );
+        }
+        rawContext.categoryConfig = categoryConfig;
+        rawContext.category = categoryId;
       }
       break;
     }
@@ -111,17 +151,29 @@ export function extractContext(
         route.split('/').filter(Boolean)[1];
 
       if (categoryId && isValidCategory(categoryId)) {
-        context.categoryConfig = UNIFIED_CATEGORY_REGISTRY[categoryId];
-        context.category = categoryId;
+        const categoryConfig = UNIFIED_CATEGORY_REGISTRY[categoryId];
+        // Defensive: Verify registry actually has this category
+        if (!categoryConfig) {
+          logger.error('Category exists but missing from UNIFIED_CATEGORY_REGISTRY', undefined, {
+            operation: 'extractContext',
+            pattern: 'CONTENT_DETAIL',
+            categoryId,
+          });
+          throw new Error(
+            `extractContext: Category '${categoryId}' is valid but missing from UNIFIED_CATEGORY_REGISTRY`
+          );
+        }
+        rawContext.categoryConfig = categoryConfig;
+        rawContext.category = categoryId;
       }
 
       if (slug) {
-        context.slug = slug;
+        rawContext.slug = slug;
       }
 
       // Add item data if provided (from schema adapter or page data)
       if (item && typeof item === 'object') {
-        context.item = item as MetadataContext['item'];
+        rawContext.item = item as MetadataContext['item'];
       }
       break;
     }
@@ -133,7 +185,7 @@ export function extractContext(
         route.split('/').filter(Boolean)[1];
 
       if (userSlug) {
-        context.slug = userSlug;
+        rawContext.slug = userSlug;
       }
 
       // Note: Profile data loading is handled by page component
@@ -149,5 +201,22 @@ export function extractContext(
       break;
   }
 
-  return context;
+  // Final validation of constructed context (LAYER 1 VALIDATION)
+  const validatedContext = validateContext(rawContext, 'extractContext');
+
+  // Production: Return empty context if validation failed (graceful degradation)
+  if (!validatedContext) {
+    logger.warn('Context validation failed, returning minimal context', {
+      operation: 'extractContext',
+      pattern,
+      route,
+    });
+    // Return minimal valid context
+    return {
+      route,
+      params,
+    };
+  }
+
+  return validatedContext;
 }

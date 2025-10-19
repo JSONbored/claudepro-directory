@@ -419,7 +419,9 @@ export const TagInactive: Story = {
     variant: 'tag',
     tag: 'React',
     isActive: false,
-    onClick: () => {},
+    onClick: () => {
+      // Intentional no-op for demonstration
+    },
   },
 };
 
@@ -428,7 +430,9 @@ export const TagActive: Story = {
     variant: 'tag',
     tag: 'TypeScript',
     isActive: true,
-    onClick: () => {},
+    onClick: () => {
+      // Intentional no-op for demonstration
+    },
   },
 };
 
@@ -437,7 +441,9 @@ export const TagWithRemove: Story = {
     variant: 'tag',
     tag: 'Next.js',
     isActive: true,
-    onClick: () => {},
+    onClick: () => {
+      // Intentional no-op for demonstration
+    },
     onRemove: () => {},
   },
 };

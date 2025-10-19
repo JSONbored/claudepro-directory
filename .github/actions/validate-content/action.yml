@@ -3,7 +3,7 @@ description: 'Unified content validation for schema, SEO, and metadata quality c
 
 inputs:
   validation-type:
-    description: 'Validation type: schema | seo | titles | metadata | quality-gates'
+    description: 'Validation type: content | seo | titles | metadata | llmstxt | all'
     required: true
   files:
     description: 'Specific files to validate (space-separated paths). Leave empty to validate all.'
@@ -40,92 +40,31 @@ runs:
         CONTINUE_ON_ERROR="${{ inputs.continue-on-error }}"
         FAILED="false"
 
-        echo "=== Running $VALIDATION_TYPE validation ==="
+        echo "=== Running $VALIDATION_TYPE validation with unified system ==="
 
-        case "$VALIDATION_TYPE" in
-          schema)
-            # Schema validation using validate-content.ts
-            if [ -n "$FILES" ]; then
-              # Validate specific files
-              for file in $FILES; do
-                echo "Validating $file..."
-                if ! npx tsx scripts/validation/validate-content.ts "$file"; then
-                  FAILED="true"
-                fi
-              done
-            else
-              # Validate all content (content build handles this)
-              if ! npm run build:content; then
-                FAILED="true"
-              fi
-            fi
-            ;;
+        # Build validation command
+        if [ "$VALIDATION_TYPE" = "all" ]; then
+          VALIDATION_CMD="npm run validate"
+        else
+          VALIDATION_CMD="npm run validate -- --type=$VALIDATION_TYPE"
+        fi
 
-          seo)
-            # SEO standards validation
-            if [ -n "$OUTPUT_FILE" ]; then
-              if ! npm run validate:seo > "$OUTPUT_FILE" 2>&1; then
-                FAILED="true"
-              fi
-              cat "$OUTPUT_FILE"
-            else
-              if ! npm run validate:seo; then
-                FAILED="true"
-              fi
-            fi
-            ;;
+        # Add CI flag for GitHub Actions compatible output
+        VALIDATION_CMD="$VALIDATION_CMD --ci"
 
-          titles)
-            # Title length validation
-            if [ -n "$OUTPUT_FILE" ]; then
-              if ! npm run validate:titles:quick > "$OUTPUT_FILE" 2>&1; then
-                FAILED="true"
-              fi
-              cat "$OUTPUT_FILE"
-            else
-              if ! npm run validate:titles:quick; then
-                FAILED="true"
-              fi
-            fi
-            ;;
-
-          metadata)
-            # Metadata quality validation (Phase 5)
-            if [ -n "$OUTPUT_FILE" ]; then
-              if ! npm run validate:seo -- --report > "$OUTPUT_FILE" 2>&1; then
-                FAILED="true"
-              fi
-              cat "$OUTPUT_FILE"
-            else
-              if ! npm run validate:seo -- --report; then
-                FAILED="true"
-              fi
-            fi
-            ;;
-
-          quality-gates)
-            # Quality gates check (requires metadata report)
-            if [ ! -f "metadata-report.txt" ]; then
-              echo "❌ Error: metadata-report.txt not found. Run metadata validation first."
-              FAILED="true"
-            else
-              # Source quality gates script
-              if [ -f "scripts/github-actions/check-quality-gates.sh" ]; then
-                if ! bash scripts/github-actions/check-quality-gates.sh metadata-report.txt; then
-                  FAILED="true"
-                fi
-              else
-                echo "⚠️  Warning: scripts/github-actions/check-quality-gates.sh not found, skipping quality gates"
-              fi
-            fi
-            ;;
-
-          *)
-            echo "❌ Error: Unknown validation type '$VALIDATION_TYPE'"
-            echo "Valid types: schema, seo, titles, metadata, quality-gates"
+        # Run validation
+        if [ -n "$OUTPUT_FILE" ]; then
+          # Capture output to file
+          if ! $VALIDATION_CMD > "$OUTPUT_FILE" 2>&1; then
             FAILED="true"
-            ;;
-        esac
+          fi
+          cat "$OUTPUT_FILE"
+        else
+          # Direct output
+          if ! $VALIDATION_CMD; then
+            FAILED="true"
+          fi
+        fi
 
         # Set outputs
         echo "failed=$FAILED" >> $GITHUB_OUTPUT

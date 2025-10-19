@@ -20,11 +20,12 @@ import { logger } from '@/src/lib/logger';
 import { generateOGImageUrl, OG_IMAGE_DIMENSIONS } from '@/src/lib/og/url-generator';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import type { MetadataContext } from '@/src/lib/seo/metadata-registry';
-import { METADATA_DEFAULTS } from '@/src/lib/seo/metadata-registry';
+import { getCurrentYear, METADATA_DEFAULTS } from '@/src/lib/seo/metadata-registry';
 import { getTemplate } from '@/src/lib/seo/metadata-templates';
 import { extractContext } from '@/src/lib/seo/pattern-matcher';
 import { classifyRoute } from '@/src/lib/seo/route-classifier';
 import { deriveMetadataFromSchema } from '@/src/lib/seo/schema-metadata-adapter';
+import { validateTemplateOutput } from '@/src/lib/seo/validation-schemas';
 
 // ============================================
 // VALIDATION HELPERS
@@ -79,7 +80,7 @@ function validateMetadata(
 function generateFallbackMetadata(route: string, context?: MetadataContext): Metadata {
   const siteName = METADATA_DEFAULTS.siteName;
   // Title must be 53-60 chars for validation
-  const fallbackTitle = `${siteName} - Browse AI Resources & Tools 2025`;
+  const fallbackTitle = `${siteName} - Browse AI Resources & Tools ${getCurrentYear()}`;
   const fallbackDescription = `Browse ${siteName} for AI agents, MCP servers, commands, rules, hooks, statuslines, collections, and guides for Claude AI and Claude Code development.`;
 
   logger.warn(`⚠️ Using fallback metadata for route: ${route}`);
@@ -175,8 +176,8 @@ function generateSmartDefaultMetadata(route: string, context?: MetadataContext):
   const capitalizedName = pageName.charAt(0).toUpperCase() + pageName.slice(1);
 
   // Ensure title meets 53-60 char requirement
-  // Formula: PageName - Claude Pro Directory - AI Resources 2025
-  const baseSuffix = ' - AI Resources 2025';
+  // Formula: PageName - Claude Pro Directory - AI Resources [YEAR]
+  const baseSuffix = ` - AI Resources ${getCurrentYear()}`;
   let title = `${capitalizedName} - ${siteName}${baseSuffix}`;
 
   if (title.length > 60) {
@@ -186,10 +187,10 @@ function generateSmartDefaultMetadata(route: string, context?: MetadataContext):
     title = `${truncatedName} - ${siteName}${baseSuffix}`;
   } else if (title.length < 53) {
     // If too short, add padding
-    title = `${capitalizedName} - ${siteName} - AI Resources & Tools 2025`;
+    title = `${capitalizedName} - ${siteName} - AI Resources & Tools ${getCurrentYear()}`;
     // If still too short, add more descriptive text
     if (title.length < 53) {
-      title = `${capitalizedName} - ${siteName} - Browse AI Resources 2025`;
+      title = `${capitalizedName} - ${siteName} - Browse AI Resources ${getCurrentYear()}`;
     }
   }
 
@@ -321,6 +322,150 @@ interface MetadataComponents {
  * }, route, context);
  * ```
  */
+/**
+ * Build OpenGraph metadata object
+ *
+ * Constructs OpenGraph metadata with validated content and OG image.
+ * Follows OpenGraph protocol standards for social media sharing.
+ *
+ * @param validated - Validated metadata from Zod schema
+ * @param canonicalUrl - Canonical URL for og:url property
+ * @returns OpenGraph metadata object for Next.js Metadata
+ */
+function buildOpenGraphMetadata(
+  validated: ValidatedMetadata,
+  canonicalUrl: string
+): Metadata['openGraph'] {
+  return {
+    title: validated.openGraph.title,
+    description: validated.openGraph.description,
+    type: validated.openGraph.type,
+    url: canonicalUrl,
+    siteName: METADATA_DEFAULTS.siteName,
+    images: [
+      {
+        url: validated.openGraph.image.url,
+        width: validated.openGraph.image.width,
+        height: validated.openGraph.image.height,
+        alt: validated.openGraph.image.alt,
+        type: 'image/webp',
+      },
+    ],
+  };
+}
+
+/**
+ * Build Twitter Card metadata object
+ *
+ * Constructs Twitter Card metadata for optimal Twitter sharing.
+ * Falls back to unvalidated data if validation failed (production graceful degradation).
+ *
+ * @param validated - Validated metadata from Zod schema (or null if validation failed)
+ * @param fallbackTitle - Fallback title if validation failed
+ * @param fallbackDescription - Fallback description if validation failed
+ * @param fallbackCard - Fallback card type if validation failed
+ * @returns Twitter Card metadata object for Next.js Metadata
+ */
+function buildTwitterMetadata(
+  validated: ValidatedMetadata,
+  fallbackTitle: string,
+  fallbackDescription: string,
+  fallbackCard: 'summary' | 'summary_large_image'
+): Metadata['twitter'] {
+  // Use validated Twitter data if available
+  if (validated.twitter) {
+    return {
+      card: validated.twitter.card,
+      title: validated.twitter.title,
+      description: validated.twitter.description,
+      images: [
+        {
+          url: validated.openGraph.image.url,
+          width: validated.openGraph.image.width,
+          height: validated.openGraph.image.height,
+          alt: validated.openGraph.image.alt,
+        },
+      ],
+    };
+  }
+
+  // Fallback to unvalidated data (production graceful degradation)
+  return {
+    card: fallbackCard,
+    title: fallbackTitle,
+    description: fallbackDescription,
+    images: [
+      {
+        url: validated.openGraph.image.url,
+        width: validated.openGraph.image.width,
+        height: validated.openGraph.image.height,
+        alt: fallbackTitle,
+      },
+    ],
+  };
+}
+
+/**
+ * Build robots directives for search engine crawlers
+ *
+ * Constructs robots meta tags with enhanced GoogleBot-specific directives.
+ * Enables rich snippets, large image previews, and unlimited video previews.
+ *
+ * **GoogleBot Directives:**
+ * - max-snippet: -1 (no limit on text snippet length)
+ * - max-image-preview: large (allows large image previews in SERPs)
+ * - max-video-preview: -1 (no limit on video preview duration)
+ *
+ * @param validated - Validated metadata from Zod schema
+ * @returns Robots directives object for Next.js Metadata
+ */
+function buildRobotsDirectives(validated: ValidatedMetadata): Metadata['robots'] {
+  if (validated.robots) {
+    return {
+      ...validated.robots,
+      googleBot: {
+        index: validated.robots.index ?? true,
+        follow: validated.robots.follow ?? true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    };
+  }
+
+  // Default: Allow all crawling with enhanced GoogleBot features
+  return {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  };
+}
+
+/**
+ * Build complete metadata object for Next.js
+ *
+ * Orchestrates metadata construction by:
+ * 1. Building canonical URL and OG image URL
+ * 2. Constructing raw metadata object for validation
+ * 3. Validating metadata with Zod schemas (throws in dev, graceful in prod)
+ * 4. Building final Next.js Metadata object with focused sub-functions
+ *
+ * **Architecture:**
+ * - Single Responsibility: Each sub-function builds one metadata section
+ * - Validation Layer: All metadata validated before use (fail-fast in dev)
+ * - Graceful Degradation: Fallback metadata in production on validation failure
+ *
+ * @param components - Metadata components from template generation
+ * @param route - Route path for canonical URL construction
+ * @param context - Optional metadata context for dynamic routes
+ * @returns Complete Next.js Metadata object ready for export
+ */
 function buildMetadataObject(
   components: MetadataComponents,
   route: string,
@@ -335,10 +480,8 @@ function buildMetadataObject(
     robots,
   } = components;
 
-  // Build canonical URL
+  // Build canonical URL and OG image URL
   const canonicalUrl = buildCanonicalUrl(route, context);
-
-  // Generate OG image URL
   const pathForOG = new URL(canonicalUrl).pathname;
   const ogImageUrl = generateOGImageUrl(pathForOG);
 
@@ -381,7 +524,7 @@ function buildMetadataObject(
     return generateFallbackMetadata(route, context);
   }
 
-  // Build complete Next.js Metadata object
+  // Build complete Next.js Metadata object using focused sub-functions
   const metadata: Metadata = {
     title: validated.title,
     description: validated.description,
@@ -390,71 +533,9 @@ function buildMetadataObject(
     alternates: {
       canonical: validated.canonicalUrl,
     },
-    openGraph: {
-      title: validated.openGraph.title,
-      description: validated.openGraph.description,
-      type: validated.openGraph.type,
-      url: validated.canonicalUrl,
-      siteName: METADATA_DEFAULTS.siteName,
-      images: [
-        {
-          url: validated.openGraph.image.url,
-          width: validated.openGraph.image.width,
-          height: validated.openGraph.image.height,
-          alt: validated.openGraph.image.alt,
-          type: 'image/webp',
-        },
-      ],
-    },
-    twitter: validated.twitter
-      ? {
-          card: validated.twitter.card,
-          title: validated.twitter.title,
-          description: validated.twitter.description,
-          images: [
-            {
-              url: validated.openGraph.image.url,
-              width: validated.openGraph.image.width,
-              height: validated.openGraph.image.height,
-              alt: validated.openGraph.image.alt,
-            },
-          ],
-        }
-      : {
-          card: twitterCard,
-          title,
-          description,
-          images: [
-            {
-              url: validated.openGraph.image.url,
-              width: validated.openGraph.image.width,
-              height: validated.openGraph.image.height,
-              alt: title,
-            },
-          ],
-        },
-    robots: validated.robots
-      ? {
-          ...validated.robots,
-          googleBot: {
-            index: validated.robots.index ?? true,
-            follow: validated.robots.follow ?? true,
-            'max-video-preview': -1,
-            'max-image-preview': 'large',
-            'max-snippet': -1,
-          },
-        }
-      : {
-          index: true,
-          follow: true,
-          googleBot: {
-            index: true,
-            follow: true,
-            'max-video-preview': -1,
-            'max-image-preview': 'large',
-            'max-snippet': -1,
-          },
-        },
+    openGraph: buildOpenGraphMetadata(validated, validated.canonicalUrl),
+    twitter: buildTwitterMetadata(validated, title, description, twitterCard),
+    robots: buildRobotsDirectives(validated),
   };
 
   return metadata;
@@ -670,9 +751,31 @@ export function generateMetadataFromPattern(
   const template = getTemplate(classification.pattern);
 
   // Step 4: Generate metadata content from template
-  const title = template.title(context);
-  const description = template.description(context);
-  const keywords = template.keywords(context);
+  const rawTitle = template.title(context);
+  const rawDescription = template.description(context);
+  const rawKeywords = template.keywords(context);
+
+  // Step 4.5: Validate template output (LAYER 2 VALIDATION)
+  // Catches SEO violations (title/description length, keyword limits) before building metadata
+  const validated = validateTemplateOutput(
+    {
+      title: rawTitle,
+      description: rawDescription,
+      keywords: rawKeywords,
+    },
+    classification.pattern
+  );
+
+  // Production: Use fallback if template validation failed
+  if (!validated) {
+    logger.warn('Template output validation failed, using fallback metadata', {
+      route,
+      pattern: classification.pattern,
+    });
+    return generateFallbackMetadata(route, context);
+  }
+
+  const { title, description, keywords } = validated;
 
   // Step 5: Determine OpenGraph type based on pattern
   // Content detail pages use 'article' for better AI citations
@@ -690,7 +793,7 @@ export function generateMetadataFromPattern(
     {
       title,
       description,
-      keywords,
+      ...(keywords && keywords.length > 0 && { keywords }),
       openGraphType,
       twitterCard: 'summary_large_image',
       robots: {
