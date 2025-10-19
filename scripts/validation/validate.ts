@@ -16,11 +16,11 @@
 import { parseArgs } from 'node:util';
 import { formatCIResults } from './core/formatter';
 import { ValidationRunner } from './core/runner';
-import { ContentValidatorWrapper } from './validators/content-validator-wrapper';
-import { LLMSTxtValidatorWrapper } from './validators/llmstxt-validator-wrapper';
-import { MetadataValidatorWrapper } from './validators/metadata-validator-wrapper';
-import { SEOValidatorWrapper } from './validators/seo-validator-wrapper';
-import { TitleValidatorWrapper } from './validators/title-validator-wrapper';
+import { ContentValidator } from './validators/content-validator';
+import { LLMSTxtValidator } from './validators/llmstxt-validator';
+import { MetadataValidator } from './validators/metadata-validator';
+import { SEOValidator } from './validators/seo-validator';
+import { TitleValidator } from './validators/title-validator';
 
 // ============================================================================
 // Parse CLI Arguments
@@ -102,11 +102,11 @@ Examples:
 
 const runner = new ValidationRunner({
   validators: [
-    new ContentValidatorWrapper(),
-    new SEOValidatorWrapper(),
-    new MetadataValidatorWrapper(),
-    new TitleValidatorWrapper(),
-    new LLMSTxtValidatorWrapper(),
+    new ContentValidator(),
+    new SEOValidator(),
+    new MetadataValidator(),
+    new TitleValidator(),
+    new LLMSTxtValidator(),
   ],
   parallel: values.parallel ?? true,
   stopOnError: false,
