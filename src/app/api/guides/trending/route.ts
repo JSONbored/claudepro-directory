@@ -109,7 +109,7 @@ const route = createApiRoute({
       // OPTIMIZATION: Use new trending calculator (calculates from view counters)
       // Load content for this category
       const guides = await getContentByCategory('guides');
-      
+
       // Calculate trending using Redis view counts
       const trendingData = await getBatchTrendingData({
         guides: guides.map((item) => ({ ...item, category: 'guides' as const })),

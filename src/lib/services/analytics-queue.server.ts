@@ -1,12 +1,12 @@
 /**
  * Analytics Queue Service
  * Batches view and copy tracking events to reduce Redis commands
- * 
+ *
  * OPTIMIZATION: Reduces Redis commands by 90-95%
  * - Without batching: 1 command per event = ~70,000 commands/day
  * - With batching: 1 command per unique slug every 5 min = ~2,000 commands/day
  * - Savings: ~68,000 commands/day
- * 
+ *
  * Trade-off: 5-minute delay in analytics (acceptable for low-traffic sites)
  */
 
@@ -29,11 +29,11 @@ class AnalyticsQueueService {
   // In-memory queues (Map for O(1) lookups and updates)
   private viewQueue = new Map<string, QueueEntry>();
   private copyQueue = new Map<string, QueueEntry>();
-  
+
   // Flush intervals
   private viewFlushInterval: NodeJS.Timeout | null = null;
   private copyFlushInterval: NodeJS.Timeout | null = null;
-  
+
   // Configuration
   private readonly FLUSH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
   private isShuttingDown = false;
@@ -51,13 +51,19 @@ class AnalyticsQueueService {
     // Start flush intervals
     this.viewFlushInterval = setInterval(() => {
       this.flushViews().catch((err) => {
-        logger.error('Failed to flush view queue', err instanceof Error ? err : new Error(String(err)));
+        logger.error(
+          'Failed to flush view queue',
+          err instanceof Error ? err : new Error(String(err))
+        );
       });
     }, this.FLUSH_INTERVAL_MS);
 
     this.copyFlushInterval = setInterval(() => {
       this.flushCopies().catch((err) => {
-        logger.error('Failed to flush copy queue', err instanceof Error ? err : new Error(String(err)));
+        logger.error(
+          'Failed to flush copy queue',
+          err instanceof Error ? err : new Error(String(err))
+        );
       });
     }, this.FLUSH_INTERVAL_MS);
 
@@ -132,17 +138,17 @@ class AnalyticsQueueService {
       // Use statsRedis.incrementView's underlying pipeline
       // But since we're batching, we'll use Redis directly for efficiency
       const { redisClient } = await import('@/src/lib/cache.server');
-      
+
       await redisClient.executeOperation(
         async (redis) => {
           const pipeline = redis.pipeline();
-          
+
           for (const entry of snapshot.values()) {
             const key = `views:${entry.category}:${entry.slug}`;
             // Use incrby to add multiple views at once
             pipeline.incrby(key, entry.count);
           }
-          
+
           await pipeline.exec();
           return true;
         },
@@ -198,11 +204,11 @@ class AnalyticsQueueService {
 
     try {
       const { redisClient } = await import('@/src/lib/cache.server');
-      
+
       await redisClient.executeOperation(
         async (redis) => {
           const pipeline = redis.pipeline();
-          
+
           for (const entry of snapshot.values()) {
             const copyKey = `copies:${entry.category}:${entry.slug}`;
             // Use incrby to add multiple copies at once
@@ -210,7 +216,7 @@ class AnalyticsQueueService {
             // Also update the sorted set for popular copies
             pipeline.zincrby(`copied:${entry.category}:all`, entry.count, entry.slug);
           }
-          
+
           await pipeline.exec();
           return true;
         },
@@ -254,7 +260,7 @@ class AnalyticsQueueService {
    */
   async shutdown(): Promise<void> {
     if (this.isShuttingDown) return;
-    
+
     this.isShuttingDown = true;
     logger.info('Analytics queue service shutting down gracefully...');
 

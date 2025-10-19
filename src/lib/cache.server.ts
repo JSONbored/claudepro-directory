@@ -1935,7 +1935,7 @@ export const statsRedis = {
             // - Phase 1: Removed redundant sorted sets (zadd, zincrby) - saved 2 commands
             // - Phase 2: Removed daily snapshots - saved 2 more commands
             // Previous: 5 commands → 3 commands → 1 command (80% reduction)
-            // 
+            //
             // NOTE: Daily snapshots removed - trending now calculated from total view counters
             // This change saves 33,600 commands/day with zero functionality loss
             const pipelineResult = await redisClient.executePipeline<number>(
@@ -2090,15 +2090,15 @@ export const statsRedis = {
 
   /**
    * DEPRECATED: getTrending() - Use getBatchTrendingData() from trending/calculator.server.ts instead
-   * 
+   *
    * This function previously queried a Redis sorted set that is no longer maintained.
    * Trending is now calculated from view counters for accuracy and efficiency.
-   * 
+   *
    * For migration:
    * 1. Load content: await getContentByCategory(category)
    * 2. Calculate trending: await getBatchTrendingData({ [category]: content })
    * 3. Extract results: trendingData.trending.slice(0, limit)
-   * 
+   *
    * @deprecated Will be removed in next major version
    */
   getTrending: unstable_cache(
@@ -2108,7 +2108,7 @@ export const statsRedis = {
         limit,
         migration: 'Load content first, then use trending/calculator.server.ts',
       });
-      
+
       // Return empty array - consumers should migrate to new API
       return [];
     },
@@ -2121,15 +2121,15 @@ export const statsRedis = {
 
   /**
    * DEPRECATED: getPopular() - Use getBatchTrendingData() from trending/calculator.server.ts instead
-   * 
+   *
    * This function previously queried a Redis sorted set that is no longer maintained.
    * Popular content is now calculated from view counters for accuracy and efficiency.
-   * 
+   *
    * For migration:
    * 1. Load content: await getContentByCategory(category)
    * 2. Calculate popular: await getBatchTrendingData({ [category]: content })
    * 3. Extract results: trendingData.popular.slice(0, limit)
-   * 
+   *
    * @deprecated Will be removed in next major version
    */
   getPopular: async (cat: string, limit = 10) => {
@@ -2138,7 +2138,7 @@ export const statsRedis = {
       limit,
       migration: 'Load content first, then use trending/calculator.server.ts',
     });
-    
+
     // Return empty array - consumers should migrate to new API
     return [];
   },
@@ -2190,10 +2190,10 @@ export const statsRedis = {
 
   /**
    * REMOVED: cleanupOldTrending() - No longer needed
-   * 
+   *
    * This function cleaned up old entries from trending sorted sets.
    * Since we no longer maintain sorted sets, this function is now a no-op.
-   * 
+   *
    * @deprecated Removed as part of Redis optimization (sorted sets removed)
    */
   cleanupOldTrending: () => {
