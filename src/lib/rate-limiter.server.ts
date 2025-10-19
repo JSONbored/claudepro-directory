@@ -379,21 +379,56 @@ export class RateLimiter {
 }
 
 /**
- * Create rate limiter instances for different endpoint types
- * All configurations are pre-validated through Zod schemas
+ * LAZY-LOADED Rate Limiter Instances
+ *
+ * CRITICAL: These are initialized on-demand rather than at module load time
+ * to prevent Redis connection initialization during middleware startup.
+ *
+ * This prevents MIDDLEWARE_INVOCATION_FAILED errors on Vercel deployments
+ * by avoiding blocking Redis operations during module initialization.
+ *
+ * All configurations are pre-validated through Zod schemas at module load,
+ * but RateLimiter instances are only created when first accessed.
  */
-export const rateLimiters = {
-  api: new RateLimiter(RATE_LIMIT_CONFIGS.api),
-  search: new RateLimiter(RATE_LIMIT_CONFIGS.search),
-  submit: new RateLimiter(RATE_LIMIT_CONFIGS.submit),
-  general: new RateLimiter(RATE_LIMIT_CONFIGS.general),
-  heavyApi: new RateLimiter(RATE_LIMIT_CONFIGS.heavyApi),
-  admin: new RateLimiter(RATE_LIMIT_CONFIGS.admin),
-  bulk: new RateLimiter(RATE_LIMIT_CONFIGS.bulk),
-  llmstxt: new RateLimiter(RATE_LIMIT_CONFIGS.llmstxt),
-  webhookBounce: new RateLimiter(RATE_LIMIT_CONFIGS.webhookBounce),
-  webhookAnalytics: new RateLimiter(RATE_LIMIT_CONFIGS.webhookAnalytics),
+type RateLimiterRegistry = {
+  api: RateLimiter;
+  search: RateLimiter;
+  submit: RateLimiter;
+  general: RateLimiter;
+  heavyApi: RateLimiter;
+  admin: RateLimiter;
+  bulk: RateLimiter;
+  llmstxt: RateLimiter;
+  webhookBounce: RateLimiter;
+  webhookAnalytics: RateLimiter;
 };
+
+let rateLimitersCache: RateLimiterRegistry | null = null;
+
+function initializeRateLimiters(): RateLimiterRegistry {
+  if (!rateLimitersCache) {
+    rateLimitersCache = {
+      api: new RateLimiter(RATE_LIMIT_CONFIGS.api),
+      search: new RateLimiter(RATE_LIMIT_CONFIGS.search),
+      submit: new RateLimiter(RATE_LIMIT_CONFIGS.submit),
+      general: new RateLimiter(RATE_LIMIT_CONFIGS.general),
+      heavyApi: new RateLimiter(RATE_LIMIT_CONFIGS.heavyApi),
+      admin: new RateLimiter(RATE_LIMIT_CONFIGS.admin),
+      bulk: new RateLimiter(RATE_LIMIT_CONFIGS.bulk),
+      llmstxt: new RateLimiter(RATE_LIMIT_CONFIGS.llmstxt),
+      webhookBounce: new RateLimiter(RATE_LIMIT_CONFIGS.webhookBounce),
+      webhookAnalytics: new RateLimiter(RATE_LIMIT_CONFIGS.webhookAnalytics),
+    };
+  }
+  return rateLimitersCache;
+}
+
+export const rateLimiters = new Proxy({} as RateLimiterRegistry, {
+  get(_target, prop: keyof RateLimiterRegistry) {
+    const limiters = initializeRateLimiters();
+    return limiters[prop];
+  },
+});
 
 /**
  * Utility function to apply rate limiting to API routes

@@ -120,7 +120,7 @@ function filePathToRoute(filePath: string): string {
   const withoutGroups = relativePath.replace(/\([^)]+\)\/?/g, '');
 
   // Convert to route path
-  let route = '/' + withoutGroups.replace(/\\/g, '/');
+  let route = `/${withoutGroups.replace(/\\/g, '/')}`;
 
   // Clean up double slashes
   route = route.replace(/\/+/g, '/');
@@ -381,4 +381,7 @@ async function main() {
   console.log(`   ${routes.length} routes exported\n`);
 }
 
-main();
+main().catch((error) => {
+  console.error('❌ Unhandled error in main:', error);
+  process.exit(1);
+});

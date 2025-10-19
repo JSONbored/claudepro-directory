@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, within } from 'storybook/test';
 import { MetricsDisplay } from './metrics-display';
 
 /**
@@ -526,8 +526,6 @@ export const EmptyMetricsTest: Story = {
     },
   },
   play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
-
     await step('Verify component renders without errors', async () => {
       // Component should render container even with empty metrics
       const container = canvasElement.querySelector('[class*="metrics"], [class*="grid"]');

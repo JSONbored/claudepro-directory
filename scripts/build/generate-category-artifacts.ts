@@ -50,7 +50,7 @@ const UI_CONSTANTS_CATEGORIES_FILE = join(SRC, 'lib/ui-constants-categories.ts')
  * We use dynamic import to avoid TypeScript compilation issues
  */
 async function loadCategoryRegistry(): Promise<{
-  registry: Record<string, any>;
+  registry: Record<string, { colorScheme?: string; label?: string }>;
   categoryIds: string[];
 }> {
   // Dynamic import from compiled JavaScript (not TypeScript)
@@ -130,7 +130,7 @@ export type CategoryId = (typeof VALID_CATEGORIES)[number];
  * Badge colors and UI configuration derived from category registry
  */
 function generateUIConstantsCategories(
-  registry: Record<string, any>,
+  registry: Record<string, { colorScheme?: string; label?: string }>,
   categoryIds: string[]
 ): string {
   // Generate badge colors from colorScheme
@@ -138,9 +138,6 @@ function generateUIConstantsCategories(
     .map((id) => {
       const config = registry[id];
       const colorScheme = config?.colorScheme || 'primary';
-
-      // Extract color name from scheme (e.g., 'purple-500' → 'purple')
-      const colorName = colorScheme.split('-')[0];
 
       return `    ${id}: 'bg-${colorScheme}/20 text-${colorScheme} border-${colorScheme}/30',`;
     })
@@ -367,4 +364,7 @@ async function main() {
   }
 }
 
-main();
+main().catch((error) => {
+  console.error('❌ Unhandled error in main:', error);
+  process.exit(1);
+});

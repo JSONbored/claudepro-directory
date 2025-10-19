@@ -82,7 +82,7 @@ function getSchemaHash(): string | null {
       // Generate hash from schema structure
       const hash = createHash('sha256').update(result).digest('hex');
       return hash;
-    } catch (error) {
+    } catch {
       console.warn('⚠️  Could not query database schema, will regenerate types');
       return null;
     }
@@ -99,7 +99,7 @@ function readStoredHash(): string | null {
 
   try {
     return readFileSync(HASH_FILE, 'utf-8').trim();
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -174,7 +174,7 @@ function cleanup(): void {
     try {
       unlinkSync(ENV_LOCAL);
       console.log('🧹 Cleaned up .env.local');
-    } catch (error) {
+    } catch {
       console.warn('⚠️  Failed to cleanup .env.local');
     }
   }
@@ -238,4 +238,7 @@ async function main() {
   }
 }
 
-main();
+main().catch((error) => {
+  console.error('❌ Unhandled error in main:', error);
+  process.exit(1);
+});

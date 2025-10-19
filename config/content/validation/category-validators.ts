@@ -42,8 +42,8 @@ export const mcpCategoryValidator: CategoryValidator = (validated, errors, warni
   if (
     !validated.package &&
     validated.configuration?.claudeDesktop?.mcp &&
-    Object.values(validated.configuration.claudeDesktop.mcp).some((config: any) =>
-      config.command?.includes('npx')
+    Object.values(validated.configuration.claudeDesktop.mcp).some(
+      (config: { command?: string[] }) => config.command?.some((cmd) => cmd.includes('npx'))
     )
   ) {
     warnings.push('Package: Recommended to specify NPM package identifier for npx-based servers');

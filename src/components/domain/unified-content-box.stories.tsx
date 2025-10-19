@@ -11,7 +11,7 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { UnifiedContentBox } from './unified-content-box';
 
 const meta: Meta<typeof UnifiedContentBox> = {
@@ -459,48 +459,30 @@ export const AllVariantsShowcase: Story = {
       <div>
         <h3 className="text-xl font-semibold mb-4">Info Boxes</h3>
         <div className="space-y-4">
-          <UnifiedContentBox
-            contentType="infobox"
-            variant="default"
-            title="Default"
-            children="Default info box"
-          />
-          <UnifiedContentBox
-            contentType="infobox"
-            variant="important"
-            title="Important"
-            children="Important info box"
-          />
-          <UnifiedContentBox
-            contentType="infobox"
-            variant="success"
-            title="Success"
-            children="Success info box"
-          />
+          <UnifiedContentBox contentType="infobox" variant="default" title="Default">
+            Default info box
+          </UnifiedContentBox>
+          <UnifiedContentBox contentType="infobox" variant="important" title="Important">
+            Important info box
+          </UnifiedContentBox>
+          <UnifiedContentBox contentType="infobox" variant="success" title="Success">
+            Success info box
+          </UnifiedContentBox>
         </div>
       </div>
 
       <div>
         <h3 className="text-xl font-semibold mb-4">Callouts</h3>
         <div className="space-y-4">
-          <UnifiedContentBox
-            contentType="callout"
-            type="info"
-            title="Info"
-            children="Info callout"
-          />
-          <UnifiedContentBox
-            contentType="callout"
-            type="warning"
-            title="Warning"
-            children="Warning callout"
-          />
-          <UnifiedContentBox
-            contentType="callout"
-            type="error"
-            title="Error"
-            children="Error callout"
-          />
+          <UnifiedContentBox contentType="callout" type="info" title="Info">
+            Info callout
+          </UnifiedContentBox>
+          <UnifiedContentBox contentType="callout" type="warning" title="Warning">
+            Warning callout
+          </UnifiedContentBox>
+          <UnifiedContentBox contentType="callout" type="error" title="Error">
+            Error callout
+          </UnifiedContentBox>
         </div>
       </div>
     </div>

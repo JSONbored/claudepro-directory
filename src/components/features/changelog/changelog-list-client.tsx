@@ -88,7 +88,7 @@ export function ChangelogListClient({ entries }: ChangelogListClientProps) {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6" aria-label="Changelog entries">
+          <div className="grid grid-cols-1 gap-6">
             {filteredEntries.map((entry) => {
               const targetPath = getChangelogPath(entry.slug);
               const nonEmptyCategories = getNonEmptyCategories(entry.categories);

@@ -42,7 +42,11 @@ export interface ValidationResult<T = unknown> {
  * Optional function for category-specific validation logic.
  * Used for validations that can't be generalized (e.g., MCP platform config).
  */
-export type CategoryValidator = (validated: any, errors: string[], warnings: string[]) => void;
+export type CategoryValidator = (
+  validated: Record<string, unknown>,
+  errors: string[],
+  warnings: string[]
+) => void;
 
 /**
  * Category Validation Config
@@ -86,7 +90,7 @@ export function validateContent<T>(
   // ========================================
   // Check if content has discoveryMetadata before running schema validation
   // This ensures discovery workflow is followed BEFORE any content creation
-  const rawContent = content as any;
+  const rawContent = content as Record<string, unknown>;
   if (!rawContent.discoveryMetadata) {
     errors.push('🚨 BLOCKING: discoveryMetadata is REQUIRED');
     errors.push('');
@@ -123,7 +127,7 @@ export function validateContent<T>(
     return { valid: false, errors, warnings };
   }
 
-  const validated = schemaValidation.data as any;
+  const validated = schemaValidation.data as Record<string, unknown>;
 
   // ========================================
   // STEP 2: SEO Validation

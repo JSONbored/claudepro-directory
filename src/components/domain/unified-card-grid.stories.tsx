@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect } from 'storybook/test';
 import { BaseCard } from '@/src/components/domain/base-card';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';

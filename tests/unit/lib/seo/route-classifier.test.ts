@@ -66,8 +66,6 @@ describe('classifyRoute', () => {
     });
 
     it('classifies :category dynamic route', () => {
-      const result = classifyRoute('/:category');
-
       // Should be STATIC (fallback) since :category is not a valid literal category
       // But after stripping :, it validates against category registry
       const validCategories = ['agents', 'mcp', 'rules', 'commands'];

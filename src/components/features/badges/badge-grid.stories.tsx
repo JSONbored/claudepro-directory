@@ -254,11 +254,6 @@ const mockBadges: UserBadgeWithBadge[] = [
 ];
 
 /**
- * Featured badges only (5 badges)
- */
-const featuredBadges: UserBadgeWithBadge[] = mockBadges.filter((b) => b.featured);
-
-/**
  * Few badges (3 badges)
  */
 const fewBadges: UserBadgeWithBadge[] = mockBadges.slice(0, 3);
@@ -885,8 +880,6 @@ export const RarityColorTest: Story = {
     },
   },
   play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
-
     await step('Verify all 5 rarity levels are displayed', async () => {
       const badges = canvasElement.querySelectorAll('[class*="badge"]');
       await expect(badges.length).toBe(5);
@@ -954,8 +947,6 @@ export const BadgeClickTest: Story = {
     },
   },
   play: async ({ args, canvasElement, step }) => {
-    const canvas = within(canvasElement);
-
     await step('Verify badges are rendered', async () => {
       const badges = canvasElement.querySelectorAll('[class*="badge"]');
       await expect(badges.length).toBe(3);
@@ -1027,8 +1018,6 @@ export const EmptyStateTest: Story = {
     },
   },
   play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
-
     await step('Verify component renders without crashing', async () => {
       // Component should render container even with no badges
       const container = canvasElement.querySelector('[class*="grid"], [class*="container"]');

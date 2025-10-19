@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { UnifiedContentBlock } from '@/src/components/content/unified-content-block';
 
 /**
@@ -458,7 +458,7 @@ export const AllVariants: Story = {
           variant="expert-quote"
           quote="An insightful quote about the product"
           author="Expert Name"
-          role="Title"
+          jobTitle="Title"
           company="Company"
         />
       </div>

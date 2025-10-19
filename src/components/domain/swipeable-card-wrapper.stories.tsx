@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, within } from 'storybook/test';
+import { fn } from 'storybook/test';
 import {
   Card,
   CardContent,
@@ -289,11 +289,9 @@ export const RealWorldExample: Story = {
     onSwipeRight: fn(async () => {
       // Mock copy to clipboard
       await navigator.clipboard?.writeText('https://claudepro.directory/agents/code-reviewer');
-      console.log('✅ Copied URL to clipboard');
     }),
     onSwipeLeft: fn(async () => {
       // Mock bookmark action
-      console.log('🔖 Added to bookmarks');
     }),
     children: (
       <Card className="w-full max-w-md">
@@ -373,8 +371,12 @@ export const ResponsiveComparison: Story = {
         </p>
         <SwipeableCardWrapper
           enableGestures={true}
-          onSwipeRight={fn(() => console.log('✅ Copied to clipboard'))}
-          onSwipeLeft={fn(() => console.log('🔖 Bookmarked'))}
+          onSwipeRight={fn(() => {
+            // Mock swipe right action
+          })}
+          onSwipeLeft={fn(() => {
+            // Mock swipe left action
+          })}
         >
           <Card className="w-full max-w-md">
             <CardHeader>
@@ -401,10 +403,16 @@ export const ResponsiveComparison: Story = {
           </CardHeader>
           <CardContent>
             <div className="flex gap-2">
-              <button className="px-3 py-2 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90">
+              <button
+                type="button"
+                className="px-3 py-2 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90"
+              >
                 Copy URL
               </button>
-              <button className="px-3 py-2 text-sm bg-secondary text-secondary-foreground rounded hover:bg-secondary/90">
+              <button
+                type="button"
+                className="px-3 py-2 text-sm bg-secondary text-secondary-foreground rounded hover:bg-secondary/90"
+              >
                 Bookmark
               </button>
             </div>
@@ -478,10 +486,16 @@ export const AccessibilityExample: Story = {
                 Desktop/Keyboard: Use buttons below
               </p>
               <div className="flex gap-2">
-                <button className="px-3 py-2 text-sm bg-green-500/20 text-green-700 dark:text-green-400 rounded border border-green-500/30">
+                <button
+                  type="button"
+                  className="px-3 py-2 text-sm bg-green-500/20 text-green-700 dark:text-green-400 rounded border border-green-500/30"
+                >
                   📋 Copy
                 </button>
-                <button className="px-3 py-2 text-sm bg-blue-500/20 text-blue-700 dark:text-blue-400 rounded border border-blue-500/30">
+                <button
+                  type="button"
+                  className="px-3 py-2 text-sm bg-blue-500/20 text-blue-700 dark:text-blue-400 rounded border border-blue-500/30"
+                >
                   🔖 Bookmark
                 </button>
               </div>

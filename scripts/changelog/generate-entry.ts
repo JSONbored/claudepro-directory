@@ -70,7 +70,7 @@ function installGitCliff(): void {
   try {
     execSync('brew install git-cliff', { stdio: 'inherit' });
     console.log('\n✅ git-cliff installed successfully!\n');
-  } catch (error) {
+  } catch {
     console.error('❌ Failed to install git-cliff');
     console.error('   Please install manually: https://git-cliff.org/docs/installation\n');
     process.exit(1);
@@ -182,6 +182,7 @@ function parseArgs(): GenerateOptions {
       case '-h':
         showHelp();
         process.exit(0);
+        break;
       default:
         console.error(`Unknown option: ${arg}\n`);
         showHelp();
@@ -284,4 +285,7 @@ async function main() {
   }
 }
 
-main();
+main().catch((error) => {
+  console.error('❌ Unhandled error in main:', error);
+  process.exit(1);
+});

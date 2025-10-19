@@ -20,7 +20,7 @@
  *   npm run coverage:report         # Show trending report
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -93,7 +93,7 @@ function readBaseline(): CoverageSnapshot | null {
 
   try {
     return JSON.parse(readFileSync(BASELINE_FILE, 'utf-8'));
-  } catch (error) {
+  } catch {
     console.warn('⚠️  Failed to read baseline, treating as first run');
     return null;
   }
@@ -121,7 +121,7 @@ function readHistory(): CoverageSnapshot[] {
 
   try {
     return JSON.parse(readFileSync(HISTORY_FILE, 'utf-8'));
-  } catch (error) {
+  } catch {
     console.warn('⚠️  Failed to read history, starting fresh');
     return [];
   }

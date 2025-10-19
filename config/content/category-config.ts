@@ -40,7 +40,7 @@ import type { CategoryValidationConfig } from './validation/generic-validator';
  * Everything needed to generate, validate, and manage content for a category.
  */
 export interface CategoryConfig {
-  schema: any; // Zod schema for this category
+  schema: z.ZodType; // Zod schema for this category
   validation: CategoryValidationConfig;
   generation: ContentGenerationRules;
 }

@@ -15,7 +15,6 @@
 
 import type { CategoryId } from '@/src/lib/config/category-types';
 import {
-  MAX_TITLE_LENGTH,
   METADATA_QUALITY_RULES,
   OPTIMAL_MAX,
   OPTIMAL_MIN,

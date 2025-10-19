@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import type { Activity } from '@/src/lib/schemas/activity.schema';
 import { ActivityTimeline } from './activity-timeline';
 
@@ -819,8 +819,6 @@ export const ActivityIconsTest: Story = {
     },
   },
   play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
-
     await step('Verify activity icons are rendered', async () => {
       // Should have SVG icons for each activity type
       const icons = canvasElement.querySelectorAll('svg');
