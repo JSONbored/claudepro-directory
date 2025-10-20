@@ -14,4 +14,4 @@ Access Jira and Confluence through a unified Atlassian MCP interface for project
 
 ---
 
-Last updated: 2025-10-20T19:35:50.466Z
+Last updated: 2025-10-20T19:41:24.237Z

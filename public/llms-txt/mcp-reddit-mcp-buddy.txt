@@ -14,4 +14,4 @@ Access Reddit content through Claude for browsing subreddits, searching posts, a
 
 ---
 
-Last updated: 2025-10-20T19:35:50.468Z
+Last updated: 2025-10-20T19:41:24.238Z

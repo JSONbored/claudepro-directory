@@ -14,4 +14,4 @@ Manage ClickUp tasks and projects directly through Claude for comprehensive proj
 
 ---
 
-Last updated: 2025-10-20T19:35:50.463Z
+Last updated: 2025-10-20T19:41:24.234Z

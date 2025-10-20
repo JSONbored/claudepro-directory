@@ -14,4 +14,4 @@ Create and edit videos through Claude using invideo's AI-powered video creation 
 
 ---
 
-Last updated: 2025-10-20T19:35:50.466Z
+Last updated: 2025-10-20T19:41:24.236Z

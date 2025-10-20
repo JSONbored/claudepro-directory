@@ -110,7 +110,7 @@ export const ConfigCard = memo(
     }, [item.category, item.slug, router]);
 
     // Fetch real-time view and copy counts from client-side hook
-    const { viewCount, copyCount, loading: countsLoading } = useViewCounts(item.category, item.slug);
+    const { viewCount, copyCount } = useViewCounts(item.category, item.slug);
 
     // Extract sponsored metadata - UnifiedContentItem already includes these properties
     const { isSponsored, sponsoredId, sponsorTier, position } = item;

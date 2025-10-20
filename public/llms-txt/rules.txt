@@ -125,4 +125,4 @@ URL: https://claudepro.directory/rules/windsurf-ai-native-ide-patterns
 Windsurf AI-native IDE specialist with Cascade AI, multi-file context awareness, and Flow collaboration patterns for Claude integration
 
 
-Last updated: 2025-10-20T19:35:50.478Z
+Last updated: 2025-10-20T19:41:24.250Z

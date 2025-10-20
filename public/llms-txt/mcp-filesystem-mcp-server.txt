@@ -14,4 +14,4 @@ The official Filesystem MCP Server from Anthropic enables Claude to interact wit
 
 ---
 
-Last updated: 2025-10-20T19:35:50.465Z
+Last updated: 2025-10-20T19:41:24.235Z

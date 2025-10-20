@@ -14,4 +14,4 @@ Integrate Stripe payment capabilities directly into Claude for payment processin
 
 ---
 
-Last updated: 2025-10-20T19:35:50.468Z
+Last updated: 2025-10-20T19:41:24.239Z

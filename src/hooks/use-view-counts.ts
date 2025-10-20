@@ -334,7 +334,7 @@ export function useBatchViewCounts(items: Array<{ category: string; slug: string
           };
 
           // Cache in localStorage and memory
-          const [category, slug] = key.split(':');
+          const [category = '', slug = ''] = key.split(':');
           ViewCountsCache.set(category, slug, typedValue.viewCount, typedValue.copyCount);
           memoryCache.set(key, {
             viewCount: typedValue.viewCount,

@@ -14,4 +14,4 @@ Comprehensive Docker image vulnerability scanning with layer analysis, base imag
 
 ---
 
-Last updated: 2025-10-20T19:35:50.501Z
+Last updated: 2025-10-20T19:41:24.274Z

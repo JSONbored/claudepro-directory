@@ -14,4 +14,4 @@ Automatically formats code files after Claude writes or edits them using Prettie
 
 ---
 
-Last updated: 2025-10-20T19:35:50.498Z
+Last updated: 2025-10-20T19:41:24.271Z

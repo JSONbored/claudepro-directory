@@ -14,4 +14,4 @@ The official PostgreSQL MCP Server from Anthropic provides read-only access to P
 
 ---
 
-Last updated: 2025-10-20T19:35:50.467Z
+Last updated: 2025-10-20T19:41:24.238Z

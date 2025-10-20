@@ -14,4 +14,4 @@ Integrate HubSpot CRM capabilities directly into Claude for customer relationshi
 
 ---
 
-Last updated: 2025-10-20T19:35:50.465Z
+Last updated: 2025-10-20T19:41:24.236Z

@@ -14,4 +14,4 @@ Alerts when code complexity exceeds thresholds in real-time
 
 ---
 
-Last updated: 2025-10-20T19:35:50.499Z
+Last updated: 2025-10-20T19:41:24.271Z

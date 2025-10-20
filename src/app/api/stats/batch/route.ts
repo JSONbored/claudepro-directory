@@ -139,7 +139,7 @@ export async function GET(request: Request) {
 
     // Parse items into category/slug pairs
     const parsedItems = items.map((item) => {
-      const [category, slug] = item.split(':');
+      const [category = '', slug = ''] = item.split(':');
       return { category, slug };
     });
 

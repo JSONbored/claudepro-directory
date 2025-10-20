@@ -14,4 +14,4 @@ Connect Claude to Figma Desktop for design operations, asset extraction, and des
 
 ---
 
-Last updated: 2025-10-20T19:35:50.464Z
+Last updated: 2025-10-20T19:41:24.235Z
