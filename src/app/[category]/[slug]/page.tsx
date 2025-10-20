@@ -66,7 +66,6 @@ import { CollectionDetailView } from '@/src/components/content/unified-detail-pa
 import { BreadcrumbSchema } from '@/src/components/infra/structured-data/breadcrumb-schema';
 import { UnifiedStructuredData } from '@/src/components/infra/structured-data/unified-structured-data';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
-import { statsRedis } from '@/src/lib/cache.server';
 import {
   isValidCategory,
   UNIFIED_CATEGORY_REGISTRY,

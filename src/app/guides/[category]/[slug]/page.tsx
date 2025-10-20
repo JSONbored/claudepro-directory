@@ -16,7 +16,7 @@ import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar'
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent } from '@/src/components/primitives/card';
 import { SectionProgress } from '@/src/components/shared/section-progress';
-import { contentCache, statsRedis } from '@/src/lib/cache.server';
+import { contentCache } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
@@ -261,9 +261,9 @@ export default async function SEOGuidePage({
     const Icon = (category && categoryIcons[category]) || BookOpen;
     const relatedGuides = await getRelatedGuides(category, slug);
 
-    // Fetch view count for this guide from Redis
+    // View count fetched client-side for real-time data (guides use full path as slug)
     const guideSlug = `${category}/${slug}`; // e.g., "tutorials/desktop-mcp-setup"
-    const viewCount = await statsRedis.getViewCount('guides', guideSlug);
+    const viewCount = 0; // Client-side fetching via useViewCounts hook (to be implemented)
 
     // Format date if available
     const formatDate = (dateStr: string) => {
