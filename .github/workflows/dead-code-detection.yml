@@ -34,14 +34,10 @@ jobs:
         with:
           fetch-depth: 0 # Full history for better analysis
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Node.js with dependencies
+        uses: ./.github/actions/setup-node-deps
         with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
+          skip-build-content: 'true'
 
       - name: Run Knip (Dead Code Detection)
         id: knip

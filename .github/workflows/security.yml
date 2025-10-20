@@ -19,11 +19,16 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  changes:
+    name: Changes Filter
+    uses: ./.github/workflows/changes-filter.yml
   secrets:
     name: Secret Scanning
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.event_name != 'schedule'  # Skip on scheduled runs
+    needs: [changes]
+    # Skip on scheduled runs; run for PRs or when code/deps changed
+    if: github.event_name != 'schedule' && (github.event_name == 'pull_request' || needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true')
 
     steps:
     - uses: actions/checkout@v5
@@ -44,7 +49,7 @@ jobs:
     name: Build for CodeQL
     uses: ./.github/workflows/build-reusable.yml
     with:
-      cache-key-suffix: 'codeql'
+      cache-key-suffix: ${{ github.event.pull_request.number || 'codeql' }}
       upload-artifact: true
 
   codeql:
@@ -61,15 +66,24 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
-    - uses: ./.github/actions/setup-node-deps
+      - uses: ./.github/actions/setup-node-deps
       with:
         skip-build-content: 'true'
 
-    - name: Download build artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: ${{ needs.build-for-codeql.outputs.artifact-name }}
-        path: ./
+      - name: Download CI build artifact (if available)
+        id: dl-ci
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: build-${{ github.event.pull_request.number || 'ci' }}-${{ github.sha }}
+          path: ./
+
+      - name: Download build artifact from build job (fallback)
+        if: steps.dl-ci.outcome == 'failure'
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build-for-codeql.outputs.artifact-name }}
+          path: ./
 
     - name: Verify build restoration
       run: |
@@ -95,7 +109,8 @@ jobs:
     name: Dependency Review
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.event_name == 'pull_request'
+    needs: [changes]
+    if: github.event_name == 'pull_request' && needs.changes.outputs.deps == 'true'
     permissions:
       contents: read
       pull-requests: write
@@ -116,6 +131,9 @@ jobs:
     name: NPM Security Audit
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    needs: [changes]
+    # Run when dependencies change or on schedule
+    if: needs.changes.outputs.deps == 'true' || github.event_name == 'schedule'
 
     steps:
     - name: Checkout repository
@@ -140,7 +158,8 @@ jobs:
     name: Socket Security Scan
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: vars.SOCKET_SECURITY_API_KEY != ''  # Only run if API key is configured
+    needs: [changes]
+    if: vars.SOCKET_SECURITY_API_KEY != '' && (needs.changes.outputs.deps == 'true' || github.event_name == 'schedule')
     permissions:
       contents: read
       pull-requests: write
