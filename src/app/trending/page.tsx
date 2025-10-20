@@ -35,18 +35,13 @@ export const metadata = generatePageMetadata('/trending');
 export const revalidate = 3600;
 
 /**
- * Load trending data from pre-calculated cache
+ * Load trending data using Redis-based view counts
  *
- * OPTIMIZATION: Reads from cache populated by /api/cron/trending every 15 minutes
- * Instead of calculating trending on every page load (expensive Redis queries),
- * we compute once per 15 minutes and serve from cache
- * 
- * Saves: ~2,000 Redis commands/day
- * Fallback: If cache miss, calculate on-demand (rare case)
+ * @description Queries Redis for real-time view counts and calculates trending content
+ * based on actual user engagement. Automatically falls back to static popularity field
+ * if Redis is unavailable. Also returns total count to avoid duplicate content fetching.
  */
 async function getTrendingData(params: TrendingParams) {
-  const { contentCache } = await import('@/src/lib/cache.server');
-
   // Log trending data access for analytics
   if (Object.keys(params).length > 0) {
     logger.info('Trending data accessed with parameters', {
@@ -59,32 +54,7 @@ async function getTrendingData(params: TrendingParams) {
   }
 
   try {
-    // Try to read from pre-calculated cache first
-    const cached = await contentCache.get<{
-      trending: unknown[];
-      popular: unknown[];
-      recent: unknown[];
-      metadata: { totalItems: number };
-    }>('trending:all');
-
-    if (cached) {
-      logger.info('Serving trending data from cache', {
-        trendingCount: cached.trending.length,
-        popularCount: cached.popular.length,
-        recentCount: cached.recent.length,
-      });
-
-      return {
-        trending: cached.trending,
-        popular: cached.popular,
-        recent: cached.recent,
-        totalCount: cached.metadata.totalItems,
-      };
-    }
-
-    // Cache miss - calculate on-demand (fallback)
-    logger.warn('Trending cache miss - calculating on-demand');
-
+    // Await all content promises (single fetch for both trending data and total count)
     const {
       rules: rulesData,
       mcp: mcpData,
@@ -105,6 +75,7 @@ async function getTrendingData(params: TrendingParams) {
       skills,
     });
 
+    // Calculate total count
     const totalCount =
       rulesData.length +
       mcpData.length +
@@ -115,6 +86,7 @@ async function getTrendingData(params: TrendingParams) {
       collectionsData.length +
       skillsData.length;
 
+    // Use Redis-based trending calculator with sponsored content injection
     const trendingData = await getBatchTrendingData(
       {
         agents: agentsData.map((item: { [key: string]: unknown }) => ({
@@ -150,8 +122,17 @@ async function getTrendingData(params: TrendingParams) {
           category: 'skills' as const,
         })),
       },
-      { includeSponsored: true }
+      { includeSponsored: true } // Enable sponsored content injection
     );
+
+    const algorithm = trendingData.metadata.redisEnabled ? 'redis-views' : 'popularity-fallback';
+    logger.info(`Loaded trending data using ${algorithm}`, {
+      trendingCount: trendingData.trending.length,
+      popularCount: trendingData.popular.length,
+      recentCount: trendingData.recent.length,
+      redisEnabled: trendingData.metadata.redisEnabled,
+      totalCount,
+    });
 
     return {
       trending: trendingData.trending,
@@ -165,6 +146,7 @@ async function getTrendingData(params: TrendingParams) {
       error instanceof Error ? error : new Error(String(error))
     );
 
+    // Ultimate fallback - return empty arrays
     return {
       trending: [],
       popular: [],
