@@ -59,6 +59,7 @@ jobs:
       content-changed: ${{ steps.filter.outputs.content }}
       seo-changed: ${{ steps.filter.outputs.seo }}
       any-changed: ${{ steps.filter.outputs.content == 'true' || steps.filter.outputs.seo == 'true' }}
+      labels-applied: ${{ steps.labeler.outcome }}
 
     steps:
       - uses: actions/checkout@v5
@@ -76,6 +77,15 @@ jobs:
               - 'content/**/*.json'
               - 'src/app/**/page.tsx'
               - 'src/lib/seo/**'
+
+      - name: Apply path-based labels
+        if: github.event_name == 'pull_request'
+        id: labeler
+        uses: actions/labeler@v6
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+          sync-labels: true
 
   # Unified validation using matrix strategy
   validate:

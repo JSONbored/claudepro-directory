@@ -1,28 +1,9 @@
-import rehypePrettyCode from 'rehype-pretty-code';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
 import type { MDXFrontmatter } from '@/src/lib/schemas/markdown.schema';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
-import { getSharedHighlighter } from './shiki-singleton';
-
-// MDX node schema for type safety
-const mdxNodeChildSchema = z.object({
-  type: z.string(),
-  value: z.string(),
-});
-
-const mdxNodePropsSchema = z.object({
-  className: z.array(z.string()).default([]),
-});
-
-const mdxNodeSchema = z.object({
-  properties: mdxNodePropsSchema.default({ className: [] }),
-  children: z.array(mdxNodeChildSchema).default([]),
-});
-
-type MDXNode = z.infer<typeof mdxNodeSchema>;
 
 // Frontmatter value schema - supports strings, numbers, booleans, and arrays
 const frontmatterValueSchema = z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]);
@@ -89,62 +70,13 @@ function parseFrontmatterWithValidation(
   });
 }
 
-// Shiki configuration for syntax highlighting
-const shikiOptions = {
-  theme: {
-    dark: 'github-dark-dimmed',
-    light: 'github-light',
-  },
-  keepBackground: false,
-  defaultLang: 'plaintext',
-  transformers: [
-    {
-      // Add copy button functionality to code blocks
-      name: 'copy-button',
-      pre(node: MDXNode) {
-        node.properties = node.properties || {};
-        node.properties.className = node.properties.className || [];
-        if (Array.isArray(node.properties.className)) {
-          node.properties.className.push('code-block-with-copy');
-        }
-      },
-    },
-  ],
-};
-
-// Rehype Pretty Code configuration with Shiki singleton
-const rehypePrettyCodeOptions = {
-  ...shikiOptions,
-  // CRITICAL: Provide shared highlighter instance to prevent multiple Shiki instances
-  getHighlighter: getSharedHighlighter,
-  onVisitLine(node: MDXNode) {
-    // Prevent lines from collapsing in `display: grid` mode, and
-    // allow empty lines to be copy/pasted
-    if (!node.children || node.children.length === 0) {
-      node.children = [{ type: 'text', value: ' ' }];
-    }
-  },
-  onVisitHighlightedLine(node: MDXNode) {
-    // Add class to highlighted lines
-    if (!node.properties) node.properties = { className: [] };
-    node.properties.className = ['line--highlighted'];
-  },
-  onVisitHighlightedChars(node: MDXNode) {
-    // Add class to highlighted characters
-    if (!node.properties) node.properties = { className: [] };
-    node.properties.className = ['word--highlighted'];
-  },
-};
-
 // Complete MDX options for next-mdx-remote
+// NOTE: Syntax highlighting is handled by Starry Night in components, not via rehype-pretty-code
 export const mdxOptions = {
   remarkPlugins: [remarkGfm],
   rehypePlugins: [
     rehypeSlug,
-    [rehypePrettyCode, rehypePrettyCodeOptions] as [
-      typeof rehypePrettyCode,
-      typeof rehypePrettyCodeOptions,
-    ],
+    // Code highlighting happens in components via <ProductionCodeBlock> with Starry Night
   ],
   format: 'mdx' as const,
 };

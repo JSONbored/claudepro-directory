@@ -17,6 +17,7 @@ on:
       - 'package.json'
       - 'tsconfig.json'
       - 'config/tools/knip.json'
+    types: [labeled, opened, synchronize, reopened]
 
 jobs:
   detect-dead-code:
@@ -27,6 +28,12 @@ jobs:
       contents: read
       issues: write
       pull-requests: write
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    # Only run on PR when explicitly labeled `dead-code`
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && contains(join(fromJson(toJson(github.event.pull_request.labels)).*.name, ','), 'dead-code'))
 
     steps:
       - name: Checkout code

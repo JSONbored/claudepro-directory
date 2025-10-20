@@ -449,20 +449,25 @@ function CopyMarkdownButton({
   };
 
   return (
-    <Button
-      variant={buttonVariant}
-      size={size}
-      onClick={handleClick}
-      disabled={disabled || status === 'executing' || isSuccess}
-      className={cn(
-        'gap-2 transition-all',
-        isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
-        className
-      )}
+    <motion.div
+      animate={isSuccess ? { scale: [1, 1.05, 1] } : {}}
+      transition={{ duration: 0.3 }}
     >
-      {showIcon && (isSuccess ? <Check className="h-4 w-4" /> : <FileText className="h-4 w-4" />)}
-      {size !== 'icon' && <span>{isSuccess ? 'Copied!' : label}</span>}
-    </Button>
+      <Button
+        variant={buttonVariant}
+        size={size}
+        onClick={handleClick}
+        disabled={disabled || status === 'executing' || isSuccess}
+        className={cn(
+          'gap-2 transition-all',
+          isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
+          className
+        )}
+      >
+        {showIcon && (isSuccess ? <Check className="h-4 w-4" /> : <FileText className="h-4 w-4" />)}
+        {size !== 'icon' && <span>{isSuccess ? 'Copied!' : label}</span>}
+      </Button>
+    </motion.div>
   );
 }
 
@@ -533,20 +538,25 @@ function DownloadMarkdownButton({
   };
 
   return (
-    <Button
-      variant={buttonVariant}
-      size={size}
-      onClick={handleClick}
-      disabled={disabled || status === 'executing' || isSuccess}
-      className={cn(
-        'gap-2 transition-all',
-        isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
-        className
-      )}
+    <motion.div
+      animate={isSuccess ? { scale: [1, 1.05, 1] } : {}}
+      transition={{ duration: 0.3 }}
     >
-      {showIcon && (isSuccess ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />)}
-      {size !== 'icon' && <span>{isSuccess ? 'Downloaded!' : label}</span>}
-    </Button>
+      <Button
+        variant={buttonVariant}
+        size={size}
+        onClick={handleClick}
+        disabled={disabled || status === 'executing' || isSuccess}
+        className={cn(
+          'gap-2 transition-all',
+          isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
+          className
+        )}
+      >
+        {showIcon && (isSuccess ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />)}
+        {size !== 'icon' && <span>{isSuccess ? 'Downloaded!' : label}</span>}
+      </Button>
+    </motion.div>
   );
 }
 
@@ -601,32 +611,37 @@ function CopyLLMsButton({
   };
 
   return (
-    <Button
-      variant={buttonVariant}
-      size={size}
-      onClick={handleClick}
-      disabled={disabled || isLoading || isSuccess}
-      className={cn(
-        'gap-2 transition-all',
-        isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
-        className
-      )}
+    <motion.div
+      animate={isSuccess ? { scale: [1, 1.05, 1] } : {}}
+      transition={{ duration: 0.3 }}
     >
-      {showIcon &&
-        (isSuccess ? (
-          <Check className="h-4 w-4" />
-        ) : isLoading ? (
-          <motion.div
-            animate={{ opacity: [1, 0.5, 1] }}
-            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
-          >
+      <Button
+        variant={buttonVariant}
+        size={size}
+        onClick={handleClick}
+        disabled={disabled || isLoading || isSuccess}
+        className={cn(
+          'gap-2 transition-all',
+          isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
+          className
+        )}
+      >
+        {showIcon &&
+          (isSuccess ? (
+            <Check className="h-4 w-4" />
+          ) : isLoading ? (
+            <motion.div
+              animate={{ opacity: [1, 0.5, 1] }}
+              transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
+            >
+              <Sparkles className="h-4 w-4" />
+            </motion.div>
+          ) : (
             <Sparkles className="h-4 w-4" />
-          </motion.div>
-        ) : (
-          <Sparkles className="h-4 w-4" />
-        ))}
-      {size !== 'icon' && <span>{isSuccess ? 'Copied!' : isLoading ? 'Loading...' : label}</span>}
-    </Button>
+          ))}
+        {size !== 'icon' && <span>{isSuccess ? 'Copied!' : isLoading ? 'Loading...' : label}</span>}
+      </Button>
+    </motion.div>
   );
 }
 

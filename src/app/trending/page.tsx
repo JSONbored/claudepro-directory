@@ -31,7 +31,7 @@ import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 export const metadata = generatePageMetadata('/trending');
 
 // ISR Configuration - Revalidate every 5 minutes for fresh Redis view counts
-export const revalidate = 300;
+export const revalidate = 900;
 
 /**
  * Load trending data using Redis-based view counts

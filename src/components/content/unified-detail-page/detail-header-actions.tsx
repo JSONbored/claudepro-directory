@@ -12,13 +12,14 @@
  * Performance: Only the interactive buttons are client-side, rest is server-rendered
  */
 
+import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedButton } from '@/src/components/domain/unified-button';
 import type { CopyType } from '@/src/components/features/growth/unified-newsletter-capture';
 import { Button } from '@/src/components/primitives/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
-import { ArrowLeft, Copy } from '@/src/lib/icons';
+import { ArrowLeft, Check, Copy } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -164,19 +165,24 @@ export function DetailHeaderActions({
           </Button>
 
           {hasContent && (
-            <Button variant="outline" onClick={handleCopyContent} className="min-w-0">
-              {copied ? (
-                <>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copied!
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Content
-                </>
-              )}
-            </Button>
+            <motion.div
+              animate={copied ? { scale: [1, 1.05, 1] } : {}}
+              transition={{ duration: 0.3 }}
+            >
+              <Button variant="outline" onClick={handleCopyContent} className="min-w-0">
+                {copied ? (
+                  <>
+                    <Check className="h-4 w-4 mr-2 text-green-500" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy Content
+                  </>
+                )}
+              </Button>
+            </motion.div>
           )}
 
           {/* Copy for AI button */}

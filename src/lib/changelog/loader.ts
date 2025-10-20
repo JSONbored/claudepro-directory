@@ -35,7 +35,7 @@ import {
  * Cache TTL configuration
  * 1 hour cache - balances freshness (manual changelog updates) with performance
  */
-const CHANGELOG_CACHE_TTL = 3600; // 1 hour in seconds
+const CHANGELOG_CACHE_TTL = 21600; // 6 hours in seconds
 
 /**
  * Get complete parsed changelog with all entries and metadata

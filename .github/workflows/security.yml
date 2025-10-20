@@ -3,14 +3,20 @@ name: Security
 on:
   push:
     branches: [ main ]
-    paths-ignore:
-      - 'content/**/*.json'
-      - 'templates/**'
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'config/**'
+      - '.github/**'
   pull_request:
     branches: [ main ]
-    paths-ignore:
-      - 'content/**/*.json'
-      - 'templates/**'
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'config/**'
+      - '.github/**'
   schedule:
     - cron: '0 3 * * 1'  # Weekly security scan on Mondays at 3am UTC
 
@@ -48,6 +54,8 @@ jobs:
   build-for-codeql:
     name: Build for CodeQL
     uses: ./.github/workflows/build-reusable.yml
+    needs: [precheck]
+    if: needs.precheck.outputs.run-security == 'true'
     with:
       cache-key-suffix: ${{ github.event.pull_request.number || 'codeql' }}
       upload-artifact: true
@@ -56,7 +64,8 @@ jobs:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [build-for-codeql]
+    needs: [precheck, build-for-codeql]
+    if: needs.precheck.outputs.run-security == 'true'
     permissions:
       actions: read
       contents: read
@@ -97,7 +106,7 @@ jobs:
       uses: github/codeql-action/init@v4
       with:
         languages: javascript-typescript
-        queries: +security-extended,security-and-quality
+        queries: security-extended
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4

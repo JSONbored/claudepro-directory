@@ -15,6 +15,7 @@
  * Server-rendered HTML from Shiki, client interactivity for UX
  */
 
+import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, Copy } from '@/src/lib/icons';
@@ -61,13 +62,14 @@ export function ProductionCodeBlock({
   }, [code, maxLines]);
 
   const handleCopy = async () => {
+    // OPTIMISTIC UI: Update state immediately
+    setIsCopied(true);
+
     try {
       await navigator.clipboard.writeText(code);
-      setIsCopied(true);
       toasts.success.codeCopied();
-      setTimeout(() => setIsCopied(false), 2000);
 
-      // Track copy event with content-type-specific analytics (dynamic import for Storybook compatibility)
+      // Track copy event (fire-and-forget)
       const pathParts = pathname?.split('/').filter(Boolean) || [];
       const category = pathParts[0] || 'unknown';
       const slug = pathParts[1] || 'unknown';
@@ -82,14 +84,19 @@ export function ProductionCodeBlock({
           });
         })
         .catch((err) => {
-          // Silently fail analytics in non-production environments (e.g., Storybook)
           if (process.env.NODE_ENV === 'production') {
             logger.error('Analytics tracking failed in ProductionCodeBlock', err as Error);
           }
         });
     } catch (_err) {
+      // ROLLBACK on error
+      setIsCopied(false);
       toasts.error.copyFailed('code');
+      return;
     }
+
+    // Reset after 2s
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   const maxHeight = `${maxLines * 1.6}rem`; // 1.6rem per line
@@ -107,10 +114,12 @@ export function ProductionCodeBlock({
                 {language}
               </span>
             )}
-            {/* Copy button */}
-            <button
+            {/* Copy button with pulse animation */}
+            <motion.button
               type="button"
               onClick={handleCopy}
+              animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
+              transition={{ duration: 0.3 }}
               className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-code/30`}
               title="Copy code"
             >
@@ -125,7 +134,7 @@ export function ProductionCodeBlock({
                   <span className="hidden sm:inline">Copy</span>
                 </>
               )}
-            </button>
+            </motion.button>
           </div>
         </div>
       )}
@@ -188,9 +197,11 @@ export function ProductionCodeBlock({
 
       {/* Copy button (floating, for blocks without filename) */}
       {!(filename || language) && (
-        <button
+        <motion.button
           type="button"
           onClick={handleCopy}
+          animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
+          transition={{ duration: 0.3 }}
           className={UI_CLASSES.CODE_BLOCK_COPY_BUTTON_FLOATING}
           style={{ minWidth: '48px', minHeight: '48px' }}
           title="Copy code"
@@ -200,7 +211,7 @@ export function ProductionCodeBlock({
           ) : (
             <Copy className={'h-4 w-4 text-muted-foreground'} />
           )}
-        </button>
+        </motion.button>
       )}
     </div>
   );

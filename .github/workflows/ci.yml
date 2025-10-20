@@ -3,19 +3,30 @@ name: CI
 on:
   push:
     branches: [ main ]
-    paths-ignore:
-      - 'content/**/*.json'
-      - 'templates/**'
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'next.config.mjs'
+      - '.github/**'
+      - '!content/**'
+      - '!templates/**'
   pull_request:
     branches: [ main ]
-    paths-ignore:
-      - 'content/**/*.json'
-      - 'content/guides/**/*.mdx'
-      - 'templates/**'
-      - '.github/ISSUE_TEMPLATE/**'
-      - '.github/pull_request_template.md'
-      - '**.md'
-      - 'LICENSE'
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'next.config.mjs'
+      - '.github/**'
+      - '!content/**'
+      - '!templates/**'
+      - '!.github/ISSUE_TEMPLATE/**'
+      - '!.github/pull_request_template.md'
+      - '!**.md'
+      - '!LICENSE'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -29,6 +40,7 @@ jobs:
     name: Code Quality (${{ matrix.check }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
     strategy:
       fail-fast: false
       matrix:
@@ -48,6 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     continue-on-error: true  # Don't block CI on test failures (SEO tests can be fixed iteratively)
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
     # Only run coverage on main branch (production)
     # PRs run tests without coverage for faster feedback
     needs: [changes]
