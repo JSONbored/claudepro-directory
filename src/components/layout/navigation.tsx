@@ -33,6 +33,7 @@
 import { motion, useScroll, useTransform } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type * as React from 'react';
 import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedButton } from '@/src/components/domain/unified-button';
@@ -78,6 +79,9 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
     } ${className}`,
     ...(active && { 'aria-current': 'page' as const }),
     ...(onClick && { onClick }),
+    style: {
+      viewTransitionName: active ? 'nav-link' : undefined,
+    } as React.CSSProperties,
   };
 
   return (
