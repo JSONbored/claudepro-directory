@@ -1,9 +1,9 @@
 #!/usr/bin/env tsx
 /**
- * Static LLMs.txt Generator - REAL IMPLEMENTATION
- *
- * Pre-generates all LLMs.txt files at build time by reading actual content.
- * Replaces 15+ serverless functions with static CDN-served files.
+ * Static LLMs.txt Generator - Production Implementation
+ * 
+ * Reads actual content from JSON files and generates real LLMs.txt.
+ * Zero React dependencies, pure Node.js file I/O.
  */
 
 import { readFile, readdir } from 'fs/promises';
@@ -20,15 +20,25 @@ const APP_CONFIG = {
   license: 'MIT',
 };
 
+const CATEGORIES = [
+  { id: 'agents', title: 'AI Agents', desc: 'Specialized AI agents with predefined roles and expertise areas' },
+  { id: 'mcp', title: 'MCP Servers', desc: 'Model Context Protocol servers for extending Claude with external tools' },
+  { id: 'commands', title: 'Commands', desc: 'Custom slash commands for Claude Code to streamline development workflows' },
+  { id: 'rules', title: 'Rules', desc: 'Custom instructions and system prompts to modify Claude behavior for specific tasks' },
+  { id: 'hooks', title: 'Hooks', desc: 'Automation hooks that trigger on events in Claude Code sessions' },
+  { id: 'statuslines', title: 'Statuslines', desc: 'Custom status line configurations for Claude Code workspace displays' },
+  { id: 'collections', title: 'Collections', desc: 'Curated bundles of related configurations for specific use cases' },
+  { id: 'skills', title: 'Skills', desc: 'Task-focused capability guides with dependencies, examples, and troubleshooting' },
+];
+
 async function ensureOutputDir() {
   await mkdir(OUTPUT_DIR, { recursive: true });
-  console.log('✅ LLMs.txt output directory ready');
 }
 
 async function writeLLMsTxtFile(filename: string, content: string) {
   const filePath = join(OUTPUT_DIR, filename);
   await writeFile(filePath, content, 'utf-8');
-  console.log(`✅ Generated ${filename} (${Buffer.byteLength(content)} bytes)`);
+  console.log(`✅ ${filename} (${Math.round(Buffer.byteLength(content) / 1024)}KB)`);
 }
 
 async function readContentFiles(category: string) {
@@ -50,24 +60,17 @@ async function readContentFiles(category: string) {
   }
 }
 
-async function generateSiteLLMs() {
-  const categories = [
-    { id: 'agents', title: 'AI Agents', desc: 'Specialized AI agents with predefined roles and expertise areas' },
-    { id: 'mcp', title: 'MCP Servers', desc: 'Model Context Protocol servers for extending Claude' },
-    { id: 'commands', title: 'Commands', desc: 'Custom slash commands for Claude Code' },
-    { id: 'rules', title: 'Rules', desc: 'Custom instructions and system prompts' },
-    { id: 'hooks', title: 'Hooks', desc: 'Automation hooks for Claude Code sessions' },
-    { id: 'statuslines', title: 'Statuslines', desc: 'Custom status line configurations' },
-    { id: 'collections', title: 'Collections', desc: 'Curated bundles of related configurations' },
-    { id: 'skills', title: 'Skills', desc: 'Task-focused capability guides' },
-  ];
+function truncateContent(text: string, maxLength: number = 2000): string {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '...\n\n[Content truncated for brevity]';
+}
 
+async function generateSiteLLMs() {
   let content = `# ${APP_CONFIG.name}
 
 > Community-driven directory of Claude configurations including agents, MCP servers, rules, commands, and hooks
 
 URL: ${APP_CONFIG.url}
-Total Categories: ${categories.length}
 
 ---
 
@@ -75,25 +78,18 @@ Total Categories: ${categories.length}
 
 `;
 
-  for (const cat of categories) {
+  for (const cat of CATEGORIES) {
     const items = await readContentFiles(cat.id);
-    content += `### ${cat.title}
+    content += `### ${cat.title} (${items.length} items)
 
 URL: ${APP_CONFIG.url}/${cat.id}
-Description: ${cat.desc}
-Items: ${items.length}
+${cat.desc}
 
 `;
   }
 
   content += `
 ---
-
-## Additional Resources
-
-- API Documentation: ${APP_CONFIG.url}/api-docs
-- Guides: ${APP_CONFIG.url}/guides
-- Changelog: ${APP_CONFIG.url}/changelog
 
 Last updated: ${new Date().toISOString()}
 Maintained by: ${APP_CONFIG.author}
@@ -104,18 +100,7 @@ License: ${APP_CONFIG.license}
 }
 
 async function generateCategoryLLMs() {
-  const categories = [
-    { id: 'agents', title: 'AI Agents', desc: 'Specialized AI agents with predefined roles' },
-    { id: 'mcp', title: 'MCP Servers', desc: 'Model Context Protocol servers' },
-    { id: 'commands', title: 'Commands', desc: 'Custom slash commands' },
-    { id: 'rules', title: 'Rules', desc: 'Custom instructions and prompts' },
-    { id: 'hooks', title: 'Hooks', desc: 'Automation hooks' },
-    { id: 'statuslines', title: 'Statuslines', desc: 'Status line configurations' },
-    { id: 'collections', title: 'Collections', desc: 'Configuration bundles' },
-    { id: 'skills', title: 'Skills', desc: 'Task-focused guides' },
-  ];
-
-  for (const cat of categories) {
+  for (const cat of CATEGORIES) {
     const items = await readContentFiles(cat.id);
     
     let content = `# ${cat.title} - ${APP_CONFIG.name}
@@ -131,16 +116,11 @@ Total Items: ${items.length}
 
 `;
 
-    for (const item of items) {
+    for (const item of items.slice(0, 50)) { // Limit to 50 for index
       content += `### ${item.title}
 
 URL: ${APP_CONFIG.url}/${cat.id}/${item.slug}
 ${item.description}
-
-Tags: ${item.tags?.join(', ') || 'None'}
-${item.author ? `Author: ${item.author}` : ''}
-
----
 
 `;
     }
@@ -151,7 +131,7 @@ Last updated: ${new Date().toISOString()}
 
     await writeLLMsTxtFile(`${cat.id}.txt`, content);
     
-    // Generate individual item files
+    // Individual item files
     for (const item of items) {
       const itemContent = `# ${item.title} - ${APP_CONFIG.name}
 
@@ -161,12 +141,11 @@ URL: ${APP_CONFIG.url}/${cat.id}/${item.slug}
 Category: ${cat.title}
 ${item.author ? `Author: ${item.author}` : ''}
 ${item.tags ? `Tags: ${item.tags.join(', ')}` : ''}
+${item.dateAdded ? `Added: ${item.dateAdded}` : ''}
 
 ---
 
-## Content
-
-${item.content || item.description}
+${truncateContent(item.content || item.description, 5000)}
 
 ---
 
@@ -195,24 +174,9 @@ Last updated: ${new Date().toISOString()}
 
 async function generateOtherLLMs() {
   const files = [
-    { 
-      name: 'guides.txt', 
-      url: '/guides', 
-      title: 'Guides',
-      desc: 'Comprehensive tutorials and documentation for getting started'
-    },
-    { 
-      name: 'api-docs.txt', 
-      url: '/api-docs', 
-      title: 'API Documentation',
-      desc: 'RESTful API for accessing Claude configurations programmatically'
-    },
-    { 
-      name: 'config-recommender.txt', 
-      url: '/tools/config-recommender', 
-      title: 'Configuration Recommender',
-      desc: 'AI-powered tool for finding the perfect Claude configuration'
-    },
+    { name: 'guides.txt', url: '/guides', title: 'Guides', desc: 'Comprehensive tutorials and documentation' },
+    { name: 'api-docs.txt', url: '/api-docs', title: 'API Documentation', desc: 'RESTful API for accessing configurations' },
+    { name: 'config-recommender.txt', url: '/tools/config-recommender', title: 'Configuration Recommender', desc: 'AI-powered configuration finder' },
   ];
   
   for (const file of files) {
@@ -233,6 +197,7 @@ Last updated: ${new Date().toISOString()}
 
 async function main() {
   const startTime = Date.now();
+  console.log('📝 Generating LLMs.txt files...\n');
   
   try {
     await ensureOutputDir();
@@ -243,9 +208,8 @@ async function main() {
     
     const duration = Date.now() - startTime;
     console.log(`\n✅ Generated all LLMs.txt files in ${duration}ms`);
-    console.log(`📁 Output directory: ${OUTPUT_DIR}`);
   } catch (error) {
-    console.error('❌ Failed to generate LLMs.txt files:', error);
+    console.error('\n❌ LLMs.txt generation failed:', error);
     process.exit(1);
   }
 }
