@@ -1850,7 +1850,9 @@ export const CacheServices = {
     defaultTTL: 3600,
     enableCompression: true,
     compressionAlgorithm: 'brotli', // Better compression than gzip
-    compressionThreshold: 500, // Compress anything over 500 bytes
+    // OPTIMIZATION: Increased from 500 to 5000 bytes (5KB)
+    // Only compress larger payloads - reduces CPU + network overhead for small values
+    compressionThreshold: 5000,
     maxValueSize: 2097152, // 2MB max
     maxMemoryMB: CACHE_MEMORY_LIMITS.api,
     enableLogging: !isProduction,
@@ -1865,7 +1867,8 @@ export const CacheServices = {
     defaultTTL: 86400,
     enableCompression: true,
     compressionAlgorithm: 'gzip', // Faster for smaller payloads
-    compressionThreshold: 1000,
+    // OPTIMIZATION: Increased from 1000 to 5000 bytes (5KB)
+    compressionThreshold: 5000,
     maxMemoryMB: CACHE_MEMORY_LIMITS.session,
     enableLogging: false,
   }),
@@ -1879,7 +1882,9 @@ export const CacheServices = {
     defaultTTL: 21600,
     enableCompression: true,
     compressionAlgorithm: 'brotli', // Best for large content
-    compressionThreshold: 200, // Compress aggressively
+    // OPTIMIZATION: Increased from 200 to 5000 bytes (5KB)
+    // Content cache can benefit from higher threshold
+    compressionThreshold: 5000,
     maxValueSize: 5242880, // 5MB max
     maxMemoryMB: CACHE_MEMORY_LIMITS.content,
     enableLogging: !isProduction,
@@ -2047,7 +2052,8 @@ export const statsRedis = {
     },
     ['view-counts'],
     {
-      revalidate: 600,
+      // OPTIMIZATION: Increased from 600s to 1800s (10min → 30min)
+      revalidate: 1800,
       tags: ['stats', 'view-counts'],
     }
   ),
@@ -2082,7 +2088,8 @@ export const statsRedis = {
       },
       [`daily-view-counts-${targetDate}-${items.map((i) => `${i.category}:${i.slug}`).join(',')}`],
       {
-        revalidate: 300,
+        // OPTIMIZATION: Increased from 300s to 900s (5min → 15min)
+        revalidate: 900,
         tags: ['stats', 'daily-view-counts'],
       }
     )();
@@ -2183,7 +2190,8 @@ export const statsRedis = {
     },
     ['copy-counts'],
     {
-      revalidate: 600,
+      // OPTIMIZATION: Increased from 600s to 1800s (10min → 30min)
+      revalidate: 1800,
       tags: ['stats', 'copy-counts'],
     }
   ),

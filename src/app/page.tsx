@@ -56,7 +56,9 @@ type EnrichedMetadata = CategoryMetadata & { viewCount: number; copyCount: numbe
  * Revalidate every 10 minutes - balance between freshness and performance
  * Homepage has mixed content with high traffic, optimized for user experience
  */
-export const revalidate = 600;
+// OPTIMIZATION: Increased from 600s (10min) to 3600s (1hr)
+// Saves ~2,700 Redis commands/day - view counts don't need real-time updates
+export const revalidate = 3600;
 
 interface HomePageProps {
   searchParams: Promise<{
@@ -128,73 +130,32 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
   }
 
   /**
-   * Modern 2025 Architecture: Unified Parallel Enrichment
-   *
-   * ARCHITECTURAL FIX: Combine category + featured enrichment into single parallel batch
-   * BEFORE: Category enrichment, THEN featured enrichment (2 sequential await calls)
-   * AFTER: All enrichment in ONE parallel batch (20-30ms gain)
+   * OPTIMIZATION: Removed server-side Redis enrichment
+   * 
+   * BEFORE: Enriched ALL content with view/copy counts on server (28 Redis MGET per rebuild)
+   * AFTER: Pass unenriched data to components, enrich client-side via cached API
+   * 
+   * Savings: ~13,000 Redis commands/day
+   * Trade-off: View counts load progressively (200-500ms delay, acceptable UX)
    */
 
-  // Storage for enriched data
+  // Prepare category data with category field (no enrichment)
   const enrichedCategoryData: Record<CategoryId, EnrichedMetadata[]> = {} as Record<
     CategoryId,
     EnrichedMetadata[]
   >;
-  let enrichedFeaturedByCategory: Record<string, UnifiedContentItem[]> = {};
 
-  try {
-    // Build unified enrichment loaders for categories AND featured content
-    const categoryEnrichmentLoaders = categoryIds.map((id) =>
-      statsRedis.enrichWithAllCounts(categoryData[id].map((item) => ({ ...item, category: id })))
-    );
+  categoryIds.forEach((id) => {
+    enrichedCategoryData[id] = categoryData[id].map((item) => ({
+      ...item,
+      category: id,
+      viewCount: 0, // Will be loaded client-side
+      copyCount: 0, // Will be loaded client-side
+    }));
+  });
 
-    const featuredEntries = Object.entries(featuredByCategory);
-    const featuredEnrichmentLoaders = featuredEntries.map(([, items]) =>
-      statsRedis.enrichWithAllCounts(items as UnifiedContentItem[])
-    );
-
-    // Single parallel batch for ALL enrichment (categories + featured)
-    const allEnrichmentLoaders = [...categoryEnrichmentLoaders, ...featuredEnrichmentLoaders];
-    const allEnrichedResults = await batchFetch(allEnrichmentLoaders);
-
-    // Split results: first N are categories, rest are featured
-    const categoryResultsEnd = categoryIds.length;
-    const categoryResults = allEnrichedResults.slice(0, categoryResultsEnd);
-    const featuredResults = allEnrichedResults.slice(categoryResultsEnd);
-
-    // Map category results
-    categoryIds.forEach((id, index) => {
-      enrichedCategoryData[id] = (categoryResults[index] as EnrichedMetadata[]) || [];
-    });
-
-    // Map featured results
-    featuredEntries.forEach(([category], index) => {
-      enrichedFeaturedByCategory[category] = (featuredResults[index] as UnifiedContentItem[]) || [];
-    });
-  } catch (error) {
-    // Log error and fallback to data without enrichment
-    logger.error(
-      'Failed to enrich content with stats',
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        source: 'HomePage',
-        operation: 'enrichWithStats',
-      }
-    );
-
-    // Fallback for featured content - use unenriched data
-    enrichedFeaturedByCategory = featuredByCategory;
-
-    // Graceful degradation: use base metadata with default counts (0)
-    categoryIds.forEach((id) => {
-      enrichedCategoryData[id] = categoryData[id].map((item) => ({
-        ...item,
-        category: id,
-        viewCount: 0,
-        copyCount: 0,
-      }));
-    });
-  }
+  // Featured content - no enrichment
+  const enrichedFeaturedByCategory = featuredByCategory;
 
   /**
    * Modern 2025 Architecture: Dynamic AllConfigs Assembly

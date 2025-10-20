@@ -115,8 +115,13 @@ export default async function GuidesPage() {
   // Load all guides
   const guidesData = await getAllGuides();
 
-  // Enrich with view and copy counts from Redis (guides won't have copy counts, but using unified enrichment)
-  const guides = await statsRedis.enrichWithAllCounts(guidesData);
+  // OPTIMIZATION: Removed server-side Redis enrichment
+  // View counts will be loaded client-side via cached API
+  const guides = guidesData.map((guide) => ({
+    ...guide,
+    viewCount: 0, // Will be loaded client-side
+    copyCount: 0, // Will be loaded client-side
+  }));
 
   logger.info('Guides page rendered', {
     guideCount: guides.length,

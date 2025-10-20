@@ -186,7 +186,7 @@ export class RateLimiter {
     // Create Upstash Ratelimit instance
     // Uses sliding window algorithm (more accurate than fixed window)
     // OPTIMIZATION: ephemeralCache added to reduce Redis commands by 60-70%
-    // Caches rate limit decisions in memory for 10 seconds
+    // OPTIMIZATION: Increased cache from 10s to 60s - saves ~2,000 additional commands/day
     this.ratelimit = new Ratelimit({
       redis: redisClient,
       limiter: Ratelimit.slidingWindow(
@@ -195,7 +195,8 @@ export class RateLimiter {
       ),
       analytics: false, // Disable to reduce Redis commands
       prefix: 'ratelimit',
-      ephemeralCache: new Map(), // In-memory cache for 10s - saves 8,600 commands/day
+      ephemeralCache: new Map(), // In-memory cache for 60s
+      timeout: 60000, // 60-second cache window
     });
   }
 

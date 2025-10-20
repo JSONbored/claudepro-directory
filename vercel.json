@@ -12,6 +12,10 @@
     {
       "path": "/api/cron/weekly-tasks",
       "schedule": "0 0 * * 1"
+    },
+    {
+      "path": "/api/cron/trending",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

@@ -23,6 +23,21 @@ import {
   validateSearchQuery,
 } from '@/src/lib/schemas/middleware.schema';
 
+/**
+ * OPTIMIZATION: Skip middleware for static assets
+ * Saves ~12,000-15,000 Redis commands/day by bypassing rate limiting for files
+ * that don't need security checks (CSS, JS, images, fonts, etc.)
+ */
+function isStaticAsset(pathname: string): boolean {
+  return (
+    pathname.startsWith('/_next/static/') ||
+    pathname.startsWith('/assets/') ||
+    pathname.startsWith('/og-images/') ||
+    pathname.startsWith('/icons/') ||
+    /\.(js|css|png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot|map)$/.test(pathname)
+  );
+}
+
 // Initialize Arcjet with comprehensive security rules
 // SECURITY: Require ARCJET_KEY in production for LIVE mode protection
 // DEVELOPMENT: Allow DRY_RUN mode without key (Arcjet SDK handles gracefully)

@@ -19,7 +19,9 @@ import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
 export const metadata = generatePageMetadata('/board');
 
-export const revalidate = 60;
+// OPTIMIZATION: Increased from 60s (1min) to 900s (15min)
+// Board doesn't use Redis, but reduces Supabase queries
+export const revalidate = 900;
 
 // Use the actual return type from the database function
 type PopularPost = {
