@@ -33,6 +33,9 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  changes:
+    name: Changes Filter
+    uses: ./.github/workflows/changes-filter.yml
   quality:
     name: Code Quality (${{ matrix.check }})
     runs-on: ubuntu-latest
@@ -60,6 +63,7 @@ jobs:
     if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
     # Only run coverage on main branch (production)
     # PRs run tests without coverage for faster feedback
+    needs: [changes]
 
     steps:
       - name: Checkout repository
@@ -68,6 +72,7 @@ jobs:
       - uses: ./.github/actions/setup-node-deps
 
       - name: Run tests (with coverage on main)
+        if: needs.changes.outputs.code == 'true' || needs.changes.outputs.tests == 'true'
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
             echo "Running tests with coverage (main branch)"
@@ -77,8 +82,12 @@ jobs:
             npm run test:unit
           fi
 
+      - name: Skip tests (no relevant changes)
+        if: needs.changes.outputs.code != 'true' && needs.changes.outputs.tests != 'true'
+        run: echo "Skipping tests: no relevant code/test changes detected"
+
       - name: Upload coverage reports to Codecov (main only)
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && (needs.changes.outputs.code == 'true' || needs.changes.outputs.tests == 'true')
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -89,7 +98,7 @@ jobs:
           verbose: true
 
       - name: Generate coverage summary (main only)
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && (needs.changes.outputs.code == 'true' || needs.changes.outputs.tests == 'true')
         run: |
           if [ -f ./coverage/coverage-summary.json ]; then
             echo "## Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
@@ -111,5 +120,5 @@ jobs:
     uses: ./.github/workflows/build-reusable.yml
     needs: [quality, test]
     with:
-      cache-key-suffix: 'ci'
-      upload-artifact: false
+      cache-key-suffix: ${{ github.event.pull_request.number || 'ci' }}
+      upload-artifact: true

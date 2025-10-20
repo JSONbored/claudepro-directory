@@ -27,7 +27,30 @@ permissions:
   pull-requests: write
 
 jobs:
-  # Get changed files for intelligent validation (also handles labeling)
+  changes:
+    name: Changes Filter
+    uses: ./.github/workflows/changes-filter.yml
+  # Auto-label PRs based on changed files
+  label:
+    name: Label Pull Request
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [changes, detect-changes]
+    # Only run label job when relevant content changes detected
+    if: github.event_name == 'pull_request' && needs.detect-changes.outputs.any-changed == 'true'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Apply path-based labels
+        uses: actions/labeler@v6
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+          sync-labels: true
+
+  # Get changed files for intelligent validation
   detect-changes:
     name: Detect Changes
     runs-on: ubuntu-latest
@@ -308,7 +331,7 @@ jobs:
     name: Validation Report
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [validate, content-quality]
+    needs: [detect-changes, validate, content-quality]
     if: always() && needs.detect-changes.outputs.any-changed == 'true'
 
     steps:

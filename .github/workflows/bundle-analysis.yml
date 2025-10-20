@@ -21,6 +21,9 @@ permissions:
   pull-requests: write
 
 jobs:
+  changes:
+    name: Changes Filter
+    uses: ./.github/workflows/changes-filter.yml
   # Check if base branch build is cached
   check-base-cache:
     name: Check Base Branch Cache
@@ -54,9 +57,9 @@ jobs:
   build-pr:
     name: Build PR Branch
     uses: ./.github/workflows/build-reusable.yml
-    if: needs.check-base-cache.result == 'success'
+    needs: [changes]
     with:
-      cache-key-suffix: 'bundle-pr'
+      cache-key-suffix: ${{ github.event.pull_request.number || 'bundle-pr' }}
       upload-artifact: true
 
   # Build base branch using reusable workflow (only if not cached)
@@ -107,7 +110,15 @@ jobs:
         with:
           skip-build-content: 'true'
 
-      - name: Download PR build artifact
+      - name: Download PR build artifact (from CI or local build)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-${{ github.event.pull_request.number || 'ci' }}-${{ github.sha }}
+          path: .next-pr
+        continue-on-error: true
+
+      - name: Fallback to Bundle Analysis build artifact
+        if: ${{ !hashFiles('.next-pr/.next/BUILD_ID') }}
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build-pr.outputs.artifact-name }}
