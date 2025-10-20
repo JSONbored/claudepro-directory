@@ -35,7 +35,7 @@ export interface ScrollRevealProps extends ScrollRevealConfig {
    * HTML element type
    * @default 'div'
    */
-  as?: 'div' | 'section' | 'article' | 'aside' | 'header' | 'footer';
+  as?: keyof Pick<typeof motion, 'div' | 'section' | 'article' | 'aside' | 'header' | 'footer'>;
 }
 
 /**
@@ -68,7 +68,7 @@ export function ScrollReveal({
 }: ScrollRevealProps) {
   const { ref, style } = useScrollReveal(config);
 
-  const Component = motion[as];
+  const Component = motion[as] as typeof motion.div;
 
   return (
     <Component ref={ref} style={style} className={className}>

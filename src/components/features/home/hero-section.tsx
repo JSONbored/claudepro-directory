@@ -21,6 +21,7 @@ const RollingText = dynamic(
   () => import('@/src/components/magic/rolling-text').then((mod) => ({ default: mod.RollingText })),
   {
     loading: () => <span className="text-accent">enthusiasts</span>,
+    ssr: false,
   }
 );
 
@@ -77,7 +78,11 @@ export function HeroSection() {
             <span className="font-semibold text-foreground">MCP servers</span>,{' '}
             <span className="font-semibold text-foreground">Claude rules</span>, and{' '}
             <span className="font-semibold text-foreground">commands</span> for{' '}
-            <RollingText />
+            <RollingText
+              words={['enthusiasts', 'developers', 'power users', 'beginners', 'builders']}
+              duration={3000}
+              className="text-accent"
+            />
           </p>
         </motion.div>
 

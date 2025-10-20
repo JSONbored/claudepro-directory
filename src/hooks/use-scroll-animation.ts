@@ -101,10 +101,10 @@ export function useParallax(config: ParallaxConfig = {}) {
   // Calculate parallax offset based on speed
   const offset = useTransform(scrollYProgress, [0, 1], range.map((val) => val * speed));
 
-  return {
-    ref,
-    ...(direction === 'vertical' ? { y: offset } : { x: offset }),
-  };
+  if (direction === 'vertical') {
+    return { ref, y: offset };
+  }
+  return { ref, x: offset };
 }
 
 /**
@@ -131,31 +131,41 @@ export function useScrollReveal(config: ScrollRevealConfig = {}) {
     offset: [`start ${threshold}`, 'start 0.2'],
   });
 
-  const style: Record<string, MotionValue<number>> = {};
+  const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+  let style: Record<string, MotionValue<number>> = { opacity };
 
   switch (animation) {
     case 'fade':
-      style.opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
+      // opacity already set
       break;
 
     case 'slide-up':
-      style.opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
-      style.y = useTransform(scrollYProgress, [0, 1], [distance, 0]);
+      style = {
+        opacity,
+        y: useTransform(scrollYProgress, [0, 1], [distance, 0]),
+      };
       break;
 
     case 'slide-down':
-      style.opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
-      style.y = useTransform(scrollYProgress, [0, 1], [-distance, 0]);
+      style = {
+        opacity,
+        y: useTransform(scrollYProgress, [0, 1], [-distance, 0]),
+      };
       break;
 
     case 'scale':
-      style.opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
-      style.scale = useTransform(scrollYProgress, [0, 1], [0.8, 1]);
+      style = {
+        opacity,
+        scale: useTransform(scrollYProgress, [0, 1], [0.8, 1]),
+      };
       break;
 
     case 'rotate':
-      style.opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
-      style.rotateX = useTransform(scrollYProgress, [0, 1], [45, 0]);
+      style = {
+        opacity,
+        rotateX: useTransform(scrollYProgress, [0, 1], [45, 0]),
+      };
       break;
   }
 

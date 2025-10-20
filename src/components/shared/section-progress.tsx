@@ -111,8 +111,8 @@ export function SectionProgress({
             opacity: progress,
           }}
         >
-          <motion.span>
-            {progress.get() ? Math.round(progress.get() * 100) : 0}%
+          <motion.span style={{ display: 'inline-block' }}>
+            {Math.round((progress.get() || 0) * 100)}%
           </motion.span>
         </motion.div>
       )}

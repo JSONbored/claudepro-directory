@@ -20,6 +20,7 @@
 
 import Link from 'next/link';
 import type { ComponentProps } from 'react';
+import type { UrlObject } from 'url';
 import { usePrefetchOnHover } from '@/src/hooks/use-prefetch-on-hover';
 
 export interface PrefetchLinkProps extends ComponentProps<typeof Link> {
@@ -56,7 +57,12 @@ export function PrefetchLink({
   children,
   ...props
 }: PrefetchLinkProps) {
-  const hrefString = typeof href === 'string' ? href : href.pathname || '';
+  // Extract string path from href (handles both string and UrlObject)
+  const hrefString = typeof href === 'string' 
+    ? href 
+    : typeof href === 'object' && href !== null
+      ? ((href as UrlObject).pathname || (href as UrlObject).href || '/')
+      : '/';
   
   const { handleMouseEnter, handleMouseLeave, handleTouchStart } = usePrefetchOnHover(
     hrefString,
