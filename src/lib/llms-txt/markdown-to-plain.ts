@@ -9,7 +9,7 @@
  * @security Uses 'he' library for proper HTML entity decoding (prevents double-unescaping)
  */
 
-import { decode } from 'he';
+import he from 'he';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
 import { DOMPurify } from '@/src/lib/security/html-sanitizer';
