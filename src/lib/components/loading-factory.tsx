@@ -1,31 +1,31 @@
 /**
  * Loading Component Factory - Configuration-Driven Skeleton System
- * 
+ *
  * Unified skeleton loading system that matches actual content structure.
  * All skeletons are configuration-driven and auto-scale with content.
- * 
+ *
  * Architecture:
  * - Single source of truth for all loading states
  * - Configuration-driven (extends UNIFIED_CATEGORY_REGISTRY)
  * - Matches actual content card structure (zero CLS)
  * - Responsive breakpoints match production
  * - GPU-accelerated shimmer animations (motion.dev)
- * 
+ *
  * Performance:
  * - Zero CLS (layout reserved exactly)
  * - Progressive enhancement (static first, shimmer second)
  * - Tree-shakeable exports
  * - Reusable patterns
- * 
+ *
  * @module lib/components/loading-factory
  */
 
 import {
+  ConfigCardSkeleton,
   ContentListSkeleton,
   LoadingSkeleton,
   PageHeaderSkeleton,
   Skeleton,
-  ConfigCardSkeleton,
 } from '@/src/components/primitives/loading-skeleton';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -230,7 +230,7 @@ export function SearchResultsLoading() {
     <div className="space-y-6">
       {/* Results count */}
       <Skeleton size="sm" width="sm" />
-      
+
       {/* Results grid */}
       <div className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}>
         {Array.from({ length: 9 }).map((_, i) => (

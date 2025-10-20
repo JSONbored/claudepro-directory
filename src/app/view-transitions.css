@@ -1,11 +1,11 @@
 /**
  * View Transitions API Styles
- * 
+ *
  * Native browser animations for smooth page morphing.
  * Baseline support as of October 2025 (Chrome 111+, Firefox 144+, Safari 18+).
- * 
+ *
  * Progressive enhancement: Falls back gracefully in unsupported browsers.
- * 
+ *
  * @see https://developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API
  */
 

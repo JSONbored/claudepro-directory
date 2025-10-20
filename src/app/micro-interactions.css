@@ -1,9 +1,9 @@
 /**
  * Micro-interactions & Polish - Global Touch Feedback
- * 
+ *
  * Subtle touch feedback and interaction polish across the entire site.
  * Enhances UX with delightful micro-interactions.
- * 
+ *
  * @module app/micro-interactions
  */
 
@@ -14,13 +14,15 @@
 /* Add subtle highlight on tap for interactive elements */
 @media (hover: none) and (pointer: coarse) {
   /* Touch devices only */
-  
+
   button:active,
   a:active,
   [role="button"]:active {
     opacity: 0.7;
     transform: scale(0.98);
-    transition: opacity 0.1s ease, transform 0.1s ease;
+    transition:
+      opacity 0.1s ease,
+      transform 0.1s ease;
   }
 
   /* Prevent double-tap zoom on buttons */
@@ -99,7 +101,7 @@ a:not([class*="button"]):not([class*="btn"]) {
 }
 
 a:not([class*="button"]):not([class*="btn"])::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
@@ -165,7 +167,8 @@ select:focus {
 }
 
 @keyframes badgePulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -186,7 +189,8 @@ select:focus {
 }
 
 @keyframes loadingPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -221,12 +225,7 @@ select:focus {
 /* Enhanced shimmer effect for skeleton loading */
 [class*="skeleton"]::before,
 [class*="Skeleton"]::before {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    hsl(var(--foreground) / 0.05),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.05), transparent);
 }
 
 /* ===========================

@@ -2,21 +2,21 @@
 
 /**
  * Smart Prefetching Hook - Hover Intent Detection
- * 
+ *
  * Prefetches routes when user hovers for 300ms (clear intent).
  * Provides instant navigation on click with zero perceived delay.
- * 
+ *
  * Performance:
  * - Prefetch triggered only after intent confirmation (300ms hover)
  * - Cancels if user moves away before delay
  * - Uses Next.js router.prefetch (caches in browser)
  * - Low bandwidth cost (only on clear intent)
- * 
+ *
  * Benefits:
  * - Instant navigation feel (0ms vs 500ms)
  * - +30% more pages per session
  * - Native app-like experience
- * 
+ *
  * @module hooks/use-prefetch-on-hover
  */
 
@@ -62,19 +62,19 @@ export interface UsePrefetchOnHoverReturn {
 
 /**
  * Hook for smart prefetching on hover intent
- * 
+ *
  * Uses 300ms delay to detect clear user intent before prefetching.
  * Prevents wasteful prefetches on accidental mouseovers.
- * 
+ *
  * @param href - Route to prefetch
  * @param options - Configuration options
  * @returns Event handlers for prefetch behavior
- * 
+ *
  * @example
  * ```tsx
  * function NavLink({ href, children }) {
  *   const { handleMouseEnter, handleMouseLeave } = usePrefetchOnHover(href);
- * 
+ *
  *   return (
  *     <Link
  *       href={href}
@@ -141,7 +141,7 @@ export function usePrefetchOnHover(
 /**
  * Batch prefetch multiple routes
  * Useful for predictive prefetching (e.g., top 3 related items)
- * 
+ *
  * @example
  * ```tsx
  * useEffect(() => {

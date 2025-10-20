@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * Button Component
@@ -16,9 +16,9 @@
 
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import type * as React from 'react';
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import { cn } from '@/src/lib/utils';
 
@@ -97,7 +97,7 @@ const Button = ({
 
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      if (!disabled && !asChild) {
+      if (!(disabled || asChild)) {
         addRipple(event);
       }
       onClick?.(event);

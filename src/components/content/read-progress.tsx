@@ -2,23 +2,23 @@
 
 /**
  * Read Progress Bar Component
- * 
+ *
  * Universal scroll progress indicator using motion.dev for smooth 60fps animations.
  * Tracks reading progress and displays a horizontal bar at the top of the page.
- * 
+ *
  * Features:
  * - Motion.dev powered (useScroll + useSpring for smooth physics)
  * - GPU-accelerated animations (60fps guaranteed)
  * - Respects prefers-reduced-motion
  * - Configurable position, color, height
  * - Zero performance overhead
- * 
+ *
  * Usage:
  * ```tsx
  * <ReadProgress /> // Default: top, accent color, 2px height
  * <ReadProgress position="bottom" color="primary" height={4} />
  * ```
- * 
+ *
  * @module components/content/read-progress
  */
 

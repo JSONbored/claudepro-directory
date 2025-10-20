@@ -2,17 +2,17 @@
 
 /**
  * ScrollReveal Component - Declarative Scroll Animations
- * 
+ *
  * Drop-in wrapper for scroll-triggered animations.
  * Uses useScrollReveal hook internally.
- * 
+ *
  * Usage:
  * ```tsx
  * <ScrollReveal animation="slide-up">
  *   <YourContent />
  * </ScrollReveal>
  * ```
- * 
+ *
  * @module components/shared/scroll-reveal
  */
 
@@ -59,19 +59,19 @@ export interface ScrollRevealProps {
 /**
  * ScrollReveal component
  * Wraps content with scroll-triggered animation
- * 
+ *
  * @example
  * ```tsx
  * // Fade in
  * <ScrollReveal animation="fade">
  *   <Card />
  * </ScrollReveal>
- * 
+ *
  * // Slide up
  * <ScrollReveal animation="slide-up" distance={100}>
  *   <Hero />
  * </ScrollReveal>
- * 
+ *
  * // Scale up
  * <ScrollReveal animation="scale" threshold={0.5}>
  *   <Image />
@@ -86,7 +86,7 @@ export function ScrollReveal({
   animation,
   distance,
 }: ScrollRevealProps) {
-  const { ref, style } = useScrollReveal({ 
+  const { ref, style } = useScrollReveal({
     ...(threshold !== undefined && { threshold }),
     ...(animation !== undefined && { animation }),
     ...(distance !== undefined && { distance }),
@@ -100,4 +100,3 @@ export function ScrollReveal({
     </Component>
   );
 }
-

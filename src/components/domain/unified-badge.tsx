@@ -207,9 +207,9 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
   const BadgeWrapper = ({ children }: { children: React.ReactNode }) => (
     <motion.div
       className="inline-block"
-      whileHover={{ 
+      whileHover={{
         y: -2,
-        transition: { type: 'spring', stiffness: 400, damping: 17 }
+        transition: { type: 'spring', stiffness: 400, damping: 17 },
       }}
       whileTap={{ scale: 0.95 }}
     >
@@ -221,11 +221,13 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
   if (props.variant === 'base') {
     return (
       <BadgeWrapper>
-        <div className={cn(
-          baseBadgeVariants({ variant: props.style }), 
-          'hover:shadow-md hover:shadow-primary/20',
-          props.className
-        )}>
+        <div
+          className={cn(
+            baseBadgeVariants({ variant: props.style }),
+            'hover:shadow-md hover:shadow-primary/20',
+            props.className
+          )}
+        >
           {props.children}
         </div>
       </BadgeWrapper>

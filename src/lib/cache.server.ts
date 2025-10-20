@@ -1656,7 +1656,8 @@ export class CacheService {
           const raw = (await pipeline.exec()) as Array<unknown>;
           // Normalize to (string | null)[] to satisfy type constraints
           const normalized = raw.map((v) => (typeof v === 'string' ? v : null)) as (
-            string | null
+            | string
+            | null
           )[];
           return normalized;
         },

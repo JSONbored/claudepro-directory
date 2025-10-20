@@ -1,6 +1,6 @@
 /**
  * ReadProgress Storybook Stories
- * 
+ *
  * Visual testing for the read progress bar component.
  * Tests different variants, positions, and configurations.
  */
@@ -15,7 +15,8 @@ const meta: Meta<typeof ReadProgress> = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: 'Scroll progress indicator using motion.dev for smooth 60fps animations. Respects prefers-reduced-motion.',
+        component:
+          'Scroll progress indicator using motion.dev for smooth 60fps animations. Respects prefers-reduced-motion.',
       },
     },
   },
@@ -85,9 +86,7 @@ export const Bottom: Story = {
       <ReadProgressPresets.bottom />
       <div className="container mx-auto px-4 py-12 space-y-4">
         <h1 className="text-4xl font-bold">Bottom Position</h1>
-        <p className="text-muted-foreground">
-          Progress bar appears at the bottom of the viewport.
-        </p>
+        <p className="text-muted-foreground">Progress bar appears at the bottom of the viewport.</p>
         {Array.from({ length: 20 }).map((_, i) => (
           <div key={i} className="p-6 border rounded-lg">
             <h2 className="text-2xl font-semibold mb-2">Section {i + 1}</h2>
@@ -164,9 +163,7 @@ export const Custom: Story = {
       />
       <div className="container mx-auto px-4 py-12 space-y-4">
         <h1 className="text-4xl font-bold">Custom Configuration</h1>
-        <p className="text-muted-foreground">
-          Primary color, 3px height, custom spring physics.
-        </p>
+        <p className="text-muted-foreground">Primary color, 3px height, custom spring physics.</p>
         {Array.from({ length: 20 }).map((_, i) => (
           <div key={i} className="p-6 border rounded-lg">
             <h2 className="text-2xl font-semibold mb-2">Section {i + 1}</h2>

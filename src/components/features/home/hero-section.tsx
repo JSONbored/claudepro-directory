@@ -2,13 +2,13 @@
 
 /**
  * Hero Section - Homepage Hero with Parallax Effects
- * 
+ *
  * Modern hero section with Motion.dev scroll-linked animations:
  * - Parallax background pattern
  * - Fade-out text on scroll
  * - Scale animation for subtitle
  * - GPU-accelerated, 60fps smooth
- * 
+ *
  * @module components/features/home/hero-section
  */
 
@@ -27,7 +27,7 @@ const RollingText = dynamic(
 
 /**
  * HeroSection Component
- * 
+ *
  * Displays homepage hero with parallax scroll effects.
  * Title fades out as user scrolls, creating depth.
  * Background pattern moves slower than content (parallax).

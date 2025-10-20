@@ -58,18 +58,18 @@ export function normalizeLanguage(lang: string, highlighter: StarryNightHighligh
     ts: 'source.ts',
     typescript: 'source.ts',
     tsx: 'source.tsx',
-    
+
     // JavaScript family
     js: 'source.js',
     javascript: 'source.js',
     jsx: 'source.jsx',
-    
+
     // Shell/Bash
     sh: 'source.shell',
     bash: 'source.shell',
     shell: 'source.shell',
     zsh: 'source.shell',
-    
+
     // Other common languages
     json: 'source.json',
     python: 'source.python',
@@ -80,14 +80,14 @@ export function normalizeLanguage(lang: string, highlighter: StarryNightHighligh
     css: 'source.css',
     yaml: 'source.yaml',
     yml: 'source.yaml',
-    
+
     // Fallback
     text: 'text.plain',
     plaintext: 'text.plain',
   };
 
   const scope = languageMap[lang.toLowerCase()] || 'text.plain';
-  
+
   // Check if scope is available, fallback to text.plain if not
   const availableScopes = highlighter.scopes();
   return availableScopes.includes(scope) ? scope : 'text.plain';

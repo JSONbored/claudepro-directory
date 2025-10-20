@@ -2,27 +2,27 @@
 
 /**
  * Scroll Animation Hooks - Motion.dev Scroll-Linked Effects
- * 
+ *
  * Reusable hooks for scroll-based animations using Motion.dev.
  * GPU-accelerated, performant, and configuration-driven.
- * 
+ *
  * Features:
  * - Parallax effects (different scroll speeds)
  * - Fade in/out based on scroll position
  * - Scale transformations
  * - Rotate effects
  * - Custom transform ranges
- * 
+ *
  * Performance:
  * - Uses Motion.dev's useScroll (native scroll events)
  * - GPU-accelerated transforms (scale, rotate, translate)
  * - No layout thrashing
  * - 60fps smooth animations
- * 
+ *
  * @module hooks/use-scroll-animation
  */
 
-import { useScroll, useTransform, type MotionValue } from 'motion/react';
+import { type MotionValue, useScroll, useTransform } from 'motion/react';
 import { useRef } from 'react';
 
 /**
@@ -77,10 +77,10 @@ export interface ScrollRevealConfig {
 /**
  * Parallax scroll effect
  * Element moves at different speed than page scroll
- * 
+ *
  * @param config - Parallax configuration
  * @returns Motion values and ref to attach to element
- * 
+ *
  * @example
  * ```tsx
  * function Hero() {
@@ -99,7 +99,11 @@ export function useParallax(config: ParallaxConfig = {}) {
   });
 
   // Calculate parallax offset based on speed
-  const offset = useTransform(scrollYProgress, [0, 1], range.map((val) => val * speed));
+  const offset = useTransform(
+    scrollYProgress,
+    [0, 1],
+    range.map((val) => val * speed)
+  );
 
   if (direction === 'vertical') {
     return { ref, y: offset };
@@ -110,10 +114,10 @@ export function useParallax(config: ParallaxConfig = {}) {
 /**
  * Scroll reveal effect
  * Element animates in when scrolled into view
- * 
+ *
  * @param config - Reveal configuration
  * @returns Motion values and ref to attach to element
- * 
+ *
  * @example
  * ```tsx
  * function Card() {
@@ -175,7 +179,7 @@ export function useScrollReveal(config: ScrollRevealConfig = {}) {
 /**
  * Fade on scroll (fade out as you scroll down)
  * Useful for hero sections that should disappear
- * 
+ *
  * @example
  * ```tsx
  * function HeroText() {
@@ -200,7 +204,7 @@ export function useFadeOnScroll() {
 /**
  * Scale on scroll
  * Element scales up/down as you scroll
- * 
+ *
  * @param config - Scale range [start, end]
  * @example
  * ```tsx
@@ -226,7 +230,7 @@ export function useScaleOnScroll(range: [number, number] = [1, 1.2]) {
 /**
  * Rotate on scroll
  * Element rotates as you scroll
- * 
+ *
  * @param range - Rotation range in degrees [start, end]
  * @example
  * ```tsx
@@ -251,7 +255,7 @@ export function useRotateOnScroll(range: [number, number] = [0, 10]) {
 
 /**
  * Section progress (shows how far through a section user has scrolled)
- * 
+ *
  * @example
  * ```tsx
  * function Article() {
@@ -279,7 +283,7 @@ export function useSectionProgress() {
 /**
  * Stagger children reveals (each child animates in sequence)
  * Returns array of refs and styles for children
- * 
+ *
  * @param count - Number of children
  * @param stagger - Delay between each child (0-1)
  * @example
@@ -304,11 +308,7 @@ export function useStaggerReveal(count: number, stagger = 0.1) {
 
   const children = Array.from({ length: count }, (_, i) => {
     const delay = stagger * i;
-    const opacity = useTransform(
-      scrollYProgress,
-      [delay, delay + 0.3],
-      [0, 1]
-    );
+    const opacity = useTransform(scrollYProgress, [delay, delay + 0.3], [0, 1]);
     const y = useTransform(scrollYProgress, [delay, delay + 0.3], [30, 0]);
 
     return {

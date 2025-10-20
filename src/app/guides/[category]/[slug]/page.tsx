@@ -8,7 +8,6 @@ import { z } from 'zod';
 import { MDXRenderer } from '@/src/components/content/mdx-renderer';
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { SectionProgress } from '@/src/components/shared/section-progress';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { MDXContentProvider } from '@/src/components/infra/providers/mdx-content-provider';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
@@ -16,6 +15,7 @@ import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent } from '@/src/components/primitives/card';
+import { SectionProgress } from '@/src/components/shared/section-progress';
 import { contentCache, statsRedis } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
@@ -435,53 +435,53 @@ export default async function SEOGuidePage({
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Content */}
                 <div className="lg:col-span-2 space-y-8">
-                <Card>
-                  <CardContent className="pt-6">
-                    <MDXContentProvider category={category} slug={slug}>
-                      <MDXRenderer
-                        source={data.content}
-                        className=""
-                        pathname={`/guides/${category}/${slug}`}
-                        metadata={{
-                          tags: data.keywords || [], // Note: SEO pages use keywords field
-                          keywords: data.keywords || [],
-                        }}
-                      />
-                    </MDXContentProvider>
-                  </CardContent>
-                </Card>
+                  <Card>
+                    <CardContent className="pt-6">
+                      <MDXContentProvider category={category} slug={slug}>
+                        <MDXRenderer
+                          source={data.content}
+                          className=""
+                          pathname={`/guides/${category}/${slug}`}
+                          metadata={{
+                            tags: data.keywords || [], // Note: SEO pages use keywords field
+                            keywords: data.keywords || [],
+                          }}
+                        />
+                      </MDXContentProvider>
+                    </CardContent>
+                  </Card>
 
-                {/* Email CTA - End of guide */}
-                <UnifiedNewsletterCapture
-                  source="content_page"
-                  variant="inline"
-                  context="guide-end"
-                  category="guides"
+                  {/* Email CTA - End of guide */}
+                  <UnifiedNewsletterCapture
+                    source="content_page"
+                    variant="inline"
+                    context="guide-end"
+                    category="guides"
+                  />
+                </div>
+
+                {/* Sidebar */}
+                <UnifiedSidebar
+                  mode="content"
+                  contentData={{
+                    title: data.title,
+                    description: data.description,
+                    keywords: data.keywords,
+                    dateUpdated: data.dateUpdated,
+                    category: category || '',
+                    content: data.content,
+                  }}
+                  relatedGuides={relatedGuides}
                 />
               </div>
-
-              {/* Sidebar */}
-              <UnifiedSidebar
-                mode="content"
-                contentData={{
-                  title: data.title,
-                  description: data.description,
-                  keywords: data.keywords,
-                  dateUpdated: data.dateUpdated,
-                  category: category || '',
-                  content: data.content,
-                }}
-                relatedGuides={relatedGuides}
-              />
             </div>
-          </div>
-        </SectionProgress>
+          </SectionProgress>
 
-        {/* Track guide views for trending analytics */}
-        <UnifiedTracker variant="view" category="guides" slug={guideSlug} />
-      </div>
-    </>
-  );
+          {/* Track guide views for trending analytics */}
+          <UnifiedTracker variant="view" category="guides" slug={guideSlug} />
+        </div>
+      </>
+    );
   } catch (error: unknown) {
     logger.error(
       'Error rendering guide page',

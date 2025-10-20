@@ -378,10 +378,14 @@ export function validateContext(
     }
 
     // Production: Log as warning via structured logger and return null
-    logger.warn(`[${source}] Invalid MetadataContext (using fallback)`, { source }, {
-      errorCount: errors.length,
-      errors: errors.join(' | ').slice(0, 500),
-    });
+    logger.warn(
+      `[${source}] Invalid MetadataContext (using fallback)`,
+      { source },
+      {
+        errorCount: errors.length,
+        errors: errors.join(' | ').slice(0, 500),
+      }
+    );
     return null;
   }
 
@@ -436,12 +440,16 @@ export function validateTemplateOutput(
     const keywords = Array.isArray((outputObj as Record<string, unknown>).keywords)
       ? ((outputObj as { keywords: unknown[] }).keywords as unknown[])
       : [];
-    logger.warn(`Template output invalid (using fallback)`, { pattern }, {
-      titleSnippet: title.substring(0, 60),
-      errorCount: errors.length,
-      errors: errors.join(' | ').slice(0, 500),
-      keywordCount: keywords.length,
-    });
+    logger.warn(
+      'Template output invalid (using fallback)',
+      { pattern },
+      {
+        titleSnippet: title.substring(0, 60),
+        errorCount: errors.length,
+        errors: errors.join(' | ').slice(0, 500),
+        keywordCount: keywords.length,
+      }
+    );
     return null;
   }
 
@@ -481,10 +489,14 @@ export function validateClassification(
     }
 
     // Production: Log as warning via structured logger and return null
-    logger.warn(`Invalid route classification (using fallback)`, { route }, {
-      errorCount: errors.length,
-      errors: errors.join(' | ').slice(0, 500),
-    });
+    logger.warn(
+      'Invalid route classification (using fallback)',
+      { route },
+      {
+        errorCount: errors.length,
+        errors: errors.join(' | ').slice(0, 500),
+      }
+    );
     return null;
   }
 

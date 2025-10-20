@@ -449,10 +449,7 @@ function CopyMarkdownButton({
   };
 
   return (
-    <motion.div
-      animate={isSuccess ? { scale: [1, 1.05, 1] } : {}}
-      transition={{ duration: 0.3 }}
-    >
+    <motion.div animate={isSuccess ? { scale: [1, 1.05, 1] } : {}} transition={{ duration: 0.3 }}>
       <Button
         variant={buttonVariant}
         size={size}
@@ -538,10 +535,7 @@ function DownloadMarkdownButton({
   };
 
   return (
-    <motion.div
-      animate={isSuccess ? { scale: [1, 1.05, 1] } : {}}
-      transition={{ duration: 0.3 }}
-    >
+    <motion.div animate={isSuccess ? { scale: [1, 1.05, 1] } : {}} transition={{ duration: 0.3 }}>
       <Button
         variant={buttonVariant}
         size={size}
@@ -611,10 +605,7 @@ function CopyLLMsButton({
   };
 
   return (
-    <motion.div
-      animate={isSuccess ? { scale: [1, 1.05, 1] } : {}}
-      transition={{ duration: 0.3 }}
-    >
+    <motion.div animate={isSuccess ? { scale: [1, 1.05, 1] } : {}} transition={{ duration: 0.3 }}>
       <Button
         variant={buttonVariant}
         size={size}

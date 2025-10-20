@@ -2,16 +2,16 @@
 
 /**
  * Section Progress Indicator
- * 
+ *
  * Visual indicator showing scroll progress through a section.
  * Useful for long-form content like guides and articles.
- * 
+ *
  * Features:
  * - Smooth progress bar (0-100%)
  * - Configurable position (top/bottom/side)
  * - Motion.dev scaleX animation
  * - GPU-accelerated
- * 
+ *
  * @module components/shared/section-progress
  */
 
@@ -58,10 +58,10 @@ export interface SectionProgressProps {
 
 /**
  * SectionProgress Component
- * 
+ *
  * Wraps content with a scroll progress indicator.
  * Bar fills as user scrolls through the section.
- * 
+ *
  * @example
  * ```tsx
  * <SectionProgress position="top" height={3} color="bg-primary">
