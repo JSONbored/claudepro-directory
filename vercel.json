@@ -1,6 +1,6 @@
 {
   "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude).github/' ':(exclude)scripts/github-actions/' ':(exclude)templates/' ':(exclude)*.md' ':(exclude)LICENSE' ':(exclude).gitignore'",
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build:smart",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "regions": ["iad1"],

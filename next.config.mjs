@@ -330,11 +330,15 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, stale-while-revalidate=86400, immutable', // 1 year cache for pre-generated APIs
+            value: 'public, max-age=31536000, immutable', // 1 year immutable cache for pre-generated static APIs
           },
           {
             key: 'Vary',
             value: 'Accept-Encoding, Accept',
+          },
+          {
+            key: 'Content-Type',
+            value: 'application/json',
           },
         ],
       },
