@@ -32,7 +32,6 @@ const RollingText = dynamic(
   }
 );
 
-import { statsRedis } from '@/src/lib/cache.server';
 import { type CategoryId, getAllCategoryIds } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
