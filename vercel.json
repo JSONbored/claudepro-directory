@@ -7,15 +7,11 @@
   "crons": [
     {
       "path": "/api/cron/daily-maintenance",
-      "schedule": "0 3 * * *"
+      "schedule": "*/15 * * * *"
     },
     {
       "path": "/api/cron/weekly-tasks",
       "schedule": "0 0 * * 1"
-    },
-    {
-      "path": "/api/cron/trending",
-      "schedule": "*/15 * * * *"
     }
   ]
 }
