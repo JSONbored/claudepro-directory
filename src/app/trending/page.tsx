@@ -13,7 +13,6 @@ import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { LazySection } from '@/src/components/infra/lazy-section';
 import { TrendingContent } from '@/src/components/shared/trending-content';
-import { statsRedis } from '@/src/lib/cache.server';
 import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
