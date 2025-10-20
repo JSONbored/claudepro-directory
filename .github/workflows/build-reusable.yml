@@ -45,6 +45,16 @@ jobs:
           name: build-${{ inputs.cache-key-suffix }}-${{ github.sha }}
           path: ./
 
+      - name: Restore full Next.js build from cache (cross-workflow)
+        id: restore-next
+        uses: actions/cache/restore@v4
+        with:
+          path: .next
+          key: next-build-${{ inputs.cache-key-suffix }}-${{ github.sha }}
+          restore-keys: |
+            next-build-${{ inputs.cache-key-suffix }}-
+            next-build-
+
       - name: Check restored build
         id: check-restored
         run: |
@@ -88,6 +98,13 @@ jobs:
           if [ -f ".next/BUILD_ID" ]; then
             echo "Build ID: $(cat .next/BUILD_ID)"
           fi
+
+      - name: Save full Next.js build to cache
+        if: steps.restore-next.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .next
+          key: next-build-${{ inputs.cache-key-suffix }}-${{ github.sha }}
 
       - name: Set artifact name
         id: artifact-info

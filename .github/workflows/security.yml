@@ -66,15 +66,24 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
-    - uses: ./.github/actions/setup-node-deps
+      - uses: ./.github/actions/setup-node-deps
       with:
         skip-build-content: 'true'
 
-    - name: Download build artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: ${{ needs.build-for-codeql.outputs.artifact-name }}
-        path: ./
+      - name: Download CI build artifact (if available)
+        id: dl-ci
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: build-${{ github.event.pull_request.number || 'ci' }}-${{ github.sha }}
+          path: ./
+
+      - name: Download build artifact from build job (fallback)
+        if: steps.dl-ci.outcome == 'failure'
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build-for-codeql.outputs.artifact-name }}
+          path: ./
 
     - name: Verify build restoration
       run: |
