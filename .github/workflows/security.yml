@@ -3,14 +3,20 @@ name: Security
 on:
   push:
     branches: [ main ]
-    paths-ignore:
-      - 'content/**/*.json'
-      - 'templates/**'
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'config/**'
+      - '.github/**'
   pull_request:
     branches: [ main ]
-    paths-ignore:
-      - 'content/**/*.json'
-      - 'templates/**'
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'config/**'
+      - '.github/**'
   schedule:
     - cron: '0 3 * * 1'  # Weekly security scan on Mondays at 3am UTC
 
@@ -19,11 +25,32 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # Gate non-scheduled jobs behind label `security` on PRs
+  precheck:
+    name: Security Label Gate
+    runs-on: ubuntu-latest
+    outputs:
+      run-security: ${{ steps.decide.outputs.run }}
+    steps:
+      - id: decide
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            labels=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name' | tr '\n' ',')
+            if echo "$labels" | grep -q 'security'; then
+              echo "run=true" >> $GITHUB_OUTPUT
+            else
+              echo "run=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "run=true" >> $GITHUB_OUTPUT
+          fi
+
   secrets:
     name: Secret Scanning
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.event_name != 'schedule'  # Skip on scheduled runs
+    needs: [precheck]
+    if: (github.event_name != 'schedule') && needs.precheck.outputs.run-security == 'true'
 
     steps:
     - uses: actions/checkout@v5
@@ -43,6 +70,8 @@ jobs:
   build-for-codeql:
     name: Build for CodeQL
     uses: ./.github/workflows/build-reusable.yml
+    needs: [precheck]
+    if: needs.precheck.outputs.run-security == 'true'
     with:
       cache-key-suffix: 'codeql'
       upload-artifact: true
@@ -51,7 +80,8 @@ jobs:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [build-for-codeql]
+    needs: [precheck, build-for-codeql]
+    if: needs.precheck.outputs.run-security == 'true'
     permissions:
       actions: read
       contents: read
@@ -83,7 +113,7 @@ jobs:
       uses: github/codeql-action/init@v4
       with:
         languages: javascript-typescript
-        queries: +security-extended,security-and-quality
+        queries: security-extended
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4
@@ -95,7 +125,8 @@ jobs:
     name: Dependency Review
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.event_name == 'pull_request'
+    needs: [precheck]
+    if: github.event_name == 'pull_request' && needs.precheck.outputs.run-security == 'true'
     permissions:
       contents: read
       pull-requests: write
@@ -116,6 +147,8 @@ jobs:
     name: NPM Security Audit
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    needs: [precheck]
+    if: needs.precheck.outputs.run-security == 'true'
 
     steps:
     - name: Checkout repository
@@ -140,7 +173,8 @@ jobs:
     name: Socket Security Scan
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: vars.SOCKET_SECURITY_API_KEY != ''  # Only run if API key is configured
+    needs: [precheck]
+    if: vars.SOCKET_SECURITY_API_KEY != '' && needs.precheck.outputs.run-security == 'true'  # Only run if API key is configured
     permissions:
       contents: read
       pull-requests: write

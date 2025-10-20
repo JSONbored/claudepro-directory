@@ -9,9 +9,7 @@ on:
       - 'package-lock.json'
       - 'next.config.mjs'
       - 'tailwind.config.ts'
-    paths-ignore:
-      - 'content/**/*.json'
-      - 'templates/**'
+    types: [labeled, opened, synchronize, reopened]
   workflow_dispatch:
 
 concurrency:
@@ -28,6 +26,7 @@ jobs:
     name: Check Base Branch Cache
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && contains(join(fromJson(toJson(github.event.pull_request.labels)).*.name, ','), 'bundle'))
     outputs:
       cache-hit: ${{ steps.cache.outputs.cache-hit }}
       base-sha: ${{ steps.get-sha.outputs.sha }}
@@ -55,6 +54,7 @@ jobs:
   build-pr:
     name: Build PR Branch
     uses: ./.github/workflows/build-reusable.yml
+    if: needs.check-base-cache.result == 'success'
     with:
       cache-key-suffix: 'bundle-pr'
       upload-artifact: true
@@ -63,7 +63,7 @@ jobs:
   build-base:
     name: Build Base Branch
     needs: [check-base-cache]
-    if: needs.check-base-cache.outputs.cache-hit != 'true'
+    if: needs.check-base-cache.result == 'success' && needs.check-base-cache.outputs.cache-hit != 'true'
     uses: ./.github/workflows/build-reusable.yml
     with:
       cache-key-suffix: 'bundle-base'
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: [check-base-cache, build-base]
-    if: needs.check-base-cache.outputs.cache-hit != 'true' && needs.build-base.result == 'success'
+    if: needs.check-base-cache.result == 'success' && needs.check-base-cache.outputs.cache-hit != 'true' && needs.build-base.result == 'success'
 
     steps:
       - name: Download base build artifact
@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [check-base-cache, build-pr, build-base]
-    if: always() && needs.build-pr.result == 'success' && (needs.build-base.result == 'success' || needs.check-base-cache.outputs.cache-hit == 'true')
+    if: always() && needs.check-base-cache.result == 'success' && needs.build-pr.result == 'success' && (needs.build-base.result == 'success' || needs.check-base-cache.outputs.cache-hit == 'true')
 
     steps:
       - name: Checkout PR branch
