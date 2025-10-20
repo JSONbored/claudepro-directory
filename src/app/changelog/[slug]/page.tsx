@@ -25,6 +25,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ReadProgress } from '@/src/components/content/read-progress';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
 import { BreadcrumbSchema } from '@/src/components/infra/structured-data/breadcrumb-schema';
 import { ChangelogArticleStructuredData } from '@/src/components/infra/structured-data/changelog-structured-data';
@@ -102,6 +103,9 @@ export default async function ChangelogEntryPage({
 
     return (
       <>
+        {/* Read Progress Bar - Shows reading progress at top of page */}
+        <ReadProgress />
+
         {/* View Tracker - Track page views */}
         <UnifiedTracker variant="view" category="changelog" slug={entry.slug} />
 

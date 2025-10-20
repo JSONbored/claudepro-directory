@@ -60,6 +60,7 @@
  */
 
 import { notFound } from 'next/navigation';
+import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedDetailPage } from '@/src/components/content/unified-detail-page';
 import { CollectionDetailView } from '@/src/components/content/unified-detail-page/collection-detail-view';
 import { BreadcrumbSchema } from '@/src/components/infra/structured-data/breadcrumb-schema';
@@ -273,6 +274,9 @@ export default async function DetailPage({
   if (category === 'collections') {
     return (
       <>
+        {/* Read Progress Bar - Shows reading progress at top of page */}
+        <ReadProgress />
+
         <UnifiedTracker variant="view" category={category} slug={slug} />
         <UnifiedTracker variant="page-view" category={category} slug={slug} />
         <UnifiedStructuredData
@@ -298,6 +302,9 @@ export default async function DetailPage({
   // Default rendering: All other categories use UnifiedDetailPage
   return (
     <>
+      {/* Read Progress Bar - Shows reading progress at top of page */}
+      <ReadProgress />
+
       <UnifiedTracker variant="view" category={category} slug={slug} />
       <UnifiedTracker variant="page-view" category={category} slug={slug} />
       <UnifiedStructuredData

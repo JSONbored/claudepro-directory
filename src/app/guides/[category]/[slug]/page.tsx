@@ -6,6 +6,7 @@ import Script from 'next/script';
 import path from 'path';
 import { z } from 'zod';
 import { MDXRenderer } from '@/src/components/content/mdx-renderer';
+import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { MDXContentProvider } from '@/src/components/infra/providers/mdx-content-provider';
@@ -350,6 +351,9 @@ export default async function SEOGuidePage({
     const articleId = `article-${pageId}`;
     return (
       <>
+        {/* Read Progress Bar - Shows reading progress at top of page */}
+        <ReadProgress />
+
         <Script id={breadcrumbId} type="application/ld+json" strategy="afterInteractive">
           {JSON.stringify(breadcrumbList)}
         </Script>
