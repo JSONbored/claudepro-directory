@@ -36,6 +36,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedButton } from '@/src/components/domain/unified-button';
+import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
 import { NavigationCommandMenu } from '@/src/components/layout/navigation-command-menu';
 import { ThemeToggle } from '@/src/components/layout/theme-toggle';
@@ -80,7 +81,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   };
 
   return (
-    <Link {...linkProps}>
+    <PrefetchLink {...linkProps}>
       {children}
       <span
         className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all duration-300 ${
@@ -88,7 +89,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
         }`}
         aria-hidden="true"
       />
-    </Link>
+    </PrefetchLink>
   );
 };
 
