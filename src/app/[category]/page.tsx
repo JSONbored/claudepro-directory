@@ -49,6 +49,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
  * Static Generation - Category listing pages
  * Fully static at build time - no ISR needed since content changes trigger rebuilds
  */
+export const dynamic = 'force-static';
 
 /**
  * Generate static params for all valid categories

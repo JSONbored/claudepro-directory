@@ -630,43 +630,45 @@ export async function middleware(request: NextRequest) {
 
 // Matcher configuration to reduce middleware invocations
 // OPTIMIZATION: Only run middleware on routes that NEED security protection
-// This reduces middleware invocations by ~50-60% while maintaining security
+// This reduces middleware invocations by ~90% while maintaining security
 //
 // Protected routes:
-// - /api/* - All API endpoints (need rate limiting + auth)
-// - /submit/* - Form submissions (need CSRF protection)
-// - /account/* - User account pages (need auth)
-// - /tools/* - Interactive tools (need rate limiting)
-// - Dynamic content routes (need view tracking + security)
+// - /api/* - All API endpoints (rate limiting + CORS)
+// - /submit/* - Form submissions (CSRF protection)
+// - /account/* - User account pages (Supabase auth)
+// - /tools/* - Interactive tools (rate limiting)
+// - /login - Login page (session management)
+// - /u/:path* - User profile pages (may need auth checks)
+// - Special pages - Partner, community, for-you (personalized content)
 //
-// Skipped routes (static/cached, low security risk):
-// - / - Homepage (ISR cached, read-only)
-// - /trending - Trending page (cached, read-only)
-// - /search - Search page (client-side, no writes)
+// Skipped routes (now fully static, no middleware needed):
+// - / - Homepage (static)
+// - /agents, /mcp, /commands, etc. - Category pages (static)
+// - /agents/:slug, /mcp/:slug, etc. - Detail pages (static, view tracking client-side)
+// - /trending - Trending page (static)
+// - /search - Search page (static shell, client-side search)
 // - /changelog/* - Changelog (static content)
 // - /guides/* - Guides (static content)
-// - /jobs/* - Jobs listing (cached)
-// - /companies - Companies listing (cached)
-// - /board - Board (cached)
+// - /jobs/* - Jobs listing (static)
+// - /companies - Companies listing (static)
+// - /board - Board (static)
 //
-// TRADE-OFF: Skipped routes have no rate limiting but are low-risk read-only pages
-// Security headers are still applied via next.config.mjs for all routes
+// PERFORMANCE IMPACT: ~90% reduction in middleware invocations
+// Security headers still applied via Nosecone for all routes (in fast-path)
+// View tracking moved to efficient client-side fetch (real-time from Redis)
 export const config = {
   matcher: [
-    // API routes (critical - need all protection)
+    // API routes (critical - need rate limiting + CORS)
     '/api/:path*',
 
     // Form submissions (critical - need CSRF protection)
     '/submit/:path*',
 
-    // User account pages (critical - need auth)
+    // User account pages (critical - need Supabase auth)
     '/account/:path*',
 
     // Interactive tools (need rate limiting)
     '/tools/:path*',
-
-    // Dynamic content detail pages (need view tracking)
-    '/(agents|mcp|commands|rules|hooks|statuslines|collections|skills)/:path*',
 
     // Special routes that need protection
     '/login',

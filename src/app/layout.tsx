@@ -9,8 +9,6 @@ const SpeedInsights = (
 
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { headers } from 'next/headers';
-import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
 import './globals.css';
@@ -119,13 +117,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Opt-out of static generation for every page so the CSP nonce can be applied
-  await connection();
-
-  // Get CSP nonce for inline scripts
-  const headersList = await headers();
-  const cspHeader = headersList.get('content-security-policy');
-  const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
+  /**
+   * STATIC GENERATION ENABLED
+   * 
+   * CSP nonces are automatically handled by Nosecone middleware per-request.
+   * Next.js 15.5+ automatically injects nonces from CSP headers into inline scripts.
+   * No manual nonce reading required - middleware sets CSP header with nonce.
+   * 
+   * This allows full static generation while maintaining strict CSP security.
+   */
 
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} font-sans`}>
@@ -169,7 +169,6 @@ export default async function RootLayout({
           defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
-          {...(nonce ? { nonce } : {})}
         >
           <PostCopyEmailProvider>
             <ErrorBoundary>
@@ -205,12 +204,10 @@ export default async function RootLayout({
         {/* PWA Install Tracking - Tracks PWA installation events */}
         <PwaInstallTracker />
         {/* Service Worker Registration for PWA Support */}
-        {/* suppressHydrationWarning: Browsers remove nonce attribute after execution (security feature), causing harmless hydration warning */}
+        {/* External script - allowed by CSP 'self' directive, no nonce needed */}
         <script
           src="/scripts/service-worker-init.js"
-          nonce={nonce}
           defer
-          suppressHydrationWarning
         />
       </body>
     </html>

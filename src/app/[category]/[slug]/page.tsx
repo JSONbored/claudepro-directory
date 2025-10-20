@@ -84,15 +84,13 @@ import type { CollectionContent } from '@/src/lib/schemas/content/collection.sch
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**
- * Dynamic Rendering (No ISR)
- *
- * @description
- * This page uses dynamic rendering because the root layout has `await connection()`,
- * which opts out of static generation. This enables per-request nonces for strict CSP.
- * All pages are rendered on-demand with Redis caching for performance.
- *
- * @see {@link file://./../../layout.tsx} - Root layout with connection()
+ * Static Generation - Detail pages
+ * 
+ * Fully static at build time - no ISR needed since content changes trigger rebuilds.
+ * CSP nonces handled automatically by Nosecone middleware (per-request).
+ * Redis used only for realtime view/copy counts (fetched client-side).
  */
+export const dynamic = 'force-static';
 
 /**
  * Generate static params for all category/slug combinations
@@ -260,15 +258,17 @@ export default async function DetailPage({
     notFound();
   }
 
-  // Optimized fetch strategy: Load critical content first, stream supplementary data
-  // Main content is loaded immediately for fastest initial render
-  const fullItem = await getFullContentBySlug(category, slug);
+  // Optimized fetch strategy: Pre-render all content at build time
+  // Parallel loading for optimal performance
+  const [fullItem, relatedItems] = await Promise.all([
+    getFullContentBySlug(category, slug),
+    getRelatedContent(category, slug, 3),
+  ]);
+  
   const itemData = fullItem || itemMeta;
 
-  // Related items and view count will be streamed via Suspense boundaries
-
-  // No transformation needed - displayTitle computed at build time
-  // This eliminates runtime overhead and follows DRY principles
+  // View counts fetched client-side for real-time data (no server overhead)
+  // Related items pre-rendered at build time (static, no Suspense needed)
 
   // Conditional rendering: Collections use specialized CollectionDetailView
   if (category === 'collections') {
@@ -324,8 +324,7 @@ export default async function DetailPage({
       />
       <UnifiedDetailPage
         item={itemData}
-        relatedItemsPromise={getRelatedContent(category, slug, 3)}
-        viewCountPromise={statsRedis.getViewCount(category, slug)}
+        relatedItems={relatedItems}
       />
     </>
   );

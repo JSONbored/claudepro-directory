@@ -69,6 +69,11 @@ export type UnifiedTrackerProps =
 
 /**
  * Shared tracking effect hook - eliminates duplication
+ * 
+ * PERFORMANCE OPTIMIZATION:
+ * Uses requestIdleCallback when available to defer tracking until browser idle.
+ * This prevents tracking from competing with critical rendering/interaction work.
+ * Falls back to immediate execution for browsers without requestIdleCallback.
  *
  * @param trackingFn - Function to call for tracking (can return any Promise type)
  * @param delay - Delay in ms before tracking (default: 0)
@@ -80,35 +85,44 @@ function useTrackingEffect(
   deps: React.DependencyList
 ) {
   useEffect(() => {
-    if (delay === 0) {
-      // Immediate execution (page-view default)
+    // Helper to execute tracking safely
+    const executeTracking = () => {
       try {
         const result = trackingFn();
-        // Handle promise if returned
         if (result instanceof Promise) {
           result.catch(() => {
-            // Silent failure - errors handled server-side or in tracker
-            // No console logging to prevent browser exposure
+            // Silent failure - errors handled server-side
           });
         }
       } catch {
         // Silent failure for sync errors
       }
-      return;
+    };
+
+    // Helper to schedule when browser is idle (better performance)
+    const scheduleWhenIdle = () => {
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        return window.requestIdleCallback(executeTracking, { timeout: 2000 });
+      } else {
+        // Fallback: execute immediately
+        executeTracking();
+        return null;
+      }
+    };
+
+    if (delay === 0) {
+      // Immediate execution when idle (page-view default)
+      const idleId = scheduleWhenIdle();
+      return () => {
+        if (idleId !== null && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+          window.cancelIdleCallback(idleId);
+        }
+      };
     }
 
-    // Delayed execution (view tracker default)
+    // Delayed execution, then when idle (view tracker default)
     const timer = setTimeout(() => {
-      try {
-        const result = trackingFn();
-        if (result instanceof Promise) {
-          result.catch(() => {
-            // Silent failure
-          });
-        }
-      } catch {
-        // Silent failure
-      }
+      scheduleWhenIdle();
     }, delay);
 
     return () => clearTimeout(timer);

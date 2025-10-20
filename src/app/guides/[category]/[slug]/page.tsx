@@ -26,10 +26,11 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
- * ISR Configuration - Guide detail pages
- * Documentation content generated at build time - static generation
+ * Static Generation - Guide detail pages
+ * Documentation content generated at build time - no ISR needed
+ * Content changes trigger rebuilds via Vercel deployments
  */
-export const dynamicParams = true;
+export const dynamic = 'force-static';
 
 // Validation schema for guide parameters
 const guideParamsSchema = z.object({
