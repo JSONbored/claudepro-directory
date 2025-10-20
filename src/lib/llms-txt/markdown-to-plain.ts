@@ -172,7 +172,7 @@ async function stripHtmlTags(text: string): Promise<string> {
     KEEP_CONTENT: true,
   });
 
-  return decode(sanitized);
+  return he.decode(sanitized);
 }
 
 /**
