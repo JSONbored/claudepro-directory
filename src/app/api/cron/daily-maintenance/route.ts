@@ -1,43 +1,30 @@
 /**
- * Consolidated Maintenance Cron Job
+ * Daily Maintenance Cron Job
  *
- * OPTIMIZATION: Consolidated to stay within Vercel free tier (2 cron jobs max)
- * 
- * Schedule: Every 15 minutes (*/15 * * * *)
+ * Consolidates multiple daily tasks into a single cron job for Vercel free tier compliance.
+ * Runs daily at 3 AM UTC to perform essential maintenance operations.
+ *
+ * Schedule: Daily at 3 AM UTC (0 3 * * *)
  * Configured in vercel.json
  *
- * Tasks performed:
- * 1. Trending Calculation - EVERY 15 minutes (Redis optimization)
- * 2. Cache Warming - Daily at 3 AM UTC only
- * 3. Job Expiration - Daily at 3 AM UTC only
- * 4. Email Sequences - Daily at 3 AM UTC only
+ * Tasks performed (in sequence):
+ * 1. Cache Warming - Pre-populate Redis cache for optimal performance
+ * 2. Job Expiration - Mark expired job listings as inactive
+ * 3. Email Sequences - Process onboarding and drip campaign emails
  *
  * Performance:
- * - Trending runs frequently (low overhead, cached results)
- * - Heavy tasks only run once daily at 3 AM
- * - Individual task error handling
- * - Comprehensive logging
+ * - Sequential execution to avoid resource contention
+ * - Individual task error handling (one failure doesn't break others)
+ * - Comprehensive logging for monitoring
  *
  * @module app/api/cron/daily-maintenance
  */
 
-import {
-  agents,
-  collections,
-  commands,
-  hooks,
-  mcp,
-  rules,
-  skills,
-  statuslines,
-} from '@/generated/content';
-import { cacheWarmer, contentCache } from '@/src/lib/cache.server';
+import { cacheWarmer } from '@/src/lib/cache.server';
 import { createApiRoute } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { emailSequenceService } from '@/src/lib/services/email-sequence.server';
 import { createClient } from '@/src/lib/supabase/admin-client';
-import { getBatchTrendingData } from '@/src/lib/trending/calculator.server';
-import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -75,150 +62,11 @@ const route = createApiRoute({
     GET: async ({ okRaw }) => {
       const overallStartTime = performance.now();
       const results: TaskResult[] = [];
-      
-      const now = new Date();
-      const currentHour = now.getUTCHours();
-      const isDailyMaintenanceTime = currentHour === 3; // 3 AM UTC
 
-      logger.info('Consolidated maintenance cron started', {
-        hour_utc: currentHour,
-        is_daily_time: isDailyMaintenanceTime,
-      });
+      logger.info('Daily maintenance cron started');
 
       // ============================================
-      // TASK 0: TRENDING CALCULATION (EVERY 15 MIN)
-      // ============================================
-      try {
-        const taskStart = performance.now();
-        logger.info('Task 0/4: Starting trending calculation (runs every 15 min)');
-
-        // Load all content
-        const {
-          rules: rulesData,
-          mcp: mcpData,
-          agents: agentsData,
-          commands: commandsData,
-          hooks: hooksData,
-          statuslines: statuslinesData,
-          collections: collectionsData,
-          skills: skillsData,
-        } = await batchLoadContent({
-          rules,
-          mcp,
-          agents,
-          commands,
-          hooks,
-          statuslines,
-          collections,
-          skills,
-        });
-
-        // Calculate trending data
-        const trendingData = await getBatchTrendingData(
-          {
-            agents: agentsData.map((item: { [key: string]: unknown }) => ({
-              ...item,
-              category: 'agents' as const,
-            })),
-            mcp: mcpData.map((item: { [key: string]: unknown }) => ({
-              ...item,
-              category: 'mcp' as const,
-            })),
-            rules: rulesData.map((item: { [key: string]: unknown }) => ({
-              ...item,
-              category: 'rules' as const,
-            })),
-            commands: commandsData.map((item: { [key: string]: unknown }) => ({
-              ...item,
-              category: 'commands' as const,
-            })),
-            hooks: hooksData.map((item: { [key: string]: unknown }) => ({
-              ...item,
-              category: 'hooks' as const,
-            })),
-            statuslines: statuslinesData.map((item: { [key: string]: unknown }) => ({
-              ...item,
-              category: 'statuslines' as const,
-            })),
-            collections: collectionsData.map((item: { [key: string]: unknown }) => ({
-              ...item,
-              category: 'collections' as const,
-            })),
-            skills: skillsData.map((item: { [key: string]: unknown }) => ({
-              ...item,
-              category: 'skills' as const,
-            })),
-          },
-          { includeSponsored: true }
-        );
-
-        // Store in cache for 15 minutes
-        await contentCache.set(
-          'trending:all',
-          {
-            trending: trendingData.trending,
-            popular: trendingData.popular,
-            recent: trendingData.recent,
-            metadata: trendingData.metadata,
-            calculatedAt: now.toISOString(),
-          },
-          900 // 15 minutes TTL
-        );
-
-        results.push({
-          task: 'trending_calculation',
-          success: true,
-          duration_ms: Math.round(performance.now() - taskStart),
-          data: {
-            trending_count: trendingData.trending.length,
-            popular_count: trendingData.popular.length,
-            recent_count: trendingData.recent.length,
-          },
-        });
-
-        logger.info('Task 0/4: Trending calculation complete', {
-          trending_count: trendingData.trending.length,
-          popular_count: trendingData.popular.length,
-          recent_count: trendingData.recent.length,
-        });
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(
-          'Task 0/4: Trending calculation failed',
-          error instanceof Error ? error : new Error(String(error))
-        );
-
-        results.push({
-          task: 'trending_calculation',
-          success: false,
-          duration_ms: Math.round(performance.now() - overallStartTime),
-          error: errorMessage,
-        });
-      }
-
-      // ============================================
-      // DAILY TASKS (ONLY AT 3 AM UTC)
-      // ============================================
-      if (!isDailyMaintenanceTime) {
-        const totalDuration = Math.round(performance.now() - overallStartTime);
-        logger.info('Skipping daily tasks (not 3 AM UTC)', {
-          total_duration_ms: totalDuration,
-        });
-
-        return okRaw(
-          {
-            success: results.every((r) => r.success),
-            total_duration_ms: totalDuration,
-            skipped_daily_tasks: true,
-            results,
-            timestamp: now.toISOString(),
-          },
-          { sMaxAge: 0, staleWhileRevalidate: 0 }
-        );
-      }
-
-      // ============================================
-      // TASK 1: CACHE WARMING (DAILY AT 3 AM)
+      // TASK 1: CACHE WARMING
       // ============================================
       try {
         const taskStart = performance.now();
@@ -385,12 +233,11 @@ const route = createApiRoute({
       const successfulTasks = results.filter((r) => r.success).length;
       const failedTasks = results.filter((r) => !r.success).length;
 
-      logger.info('Consolidated maintenance cron completed', {
+      logger.info('Daily maintenance cron completed', {
         total_duration_ms: totalDuration,
         total_duration_sec: (totalDuration / 1000).toFixed(2),
         successful_tasks: successfulTasks,
         failed_tasks: failedTasks,
-        ran_daily_tasks: isDailyMaintenanceTime,
         task_summary: JSON.stringify(
           results.map((r) => ({
             task: r.task,
@@ -431,9 +278,8 @@ const route = createApiRoute({
           total_duration_ms: totalDuration,
           successful_tasks: successfulTasks,
           failed_tasks: failedTasks,
-          ran_daily_tasks: isDailyMaintenanceTime,
           results,
-          timestamp: now.toISOString(),
+          timestamp: new Date().toISOString(),
         },
         { sMaxAge: 0, staleWhileRevalidate: 0 }
       );
