@@ -107,8 +107,8 @@ export function usePrefetchOnHover(
 
     // Set timer for intent confirmation
     timeoutRef.current = setTimeout(() => {
-      // Only include kind option if priority is set (Next.js 15 type requirement)
-      router.prefetch(href, priority ? { kind: 'auto' } : undefined);
+      // Next.js 15 prefetch API - call without options for default behavior
+      router.prefetch(href);
       prefetchedRef.current = true;
       timeoutRef.current = null;
     }, delay);
@@ -126,10 +126,10 @@ export function usePrefetchOnHover(
     // Mobile: touch = clear intent, prefetch immediately
     if (disabled || prefetchedRef.current) return;
 
-    // Only include kind option if priority is set (Next.js 15 type requirement)
-    router.prefetch(href, priority ? { kind: 'auto' } : undefined);
+    // Next.js 15 prefetch API - call without options for default behavior
+    router.prefetch(href);
     prefetchedRef.current = true;
-  }, [href, disabled, priority, router]);
+  }, [href, disabled, router]);
 
   return {
     handleMouseEnter,

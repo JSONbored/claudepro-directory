@@ -37,7 +37,7 @@ export function HeroSection() {
   const { ref: titleRef, opacity: titleOpacity } = useFadeOnScroll();
 
   // Parallax background (moves slower than scroll)
-  const { ref: bgRef, y: bgY } = useParallax({ speed: 0.5 });
+  const { ref: bgRef, y: bgY } = useParallax({ speed: 0.5, direction: 'vertical' });
 
   // Scale subtitle slightly as it fades
   const { ref: subtitleRef, scale: subtitleScale } = useScaleOnScroll([1, 0.95]);
@@ -47,7 +47,7 @@ export function HeroSection() {
       {/* Parallax Background Pattern */}
       <motion.div
         ref={bgRef}
-        style={{ y: bgY }}
+        style={bgY ? { y: bgY } : {}}
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
         aria-hidden="true"
       >
@@ -88,7 +88,7 @@ export function HeroSection() {
 
         {/* Accent decoration with parallax */}
         <motion.div
-          style={{ y: bgY, opacity: titleOpacity }}
+          style={bgY ? { y: bgY, opacity: titleOpacity } : { opacity: titleOpacity }}
           className="mx-auto mt-8 h-1 w-24 rounded-full bg-gradient-to-r from-accent/50 to-accent"
         />
       </div>

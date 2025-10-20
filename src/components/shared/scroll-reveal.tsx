@@ -18,9 +18,9 @@
 
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
-import { useScrollReveal, type ScrollRevealConfig } from '@/src/hooks/use-scroll-animation';
+import { useScrollReveal } from '@/src/hooks/use-scroll-animation';
 
-export interface ScrollRevealProps extends ScrollRevealConfig {
+export interface ScrollRevealProps {
   /**
    * Content to animate
    */
@@ -36,6 +36,24 @@ export interface ScrollRevealProps extends ScrollRevealConfig {
    * @default 'div'
    */
   as?: keyof Pick<typeof motion, 'div' | 'section' | 'article' | 'aside' | 'header' | 'footer'>;
+
+  /**
+   * Start reveal when element is this far in viewport (0-1)
+   * @default 0.8
+   */
+  threshold?: number;
+
+  /**
+   * Animation type
+   * @default 'fade'
+   */
+  animation?: 'fade' | 'slide-up' | 'slide-down' | 'scale' | 'rotate';
+
+  /**
+   * Distance for slide animations (pixels)
+   * @default 50
+   */
+  distance?: number;
 }
 
 /**
@@ -64,9 +82,15 @@ export function ScrollReveal({
   children,
   className,
   as = 'div',
-  ...config
+  threshold,
+  animation,
+  distance,
 }: ScrollRevealProps) {
-  const { ref, style } = useScrollReveal(config);
+  const { ref, style } = useScrollReveal({ 
+    ...(threshold !== undefined && { threshold }),
+    ...(animation !== undefined && { animation }),
+    ...(distance !== undefined && { distance }),
+  });
 
   const Component = motion[as] as typeof motion.div;
 
@@ -77,52 +101,3 @@ export function ScrollReveal({
   );
 }
 
-/**
- * Preset variants for common use cases
- */
-export const ScrollRevealPresets = {
-  /**
-   * Fade in gently
-   */
-  FadeIn: ({ children, className }: { children: ReactNode; className?: string }) => (
-    <ScrollReveal animation="fade" threshold={0.8} className={className}>
-      {children}
-    </ScrollReveal>
-  ),
-
-  /**
-   * Slide up from bottom
-   */
-  SlideUp: ({ children, className }: { children: ReactNode; className?: string }) => (
-    <ScrollReveal animation="slide-up" distance={50} threshold={0.8} className={className}>
-      {children}
-    </ScrollReveal>
-  ),
-
-  /**
-   * Scale up from small
-   */
-  ScaleUp: ({ children, className }: { children: ReactNode; className?: string }) => (
-    <ScrollReveal animation="scale" threshold={0.8} className={className}>
-      {children}
-    </ScrollReveal>
-  ),
-
-  /**
-   * Dramatic entrance (large slide)
-   */
-  Dramatic: ({ children, className }: { children: ReactNode; className?: string }) => (
-    <ScrollReveal animation="slide-up" distance={100} threshold={0.9} className={className}>
-      {children}
-    </ScrollReveal>
-  ),
-
-  /**
-   * Subtle (small movement)
-   */
-  Subtle: ({ children, className }: { children: ReactNode; className?: string }) => (
-    <ScrollReveal animation="slide-up" distance={20} threshold={0.7} className={className}>
-      {children}
-    </ScrollReveal>
-  ),
-} as const;

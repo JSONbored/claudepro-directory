@@ -8,6 +8,7 @@
  * Features:
  * - Hover scale effect (desktop)
  * - Tap feedback (mobile)
+ * - Ripple effect on click (Material Design)
  * - Spring physics for natural feel
  * - Respects disabled state
  * - Works with all variants (default, destructive, outline, secondary, ghost, link)
@@ -15,10 +16,18 @@
 
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import type * as React from 'react';
+import { useState, useCallback } from 'react';
 
 import { cn } from '@/src/lib/utils';
+
+interface RippleType {
+  x: number;
+  y: number;
+  size: number;
+  id: number;
+}
 
 const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
@@ -59,8 +68,43 @@ const Button = ({
   asChild = false,
   disabled = false,
   ref,
+  onClick,
   ...props
 }: ButtonProps & { ref?: React.RefObject<HTMLButtonElement | null> }) => {
+  const [ripples, setRipples] = useState<RippleType[]>([]);
+
+  const addRipple = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    const button = event.currentTarget;
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+
+    const newRipple: RippleType = {
+      x,
+      y,
+      size,
+      id: Date.now(),
+    };
+
+    setRipples((prev) => [...prev, newRipple]);
+
+    // Remove ripple after animation
+    setTimeout(() => {
+      setRipples((prev) => prev.filter((r) => r.id !== newRipple.id));
+    }, 600);
+  }, []);
+
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (!disabled && !asChild) {
+        addRipple(event);
+      }
+      onClick?.(event);
+    },
+    [addRipple, onClick, disabled, asChild]
+  );
+
   const Comp = asChild ? Slot : 'button';
 
   // Skip animations if asChild (for Link wrappers, etc.)
@@ -70,14 +114,35 @@ const Button = ({
     );
   }
 
-  // Button element
+  // Button element with ripple
   const buttonElement = (
     <Comp
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, className }), 'relative overflow-hidden')}
       ref={ref}
       disabled={disabled}
+      onClick={handleClick}
       {...props}
-    />
+    >
+      {props.children}
+      <AnimatePresence>
+        {ripples.map((ripple) => (
+          <motion.span
+            key={ripple.id}
+            className="absolute rounded-full bg-white/30 pointer-events-none"
+            style={{
+              left: ripple.x,
+              top: ripple.y,
+              width: ripple.size,
+              height: ripple.size,
+            }}
+            initial={{ scale: 0, opacity: 1 }}
+            animate={{ scale: 2, opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+          />
+        ))}
+      </AnimatePresence>
+    </Comp>
   );
 
   // Wrap with motion animations if button is enabled
@@ -87,8 +152,8 @@ const Button = ({
 
   return (
     <motion.div
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}
       style={{ display: 'inline-block' }}
     >

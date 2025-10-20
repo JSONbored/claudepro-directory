@@ -257,14 +257,3 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     </div>
   );
 }
-       source="homepage"
-              context="homepage"
-              headline="Join 1,000+ Claude Power Users"
-              description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
-            />
-          </LazySection>
-        </Suspense>
-      </section>
-    </div>
-  );
-}

@@ -70,14 +70,15 @@ const SKELETON_CONFIGS: Record<string, SkeletonConfig> = {
  * Category list page loading
  * Matches structure of /[category] pages
  */
-export function CategoryLoading({ 
+export function CategoryLoading({
   variant = 'grid3',
   showSearch = true,
-}: { 
+}: {
   variant?: keyof typeof SKELETON_CONFIGS;
   showSearch?: boolean;
 } = {}) {
-  const config = SKELETON_CONFIGS[variant];
+  const selectedVariant = variant || 'grid3';
+  const config = SKELETON_CONFIGS[selectedVariant] as SkeletonConfig;
 
   return (
     <div className="container mx-auto px-4 py-8">
