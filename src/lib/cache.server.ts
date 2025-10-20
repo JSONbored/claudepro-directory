@@ -1665,7 +1665,8 @@ export class CacheService {
               redis.set(fullKey, serialized, { ex: ttl })
             )
           );
-          return results;
+          // Type assertion: redis.set() returns "OK" | null, but we treat as success/failure
+          return results as (string | null)[];
         },
         async () => {
           // Fallback operation
