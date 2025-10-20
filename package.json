@@ -228,7 +228,7 @@
     "rehype-pretty-code": "^0.14.1",
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.1",
-    "resend": "^6.1.3",
+    "resend": "^6.2.0",
     "shiki": "^3.13.0",
     "sonner": "^2.0.7",
     "svix": "^1.77.0",
