@@ -21,11 +21,7 @@ import { logger } from '@/src/lib/logger';
  */
 export const runtime = 'nodejs';
 
-/**
- * ISR revalidation
- * Guides index changes infrequently - revalidate every hour
- */
-export const revalidate = 3600;
+// Static generation - will be replaced with pre-generated static file
 
 const GUIDE_CATEGORIES = [
   {

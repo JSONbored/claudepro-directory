@@ -18,8 +18,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata = generatePageMetadata('/companies');
 
-// ISR - Static content (centralized config)
-export const revalidate = 3600;
+// Static Generation - Companies page generated at build time
 
 export default async function CompaniesPage() {
   const supabase = await createAdminClient();

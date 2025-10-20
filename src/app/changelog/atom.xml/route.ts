@@ -39,9 +39,8 @@ import { logger } from '@/src/lib/logger';
 export const runtime = 'nodejs';
 
 /**
- * ISR revalidation - Atom feed for SEO (centralized config)
+ * Static generation - Atom feed generated at build time
  */
-export const revalidate = 21600;
 
 /**
  * Maximum number of entries to include in Atom feed

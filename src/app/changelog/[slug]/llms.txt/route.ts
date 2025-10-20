@@ -38,11 +38,7 @@ import { logger } from '@/src/lib/logger';
  */
 export const runtime = 'nodejs';
 
-/**
- * ISR revalidation
- * Changelog entries update occasionally - revalidate every 15 minutes
- */
-export const revalidate = 900;
+// Static generation - will be replaced with pre-generated static file
 
 /**
  * Generate static params for all changelog entries

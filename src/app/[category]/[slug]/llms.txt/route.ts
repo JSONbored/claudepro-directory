@@ -29,11 +29,7 @@ import { errorInputSchema } from '@/src/lib/schemas/error.schema';
  */
 export const runtime = 'nodejs';
 
-/**
- * ISR revalidation
- * Content detail pages update periodically - revalidate every 10 minutes
- */
-export const revalidate = 3600;
+// Static generation - will be replaced with pre-generated static file
 
 /**
  * Generate static params for all category/slug combinations

@@ -27,9 +27,8 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * ISR Configuration - Guide detail pages
- * Documentation content updates occasionally - revalidate every 30 minutes
+ * Documentation content generated at build time - static generation
  */
-export const revalidate = 1800;
 export const dynamicParams = true;
 
 // Validation schema for guide parameters

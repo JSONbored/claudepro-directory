@@ -39,9 +39,8 @@ import { logger } from '@/src/lib/logger';
 export const runtime = 'nodejs';
 
 /**
- * ISR revalidation - RSS feed for SEO (centralized config)
+ * Static generation - RSS feed generated at build time
  */
-export const revalidate = 21600;
 
 /**
  * Maximum number of entries to include in RSS feed

@@ -36,7 +36,7 @@ interface PageProps {
 }
 
 // ISR - Static content (centralized config)
-export const revalidate = 3600;
+// Static Generation - Results pages generated at build time
 
 /**
  * Generate metadata for SEO and social sharing

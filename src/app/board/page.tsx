@@ -19,7 +19,7 @@ import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
 export const metadata = generatePageMetadata('/board');
 
-export const revalidate = 60;
+// Static Generation - Board page generated at build time
 
 // Use the actual return type from the database function
 type PopularPost = {

@@ -306,6 +306,47 @@ const nextConfig = {
     return config;
   },
 
+  // Rewrites for static file serving - preserves URLs for SEO
+  async rewrites() {
+    return [
+      // LLMs.txt routes - serve pre-generated static files
+      {
+        source: '/llms.txt',
+        destination: '/llms-txt/site.txt',
+      },
+      {
+        source: '/changelog/llms.txt',
+        destination: '/llms-txt/changelog.txt',
+      },
+      {
+        source: '/changelog/:slug/llms.txt',
+        destination: '/llms-txt/changelog-:slug.txt',
+      },
+      {
+        source: '/guides/llms.txt',
+        destination: '/llms-txt/guides.txt',
+      },
+      {
+        source: '/api-docs/llms.txt',
+        destination: '/llms-txt/api-docs.txt',
+      },
+      {
+        source: '/tools/config-recommender/llms.txt',
+        destination: '/llms-txt/config-recommender.txt',
+      },
+      // Category llms.txt
+      {
+        source: '/:category(agents|mcp|commands|rules|hooks|statuslines|collections|skills)/llms.txt',
+        destination: '/llms-txt/:category.txt',
+      },
+      // Individual item llms.txt
+      {
+        source: '/:category(agents|mcp|commands|rules|hooks|statuslines|collections|skills)/:slug/llms.txt',
+        destination: '/llms-txt/:category-:slug.txt',
+      },
+    ];
+  },
+
   // Headers for caching only - security headers handled by Nosecone in middleware.ts
   async headers() {
     return [
@@ -315,7 +356,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=14400, stale-while-revalidate=86400', // 4 hours cache, 24 hours stale
+            value: 'public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800', // 24h cache, 7 days stale, serve stale on error
           },
           {
             key: 'Vary',
@@ -372,7 +413,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=3600, stale-while-revalidate=86400', // 1 hour cache for content pages
+            value: 'public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800', // 24h cache, 7 days stale, serve stale on error
           },
           {
             key: 'Vary',

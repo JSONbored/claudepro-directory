@@ -47,21 +47,8 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**
- * ISR Configuration - Category listing pages
- * Static configurations with view count updates - revalidate every 5 minutes
- * Balances fresh analytics with performance for category browsing
- */
-export const revalidate = 300;
-
-/**
- * ISR revalidation interval in seconds (4 hours)
- *
- * @description
- * Revalidate every 4 hours (14400 seconds) to pick up new content.
- * Balances freshness with build frequency - content doesn't change often enough
- * to warrant hourly revalidation, but 4 hours ensures same-day updates appear.
- *
- * @constant {number}
+ * Static Generation - Category listing pages
+ * Fully static at build time - no ISR needed since content changes trigger rebuilds
  */
 
 /**
@@ -172,13 +159,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   // Load content for this category
   const itemsData = await getContentByCategory(category);
 
-  // Enrich with view and copy counts from Redis (parallel batch operation)
-  const items = await statsRedis.enrichWithAllCounts(
-    itemsData.map((item) => ({
-      ...item,
-      category,
-    }))
-  );
+  // Map items with category (counts now fetched client-side for static generation)
+  const items = itemsData.map((item) => ({
+    ...item,
+    category,
+    viewCount: 0, // Placeholder - fetched client-side via useViewCounts hook
+    copyCount: 0, // Placeholder - fetched client-side via useViewCounts hook
+  }));
 
   // Process badges (handle dynamic count badges)
   const badges = config.listPage.badges.map((badge) => {

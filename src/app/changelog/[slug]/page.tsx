@@ -40,8 +40,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-// ISR - revalidate every 10 minutes
-export const revalidate = 900;
+// Static Generation - Changelog detail pages generated at build time
 
 /**
  * Generate static params for all changelog entries

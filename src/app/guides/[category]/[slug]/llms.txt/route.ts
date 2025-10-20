@@ -23,11 +23,7 @@ import { errorInputSchema } from '@/src/lib/schemas/error.schema';
  */
 export const runtime = 'nodejs';
 
-/**
- * ISR revalidation
- * Guide documentation updates occasionally - revalidate every 30 minutes
- */
-export const revalidate = 1800;
+// Static generation - will be replaced with pre-generated static file
 
 export const dynamicParams = true;
 

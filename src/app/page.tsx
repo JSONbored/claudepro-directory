@@ -43,11 +43,10 @@ type CategoryMetadata = UnifiedContentItem & { category: CategoryId };
 type EnrichedMetadata = CategoryMetadata & { viewCount: number; copyCount: number };
 
 /**
- * ISR Configuration - Homepage
- * Revalidate every 10 minutes - balance between freshness and performance
- * Homepage has mixed content with high traffic, optimized for user experience
+ * Static Generation - Homepage
+ * Fully static at build time - content changes trigger rebuilds
+ * View counts fetched client-side for real-time analytics
  */
-export const revalidate = 1800;
 
 interface HomePageProps {
   searchParams: Promise<{

@@ -29,11 +29,7 @@ import { batchLoadContent } from '@/src/lib/utils/batch.utils';
  */
 export const runtime = 'nodejs';
 
-/**
- * ISR revalidation
- * AI training data changes infrequently - revalidate every hour
- */
-export const revalidate = 3600;
+// Static generation - will be replaced with pre-generated static file
 
 /**
  * Handle GET request for site-wide llms.txt

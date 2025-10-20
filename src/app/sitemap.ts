@@ -78,6 +78,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 }
 
 /**
- * ISR Revalidation - Sitemap for SEO (centralized config)
+ * Static Generation - Sitemap generated at build time
+ * Updated automatically on rebuild when content changes
  */
-export const revalidate = 21600;

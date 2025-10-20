@@ -17,10 +17,9 @@ import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**
- * ISR Configuration - Guides listing page
- * Documentation content updates occasionally - revalidate every 30 minutes
+ * Static Generation - Guides listing page
+ * Documentation content generated at build time
  */
-export const revalidate = 1800;
 
 /**
  * Page metadata
