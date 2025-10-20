@@ -32,6 +32,7 @@
 
 import { z } from 'zod';
 import { METADATA_QUALITY_RULES } from '@/src/lib/config/seo-config';
+import { logger } from '@/src/lib/logger';
 
 // ============================================
 // LAYER 1: INPUT VALIDATION SCHEMAS
@@ -376,9 +377,11 @@ export function validateContext(
       );
     }
 
-    // Production: Log as warning (expected fallback path) and return null
-    // biome-ignore lint/suspicious/noConsole: Server logging in production
-    console.warn(`[${source}] Invalid MetadataContext (using fallback):`, errors);
+    // Production: Log as warning via structured logger and return null
+    logger.warn(`[${source}] Invalid MetadataContext (using fallback)`, { source }, {
+      errorCount: errors.length,
+      errors: errors.join(' | ').slice(0, 500),
+    });
     return null;
   }
 
@@ -430,17 +433,14 @@ export function validateTemplateOutput(
     const outputObj =
       typeof output === 'object' && output !== null ? (output as Record<string, unknown>) : {};
     const title = typeof outputObj.title === 'string' ? outputObj.title : 'Unknown';
-    // biome-ignore lint/suspicious/noConsole: Server logging in production
-    console.warn(`[Template:${pattern}] Invalid output (using fallback):`, {
-      errors,
-      keywords: outputObj.keywords || 'N/A',
-      title: title.substring(0, 60),
-      keywordLengths: Array.isArray(outputObj.keywords)
-        ? outputObj.keywords.map((k: unknown) => {
-            const keyword = String(k);
-            return `"${keyword}" (${keyword.length})`;
-          })
-        : 'N/A',
+    const keywords = Array.isArray((outputObj as Record<string, unknown>).keywords)
+      ? ((outputObj as { keywords: unknown[] }).keywords as unknown[])
+      : [];
+    logger.warn(`Template output invalid (using fallback)`, { pattern }, {
+      titleSnippet: title.substring(0, 60),
+      errorCount: errors.length,
+      errors: errors.join(' | ').slice(0, 500),
+      keywordCount: keywords.length,
     });
     return null;
   }
@@ -480,9 +480,11 @@ export function validateClassification(
       );
     }
 
-    // Production: Log as warning (expected fallback path) and return null
-    // biome-ignore lint/suspicious/noConsole: Server logging in production
-    console.warn(`[classifyRoute] Invalid classification for ${route} (using fallback):`, errors);
+    // Production: Log as warning via structured logger and return null
+    logger.warn(`Invalid route classification (using fallback)`, { route }, {
+      errorCount: errors.length,
+      errors: errors.join(' | ').slice(0, 500),
+    });
     return null;
   }
 
