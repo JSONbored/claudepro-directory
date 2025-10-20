@@ -1,3 +1,6 @@
-import { DefaultLoading } from '@/src/lib/components/loading-factory';
+/**
+ * Root Loading State
+ * Uses centralized loading factory for consistency
+ */
 
-export default DefaultLoading;
+export { HomePageLoading as default } from '@/src/lib/components/loading-factory';
