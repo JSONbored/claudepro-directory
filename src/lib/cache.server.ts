@@ -1569,30 +1569,23 @@ export class CacheService {
    */
   async getMany<T>(keys: string[]): Promise<Map<string, T | null>> {
     const results = new Map<string, T | null>();
-
     if (keys.length === 0) return results;
 
     try {
       const fullKeys = keys.map((key) => this.generateKey(key));
 
-      // Use Promise.all to leverage auto-pipelining
+      // Single MGET for all keys (N→1 command)
       const values = await redisClient.executeOperation(
-        async (redis) => {
-          // Make all calls in parallel - auto-pipelining will batch them
-          return Promise.all(fullKeys.map((fullKey) => redis.get(fullKey)));
-        },
-        async () => {
-          // Fallback operation
-          return Promise.all(fullKeys.map((fullKey) => redisClient.getFallback(fullKey)));
-        },
-        'cache_getMany'
+        async (redis) => (await redis.mget(...fullKeys)) as (string | null)[],
+        async () => Promise.all(fullKeys.map((k) => redisClient.getFallback(k))),
+        'cache_getMany_mget'
       );
 
       // Deserialize results in parallel
       await Promise.all(
         values.map(async (value, index) => {
           const key = keys[index];
-          if (!key) return; // Guard against undefined keys
+          if (!key) return;
 
           if (value) {
             const deserialized = await this.deserializeEntry<T>(String(value));
@@ -1611,19 +1604,15 @@ export class CacheService {
       );
 
       if (this.config.enableLogging) {
-        logger.debug(`Cache getMany for ${keys.length} keys, ${results.size} hits`);
+        logger.debug(`Cache getMany (MGET) for ${keys.length} keys, ${results.size} hits`);
       }
     } catch (error) {
       this.stats.errors++;
       logger.error(
-        `Cache getMany failed for ${keys.length} keys`,
+        `Cache getMany (MGET) failed for ${keys.length} keys`,
         error instanceof Error ? error : new Error(String(error))
       );
-
-      // Return empty results for all keys
-      for (const key of keys) {
-        results.set(key, null);
-      }
+      for (const key of keys) results.set(key, null);
     }
 
     return results;
@@ -1659,12 +1648,12 @@ export class CacheService {
       // Use Promise.all to leverage auto-pipelining
       const setResults = await redisClient.executeOperation(
         async (redis) => {
-          // Make all SET calls in parallel - auto-pipelining will batch them
-          const results = await Promise.all(
-            serializedEntries.map(({ fullKey, serialized, ttl }) =>
-              redis.set(fullKey, serialized, { ex: ttl })
-            )
-          );
+          // Use a single pipeline for all SETs (1 roundtrip)
+          const pipeline = redis.pipeline();
+          for (const { fullKey, serialized, ttl } of serializedEntries) {
+            pipeline.set(fullKey, serialized, { ex: ttl });
+          }
+          const results = (await pipeline.exec()) as Array<'OK' | null | undefined>;
           return results;
         },
         async () => {
@@ -2047,7 +2036,7 @@ export const statsRedis = {
     },
     ['view-counts'],
     {
-      revalidate: 600,
+      revalidate: 3600,
       tags: ['stats', 'view-counts'],
     }
   ),
@@ -2082,7 +2071,7 @@ export const statsRedis = {
       },
       [`daily-view-counts-${targetDate}-${items.map((i) => `${i.category}:${i.slug}`).join(',')}`],
       {
-        revalidate: 300,
+        revalidate: 1800,
         tags: ['stats', 'daily-view-counts'],
       }
     )();
@@ -2183,7 +2172,7 @@ export const statsRedis = {
     },
     ['copy-counts'],
     {
-      revalidate: 600,
+      revalidate: 3600,
       tags: ['stats', 'copy-counts'],
     }
   ),

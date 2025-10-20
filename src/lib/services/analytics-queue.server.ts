@@ -213,8 +213,7 @@ class AnalyticsQueueService {
             const copyKey = `copies:${entry.category}:${entry.slug}`;
             // Use incrby to add multiple copies at once
             pipeline.incrby(copyKey, entry.count);
-            // Also update the sorted set for popular copies
-            pipeline.zincrby(`copied:${entry.category}:all`, entry.count, entry.slug);
+            // NOTE: Removed sorted set updates; compute top-copied via nightly job instead
           }
 
           await pipeline.exec();

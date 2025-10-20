@@ -56,7 +56,7 @@ type EnrichedMetadata = CategoryMetadata & { viewCount: number; copyCount: numbe
  * Revalidate every 10 minutes - balance between freshness and performance
  * Homepage has mixed content with high traffic, optimized for user experience
  */
-export const revalidate = 600;
+export const revalidate = 1800;
 
 interface HomePageProps {
   searchParams: Promise<{
