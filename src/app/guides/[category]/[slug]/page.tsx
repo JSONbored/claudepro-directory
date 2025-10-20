@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { MDXRenderer } from '@/src/components/content/mdx-renderer';
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { SectionProgress } from '@/src/components/shared/section-progress';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { MDXContentProvider } from '@/src/components/infra/providers/mdx-content-provider';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
@@ -429,10 +430,11 @@ export default async function SEOGuidePage({
           </div>
 
           {/* Content with sidebar layout - matches content pages */}
-          <div className="container mx-auto px-4 py-12">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Main Content */}
-              <div className="lg:col-span-2 space-y-8">
+          <SectionProgress position="top" height={3} color="bg-accent">
+            <div className="container mx-auto px-4 py-12">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Main Content */}
+                <div className="lg:col-span-2 space-y-8">
                 <Card>
                   <CardContent className="pt-6">
                     <MDXContentProvider category={category} slug={slug}>
