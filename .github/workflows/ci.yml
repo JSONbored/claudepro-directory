@@ -22,6 +22,32 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run-tests: ${{ steps.filter.outputs.code == 'true' || steps.filter.outputs.tests == 'true' }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            code:
+              - 'src/**/*.{ts,tsx,js,jsx}'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'next.config.mjs'
+              - 'tailwind.config.ts'
+              - 'scripts/**'
+              - 'config/**'
+            tests:
+              - 'tests/**'
+              - 'src/**/*.test.{ts,tsx,js,jsx}'
+              - 'jest.config.*'
+              - 'config/tools/playwright.config.ts'
   quality:
     name: Code Quality (${{ matrix.check }})
     runs-on: ubuntu-latest
@@ -47,6 +73,7 @@ jobs:
     continue-on-error: true  # Don't block CI on test failures (SEO tests can be fixed iteratively)
     # Only run coverage on main branch (production)
     # PRs run tests without coverage for faster feedback
+    needs: [detect-changes]
 
     steps:
       - name: Checkout repository
@@ -55,6 +82,7 @@ jobs:
       - uses: ./.github/actions/setup-node-deps
 
       - name: Run tests (with coverage on main)
+        if: needs.detect-changes.outputs.run-tests == 'true'
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
             echo "Running tests with coverage (main branch)"
@@ -64,8 +92,12 @@ jobs:
             npm run test:unit
           fi
 
+      - name: Skip tests (no relevant changes)
+        if: needs.detect-changes.outputs.run-tests != 'true'
+        run: echo "Skipping tests: no relevant code/test changes detected"
+
       - name: Upload coverage reports to Codecov (main only)
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && needs.detect-changes.outputs.run-tests == 'true'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -76,7 +108,7 @@ jobs:
           verbose: true
 
       - name: Generate coverage summary (main only)
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && needs.detect-changes.outputs.run-tests == 'true'
         run: |
           if [ -f ./coverage/coverage-summary.json ]; then
             echo "## Test Coverage Summary" >> $GITHUB_STEP_SUMMARY

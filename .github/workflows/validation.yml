@@ -32,7 +32,9 @@ jobs:
     name: Label Pull Request
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    if: github.event_name == 'pull_request'
+    needs: [detect-changes]
+    # Only run label job when relevant content changes detected
+    if: github.event_name == 'pull_request' && needs.detect-changes.outputs.any-changed == 'true'
 
     steps:
       - name: Checkout repository
@@ -316,7 +318,7 @@ jobs:
     name: Validation Report
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [validate, content-quality]
+    needs: [detect-changes, validate, content-quality]
     if: always() && needs.detect-changes.outputs.any-changed == 'true'
 
     steps:

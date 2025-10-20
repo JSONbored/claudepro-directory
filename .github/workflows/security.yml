@@ -19,11 +19,40 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      deps: ${{ steps.filter.outputs.deps }}
+      code: ${{ steps.filter.outputs.code }}
+      content: ${{ steps.filter.outputs.content }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            deps:
+              - 'package.json'
+              - 'package-lock.json'
+            code:
+              - 'src/**'
+              - 'scripts/**'
+              - 'config/**'
+              - 'next.config.mjs'
+              - 'tailwind.config.ts'
+            content:
+              - 'content/**'
+              - 'templates/**'
   secrets:
     name: Secret Scanning
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.event_name != 'schedule'  # Skip on scheduled runs
+    needs: [detect-changes]
+    # Skip on scheduled runs; run for PRs or when code/deps changed
+    if: github.event_name != 'schedule' && (github.event_name == 'pull_request' || needs.detect-changes.outputs.code == 'true' || needs.detect-changes.outputs.deps == 'true')
 
     steps:
     - uses: actions/checkout@v5
@@ -95,7 +124,8 @@ jobs:
     name: Dependency Review
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.event_name == 'pull_request'
+    needs: [detect-changes]
+    if: github.event_name == 'pull_request' && needs.detect-changes.outputs.deps == 'true'
     permissions:
       contents: read
       pull-requests: write
@@ -116,6 +146,9 @@ jobs:
     name: NPM Security Audit
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    needs: [detect-changes]
+    # Run when dependencies change or on schedule
+    if: needs.detect-changes.outputs.deps == 'true' || github.event_name == 'schedule'
 
     steps:
     - name: Checkout repository
@@ -140,7 +173,8 @@ jobs:
     name: Socket Security Scan
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: vars.SOCKET_SECURITY_API_KEY != ''  # Only run if API key is configured
+    needs: [detect-changes]
+    if: vars.SOCKET_SECURITY_API_KEY != '' && (needs.detect-changes.outputs.deps == 'true' || github.event_name == 'schedule')
     permissions:
       contents: read
       pull-requests: write
