@@ -37,6 +37,24 @@ jobs:
         with:
           ref: ${{ inputs.checkout-ref }}
 
+      - name: Restore prebuilt artifact (if available)
+        id: restore-artifact
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: build-${{ inputs.cache-key-suffix }}-${{ github.sha }}
+          path: ./
+
+      - name: Check restored build
+        id: check-restored
+        run: |
+          if [ -d ".next" ]; then
+            echo "restored=true" >> $GITHUB_OUTPUT
+            echo "✅ Reused existing build artifact"
+          else
+            echo "restored=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup Node.js and dependencies
         uses: ./.github/actions/setup-node-deps
 
@@ -51,6 +69,7 @@ jobs:
             ${{ runner.os }}-nextjs-
 
       - name: Build Next.js application
+        if: steps.check-restored.outputs.restored != 'true'
         run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: 1

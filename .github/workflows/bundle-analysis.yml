@@ -23,6 +23,9 @@ permissions:
   pull-requests: write
 
 jobs:
+  changes:
+    name: Changes Filter
+    uses: ./.github/workflows/changes-filter.yml
   # Check if base branch build is cached
   check-base-cache:
     name: Check Base Branch Cache
@@ -55,8 +58,9 @@ jobs:
   build-pr:
     name: Build PR Branch
     uses: ./.github/workflows/build-reusable.yml
+    needs: [changes]
     with:
-      cache-key-suffix: 'bundle-pr'
+      cache-key-suffix: ${{ github.event.pull_request.number || 'bundle-pr' }}
       upload-artifact: true
 
   # Build base branch using reusable workflow (only if not cached)

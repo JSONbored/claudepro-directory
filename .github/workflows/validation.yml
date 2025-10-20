@@ -27,12 +27,15 @@ permissions:
   pull-requests: write
 
 jobs:
+  changes:
+    name: Changes Filter
+    uses: ./.github/workflows/changes-filter.yml
   # Auto-label PRs based on changed files
   label:
     name: Label Pull Request
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [detect-changes]
+    needs: [changes, detect-changes]
     # Only run label job when relevant content changes detected
     if: github.event_name == 'pull_request' && needs.detect-changes.outputs.any-changed == 'true'
 
