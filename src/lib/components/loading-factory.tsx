@@ -20,8 +20,7 @@
  * @module lib/components/loading-factory
  */
 
-import { 
-  ConfigGridSkeleton,
+import {
   ContentListSkeleton,
   LoadingSkeleton,
   PageHeaderSkeleton,
