@@ -139,10 +139,14 @@ export async function GET(request: Request) {
 
     // Parse items into category/slug pairs
     // Items are pre-validated with regex /^[a-z-]+:[a-z0-9-]+$/ so split will always have 2 parts
-    const parsedItems: Array<{ category: string; slug: string }> = items.map((item) => {
-      const [category, slug] = item.split(':');
-      return { category: category!, slug: slug! };
-    });
+    const parsedItems: Array<{ category: string; slug: string }> = items
+      .map((item) => {
+        const [category, slug] = item.split(':');
+        // Type guard: ensure both parts exist
+        if (!(category && slug)) return null;
+        return { category, slug };
+      })
+      .filter((item): item is { category: string; slug: string } => item !== null);
 
     // Fetch from Redis (batch operation)
     logger.info('Stats batch request (fetching from Redis)', {
@@ -185,8 +189,7 @@ export async function GET(request: Request) {
       },
       {
         headers: {
-          'Cache-Control':
-            'public, max-age=300, stale-while-revalidate=3600, stale-if-error=86400', // 5min cache, 1h stale, 24h error
+          'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600, stale-if-error=86400', // 5min cache, 1h stale, 24h error
           'X-Cache': 'MISS',
         },
       }

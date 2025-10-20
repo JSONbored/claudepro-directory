@@ -91,7 +91,7 @@ export function usePrefetchOnHover(
   href: string,
   options: UsePrefetchOnHoverOptions = {}
 ): UsePrefetchOnHoverReturn {
-  const { delay = 300, disabled = false, priority } = options;
+  const { delay = 300, disabled = false, priority: _priority } = options;
   const router = useRouter();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const prefetchedRef = useRef(false);
@@ -112,7 +112,7 @@ export function usePrefetchOnHover(
       prefetchedRef.current = true;
       timeoutRef.current = null;
     }, delay);
-  }, [href, delay, disabled, priority, router]);
+  }, [href, delay, disabled, router]);
 
   const handleMouseLeave = useCallback(() => {
     // Cancel prefetch if user moves away before delay

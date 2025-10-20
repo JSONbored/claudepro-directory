@@ -47,7 +47,7 @@ class ViewCountsCache {
    * Get cache key for item
    */
   private static getCacheKey(category: string, slug: string): string {
-    return `${this.CACHE_KEY_PREFIX}${category}:${slug}`;
+    return `${ViewCountsCache.CACHE_KEY_PREFIX}${category}:${slug}`;
   }
 
   /**
@@ -57,7 +57,7 @@ class ViewCountsCache {
     if (typeof window === 'undefined') return null;
 
     try {
-      const key = this.getCacheKey(category, slug);
+      const key = ViewCountsCache.getCacheKey(category, slug);
       const cached = localStorage.getItem(key);
       if (!cached) return null;
 
@@ -65,7 +65,7 @@ class ViewCountsCache {
       const age = Date.now() - entry.timestamp;
 
       // Return null if beyond stale threshold (7 days)
-      if (age > this.STALE_TTL_MS) {
+      if (age > ViewCountsCache.STALE_TTL_MS) {
         localStorage.removeItem(key);
         return null;
       }
@@ -81,7 +81,7 @@ class ViewCountsCache {
    */
   static isFresh(entry: CacheEntry): boolean {
     const age = Date.now() - entry.timestamp;
-    return age < this.CACHE_TTL_MS;
+    return age < ViewCountsCache.CACHE_TTL_MS;
   }
 
   /**
@@ -91,7 +91,7 @@ class ViewCountsCache {
     if (typeof window === 'undefined') return;
 
     try {
-      const key = this.getCacheKey(category, slug);
+      const key = ViewCountsCache.getCacheKey(category, slug);
       const entry: CacheEntry = {
         viewCount,
         copyCount,
@@ -115,13 +115,13 @@ class ViewCountsCache {
 
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (!key?.startsWith(this.CACHE_KEY_PREFIX)) continue;
+        if (!key?.startsWith(ViewCountsCache.CACHE_KEY_PREFIX)) continue;
 
         const cached = localStorage.getItem(key);
         if (!cached) continue;
 
         const entry: CacheEntry = JSON.parse(cached);
-        if (now - entry.timestamp > this.STALE_TTL_MS) {
+        if (now - entry.timestamp > ViewCountsCache.STALE_TTL_MS) {
           keysToRemove.push(key);
         }
       }
@@ -173,7 +173,7 @@ async function fetchCounts(category: string, slug: string): Promise<CacheEntry> 
 
       const data = await response.json();
 
-      if (!data.success || !data.data || !data.data[cacheKey]) {
+      if (!(data.success && data.data && data.data[cacheKey])) {
         throw new Error('Invalid response format');
       }
 
@@ -323,7 +323,7 @@ export function useBatchViewCounts(items: Array<{ category: string; slug: string
     fetch(`/api/stats/batch?items=${itemsParam}`)
       .then((res) => res.json())
       .then((data) => {
-        if (!data.success || !data.data) return;
+        if (!(data.success && data.data)) return;
 
         const freshCounts = { ...cachedCounts };
         for (const [key, value] of Object.entries(data.data)) {

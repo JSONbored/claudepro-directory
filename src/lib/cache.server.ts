@@ -2082,7 +2082,6 @@ export const statsRedis = {
     )();
   },
 
-
   trackCopy: async (cat: string, slug: string) => {
     const v = cacheKeyParamsSchema.parse({ category: cat, slug });
     await redis(
@@ -2127,7 +2126,6 @@ export const statsRedis = {
       tags: ['stats', 'copy-counts'],
     }
   ),
-
 
   /**
    * Enrich content items with Redis view counts

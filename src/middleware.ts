@@ -655,19 +655,19 @@ export const config = {
   matcher: [
     // API routes (critical - need all protection)
     '/api/:path*',
-    
+
     // Form submissions (critical - need CSRF protection)
     '/submit/:path*',
-    
+
     // User account pages (critical - need auth)
     '/account/:path*',
-    
+
     // Interactive tools (need rate limiting)
     '/tools/:path*',
-    
+
     // Dynamic content detail pages (need view tracking)
     '/(agents|mcp|commands|rules|hooks|statuslines|collections|skills)/:path*',
-    
+
     // Special routes that need protection
     '/login',
     '/u/:path*',

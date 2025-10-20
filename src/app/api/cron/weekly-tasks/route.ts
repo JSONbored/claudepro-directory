@@ -108,7 +108,7 @@ const route = createApiRoute({
         // Process categories in batches
         for (let i = 0; i < categories.length; i += BATCH_SIZE) {
           const batch = categories.slice(i, i + BATCH_SIZE);
-          
+
           const batchPromises = batch.map(async ({ name, items }) => {
             try {
               if (items.length === 0) {
@@ -143,7 +143,7 @@ const route = createApiRoute({
 
           // Wait for batch to complete
           const batchResults = await Promise.allSettled(batchPromises);
-          
+
           // Extract results
           for (const settled of batchResults) {
             if (settled.status === 'fulfilled') {
@@ -156,7 +156,8 @@ const route = createApiRoute({
               featuredResults.push({
                 category: 'unknown',
                 featured: [],
-                error: settled.reason instanceof Error ? settled.reason.message : String(settled.reason),
+                error:
+                  settled.reason instanceof Error ? settled.reason.message : String(settled.reason),
               });
             }
           }

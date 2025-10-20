@@ -324,11 +324,7 @@ export function classifyApiEndpoint(
   }
 
   // Heavy data operations
-  if (
-    path.includes('/bulk') ||
-    path.includes('/export') ||
-    path.includes('/all-')
-  ) {
+  if (path.includes('/bulk') || path.includes('/export') || path.includes('/all-')) {
     return 'heavy_api';
   }
 

@@ -1,12 +1,12 @@
 /**
  * Test script to verify unified llms.txt route returns identical content
- * 
+ *
  * This script tests that the new unified [[...segments]]/llms.txt/route.ts
  * returns EXACTLY the same content as the old separate route files.
- * 
+ *
  * Usage:
  *   tsx scripts/test-llmstxt-migration.ts
- * 
+ *
  * Expected: All tests pass (URLs return 200 and content is valid)
  */
 
@@ -16,16 +16,16 @@ const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
 // Test URLs that should work
 const TEST_URLS = [
-  '/llms.txt',                                      // Site index
-  '/agents/llms.txt',                               // Category index
-  '/mcp/llms.txt',                                  // Category index
-  '/commands/llms.txt',                             // Category index
-  '/agents/code-reviewer-agent/llms.txt',          // Item detail
-  '/mcp/github-mcp-server/llms.txt',               // Item detail (example)
-  '/changelog/llms.txt',                            // Changelog index
-  '/guides/llms.txt',                               // Guides index
-  '/api-docs/llms.txt',                             // API docs
-  '/tools/config-recommender/llms.txt',            // Config recommender
+  '/llms.txt', // Site index
+  '/agents/llms.txt', // Category index
+  '/mcp/llms.txt', // Category index
+  '/commands/llms.txt', // Category index
+  '/agents/code-reviewer-agent/llms.txt', // Item detail
+  '/mcp/github-mcp-server/llms.txt', // Item detail (example)
+  '/changelog/llms.txt', // Changelog index
+  '/guides/llms.txt', // Guides index
+  '/api-docs/llms.txt', // API docs
+  '/tools/config-recommender/llms.txt', // Config recommender
 ];
 
 interface TestResult {
@@ -39,7 +39,7 @@ interface TestResult {
 async function testUrl(url: string): Promise<TestResult> {
   try {
     const response = await fetch(`${BASE_URL}${url}`);
-    
+
     if (!response.ok) {
       // 404 is acceptable for some test URLs (items that may not exist)
       if (response.status === 404 && url.split('/').length > 3) {
@@ -50,7 +50,7 @@ async function testUrl(url: string): Promise<TestResult> {
           error: 'Item not found (expected for test data)',
         };
       }
-      
+
       return {
         url,
         status: 'fail',
@@ -60,7 +60,7 @@ async function testUrl(url: string): Promise<TestResult> {
     }
 
     const content = await response.text();
-    
+
     // Validate content is plain text
     const contentType = response.headers.get('content-type');
     if (!contentType?.includes('text/plain')) {
@@ -83,7 +83,7 @@ async function testUrl(url: string): Promise<TestResult> {
     }
 
     // Validate content contains expected markers
-    if (!content.includes('Source: ClaudePro Directory') && !content.includes('Category:')) {
+    if (!(content.includes('Source: ClaudePro Directory') || content.includes('Category:'))) {
       return {
         url,
         status: 'fail',
@@ -126,17 +126,17 @@ async function main() {
   }
 
   // Summary
-  const passed = results.filter(r => r.status === 'pass').length;
-  const failed = results.filter(r => r.status === 'fail').length;
+  const passed = results.filter((r) => r.status === 'pass').length;
+  const failed = results.filter((r) => r.status === 'fail').length;
 
-  console.log('\n' + '='.repeat(50));
+  console.log(`\n${'='.repeat(50)}`);
   console.log(`\n📊 Results: ${passed}/${TEST_URLS.length} passed`);
 
   if (failed > 0) {
     console.log('\n❌ Failed tests:');
     results
-      .filter(r => r.status === 'fail')
-      .forEach(r => {
+      .filter((r) => r.status === 'fail')
+      .forEach((r) => {
         console.log(`  - ${r.url}: ${r.error}`);
       });
     process.exit(1);

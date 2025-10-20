@@ -252,7 +252,8 @@ const route = createApiRoute({
             task: 'unknown',
             success: false,
             duration_ms: 0,
-            error: settled.reason instanceof Error ? settled.reason.message : String(settled.reason),
+            error:
+              settled.reason instanceof Error ? settled.reason.message : String(settled.reason),
           });
         }
       }
