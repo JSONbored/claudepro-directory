@@ -159,11 +159,9 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
       </head>
       <body className="font-sans">
-        {/* Suspense boundary for structured data - streams after initial HTML */}
-        <Suspense fallback={null}>
-          {await StructuredData({ type: 'website' })}
-          {await OrganizationStructuredData()}
-        </Suspense>
+        {/* Structured data - static JSON-LD for SEO */}
+        <StructuredData type="website" />
+        <OrganizationStructuredData />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -199,8 +197,7 @@ export default async function RootLayout({
         <Analytics />
         <SpeedInsights />
         {/* Umami Analytics - Privacy-focused analytics (production only) */}
-        {/* Suspense boundary for analytics - streams after critical content */}
-        <Suspense fallback={null}>{await UmamiScript()}</Suspense>
+        <UmamiScript />
         {/* PWA Install Tracking - Tracks PWA installation events */}
         <PwaInstallTracker />
         {/* Service Worker Registration for PWA Support */}

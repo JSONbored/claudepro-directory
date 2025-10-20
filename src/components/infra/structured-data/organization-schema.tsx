@@ -1,4 +1,3 @@
-import { headers } from 'next/headers';
 import Script from 'next/script';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
@@ -7,11 +6,8 @@ import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
  * Generate organization structured data for the entire site
  * This provides search engines and AI with comprehensive information about the organization
  */
-export async function OrganizationStructuredData() {
-  // Extract nonce from CSP header for script security
-  const headersList = await headers();
-  const cspHeader = headersList.get('content-security-policy');
-  const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
+export function OrganizationStructuredData() {
+  // JSON-LD is structured data, not executable code - no CSP nonce needed
   const baseUrl = APP_CONFIG.url;
 
   const organizationSchema = {
@@ -275,7 +271,6 @@ export async function OrganizationStructuredData() {
             __html: serializeJsonLd(schema),
           }}
           strategy="afterInteractive"
-          nonce={nonce}
         />
       ))}
     </>

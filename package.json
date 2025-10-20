@@ -95,7 +95,8 @@
   },
   "scripts": {
     "dev": "npm run build:content && npm run generate:service-worker && next dev --turbopack",
-    "build": "npm run generate:categories && npm run generate:events && npm run build:content && npm run generate:service-worker && npm run generate:openapi && npm run build:api-docs && next build --turbopack",
+    "build": "npm run build:parallel && npm run build:api-docs && next build --turbopack",
+    "build:parallel": "npm run generate:categories & npm run generate:events & npm run build:content & npm run generate:service-worker & npm run generate:openapi & wait",
     "build:smart": "npm run generate:static-api:conditional && npm run build",
     "build:analyze": "TURBOPACK_STATS=1 npm run build",
     "build:content": "tsx scripts/build/build-content.ts",
