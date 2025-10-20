@@ -14,6 +14,7 @@
  * Adding a new tab now only requires updating HOMEPAGE_TAB_CATEGORIES
  */
 
+import { motion } from 'motion/react';
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
@@ -46,24 +47,36 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
 
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-8">
-      <TabsList className="grid w-full lg:w-auto lg:grid-flow-col lg:auto-cols-fr gap-1">
-        {HOMEPAGE_TAB_CATEGORIES.map((tab) => {
-          // Get display name from category config, or use tab name
-          let displayName = tab.charAt(0).toUpperCase() + tab.slice(1);
+      {/* Tabs with horizontal scroll on mobile/tablet */}
+      <TabsList className="w-full overflow-x-auto lg:w-auto lg:grid lg:grid-flow-col lg:auto-cols-fr gap-1 scrollbar-hide">
+        <div className="flex lg:contents min-w-max lg:min-w-0">
+          {HOMEPAGE_TAB_CATEGORIES.map((tab) => {
+            // Get display name from category config, or use tab name
+            let displayName = tab.charAt(0).toUpperCase() + tab.slice(1);
 
-          if (tab !== 'all' && tab !== 'community') {
-            const config = UNIFIED_CATEGORY_REGISTRY[tab];
-            if (config) {
-              displayName = config.pluralTitle;
+            if (tab !== 'all' && tab !== 'community') {
+              const config = UNIFIED_CATEGORY_REGISTRY[tab];
+              if (config) {
+                displayName = config.pluralTitle;
+              }
             }
-          }
 
-          return (
-            <TabsTrigger key={tab} value={tab} className="text-sm">
-              {displayName}
-            </TabsTrigger>
-          );
-        })}
+            return (
+              <motion.div
+                key={tab}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              >
+                <TabsTrigger
+                  value={tab}
+                  className="text-xs sm:text-sm px-3 sm:px-4 whitespace-nowrap"
+                >
+                  {displayName}
+                </TabsTrigger>
+              </motion.div>
+            );
+          })}
+        </div>
       </TabsList>
 
       {/* Tab content for all content tabs */}

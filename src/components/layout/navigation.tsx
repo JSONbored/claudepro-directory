@@ -200,9 +200,9 @@ export const Navigation = () => {
                   </span>
                 </Link>
 
-                {/* Desktop Navigation */}
+                {/* Desktop Navigation - ONLY show at xl: (1280px+) */}
                 <nav
-                  className={`hidden ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} md:gap-3 lg:gap-4 text-sm lg:text-base md:flex`}
+                  className={`hidden xl:flex ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} lg:gap-4 text-sm lg:text-base`}
                   aria-label="Primary navigation"
                 >
                   {PRIMARY_NAVIGATION.map((link) => (
@@ -327,6 +327,45 @@ export const Navigation = () => {
                   </DropdownMenu>
                 </nav>
 
+                {/* Tablet Navigation (768px-1279px) - Horizontal scroll with Motion.dev */}
+                <motion.nav
+                  className="hidden md:flex xl:hidden overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  aria-label="Tablet navigation"
+                >
+                  <div className={`flex ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} px-2`}>
+                    {PRIMARY_NAVIGATION.slice(0, 5).map((link, index) => (
+                      <motion.div
+                        key={link.href}
+                        className="snap-center"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05, duration: 0.3 }}
+                      >
+                        <NavLink
+                          href={link.href}
+                          isActive={isActive}
+                          onClick={() => setIsOpen(false)}
+                          className="text-xs px-3 py-2 whitespace-nowrap"
+                        >
+                          {link.label}
+                        </NavLink>
+                      </motion.div>
+                    ))}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsOpen(true)}
+                      className="text-xs whitespace-nowrap"
+                      aria-label="Open more navigation options"
+                    >
+                      More
+                    </Button>
+                  </div>
+                </motion.nav>
+
                 {/* Right Side Actions */}
                 <div className={'flex items-center gap-2 md:gap-3'}>
                   {/* Global Search Trigger */}
@@ -365,58 +404,82 @@ export const Navigation = () => {
 
                   <ThemeToggle />
 
-                  {/* Mobile Menu */}
+                  {/* Mobile Menu - Show ONLY below md: (< 768px) */}
                   <Sheet open={isOpen} onOpenChange={setIsOpen}>
                     <SheetTrigger asChild>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="lg:hidden"
+                        className="md:hidden"
                         aria-label="Open mobile menu"
                       >
-                        <Menu className="h-5 w-5" />
+                        <Menu className="h-6 w-6" />
                       </Button>
                     </SheetTrigger>
                     <SheetContent
                       side="right"
-                      className="w-[300px] sm:w-[380px] border-l border-border/50"
+                      className="w-full sm:w-[380px] border-l border-border/50"
                     >
+                      {/* Swipe-to-close indicator */}
+                      <motion.div
+                        className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-border/50 rounded-full cursor-grab active:cursor-grabbing"
+                        drag="y"
+                        dragConstraints={{ top: 0, bottom: 50 }}
+                        onDragEnd={(_, info) => {
+                          if (info.offset.y > 100) setIsOpen(false);
+                        }}
+                        whileDrag={{ scale: 1.2, backgroundColor: 'hsl(var(--accent))' }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                      />
+
                       <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                      <div className={'flex flex-col h-full'}>
-                        {/* Header */}
-                        <div className={'flex items-center gap-3 pt-6 pb-8 px-1'}>
-                          <LogoIcon className="h-8 w-8 flex-shrink-0" />
-                          <span className={'font-semibold text-lg text-foreground'}>
+                      <div className={'flex flex-col h-full pt-8'}>
+                        {/* Header with Motion.dev fade-in */}
+                        <motion.div
+                          className={'flex items-center gap-3 pb-8 px-1'}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.1 }}
+                        >
+                          <LogoIcon className="h-10 w-10 flex-shrink-0" />
+                          <span className={'font-semibold text-xl text-foreground'}>
                             {APP_CONFIG.domain}
                           </span>
-                        </div>
+                        </motion.div>
 
-                        {/* Main Navigation */}
+                        {/* Main Navigation - Staggered animations */}
                         <div className={'flex-1 overflow-y-auto'}>
-                          <nav className={'space-y-4 px-3'} aria-label="Primary navigation">
-                            <div className="space-y-3">
-                              {PRIMARY_NAVIGATION.map((link) => (
-                                <NavLink
+                          <nav className={'space-y-3 px-3'} aria-label="Primary navigation">
+                            {PRIMARY_NAVIGATION.map((link, index) => {
+                              const IconComponent = link.icon;
+                              return (
+                                <motion.div
                                   key={link.href}
-                                  href={link.href}
-                                  isActive={isActive}
-                                  onClick={() => setIsOpen(false)}
-                                  className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
+                                  initial={{ opacity: 0, x: -20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: 0.15 + index * 0.05 }}
                                 >
-                                  {link.isNew ? (
-                                    <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                                      {link.label}
+                                  <NavLink
+                                    href={link.href}
+                                    isActive={isActive}
+                                    onClick={() => setIsOpen(false)}
+                                    className="flex items-center w-full px-5 py-4 text-base font-medium rounded-xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                                  >
+                                    {IconComponent && (
+                                      <IconComponent className="h-5 w-5 mr-3 flex-shrink-0" />
+                                    )}
+                                    <span>{link.label}</span>
+                                    {link.isNew && (
                                       <UnifiedBadge
                                         variant="new-indicator"
                                         label={`New: ${link.label}`}
+                                        className="ml-auto"
                                       />
-                                    </span>
-                                  ) : (
-                                    link.label
-                                  )}
-                                </NavLink>
-                              ))}
-                            </div>
+                                    )}
+                                  </NavLink>
+                                </motion.div>
+                              );
+                            })}
 
                             {/* Secondary Navigation */}
                             <nav
@@ -425,69 +488,86 @@ export const Navigation = () => {
                             >
                               <div className="space-y-3">
                                 {SECONDARY_NAVIGATION.flatMap((group) => group.links).map(
-                                  (link) => (
-                                    <NavLink
-                                      key={link.href}
-                                      href={link.href}
-                                      isActive={isActive}
-                                      onClick={() => setIsOpen(false)}
-                                      className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
-                                    >
-                                      {link.label}
-                                    </NavLink>
-                                  )
+                                  (link, index) => {
+                                    const IconComponent = link.icon;
+                                    return (
+                                      <motion.div
+                                        key={link.href}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{
+                                          delay: 0.15 + (PRIMARY_NAVIGATION.length + index) * 0.05,
+                                        }}
+                                      >
+                                        <NavLink
+                                          href={link.href}
+                                          isActive={isActive}
+                                          onClick={() => setIsOpen(false)}
+                                          className="flex items-center w-full px-5 py-4 text-sm font-medium text-muted-foreground rounded-xl bg-card/50 border border-border/40 hover:bg-accent/5 hover:text-foreground hover:border-accent/30 transition-all duration-200 active:scale-[0.98]"
+                                        >
+                                          {IconComponent && (
+                                            <IconComponent className="h-4 w-4 mr-3 flex-shrink-0" />
+                                          )}
+                                          <span>{link.label}</span>
+                                        </NavLink>
+                                      </motion.div>
+                                    );
+                                  }
                                 )}
-                                <NavLink
-                                  href={ROUTES.SUBMIT}
-                                  isActive={isActive}
-                                  onClick={() => setIsOpen(false)}
-                                  className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
-                                >
-                                  Submit Config
-                                </NavLink>
                               </div>
                             </nav>
                           </nav>
                         </div>
 
-                        {/* Footer Actions */}
-                        <div className={'border-t border-border/30 pt-6 pb-6 px-6'}>
-                          <div
-                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2} gap-6`}
-                          >
-                            <Button
-                              variant="outline"
-                              size="lg"
-                              className={
-                                'w-16 h-16 rounded-2xl border-border/40 bg-card hover:bg-discord/10 hover:border-discord/30 transition-all duration-200 active:scale-[0.95]'
-                              }
-                              onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
-                              aria-label="Join our Discord community"
+                        {/* Footer with spring animation on tap */}
+                        <motion.div
+                          className={'border-t border-border/30 pt-6 pb-6'}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          <div className="grid grid-cols-3 gap-4 px-4">
+                            {[
+                              {
+                                icon: DiscordIcon,
+                                onClick: () =>
+                                  window.open('https://discord.gg/Ax3Py4YDrq', '_blank'),
+                                label: 'Discord',
+                                color: 'discord',
+                              },
+                              {
+                                icon: Github,
+                                onClick: () => window.open(SOCIAL_LINKS.github, '_blank'),
+                                label: 'GitHub',
+                                color: 'accent',
+                              },
+                            ].map((item) => (
+                              <motion.div
+                                key={item.label}
+                                whileTap={{ scale: 0.9 }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                              >
+                                <Button
+                                  variant="outline"
+                                  size="lg"
+                                  className={`w-full h-20 rounded-2xl border-border/40 bg-card hover:bg-${item.color}/10 hover:border-${item.color}/30 transition-all duration-200`}
+                                  onClick={item.onClick}
+                                  aria-label={item.label}
+                                >
+                                  <item.icon className="h-8 w-8" />
+                                </Button>
+                              </motion.div>
+                            ))}
+                            <motion.div
+                              whileTap={{ scale: 0.9 }}
+                              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                             >
-                              <DiscordIcon className="h-7 w-7 text-discord" />
-                            </Button>
-
-                            <Button
-                              variant="outline"
-                              size="lg"
-                              className={
-                                'w-16 h-16 rounded-2xl border-border/40 bg-card hover:bg-accent/10 hover:border-accent/30 transition-all duration-200 active:scale-[0.95]'
-                              }
-                              onClick={() => window.open(SOCIAL_LINKS.github, '_blank')}
-                              aria-label="View source code on GitHub"
-                            >
-                              <Github className="h-7 w-7" />
-                            </Button>
-
-                            <div
-                              className={
-                                'w-16 h-16 flex items-center justify-center rounded-2xl border border-border/40 bg-card'
-                              }
-                            >
-                              <ThemeToggle />
-                            </div>
+                              <div className="w-full h-20 flex items-center justify-center rounded-2xl border border-border/40 bg-card">
+                                <ThemeToggle />
+                              </div>
+                            </motion.div>
                           </div>
-                        </div>
+                        </motion.div>
                       </div>
                     </SheetContent>
                   </Sheet>

@@ -45,12 +45,31 @@ export default async function AccountLayout({ children }: { children: React.Reac
     }
   }
 
-  // Get user profile data
-  const { data: profile } = await supabase
+  // Get user profile data - with automatic initialization if missing
+  let { data: profile, error: profileError } = await supabase
     .from('users')
     .select('name, slug, image')
     .eq('id', user.id)
     .single();
+
+  // If no profile exists, create one automatically
+  if (profileError || !profile) {
+    const now = new Date().toISOString();
+    const { data: newProfile } = await supabase
+      .from('users')
+      .insert({
+        id: user.id,
+        email: user.email ?? null,
+        name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+        image: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+        created_at: now,
+        updated_at: now,
+      })
+      .select('name, slug, image')
+      .single();
+
+    profile = newProfile || null;
+  }
 
   // Check if user has any sponsored campaigns
   const { data: sponsorships } = await supabase

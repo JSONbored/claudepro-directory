@@ -25,6 +25,7 @@ import { PostCopyEmailProvider } from '@/src/components/infra/providers/post-cop
 import { PwaInstallTracker } from '@/src/components/infra/pwa-install-tracker';
 import { OrganizationStructuredData } from '@/src/components/infra/structured-data/organization-schema';
 import { AnnouncementBanner } from '@/src/components/layout/announcement-banner';
+import { FloatingMobileSearch } from '@/src/components/layout/floating-mobile-search';
 import { Footer } from '@/src/components/layout/footer';
 import { Navigation } from '@/src/components/layout/navigation';
 import { StructuredData } from '@/src/components/shared/structured-data';
@@ -188,6 +189,7 @@ export default async function RootLayout({
                   {children}
                 </main>
                 <Footer />
+                <FloatingMobileSearch />
               </div>
             </ErrorBoundary>
             <Toaster />

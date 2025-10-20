@@ -26,22 +26,48 @@ export default async function SettingsPage() {
   if (!user) return null;
 
   // Get user profile; if missing, initialize a minimal row to prevent blank page
-  let { data: profile } = await supabase.from('users').select('*').eq('id', user.id).single();
-  if (!profile) {
+  let { data: profile, error: profileError } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError || !profile) {
     const now = new Date().toISOString();
-    const { data: inserted } = await supabase
+    const { data: inserted, error: insertError } = await supabase
       .from('users')
-      .insert({ id: user.id, email: user.email ?? null, created_at: now, updated_at: now })
+      .insert({
+        id: user.id,
+        email: user.email ?? null,
+        name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+        image: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+        created_at: now,
+        updated_at: now,
+      })
       .select()
       .single();
-    profile = inserted || null;
+
+    if (insertError) {
+      // RLS policy might be blocking insert, try to fetch again
+      const { data: refetch } = await supabase.from('users').select('*').eq('id', user.id).single();
+      profile = refetch || null;
+    } else {
+      profile = inserted || null;
+    }
   }
 
   if (!profile) {
     return (
       <div className="space-y-6">
         <h1 className="text-3xl font-bold mb-2">Settings</h1>
-        <p className="text-muted-foreground">We couldn't load your profile. Please try again.</p>
+        <p className="text-muted-foreground mb-4">
+          We couldn't load your profile. This might be a database permissions issue.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          User ID: {user.id}
+          <br />
+          Email: {user.email}
+        </p>
       </div>
     );
   }
