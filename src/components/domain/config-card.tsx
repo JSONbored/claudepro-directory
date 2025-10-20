@@ -22,6 +22,7 @@ import { UnifiedReview } from '@/src/components/domain/unified-review';
 import { BorderBeam } from '@/src/components/magic/border-beam';
 import { Button } from '@/src/components/primitives/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
+import { useViewCounts } from '@/src/hooks/use-view-counts';
 import { addBookmark } from '@/src/lib/actions/user.actions';
 import { type CategoryId, VALID_CATEGORIES } from '@/src/lib/config/category-config';
 import {
@@ -108,11 +109,11 @@ export const ConfigCard = memo(
       }
     }, [item.category, item.slug, router]);
 
-    // Extract sponsored metadata - UnifiedContentItem already includes these properties
-    const { isSponsored, sponsoredId, sponsorTier, position, viewCount } = item;
+    // Fetch real-time view and copy counts from client-side hook
+    const { viewCount, copyCount, loading: countsLoading } = useViewCounts(item.category, item.slug);
 
-    // copyCount is a runtime property added by analytics (not in schema)
-    const copyCount = (item as { copyCount?: number }).copyCount;
+    // Extract sponsored metadata - UnifiedContentItem already includes these properties
+    const { isSponsored, sponsoredId, sponsorTier, position } = item;
 
     // Extract featured metadata (weekly algorithm selection)
     // Note: _featured is a computed property added by trending algorithm, not in schema
