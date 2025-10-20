@@ -475,12 +475,13 @@ export default async function SEOGuidePage({
               />
             </div>
           </div>
-        </div>
+        </SectionProgress>
 
         {/* Track guide views for trending analytics */}
         <UnifiedTracker variant="view" category="guides" slug={guideSlug} />
-      </>
-    );
+      </div>
+    </>
+  );
   } catch (error: unknown) {
     logger.error(
       'Error rendering guide page',
