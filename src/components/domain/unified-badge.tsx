@@ -16,6 +16,7 @@
 'use client';
 
 import { cva } from 'class-variance-authority';
+import { motion } from 'motion/react';
 import type * as React from 'react';
 import {
   Tooltip,
@@ -202,57 +203,83 @@ export type UnifiedBadgeProps =
  * ```
  */
 export function UnifiedBadge(props: UnifiedBadgeProps) {
+  // Wrap all badges with hover animation
+  const BadgeWrapper = ({ children }: { children: React.ReactNode }) => (
+    <motion.div
+      className="inline-block"
+      whileHover={{ 
+        y: -2,
+        transition: { type: 'spring', stiffness: 400, damping: 17 }
+      }}
+      whileTap={{ scale: 0.95 }}
+    >
+      {children}
+    </motion.div>
+  );
+
   // Base badge variant
   if (props.variant === 'base') {
     return (
-      <div className={cn(baseBadgeVariants({ variant: props.style }), props.className)}>
-        {props.children}
-      </div>
+      <BadgeWrapper>
+        <div className={cn(
+          baseBadgeVariants({ variant: props.style }), 
+          'hover:shadow-md hover:shadow-primary/20',
+          props.className
+        )}>
+          {props.children}
+        </div>
+      </BadgeWrapper>
     );
   }
 
   // Category badge variant
   if (props.variant === 'category') {
     return (
-      <div
-        className={cn(
-          'text-xs font-medium border transition-colors',
-          categoryBadgeStyles[props.category],
-          props.className
-        )}
-      >
-        {props.children}
-      </div>
+      <BadgeWrapper>
+        <div
+          className={cn(
+            'text-xs font-medium border transition-colors hover:shadow-md hover:shadow-primary/20',
+            categoryBadgeStyles[props.category],
+            props.className
+          )}
+        >
+          {props.children}
+        </div>
+      </BadgeWrapper>
     );
   }
 
   // Source badge variant
   if (props.variant === 'source') {
     return (
-      <div
-        className={cn(
-          'text-xs font-medium border transition-colors',
-          sourceBadgeStyles[props.source],
-          props.className
-        )}
-      >
-        {props.children}
-      </div>
+      <BadgeWrapper>
+        <div
+          className={cn(
+            'text-xs font-medium border transition-colors hover:shadow-md hover:shadow-primary/20',
+            sourceBadgeStyles[props.source],
+            props.className
+          )}
+        >
+          {props.children}
+        </div>
+      </BadgeWrapper>
     );
   }
 
   // Status badge variant
   if (props.variant === 'status') {
     return (
-      <div
-        className={cn(
-          'text-xs font-medium border transition-colors',
-          statusBadgeStyles[props.status],
-          props.className
-        )}
-      >
-        {props.children}
-      </div>
+      <BadgeWrapper>
+        <div
+          className={cn(
+            'text-xs font-medium border transition-colors hover:shadow-md hover:shadow-primary/20',
+            statusBadgeStyles[props.status],
+            props.className
+          )}
+        >
+          {props.children}
+        </div>
+      </BadgeWrapper>
     );
   }
 

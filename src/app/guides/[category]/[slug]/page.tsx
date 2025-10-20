@@ -6,7 +6,9 @@ import Script from 'next/script';
 import path from 'path';
 import { z } from 'zod';
 import { MDXRenderer } from '@/src/components/content/mdx-renderer';
+import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { SectionProgress } from '@/src/components/shared/section-progress';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { MDXContentProvider } from '@/src/components/infra/providers/mdx-content-provider';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
@@ -350,6 +352,9 @@ export default async function SEOGuidePage({
     const articleId = `article-${pageId}`;
     return (
       <>
+        {/* Read Progress Bar - Shows reading progress at top of page */}
+        <ReadProgress />
+
         <Script id={breadcrumbId} type="application/ld+json" strategy="afterInteractive">
           {JSON.stringify(breadcrumbList)}
         </Script>
@@ -425,10 +430,11 @@ export default async function SEOGuidePage({
           </div>
 
           {/* Content with sidebar layout - matches content pages */}
-          <div className="container mx-auto px-4 py-12">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Main Content */}
-              <div className="lg:col-span-2 space-y-8">
+          <SectionProgress position="top" height={3} color="bg-accent">
+            <div className="container mx-auto px-4 py-12">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Main Content */}
+                <div className="lg:col-span-2 space-y-8">
                 <Card>
                   <CardContent className="pt-6">
                     <MDXContentProvider category={category} slug={slug}>
@@ -469,12 +475,13 @@ export default async function SEOGuidePage({
               />
             </div>
           </div>
-        </div>
+        </SectionProgress>
 
         {/* Track guide views for trending analytics */}
         <UnifiedTracker variant="view" category="guides" slug={guideSlug} />
-      </>
-    );
+      </div>
+    </>
+  );
   } catch (error: unknown) {
     logger.error(
       'Error rendering guide page',

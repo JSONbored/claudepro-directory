@@ -90,18 +90,19 @@ export function useCopyToClipboard(
 
   const copy = useCallback(
     async (text: string): Promise<boolean> => {
-      try {
-        // Clear any existing timeout
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-        }
+      // OPTIMISTIC UI: Set copied immediately
+      setCopied(true);
+      setError(null);
 
+      // Clear any existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      try {
         await navigator.clipboard.writeText(text);
 
-        setCopied(true);
-        setError(null);
-
-        // Reset after delay
+        // Success - schedule reset
         timeoutRef.current = setTimeout(() => {
           setCopied(false);
           timeoutRef.current = null;
@@ -110,6 +111,7 @@ export function useCopyToClipboard(
         onSuccess?.();
         return true;
       } catch (err) {
+        // ROLLBACK on error
         const errorObj = err instanceof Error ? err : new Error(String(err));
         setError(errorObj);
         setCopied(false);
