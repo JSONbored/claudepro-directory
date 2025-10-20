@@ -346,7 +346,7 @@ export async function middleware(request: NextRequest) {
 
   // OPTIMIZATION: Skip all middleware processing for static assets
   // Static files don't need rate limiting, security checks, or Redis operations
-  if (isStaticAsset(pathname)) {
+  if (shouldSkipMiddleware(pathname)) {
     return NextResponse.next();
   }
 
