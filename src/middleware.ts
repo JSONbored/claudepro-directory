@@ -344,6 +344,12 @@ export async function middleware(request: NextRequest) {
   const startTime = isDevelopment ? performance.now() : 0;
   const pathname = request.nextUrl.pathname;
 
+  // OPTIMIZATION: Skip all middleware processing for static assets
+  // Static files don't need rate limiting, security checks, or Redis operations
+  if (isStaticAsset(pathname)) {
+    return NextResponse.next();
+  }
+
   // CRITICAL SECURITY: CVE-2025-29927 mitigation - detect middleware bypass attempts
   // Check for suspicious headers that could bypass middleware execution
   const suspiciousHeaders = [
