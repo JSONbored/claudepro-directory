@@ -4,20 +4,22 @@
  * Fetches view and copy counts for multiple items in a single request.
  * CRITICAL: Aggressive caching to stay under 3-5k Redis commands/day budget.
  *
- * Caching Strategy (5-tier):
- * 1. Next.js ISR cache (5 minutes) - eliminated most requests
- * 2. CDN cache (5 minutes) - serves cached responses globally
- * 3. In-memory cache (1 minute) - reduces Redis load within serverless instance
- * 4. localStorage cache (client) - reduces API calls
- * 5. Stale-while-revalidate (client) - serves stale data while refreshing
+ * Caching Strategy (NO ISR - fully static site):
+ * 1. CDN cache (5 minutes via Cache-Control headers) - serves cached responses globally
+ * 2. In-memory cache (1 minute) - reduces Redis load within serverless instance
+ * 3. localStorage cache (24h client-side) - prevents most API calls
+ * 4. Stale-while-revalidate (1h client-side) - serves stale data while refreshing
  *
  * Redis Budget Calculation:
  * - Without caching: 10,000+ commands/day (100 page views/hour * 24 hours)
- * - With 5-minute cache: ~300 commands/day (1 command per 5 minutes * 24 hours * 12)
+ * - With localStorage (24h cache) + 95% hit rate: ~120 API calls/day
+ * - With in-memory cache (1 min): ~120 Redis commands/day
  * - Target: <500 commands/day ✅
  *
  * Performance:
- * - Cache hit (CDN): <10ms
+ * - Cache hit (localStorage): <5ms, no network request
+ * - Cache hit (CDN): <50ms
+ * - Cache hit (in-memory): <10ms
  * - Cache miss (Redis): <100ms
  * - Batch size: up to 50 items per request
  *
@@ -30,13 +32,7 @@ import { statsRedis } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
 
 /**
- * ISR Configuration
- * Revalidate every 5 minutes to balance freshness with Redis budget
- */
-export const revalidate = 300; // 5 minutes
-
-/**
- * Runtime configuration
+ * Runtime configuration - serverless function (no ISR)
  */
 export const runtime = 'nodejs';
 
