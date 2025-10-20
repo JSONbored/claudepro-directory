@@ -95,8 +95,7 @@
   },
   "scripts": {
     "dev": "npm run build:content && npm run generate:service-worker && next dev --turbopack",
-    "build": "npm run generate:categories && npm run generate:events && npm run build:content && npm run generate:llms && npm run generate:api && npm run generate:service-worker && npm run generate:openapi && npm run build:api-docs && next build --turbopack",
-    "generate:llms": "tsx scripts/build/generate-llms-txt.ts",
+    "build": "npm run generate:categories && npm run generate:events && npm run build:content && npm run generate:api && npm run generate:service-worker && npm run generate:openapi && npm run build:api-docs && next build --turbopack",
     "generate:api": "tsx scripts/build/generate-static-api.ts",
     "build:analyze": "TURBOPACK_STATS=1 npm run build",
     "build:content": "tsx scripts/build/build-content.ts",
