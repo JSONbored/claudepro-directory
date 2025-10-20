@@ -27,25 +27,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  # Auto-label PRs based on changed files
-  label:
-    name: Label Pull Request
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    if: github.event_name == 'pull_request'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Apply path-based labels
-        uses: actions/labeler@v6
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          configuration-path: .github/labeler.yml
-          sync-labels: true
-
-  # Get changed files for intelligent validation
+  # Get changed files for intelligent validation (also handles labeling)
   detect-changes:
     name: Detect Changes
     runs-on: ubuntu-latest
@@ -54,6 +36,7 @@ jobs:
       content-changed: ${{ steps.filter.outputs.content }}
       seo-changed: ${{ steps.filter.outputs.seo }}
       any-changed: ${{ steps.filter.outputs.content == 'true' || steps.filter.outputs.seo == 'true' }}
+      labels-applied: ${{ steps.labeler.outcome }}
 
     steps:
       - uses: actions/checkout@v5
@@ -71,6 +54,15 @@ jobs:
               - 'content/**/*.json'
               - 'src/app/**/page.tsx'
               - 'src/lib/seo/**'
+
+      - name: Apply path-based labels
+        if: github.event_name == 'pull_request'
+        id: labeler
+        uses: actions/labeler@v6
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+          sync-labels: true
 
   # Unified validation using matrix strategy
   validate:

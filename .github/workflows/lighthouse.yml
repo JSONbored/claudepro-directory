@@ -9,14 +9,15 @@ on:
       - 'package.json'
       - 'next.config.mjs'
       - 'tailwind.config.ts'
-    paths-ignore:
-      - 'content/**/*.json'
-      - 'templates/**'
+    types: [labeled, opened, synchronize, reopened]
   push:
     branches: [ main ]
-    paths-ignore:
-      - 'content/**/*.json'
-      - 'templates/**'
+    paths:
+      - 'src/**/*.{ts,tsx,js,jsx}'
+      - 'public/**'
+      - 'package.json'
+      - 'next.config.mjs'
+      - 'tailwind.config.ts'
   workflow_dispatch:
 
 concurrency:
@@ -35,6 +36,7 @@ jobs:
     with:
       cache-key-suffix: 'lighthouse'
       upload-artifact: true
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && contains(join(fromJson(toJson(github.event.pull_request.labels)).*.name, ','), 'perf'))
 
   # Run Lighthouse audit on built application
   lighthouse:
@@ -42,6 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [build]
+    if: needs.build.result == 'success'
 
     steps:
       - name: Checkout repository
