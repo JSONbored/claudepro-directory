@@ -71,7 +71,6 @@ const apiConfigSchema = z.object({
     commands: z.string().startsWith('/api/'),
     hooks: z.string().startsWith('/api/'),
     skills: z.string().startsWith('/api/'),
-    allConfigurations: z.string().startsWith('/api/'),
   }),
 });
 
@@ -84,7 +83,6 @@ export const API_CONFIG = apiConfigSchema.parse({
     commands: '/api/commands.json',
     hooks: '/api/hooks.json',
     skills: '/api/skills.json',
-    allConfigurations: '/api/all-configurations.json',
   },
 });
 

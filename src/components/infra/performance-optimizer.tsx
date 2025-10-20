@@ -5,14 +5,6 @@ import { useEffect } from 'react';
 // Critical resource preloader for perfect Core Web Vitals
 export function PerformanceOptimizer() {
   useEffect(() => {
-    // Prefetch critical API routes
-    const prefetchAPI = (url: string) => {
-      const link = document.createElement('link');
-      link.rel = 'prefetch';
-      link.href = url;
-      document.head.appendChild(link);
-    };
-
     // Optimize LCP by preloading hero content
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -29,9 +21,6 @@ export function PerformanceOptimizer() {
     document.querySelectorAll('[data-lazy]').forEach((el) => {
       observer.observe(el);
     });
-
-    // Prefetch critical routes
-    prefetchAPI('/api/all-configurations.json');
 
     // Cleanup
     return () => {

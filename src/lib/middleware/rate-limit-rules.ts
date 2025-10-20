@@ -81,11 +81,6 @@ export const EXACT_ROUTE_CONFIG: readonly ExactRouteConfig[] = [
 
   // Heavy API endpoints (moderate restrictions)
   {
-    path: '/api/all-configurations.json',
-    limiterKey: 'heavyApi',
-    description: 'All configurations - heavy dataset with moderate restrictions',
-  },
-  {
     path: '/api/guides/trending',
     limiterKey: 'heavyApi',
     description: 'Trending guides - moderate usage endpoint',

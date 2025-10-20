@@ -77,10 +77,6 @@ describe('Rate Limit Rules - Endpoint Classification', () => {
   });
 
   describe('Heavy API Endpoints', () => {
-    test('should classify all-configurations as heavy API', () => {
-      expect(classifyEndpoint('/api/all-configurations.json')).toBe('heavy_api');
-    });
-
     test('should classify trending guides as heavy API', () => {
       expect(classifyEndpoint('/api/guides/trending')).toBe('heavy_api');
     });
@@ -96,7 +92,6 @@ describe('Rate Limit Rules - Endpoint Classification', () => {
     });
 
     test('should assign heavyApi limiter to heavy endpoints', () => {
-      expect(getRateLimiterKey('/api/all-configurations.json')).toBe('heavyApi');
       expect(getRateLimiterKey('/api/cron/daily-digest')).toBe('heavyApi');
     });
   });
@@ -205,9 +200,6 @@ describe('Rate Limit Rules - Route Descriptions', () => {
   test('should provide descriptions for exact routes', () => {
     const cacheWarmDesc = getRouteDescription('/api/cache/warm');
     expect(cacheWarmDesc).toContain('admin');
-
-    const allConfigsDesc = getRouteDescription('/api/all-configurations.json');
-    expect(allConfigsDesc).toContain('configurations');
   });
 
   test('should provide descriptions for pattern-matched routes', () => {
@@ -234,11 +226,6 @@ describe('Rate Limit Rules - Pattern Matching', () => {
       // It also matches /^\/api\/cache\// pattern (admin)
       // Exact match should take precedence
       expect(getRateLimiterKey('/api/cache/warm')).toBe('admin');
-    });
-
-    test('should use exact match for all-configurations.json', () => {
-      // Exact match for this specific endpoint
-      expect(getRateLimiterKey('/api/all-configurations.json')).toBe('heavyApi');
     });
   });
 
@@ -306,7 +293,6 @@ describe('Rate Limit Rules - Comprehensive Coverage', () => {
     // Sample paths from each category
     const samplePaths = [
       '/api/cache/warm',
-      '/api/all-configurations.json',
       '/api/search',
       '/api/submit',
       '/api/agents.json',
@@ -319,7 +305,7 @@ describe('Rate Limit Rules - Comprehensive Coverage', () => {
       if (key) categories.add(key);
     }
 
-    // Should have admin, heavyApi, search, submit, api, llmstxt
+    // Should have admin, search, submit, api, llmstxt
     expect(categories.size).toBeGreaterThanOrEqual(5);
   });
 

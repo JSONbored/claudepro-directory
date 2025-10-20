@@ -327,8 +327,7 @@ export function classifyApiEndpoint(
   if (
     path.includes('/bulk') ||
     path.includes('/export') ||
-    path.includes('/all-') ||
-    path.includes('/all-configurations')
+    path.includes('/all-')
   ) {
     return 'heavy_api';
   }

@@ -258,52 +258,6 @@ export const guidesTrendingDataSchema = z.object({
   }),
 });
 
-// All configurations streaming schemas
-export const allConfigsQuerySchema = z.object({
-  stream: z
-    .enum(['true', 'false'])
-    .default('false')
-    .transform((val) => val === 'true')
-    .openapi({
-      description: 'Enable streaming response for large datasets',
-      example: 'false',
-    }),
-  format: z.enum(['json', 'ndjson']).default('json').openapi({
-    description: 'Response format: standard JSON or newline-delimited JSON (NDJSON)',
-    example: 'json',
-  }),
-  batchSize: z.coerce.number().min(10).max(100).default(50).openapi({
-    description: 'Number of items per batch in streaming mode (10-100)',
-    example: 50,
-  }),
-  page: pageSchema.optional(),
-  limit: limitSchema.optional(),
-});
-
-export const allConfigsDataSchema = z.object({
-  '@context': z.string().openapi({ description: 'JSON-LD context', example: 'https://schema.org' }),
-  '@type': z.string().openapi({ description: 'Schema.org type', example: 'Dataset' }),
-  name: z.string().openapi({ description: 'Dataset name' }),
-  description: z.string().openapi({ description: 'Dataset description' }),
-  license: z.string().openapi({ description: 'License URL' }),
-  lastUpdated: z.string().openapi({ description: 'ISO 8601 timestamp' }),
-  statistics: z.object({
-    totalConfigurations: z
-      .number()
-      .int()
-      .min(0)
-      .openapi({ description: 'Total number of configurations' }),
-    agents: z.number().int().min(0).openapi({ description: 'Number of agents' }),
-    mcp: z.number().int().min(0).openapi({ description: 'Number of MCP servers' }),
-    rules: z.number().int().min(0).openapi({ description: 'Number of rules' }),
-    commands: z.number().int().min(0).openapi({ description: 'Number of commands' }),
-    hooks: z.number().int().min(0).openapi({ description: 'Number of hooks' }),
-    statuslines: z.number().int().min(0).openapi({ description: 'Number of statuslines' }),
-  }),
-  data: z.object({}).passthrough().openapi({ description: 'Configuration data by category' }),
-  endpoints: z.object({}).passthrough().openapi({ description: 'API endpoints by category' }),
-});
-
 /**
  * Endpoint Registry
  *
@@ -552,41 +506,6 @@ export const endpointRegistry = {
       },
       400: {
         description: 'Bad request - invalid parameters',
-        content: {
-          'application/json': {
-            schema: errorResponseSchema,
-          },
-        },
-      },
-    },
-  },
-
-  // All Configurations Endpoint
-  'GET /api/all-configurations.json': {
-    operationId: 'getAllConfigurations',
-    summary: 'Get all configurations',
-    description:
-      'Retrieve all content configurations across all categories with optional streaming support for large datasets. Supports both standard JSON and NDJSON formats.',
-    tags: ['Content'],
-    request: {
-      query: allConfigsQuerySchema,
-    },
-    responses: {
-      200: {
-        description: 'Successful response with all configurations',
-        content: {
-          'application/json': {
-            schema: allConfigsDataSchema,
-          },
-          'application/x-ndjson': {
-            schema: z.string().openapi({
-              description: 'Newline-delimited JSON stream of configuration data',
-            }),
-          },
-        },
-      },
-      400: {
-        description: 'Bad request - invalid query parameters',
         content: {
           'application/json': {
             schema: errorResponseSchema,

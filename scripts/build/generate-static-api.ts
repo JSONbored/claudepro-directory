@@ -84,34 +84,6 @@ async function generateCategoryAPIs() {
   }
 }
 
-async function generateAllConfigurationsAPI() {
-  const allData: Record<string, any> = {};
-  const stats: Record<string, number> = { totalConfigurations: 0 };
-  
-  for (const cat of CATEGORIES) {
-    const items = await readContentFiles(cat.id);
-    allData[cat.id] = transformContent(items, cat.type, cat.id);
-    stats[cat.id] = items.length;
-    stats.totalConfigurations += items.length;
-  }
-  
-  const response = {
-    '@context': 'https://schema.org',
-    '@type': 'Dataset',
-    name: `${APP_CONFIG.name} - All Configurations`,
-    description: APP_CONFIG.description,
-    license: APP_CONFIG.license,
-    lastUpdated: new Date().toISOString(),
-    statistics: stats,
-    data: allData,
-    endpoints: Object.fromEntries(
-      CATEGORIES.map(cat => [cat.id, `${APP_CONFIG.url}/api/${cat.file}`])
-    ),
-  };
-  
-  await writeJSONFile('all-configurations.json', response);
-}
-
 async function main() {
   const startTime = Date.now();
   console.log('🔧 Generating static API files...\n');
@@ -119,7 +91,6 @@ async function main() {
   try {
     await ensureOutputDir();
     await generateCategoryAPIs();
-    await generateAllConfigurationsAPI();
     
     const duration = Date.now() - startTime;
     console.log(`\n✅ Generated all API JSON files in ${duration}ms`);

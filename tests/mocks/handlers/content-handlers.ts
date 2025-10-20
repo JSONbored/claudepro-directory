@@ -41,42 +41,6 @@ const contentResponses = {
  */
 export const contentHandlers = [
   /**
-   * GET /api/all-configurations.json - Success
-   * Returns all content types combined
-   * NOTE: Must be before /:contentType to match first
-   */
-  http.get('http://localhost:3000/api/all-configurations.json', async () => {
-    await delay(100);
-
-    const totalCount =
-      mockAgents.length +
-      mockMcp.length +
-      mockCommands.length +
-      mockHooks.length +
-      mockRules.length +
-      mockStatuslines.length;
-
-    return HttpResponse.json(
-      {
-        agents: mockAgents,
-        mcp: mockMcp,
-        commands: mockCommands,
-        hooks: mockHooks,
-        rules: mockRules,
-        statuslines: mockStatuslines,
-        totalCount,
-        lastUpdated: new Date().toISOString(),
-      },
-      {
-        headers: {
-          'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-  }),
-
-  /**
    * GET /api/[contentType] - Success
    * Returns mock content data with proper structure
    */
