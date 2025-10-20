@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Analyze, troubleshoot, and optimize Plaid integrations for banking data and financial account linking
+
+URL: https://claudepro.directory/mcp/plaid-mcp-server
+Category: MCP Servers
+Author: Plaid
+Tags: banking, plaid, fintech, financial-data, account-linking
+Added: 2025-09-18
+
+---
+
+Connect Claude to Plaid for banking data integration and financial services troubleshooting.
+
+---
+
+Last updated: 2025-10-20T19:35:50.467Z

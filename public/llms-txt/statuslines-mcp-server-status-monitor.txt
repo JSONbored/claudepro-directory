@@ -1,0 +1,53 @@
+# undefined - Claude Pro Directory
+
+> Real-time MCP server monitoring statusline showing connected servers, active tools, and performance metrics for Claude Code MCP integration
+
+URL: https://claudepro.directory/statuslines/mcp-server-status-monitor
+Category: Statuslines
+Author: JSONbored
+Tags: mcp, monitoring, servers, tools, performance
+Added: 2025-10-16
+
+---
+
+#!/usr/bin/env bash
+
+# MCP Server Status Monitor
+# Shows connected MCP servers and active tools
+
+read -r input
+
+# Extract MCP server info (if available in Claude Code context)
+mcp_servers=$(echo "$input" | jq -r '.mcp.servers // []' 2>/dev/null || echo "[]")
+server_count=$(echo "$mcp_servers" | jq 'length' 2>/dev/null || echo "0")
+
+# Count active tools across all servers
+active_tools=0
+for server in $(echo "$mcp_servers" | jq -r '.[] | @base64'); do
+  tools=$(echo $server | base64 -d | jq '.tools | length' 2>/dev/null || echo "0")
+  active_tools=$((active_tools + tools))
+done
+
+# Color based on server status
+if [ "$server_count" -gt 0 ]; then
+  color="\033[32m"  # Green - servers connected
+  icon="🔌"
+else
+  color="\033[90m"  # Gray - no servers
+  icon="⚫"
+fi
+
+# List server names
+server_names=$(echo "$mcp_servers" | jq -r '.[].name' 2>/dev/null | tr '\n' ',' | sed 's/,$//')
+
+# Output
+if [ "$server_count" -gt 0 ]; then
+  echo -e "${icon} MCP ${color}${server_count}${color}\033[0m servers │ ${active_tools} tools │ ${server_names:0:30}"
+else
+  echo -e "${icon} MCP ${color}disconnected${color}\033[0m"
+fi
+
+
+---
+
+Last updated: 2025-10-20T19:35:50.511Z

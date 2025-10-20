@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Monitors and logs database query performance metrics with slow query detection, N+1 analysis, and optimization suggestions
+
+URL: https://claudepro.directory/hooks/database-query-performance-logger
+Category: Hooks
+Author: JSONbored
+Tags: database, performance, monitoring, optimization, logging
+Added: 2025-10-19
+
+---
+
+Monitors and logs database query performance metrics with slow query detection, N+1 analysis, and optimization suggestions
+
+---
+
+Last updated: 2025-10-20T19:35:50.500Z

@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Official MCP server providing secure file system operations for Claude Desktop and Claude Code
+
+URL: https://claudepro.directory/mcp/filesystem-mcp-server
+Category: MCP Servers
+Author: Anthropic
+Tags: filesystem, files, directories, official, anthropic
+Added: 2025-09-15
+
+---
+
+The official Filesystem MCP Server from Anthropic enables Claude to interact with your local file system securely with configurable access controls.
+
+---
+
+Last updated: 2025-10-20T19:35:50.465Z

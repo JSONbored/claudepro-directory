@@ -1,0 +1,172 @@
+# undefined - Claude Pro Directory
+
+> Advanced test suite generator with property-based testing, mutation testing, and intelligent test case discovery
+
+URL: https://claudepro.directory/commands/test-advanced
+Category: Commands
+Author: claudepro
+Tags: testing, unit-tests, integration-tests, property-based, mutation-testing
+Added: 2025-09-16
+
+---
+
+The `/test` command generates comprehensive test suites with advanced testing methodologies including property-based testing, mutation testing, snapshot testing, and intelligent edge case discovery.
+
+## Usage
+
+```
+/test [options] <file_or_function>
+```
+
+## Options
+
+### Test Types
+- `--unit` - Unit tests with mocking and isolation
+- `--integration` - Integration tests with real dependencies
+- `--e2e` - End-to-end tests with full system simulation
+- `--property` - Property-based testing with hypothesis generation
+- `--mutation` - Mutation testing for test quality assessment
+- `--snapshot` - Snapshot testing for UI and output consistency
+- `--performance` - Performance and load testing
+- `--security` - Security and penetration testing
+- `--all` - Comprehensive test suite (default)
+
+### Testing Frameworks
+- `--jest` - Jest testing framework (JavaScript/TypeScript)
+- `--vitest` - Vitest testing framework (faster Jest alternative)
+- `--pytest` - pytest framework (Python)
+- `--junit` - JUnit framework (Java)
+- `--rspec` - RSpec framework (Ruby)
+- `--go-test` - Go testing package
+- `--rust-test` - Rust testing framework
+
+### Advanced Features
+- `--coverage` - Generate code coverage reports with detailed metrics
+- `--baseline` - Generate performance baselines and regression detection
+- `--fuzz` - Fuzzing tests with random input generation
+- `--contract` - Contract testing for API compatibility
+- `--visual` - Visual regression testing for UI components
+
+### AI-Powered Features
+- `--smart-cases` - AI-generated edge cases and corner cases
+- `--behavior-discovery` - Automatic behavior pattern recognition
+- `--test-oracle` - AI-powered test oracle generation
+- `--failure-prediction` - Predict likely failure scenarios
+
+## Examples
+
+### Advanced React Component Testing
+
+```jsx
+// Component to test: UserProfileCard.jsx
+import React, { useState, useEffect } from 'react';
+import { fetchUserProfile, updateUserProfile } from '../api/users';
+import { useAuth } from '../hooks/useAuth';
+import { toast } from '../utils/toast';
+
+const UserProfileCard = ({ userId, onProfileUpdate, editable = false }) => {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [formData, setFormData] = useState({});
+  const [errors, setErrors] = useState({});
+  
+  const { user: currentUser } = useAuth();
+  
+  useEffect(() => {
+    loadProfile();
+  }, [userId]);
+  
+  const loadProfile = async () => {
+    try {
+      setLoading(true);
+      const userProfile = await fetchUserProfile(userId);
+      setProfile(userProfile);
+      setFormData({
+        name: userProfile.name,
+        email: userProfile.email,
+        bio: userProfile.bio || ''
+      });
+    } catch (error) {
+      toast.error('Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.name?.trim()) {
+      newErrors.name = 'Name is required';
+    } else if (formData.name.length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
+    } else if (formData.name.length > 100) {
+      newErrors.name = 'Name must be less than 100 characters';
+    }
+    
+    if (!formData.email?.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
+    }
+    
+    if (formData.bio && formData.bio.length > 500) {
+      newErrors.bio = 'Bio must be less than 500 characters';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
+  const handleSave = async () => {
+    if (!validateForm()) return;
+    
+    try {
+      setLoading(true);
+      const updatedProfile = await updateUserProfile(userId, formData);
+      setProfile(updatedProfile);
+      setEditing(false);
+      toast.success('Profile updated successfully');
+      onProfileUpdate?.(updatedProfile);
+    } catch (error) {
+      if (error.status === 409) {
+        setErrors({ email: 'Email already exists' });
+      } else {
+        toast.error('Failed to update profile');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const canEdit = editable && (currentUser?.id === userId || currentUser?.role === 'admin');
+  
+  if (loading && !profile) {
+    return <div data-testid="loading-spinner">Loading...</div>;
+  }
+  
+  if (!profile) {
+    return <div data-testid="error-message">Profile not found</div>;
+  }
+  
+  return (
+    <div data-testid="user-profile-card" className="profile-card">
+      <div className="profile-header">
+        <img 
+          src={profile.avatar || '/default-avatar.png'} 
+          alt={`${profile.name}'s avatar`}
+          data-testid="profile-avatar"
+        />
+        {editing ? (
+          <input
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            data-testid="n...
+
+[Content truncated for brevity]
+
+---
+
+Last updated: 2025-10-20T19:35:50.475Z

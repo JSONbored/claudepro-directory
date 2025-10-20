@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Alerts when code complexity exceeds thresholds in real-time
+
+URL: https://claudepro.directory/hooks/code-complexity-alert-monitor
+Category: Hooks
+Author: JSONbored
+Tags: complexity, code-quality, notification, monitoring, maintainability
+Added: 2025-09-19
+
+---
+
+Alerts when code complexity exceeds thresholds in real-time
+
+---
+
+Last updated: 2025-10-20T19:35:50.499Z

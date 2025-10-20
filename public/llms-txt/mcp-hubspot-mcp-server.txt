@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Access and manage HubSpot CRM data including contacts, companies, and deals
+
+URL: https://claudepro.directory/mcp/hubspot-mcp-server
+Category: MCP Servers
+Author: HubSpot
+Tags: crm, hubspot, sales, marketing, customer-data
+Added: 2025-09-18
+
+---
+
+Integrate HubSpot CRM capabilities directly into Claude for customer relationship management.
+
+---
+
+Last updated: 2025-10-20T19:35:50.465Z

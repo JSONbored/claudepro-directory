@@ -1,0 +1,9 @@
+# Configuration Recommender - Claude Pro Directory
+
+> AI-powered configuration finder
+
+URL: https://claudepro.directory/tools/config-recommender
+
+Visit the website for more information.
+
+Last updated: 2025-10-20T19:35:50.523Z

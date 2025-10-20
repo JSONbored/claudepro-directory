@@ -1,0 +1,208 @@
+# undefined - Claude Pro Directory
+
+> Comprehensive code review with security analysis, performance optimization, and best practices validation
+
+URL: https://claudepro.directory/commands/review
+Category: Commands
+Author: claudepro
+Tags: code-review, security, performance, quality, analysis
+Added: 2025-09-16
+
+---
+
+The `/review` command provides comprehensive code analysis including security vulnerabilities, performance optimizations, code quality improvements, and adherence to best practices.
+
+## Usage
+
+```
+/review [options] <file_or_directory>
+```
+
+## Options
+
+### Review Types
+- `--security` - Focus on security vulnerabilities and threats
+- `--performance` - Analyze performance bottlenecks and optimizations
+- `--style` - Check coding style and formatting
+- `--architecture` - Review architectural patterns and design
+- `--all` - Comprehensive review (default)
+
+### Output Formats
+- `--format=markdown` - Markdown report (default)
+- `--format=json` - Machine-readable JSON output
+- `--format=html` - Rich HTML report
+- `--format=sarif` - SARIF format for CI/CD integration
+
+### Severity Filtering
+- `--severity=critical` - Only critical issues
+- `--severity=high` - High and critical issues
+- `--severity=medium` - Medium, high, and critical issues
+- `--severity=all` - All issues including low severity
+
+### Language-Specific Options
+- `--eslint` - Use ESLint rules for JavaScript/TypeScript
+- `--pylint` - Use Pylint for Python code
+- `--rustfmt` - Use Rust formatting and clippy
+- `--gofmt` - Use Go formatting and vet
+- `--rubocop` - Use RuboCop for Ruby
+
+## Examples
+
+### Basic Code Review
+
+```javascript
+// Example file: user-service.js
+class UserService {
+  constructor() {
+    this.users = [];
+    this.database = new Database(process.env.DB_PASSWORD); // 🚨 Security Issue
+  }
+  
+  async createUser(userData) {
+    // 🚨 No input validation
+    const user = {
+      id: Math.random(), // 🚨 Poor ID generation
+      ...userData,
+      createdAt: new Date()
+    };
+    
+    // 🚨 SQL injection vulnerability
+    const query = `INSERT INTO users (name, email) VALUES ('${user.name}', '${user.email}')`;
+    await this.database.query(query);
+    
+    this.users.push(user);
+    return user;
+  }
+  
+  // 🚨 No access control
+  async deleteUser(userId) {
+    const index = this.users.findIndex(u => u.id == userId); // 🚨 Type coercion
+    if (index > -1) {
+      this.users.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
+  
+  // 🚨 Inefficient search
+  async searchUsers(query) {
+    return this.users.filter(user => 
+      user.name.toLowerCase().includes(query.toLowerCase()) ||
+      user.email.toLowerCase().includes(query.toLowerCase())
+    );
+  }
+}
+```
+
+**Generated Review Report:**
+
+```markdown
+# Code Review Report: user-service.js
+
+## 🚨 Critical Issues (4)
+
+### 1. SQL Injection Vulnerability
+**Location:** Line 15  
+**Severity:** Critical  
+**Category:** Security  
+
+**Issue:** Direct string concatenation in SQL query allows SQL injection attacks.
+
+```javascript
+// ❌ Vulnerable code
+const query = `INSERT INTO users (name, email) VALUES ('${user.name}', '${user.email}')`;
+
+// ✅ Recommended fix
+const query = 'INSERT INTO users (name, email) VALUES (?, ?)';
+await this.database.query(query, [user.name, user.email]);
+```
+
+**Impact:** Attackers could execute arbitrary SQL commands, potentially accessing or deleting sensitive data.
+
+### 2. Exposed Database Credentials
+**Location:** Line 4  
+**Severity:** Critical  
+**Category:** Security  
+
+**Issue:** Database password exposed in environment variable without proper encryption.
+
+```javascript
+// ❌ Vulnerable code
+this.database = new Database(process.env.DB_PASSWORD);
+
+// ✅ Recommended fix
+const dbConfig = {
+  host: process.env.DB_HOST,
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  ssl: true,
+  connectionLimit: 10
+};
+this.database = new Database(dbConfig);
+```
+
+### 3. Missing Input Validation
+**Location:** Line 7  
+**Severity:** Critical  
+**Category:** Security  
+
+**Issue:** No validation of user input allows injection of malicious data.
+
+```javascript
+// ✅ Recommended implementation
+const Joi = require('joi');
+
+const userSchema = Joi.object({
+  name: Joi.string().alphanum().min(2).max(50).required(),
+  email: Joi.string().email().required(),
+  age: Joi.number().integer().min(13).max(120)
+});
+
+async createUser(userData) {
+  const { error, value } = userSchema.validate(userData);
+  if (error) {
+    throw new ValidationError('Invalid user data', error.details);
+  }
+  // Continue with validated data...
+}
+```
+
+### 4. Weak ID Generation
+**Location:** Line 9  
+**Severity:** High  
+**Category:** Security  
+
+**Issue:** Math.random() is predictable and not suitable for ID generation.
+
+```javascript
+// ❌ Vulnerable code
+id: Math.random()
+
+// ✅ Recommended fix
+const { v4: uuidv4 } = require('uuid');
+id: uuidv4()
+
+// Or for numeric IDs:
+const crypto = require('crypto');
+id: crypto.randomBytes(16).toString('hex')
+```
+
+## ⚠️ High Priority Issues (2)
+
+### 5. Missing Access Control
+**Location:** Line 25  
+**Severity:** High  
+**Category:** Security  
+
+**Issue:** No authorization checks allow any user to delete any other user.
+
+```javascript
+// ✅ Recommended implementation
+async deleteUser(userId, requestingUserId, userRole) {
+  // Check if user can delete (self or admin...
+
+[Content truncated for brevity]
+
+---
+
+Last updated: 2025-10-20T19:35:50.474Z

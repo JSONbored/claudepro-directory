@@ -1,0 +1,79 @@
+# undefined - Claude Pro Directory
+
+> Time-tracking statusline showing elapsed session duration, tokens per minute rate, and estimated cost with productivity metrics
+
+URL: https://claudepro.directory/statuslines/session-timer-statusline
+Category: Statuslines
+Author: JSONbored
+Tags: timer, productivity, metrics, bash, time-tracking, analytics
+Added: 2025-10-01
+
+---
+
+#!/usr/bin/env bash
+
+# Session Timer Statusline for Claude Code
+# Tracks session duration and productivity metrics
+
+# Read JSON from stdin
+read -r input
+
+# Extract session data
+model=$(echo "$input" | jq -r '.model // "unknown"' | sed 's/claude-//')
+tokens=$(echo "$input" | jq -r '.session.totalTokens // 0')
+cost=$(echo "$input" | jq -r '.session.estimatedCost // 0' | awk '{printf "%.3f", $0}')
+session_start=$(echo "$input" | jq -r '.session.startTime // ""')
+
+# Calculate session duration
+if [ -n "$session_start" ]; then
+  start_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${session_start%.*}" "+%s" 2>/dev/null || echo "0")
+  current_epoch=$(date +%s)
+  duration=$((current_epoch - start_epoch))
+  
+  # Format duration as HH:MM:SS
+  hours=$((duration / 3600))
+  minutes=$(((duration % 3600) / 60))
+  seconds=$((duration % 60))
+  formatted_time=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
+  
+  # Calculate tokens per minute
+  if [ $duration -gt 0 ]; then
+    tokens_per_min=$((tokens * 60 / duration))
+    
+    # Productivity rating
+    if [ $tokens_per_min -gt 500 ]; then
+      prod_color="\033[32m"  # Green - high productivity
+      prod_indicator="🔥"
+    elif [ $tokens_per_min -gt 200 ]; then
+      prod_color="\033[33m"  # Yellow - medium productivity
+      prod_indicator="⚡"
+    else
+      prod_color="\033[36m"  # Cyan - normal
+      prod_indicator="💭"
+    fi
+  else
+    tokens_per_min=0
+    prod_color="\033[36m"
+    prod_indicator="💭"
+  fi
+  
+  # Calculate cost per hour
+  if [ $duration -gt 0 ]; then
+    cost_per_hour=$(echo "$cost * 3600 / $duration" | bc -l | awk '{printf "%.2f", $0}')
+  else
+    cost_per_hour="0.00"
+  fi
+else
+  formatted_time="00:00:00"
+  tokens_per_min=0
+  cost_per_hour="0.00"
+  prod_indicator="💭"
+fi
+
+# Build statusline
+echo -e "\033[35m⏱  ${formatted_time}\033[0m │ \033[36m${model}\033[0m │ ${prod_color}${prod_indicator} ${tokens_per_min}/min\033[0m │ \033[33m\$${cost_per_hour}/hr\033[0m"
+
+
+---
+
+Last updated: 2025-10-20T19:35:50.512Z

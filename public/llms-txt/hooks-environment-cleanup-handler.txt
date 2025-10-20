@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Cleans up temporary files, caches, and resources when Claude session ends
+
+URL: https://claudepro.directory/hooks/environment-cleanup-handler
+Category: Hooks
+Author: JSONbored
+Tags: cleanup, stop-hook, maintenance, resources, optimization
+Added: 2025-09-19
+
+---
+
+Cleans up temporary files, caches, and resources when Claude session ends
+
+---
+
+Last updated: 2025-10-20T19:35:50.502Z

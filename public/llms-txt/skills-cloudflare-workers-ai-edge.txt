@@ -1,0 +1,143 @@
+# Cloudflare Workers AI Edge Functions - Claude Pro Directory
+
+> Deploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share.
+
+URL: https://claudepro.directory/skills/cloudflare-workers-ai-edge
+Category: Skills
+Author: JSONbored
+Tags: cloudflare, edge-computing, ai, serverless, workers
+Added: 2025-10-16
+
+---
+
+# Cloudflare Workers AI Edge Functions Skill
+
+## What This Skill Enables
+
+Claude can build and deploy AI-powered serverless functions on Cloudflare's global edge network, spanning 275+ cities with sub-5ms cold start times (10-80x faster than AWS Lambda@Edge). With 40% edge computing market share and 4,000% year-over-year growth in AI inference requests, Cloudflare Workers AI brings machine learning models directly to users worldwide with minimal latency.
+
+## Prerequisites
+
+**Required:**
+- Claude Pro subscription or Claude Code CLI
+- Cloudflare account (free tier available)
+- Wrangler CLI installed (`npm install -g wrangler`)
+- Basic understanding of JavaScript/TypeScript
+
+**What Claude handles automatically:**
+- Writing Workers code with TypeScript types
+- Configuring wrangler.toml for deployments
+- Implementing AI model bindings (Llama-2, Whisper, Stable Diffusion)
+- Setting up D1 database and R2 storage integrations
+- Managing environment variables and secrets
+- Deploying to Cloudflare's edge network
+- Optimizing for V8 isolate performance
+
+## How to Use This Skill
+
+### Deploy a Basic Edge Function
+
+**Prompt:** "Create a Cloudflare Worker that responds to HTTP requests with JSON data and deploys to the edge."
+
+Claude will:
+1. Generate a Worker with proper `fetch` event handler
+2. Create `wrangler.toml` configuration
+3. Set up TypeScript types for Request/Response
+4. Add error handling and CORS headers
+5. Deploy with `wrangler publish`
+6. Provide the deployed Worker URL
+
+### AI Model Integration (Llama-2 Chat)
+
+**Prompt:** "Build a Cloudflare Worker that uses Llama-2 to generate chat responses. Accept POST requests with user messages and stream the AI responses back."
+
+Claude will:
+1. Configure AI binding in wrangler.toml
+2. Implement streaming response with ReadableStream
+3. Add proper prompt formatting for Llama-2
+4. Set up rate limiting to control costs
+5. Include request validation and error handling
+6. Deploy with Workers AI binding enabled
+
+### Image Generation with Stable Diffusion
+
+**Prompt:** "Create an edge function that generates images using Stable Diffusion XL. Accept a text prompt via API and return the generated image URL stored in R2."
+
+Claude will:
+1. Set up Workers AI binding for Stable Diffusion
+2. Configure R2 bucket for image storage
+3. Implement image generation with proper parameters
+4. Upload generated images to R2 with public URLs
+5. Add caching headers for CDN optimization
+6. Include usage analytics with D1 database
+
+### Real-Time Translation API
+
+**Prompt:** "Build a translation API using Cloudflare Workers AI that detects the source language and translates to the target language. Support 50+ languages with edge caching."
+
+Claude will:
+1. Use Workers AI translation models
+2. Implement language detection
+3. Set up KV namespace for translation caching
+4. Add rate limiting per IP address
+5. Configure CDN cache for common translations
+6. Include usage metrics and error logging
+
+## Tips for Best Results
+
+1. **Leverage V8 Isolates**: Workers use V8 isolates that start in <5ms and use 1/10th the memory of Node.js. Design stateless functions that take advantage of this architecture.
+
+2. **Use Durable Objects for State**: For stateful operations (WebSockets, real-time collaboration), request Durable Objects implementation instead of external databases.
+
+3. **Model Selection**: Choose appropriate AI models based on latency requirements. Smaller models like Llama-2-7B offer faster inference than larger variants.
+
+4. **Edge Caching**: Implement Cache API or KV storage for frequently accessed data to reduce AI inference costs.
+
+5. **Cost Optimization**: Workers AI charges per request. Use caching, rate limiting, and request batching to optimize costs.
+
+6. **Geographic Routing**: Workers automatically route to the nearest data center. For AI models, consider pinning specific regions for data residency compliance.
+
+## Common Workflows
+
+### Full-Stack AI Application
+```
+"Create a complete AI-powered application on Cloudflare:
+1. Workers AI for text generation (Llama-2)
+2. D1 database for storing conversations
+3. R2 for file uploads and generated content
+4. KV for session management and caching
+5. Pages for frontend deployment
+6. Queue for background job processing
+Include TypeScript types and deployment scripts."
+```
+
+### Content Moderation API
+```
+"Build an edge API that:
+1. Accepts text content via POST request
+2. Uses Workers AI to detect harmful content
+3. Classifies content as safe/unsafe with confidence scores
+4. Logs results to D1 database
+5. Returns moderation decision in <100ms
+6. Handles 10,000 requests per minute"
+```
+
+### Smart Image CDN
+```
+"Create a Cloudflare Worker that:
+1. Intercepts image requests
+2. Analyzes image with Workers AI (OCR, object detection)
+3. Automatically optimizes images for device/bandwidth
+4. Stores optimized versions in R2
+5. Serves from edge cache on subsequent requests
+6. Includes usage analytics and cost tracking"
+```
+
+### Real-Time Sentiment Analysis
+```...
+
+[Content truncated for brevity]
+
+---
+
+Last updated: 2025-10-20T19:35:50.518Z

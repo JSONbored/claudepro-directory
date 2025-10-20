@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Real-time vulnerability scanning for dependencies with automated CVE detection, severity assessment, and patch recommendations
+
+URL: https://claudepro.directory/hooks/dependency-security-scanner
+Category: Hooks
+Author: JSONbored
+Tags: security, dependencies, vulnerability, cve, automation
+Added: 2025-10-19
+
+---
+
+Real-time vulnerability scanning for dependencies with automated CVE detection, severity assessment, and patch recommendations
+
+---
+
+Last updated: 2025-10-20T19:35:50.500Z

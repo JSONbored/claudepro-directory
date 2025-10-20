@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Create, deploy, and manage websites on Netlify platform
+
+URL: https://claudepro.directory/mcp/netlify-mcp-server
+Category: MCP Servers
+Author: Netlify
+Tags: deployment, netlify, hosting, static-sites, serverless
+Added: 2025-09-18
+
+---
+
+Control Netlify sites and deployments through Claude for comprehensive site management.
+
+---
+
+Last updated: 2025-10-20T19:35:50.467Z

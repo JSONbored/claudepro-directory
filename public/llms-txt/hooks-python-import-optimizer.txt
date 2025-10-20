@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Automatically sorts and optimizes Python imports using isort when Python files are modified
+
+URL: https://claudepro.directory/hooks/python-import-optimizer
+Category: Hooks
+Author: JSONbored
+Tags: python, imports, formatting, optimization, isort
+Added: 2025-09-19
+
+---
+
+Automatically sorts and optimizes Python imports using isort when Python files are modified
+
+---
+
+Last updated: 2025-10-20T19:35:50.506Z

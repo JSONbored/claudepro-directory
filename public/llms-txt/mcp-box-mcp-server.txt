@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Access enterprise content, analyze unstructured data, and automate workflows
+
+URL: https://claudepro.directory/mcp/box-mcp-server
+Category: MCP Servers
+Author: Box
+Tags: storage, box, enterprise, document-management, collaboration
+Added: 2025-09-18
+
+---
+
+Connect Claude to Box for enterprise content management and document automation.
+
+---
+
+Last updated: 2025-10-20T19:35:50.463Z

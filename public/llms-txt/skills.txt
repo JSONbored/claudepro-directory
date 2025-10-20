@@ -1,0 +1,118 @@
+# Skills - Claude Pro Directory
+
+> Task-focused capability guides with dependencies, examples, and troubleshooting
+
+URL: https://claudepro.directory/skills
+Total Items: 21
+
+---
+
+## All Skills
+
+### Audio Transcription and Summarization
+
+URL: https://claudepro.directory/skills/audio-transcription-summarization
+Transcribe audio with Whisper/ffmpeg and produce structured, timestamped summaries and action items.
+
+### CLI Data Viz Quickstart
+
+URL: https://claudepro.directory/skills/cli-data-viz-quickstart
+Turn CSV/JSON into quick charts from the command line; export PNG/SVG for reports.
+
+### Cloudflare Workers AI Edge Functions
+
+URL: https://claudepro.directory/skills/cloudflare-workers-ai-edge
+Deploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share.
+
+### CSV & Excel Data Wrangler
+
+URL: https://claudepro.directory/skills/csv-excel-data-wrangler
+Clean, filter, join, pivot, and export CSV/XLSX data reliably with reproducible steps.
+
+### DOCX Report Generator
+
+URL: https://claudepro.directory/skills/docx-report-generator
+Fill templated DOCX with data to produce reports/invoices, with images and PDF export.
+
+### GitHub Actions AI-Powered CI/CD Automation
+
+URL: https://claudepro.directory/skills/github-actions-ai-cicd
+Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration.
+
+### Image OCR and Table Extraction
+
+URL: https://claudepro.directory/skills/image-ocr-table-extraction
+Extract text and tabular data from images/scans using Tesseract and OpenCV with preprocessing.
+
+### JSON Schema Validation and Transformation
+
+URL: https://claudepro.directory/skills/json-schema-validation-transformation
+Validate JSON with Ajv/Zod and perform safe, lossless schema migrations and transformations.
+
+### Log Parsing and Incident Timeline
+
+URL: https://claudepro.directory/skills/log-parsing-incident-timeline
+Parse web/app/system logs into structured incidents and timelines with anomaly hints.
+
+### Markdown Knowledge Base Composer
+
+URL: https://claudepro.directory/skills/markdown-knowledge-base-composer
+Aggregate Markdown folders into a cohesive knowledge base with TOC, cross-links, and export.
+
+### Mintlify AI Documentation Automation
+
+URL: https://claudepro.directory/skills/mintlify-documentation-automation
+Automate beautiful, searchable documentation creation with Mintlify, AI-powered content generation from code, and interactive MDX components.
+
+### Playwright E2E Testing Automation
+
+URL: https://claudepro.directory/skills/playwright-e2e-testing
+Automate end-to-end testing with Playwright, AI-powered test generation, and comprehensive browser coverage for modern web applications.
+
+### PostgreSQL Query Optimization
+
+URL: https://claudepro.directory/skills/postgresql-query-optimization
+Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and execution plan analysis.
+
+### REST API Client Harness
+
+URL: https://claudepro.directory/skills/rest-api-client-harness
+Explore and script against REST APIs with auth, pagination, retries, and error handling.
+
+### Supabase Realtime Database Builder
+
+URL: https://claudepro.directory/skills/supabase-realtime-database
+Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ developers.
+
+### tRPC Type-Safe API Builder
+
+URL: https://claudepro.directory/skills/trpc-type-safe-api
+Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications.
+
+### V0 Rapid UI Prototyping Workflow
+
+URL: https://claudepro.directory/skills/v0-rapid-prototyping
+Build production-ready React components and full pages in minutes using V0.dev AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integration.
+
+### WebAssembly Module Development
+
+URL: https://claudepro.directory/skills/webassembly-module-development
+Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads.
+
+### Website Content Crawler and Summarizer
+
+URL: https://claudepro.directory/skills/website-crawler-summarizer
+Crawl domains respectfully, extract readable content, dedupe, and generate structured summaries.
+
+### Windsurf AI-Native Collaborative Development
+
+URL: https://claudepro.directory/skills/windsurf-collaborative-development
+Master collaborative AI-assisted development with Windsurf IDE's Cascade AI, multi-file context awareness, and Flow patterns for team workflows.
+
+### Zod Schema Validator
+
+URL: https://claudepro.directory/skills/zod-schema-validator
+Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference.
+
+
+Last updated: 2025-10-20T19:35:50.517Z

@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Official MCP server providing Git repository tools for reading, searching, and manipulating Git repositories
+
+URL: https://claudepro.directory/mcp/git-mcp-server
+Category: MCP Servers
+Author: Anthropic
+Tags: git, version-control, repositories, official, anthropic
+Added: 2025-09-16
+
+---
+
+The official Git MCP Server from Anthropic provides comprehensive tools to read, search, and manipulate Git repositories through Claude.
+
+---
+
+Last updated: 2025-10-20T19:35:50.465Z

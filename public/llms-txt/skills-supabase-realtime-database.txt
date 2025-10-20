@@ -1,0 +1,157 @@
+# Supabase Realtime Database Builder - Claude Pro Directory
+
+> Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ developers.
+
+URL: https://claudepro.directory/skills/supabase-realtime-database
+Category: Skills
+Author: JSONbored
+Tags: supabase, postgres, realtime, backend, database
+Added: 2025-10-16
+
+---
+
+# Supabase Realtime Database Builder Skill
+
+## What This Skill Enables
+
+Claude can build complete backend systems using Supabase, the open-source Firebase alternative that raised $100M at $5B valuation in October 2025. With 4M+ developers and enterprise-scale Multigres features launching, Supabase provides PostgreSQL database, real-time subscriptions, authentication, storage, and Edge Functions - all with automatic APIs and pgvector for AI embeddings.
+
+## Prerequisites
+
+**Required:**
+- Claude Pro subscription or Claude Code CLI
+- Supabase account (free tier available)
+- Node.js 18+ for client libraries
+- Basic SQL and JavaScript knowledge
+
+**What Claude handles automatically:**
+- Setting up Supabase project and database schema
+- Creating Row Level Security (RLS) policies
+- Generating TypeScript types from database
+- Implementing real-time subscriptions
+- Configuring authentication with multiple providers
+- Building Edge Functions with Deno
+- Setting up Storage buckets with access control
+- Integrating pgvector for AI embeddings
+
+## How to Use This Skill
+
+### Initialize Supabase Project
+
+**Prompt:** "Set up a Supabase project for a task management app with users, projects, tasks tables. Include RLS policies and TypeScript types."
+
+Claude will:
+1. Create database schema with foreign keys
+2. Set up RLS policies for multi-tenant data
+3. Generate migration files
+4. Create TypeScript types with supabase gen types
+5. Initialize Supabase client in application
+6. Add authentication flow
+7. Configure authorization rules
+
+### Real-Time Collaboration
+
+**Prompt:** "Build real-time chat functionality where users see messages instantly when posted. Include typing indicators and online presence."
+
+Claude will:
+1. Create messages table with indexes
+2. Set up real-time subscription channel
+3. Implement message broadcasting
+4. Add presence tracking
+5. Show typing indicator
+6. Handle connection state
+7. Optimize with message batching
+
+### AI Integration with pgvector
+
+**Prompt:** "Create a semantic search system using pgvector. Store document embeddings from OpenAI and enable similarity search with cosine distance."
+
+Claude will:
+1. Enable pgvector extension
+2. Create table with vector column
+3. Generate embeddings with OpenAI
+4. Store vectors in Supabase
+5. Implement similarity search RPC
+6. Add HNSW index for performance
+7. Create semantic search API
+
+### Edge Functions for Business Logic
+
+**Prompt:** "Build Edge Functions that: send welcome emails on signup, process webhook from Stripe, and run nightly data aggregation job."
+
+Claude will:
+1. Create Deno Edge Functions
+2. Set up function triggers (database, HTTP, cron)
+3. Implement email sending with Resend
+4. Add Stripe webhook validation
+5. Create scheduled job
+6. Include error handling and logging
+7. Deploy with supabase functions deploy
+
+## Tips for Best Results
+
+1. **RLS is Critical**: Always implement Row Level Security policies. Request policies that match your access patterns (user owns data, team members can access, public read).
+
+2. **Type Generation**: Use `supabase gen types typescript` to generate TypeScript types. This ensures client code matches database schema.
+
+3. **Real-Time Channels**: Supabase real-time has different channel types (postgres_changes, broadcast, presence). Specify which you need based on use case.
+
+4. **Edge Functions with Deno**: Supabase uses Deno for Edge Functions. Request Deno-compatible code (no Node.js-specific APIs).
+
+5. **Storage Access Control**: Storage buckets can be public or private. Request appropriate RLS policies for file access.
+
+6. **Connection Pooling**: For serverless deployments, use Supabase connection pooling to avoid exceeding connection limits.
+
+## Common Workflows
+
+### Complete SaaS Backend
+```
+"Build a SaaS backend with Supabase:
+1. Authentication with email, Google, GitHub OAuth
+2. Organizations and team member management
+3. Role-based access control (owner, admin, member)
+4. Real-time activity feed
+5. File uploads to Storage with access control
+6. Billing integration with Stripe webhooks
+7. Edge Functions for business logic
+8. pgvector for AI-powered search"
+```
+
+### Social Media Platform
+```
+"Create social media backend:
+1. User profiles with avatars in Storage
+2. Posts with likes, comments, shares
+3. Real-time notifications
+4. Follow/unfollow relationships
+5. Feed algorithm with RLS
+6. Direct messaging with presence
+7. Content moderation Edge Function
+8. Full-text search with PostgreSQL"
+```
+
+### IoT Data Collection
+```
+"Build IoT data collection system:
+1. Device registration and authentication
+2. Time-series data table with partitioning
+3. Real-time sensor data streaming
+4. Edge Functions for data aggregation
+5. Alert system for threshold violations
+6. Historical data analytics queries
+7. Dashboard real-time updates
+8. Export to CSV with Storage"
+```
+
+### AI-Powered Knowledge Base
+```
+"Create knowledge base with AI:
+1. Document storage with chunking
+2. Generate embeddings with OpenAI
+3. Store vectors in pgv...
+
+[Content truncated for brevity]
+
+---
+
+Last updated: 2025-10-20T19:35:50.521Z

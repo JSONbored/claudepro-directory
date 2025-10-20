@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Manage Jira tickets and Confluence documentation
+
+URL: https://claudepro.directory/mcp/jira-mcp-server
+Category: MCP Servers
+Author: Atlassian
+Tags: jira, confluence, atlassian, project-management, documentation
+Added: 2025-09-18
+
+---
+
+Access Jira and Confluence through a unified Atlassian MCP interface for project and documentation management.
+
+---
+
+Last updated: 2025-10-20T19:35:50.466Z

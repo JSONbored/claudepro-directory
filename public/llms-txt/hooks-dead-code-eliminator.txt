@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Automatically detects and removes unused code, imports, and dependencies with safe deletion verification and rollback support
+
+URL: https://claudepro.directory/hooks/dead-code-eliminator
+Category: Hooks
+Author: JSONbored
+Tags: code-quality, cleanup, optimization, refactoring, automation
+Added: 2025-10-19
+
+---
+
+Automatically detects and removes unused code, imports, and dependencies with safe deletion verification and rollback support
+
+---
+
+Last updated: 2025-10-20T19:35:50.500Z

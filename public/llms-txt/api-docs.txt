@@ -1,0 +1,9 @@
+# API Documentation - Claude Pro Directory
+
+> RESTful API for accessing configurations
+
+URL: https://claudepro.directory/api-docs
+
+Visit the website for more information.
+
+Last updated: 2025-10-20T19:35:50.523Z

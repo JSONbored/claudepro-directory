@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Automatically runs pylint on Python files after editing to enforce code quality standards
+
+URL: https://claudepro.directory/hooks/python-linter-integration
+Category: Hooks
+Author: JSONbored
+Tags: python, linting, code-quality, pylint
+Added: 2025-09-19
+
+---
+
+Automatically runs pylint on Python files after editing to enforce code quality standards
+
+---
+
+Last updated: 2025-10-20T19:35:50.506Z

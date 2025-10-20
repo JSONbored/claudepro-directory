@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Tracks error patterns and alerts when error rates spike
+
+URL: https://claudepro.directory/hooks/error-rate-monitor
+Category: Hooks
+Author: JSONbored
+Tags: errors, monitoring, notification, debugging, alerts
+Added: 2025-09-19
+
+---
+
+Tracks error patterns and alerts when error rates spike
+
+---
+
+Last updated: 2025-10-20T19:35:50.502Z

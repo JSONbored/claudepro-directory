@@ -1,0 +1,194 @@
+# undefined - Claude Pro Directory
+
+> Comprehensive security audit with vulnerability detection, threat analysis, and automated remediation recommendations
+
+URL: https://claudepro.directory/commands/security
+Category: Commands
+Author: claudepro
+Tags: security, audit, vulnerability, threat-analysis, penetration-testing
+Added: 2025-09-16
+
+---
+
+The `/security` command provides comprehensive security auditing including vulnerability scanning, threat modeling, penetration testing, compliance checking, and automated security hardening recommendations.
+
+## Usage
+
+```
+/security [options] <file_or_project>
+```
+
+## Options
+
+### Audit Types
+- `--vulnerability` - OWASP Top 10 and CVE scanning
+- `--authentication` - Auth and session security analysis
+- `--authorization` - Access control and permissions audit
+- `--data-protection` - Encryption and data security review
+- `--infrastructure` - Server and network security assessment
+- `--compliance` - SOC2, GDPR, HIPAA compliance checking
+- `--all` - Comprehensive security audit (default)
+
+### Scan Depth
+- `--surface` - Quick surface-level scan
+- `--deep` - Comprehensive deep analysis
+- `--penetration` - Simulated attack testing
+- `--compliance` - Regulatory compliance audit
+
+### Threat Modeling
+- `--stride` - STRIDE threat modeling framework
+- `--attack-tree` - Generate attack tree analysis
+- `--risk-assessment` - Quantitative risk analysis
+- `--threat-intelligence` - Latest threat intelligence integration
+
+### Output Formats
+- `--format=report` - Detailed security report (default)
+- `--format=sarif` - SARIF format for CI/CD integration
+- `--format=json` - Machine-readable JSON output
+- `--format=executive` - Executive summary for stakeholders
+
+## Examples
+
+### Web Application Security Audit
+
+```javascript
+// Vulnerable web application with multiple security issues
+const express = require('express');
+const mysql = require('mysql');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const app = express();
+
+// 🚨 Security Issue 1: No rate limiting
+app.use(express.json());
+
+// 🚨 Security Issue 2: Hardcoded database credentials
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'password123', // 🚨 Hardcoded password
+  database: 'myapp'
+});
+
+// 🚨 Security Issue 3: Weak JWT secret
+const JWT_SECRET = 'secret'; // 🚨 Weak secret
+
+// 🚨 Security Issue 4: SQL Injection vulnerability
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  
+  // 🚨 Direct string interpolation - SQL injection risk
+  const query = `SELECT * FROM users WHERE email = '${email}'`;
+  
+  db.query(query, async (err, results) => {
+    if (err) {
+      // 🚨 Security Issue 5: Information disclosure
+      return res.status(500).json({ error: err.message });
+    }
+    
+    if (results.length === 0) {
+      // 🚨 Security Issue 6: User enumeration
+      return res.status(401).json({ error: 'Invalid email' });
+    }
+    
+    const user = results[0];
+    
+    // 🚨 Security Issue 7: Timing attack vulnerability
+    if (await bcrypt.compare(password, user.password)) {
+      const token = jwt.sign(
+        { userId: user.id, email: user.email },
+        JWT_SECRET // 🚨 Weak secret
+      );
+      
+      // 🚨 Security Issue 8: Sensitive data in token
+      res.json({ token, user: user }); // 🚨 Exposes password hash
+    } else {
+      res.status(401).json({ error: 'Invalid password' });
+    }
+  });
+});
+
+// 🚨 Security Issue 9: Missing authentication middleware
+app.get('/admin/users', (req, res) => {
+  const query = 'SELECT * FROM users';
+  
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    
+    // 🚨 Security Issue 10: No access control
+    res.json(results); // 🚨 Exposes all user data including passwords
+  });
+});
+
+// 🚨 Security Issue 11: XSS vulnerability
+app.get('/search', (req, res) => {
+  const { q } = req.query;
+  
+  // 🚨 Direct output without sanitization
+  res.send(`<h1>Search results for: ${q}</h1>`);
+});
+
+// 🚨 Security Issue 12: CSRF vulnerability (no CSRF protection)
+app.post('/transfer-money', (req, res) => {
+  const { to, amount } = req.body;
+  
+  // 🚨 No CSRF token validation
+  // Process money transfer...
+  
+  res.json({ success: true });
+});
+
+// 🚨 Security Issue 13: Missing security headers
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
+});
+```
+
+**Security Audit Report:**
+
+```markdown
+# 🔒 Security Audit Report
+
+## 🚨 Critical Vulnerabilities (13 issues found)
+
+### 1. SQL Injection (CRITICAL - CWE-89)
+**Location:** `/login` endpoint, line 18  
+**CVSS Score:** 9.8 (Critical)  
+**Attack Vector:** Network  
+**Impact:** Complete database compromise
+
+**Vulnerability:**
+```javascript
+// ❌ Vulnerable code
+const query = `SELECT * FROM users WHERE email = '${email}'`;
+
+// 🚨 Attack payload:
+// email: "' OR '1'='1' UNION SELECT username, password FROM admin_users --"
+```
+
+**Proof of Concept:**
+```bash
+curl -X POST http://localhost:3000/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "\047 OR 1=1 --", "password": "anything"}'
+
+# Result: Bypasses authentication and may expose user data
+```
+
+**Impact:**
+- Complete database access
+- User credential theft
+- Data manipulation/deletion
+- Administrative access escalation
+
+**Remediation:**
+```javascript
+// ✅ Sec...
+
+[Content truncated for brevity]
+
+---
+
+Last updated: 2025-10-20T19:35:50.474Z

@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration
+
+URL: https://claudepro.directory/mcp/docker-mcp-server
+Category: MCP Servers
+Author: JSONbored
+Tags: docker, containers, devops, orchestration, deployment
+Added: 2025-09-16
+
+---
+
+Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration.
+
+---
+
+Last updated: 2025-10-20T19:35:50.464Z

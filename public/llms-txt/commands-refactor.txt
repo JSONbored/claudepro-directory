@@ -1,0 +1,206 @@
+# undefined - Claude Pro Directory
+
+> Intelligent code refactoring command that analyzes code structure and applies best practices for improved maintainability and performance
+
+URL: https://claudepro.directory/commands/refactor
+Category: Commands
+Author: JSONbored
+Tags: refactoring, code-quality, cleanup, optimization, patterns
+Added: 2025-09-16
+
+---
+
+The `/refactor` command provides intelligent code refactoring capabilities with multiple strategies and safety checks.
+
+## Usage
+
+```
+/refactor [options] <file_or_selection>
+```
+
+## Options
+
+### Refactoring Types
+- `--extract-function` - Extract repeated code into functions
+- `--extract-variable` - Extract complex expressions into variables
+- `--extract-constant` - Move magic numbers/strings to constants
+- `--inline` - Inline simple functions/variables
+- `--rename` - Rename variables/functions for clarity
+- `--simplify` - Simplify complex conditional logic
+- `--modernize` - Update to modern language features
+- `--performance` - Apply performance optimizations
+
+### Safety Options
+- `--dry-run` - Show proposed changes without applying
+- `--interactive` - Prompt for each change
+- `--backup` - Create backup before refactoring
+- `--test-first` - Run tests before and after changes
+
+### Language-Specific Options
+- `--javascript` - Apply JS/TS specific refactoring
+- `--python` - Apply Python-specific refactoring
+- `--java` - Apply Java-specific refactoring
+- `--csharp` - Apply C#-specific refactoring
+
+## Examples
+
+### Extract Function
+```javascript
+// Before
+function processUsers(users) {
+  for (let user of users) {
+    if (user.email && user.email.includes('@')) {
+      user.isValid = true;
+      user.domain = user.email.split('@')[1];
+    } else {
+      user.isValid = false;
+      user.domain = null;
+    }
+  }
+}
+
+// After refactoring with --extract-function
+function validateEmail(email) {
+  return email && email.includes('@');
+}
+
+function extractDomain(email) {
+  return email.split('@')[1];
+}
+
+function processUsers(users) {
+  for (let user of users) {
+    if (validateEmail(user.email)) {
+      user.isValid = true;
+      user.domain = extractDomain(user.email);
+    } else {
+      user.isValid = false;
+      user.domain = null;
+    }
+  }
+}
+```
+
+### Extract Constants
+```python
+# Before
+def calculate_discount(price, customer_type):
+    if customer_type == "premium":
+        return price * 0.2
+    elif customer_type == "regular":
+        return price * 0.1
+    else:
+        return 0
+
+# After refactoring with --extract-constant
+PREMIUM_DISCOUNT_RATE = 0.2
+REGULAR_DISCOUNT_RATE = 0.1
+PREMIUM_CUSTOMER_TYPE = "premium"
+REGULAR_CUSTOMER_TYPE = "regular"
+
+def calculate_discount(price, customer_type):
+    if customer_type == PREMIUM_CUSTOMER_TYPE:
+        return price * PREMIUM_DISCOUNT_RATE
+    elif customer_type == REGULAR_CUSTOMER_TYPE:
+        return price * REGULAR_DISCOUNT_RATE
+    else:
+        return 0
+```
+
+### Modernize Code
+```javascript
+// Before (ES5 style)
+function getUserNames(users) {
+  var names = [];
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].active) {
+      names.push(users[i].name);
+    }
+  }
+  return names;
+}
+
+// After refactoring with --modernize
+function getUserNames(users) {
+  return users
+    .filter(user => user.active)
+    .map(user => user.name);
+}
+```
+
+## Refactoring Patterns
+
+### Design Patterns
+- **Strategy Pattern** - Replace conditional logic with strategy objects
+- **Factory Pattern** - Extract object creation logic
+- **Observer Pattern** - Implement event-driven architecture
+- **Decorator Pattern** - Add functionality without inheritance
+
+### Code Smells Detection
+- **Long Method** - Break down large functions
+- **Large Class** - Split into focused classes
+- **Duplicate Code** - Extract common functionality
+- **Long Parameter List** - Use parameter objects
+- **Feature Envy** - Move methods to appropriate classes
+
+### Performance Optimizations
+- **Lazy Loading** - Load resources only when needed
+- **Memoization** - Cache expensive computations
+- **Batch Operations** - Combine multiple operations
+- **Async Optimization** - Convert synchronous to asynchronous
+
+## Safety Measures
+
+### Pre-refactoring Checks
+- Syntax validation
+- Type checking (TypeScript, etc.)
+- Lint rule compliance
+- Test coverage analysis
+
+### Post-refactoring Validation
+- Automated test execution
+- Code quality metrics comparison
+- Performance benchmarking
+- Security vulnerability scanning
+
+## Integration
+
+### IDE Integration
+- VS Code extension support
+- IntelliJ plugin compatibility
+- Vim/Neovim integration
+- Emacs package support
+
+### CI/CD Integration
+- Pre-commit hooks
+- GitHub Actions workflow
+- GitLab CI pipeline
+- Jenkins job integration
+
+## Configuration
+
+Create a `.refactor.json` file in your project root:
+
+```json
+{
+  "rules": {
+    "maxFunctionLength": 20,
+    "maxParameterCount": 4,
+    "enforceConstantExtraction": true,
+    "modernizeFeatures": true
+  },
+  "exclude": [
+    "node_modules/**",
+    "dist/**",
+    "*.test.js"
+  ],
+  "backup": {
+    "enabled": true,
+    "directory": ".refactor-backups"
+  }
+}
+```
+
+---
+
+Last updated: 2025-10-20T19:35:50.474Z

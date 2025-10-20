@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Generates a comprehensive report when Claude Code workflow stops, including files modified, tests run, and git status
+
+URL: https://claudepro.directory/hooks/workflow-completion-report
+Category: Hooks
+Author: JSONbored
+Tags: reporting, workflow, analytics, summary, stop-hook
+Added: 2025-09-19
+
+---
+
+Generates a comprehensive report when Claude Code workflow stops, including files modified, tests run, and git status
+
+---
+
+Last updated: 2025-10-20T19:35:50.509Z

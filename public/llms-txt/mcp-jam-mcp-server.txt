@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Debug faster with AI agents that access video recordings, console logs, and network requests
+
+URL: https://claudepro.directory/mcp/jam-mcp-server
+Category: MCP Servers
+Author: Jam
+Tags: debugging, jam, testing, bug-tracking, developer-tools
+Added: 2025-09-18
+
+---
+
+Access Jam bug recordings and debug information to troubleshoot issues more efficiently.
+
+---
+
+Last updated: 2025-10-20T19:35:50.466Z

@@ -1,0 +1,128 @@
+# Rules - Claude Pro Directory
+
+> Custom instructions and system prompts to modify Claude behavior for specific tasks
+
+URL: https://claudepro.directory/rules
+Total Items: 23
+
+---
+
+## All Rules
+
+### undefined
+
+URL: https://claudepro.directory/rules/ai-prompt-engineering-expert
+Expert in AI prompt engineering with focus on coding tasks, test-driven development patterns, iterative refinement, and context management for optimal AI assistance
+
+### undefined
+
+URL: https://claudepro.directory/rules/api-design-expert
+Transform Claude into a comprehensive API design specialist focused on RESTful APIs, GraphQL, OpenAPI, and modern API architecture patterns
+
+### undefined
+
+URL: https://claudepro.directory/rules/aws-cloud-architect
+Expert AWS architect with deep knowledge of cloud services, best practices, and Well-Architected Framework
+
+### undefined
+
+URL: https://claudepro.directory/rules/biome-strict-linting-rules
+Biome linting rules configuration for code quality validation. Strict enforcement, custom overrides, VCS integration, and automated fixes for TypeScript.
+
+### undefined
+
+URL: https://claudepro.directory/rules/code-review-expert
+Comprehensive code review rules for thorough analysis and constructive feedback
+
+### undefined
+
+URL: https://claudepro.directory/rules/database-expert
+Transform Claude into a database specialist with expertise in SQL, NoSQL, database design, optimization, and modern data architectures
+
+### undefined
+
+URL: https://claudepro.directory/rules/devops-sre-expert
+Transform Claude into a DevOps/SRE specialist with expertise in cloud infrastructure, CI/CD, monitoring, and automation
+
+### undefined
+
+URL: https://claudepro.directory/rules/go-golang-expert
+Transform Claude into a Go language expert with deep knowledge of concurrency, performance optimization, and idiomatic Go
+
+### undefined
+
+URL: https://claudepro.directory/rules/graphql-federation-specialist
+Expert in GraphQL Federation architecture for microservices, specializing in Apollo Federation, schema composition, and distributed graph patterns
+
+### undefined
+
+URL: https://claudepro.directory/rules/kubernetes-devsecops-engineer
+Expert in Kubernetes DevSecOps with GitOps workflows, pod security standards, RBAC, secret management, and automated security scanning for production clusters
+
+### undefined
+
+URL: https://claudepro.directory/rules/mobile-app-development-expert
+Expert in iOS, Android, and cross-platform mobile development with React Native, Flutter, and native frameworks
+
+### undefined
+
+URL: https://claudepro.directory/rules/nextjs-15-performance-architect
+Expert in Next.js 15 performance optimization with Turbopack, partial prerendering, advanced caching strategies, and Core Web Vitals excellence
+
+### undefined
+
+URL: https://claudepro.directory/rules/production-codebase-auditor
+Expert in comprehensive production codebase analysis with Zod validation enforcement, security vulnerability detection, and code consolidation strategies
+
+### undefined
+
+URL: https://claudepro.directory/rules/python-data-science-expert
+Transform Claude into a data science specialist with expertise in Python, machine learning, and data analysis
+
+### undefined
+
+URL: https://claudepro.directory/rules/react-19-concurrent-features-specialist
+React 19 concurrent features specialist with useTransition, useDeferredValue, Suspense boundaries, streaming SSR, and selective hydration patterns
+
+### undefined
+
+URL: https://claudepro.directory/rules/react-next-js-expert
+Transform Claude into a React and Next.js specialist with deep knowledge of modern patterns, performance optimization, and best practices
+
+### undefined
+
+URL: https://claudepro.directory/rules/react-server-components-expert
+Expert in React Server Components (RSC) with React 19 and Next.js 15, specializing in server-first rendering patterns, data fetching strategies, and streaming architectures
+
+### undefined
+
+URL: https://claudepro.directory/rules/security-auditor-penetration-tester
+Configure Claude as a security expert for vulnerability assessment, penetration testing, and security best practices
+
+### undefined
+
+URL: https://claudepro.directory/rules/security-first-react-components
+Security-first React component architect with XSS prevention, CSP integration, input sanitization, and OWASP Top 10 mitigation patterns
+
+### undefined
+
+URL: https://claudepro.directory/rules/terraform-infrastructure-architect
+Expert in Terraform infrastructure as code with AI-assisted generation, modular patterns, state management, and multi-cloud deployments
+
+### undefined
+
+URL: https://claudepro.directory/rules/typescript-5x-strict-mode-expert
+TypeScript 5.x strict mode expert with template literal types, strict null checks, type guards, and ESLint integration for enterprise-grade type safety
+
+### undefined
+
+URL: https://claudepro.directory/rules/wcag-accessibility-auditor
+Expert in WCAG 2.2 Level AA accessibility compliance, automated testing tools, ARIA patterns, and inclusive design for web applications
+
+### undefined
+
+URL: https://claudepro.directory/rules/windsurf-ai-native-ide-patterns
+Windsurf AI-native IDE specialist with Cascade AI, multi-file context awareness, and Flow collaboration patterns for Claude integration
+
+
+Last updated: 2025-10-20T19:35:50.478Z

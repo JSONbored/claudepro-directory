@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Browse Reddit, search posts, and analyze user activity directly from Claude - no API keys required
+
+URL: https://claudepro.directory/mcp/reddit-mcp-buddy
+Category: MCP Servers
+Author: karanb192
+Tags: reddit, social-media, search, analytics, community
+Added: 2025-09-27
+
+---
+
+Access Reddit content through Claude for browsing subreddits, searching posts, analyzing comments, and tracking user activity. Works instantly with zero setup.
+
+---
+
+Last updated: 2025-10-20T19:35:50.468Z

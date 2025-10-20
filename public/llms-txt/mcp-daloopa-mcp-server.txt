@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Access high-quality fundamental financial data from SEC filings and investor presentations
+
+URL: https://claudepro.directory/mcp/daloopa-mcp-server
+Category: MCP Servers
+Author: Daloopa
+Tags: finance, daloopa, sec-filings, financial-data, investor-relations
+Added: 2025-09-18
+
+---
+
+Access comprehensive financial data and SEC filing information through Daloopa's curated database.
+
+---
+
+Last updated: 2025-10-20T19:35:50.464Z

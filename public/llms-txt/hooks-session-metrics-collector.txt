@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Collects and reports detailed metrics about the coding session when Claude stops
+
+URL: https://claudepro.directory/hooks/session-metrics-collector
+Category: Hooks
+Author: JSONbored
+Tags: metrics, analytics, stop-hook, performance, statistics
+Added: 2025-09-19
+
+---
+
+Collects and reports detailed metrics about the coding session when Claude stops
+
+---
+
+Last updated: 2025-10-20T19:35:50.507Z

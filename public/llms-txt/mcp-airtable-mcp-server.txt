@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Read and write records, manage bases and tables in Airtable directly from Claude
+
+URL: https://claudepro.directory/mcp/airtable-mcp-server
+Category: MCP Servers
+Author: domdomegg
+Tags: database, airtable, data-management, crud, tables
+Added: 2025-09-18
+
+---
+
+Connect Claude to Airtable databases for seamless data management and automation of your bases and tables.
+
+---
+
+Last updated: 2025-10-20T19:35:50.462Z

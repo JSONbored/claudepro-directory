@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Automated accessibility testing and compliance checking for web applications following WCAG guidelines
+
+URL: https://claudepro.directory/hooks/accessibility-checker
+Category: Hooks
+Author: JSONbored
+Tags: accessibility, a11y, wcag, testing, compliance
+Added: 2025-09-19
+
+---
+
+Automated accessibility testing and compliance checking for web applications following WCAG guidelines
+
+---
+
+Last updated: 2025-10-20T19:35:50.498Z

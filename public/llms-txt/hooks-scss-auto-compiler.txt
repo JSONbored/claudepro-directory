@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Automatically compiles SCSS/Sass files to CSS when they are modified
+
+URL: https://claudepro.directory/hooks/scss-auto-compiler
+Category: Hooks
+Author: JSONbored
+Tags: scss, sass, css, styling, compilation
+Added: 2025-09-19
+
+---
+
+Automatically compiles SCSS/Sass files to CSS when they are modified
+
+---
+
+Last updated: 2025-10-20T19:35:50.507Z

@@ -1,0 +1,263 @@
+# Hooks - Claude Pro Directory
+
+> Automation hooks that trigger on events in Claude Code sessions
+
+URL: https://claudepro.directory/hooks
+Total Items: 65
+
+---
+
+## All Hooks
+
+### undefined
+
+URL: https://claudepro.directory/hooks/accessibility-checker
+Automated accessibility testing and compliance checking for web applications following WCAG guidelines
+
+### undefined
+
+URL: https://claudepro.directory/hooks/api-endpoint-documentation-generator
+Automatically generates or updates API documentation when endpoint files are modified
+
+### undefined
+
+URL: https://claudepro.directory/hooks/auto-code-formatter-hook
+Automatically formats code files after Claude writes or edits them using Prettier, Black, or other formatters
+
+### undefined
+
+URL: https://claudepro.directory/hooks/auto-save-backup
+Automatically creates timestamped backups of files before modification to prevent data loss
+
+### undefined
+
+URL: https://claudepro.directory/hooks/aws-cloudformation-validator
+Validates AWS CloudFormation templates for syntax errors and best practices
+
+### undefined
+
+URL: https://claudepro.directory/hooks/cloud-backup-on-session-stop
+Automatically backs up changed files to cloud storage when session ends
+
+### undefined
+
+URL: https://claudepro.directory/hooks/code-complexity-alert-monitor
+Alerts when code complexity exceeds thresholds in real-time
+
+### undefined
+
+URL: https://claudepro.directory/hooks/css-unused-selector-detector
+Detects unused CSS selectors when stylesheets are modified to keep CSS lean
+
+### undefined
+
+URL: https://claudepro.directory/hooks/database-connection-cleanup
+Closes all database connections and cleans up resources when session ends
+
+### undefined
+
+URL: https://claudepro.directory/hooks/database-migration-runner
+Automated database migration management with rollback capabilities, validation, and multi-environment support
+
+### undefined
+
+URL: https://claudepro.directory/hooks/database-query-performance-logger
+Monitors and logs database query performance metrics with slow query detection, N+1 analysis, and optimization suggestions
+
+### undefined
+
+URL: https://claudepro.directory/hooks/dead-code-eliminator
+Automatically detects and removes unused code, imports, and dependencies with safe deletion verification and rollback support
+
+### undefined
+
+URL: https://claudepro.directory/hooks/dependency-security-audit-on-stop
+Performs a comprehensive security audit of all dependencies when session ends
+
+### undefined
+
+URL: https://claudepro.directory/hooks/dependency-security-scanner
+Real-time vulnerability scanning for dependencies with automated CVE detection, severity assessment, and patch recommendations
+
+### undefined
+
+URL: https://claudepro.directory/hooks/dependency-update-checker
+Automatically checks for outdated dependencies and suggests updates with security analysis
+
+### undefined
+
+URL: https://claudepro.directory/hooks/discord-activity-notifier
+Sends development activity updates to Discord channel for team collaboration
+
+### undefined
+
+URL: https://claudepro.directory/hooks/docker-container-auto-rebuild
+Automatically rebuilds Docker containers when Dockerfile or docker-compose.yml files are modified
+
+### undefined
+
+URL: https://claudepro.directory/hooks/docker-image-security-scanner
+Comprehensive Docker image vulnerability scanning with layer analysis, base image recommendations, and security best practices enforcement
+
+### undefined
+
+URL: https://claudepro.directory/hooks/documentation-auto-generator-on-stop
+Automatically generates or updates project documentation when session ends
+
+### undefined
+
+URL: https://claudepro.directory/hooks/documentation-coverage-checker
+Automated documentation coverage analysis with missing docstring detection, API documentation validation, and completeness scoring
+
+### undefined
+
+URL: https://claudepro.directory/hooks/documentation-generator
+Automatically generates and updates project documentation from code comments, README files, and API definitions
+
+### undefined
+
+URL: https://claudepro.directory/hooks/environment-cleanup-handler
+Cleans up temporary files, caches, and resources when Claude session ends
+
+### undefined
+
+URL: https://claudepro.directory/hooks/environment-variable-validator
+Validates environment variables, checks for required vars, and ensures proper configuration across environments
+
+### undefined
+
+URL: https://claudepro.directory/hooks/error-rate-monitor
+Tracks error patterns and alerts when error rates spike
+
+### undefined
+
+URL: https://claudepro.directory/hooks/file-size-warning-monitor
+Alerts when files exceed size thresholds that could impact performance
+
+### undefined
+
+URL: https://claudepro.directory/hooks/final-bundle-size-reporter
+Analyzes and reports final bundle sizes when the development session ends
+
+### undefined
+
+URL: https://claudepro.directory/hooks/git-auto-commit-on-stop
+Automatically commits all changes with a summary when Claude Code session ends
+
+### undefined
+
+URL: https://claudepro.directory/hooks/git-branch-protection
+Prevents direct edits to protected branches like main or master, enforcing PR-based workflows
+
+### undefined
+
+URL: https://claudepro.directory/hooks/git-pre-commit-validator
+Comprehensive pre-commit hook that validates code quality, runs tests, and enforces standards
+
+### undefined
+
+URL: https://claudepro.directory/hooks/github-actions-workflow-validator
+Validates GitHub Actions workflow files for syntax errors and best practices
+
+### undefined
+
+URL: https://claudepro.directory/hooks/go-module-tidy
+Automatically runs go mod tidy when Go files or go.mod are modified to keep dependencies clean
+
+### undefined
+
+URL: https://claudepro.directory/hooks/graphql-schema-validator
+Validates GraphQL schema files and checks for breaking changes when modified
+
+### undefined
+
+URL: https://claudepro.directory/hooks/i18n-translation-validator
+Validates translation files for missing keys and ensures consistency across different language files
+
+### undefined
+
+URL: https://claudepro.directory/hooks/jest-snapshot-auto-updater
+Automatically updates Jest snapshots when component files are modified significantly
+
+### undefined
+
+URL: https://claudepro.directory/hooks/json-schema-validator
+Validates JSON files against their schemas when modified to ensure data integrity
+
+### undefined
+
+URL: https://claudepro.directory/hooks/kubernetes-manifest-validator
+Validates Kubernetes YAML manifests for syntax and best practices when modified
+
+### undefined
+
+URL: https://claudepro.directory/hooks/markdown-link-checker
+Validates all links in markdown files to detect broken links and references
+
+### undefined
+
+URL: https://claudepro.directory/hooks/memory-usage-monitor
+Monitors memory usage and alerts when thresholds are exceeded
+
+### undefined
+
+URL: https://claudepro.directory/hooks/nextjs-route-analyzer
+Analyzes Next.js page routes and generates a route map when pages are added or modified
+
+### undefined
+
+URL: https://claudepro.directory/hooks/package-vulnerability-scanner
+Scans for security vulnerabilities when package.json or requirements.txt files are modified
+
+### undefined
+
+URL: https://claudepro.directory/hooks/performance-benchmark-report
+Runs performance benchmarks and generates comparison report when session ends
+
+### undefined
+
+URL: https://claudepro.directory/hooks/performance-impact-monitor
+Monitors and alerts on performance-impacting changes in real-time
+
+### undefined
+
+URL: https://claudepro.directory/hooks/performance-monitor
+Monitors application performance metrics, identifies bottlenecks, and provides optimization recommendations
+
+### undefined
+
+URL: https://claudepro.directory/hooks/playwright-test-runner
+Automatically runs Playwright E2E tests when test files or page components are modified
+
+### undefined
+
+URL: https://claudepro.directory/hooks/prisma-schema-sync
+Automatically generates Prisma client and creates migrations when schema.prisma is modified
+
+### undefined
+
+URL: https://claudepro.directory/hooks/python-import-optimizer
+Automatically sorts and optimizes Python imports using isort when Python files are modified
+
+### undefined
+
+URL: https://claudepro.directory/hooks/python-linter-integration
+Automatically runs pylint on Python files after editing to enforce code quality standards
+
+### undefined
+
+URL: https://claudepro.directory/hooks/react-component-test-generator
+Automatically creates or updates test files when React components are modified
+
+### undefined
+
+URL: https://claudepro.directory/hooks/real-time-activity-tracker
+Tracks all Claude Code activities in real-time and logs them for monitoring and debugging
+
+### undefined
+
+URL: https://claudepro.directory/hooks/redis-cache-invalidator
+Automatically clears relevant Redis cache keys when data model files are modified
+
+
+Last updated: 2025-10-20T19:35:50.492Z

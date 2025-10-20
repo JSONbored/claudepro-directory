@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Interact with Asana workspaces to manage projects and tasks
+
+URL: https://claudepro.directory/mcp/asana-mcp-server
+Category: MCP Servers
+Author: Asana
+Tags: asana, project-management, tasks, team-collaboration, workflow
+Added: 2025-09-18
+
+---
+
+Connect Claude to Asana for comprehensive project management and team collaboration.
+
+---
+
+Last updated: 2025-10-20T19:35:50.463Z

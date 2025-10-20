@@ -1,0 +1,192 @@
+# undefined - Claude Pro Directory
+
+> Advanced performance optimization with bottleneck analysis, memory profiling, and automated improvements
+
+URL: https://claudepro.directory/commands/optimize
+Category: Commands
+Author: claudepro
+Tags: performance, optimization, profiling, bottleneck, efficiency
+Added: 2025-09-16
+
+---
+
+The `/optimize` command provides comprehensive performance analysis and optimization recommendations including bottleneck identification, memory profiling, algorithm improvements, and automated code transformations.
+
+## Usage
+
+```
+/optimize [options] <file_or_function>
+```
+
+## Options
+
+### Optimization Types
+- `--performance` - CPU and execution time optimization
+- `--memory` - Memory usage and allocation optimization
+- `--network` - Network request and bandwidth optimization
+- `--database` - Database query and connection optimization
+- `--bundle` - Bundle size and loading optimization
+- `--all` - Comprehensive optimization analysis (default)
+
+### Analysis Depth
+- `--quick` - Fast analysis with basic recommendations
+- `--detailed` - Comprehensive profiling and analysis
+- `--deep` - Advanced algorithm and architecture analysis
+- `--benchmark` - Performance benchmarking and comparison
+
+### Target Metrics
+- `--latency` - Focus on response time reduction
+- `--throughput` - Focus on request handling capacity
+- `--scalability` - Focus on scaling characteristics
+- `--efficiency` - Focus on resource utilization
+
+### Output Options
+- `--format=report` - Detailed optimization report (default)
+- `--format=diff` - Before/after code comparison
+- `--format=metrics` - Performance metrics and benchmarks
+- `--format=interactive` - Interactive optimization guide
+
+## Examples
+
+### Database Query Optimization
+
+```javascript
+// Unoptimized code with multiple performance issues
+class ProductService {
+  constructor(database) {
+    this.db = database;
+  }
+  
+  // 🐌 Issue 1: N+1 Query Problem
+  async getProductsWithReviews() {
+    const products = await this.db.query('SELECT * FROM products');
+    
+    for (const product of products) {
+      // 🐌 Executes N queries (one per product)
+      product.reviews = await this.db.query(
+        'SELECT * FROM reviews WHERE product_id = ?', 
+        [product.id]
+      );
+      
+      // 🐌 Issue 2: Another N queries for user data
+      for (const review of product.reviews) {
+        review.user = await this.db.query(
+          'SELECT name, avatar FROM users WHERE id = ?',
+          [review.user_id]
+        );
+      }
+    }
+    
+    return products;
+  }
+  
+  // 🐌 Issue 3: Inefficient search without indexes
+  async searchProducts(searchTerm) {
+    return await this.db.query(`
+      SELECT * FROM products 
+      WHERE LOWER(name) LIKE LOWER('%${searchTerm}%') 
+         OR LOWER(description) LIKE LOWER('%${searchTerm}%')
+      ORDER BY name
+    `);
+  }
+  
+  // 🐌 Issue 4: No pagination, loads all data
+  async getPopularProducts() {
+    return await this.db.query(`
+      SELECT p.*, COUNT(r.id) as review_count,
+             AVG(r.rating) as avg_rating
+      FROM products p
+      LEFT JOIN reviews r ON p.id = r.product_id
+      GROUP BY p.id
+      ORDER BY review_count DESC, avg_rating DESC
+    `);
+  }
+  
+  // 🐌 Issue 5: Expensive aggregation on every call
+  async getProductStats(productId) {
+    const product = await this.db.query(
+      'SELECT * FROM products WHERE id = ?', 
+      [productId]
+    );
+    
+    const reviewCount = await this.db.query(
+      'SELECT COUNT(*) as count FROM reviews WHERE product_id = ?',
+      [productId]
+    );
+    
+    const avgRating = await this.db.query(
+      'SELECT AVG(rating) as avg FROM reviews WHERE product_id = ?',
+      [productId]
+    );
+    
+    const recentReviews = await this.db.query(
+      'SELECT * FROM reviews WHERE product_id = ? ORDER BY created_at DESC LIMIT 5',
+      [productId]
+    );
+    
+    return {
+      ...product[0],
+      reviewCount: reviewCount[0].count,
+      avgRating: avgRating[0].avg,
+      recentReviews
+    };
+  }
+}
+```
+
+**Optimization Analysis:**
+
+```markdown
+# 🚀 Performance Optimization Report
+
+## 📊 Performance Issues Identified
+
+### Issue 1: N+1 Query Problem (Critical)
+**Location:** `getProductsWithReviews()` method
+**Impact:** 🔴 Severe - O(n²) database queries
+**Current Performance:** 1,000 products = 2,001 queries
+**Estimated Fix Impact:** 99.5% query reduction
+
+**Problem Analysis:**
+```
+Current Execution:
+1. SELECT * FROM products (1 query)
+2. For each product (N queries):
+   - SELECT * FROM reviews WHERE product_id = ?
+3. For each review (N*M queries):
+   - SELECT name, avatar FROM users WHERE id = ?
+
+Total Queries: 1 + N + (N * avg_reviews_per_product)
+With 100 products, 5 reviews each: 1 + 100 + 500 = 601 queries!
+```
+
+**Optimized Solution:**
+```javascript
+async getProductsWithReviews() {
+  // ✅ Single optimized query with JOINs
+  const query = `
+    SELECT 
+      p.id as product_id,
+      p.name as product_name,
+      p.description,
+      p.price,
+      p.created_at as product_created_at,
+      r.id as review_id,
+      r.rating,
+      r.comment,
+      r.created_at as review_created_at,
+      u.name as user_name,
+      u.avatar as user_avatar
+    FROM products p
+    LEFT JOIN reviews r ON p.id = r.product_id
+    LEFT JOIN users u ON r.user_id = u.id
+    ORDER BY p.id, r.created_at DESC
+  `;
+  
+  const rows = aw...
+
+[Content truncated for brevity]
+
+---
+
+Last updated: 2025-10-20T19:35:50.474Z

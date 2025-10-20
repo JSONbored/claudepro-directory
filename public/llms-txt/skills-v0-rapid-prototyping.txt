@@ -1,0 +1,138 @@
+# V0 Rapid UI Prototyping Workflow - Claude Pro Directory
+
+> Build production-ready React components and full pages in minutes using V0.dev AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integration.
+
+URL: https://claudepro.directory/skills/v0-rapid-prototyping
+Category: Skills
+Author: JSONbored
+Tags: v0, prototyping, ui, shadcn, react
+Added: 2025-10-16
+
+---
+
+# V0 Rapid UI Prototyping Workflow Skill
+
+## What This Skill Enables
+
+Claude can generate production-ready React components and complete page layouts using V0.dev patterns - Vercel's breakthrough AI UI generator that has transformed frontend development in 2025. This skill enables instant component creation with shadcn/ui integration, TailwindCSS v4 styling, full TypeScript support, and seamless Next.js 15 App Router compatibility.
+
+## Prerequisites
+
+**Required:**
+- Next.js 15+ project (App Router)
+- TailwindCSS v4.1+ configured
+- shadcn/ui components installed
+- Node.js 18+
+
+**What Claude handles automatically:**
+- Generating React 19 components with proper TypeScript types
+- Applying TailwindCSS v4 styling with CSS variables
+- Integrating shadcn/ui components
+- Creating responsive, mobile-first layouts
+- Adding framer-motion animations
+- Implementing accessibility (WCAG 2.2 Level AA)
+- Server/Client component distinction
+
+## How to Use This Skill
+
+### Component Generation from Description
+
+**Prompt:** "Create a pricing table component with 3 tiers (Basic, Pro, Enterprise). Include monthly/annual toggle, feature lists with checkmarks, and prominent CTA buttons. Use shadcn/ui Card and Button components."
+
+Claude will:
+1. Generate TypeScript component with proper types
+2. Use shadcn/ui primitives (Card, Button, Switch)
+3. Apply TailwindCSS v4 utility classes
+4. Implement state management with useState
+5. Add responsive grid layout
+6. Include accessibility attributes (ARIA labels)
+7. Add smooth transitions with CSS
+
+### Dashboard Layout Creation
+
+**Prompt:** "Build an analytics dashboard layout with sidebar navigation, header with search and notifications, stat cards showing KPIs, revenue chart using Recharts, and recent activity table. Make it fully responsive."
+
+Claude will:
+1. Create Server Component for static shell
+2. Add Client Components for interactive elements
+3. Implement responsive sidebar (mobile drawer)
+4. Generate stat cards with icons from lucide-react
+5. Integrate Recharts with proper TypeScript types
+6. Add loading states with Suspense boundaries
+7. Include dark mode support via next-themes
+
+### Form Generation with Validation
+
+**Prompt:** "Create a user registration form with email, password, confirm password, and terms acceptance. Use react-hook-form with Zod validation. Show validation errors inline and disable submit until valid."
+
+Claude will:
+1. Generate form with shadcn/ui Form components
+2. Define Zod schema with comprehensive validation
+3. Integrate react-hook-form with zodResolver
+4. Add password strength indicator
+5. Implement real-time validation feedback
+6. Create accessible error messages
+7. Add loading state during submission
+
+### Landing Page Section
+
+**Prompt:** "Design a hero section with gradient background, animated headline text, two CTA buttons, and three feature highlights below. Include subtle animations on scroll using framer-motion."
+
+Claude will:
+1. Create responsive hero layout
+2. Add gradient backgrounds with TailwindCSS
+3. Implement text animations with framer-motion
+4. Add button hover effects
+5. Create feature cards with icons
+6. Implement scroll-triggered animations
+7. Optimize for Core Web Vitals
+
+## Tips for Best Results
+
+1. **Be Specific About Components**: Mention exact shadcn/ui components you want (Card, Button, Dialog, etc.) for consistent design system usage.
+
+2. **Request Mobile-First**: Always specify "mobile-first responsive design" to ensure proper breakpoints and touch-friendly interactions.
+
+3. **Accessibility First**: Ask for WCAG 2.2 Level AA compliance to get proper semantic HTML, ARIA labels, and keyboard navigation.
+
+4. **Server vs Client**: Clarify if components need interactivity (Client Component with 'use client') or can be static (Server Component).
+
+5. **Animation Budgets**: Request "performant animations" to get GPU-accelerated framer-motion transitions instead of heavy JavaScript.
+
+6. **Dark Mode**: Specify "with dark mode support" to get proper color variable usage compatible with next-themes.
+
+## Common Workflows
+
+### Complete Page Generation
+```
+"Create a complete product details page with:
+1. Image gallery with thumbnails (Client Component)
+2. Product info section (title, price, description)
+3. Add to cart button with quantity selector
+4. Reviews section with star ratings
+5. Related products carousel
+6. Mobile-responsive layout with good UX
+7. Loading states and error handling"
+```
+
+### Component Library Starter
+```
+"Generate a set of reusable UI components:
+1. CustomButton with variants (primary, secondary, outline, ghost)
+2. CustomCard with header, content, footer slots
+3. CustomInput with label, error message, help text
+4. CustomSelect with search and multi-select
+5. All components with TypeScript props, accessibility, and Storybook-ready"
+```
+
+### Data Visualization Dashboard
+```
+"Build a data visualization dashboard component:
+1. KPI summary cards at top (Revenue, Users, Conversion)
+2. Line chart for 30-day trends using Rech...
+
+[Content truncated for brevity]
+
+---
+
+Last updated: 2025-10-20T19:35:50.521Z

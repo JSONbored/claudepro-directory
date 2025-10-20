@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Runs performance benchmarks and generates comparison report when session ends
+
+URL: https://claudepro.directory/hooks/performance-benchmark-report
+Category: Hooks
+Author: JSONbored
+Tags: performance, benchmarking, stop-hook, testing, metrics
+Added: 2025-09-19
+
+---
+
+Runs performance benchmarks and generates comparison report when session ends
+
+---
+
+Last updated: 2025-10-20T19:35:50.505Z

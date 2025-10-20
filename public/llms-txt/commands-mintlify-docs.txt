@@ -1,0 +1,230 @@
+# undefined - Claude Pro Directory
+
+> Generate beautiful, searchable documentation using Mintlify with AI-powered content generation, API reference automation, and MDX components
+
+URL: https://claudepro.directory/commands/mintlify-docs
+Category: Commands
+Author: JSONbored
+Tags: mintlify, documentation, mdx, api-docs, ai
+Added: 2025-10-16
+
+---
+
+The `/mintlify-docs` command generates comprehensive, production-ready documentation using Mintlify with AI-powered content creation, API reference automation, and interactive MDX components.
+
+## Usage
+
+```
+/mintlify-docs [options] <documentation_scope>
+```
+
+## Options
+
+### Documentation Types
+- `--quickstart` - Generate quickstart guide
+- `--api-reference` - Generate API reference from code
+- `--tutorial` - Generate step-by-step tutorial
+- `--guide` - Generate conceptual guide
+- `--changelog` - Generate changelog from git history
+
+### Source Analysis
+- `--from-code=<path>` - Generate docs from source code
+- `--from-openapi=<path>` - Generate API docs from OpenAPI spec
+- `--from-types=<path>` - Generate docs from TypeScript types
+- `--from-jsdoc` - Extract JSDoc comments
+
+### Output Format
+- `--mdx` - Generate MDX with components (default)
+- `--markdown` - Generate plain Markdown
+- `--with-examples` - Include code examples
+- `--with-snippets` - Include interactive snippets
+
+### Features
+- `--search` - Configure search integration
+- `--navigation` - Generate navigation structure
+- `--analytics` - Add analytics tracking
+- `--versioning` - Enable version management
+
+## Examples
+
+### API Reference from TypeScript
+
+**Command:**
+```
+/mintlify-docs --api-reference --from-types=src/api/users.ts --with-examples
+```
+
+**Input Code:**
+```typescript
+// src/api/users.ts
+/**
+ * User management API client
+ * @module UserAPI
+ */
+
+export interface User {
+  /** Unique user identifier */
+  id: string;
+  /** User's email address */
+  email: string;
+  /** Display name */
+  name: string;
+  /** User role */
+  role: 'admin' | 'user' | 'guest';
+  /** Account creation timestamp */
+  createdAt: Date;
+}
+
+export interface CreateUserInput {
+  email: string;
+  name: string;
+  password: string;
+}
+
+/**
+ * Retrieves a user by ID
+ * @param userId - The user's unique identifier
+ * @returns Promise resolving to the user object
+ * @throws {NotFoundError} If user doesn't exist
+ * @throws {AuthorizationError} If caller lacks permission
+ * @example
+ * ```typescript
+ * const user = await getUser('user_123');
+ * console.log(user.name);
+ * ```
+ */
+export async function getUser(userId: string): Promise<User> {
+  const response = await fetch(`/api/users/${userId}`);
+  if (!response.ok) throw new Error('Failed to fetch user');
+  return response.json();
+}
+
+/**
+ * Creates a new user
+ * @param input - User creation data
+ * @returns Promise resolving to the created user
+ * @throws {ValidationError} If input is invalid
+ * @throws {ConflictError} If email already exists
+ * @example
+ * ```typescript
+ * const newUser = await createUser({
+ *   email: 'user@example.com',
+ *   name: 'John Doe',
+ *   password: 'secure-password'
+ * });
+ * ```
+ */
+export async function createUser(input: CreateUserInput): Promise<User> {
+  const response = await fetch('/api/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  if (!response.ok) throw new Error('Failed to create user');
+  return response.json();
+}
+```
+
+**Generated Documentation:**
+```mdx
+---
+title: 'User API'
+description: 'Manage user accounts and profiles'
+icon: 'users'
+---
+
+# User Management API
+
+The User API provides endpoints for managing user accounts, authentication, and profiles.
+
+## User Object
+
+The User object represents a user account in your application.
+
+<ResponseField name="id" type="string" required>
+  Unique user identifier
+</ResponseField>
+
+<ResponseField name="email" type="string" required>
+  User's email address
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  Display name
+</ResponseField>
+
+<ResponseField name="role" type="'admin' | 'user' | 'guest'" required>
+  User role determining access permissions
+</ResponseField>
+
+<ResponseField name="createdAt" type="Date" required>
+  Account creation timestamp
+</ResponseField>
+
+<CodeGroup>
+
+```typescript User Object
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: 'admin' | 'user' | 'guest';
+  createdAt: Date;
+}
+```
+
+```json Example
+{
+  "id": "user_123",
+  "email": "user@example.com",
+  "name": "John Doe",
+  "role": "user",
+  "createdAt": "2025-10-16T12:00:00Z"
+}
+```
+
+</CodeGroup>
+
+## Get User
+
+<div className="api-method">
+  <div className="api-method-label">GET</div>
+  <div className="api-method-path">/api/users/:userId</div>
+</div>
+
+Retrieves a user by their unique identifier.
+
+### Path Parameters
+
+<ParamField path="userId" type="string" required>
+  The user's unique identifier
+</ParamField>
+
+### Response
+
+<ResponseField name="user" type="User">
+  The requested user object
+</ResponseField>
+
+### Error Codes
+
+<ResponseField name="404" type="NotFoundError">
+  User with the specified ID doesn't exist
+</ResponseField>
+
+<ResponseField name="403" type="AuthorizationError">
+  Caller lacks permission to access this user
+</ResponseField>
+
+<CodeGroup>
+
+```typescript TypeScript SDK
+import { getUser } from '@/api/users';
+
+const user = await getUser('user_123'...
+
+[Content truncated for brevity]
+
+---
+
+Last updated: 2025-10-20T19:35:50.473Z

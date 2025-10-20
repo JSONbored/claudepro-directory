@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Analyzes webpack bundle size when webpack config or entry files are modified
+
+URL: https://claudepro.directory/hooks/webpack-bundle-analyzer
+Category: Hooks
+Author: JSONbored
+Tags: webpack, bundle, performance, optimization, analysis
+Added: 2025-09-19
+
+---
+
+Analyzes webpack bundle size when webpack config or entry files are modified
+
+---
+
+Last updated: 2025-10-20T19:35:50.509Z

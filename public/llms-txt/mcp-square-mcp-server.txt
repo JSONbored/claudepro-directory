@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Build on Square APIs for payments, inventory, and order management
+
+URL: https://claudepro.directory/mcp/square-mcp-server
+Category: MCP Servers
+Author: Square
+Tags: payments, square, pos, inventory, commerce
+Added: 2025-09-18
+
+---
+
+Integrate Square's commerce platform with Claude for payment processing and business management.
+
+---
+
+Last updated: 2025-10-20T19:35:50.468Z

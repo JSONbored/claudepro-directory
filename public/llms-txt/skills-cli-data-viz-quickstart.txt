@@ -1,0 +1,202 @@
+# CLI Data Viz Quickstart - Claude Pro Directory
+
+> Turn CSV/JSON into quick charts from the command line; export PNG/SVG for reports.
+
+URL: https://claudepro.directory/skills/cli-data-viz-quickstart
+Category: Skills
+Author: JSONbored
+Tags: visualization, charts, python, vega
+Added: 2025-10-15
+
+---
+
+# CLI Data Visualization Quickstart Skill
+
+## What This Skill Enables
+
+Claude can create charts and visualizations from your data (CSV, JSON, Excel) using matplotlib, seaborn, plotly, or other visualization libraries. Generate publication-ready charts, dashboards, and data visualizations with custom styling.
+
+## Prerequisites
+
+**Required:**
+- Claude Pro subscription
+- Code Interpreter feature enabled
+- Data file uploaded (CSV, JSON, Excel)
+
+**What Claude handles:**
+- Installing visualization libraries (matplotlib, seaborn, plotly)
+- Data loading and preprocessing
+- Chart generation with customization
+- Exporting to PNG, SVG, or interactive HTML
+- Multi-chart layouts and dashboards
+
+## How to Use This Skill
+
+### Quick Chart from Data
+
+**Prompt:** "Create a bar chart from this CSV showing sales by category. Make it professional-looking with labels and save as chart.png"
+
+Claude will:
+1. Load and analyze the CSV
+2. Generate bar chart
+3. Add labels, title, legend
+4. Apply professional styling
+5. Export high-resolution PNG
+
+### Time Series Plot
+
+**Prompt:** "Plot this time series data: dates on x-axis, values on y-axis. Show trend line and save as SVG."
+
+Claude will:
+1. Parse date column
+2. Create line plot
+3. Add trend line (regression)
+4. Format dates nicely
+5. Export as scalable SVG
+
+### Multiple Subplots
+
+**Prompt:** "Create a 2x2 grid of charts from this data:
+- Top left: revenue by month
+- Top right: customer distribution
+- Bottom left: product performance
+- Bottom right: regional breakdown
+Use consistent colors and save as dashboard.png"
+
+Claude will:
+1. Create subplot layout
+2. Generate each chart
+3. Apply consistent styling
+4. Add overall title
+5. Export combined visualization
+
+### Interactive Chart
+
+**Prompt:** "Create an interactive plotly chart with hover tooltips and zoom. Save as HTML."
+
+Claude will:
+1. Use plotly library
+2. Create interactive visualization
+3. Add hover information
+4. Enable zoom/pan
+5. Export as standalone HTML file
+
+## Common Workflows
+
+### Sales Dashboard
+```
+"Create a sales dashboard from this data:
+1. Line chart: monthly revenue trend
+2. Bar chart: top 10 products by sales
+3. Pie chart: sales by region
+4. Table: key metrics summary
+Use a professional color scheme and save as sales_dashboard.png"
+```
+
+### Statistical Visualization
+```
+"Visualize this dataset statistically:
+1. Histogram with distribution curve
+2. Box plot showing quartiles
+3. Scatter plot with correlation
+4. Heatmap of correlations between variables
+Add statistical annotations and save as analysis.png"
+```
+
+### Comparative Analysis
+```
+"Compare Year 2024 vs 2025 data:
+1. Side-by-side bar charts
+2. Percentage change annotations
+3. Highlight positive/negative changes with colors
+4. Add summary statistics
+Make it presentation-ready"
+```
+
+### Custom Styled Chart
+```
+"Create a chart matching our brand:
+- Primary color: #FF6B35
+- Font: Arial
+- Style: minimalist, no grid lines
+- Background: white
+- High DPI for print (300 dpi)
+Show monthly data as area chart"
+```
+
+## Chart Types Available
+
+### Basic Charts
+- Line plots (single/multiple series)
+- Bar charts (vertical/horizontal)
+- Scatter plots (with trend lines)
+- Pie charts (with percentages)
+- Area charts (stacked/unstacked)
+
+### Statistical Charts
+- Histograms (with KDE)
+- Box plots (with outliers)
+- Violin plots
+- Heatmaps (correlation matrices)
+- Distribution plots
+
+### Advanced Charts
+- Multi-axis plots
+- Subplots and grids
+- 3D visualizations
+- Animated charts
+- Interactive dashboards
+
+## Tips for Best Results
+
+1. **Describe Your Data**: Tell Claude what each column represents
+2. **Specify Chart Type**: Be clear about visualization type (bar, line, scatter, etc.)
+3. **Styling Preferences**: Mention colors, fonts, size, DPI
+4. **Labels Matter**: Ask for clear titles, axis labels, legends
+5. **Export Format**: PNG for presentations, SVG for web, HTML for interactive
+6. **Size/Resolution**: Specify dimensions ("800x600 pixels" or "10x6 inches at 300 dpi")
+7. **Multiple Charts**: Describe layout ("2x2 grid" or "side by side")
+
+## Customization Options
+
+### Colors & Themes
+- Built-in themes (seaborn, ggplot, bmh)
+- Custom color palettes
+- Brand color matching
+- Color-blind friendly palettes
+
+### Annotations
+- Data labels on points/bars
+- Trend lines and statistics
+- Reference lines
+- Text annotations
+- Arrows and callouts
+
+### Export Options
+- PNG (raster, high DPI)
+- SVG (vector, scalable)
+- PDF (print-ready)
+- HTML (interactive)
+- Multiple formats at once
+
+## Troubleshooting
+
+**Issue:** Charts look cluttered
+**Solution:** "Simplify the chart: remove grid, use fewer colors, increase spacing"
+
+**Issue:** Text too small or overlapping
+**Solution:** "Increase font size to 12pt and rotate x-axis labels 45 degrees"
+
+**Issue:** Colors don't match brand
+**Solution:** Provide hex codes: "Use #FF6B35 for primary, #4ECDC4 for secondary"
+
+**Issue:** Export quality is poor
+**Solution:** "Export at 300 DPI for print quality" or "Use vector format (SVG/PDF)"
+
+**Issue:** Legend bl...
+
+[Content truncated for brevity]
+
+---
+
+Last updated: 2025-10-20T19:35:50.518Z

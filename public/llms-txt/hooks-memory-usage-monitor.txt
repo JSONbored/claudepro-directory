@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Monitors memory usage and alerts when thresholds are exceeded
+
+URL: https://claudepro.directory/hooks/memory-usage-monitor
+Category: Hooks
+Author: JSONbored
+Tags: memory, performance, monitoring, notification, resources
+Added: 2025-09-19
+
+---
+
+Monitors memory usage and alerts when thresholds are exceeded
+
+---
+
+Last updated: 2025-10-20T19:35:50.505Z

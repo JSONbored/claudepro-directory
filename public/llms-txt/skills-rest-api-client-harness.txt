@@ -1,0 +1,217 @@
+# REST API Client Harness - Claude Pro Directory
+
+> Explore and script against REST APIs with auth, pagination, retries, and error handling.
+
+URL: https://claudepro.directory/skills/rest-api-client-harness
+Category: Skills
+Author: JSONbored
+Tags: rest, http, api, curl, node
+Added: 2025-10-15
+
+---
+
+# REST API Client Harness Skill
+
+## What This Skill Enables
+
+Claude can interact with REST APIs: make requests, handle authentication (API keys, OAuth, JWT), paginate through results, handle rate limits with retries, and process responses. Build API integration scripts, test endpoints, and extract data from web services.
+
+## Prerequisites
+
+**Required:**
+- Claude Pro subscription
+- Code Interpreter feature enabled
+- API credentials (if required by the API)
+
+**What Claude handles:**
+- Installing HTTP libraries (requests, axios, fetch)
+- Making authenticated requests
+- Handling pagination
+- Retry logic with exponential backoff
+- Response parsing and data extraction
+- Error handling
+
+## How to Use This Skill
+
+### Simple API Request
+
+**Prompt:** "Fetch data from this REST API endpoint: https://api.example.com/users
+Use API key: [your-key]
+Show me the first 10 results."
+
+Claude will:
+1. Make GET request with auth header
+2. Parse JSON response
+3. Extract and display data
+4. Handle errors gracefully
+
+### Paginated Data Extraction
+
+**Prompt:** "Fetch all pages from this paginated API:
+URL: https://api.example.com/items
+Pagination: cursor-based (next_cursor field)
+API Key: [your-key]
+Save all results to items.json"
+
+Claude will:
+1. Make first request
+2. Loop through pages using cursor
+3. Collect all results
+4. Save to JSON file
+5. Report total count
+
+### POST Request with Data
+
+**Prompt:** "Create a new user via POST request:
+URL: https://api.example.com/users
+Payload: {name: 'John Doe', email: 'john@example.com'}
+Auth: Bearer token [your-token]
+Show me the response."
+
+Claude will:
+1. Prepare POST request
+2. Set headers (auth, content-type)
+3. Send JSON payload
+4. Parse response
+5. Display result or error
+
+### Batch Operations
+
+**Prompt:** "Upload all these records to the API:
+- Read from users.csv
+- For each row, POST to /users endpoint
+- Handle rate limits (max 10 requests/second)
+- Log successes and failures
+- Retry failures once"
+
+Claude will:
+1. Read CSV data
+2. Iterate through rows
+3. Make POST requests with rate limiting
+4. Retry on failures
+5. Generate success/failure report
+
+## Common Workflows
+
+### API Testing & Exploration
+```
+"Test this API endpoint:
+1. Make GET request to /api/products
+2. Check status code and headers
+3. Validate JSON response schema
+4. Show sample of first 3 records
+5. Report if any fields are null/missing"
+```
+
+### Data Migration
+```
+"Migrate data from API A to API B:
+1. Fetch all records from source API (paginated)
+2. Transform to target API format
+3. POST to destination API
+4. Handle rate limits (5 req/sec)
+5. Log migration progress and errors
+Save unmigrated records to errors.json"
+```
+
+### Webhook Testing
+```
+"Test this webhook:
+1. POST sample payload to webhook URL
+2. Check response status
+3. Validate response format
+4. Test with invalid payload
+5. Report all results"
+```
+
+### API Monitoring
+```
+"Monitor API health:
+1. Hit /health endpoint every minute for 10 minutes
+2. Record response time and status
+3. Alert if response time > 1 second
+4. Create uptime report
+5. Plot response times"
+```
+
+## Authentication Methods
+
+### API Key Authentication
+- Header: `X-API-Key: your-key`
+- Query parameter: `?api_key=your-key`
+- Custom header format
+
+### Bearer Token (JWT)
+- Header: `Authorization: Bearer your-token`
+- Token refresh handling
+- Expiration detection
+
+### Basic Authentication
+- Header: `Authorization: Basic base64(user:pass)`
+- Credentials encoding
+
+### OAuth 2.0
+- Client credentials flow
+- Authorization code flow
+- Token refresh logic
+
+## Advanced Features
+
+### Rate Limiting & Retries
+- Respect rate limit headers
+- Exponential backoff
+- Jitter for retry timing
+- Max retry attempts
+
+### Response Handling
+- JSON parsing
+- XML/HTML parsing
+- Binary data (images, files)
+- Streaming responses
+
+### Error Handling
+- HTTP status code detection
+- Custom error messages
+- Validation errors
+- Network timeouts
+
+### Data Transformation
+- JSON to CSV conversion
+- Field mapping and renaming
+- Data type coercion
+- Filtering and aggregation
+
+## Tips for Best Results
+
+1. **Provide API Docs**: Share API documentation link or describe endpoints
+2. **Authentication**: Be clear about auth method and provide credentials securely
+3. **Rate Limits**: Mention any known rate limits ("max 100 requests/minute")
+4. **Pagination**: Describe pagination style (cursor, offset, page-based)
+5. **Error Handling**: Specify how to handle failures ("retry 3 times then skip")
+6. **Data Volume**: Estimate how many requests ("expect 1000 records across 10 pages")
+7. **Response Format**: Mention expected format (JSON, XML, etc.)
+
+## Common Patterns
+
+### Cursor-Based Pagination
+```python
+url = "https://api.example.com/items"
+all_items = []
+cursor = None
+while True:
+    params = {"cursor": cursor} if cursor else {}
+    response = requests.get(url, params=params)
+    data = response.json()
+    all_items.extend(data["items"])
+    cursor = data.get("next_cursor")
+    if not cursor:
+        break
+```
+
+### Retry with Exponential Ba...
+
+[Content truncated for brevity]
+
+---
+
+Last updated: 2025-10-20T19:35:50.520Z

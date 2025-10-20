@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Alerts when files exceed size thresholds that could impact performance
+
+URL: https://claudepro.directory/hooks/file-size-warning-monitor
+Category: Hooks
+Author: JSONbored
+Tags: file-size, performance, notification, monitoring, optimization
+Added: 2025-09-19
+
+---
+
+Alerts when files exceed size thresholds that could impact performance
+
+---
+
+Last updated: 2025-10-20T19:35:50.502Z

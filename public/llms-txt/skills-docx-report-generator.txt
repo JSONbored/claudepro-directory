@@ -1,0 +1,190 @@
+# DOCX Report Generator - Claude Pro Directory
+
+> Fill templated DOCX with data to produce reports/invoices, with images and PDF export.
+
+URL: https://claudepro.directory/skills/docx-report-generator
+Category: Skills
+Author: JSONbored
+Tags: docx, reports, templating, python
+Added: 2025-10-15
+
+---
+
+# DOCX Report Generator Skill
+
+## What This Skill Enables
+
+Claude can create, edit, and format Microsoft Word documents (.docx) programmatically. Generate professional reports, proposals, documentation, and formatted documents with tables, charts, headers, and custom styling.
+
+## Prerequisites
+
+**Required:**
+- Claude Pro subscription
+- Code Interpreter feature enabled
+- Template document uploaded (optional, for editing existing docs)
+
+**What Claude handles:**
+- Installing python-docx and document libraries
+- Document structure and formatting
+- Table generation and styling
+- Page layout and sections
+- Converting between formats (Markdown → DOCX)
+
+## How to Use This Skill
+
+### Create a New Document
+
+**Prompt:** "Create a professional business proposal document with:
+- Title page with company logo placeholder
+- Executive summary section
+- 3-column pricing table
+- Terms and conditions
+Save as proposal.docx"
+
+Claude will:
+1. Create document structure
+2. Add formatted sections
+3. Generate styled tables
+4. Apply professional formatting
+5. Export as .docx file
+
+### Edit Existing Document
+
+**Prompt:** "Open this contract template and:
+1. Replace all [COMPANY_NAME] with 'Acme Corp'
+2. Update the pricing table in section 3
+3. Add a new clause about termination
+4. Save as acme_contract.docx"
+
+Claude will:
+1. Load the existing document
+2. Find and replace text
+3. Modify tables
+4. Insert new content
+5. Preserve original formatting
+
+### Generate Report from Data
+
+**Prompt:** "Create a monthly sales report from this CSV data:
+- Executive summary with key metrics
+- Sales by region table
+- Top performers list
+- Month-over-month comparison chart
+- Save as sales_report_october.docx"
+
+Claude will:
+1. Analyze the CSV data
+2. Calculate metrics
+3. Generate formatted sections
+4. Create tables with data
+5. Add visual elements
+
+### Format Conversion
+
+**Prompt:** "Convert this Markdown document to a formatted Word document with:
+- Headings styled with built-in heading styles
+- Code blocks in monospace font
+- Bullet lists properly formatted
+- Save as documentation.docx"
+
+Claude will:
+1. Parse Markdown structure
+2. Map to Word styles
+3. Apply formatting
+4. Generate DOCX
+
+## Common Workflows
+
+### Meeting Minutes Template
+```
+"Create a meeting minutes template with:
+1. Header: Date, Time, Location, Attendees
+2. Agenda items section
+3. Discussion notes table (Topic | Discussion | Decision)
+4. Action items table (Task | Owner | Due Date | Status)
+5. Next meeting section
+Use professional formatting with the 'Office' built-in style."
+```
+
+### Invoice Generation
+```
+"Generate an invoice document:
+1. Company header (name, address, logo placeholder)
+2. Invoice details (number, date, due date)
+3. Bill to / Ship to sections
+4. Line items table (Description, Qty, Rate, Amount)
+5. Subtotal, tax, total calculations
+6. Payment terms footer
+Make it look professional with borders and shading."
+```
+
+### Technical Documentation
+```
+"Create technical documentation:
+1. Cover page with title and version
+2. Table of contents (auto-generated)
+3. Multiple sections with heading hierarchy
+4. Code examples in monospace with syntax highlighting
+5. Tables for API endpoints
+6. Numbered figures with captions
+Use consistent styling throughout."
+```
+
+### Resume/CV Formatting
+```
+"Format this resume data into a professional document:
+1. Header with name and contact info
+2. Professional summary
+3. Work experience (company, role, dates, bullets)
+4. Education section
+5. Skills table (2 columns)
+6. Use modern, clean formatting
+Save as resume.docx"
+```
+
+## Tips for Best Results
+
+1. **Be Specific About Formatting**: Mention fonts, sizes, colors, alignment
+2. **Reference Built-in Styles**: Use Word's built-in styles ("Heading 1", "Title", "Intense Quote")
+3. **Table Formatting**: Specify headers, borders, shading, column widths
+4. **Page Layout**: Mention margins, orientation, page size if non-standard
+5. **Images**: Provide image files or describe placeholder dimensions
+6. **Consistent Style**: Ask for style guides ("use Arial 11pt throughout")
+7. **Sections**: Use section breaks for different headers/footers
+
+## Advanced Features
+
+### Headers & Footers
+- Different first page headers
+- Page numbers with custom formatting
+- Chapter/section titles in headers
+- Watermarks and background
+
+### Table Enhancements
+- Merged cells
+- Repeating header rows
+- Conditional formatting
+- Auto-width columns
+
+### Document Automation
+- Mail merge from data files
+- Template-based generation
+- Batch document creation
+- Variable substitution
+
+## Troubleshooting
+
+**Issue:** Formatting doesn't look right
+**Solution:** Be more specific about styles. Reference Word's built-in style names or describe exact formatting (font, size, color, alignment)
+
+**Issue:** Tables break across pages poorly
+**Solution:** Ask Claude to set "keep rows together" or adjust table properties
+
+**Issue:** Images not appearing
+**Solution:** Upload images separately and reference them in your prompt, or describe placeholder dime...
+
+[Content truncated for brevity]
+
+---
+
+Last updated: 2025-10-20T19:35:50.519Z

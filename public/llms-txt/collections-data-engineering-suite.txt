@@ -1,0 +1,17 @@
+# Data Engineering Suite - Claude Pro Directory
+
+> Comprehensive toolkit for data engineers working with databases, ETL pipelines, and data infrastructure. Includes database design, optimization, and cloud services integration.
+
+URL: https://claudepro.directory/collections/data-engineering-suite
+Category: Collections
+Author: JSONbored
+Tags: data, database, etl, sql, cloud, engineering
+Added: 2025-10-02
+
+---
+
+Comprehensive toolkit for data engineers working with databases, ETL pipelines, and data infrastructure. Includes database design, optimization, and cloud services integration.
+
+---
+
+Last updated: 2025-10-20T19:35:50.515Z

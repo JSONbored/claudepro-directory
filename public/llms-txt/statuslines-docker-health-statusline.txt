@@ -1,0 +1,49 @@
+# Docker Health Statusline - Claude Pro Directory
+
+> Docker statusline configuration for Claude Code CLI. Features real-time health monitoring, color-coded indicators, and container tracking. Production-ready.
+
+URL: https://claudepro.directory/statuslines/docker-health-statusline
+Category: Statuslines
+Author: Claude Pro Directory
+Tags: docker, statusline, monitoring, health-check, containers, CLI, claude-code, devops
+Added: 2025-10-19
+
+---
+
+#!/bin/bash
+
+# Docker Health Statusline
+# Real-time container health monitoring for Claude Code CLI
+
+# Get running containers count
+running=$(docker ps -q 2>/dev/null | wc -l | tr -d ' ')
+
+# Get total containers
+total=$(docker ps -a -q 2>/dev/null | wc -l | tr -d ' ')
+
+# Get unhealthy containers
+unhealthy=$(docker ps --filter health=unhealthy -q 2>/dev/null | wc -l | tr -d ' ')
+
+# Color codes
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Status indicator
+if [ "$unhealthy" -gt 0 ]; then
+    status="${RED}●${NC}"
+elif [ "$running" -eq 0 ]; then
+    status="${YELLOW}○${NC}"
+else
+    status="${GREEN}●${NC}"
+fi
+
+# Display statusline
+echo -e "${BLUE}🐳${NC} ${status} ${running}/${total}"
+
+
+---
+
+Last updated: 2025-10-20T19:35:50.511Z

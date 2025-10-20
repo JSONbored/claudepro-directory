@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Official Redis MCP server providing natural language interface for Redis data management and operations
+
+URL: https://claudepro.directory/mcp/redis-mcp-server
+Category: MCP Servers
+Author: Redis
+Tags: redis, cache, database, nosql, official
+Added: 2025-09-20
+
+---
+
+The official Redis MCP Server provides a natural language interface for AI agents to manage and search data in Redis, supporting various data structures and integrations.
+
+---
+
+Last updated: 2025-10-20T19:35:50.468Z

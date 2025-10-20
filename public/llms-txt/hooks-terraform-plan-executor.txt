@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Automatically runs terraform plan when .tf files are modified to preview infrastructure changes
+
+URL: https://claudepro.directory/hooks/terraform-plan-executor
+Category: Hooks
+Author: JSONbored
+Tags: terraform, infrastructure, iac, devops, cloud
+Added: 2025-09-19
+
+---
+
+Automatically runs terraform plan when .tf files are modified to preview infrastructure changes
+
+---
+
+Last updated: 2025-10-20T19:35:50.508Z

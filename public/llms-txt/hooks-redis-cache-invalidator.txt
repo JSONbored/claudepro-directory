@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Automatically clears relevant Redis cache keys when data model files are modified
+
+URL: https://claudepro.directory/hooks/redis-cache-invalidator
+Category: Hooks
+Author: JSONbored
+Tags: redis, cache, performance, data-models, invalidation
+Added: 2025-09-19
+
+---
+
+Automatically clears relevant Redis cache keys when data model files are modified
+
+---
+
+Last updated: 2025-10-20T19:35:50.507Z

@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Build video creation capabilities into your applications
+
+URL: https://claudepro.directory/mcp/invideo-mcp-server
+Category: MCP Servers
+Author: invideo
+Tags: video, invideo, media, content-creation, ai-video
+Added: 2025-09-18
+
+---
+
+Create and edit videos through Claude using invideo's AI-powered video creation platform.
+
+---
+
+Last updated: 2025-10-20T19:35:50.466Z

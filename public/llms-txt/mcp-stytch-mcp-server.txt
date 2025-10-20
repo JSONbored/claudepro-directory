@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Configure and manage Stytch authentication services and workspace settings
+
+URL: https://claudepro.directory/mcp/stytch-mcp-server
+Category: MCP Servers
+Author: Stytch
+Tags: authentication, stytch, identity, security, auth
+Added: 2025-09-18
+
+---
+
+Manage Stytch authentication configurations and workspace settings for identity management.
+
+---
+
+Last updated: 2025-10-20T19:35:50.469Z

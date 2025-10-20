@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Tracks all Claude Code activities in real-time and logs them for monitoring and debugging
+
+URL: https://claudepro.directory/hooks/real-time-activity-tracker
+Category: Hooks
+Author: JSONbored
+Tags: monitoring, logging, notification, real-time, debugging
+Added: 2025-09-19
+
+---
+
+Tracks all Claude Code activities in real-time and logs them for monitoring and debugging
+
+---
+
+Last updated: 2025-10-20T19:35:50.506Z

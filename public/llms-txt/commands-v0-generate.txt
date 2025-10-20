@@ -1,0 +1,157 @@
+# undefined - Claude Pro Directory
+
+> Generate production-ready React components from natural language using V0.dev patterns with shadcn/ui, TailwindCSS, and TypeScript
+
+URL: https://claudepro.directory/commands/v0-generate
+Category: Commands
+Author: JSONbored
+Tags: v0, ui-generation, shadcn, react, tailwind
+Added: 2025-10-16
+
+---
+
+The `/v0-generate` command generates production-ready React components using V0.dev AI patterns with shadcn/ui integration, TailwindCSS v4, and full TypeScript support.
+
+## Usage
+
+```
+/v0-generate [options] <component_description>
+```
+
+## Options
+
+### Component Types
+- `--page` - Generate full page layout (default)
+- `--component` - Generate reusable component
+- `--form` - Generate form with validation
+- `--dashboard` - Generate dashboard layout
+- `--landing` - Generate landing page section
+
+### Framework Integration
+- `--next15` - Next.js 15 App Router (default)
+- `--react19` - Standalone React 19
+- `--remix` - Remix framework
+- `--astro` - Astro with React islands
+
+### UI Libraries
+- `--shadcn` - Use shadcn/ui components (default)
+- `--radix` - Raw Radix UI primitives
+- `--headless` - Headless UI components
+- `--custom` - Custom styled components
+
+### Styling Options
+- `--tailwind` - TailwindCSS v4 (default)
+- `--css-modules` - CSS Modules
+- `--styled` - Styled Components
+- `--vanilla` - Vanilla Extract
+
+### Features
+- `--responsive` - Mobile-first responsive design (default: true)
+- `--dark-mode` - Include dark mode support
+- `--animated` - Add framer-motion animations
+- `--accessible` - WCAG 2.2 Level AA compliance
+- `--server-component` - React Server Component
+- `--client-component` - Client Component with interactivity
+
+## Examples
+
+### Dashboard Page Generation
+
+**Command:**
+```
+/v0-generate --page --dashboard --dark-mode "Analytics dashboard with revenue chart, user stats cards, and recent activity table"
+```
+
+**Generated Code:**
+```typescript
+// app/dashboard/page.tsx
+import { Suspense } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RevenueChart } from '@/components/dashboard/revenue-chart';
+import { StatsCards } from '@/components/dashboard/stats-cards';
+import { ActivityTable } from '@/components/dashboard/activity-table';
+import { DollarSign, Users, ShoppingCart, TrendingUp } from 'lucide-react';
+
+export default async function DashboardPage() {
+  return (
+    <div className="flex min-h-screen flex-col">
+      <header className="border-b">
+        <div className="container flex h-16 items-center px-4">
+          <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
+        </div>
+      </header>
+
+      <main className="flex-1 space-y-4 p-4 md:p-8">
+        {/* Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Revenue
+              </CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">$45,231.89</div>
+              <p className="text-xs text-muted-foreground">
+                +20.1% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Active Users
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+2,350</div>
+              <p className="text-xs text-muted-foreground">
+                +180.1% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Sales</CardTitle>
+              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+12,234</div>
+              <p className="text-xs text-muted-foreground">
+                +19% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Conversion Rate
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+3.24%</div>
+              <p className="text-xs text-muted-foreground">
+                +0.5% from last month
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Revenue Chart */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <Card className="col-span-4">
+            <CardHeader>
+             ...
+
+[Content truncated for brevity]
+
+---
+
+Last updated: 2025-10-20T19:35:50.475Z

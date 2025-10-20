@@ -1,0 +1,93 @@
+# Commands - Claude Pro Directory
+
+> Custom slash commands for Claude Code to streamline development workflows
+
+URL: https://claudepro.directory/commands
+Total Items: 16
+
+---
+
+## All Commands
+
+### undefined
+
+URL: https://claudepro.directory/commands/autogen-workflow
+Orchestrate multi-agent workflows using Microsoft AutoGen v0.4 with role-based task delegation, conversation patterns, and collaborative problem solving
+
+### undefined
+
+URL: https://claudepro.directory/commands/cursor-rules
+Generate .cursorrules files for AI-native development with project-specific patterns, coding standards, and intelligent context awareness
+
+### undefined
+
+URL: https://claudepro.directory/commands/debug
+Advanced debugging assistant with root cause analysis, step-by-step troubleshooting, and automated fix suggestions
+
+### undefined
+
+URL: https://claudepro.directory/commands/docs
+Intelligent documentation generator with API specs, code examples, tutorials, and interactive guides
+
+### undefined
+
+URL: https://claudepro.directory/commands/explain
+Intelligent code explanation with visual diagrams, step-by-step breakdowns, and interactive examples
+
+### undefined
+
+URL: https://claudepro.directory/commands/generate-tests
+Automatically generate comprehensive test suites including unit tests, integration tests, and edge cases with multiple testing framework support
+
+### undefined
+
+URL: https://claudepro.directory/commands/git-smart-commit
+Intelligently analyzes changes and creates well-formatted git commits with conventional commit messages
+
+### undefined
+
+URL: https://claudepro.directory/commands/mintlify-docs
+Generate beautiful, searchable documentation using Mintlify with AI-powered content generation, API reference automation, and MDX components
+
+### undefined
+
+URL: https://claudepro.directory/commands/optimize
+Advanced performance optimization with bottleneck analysis, memory profiling, and automated improvements
+
+### undefined
+
+URL: https://claudepro.directory/commands/refactor
+Intelligent code refactoring command that analyzes code structure and applies best practices for improved maintainability and performance
+
+### undefined
+
+URL: https://claudepro.directory/commands/review
+Comprehensive code review with security analysis, performance optimization, and best practices validation
+
+### undefined
+
+URL: https://claudepro.directory/commands/security-audit
+Deploy 100 specialized sub-agents for comprehensive enterprise-grade security, performance, and optimization audit of production codebase
+
+### undefined
+
+URL: https://claudepro.directory/commands/security
+Comprehensive security audit with vulnerability detection, threat analysis, and automated remediation recommendations
+
+### undefined
+
+URL: https://claudepro.directory/commands/test-advanced
+Advanced test suite generator with property-based testing, mutation testing, and intelligent test case discovery
+
+### undefined
+
+URL: https://claudepro.directory/commands/v0-generate
+Generate production-ready React components from natural language using V0.dev patterns with shadcn/ui, TailwindCSS, and TypeScript
+
+### undefined
+
+URL: https://claudepro.directory/commands/zod-audit
+Production codebase auditor specialized in Zod schema validation coverage, security vulnerability detection, and dead code elimination
+
+
+Last updated: 2025-10-20T19:35:50.472Z

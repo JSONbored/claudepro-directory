@@ -1,0 +1,17 @@
+# undefined - Claude Pro Directory
+
+> Access customer conversations, tickets, and user data in real-time
+
+URL: https://claudepro.directory/mcp/intercom-mcp-server
+Category: MCP Servers
+Author: Intercom
+Tags: customer-support, intercom, chat, helpdesk, crm
+Added: 2025-09-18
+
+---
+
+Connect Claude to Intercom for customer support operations and conversation management.
+
+---
+
+Last updated: 2025-10-20T19:35:50.465Z
