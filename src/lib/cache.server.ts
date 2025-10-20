@@ -1653,8 +1653,12 @@ export class CacheService {
           for (const { fullKey, serialized, ttl } of serializedEntries) {
             pipeline.set(fullKey, serialized, { ex: ttl });
           }
-          const results = (await pipeline.exec()) as Array<'OK' | null | undefined>;
-          return results;
+          const raw = (await pipeline.exec()) as Array<unknown>;
+          // Normalize to (string | null)[] to satisfy type constraints
+          const normalized = raw.map((v) => (typeof v === 'string' ? v : null)) as (
+            string | null
+          )[];
+          return normalized;
         },
         async () => {
           // Fallback operation
@@ -1664,7 +1668,7 @@ export class CacheService {
             )
           );
           // Return array of undefined for fallback
-          return new Array(serializedEntries.length).fill(undefined) as (string | null)[];
+          return new Array(serializedEntries.length).fill(null) as (string | null)[];
         },
         'cache_setMany'
       );
