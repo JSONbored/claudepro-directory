@@ -107,7 +107,8 @@ export function usePrefetchOnHover(
 
     // Set timer for intent confirmation
     timeoutRef.current = setTimeout(() => {
-      router.prefetch(href, { kind: priority ? 'auto' : undefined });
+      // Only include kind option if priority is set (Next.js 15 type requirement)
+      router.prefetch(href, priority ? { kind: 'auto' } : undefined);
       prefetchedRef.current = true;
       timeoutRef.current = null;
     }, delay);
@@ -125,7 +126,8 @@ export function usePrefetchOnHover(
     // Mobile: touch = clear intent, prefetch immediately
     if (disabled || prefetchedRef.current) return;
 
-    router.prefetch(href, { kind: priority ? 'auto' : undefined });
+    // Only include kind option if priority is set (Next.js 15 type requirement)
+    router.prefetch(href, priority ? { kind: 'auto' } : undefined);
     prefetchedRef.current = true;
   }, [href, disabled, priority, router]);
 
