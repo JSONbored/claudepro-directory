@@ -377,8 +377,8 @@ export function validateContext(
     }
 
     // Production: Log and return null for graceful degradation
-    // biome-ignore lint/suspicious/noConsole: Production error logging required for debugging SEO validation failures
-    console.error(`[${source}] Invalid MetadataContext (using fallback):`, errors);
+    // biome-ignore lint/suspicious/noConsole: Production warning logging for validation failures with graceful fallback
+    console.warn(`[${source}] Invalid MetadataContext (using fallback):`, errors);
     return null;
   }
 
@@ -426,12 +426,12 @@ export function validateTemplateOutput(
       );
     }
 
-    // Production: Log with enhanced context for debugging
+    // Production: Log with enhanced context for debugging (warning level - graceful fallback, not error)
     const outputObj =
       typeof output === 'object' && output !== null ? (output as Record<string, unknown>) : {};
     const title = typeof outputObj.title === 'string' ? outputObj.title : 'Unknown';
-    // biome-ignore lint/suspicious/noConsole: Production error logging required for debugging template validation failures
-    console.error(`[Template:${pattern}] Invalid output (using fallback):`, {
+    // biome-ignore lint/suspicious/noConsole: Production warning logging for template validation failures with graceful fallback
+    console.warn(`[Template:${pattern}] Invalid output (using fallback):`, {
       errors,
       keywords: outputObj.keywords || 'N/A',
       title: title.substring(0, 60),
