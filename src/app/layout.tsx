@@ -10,7 +10,6 @@ const SpeedInsights = (
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
-import { Suspense } from 'react';
 import './globals.css';
 import './view-transitions.css';
 import './micro-interactions.css';
