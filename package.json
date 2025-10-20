@@ -218,6 +218,7 @@
     "fumadocs-openapi": "^9.5.1",
     "fumadocs-ui": "^15.8.5",
     "fuzzysort": "^3.1.0",
+    "glob": "^11.0.0",
     "hast-util-to-html": "^9.0.5",
     "he": "^1.2.0",
     "jsdom": "^27.0.1",
