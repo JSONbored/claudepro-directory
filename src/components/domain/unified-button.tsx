@@ -631,16 +631,17 @@ function CopyLLMsButton({
             <Check className="h-4 w-4" />
           ) : isLoading ? (
             <motion.div
-            animate={{ opacity: [1, 0.5, 1] }}
-            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
-          >
+              animate={{ opacity: [1, 0.5, 1] }}
+              transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
+            >
+              <Sparkles className="h-4 w-4" />
+            </motion.div>
+          ) : (
             <Sparkles className="h-4 w-4" />
-          </motion.div>
-        ) : (
-          <Sparkles className="h-4 w-4" />
-        ))}
-      {size !== 'icon' && <span>{isSuccess ? 'Copied!' : isLoading ? 'Loading...' : label}</span>}
-    </Button>
+          ))}
+        {size !== 'icon' && <span>{isSuccess ? 'Copied!' : isLoading ? 'Loading...' : label}</span>}
+      </Button>
+    </motion.div>
   );
 }
 
