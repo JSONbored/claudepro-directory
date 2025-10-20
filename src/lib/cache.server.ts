@@ -2082,60 +2082,6 @@ export const statsRedis = {
     )();
   },
 
-  /**
-   * DEPRECATED: getTrending() - Use getBatchTrendingData() from trending/calculator.server.ts instead
-   *
-   * This function previously queried a Redis sorted set that is no longer maintained.
-   * Trending is now calculated from view counters for accuracy and efficiency.
-   *
-   * For migration:
-   * 1. Load content: await getContentByCategory(category)
-   * 2. Calculate trending: await getBatchTrendingData({ [category]: content })
-   * 3. Extract results: trendingData.trending.slice(0, limit)
-   *
-   * @deprecated Will be removed in next major version
-   */
-  getTrending: unstable_cache(
-    async (cat: string, limit = 10) => {
-      logger.warn('getTrending() is deprecated - use getBatchTrendingData() instead', {
-        category: cat,
-        limit,
-        migration: 'Load content first, then use trending/calculator.server.ts',
-      });
-
-      // Return empty array - consumers should migrate to new API
-      return [];
-    },
-    ['trending'],
-    {
-      revalidate: 600,
-      tags: ['stats', 'trending'],
-    }
-  ),
-
-  /**
-   * DEPRECATED: getPopular() - Use getBatchTrendingData() from trending/calculator.server.ts instead
-   *
-   * This function previously queried a Redis sorted set that is no longer maintained.
-   * Popular content is now calculated from view counters for accuracy and efficiency.
-   *
-   * For migration:
-   * 1. Load content: await getContentByCategory(category)
-   * 2. Calculate popular: await getBatchTrendingData({ [category]: content })
-   * 3. Extract results: trendingData.popular.slice(0, limit)
-   *
-   * @deprecated Will be removed in next major version
-   */
-  getPopular: async (cat: string, limit = 10) => {
-    logger.warn('getPopular() is deprecated - use getBatchTrendingData() instead', {
-      category: cat,
-      limit,
-      migration: 'Load content first, then use trending/calculator.server.ts',
-    });
-
-    // Return empty array - consumers should migrate to new API
-    return [];
-  },
 
   trackCopy: async (cat: string, slug: string) => {
     const v = cacheKeyParamsSchema.parse({ category: cat, slug });
@@ -2182,18 +2128,6 @@ export const statsRedis = {
     }
   ),
 
-  /**
-   * REMOVED: cleanupOldTrending() - No longer needed
-   *
-   * This function cleaned up old entries from trending sorted sets.
-   * Since we no longer maintain sorted sets, this function is now a no-op.
-   *
-   * @deprecated Removed as part of Redis optimization (sorted sets removed)
-   */
-  cleanupOldTrending: () => {
-    // No-op: Sorted sets no longer maintained
-    return Promise.resolve();
-  },
 
   /**
    * Enrich content items with Redis view counts
@@ -2450,13 +2384,6 @@ const CACHE_WARMER_LIMITS = {
 // Auto-generated from UNIFIED_CATEGORY_REGISTRY
 const warmableCategorySchema = z.enum(getAllCategoryIds() as [string, ...string[]]);
 
-const cacheWarmerPopularItemSchema = z.object({
-  slug: nonEmptyString
-    .max(CACHE_WARMER_LIMITS.MAX_SLUG_LENGTH)
-    .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid slug format'),
-  views: nonNegativeInt,
-});
-
 const categoryMetadataSchema = z.object({
   name: warmableCategorySchema,
   items: z
@@ -2553,23 +2480,13 @@ class CacheWarmer {
           // Validate category name
           const validatedCategoryName = warmableCategorySchema.parse(category.name);
 
-          // Get top 10 popular items from Redis stats
-          const popular = await statsRedis?.getPopular(validatedCategoryName, 10);
-
-          if (popular && popular.length > 0) {
-            // Validate and warm cache for popular items
-            const validatedPopular = z.array(cacheWarmerPopularItemSchema).parse(popular);
-            for (const item of validatedPopular) {
-              await this.warmItem(validatedCategoryName, item.slug);
-              itemsWarmed++;
-            }
-          } else {
-            // If no popularity data, warm first 5 items as fallback
-            const topItems = category.items.slice(0, 5);
-            for (const item of topItems) {
-              await this.warmItem(validatedCategoryName, item.slug);
-              itemsWarmed++;
-            }
+          // Warm first 10 items (simple and reliable)
+          // Note: getPopular() was deprecated and removed
+          // Future: Could integrate with trending/calculator.server.ts for smarter warming
+          const topItems = category.items.slice(0, 10);
+          for (const item of topItems) {
+            await this.warmItem(validatedCategoryName, item.slug);
+            itemsWarmed++;
           }
         } catch (error) {
           logger.error(`Failed to warm cache for category ${category.name}`, error as Error);

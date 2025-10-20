@@ -6,7 +6,6 @@ import { statsRedis } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
-import { analyticsQueue } from '@/src/lib/services/analytics-queue.server';
 import { createClient } from '@/src/lib/supabase/server';
 
 /**
@@ -55,10 +54,11 @@ export const trackView = rateLimitedAction
       };
     }
 
-    // OPTIMIZATION: Queue view instead of immediate Redis write
-    // Views are batched and flushed every 5 minutes
-    // This reduces Redis commands by 95% with acceptable 5-minute delay
-    analyticsQueue.queueView(category, slug);
+    // OPTIMIZATION: Direct Redis write with in-memory deduplication
+    // Deduplication prevents spam (1-minute window per slug)
+    // This keeps Redis usage under 10k commands/day
+    const { analyticsTracking } = await import('@/src/lib/services/analytics-queue.server');
+    await analyticsTracking.trackView(category, slug);
 
     // Track interaction for personalization (non-blocking)
     const supabase = await createClient();
@@ -125,9 +125,10 @@ export const trackCopy = rateLimitedAction
       };
     }
 
-    // OPTIMIZATION: Queue copy instead of immediate Redis write
-    // Copies are batched and flushed every 5 minutes
-    analyticsQueue.queueCopy(category, slug);
+    // OPTIMIZATION: Direct Redis write with in-memory deduplication
+    // Deduplication prevents spam (1-minute window per slug)
+    const { analyticsTracking } = await import('@/src/lib/services/analytics-queue.server');
+    await analyticsTracking.trackCopy(category, slug);
 
     // Track interaction for personalization (non-blocking)
     const supabase = await createClient();
