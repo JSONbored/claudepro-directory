@@ -376,9 +376,9 @@ export function validateContext(
       );
     }
 
-    // Production: Log and return null for graceful degradation
-    // biome-ignore lint/suspicious/noConsole: Production error logging required for debugging SEO validation failures
-    console.error(`[${source}] Invalid MetadataContext (using fallback):`, errors);
+    // Production: Log as warning (expected fallback path) and return null
+    // biome-ignore lint/suspicious/noConsole: Server logging in production
+    console.warn(`[${source}] Invalid MetadataContext (using fallback):`, errors);
     return null;
   }
 
@@ -426,12 +426,12 @@ export function validateTemplateOutput(
       );
     }
 
-    // Production: Log with enhanced context for debugging
+    // Production: Log with enhanced context for debugging (warn level)
     const outputObj =
       typeof output === 'object' && output !== null ? (output as Record<string, unknown>) : {};
     const title = typeof outputObj.title === 'string' ? outputObj.title : 'Unknown';
-    // biome-ignore lint/suspicious/noConsole: Production error logging required for debugging template validation failures
-    console.error(`[Template:${pattern}] Invalid output (using fallback):`, {
+    // biome-ignore lint/suspicious/noConsole: Server logging in production
+    console.warn(`[Template:${pattern}] Invalid output (using fallback):`, {
       errors,
       keywords: outputObj.keywords || 'N/A',
       title: title.substring(0, 60),
@@ -480,9 +480,9 @@ export function validateClassification(
       );
     }
 
-    // Production: Log and return null for graceful degradation
-    // biome-ignore lint/suspicious/noConsole: Production error logging required for debugging route classification failures
-    console.error(`[classifyRoute] Invalid classification for ${route} (using fallback):`, errors);
+    // Production: Log as warning (expected fallback path) and return null
+    // biome-ignore lint/suspicious/noConsole: Server logging in production
+    console.warn(`[classifyRoute] Invalid classification for ${route} (using fallback):`, errors);
     return null;
   }
 
