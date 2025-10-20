@@ -210,4 +210,4 @@ URL: https://claudepro.directory/mcp/zapier-mcp-server
 Connect to nearly 8,000 apps through Zapier's automation platform
 
 
-Last updated: 2025-10-20T19:41:24.232Z
+Last updated: 2025-10-20T19:49:30.327Z

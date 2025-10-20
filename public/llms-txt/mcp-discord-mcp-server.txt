@@ -14,4 +14,4 @@ Enable your AI assistants to seamlessly interact with Discord servers through co
 
 ---
 
-Last updated: 2025-10-20T19:41:24.235Z
+Last updated: 2025-10-20T19:49:30.330Z

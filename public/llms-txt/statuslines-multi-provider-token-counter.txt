@@ -86,4 +86,4 @@ echo -e "${icon} ${provider} │ ${color}${tokens_formatted}${color}\033[0m/${li
 
 ---
 
-Last updated: 2025-10-20T19:41:24.284Z
+Last updated: 2025-10-20T19:49:30.391Z

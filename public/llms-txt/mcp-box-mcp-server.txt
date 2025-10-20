@@ -14,4 +14,4 @@ Connect Claude to Box for enterprise content management and document automation.
 
 ---
 
-Last updated: 2025-10-20T19:41:24.233Z
+Last updated: 2025-10-20T19:49:30.328Z

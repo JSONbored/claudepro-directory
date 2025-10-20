@@ -65,4 +65,4 @@ URL: https://claudepro.directory/statuslines/starship-powerline-theme
 Starship-inspired powerline statusline with Nerd Font glyphs, modular segments, and Git integration for Claude Code
 
 
-Last updated: 2025-10-20T19:41:24.282Z
+Last updated: 2025-10-20T19:49:30.390Z

@@ -14,4 +14,4 @@ Automated security vulnerability scanning that integrates with development workf
 
 ---
 
-Last updated: 2025-10-20T19:41:24.279Z
+Last updated: 2025-10-20T19:49:30.384Z

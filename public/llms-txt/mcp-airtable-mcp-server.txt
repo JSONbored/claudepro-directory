@@ -14,4 +14,4 @@ Connect Claude to Airtable databases for seamless data management and automation
 
 ---
 
-Last updated: 2025-10-20T19:41:24.233Z
+Last updated: 2025-10-20T19:49:30.328Z

@@ -14,4 +14,4 @@ Connect Claude to PayPal for comprehensive payment processing and financial oper
 
 ---
 
-Last updated: 2025-10-20T19:41:24.238Z
+Last updated: 2025-10-20T19:49:30.333Z

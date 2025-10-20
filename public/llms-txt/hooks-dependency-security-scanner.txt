@@ -14,4 +14,4 @@ Real-time vulnerability scanning for dependencies with automated CVE detection, 
 
 ---
 
-Last updated: 2025-10-20T19:41:24.273Z
+Last updated: 2025-10-20T19:49:30.367Z

@@ -14,4 +14,4 @@ Validates AWS CloudFormation templates for syntax errors and best practices
 
 ---
 
-Last updated: 2025-10-20T19:41:24.271Z
+Last updated: 2025-10-20T19:49:30.364Z

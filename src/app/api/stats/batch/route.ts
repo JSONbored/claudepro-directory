@@ -138,9 +138,10 @@ export async function GET(request: Request) {
     }
 
     // Parse items into category/slug pairs
-    const parsedItems = items.map((item) => {
-      const [category = '', slug = ''] = item.split(':');
-      return { category, slug };
+    // Items are pre-validated with regex /^[a-z-]+:[a-z0-9-]+$/ so split will always have 2 parts
+    const parsedItems: Array<{ category: string; slug: string }> = items.map((item) => {
+      const [category, slug] = item.split(':');
+      return { category: category!, slug: slug! };
     });
 
     // Fetch from Redis (batch operation)

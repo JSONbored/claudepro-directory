@@ -14,4 +14,4 @@ Analyze dependency security and supply chain risks with Socket's comprehensive v
 
 ---
 
-Last updated: 2025-10-20T19:41:24.239Z
+Last updated: 2025-10-20T19:49:30.334Z

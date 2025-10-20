@@ -14,4 +14,4 @@ Validates all links in markdown files to detect broken links and references
 
 ---
 
-Last updated: 2025-10-20T19:41:24.277Z
+Last updated: 2025-10-20T19:49:30.380Z

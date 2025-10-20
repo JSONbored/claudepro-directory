@@ -14,4 +14,4 @@ Manage Stytch authentication configurations and workspace settings for identity 
 
 ---
 
-Last updated: 2025-10-20T19:41:24.240Z
+Last updated: 2025-10-20T19:49:30.335Z

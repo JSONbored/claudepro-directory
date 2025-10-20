@@ -14,4 +14,4 @@ Validates Kubernetes YAML manifests for syntax and best practices when modified
 
 ---
 
-Last updated: 2025-10-20T19:41:24.277Z
+Last updated: 2025-10-20T19:49:30.380Z

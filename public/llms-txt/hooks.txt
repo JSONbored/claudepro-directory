@@ -260,4 +260,4 @@ URL: https://claudepro.directory/hooks/redis-cache-invalidator
 Automatically clears relevant Redis cache keys when data model files are modified
 
 
-Last updated: 2025-10-20T19:41:24.264Z
+Last updated: 2025-10-20T19:49:30.361Z

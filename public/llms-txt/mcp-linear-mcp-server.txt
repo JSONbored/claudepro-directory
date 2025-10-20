@@ -14,4 +14,4 @@ Connect Claude to Linear for comprehensive project management, issue tracking, a
 
 ---
 
-Last updated: 2025-10-20T19:41:24.237Z
+Last updated: 2025-10-20T19:49:30.332Z

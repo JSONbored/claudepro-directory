@@ -14,4 +14,4 @@ Connect Claude to Plaid for banking data integration and financial services trou
 
 ---
 
-Last updated: 2025-10-20T19:41:24.238Z
+Last updated: 2025-10-20T19:49:30.333Z

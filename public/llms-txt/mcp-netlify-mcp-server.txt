@@ -14,4 +14,4 @@ Control Netlify sites and deployments through Claude for comprehensive site mana
 
 ---
 
-Last updated: 2025-10-20T19:41:24.238Z
+Last updated: 2025-10-20T19:49:30.333Z

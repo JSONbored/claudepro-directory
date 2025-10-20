@@ -14,4 +14,4 @@ Lints Vue 3 components for Composition API best practices and common issues
 
 ---
 
-Last updated: 2025-10-20T19:41:24.281Z
+Last updated: 2025-10-20T19:49:30.388Z
