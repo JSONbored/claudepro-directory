@@ -168,25 +168,189 @@ async function generateKey(request: Request, prefix = 'rate_limit'): Promise<str
 }
 
 // ============================================
+// TTL CACHE WITH EVICTION & MONITORING
+// ============================================
+
+/**
+ * Cache entry with TTL tracking
+ */
+interface CacheEntry<T> {
+  value: T;
+  expiresAt: number;
+}
+
+/**
+ * TTL Cache with automatic eviction and monitoring
+ * Enhanced version of Map with Time-To-Live support
+ */
+class TTLCache<K, V> {
+  private cache = new Map<K, CacheEntry<V>>();
+  private ttlMs: number;
+  private maxSize: number;
+  private stats = {
+    hits: 0,
+    misses: 0,
+    evictions: 0,
+    size: 0,
+  };
+  private cleanupInterval: NodeJS.Timeout | null = null;
+
+  constructor(ttlMs = 10000, maxSize = 10000) {
+    this.ttlMs = ttlMs;
+    this.maxSize = maxSize;
+
+    // Start periodic cleanup (every TTL duration)
+    this.cleanupInterval = setInterval(() => {
+      this.evictExpired();
+    }, ttlMs);
+  }
+
+  set(key: K, value: V): void {
+    // Evict if at max size
+    if (this.cache.size >= this.maxSize) {
+      this.evictOldest();
+    }
+
+    this.cache.set(key, {
+      value,
+      expiresAt: Date.now() + this.ttlMs,
+    });
+    this.stats.size = this.cache.size;
+  }
+
+  get(key: K): V | undefined {
+    const entry = this.cache.get(key);
+
+    if (!entry) {
+      this.stats.misses++;
+      return undefined;
+    }
+
+    // Check if expired
+    if (Date.now() > entry.expiresAt) {
+      this.cache.delete(key);
+      this.stats.misses++;
+      this.stats.evictions++;
+      this.stats.size = this.cache.size;
+      return undefined;
+    }
+
+    this.stats.hits++;
+    return entry.value;
+  }
+
+  delete(key: K): boolean {
+    const deleted = this.cache.delete(key);
+    if (deleted) {
+      this.stats.size = this.cache.size;
+    }
+    return deleted;
+  }
+
+  /**
+   * Evict all expired entries
+   */
+  private evictExpired(): void {
+    const now = Date.now();
+    let evicted = 0;
+
+    for (const [key, entry] of this.cache.entries()) {
+      if (now > entry.expiresAt) {
+        this.cache.delete(key);
+        evicted++;
+      }
+    }
+
+    if (evicted > 0) {
+      this.stats.evictions += evicted;
+      this.stats.size = this.cache.size;
+      logger.debug(
+        'TTL cache eviction',
+        {},
+        {
+          evicted,
+          remaining: this.cache.size,
+        }
+      );
+    }
+  }
+
+  /**
+   * Evict oldest entry (LRU-style when at max size)
+   */
+  private evictOldest(): void {
+    const firstKey = this.cache.keys().next().value;
+    if (firstKey !== undefined) {
+      this.cache.delete(firstKey);
+      this.stats.evictions++;
+      this.stats.size = this.cache.size;
+    }
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getStats() {
+    const total = this.stats.hits + this.stats.misses;
+    const hitRate = total > 0 ? (this.stats.hits / total) * 100 : 0;
+
+    return {
+      ...this.stats,
+      hitRate: Number(hitRate.toFixed(2)),
+      total,
+    };
+  }
+
+  /**
+   * Clear all entries and reset stats
+   */
+  clear(): void {
+    this.cache.clear();
+    this.stats = {
+      hits: 0,
+      misses: 0,
+      evictions: 0,
+      size: 0,
+    };
+  }
+
+  /**
+   * Cleanup and stop background eviction
+   */
+  destroy(): void {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
+    this.clear();
+  }
+}
+
+// ============================================
 // RATE LIMITER CLASS
 // ============================================
 
 /**
  * Rate limiter using Upstash Ratelimit SDK
- * Optimized implementation with sliding window algorithm
+ * Optimized implementation with sliding window algorithm and TTL cache
  */
 export class RateLimiter {
   private ratelimit: Ratelimit;
   private config: MiddlewareRateLimitConfig;
+  private ttlCache: TTLCache<string, number>;
 
   constructor(config: MiddlewareRateLimitConfig) {
     // Validate the input configuration
     this.config = middlewareRateLimitConfigSchema.parse(config);
 
+    // Create TTL cache with monitoring (10s TTL, max 10k entries)
+    // SDK expects Map<string, number> where number is the remaining count
+    this.ttlCache = new TTLCache<string, number>(10000, 10000);
+
     // Create Upstash Ratelimit instance
     // Uses sliding window algorithm (more accurate than fixed window)
-    // OPTIMIZATION: ephemeralCache added to reduce Redis commands by 60-70%
-    // Caches rate limit decisions in memory for 10 seconds
+    // OPTIMIZATION: TTL cache added to reduce Redis commands by 60-70%
+    // Caches rate limit decisions in memory with automatic eviction
     this.ratelimit = new Ratelimit({
       redis: redisClient,
       limiter: Ratelimit.slidingWindow(
@@ -195,8 +359,22 @@ export class RateLimiter {
       ),
       analytics: false, // Disable to reduce Redis commands
       prefix: 'ratelimit',
-      ephemeralCache: new Map(), // In-memory cache for 10s - saves 8,600 commands/day
+      ephemeralCache: this.ttlCache as unknown as Map<string, number>, // Type-cast for SDK compatibility
     });
+  }
+
+  /**
+   * Get cache statistics for monitoring
+   */
+  getCacheStats() {
+    return this.ttlCache.getStats();
+  }
+
+  /**
+   * Clear cache and reset monitoring stats
+   */
+  clearCache(): void {
+    this.ttlCache.clear();
   }
 
   private async defaultErrorResponse(request: Request, info: RateLimitInfo): Promise<Response> {
@@ -415,4 +593,46 @@ export async function withRateLimit<T extends unknown[]>(
   newResponse.headers.set('X-RateLimit-Reset', String(result.resetTime));
 
   return newResponse;
+}
+
+/**
+ * Get aggregated cache statistics across all rate limiters
+ * Useful for monitoring and debugging
+ */
+export function getRateLimiterStats() {
+  const limiters = initializeRateLimiters();
+
+  return {
+    api: limiters.api.getCacheStats(),
+    search: limiters.search.getCacheStats(),
+    submit: limiters.submit.getCacheStats(),
+    general: limiters.general.getCacheStats(),
+    heavyApi: limiters.heavyApi.getCacheStats(),
+    admin: limiters.admin.getCacheStats(),
+    bulk: limiters.bulk.getCacheStats(),
+    llmstxt: limiters.llmstxt.getCacheStats(),
+    webhookBounce: limiters.webhookBounce.getCacheStats(),
+    webhookAnalytics: limiters.webhookAnalytics.getCacheStats(),
+  };
+}
+
+/**
+ * Clear all rate limiter caches
+ * Useful for testing or manual cache invalidation
+ */
+export function clearAllRateLimiterCaches(): void {
+  const limiters = initializeRateLimiters();
+
+  limiters.api.clearCache();
+  limiters.search.clearCache();
+  limiters.submit.clearCache();
+  limiters.general.clearCache();
+  limiters.heavyApi.clearCache();
+  limiters.admin.clearCache();
+  limiters.bulk.clearCache();
+  limiters.llmstxt.clearCache();
+  limiters.webhookBounce.clearCache();
+  limiters.webhookAnalytics.clearCache();
+
+  logger.info('All rate limiter caches cleared');
 }

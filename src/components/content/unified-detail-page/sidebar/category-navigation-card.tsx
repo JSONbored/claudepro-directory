@@ -57,7 +57,6 @@
  * @see src/components/shared/base-card.tsx - Content display cards (different purpose)
  */
 
-import Link from 'next/link';
 import { z } from 'zod';
 import {
   Tooltip,
@@ -65,6 +64,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/primitives/tooltip';
+import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import type { LucideIcon } from '@/src/lib/icons';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -120,16 +120,17 @@ export function CategoryNavigationCard({
           return (
             <Tooltip key={key}>
               <TooltipTrigger asChild>
-                <Link
+                <PrefetchLink
                   href={`${validatedProps.basePath}/${key}`}
                   className={`p-2 rounded-lg transition-all duration-200 ${
                     isActive
                       ? info.activeColor || 'text-primary bg-primary/10'
                       : `text-muted-foreground ${info.color || 'hover:text-primary hover:bg-muted/50'}`
                   }`}
+                  prefetchDelay={200}
                 >
                   <Icon className="h-4 w-4" />
-                </Link>
+                </PrefetchLink>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="text-xs max-w-[200px]">
                 <div className="font-semibold">{info.label}</div>

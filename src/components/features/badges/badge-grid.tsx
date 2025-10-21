@@ -18,7 +18,6 @@
 
 'use client';
 
-import { Info, Lock, Star } from 'lucide-react';
 import { memo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { toggleBadgeFeatured } from '#lib/actions/badges';
@@ -41,6 +40,7 @@ import {
   BADGE_REGISTRY,
   type BadgeDefinition,
 } from '@/src/lib/config/badges.config';
+import { Info, Lock, Star } from '@/src/lib/icons';
 import type { UserBadgeWithBadge } from '@/src/lib/repositories/user-badge.repository';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';

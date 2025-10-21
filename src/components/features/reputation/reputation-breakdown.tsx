@@ -17,7 +17,6 @@
 
 'use client';
 
-import { FileText, MessageSquare, Star, ThumbsUp, TrendingUp, Trophy } from 'lucide-react';
 import { memo } from 'react';
 import { HorizontalBarChart } from '@/src/components/domain/horizontal-bar-chart';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -35,6 +34,7 @@ import {
   REPUTATION_POINTS,
   type ReputationBreakdown as ReputationBreakdownType,
 } from '@/src/lib/config/reputation.config';
+import { FileText, MessageSquare, Star, ThumbsUp, TrendingUp, Trophy } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 

@@ -13,7 +13,6 @@
  * - Responsive grid layout
  */
 
-import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { BaseCard } from '@/src/components/domain/base-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -40,6 +39,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/primitives/tooltip';
+import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import { addBookmarkBatch } from '@/src/lib/actions/user.actions';
 import { ROUTES } from '@/src/lib/constants/routes';
 import {
@@ -173,10 +173,14 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             Share Results
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link href={ROUTES.TOOLS_CONFIG_RECOMMENDER} className="gap-2">
+            <PrefetchLink
+              href={ROUTES.TOOLS_CONFIG_RECOMMENDER}
+              className="gap-2"
+              prefetchDelay={200}
+            >
               <RefreshCw className="h-4 w-4" />
               Start Over
-            </Link>
+            </PrefetchLink>
           </Button>
         </div>
       </div>
@@ -393,7 +397,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     className={`absolute inset-0 bg-gradient-to-br ${getMatchGradient(result.matchScore)} opacity-50 pointer-events-none`}
                   />
 
-                  <Link href={targetPath}>
+                  <PrefetchLink href={targetPath} prefetch={true}>
                     <BaseCard
                       targetPath={targetPath}
                       displayTitle={result.title}
@@ -467,7 +471,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                       }
                       showActions={false}
                     />
-                  </Link>
+                  </PrefetchLink>
                 </div>
               );
             })}
@@ -498,13 +502,15 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           </p>
           <div className={UI_CLASSES.FLEX_WRAP_GAP_3}>
             <Button asChild>
-              <Link href="/" className="gap-2">
+              <PrefetchLink href="/" className="gap-2" prefetch={true}>
                 Browse All Configs
                 <ArrowRight className="h-4 w-4" />
-              </Link>
+              </PrefetchLink>
             </Button>
             <Button variant="outline" asChild>
-              <Link href={ROUTES.GUIDES}>View Setup Guides</Link>
+              <PrefetchLink href={ROUTES.GUIDES} prefetch={true}>
+                View Setup Guides
+              </PrefetchLink>
             </Button>
           </div>
         </CardContent>

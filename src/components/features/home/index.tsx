@@ -23,10 +23,8 @@
  * Result: Clean, maintainable, production-grade architecture
  */
 
-import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   LazyFeaturedSections,
   LazySearchSection,
@@ -34,6 +32,7 @@ import {
 } from '@/src/components/features/home/lazy-homepage-sections';
 import { NumberTicker } from '@/src/components/magic/number-ticker';
 import { HomepageStatsSkeleton, Skeleton } from '@/src/components/primitives/loading-skeleton';
+import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import { useSearch } from '@/src/hooks/use-search';
 import {
   getCategoryStatsConfig,
@@ -42,6 +41,7 @@ import {
 import { ROUTES } from '@/src/lib/constants/routes';
 import type { HomePageClientProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { FallbackDiv, preloadMotion, useLazyMotion } from '@/src/lib/utils/use-lazy-motion';
 
 const UnifiedSearch = dynamic(
   () =>
@@ -61,8 +61,15 @@ function HomePageClientComponent({
   stats,
 }: HomePageClientProps) {
   const allConfigs = (initialData.allConfigs || []) as UnifiedContentItem[];
+  const { motion } = useLazyMotion();
+  const MotionDiv = motion?.div ?? FallbackDiv;
 
   const [activeTab, setActiveTab] = useState('all');
+
+  // Preload motion for smooth animations
+  useEffect(() => {
+    preloadMotion();
+  }, []);
 
   // Memoize search options to prevent infinite re-renders
   const searchOptions = useMemo(
@@ -145,11 +152,15 @@ function HomePageClientComponent({
           {stats ? (
             <>
               {/* Mobile Stats - Compact horizontal scroll carousel */}
-              <motion.div
+              <MotionDiv
                 className="md:hidden mt-6 overflow-x-auto scrollbar-hide"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
+                {...(motion
+                  ? {
+                      initial: { opacity: 0, y: 10 },
+                      animate: { opacity: 1, y: 0 },
+                      transition: { delay: 0.3 },
+                    }
+                  : {})}
               >
                 <div className="flex gap-3 px-4 pb-2">
                   {getCategoryStatsConfig()
@@ -158,11 +169,15 @@ function HomePageClientComponent({
                       const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
 
                       return (
-                        <Link key={categoryId} href={categoryRoute}>
-                          <motion.div
+                        <PrefetchLink key={categoryId} href={categoryRoute} prefetchDelay={180}>
+                          <MotionDiv
                             className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border/40 bg-card/50 backdrop-blur-sm whitespace-nowrap min-w-fit"
-                            whileTap={{ scale: 0.95 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                            {...(motion
+                              ? {
+                                  whileTap: { scale: 0.95 },
+                                  transition: { type: 'spring', stiffness: 400, damping: 17 },
+                                }
+                              : {})}
                           >
                             <Icon
                               className="h-4 w-4 text-accent flex-shrink-0"
@@ -171,12 +186,12 @@ function HomePageClientComponent({
                             <span className="text-sm font-medium">
                               <NumberTicker value={stats[categoryId] || 0} delay={delay} />
                             </span>
-                          </motion.div>
-                        </Link>
+                          </MotionDiv>
+                        </PrefetchLink>
                       );
                     })}
                 </div>
-              </motion.div>
+              </MotionDiv>
 
               {/* Desktop Stats - Full layout (unchanged) */}
               <div
@@ -189,25 +204,30 @@ function HomePageClientComponent({
                   const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
 
                   return (
-                    <Link
+                    <PrefetchLink
                       key={categoryId}
                       href={categoryRoute}
                       className="group"
                       aria-label={`View all ${displayText}`}
+                      prefetchDelay={200}
                     >
-                      <motion.div
+                      <MotionDiv
                         className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} px-2 py-1 rounded-md border border-transparent transition-colors cursor-pointer`}
-                        whileHover={{
-                          scale: 1.05,
-                          y: -2,
-                          borderColor: 'hsl(var(--accent) / 0.3)',
-                          backgroundColor: 'hsl(var(--accent) / 0.05)',
-                          transition: { type: 'spring', stiffness: 400, damping: 15 },
-                        }}
-                        whileTap={{
-                          scale: 0.98,
-                          transition: { type: 'spring', stiffness: 400, damping: 15 },
-                        }}
+                        {...(motion
+                          ? {
+                              whileHover: {
+                                scale: 1.05,
+                                y: -2,
+                                borderColor: 'hsl(var(--accent) / 0.3)',
+                                backgroundColor: 'hsl(var(--accent) / 0.05)',
+                                transition: { type: 'spring', stiffness: 400, damping: 15 },
+                              },
+                              whileTap: {
+                                scale: 0.98,
+                                transition: { type: 'spring', stiffness: 400, damping: 15 },
+                              },
+                            }
+                          : {})}
                       >
                         <Icon
                           className="h-4 w-4 transition-colors group-hover:text-accent"
@@ -217,8 +237,8 @@ function HomePageClientComponent({
                           <NumberTicker value={stats[categoryId] || 0} delay={delay} />{' '}
                           {displayText}
                         </span>
-                      </motion.div>
-                    </Link>
+                      </MotionDiv>
+                    </PrefetchLink>
                   );
                 })}
               </div>
@@ -236,18 +256,15 @@ function HomePageClientComponent({
           filteredResults={filteredResults}
           onClearSearch={handleClearSearch}
         />
-
-        {/* Featured Content Sections - Render immediately (above the fold) */}
-        {!isSearching && <LazyFeaturedSections categories={featuredByCategory || initialData} />}
-
-        {/* Tabs Section - Render immediately (above the fold) */}
-        {!isSearching && (
-          <LazyTabsSection
-            activeTab={activeTab}
-            filteredResults={filteredResults}
-            onTabChange={handleTabChange}
-          />
-        )}
+        {/* Featured Content Sections - Render immediately (above the fold) */}!isSearching &&{' '}
+        <LazyFeaturedSections categories={featuredByCategory || initialData} />
+        !isSearching && (
+        <LazyTabsSection
+          activeTab={activeTab}
+          filteredResults={filteredResults}
+          onTabChange={handleTabChange}
+        />
+        )
       </section>
     </>
   );

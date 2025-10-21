@@ -1913,9 +1913,64 @@ const redis = <T>(fn: (client: Redis) => Promise<T>, fallback: () => T | Promise
 /**
  * Unified stats operations
  */
+type CommandCounter = {
+  commands: number;
+  lastReset: number;
+};
+
+const REDIS_COMMAND_BUDGET = Number.parseInt(
+  process.env.NEXT_PUBLIC_REDIS_COMMAND_BUDGET ?? '10000',
+  10
+);
+const commandCounter: CommandCounter = {
+  commands: 0,
+  lastReset: Date.now(),
+};
+
+const commandLog: Array<{
+  operation: string;
+  timestamp: number;
+  commandCount: number;
+  metadata?: Record<string, unknown>;
+}> = [];
+
+function trackCommand(commandCount: number, operation: string, metadata?: Record<string, unknown>) {
+  const now = Date.now();
+  const elapsed = now - commandCounter.lastReset;
+
+  // Reset every 24 hours to align with daily budget and prune old logs
+  if (elapsed > 24 * 60 * 60 * 1000) {
+    commandCounter.commands = 0;
+    commandCounter.lastReset = now;
+    commandLog.length = 0;
+  }
+
+  commandCounter.commands += commandCount;
+  commandLog.push(
+    metadata !== undefined
+      ? { operation, timestamp: now, commandCount, metadata }
+      : { operation, timestamp: now, commandCount }
+  );
+
+  if (commandCounter.commands >= REDIS_COMMAND_BUDGET) {
+    logger.warn('Redis command budget threshold reached', {
+      totalCommands: commandCounter.commands,
+      budget: REDIS_COMMAND_BUDGET,
+      operation,
+      ...metadata,
+    });
+  }
+}
+
 export const statsRedis = {
   isEnabled: () => redisClient.getStatus().isConnected || redisClient.getStatus().isFallback,
   isConnected: () => redisClient.getStatus().isConnected,
+  getCommandMetrics: () => ({
+    totalCommands: commandCounter.commands,
+    budget: REDIS_COMMAND_BUDGET,
+    log: [...commandLog],
+    lastReset: commandCounter.lastReset,
+  }),
 
   incrementView: (cat: string, slug: string) =>
     exec(
@@ -2006,6 +2061,8 @@ export const statsRedis = {
               });
             }
 
+            trackCommand(1, 'incrementView', { category: cat, slug });
+
             return viewCount;
           },
           () => null,
@@ -2031,6 +2088,7 @@ export const statsRedis = {
         () => new Array(items.length).fill(0) as (number | null)[],
         'getViewCounts'
       );
+      trackCommand(1, 'getViewCounts', { itemCount: items.length });
       return items.reduce(
         (acc, item, i) => {
           acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
@@ -2112,6 +2170,7 @@ export const statsRedis = {
         () => new Array(items.length).fill(0) as (number | null)[],
         'getCopyCounts'
       );
+      trackCommand(1, 'getCopyCounts', { itemCount: items.length });
       return items.reduce(
         (acc, item, i) => {
           acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
@@ -2242,6 +2301,48 @@ export const statsRedis = {
     }
   },
 };
+
+type StatsItem = { category: string; slug: string };
+
+export async function prewarmStatsCache(items: StatsItem[]): Promise<{
+  success: boolean;
+  warmed: number;
+  message?: string;
+}> {
+  const uniqueItems = Array.from(
+    new Map(items.map((item) => [`${item.category}:${item.slug}`, item])).values()
+  );
+
+  if (uniqueItems.length === 0) {
+    return { success: false, warmed: 0, message: 'No items provided' };
+  }
+
+  if (!statsRedis.isEnabled()) {
+    logger.info('Skipping stats prewarm - Redis not configured');
+    return { success: false, warmed: 0, message: 'Redis not configured' };
+  }
+
+  try {
+    await Promise.all([
+      statsRedis.getViewCounts(uniqueItems),
+      statsRedis.getCopyCounts(uniqueItems),
+    ]);
+
+    logger.info('Stats prewarm complete', {
+      itemCount: uniqueItems.length,
+    });
+
+    return { success: true, warmed: uniqueItems.length };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error('Stats prewarm failed', error instanceof Error ? error : new Error(errorMessage));
+    return {
+      success: false,
+      warmed: 0,
+      message: errorMessage,
+    };
+  }
+}
 
 /**
  * Unified cache operations

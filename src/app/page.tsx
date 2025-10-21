@@ -34,7 +34,7 @@ import { batchFetch } from '@/src/lib/utils/batch.utils';
  * Modern approach: Generic type that works for all categories
  * View/copy counts added client-side via useViewCounts hook
  */
-type CategoryMetadata = UnifiedContentItem & { 
+type CategoryMetadata = UnifiedContentItem & {
   category: CategoryId;
   viewCount: number;
   copyCount: number;
@@ -42,12 +42,12 @@ type CategoryMetadata = UnifiedContentItem & {
 
 /**
  * Static Generation - Homepage
- * 
+ *
  * FULLY STATIC at build time:
  * - No Redis dependency during build
  * - No runtime function invocations
  * - Pure HTML served from CDN
- * 
+ *
  * Real-time data fetched CLIENT-SIDE:
  * - View/copy counts via /api/stats/batch
  * - 95% cache hit rate (localStorage 24h + in-memory 5min)
@@ -129,7 +129,7 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
    *
    * View/copy counts are fetched CLIENT-SIDE for real-time data.
    * This eliminates Redis dependency at build time, making homepage truly static.
-   * 
+   *
    * Client-side fetching via useViewCounts hook:
    * - Multi-tier caching (localStorage 24h + in-memory 5min)
    * - Batch API requests (/api/stats/batch)

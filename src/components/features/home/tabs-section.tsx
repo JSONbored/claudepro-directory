@@ -15,12 +15,12 @@
  */
 
 import { motion } from 'motion/react';
-import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { Button } from '@/src/components/primitives/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
+import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import {
   HOMEPAGE_TAB_CATEGORIES,
   UNIFIED_CATEGORY_REGISTRY,
@@ -121,7 +121,9 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
 
         <div className={'text-center pt-8'}>
           <Button variant="outline" asChild>
-            <Link href={ROUTES.COMMUNITY}>View All Contributors</Link>
+            <PrefetchLink href={ROUTES.COMMUNITY} prefetchDelay={220}>
+              View All Contributors
+            </PrefetchLink>
           </Button>
         </div>
       </TabsContent>

@@ -95,8 +95,8 @@
   },
   "scripts": {
     "dev": "npm run build:content && npm run generate:service-worker && next dev --turbopack",
-    "build": "npm run build:parallel && npm run build:api-docs && next build --turbopack",
-    "build:parallel": "npm run generate:categories & npm run generate:events & npm run build:content & npm run generate:service-worker & npm run generate:openapi & wait",
+    "build": "npm run build:setup && npm run build:api-docs && next build --turbopack",
+    "build:setup": "npm-run-all --parallel generate:categories generate:events build:content generate:service-worker generate:openapi",
     "build:smart": "npm run generate:static-api:conditional && npm run build",
     "build:analyze": "TURBOPACK_STATS=1 npm run build",
     "build:content": "tsx scripts/build/build-content.ts",
@@ -241,7 +241,8 @@
     "tailwindcss": "^4.1.14",
     "tsx": "^4.20.6",
     "typescript": "5.9.3",
-    "zod": "^4.1.12"
+    "zod": "^4.1.12",
+    "npm-run-all": "^4.1.5"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",

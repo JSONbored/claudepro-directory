@@ -21,7 +21,6 @@
 
 import type { User } from '@supabase/supabase-js';
 import { motion } from 'motion/react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/avatar';
@@ -35,6 +34,7 @@ import {
   DropdownMenuTrigger,
 } from '@/src/components/primitives/dropdown-menu';
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
+import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import { Activity, BookOpen, LogOut, Settings, User as UserIcon } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -122,10 +122,10 @@ export function UserMenu({ className }: UserMenuProps) {
           aria-label="Sign in"
           asChild
         >
-          <Link href="/login">
+          <PrefetchLink href="/login" prefetchDelay={150}>
             <UserIcon className="h-4 w-4" />
             <span className={'hidden lg:inline'}>Sign In</span>
-          </Link>
+          </PrefetchLink>
         </Button>
       </div>
     );
@@ -180,24 +180,24 @@ export function UserMenu({ className }: UserMenuProps) {
 
           {/* Navigation Links */}
           <DropdownMenuItem asChild>
-            <Link href="/account/settings">
+            <PrefetchLink href="/account/settings" prefetchDelay={200}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
-            </Link>
+            </PrefetchLink>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
-            <Link href="/account/library">
+            <PrefetchLink href="/account/library" prefetchDelay={200}>
               <BookOpen className="mr-2 h-4 w-4" />
               <span>Library</span>
-            </Link>
+            </PrefetchLink>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
-            <Link href="/account/activity">
+            <PrefetchLink href="/account/activity" prefetchDelay={200}>
               <Activity className="mr-2 h-4 w-4" />
               <span>Activity</span>
-            </Link>
+            </PrefetchLink>
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />

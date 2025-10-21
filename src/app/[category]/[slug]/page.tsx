@@ -84,7 +84,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**
  * Static Generation - Detail pages
- * 
+ *
  * Fully static at build time - no ISR needed since content changes trigger rebuilds.
  * CSP nonces handled automatically by Nosecone middleware (per-request).
  * Redis used only for realtime view/copy counts (fetched client-side).
@@ -263,7 +263,7 @@ export default async function DetailPage({
     getFullContentBySlug(category, slug),
     getRelatedContent(category, slug, 3),
   ]);
-  
+
   const itemData = fullItem || itemMeta;
 
   // View counts fetched client-side for real-time data (no server overhead)
@@ -321,10 +321,7 @@ export default async function DetailPage({
           },
         ]}
       />
-      <UnifiedDetailPage
-        item={itemData}
-        relatedItems={relatedItems}
-      />
+      <UnifiedDetailPage item={itemData} relatedItems={relatedItems} />
     </>
   );
 }

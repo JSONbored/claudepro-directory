@@ -2,7 +2,7 @@
  * useViewCounts Hook
  *
  * Client-side hook for fetching view/copy counts with aggressive caching.
- * CRITICAL: Multi-tier caching to stay under 3-5k Redis commands/day budget.
+ * CRITICAL: Multi-tier caching to stay under ~10k Redis commands/day budget (Upstash free tier ~16k/day).
  *
  * Caching Strategy:
  * 1. localStorage (24 hours) - eliminates API calls for repeat visitors
@@ -14,7 +14,7 @@
  * Redis Impact:
  * - Without client cache: Every page view = 1 API call = potential Redis read
  * - With localStorage: Only 1 API call per 24 hours per user
- * - Estimated reduction: 95-99% fewer API calls
+ * - Estimated reduction: 95-99% fewer API calls (keeps us under Upstash free tier 16k/day)
  *
  * Usage:
  * ```tsx
@@ -25,6 +25,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { StatsBatchRequestBody, StatsBatchResponse } from '@/src/lib/stats/types';
 
 /**
  * Cache entry structure
@@ -147,56 +148,144 @@ const MEMORY_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
  */
 const pendingFetches = new Map<string, Promise<CacheEntry>>();
 
-/**
- * Fetch counts from API
- */
-async function fetchCounts(category: string, slug: string): Promise<CacheEntry> {
+interface BatchResolver {
+  resolve: (entry: CacheEntry) => void;
+  reject: (error: unknown) => void;
+}
+
+const batchRequests = new Map<string, { category: string; slug: string }>();
+const batchResolvers = new Map<string, BatchResolver[]>();
+const BATCH_FLUSH_DELAY_MS = 25;
+const MAX_BATCH_SIZE = 50;
+
+export const STATS_BATCH_FLUSH_DELAY_MS = BATCH_FLUSH_DELAY_MS;
+export const STATS_BATCH_MAX_SIZE = MAX_BATCH_SIZE;
+
+let batchTimer: ReturnType<typeof setTimeout> | null = null;
+
+function enqueueBatch(category: string, slug: string): Promise<CacheEntry> {
   const cacheKey = `${category}:${slug}`;
 
-  // Check if fetch is already in progress (deduplication)
+  return new Promise<CacheEntry>((resolve, reject) => {
+    // Ensure we only store the last request for a given key
+    batchRequests.set(cacheKey, { category, slug });
+    const resolvers = batchResolvers.get(cacheKey) ?? [];
+    resolvers.push({ resolve, reject });
+    batchResolvers.set(cacheKey, resolvers);
+
+    if (!batchTimer) {
+      batchTimer = setTimeout(flushBatch, BATCH_FLUSH_DELAY_MS);
+    }
+  });
+}
+
+async function flushBatch() {
+  const requests = Array.from(batchRequests.values());
+  const resolversMap = new Map(batchResolvers);
+
+  batchRequests.clear();
+  batchResolvers.clear();
+
+  if (batchTimer) {
+    clearTimeout(batchTimer);
+    batchTimer = null;
+  }
+
+  if (requests.length === 0) {
+    return;
+  }
+
+  const chunks: Array<Array<{ category: string; slug: string }>> = [];
+  for (let i = 0; i < requests.length; i += MAX_BATCH_SIZE) {
+    chunks.push(requests.slice(i, i + MAX_BATCH_SIZE));
+  }
+
+  for (const chunk of chunks) {
+    // Create keys for this specific chunk
+    const chunkKeys = chunk.map((item) => `${item.category}:${item.slug}`);
+
+    const body: StatsBatchRequestBody = {
+      items: chunk.map((item) => ({
+        category: item.category,
+        slug: item.slug,
+        type: 'both' as const,
+      })),
+      mode: 'cached',
+    };
+
+    try {
+      const response = await fetch('/api/stats/batch', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(body),
+        next: { revalidate: 300 },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const json: StatsBatchResponse = await response.json();
+
+      if (!(json.success && json.data)) {
+        throw new Error(json.error || 'Invalid response format');
+      }
+
+      for (const itemKey of chunkKeys) {
+        const [category = '', slug = ''] = itemKey.split(':');
+        const counts = json.data[itemKey] ?? {};
+        const entry: CacheEntry = {
+          viewCount: typeof counts.viewCount === 'number' ? counts.viewCount : 0,
+          copyCount: typeof counts.copyCount === 'number' ? counts.copyCount : 0,
+          timestamp: Date.now(),
+        };
+
+        memoryCache.set(itemKey, entry);
+        ViewCountsCache.set(category, slug, entry.viewCount, entry.copyCount);
+
+        const resolvers = resolversMap.get(itemKey);
+        if (resolvers) {
+          resolvers.forEach(({ resolve }) => resolve(entry));
+          resolversMap.delete(itemKey);
+        }
+      }
+    } catch (error) {
+      for (const itemKey of chunkKeys) {
+        const resolvers = resolversMap.get(itemKey);
+        if (resolvers) {
+          resolvers.forEach(({ reject }) => reject(error));
+          resolversMap.delete(itemKey);
+        }
+      }
+    }
+  }
+
+  if (resolversMap.size > 0) {
+    const fallbackError = new Error('Stats batch request not fulfilled');
+    resolversMap.forEach((resolvers) => {
+      resolvers.forEach(({ reject }) => reject(fallbackError));
+    });
+  }
+}
+
+function requestCounts(category: string, slug: string): Promise<CacheEntry> {
+  const cacheKey = `${category}:${slug}`;
   const pending = pendingFetches.get(cacheKey);
   if (pending) {
     return pending;
   }
 
-  // Create new fetch promise
-  const fetchPromise = (async () => {
-    try {
-      const response = await fetch(`/api/stats/batch?items=${cacheKey}`, {
-        // Use SWR cache strategy
-        next: { revalidate: 300 }, // 5 minutes
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (!(data.success && data.data && data.data[cacheKey])) {
-        throw new Error('Invalid response format');
-      }
-
-      const counts = data.data[cacheKey];
-      const entry: CacheEntry = {
-        viewCount: counts.viewCount || 0,
-        copyCount: counts.copyCount || 0,
-        timestamp: Date.now(),
-      };
-
-      // Store in both caches
-      memoryCache.set(cacheKey, entry);
-      ViewCountsCache.set(category, slug, entry.viewCount, entry.copyCount);
-
-      return entry;
-    } finally {
-      // Remove from pending fetches
+  const promise = enqueueBatch(category, slug)
+    .catch((error) => {
+      throw error;
+    })
+    .finally(() => {
       pendingFetches.delete(cacheKey);
-    }
-  })();
+    });
 
-  pendingFetches.set(cacheKey, fetchPromise);
-  return fetchPromise;
+  pendingFetches.set(cacheKey, promise);
+  return promise;
 }
 
 /**
@@ -235,7 +324,7 @@ export function useViewCounts(category: string, slug: string) {
       }
 
       // If stale but within 7 days, show stale data and refresh in background
-      fetchCounts(category, slug).then((fresh) => {
+      requestCounts(category, slug).then((fresh) => {
         setViewCount(fresh.viewCount);
         setCopyCount(fresh.copyCount);
       });
@@ -244,7 +333,7 @@ export function useViewCounts(category: string, slug: string) {
 
     // 3. No cache - fetch from API
     setLoading(true);
-    fetchCounts(category, slug)
+    requestCounts(category, slug)
       .then((fresh) => {
         setViewCount(fresh.viewCount);
         setCopyCount(fresh.copyCount);
@@ -318,35 +407,23 @@ export function useBatchViewCounts(items: Array<{ category: string; slug: string
       return;
     }
 
-    const itemsParam = itemsToFetch.map((item) => `${item.category}:${item.slug}`).join(',');
-
-    fetch(`/api/stats/batch?items=${itemsParam}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!(data.success && data.data)) return;
-
-        const freshCounts = { ...cachedCounts };
-        for (const [key, value] of Object.entries(data.data)) {
-          const typedValue = value as { viewCount: number; copyCount: number };
-          freshCounts[key] = {
-            viewCount: typedValue.viewCount,
-            copyCount: typedValue.copyCount,
-          };
-
-          // Cache in localStorage and memory
-          const [category = '', slug = ''] = key.split(':');
-          ViewCountsCache.set(category, slug, typedValue.viewCount, typedValue.copyCount);
-          memoryCache.set(key, {
-            viewCount: typedValue.viewCount,
-            copyCount: typedValue.copyCount,
-            timestamp: Date.now(),
-          });
-        }
-
-        setCounts(freshCounts);
-      })
-      .catch(() => {
-        // Silent fail
+    Promise.all(
+      itemsToFetch.map((item) =>
+        requestCounts(item.category, item.slug)
+          .then((entry) => {
+            const key = `${item.category}:${item.slug}`;
+            cachedCounts[key] = {
+              viewCount: entry.viewCount,
+              copyCount: entry.copyCount,
+            };
+          })
+          .catch(() => {
+            // Silent fail - leave cached value (defaults to 0)
+          })
+      )
+    )
+      .then(() => {
+        setCounts({ ...cachedCounts });
       })
       .finally(() => {
         setLoading(false);

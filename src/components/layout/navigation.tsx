@@ -30,8 +30,6 @@
  * @see Linear Issues: SHA-3026, SHA-3027, SHA-3028, SHA-3029, SHA-3030, SHA-3031, SHA-3032
  */
 
-import { motion, useScroll, useTransform } from 'motion/react';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type * as React from 'react';
 import { useEffect, useState } from 'react';
@@ -59,6 +57,7 @@ import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ChevronDown, DiscordIcon, Github, LogoIcon, Menu } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { preloadMotion, useLazyMotion } from '@/src/lib/utils/use-lazy-motion';
 
 interface NavLinkProps {
   href: string;
@@ -98,6 +97,28 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
 };
 
 export const Navigation = () => {
+  const motionModule = useLazyMotion();
+  const motion = motionModule?.motion;
+  const useScroll = motionModule?.useScroll;
+  const useTransform = motionModule?.useTransform;
+  // Use type-safe component assignment (accepts both motion and fallback props)
+  const MotionHeader =
+    motion?.header ??
+    (({ children, ...props }: Record<string, unknown>) => (
+      <header {...(props as React.HTMLAttributes<HTMLElement>)}>
+        {children as React.ReactNode}
+      </header>
+    ));
+  const MotionNav =
+    motion?.nav ??
+    (({ children, ...props }: Record<string, unknown>) => (
+      <nav {...(props as React.HTMLAttributes<HTMLElement>)}>{children as React.ReactNode}</nav>
+    ));
+  const MotionDiv =
+    motion?.div ??
+    (({ children, ...props }: Record<string, unknown>) => (
+      <div {...(props as React.HTMLAttributes<HTMLDivElement>)}>{children as React.ReactNode}</div>
+    ));
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
@@ -105,11 +126,20 @@ export const Navigation = () => {
   // Global search keyboard shortcut (⌘K / Ctrl+K)
   useSearchShortcut();
 
-  // Motion.dev scroll-based animations (Phase 1.5 - October 2025)
-  const { scrollY } = useScroll();
-  const backdropBlur = useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(12px)']);
-  const navOpacity = useTransform(scrollY, [0, 50], [0.95, 1]);
-  const logoScale = useTransform(scrollY, [0, 100], [1, 0.9]);
+  useEffect(() => {
+    preloadMotion();
+  }, []);
+
+  // Motion.dev scroll-based animations (lazy loaded)
+  const scrollValues = useScroll?.();
+  const scrollY = scrollValues?.scrollY;
+  const backdropBlur =
+    useTransform && scrollY
+      ? useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(12px)'])
+      : undefined;
+  const navOpacity =
+    useTransform && scrollY ? useTransform(scrollY, [0, 50], [0.95, 1]) : undefined;
+  const logoScale = useTransform && scrollY ? useTransform(scrollY, [0, 100], [1, 0.9]) : undefined;
 
   // SHA-2088: Optimized scroll handler with threshold check and rAF debouncing
   // Only updates state when crossing 20px threshold (prevents 98% of unnecessary re-renders)
@@ -159,16 +189,18 @@ export const Navigation = () => {
       {/* Global Command Menu (⌘K) */}
       <NavigationCommandMenu />
 
-      <motion.header
+      <MotionHeader
         className="sticky top-0 z-50 w-full pt-1 px-3 pb-3 will-change-transform contain-layout"
-        style={{ opacity: navOpacity }}
+        {...(navOpacity ? { style: { opacity: navOpacity } } : {})}
       >
         <div className="container mx-auto">
-          <motion.nav
+          <MotionNav
             className={`rounded-2xl border border-border/50 bg-card/95 shadow-lg hover:shadow-xl transition-shadow duration-300 ${
               isScrolled ? 'shadow-xl' : ''
             }`}
-            style={{ backdropFilter: backdropBlur }}
+            {...(backdropBlur
+              ? { style: { backdropFilter: backdropBlur as unknown as string } }
+              : {})}
             aria-label="Main navigation container"
           >
             <div className="px-3 md:px-4">
@@ -178,19 +210,19 @@ export const Navigation = () => {
                 }`}
               >
                 {/* Logo with Motion.dev scale animation */}
-                <Link
+                <PrefetchLink
                   href={ROUTES.HOME}
-                  prefetch={true}
                   className="flex items-center gap-2 min-w-0 flex-shrink"
                   aria-label="Claude Pro Directory - Go to homepage"
+                  prefetchDelay={120}
                 >
-                  <motion.div style={{ scale: logoScale }}>
+                  <MotionDiv {...(logoScale ? { style: { scale: logoScale } } : {})}>
                     <LogoIcon
                       className={`transition-all duration-300 flex-shrink-0 hidden xl:block ${
                         isScrolled ? 'h-6 w-6' : 'h-8 w-8'
                       }`}
                     />
-                  </motion.div>
+                  </MotionDiv>
                   <span
                     className={`font-medium text-foreground transition-all duration-300 hidden xl:inline ${
                       isScrolled ? 'text-base' : 'text-lg'
@@ -198,7 +230,7 @@ export const Navigation = () => {
                   >
                     {APP_CONFIG.domain}
                   </span>
-                </Link>
+                </PrefetchLink>
 
                 {/* Desktop Navigation - ONLY show at xl: (1280px+) */}
                 <nav
@@ -247,12 +279,12 @@ export const Navigation = () => {
                                 const IconComponent = link.icon;
                                 return (
                                   <DropdownMenuItem key={link.href} asChild>
-                                    <Link
+                                    <PrefetchLink
                                       href={link.href}
-                                      prefetch={true}
                                       className={
                                         'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg hover:bg-accent/10 hover:scale-[1.02] transition-all duration-200 group'
                                       }
+                                      prefetchDelay={220}
                                     >
                                       {IconComponent && (
                                         <div
@@ -276,7 +308,7 @@ export const Navigation = () => {
                                           </div>
                                         )}
                                       </div>
-                                    </Link>
+                                    </PrefetchLink>
                                   </DropdownMenuItem>
                                 );
                               })}
@@ -288,12 +320,12 @@ export const Navigation = () => {
                       {/* Submit Config - Standalone CTA */}
                       <DropdownMenuSeparator className="my-4" />
                       <DropdownMenuItem asChild>
-                        <Link
+                        <PrefetchLink
                           href={ROUTES.SUBMIT}
-                          prefetch={true}
                           className={
                             'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg bg-accent/5 hover:bg-accent/10 hover:scale-[1.01] transition-all duration-200 group'
                           }
+                          prefetchDelay={160}
                         >
                           <div
                             className={
@@ -321,29 +353,20 @@ export const Navigation = () => {
                               Share your configuration with the community
                             </div>
                           </div>
-                        </Link>
+                        </PrefetchLink>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </nav>
 
                 {/* Tablet Navigation (768px-1279px) - Horizontal scroll with Motion.dev */}
-                <motion.nav
+                <MotionNav
                   className="hidden md:flex xl:hidden overflow-x-auto scrollbar-hide snap-x snap-mandatory"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
                   aria-label="Tablet navigation"
                 >
                   <div className={`flex ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} px-2`}>
-                    {PRIMARY_NAVIGATION.slice(0, 5).map((link, index) => (
-                      <motion.div
-                        key={link.href}
-                        className="snap-center"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05, duration: 0.3 }}
-                      >
+                    {PRIMARY_NAVIGATION.slice(0, 5).map((link) => (
+                      <MotionDiv key={link.href} className="snap-center">
                         <NavLink
                           href={link.href}
                           isActive={isActive}
@@ -352,7 +375,7 @@ export const Navigation = () => {
                         >
                           {link.label}
                         </NavLink>
-                      </motion.div>
+                      </MotionDiv>
                     ))}
                     <Button
                       variant="ghost"
@@ -364,7 +387,7 @@ export const Navigation = () => {
                       More
                     </Button>
                   </div>
-                </motion.nav>
+                </MotionNav>
 
                 {/* Right Side Actions */}
                 <div className={'flex items-center gap-2 md:gap-3'}>
@@ -421,63 +444,80 @@ export const Navigation = () => {
                       className="w-full sm:w-[380px] border-l border-border/50"
                     >
                       {/* Swipe-to-close indicator */}
-                      <motion.div
-                        className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-border/50 rounded-full cursor-grab active:cursor-grabbing"
-                        drag="y"
-                        dragConstraints={{ top: 0, bottom: 50 }}
-                        onDragEnd={(_, info) => {
-                          if (info.offset.y > 100) setIsOpen(false);
-                        }}
-                        whileDrag={{ scale: 1.2, backgroundColor: 'hsl(var(--accent))' }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                      />
+                      {motion && (
+                        <motion.div
+                          className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-border/50 rounded-full cursor-grab active:cursor-grabbing"
+                          drag="y"
+                          dragConstraints={{ top: 0, bottom: 50 }}
+                          onDragEnd={(_, info) => {
+                            if (info.offset.y > 100) setIsOpen(false);
+                          }}
+                          whileDrag={{ scale: 1.2, backgroundColor: 'hsl(var(--accent))' }}
+                          transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                        />
+                      )}
 
                       <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                       <div className={'flex flex-col h-full pt-8'}>
                         {/* Header with Motion.dev fade-in */}
-                        <motion.div
-                          className={'flex items-center gap-3 pb-8 px-1'}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.1 }}
-                        >
-                          <LogoIcon className="h-10 w-10 flex-shrink-0" />
-                          <span className={'font-semibold text-xl text-foreground'}>
-                            {APP_CONFIG.domain}
-                          </span>
-                        </motion.div>
+                        {motion ? (
+                          <motion.div
+                            className={'flex items-center gap-3 pb-8 px-1'}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.1 }}
+                          >
+                            <LogoIcon className="h-10 w-10 flex-shrink-0" />
+                            <span className={'font-semibold text-xl text-foreground'}>
+                              {APP_CONFIG.domain}
+                            </span>
+                          </motion.div>
+                        ) : (
+                          <div className={'flex items-center gap-3 pb-8 px-1'}>
+                            <LogoIcon className="h-10 w-10 flex-shrink-0" />
+                            <span className={'font-semibold text-xl text-foreground'}>
+                              {APP_CONFIG.domain}
+                            </span>
+                          </div>
+                        )}
 
                         {/* Main Navigation - Staggered animations */}
                         <div className={'flex-1 overflow-y-auto'}>
                           <nav className={'space-y-3 px-3'} aria-label="Primary navigation">
                             {PRIMARY_NAVIGATION.map((link, index) => {
                               const IconComponent = link.icon;
-                              return (
+                              const navContent = (
+                                <NavLink
+                                  href={link.href}
+                                  isActive={isActive}
+                                  onClick={() => setIsOpen(false)}
+                                  className="flex items-center w-full px-5 py-4 text-base font-medium rounded-xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                                >
+                                  {IconComponent && (
+                                    <IconComponent className="h-5 w-5 mr-3 flex-shrink-0" />
+                                  )}
+                                  <span>{link.label}</span>
+                                  {link.isNew && (
+                                    <UnifiedBadge
+                                      variant="new-indicator"
+                                      label={`New: ${link.label}`}
+                                      className="ml-auto"
+                                    />
+                                  )}
+                                </NavLink>
+                              );
+
+                              return motion ? (
                                 <motion.div
                                   key={link.href}
                                   initial={{ opacity: 0, x: -20 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ delay: 0.15 + index * 0.05 }}
                                 >
-                                  <NavLink
-                                    href={link.href}
-                                    isActive={isActive}
-                                    onClick={() => setIsOpen(false)}
-                                    className="flex items-center w-full px-5 py-4 text-base font-medium rounded-xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
-                                  >
-                                    {IconComponent && (
-                                      <IconComponent className="h-5 w-5 mr-3 flex-shrink-0" />
-                                    )}
-                                    <span>{link.label}</span>
-                                    {link.isNew && (
-                                      <UnifiedBadge
-                                        variant="new-indicator"
-                                        label={`New: ${link.label}`}
-                                        className="ml-auto"
-                                      />
-                                    )}
-                                  </NavLink>
+                                  {navContent}
                                 </motion.div>
+                              ) : (
+                                <div key={link.href}>{navContent}</div>
                               );
                             })}
 
@@ -490,7 +530,21 @@ export const Navigation = () => {
                                 {SECONDARY_NAVIGATION.flatMap((group) => group.links).map(
                                   (link, index) => {
                                     const IconComponent = link.icon;
-                                    return (
+                                    const navContent = (
+                                      <NavLink
+                                        href={link.href}
+                                        isActive={isActive}
+                                        onClick={() => setIsOpen(false)}
+                                        className="flex items-center w-full px-5 py-4 text-sm font-medium text-muted-foreground rounded-xl bg-card/50 border border-border/40 hover:bg-accent/5 hover:text-foreground hover:border-accent/30 transition-all duration-200 active:scale-[0.98]"
+                                      >
+                                        {IconComponent && (
+                                          <IconComponent className="h-4 w-4 mr-3 flex-shrink-0" />
+                                        )}
+                                        <span>{link.label}</span>
+                                      </NavLink>
+                                    );
+
+                                    return motion ? (
                                       <motion.div
                                         key={link.href}
                                         initial={{ opacity: 0, x: -20 }}
@@ -499,18 +553,10 @@ export const Navigation = () => {
                                           delay: 0.15 + (PRIMARY_NAVIGATION.length + index) * 0.05,
                                         }}
                                       >
-                                        <NavLink
-                                          href={link.href}
-                                          isActive={isActive}
-                                          onClick={() => setIsOpen(false)}
-                                          className="flex items-center w-full px-5 py-4 text-sm font-medium text-muted-foreground rounded-xl bg-card/50 border border-border/40 hover:bg-accent/5 hover:text-foreground hover:border-accent/30 transition-all duration-200 active:scale-[0.98]"
-                                        >
-                                          {IconComponent && (
-                                            <IconComponent className="h-4 w-4 mr-3 flex-shrink-0" />
-                                          )}
-                                          <span>{link.label}</span>
-                                        </NavLink>
+                                        {navContent}
                                       </motion.div>
+                                    ) : (
+                                      <div key={link.href}>{navContent}</div>
                                     );
                                   }
                                 )}
@@ -520,63 +566,102 @@ export const Navigation = () => {
                         </div>
 
                         {/* Footer with spring animation on tap */}
-                        <motion.div
-                          className={'border-t border-border/30 pt-6 pb-6'}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.3 }}
-                        >
-                          <div className="grid grid-cols-3 gap-4 px-4">
-                            {[
-                              {
-                                icon: DiscordIcon,
-                                onClick: () =>
-                                  window.open('https://discord.gg/Ax3Py4YDrq', '_blank'),
-                                label: 'Discord',
-                                color: 'discord',
-                              },
-                              {
-                                icon: Github,
-                                onClick: () => window.open(SOCIAL_LINKS.github, '_blank'),
-                                label: 'GitHub',
-                                color: 'accent',
-                              },
-                            ].map((item) => (
+                        {motion ? (
+                          <motion.div
+                            className={'border-t border-border/30 pt-6 pb-6'}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                          >
+                            <div className="grid grid-cols-3 gap-4 px-4">
+                              {[
+                                {
+                                  icon: DiscordIcon,
+                                  onClick: () =>
+                                    window.open('https://discord.gg/Ax3Py4YDrq', '_blank'),
+                                  label: 'Discord',
+                                  color: 'discord',
+                                },
+                                {
+                                  icon: Github,
+                                  onClick: () => window.open(SOCIAL_LINKS.github, '_blank'),
+                                  label: 'GitHub',
+                                  color: 'accent',
+                                },
+                              ].map((item) => (
+                                <motion.div
+                                  key={item.label}
+                                  whileTap={{ scale: 0.9 }}
+                                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                                >
+                                  <Button
+                                    variant="outline"
+                                    size="lg"
+                                    className={`w-full h-20 rounded-2xl border-border/40 bg-card hover:bg-${item.color}/10 hover:border-${item.color}/30 transition-all duration-200`}
+                                    onClick={item.onClick}
+                                    aria-label={item.label}
+                                  >
+                                    <item.icon className="h-8 w-8" />
+                                  </Button>
+                                </motion.div>
+                              ))}
                               <motion.div
-                                key={item.label}
                                 whileTap={{ scale: 0.9 }}
                                 transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                               >
-                                <Button
-                                  variant="outline"
-                                  size="lg"
-                                  className={`w-full h-20 rounded-2xl border-border/40 bg-card hover:bg-${item.color}/10 hover:border-${item.color}/30 transition-all duration-200`}
-                                  onClick={item.onClick}
-                                  aria-label={item.label}
-                                >
-                                  <item.icon className="h-8 w-8" />
-                                </Button>
+                                <div className="w-full h-20 flex items-center justify-center rounded-2xl border border-border/40 bg-card">
+                                  <ThemeToggle />
+                                </div>
                               </motion.div>
-                            ))}
-                            <motion.div
-                              whileTap={{ scale: 0.9 }}
-                              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                            >
-                              <div className="w-full h-20 flex items-center justify-center rounded-2xl border border-border/40 bg-card">
-                                <ThemeToggle />
+                            </div>
+                          </motion.div>
+                        ) : (
+                          <div className={'border-t border-border/30 pt-6 pb-6'}>
+                            <div className="grid grid-cols-3 gap-4 px-4">
+                              {[
+                                {
+                                  icon: DiscordIcon,
+                                  onClick: () =>
+                                    window.open('https://discord.gg/Ax3Py4YDrq', '_blank'),
+                                  label: 'Discord',
+                                  color: 'discord',
+                                },
+                                {
+                                  icon: Github,
+                                  onClick: () => window.open(SOCIAL_LINKS.github, '_blank'),
+                                  label: 'GitHub',
+                                  color: 'accent',
+                                },
+                              ].map((item) => (
+                                <div key={item.label}>
+                                  <Button
+                                    variant="outline"
+                                    size="lg"
+                                    className={`w-full h-20 rounded-2xl border-border/40 bg-card hover:bg-${item.color}/10 hover:border-${item.color}/30 transition-all duration-200`}
+                                    onClick={item.onClick}
+                                    aria-label={item.label}
+                                  >
+                                    <item.icon className="h-8 w-8" />
+                                  </Button>
+                                </div>
+                              ))}
+                              <div>
+                                <div className="w-full h-20 flex items-center justify-center rounded-2xl border border-border/40 bg-card">
+                                  <ThemeToggle />
+                                </div>
                               </div>
-                            </motion.div>
+                            </div>
                           </div>
-                        </motion.div>
+                        )}
                       </div>
                     </SheetContent>
                   </Sheet>
                 </div>
               </div>
             </div>
-          </motion.nav>
+          </MotionNav>
         </div>
-      </motion.header>
+      </MotionHeader>
     </>
   );
 };

@@ -116,12 +116,12 @@ const nextConfig = {
   turbopack: {
     // Module resolution aliases for cleaner imports
     resolveAlias: {
-      '@': './',
-      '@components': './components',
-      '@lib': './lib',
-      '@hooks': './hooks',
-      '@types': './types',
-      '@utils': './lib/utils',
+      '@src': './src',
+      '@components': './src/components',
+      '@lib': './src/lib',
+      '@hooks': './src/hooks',
+      '@types': './src/types',
+      '@utils': './src/lib/utils',
       '@content': './content',
       '@generated': './generated',
     },
@@ -300,7 +300,12 @@ const nextConfig = {
     // Essential alias only
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': resolve(__dirname, './'),
+      '@src': resolve(__dirname, './src'),
+      '@components': resolve(__dirname, './src/components'),
+      '@lib': resolve(__dirname, './src/lib'),
+      '@hooks': resolve(__dirname, './src/hooks'),
+      '@types': resolve(__dirname, './src/types'),
+      '@utils': resolve(__dirname, './src/lib/utils'),
     };
 
     return config;

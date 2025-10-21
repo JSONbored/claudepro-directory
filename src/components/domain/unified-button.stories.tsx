@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Copy, Download, Share2 } from 'lucide-react';
 import { expect, fn, userEvent, within } from 'storybook/test';
+import { Copy, Download, Share2 } from '@/src/lib/icons';
 import { UnifiedButton } from './unified-button';
 
 /**

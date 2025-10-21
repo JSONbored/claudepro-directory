@@ -8,12 +8,13 @@
 
 'use client';
 
-import { motion } from 'motion/react';
-import Link from 'next/link';
+import { useEffect } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { DiscordIcon, ExternalLink, Github, Sparkles } from '@/src/lib/icons';
+import { preloadMotion, useLazyMotion } from '@/src/lib/utils/use-lazy-motion';
 
 /**
  * Footer Component
@@ -24,6 +25,19 @@ import { DiscordIcon, ExternalLink, Github, Sparkles } from '@/src/lib/icons';
  * Includes llms.txt link for AI assistant discoverability per LLMs.txt specification
  */
 export function Footer() {
+  const motionModule = useLazyMotion();
+  const motion = motionModule?.motion;
+  const MotionDiv =
+    motion?.div ??
+    ((props: React.HTMLAttributes<HTMLDivElement>) => <div {...props}>{props.children}</div>);
+  const MotionP =
+    motion?.p ??
+    ((props: React.HTMLAttributes<HTMLParagraphElement>) => <p {...props}>{props.children}</p>);
+
+  useEffect(() => {
+    preloadMotion();
+  }, []);
+
   const currentYear = new Date().getFullYear();
 
   return (
@@ -32,13 +46,7 @@ export function Footer() {
         {/* Three-column grid with better mobile stacking */}
         <div className="grid gap-8 md:gap-12 grid-cols-1 md:grid-cols-3">
           {/* About Section - Takes full width on mobile */}
-          <motion.div
-            className="text-center md:text-left"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4 }}
-          >
+          <MotionDiv className="text-center md:text-left">
             <h3 className={'font-semibold mb-4 text-lg md:text-base'}>{APP_CONFIG.name}</h3>
             <p className={'text-sm md:text-xs text-muted-foreground mb-6 max-w-sm mx-auto md:mx-0'}>
               {APP_CONFIG.description}
@@ -50,22 +58,18 @@ export function Footer() {
                 { href: SOCIAL_LINKS.github || '#', icon: Github, label: 'GitHub' },
                 { href: SOCIAL_LINKS.discord || '#', icon: DiscordIcon, label: 'Discord' },
               ].map((social) => (
-                <motion.div
-                  key={social.label}
-                  whileHover={{ scale: 1.15, y: -3 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                >
-                  <Link
+                <MotionDiv key={social.label}>
+                  <PrefetchLink
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-muted-foreground hover:text-foreground transition-colors"
                     aria-label={social.label}
+                    prefetchDelay={150}
                   >
                     <social.icon className="h-7 w-7 md:h-5 md:w-5" />
-                  </Link>
-                </motion.div>
+                  </PrefetchLink>
+                </MotionDiv>
               ))}
 
               {/* Open Source Badge - Hide on small mobile */}
@@ -80,16 +84,10 @@ export function Footer() {
                 </UnifiedBadge>
               </div>
             </div>
-          </motion.div>
+          </MotionDiv>
 
           {/* Quick Links - Staggered fade-in */}
-          <motion.div
-            className="text-center md:text-left"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-          >
+          <MotionDiv className="text-center md:text-left">
             <h3 className={'font-semibold mb-4 text-lg md:text-base'}>Quick Links</h3>
             <ul className={'space-y-3 md:space-y-2'}>
               {[
@@ -98,98 +96,69 @@ export function Footer() {
                 { href: ROUTES.CHANGELOG, label: 'Changelog' },
                 { href: ROUTES.COMMUNITY, label: 'Community' },
                 { href: ROUTES.SUBMIT, label: 'Submit' },
-              ].map((link, index) => (
-                <motion.li
-                  key={link.href}
-                  initial={{ opacity: 0, x: -10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.15 + index * 0.05 }}
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.05, x: 3 }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                    className="inline-block"
-                  >
-                    <Link
+              ].map((link) => (
+                <MotionDiv key={link.href}>
+                  <div className="inline-block">
+                    <PrefetchLink
                       href={link.href}
                       className="text-base md:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      prefetchDelay={200}
                     >
                       {link.label}
-                    </Link>
-                  </motion.div>
-                </motion.li>
+                    </PrefetchLink>
+                  </div>
+                </MotionDiv>
               ))}
             </ul>
-          </motion.div>
+          </MotionDiv>
 
           {/* AI & Resources */}
-          <motion.div
-            className="text-center md:text-left"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-          >
+          <MotionDiv className="text-center md:text-left">
             <h3 className={'font-semibold mb-4 text-lg md:text-base'}>AI & Resources</h3>
             <ul className={'space-y-3 md:space-y-2'}>
               {[
                 { href: ROUTES.LLMS_TXT, label: 'LLMs.txt', icon: Sparkles },
                 { href: ROUTES.API_DOCS, label: 'API Docs', icon: null },
                 { href: ROUTES.PARTNER, label: 'Partner Program', icon: null },
-              ].map((link, index) => (
-                <motion.li
-                  key={link.href}
-                  initial={{ opacity: 0, x: -10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2 + index * 0.05 }}
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.05, x: 3 }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                    className="inline-block"
-                  >
-                    <Link
+              ].map((link) => (
+                <MotionDiv key={link.href}>
+                  <div className="inline-block">
+                    <PrefetchLink
                       href={link.href}
                       className="text-base md:text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-2"
                       aria-label={link.label}
+                      prefetchDelay={200}
                     >
                       {link.icon && <link.icon className="h-4 w-4" />}
                       <span>{link.label}</span>
-                    </Link>
-                  </motion.div>
-                </motion.li>
+                    </PrefetchLink>
+                  </div>
+                </MotionDiv>
               ))}
             </ul>
-          </motion.div>
+          </MotionDiv>
         </div>
 
         {/* Bottom Bar - Better mobile layout */}
-        <motion.div
+        <MotionDiv
           className={
             'mt-8 md:mt-12 pt-6 border-t border-border/30 flex flex-col md:flex-row items-center justify-between gap-4'
           }
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
         >
           <p className={'text-sm text-muted-foreground text-center md:text-left'}>
             © {currentYear} {APP_CONFIG.author}. All rights reserved.
           </p>
-          <motion.p className={'text-xs text-muted-foreground'} whileHover={{ scale: 1.05 }}>
-            <Link
+          <MotionP className={'text-xs text-muted-foreground'}>
+            <PrefetchLink
               href={ROUTES.LLMS_TXT}
               className="hover:text-foreground transition-colors inline-flex items-center gap-1.5"
+              prefetchDelay={150}
             >
               <Sparkles className="h-3 w-3" />
               AI-optimized content available
-            </Link>
-          </motion.p>
-        </motion.div>
+            </PrefetchLink>
+          </MotionP>
+        </MotionDiv>
       </div>
     </footer>
   );

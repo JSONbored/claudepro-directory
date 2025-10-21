@@ -18,7 +18,6 @@
 
 'use client';
 
-import { Award, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
@@ -28,6 +27,7 @@ import {
   BADGE_REGISTRY,
   type BadgeDefinition,
 } from '@/src/lib/config/badges.config';
+import { Award, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';
 

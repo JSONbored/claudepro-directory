@@ -17,8 +17,7 @@
  * - Maintainability: Hard → Easy
  */
 
-import type { LucideIcon } from 'lucide-react';
-import { Github } from '@/src/lib/icons';
+import { Github, type LucideIcon } from '@/src/lib/icons';
 
 // ============================================================================
 // TYPE DEFINITIONS

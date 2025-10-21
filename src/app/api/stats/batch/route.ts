@@ -23,33 +23,58 @@
  * - Cache miss (Redis): <100ms
  * - Batch size: up to 50 items per request
  *
- * @route GET /api/stats/batch?items=category:slug,category:slug,...
+ * @route POST /api/stats/batch
  */
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { statsRedis } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
+import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
+import type {
+  StatsBatchMode,
+  StatsBatchResult,
+  StatsHydrationPayload,
+} from '@/src/lib/stats/types';
 
 /**
  * Runtime configuration - serverless function (no ISR)
  */
 export const runtime = 'nodejs';
 
-/**
- * Request validation schema
- */
-const statsQuerySchema = z.object({
-  items: z
-    .string()
-    .min(1)
-    .max(2000)
-    .describe('Comma-separated list of category:slug pairs (max 50 items)')
-    .transform((val) => val.split(',').filter((item) => item.trim()))
-    .pipe(
-      z.array(z.string().regex(/^[a-z-]+:[a-z0-9-]+$/)).max(50, 'Maximum 50 items per request')
-    ),
-});
+const statsBatchItemSchema = z
+  .object({
+    category: categoryIdSchema.describe('Category identifier for the stat item'),
+    slug: z
+      .string()
+      .min(1, 'Slug is required')
+      .max(200, 'Slug must be <= 200 characters')
+      .regex(/^[a-z0-9-]+$/, 'Slug must be kebab-case'),
+    type: z
+      .enum(['views', 'copies', 'both'])
+      .default('both')
+      .describe('Type of stat requested for the item'),
+  })
+  .describe('Stat item describing which counters to fetch');
+
+const statsBatchBodySchema = z
+  .object({
+    items: z
+      .array(statsBatchItemSchema)
+      .min(1, 'At least one item is required')
+      .max(50, 'Maximum 50 items per request')
+      .describe('Collection of stat items to retrieve in this batch'),
+    mode: z
+      .enum(['cached', 'realtime'])
+      .default('cached')
+      .describe('Fetch mode. Cached respects CDN caching, realtime bypasses cache headers'),
+  })
+  .describe('Request payload for stats batch API');
+
+const CACHE_CONTROL_HEADERS: Record<StatsBatchMode, string> = {
+  cached: 'public, max-age=0, s-maxage=300, stale-while-revalidate=60, stale-if-error=86400',
+  realtime: 'no-cache, no-store, must-revalidate',
+};
 
 /**
  * In-memory cache (per serverless instance)
@@ -76,48 +101,63 @@ function cleanExpiredCache() {
 }
 
 /**
- * GET handler - fetch stats for multiple items
+ * POST handler - fetch stats for multiple items
  */
-export async function GET(request: Request) {
+export async function POST(request: Request) {
   try {
-    // Parse and validate query params
-    const url = new URL(request.url);
-    const itemsParam = url.searchParams.get('items');
+    const rawBody = await request.json().catch(() => null);
 
-    if (!itemsParam) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Missing items parameter',
-          message: 'Provide items as comma-separated category:slug pairs',
-        },
-        { status: 400 }
-      );
-    }
-
-    const validation = statsQuerySchema.safeParse({ items: itemsParam });
+    const validation = statsBatchBodySchema.safeParse(rawBody);
 
     if (!validation.success) {
+      const issue = validation.error.issues[0];
       return NextResponse.json(
         {
           success: false,
-          error: 'Invalid items parameter',
-          message: validation.error.issues[0]?.message || 'Invalid format',
+          error: 'Invalid request body',
+          message: issue?.message || 'Malformed request payload',
         },
         { status: 400 }
       );
     }
 
-    const items = validation.data.items;
+    const { items: requestedItems, mode } = validation.data;
 
-    // Check in-memory cache first (reduces Redis load)
-    const cacheKey = items.sort().join(',');
+    const structuredItems = Array.from(
+      new Map(
+        requestedItems.map((item) => [`${item.category}:${item.slug}:${item.type}`, item])
+      ).values()
+    );
+
+    if (structuredItems.length === 0) {
+      return NextResponse.json(
+        {
+          success: true,
+          data: {},
+          cached: false,
+        },
+        {
+          headers: {
+            'Cache-Control': CACHE_CONTROL_HEADERS[mode],
+            'X-Cache': 'MISS',
+          },
+        }
+      );
+    }
+
+    const cacheKeyBase = structuredItems
+      .map((item) => `${item.category}:${item.slug}:${item.type}`)
+      .sort()
+      .join(',');
+    const cacheKey = `${mode}|${cacheKeyBase}`;
+
     const cached = inMemoryCache.get(cacheKey);
 
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    if (mode === 'cached' && cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
       logger.info('Stats batch request (in-memory cache hit)', {
-        itemCount: items.length,
+        itemCount: structuredItems.length,
         cacheAge: Date.now() - cached.timestamp,
+        mode,
       });
 
       return NextResponse.json(
@@ -129,68 +169,89 @@ export async function GET(request: Request) {
         },
         {
           headers: {
-            'Cache-Control':
-              'public, max-age=300, stale-while-revalidate=3600, stale-if-error=86400', // 5min cache, 1h stale, 24h error
+            'Cache-Control': CACHE_CONTROL_HEADERS[mode],
             'X-Cache': 'HIT-MEMORY',
           },
         }
       );
     }
 
-    // Parse items into category/slug pairs
-    // Items are pre-validated with regex /^[a-z-]+:[a-z0-9-]+$/ so split will always have 2 parts
-    const parsedItems: Array<{ category: string; slug: string }> = items
-      .map((item) => {
-        const [category, slug] = item.split(':');
-        // Type guard: ensure both parts exist
-        if (!(category && slug)) return null;
-        return { category, slug };
-      })
-      .filter((item): item is { category: string; slug: string } => item !== null);
+    const parsedItems: Array<{ category: string; slug: string }> = Array.from(
+      new Map(
+        structuredItems.map(({ category, slug }) => [`${category}:${slug}`, { category, slug }])
+      ).values()
+    );
 
-    // Fetch from Redis (batch operation)
     logger.info('Stats batch request (fetching from Redis)', {
-      itemCount: items.length,
+      itemCount: structuredItems.length,
+      mode,
     });
 
-    const [viewCounts, copyCounts] = await Promise.all([
-      statsRedis.getViewCounts(parsedItems),
-      statsRedis.getCopyCounts(parsedItems),
-    ]);
+    const requests: Array<Promise<Record<string, number>>> = [];
+    const viewsRequested = structuredItems.some((item) => item.type !== 'copies');
+    const copiesRequested = structuredItems.some((item) => item.type !== 'views');
 
-    // Build response
-    const data: Record<string, { viewCount: number; copyCount: number }> = {};
-    for (const item of parsedItems) {
-      const key = `${item.category}:${item.slug}`;
-      data[key] = {
-        viewCount: viewCounts[key] || 0,
-        copyCount: copyCounts[key] || 0,
-      };
+    if (viewsRequested) {
+      requests.push(statsRedis.getViewCounts(parsedItems));
+    } else {
+      requests.push(Promise.resolve({}));
     }
 
-    // Store in in-memory cache
-    inMemoryCache.set(cacheKey, { data, timestamp: Date.now() });
+    if (copiesRequested) {
+      requests.push(statsRedis.getCopyCounts(parsedItems));
+    } else {
+      requests.push(Promise.resolve({}));
+    }
 
-    // Clean old cache entries (async, don't await)
-    if (inMemoryCache.size > 100) {
-      cleanExpiredCache();
+    const [viewCounts, copyCounts] = await Promise.all(requests);
+
+    const data = structuredItems.reduce<StatsBatchResult>((acc, item) => {
+      const key = `${item.category}:${item.slug}`;
+      const wantsViews = item.type === 'views' || item.type === 'both';
+      const wantsCopies = item.type === 'copies' || item.type === 'both';
+      const existing = acc[key] ?? { viewCount: 0, copyCount: 0 };
+
+      acc[key] = {
+        viewCount: wantsViews ? (viewCounts?.[key] ?? existing.viewCount) : existing.viewCount,
+        copyCount: wantsCopies ? (copyCounts?.[key] ?? existing.copyCount) : existing.copyCount,
+      };
+
+      return acc;
+    }, {});
+
+    if (mode === 'cached') {
+      inMemoryCache.set(cacheKey, { data, timestamp: Date.now() });
+
+      if (inMemoryCache.size > 100) {
+        cleanExpiredCache();
+      }
     }
 
     logger.info('Stats batch request completed', {
-      itemCount: items.length,
+      itemCount: structuredItems.length,
       cached: false,
+      mode,
     });
+
+    const payload: StatsHydrationPayload | undefined =
+      mode === 'cached'
+        ? {
+            items: structuredItems,
+            results: data,
+          }
+        : undefined;
 
     return NextResponse.json(
       {
         success: true,
         data,
-        cached: false,
+        cached: mode === 'cached' && Boolean(cached),
+        payload,
       },
       {
         headers: {
-          'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600, stale-if-error=86400', // 5min cache, 1h stale, 24h error
-          'X-Cache': 'MISS',
+          'Cache-Control': CACHE_CONTROL_HEADERS[mode],
+          'X-Cache': cached ? 'HIT-MEMORY' : 'MISS',
         },
       }
     );

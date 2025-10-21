@@ -1,185 +1,124 @@
 /**
- * Fuzzysort Adapter - High-performance search library adapter
+ * Search API - High-performance search with Web Worker offloading
  *
- * Migration from Fuse.js to Fuzzysort for better performance:
- * - 3-5x faster search operations
+ * Architecture:
+ * - Web Worker for search computation (keeps main thread responsive)
+ * - Automatic fallback to main thread if workers unsupported
+ * - Fuzzysort for fast fuzzy matching (3-5x faster than Fuse.js)
  * - 67% smaller bundle size (20KB vs 60KB)
  * - Lazy-loaded for optimal initial page load
- * - Drop-in replacement with identical API surface
  *
- * BUNDLE OPTIMIZATION:
- * - Fuzzysort module lazy-loaded on first search (lines 18-34)
+ * PERFORMANCE OPTIMIZATION:
+ * - Search runs in separate thread (60fps maintained during search)
  * - Prepared items cached with WeakMap for automatic GC
+ * - Progressive enhancement (falls back gracefully)
  * - Compatible with existing Fuse.js API (threshold conversion)
  *
  * @see https://github.com/farzher/fuzzysort
  */
 
-import { UI_CONFIG } from '@/src/lib/constants';
 import {
   sortAlphabetically,
   sortByNewest,
   sortByPopularity,
 } from '@/src/lib/content/content-sorting';
-import { logger } from '@/src/lib/logger';
 import type { ContentItem } from '@/src/lib/schemas/content/content-item-union.schema';
 import type { SearchableItem, SearchFilters } from '@/src/lib/schemas/search.schema';
 
-// Lazy-load fuzzysort module
-let fuzzysortModule: typeof import('fuzzysort') | null = null;
+// Import fallback for when worker initialization or search fails
+import { searchWithFuzzysort as fallbackSearch } from './search-fallback';
 
-async function loadFuzzysort() {
-  if (!fuzzysortModule) {
-    try {
-      fuzzysortModule = await import('fuzzysort');
-      logger.info('Fuzzysort module loaded successfully');
-    } catch (error) {
-      logger.error(
-        'Failed to load fuzzysort module',
-        error instanceof Error ? error : new Error(String(error))
-      );
-      throw error;
-    }
+// Worker instance (shared across all search calls)
+let workerInstance: Worker | null = null;
+let workerSupported: boolean | null = null;
+let requestIdCounter = 0;
+
+/**
+ * Initialize Web Worker for search
+ * Progressive enhancement - returns null if workers not supported
+ */
+function initializeWorker(): Worker | null {
+  // Check support once
+  if (workerSupported === null) {
+    workerSupported = typeof Worker !== 'undefined';
   }
-  return fuzzysortModule;
-}
 
-// Prepared items cache for performance
-const preparedCache = new WeakMap<object, PreparedItem>();
+  if (!workerSupported) {
+    return null;
+  }
 
-interface PreparedItem {
-  item: SearchableItem;
-  titlePrepared: Fuzzysort.Prepared | undefined;
-  namePrepared: Fuzzysort.Prepared | undefined;
-  descriptionPrepared: Fuzzysort.Prepared | undefined;
-  tagsPrepared: Fuzzysort.Prepared | undefined;
-  categoryPrepared: Fuzzysort.Prepared | undefined;
-}
+  // Return existing instance
+  if (workerInstance) {
+    return workerInstance;
+  }
 
-/**
- * Prepare items for fast searching
- * Uses WeakMap for automatic garbage collection
- */
-async function prepareItems<T extends SearchableItem>(items: T[]): Promise<PreparedItem[]> {
-  const fuzzysort = await loadFuzzysort();
-
-  return items.map((item) => {
-    // Check cache first
-    const cached = preparedCache.get(item);
-    if (cached) {
-      return cached;
-    }
-
-    // Prepare all searchable fields
-    const prepared: PreparedItem = {
-      item,
-      titlePrepared: item.title ? fuzzysort.prepare(item.title) : undefined,
-      namePrepared: item.name ? fuzzysort.prepare(item.name) : undefined,
-      descriptionPrepared: item.description ? fuzzysort.prepare(item.description) : undefined,
-      tagsPrepared: item.tags?.length ? fuzzysort.prepare(item.tags.join(' ')) : undefined,
-      categoryPrepared: item.category ? fuzzysort.prepare(item.category) : undefined,
-    };
-
-    // Cache for future use
-    preparedCache.set(item, prepared);
-
-    return prepared;
-  });
+  try {
+    workerInstance = new Worker('/workers/search.worker.js');
+    return workerInstance;
+  } catch {
+    workerSupported = false;
+    return null;
+  }
 }
 
 /**
- * Convert Fuse.js threshold to Fuzzysort threshold
- * Fuse.js: 0.0 (exact) to 1.0 (match anything)
- * Fuzzysort: -Infinity (strict) to 0 (permissive)
+ * Search using Web Worker (with fallback to main thread)
  */
-function convertThreshold(fuseThreshold: number): number {
-  // Map Fuse.js 0.3 (typical) to Fuzzysort -10000
-  // Map Fuse.js 0.0 to Fuzzysort -Infinity
-  // Map Fuse.js 1.0 to Fuzzysort 0
-  if (fuseThreshold === 0) return Number.NEGATIVE_INFINITY;
-  if (fuseThreshold >= 1) return 0;
-
-  // Linear mapping: 0.3 -> -10000, 0.6 -> -5000, etc.
-  return -10000 * (1 - fuseThreshold);
-}
-
-/**
- * Search with Fuzzysort - Drop-in replacement for Fuse.js
- *
- * @param items - Array of searchable items
- * @param query - Search query string
- * @param options - Search options (Fuse.js compatible)
- * @returns Array of matching items sorted by relevance
- */
-async function searchWithFuzzysort<T extends SearchableItem>(
+async function searchWithWorker<T extends SearchableItem>(
   items: T[],
   query: string,
   options?: {
     threshold?: number;
     limit?: number;
-    keys?: Array<{ name: string; weight?: number }>;
   }
 ): Promise<T[]> {
-  const fuzzysort = await loadFuzzysort();
+  const worker = initializeWorker();
 
-  // Handle empty query - return all items
-  if (!query.trim()) {
-    return items;
+  // Fallback to main thread if worker not available
+  if (!worker) {
+    return fallbackSearch(items, query, options);
   }
 
-  // Prepare items for searching
-  const prepared = await prepareItems(items);
+  const requestId = ++requestIdCounter;
 
-  // Convert Fuse.js threshold to Fuzzysort threshold
-  const threshold = options?.threshold !== undefined ? convertThreshold(options.threshold) : -10000; // Default similar to Fuse.js 0.3
+  return new Promise<T[]>((resolve, reject) => {
+    // Timeout after 5 seconds
+    const timeout = setTimeout(() => {
+      reject(new Error('Search timeout'));
+    }, 5000);
 
-  // Build search targets based on keys option
-  const targets = [
-    'titlePrepared',
-    'namePrepared',
-    'descriptionPrepared',
-    'tagsPrepared',
-    'categoryPrepared',
-  ];
+    // Listen for response
+    const handleMessage = (e: MessageEvent) => {
+      const { type, results, requestId: responseId } = e.data;
 
-  try {
-    // Perform multi-field search
-    const results = fuzzysort.go(query, prepared, {
-      keys: targets,
-      threshold,
-      limit: options?.limit ?? UI_CONFIG.pagination.maxLimit,
-      all: false,
+      if (responseId !== requestId) return;
+
+      clearTimeout(timeout);
+      worker.removeEventListener('message', handleMessage);
+
+      if (type === 'results') {
+        resolve(results as T[]);
+      } else if (type === 'error') {
+        // Fallback to main thread on worker error (error logged by worker)
+        fallbackSearch(items, query, options).then(resolve).catch(reject);
+      }
+    };
+
+    worker.addEventListener('message', handleMessage);
+
+    // Send search request
+    worker.postMessage({
+      type: 'search',
+      query,
+      items,
+      options,
+      requestId,
     });
-
-    // Extract items from results
-    return results.map((result: Fuzzysort.KeysResult<PreparedItem>) => result.obj.item as T);
-  } catch (error) {
-    logger.error(
-      'Fuzzysort search failed',
-      error instanceof Error ? error : new Error(String(error)),
-      { query, itemCount: items.length }
-    );
-
-    // Fallback to simple filtering
-    const queryLower = query.toLowerCase();
-    return items.filter((item) => {
-      const searchText = [
-        item.title || '',
-        item.name || '',
-        item.description || '',
-        ...(item.tags || []),
-        item.category || '',
-      ]
-        .join(' ')
-        .toLowerCase();
-
-      return searchText.includes(queryLower);
-    });
-  }
+  });
 }
 
 /**
- * Search with filters - combines fuzzysort with filter logic
+ * Search with filters - combines worker-based search with filter logic
  */
 export async function searchWithFilters<T extends SearchableItem>(
   items: T[],
@@ -216,10 +155,8 @@ export async function searchWithFilters<T extends SearchableItem>(
     });
   }
 
-  // Search filtered items
-  const searchResults = query.trim()
-    ? await searchWithFuzzysort(filtered, query, options)
-    : filtered;
+  // Search filtered items using worker (with automatic fallback)
+  const searchResults = query.trim() ? await searchWithWorker(filtered, query, options) : filtered;
 
   // Apply sorting
   return applySorting(searchResults, filters.sort);

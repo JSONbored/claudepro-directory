@@ -517,8 +517,8 @@ function DownloadMarkdownButton({
           .then(([eventMapper, tracker]) => {
             tracker.trackEvent(eventMapper.getDownloadMarkdownEvent(category), {
               slug,
-              filename,
-              file_size: fileSize,
+              filename: String(filename),
+              file_size: Number(fileSize),
             });
           })
           .catch(() => {

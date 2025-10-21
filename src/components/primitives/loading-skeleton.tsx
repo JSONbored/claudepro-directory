@@ -12,10 +12,11 @@
  */
 
 import { cva, type VariantProps } from 'class-variance-authority';
-import { motion } from 'motion/react';
 import type * as React from 'react';
+import { useEffect } from 'react';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import { preloadMotion, useLazyMotion } from '@/src/lib/utils/use-lazy-motion';
 
 const skeletonVariants = cva('relative overflow-hidden bg-muted rounded', {
   variants: {
@@ -78,6 +79,13 @@ function Skeleton({
   noShimmer = false,
   ...props
 }: SkeletonProps) {
+  const motionModule = useLazyMotion();
+  const MotionDiv = motionModule?.motion?.div ?? null;
+
+  useEffect(() => {
+    preloadMotion();
+  }, []);
+
   return (
     <div
       className={cn(
@@ -88,8 +96,8 @@ function Skeleton({
       {...props}
     >
       {/* Shimmer wave effect - only if not disabled */}
-      {!noShimmer && (
-        <motion.div
+      {!noShimmer && MotionDiv ? (
+        <MotionDiv
           className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
           animate={{
             x: ['-100%', '100%'],
@@ -103,6 +111,8 @@ function Skeleton({
             willChange: 'transform',
           }}
         />
+      ) : noShimmer ? null : (
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
       )}
     </div>
   );

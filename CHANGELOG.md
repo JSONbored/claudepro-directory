@@ -1819,17 +1819,17 @@ Comprehensive refactoring of card and newsletter components following compositio
   description={item.description}
   author={item.author}
   renderTopBadges={() => (
-    <>
+    {/* Fragment */}
       <TypeBadge type={item.category} />
       {isSponsored && <SponsoredBadge tier={sponsorTier} />}
-    </>
+    {/* End Fragment */}
   )}
   renderActions={() => (
-    <>
+    {/* Fragment */}
       <BookmarkButton />
       <CardCopyAction />
       <Button>View</Button>
-    </>
+    {/* End Fragment */}
   )}
 />
 ```
@@ -3043,8 +3043,8 @@ Added complete newsletter subscription infrastructure with Resend integration, f
 **Email Infrastructure:**
 
 - **Domain:** `mail.claudepro.directory` (subdomain for deliverability)
-- **Integration:** Resend <> Vercel Marketplace direct integration
-- **DNS:** Managed via Resend <> Cloudflare integration
+- **Integration:** Resend ↔ Vercel Marketplace direct integration
+- **DNS:** Managed via Resend ↔ Cloudflare integration
 - **From Address:** `hello@mail.claudepro.directory`
 
 **Rate Limiting:**

@@ -1,34 +1,57 @@
-// Dynamic imports for Vercel monitoring tools
-// Load at page bottom to avoid blocking initial render (30KB bundle, 50-100ms TTI gain)
-const Analytics = (await import('@vercel/analytics/next').catch(() => ({ Analytics: () => null })))
-  .Analytics;
-
-const SpeedInsights = (
-  await import('@vercel/speed-insights/next').catch(() => ({ SpeedInsights: () => null }))
-).SpeedInsights;
-
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import './view-transitions.css';
 import './micro-interactions.css';
 import './starry-night.css';
-import { Toaster } from 'sonner';
-import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
-import { PerformanceOptimizer } from '@/src/components/infra/performance-optimizer';
 import { PostCopyEmailProvider } from '@/src/components/infra/providers/post-copy-email-provider';
 import { PwaInstallTracker } from '@/src/components/infra/pwa-install-tracker';
 import { OrganizationStructuredData } from '@/src/components/infra/structured-data/organization-schema';
 import { AnnouncementBanner } from '@/src/components/layout/announcement-banner';
-import { FloatingMobileSearch } from '@/src/components/layout/floating-mobile-search';
 import { Footer } from '@/src/components/layout/footer';
 import { Navigation } from '@/src/components/layout/navigation';
 import { StructuredData } from '@/src/components/shared/structured-data';
 import { UmamiScript } from '@/src/components/shared/umami-script';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+
+async function loadAnalytics() {
+  if (process.env.NEXT_RUNTIME === 'edge') {
+    return { Analytics: () => null, SpeedInsights: () => null };
+  }
+
+  try {
+    const [analyticsMod, speedMod] = await Promise.all([
+      import('@vercel/analytics/next'),
+      import('@vercel/speed-insights/next'),
+    ]);
+    return {
+      Analytics: analyticsMod.Analytics,
+      SpeedInsights: speedMod.SpeedInsights,
+    };
+  } catch {
+    return { Analytics: () => null, SpeedInsights: () => null };
+  }
+}
+
+const DynamicUnifiedNewsletterCapture = dynamic(() =>
+  import('@/src/components/features/growth/unified-newsletter-capture').then(
+    ({ UnifiedNewsletterCapture }) => UnifiedNewsletterCapture
+  )
+);
+
+const DynamicToaster = dynamic(() => import('sonner').then((mod) => mod.Toaster));
+
+const DynamicPerformanceOptimizer = dynamic(() =>
+  import('@/src/components/infra/performance-optimizer').then((mod) => mod.PerformanceOptimizer)
+);
+
+const DynamicFloatingMobileSearch = dynamic(() =>
+  import('@/src/components/layout/floating-mobile-search').then((mod) => mod.FloatingMobileSearch)
+);
 
 // Configure Inter font with optimizations
 const inter = Inter({
@@ -118,13 +141,15 @@ export default async function RootLayout({
 }>) {
   /**
    * STATIC GENERATION ENABLED
-   * 
+   *
    * CSP nonces are automatically handled by Nosecone middleware per-request.
    * Next.js 15.5+ automatically injects nonces from CSP headers into inline scripts.
    * No manual nonce reading required - middleware sets CSP header with nonce.
-   * 
+   *
    * This allows full static generation while maintaining strict CSP security.
    */
+
+  const { Analytics, SpeedInsights } = await loadAnalytics();
 
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} font-sans`}>
@@ -161,12 +186,7 @@ export default async function RootLayout({
         {/* Structured data - static JSON-LD for SEO */}
         <StructuredData type="website" />
         <OrganizationStructuredData />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <PostCopyEmailProvider>
             <ErrorBoundary>
               <a
@@ -185,14 +205,14 @@ export default async function RootLayout({
                   {children}
                 </main>
                 <Footer />
-                <FloatingMobileSearch />
+                <DynamicFloatingMobileSearch />
               </div>
             </ErrorBoundary>
-            <Toaster />
-            <UnifiedNewsletterCapture variant="footer-bar" source="footer" />
+            <DynamicToaster />
+            <DynamicUnifiedNewsletterCapture variant="footer-bar" source="footer" />
           </PostCopyEmailProvider>
         </ThemeProvider>
-        <PerformanceOptimizer />
+        <DynamicPerformanceOptimizer />
         <Analytics />
         <SpeedInsights />
         {/* Umami Analytics - Privacy-focused analytics (production only) */}
@@ -201,10 +221,7 @@ export default async function RootLayout({
         <PwaInstallTracker />
         {/* Service Worker Registration for PWA Support */}
         {/* External script - allowed by CSP 'self' directive, no nonce needed */}
-        <script
-          src="/scripts/service-worker-init.js"
-          defer
-        />
+        <script src="/scripts/service-worker-init.js" defer />
       </body>
     </html>
   );

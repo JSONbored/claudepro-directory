@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/src/components/content-search-client';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -6,6 +5,7 @@ import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unifi
 import { LazySection } from '@/src/components/infra/lazy-section';
 import { Button } from '@/src/components/primitives/button';
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
+import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ExternalLink, HelpCircle } from '@/src/lib/icons';
 import type {
@@ -72,14 +72,15 @@ function ContentHeroSection<T extends UnifiedContentItem>({
           </ul>
 
           <Button variant="outline" size="sm" asChild>
-            <Link
+            <PrefetchLink
               href={ROUTES.SUBMIT}
               className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
               aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
+              prefetchDelay={200}
             >
               <ExternalLink className="h-3 w-3" aria-hidden="true" />
               Submit {title.slice(0, -1)}
-            </Link>
+            </PrefetchLink>
           </Button>
         </div>
       </div>

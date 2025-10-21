@@ -12,12 +12,12 @@
  * @see lib/config/custom-sidebars.tsx - Custom sidebar renderers
  */
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
+import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';
@@ -206,10 +206,11 @@ export const DetailSidebar = memo(function DetailSidebar({
           </CardHeader>
           <CardContent className="space-y-3">
             {relatedItems.slice(0, 5).map((relatedItem) => (
-              <Link
+              <PrefetchLink
                 key={relatedItem.slug}
                 href={getContentItemUrl(relatedItem)}
                 className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer w-full text-left block`}
+                prefetchDelay={200}
               >
                 <div className={'flex-1 min-w-0'}>
                   <h4 className="font-medium text-sm truncate">{getDisplayTitle(relatedItem)}</h4>
@@ -218,7 +219,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                   </p>
                 </div>
                 <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0 ml-2" />
-              </Link>
+              </PrefetchLink>
             ))}
           </CardContent>
         </Card>

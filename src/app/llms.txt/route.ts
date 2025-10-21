@@ -1,6 +1,6 @@
 /**
  * Site-Wide LLMs.txt Route Handler (Restored)
- * 
+ *
  * @route GET /llms.txt
  */
 

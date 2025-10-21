@@ -9,11 +9,11 @@
  * Adding a new featured category now only requires updating HOMEPAGE_FEATURED_CATEGORIES
  */
 
-import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { Button } from '@/src/components/primitives/button';
+import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import {
   HOMEPAGE_FEATURED_CATEGORIES,
   UNIFIED_CATEGORY_REGISTRY,
@@ -49,9 +49,13 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
       <div>
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
           <h2 className={'text-2xl font-bold'}>{title}</h2>
-          <Link href={href} className="text-accent hover:underline flex items-center gap-2">
+          <PrefetchLink
+            href={href}
+            className="text-accent hover:underline flex items-center gap-2"
+            prefetchDelay={180}
+          >
             View all <ExternalLink className="h-4 w-4" />
-          </Link>
+          </PrefetchLink>
         </div>
         <UnifiedCardGrid
           items={featuredItems}
@@ -102,9 +106,13 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories }) =>
       <div>
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
           <h2 className={'text-2xl font-bold'}>Featured Jobs</h2>
-          <Link href={ROUTES.JOBS} className="text-accent hover:underline flex items-center gap-2">
+          <PrefetchLink
+            href={ROUTES.JOBS}
+            className="text-accent hover:underline flex items-center gap-2"
+            prefetchDelay={200}
+          >
             View all <ExternalLink className="h-4 w-4" />
-          </Link>
+          </PrefetchLink>
         </div>
         <div className={UI_CLASSES.CONTAINER_CARD_MUTED}>
           <Briefcase className={'h-12 w-12 mx-auto mb-4 text-muted-foreground/50'} />
@@ -113,7 +121,9 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories }) =>
             Discover opportunities with companies building the future of AI
           </p>
           <Button asChild>
-            <Link href={ROUTES.JOBS}>Browse Job Opportunities</Link>
+            <PrefetchLink href={ROUTES.JOBS} prefetchDelay={200}>
+              Browse Job Opportunities
+            </PrefetchLink>
           </Button>
         </div>
       </div>

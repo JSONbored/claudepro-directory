@@ -14,7 +14,6 @@
  * @see components/shared/sidebar-card.tsx - Base sidebar card component
  */
 
-import Link from 'next/link';
 import { memo, useEffect, useState } from 'react';
 import { CategoryNavigationCard } from '@/src/components/content/unified-detail-page/sidebar/category-navigation-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -27,6 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/primitives/tooltip';
+import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import { ROUTES } from '@/src/lib/constants/routes';
 import {
   BookOpen,
@@ -305,12 +305,13 @@ function UnifiedSidebarComponent({
                     </div>
                   ) : (
                     trendingGuides.map((guide, index) => (
-                      <Link
+                      <PrefetchLink
                         key={guide.slug}
                         href={guide.slug}
                         className={
                           'group flex items-center justify-between text-xs hover:bg-muted/50 rounded px-1.5 py-1 transition-colors'
                         }
+                        prefetchDelay={220}
                       >
                         <span
                           className={
@@ -327,7 +328,7 @@ function UnifiedSidebarComponent({
                         >
                           {guide.views}
                         </UnifiedBadge>
-                      </Link>
+                      </PrefetchLink>
                     ))
                   )}
                 </div>
@@ -391,7 +392,12 @@ function UnifiedSidebarComponent({
                   <CardContent className={'pb-3 px-3'}>
                     <div className="space-y-1">
                       {validatedRelatedGuides.slice(0, 3).map((guide) => (
-                        <Link key={guide.slug} href={guide.slug} className="block group">
+                        <PrefetchLink
+                          key={guide.slug}
+                          href={guide.slug}
+                          className="block group"
+                          prefetchDelay={220}
+                        >
                           <div
                             className={
                               'text-3xs text-muted-foreground group-hover:text-primary transition-colors py-0.5 truncate'
@@ -399,17 +405,18 @@ function UnifiedSidebarComponent({
                           >
                             {guide.title}
                           </div>
-                        </Link>
+                        </PrefetchLink>
                       ))}
                       {validatedRelatedGuides.length > 3 && (
-                        <Link
+                        <PrefetchLink
                           href={ROUTES.GUIDES}
                           className={
                             'text-2xs text-primary hover:underline inline-flex items-center gap-0.5 mt-1'
                           }
+                          prefetch={true}
                         >
                           View all ({validatedRelatedGuides.length})
-                        </Link>
+                        </PrefetchLink>
                       )}
                     </div>
                   </CardContent>
@@ -430,7 +437,12 @@ function UnifiedSidebarComponent({
               <CardContent className={'pb-3 px-3'}>
                 <div className="space-y-1.5">
                   {recentGuides.map((guide) => (
-                    <Link key={guide.slug} href={guide.slug} className="group">
+                    <PrefetchLink
+                      key={guide.slug}
+                      href={guide.slug}
+                      className="group"
+                      prefetchDelay={220}
+                    >
                       <div
                         className={
                           'text-3xs text-muted-foreground group-hover:text-primary transition-colors py-0.5'
@@ -439,7 +451,7 @@ function UnifiedSidebarComponent({
                         <div className="truncate">{guide.title}</div>
                         <div className="text-2xs text-muted-foreground/60">{guide.date}</div>
                       </div>
-                    </Link>
+                    </PrefetchLink>
                   ))}
                 </div>
               </CardContent>
@@ -481,18 +493,20 @@ function UnifiedSidebarComponent({
           {/* Quick Links */}
           <div className={'px-2 pt-1'}>
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-2xs`}>
-              <Link
+              <PrefetchLink
                 href={ROUTES.GUIDES}
                 className={'text-muted-foreground hover:text-primary transition-colors'}
+                prefetchDelay={200}
               >
                 ← All Guides
-              </Link>
-              <Link
+              </PrefetchLink>
+              <PrefetchLink
                 href={ROUTES.HOME}
                 className={'text-muted-foreground hover:text-primary transition-colors'}
+                prefetchDelay={200}
               >
                 Browse Directory →
-              </Link>
+              </PrefetchLink>
             </div>
           </div>
         </div>

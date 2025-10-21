@@ -69,7 +69,7 @@ export type UnifiedTrackerProps =
 
 /**
  * Shared tracking effect hook - eliminates duplication
- * 
+ *
  * PERFORMANCE OPTIMIZATION:
  * Uses requestIdleCallback when available to defer tracking until browser idle.
  * This prevents tracking from competing with critical rendering/interaction work.
@@ -103,11 +103,10 @@ function useTrackingEffect(
     const scheduleWhenIdle = () => {
       if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
         return window.requestIdleCallback(executeTracking, { timeout: 2000 });
-      } else {
-        // Fallback: execute immediately
-        executeTracking();
-        return null;
       }
+      // Fallback: execute immediately
+      executeTracking();
+      return null;
     };
 
     if (delay === 0) {
