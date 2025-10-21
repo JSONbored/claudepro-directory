@@ -242,7 +242,7 @@ export const removeBookmark = authedAction
 
     // OPTIMIZATION: Invalidate personalization caches
     // User removed bookmark → For You feed should update recommendations
-    revalidateTag(`user-${userId}`);
+    revalidateTag(`user-${userId}`, 'max');
     revalidatePath('/for-you');
 
     return {
@@ -363,7 +363,7 @@ export const addBookmarkBatch = authedAction
 
       // OPTIMIZATION: Invalidate personalization caches
       // Bulk bookmark operation → For You feed should update recommendations
-      revalidateTag(`user-${userId}`);
+      revalidateTag(`user-${userId}`, 'max');
       revalidatePath('/for-you');
 
       return {

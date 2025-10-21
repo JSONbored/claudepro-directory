@@ -624,7 +624,7 @@ export const createReview = authedAction
     // Revalidate detail page and list pages
     revalidatePath(`/${content_type}/${content_slug}`);
     revalidatePath(`/${content_type}`);
-    revalidateTag(`reviews:${content_type}:${content_slug}`);
+    revalidateTag(`reviews:${content_type}:${content_slug}`, 'max');
 
     // Ensure data exists before accessing properties
     if (!result.data) {
@@ -707,7 +707,8 @@ export const updateReview = authedAction
     revalidatePath(`/${existingResult.data.content_type}/${existingResult.data.content_slug}`);
     revalidatePath(`/${existingResult.data.content_type}`);
     revalidateTag(
-      `reviews:${existingResult.data.content_type}:${existingResult.data.content_slug}`
+      `reviews:${existingResult.data.content_type}:${existingResult.data.content_slug}`,
+      'max'
     );
 
     logger.info('Review updated', {
@@ -771,7 +772,8 @@ export const deleteReview = authedAction
     revalidatePath(`/${existingResult.data.content_type}/${existingResult.data.content_slug}`);
     revalidatePath(`/${existingResult.data.content_type}`);
     revalidateTag(
-      `reviews:${existingResult.data.content_type}:${existingResult.data.content_slug}`
+      `reviews:${existingResult.data.content_type}:${existingResult.data.content_slug}`,
+      'max'
     );
 
     logger.info('Review deleted', {
@@ -857,7 +859,10 @@ export const markReviewHelpful = authedAction
 
     // Revalidate detail page (helpful count changed)
     revalidatePath(`/${reviewResult.data.content_type}/${reviewResult.data.content_slug}`);
-    revalidateTag(`reviews:${reviewResult.data.content_type}:${reviewResult.data.content_slug}`);
+    revalidateTag(
+      `reviews:${reviewResult.data.content_type}:${reviewResult.data.content_slug}`,
+      'max'
+    );
 
     return {
       success: true,

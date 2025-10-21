@@ -10,7 +10,27 @@ import { z } from 'zod';
 import { nonNegativeInt, positiveInt } from './primitives/base-numbers';
 import { nonEmptyString } from './primitives/base-strings';
 import { parseContentType } from './primitives/sanitization-transforms';
-import { categoryIdSchema } from './shared.schema';
+
+/**
+ * MIDDLEWARE-SPECIFIC: Inline categoryIdSchema to avoid importing shared.schema (649 lines)
+ * This breaks the large dependency chain and helps Turbopack tree-shaking
+ * Hardcoded enum values must match UNIFIED_CATEGORY_REGISTRY keys exactly
+ */
+const categoryIdSchema = z
+  .enum([
+    'agents',
+    'mcp',
+    'rules',
+    'commands',
+    'hooks',
+    'statuslines',
+    'skills',
+    'collections',
+    'guides',
+    'jobs',
+    'changelog',
+  ])
+  .describe('All valid categories - middleware-specific inline version');
 
 /**
  * Security constants for middleware
