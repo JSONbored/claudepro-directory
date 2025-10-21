@@ -1,0 +1,117 @@
+{
+  "metadata": {
+    "slug": "claude-mcp-server-setup-guide",
+    "title": "Complete Guide to Setting Up MCP Servers for Claude Desktop",
+    "seoTitle": "Claude MCP Server Setup 2025",
+    "description": "Master MCP server installation and configuration for Claude Desktop. Complete step-by-step setup guide with optimization tips and best practices for 2025.",
+    "keywords": [
+      "Claude MCP server",
+      "MCP server setup",
+      "Claude Desktop configuration",
+      "AI tool integration",
+      "Claude automation"
+    ],
+    "dateUpdated": "2025-09-22",
+    "dateAdded": "2025-09-22",
+    "author": "Claude Pro Directory Team",
+    "category": "guides",
+    "subcategory": "tutorials",
+    "tags": ["mcp-servers", "configuration", "tutorial", "setup", "integration"],
+    "readingTime": "12 min",
+    "difficulty": "intermediate",
+    "featured": false,
+    "lastReviewed": "2025-09-22",
+    "aiOptimized": true,
+    "citationReady": true,
+    "source": "claudepro"
+  },
+  "content": {
+    "sections": [
+      {
+        "type": "component",
+        "component": "UnifiedContentBlock",
+        "props": {
+          "variant": "tldr",
+          "content": "MCP (Model Context Protocol) servers enable Claude Desktop to interact with external tools and systems. This guide provides a complete walkthrough for setting up MCP servers, from installation to advanced configuration, with practical examples and troubleshooting tips.",
+          "keyPoints": [
+            "Install Claude Desktop and Node.js as prerequisites",
+            "Configure MCP servers in claude_desktop_config.json",
+            "Test connections and verify server functionality",
+            "Optimize performance with best practices"
+          ],
+          "children": "- **Operating System**: macOS 12+, Windows 10+, or Ubuntu 20.04+\n  - **Claude Desktop**: Version 0.7.0 or higher\n  - **Node.js**: Version 18.0+ (LTS recommended)\n  - **RAM**: Minimum 8GB (16GB recommended)\n  - **Storage**: 2GB free space for MCP servers"
+        }
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Step-by-Step Installation Guide",
+        "id": "step-by-step-installation-guide"
+      },
+      {
+        "type": "component",
+        "component": "StepByStepGuide",
+        "props": {
+          "title": "MCP Server Installation Process",
+          "description": "Follow these steps to install and configure your first MCP server",
+          "estimatedTime": "15 minutes",
+          "steps": "[\n    {\n      title: \"Install Node.js and npm\",\n      description: \"Download and install Node.js from nodejs.org. Verify installation with 'node --version'\",\n      code: \"node --version\\nnpm --version\",\n      validation: \"Both commands should return version numbers\"\n    },\n    {\n      title: \"Locate Claude Desktop Configuration\",\n      description: \"Find your Claude Desktop configuration file based on your operating system\",\n      code: \"# macOS\\n~/Library/Application Support/Claude/claude_desktop_config.json\\n\\n# Windows\\n%APPDATA%\\\\Claude\\\\claude_desktop_config.json\\n\\n# Linux\\n~/.config/Claude/claude_desktop_config.json\",\n      validation: \"File should exist or be created if missing\"\n    },\n    {\n      title: \"Install Your First MCP Server\",\n      description: \"Install the filesystem MCP server as a starting point\",\n      code: \"npm install -g @modelcontextprotocol/server-filesystem\",\n      validation: \"Installation completes without errors\"\n    },\n    {\n      title: \"Configure the MCP Server\",\n      description: \"Add the server configuration to claude_desktop_config.json\",\n      code: '{\\n  \"mcpServers\": {\\n    \"filesystem\": {\\n      \"command\": \"npx\",\\n      \"args\": [\"-y\", \"@modelcontextprotocol/server-filesystem\", \"/path/to/allowed/directory\"]\\n    }\\n  }\\n}',\n      validation: \"Configuration file saves successfully\"\n    },\n    {\n      title: \"Restart Claude Desktop\",\n      description: \"Close and reopen Claude Desktop to load the new configuration\",\n      code: \"# Verify server is loaded by typing in Claude:\\n'What MCP servers are available?'\",\n      validation: \"Claude lists the filesystem server as available\"\n    }\n  ]",
+          "children": "return {\n    tools: [{\n      name: 'my_tool',\n      description: 'Custom tool description',\n      inputSchema: {\n        type: 'object',\n        properties: {\n          query: { type: 'string' }\n        }\n      }\n    }]\n  };\n});\n\nserver.connect(process.stdin, process.stdout);`\n    }\n  ]}\n/>"
+        }
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Troubleshooting Common Issues",
+        "id": "troubleshooting-common-issues"
+      },
+      {
+        "type": "component",
+        "component": "UnifiedContentBox",
+        "props": {
+          "contentType": "callout",
+          "type": "warning",
+          "title": "Common Configuration Errors",
+          "children": "If your MCP server isn't working, check these common issues:"
+        }
+      },
+      {
+        "type": "component",
+        "component": "UnifiedContentBox",
+        "props": {
+          "contentType": "infobox",
+          "title": "Troubleshooting Checklist",
+          "variant": "warning",
+          "children": "- **Invalid JSON syntax**: Validate your claude_desktop_config.json with a JSON validator\n  - **Incorrect file paths**: Always use absolute paths, not relative paths\n  - **Missing dependencies**: Run `npm list -g` to verify all packages are installed\n  - **Permission issues**: Ensure servers have read/write access to specified directories\n  - **Port conflicts**: Check if another process is using the same port\n  - **Outdated versions**: Update Claude Desktop and MCP servers regularly"
+        }
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Performance Optimization Tips",
+        "id": "performance-optimization-tips"
+      },
+      {
+        "type": "component",
+        "component": "UnifiedContentBox",
+        "props": {
+          "contentType": "infobox",
+          "title": "Pro Tip",
+          "variant": "info",
+          "children": "Optimizing your MCP servers can significantly improve Claude Desktop's responsiveness and reduce resource usage."
+        }
+      },
+      {
+        "type": "component",
+        "component": "UnifiedContentBlock",
+        "props": {
+          "variant": "quick-reference",
+          "title": "MCP Server Best Practices",
+          "columns": 2,
+          "items": "[\n    { label: \"Connection Pooling\", value: \"Reuse database connections to reduce overhead\" },\n    { label: \"Rate Limiting\", value: \"Implement rate limits to prevent API throttling\" },\n    { label: \"Response Caching\", value: \"Cache frequently accessed data for faster responses\" },\n    { label: \"Debug Logging\", value: \"Enable verbose logging only when troubleshooting\" },\n    { label: \"Batch Operations\", value: \"Group multiple operations to reduce round trips\" },\n    { label: \"Resource Monitoring\", value: \"Track CPU and memory usage of MCP servers\" }\n  ]",
+          "children": "You now have all the knowledge needed to set up and configure MCP servers for Claude Desktop. Start with a simple filesystem server and expand from there!"
+        }
+      }
+    ]
+  }
+}

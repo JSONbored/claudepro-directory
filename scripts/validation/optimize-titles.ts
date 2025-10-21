@@ -197,9 +197,9 @@ async function optimizeGuides(contentDir: string): Promise<OptimizationStats> {
     if (!stat.isDirectory()) continue;
 
     const files = await fs.readdir(categoryPath);
-    const mdxFiles = files.filter((f) => f.endsWith('.mdx'));
+    const guideFiles = files.filter((f) => f.endsWith('.mdx') || f.endsWith('.json'));
 
-    for (const file of mdxFiles) {
+    for (const file of guideFiles) {
       const filePath = path.join(categoryPath, file);
       stats.total++;
 

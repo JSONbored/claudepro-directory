@@ -260,12 +260,8 @@ const nextConfig = {
       // This breaks Turbopack SSR with "Cannot read properties of undefined (reading '_string')" error
       // Zod schemas should be lazily evaluated at runtime, not during build-time tree-shaking
       'gray-matter',
-      'next-mdx-remote',
       'next-themes',
       'react-error-boundary',
-      'rehype-pretty-code',
-      'rehype-slug',
-      'remark-gfm',
       'shiki',
       // Add all Radix UI packages for aggressive tree-shaking
       '@radix-ui/react-accordion',
@@ -326,8 +322,8 @@ const nextConfig = {
       // Keep template file exclusion (this is useful)
       config.plugins.push(
         new webpack.IgnorePlugin({
-          resourceRegExp: /-template\.(json|mdx|ts|tsx)$/,
-          contextRegExp: /\/(content|seo\/templates)\//,
+          resourceRegExp: /-template\.(json|ts|tsx)$/,
+          contextRegExp: /\/(content|templates)\//,
         })
       );
     }

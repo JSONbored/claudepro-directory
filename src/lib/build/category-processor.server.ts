@@ -295,9 +295,23 @@ async function processContentFile<T extends ContentType>(
 
     let parsedData: z.infer<typeof rawJsonSchema>;
     const isMdx = file.endsWith('.mdx');
+    const isJson = file.endsWith('.json');
 
     try {
-      if (isMdx) {
+      if (isJson) {
+        // Parse JSON guide format
+        const json = JSON.parse(content);
+
+        // Extract subcategory from file path (e.g., "tutorials/guide.json" → "tutorials")
+        const subcategory = file.includes('/') ? file.split('/')[0] : undefined;
+
+        // Map JSON metadata to schema format
+        parsedData = {
+          ...json.metadata,
+          subcategory,
+          content: JSON.stringify(json), // Store full JSON for rendering
+        };
+      } else if (isMdx) {
         // Parse MDX frontmatter for guides
         const { frontmatter, content: mdxContent } = parseMDXFrontmatter(content);
 
@@ -451,17 +465,17 @@ async function processCategoryFiles<T extends ContentType>(
       const subdirPath = join(categoryDir, subdir);
       try {
         const subdirFiles = await readdir(subdirPath);
-        const mdxFiles = subdirFiles
+        const guideFiles = subdirFiles
           .filter(
             (f) =>
-              f.endsWith('.mdx') &&
+              (f.endsWith('.mdx') || f.endsWith('.json')) &&
               !f.includes('..') &&
               !f.startsWith('.') &&
               !f.includes('template') &&
-              /^[a-zA-Z0-9\-_]+\.mdx$/.test(f)
+              /^[a-zA-Z0-9\-_]+\.(mdx|json)$/.test(f)
           )
           .map((f) => `${subdir}/${f}`); // Prefix with subdir for routing
-        contentFiles.push(...mdxFiles);
+        contentFiles.push(...guideFiles);
       } catch (error) {
         // Subdirectory doesn't exist or can't be read - skip it
         logger.debug(

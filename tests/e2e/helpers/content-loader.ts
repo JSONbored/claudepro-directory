@@ -177,8 +177,8 @@ export function getAllGuides(): GuideMetadata[] {
     const files = fs.readdirSync(categoryDir);
 
     for (const file of files) {
-      if (file.endsWith('.mdx')) {
-        const slug = file.replace('.mdx', '');
+      if (file.endsWith('.json') || file.endsWith('.mdx')) {
+        const slug = file.replace(/\.(mdx|json)$/, '');
         guides.push({
           slug,
           category,

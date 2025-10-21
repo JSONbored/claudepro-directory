@@ -12,7 +12,6 @@ import path from 'path';
 import { z } from 'zod';
 import { contentCache } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { generateLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
@@ -81,7 +80,6 @@ export async function GET(
       });
     }
 
-    const filename = `${slug}.mdx`;
     const cacheKey = `guide-llmstxt:v2:${category}:${slug}`; // v2: added Title field to metadata
 
     // Try cache first using cacheWithRefresh
@@ -125,15 +123,22 @@ export async function GET(
         cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
       });
     }
-    const filePath = path.join(process.cwd(), 'content', 'guides', mappedPath, filename);
 
-    let fileContent: string;
+    // Load JSON guide file
+    const jsonPath = path.join(process.cwd(), 'content', 'guides', mappedPath, `${slug}.json`);
+
+    let frontmatter: any;
+    let content: string;
+
     try {
-      fileContent = await fs.readFile(filePath, 'utf-8');
+      const jsonContent = await fs.readFile(jsonPath, 'utf-8');
+      const json = JSON.parse(jsonContent);
+      frontmatter = json.metadata;
+      content = JSON.stringify(json.content.sections, null, 2);
     } catch {
       requestLogger.warn('Guide file not found for llms.txt', {
         category,
-        filename,
+        slug,
       });
 
       return apiResponse.raw('Guide not found', {
@@ -142,9 +147,6 @@ export async function GET(
         cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
       });
     }
-
-    // Parse MDX frontmatter
-    const { frontmatter, content } = parseMDXFrontmatter(fileContent);
 
     // Transform to LLMsTxtItem format (with proper type handling)
     const llmsItem: LLMsTxtItem = {

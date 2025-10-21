@@ -220,9 +220,11 @@ export async function generateAllSiteUrls(
       const seoDir = join(CONTENT_PATHS.guides, category);
       if (existsSync(seoDir)) {
         try {
-          const files = readdirSync(seoDir).filter((f) => f.endsWith('.mdx'));
+          const files = readdirSync(seoDir).filter(
+            (f) => f.endsWith('.mdx') || f.endsWith('.json')
+          );
           files.forEach((file) => {
-            const slug = file.replace('.mdx', '');
+            const slug = file.replace(/\.(mdx|json)$/, '');
 
             // Guide page
             urls.push({
@@ -386,9 +388,11 @@ export async function generateAllSiteUrls(
     const comparisonsDir = join(CONTENT_PATHS.guides, 'comparisons');
     if (existsSync(comparisonsDir)) {
       try {
-        const files = readdirSync(comparisonsDir).filter((f) => f.endsWith('.mdx'));
+        const files = readdirSync(comparisonsDir).filter(
+          (f) => f.endsWith('.mdx') || f.endsWith('.json')
+        );
         files.forEach((file) => {
-          const slug = file.replace('.mdx', '');
+          const slug = file.replace(/\.(mdx|json)$/, '');
 
           urls.push({
             loc: `${baseUrl}/compare/${slug}`,

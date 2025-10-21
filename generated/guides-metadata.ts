@@ -12,7 +12,7 @@ export type GuideMetadata = Pick<GuideContent, 'slug' | 'title' | 'seoTitle' | '
 
 export const guidesMetadata: GuideMetadata[] = [
   {
-    "slug": "build-mcp-server-mdx",
+    "slug": "build-mcp-server",
     "title": "Claude MCP Server Development: Build Custom AI Integrations",
     "seoTitle": "Build Claude MCP Servers",
     "description": "Master MCP server development from scratch. Create custom Claude Desktop integrations with TypeScript/Python in 60 minutes using production-ready patterns.",
@@ -38,7 +38,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "12 min"
   },
   {
-    "slug": "claude-4-extended-thinking-tutorial-mdx",
+    "slug": "claude-4-extended-thinking-tutorial",
     "title": "How to Implement Claude 4 Extended Thinking API - Complete Tutorial 2025",
     "seoTitle": "Claude 4 Extended Thinking",
     "description": "Implement Claude 4 Extended Thinking API in 25 minutes. Master 500K token reasoning chains, thinking budget optimization, and industry-leading 74.5% accuracy.",
@@ -64,7 +64,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "12 min"
   },
   {
-    "slug": "claude-agent-development-framework-mdx",
+    "slug": "claude-agent-development-framework",
     "title": "Claude Agent Development 2025: Build Autonomous AI Agents",
     "seoTitle": "Claude Agent Development",
     "description": "Build Claude autonomous agents with 90.2% better performance. Learn multi-agent orchestration, subagents implementation, and deployment achieving $0.045/task.",
@@ -90,7 +90,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "25 min"
   },
   {
-    "slug": "claude-mcp-server-setup-guide-mdx",
+    "slug": "claude-mcp-server-setup-guide",
     "title": "Complete Guide to Setting Up MCP Servers for Claude Desktop",
     "seoTitle": "Claude MCP Server Setup 2025",
     "description": "Master MCP server installation and configuration for Claude Desktop. Complete step-by-step setup guide with optimization tips and best practices for 2025.",
@@ -117,7 +117,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "12 min"
   },
   {
-    "slug": "claude-rate-limits-fix-mdx",
+    "slug": "claude-rate-limits-fix",
     "title": "Claude Rate Limits Fix - Complete Optimization Guide 2025",
     "seoTitle": "Claude Rate Limits Fix 2025",
     "description": "Fix Claude 429 errors and usage limits with proven solutions reducing token consumption by 70%. Master rate limit optimization for 18.3M affected users.",
@@ -143,7 +143,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "20 min"
   },
   {
-    "slug": "desktop-mcp-setup-mdx",
+    "slug": "desktop-mcp-setup",
     "title": "How to Configure Claude Desktop MCP Servers - Complete Setup Tutorial 2025",
     "seoTitle": "Claude Desktop MCP Setup",
     "description": "Master Claude Desktop MCP server setup in 20 minutes. Complete config JSON tutorial with filesystem integration, troubleshooting, and proven solutions.",
@@ -169,7 +169,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "12 min"
   },
   {
-    "slug": "multi-directory-setup-mdx",
+    "slug": "multi-directory-setup",
     "title": "Claude Code Multi-Directory Setup: Enterprise Codebase Management Workflow 2025",
     "seoTitle": "Claude Multi-Directory 2025",
     "description": "Master Claude Code multi-directory enterprise workflow. Step-by-step setup, automation hooks, and proven enterprise strategies for 30-100x productivity boost.",
@@ -195,7 +195,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "12 min"
   },
   {
-    "slug": "wsl-setup-guide-mdx",
+    "slug": "wsl-setup-guide",
     "title": "How to Setup Claude Code on WSL - Windows Developer Guide 2025",
     "seoTitle": "Claude Code WSL Setup 2025",
     "description": "Complete Claude Code WSL2 installation tutorial in 30 minutes. Configure Node.js, resolve PATH conflicts, and optimize Windows development performance.",
@@ -221,7 +221,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "12 min"
   },
   {
-    "slug": "claude-vs-codewhisperer-gemini-mdx",
+    "slug": "claude-vs-codewhisperer-gemini",
     "title": "Claude vs Amazon Q Developer vs Gemini Code: AWS Cloud Development 2025",
     "seoTitle": "Claude vs Q vs Gemini 2025",
     "description": "Compare Claude vs Amazon Q Developer vs Gemini Code for AWS cloud development. Real benchmarks, pricing analysis, and production use cases for selection.",
@@ -247,7 +247,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "12 min"
   },
   {
-    "slug": "claude-vs-copilot-python-mdx",
+    "slug": "claude-vs-copilot-python",
     "title": "Claude vs GitHub Copilot vs ChatGPT for Python Development 2025",
     "seoTitle": "Claude vs Copilot Python",
     "description": "Claude vs GitHub Copilot vs ChatGPT for Python development. Features, pricing, benchmarks, and real results for choosing the best AI coding assistant.",
@@ -273,7 +273,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "12 min"
   },
   {
-    "slug": "claude-vs-cursor-codeium-mdx",
+    "slug": "claude-vs-cursor-codeium",
     "title": "Claude Code vs Cursor vs Codeium - Complete Comparison 2025",
     "seoTitle": "Claude vs Cursor Codeium",
     "description": "Compare Claude Code vs Cursor vs Codeium AI coding assistants. Complete feature analysis, performance benchmarks, pricing, and recommendations for developers.",
@@ -297,7 +297,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "12 min"
   },
   {
-    "slug": "chatgpt-migration-guide-mdx",
+    "slug": "chatgpt-migration-guide",
     "title": "How to Migrate from ChatGPT to Claude - Developer Guide 2025",
     "seoTitle": "ChatGPT to Claude Migration",
     "description": "Switch from ChatGPT to Claude in 30 minutes. Complete migration tutorial covering API transitions, prompt engineering, and workflow optimization strategies.",
@@ -323,7 +323,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "12 min"
   },
   {
-    "slug": "migration-workflow-guide-mdx",
+    "slug": "migration-workflow-guide",
     "title": "Complete Claude Migration Playbook: From ChatGPT, Gemini & Copilot to Claude 4",
     "seoTitle": "Claude Migration Playbook",
     "description": "Complete migration workflow from ChatGPT, Gemini, and Copilot to Claude 4. Enterprise frameworks, real production metrics, and proven migration strategies.",
@@ -349,7 +349,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "18 min"
   },
   {
-    "slug": "business-process-automation-mdx",
+    "slug": "business-process-automation",
     "title": "Claude Agents for Business Process Automation: Enterprise Guide",
     "seoTitle": "Claude Process Automation",
     "description": "Deploy Claude AI agents for enterprise business process automation. Master implementation strategies, integration patterns, and best practices for optimization.",
@@ -375,7 +375,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "12 min"
   },
   {
-    "slug": "financial-services-guide-mdx",
+    "slug": "financial-services-guide",
     "title": "Claude for Financial Services: Enterprise AI Implementation Guide 2025",
     "seoTitle": "Claude Financial Services",
     "description": "Transform financial operations with Claude. Learn implementation strategies for trading, risk, and regulatory automation with comprehensive compliance.",
@@ -401,7 +401,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "14 min"
   },
   {
-    "slug": "healthcare-hipaa-guide-mdx",
+    "slug": "healthcare-hipaa-guide",
     "title": "Claude AI Healthcare: HIPAA-Compliant Clinical Documentation",
     "seoTitle": "Claude Healthcare HIPAA 2025",
     "description": "Deploy HIPAA-compliant Claude AI for 10-35x faster healthcare documentation. Enterprise configuration guide with approved providers and compliance requirements.",
@@ -426,7 +426,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "12 min"
   },
   {
-    "slug": "fix-environment-variables-mdx",
+    "slug": "fix-environment-variables",
     "title": "Fix Claude Code Environment Variable Configuration Errors",
     "seoTitle": "Fix Claude Environment Vars",
     "description": "Debug Claude Code authentication failures, OAuth errors, and API key configuration issues with platform-specific solutions and automated management tools.",
@@ -452,7 +452,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "8 min"
   },
   {
-    "slug": "fix-installation-errors-mdx",
+    "slug": "fix-installation-errors",
     "title": "How to Install Claude Code Without npm Permission Errors - Complete Tutorial 2025",
     "seoTitle": "Fix Claude Code npm Errors",
     "description": "Install Claude Code correctly in 15-25 minutes. Fix npm permission errors, configure PATH, and resolve 'command not found' issues with proven solutions.",
@@ -478,7 +478,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "12 min"
   },
   {
-    "slug": "fix-mcp-connection-errors-mdx",
+    "slug": "fix-mcp-connection-errors",
     "title": "Fix Claude Desktop MCP Server Disconnected Error -32000: Complete Guide 2025",
     "seoTitle": "Fix Claude MCP Error -32000",
     "description": "Resolve Claude Desktop MCP server connection errors fast. Step-by-step fixes for error -32000, disconnections, and configuration issues with proven solutions.",
@@ -504,7 +504,7 @@ export const guidesMetadata: GuideMetadata[] = [
     "readingTime": "12 min"
   },
   {
-    "slug": "fix-memory-leak-performance-mdx",
+    "slug": "fix-memory-leak-performance",
     "title": "Fix Claude Code Memory Leaks & Performance Issues",
     "seoTitle": "Fix Claude Code Performance",
     "description": "Fix Claude Code memory leaks consuming 120GB RAM and performance issues. Resolve crashes, session freezes, and slow performance with proven fix methods.",

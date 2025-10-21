@@ -1,0 +1,236 @@
+{
+  "metadata": {
+    "slug": "fix-installation-errors",
+    "title": "How to Install Claude Code Without npm Permission Errors - Complete Tutorial 2025",
+    "seoTitle": "Fix Claude Code npm Errors",
+    "description": "Install Claude Code correctly in 15-25 minutes. Fix npm permission errors, configure PATH, and resolve 'command not found' issues with proven solutions.",
+    "keywords": [
+      "claude code installation tutorial",
+      "how to fix npm permission errors claude",
+      "step by step claude code setup guide",
+      "claude command not found fix 2025",
+      "claude code npm eacces error tutorial"
+    ],
+    "dateUpdated": "2025-09-22",
+    "dateAdded": "2025-09-22",
+    "author": "Claude Pro Directory",
+    "category": "guides",
+    "subcategory": "tutorials",
+    "tags": ["tutorial", "beginner", "installation", "troubleshooting"],
+    "readingTime": "12 min",
+    "difficulty": "beginner",
+    "featured": false,
+    "lastReviewed": "2025-09-22",
+    "aiOptimized": true,
+    "citationReady": true,
+    "source": "claudepro"
+  },
+  "content": {
+    "sections": [
+      {
+        "type": "component",
+        "component": "UnifiedContentBlock",
+        "props": {
+          "variant": "tldr",
+          "content": "This tutorial teaches you to install Claude Code without permission errors in 15-25 minutes. You'll learn platform-specific installation methods, fix npm EACCES errors, and configure PATH correctly. Perfect for developers encountering common installation issues.",
+          "keyPoints": [
+            "Native curl installer eliminates most npm permission issues",
+            "User-level npm configuration prevents EACCES errors permanently",
+            "Shell-specific PATH setup ensures 'command not found' resolution",
+            "15-25 minutes total with 6 verification steps"
+          ],
+          "children": "**Prerequisites:** Basic terminal knowledge  \n**Time Required:** 15-25 minutes active work  \n**Tools Needed:** Node.js 18+, Terminal, Browser  \n**Outcome:** Working Claude Code installation with proper PATH"
+        }
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "What You'll Learn",
+        "id": "what-youll-learn"
+      },
+      {
+        "type": "component",
+        "component": "UnifiedContentBlock",
+        "props": {
+          "variant": "feature-grid",
+          "title": "Learning Outcomes",
+          "description": "Skills and knowledge you'll master in this tutorial",
+          "features": "[\n    {\n      title: \"Platform-Specific Installation\",\n      description: \"Master native curl installer for macOS and Linux. Configure WSL2 properly for Windows systems.\",\n      badge: \"Essential\"\n    },\n    {\n      title: \"npm Permission Resolution\", \n      description: \"Fix EACCES errors without using sudo. Create user-level npm directories permanently.\",\n      badge: \"Practical\"\n    },\n    {\n      title: \"PATH Configuration Mastery\",\n      description: \"Configure shell-specific PATH correctly. Debug 'command not found' errors systematically.\",\n      badge: \"Advanced\"\n    },\n    {\n      title: \"Version Management\",\n      description: \"Use Volta or NVM for clean isolation. Prevent Node.js version conflicts completely.\",\n      badge: \"Applied\"\n    }\n  ]",
+          "columns": 2,
+          "children": "time: \"3-5 minutes\",\n      tip: \"Key insight: Never use sudo with npm. User directories prevent all permission issues.\"\n    },\n    {\n      title: \"Step 3: Install Claude Code\",\n      description: \"Use the native installer for best results. This method provides automatic updates and better reliability.\",\n      code: \"# Native installer (recommended)\\ncurl -fsSL https://claude.ai/install.sh | bash\\n\\n# Alternative: npm installation\\nnpm install -g @anthropic-ai/claude-code\\n\\n# Verify installation\\nclaude --version\",\n      time: \"5-7 minutes\",\n      tip: \"Troubleshooting: Use curl method for more reliable installation than npm.\"\n    },\n    {\n      title: \"Step 4: Configure PATH for Your Shell\",\n      description: \"Add Claude to PATH based on your shell type. Modern macOS uses Zsh while Linux typically uses Bash.\",\n      code: \"# For Zsh (macOS)\\necho 'export PATH=\\\"$HOME/.local/bin:$PATH\\\"' >> ~/.zprofile\\nsource ~/.zprofile\\n\\n# For Bash (Linux)\\necho 'export PATH=\\\"$HOME/.npm-global/bin:$PATH\\\"' >> ~/.bashrc\\nsource ~/.bashrc\\n\\n# Verify PATH\\necho $PATH | grep -E '(npm-global|.local)'\",\n      time: \"3-5 minutes\",\n      tip: \"Best practice: Use ~/.zprofile on macOS to prevent path_helper issues.\"\n    },\n    {\n      title: \"Step 5: Verify and Troubleshoot\",\n      description: \"Run diagnostics to confirm successful installation. Claude doctor provides comprehensive system checks.\",\n      code: \"# Run diagnostics\\nclaude doctor\\n\\n# Test basic functionality\\nclaude\\n# Should open authentication in browser\\n\\n# Check installation location\\nwhich claude\\n# Should show: /home/user/.npm-global/bin/claude\",\n      time: \"2-3 minutes\",\n      tip: \"Common issue: Clear browser cookies if authentication fails repeatedly.\"\n    },\n    {\n      title: \"Step 6: First Project Setup\",\n      description: \"Initialize Claude Code in your project directory. Configure API key or browser authentication method.\",\n      code: \"# Navigate to project\\ncd ~/your-project\\n\\n# Start Claude Code\\nclaude\\n\\n# Authenticate via browser\\n# Select Claude Console option\\n\\n# Test with simple command\\n# Type: \\\"Read package.json and summarize\\\"\",\n      time: \"3-5 minutes\",\n      tip: \"Best practice: Create CLAUDE.md file for project-specific configuration.\"\n    }\n  ]}\n/>"
+        }
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Key Concepts Explained",
+        "id": "key-concepts-explained"
+      },
+      {
+        "type": "paragraph",
+        "content": "Understanding these concepts ensures you can adapt this tutorial to your specific needs and troubleshoot issues effectively."
+      },
+      {
+        "type": "component",
+        "component": "UnifiedContentBox",
+        "props": {
+          "contentType": "accordion",
+          "title": "Core Concepts Deep Dive",
+          "description": "Essential knowledge for mastering this tutorial",
+          "items": "[\n    {\n      title: \"Why npm Permission Errors Occur\",\n      content: (\n        <di"
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": "<p><strong>Key benefits of user directories:</strong></p>           <ul>             <li>No sudo required - eliminates permission cascades</li>             <li>Safer installation - protects system integrity</li>             <li>Easier uninstallation - simple directory removal</li>           </ul>         </div>       ),       defaultOpen: true     },     {       title: \"When to Use Native vs npm Installation\",       content: (         <div>           <p>Choose native installer for production setups and automatic updates. Native installation offers more reliable results than npm. Use npm installation for version pinning or CI/CD pipelines.</p>           <p><strong>Ideal scenarios:</strong> Native for development machines, npm for Docker containers, Volta for team environments</p>         </div>       )     },     {       title: \"Common PATH Configuration Mistakes\",       content: (         <div>           <p>PATH mistakes cause 'command not found' errors after successful installation:</p>           <ul>             <li><strong>Wrong config file:</strong> Using ~/.bashrc on macOS - use ~/.zprofile instead</li>             <li><strong>Missing source command:</strong> Forgetting to reload shell - run source command</li>             <li><strong>Path ordering issues:</strong> System paths override user - place user paths first</li>           </ul>         </div>       )     }   ]} />"
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Practical Examples",
+        "id": "practical-examples"
+      },
+      {
+        "type": "component",
+        "component": "Tabs",
+        "props": {
+          "title": "Real-World Applications",
+          "description": "See how to apply this tutorial in different contexts",
+          "items": "[\n    {\n      label: \"Basic Example\",\n      value: \"basic\",\n      content: (\n        <di"
+        }
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Configure npm directory",
+        "id": "configure-npm-directory"
+      },
+      {
+        "type": "paragraph",
+        "content": "mkdir ~/.npm-global npm config set prefix '~/.npm-global' echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc source ~/.bashrc"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Install Claude Code",
+        "id": "install-claude-code"
+      },
+      {
+        "type": "paragraph",
+        "content": "npm install -g @anthropic-ai/claude-code"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Expected result:",
+        "id": "expected-result"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "claude command available globally`",
+        "id": "claude-command-available-globally"
+      },
+      {
+        "type": "paragraph",
+        "content": "},               {                 language: \"javascript\",                 filename: \"verify.js\",                  code: `// Verify installation programmatically const { execSync } = require('child_process');"
+      },
+      {
+        "type": "paragraph",
+        "content": "const config: InstallConfig = {   nodeVersion: '20.11.0',   claudeVersion: 'latest',   autoUpdate: true };"
+      },
+      {
+        "type": "paragraph",
+        "content": "// Installation script const installCommands = [   'curl https://get.volta.sh | bash',   'volta install node@20',   'volta install @anthropic-ai/claude-code' ];`               },               {                 language: \"bash\",                 filename: \"homebrew-fix.sh\",                 code: `# Fix Homebrew symlink issues brew unlink node brew link --overwrite node"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Create manual symlink if needed",
+        "id": "create-manual-symlink-if-needed"
+      },
+      {
+        "type": "paragraph",
+        "content": "ln -sf /opt/homebrew/bin/claude /usr/local/bin/claude"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Add to Zsh profile",
+        "id": "add-to-zsh-profile"
+      },
+      {
+        "type": "paragraph",
+        "content": "echo 'export PATH=\"/opt/homebrew/bin:$PATH\"' >> ~/.zprofile source ~/.zprofile"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Verify with full path",
+        "id": "verify-with-full-path"
+      },
+      {
+        "type": "paragraph",
+        "content": "- name: configure-nodejs       run: |         # Inside WSL         sudo apt update         sudo apt install nodejs npm"
+      },
+      {
+        "type": "paragraph",
+        "content": "- name: install-claude       run: |         mkdir ~/.npm-global         npm config set prefix '~/.npm-global'         export PATH=\"$HOME/.npm-global/bin:$PATH\"         npm install -g @anthropic-ai/claude-code`               }             ]}           />           <p><strong>Outcome:</strong> Windows integration with 100% Unix compatibility for Claude Code</p>         </div>       )     }   ]} />"
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Troubleshooting Guide",
+        "id": "troubleshooting-guide"
+      },
+      {
+        "type": "component",
+        "component": "UnifiedContentBox",
+        "props": {
+          "contentType": "callout",
+          "type": "warning",
+          "title": "Common Issues and Solutions",
+          "children": "**Issue 1: EACCES permission denied to /usr/local/lib**  \n**Solution:** Never use sudo. Reconfigure npm prefix to ~/.npm-global directory. This fixes the root cause permanently.\n\n**Issue 2: claude: command not found after installation**  \n**Solution:** Add npm global bin to PATH. Source your shell config file immediately.\n\n**Issue 3: Update installed. Restart to apply loop**  \n**Solution:** Run claude migrate-installer command. Switches to native installer with working auto-updates."
+        }
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Advanced Techniques",
+        "id": "advanced-techniques"
+      },
+      {
+        "type": "component",
+        "component": "UnifiedContentBox",
+        "props": {
+          "contentType": "callout",
+          "type": "tip",
+          "title": "Professional Tips",
+          "children": "**Performance Optimization:** Consider pinning to a stable version for consistent performance. Test newer versions in development first.\n\n**Security Best Practice:** Always configure API keys as environment variables. Never commit keys to version control.\n\n**Scalability Pattern:** Use Volta for team installations. Provides automatic version switching and improved shell startup."
+        }
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Validation and Testing",
+        "id": "validation-and-testing"
+      },
+      {
+        "type": "component",
+        "component": "UnifiedContentBlock",
+        "props": {
+          "variant": "feature-grid",
+          "title": "Success Criteria",
+          "description": "How to verify your implementation works correctly",
+          "features": "[\n    {\n      title: \"Version Check\",\n      description: \"claude --version returns version number within 1 second\",\n      badge: \"Required\"\n    },\n    {\n      title: \"Doctor Diagnostics\", \n      description: \"claude doctor shows all green checks without warnings\",\n      badge: \"Important\"\n    },\n    {\n      title: \"Authentication Test\",\n      description: \"Browser opens for OAuth when running claude command\",\n      badge: \"Critical\"\n    },\n    {\n      title: \"Project Integration\",\n      description: \"Claude reads local files without permission errors\",\n      badge: \"Essential\"\n    }\n  ]",
+          "columns": 2,
+          "children": "**Congratulations!** You've mastered Claude Code installation without permission errors. \n\n**What you achieved:**\n- ✅ Configured npm to avoid EACCES errors permanently\n- ✅ Installed Claude Code with proper PATH configuration \n- ✅ Learned platform-specific installation methods\n\n**Ready for more?** Explore our [tutorials collection](/guides/tutorials) or join our [community](/community) to share your installation experience and help others overcome setup challenges."
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": "*Last updated: September 2025 | Found this helpful? Share it with developers struggling with Claude Code installation and explore more [Claude tutorials](/guides/tutorials).*"
+      }
+    ]
+  }
+}

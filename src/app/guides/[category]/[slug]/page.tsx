@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import path from 'path';
 import { z } from 'zod';
-import { MDXRenderer } from '@/src/components/content/mdx-renderer';
+import { JsonContentRenderer } from '@/src/components/content/json-content-renderer';
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
@@ -19,7 +19,6 @@ import { SectionProgress } from '@/src/components/shared/section-progress';
 import { contentCache } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
-import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { ArrowLeft, BookOpen, Calendar, Eye, FileText, Tag, Users, Zap } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -57,10 +56,10 @@ export async function generateStaticParams() {
         const files = await fs.readdir(guidesPath);
 
         for (const file of files) {
-          if (file.endsWith('.mdx')) {
+          if (file.endsWith('.json')) {
             params.push({
               category,
-              slug: file.replace('.mdx', ''),
+              slug: file.replace('.json', ''),
             });
           }
         }
@@ -109,8 +108,6 @@ async function getSEOPageData(category: string, slug: string): Promise<SEOPageDa
     troubleshooting: 'troubleshooting',
   };
 
-  const filename = `${slug}.mdx`;
-
   if (!pathMap[category]) return null;
 
   const cacheKey = `guide:${category}:${slug}`;
@@ -122,26 +119,23 @@ async function getSEOPageData(category: string, slug: string): Promise<SEOPageDa
         const mappedPath = pathMap[category];
         if (!mappedPath) return null;
 
-        const filePath = path.join(process.cwd(), 'content', 'guides', mappedPath, filename);
-
-        // Read file directly - this avoids TOCTOU race condition
-        // If file doesn't exist or can't be read, catch block will handle it
-        const fileContent = await fs.readFile(filePath, 'utf-8');
-
-        // Parse frontmatter using our MDX parser
-        const { frontmatter, content } = parseMDXFrontmatter(fileContent);
+        // Load JSON guide file
+        const jsonPath = path.join(process.cwd(), 'content', 'guides', mappedPath, `${slug}.json`);
+        const jsonContent = await fs.readFile(jsonPath, 'utf-8');
+        const json = JSON.parse(jsonContent);
 
         return {
-          title: frontmatter.title || '',
-          seoTitle: frontmatter.seoTitle, // Short title for <title> tag optimization
-          description: frontmatter.description || '',
-          keywords: Array.isArray(frontmatter.keywords) ? frontmatter.keywords : [],
-          dateUpdated: frontmatter.dateUpdated || '',
-          author: frontmatter.author || APP_CONFIG.author,
-          readingTime: frontmatter.readingTime || '',
-          difficulty: frontmatter.difficulty || '',
-          category: frontmatter.category || category,
-          content,
+          title: json.metadata.title || '',
+          seoTitle: json.metadata.seoTitle,
+          description: json.metadata.description || '',
+          keywords: json.metadata.keywords || [],
+          dateUpdated: json.metadata.dateUpdated || '',
+          author: json.metadata.author || APP_CONFIG.author,
+          readingTime: json.metadata.readingTime || '',
+          difficulty: json.metadata.difficulty || '',
+          category: json.metadata.category || category,
+          content: json, // Store full JSON for renderer
+          format: 'json' as const,
         };
       } catch (_error) {
         return null;
@@ -172,14 +166,19 @@ async function getRelatedGuides(
         const files = await fs.readdir(dir);
 
         for (const file of files) {
-          const fileSlug = file.replace('.mdx', '');
-          if (file.endsWith('.mdx') && fileSlug !== currentSlug) {
+          const fileSlug = file.replace('.json', '');
+          if (file.endsWith('.json') && fileSlug !== currentSlug) {
             const content = await fs.readFile(path.join(dir, file), 'utf-8');
-            const titleMatch = content.match(/title:\s*["']([^"']+)["']/);
 
-            if (titleMatch?.[1]) {
+            let title: string | null = null;
+            try {
+              const json = JSON.parse(content);
+              title = json.metadata?.title;
+            } catch {}
+
+            if (title) {
               relatedGuides.push({
-                title: titleMatch[1],
+                title,
                 slug: `/guides/${currentCategory}/${fileSlug}`,
                 category: currentCategory,
               });
@@ -445,15 +444,7 @@ export default async function SEOGuidePage({
                   <Card>
                     <CardContent className="pt-6">
                       <MDXContentProvider category={category} slug={slug}>
-                        <MDXRenderer
-                          source={data.content}
-                          className=""
-                          pathname={`/guides/${category}/${slug}`}
-                          metadata={{
-                            tags: data.keywords || [], // Note: SEO pages use keywords field
-                            keywords: data.keywords || [],
-                          }}
-                        />
+                        <JsonContentRenderer json={data.content} className="" />
                       </MDXContentProvider>
                     </CardContent>
                   </Card>

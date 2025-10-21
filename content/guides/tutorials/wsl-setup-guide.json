@@ -1,0 +1,360 @@
+{
+  "metadata": {
+    "slug": "wsl-setup-guide",
+    "title": "How to Setup Claude Code on WSL - Windows Developer Guide 2025",
+    "seoTitle": "Claude Code WSL Setup 2025",
+    "description": "Complete Claude Code WSL2 installation tutorial in 30 minutes. Configure Node.js, resolve PATH conflicts, and optimize Windows development performance.",
+    "keywords": [
+      "claude code wsl setup",
+      "claude code windows installation",
+      "claude code terminal setup wsl",
+      "wsl2 claude configuration",
+      "windows subsystem linux claude"
+    ],
+    "dateUpdated": "2025-09-22",
+    "dateAdded": "2025-09-22",
+    "author": "Claude Pro Directory",
+    "category": "guides",
+    "subcategory": "tutorials",
+    "tags": ["tutorial", "intermediate", "wsl", "windows"],
+    "readingTime": "12 min",
+    "difficulty": "intermediate",
+    "featured": false,
+    "lastReviewed": "2025-09-22",
+    "aiOptimized": true,
+    "citationReady": true,
+    "source": "claudepro"
+  },
+  "content": {
+    "sections": [
+      {
+        "type": "component",
+        "component": "UnifiedContentBlock",
+        "props": {
+          "variant": "tldr",
+          "content": "This tutorial teaches you to configure Claude Code on Windows Subsystem for Linux in 30 minutes. You'll learn WSL2 installation, Node.js environment setup, and PATH conflict resolution. Perfect for Windows developers who want optimal Claude Code performance without switching operating systems.",
+          "keyPoints": [
+            "WSL2 setup with Ubuntu 22.04 LTS - reduces errors by 80%",
+            "Node.js configuration through NVM - eliminates permission issues",
+            "PATH management strategies - improves performance by 3-5x",
+            "30 minutes total with 8 hands-on configuration steps"
+          ],
+          "children": "**Error: WslRegisterDistribution failed with error: 0x80370114**  \n**Solution:** Enable Virtual Machine Platform feature. Run `dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart` in PowerShell as Administrator."
+        }
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Step 2: Configure Node.js Environment",
+        "id": "step-2-configure-nodejs-environment"
+      },
+      {
+        "type": "component",
+        "component": "StepByStepGuide",
+        "props": {
+          "title": "Node.js Setup with NVM",
+          "description": "Install Node Version Manager for flexible version control",
+          "NVM_DIR": "$HOME/.nvm",
+          "steps": "[\n    {\n      number: 1,\n      title: \"Install NVM in Ubuntu\",\n      description: \"Download and install Node Version Manager using the official script. NVM eliminates permission issues that affect 60% of developers.\",\n      time: \"3 minutes\",\n      code: `# Install NVM (in WSL Ubuntu terminal)\ncurl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash\n\n# Add NVM to shell profile\necho 'export NVM_DIR=\"$HOME/.nvm\"'",
+          "children": "echo '[ -s \"$NVM_DIR/nvm.sh\" ] && \\. \"$NVM_DIR/nvm.sh\"' >> ~/.bashrc\necho '[ -s \"$NVM_DIR/bash_completion\" ] && \\. \"$NVM_DIR/bash_completion\"' >> ~/.bashrc"
+        }
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Reload shell configuration",
+        "id": "reload-shell-configuration"
+      },
+      {
+        "type": "paragraph",
+        "content": "source ~/.bashrc`     },     {       number: 2,       title: \"Install Node.js 20 LTS\",       description: \"Install the latest LTS version meeting Claude Code's Node.js 18.0+ requirement. NVM manages versions without conflicts.\",       time: \"2 minutes\",       code: `# Install Node.js LTS version nvm install --lts nvm use --lts"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Verify installation",
+        "id": "verify-installation"
+      },
+      {
+        "type": "paragraph",
+        "content": "node --version  # Should show v20.x.x npm --version   # Should show 10.x.x"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Set as default version",
+        "id": "set-as-default-version"
+      },
+      {
+        "type": "paragraph",
+        "content": "nvm alias default node`     },     {       number: 3,       title: \"Configure NPM Global Directory\",       description: \"Set up user-writable npm directory to avoid permission errors. This prevents EACCES errors during global package installation.\",       time: \"1 minute\",       code: `# Create npm global directory mkdir ~/.npm-global npm config set prefix '~/.npm-global'"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Add to PATH in .bashrc",
+        "id": "add-to-path-in-bashrc"
+      },
+      {
+        "type": "paragraph",
+        "content": "echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.bashrc source ~/.bashrc"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Verify configuration",
+        "id": "verify-configuration"
+      },
+      {
+        "type": "paragraph",
+        "content": "npm config get prefix  # Shows /home/[user]/.npm-global`     },     {       number: 4,       title: \"Install Build Tools\",       description: \"Install essential compilation tools for native Node.js modules. Required for packages with C++ bindings used by Claude Code.\",       time: \"2 minutes\",       code: `# Install build essentials sudo apt update sudo apt install -y build-essential python3"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Configure npm Python path",
+        "id": "configure-npm-python-path"
+      },
+      {
+        "type": "paragraph",
+        "content": "npm config set python python3"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Install node-gyp globally",
+        "id": "install-node-gyp-globally"
+      },
+      {
+        "type": "paragraph",
+        "content": "npm install -g node-gyp"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Verify tools",
+        "id": "verify-tools"
+      },
+      {
+        "type": "paragraph",
+        "content": "gcc --version    # Should show gcc version python3 --version # Should show Python 3.x`     }   ]} />"
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Step 3: Install Claude Code",
+        "id": "step-3-install-claude-code"
+      },
+      {
+        "type": "component",
+        "component": "StepByStepGuide",
+        "props": {
+          "title": "Claude Code Installation",
+          "description": "Install and configure Claude Code in WSL environment",
+          "ANTHROPIC_API_KEY": "your-api-key",
+          "steps": "[\n    {\n      number: 1,\n      title: \"Install Claude Code Package\",\n      description: \"Use native installer for automatic updates and optimal configuration. Avoids npm permission complexities entirely.\",\n      time: \"2 minutes\",\n      code: `# Install Claude Code using native installer\ncurl -fsSL https://claude.ai/install.sh | bash\n\n# Alternative: NPM installation (if native fails)\nnpm install -g @anthropic-ai/claude-code\n\n# Verify installation\nclaude --version  # Shows claude-code version\nwhich claude      # Shows /home/[user]/.npm-global/bin/claude`\n    },\n    {\n      number: 2,\n      title: \"Run Diagnostic Check\",\n      description: \"Verify all components are properly configured. Claude doctor command checks dependencies and configuration status.\",\n      time: \"1 minute\",\n      code: `# Run Claude diagnostic\nclaude doctor\n\n# Expected output:\n# ✓ Installation type: native\n# ✓ Version: 1.0.44\n# ✓ Node.js: v20.x.x\n# ✓ Auto-update: enabled\n# ✓ IDE detection: VS Code found`\n    },\n    {\n      number: 3,\n      title: \"Configure Authentication\",\n      description: \"Set up Claude Console authentication or API key. Browser opens automatically for OAuth flow during first run.\",\n      time: \"2 minutes\",\n      code: `# Start Claude Code (opens browser for auth)\ncd ~/projects/my-project\nclaude\n\n# Alternative: Use API key directly\nexport ANTHROPIC_API_KEY='your-api-key-here'\n\n# Add to .bashrc for persistence\necho 'export ANTHROPIC_API_KEY=\"your-api-key\"'",
+          "children": "}\n  ]}\n/>"
+        }
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Step 4: Configure IDE Integration",
+        "id": "step-4-configure-ide-integration"
+      },
+      {
+        "type": "component",
+        "component": "Tabs",
+        "props": {
+          "title": "IDE Setup Options",
+          "description": "Configure your preferred development environment",
+          "items": "[\n    {\n      label: \"VS Code Setup\",\n      value: \"vscode\",\n      content: (\n        <di"
+        }
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Open project in WSL from Windows",
+        "id": "open-project-in-wsl-from-windows"
+      },
+      {
+        "type": "paragraph",
+        "content": "cd ~/projects/my-app code ."
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "VS Code server installs automatically",
+        "id": "vs-code-server-installs-automatically"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Full IntelliSense and debugging available`",
+        "id": "full-intellisense-and-debugging-available"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Create alias for convenience",
+        "id": "create-alias-for-convenience"
+      },
+      {
+        "type": "paragraph",
+        "content": "echo 'alias cursor-wsl=\"cursor --folder-uri vscode-remote://wsl+Ubuntu-22.04$(pwd)\"' >> ~/.bashrc source ~/.bashrc"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Now use: cursor-wsl in any project directory`",
+        "id": "now-use-cursor-wsl-in-any-project-directory"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Create tmux configuration",
+        "id": "create-tmux-configuration"
+      },
+      {
+        "type": "paragraph",
+        "content": "cat > ~/.tmux.conf << 'EOF' set -g mouse on set -g history-limit 10000 bind r source-file ~/.tmux.conf set -g default-terminal \"screen-256color\" EOF"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Start tmux session for Claude",
+        "id": "start-tmux-session-for-claude"
+      },
+      {
+        "type": "paragraph",
+        "content": "tmux new -s claude-dev claude  # Run Claude Code in tmux"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Detach: Ctrl+b, d",
+        "id": "detach-ctrlb-d"
+      },
+      {
+        "type": "heading",
+        "level": 1,
+        "text": "Reattach: tmux attach -t claude-dev`",
+        "id": "reattach-tmux-attach-t-claude-dev"
+      },
+      {
+        "type": "paragraph",
+        "content": "}             ]}           />           <p><strong>Outcome:</strong> Persistent development sessions survive disconnections. Ideal for remote development scenarios.</p>         </div>       )     }   ]} />"
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Step 5: Optimize Performance",
+        "id": "step-5-optimize-performance"
+      },
+      {
+        "type": "component",
+        "component": "StepByStepGuide",
+        "props": {
+          "title": "Performance Optimization",
+          "description": "Achieve 10x speed improvements with targeted optimizations",
+          "steps": "[\n    {\n      number: 1,\n      title: \"Configure Windows Defender Exclusions\",\n      description: \"Exclude WSL directories from real-time scanning. Reduces file operation latency by 30-50% during builds.\",\n      time: \"2 minutes\",\n      code: `# Add WSL exclusions (PowerShell as Admin)\nAdd-MpPreference -ExclusionPath \"\\\\\\\\wsl$\\\\Ubuntu-22.04\"\nAdd-MpPreference -ExclusionProcess \"node.exe\"\nAdd-MpPreference -ExclusionProcess \"npm\"\n\n# Verify exclusions\nGet-MpPreference | Select-Object ExclusionPath`\n    },\n    {\n      number: 2,\n      title: \"Optimize File System Usage\",\n      description: \"Move projects to Linux filesystem for maximum performance. Native ext4 achieves 500MB/s versus 50MB/s on Windows mounts.\",\n      time: \"5 minutes\",\n      code: `# Create project structure in Linux filesystem\nmkdir -p ~/dev/projects\ncd ~/dev/projects\n\n# Clone or move existing projects\ngit clone https://github.com/user/project.git\n\n# Never use /mnt/c/ for development\n# Bad:  cd /mnt/c/Users/name/projects  (20x slower)\n# Good: cd ~/dev/projects              (native speed)\n\n# Check current directory performance\ntime find . -type f | wc -l  # Should complete in <1 second`\n    },\n    {\n      number: 3,\n      title: \"Configure Git for Dual Systems\",\n      description: \"Optimize git operations based on repository location. Smart configuration improves performance by 5-10x.\",\n      time: \"2 minutes\",\n      code: `# Configure git for WSL\ngit config --global core.autocrlf input\ngit config --global core.preloadindex true\ngit config --global core.fscache true\n\n# Create smart git function\ncat",
+          "children": "git() {\n  if [[ $(pwd) == /mnt/* ]]; then\n    /mnt/c/Program\\\\ Files/Git/bin/git.exe \"$@\"\n  else\n    /usr/bin/git \"$@\"\n  fi\n}\nEOF\n\nsource ~/.bashrc`\n    }\n  ]}\n/>"
+        }
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Troubleshooting Common Issues",
+        "id": "troubleshooting-common-issues"
+      },
+      {
+        "type": "component",
+        "component": "UnifiedContentBox",
+        "props": {
+          "contentType": "accordion",
+          "title": "Problem Solutions",
+          "items": "[\n    {\n      title: \"WSL 2 requires kernel update error\",\n      content: (\n        <di"
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": "<p><strong>Root Cause:</strong> Missing or outdated WSL2 kernel after Windows updates.</p>           <p><strong>Solution:</strong> Download WSL2 kernel update from Microsoft or run `wsl --update` in PowerShell.</p>           <p><strong>Prevention:</strong> Enable automatic WSL updates through Windows Update settings.</p>         </div>       ),       defaultOpen: true     },     {       title: \"DNS resolution failures in WSL\",       content: (         <div>           <p><strong>Symptoms:</strong> Cannot install packages, authentication fails, network timeouts.</p>           <p><strong>Fix:</strong> Configure manual DNS servers in /etc/resolv.conf with nameserver 8.8.8.8.</p>           <p><strong>Permanent Solution:</strong> Add `generateResolvConf = false` to /etc/wsl.conf.</p>         </div>       )     },     {       title: \"High memory usage by vmmem process\",       content: (         <div>           <p><strong>Issue:</strong> vmmem process consumes 8-16GB RAM during development.</p>           <p><strong>Configuration:</strong> Set memory=4GB in .wslconfig file in Windows user directory.</p>           <p><strong>Additional Option:</strong> Enable experimental sparse VHD support for 40-60% disk savings.</p>         </div>       )     },     {       title: \"File watching not working\",       content: (         <div>           <p><strong>Problem:</strong> Hot reload fails for projects on Windows filesystem.</p>           <p><strong>Solution:</strong> Move projects to Linux filesystem (~/projects) for inotify support.</p>           <p><strong>Workaround:</strong> Set CHOKIDAR_USEPOLLING=true for Windows mount compatibility.</p>         </div>       )     }   ]} />"
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Verification Checklist",
+        "id": "verification-checklist"
+      },
+      {
+        "type": "component",
+        "component": "UnifiedContentBox",
+        "props": {
+          "contentType": "infobox",
+          "title": "Installation Verification Steps",
+          "content": "Run these commands to confirm successful setup. All should complete without errors.",
+          "children": "echo \"=== IDE Check ===\"\ncode --version 2>/dev/null && echo \"VS Code: OK\" || echo \"VS Code: Not found\"\n\necho \"All checks complete!\"`\n    }\n  ]}\n/>",
+          "variant": "success"
+        }
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Best Practices Summary",
+        "id": "best-practices-summary"
+      },
+      {
+        "type": "component",
+        "component": "UnifiedContentBlock",
+        "props": {
+          "variant": "quick-reference",
+          "title": "WSL Claude Code Cheat Sheet",
+          "description": "Essential commands and configurations",
+          "items": "[\n    {\n      label: \"Start Claude\",\n      value: \"cd ~/project && claude\",\n      description: \"Launch Claude in project directory for context awareness\"\n    },\n    {\n      label: \"Update Claude\", \n      value: \"claude migrate-installer\",\n      description: \"Migrate to native installer for automatic updates\"\n    },\n    {\n      label: \"Fix PATH Issues\",\n      value: \"export PATH=\\\"/usr/local/bin:$PATH\\\"\",\n      description: \"Prioritize Linux binaries over Windows executables\"\n    },\n    {\n      label: \"Check Performance\",\n      value: \"time find . -type f | wc -l\",\n      description: \"Measure filesystem performance - target <1 second\"\n    },\n    {\n      label: \"Restart WSL\",\n      value: \"wsl --shutdown && wsl\",\n      description: \"Full restart to apply configuration changes\"\n    },\n    {\n      label: \"Memory Management\",\n      value: \"memory=4GB in .wslconfig\",\n      description: \"Limit WSL memory usage for system stability\"\n    }\n  ]",
+          "columns": 2,
+          "children": "**Performance Optimization:** Use Linux filesystem exclusively for 20x speed improvement. Projects in ~/dev run faster than /mnt/c/.\n\n**Security Best Practice:** Always configure npm to use user directories. Never use sudo with npm installations.\n\n**Scalability Pattern:** For teams, create shared .wslconfig templates. Standardize configurations across developer machines."
+        }
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Next Steps",
+        "id": "next-steps"
+      },
+      {
+        "type": "component",
+        "component": "Tabs",
+        "props": {
+          "title": "Extended Learning",
+          "description": "Continue improving your WSL Claude setup",
+          "items": "[\n    {\n      label: \"When to Use\",\n      value: \"when\",\n      content: (\n        <di"
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": "<p><strong>Ideal scenarios:</strong> Web development, AI/ML projects, cross-platform applications</p>         </div>       )     },     {       label: \"Common Variations\",       value: \"variations\",       content: (         <div>           <p>Adapt this tutorial for different needs:</p>           <ul>             <li><strong>Docker Integration:</strong> When using containers - install Docker Desktop with WSL2 backend</li>             <li><strong>Multiple Distributions:</strong> For testing - install Debian alongside Ubuntu</li>             <li><strong>GPU Support:</strong> For ML workflows - enable CUDA toolkit in WSL2</li>           </ul>         </div>       )     }   ]} />"
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Frequently Asked Questions",
+        "id": "frequently-asked-questions"
+      },
+      {
+        "type": "component",
+        "component": "UnifiedContentBox",
+        "props": {
+          "contentType": "faq",
+          "title": "Common Questions",
+          "description": "Quick answers to frequent WSL Claude Code questions",
+          "faqs": "[\n    {\n      question: \"Why does Claude Code require WSL2 on Windows?\",\n      answer: \"Claude Code needs Unix-based environments for proper terminal handling. WSL2 provides native Linux compatibility while maintaining Windows integration. Native Windows terminals lack required features.\",\n      category: \"technical\"\n    },\n    {\n      question: \"How do I fix 'command not found' errors?\",\n      answer: \"Check PATH configuration with 'echo $PATH'. Ensure Linux paths appear before Windows paths. Run 'which claude' to verify correct binary location.\",\n      category: \"troubleshooting\"\n    },\n    {\n      question: \"What are the performance differences?\",\n      answer: \"Linux filesystem operations run 20x faster than Windows mounts. File watching works natively in Linux filesystem. Build times improve by 50-70% with proper configuration.\",\n      category: \"performance\"\n    },\n    {\n      question: \"Can I use PowerShell instead of WSL?\",\n      answer: \"No, Claude Code explicitly requires Unix terminals. PowerShell lacks necessary features for Claude's interactive mode. WSL2 remains the only Windows option.\",\n      category: \"compatibility\"\n    },\n    {\n      question: \"How much disk space does WSL2 require?\",\n      answer: \"Initial installation needs 2-4GB for Ubuntu. Development environments typically grow to 10-20GB. Enable sparse VHD for 40% space savings.\",\n      category: \"requirements\"\n    }\n  ]",
+          "children": "**Congratulations!** You've mastered Claude Code WSL setup and can now develop efficiently on Windows.\n\n**What you achieved:**\n- ✅ WSL2 with Ubuntu 22.04 fully configured\n- ✅ Node.js environment with proper permissions\n- ✅ Claude Code running at optimal performance\n\n**Ready for more?** Explore our [tutorials collection](/guides/tutorials) or join our [community](/community) to share your setup and get help with advanced configurations."
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": "*Last updated: September 2025 | Found this helpful? Share it with your team and explore more [Claude tutorials](/guides/tutorials).*"
+      }
+    ]
+  }
+}

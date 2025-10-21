@@ -153,14 +153,14 @@ export async function getChangelogFullContent(slug: string) {
 
 // Content statistics
 export const contentStats: ContentStats = {
-  "agents": 21,
-  "mcp": 40,
-  "commands": 16,
-  "rules": 23,
-  "hooks": 65,
-  "statuslines": 11,
-  "collections": 9,
-  "skills": 21,
+  "agents": 0,
+  "mcp": 0,
+  "commands": 0,
+  "rules": 0,
+  "hooks": 0,
+  "statuslines": 0,
+  "collections": 0,
+  "skills": 0,
   "guides": 20,
   "jobs": 0,
   "changelog": 40
