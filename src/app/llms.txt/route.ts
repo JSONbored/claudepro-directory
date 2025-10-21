@@ -20,7 +20,6 @@ import { generateSiteLLMsTxt } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 import { batchLoadContent } from '@/src/lib/utils/batch.utils';
-import { APP_CONFIG } from '@/src/lib/constants';
 
 export const runtime = 'nodejs';
 
