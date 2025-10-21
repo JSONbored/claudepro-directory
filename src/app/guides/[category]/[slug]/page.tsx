@@ -32,6 +32,50 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
  */
 export const dynamic = 'force-static';
 
+/**
+ * OPTIMIZATION: Pre-generate static params for all guides
+ * This tells Next.js which pages to build at build time (faster than on-demand)
+ */
+export async function generateStaticParams() {
+  const guideCategories = [
+    'use-cases',
+    'tutorials',
+    'collections',
+    'categories',
+    'workflows',
+    'comparisons',
+    'troubleshooting',
+  ];
+
+  const params: Array<{ category: string; slug: string }> = [];
+
+  try {
+    for (const category of guideCategories) {
+      const guidesPath = path.join(process.cwd(), 'content', 'guides', category);
+
+      try {
+        const files = await fs.readdir(guidesPath);
+
+        for (const file of files) {
+          if (file.endsWith('.mdx')) {
+            params.push({
+              category,
+              slug: file.replace('.mdx', ''),
+            });
+          }
+        }
+      } catch {}
+    }
+  } catch (error) {
+    logger.error(
+      'Failed to generate guide static params',
+      error instanceof Error ? error : new Error(String(error))
+    );
+  }
+
+  return params;
+}
+
 // Validation schema for guide parameters
 const guideParamsSchema = z.object({
   category: z
@@ -152,43 +196,6 @@ async function getRelatedGuides(
     },
     4 * 60 * 60 // Cache for 4 hours
   );
-}
-
-export async function generateStaticParams() {
-  const categories = [
-    'use-cases',
-    'tutorials',
-    'collections',
-    'categories',
-    'workflows',
-    'comparisons',
-    'troubleshooting',
-  ];
-  const paths = [];
-
-  for (const category of categories) {
-    // Add individual guide pages only (category pages handled by [category]/page.tsx)
-    try {
-      const dir = path.join(process.cwd(), 'content', 'guides', category);
-
-      // Read directory directly - catch will handle if it doesn't exist
-      const files = await fs.readdir(dir);
-
-      for (const file of files) {
-        if (file.endsWith('.mdx')) {
-          const slug = file.replace('.mdx', '');
-          paths.push({
-            category,
-            slug,
-          });
-        }
-      }
-    } catch {
-      // Directory doesn't exist yet
-    }
-  }
-
-  return paths;
 }
 
 export async function generateMetadata({

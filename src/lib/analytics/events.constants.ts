@@ -132,8 +132,10 @@ export const EVENTS = {
   RELATED_CLICK_FROM_COMMAND: 'related_click_from_command' as RelatedClickEvent<'commands'>,
   RELATED_CLICK_FROM_RULE: 'related_click_from_rule' as RelatedClickEvent<'rules'>,
   RELATED_CLICK_FROM_HOOK: 'related_click_from_hook' as RelatedClickEvent<'hooks'>,
-  RELATED_CLICK_FROM_STATUSLINE: 'related_click_from_statusline' as RelatedClickEvent<'statuslines'>,
-  RELATED_CLICK_FROM_COLLECTION: 'related_click_from_collection' as RelatedClickEvent<'collections'>,
+  RELATED_CLICK_FROM_STATUSLINE:
+    'related_click_from_statusline' as RelatedClickEvent<'statuslines'>,
+  RELATED_CLICK_FROM_COLLECTION:
+    'related_click_from_collection' as RelatedClickEvent<'collections'>,
   RELATED_CLICK_FROM_SKILL: 'related_click_from_skill' as RelatedClickEvent<'skills'>,
   RELATED_CLICK_FROM_GUIDE: 'related_click_from_guide' as RelatedClickEvent<'guides'>,
   RELATED_CLICK_FROM_JOB: 'related_click_from_job' as RelatedClickEvent<'jobs'>,
@@ -207,8 +209,10 @@ export const EVENTS = {
   DOWNLOAD_MARKDOWN_COMMAND: 'download_markdown_command' as DownloadMarkdownEvent<'commands'>,
   DOWNLOAD_MARKDOWN_RULE: 'download_markdown_rule' as DownloadMarkdownEvent<'rules'>,
   DOWNLOAD_MARKDOWN_HOOK: 'download_markdown_hook' as DownloadMarkdownEvent<'hooks'>,
-  DOWNLOAD_MARKDOWN_STATUSLINE: 'download_markdown_statusline' as DownloadMarkdownEvent<'statuslines'>,
-  DOWNLOAD_MARKDOWN_COLLECTION: 'download_markdown_collection' as DownloadMarkdownEvent<'collections'>,
+  DOWNLOAD_MARKDOWN_STATUSLINE:
+    'download_markdown_statusline' as DownloadMarkdownEvent<'statuslines'>,
+  DOWNLOAD_MARKDOWN_COLLECTION:
+    'download_markdown_collection' as DownloadMarkdownEvent<'collections'>,
   DOWNLOAD_MARKDOWN_SKILL: 'download_markdown_skill' as DownloadMarkdownEvent<'skills'>,
   DOWNLOAD_MARKDOWN_GUIDE: 'download_markdown_guide' as DownloadMarkdownEvent<'guides'>,
   DOWNLOAD_MARKDOWN_JOB: 'download_markdown_job' as DownloadMarkdownEvent<'jobs'>,
@@ -309,7 +313,15 @@ export type EventName = (typeof EVENTS)[keyof typeof EVENTS];
  */
 interface EventConfig {
   description: string;
-  category: 'CONTENT' | 'JOURNEY' | 'PERFORMANCE' | 'INTERACTION' | 'ERROR' | 'FEATURE' | 'NAVIGATION' | 'PERSONALIZATION';
+  category:
+    | 'CONTENT'
+    | 'JOURNEY'
+    | 'PERFORMANCE'
+    | 'INTERACTION'
+    | 'ERROR'
+    | 'FEATURE'
+    | 'NAVIGATION'
+    | 'PERSONALIZATION';
   enabled: boolean;
   sampleRate?: number;
   debugOnly?: boolean;

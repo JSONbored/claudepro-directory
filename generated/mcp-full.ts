@@ -1,0 +1,5328 @@
+/**
+ * Auto-generated full content file
+ * Category: MCP Servers
+ *
+ * DO NOT EDIT MANUALLY
+ * @see scripts/build-content.ts
+ */
+
+import type { McpContent } from '@/src/lib/schemas/content/mcp.schema';
+
+export const mcpFull: McpContent[] = [
+  {
+    "slug": "airtable-mcp-server",
+    "description": "Read and write records, manage bases and tables in Airtable directly from Claude",
+    "author": "domdomegg",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "database",
+      "airtable",
+      "data-management",
+      "crud",
+      "tables"
+    ],
+    "content": "Connect Claude to Airtable databases for seamless data management and automation of your bases and tables.",
+    "title": "Airtable MCP Server",
+    "displayTitle": "Airtable MCP Server",
+    "seoTitle": "Airtable MCP Server for Claude",
+    "source": "community",
+    "documentationUrl": "https://github.com/domdomegg/airtable-mcp-server",
+    "features": [
+      "Read and write records in Airtable bases",
+      "Create and manage tables with full schema control",
+      "Query and filter data with complex conditions",
+      "Update multiple records in batch operations",
+      "Access metadata and schema information"
+    ],
+    "useCases": [
+      "Automate data entry and updates across multiple bases",
+      "Generate reports from Airtable data with AI analysis",
+      "Sync data between Airtable and other systems",
+      "Bulk operations on records for data cleaning",
+      "Create dynamic dashboards from Airtable content"
+    ],
+    "examples": [
+      {
+        "title": "Read all records from the Projects table",
+        "code": "Ask Claude: \"Read all records from the Projects table\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Add a new contact with these details to Airtable",
+        "code": "Ask Claude: \"Add a new contact with these details to Airtable\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Update the status field for all overdue tasks",
+        "code": "Ask Claude: \"Update the status field for all overdue tasks\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Filter records where status='active' AND priority=...",
+        "code": "Ask Claude: \"Filter records where status='active' AND priority='high'\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "airtable": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "airtable-mcp-server"
+            ],
+            "env": {
+              "AIRTABLE_API_KEY": "your_api_key_here"
+            }
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "airtable": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "airtable-mcp-server"
+            ],
+            "env": {
+              "AIRTABLE_API_KEY": "${AIRTABLE_API_KEY}"
+            }
+          }
+        }
+      }
+    },
+    "package": "airtable-mcp-server",
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Get your Airtable API key from https://airtable.com/account",
+          "Open Claude Desktop configuration file",
+          "Add the Airtable server configuration with your API key",
+          "Restart Claude Desktop"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY -- npx -y airtable-mcp-server"
+    },
+    "security": [
+      "Use read-only API keys when write access isn't needed",
+      "Limit access to specific bases when possible",
+      "Regularly rotate API keys for security",
+      "Monitor API usage through Airtable dashboard"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Authentication failed with 401 Unauthorized error",
+        "solution": "Verify Personal Access Token at https://airtable.com/account has correct scopes. Ensure token grants access to specific base. Check AIRTABLE_API_KEY environment variable matches your PAT."
+      },
+      {
+        "issue": "Rate limit exceeded - 5 requests per second throttling",
+        "solution": "Implement 200ms delay between requests (5 req/sec limit). Use batch endpoints to update 10 records per request. Consider batching to achieve 50 updates/second maximum throughput."
+      },
+      {
+        "issue": "Base or table not found with 404 error",
+        "solution": "Verify base ID starts with 'app' prefix. Check table name is exact case-sensitive match. Confirm PAT has base-level permissions granted at https://airtable.com/account."
+      },
+      {
+        "issue": "Field validation errors when creating or updating records",
+        "solution": "Match field types exactly (text, number, single select, etc). Provide all required fields. Use GET request to table schema to verify field names, types, and validation rules."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "schema"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "asana-mcp-server",
+    "description": "Interact with Asana workspaces to manage projects and tasks",
+    "author": "Asana",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "asana",
+      "project-management",
+      "tasks",
+      "team-collaboration",
+      "workflow"
+    ],
+    "content": "Connect Claude to Asana for comprehensive project management and team collaboration.",
+    "title": "Asana MCP Server",
+    "displayTitle": "Asana MCP Server",
+    "seoTitle": "Asana MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server",
+    "features": [
+      "Create and manage tasks with rich metadata",
+      "Update project status and milestones",
+      "Assign team members and collaborators",
+      "Set due dates and task dependencies",
+      "Generate progress reports and analytics"
+    ],
+    "useCases": [
+      "Create tasks from meeting notes",
+      "Update project timelines and deadlines",
+      "Assign work to team members efficiently",
+      "Track milestone progress across projects",
+      "Generate status reports for stakeholders"
+    ],
+    "examples": [
+      {
+        "title": "Create a task for the new feature",
+        "code": "Ask Claude: \"Create a task for the new feature\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Show all tasks due this week",
+        "code": "Ask Claude: \"Show all tasks due this week\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Update project status to on-track",
+        "code": "Ask Claude: \"Update project status to on-track\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Assign task to team member",
+        "code": "Ask Claude: \"Assign task to team member\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "asana": {
+            "transport": "sse",
+            "url": "https://mcp.asana.com/sse"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "asana": {
+            "transport": "sse",
+            "url": "https://mcp.asana.com/sse"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Asana server configuration with SSE transport",
+          "Restart Claude Desktop",
+          "Authenticate via OAuth when prompted"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport sse asana https://mcp.asana.com/sse"
+    },
+    "security": [
+      "OAuth authentication for secure access",
+      "Workspace permissions apply automatically",
+      "Audit trail maintained for all actions",
+      "Regular permission reviews recommended"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "OAuth authentication fails or connection times out",
+        "solution": "Remove ~/.mcp-auth directory with `rm -rf ~/.mcp-auth` and re-authenticate. Verify SSE URL https://mcp.asana.com/sse is accessible. Logout and re-login to Asana account if errors persist."
+      },
+      {
+        "issue": "Insufficient permissions to create or modify tasks",
+        "solution": "Verify workspace role is Member or higher (not Guest). Check project permissions allow task creation. Contact workspace admin to upgrade access level if needed."
+      },
+      {
+        "issue": "Rate limit exceeded during bulk task operations",
+        "solution": "Free tier: 150 req/min limit. Paid tier: 1,500 req/min. Batch operations into groups of 10-20 tasks. Implement delays between batches. Check Retry-After header in 429 responses."
+      },
+      {
+        "issue": "Tasks not appearing or data appears stale",
+        "solution": "Run tools/list command to refresh available endpoints. Restart MCP client connection. Verify you're querying correct workspace - switch workspaces if accessing wrong data."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "create"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "aws-services-mcp-server",
+    "description": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring",
+    "author": "AWS Labs",
+    "dateAdded": "2025-09-16",
+    "tags": [
+      "aws",
+      "cloud",
+      "infrastructure",
+      "deployment",
+      "monitoring"
+    ],
+    "content": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring.",
+    "title": "AWS Services MCP Server",
+    "displayTitle": "Aws Services MCP Server",
+    "source": "official",
+    "documentationUrl": "https://github.com/awslabs/mcp",
+    "features": [
+      "EC2 instance management and monitoring",
+      "S3 bucket and object operations",
+      "Lambda function deployment and invocation",
+      "RDS database management",
+      "CloudWatch metrics and alarms",
+      "VPC and networking configuration",
+      "IAM user and role management",
+      "CloudFormation stack deployment",
+      "Auto Scaling group management",
+      "Load balancer configuration"
+    ],
+    "useCases": [
+      "Deploy and manage EC2 instances for web applications",
+      "Automate S3 bucket creation and file operations",
+      "Deploy Lambda functions for serverless computing",
+      "Monitor application performance with CloudWatch",
+      "Manage RDS databases and create read replicas",
+      "Configure VPC networking and security groups",
+      "Deploy infrastructure using CloudFormation templates",
+      "Set up auto-scaling for high availability",
+      "Implement cost optimization strategies",
+      "Manage IAM roles and policies for security"
+    ],
+    "examples": [
+      {
+        "title": "Launch a new EC2 instance with custom tags",
+        "code": "Ask Claude: \"Launch a new EC2 instance with custom tags\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Create an S3 bucket with versioning enabled",
+        "code": "Ask Claude: \"Create an S3 bucket with versioning enabled\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Deploy a Lambda function with environment variable...",
+        "code": "Ask Claude: \"Deploy a Lambda function with environment variables\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Set up CloudWatch alarms for application monitorin...",
+        "code": "Ask Claude: \"Set up CloudWatch alarms for application monitoring\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Create an RDS instance with automated backups",
+        "code": "Ask Claude: \"Create an RDS instance with automated backups\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Deploy a complete web application stack via CloudF...",
+        "code": "Ask Claude: \"Deploy a complete web application stack via CloudFormation\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "aws": {
+            "command": "uvx",
+            "args": [
+              "awslabs.core-mcp-server@latest"
+            ],
+            "env": {
+              "AWS_PROFILE": "your-aws-profile",
+              "AWS_REGION": "us-east-1",
+              "FASTMCP_LOG_LEVEL": "ERROR"
+            }
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "aws": {
+            "command": "uvx",
+            "args": [
+              "awslabs.core-mcp-server@latest"
+            ],
+            "env": {
+              "AWS_PROFILE": "${AWS_PROFILE}",
+              "AWS_REGION": "${AWS_REGION:-us-east-1}",
+              "FASTMCP_LOG_LEVEL": "${FASTMCP_LOG_LEVEL:-ERROR}"
+            }
+          }
+        }
+      }
+    },
+    "package": "awslabs.core-mcp-server",
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Install the AWS MCP server: uvx awslabs.core-mcp-server@latest",
+          "Open your Claude Desktop configuration file",
+          "Add the AWS MCP server configuration with your credentials",
+          "Configure AWS authentication (IAM keys, profile, or roles)",
+          "Restart Claude Desktop"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "uvx awslabs.core-mcp-server@latest"
+    },
+    "security": [
+      "Support for IAM user credentials and roles",
+      "AWS Profile-based authentication",
+      "Least privilege access with specific permissions",
+      "CloudTrail integration for audit logging",
+      "Secrets Manager for credential management",
+      "VPC security groups and network ACLs"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "AWS credentials not found or authentication failure",
+        "solution": "Run `aws configure` to set access keys. Verify AWS_PROFILE matches profile in ~/.aws/credentials. Test with `aws sts get-caller-identity` command to confirm authentication."
+      },
+      {
+        "issue": "IAM permissions denied for specific AWS service operations",
+        "solution": "Attach required IAM policy (AmazonEC2FullAccess, AmazonS3FullAccess, etc). Use AWS Policy Simulator to test permissions. Verify principal has necessary actions in IAM policy document."
+      },
+      {
+        "issue": "Resources not found - wrong AWS region configured",
+        "solution": "Verify AWS_REGION environment variable matches resource location (us-east-1, eu-west-1, etc). Update with `aws configure set region REGION_NAME`. Check region in AWS Console matches CLI."
+      },
+      {
+        "issue": "CloudFormation template validation errors or syntax issues",
+        "solution": "Validate with `aws cloudformation validate-template --template-body file://template.yaml`. Check resource types match AWS documentation exactly. Verify parameter types and AllowedValues constraints."
+      },
+      {
+        "issue": "API throttling or RequestLimitExceeded errors",
+        "solution": "Implement exponential backoff for retries (wait 2^n seconds). Reduce concurrent requests to max 10. Request service quota increase at AWS Service Quotas console for sustained high usage."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "ec2:*",
+      "s3:*",
+      "lambda:*",
+      "rds:*",
+      "cloudwatch:*"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "box-mcp-server",
+    "description": "Access enterprise content, analyze unstructured data, and automate workflows",
+    "author": "Box",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "storage",
+      "box",
+      "enterprise",
+      "document-management",
+      "collaboration"
+    ],
+    "content": "Connect Claude to Box for enterprise content management and document automation.",
+    "title": "Box MCP Server",
+    "displayTitle": "Box MCP Server",
+    "seoTitle": "Box MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://box.dev/guides/box-mcp/remote/",
+    "features": [
+      "Access and search files across your Box enterprise",
+      "Analyze document content and extract insights",
+      "Automate content workflows and file organization",
+      "Manage folder structures and permissions",
+      "Generate summaries from enterprise documents",
+      "Enterprise-grade security and audit trails"
+    ],
+    "useCases": [
+      "Search enterprise documents by content or metadata",
+      "Extract and analyze data from invoices and contracts",
+      "Generate summaries of quarterly reports and documents",
+      "Automate file organization and folder management",
+      "Analyze document patterns across your organization",
+      "Create workflow automations for content processes"
+    ],
+    "examples": [
+      {
+        "title": "Find all contracts from 2024",
+        "code": "Ask Claude: \"Find all contracts from 2024\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Summarize the quarterly reports in the finance fol...",
+        "code": "Ask Claude: \"Summarize the quarterly reports in the finance folder\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Extract key data from invoice documents",
+        "code": "Ask Claude: \"Extract key data from invoice documents\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Organize project files by client and date",
+        "code": "Ask Claude: \"Organize project files by client and date\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "box": {
+            "transport": "http",
+            "url": "https://mcp.box.com/"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "box": {
+            "transport": "http",
+            "url": "https://mcp.box.com/"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open your Claude Desktop configuration file",
+          "Add the Box MCP server configuration",
+          "Restart Claude Desktop",
+          "Authenticate with your Box account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http box https://mcp.box.com/"
+    },
+    "security": [
+      "Enterprise authentication and SSO support",
+      "Respects existing file and folder permissions",
+      "Maintains complete audit trail of all operations",
+      "Compliant with data governance requirements"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Getting HTTP 429 error with rate limit exceeded message",
+        "solution": "Reduce request frequency to stay under 1,000 API calls per minute per user (16.67 calls/second). Implement exponential backoff using the retry-after header value returned in the 429 response."
+      },
+      {
+        "issue": "Search operations failing across enterprise",
+        "solution": "Enterprise has 12 searches per second limit total. Distribute search requests across all apps, add delays between searches, or contact Box support to increase quota for your business plan."
+      },
+      {
+        "issue": "Upload operations timing out or failing",
+        "solution": "Verify you're staying under 4 uploads per second per user limit. Queue upload requests with proper throttling, check network connectivity, and ensure files meet size requirements for your account tier."
+      },
+      {
+        "issue": "Authentication fails with invalid token errors",
+        "solution": "Regenerate your Box API access token from Box Developer Console. Verify token hasn't expired and includes correct scopes (read, write, delete) required for your operations."
+      },
+      {
+        "issue": "Cannot access specific folders or files",
+        "solution": "Verify your Box account has appropriate folder permissions set. Check enterprise admin settings for content access restrictions and ensure your API token has necessary permissions for target directories."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "delete"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "canva-mcp-server",
+    "description": "Browse, summarize, and generate Canva designs directly from Claude",
+    "author": "Canva",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "design",
+      "canva",
+      "graphics",
+      "templates",
+      "creative"
+    ],
+    "content": "Create and manage Canva designs through Claude for automated design generation.",
+    "title": "Canva MCP Server",
+    "displayTitle": "Canva MCP Server",
+    "seoTitle": "Canva MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://www.canva.dev/docs/connect/canva-mcp-server-setup/",
+    "features": [
+      "Browse design templates and assets",
+      "Generate new designs programmatically",
+      "Summarize design content and elements",
+      "Autofill design elements with data",
+      "Manage brand kits and style guides"
+    ],
+    "useCases": [
+      "Generate social media graphics at scale",
+      "Create presentation slides automatically",
+      "Design marketing materials consistently",
+      "Produce brand assets variations",
+      "Maintain brand consistency across designs"
+    ],
+    "examples": [
+      {
+        "title": "Create an Instagram post about our product launch",
+        "code": "Ask Claude: \"Create an Instagram post about our product launch\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Generate a presentation slide template",
+        "code": "Ask Claude: \"Generate a presentation slide template\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Export all logo variations",
+        "code": "Ask Claude: \"Export all logo variations\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Update brand colors in templates",
+        "code": "Ask Claude: \"Update brand colors in templates\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "canva": {
+            "transport": "http",
+            "url": "https://mcp.canva.com/mcp"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "canva": {
+            "transport": "http",
+            "url": "https://mcp.canva.com/mcp"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Canva server configuration with HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate with your Canva account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http canva https://mcp.canva.com/mcp"
+    },
+    "security": [
+      "OAuth authentication for account access",
+      "Respect brand guidelines and permissions",
+      "Manage team permissions appropriately",
+      "Regular asset backups recommended"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Rate limit error when exporting designs",
+        "solution": "Design Export API allows 10 requests per 10 seconds. Wait for time window to reset before retrying. Implement request queuing with 1-second delays between exports to stay within limits."
+      },
+      {
+        "issue": "Authentication fails with 401 signature verification error",
+        "solution": "Verify your OAuth 2.0 implementation ensures tokens refresh correctly. Check that access token hasn't expired and regenerate from Canva Developer Console if needed."
+      },
+      {
+        "issue": "Cannot add elements to design - hitting rate limit",
+        "solution": "Native Element API allows 20 requests per 10 seconds. Batch element additions where possible and add 500ms delays between individual add operations to avoid throttling."
+      },
+      {
+        "issue": "Designs not accessible or permission denied errors",
+        "solution": "Verify your Canva Pro subscription is active and your account has proper team permissions. Check OAuth scope includes design read/write access and re-authenticate if necessary."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "create",
+      "export"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "clickup-mcp-server",
+    "description": "Task management and project tracking with ClickUp integration",
+    "author": "hauptsacheNet",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "project-management",
+      "clickup",
+      "tasks",
+      "productivity",
+      "team-collaboration"
+    ],
+    "content": "Manage ClickUp tasks and projects directly through Claude for comprehensive project management.",
+    "title": "Clickup MCP Server",
+    "displayTitle": "Clickup MCP Server",
+    "seoTitle": "Clickup MCP Server for Claude",
+    "source": "community",
+    "documentationUrl": "https://github.com/hauptsacheNet/clickup-mcp",
+    "features": [
+      "Create and update tasks with custom fields",
+      "Manage project spaces and folders",
+      "Track time entries and productivity",
+      "Update task statuses and priorities",
+      "Assign team members and set due dates"
+    ],
+    "useCases": [
+      "Create tasks from requirements documents",
+      "Update project progress in bulk",
+      "Generate status reports for stakeholders",
+      "Perform bulk task operations",
+      "Automate time tracking entries"
+    ],
+    "examples": [
+      {
+        "title": "Create a new task in the Development space",
+        "code": "Ask Claude: \"Create a new task in the Development space\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Update task CL-123 to completed",
+        "code": "Ask Claude: \"Update task CL-123 to completed\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "List all my assigned tasks",
+        "code": "Ask Claude: \"List all my assigned tasks\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Add time entry to current task",
+        "code": "Ask Claude: \"Add time entry to current task\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "clickup": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "@hauptsache.net/clickup-mcp"
+            ],
+            "env": {
+              "CLICKUP_API_KEY": "your_api_key",
+              "CLICKUP_TEAM_ID": "your_team_id"
+            }
+          }
+        }
+      }
+    },
+    "package": "@hauptsache.net/clickup-mcp",
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Get your ClickUp API key from https://app.clickup.com/settings/apps",
+          "Find your Team ID in ClickUp settings",
+          "Open Claude Desktop configuration file",
+          "Add the ClickUp server configuration with your credentials",
+          "Restart Claude Desktop"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add clickup --env CLICKUP_API_KEY=YOUR_KEY --env CLICKUP_TEAM_ID=YOUR_TEAM_ID -- npx -y @hauptsache.net/clickup-mcp"
+    },
+    "security": [
+      "Use personal API tokens for authentication",
+      "Limit permissions to necessary spaces only",
+      "Rotate API keys regularly",
+      "Monitor API usage for anomalies"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Getting HTTP 429 with rate limit exceeded errors",
+        "solution": "ClickUp limits to 100 requests per minute per token. Check X-RateLimit-Reset header for reset time. Implement exponential backoff and wait specified seconds before retry."
+      },
+      {
+        "issue": "OAuth error: team not authorized for access token",
+        "solution": "Re-authenticate to authorize workspace access. Verify OAuth scope includes required permissions and check if user revoked authorization. Generate new API token from ClickUp settings if needed."
+      },
+      {
+        "issue": "Authorization token missing in header error",
+        "solution": "Add Authorization header with your API key to all requests. Format: Authorization: YOUR_API_KEY. Verify token is correctly copied from ClickUp API settings without extra spaces."
+      },
+      {
+        "issue": "Cannot access tasks or spaces - permission denied",
+        "solution": "Verify your ClickUp account has access to target spaces and lists. Check workspace admin settings and ensure API token has necessary permissions for workspace and spaces."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "delete"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "cloudflare-mcp-server",
+    "description": "Build applications, analyze traffic, and manage security settings through Cloudflare",
+    "author": "Cloudflare",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "cloudflare",
+      "cdn",
+      "security",
+      "dns",
+      "infrastructure"
+    ],
+    "content": "Manage Cloudflare services and configurations through Claude for comprehensive infrastructure control.",
+    "title": "Cloudflare MCP Server",
+    "displayTitle": "Cloudflare MCP Server",
+    "source": "official",
+    "documentationUrl": "https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/",
+    "features": [
+      "Configure DNS settings and records",
+      "Manage security rules and WAF",
+      "Analyze traffic patterns and metrics",
+      "Control caching behavior and purging",
+      "Deploy Workers and Pages"
+    ],
+    "useCases": [
+      "Deploy edge functions globally",
+      "Configure WAF rules for security",
+      "Manage DNS records programmatically",
+      "Analyze attack patterns and threats",
+      "Optimize site performance with caching"
+    ],
+    "examples": [
+      {
+        "title": "Add DNS record for subdomain",
+        "code": "Ask Claude: \"Add DNS record for subdomain\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Deploy Worker script",
+        "code": "Ask Claude: \"Deploy Worker script\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Show traffic analytics",
+        "code": "Ask Claude: \"Show traffic analytics\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Configure firewall rule",
+        "code": "Ask Claude: \"Configure firewall rule\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "cloudflare": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "@cloudflare/mcp-server-cloudflare"
+            ],
+            "env": {
+              "CLOUDFLARE_API_TOKEN": "your_api_token",
+              "CLOUDFLARE_ACCOUNT_ID": "your_account_id"
+            }
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "cloudflare": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "@cloudflare/mcp-server-cloudflare"
+            ],
+            "env": {
+              "CLOUDFLARE_API_TOKEN": "${CLOUDFLARE_API_TOKEN}",
+              "CLOUDFLARE_ACCOUNT_ID": "${CLOUDFLARE_ACCOUNT_ID}"
+            }
+          }
+        }
+      }
+    },
+    "package": "@cloudflare/mcp-server-cloudflare",
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Get your Cloudflare API Token from https://dash.cloudflare.com/profile/api-tokens",
+          "Find your Account ID in the Cloudflare dashboard",
+          "Open Claude Desktop configuration file",
+          "Add the Cloudflare MCP server configuration with your credentials",
+          "Restart Claude Desktop"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add cloudflare --env CLOUDFLARE_API_TOKEN=YOUR_TOKEN --env CLOUDFLARE_ACCOUNT_ID=YOUR_ACCOUNT_ID"
+    },
+    "security": [
+      "Use API tokens with minimal scope",
+      "Enable 2FA on Cloudflare account",
+      "Regular security audits recommended",
+      "Monitor API usage and rate limits"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "HTTP 429 error: API rate limit exceeded for 5 minutes",
+        "solution": "Cloudflare global rate limit is 1,200 requests per 5 minutes. Wait for 5-minute window to reset. Distribute API calls across time and implement request throttling to stay under 4 requests per second."
+      },
+      {
+        "issue": "Rate limit API error: decoding not yet implemented",
+        "solution": "Add Content-Type: application/json header to your API request. Verify request body is properly formatted JSON and includes all required parameters for the endpoint."
+      },
+      {
+        "issue": "Error: ratelimit.api.not_entitled for Enterprise features",
+        "solution": "Contact your Cloudflare Account Team to enable Enterprise rate limiting features. Verify your account tier supports advanced rate limiting or migrate to Ruleset Engine API."
+      },
+      {
+        "issue": "Authentication error: token permission insufficient",
+        "solution": "Verify API token has Firewall Services Write permission for rate limiting. Check token hasn't expired and regenerate from Cloudflare dashboard if needed. Use Bearer authentication, not email/key pair."
+      },
+      {
+        "issue": "Cannot configure rate limits or firewall rules",
+        "solution": "Ensure API token has correct zone and account-level permissions. Verify you're using Ruleset Engine API (not deprecated Rate Limiting API) and check account tier supports feature."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "deploy"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "cloudinary-mcp-server",
+    "description": "Upload, manage, transform, and analyze media assets in the cloud",
+    "author": "Cloudinary",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "media",
+      "cloudinary",
+      "images",
+      "video",
+      "asset-management"
+    ],
+    "content": "Manage and transform media assets through Cloudinary's comprehensive cloud-based media platform.",
+    "title": "Cloudinary MCP Server",
+    "displayTitle": "Cloudinary MCP Server",
+    "source": "official",
+    "documentationUrl": "https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers",
+    "features": [
+      "Upload and store media assets securely",
+      "Apply real-time image and video transformations",
+      "Optimize media for web delivery",
+      "Manage asset metadata and tags",
+      "Generate responsive image variations"
+    ],
+    "useCases": [
+      "Batch optimize images for web",
+      "Dynamic image resizing and cropping",
+      "Video transcoding and optimization",
+      "Asset organization and tagging",
+      "Content moderation and analysis"
+    ],
+    "examples": [
+      {
+        "title": "Resize all product images to 800x600",
+        "code": "Ask Claude: \"Resize all product images to 800x600\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Apply watermark to videos",
+        "code": "Ask Claude: \"Apply watermark to videos\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Generate responsive image sets",
+        "code": "Ask Claude: \"Generate responsive image sets\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Optimize images for web delivery",
+        "code": "Ask Claude: \"Optimize images for web delivery\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "cloudinary": {
+            "env": {
+              "CLOUDINARY_CLOUD_NAME": "your_cloud_name",
+              "CLOUDINARY_API_KEY": "your_api_key",
+              "CLOUDINARY_API_SECRET": "your_api_secret"
+            },
+            "transport": "http",
+            "url": "https://mcp.cloudinary.com/"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "cloudinary": {
+            "env": {
+              "CLOUDINARY_CLOUD_NAME": "${CLOUDINARY_CLOUD_NAME}",
+              "CLOUDINARY_API_KEY": "${CLOUDINARY_API_KEY}",
+              "CLOUDINARY_API_SECRET": "${CLOUDINARY_API_SECRET}"
+            },
+            "transport": "http",
+            "url": "https://mcp.cloudinary.com/"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Get your Cloudinary credentials from https://console.cloudinary.com/",
+          "Note your Cloud Name, API Key, and API Secret",
+          "Open Claude Desktop configuration file",
+          "Add the Cloudinary MCP server configuration with your credentials",
+          "Restart Claude Desktop"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add cloudinary --env CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME --env CLOUDINARY_API_KEY=YOUR_KEY --env CLOUDINARY_API_SECRET=YOUR_SECRET"
+    },
+    "security": [
+      "OAuth authentication for secure access",
+      "Secure upload presets configuration",
+      "Monitor bandwidth usage",
+      "Set transformation limits"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "HTTP 420 rate limited error on Admin API requests",
+        "solution": "Admin API limits: Free plan 500/hour, Paid 2000/hour. Wait for hourly reset or upgrade plan. Use Retry-After header to time your next request. Upload API has no rate limits."
+      },
+      {
+        "issue": "HTTP 401 authentication required error",
+        "solution": "Verify CLOUDINARY_CLOUD_NAME, API_KEY, and API_SECRET are correctly set. Check signed URLs for add-ons or Strict Transformation mode. Regenerate credentials from Cloudinary Console if authentication fails."
+      },
+      {
+        "issue": "Image transformation fails or returns errors",
+        "solution": "Verify transformation parameters are valid and supported. Check account tier for transformation quota limits. Ensure URL is properly signed for Strict Transformations mode if enabled."
+      },
+      {
+        "issue": "Upload fails with file too large error",
+        "solution": "Check file size against your account tier limits (typically 10-100MB). For larger files, use chunked uploads. Verify network connectivity and increase timeout settings for large files."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "transform",
+      "delete"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "daloopa-mcp-server",
+    "description": "Access high-quality fundamental financial data from SEC filings and investor presentations",
+    "author": "Daloopa",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "finance",
+      "daloopa",
+      "sec-filings",
+      "financial-data",
+      "investor-relations"
+    ],
+    "content": "Access comprehensive financial data and SEC filing information through Daloopa's curated database.",
+    "title": "Daloopa MCP Server",
+    "displayTitle": "Daloopa MCP Server",
+    "seoTitle": "Daloopa MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://docs.daloopa.com/docs/daloopa-mcp",
+    "features": [
+      "Access SEC filing data and documents",
+      "Retrieve financial statements and metrics",
+      "Query investor presentations",
+      "Analyze historical financial data",
+      "Compare company metrics across periods"
+    ],
+    "useCases": [
+      "Analyze quarterly earnings data",
+      "Compare financial metrics across companies",
+      "Build financial models with accurate data",
+      "Track KPI trends over time",
+      "Research investment opportunities"
+    ],
+    "examples": [
+      {
+        "title": "Get Apple's latest 10-K filing data",
+        "code": "Ask Claude: \"Get Apple's latest 10-K filing data\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Compare revenue growth across tech companies",
+        "code": "Ask Claude: \"Compare revenue growth across tech companies\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Extract key metrics from investor presentation",
+        "code": "Ask Claude: \"Extract key metrics from investor presentation\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Show historical EBITDA margins",
+        "code": "Ask Claude: \"Show historical EBITDA margins\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "daloopa": {
+            "transport": "http",
+            "url": "https://mcp.daloopa.com/server/mcp"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "daloopa": {
+            "transport": "http",
+            "url": "https://mcp.daloopa.com/server/mcp"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Daloopa server configuration with HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate with your Daloopa account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http daloopa https://mcp.daloopa.com/server/mcp"
+    },
+    "security": [
+      "OAuth authentication for access",
+      "Respect data licensing agreements",
+      "Monitor API usage limits",
+      "Cache frequently accessed data"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Authentication error: API key invalid or missing",
+        "solution": "Add Authorization header with your API key to all requests. Contact Daloopa sales team to obtain or regenerate API key. Verify key is copied correctly without extra spaces or line breaks."
+      },
+      {
+        "issue": "Company data not found or unavailable",
+        "solution": "Verify ticker symbol is correct and company is in Daloopa coverage universe. Check your subscription tier includes access to requested company data. Contact Daloopa support for coverage questions."
+      },
+      {
+        "issue": "Financial metrics missing for specific periods",
+        "solution": "Confirm company has filed SEC documents for requested period. Check data availability dates for your subscription tier. Verify quarter/year format matches API requirements (e.g., Q1 2024)."
+      },
+      {
+        "issue": "API requests timing out or running slowly",
+        "solution": "Reduce payload size by limiting fields returned in response. Implement pagination for large datasets. Check network connectivity and consider caching frequently accessed data locally."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "discord-mcp-server",
+    "description": "Discord bot integration for community management, moderation, and server automation",
+    "author": "saseq",
+    "dateAdded": "2025-09-20",
+    "tags": [
+      "discord",
+      "bot",
+      "community",
+      "moderation",
+      "social"
+    ],
+    "content": "Enable your AI assistants to seamlessly interact with Discord servers through comprehensive bot functionality and automation capabilities.",
+    "title": "Discord MCP Server",
+    "displayTitle": "Discord MCP Server",
+    "seoTitle": "Discord MCP Server for Claude",
+    "source": "community",
+    "documentationUrl": "https://github.com/saseq/discord-mcp",
+    "features": [
+      "Server information retrieval",
+      "Channel management and creation",
+      "Category organization",
+      "Message operations",
+      "Member management",
+      "Role administration"
+    ],
+    "useCases": [
+      "Automated server moderation and management",
+      "Community engagement and member onboarding",
+      "Channel organization and content management",
+      "Bot-driven notifications and alerts",
+      "Member role management and permissions"
+    ],
+    "examples": [
+      {
+        "title": "Get server information and member count",
+        "code": "Ask Claude: \"Get server information and member count\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Create new text channels and categories",
+        "code": "Ask Claude: \"Create new text channels and categories\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Manage member roles and permissions",
+        "code": "Ask Claude: \"Manage member roles and permissions\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Retrieve channel lists and configurations",
+        "code": "Ask Claude: \"Retrieve channel lists and configurations\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "discord-mcp": {
+            "command": "java",
+            "args": [
+              "-jar",
+              "/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar"
+            ],
+            "env": {
+              "DISCORD_TOKEN": "YOUR_DISCORD_BOT_TOKEN",
+              "DISCORD_GUILD_ID": "OPTIONAL_DEFAULT_SERVER_ID"
+            }
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "discord-mcp": {
+            "command": "java",
+            "args": [
+              "-jar",
+              "/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar"
+            ],
+            "env": {
+              "DISCORD_TOKEN": "${DISCORD_TOKEN}",
+              "DISCORD_GUILD_ID": "${DISCORD_GUILD_ID}"
+            }
+          }
+        }
+      }
+    },
+    "package": "@SaseQ/discord-mcp",
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Install via Smithery CLI: npx -y @smithery/cli@latest install @SaseQ/discord-mcp --client claude",
+          "Create a Discord bot application",
+          "Get your Discord bot token",
+          "Configure the MCP server with your bot token",
+          "Restart Claude Desktop"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "npx -y @smithery/cli@latest install @SaseQ/discord-mcp --client claude"
+    },
+    "security": [
+      "Bot token authentication required",
+      "Guild-specific permissions",
+      "Configurable access controls",
+      "Secure Discord API integration"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "HTTP 429 rate limit error when sending messages",
+        "solution": "Discord limits 50 requests per second most endpoints. Check X-RateLimit headers for specific bucket limits. Implement request queuing with 4 requests per 100ms (40/second) to avoid throttling."
+      },
+      {
+        "issue": "Bot gets 24-hour IP ban for invalid requests",
+        "solution": "IP addresses making 10,000+ invalid HTTP requests per 10 minutes are banned for 24 hours. Fix 401/403 errors in your code, implement proper error handling, validate requests before sending."
+      },
+      {
+        "issue": "Bot token authentication fails with 401 error",
+        "solution": "Regenerate bot token from Discord Developer Portal. Verify DISCORD_TOKEN environment variable is set correctly. Ensure token includes Bot prefix in Authorization header: Bot YOUR_TOKEN."
+      },
+      {
+        "issue": "Cannot access guild channels or members",
+        "solution": "Verify bot has required permissions in Discord server settings. Check DISCORD_GUILD_ID matches target server. Ensure bot has been invited with correct OAuth scopes (bot, send_messages, manage_channels, manage_roles)."
+      },
+      {
+        "issue": "Java runtime error or MCP server won't start",
+        "solution": "Install Java JDK 11 or higher. Run java -version to verify installation. Check JAR file path is absolute and file exists. Verify execute permissions on JAR file."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "bot",
+      "send_messages",
+      "manage_channels",
+      "manage_roles"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "docker-mcp-server",
+    "description": "Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration",
+    "author": "JSONbored",
+    "dateAdded": "2025-09-16",
+    "tags": [
+      "docker",
+      "containers",
+      "devops",
+      "orchestration",
+      "deployment"
+    ],
+    "content": "Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration.",
+    "title": "Docker MCP Server",
+    "displayTitle": "Docker MCP Server",
+    "seoTitle": "Docker MCP Server for Claude",
+    "source": "community",
+    "documentationUrl": "https://docs.docker.com/engine/api/",
+    "features": [
+      "Container lifecycle management (start, stop, restart)",
+      "Image operations (pull, build, push, tag)",
+      "Docker Compose service management",
+      "Volume and network administration",
+      "Real-time container logs and monitoring",
+      "Registry operations and authentication"
+    ],
+    "useCases": [
+      "Deploy and manage containerized applications",
+      "Build and optimize Docker images",
+      "Monitor container performance and logs",
+      "Orchestrate multi-container applications with Compose",
+      "Manage Docker registry operations"
+    ],
+    "examples": [
+      {
+        "title": "List all running containers and their status",
+        "code": "Ask Claude: \"List all running containers and their status\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Build a Docker image from a Dockerfile",
+        "code": "Ask Claude: \"Build a Docker image from a Dockerfile\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Start a new container with custom configuration",
+        "code": "Ask Claude: \"Start a new container with custom configuration\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "View real-time logs from a specific container",
+        "code": "Ask Claude: \"View real-time logs from a specific container\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Deploy a multi-service application using Docker Co...",
+        "code": "Ask Claude: \"Deploy a multi-service application using Docker Compose\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "docker": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "@docker/mcp-server"
+            ],
+            "env": {
+              "DOCKER_HOST": "unix:///var/run/docker.sock",
+              "DOCKER_API_VERSION": "1.43"
+            }
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "docker": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "@docker/mcp-server"
+            ],
+            "env": {
+              "DOCKER_HOST": "${DOCKER_HOST:-unix:///var/run/docker.sock}",
+              "DOCKER_API_VERSION": "${DOCKER_API_VERSION:-1.43}"
+            }
+          }
+        }
+      }
+    },
+    "package": "@docker/mcp-server",
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Ensure Docker is installed and running on your system",
+          "Open Claude Desktop configuration file",
+          "Add the Docker MCP server configuration",
+          "Restart Claude Desktop",
+          "Verify Docker socket access permissions"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add docker -- npx -y @docker/mcp-server"
+    },
+    "security": [
+      "Secure Docker daemon socket access",
+      "TLS certificate validation for remote connections",
+      "Registry authentication management",
+      "Container resource limits and isolation",
+      "Network security controls"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Permission denied connecting to Docker daemon socket",
+        "solution": "Add your user to docker group: sudo usermod -a -G docker $USER, then log out and back in. Alternatively, run sudo systemctl start docker to ensure daemon is running."
+      },
+      {
+        "issue": "Cannot connect to Docker daemon - connection refused",
+        "solution": "Start Docker daemon: sudo systemctl start docker (Linux) or launch Docker Desktop (Mac/Windows). Verify daemon is running: docker ps. Check DOCKER_HOST environment variable points to correct socket."
+      },
+      {
+        "issue": "Error: /var/run/docker.sock has wrong permissions",
+        "solution": "Run sudo chmod 666 /var/run/docker.sock (temporary fix) or add user to docker group (permanent). Verify socket file exists: ls -l /var/run/docker.sock."
+      },
+      {
+        "issue": "Docker API version mismatch error",
+        "solution": "Set DOCKER_API_VERSION environment variable to match your Docker version. Run docker version to check API version. Update MCP server config with correct API version (e.g., 1.43)."
+      },
+      {
+        "issue": "Container operations fail with authentication errors",
+        "solution": "Run docker login to authenticate with registry. Verify registry credentials are correct. For private registries, ensure network access and check firewall rules don't block Docker registry ports."
+      }
+    ],
+    "requiresAuth": false,
+    "permissions": [
+      "containers",
+      "images",
+      "volumes",
+      "networks"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "figma-mcp-server",
+    "description": "Access designs, export assets, and interact with Figma files through Claude",
+    "author": "Figma",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "design",
+      "figma",
+      "ui-ux",
+      "assets",
+      "graphics"
+    ],
+    "content": "Connect Claude to Figma Desktop for design operations, asset extraction, and design system management.",
+    "title": "Figma MCP Server",
+    "displayTitle": "Figma MCP Server",
+    "seoTitle": "Figma MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://help.figma.com/hc/en-us/articles/32132100833559",
+    "features": [
+      "Access and browse Figma designs in real-time",
+      "Export assets in various formats (PNG, SVG, PDF)",
+      "Read design specifications and properties",
+      "Navigate through pages and frames programmatically",
+      "Extract text content and style information"
+    ],
+    "useCases": [
+      "Export design assets for development implementation",
+      "Extract design tokens and specifications",
+      "Generate code from design components",
+      "Analyze design systems for consistency",
+      "Create design documentation automatically"
+    ],
+    "examples": [
+      {
+        "title": "Export all icons from the design system as SVG",
+        "code": "Ask Claude: \"Export all icons from the design system as SVG\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Get the color palette from this Figma file",
+        "code": "Ask Claude: \"Get the color palette from this Figma file\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Extract component specifications for developers",
+        "code": "Ask Claude: \"Extract component specifications for developers\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "List all text styles used in the design",
+        "code": "Ask Claude: \"List all text styles used in the design\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "figma": {
+            "transport": "http",
+            "url": "http://127.0.0.1:3845/mcp"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "figma": {
+            "transport": "http",
+            "url": "http://127.0.0.1:3845/mcp"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Ensure Figma Desktop is running with Dev Mode MCP Server enabled",
+          "Open Claude Desktop configuration file",
+          "Add the Figma server configuration pointing to local port",
+          "Restart Claude Desktop"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http figma-dev-mode-mcp-server http://127.0.0.1:3845/mcp"
+    },
+    "security": [
+      "Only works with local Figma Desktop instance",
+      "Requires appropriate file permissions in Figma",
+      "No external API keys or authentication needed"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Invalid sessionId error from MCP endpoint",
+        "solution": "Change transport type from sse to http in MCP config. Remove old config: claude mcp remove figma-dev-mode-mcp-server, then re-add with http transport at http://127.0.0.1:3845/mcp."
+      },
+      {
+        "issue": "HTTP 404 error: MCP server not responding",
+        "solution": "Ensure Figma Desktop app is running and Dev Mode MCP Server is active. Check Figma preferences to verify MCP Server is enabled. Restart Figma Desktop if server doesn't appear."
+      },
+      {
+        "issue": "Connection failed: invalid request body error",
+        "solution": "Verify you're using http transport, not sse. Update config URL to http://127.0.0.1:3845/mcp. Check request format matches MCP protocol specification for initialize request."
+      },
+      {
+        "issue": "Cannot access assets - 404 on asset requests",
+        "solution": "MCP Server can't serve assets directly from browser. Access assets through Claude Code or configured MCP client. Verify file is open in Figma Desktop and permissions allow export."
+      },
+      {
+        "issue": "WSL users cannot connect to local MCP server",
+        "solution": "Figma MCP binds only to 127.0.0.1 which WSL can't access. Use Windows-native Claude Code installation or configure port forwarding from WSL to Windows host for 127.0.0.1:3845."
+      }
+    ],
+    "requiresAuth": false,
+    "permissions": [
+      "read",
+      "export"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "filesystem-mcp-server",
+    "description": "Official MCP server providing secure file system operations for Claude Desktop and Claude Code",
+    "author": "Anthropic",
+    "dateAdded": "2025-09-15",
+    "tags": [
+      "filesystem",
+      "files",
+      "directories",
+      "official",
+      "anthropic"
+    ],
+    "content": "The official Filesystem MCP Server from Anthropic enables Claude to interact with your local file system securely with configurable access controls.",
+    "title": "Filesystem MCP Server",
+    "displayTitle": "Filesystem MCP Server",
+    "source": "official",
+    "documentationUrl": "https://modelcontextprotocol.io/examples",
+    "features": [
+      "Secure file operations with proper permissions",
+      "Directory management and browsing",
+      "Configurable access controls to specific directories",
+      "Built-in protections against unauthorized access",
+      "Read, write, and manage files safely",
+      "Create and manage directory structures"
+    ],
+    "useCases": [
+      "Read file contents and analyze code",
+      "Create and modify files in your project",
+      "Browse directory structures and file organization",
+      "Search for files containing specific content",
+      "Manage project files and folders",
+      "Backup and organize important files"
+    ],
+    "examples": [
+      {
+        "title": "Reading Project Configuration Files",
+        "code": "// Read package.json and analyze dependencies\n\"Show me the contents of package.json and explain the dependencies\"\n\n// Read TypeScript config\n\"Read tsconfig.json and suggest improvements for a Next.js project\"",
+        "language": "javascript",
+        "description": "Access configuration files to understand project setup, dependencies, and build configurations. Claude can analyze and suggest optimizations."
+      },
+      {
+        "title": "Creating New Files and Directories",
+        "code": "// Create a new React component\n\"Create src/components/Button.tsx with a reusable Button component using TypeScript\"\n\n// Create multiple related files\n\"Set up a new feature module:\n- Create src/features/auth/\n- Add index.ts, types.ts, and hooks.ts files\"",
+        "language": "javascript",
+        "description": "Generate new files and directory structures. Perfect for scaffolding components, modules, or configuration files."
+      },
+      {
+        "title": "Searching and Analyzing Codebase",
+        "code": "// Find specific patterns\n\"Find all TypeScript files in src/ that use useState\"\n\n// Search for TODOs and FIXMEs\n\"List all files containing TODO or FIXME comments\"\n\n// Analyze imports\n\"Show me all files that import from 'react-query'\"",
+        "language": "javascript",
+        "description": "Search through your codebase for patterns, imports, comments, or specific code structures. Essential for code reviews and refactoring."
+      },
+      {
+        "title": "Reading and Modifying Multiple Files",
+        "code": "// Update multiple related files\n\"Update all API client files in src/api/ to use the new authentication header\"\n\n// Read project structure\n\"Show me the directory structure of src/ and list all component files\"",
+        "language": "javascript",
+        "description": "Work with multiple files simultaneously. Perfect for refactoring, updating configurations, or analyzing project architecture."
+      },
+      {
+        "title": "Project Setup and Configuration",
+        "code": "// Initialize new configuration\n\"Create .env.example file with all required environment variables from the codebase\"\n\n// Setup linting\n\"Create .eslintrc.json with React and TypeScript rules\"",
+        "language": "javascript",
+        "description": "Set up project configuration files, environment templates, and development tools. Claude can generate properly structured config files."
+      },
+      {
+        "title": "Code Migration and Refactoring",
+        "code": "// Migrate file structure\n\"Move all files from src/old-components/ to src/components/ and update all imports\"\n\n// Refactor code style\n\"Convert all CommonJS requires in src/ to ES6 imports\"",
+        "language": "javascript",
+        "description": "Perform large-scale code migrations and refactoring operations. The filesystem server handles file moves and updates safely."
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "filesystem": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "@modelcontextprotocol/server-filesystem",
+              "/path/to/allowed/directory"
+            ]
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "filesystem": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "@modelcontextprotocol/server-filesystem",
+              "/path/to/allowed/directory"
+            ]
+          }
+        }
+      }
+    },
+    "package": "@modelcontextprotocol/server-filesystem",
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open your Claude Desktop configuration file",
+          "Add the Filesystem MCP server configuration",
+          "Restart Claude Desktop",
+          "Verify the connection by asking Claude to list files"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "Create a .mcp.json file in your project root with the Filesystem server configuration"
+    },
+    "security": [
+      "Limit directory access to only necessary paths",
+      "Use absolute paths to prevent directory traversal",
+      "Monitor file operations in Claude Desktop logs",
+      "Backup important files before allowing write operations",
+      "Built-in protections against unauthorized access"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Permission denied when accessing files or directories",
+        "solution": "Verify filesystem server has read/write permissions to target directories. Run ls -l to check ownership and permissions. Use absolute paths in ALLOWED_DIRS config, not relative paths."
+      },
+      {
+        "issue": "Directory not allowed error from MCP server",
+        "solution": "Add directory to allowed directories in MCP server config args. Use absolute path: npx -y @modelcontextprotocol/server-filesystem /absolute/path/to/directory. Restart Claude Desktop after config change."
+      },
+      {
+        "issue": "MCP server fails to start or connect",
+        "solution": "Verify Node.js is installed: run node --version (requires v14+). Check Claude Desktop config syntax is valid JSON. Ensure no other process is using same MCP server instance."
+      },
+      {
+        "issue": "File operations fail or return no results",
+        "solution": "Confirm target files exist in allowed directories. Check file paths are absolute and accessible. Verify filesystem server process is running via Claude Desktop logs or MCP status."
+      }
+    ],
+    "requiresAuth": false,
+    "permissions": [
+      "filesystem"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "fireflies-mcp-server",
+    "description": "Extract valuable insights from meeting transcripts and summaries",
+    "author": "Fireflies",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "meetings",
+      "fireflies",
+      "transcription",
+      "notes",
+      "ai-assistant"
+    ],
+    "content": "Access and analyze meeting transcripts and insights through Fireflies.ai's meeting intelligence platform.",
+    "title": "Fireflies MCP Server",
+    "displayTitle": "Fireflies MCP Server",
+    "seoTitle": "Fireflies MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol",
+    "features": [
+      "Access meeting transcripts and recordings",
+      "Retrieve automated meeting summaries",
+      "Search conversation content",
+      "Extract action items and decisions",
+      "Analyze speaker analytics and participation"
+    ],
+    "useCases": [
+      "Review meeting outcomes and decisions",
+      "Extract action items for follow-up",
+      "Search past discussions by topic",
+      "Generate meeting reports for stakeholders",
+      "Track speaker participation metrics"
+    ],
+    "examples": [
+      {
+        "title": "Get action items from today's standup",
+        "code": "Ask Claude: \"Get action items from today's standup\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Search for discussions about Q4 planning",
+        "code": "Ask Claude: \"Search for discussions about Q4 planning\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Generate summary of customer call",
+        "code": "Ask Claude: \"Generate summary of customer call\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Find all mentions of budget in recent meetings",
+        "code": "Ask Claude: \"Find all mentions of budget in recent meetings\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "fireflies": {
+            "transport": "http",
+            "url": "https://api.fireflies.ai/mcp"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "fireflies": {
+            "transport": "http",
+            "url": "https://api.fireflies.ai/mcp"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Fireflies server configuration with HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate with your Fireflies account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http fireflies https://api.fireflies.ai/mcp"
+    },
+    "security": [
+      "OAuth authentication for workspace access",
+      "Respect meeting privacy settings",
+      "Control transcript access permissions",
+      "Regular data audits recommended"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Too many requests error with code 429",
+        "solution": "Free/Pro plans: 50 requests/day limit. Business/Enterprise: 60 requests/minute. Check retryAfter timestamp in error response. Wait specified time before retry or upgrade plan for higher limits."
+      },
+      {
+        "issue": "Invalid API key or authentication failed error",
+        "solution": "Add Authorization header with Bearer YOUR_API_KEY format. Verify API key hasn't expired in Fireflies settings. Check for typos and regenerate key if authentication continues to fail."
+      },
+      {
+        "issue": "Cannot access meeting transcripts or recordings",
+        "solution": "Verify workspace permissions grant access to meetings. Check meeting privacy settings allow API access. Ensure your account has viewer or higher role for target meetings in Fireflies workspace."
+      },
+      {
+        "issue": "Transcripts incomplete or missing sections",
+        "solution": "Check audio quality of original recording. Verify storage limits haven't been exceeded for your plan tier. Review transcript settings for language and accuracy preferences in Fireflies workspace."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "search"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "git-mcp-server",
+    "description": "Official MCP server providing Git repository tools for reading, searching, and manipulating Git repositories",
+    "author": "Anthropic",
+    "dateAdded": "2025-09-16",
+    "tags": [
+      "git",
+      "version-control",
+      "repositories",
+      "official",
+      "anthropic"
+    ],
+    "content": "The official Git MCP Server from Anthropic provides comprehensive tools to read, search, and manipulate Git repositories through Claude.",
+    "title": "Git MCP Server",
+    "displayTitle": "Git MCP Server",
+    "seoTitle": "Git MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://modelcontextprotocol.io/examples",
+    "features": [
+      "Access commit history, branch information, and repository status",
+      "Read files from any commit, branch, or tag",
+      "Search through commit messages, file contents, and repository structure",
+      "Compare changes between commits, branches, and files",
+      "Work with different branches and track changes",
+      "Safe exploration without making changes"
+    ],
+    "useCases": [
+      "Analyze commit patterns and development history",
+      "Understand code evolution over time",
+      "Examine specific commits and their changes",
+      "Compare different versions of files",
+      "Search for commits mentioning specific topics",
+      "Generate repository documentation"
+    ],
+    "examples": [
+      {
+        "title": "Show me the recent commit history",
+        "code": "Ask Claude: \"Show me the recent commit history\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "What branches exist in this repository?",
+        "code": "Ask Claude: \"What branches exist in this repository?\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Find commits mentioning bug fix",
+        "code": "Ask Claude: \"Find commits mentioning bug fix\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "What changed in the last 5 commits?",
+        "code": "Ask Claude: \"What changed in the last 5 commits?\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Compare this file between two commits",
+        "code": "Ask Claude: \"Compare this file between two commits\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "git": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "@modelcontextprotocol/server-git"
+            ]
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "git": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "@modelcontextprotocol/server-git"
+            ]
+          }
+        }
+      }
+    },
+    "package": "@modelcontextprotocol/server-git",
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open your Claude Desktop configuration file",
+          "Add the Git MCP server configuration",
+          "Restart Claude Desktop",
+          "Ask Claude about recent commit history to verify connection"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "Create a .mcp.json file in your project root with the Git server configuration"
+    },
+    "security": [
+      "Read-only access to repositories",
+      "Works with local Git repositories only",
+      "No remote operations performed",
+      "Safe exploration without making changes",
+      "Respects existing file permissions"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Not a Git repository error when accessing features",
+        "solution": "Navigate to Git repository root directory before using MCP server. Run git status locally to verify directory is initialized. Initialize repository with git init if needed."
+      },
+      {
+        "issue": "Permission denied accessing repository files",
+        "solution": "Run ls -l on repository directory to check user has read permissions. Verify MCP server process user matches repository owner. Add user to appropriate group if needed: sudo usermod -a -G."
+      },
+      {
+        "issue": "Git command not found or unavailable error",
+        "solution": "Install Git: sudo apt install git (Linux) or brew install git (macOS). Verify installation: git --version. Ensure Git binary is in system PATH environment variable."
+      },
+      {
+        "issue": "Cannot read commits or repository history",
+        "solution": "Verify .git directory exists and isn't corrupted. Check repository permissions allow read access. Run git fsck to check repository integrity. Clone fresh copy if repository is corrupted."
+      }
+    ],
+    "requiresAuth": false,
+    "permissions": [
+      "git",
+      "filesystem"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "github-mcp-server",
+    "description": "Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality",
+    "author": "GitHub",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "github",
+      "git",
+      "repositories",
+      "api",
+      "official"
+    ],
+    "content": "Access the GitHub API through Claude for comprehensive repository management, file operations, and search functionality.",
+    "title": "Github MCP Server",
+    "displayTitle": "Github MCP Server",
+    "seoTitle": "GitHub MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://www.npmjs.com/package/@modelcontextprotocol/server-github",
+    "features": [
+      "Create, read, update, and delete files across repositories",
+      "Access repository information, branches, and metadata",
+      "Search code, issues, pull requests, and users",
+      "Automatic branch creation and Git history preservation",
+      "Batch operations support for multi-file changes",
+      "Repository insights and contributor statistics"
+    ],
+    "useCases": [
+      "Browse and manage repository files and folders",
+      "Search code across multiple repositories",
+      "Access repository information and commit history",
+      "Create and update files with proper Git history",
+      "Find issues, pull requests, and collaborators",
+      "Analyze codebase structure and development patterns"
+    ],
+    "examples": [
+      {
+        "title": "Reading Repository Files",
+        "code": "// Ask Claude to read a specific file\n\"Can you show me the contents of src/lib/utils.ts from my-org/my-repo?\"\n\n// Or read multiple files\n\"Show me all TypeScript files in the src/components directory of my-org/my-repo\"",
+        "language": "javascript",
+        "description": "Read files and directories from any GitHub repository you have access to. Claude will fetch the content and help you understand or modify it."
+      },
+      {
+        "title": "Creating and Updating Files",
+        "code": "// Create a new React component\n\"Create a new Button component in my-org/my-repo at src/components/Button.tsx with TypeScript and proper props\"\n\n// Update existing file\n\"Update the README.md in my-org/my-repo to include installation instructions for the new Button component\"",
+        "language": "javascript",
+        "description": "Create new files or update existing ones. The MCP server automatically creates branches and maintains proper Git history for all changes."
+      },
+      {
+        "title": "Searching Code Across Repositories",
+        "code": "// Search for specific patterns\n\"Find all files in my-org/my-repo that use the 'useState' hook\"\n\n// Search across multiple repos\n\"Search all my repositories for functions that handle authentication\"",
+        "language": "javascript",
+        "description": "Search code using GitHub's powerful search API. Find functions, classes, patterns, or specific implementations across your repositories."
+      },
+      {
+        "title": "Managing Issues and Pull Requests",
+        "code": "// List issues\n\"Show me all open issues with the 'bug' label in my-org/my-repo\"\n\n// Find pull requests\n\"Find all pull requests that mention 'authentication' in my-org/my-repo\"",
+        "language": "javascript",
+        "description": "Query issues and pull requests using GitHub's search syntax. Filter by labels, status, author, and more."
+      },
+      {
+        "title": "Repository Information and Statistics",
+        "code": "// Get repository details\n\"Show me information about my-org/my-repo including stars, forks, and main language\"\n\n// List all repositories\n\"List all repositories in my-org organization sorted by stars\"",
+        "language": "javascript",
+        "description": "Access repository metadata, statistics, and insights. Useful for analyzing project health and contributor activity."
+      },
+      {
+        "title": "Batch File Operations",
+        "code": "// Create multiple related files at once\n\"Create a new feature in my-org/my-repo:\n- Component file at src/components/Feature.tsx\n- Test file at src/components/Feature.test.tsx  \n- Export it from src/components/index.ts\"",
+        "language": "javascript",
+        "description": "Perform multiple file operations atomically. The MCP server handles branch creation and ensures all changes are committed together."
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "github": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "@modelcontextprotocol/server-github"
+            ],
+            "env": {
+              "GITHUB_PERSONAL_ACCESS_TOKEN": "your_github_token_here"
+            }
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "github": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "@modelcontextprotocol/server-github"
+            ],
+            "env": {
+              "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+            }
+          }
+        }
+      }
+    },
+    "package": "@modelcontextprotocol/server-github",
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Generate a GitHub Personal Access Token with repo permissions",
+          "Open Claude Desktop configuration file",
+          "Add the GitHub MCP server configuration with your token",
+          "Restart Claude Desktop",
+          "Verify connection by asking Claude to show your repositories"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add github --env GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_TOKEN -- npx -y @modelcontextprotocol/server-github"
+    },
+    "security": [
+      "Use Personal Access Tokens with minimal required scopes",
+      "Store tokens securely and rotate regularly",
+      "Respect GitHub API rate limits",
+      "All operations maintain proper Git history",
+      "Built-in error handling for API issues"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "API rate limit exceeded: 5000 requests per hour hit",
+        "solution": "Personal access tokens have 5,000 requests/hour limit. Wait for hourly reset or use GitHub App with 15,000/hour limit for Enterprise Cloud. Check X-RateLimit-Reset header for reset time."
+      },
+      {
+        "issue": "HTTP 401 unauthorized error with valid token",
+        "solution": "Regenerate personal access token from GitHub Settings > Developer Settings. Verify token includes repo scope for repository access. Check token hasn't expired and update GITHUB_PERSONAL_ACCESS_TOKEN in config."
+      },
+      {
+        "issue": "403 forbidden when accessing organization repos",
+        "solution": "Authorize token for SSO if organization requires it. Go to GitHub Settings > Applications > Personal Access Tokens, click Configure SSO, and authorize organization. Verify you have repo access."
+      },
+      {
+        "issue": "Repository not found or access denied error",
+        "solution": "Verify repository name spelling: owner/repo-name format. Check you have read permissions to repository. For private repos, ensure token has repo scope, not just public_repo."
+      },
+      {
+        "issue": "Cannot create or update files - permission error",
+        "solution": "Verify token has repo write permissions. Check repository isn't archived or locked. For organization repos, confirm you have push access and branch protection rules allow commits."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "repo",
+      "public_repo",
+      "read:user"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "hubspot-mcp-server",
+    "description": "Access and manage HubSpot CRM data including contacts, companies, and deals",
+    "author": "HubSpot",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "crm",
+      "hubspot",
+      "sales",
+      "marketing",
+      "customer-data"
+    ],
+    "content": "Integrate HubSpot CRM capabilities directly into Claude for customer relationship management.",
+    "title": "Hubspot MCP Server",
+    "displayTitle": "Hubspot MCP Server",
+    "seoTitle": "Hubspot MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://developers.hubspot.com/mcp",
+    "features": [
+      "Fetch and update contact records",
+      "Manage companies and deals pipeline",
+      "Create and update CRM records",
+      "Search CRM data with filters",
+      "Generate sales and marketing reports"
+    ],
+    "useCases": [
+      "Update contact information in bulk",
+      "Create new deals in the pipeline",
+      "Track sales pipeline progress",
+      "Generate customer reports and insights",
+      "Manage marketing lists and segments"
+    ],
+    "examples": [
+      {
+        "title": "Create a new contact for John Doe",
+        "code": "Ask Claude: \"Create a new contact for John Doe\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Update deal stage to closed-won",
+        "code": "Ask Claude: \"Update deal stage to closed-won\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Find all contacts from Microsoft",
+        "code": "Ask Claude: \"Find all contacts from Microsoft\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Generate pipeline report",
+        "code": "Ask Claude: \"Generate pipeline report\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "hubspot": {
+            "transport": "http",
+            "url": "https://mcp.hubspot.com/anthropic"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "hubspot": {
+            "transport": "http",
+            "url": "https://mcp.hubspot.com/anthropic"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the HubSpot server configuration with HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate with your HubSpot account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http hubspot https://mcp.hubspot.com/anthropic"
+    },
+    "security": [
+      "OAuth authentication for secure access",
+      "Respect data privacy regulations",
+      "Monitor API usage and limits",
+      "Regular data audits recommended"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "HTTP 429 error: rate limit exceeded on API calls",
+        "solution": "OAuth apps limited to 110 requests per 10 seconds per account. Wait for rate limit window to reset. Implement throttling with max 11 requests/second to stay within burst limit."
+      },
+      {
+        "issue": "Search API hitting rate limit with only few requests",
+        "solution": "Search endpoints limited to 4 requests per second per token. Add 250ms delays between search operations. Consider caching search results to reduce API calls."
+      },
+      {
+        "issue": "HTTP 401 unauthorized - OAuth token invalid",
+        "solution": "Check access token expiration (look at expires_in parameter). Re-authenticate to get new OAuth token. Verify token has correct scopes for HubSpot API access (contacts, deals, etc)."
+      },
+      {
+        "issue": "HTTP 403 forbidden when accessing CRM objects",
+        "solution": "Verify OAuth token has required scopes. Contacts access needed for contacts, content access for deals. Check account permissions in HubSpot settings and re-authenticate with correct scopes."
+      },
+      {
+        "issue": "Error rate exceeds 5% causing marketplace issues",
+        "solution": "Reduce failed requests by implementing proper error handling. Validate input before API calls. Check API responses and fix 4xx errors in your code to lower error rate below 5%."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "create"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "hugging-face-mcp-server",
+    "description": "Access Hugging Face Hub and Gradio AI applications",
+    "author": "Hugging Face",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "ai",
+      "hugging-face",
+      "machine-learning",
+      "models",
+      "datasets"
+    ],
+    "content": "Connect to Hugging Face Hub for AI models, datasets, and Gradio application access.",
+    "title": "Hugging Face MCP Server",
+    "displayTitle": "Hugging Face MCP Server",
+    "source": "official",
+    "documentationUrl": "https://huggingface.co/settings/mcp",
+    "features": [
+      "Access model information and metrics",
+      "Browse and search datasets",
+      "Run Gradio AI applications",
+      "Query model performance data",
+      "Access Spaces and demos"
+    ],
+    "useCases": [
+      "Find suitable AI models for tasks",
+      "Access dataset information for training",
+      "Run model inference through Gradio",
+      "Compare model performance metrics",
+      "Search research papers and documentation"
+    ],
+    "examples": [
+      {
+        "title": "Find the best text generation model",
+        "code": "Ask Claude: \"Find the best text generation model\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Access the IMDB dataset",
+        "code": "Ask Claude: \"Access the IMDB dataset\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Run the stable diffusion demo",
+        "code": "Ask Claude: \"Run the stable diffusion demo\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Compare BERT model variants",
+        "code": "Ask Claude: \"Compare BERT model variants\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "huggingface": {
+            "transport": "http",
+            "url": "https://huggingface.co/mcp"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "huggingface": {
+            "transport": "http",
+            "url": "https://huggingface.co/mcp"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Hugging Face server configuration with HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate with your Hugging Face account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http huggingface https://huggingface.co/mcp"
+    },
+    "security": [
+      "OAuth authentication for access",
+      "Monitor API usage limits",
+      "Respect model licenses",
+      "Check compute resource limits"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Rate limit reached: log in or use your apiToken error",
+        "solution": "Pass HF_TOKEN in requests to authenticate. Get token from Hugging Face Settings > Access Tokens. Add Authorization: Bearer YOUR_TOKEN header to all API requests to avoid free tier limits."
+      },
+      {
+        "issue": "Persistent rate limiting despite no recent usage",
+        "solution": "Rate limits are per 5-minute windows across all request types. Check your Billing page for current rate limit status across three buckets. Wait for 5-minute window reset or upgrade to PRO/Enterprise."
+      },
+      {
+        "issue": "Inference API returns authentication errors",
+        "solution": "Serverless Inference API requires authentication. Add your HF token to requests. For heavy usage, switch to Inference Endpoints which provides dedicated resources and higher limits."
+      },
+      {
+        "issue": "Cannot access models or datasets - permission error",
+        "solution": "Verify your account has access to requested model or dataset. For gated models, accept terms on model page. Check model visibility settings and ensure you're authenticated with correct token."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "run"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "intercom-mcp-server",
+    "description": "Access customer conversations, tickets, and user data in real-time",
+    "author": "Intercom",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "customer-support",
+      "intercom",
+      "chat",
+      "helpdesk",
+      "crm"
+    ],
+    "content": "Connect Claude to Intercom for customer support operations and conversation management.",
+    "title": "Intercom MCP Server",
+    "displayTitle": "Intercom MCP Server",
+    "seoTitle": "Intercom MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://developers.intercom.com/docs/guides/mcp",
+    "features": [
+      "Access customer conversations in real-time",
+      "Manage support tickets and queues",
+      "Query user data and profiles",
+      "Update customer information",
+      "Track conversation metrics and analytics"
+    ],
+    "useCases": [
+      "Respond to customer queries efficiently",
+      "Analyze support trends and patterns",
+      "Update customer information in bulk",
+      "Generate support metrics reports",
+      "Manage ticket queues and priorities"
+    ],
+    "examples": [
+      {
+        "title": "Show open conversations from today",
+        "code": "Ask Claude: \"Show open conversations from today\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Find customer by email",
+        "code": "Ask Claude: \"Find customer by email\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Update ticket status to resolved",
+        "code": "Ask Claude: \"Update ticket status to resolved\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Generate weekly support metrics",
+        "code": "Ask Claude: \"Generate weekly support metrics\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "intercom": {
+            "transport": "sse",
+            "url": "https://mcp.intercom.com/sse"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "intercom": {
+            "transport": "sse",
+            "url": "https://mcp.intercom.com/sse"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Intercom server configuration with SSE or HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate with your Intercom workspace"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport sse intercom https://mcp.intercom.com/sse"
+    },
+    "security": [
+      "OAuth authentication for workspace access",
+      "Respect customer privacy regulations",
+      "Monitor response quality",
+      "Regular training updates recommended"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "HTTP 429 Too Many Requests - rate limit hit",
+        "solution": "Private apps: 10,000 calls/min per app, 25,000/min per workspace. Public apps same limits. Check X-RateLimit-Reset header for reset time. Implement exponential backoff when approaching X-RateLimit-Remaining threshold."
+      },
+      {
+        "issue": "HTTP 401 Unauthorized - authentication failed",
+        "solution": "Verify API key is valid and copied correctly from Intercom settings. Check Authorization header format: Bearer YOUR_API_KEY. Regenerate API key from Intercom Developer Hub if authentication fails."
+      },
+      {
+        "issue": "Cannot access conversations or customer data",
+        "solution": "Verify workspace permissions grant access to conversations. Check team member role has necessary permissions. For private apps, confirm OAuth scope includes required access (read_conversations, write_conversations)."
+      },
+      {
+        "issue": "Webhook requests timing out or failing",
+        "solution": "Note: rate limits apply only to REST API, not webhooks. Verify webhook endpoint is accessible and responds within 15 seconds. Check webhook signature for security validation."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "respond"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "invideo-mcp-server",
+    "description": "Build video creation capabilities into your applications",
+    "author": "invideo",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "video",
+      "invideo",
+      "media",
+      "content-creation",
+      "ai-video"
+    ],
+    "content": "Create and edit videos through Claude using invideo's AI-powered video creation platform.",
+    "title": "Invideo MCP Server",
+    "displayTitle": "Invideo MCP Server",
+    "seoTitle": "Invideo MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://invideo.io/ai/mcp",
+    "features": [
+      "Generate videos from text prompts",
+      "Edit existing videos programmatically",
+      "Add voiceovers and background music",
+      "Create video templates for reuse",
+      "Export videos in multiple formats"
+    ],
+    "useCases": [
+      "Generate marketing videos at scale",
+      "Create social media content automatically",
+      "Produce educational video content",
+      "Edit video presentations",
+      "Batch produce video variations"
+    ],
+    "examples": [
+      {
+        "title": "Create a 30-second product video",
+        "code": "Ask Claude: \"Create a 30-second product video\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Add subtitles to my video",
+        "code": "Ask Claude: \"Add subtitles to my video\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Generate a video from this blog post",
+        "code": "Ask Claude: \"Generate a video from this blog post\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Export video in 1080p MP4",
+        "code": "Ask Claude: \"Export video in 1080p MP4\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "invideo": {
+            "transport": "sse",
+            "url": "https://mcp.invideo.io/sse"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "invideo": {
+            "transport": "sse",
+            "url": "https://mcp.invideo.io/sse"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the invideo server configuration with SSE transport",
+          "Restart Claude Desktop",
+          "Authenticate with your invideo account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport sse invideo https://mcp.invideo.io/sse"
+    },
+    "security": [
+      "OAuth authentication for account access",
+      "Respect copyright for media assets",
+      "Monitor storage usage limits",
+      "Check export quota restrictions"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Authentication error: could not authenticate user",
+        "solution": "Verify OAuth credentials are valid in invideo account settings. Check username and password are correct if using basic auth. Ensure account isn't locked and re-authenticate if needed."
+      },
+      {
+        "issue": "Video export or rendering queue taking too long",
+        "solution": "Check rendering queue status in invideo dashboard. Large videos take longer to process. Verify your account tier supports requested video length and quality. Contact support if queue is stuck."
+      },
+      {
+        "issue": "Storage limit exceeded when uploading media",
+        "solution": "Check storage usage in invideo account settings. Delete unused videos to free space. Upgrade account tier for higher storage limits. Compress media files before upload to save space."
+      },
+      {
+        "issue": "Unsupported media format error on upload",
+        "solution": "Verify media files are in supported formats (MP4, MOV for video; JPG, PNG for images). Convert unsupported formats using video converter. Check file isn't corrupted before uploading."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "create",
+      "export"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "jam-mcp-server",
+    "description": "Debug faster with AI agents that access video recordings, console logs, and network requests",
+    "author": "Jam",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "debugging",
+      "jam",
+      "testing",
+      "bug-tracking",
+      "developer-tools"
+    ],
+    "content": "Access Jam bug recordings and debug information to troubleshoot issues more efficiently.",
+    "title": "Jam MCP Server",
+    "displayTitle": "Jam MCP Server",
+    "seoTitle": "Jam MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://jam.dev/docs/debug-a-jam/mcp",
+    "features": [
+      "Access bug video recordings",
+      "View console logs and errors",
+      "Analyze network requests and responses",
+      "Review error messages and stack traces",
+      "Track user interaction sequences"
+    ],
+    "useCases": [
+      "Debug production issues with full context",
+      "Analyze error patterns across recordings",
+      "Review bug reproduction steps",
+      "Inspect network failures and timeouts",
+      "Generate detailed bug reports"
+    ],
+    "examples": [
+      {
+        "title": "Show the console errors from bug JAM-123",
+        "code": "Ask Claude: \"Show the console errors from bug JAM-123\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Analyze the network requests in the checkout issue",
+        "code": "Ask Claude: \"Analyze the network requests in the checkout issue\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Get reproduction steps for the login bug",
+        "code": "Ask Claude: \"Get reproduction steps for the login bug\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Find all JavaScript errors from today",
+        "code": "Ask Claude: \"Find all JavaScript errors from today\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "jam": {
+            "transport": "http",
+            "url": "https://mcp.jam.dev/mcp"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "jam": {
+            "transport": "http",
+            "url": "https://mcp.jam.dev/mcp"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Jam server configuration with HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate with your Jam account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http jam https://mcp.jam.dev/mcp"
+    },
+    "security": [
+      "OAuth authentication for access",
+      "Sanitize sensitive data in recordings",
+      "Control recording access permissions",
+      "Regular cleanup of old recordings"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "HTTP 429 rate limit exceeded error",
+        "solution": "Implement exponential backoff with increasing delays between retries. Monitor rate limit headers in API responses. Distribute requests over time rather than burst operations to stay within limits."
+      },
+      {
+        "issue": "Cannot access bug recordings or debug data",
+        "solution": "Verify workspace permissions grant access to recordings. Check your account role has viewer or higher permissions. Ensure recording ID is correct and recording hasn't been deleted."
+      },
+      {
+        "issue": "Console logs or network data incomplete",
+        "solution": "Verify Jam browser extension was active during bug recording. Check privacy settings don't block sensitive data capture. Ensure user had console open when error occurred for complete logs."
+      },
+      {
+        "issue": "Video playback fails or shows blank screen",
+        "solution": "Check browser supports video format and codecs. Verify recording completed successfully and wasn't interrupted. Clear browser cache and retry. Contact Jam support if corruption suspected."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "analyze"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "jira-mcp-server",
+    "description": "Manage Jira tickets and Confluence documentation",
+    "author": "Atlassian",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "jira",
+      "confluence",
+      "atlassian",
+      "project-management",
+      "documentation"
+    ],
+    "content": "Access Jira and Confluence through a unified Atlassian MCP interface for project and documentation management.",
+    "title": "Jira MCP Server",
+    "displayTitle": "Jira MCP Server",
+    "seoTitle": "Jira MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://www.atlassian.com/platform/remote-mcp-server",
+    "features": [
+      "Create and update Jira issues with custom fields",
+      "Manage Confluence pages and spaces",
+      "Search across both Jira and Confluence",
+      "Link issues to documentation seamlessly",
+      "Generate reports from project data"
+    ],
+    "useCases": [
+      "Create Jira tickets from requirements",
+      "Update Confluence documentation automatically",
+      "Link issues to wiki pages for context",
+      "Generate sprint reports and metrics",
+      "Manage team workflows across tools"
+    ],
+    "examples": [
+      {
+        "title": "Create a Jira bug for the login issue",
+        "code": "Ask Claude: \"Create a Jira bug for the login issue\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Update the API documentation in Confluence",
+        "code": "Ask Claude: \"Update the API documentation in Confluence\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Find all issues assigned to me",
+        "code": "Ask Claude: \"Find all issues assigned to me\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Generate a sprint report",
+        "code": "Ask Claude: \"Generate a sprint report\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "atlassian": {
+            "transport": "sse",
+            "url": "https://mcp.atlassian.com/v1/sse"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "atlassian": {
+            "transport": "sse",
+            "url": "https://mcp.atlassian.com/v1/sse"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Atlassian server configuration with SSE transport",
+          "Restart Claude Desktop",
+          "Authenticate with your Atlassian account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport sse atlassian https://mcp.atlassian.com/v1/sse"
+    },
+    "security": [
+      "OAuth manages authentication securely",
+      "Respect space and project permissions",
+      "Use JQL for precise query filtering",
+      "Regular backups recommended for critical data"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "HTTP 429 rate limit error starting November 2025",
+        "solution": "Atlassian enforces rate limits on API tokens from Nov 22, 2025. Check Retry-After and X-RateLimit-Reset headers. Implement caching, pagination, and webhooks to reduce API calls below token limits."
+      },
+      {
+        "issue": "Free app rate limiting starting August 2025",
+        "solution": "Free apps rate limited from Aug 18, 2025, burst limits from Aug 28. Upgrade to paid tier for higher limits. Implement jitter on scheduled tasks and optimize JQL queries to reduce calls."
+      },
+      {
+        "issue": "OAuth token authentication failed or expired",
+        "solution": "Re-authenticate via OAuth flow to get new token. Verify token hasn't been revoked in Atlassian admin settings. Check token scope includes required permissions for Jira and Confluence access."
+      },
+      {
+        "issue": "Cannot access project or issues - permission denied",
+        "solution": "Verify your Atlassian account has project access. Check project visibility settings allow API access. Ensure OAuth scope includes appropriate permissions (read:jira-work, write:jira-work)."
+      },
+      {
+        "issue": "JQL search queries returning no results or errors",
+        "solution": "Validate JQL syntax is correct using Jira's JQL builder. Check field names match custom field IDs. Verify search permissions for projects in query. Use /rest/api/3/search with proper authentication."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "admin"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "kubernetes-mcp-server",
+    "description": "Kubernetes cluster management and container orchestration through MCP integration",
+    "author": "feiskyer",
+    "dateAdded": "2025-09-20",
+    "tags": [
+      "kubernetes",
+      "k8s",
+      "container",
+      "orchestration",
+      "devops"
+    ],
+    "content": "A Model Context Protocol server that enables AI assistants to interact with Kubernetes clusters, translating natural language requests into Kubernetes operations.",
+    "title": "Kubernetes MCP Server",
+    "displayTitle": "Kubernetes MCP Server",
+    "source": "community",
+    "documentationUrl": "https://github.com/feiskyer/mcp-kubernetes-server",
+    "features": [
+      "Cluster resource management",
+      "Pod and deployment operations",
+      "Service and ingress configuration",
+      "Namespace management",
+      "ConfigMap and Secret handling",
+      "Real-time cluster monitoring"
+    ],
+    "useCases": [
+      "Deploy and manage containerized applications",
+      "Monitor cluster health and resource usage",
+      "Scale workloads based on demand",
+      "Manage secrets and configuration data",
+      "Troubleshoot deployment issues",
+      "Automate cluster operations"
+    ],
+    "examples": [
+      {
+        "title": "List all pods in the default namespace",
+        "code": "Ask Claude: \"List all pods in the default namespace\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Create a new deployment with specified image",
+        "code": "Ask Claude: \"Create a new deployment with specified image\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Scale a deployment to 5 replicas",
+        "code": "Ask Claude: \"Scale a deployment to 5 replicas\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Get cluster node information and status",
+        "code": "Ask Claude: \"Get cluster node information and status\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "kubernetes": {
+            "command": "uvx",
+            "args": [
+              "mcp-kubernetes-server"
+            ],
+            "env": {
+              "KUBECONFIG": "/path/to/your/kubeconfig"
+            }
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "kubernetes": {
+            "command": "uvx",
+            "args": [
+              "mcp-kubernetes-server"
+            ],
+            "env": {
+              "KUBECONFIG": "${KUBECONFIG:-~/.kube/config}"
+            }
+          }
+        }
+      }
+    },
+    "package": "mcp-kubernetes-server",
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Install via uvx: uvx mcp-kubernetes-server",
+          "Configure your kubeconfig file",
+          "Set KUBECONFIG environment variable",
+          "Add server configuration to Claude Desktop",
+          "Restart Claude Desktop"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add kubernetes --env KUBECONFIG=/path/to/your/kubeconfig -- uvx mcp-kubernetes-server"
+    },
+    "security": [
+      "Uses kubeconfig for authentication",
+      "Respects existing RBAC permissions",
+      "Secure kubectl API integration",
+      "Cluster-scoped access controls"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Unauthorized: server has asked for client credentials",
+        "solution": "Verify kubeconfig file is correctly configured at ~/.kube/config. Check IAM entity is authenticated by cluster. Run kubectl config view to verify context and credentials are set properly."
+      },
+      {
+        "issue": "Connection refused: localhost:8080 error",
+        "solution": "Set KUBECONFIG environment variable to correct path. Export KUBECONFIG=~/.kube/config or specify in MCP server config. Verify kubeconfig file exists and has valid cluster endpoint, not localhost:8080."
+      },
+      {
+        "issue": "RBAC permission denied for cluster operations",
+        "solution": "Verify your user has appropriate RBAC permissions. Check if IAM principal needs system:masters group for admin access. For EKS, use access entries with API or API_AND_CONFIG_MAP authentication mode."
+      },
+      {
+        "issue": "kubectl version incompatibility with cluster",
+        "solution": "Ensure kubectl version within ±1 minor version of cluster. For Kubernetes 1.29 cluster, use kubectl 1.28-1.30. Run kubectl version to check client and server versions. Update kubectl if needed."
+      },
+      {
+        "issue": "TLS certificate errors or chain of trust invalid",
+        "solution": "Check certificate hasn't expired: kubectl config view --raw. Verify CA certificate in kubeconfig matches cluster CA. For EKS, regenerate kubeconfig: aws eks update-kubeconfig --name cluster-name."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "cluster-admin",
+      "view",
+      "edit"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "linear-mcp-server",
+    "description": "Integrate with Linear's issue tracking and project management system",
+    "author": "Linear",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "project-management",
+      "linear",
+      "issues",
+      "tasks",
+      "agile"
+    ],
+    "content": "Connect Claude to Linear for comprehensive project management, issue tracking, and team collaboration.",
+    "title": "Linear MCP Server",
+    "displayTitle": "Linear MCP Server",
+    "seoTitle": "Linear MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://linear.app/docs/mcp",
+    "features": [
+      "Create and update issues with full metadata",
+      "Manage projects and cycles programmatically",
+      "Track team velocity and progress metrics",
+      "Query and filter issues with advanced search",
+      "Update issue status and assignments in bulk"
+    ],
+    "useCases": [
+      "Create issues from bug reports or feature requests",
+      "Update issue status in bulk operations",
+      "Generate sprint reports and velocity metrics",
+      "Track project progress across teams",
+      "Automate issue triage and assignment"
+    ],
+    "examples": [
+      {
+        "title": "Create a new bug issue for the login problem",
+        "code": "Ask Claude: \"Create a new bug issue for the login problem\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Show me all issues assigned to me",
+        "code": "Ask Claude: \"Show me all issues assigned to me\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Update issue LIN-123 to 'In Progress'",
+        "code": "Ask Claude: \"Update issue LIN-123 to 'In Progress'\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "List all issues in the current sprint",
+        "code": "Ask Claude: \"List all issues in the current sprint\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "linear": {
+            "transport": "sse",
+            "url": "https://mcp.linear.app/sse"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "linear": {
+            "transport": "sse",
+            "url": "https://mcp.linear.app/sse"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Linear server configuration with SSE transport",
+          "Restart Claude Desktop",
+          "Authenticate through OAuth when prompted"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport sse linear https://mcp.linear.app/sse"
+    },
+    "security": [
+      "OAuth tokens are managed securely by Linear",
+      "Permissions follow Linear workspace settings",
+      "Tokens auto-refresh as needed",
+      "All actions are audited in Linear"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "OAuth access token expired - 401 Unauthorized error",
+        "solution": "Access tokens expire after 24 hours. Re-authenticate to get new token with refresh token enabled (default for OAuth apps created after Oct 1, 2025). Token refreshes automatically in compliant clients."
+      },
+      {
+        "issue": "Rate limit exceeded - RATELIMITED error code returned",
+        "solution": "API key auth: 1,500 requests/hour, 250K complexity points/hour. Unauthenticated: 60 req/hour. Implement exponential backoff. Use webhooks instead of polling. Contact support for temporary limit increase."
+      },
+      {
+        "issue": "GraphQL query complexity limit exceeded - 10,000 points",
+        "solution": "Single query cannot exceed 10,000 complexity points. Reduce query depth or split into multiple smaller queries. Remove unnecessary nested fields. Check query complexity in Linear docs."
+      },
+      {
+        "issue": "Insufficient workspace permissions for operation",
+        "solution": "Verify your Linear account has Member or Admin role (not Guest). Check workspace settings for user permissions. Contact workspace admin to upgrade role if needed."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "admin"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "monday-mcp-server",
+    "description": "Manage monday.com boards, items, and CRM activities",
+    "author": "Monday.com",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "monday",
+      "project-management",
+      "crm",
+      "workflow",
+      "team-management"
+    ],
+    "content": "Control monday.com boards and workflows through Claude for visual project management.",
+    "title": "Monday MCP Server",
+    "displayTitle": "Monday MCP Server",
+    "seoTitle": "Monday MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://developer.monday.com/apps/docs/mondaycom-mcp-integration",
+    "features": [
+      "Create and update board items",
+      "Manage board columns and structure",
+      "Assign owners and team members",
+      "Set timelines and deadlines",
+      "Add CRM activities and track deals"
+    ],
+    "useCases": [
+      "Create project items from requirements",
+      "Update task status across boards",
+      "Assign team members to tasks",
+      "Track project timelines visually",
+      "Manage CRM pipeline and activities"
+    ],
+    "examples": [
+      {
+        "title": "Create a new item in the Projects board",
+        "code": "Ask Claude: \"Create a new item in the Projects board\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Update status to Done for item 12345",
+        "code": "Ask Claude: \"Update status to Done for item 12345\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Assign this task to the design team",
+        "code": "Ask Claude: \"Assign this task to the design team\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Add CRM activity for client meeting",
+        "code": "Ask Claude: \"Add CRM activity for client meeting\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "monday": {
+            "transport": "sse",
+            "url": "https://mcp.monday.com/sse"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "monday": {
+            "transport": "sse",
+            "url": "https://mcp.monday.com/sse"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Monday server configuration with SSE transport",
+          "Restart Claude Desktop",
+          "Authenticate with monday.com"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport sse monday https://mcp.monday.com/sse"
+    },
+    "security": [
+      "OAuth authentication for secure access",
+      "Board-level permissions respected",
+      "Audit log tracking for all changes",
+      "Regular permission reviews recommended"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "API rate limit exceeded - 429 error code returned",
+        "solution": "Rate limit: 10,000,000 complexity points/minute per account. Check Retry-After header in response to see wait time. Reduce query complexity or split operations into smaller batches."
+      },
+      {
+        "issue": "OAuth authentication fails or workspace access denied",
+        "solution": "Verify workspace permissions allow API access. Re-authenticate at https://mcp.monday.com/sse. Check account has Member role (not Guest). Contact workspace admin to grant API permissions."
+      },
+      {
+        "issue": "GraphQL query complexity calculation too high",
+        "solution": "Reduce nested fields in queries. Limit items per query to 50-100. Check monday.com developer docs for complexity calculation. Split complex queries into multiple simpler requests."
+      },
+      {
+        "issue": "Board or item permissions insufficient for operation",
+        "solution": "Verify your account has write permissions to specific board. Check board sharing settings allow modifications. Contact board owner to upgrade access level if read-only."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "create"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "netlify-mcp-server",
+    "description": "Create, deploy, and manage websites on Netlify platform",
+    "author": "Netlify",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "deployment",
+      "netlify",
+      "hosting",
+      "static-sites",
+      "serverless"
+    ],
+    "content": "Control Netlify sites and deployments through Claude for comprehensive site management.",
+    "title": "Netlify MCP Server",
+    "displayTitle": "Netlify MCP Server",
+    "seoTitle": "Netlify MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/",
+    "features": [
+      "Create and deploy sites automatically",
+      "Manage environment secrets and variables",
+      "Configure access controls and permissions",
+      "Handle form submissions and data",
+      "Control site settings and domains"
+    ],
+    "useCases": [
+      "Deploy static sites with zero configuration",
+      "Manage environment variables securely",
+      "Configure custom domains and SSL",
+      "Process form submissions automatically",
+      "Set up redirects and rewrites"
+    ],
+    "examples": [
+      {
+        "title": "Deploy my site to production",
+        "code": "Ask Claude: \"Deploy my site to production\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Update the API_KEY environment variable",
+        "code": "Ask Claude: \"Update the API_KEY environment variable\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Show recent form submissions",
+        "code": "Ask Claude: \"Show recent form submissions\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Configure domain redirect",
+        "code": "Ask Claude: \"Configure domain redirect\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "netlify": {
+            "transport": "http",
+            "url": "https://netlify-mcp.netlify.app/mcp"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "netlify": {
+            "transport": "http",
+            "url": "https://netlify-mcp.netlify.app/mcp"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Netlify server configuration with HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate with your Netlify account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http netlify https://netlify-mcp.netlify.app/mcp"
+    },
+    "security": [
+      "OAuth authentication for access control",
+      "Secure secret management system",
+      "Access control configuration options",
+      "Build hook security measures"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Build minutes quota exceeded - site paused",
+        "solution": "Starter plan: 300 build minutes/month. Check usage at app.netlify.com under team settings. Upgrade plan for more minutes. Site auto-resumes next billing cycle or upgrade immediately."
+      },
+      {
+        "issue": "API rate limit exceeded during deployment",
+        "solution": "GitHub API limit: 60 req/hour unauthenticated. Authorize Netlify app with GitHub for higher limit. Reduce file count in deployments. Use .gitignore to exclude unnecessary files from builds."
+      },
+      {
+        "issue": "OAuth authentication fails or permissions denied",
+        "solution": "Re-authenticate at https://netlify-mcp.netlify.app/mcp. Verify account has team member role with deploy permissions. Check site access settings allow API operations. Logout and login to refresh token."
+      },
+      {
+        "issue": "Environment variable not available during build",
+        "solution": "Add variables in site settings under Build & deploy > Environment. Use exact key names (case-sensitive). Redeploy site after adding variables. Check build logs for variable loading confirmation."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "deploy"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "notion-mcp-server",
+    "description": "Read docs, update pages, and manage tasks in Notion workspaces",
+    "author": "Notion",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "documentation",
+      "notion",
+      "wiki",
+      "notes",
+      "knowledge-base"
+    ],
+    "content": "Access and manage your Notion workspace directly from Claude for documentation and knowledge management.",
+    "title": "Notion MCP Server",
+    "displayTitle": "Notion MCP Server",
+    "seoTitle": "Notion MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://developers.notion.com/docs/mcp",
+    "features": [
+      "Read and update Notion pages with rich content",
+      "Create new pages and databases programmatically",
+      "Query database content with filters and sorts",
+      "Manage tasks and project workflows",
+      "Search across entire workspace content"
+    ],
+    "useCases": [
+      "Create meeting notes automatically from discussions",
+      "Update project documentation with latest information",
+      "Generate reports from database content",
+      "Sync tasks across different systems",
+      "Build knowledge base entries from research"
+    ],
+    "examples": [
+      {
+        "title": "Create a new page for today's meeting notes",
+        "code": "Ask Claude: \"Create a new page for today's meeting notes\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Update the project status in Notion",
+        "code": "Ask Claude: \"Update the project status in Notion\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Find all tasks due this week",
+        "code": "Ask Claude: \"Find all tasks due this week\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Add this conversation summary to Notion",
+        "code": "Ask Claude: \"Add this conversation summary to Notion\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "notion": {
+            "transport": "http",
+            "url": "https://mcp.notion.com/mcp"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "notion": {
+            "transport": "http",
+            "url": "https://mcp.notion.com/mcp"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Notion server configuration with HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate via OAuth when prompted"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http notion https://mcp.notion.com/mcp"
+    },
+    "security": [
+      "OAuth tokens are securely managed by Notion",
+      "Respect workspace permissions and sharing settings",
+      "Be cautious with bulk update operations",
+      "Regular backups recommended for critical data"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Rate limit reached - 429 error with rate_limited code",
+        "solution": "Rate limit: 3 requests/second average per integration. Implement 350ms delay between requests. Use burst capacity sparingly. Back off exponentially on 429 errors. Check Retry-After header."
+      },
+      {
+        "issue": "Page or database not accessible - integration permissions",
+        "solution": "Share page/database with integration explicitly in Notion. Click Share > Add connection > select your integration. Verify integration has read/write permissions. Check parent page sharing settings."
+      },
+      {
+        "issue": "OAuth authentication fails or bad gateway error",
+        "solution": "Re-authenticate at https://mcp.notion.com/mcp. Verify workspace allows integrations (not Guest workspace). Check internet connectivity. Restart MCP client if persistent 502 errors occur."
+      },
+      {
+        "issue": "API returns empty results or stale data from queries",
+        "solution": "Verify query filters match exact database property names (case-sensitive). Check integration has access to specific database. Refresh integration permissions. Use property IDs instead of names for reliability."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "create"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "paypal-mcp-server",
+    "description": "Integrate PayPal commerce capabilities, payment processing, and transaction management",
+    "author": "PayPal",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "payments",
+      "paypal",
+      "commerce",
+      "transactions",
+      "financial"
+    ],
+    "content": "Connect Claude to PayPal for comprehensive payment processing and financial operations.",
+    "title": "Paypal MCP Server",
+    "displayTitle": "Paypal MCP Server",
+    "seoTitle": "Paypal MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://www.paypal.ai/",
+    "features": [
+      "Process payments and refunds",
+      "Manage transactions and disputes",
+      "Handle chargebacks and resolutions",
+      "View account balances and history",
+      "Generate financial reports and analytics"
+    ],
+    "useCases": [
+      "Process customer refunds quickly",
+      "Review transaction history",
+      "Handle payment disputes efficiently",
+      "Generate financial reports",
+      "Monitor account activity"
+    ],
+    "examples": [
+      {
+        "title": "Process a refund for transaction ID ABC123",
+        "code": "Ask Claude: \"Process a refund for transaction ID ABC123\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Show today's payment activity",
+        "code": "Ask Claude: \"Show today's payment activity\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Generate monthly transaction report",
+        "code": "Ask Claude: \"Generate monthly transaction report\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Check account balance",
+        "code": "Ask Claude: \"Check account balance\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "paypal": {
+            "transport": "sse",
+            "url": "https://mcp.paypal.com/sse"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "paypal": {
+            "transport": "sse",
+            "url": "https://mcp.paypal.com/sse"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the PayPal server configuration with SSE or HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate with your PayPal account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport sse paypal https://mcp.paypal.com/sse"
+    },
+    "security": [
+      "OAuth authentication required",
+      "Use sandbox for testing",
+      "Monitor transaction logs",
+      "Follow PCI compliance guidelines"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Rate limit reached - 429 RATE_LIMIT_REACHED error",
+        "solution": "PayPal doesn't publish rate limits but blocks anomalous traffic. Use webhooks instead of polling. Cache OAuth tokens (valid 8 hours). Implement exponential backoff on 429 errors. Contact support if legitimate traffic blocked."
+      },
+      {
+        "issue": "Authentication failed - 401 Unauthorized error",
+        "solution": "Verify API credentials match environment (sandbox vs live). Check client ID and secret are correct. Generate new OAuth token if expired (8 hour lifetime). Use https://api-m.sandbox.paypal.com for sandbox testing."
+      },
+      {
+        "issue": "Sandbox vs production environment confusion",
+        "solution": "Sandbox URL: https://api-m.sandbox.paypal.com. Production URL: https://api-m.paypal.com. Use separate API credentials for each environment. Test all operations in sandbox before going live."
+      },
+      {
+        "issue": "Insufficient permissions for refund or transaction operation",
+        "solution": "Verify PayPal account is Business account (not Personal). Check API app has required scopes enabled in developer dashboard. Ensure transaction is eligible for refund (not expired). Review account restrictions."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "refund"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "plaid-mcp-server",
+    "description": "Analyze, troubleshoot, and optimize Plaid integrations for banking data and financial account linking",
+    "author": "Plaid",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "banking",
+      "plaid",
+      "fintech",
+      "financial-data",
+      "account-linking"
+    ],
+    "content": "Connect Claude to Plaid for banking data integration and financial services troubleshooting.",
+    "title": "Plaid MCP Server",
+    "displayTitle": "Plaid MCP Server",
+    "seoTitle": "Plaid MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://plaid.com/blog/plaid-mcp-ai-assistant-claude/",
+    "features": [
+      "Link financial accounts securely",
+      "Access transaction data and history",
+      "Verify account ownership",
+      "Retrieve balance information",
+      "Troubleshoot integration issues"
+    ],
+    "useCases": [
+      "Debug account linking issues",
+      "Analyze transaction categorization",
+      "Verify webhook configurations",
+      "Test API integrations",
+      "Monitor API usage patterns"
+    ],
+    "examples": [
+      {
+        "title": "Debug why account linking is failing",
+        "code": "Ask Claude: \"Debug why account linking is failing\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Show recent API errors",
+        "code": "Ask Claude: \"Show recent API errors\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Verify webhook configuration",
+        "code": "Ask Claude: \"Verify webhook configuration\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Check transaction categorization accuracy",
+        "code": "Ask Claude: \"Check transaction categorization accuracy\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "plaid": {
+            "transport": "sse",
+            "url": "https://api.dashboard.plaid.com/mcp/sse"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "plaid": {
+            "transport": "sse",
+            "url": "https://api.dashboard.plaid.com/mcp/sse"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Plaid server configuration with SSE transport",
+          "Restart Claude Desktop",
+          "Authenticate with Plaid Dashboard"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport sse plaid https://api.dashboard.plaid.com/mcp/sse"
+    },
+    "security": [
+      "OAuth authentication required",
+      "Use development environment for testing",
+      "Protect sensitive financial data",
+      "Follow compliance requirements"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Rate limit exceeded errors during API requests",
+        "solution": "Plaid enforces rate limits per endpoint. Check error_code and error_type in response body. Use request ID for support inquiries. Implement exponential backoff for retry logic. Monitor rate limit headers."
+      },
+      {
+        "issue": "Item authentication failed or expired access token",
+        "solution": "Listen for PENDING_DISCONNECT webhook (US/CA) or PENDING_EXPIRATION (UK/EU). Send users through update mode before Items expire. Re-authenticate via Plaid Link. Check error_type for specific issue."
+      },
+      {
+        "issue": "Webhook verification fails or not receiving webhooks",
+        "solution": "Verify webhook signature using Plaid's verification guide. Check webhook URL is publicly accessible. Test endpoint returns 200 status. Enable webhook logging in Dashboard. Review firewall/security group rules."
+      },
+      {
+        "issue": "Development vs production environment mismatch",
+        "solution": "Use separate API keys for sandbox and production. Verify environment in Dashboard matches code. Check client_id and secret match environment. Test in sandbox before going live with production credentials."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "debug",
+      "test"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "postgresql-mcp-server",
+    "description": "Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities",
+    "author": "Anthropic",
+    "dateAdded": "2025-09-16",
+    "tags": [
+      "postgresql",
+      "database",
+      "sql",
+      "official",
+      "anthropic"
+    ],
+    "content": "The official PostgreSQL MCP Server from Anthropic provides read-only access to PostgreSQL databases, enabling Claude to inspect schemas and execute safe queries.",
+    "title": "Postgresql MCP Server",
+    "displayTitle": "Postgresql MCP Server",
+    "source": "official",
+    "documentationUrl": "https://modelcontextprotocol.io/examples",
+    "features": [
+      "Read-only access for safe database exploration",
+      "Automatic discovery of table structures and columns",
+      "Execute SELECT queries within read-only transactions",
+      "Access detailed database metadata and structure",
+      "Perform data analysis without altering database state",
+      "Support for SSL connections and authentication"
+    ],
+    "useCases": [
+      "Understand database schema and relationships",
+      "Generate reports from existing data",
+      "Analyze data patterns and distributions",
+      "Create documentation from database structure",
+      "Write and test SELECT queries",
+      "Explore unfamiliar database schemas"
+    ],
+    "examples": [
+      {
+        "title": "What tables exist in my database?",
+        "code": "Ask Claude: \"What tables exist in my database?\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Describe the structure of the users table",
+        "code": "Ask Claude: \"Describe the structure of the users table\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "How many records are in each table?",
+        "code": "Ask Claude: \"How many records are in each table?\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Write a query to find active users from last month",
+        "code": "Ask Claude: \"Write a query to find active users from last month\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Generate documentation for my database schema",
+        "code": "Ask Claude: \"Generate documentation for my database schema\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "postgres": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "@modelcontextprotocol/server-postgres",
+              "postgresql://localhost/mydb"
+            ]
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "postgres": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "@modelcontextprotocol/server-postgres",
+              "postgresql://localhost/mydb"
+            ]
+          }
+        }
+      }
+    },
+    "package": "@modelcontextprotocol/server-postgres",
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open your Claude Desktop configuration file",
+          "Add the PostgreSQL MCP server configuration with connection string",
+          "Restart Claude Desktop",
+          "Ask Claude to list tables to verify connection"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "Create a .mcp.json file with PostgreSQL server configuration and connection string"
+    },
+    "security": [
+      "All queries execute in read-only transactions",
+      "INSERT, UPDATE, DELETE operations are prevented",
+      "Supports SSL/TLS encryption for connections",
+      "Respects existing database user permissions",
+      "Safe exploration without data modification risks"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Connection refused or database not accessible",
+        "solution": "Verify PostgreSQL is running with pg_isready command. Check connection string format: postgresql://user:password@host:port/database. Test with psql command first. Verify firewall allows connections on port 5432."
+      },
+      {
+        "issue": "SSL connection error - wrong version number or verify failed",
+        "solution": "Add sslmode parameter: postgresql://host/db?sslmode=require. Verify PostgreSQL supports TLS version (check pg_config --configure). Use sslmode=disable for local dev only. Check certificate matches CA in ssl_ca_file."
+      },
+      {
+        "issue": "Authentication failed for user or password rejected",
+        "solution": "Verify username/password in connection string exact match. Check pg_hba.conf allows connection method (md5, scram-sha-256). Ensure user exists with GRANT SELECT permissions. Test auth with psql -U username -d database."
+      },
+      {
+        "issue": "Certificate authentication failed - CN mismatch",
+        "solution": "Verify certificate CN matches PostgreSQL username exactly. Configure pg_ident.conf for username mapping if needed. Check ssl_cert_file and ssl_key_file permissions (owned by postgres user). Ensure client cert trusted by server CA."
+      },
+      {
+        "issue": "Permission denied on table or schema access error",
+        "solution": "Grant SELECT permissions: GRANT SELECT ON ALL TABLES IN SCHEMA public TO username. Verify read-only user has pg_read_all_data role. Check schema permissions with \\dp command in psql. Ensure user connected to correct database."
+      }
+    ],
+    "requiresAuth": true,
+    "authType": "connection_string",
+    "permissions": [
+      "read"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "reddit-mcp-buddy",
+    "description": "Browse Reddit, search posts, and analyze user activity directly from Claude - no API keys required",
+    "author": "karanb192",
+    "dateAdded": "2025-09-27",
+    "tags": [
+      "reddit",
+      "social-media",
+      "search",
+      "analytics",
+      "community"
+    ],
+    "content": "Access Reddit content through Claude for browsing subreddits, searching posts, analyzing comments, and tracking user activity. Works instantly with zero setup.",
+    "title": "Reddit MCP Buddy",
+    "displayTitle": "Reddit MCP Buddy",
+    "seoTitle": "Reddit MCP Buddy for Claude",
+    "source": "community",
+    "documentationUrl": "https://github.com/karanb192/reddit-mcp-buddy",
+    "features": [
+      "Browse any subreddit with sorting options (hot, new, top, rising)",
+      "Search across Reddit with advanced filters",
+      "Get full post details including all comments",
+      "Analyze user profiles, karma, and post history",
+      "No API keys required - works instantly",
+      "Optional Reddit authentication for enhanced rate limits"
+    ],
+    "useCases": [
+      "Research trending topics and community sentiment",
+      "Analyze discussions about products or technologies",
+      "Track user engagement and community dynamics",
+      "Find relevant discussions across multiple subreddits",
+      "Monitor brand mentions and feedback",
+      "Gather insights from specialized communities"
+    ],
+    "examples": [
+      {
+        "title": "What's trending in r/technology today?",
+        "code": "Ask Claude: \"What's trending in r/technology today?\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Search for discussions about ChatGPT in r/programm...",
+        "code": "Ask Claude: \"Search for discussions about ChatGPT in r/programming\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Get the top posts from r/MachineLearning this week",
+        "code": "Ask Claude: \"Get the top posts from r/MachineLearning this week\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Find the most discussed topics in r/stocks",
+        "code": "Ask Claude: \"Find the most discussed topics in r/stocks\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "What is trending on reddit?",
+        "code": "Ask Claude: \"What is trending on reddit?\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Search for discussions about AI",
+        "code": "Ask Claude: \"Search for discussions about AI\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Show me the comments on this Reddit URL",
+        "code": "Ask Claude: \"Show me the comments on this Reddit URL\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "reddit": {
+            "command": "npx",
+            "args": [
+              "reddit-mcp-buddy"
+            ]
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "reddit": {
+            "command": "npx",
+            "args": [
+              "reddit-mcp-buddy"
+            ]
+          }
+        }
+      }
+    },
+    "package": "reddit-mcp-buddy",
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Reddit MCP Buddy server configuration",
+          "Restart Claude Desktop",
+          "Start browsing Reddit immediately (no auth required)",
+          "Optionally add Reddit credentials for higher rate limits"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add reddit-buddy -- npx reddit-mcp-buddy"
+    },
+    "security": [
+      "No API keys required for basic usage",
+      "Optional Reddit app credentials for enhanced rate limits",
+      "All credentials stored locally in Claude config",
+      "Read-only access - no posting capabilities"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Rate limit errors: Add Reddit credentials for higher limits",
+        "solution": "Check the documentation for detailed troubleshooting steps."
+      },
+      {
+        "issue": "Subreddit not found: Check spelling (case-insensitive)",
+        "solution": "Check the documentation for detailed troubleshooting steps."
+      },
+      {
+        "issue": "Private subreddits require authentication",
+        "solution": "Check the documentation for detailed troubleshooting steps."
+      },
+      {
+        "issue": "Restart Claude Desktop after config changes",
+        "solution": "Check the documentation for detailed troubleshooting steps."
+      }
+    ],
+    "requiresAuth": false,
+    "permissions": [
+      "read"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "redis-mcp-server",
+    "description": "Official Redis MCP server providing natural language interface for Redis data management and operations",
+    "author": "Redis",
+    "dateAdded": "2025-09-20",
+    "tags": [
+      "redis",
+      "cache",
+      "database",
+      "nosql",
+      "official"
+    ],
+    "content": "The official Redis MCP Server provides a natural language interface for AI agents to manage and search data in Redis, supporting various data structures and integrations.",
+    "title": "Redis MCP Server",
+    "displayTitle": "Redis MCP Server",
+    "seoTitle": "Redis MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://github.com/redis/mcp-redis",
+    "features": [
+      "String operations with TTL support",
+      "Hash, list, set, and sorted set management",
+      "Pub/Sub messaging",
+      "Stream operations",
+      "JSON data handling",
+      "Vector search capabilities",
+      "Server management and monitoring"
+    ],
+    "useCases": [
+      "High-performance caching solutions",
+      "Session management and storage",
+      "Real-time messaging with pub/sub",
+      "Leaderboards and ranking systems",
+      "Stream processing and event sourcing",
+      "Vector similarity search",
+      "Rate limiting and counters"
+    ],
+    "examples": [
+      {
+        "title": "Store and retrieve cached data with expiration",
+        "code": "Ask Claude: \"Store and retrieve cached data with expiration\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Manage user sessions and preferences",
+        "code": "Ask Claude: \"Manage user sessions and preferences\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Implement real-time chat with pub/sub",
+        "code": "Ask Claude: \"Implement real-time chat with pub/sub\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Create leaderboards with sorted sets",
+        "code": "Ask Claude: \"Create leaderboards with sorted sets\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Process events using Redis streams",
+        "code": "Ask Claude: \"Process events using Redis streams\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "redis": {
+            "command": "uvx",
+            "args": [
+              "--from",
+              "git+https://github.com/redis/mcp-redis.git",
+              "redis-mcp-server",
+              "--url",
+              "redis://localhost:6379/0"
+            ]
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "redis": {
+            "command": "uvx",
+            "args": [
+              "--from",
+              "git+https://github.com/redis/mcp-redis.git",
+              "redis-mcp-server",
+              "--url",
+              "redis://localhost:6379/0"
+            ]
+          }
+        }
+      }
+    },
+    "package": "@redis/mcp-redis",
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Install via Smithery CLI: npx -y @smithery/cli install @redis/mcp-redis --client claude",
+          "Or install via uvx: uvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server",
+          "Configure Redis connection URL",
+          "Add server configuration to Claude Desktop",
+          "Restart Claude Desktop"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "uvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server --url redis://localhost:6379/0"
+    },
+    "security": [
+      "Redis ACL user management",
+      "SSL/TLS encryption support",
+      "Password authentication",
+      "Read-only user configurations",
+      "Network security controls"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Connection refused or Redis server not accessible",
+        "solution": "Verify Redis running with redis-cli ping (should return PONG). Check URL format: redis://localhost:6379/0 or redis://user:password@host:port/db. Confirm network allows port 6379. Test with redis-cli -u URL command."
+      },
+      {
+        "issue": "NOAUTH Authentication required error",
+        "solution": "Add password to connection URL: redis://:password@host:6379. Use AUTH command or configure ACL username. Verify requirepass in redis.conf matches. Check ACL user exists with ACL LIST command."
+      },
+      {
+        "issue": "NOPERM user has no permissions to run command or access key",
+        "solution": "Grant permissions with ACL SETUSER username +@all ~*. Check ACL rules with ACL GETUSER username. Ensure user has +@read +@write categories. Verify key patterns allow access with ~key:* syntax."
+      },
+      {
+        "issue": "ACL authentication failed or WRONGPASS invalid password",
+        "solution": "Verify password matches ACL user with ACL GETUSER. Check ACL file loaded correctly (restart Redis after editing). Ensure user not flagged nopass without valid passwords. View security events with ACL LOG."
+      },
+      {
+        "issue": "TLS/SSL connection error or certificate validation failed",
+        "solution": "Use rediss:// (note double 's') for TLS connections. Add tls=true parameter to URL. Verify Redis built with TLS support (redis-server --version). Check certificates match CA and have correct permissions."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "admin"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "sentry-mcp-server",
+    "description": "Monitor errors, debug production issues, and track application health",
+    "author": "Sentry",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "monitoring",
+      "sentry",
+      "debugging",
+      "errors",
+      "devops"
+    ],
+    "content": "Connect Claude to Sentry for comprehensive error monitoring, debugging, and application health tracking.",
+    "title": "Sentry MCP Server",
+    "displayTitle": "Sentry MCP Server",
+    "seoTitle": "Sentry MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://docs.sentry.io/product/sentry-mcp/",
+    "features": [
+      "View and analyze error reports in real-time",
+      "Access detailed stack traces and error context",
+      "Track error trends and patterns over time",
+      "Monitor release health and regression detection",
+      "Analyze performance metrics and bottlenecks"
+    ],
+    "useCases": [
+      "Debug production errors with full context",
+      "Identify error patterns and root causes",
+      "Track deployment impact on error rates",
+      "Monitor application performance metrics",
+      "Generate error reports for stakeholders"
+    ],
+    "examples": [
+      {
+        "title": "What are the most common errors in the last 24 hou...",
+        "code": "Ask Claude: \"What are the most common errors in the last 24 hours?\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Show me the stack trace for error ID abc123",
+        "code": "Ask Claude: \"Show me the stack trace for error ID abc123\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Which deployment introduced these new errors?",
+        "code": "Ask Claude: \"Which deployment introduced these new errors?\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Find all errors affecting the checkout flow",
+        "code": "Ask Claude: \"Find all errors affecting the checkout flow\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "sentry": {
+            "transport": "http",
+            "url": "https://mcp.sentry.dev/mcp"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "sentry": {
+            "transport": "http",
+            "url": "https://mcp.sentry.dev/mcp"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Sentry server configuration with HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate with your Sentry account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http sentry https://mcp.sentry.dev/mcp"
+    },
+    "security": [
+      "OAuth authentication required for access",
+      "Respect data sensitivity and PII concerns",
+      "Filter by environment (production/staging)",
+      "Use read-only access when appropriate"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "API rate limit exceeded - 429 status code returned",
+        "solution": "Sentry rate limits all API requests. Check Retry-After header for wait time in seconds. Implement exponential backoff for retries. Reduce request frequency. Contact support for enterprise rate limit increase."
+      },
+      {
+        "issue": "Authentication failed or insufficient project permissions",
+        "solution": "Verify Auth Token has required scopes in Sentry settings. Check token assigned to correct organization/project. Ensure user role has API access (Member or Admin). Re-generate token if expired or revoked."
+      },
+      {
+        "issue": "Project not found or access denied errors",
+        "solution": "Verify project slug matches exactly (case-sensitive). Check organization membership and project access in Sentry dashboard. Ensure Auth Token has project:read scope minimum. Confirm project not archived or deleted."
+      },
+      {
+        "issue": "OAuth connection fails or token invalid",
+        "solution": "Re-authenticate at https://mcp.sentry.dev/mcp. Verify OAuth app has required permissions in Sentry. Check token not revoked in Settings > Auth Tokens. Ensure organization allows OAuth apps in security settings."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "socket-mcp-server",
+    "description": "Security analysis and vulnerability scanning for dependencies",
+    "author": "Socket",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "security",
+      "dependencies",
+      "vulnerability-scanning",
+      "npm",
+      "supply-chain"
+    ],
+    "content": "Analyze dependency security and supply chain risks with Socket's comprehensive vulnerability detection.",
+    "title": "Socket MCP Server",
+    "displayTitle": "Socket MCP Server",
+    "seoTitle": "Socket MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://github.com/SocketDev/socket-mcp",
+    "features": [
+      "Scan dependencies for known vulnerabilities",
+      "Analyze security scores for packages",
+      "Detect supply chain attacks and risks",
+      "Monitor package health metrics",
+      "Generate detailed security reports"
+    ],
+    "useCases": [
+      "Audit project dependencies for vulnerabilities",
+      "Check security before adding new packages",
+      "Monitor supply chain security risks",
+      "Validate package updates are safe",
+      "Generate security compliance reports"
+    ],
+    "examples": [
+      {
+        "title": "Scan my package.json for vulnerabilities",
+        "code": "Ask Claude: \"Scan my package.json for vulnerabilities\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Check the security score of lodash",
+        "code": "Ask Claude: \"Check the security score of lodash\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Find risky dependencies in my project",
+        "code": "Ask Claude: \"Find risky dependencies in my project\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Generate a security report",
+        "code": "Ask Claude: \"Generate a security report\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "socket": {
+            "transport": "http",
+            "url": "https://mcp.socket.dev/"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "socket": {
+            "transport": "http",
+            "url": "https://mcp.socket.dev/"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Socket server configuration with HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate with your Socket account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http socket https://mcp.socket.dev/"
+    },
+    "security": [
+      "OAuth authentication required for access",
+      "Regular security scans recommended",
+      "Monitor critical security alerts",
+      "Review and apply suggested fixes"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Rate limit exceeded - 429 Too Many Requests error",
+        "solution": "Rate limit: 600 requests/minute. Implement random exponential backoff for retries. Space out API calls to stay under 10 req/second average. Contact support@socket.dev to request rate limit increase for organization."
+      },
+      {
+        "issue": "Authentication failed or API key invalid",
+        "solution": "Provide API token via HTTP Basic auth with token as username, blank password. Use Authorization: Bearer YOUR_API_KEY header format. Verify API key in Socket Dashboard settings. Generate new key if expired or compromised."
+      },
+      {
+        "issue": "Package scan failed or unsupported package manager",
+        "solution": "Socket supports npm, PyPI, Go modules, Maven, and Packagist. Verify package.json or requirements.txt format valid. Check package exists in registry. Review scan output for specific error messages."
+      },
+      {
+        "issue": "SBOM export or security report generation errors",
+        "solution": "Verify account has access to SBOM export features. Check report snapshot hash authentication (SHA2). Ensure sufficient permissions for license policy management. Review API response for specific error details."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "scan"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "square-mcp-server",
+    "description": "Build on Square APIs for payments, inventory, and order management",
+    "author": "Square",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "payments",
+      "square",
+      "pos",
+      "inventory",
+      "commerce"
+    ],
+    "content": "Integrate Square's commerce platform with Claude for payment processing and business management.",
+    "title": "Square MCP Server",
+    "displayTitle": "Square MCP Server",
+    "seoTitle": "Square MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://developer.squareup.com/docs/mcp",
+    "features": [
+      "Process payments and refunds",
+      "Manage inventory levels and catalogs",
+      "Handle orders and fulfillment",
+      "Track customer profiles and history",
+      "Manage multiple business locations"
+    ],
+    "useCases": [
+      "Process customer payments efficiently",
+      "Update inventory levels in real-time",
+      "Create customer profiles for marketing",
+      "Generate sales reports and analytics",
+      "Track order fulfillment status"
+    ],
+    "examples": [
+      {
+        "title": "Process a $50 payment",
+        "code": "Ask Claude: \"Process a $50 payment\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Check inventory for SKU-123",
+        "code": "Ask Claude: \"Check inventory for SKU-123\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Create order for customer",
+        "code": "Ask Claude: \"Create order for customer\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Generate today's sales report",
+        "code": "Ask Claude: \"Generate today's sales report\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "square": {
+            "transport": "sse",
+            "url": "https://mcp.squareup.com/sse"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "square": {
+            "transport": "sse",
+            "url": "https://mcp.squareup.com/sse"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Square server configuration with SSE transport",
+          "Restart Claude Desktop",
+          "Authenticate with your Square account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport sse square https://mcp.squareup.com/sse"
+    },
+    "security": [
+      "OAuth authentication for secure access",
+      "PCI compliance for payment processing",
+      "Test in sandbox environment first",
+      "Monitor transaction logs"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Rate limit exceeded - 429 RATE_LIMITED error returned",
+        "solution": "Square doesn't publish specific rate limits but throttles high request volumes. Implement exponential backoff for retries. Reduce request frequency. Batch operations where possible. Contact support if legitimate traffic blocked."
+      },
+      {
+        "issue": "Authentication failed - UNAUTHORIZED error using wrong environment",
+        "solution": "Production: https://connect.squareup.com/v2. Sandbox: https://connect.squareupsandbox.com/v2. Use correct access token for environment from Developer Console. Verify application ID matches environment. Check token not expired or revoked."
+      },
+      {
+        "issue": "Sandbox limitations - payment method not supported",
+        "solution": "Sandbox only supports credit/debit card payments. Afterpay, Cash App Pay, Google Pay, Apple Pay not available in Sandbox. Test payment flows in production with real cards after Sandbox validation."
+      },
+      {
+        "issue": "Location permissions insufficient for operation",
+        "solution": "Verify merchant account has active location enabled. Check access token has permissions for specific location ID. Ensure user role allows API operations. Review location settings in Square Dashboard."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "payments"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "stripe-mcp-server",
+    "description": "Payment processing, subscription management, and financial transaction handling",
+    "author": "Stripe",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "payments",
+      "stripe",
+      "billing",
+      "subscriptions",
+      "commerce"
+    ],
+    "content": "Integrate Stripe payment capabilities directly into Claude for payment processing and financial operations.",
+    "title": "Stripe MCP Server",
+    "displayTitle": "Stripe MCP Server",
+    "seoTitle": "Stripe MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://docs.stripe.com/mcp",
+    "features": [
+      "Process payments and refunds programmatically",
+      "Manage customer subscriptions and billing cycles",
+      "View transaction history and payment analytics",
+      "Handle billing operations and invoice generation",
+      "Monitor payment metrics and revenue data"
+    ],
+    "useCases": [
+      "Process customer refunds quickly",
+      "Update subscription plans for customers",
+      "Generate billing reports and analytics",
+      "Analyze payment trends and patterns",
+      "Handle failed payments and retry logic"
+    ],
+    "examples": [
+      {
+        "title": "Processing Refunds",
+        "code": "// Full refund for a payment\n\"Refund payment pi_1234567890 completely\"\n\n// Partial refund with reason\n\"Issue a $25 partial refund for payment pi_1234567890 with reason: customer_request\"\n\n// Refund with metadata\n\"Refund payment pi_1234567890 and add metadata: support_ticket=TICKET-123\"",
+        "language": "javascript",
+        "description": "Process full or partial refunds for payments. Include reasons and metadata for tracking. Stripe automatically handles failed payment recovery."
+      },
+      {
+        "title": "Subscription Management",
+        "code": "// List active subscriptions\n\"Show all active subscriptions for customer cus_abc123\"\n\n// Update subscription plan\n\"Upgrade customer cus_abc123 from price_basic to price_premium starting next billing cycle\"\n\n// Cancel subscription\n\"Cancel subscription sub_xyz at period end\"",
+        "language": "javascript",
+        "description": "Manage customer subscriptions including upgrades, downgrades, and cancellations. Control billing cycles and proration settings."
+      },
+      {
+        "title": "Revenue and Analytics",
+        "code": "// Monthly revenue report\n\"Show total revenue and transaction count for September 2024\"\n\n// Revenue by product\n\"Break down revenue by product for the last quarter\"\n\n// Failed payment analysis\n\"List all failed payments in the last 30 days with reasons\"",
+        "language": "javascript",
+        "description": "Generate revenue reports, analyze payment trends, and identify failed transactions. Essential for financial reporting and business intelligence."
+      },
+      {
+        "title": "Customer and Invoice Management",
+        "code": "// Create invoice\n\"Create an invoice for customer cus_abc123 with items:\n- price_item1 x 2\n- price_item2 x 1\nDue in 14 days\"\n\n// Send invoice reminder\n\"Send payment reminder for invoice in_xyz to customer\"\n\n// View customer payment history\n\"Show all payments for customer cus_abc123 in the last 6 months\"",
+        "language": "javascript",
+        "description": "Manage invoices, send payment reminders, and track customer payment history. Automate billing workflows for B2B customers."
+      },
+      {
+        "title": "Payment Method Management",
+        "code": "// List customer payment methods\n\"Show all payment methods for customer cus_abc123\"\n\n// Set default payment method\n\"Set payment method pm_xyz as default for customer cus_abc123\"\n\n// Remove expired cards\n\"List and remove all expired payment methods\"",
+        "language": "javascript",
+        "description": "Manage customer payment methods including cards, bank accounts, and wallets. Update default methods and clean up expired entries."
+      },
+      {
+        "title": "Webhook and Event Handling",
+        "code": "// List recent events\n\"Show recent webhook events for type payment_intent.succeeded\"\n\n// Retry failed webhooks\n\"Retry failed webhook deliveries from the last 24 hours\"\n\n// Monitor webhook health\n\"Show webhook endpoint health status and delivery success rate\"",
+        "language": "javascript",
+        "description": "Monitor webhook events, retry failed deliveries, and track integration health. Essential for maintaining reliable payment processing."
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "stripe": {
+            "transport": "http",
+            "url": "https://mcp.stripe.com"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "stripe": {
+            "transport": "http",
+            "url": "https://mcp.stripe.com"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Stripe server configuration with HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate with your Stripe account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http stripe https://mcp.stripe.com"
+    },
+    "security": [
+      "OAuth ensures secure access to Stripe data",
+      "Test in Stripe test mode before production",
+      "Log all payment operations for audit trail",
+      "Follow PCI compliance guidelines"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Rate limit exceeded - 429 Too Many Requests error",
+        "solution": "Rate limits: 100 req/sec live mode, 25 req/sec test mode. Check RateLimit-Remaining header in responses. Implement exponential backoff for retries. Use webhooks instead of polling. Batch operations where possible."
+      },
+      {
+        "issue": "Test mode vs live mode object mismatch",
+        "solution": "Test and live mode objects completely separate. Use sk_test_ keys for test mode, sk_live_ for production. Verify API key matches intended environment. Check Dashboard mode toggle matches code environment."
+      },
+      {
+        "issue": "Webhook delivery failures or retry exhaustion",
+        "solution": "Live mode: Stripe retries 3 days with exponential backoff. Test mode: 3 retries over few hours. Ensure endpoint returns 200 status quickly. Check webhook signing secret matches. Review endpoint logs for errors."
+      },
+      {
+        "issue": "Authentication failed or API key invalid",
+        "solution": "Verify API key starts with sk_test_ or sk_live_ prefix. Check key not revoked in Stripe Dashboard. Ensure correct publishable/secret key pair. Re-generate keys if compromised. Use restricted keys for limited scopes."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "refund"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "stytch-mcp-server",
+    "description": "Configure and manage Stytch authentication services and workspace settings",
+    "author": "Stytch",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "authentication",
+      "stytch",
+      "identity",
+      "security",
+      "auth"
+    ],
+    "content": "Manage Stytch authentication configurations and workspace settings for identity management.",
+    "title": "Stytch MCP Server",
+    "displayTitle": "Stytch MCP Server",
+    "seoTitle": "Stytch MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://stytch.com/docs/workspace-management/stytch-mcp",
+    "features": [
+      "Configure authentication methods and flows",
+      "Manage redirect URLs and callbacks",
+      "Customize email templates and branding",
+      "Update workspace security settings",
+      "Monitor authentication events and metrics"
+    ],
+    "useCases": [
+      "Configure authentication flows",
+      "Update email templates for notifications",
+      "Manage redirect URLs for OAuth",
+      "Set security policies and rules",
+      "Test authentication methods"
+    ],
+    "examples": [
+      {
+        "title": "Add new redirect URL for production",
+        "code": "Ask Claude: \"Add new redirect URL for production\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Update password reset email template",
+        "code": "Ask Claude: \"Update password reset email template\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Configure MFA settings",
+        "code": "Ask Claude: \"Configure MFA settings\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Show authentication metrics for this week",
+        "code": "Ask Claude: \"Show authentication metrics for this week\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "stytch": {
+            "transport": "http",
+            "url": "http://mcp.stytch.dev/mcp"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "stytch": {
+            "transport": "http",
+            "url": "http://mcp.stytch.dev/mcp"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Stytch server configuration with HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate with your Stytch account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http stytch http://mcp.stytch.dev/mcp"
+    },
+    "security": [
+      "OAuth authentication for access",
+      "Test in sandbox environment first",
+      "Regular security audits",
+      "Monitor failed authentication attempts"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Rate limit exceeded - 429 error returned",
+        "solution": "Stytch enforces rate limits per endpoint. Check error response for Retry-After header. Implement exponential backoff for retries. Review rate limits docs for specific endpoint limits. Contact support for increase requests."
+      },
+      {
+        "issue": "Invalid redirect URL or scheme error",
+        "solution": "Add redirect URL in Stytch Dashboard under redirect_urls. Use https:// for production (http:// only for localhost loopback). Verify URL exact match (case-sensitive). Check no duplicate redirect URLs configured."
+      },
+      {
+        "issue": "Misconfigured client or redirect URL not allowed",
+        "solution": "Ensure client has valid redirect_urls in Dashboard. Public clients require proper scheme (https or http loopback only). Localhost restrictions apply to certain clients. Verify client ID matches project."
+      },
+      {
+        "issue": "Authentication failed or project access denied",
+        "solution": "Verify API keys match environment (test vs live). Check project_id and secret from Stytch Dashboard. Ensure user has project access permissions. Re-generate API keys if compromised. Review project security settings."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "configure"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "vercel-mcp-server",
+    "description": "Manage deployments, analyze logs, and control Vercel projects",
+    "author": "Vercel",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "deployment",
+      "vercel",
+      "hosting",
+      "devops",
+      "infrastructure"
+    ],
+    "content": "Control Vercel deployments and infrastructure through Claude for seamless deployment management.",
+    "title": "Vercel MCP Server",
+    "displayTitle": "Vercel MCP Server",
+    "seoTitle": "Vercel MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://vercel.com/docs/mcp/vercel-mcp",
+    "features": [
+      "Search and navigate Vercel documentation",
+      "Manage projects and deployment configurations",
+      "Analyze deployment logs and build outputs",
+      "Monitor build status and performance",
+      "Configure environment variables and domains"
+    ],
+    "useCases": [
+      "Deploy new versions to production",
+      "Debug build failures and errors",
+      "Analyze deployment logs for issues",
+      "Manage environment variables across projects",
+      "Configure custom domains and redirects"
+    ],
+    "examples": [
+      {
+        "title": "Deploy the latest commit to production",
+        "code": "Ask Claude: \"Deploy the latest commit to production\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Show me the build logs for the failed deployment",
+        "code": "Ask Claude: \"Show me the build logs for the failed deployment\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Update the API_KEY environment variable",
+        "code": "Ask Claude: \"Update the API_KEY environment variable\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "List all recent deployments",
+        "code": "Ask Claude: \"List all recent deployments\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "vercel": {
+            "transport": "http",
+            "url": "https://mcp.vercel.com/"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "vercel": {
+            "transport": "http",
+            "url": "https://mcp.vercel.com/"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Vercel server configuration with HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate with your Vercel account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http vercel https://mcp.vercel.com/"
+    },
+    "security": [
+      "OAuth authentication required for access",
+      "Use team tokens for shared projects",
+      "Monitor deployment permissions carefully",
+      "Review changes before production deploys"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Build quota exceeded or deployment fails from quota limits",
+        "solution": "Check quota usage at vercel.com/dashboard/usage. Plans have specific build time/memory limits. Upgrade plan for higher quotas. Optimize build scripts to reduce time. Review vercel.com/docs/limits for plan limits."
+      },
+      {
+        "issue": "Deployment fails with missing environment variables",
+        "solution": "Add environment variables in Project Settings > Environment Variables. Set correct environment scope (Production/Preview/Development). Redeploy after adding variables. Check .env.local not committed to git."
+      },
+      {
+        "issue": "API rate limit errors from third-party services",
+        "solution": "Implement rate limiting with Vercel WAF. Use Vercel KV/Redis for rate limit tracking. Check third-party API quotas not exceeded. Add delays between API calls. Use edge functions for caching."
+      },
+      {
+        "issue": "Authentication failed or insufficient project permissions",
+        "solution": "Verify Vercel API token has required scopes. Check team membership and project access in Dashboard. Use team tokens for shared projects. Re-authenticate OAuth connection. Ensure token not expired or revoked."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "deploy"
+    ],
+    "configLocation": "claude_desktop_config.json"
+  },
+  {
+    "slug": "workato-mcp-server",
+    "description": "Access any application, workflows, or data via Workato's integration platform",
+    "author": "Workato",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "automation",
+      "workato",
+      "integration",
+      "workflow",
+      "iPaaS"
+    ],
+    "content": "Connect to hundreds of applications through Workato's enterprise automation and integration platform.",
+    "title": "Workato MCP Server",
+    "displayTitle": "Workato MCP Server",
+    "seoTitle": "Workato MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://docs.workato.com/mcp.html",
+    "features": [
+      "Execute recipes (workflows) on demand",
+      "Access connected application data",
+      "Retrieve and update cross-system data",
+      "Monitor job execution status",
+      "Trigger complex automation workflows"
+    ],
+    "useCases": [
+      "Trigger complex multi-system workflows",
+      "Integrate data across enterprise applications",
+      "Access any connected system through one interface",
+      "Automate business processes end-to-end",
+      "Execute custom recipes on demand"
+    ],
+    "examples": [
+      {
+        "title": "Sync Salesforce contacts to HubSpot",
+        "code": "Ask Claude: \"Sync Salesforce contacts to HubSpot\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Execute the invoice processing workflow",
+        "code": "Ask Claude: \"Execute the invoice processing workflow\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Check status of overnight data sync",
+        "code": "Ask Claude: \"Check status of overnight data sync\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Trigger customer onboarding recipe",
+        "code": "Ask Claude: \"Trigger customer onboarding recipe\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "workato": {
+            "transport": "http",
+            "url": "https://your-workspace.workato.com/mcp"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "workato": {
+            "transport": "http",
+            "url": "https://your-workspace.workato.com/mcp"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Access your Workato workspace",
+          "Navigate to MCP configuration section",
+          "Generate your custom MCP endpoint",
+          "Add the generated URL to Claude Desktop configuration"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http workato YOUR_WORKATO_MCP_URL"
+    },
+    "security": [
+      "OAuth or API key authentication",
+      "Role-based access control",
+      "Audit trail for all operations",
+      "Test recipes in sandbox environment"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Webhook rate limit exceeded - 429 Too Many Requests",
+        "solution": "Rate limit: 20 events/sec (72K events/hour), burst 9K events. Check X-Rate-Limit-Remaining, X-Rate-Limit-Reset headers. Wait for Retry-After duration. Reduce event frequency. Optimize recipes to minimize calls."
+      },
+      {
+        "issue": "Recipe execution failed - job error during processing",
+        "solution": "Go to Jobs tab, select failed job, inspect Data tab step-by-step. Check trigger configuration correct. Verify app connections active. Review error message for specific issue. Re-authenticate connections if needed."
+      },
+      {
+        "issue": "API rate limit violation from external app (Salesforce, Slack)",
+        "solution": "Use Wait/Batch/Conditional steps to rate-limit API calls programmatically. Reduce number of actions per recipe. Optimize to make minimal calls. RecipeOps monitors violations every 5 minutes. Review app-specific rate limits."
+      },
+      {
+        "issue": "Recipe not running or trigger not activating",
+        "solution": "Verify recipe is active (not paused). Check trigger configuration matches event source. Test trigger with sample data. Review connection permissions allow trigger access. Check app webhook configuration if using webhook trigger."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "execute"
+    ],
+    "configLocation": "custom_generated"
+  },
+  {
+    "slug": "zapier-mcp-server",
+    "description": "Connect to nearly 8,000 apps through Zapier's automation platform",
+    "author": "Zapier",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "automation",
+      "zapier",
+      "integration",
+      "workflow",
+      "no-code"
+    ],
+    "content": "Access thousands of app integrations through Zapier's no-code automation platform.",
+    "title": "Zapier MCP Server",
+    "displayTitle": "Zapier MCP Server",
+    "seoTitle": "Zapier MCP Server for Claude",
+    "source": "official",
+    "documentationUrl": "https://help.zapier.com/hc/en-us/articles/36265392843917",
+    "features": [
+      "Trigger Zaps (workflows) programmatically",
+      "Access data from connected apps",
+      "Read and write cross-application data",
+      "Monitor Zap execution status",
+      "Execute custom actions across apps"
+    ],
+    "useCases": [
+      "Trigger multi-step workflows across apps",
+      "Connect disparate systems without code",
+      "Automate repetitive tasks",
+      "Sync data between applications",
+      "Process webhooks and events"
+    ],
+    "examples": [
+      {
+        "title": "Trigger the new customer onboarding Zap",
+        "code": "Ask Claude: \"Trigger the new customer onboarding Zap\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Send Slack notification when deal closes",
+        "code": "Ask Claude: \"Send Slack notification when deal closes\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Add form submission to Google Sheets",
+        "code": "Ask Claude: \"Add form submission to Google Sheets\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      },
+      {
+        "title": "Create Trello card from email",
+        "code": "Ask Claude: \"Create Trello card from email\"",
+        "language": "plaintext",
+        "description": "Common usage pattern for this MCP server"
+      }
+    ],
+    "category": "mcp",
+    "configuration": {
+      "claudeDesktop": {
+        "mcp": {
+          "zapier": {
+            "transport": "http",
+            "url": "https://mcp.zapier.com/YOUR_GENERATED_URL"
+          }
+        }
+      },
+      "claudeCode": {
+        "mcp": {
+          "zapier": {
+            "transport": "http",
+            "url": "https://mcp.zapier.com/YOUR_GENERATED_URL"
+          }
+        }
+      }
+    },
+    "package": null,
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Visit mcp.zapier.com",
+          "Sign in to your Zapier account",
+          "Generate your personal MCP endpoint",
+          "Copy the provided URL and add to Claude Desktop configuration"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http zapier YOUR_GENERATED_URL"
+    },
+    "security": [
+      "Personal authentication tokens",
+      "Zap-level permission controls",
+      "Monitor task usage limits",
+      "Test Zaps before enabling"
+    ],
+    "troubleshooting": [
+      {
+        "issue": "Task limit exceeded or Zap throttled without clear error",
+        "solution": "Check Dashboard > Usage for daily/monthly task quotas. Each action counts as one task. Zaps throttled if exceeding plan limits or burst thresholds. Add Delay after Queue step to manage rate. Upgrade plan for higher limits."
+      },
+      {
+        "issue": "API rate limit errors from connected apps",
+        "solution": "Check app-specific API usage limits in Zap History. Batch tasks where possible. Implement delays between steps (Delay action). Upgrade app plan if hitting external service limits. Use webhooks instead of polling triggers."
+      },
+      {
+        "issue": "Zap fails with authentication or connection errors",
+        "solution": "Use Zap History to inspect failed tasks and error codes. Reauthenticate accounts if credentials expired. Check app connection status in My Apps. Verify OAuth redirect URLs correct. Test connection with sample trigger."
+      },
+      {
+        "issue": "Data formatting or missing field errors in multi-step Zaps",
+        "solution": "Check payloads in Zap History for missing/malformed data. Use Formatter to transform data between steps. Verify required fields mapped correctly. Test each step individually. Enable detailed logging for debugging."
+      }
+    ],
+    "requiresAuth": true,
+    "permissions": [
+      "read",
+      "write",
+      "trigger"
+    ],
+    "configLocation": "user_specific"
+  }
+];
+
+export const mcpFullBySlug = new Map(mcpFull.map(item => [item.slug, item]));
+
+export function getMcpFullBySlug(slug: string) {
+  return mcpFullBySlug.get(slug) || null;
+}
+
+export type McpFull = typeof mcpFull[number];

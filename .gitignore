@@ -36,7 +36,7 @@ lerna-debug.log*
 .claude/
 .cursor/
 src/generated/
-generated/
+# generated/ - NOW TRACKED for faster builds (content rarely changes)
 
 # Build-generated API files
 public/static-api/
@@ -53,7 +53,8 @@ content/api-docs/*.mdx
 
 # Cache files
 .eslintcache
-*.tsbuildinfo
+# Keep TypeScript incremental cache in .next/cache/ (tracked by Vercel)
+# *.tsbuildinfo - removed to allow .next/cache/tsconfig.tsbuildinfo
 coverage/
 .coverage-baseline.json
 .coverage-history.json
@@ -102,3 +103,5 @@ config/tools/tech-debt/.history.json
 
 *storybook.log
 storybook-static
+
+docs/

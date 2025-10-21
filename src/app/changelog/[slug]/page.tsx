@@ -31,7 +31,7 @@ import { BreadcrumbSchema } from '@/src/components/infra/structured-data/breadcr
 import { ChangelogArticleStructuredData } from '@/src/components/infra/structured-data/changelog-structured-data';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 import { Separator } from '@/src/components/primitives/separator';
-import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
+import { getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
@@ -44,14 +44,12 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Generate static params for all changelog entries
+ * OPTIMIZATION: Use slug-only loader for faster generation
  */
 export async function generateStaticParams() {
   try {
-    const entries = await getAllChangelogEntries();
-
-    return entries.map((entry) => ({
-      slug: entry.slug,
-    }));
+    const { getChangelogSlugsOnly } = await import('@/src/lib/changelog/loader');
+    return await getChangelogSlugsOnly();
   } catch (error) {
     logger.error(
       'Failed to generate changelog static params',

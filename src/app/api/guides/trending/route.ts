@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { contentCache } from '@/src/lib/cache.server';
 import { UI_CONFIG } from '@/src/lib/constants';
 import { CACHE_CONFIG } from '@/src/lib/constants/cache';
-import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { createApiRoute } from '@/src/lib/error-handler';
 import { rateLimiters } from '@/src/lib/rate-limiter.server';
 import {
@@ -106,13 +105,15 @@ const route = createApiRoute({
         });
       }
 
-      // OPTIMIZATION: Use new trending calculator (calculates from view counters)
-      // Load content for this category
-      const guides = await getContentByCategory('guides');
+      // OPTIMIZATION: Load metadata-only (not full content) for trending calculation
+      // getBatchTrendingData only uses category+slug for Redis lookups, then maps results back
+      const { lazyContentLoaders } = await import('@/src/components/shared/lazy-content-loaders');
+      const guidesMetadata = await lazyContentLoaders.guides();
 
       // Calculate trending using Redis view counts
+      // Type assertion safe: getBatchTrendingData only reads slug/category from items
       const trendingData = await getBatchTrendingData({
-        guides: guides.map((item) => ({ ...item, category: 'guides' as const })),
+        guides: guidesMetadata as any,
       });
 
       // Extract trending items and paginate

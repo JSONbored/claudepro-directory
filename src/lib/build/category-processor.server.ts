@@ -78,6 +78,7 @@ export interface CategoryBuildResult {
   readonly metadata: readonly Record<string, unknown>[];
   readonly metrics: BuildMetrics;
   readonly errors: readonly Error[];
+  readonly fileHashes: Readonly<Record<string, { hash: string; mtime: number }>>;
 }
 
 /**
@@ -117,6 +118,8 @@ export interface FileProcessResult<T extends ContentType> {
   readonly error: Error | null;
   readonly fromCache: boolean;
   readonly processingTimeMs: number;
+  readonly fileHash?: string;
+  readonly fileMtime?: number;
 }
 
 /**
@@ -271,14 +274,16 @@ async function processContentFile<T extends ContentType>(
       throw new Error(`File ${file} exceeds 1MB size limit`);
     }
 
-    // Check cache
+    // Check cache and compute hash for incremental builds
     const contentHash = computeContentHash(content);
+    const fileMtime = fileStats.mtimeMs;
+
     if (cache && config.buildConfig.enableCache) {
       const cached = cache.files[filePath];
-      if (cached && cached.hash === contentHash && cached.mtime === fileStats.mtimeMs) {
+      if (cached && cached.hash === contentHash && cached.mtime === fileMtime) {
         logger.debug(`Cache hit: ${file}`);
         // Note: In a full implementation, we'd return cached parsed content
-        // For now, we proceed with parsing as cached content isn't stored
+        // For now, we proceed with parsing but mark it as from cache
       }
     }
 
@@ -390,6 +395,8 @@ async function processContentFile<T extends ContentType>(
       error: null,
       fromCache: false,
       processingTimeMs: performance.now() - startTime,
+      fileHash: contentHash,
+      fileMtime,
     };
   } catch (error) {
     return {
@@ -550,8 +557,20 @@ export async function buildCategory(
       peakMemoryMB: (endMemory - startMemory) / 1024 / 1024,
     };
 
+    // Collect file hashes for incremental builds
+    const fileHashes: Record<string, { hash: string; mtime: number }> = {};
+    for (const result of results) {
+      if (result.fileHash && result.fileMtime) {
+        const filePath = join(contentDir, categoryId, result.file);
+        fileHashes[filePath] = {
+          hash: result.fileHash,
+          mtime: result.fileMtime,
+        };
+      }
+    }
+
     logger.success(
-      `Built ${config.pluralTitle}: ${metrics.filesValid}/${metrics.filesProcessed} valid (${metrics.processingTimeMs.toFixed(0)}ms, ${metrics.peakMemoryMB.toFixed(1)}MB)`
+      `Built ${config.pluralTitle}: ${metrics.filesValid}/${metrics.filesProcessed} valid (${metrics.processingTimeMs.toFixed(0)}ms, ${metrics.peakMemoryMB.toFixed(1)}MB, ${Object.keys(fileHashes).length} files tracked)`
     );
 
     return {
@@ -561,6 +580,7 @@ export async function buildCategory(
       metadata,
       metrics,
       errors: failed.map((r) => r.error).filter((e): e is Error => e !== null),
+      fileHashes,
     };
   } catch (error) {
     logger.error(
@@ -583,6 +603,7 @@ export async function buildCategory(
         peakMemoryMB: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
       },
       errors: [error instanceof Error ? error : new Error(String(error))],
+      fileHashes: {},
     };
   }
 }

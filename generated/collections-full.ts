@@ -1,0 +1,889 @@
+/**
+ * Auto-generated full content file
+ * Category: Collections
+ *
+ * DO NOT EDIT MANUALLY
+ * @see scripts/build-content.ts
+ */
+
+import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
+
+export const collectionsFull: CollectionContent[] = [
+  {
+    "slug": "api-development-starter-kit",
+    "description": "Complete toolkit for building and documenting RESTful APIs with automated testing and documentation generation. Perfect for backend developers starting new API projects.",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-02",
+    "tags": [
+      "api",
+      "backend",
+      "rest",
+      "development",
+      "documentation",
+      "testing"
+    ],
+    "title": "API Development Starter Kit",
+    "displayTitle": "API Development Starter Kit",
+    "seoTitle": "API Development Kit",
+    "source": "community",
+    "features": [
+      "Complete API development workflow",
+      "Automated documentation generation",
+      "Built-in testing and debugging tools",
+      "REST API design best practices"
+    ],
+    "useCases": [
+      "Building new REST APIs from scratch",
+      "Standardizing API development across teams",
+      "Learning API development best practices",
+      "Rapid prototyping of API endpoints"
+    ],
+    "category": "collections",
+    "collectionType": "starter-kit",
+    "difficulty": "beginner",
+    "items": [
+      {
+        "category": "agents",
+        "slug": "api-builder-agent",
+        "reason": "Helps design and build RESTful API endpoints following best practices"
+      },
+      {
+        "category": "commands",
+        "slug": "docs",
+        "reason": "Generates comprehensive API documentation automatically"
+      },
+      {
+        "category": "commands",
+        "slug": "generate-tests",
+        "reason": "Creates unit and integration tests for API endpoints"
+      },
+      {
+        "category": "commands",
+        "slug": "debug",
+        "reason": "Helps debug API issues and trace request/response flows"
+      }
+    ],
+    "installationOrder": [
+      "api-builder-agent",
+      "docs",
+      "generate-tests",
+      "debug"
+    ],
+    "prerequisites": [
+      "Node.js 18 or higher",
+      "Basic understanding of REST API concepts",
+      "Code editor with Claude integration"
+    ],
+    "estimatedSetupTime": "20 minutes",
+    "compatibility": {
+      "claudeDesktop": true,
+      "claudeCode": true
+    },
+    "troubleshooting": [
+      {
+        "issue": "API Builder agent conflicts with existing test framework",
+        "solution": "Install items in the specified order: api-builder-agent first, then docs, generate-tests, debug. Run npm ls to verify no peer dependency conflicts between generated code and test framework."
+      },
+      {
+        "issue": "Documentation generation fails after installing debug command",
+        "solution": "Ensure all items share compatible Node.js versions. Check package.json engines field across agent and commands. Reinstall docs command after verifying Node 18+ is active."
+      },
+      {
+        "issue": "Missing test dependencies when using generate-tests command",
+        "solution": "Install testing framework before collection setup. Run npm install jest @types/jest or your preferred test runner. Then reinstall generate-tests command to detect framework."
+      },
+      {
+        "issue": "Installation order not followed causing endpoint conflicts",
+        "solution": "Uninstall all collection items using Claude Code settings. Reinstall strictly following installationOrder array: api-builder-agent, docs, generate-tests, debug. Restart Claude after each."
+      },
+      {
+        "issue": "Debug command cannot trace requests from API Builder agent",
+        "solution": "Enable request logging in API Builder agent settings first. Install debug command last to allow proper hook integration. Verify both items are enabled in Claude Code preferences."
+      }
+    ]
+  },
+  {
+    "slug": "aws-cloud-infrastructure-bundle",
+    "description": "Complete AWS infrastructure management toolkit combining cloud architecture expertise, CloudFormation validation, and AWS services integration. Perfect for teams building and maintaining cloud-native applications on AWS.",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-02",
+    "tags": [
+      "aws",
+      "cloud",
+      "infrastructure",
+      "devops",
+      "cloudformation",
+      "serverless"
+    ],
+    "title": "AWS Cloud Infrastructure Bundle",
+    "displayTitle": "Aws Cloud Infrastructure Bundle",
+    "seoTitle": "AWS Infra Bundle",
+    "source": "community",
+    "features": [
+      "AWS architecture design and planning",
+      "CloudFormation template validation",
+      "Multi-service AWS integration",
+      "DevOps and SRE best practices"
+    ],
+    "useCases": [
+      "Building cloud-native applications on AWS",
+      "Managing AWS infrastructure as code",
+      "Migrating applications to AWS",
+      "Implementing DevOps practices on AWS"
+    ],
+    "category": "collections",
+    "collectionType": "use-case",
+    "difficulty": "advanced",
+    "items": [
+      {
+        "category": "rules",
+        "slug": "aws-cloud-architect",
+        "reason": "Expert guidance for AWS architecture and design patterns"
+      },
+      {
+        "category": "rules",
+        "slug": "devops-sre-expert",
+        "reason": "DevOps and SRE best practices for cloud operations"
+      },
+      {
+        "category": "mcp",
+        "slug": "aws-services-mcp-server",
+        "reason": "Direct integration with AWS services and APIs"
+      },
+      {
+        "category": "hooks",
+        "slug": "aws-cloudformation-validator",
+        "reason": "Validates CloudFormation templates before deployment"
+      },
+      {
+        "category": "agents",
+        "slug": "backend-architect-agent",
+        "reason": "Designs scalable backend architectures for cloud deployment"
+      }
+    ],
+    "installationOrder": [
+      "aws-cloud-architect",
+      "devops-sre-expert",
+      "backend-architect-agent",
+      "aws-services-mcp-server",
+      "aws-cloudformation-validator"
+    ],
+    "prerequisites": [
+      "AWS account with appropriate permissions",
+      "Basic understanding of cloud computing concepts",
+      "AWS CLI configured locally",
+      "CloudFormation or infrastructure-as-code experience"
+    ],
+    "estimatedSetupTime": "40 minutes",
+    "compatibility": {
+      "claudeDesktop": true,
+      "claudeCode": true
+    },
+    "troubleshooting": [
+      {
+        "issue": "AWS MCP server fails: 'Credentials not configured' error",
+        "solution": "Run aws configure to set credentials. Ensure AWS_REGION, AWS_ACCESS_KEY_ID, and AWS_SECRET_ACCESS_KEY are in environment or ~/.aws/credentials file."
+      },
+      {
+        "issue": "CloudFormation validator conflicts with AWS services MCP",
+        "solution": "Install validator hook after AWS MCP server. Update config order: MCP servers first, then hooks. Restart to reinitialize hook dependency chain."
+      },
+      {
+        "issue": "Backend architect agent and AWS rules give contradictory advice",
+        "solution": "Prioritize AWS cloud architect rule for AWS-specific patterns. Use backend architect for general design. Set rule precedence in config hierarchy."
+      },
+      {
+        "issue": "AWS CLI version 1.x incompatible with MCP server features",
+        "solution": "Upgrade to AWS CLI v2: curl https://awscli.amazonaws.com/install | bash. Verify with aws --version. MCP server requires CLI v2.0+ for SSO support."
+      },
+      {
+        "issue": "Permission errors when validator checks CloudFormation templates",
+        "solution": "Grant IAM permissions: cloudformation:ValidateTemplate and cloudformation:DescribeStacks. Add to AWS user/role policy, then restart validator hook."
+      }
+    ]
+  },
+  {
+    "slug": "backend-development-suite",
+    "description": "Full-featured backend development environment combining architecture planning, database design, and cloud services integration. Perfect for building scalable server-side applications.",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-02",
+    "tags": [
+      "backend",
+      "architecture",
+      "database",
+      "cloud",
+      "aws",
+      "infrastructure"
+    ],
+    "title": "Backend Development Suite",
+    "displayTitle": "Backend Development Suite",
+    "seoTitle": "Backend Development",
+    "source": "community",
+    "features": [
+      "Architecture design and planning",
+      "Database schema design and optimization",
+      "Cloud services integration (AWS)",
+      "API development and documentation"
+    ],
+    "useCases": [
+      "Building new backend services from scratch",
+      "Migrating applications to cloud infrastructure",
+      "Designing scalable database architectures",
+      "Implementing microservices patterns"
+    ],
+    "category": "collections",
+    "collectionType": "use-case",
+    "difficulty": "advanced",
+    "items": [
+      {
+        "category": "agents",
+        "slug": "backend-architect-agent",
+        "reason": "Designs scalable backend architectures and system designs"
+      },
+      {
+        "category": "agents",
+        "slug": "database-specialist-agent",
+        "reason": "Provides expert database design and optimization guidance"
+      },
+      {
+        "category": "agents",
+        "slug": "api-builder-agent",
+        "reason": "Helps build robust RESTful APIs"
+      },
+      {
+        "category": "mcp",
+        "slug": "aws-services-mcp-server",
+        "reason": "Integrates AWS cloud services for infrastructure management"
+      }
+    ],
+    "installationOrder": [
+      "backend-architect-agent",
+      "database-specialist-agent",
+      "aws-services-mcp-server",
+      "api-builder-agent"
+    ],
+    "prerequisites": [
+      "Node.js 18 or higher",
+      "AWS account (for AWS MCP server)",
+      "Understanding of backend development concepts",
+      "Database knowledge (SQL or NoSQL)"
+    ],
+    "estimatedSetupTime": "30 minutes",
+    "compatibility": {
+      "claudeDesktop": true,
+      "claudeCode": true
+    },
+    "troubleshooting": [
+      {
+        "issue": "Multiple agents provide conflicting architectural recommendations",
+        "solution": "Install backend-architect-agent first to establish system design. Database and API agents will follow architectural decisions. Enable only one agent at a time when designing new components."
+      },
+      {
+        "issue": "AWS MCP server version incompatible with agent-generated code",
+        "solution": "Verify aws-services-mcp-server supports AWS SDK v3. Check package.json for @aws-sdk version compatibility with generated code. Update MCP server to latest version matching SDK requirements."
+      },
+      {
+        "issue": "Database agent schema conflicts with API Builder endpoints",
+        "solution": "Follow installationOrder: install database-specialist-agent before api-builder-agent. Database agent sets schema first, API agent generates compatible endpoints matching established design."
+      },
+      {
+        "issue": "Missing AWS credentials prevent MCP server initialization",
+        "solution": "Configure AWS credentials first: run aws configure or set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY. Verify with aws sts get-caller-identity then install aws-services-mcp-server."
+      },
+      {
+        "issue": "Collection items require different Node.js versions",
+        "solution": "All items require Node 18+. Verify with node --version before installation. Use nvm to switch versions: nvm use 18. Reinstall entire collection after activating correct Node version."
+      }
+    ]
+  },
+  {
+    "slug": "code-quality-toolkit",
+    "description": "Comprehensive suite of tools for maintaining high code quality through automated reviews, testing, and best practice enforcement. Essential for teams focused on code excellence.",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-02",
+    "tags": [
+      "code-quality",
+      "review",
+      "testing",
+      "best-practices",
+      "refactoring"
+    ],
+    "title": "Code Quality & Review Toolkit",
+    "displayTitle": "Code Quality & Review Toolkit",
+    "seoTitle": "Code Quality & Review",
+    "source": "community",
+    "features": [
+      "Automated code review and suggestions",
+      "Test generation and coverage analysis",
+      "Code refactoring assistance",
+      "Best practice enforcement"
+    ],
+    "useCases": [
+      "Performing comprehensive code reviews",
+      "Improving test coverage across projects",
+      "Refactoring legacy code safely",
+      "Enforcing team coding standards"
+    ],
+    "category": "collections",
+    "collectionType": "workflow",
+    "difficulty": "intermediate",
+    "items": [
+      {
+        "category": "agents",
+        "slug": "code-reviewer-agent",
+        "reason": "Performs in-depth code reviews with actionable suggestions"
+      },
+      {
+        "category": "commands",
+        "slug": "generate-tests",
+        "reason": "Automatically generates unit and integration tests"
+      },
+      {
+        "category": "commands",
+        "slug": "explain",
+        "reason": "Explains complex code sections for better understanding"
+      }
+    ],
+    "installationOrder": [
+      "code-reviewer-agent",
+      "generate-tests",
+      "explain"
+    ],
+    "prerequisites": [
+      "Existing codebase to review",
+      "Understanding of testing frameworks",
+      "Git repository setup"
+    ],
+    "estimatedSetupTime": "15 minutes",
+    "compatibility": {
+      "claudeDesktop": true,
+      "claudeCode": true
+    },
+    "troubleshooting": [
+      {
+        "issue": "Code reviewer agent rejects tests generated by generate-tests",
+        "solution": "Install code-reviewer-agent first to establish quality standards. Then install generate-tests to create tests matching those standards. Configure test generation to follow reviewer's style guide."
+      },
+      {
+        "issue": "Generate-tests command missing required testing framework",
+        "solution": "Install testing framework before collection: npm install -D jest @types/jest or npm install -D vitest. Verify test runner in package.json scripts. Reinstall generate-tests after framework setup."
+      },
+      {
+        "issue": "Explain command output conflicts with reviewer agent's suggestions",
+        "solution": "Use explain command for understanding existing code, code-reviewer-agent for improvement suggestions. Install both per installationOrder. They serve complementary purposes, not conflicting ones."
+      },
+      {
+        "issue": "Collection items cannot find codebase root directory",
+        "solution": "Ensure Git repository initialized in project root: git init. All collection items detect project root via .git directory. Open Claude Code in repository root, not subdirectory."
+      },
+      {
+        "issue": "Test generation fails due to TypeScript configuration issues",
+        "solution": "Verify tsconfig.json includes test files in compilation. Add test directory to include array. Install @types packages for testing framework. Restart Claude Code after TypeScript config changes."
+      }
+    ]
+  },
+  {
+    "slug": "content-creation-workflow",
+    "description": "Streamlined workflow for content creators and marketers. Manage projects across multiple platforms, design graphics, and automate content distribution with integrated tools.",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-02",
+    "tags": [
+      "content",
+      "marketing",
+      "design",
+      "workflow",
+      "automation",
+      "social-media"
+    ],
+    "title": "Content Creation Workflow",
+    "displayTitle": "Content Creation Workflow",
+    "seoTitle": "Content Creation",
+    "source": "community",
+    "features": [
+      "Multi-platform project management",
+      "Visual content creation tools",
+      "Content distribution automation",
+      "Team collaboration features"
+    ],
+    "useCases": [
+      "Managing content calendars and campaigns",
+      "Creating social media graphics and assets",
+      "Coordinating content across multiple platforms",
+      "Streamlining content approval workflows"
+    ],
+    "category": "collections",
+    "collectionType": "workflow",
+    "difficulty": "beginner",
+    "items": [
+      {
+        "category": "mcp",
+        "slug": "asana-mcp-server",
+        "reason": "Manage content projects, tasks, and deadlines in Asana"
+      },
+      {
+        "category": "mcp",
+        "slug": "clickup-mcp-server",
+        "reason": "Alternative project management with powerful automation features"
+      },
+      {
+        "category": "mcp",
+        "slug": "canva-mcp-server",
+        "reason": "Create and edit visual content directly from Claude"
+      },
+      {
+        "category": "mcp",
+        "slug": "cloudinary-mcp-server",
+        "reason": "Manage and optimize media assets for content distribution"
+      },
+      {
+        "category": "commands",
+        "slug": "docs",
+        "reason": "Generate content briefs, documentation, and style guides"
+      }
+    ],
+    "installationOrder": [
+      "asana-mcp-server",
+      "clickup-mcp-server",
+      "canva-mcp-server",
+      "cloudinary-mcp-server",
+      "docs"
+    ],
+    "prerequisites": [
+      "Asana or ClickUp account",
+      "Canva account (free or Pro)",
+      "Cloudinary account (optional, for advanced media management)"
+    ],
+    "estimatedSetupTime": "25 minutes",
+    "compatibility": {
+      "claudeDesktop": true,
+      "claudeCode": false
+    },
+    "troubleshooting": [
+      {
+        "issue": "Asana and ClickUp MCP servers conflict when both enabled",
+        "solution": "Choose one project management tool. Edit claude_desktop_config.json to comment out the unused server. Restart Claude Desktop to apply changes."
+      },
+      {
+        "issue": "Canva MCP server fails with 'API key not found' error",
+        "solution": "Generate Canva API token at canva.com/developers. Add to config: CANVA_API_KEY=token. Verify token has design.read and design.write scopes."
+      },
+      {
+        "issue": "Cloudinary media uploads fail after Canva integration",
+        "solution": "Set unique output directories for each service. Configure Canva uploads to /canva and Cloudinary to /cloudinary in respective MCP server settings."
+      },
+      {
+        "issue": "Missing Node.js dependencies for all MCP servers in bundle",
+        "solution": "Install Node.js 18+ from nodejs.org. Run npm install -g @modelcontextprotocol/server-* for each MCP server. Verify with node --version."
+      },
+      {
+        "issue": "Collection items installed but not appearing in Claude",
+        "solution": "Verify installation order: project management first, then media tools. Check claude_desktop_config.json syntax. Restart Claude Desktop completely."
+      }
+    ]
+  },
+  {
+    "slug": "data-engineering-suite",
+    "description": "Comprehensive toolkit for data engineers working with databases, ETL pipelines, and data infrastructure. Includes database design, optimization, and cloud services integration.",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-02",
+    "tags": [
+      "data",
+      "database",
+      "etl",
+      "sql",
+      "cloud",
+      "engineering"
+    ],
+    "title": "Data Engineering Suite",
+    "displayTitle": "Data Engineering Suite",
+    "seoTitle": "Data Engineering Suite",
+    "source": "community",
+    "features": [
+      "Database design and optimization tools",
+      "Cloud data services integration",
+      "SQL query optimization and debugging",
+      "Data pipeline automation"
+    ],
+    "useCases": [
+      "Building and optimizing data pipelines",
+      "Managing cloud-based data infrastructure",
+      "Database performance tuning",
+      "Migrating data systems to the cloud"
+    ],
+    "category": "collections",
+    "collectionType": "use-case",
+    "difficulty": "intermediate",
+    "items": [
+      {
+        "category": "agents",
+        "slug": "database-specialist-agent",
+        "reason": "Expert guidance for database design, optimization, and troubleshooting"
+      },
+      {
+        "category": "mcp",
+        "slug": "aws-services-mcp-server",
+        "reason": "Integrates AWS data services like RDS, DynamoDB, and S3"
+      },
+      {
+        "category": "mcp",
+        "slug": "airtable-mcp-server",
+        "reason": "Connects to Airtable for flexible data management and workflows"
+      },
+      {
+        "category": "rules",
+        "slug": "database-expert",
+        "reason": "Provides database best practices and optimization rules"
+      },
+      {
+        "category": "commands",
+        "slug": "optimize",
+        "reason": "Optimizes SQL queries and database schemas"
+      },
+      {
+        "category": "commands",
+        "slug": "debug",
+        "reason": "Helps debug data pipeline issues and query performance problems"
+      }
+    ],
+    "installationOrder": [
+      "database-specialist-agent",
+      "database-expert",
+      "aws-services-mcp-server",
+      "airtable-mcp-server",
+      "optimize",
+      "debug"
+    ],
+    "prerequisites": [
+      "Basic SQL knowledge",
+      "AWS account (for AWS services integration)",
+      "Understanding of database concepts"
+    ],
+    "estimatedSetupTime": "30 minutes",
+    "compatibility": {
+      "claudeDesktop": true,
+      "claudeCode": true
+    },
+    "troubleshooting": [
+      {
+        "issue": "AWS MCP server auth conflicts with Airtable MCP credentials",
+        "solution": "Configure separate credential stores for each MCP server. Use AWS_PROFILE env var for aws-services-mcp-server, AIRTABLE_API_KEY for airtable-mcp-server. Keep credentials in different config files."
+      },
+      {
+        "issue": "Database agent and rules provide contradicting optimization advice",
+        "solution": "Install database-expert rules before database-specialist-agent. Agent will defer to rules for best practices. Update rules file to match your database engine (PostgreSQL, MySQL, etc.)."
+      },
+      {
+        "issue": "MCP servers fail to initialize due to missing AWS SDK dependencies",
+        "solution": "Install AWS SDK before MCP servers: npm install @aws-sdk/client-rds @aws-sdk/client-dynamodb @aws-sdk/client-s3. Then reinstall aws-services-mcp-server to detect installed SDKs."
+      },
+      {
+        "issue": "Optimize command incompatible with database agent's schema format",
+        "solution": "Ensure database-specialist-agent and optimize command use same schema definition format. Install agent first to establish format, then install optimize command to inherit conventions."
+      },
+      {
+        "issue": "Collection setup fails without proper AWS region configuration",
+        "solution": "Set AWS_REGION environment variable before installing MCP servers: export AWS_REGION=us-east-1. Configure region in Claude Code settings under MCP server preferences. Restart Claude after setting."
+      }
+    ]
+  },
+  {
+    "slug": "debugging-troubleshooting-system",
+    "description": "Complete debugging toolkit for identifying, analyzing, and resolving complex software issues. Combines AI-assisted debugging with powerful diagnostic commands.",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-02",
+    "tags": [
+      "debugging",
+      "troubleshooting",
+      "error-handling",
+      "diagnostics",
+      "problem-solving"
+    ],
+    "title": "Debugging & Troubleshooting System",
+    "displayTitle": "Debugging & Troubleshooting System",
+    "seoTitle": "Debug & Troubleshoot",
+    "source": "community",
+    "features": [
+      "AI-powered error analysis and resolution",
+      "Step-by-step debugging guidance",
+      "Root cause identification",
+      "Code explanation for complex bugs"
+    ],
+    "useCases": [
+      "Resolving production bugs quickly",
+      "Understanding unfamiliar codebase issues",
+      "Debugging complex asynchronous code",
+      "Training junior developers on debugging techniques"
+    ],
+    "category": "collections",
+    "collectionType": "advanced-system",
+    "difficulty": "intermediate",
+    "items": [
+      {
+        "category": "agents",
+        "slug": "debugging-assistant-agent",
+        "reason": "Provides expert debugging assistance and error analysis"
+      },
+      {
+        "category": "commands",
+        "slug": "debug",
+        "reason": "Interactive debugging command with step-by-step guidance"
+      },
+      {
+        "category": "commands",
+        "slug": "explain",
+        "reason": "Explains complex code behavior causing bugs"
+      }
+    ],
+    "installationOrder": [
+      "debugging-assistant-agent",
+      "debug",
+      "explain"
+    ],
+    "prerequisites": [
+      "Basic debugging knowledge",
+      "Access to application logs",
+      "Development environment setup"
+    ],
+    "estimatedSetupTime": "10 minutes",
+    "compatibility": {
+      "claudeDesktop": true,
+      "claudeCode": true
+    },
+    "troubleshooting": [
+      {
+        "issue": "Collection items fail to load with 'missing component' errors",
+        "solution": "Verify all items exist in respective category folders (agents/, commands/). Install missing components individually first, then activate collection."
+      },
+      {
+        "issue": "Prerequisites check passes but debugging features still unavailable",
+        "solution": "Ensure application logs are accessible and readable. Check development environment PATH includes debugger tools. Restart IDE after installing dependencies."
+      },
+      {
+        "issue": "Debugging agent and debug command conflict causing duplicate output",
+        "solution": "Use agent for systematic analysis, command for quick fixes. Disable one component temporarily if conflicts persist. Check configuration.systemPrompt doesn't overlap."
+      },
+      {
+        "issue": "Installation order not followed, components incompatible after setup",
+        "solution": "Remove all collection items and reinstall in specified order: debugging-assistant-agent, debug, explain. Clear Claude cache between installations."
+      }
+    ]
+  },
+  {
+    "slug": "developer-productivity-booster",
+    "description": "Maximize your development efficiency with automated workflows, smart backups, code formatting, and enhanced visual feedback. This collection combines productivity hooks, informative statuslines, and time-saving commands for a streamlined development experience.",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-02",
+    "tags": [
+      "productivity",
+      "automation",
+      "workflow",
+      "efficiency",
+      "developer-tools"
+    ],
+    "title": "Developer Productivity Booster",
+    "displayTitle": "Developer Productivity Booster",
+    "seoTitle": "Productivity Booster",
+    "source": "community",
+    "features": [
+      "Automated code formatting on save",
+      "Automatic backup and session management",
+      "Enhanced visual statusline with git info",
+      "Time-saving documentation commands"
+    ],
+    "useCases": [
+      "Setting up a productive development environment",
+      "Reducing manual repetitive tasks",
+      "Improving code consistency across team",
+      "Preventing work loss with automatic backups"
+    ],
+    "category": "collections",
+    "collectionType": "workflow",
+    "difficulty": "beginner",
+    "items": [
+      {
+        "category": "hooks",
+        "slug": "auto-code-formatter-hook",
+        "reason": "Automatically formats code to maintain consistency"
+      },
+      {
+        "category": "hooks",
+        "slug": "auto-save-backup",
+        "reason": "Prevents work loss with automatic session backups"
+      },
+      {
+        "category": "statuslines",
+        "slug": "git-status-statusline",
+        "reason": "Shows git branch and status at a glance"
+      },
+      {
+        "category": "statuslines",
+        "slug": "session-timer-statusline",
+        "reason": "Tracks coding session time for productivity insights"
+      },
+      {
+        "category": "commands",
+        "slug": "docs",
+        "reason": "Quickly generate documentation for code"
+      },
+      {
+        "category": "commands",
+        "slug": "git-smart-commit",
+        "reason": "Creates intelligent, well-formatted git commits"
+      }
+    ],
+    "installationOrder": [
+      "auto-code-formatter-hook",
+      "auto-save-backup",
+      "git-status-statusline",
+      "session-timer-statusline",
+      "docs",
+      "git-smart-commit"
+    ],
+    "prerequisites": [
+      "Git repository initialized",
+      "Code formatter (Prettier, Black, etc.) installed",
+      "Basic git workflow knowledge"
+    ],
+    "estimatedSetupTime": "15 minutes",
+    "compatibility": {
+      "claudeDesktop": false,
+      "claudeCode": true
+    },
+    "troubleshooting": [
+      {
+        "issue": "Auto-formatter hook conflicts with git-smart-commit command",
+        "solution": "Install auto-code-formatter-hook before git-smart-commit. Configure formatter exclusions in .prettierignore or similar. Ensure both use same formatter version to prevent conflicting reformats."
+      },
+      {
+        "issue": "Statuslines not displaying after installing all hooks first",
+        "solution": "Install hooks first, then statuslines, then commands per installationOrder. Restart Claude Code after installing statuslines. Check View > Statusline is enabled in preferences."
+      },
+      {
+        "issue": "Auto-save-backup interferes with git-status-statusline updates",
+        "solution": "Configure auto-save-backup to ignore .git directory. Add .git/** to backup exclusions. Ensure git-status-statusline polling interval allows backup completion between updates."
+      },
+      {
+        "issue": "Missing code formatter binary prevents hook from executing",
+        "solution": "Install formatter globally: npm install -g prettier or pip install black. Verify formatter command available in PATH: which prettier. Then reinstall auto-code-formatter-hook."
+      },
+      {
+        "issue": "Session timer statusline conflicts with git status display",
+        "solution": "Both statuslines can coexist. Configure statusline layout in Claude Code settings: place session-timer-statusline on left, git-status-statusline on right. Restart after configuration change."
+      }
+    ]
+  },
+  {
+    "slug": "production-readiness-toolkit",
+    "description": "Comprehensive system for ensuring code quality, security, and compliance before production deployment. Includes automated code reviews, complexity monitoring, backup strategies, and production-grade rules for professional development teams.",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-02",
+    "tags": [
+      "production",
+      "code-quality",
+      "security",
+      "compliance",
+      "deployment",
+      "best-practices"
+    ],
+    "title": "Production Readiness Toolkit",
+    "displayTitle": "Production Readiness Toolkit",
+    "seoTitle": "Production Toolkit",
+    "source": "community",
+    "features": [
+      "Automated code review and complexity monitoring",
+      "Production-grade codebase auditing",
+      "Automatic backup and safety hooks",
+      "Security and compliance checking"
+    ],
+    "useCases": [
+      "Preparing code for production deployment",
+      "Implementing team code quality standards",
+      "Preventing production bugs and security issues",
+      "Enterprise-grade development workflows"
+    ],
+    "category": "collections",
+    "collectionType": "advanced-system",
+    "difficulty": "advanced",
+    "items": [
+      {
+        "category": "rules",
+        "slug": "production-codebase-auditor",
+        "reason": "Enforces production-grade code standards and best practices"
+      },
+      {
+        "category": "rules",
+        "slug": "code-review-expert",
+        "reason": "Provides expert-level code review guidance"
+      },
+      {
+        "category": "hooks",
+        "slug": "code-complexity-alert-monitor",
+        "reason": "Monitors and alerts on code complexity metrics"
+      },
+      {
+        "category": "hooks",
+        "slug": "auto-save-backup",
+        "reason": "Automatically backs up work to prevent data loss"
+      },
+      {
+        "category": "agents",
+        "slug": "code-reviewer-agent",
+        "reason": "AI-powered comprehensive code review"
+      },
+      {
+        "category": "commands",
+        "slug": "generate-tests",
+        "reason": "Ensures adequate test coverage before deployment"
+      }
+    ],
+    "installationOrder": [
+      "production-codebase-auditor",
+      "code-review-expert",
+      "code-complexity-alert-monitor",
+      "auto-save-backup",
+      "code-reviewer-agent",
+      "generate-tests"
+    ],
+    "prerequisites": [
+      "Existing codebase with CI/CD pipeline",
+      "Understanding of production deployment processes",
+      "Team buy-in for code quality standards",
+      "Access to version control system"
+    ],
+    "estimatedSetupTime": "45 minutes",
+    "compatibility": {
+      "claudeDesktop": true,
+      "claudeCode": true
+    },
+    "troubleshooting": [
+      {
+        "issue": "Code complexity monitor triggers false alerts constantly",
+        "solution": "Configure thresholds in hook settings: cyclomatic_complexity: 15, cognitive_complexity: 20. Add exceptions for generated code in .complexityignore file."
+      },
+      {
+        "issue": "Auto-save backup conflicts with Git version control system",
+        "solution": "Set backup directory outside Git repo in hook config: backup_path: '../backups'. Add backup_path to .gitignore. Schedule cleanup for backups older than 7 days."
+      },
+      {
+        "issue": "Code reviewer agent and production auditor rules disagree",
+        "solution": "Production auditor takes precedence for deployment decisions. Use reviewer agent for development phase. Configure agent to defer to auditor rules."
+      },
+      {
+        "issue": "Generate-tests command fails: missing test framework setup",
+        "solution": "Install test dependencies: npm install -D jest @types/jest ts-jest. Initialize config: npx jest --init. Ensure package.json has test script defined."
+      },
+      {
+        "issue": "Collection slows down Claude responses significantly",
+        "solution": "Disable hooks during development: set enabled: false for complexity monitor and backup. Re-enable before commits. Use agent/rules only for reviews."
+      }
+    ]
+  }
+];
+
+export const collectionsFullBySlug = new Map(collectionsFull.map(item => [item.slug, item]));
+
+export function getCollectionFullBySlug(slug: string) {
+  return collectionsFullBySlug.get(slug) || null;
+}
+
+export type CollectionFull = typeof collectionsFull[number];

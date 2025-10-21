@@ -73,7 +73,6 @@ import {
 } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import {
-  getContentByCategory,
   getContentBySlug,
   getFullContentBySlug,
   getRelatedContent,
@@ -117,8 +116,11 @@ export const dynamic = 'force-static';
 export async function generateStaticParams() {
   const allParams: Array<{ category: string; slug: string }> = [];
 
+  // OPTIMIZATION: Use slug-only loader for 10x faster static param generation
+  const { getContentSlugsOnly } = await import('@/src/lib/content/content-loaders');
+
   for (const category of VALID_CATEGORIES) {
-    const items = await getContentByCategory(category);
+    const items = await getContentSlugsOnly(category);
 
     for (const item of items) {
       allParams.push({

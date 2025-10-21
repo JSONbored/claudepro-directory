@@ -89,7 +89,6 @@ function generateMetadataFile(categoryId: CategoryId, metadata: readonly unknown
   return `/**
  * Auto-generated metadata file
  * Category: ${config.pluralTitle}
- * Generated: ${new Date().toISOString()}
  *
  * DO NOT EDIT MANUALLY
  * @see scripts/build-content.ts
@@ -126,7 +125,6 @@ function generateFullContentFile(categoryId: CategoryId, items: readonly unknown
   return `/**
  * Auto-generated full content file
  * Category: ${config.pluralTitle}
- * Generated: ${new Date().toISOString()}
  *
  * DO NOT EDIT MANUALLY
  * @see scripts/build-content.ts
@@ -158,7 +156,6 @@ function generateIndexFile(contentStats: ContentStats): string {
 
   return `/**
  * Auto-generated content index
- * Generated: ${new Date().toISOString()}
  *
  * Modern lazy loading architecture:
  * - Metadata loaded on-demand via metadataLoader
@@ -370,16 +367,24 @@ async function main(): Promise<void> {
     // This eliminates 676 KB of redundant generated files (596 KB + 80 KB split files)
     logger.info('\n✅ Content metadata generation complete (using lazy loaders)');
 
-    // Save updated cache
+    // Save updated cache with file hashes for incremental builds
+    // Collect all processed file hashes from build results
+    const fileHashes: Record<string, { hash: string; mtime: number }> = {};
+
+    for (const result of buildResults) {
+      // Merge file hashes from each category build result
+      Object.assign(fileHashes, result.fileHashes);
+    }
+
     const newCache = {
       version: '1.0.0',
-      files: {},
+      files: fileHashes,
       lastBuild: new Date().toISOString(),
     };
 
-    // Note: File hashing for incremental builds would be implemented here
-    // This would collect content hashes for each file to enable smart cache invalidation
-
+    logger.info(
+      `💾 Saving build cache (${Object.keys(fileHashes).length} files tracked for incremental builds)`
+    );
     await saveBuildCache(CACHE_DIR, newCache);
 
     // Trigger cache invalidation for related content

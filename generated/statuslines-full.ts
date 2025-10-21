@@ -1,0 +1,779 @@
+/**
+ * Auto-generated full content file
+ * Category: Statuslines
+ *
+ * DO NOT EDIT MANUALLY
+ * @see scripts/build-content.ts
+ */
+
+import type { StatuslineContent } from '@/src/lib/schemas/content/statusline.schema';
+
+export const statuslinesFull: StatuslineContent[] = [
+  {
+    "slug": "docker-health-statusline",
+    "description": "Docker statusline configuration for Claude Code CLI. Features real-time health monitoring, color-coded indicators, and container tracking. Production-ready.",
+    "author": "Claude Pro Directory",
+    "dateAdded": "2025-10-19",
+    "tags": [
+      "docker",
+      "statusline",
+      "monitoring",
+      "health-check",
+      "containers",
+      "CLI",
+      "claude-code",
+      "devops"
+    ],
+    "content": "#!/bin/bash\n\n# Docker Health Statusline\n# Real-time container health monitoring for Claude Code CLI\n\n# Get running containers count\nrunning=$(docker ps -q 2>/dev/null | wc -l | tr -d ' ')\n\n# Get total containers\ntotal=$(docker ps -a -q 2>/dev/null | wc -l | tr -d ' ')\n\n# Get unhealthy containers\nunhealthy=$(docker ps --filter health=unhealthy -q 2>/dev/null | wc -l | tr -d ' ')\n\n# Color codes\nGREEN='\\033[0;32m'\nYELLOW='\\033[1;33m'\nRED='\\033[0;31m'\nBLUE='\\033[0;34m'\nNC='\\033[0m' # No Color\n\n# Status indicator\nif [ \"$unhealthy\" -gt 0 ]; then\n    status=\"${RED}●${NC}\"\nelif [ \"$running\" -eq 0 ]; then\n    status=\"${YELLOW}○${NC}\"\nelse\n    status=\"${GREEN}●${NC}\"\nfi\n\n# Display statusline\necho -e \"${BLUE}🐳${NC} ${status} ${running}/${total}\"\n",
+    "title": "Docker Health Statusline",
+    "displayTitle": "Docker Health Statusline",
+    "seoTitle": "Claude Code Docker Statusline - Container Health Monitoring",
+    "documentationUrl": "https://docs.docker.com/reference/cli/docker/container/stats/",
+    "features": [
+      "Real-time container count display (running/total)",
+      "Color-coded health status indicators (green=healthy, yellow=stopped, red=unhealthy)",
+      "Docker whale emoji for visual identification",
+      "Lightweight bash implementation with minimal overhead",
+      "Automatic unhealthy container detection",
+      "Configurable refresh interval (default 2000ms)"
+    ],
+    "useCases": [
+      "Monitoring Docker container health during development",
+      "Quick visual confirmation of running containers",
+      "DevOps workflows requiring constant container status awareness",
+      "Multi-container application development with health checks"
+    ],
+    "examples": [
+      {
+        "title": "Basic Installation",
+        "code": "# Save script\ncat > ~/.claude/statusline-docker.sh << 'EOF'\n#!/bin/bash\nrunning=$(docker ps -q 2>/dev/null | wc -l | tr -d ' ')\ntotal=$(docker ps -a -q 2>/dev/null | wc -l | tr -d ' ')\necho -e \"🐳 ${running}/${total}\"\nEOF\n\n# Make executable\nchmod +x ~/.claude/statusline-docker.sh",
+        "language": "bash",
+        "description": "Quick installation for basic container count display"
+      },
+      {
+        "title": "With Health Check Monitoring",
+        "code": "# Enhanced version with health checks\n#!/bin/bash\nrunning=$(docker ps -q | wc -l | tr -d ' ')\nunhealthy=$(docker ps --filter health=unhealthy -q | wc -l | tr -d ' ')\n\nif [ \"$unhealthy\" -gt 0 ]; then\n    echo -e \"🐳 \\033[0;31m●\\033[0m ${running} (${unhealthy} unhealthy)\"\nelse\n    echo -e \"🐳 \\033[0;32m●\\033[0m ${running}\"\nfi",
+        "language": "bash",
+        "description": "Advanced version with health status monitoring and alerts"
+      }
+    ],
+    "category": "statuslines",
+    "statuslineType": "rich",
+    "configuration": {
+      "format": "bash",
+      "refreshInterval": 2000,
+      "position": "left",
+      "colorScheme": "docker-blue"
+    },
+    "installation": {
+      "claudeCode": {
+        "steps": [
+          "Save the script to ~/.claude/statusline-docker.sh",
+          "Make it executable: chmod +x ~/.claude/statusline-docker.sh",
+          "Add to ~/.claude/statusline.json with format: \"bash\" and script path",
+          "Set refreshInterval to 2000ms for real-time updates",
+          "Restart Claude Code CLI to apply changes"
+        ],
+        "configFormat": "json",
+        "configPath": {
+          "macos": "~/.claude/statusline.json",
+          "linux": "~/.claude/statusline.json",
+          "windows": "%USERPROFILE%\\.claude\\statusline.json"
+        }
+      },
+      "requirements": [
+        "Docker Engine installed and running",
+        "Bash shell (bash 4.0+)",
+        "Docker CLI accessible in PATH",
+        "User permissions to run docker commands"
+      ]
+    },
+    "troubleshooting": [
+      {
+        "issue": "Statusline shows 0/0 containers even when containers are running",
+        "solution": "Verify Docker daemon is running with 'docker ps'. Check user has permissions to access Docker socket. On Linux, add user to docker group with 'sudo usermod -aG docker $USER' and restart terminal."
+      },
+      {
+        "issue": "Colors not displaying correctly in statusline output",
+        "solution": "Ensure terminal supports ANSI color codes. Set TERM=xterm-256color in shell profile. Verify colorScheme setting in statusline.json matches terminal capabilities."
+      },
+      {
+        "issue": "Statusline causing performance lag or high CPU usage",
+        "solution": "Increase refreshInterval to 3000-5000ms in configuration. Reduce docker ps query frequency. Consider caching container count between refresh cycles for better performance."
+      },
+      {
+        "issue": "Health check status not updating or always showing healthy",
+        "solution": "Confirm containers have HEALTHCHECK defined in Dockerfile or docker-compose.yml. Verify docker version supports health checks (17.05+). Run 'docker inspect CONTAINER' to check health configuration."
+      }
+    ],
+    "preview": "🐳 ● 3/5"
+  },
+  {
+    "slug": "git-status-statusline",
+    "description": "Git-focused statusline showing branch, dirty status, ahead/behind indicators, and stash count alongside Claude session info",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-01",
+    "tags": [
+      "git",
+      "version-control",
+      "developer",
+      "bash",
+      "powerline",
+      "status-indicators"
+    ],
+    "content": "#!/usr/bin/env bash\n\n# Git-Focused Statusline for Claude Code\n# Emphasizes git status with visual indicators\n\n# Read JSON from stdin\nread -r input\n\n# Extract Claude session data\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"' | sed 's/claude-//')\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\nworkdir=$(echo \"$input\" | jq -r '.workspace.path // \".\"')\n\n# Get git information from workspace\ncd \"$workdir\" 2>/dev/null || cd .\n\nif git rev-parse --git-dir > /dev/null 2>&1; then\n  # Get branch name\n  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo \"(detached)\")\n  \n  # Check if working directory is clean\n  if [ -z \"$(git status --porcelain)\" ]; then\n    status_icon=\"✓\"\n    status_color=\"\\033[32m\"  # Green\n  else\n    status_icon=\"✗\"\n    status_color=\"\\033[33m\"  # Yellow\n  fi\n  \n  # Check ahead/behind status\n  ahead_behind=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null)\n  if [ -n \"$ahead_behind\" ]; then\n    ahead=$(echo \"$ahead_behind\" | cut -f1)\n    behind=$(echo \"$ahead_behind\" | cut -f2)\n    if [ \"$ahead\" -gt 0 ]; then\n      tracking=\"↑$ahead\"\n    fi\n    if [ \"$behind\" -gt 0 ]; then\n      tracking=\"${tracking}↓$behind\"\n    fi\n  fi\n  \n  # Check stash count\n  stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')\n  if [ \"$stash_count\" -gt 0 ]; then\n    stash_info=\" ⚑$stash_count\"\n  fi\n  \n  git_info=\" ${status_color}${branch}${tracking}${stash_info} ${status_icon}\\033[0m\"\nelse\n  git_info=\"\"\nfi\n\n# Build statusline\necho -e \"\\033[36m${model}\\033[0m │ \\033[35m${tokens}\\033[0m${git_info}\"\n",
+    "title": "Git Status Statusline",
+    "displayTitle": "Git Status Statusline",
+    "source": "community",
+    "documentationUrl": "https://git-scm.com/docs/git-status",
+    "features": [
+      "Git branch name with  icon",
+      "Dirty working directory indicator (✗)",
+      "Ahead/behind remote branch tracking (↑↓)",
+      "Stash count display when stashes exist",
+      "Model and token count in compact format",
+      "Color-coded status (green=clean, yellow=dirty, red=conflict)",
+      "Graceful fallback when not in git repository"
+    ],
+    "useCases": [
+      "Active development with frequent git operations",
+      "Working across multiple branches simultaneously",
+      "Monitoring uncommitted changes during AI pair programming",
+      "Tracking sync status with remote repository",
+      "Quick visual feedback for git workflow state"
+    ],
+    "category": "statuslines",
+    "statuslineType": "custom",
+    "configuration": {
+      "format": "bash",
+      "refreshInterval": 1000,
+      "position": "left",
+      "colorScheme": "git-status"
+    },
+    "troubleshooting": [
+      {
+        "issue": "Git branch not showing or shows '(detached)'",
+        "solution": "Ensure you're on a proper branch: git checkout main. Detached HEAD state is normal when checking out specific commits."
+      },
+      {
+        "issue": "Ahead/behind indicators (↑↓) not appearing",
+        "solution": "This requires an upstream branch to be set. Run: git branch --set-upstream-to=origin/main main (adjust branch name as needed)."
+      },
+      {
+        "issue": "Status always shows dirty (✗) even after commit",
+        "solution": "Check git status for untracked files or changes. The statusline reflects actual git state. Run git status -s to see what's detected."
+      },
+      {
+        "issue": "Unicode icons showing as boxes",
+        "solution": "Install a Nerd Font or ensure terminal has Unicode support. Test with: echo ' ✓ ✗ ↑ ↓ ⚑'"
+      }
+    ],
+    "requirements": [
+      "Bash shell",
+      "Git version 2.0 or higher",
+      "jq JSON processor",
+      "Terminal with Unicode support for git icons"
+    ],
+    "preview": "sonnet-4.5 │ 1,234  main↑2 ✗ ⚑1"
+  },
+  {
+    "slug": "mcp-server-status-monitor",
+    "description": "Real-time MCP server monitoring statusline showing connected servers, active tools, and performance metrics for Claude Code MCP integration",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-16",
+    "tags": [
+      "mcp",
+      "monitoring",
+      "servers",
+      "tools",
+      "performance"
+    ],
+    "content": "#!/usr/bin/env bash\n\n# MCP Server Status Monitor\n# Shows connected MCP servers and active tools\n\nread -r input\n\n# Extract MCP server info (if available in Claude Code context)\nmcp_servers=$(echo \"$input\" | jq -r '.mcp.servers // []' 2>/dev/null || echo \"[]\")\nserver_count=$(echo \"$mcp_servers\" | jq 'length' 2>/dev/null || echo \"0\")\n\n# Count active tools across all servers\nactive_tools=0\nfor server in $(echo \"$mcp_servers\" | jq -r '.[] | @base64'); do\n  tools=$(echo $server | base64 -d | jq '.tools | length' 2>/dev/null || echo \"0\")\n  active_tools=$((active_tools + tools))\ndone\n\n# Color based on server status\nif [ \"$server_count\" -gt 0 ]; then\n  color=\"\\033[32m\"  # Green - servers connected\n  icon=\"🔌\"\nelse\n  color=\"\\033[90m\"  # Gray - no servers\n  icon=\"⚫\"\nfi\n\n# List server names\nserver_names=$(echo \"$mcp_servers\" | jq -r '.[].name' 2>/dev/null | tr '\\n' ',' | sed 's/,$//')\n\n# Output\nif [ \"$server_count\" -gt 0 ]; then\n  echo -e \"${icon} MCP ${color}${server_count}${color}\\033[0m servers │ ${active_tools} tools │ ${server_names:0:30}\"\nelse\n  echo -e \"${icon} MCP ${color}disconnected${color}\\033[0m\"\nfi\n",
+    "title": "MCP Server Status Monitor",
+    "displayTitle": "MCP Server Status Monitor",
+    "source": "community",
+    "features": [
+      "Real-time connected server count",
+      "Active tools aggregation across all servers",
+      "Server name display with truncation",
+      "Color-coded connection status",
+      "Performance-optimized JSON parsing",
+      "Graceful fallback when MCP unavailable"
+    ],
+    "useCases": [
+      "Monitoring MCP server connectivity during development",
+      "Tracking available tools across connected servers",
+      "Debugging MCP connection issues",
+      "Verifying server plugin installations"
+    ],
+    "category": "statuslines",
+    "statuslineType": "custom",
+    "configuration": {
+      "format": "bash",
+      "refreshInterval": 2000,
+      "position": "left"
+    },
+    "troubleshooting": [
+      {
+        "issue": "Statusline shows 'MCP disconnected' despite configured servers",
+        "solution": "Verify servers are actually connected: run 'claude mcp list' to check server status. Ensure servers are properly configured in ~/.mcp.json and restart Claude Code if needed."
+      },
+      {
+        "issue": "Server count shows 0 but MCP servers are running in terminal",
+        "solution": "Check that MCP context data is accessible. Verify Claude Code version supports MCP statusline API. Run 'claude mcp get [server-name]' to verify individual server status."
+      },
+      {
+        "issue": "Tool count incorrect or not updating",
+        "solution": "This indicates silent tool registration failure. Run '/mcp' in Claude Code to verify tool registration. Restart connected servers if tools remain unavailable despite connection."
+      },
+      {
+        "issue": "MCP server startup failures or connection timeouts",
+        "solution": "Launch with --mcp-debug flag. Check logs: ~/Library/Logs/Claude/mcp.log (macOS). Verify server.connect() is called and transport listener is active."
+      },
+      {
+        "issue": "JSON-RPC errors like 'Method not found' or invalid JSON",
+        "solution": "Server may not support prompts/list or resources/list, or writes non-JSON to stdout. Ensure JSON-RPC 2.0 compliance. Use MCP Inspector for interactive testing."
+      }
+    ],
+    "requirements": [
+      "Bash shell",
+      "jq JSON processor",
+      "Claude Code with MCP support"
+    ],
+    "preview": "🔌 MCP 3 servers │ 12 tools │ filesystem,git,database"
+  },
+  {
+    "slug": "minimal-powerline",
+    "description": "Clean, performance-optimized statusline with Powerline glyphs showing model, directory, and token count",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-01",
+    "tags": [
+      "powerline",
+      "minimal",
+      "performance",
+      "bash",
+      "lightweight"
+    ],
+    "content": "#!/usr/bin/env bash\n\n# Minimal Powerline Statusline for Claude Code\n# Displays: Model | Directory | Token Count\n\n# Read JSON from stdin\nread -r input\n\n# Extract values using jq\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\ndir=$(echo \"$input\" | jq -r '.workspace.path // \"~\"' | sed \"s|$HOME|~|\")\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\n\n# Powerline separators\nSEP=\"\\ue0b0\"\n\n# Color codes (256-color palette)\nMODEL_BG=\"\\033[48;5;111m\"  # Light blue background\nMODEL_FG=\"\\033[38;5;111m\"  # Light blue foreground\nDIR_BG=\"\\033[48;5;246m\"    # Gray background\nDIR_FG=\"\\033[38;5;246m\"    # Gray foreground\nTOKEN_BG=\"\\033[48;5;214m\"  # Orange background\nTOKEN_FG=\"\\033[38;5;214m\"  # Orange foreground\nRESET=\"\\033[0m\"\n\n# Build statusline with Powerline glyphs\necho -e \"${MODEL_BG} ${model} ${RESET}${MODEL_FG}${SEP}${RESET} ${DIR_BG} ${dir} ${RESET}${DIR_FG}${SEP}${RESET} ${TOKEN_BG} ${tokens} ${RESET}${TOKEN_FG}${SEP}${RESET}\"",
+    "title": "Minimal Powerline",
+    "displayTitle": "Minimal Powerline",
+    "source": "community",
+    "documentationUrl": "https://github.com/powerline/powerline",
+    "features": [
+      "Powerline-style separators and glyphs",
+      "Displays current AI model in use",
+      "Shows workspace directory with home shortening",
+      "Real-time token count tracking",
+      "Low performance impact with minimal processing",
+      "256-color terminal support",
+      "Requires jq for JSON parsing"
+    ],
+    "useCases": [
+      "Quick overview of current session context",
+      "Minimal distraction with essential information only",
+      "Performance-conscious users with slow terminals",
+      "Teams standardizing on Powerline aesthetic"
+    ],
+    "category": "statuslines",
+    "statuslineType": "powerline",
+    "configuration": {
+      "format": "bash",
+      "refreshInterval": 500,
+      "position": "left",
+      "colorScheme": "powerline-default"
+    },
+    "troubleshooting": [
+      {
+        "issue": "Powerline separators showing as boxes or question marks",
+        "solution": "Install a Nerd Font (e.g., FiraCode Nerd Font) and configure your terminal to use it. Verify with: echo -e '\\ue0b0'"
+      },
+      {
+        "issue": "Colors not displaying correctly",
+        "solution": "Ensure terminal supports 256 colors. Test with: tput colors (should return 256). Set TERM=xterm-256color if needed."
+      },
+      {
+        "issue": "jq command not found error",
+        "solution": "Install jq: brew install jq (macOS), apt install jq (Linux), or download from https://jqlang.github.io/jq/"
+      },
+      {
+        "issue": "tput colors shows 8 but terminal supports 256 colors",
+        "solution": "Set TERM explicitly: export TERM=xterm-256color. Test: env TERM=xterm-256color tput colors (should show 256). For tmux/screen use TERM=screen-256color."
+      },
+      {
+        "issue": "Powerline separators misaligned or cut off at edges",
+        "solution": "Install Powerline-patched font from github.com/powerline/fonts. U+E0B0-U+E0B3 require patched fonts. For VS Code, enable GPU acceleration for better rendering."
+      }
+    ],
+    "requirements": [
+      "Bash shell",
+      "jq JSON processor",
+      "Terminal with 256-color support",
+      "Powerline-compatible font (Nerd Fonts recommended)"
+    ],
+    "preview": " claude-sonnet-4.5  ~/projects/my-app   1,234 "
+  },
+  {
+    "slug": "multi-line-statusline",
+    "description": "Comprehensive multi-line statusline displaying detailed session information across two lines with organized sections and visual separators",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-01",
+    "tags": [
+      "multi-line",
+      "comprehensive",
+      "detailed",
+      "bash",
+      "powerline",
+      "dashboard"
+    ],
+    "content": "#!/usr/bin/env bash\n\n# Multi-Line Statusline for Claude Code\n# Displays comprehensive session info across two lines\n\n# Read JSON from stdin\nread -r input\n\n# Extract all available data\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\ndir=$(echo \"$input\" | jq -r '.workspace.path // \"~\"' | sed \"s|$HOME|~|\")\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\ncost=$(echo \"$input\" | jq -r '.session.estimatedCost // 0' | awk '{printf \"%.3f\", $0}')\nmemory=$(echo \"$input\" | jq -r '.system.memoryUsage // 0' | awk '{printf \"%.1f\", $0/1024/1024}')\n\n# Get git info if in repo\nworkdir=$(echo \"$input\" | jq -r '.workspace.path // \".\"')\ncd \"$workdir\" 2>/dev/null || cd .\n\nif git rev-parse --git-dir > /dev/null 2>&1; then\n  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo \"(detached)\")\n  if [ -z \"$(git status --porcelain)\" ]; then\n    git_status=\"\\033[32m ✓\\033[0m\"\n  else\n    git_status=\"\\033[33m ✗\\033[0m\"\n  fi\n  git_display=\" ${branch}${git_status}\"\nelse\n  git_display=\"\"\nfi\n\n# Box drawing and separators\nSEP=\"\\ue0b0\"\nVSEP=\"│\"\nTOP_LEFT=\"┌\"\nBOT_LEFT=\"└\"\n\n# Color scheme\nRESET=\"\\033[0m\"\nMODEL_C=\"\\033[38;5;111m\"  # Blue\nDIR_C=\"\\033[38;5;214m\"    # Orange\nTOKEN_C=\"\\033[38;5;76m\"   # Green\nCOST_C=\"\\033[38;5;220m\"   # Yellow\nMEM_C=\"\\033[38;5;139m\"    # Purple\n\n# Build top line: Model | Directory | Git\ntop_line=\"${TOP_LEFT}${RESET} ${MODEL_C}${model}${RESET} ${VSEP} ${DIR_C}${dir}${RESET}${git_display}\"\n\n# Build bottom line: Tokens | Cost | Memory\nbottom_line=\"${BOT_LEFT}${RESET} ${TOKEN_C} ${tokens:,} tokens${RESET} ${VSEP} ${COST_C}\\$${cost}${RESET}\"\n\nif [ \"$memory\" != \"0.0\" ]; then\n  bottom_line=\"${bottom_line} ${VSEP} ${MEM_C}${memory} MB${RESET}\"\nfi\n\n# Output both lines\necho -e \"$top_line\"\necho -e \"$bottom_line\"\n",
+    "title": "Multi Line Statusline",
+    "displayTitle": "Multi Line Statusline",
+    "source": "community",
+    "features": [
+      "Two-line display for comprehensive information",
+      "Top line: Model, directory, git status",
+      "Bottom line: Tokens, cost, session time, memory usage",
+      "Powerline separators and section dividers",
+      "Color-coded sections for easy scanning",
+      "Box drawing characters for visual structure",
+      "Optional memory usage monitoring"
+    ],
+    "useCases": [
+      "Power users needing comprehensive session visibility",
+      "Development sessions with complex context switching",
+      "Monitoring resource usage during heavy workloads",
+      "Teams requiring detailed audit trails",
+      "Presentations or pair programming demonstrations"
+    ],
+    "category": "statuslines",
+    "statuslineType": "custom",
+    "configuration": {
+      "format": "bash",
+      "refreshInterval": 1000,
+      "position": "left",
+      "colorScheme": "multi-line-dashboard"
+    },
+    "troubleshooting": [
+      {
+        "issue": "Box drawing characters showing as garbage or question marks",
+        "solution": "Ensure terminal has UTF-8 encoding enabled. Set: export LANG=en_US.UTF-8. Test with: echo '┌│└'"
+      },
+      {
+        "issue": "Second line overwriting first line or display corruption",
+        "solution": "Terminal may not support multi-line statuslines properly. Check Claude Code configuration for multi-line support or use single-line statusline instead."
+      },
+      {
+        "issue": "Memory usage always showing 0.0 MB",
+        "solution": "Memory monitoring may not be available in your Claude Code version. This field is optional - statusline works without it."
+      },
+      {
+        "issue": "Lines not aligned or wrapped incorrectly",
+        "solution": "Terminal window may be too narrow. Resize to at least 80 characters wide or simplify displayed information."
+      }
+    ],
+    "requirements": [
+      "Bash shell",
+      "jq JSON processor",
+      "Terminal with Unicode box drawing support",
+      "Terminal height sufficient for multi-line display"
+    ],
+    "preview": "┌ claude-sonnet-4.5 │ ~/projects/app  main ✓\n└  12,345 tokens │ $0.234 │ 156.3 MB"
+  },
+  {
+    "slug": "multi-provider-token-counter",
+    "description": "Multi-provider AI token counter displaying real-time context usage for Claude (1M), GPT-4.1 (1M), Gemini 2.x (1M), and Grok 3 (1M) with 2025 verified limits",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-16",
+    "tags": [
+      "tokens",
+      "multi-provider",
+      "context-limits",
+      "ai-models",
+      "monitoring"
+    ],
+    "content": "#!/usr/bin/env bash\n\n# Multi-Provider Token Counter - 2025 Context Limits\n# Supports: Claude Sonnet 4 (1M), GPT-4.1 (1M), Gemini 2.x (1M), Grok 3 (1M)\n\nread -r input\n\n# Extract model and token info\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\n\n# Determine provider and context limit\nif [[ \"$model\" == *\"claude\"* ]]; then\n  if [[ \"$model\" == *\"sonnet-4\"* ]] || [[ \"$model\" == *\"sonnet-3.5\"* ]]; then\n    limit=1000000\n    provider=\"Claude\"\n    icon=\"🔮\"\n  else\n    limit=200000\n    provider=\"Claude\"\n    icon=\"🔮\"\n  fi\nelif [[ \"$model\" == *\"gpt-4.1\"* ]]; then\n  limit=1000000\n  provider=\"GPT-4.1\"\n  icon=\"🤖\"\nelif [[ \"$model\" == *\"gpt-4o\"* ]]; then\n  limit=128000\n  provider=\"GPT-4o\"\n  icon=\"🤖\"\nelif [[ \"$model\" == *\"gemini\"* ]]; then\n  if [[ \"$model\" == *\"2.\"* ]] || [[ \"$model\" == *\"1.5-pro\"* ]]; then\n    limit=1000000\n    provider=\"Gemini\"\n    icon=\"💎\"\n  else\n    limit=128000\n    provider=\"Gemini\"\n    icon=\"💎\"\n  fi\nelif [[ \"$model\" == *\"grok-3\"* ]]; then\n  limit=1000000\n  provider=\"Grok\"\n  icon=\"⚡\"\nelif [[ \"$model\" == *\"grok-4\"* ]]; then\n  limit=256000\n  provider=\"Grok\"\n  icon=\"⚡\"\nelse\n  limit=100000\n  provider=\"Unknown\"\n  icon=\"❓\"\nfi\n\n# Calculate usage percentage\npercentage=$(awk \"BEGIN {printf \\\"%.1f\\\", ($tokens / $limit) * 100}\")\n\n# Color coding based on usage\nif (( $(echo \"$percentage < 50\" | bc -l) )); then\n  color=\"\\033[32m\"  # Green\nelif (( $(echo \"$percentage < 80\" | bc -l) )); then\n  color=\"\\033[33m\"  # Yellow\nelse\n  color=\"\\033[31m\"  # Red\nfi\n\n# Format token count with commas\ntokens_formatted=$(printf \"%'d\" $tokens)\nlimit_formatted=$(printf \"%'d\" $limit)\n\n# Output statusline\necho -e \"${icon} ${provider} │ ${color}${tokens_formatted}${color}\\033[0m/${limit_formatted} (${percentage}%)\\033[0m\"\n",
+    "title": "Multi Provider Token Counter",
+    "displayTitle": "Multi Provider Token Counter",
+    "source": "community",
+    "documentationUrl": "https://docs.anthropic.com/claude/docs/models-overview",
+    "features": [
+      "Automatic provider detection (Claude, GPT-4, Gemini, Grok)",
+      "2025 verified context limits (1M for latest models)",
+      "Real-time usage percentage calculation",
+      "Color-coded warnings (green <50%, yellow <80%, red ≥80%)",
+      "Formatted token counts with thousand separators",
+      "Provider-specific icons for visual identification",
+      "Supports legacy models with correct limits"
+    ],
+    "useCases": [
+      "Monitoring context usage across multiple AI providers",
+      "Tracking token consumption to avoid context limit errors",
+      "Comparing model efficiency across providers",
+      "Real-time awareness of remaining context budget",
+      "Multi-model workflow optimization"
+    ],
+    "category": "statuslines",
+    "statuslineType": "custom",
+    "configuration": {
+      "format": "bash",
+      "refreshInterval": 1000,
+      "position": "right",
+      "colorScheme": "provider-aware"
+    },
+    "troubleshooting": [
+      {
+        "issue": "Percentage shows >100% or incorrect limit",
+        "solution": "Update model detection logic with latest model names. Check Claude docs for current model IDs."
+      },
+      {
+        "issue": "Icons showing as boxes",
+        "solution": "Install Nerd Font or emoji-capable font. Test with: echo '🔮 🤖 💎 ⚡'"
+      },
+      {
+        "issue": "Colors not working",
+        "solution": "Ensure TERM environment variable supports colors: echo $TERM should show 'xterm-256color' or similar"
+      },
+      {
+        "issue": "Model detection fails for new AI models or versions",
+        "solution": "Add patterns to detection logic. Common: claude-* (Opus/Sonnet/Haiku), gpt-* (4o/4.1/o3), gemini-* (2.0/2.5-pro), grok-* (3/4). Update with [[ \"$model\" == *\"pattern\"* ]]."
+      },
+      {
+        "issue": "Percentage calculation precision too low or rounded values",
+        "solution": "Increase bc scale for decimals. Current: scale=1. Use: awk \"BEGIN {printf \\\"%.2f\\\", ($tokens / $limit) * 100}\" for two decimals. Higher scale slows execution."
+      }
+    ],
+    "requirements": [
+      "Bash shell",
+      "jq JSON processor",
+      "bc calculator for percentage math",
+      "Terminal with Unicode and color support"
+    ],
+    "preview": "🔮 Claude │ 456,789/1,000,000 (45.7%)"
+  },
+  {
+    "slug": "python-rich-statusline",
+    "description": "Feature-rich statusline using Python's Rich library for beautiful formatting, progress bars, and real-time token cost tracking",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-01",
+    "tags": [
+      "python",
+      "rich",
+      "advanced",
+      "cost-tracking",
+      "progress",
+      "colorful"
+    ],
+    "content": "#!/usr/bin/env python3\n\nimport sys\nimport json\nfrom rich.console import Console\nfrom rich.text import Text\n\nconsole = Console()\n\n# Read JSON from stdin\ntry:\n    data = json.load(sys.stdin)\nexcept json.JSONDecodeError:\n    console.print(\"[red]Error: Invalid JSON input[/red]\")\n    sys.exit(1)\n\n# Extract session data\nmodel = data.get('model', 'unknown')\nworkspace = data.get('workspace', {}).get('path', '~').replace(f\"{os.path.expanduser('~')}\", '~')\ntokens = data.get('session', {}).get('totalTokens', 0)\ncost = data.get('session', {}).get('estimatedCost', 0.0)\ngit_branch = data.get('git', {}).get('branch', None)\n\n# Build status components\nstatus = Text()\n\n# Model indicator with emoji\nstatus.append(\"🤖 \", style=\"bold\")\nstatus.append(f\"{model}\", style=\"bold cyan\")\nstatus.append(\" │ \", style=\"dim\")\n\n# Directory\nstatus.append(\"📁 \", style=\"bold\")\nstatus.append(f\"{workspace}\", style=\"yellow\")\n\n# Git branch if available\nif git_branch:\n    status.append(\" │ \", style=\"dim\")\n    status.append(\" \", style=\"bold\")\n    status.append(f\"{git_branch}\", style=\"magenta\")\n\n# Token usage\nstatus.append(\" │ \", style=\"dim\")\nstatus.append(\"🎯 \", style=\"bold\")\nstatus.append(f\"{tokens:,}\", style=\"green\" if tokens < 100000 else \"yellow\")\n\n# Cost with dynamic coloring\nif cost > 0:\n    status.append(\" │ \", style=\"dim\")\n    status.append(\"💰 \", style=\"bold\")\n    cost_color = \"green\" if cost < 0.10 else \"yellow\" if cost < 1.0 else \"red\"\n    status.append(f\"${cost:.3f}\", style=cost_color)\n\nconsole.print(status)\n",
+    "title": "Python Rich Statusline",
+    "displayTitle": "Python Rich Statusline",
+    "source": "community",
+    "documentationUrl": "https://rich.readthedocs.io/",
+    "features": [
+      "Rich library for beautiful terminal formatting",
+      "Real-time token cost calculation and display",
+      "Progress bar showing session token usage",
+      "Git branch and status indicators",
+      "Emoji support for visual feedback",
+      "Dynamic color schemes based on cost thresholds",
+      "JSON parsing with error handling"
+    ],
+    "useCases": [
+      "Track token costs in real-time during long sessions",
+      "Monitor git branch when working across multiple projects",
+      "Visual feedback for budget-conscious API usage",
+      "Enhanced aesthetics for presentation or streaming"
+    ],
+    "category": "statuslines",
+    "statuslineType": "rich",
+    "configuration": {
+      "format": "python",
+      "refreshInterval": 1000,
+      "position": "left",
+      "colorScheme": "rich-default"
+    },
+    "troubleshooting": [
+      {
+        "issue": "ModuleNotFoundError: No module named 'rich'",
+        "solution": "Install the Rich library: pip3 install rich or python3 -m pip install rich"
+      },
+      {
+        "issue": "Emojis displaying as boxes or not rendering",
+        "solution": "Ensure terminal supports Unicode emojis. Use iTerm2, Kitty, or Windows Terminal. Test with: python3 -c 'print(\"🤖 Test\")'"
+      },
+      {
+        "issue": "Colors look washed out or incorrect",
+        "solution": "Enable truecolor support. Set COLORTERM=truecolor environment variable or use a terminal that supports 24-bit color."
+      },
+      {
+        "issue": "Script execution too slow",
+        "solution": "Rich has some startup overhead. Consider increasing refreshInterval to 2000-3000ms or use the minimal-powerline statusline instead."
+      }
+    ],
+    "requirements": [
+      "Python 3.6 or higher",
+      "Rich library (pip install rich)",
+      "Terminal with emoji support",
+      "Terminal with truecolor support (recommended)"
+    ],
+    "preview": "🤖 claude-sonnet-4.5 │ 📁 ~/projects/app │  main │ 🎯 12,345 │ 💰 $0.234"
+  },
+  {
+    "slug": "real-time-cost-tracker",
+    "description": "Real-time AI cost tracking statusline with per-session spend analytics, model pricing, and budget alerts",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-16",
+    "tags": [
+      "cost",
+      "pricing",
+      "budget",
+      "analytics",
+      "monitoring"
+    ],
+    "content": "#!/usr/bin/env bash\n\n# Real-Time Cost Tracker\n# Calculate session costs based on token usage\n\nread -r input\n\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\n\n# 2025 Pricing (per 1M tokens)\nif [[ \"$model\" == *\"claude-sonnet-4\"* ]]; then\n  price_per_m=3.00\nelif [[ \"$model\" == *\"gpt-4\"* ]]; then\n  price_per_m=5.00\nelif [[ \"$model\" == *\"gemini\"* ]]; then\n  price_per_m=1.25\nelse\n  price_per_m=1.00\nfi\n\n# Calculate cost\ncost=$(awk \"BEGIN {printf \\\"%.4f\\\", ($tokens / 1000000) * $price_per_m}\")\n\n# Budget alert\nif (( $(echo \"$cost > 0.50\" | bc -l) )); then\n  color=\"\\033[31m\"  # Red\n  icon=\"⚠️\"\nelif (( $(echo \"$cost > 0.10\" | bc -l) )); then\n  color=\"\\033[33m\"  # Yellow\n  icon=\"💰\"\nelse\n  color=\"\\033[32m\"  # Green\n  icon=\"💵\"\nfi\n\necho -e \"${icon} ${color}$${cost}${color}\\033[0m │ ${tokens} tokens\"\n",
+    "title": "Real Time Cost Tracker",
+    "displayTitle": "Real Time Cost Tracker",
+    "source": "community",
+    "features": [
+      "Real-time cost calculation",
+      "2025 model pricing (Claude, GPT-4, Gemini)",
+      "Budget threshold alerts",
+      "Color-coded spend warnings",
+      "Session cost tracking"
+    ],
+    "category": "statuslines",
+    "statuslineType": "custom",
+    "configuration": {
+      "format": "bash",
+      "refreshInterval": 1000,
+      "position": "right"
+    },
+    "troubleshooting": [
+      {
+        "issue": "Cost calculation shows wrong decimal format with comma separator",
+        "solution": "Set LC_NUMERIC=C at script start to enforce dot decimal separator. Some locales default to comma, breaking bc. Add: export LC_NUMERIC=C before math operations."
+      },
+      {
+        "issue": "Pricing appears outdated or incorrect for current AI models",
+        "solution": "Update price_per_m values. Claude Sonnet 4 is $3/M (2025), GPT-4o is $3/$10, Gemini 1.5 Pro is $3.50/M. Verify at provider docs before updating script."
+      },
+      {
+        "issue": "bc: command not found when running cost calculations",
+        "solution": "Install bc calculator: brew install bc (macOS), apt install bc (Ubuntu/Debian). Required for floating-point arithmetic in bash scripts."
+      },
+      {
+        "issue": "Cost displays as $0.0000 despite high token usage",
+        "solution": "Check printf precision: use %.4f for micro-dollars. Verify tokens populated: echo $tokens. If zero, test JSON parsing: echo \"$input\" | jq '.session.totalTokens'."
+      }
+    ],
+    "requirements": [
+      "Bash",
+      "jq",
+      "bc calculator"
+    ],
+    "preview": "💵 $0.0234 │ 7,800 tokens"
+  },
+  {
+    "slug": "session-timer-statusline",
+    "description": "Time-tracking statusline showing elapsed session duration, tokens per minute rate, and estimated cost with productivity metrics",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-01",
+    "tags": [
+      "timer",
+      "productivity",
+      "metrics",
+      "bash",
+      "time-tracking",
+      "analytics"
+    ],
+    "content": "#!/usr/bin/env bash\n\n# Session Timer Statusline for Claude Code\n# Tracks session duration and productivity metrics\n\n# Read JSON from stdin\nread -r input\n\n# Extract session data\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"' | sed 's/claude-//')\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\ncost=$(echo \"$input\" | jq -r '.session.estimatedCost // 0' | awk '{printf \"%.3f\", $0}')\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\n\n# Calculate session duration\nif [ -n \"$session_start\" ]; then\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%S\" \"${session_start%.*}\" \"+%s\" 2>/dev/null || echo \"0\")\n  current_epoch=$(date +%s)\n  duration=$((current_epoch - start_epoch))\n  \n  # Format duration as HH:MM:SS\n  hours=$((duration / 3600))\n  minutes=$(((duration % 3600) / 60))\n  seconds=$((duration % 60))\n  formatted_time=$(printf \"%02d:%02d:%02d\" $hours $minutes $seconds)\n  \n  # Calculate tokens per minute\n  if [ $duration -gt 0 ]; then\n    tokens_per_min=$((tokens * 60 / duration))\n    \n    # Productivity rating\n    if [ $tokens_per_min -gt 500 ]; then\n      prod_color=\"\\033[32m\"  # Green - high productivity\n      prod_indicator=\"🔥\"\n    elif [ $tokens_per_min -gt 200 ]; then\n      prod_color=\"\\033[33m\"  # Yellow - medium productivity\n      prod_indicator=\"⚡\"\n    else\n      prod_color=\"\\033[36m\"  # Cyan - normal\n      prod_indicator=\"💭\"\n    fi\n  else\n    tokens_per_min=0\n    prod_color=\"\\033[36m\"\n    prod_indicator=\"💭\"\n  fi\n  \n  # Calculate cost per hour\n  if [ $duration -gt 0 ]; then\n    cost_per_hour=$(echo \"$cost * 3600 / $duration\" | bc -l | awk '{printf \"%.2f\", $0}')\n  else\n    cost_per_hour=\"0.00\"\n  fi\nelse\n  formatted_time=\"00:00:00\"\n  tokens_per_min=0\n  cost_per_hour=\"0.00\"\n  prod_indicator=\"💭\"\nfi\n\n# Build statusline\necho -e \"\\033[35m⏱  ${formatted_time}\\033[0m │ \\033[36m${model}\\033[0m │ ${prod_color}${prod_indicator} ${tokens_per_min}/min\\033[0m │ \\033[33m\\$${cost_per_hour}/hr\\033[0m\"\n",
+    "title": "Session Timer Statusline",
+    "displayTitle": "Session Timer Statusline",
+    "seoTitle": "Session Timer",
+    "source": "community",
+    "features": [
+      "Elapsed session time in HH:MM:SS format",
+      "Real-time tokens per minute calculation",
+      "Cost per hour estimation",
+      "Session start time display",
+      "Productivity metrics (tokens/min indicator)",
+      "Color-coded efficiency ratings",
+      "Persistent timing across statusline refreshes"
+    ],
+    "useCases": [
+      "Track billable hours for client work",
+      "Monitor session productivity and efficiency",
+      "Budget management for API cost control",
+      "Time-boxed development sessions (Pomodoro technique)",
+      "Performance benchmarking across different models"
+    ],
+    "category": "statuslines",
+    "statuslineType": "custom",
+    "configuration": {
+      "format": "bash",
+      "refreshInterval": 1000,
+      "position": "left",
+      "colorScheme": "productivity-metrics"
+    },
+    "troubleshooting": [
+      {
+        "issue": "Timer showing 00:00:00 or not incrementing",
+        "solution": "Ensure Claude Code is providing session.startTime in JSON. Check with: echo \"$input\" | jq '.session.startTime'. May require Claude Code update."
+      },
+      {
+        "issue": "date command error: illegal time format",
+        "solution": "macOS uses 'date -j', Linux uses 'date -d'. Script may need adjustment for your OS. For Linux, replace '-j -f' with '-d'."
+      },
+      {
+        "issue": "bc: command not found",
+        "solution": "Install bc calculator: brew install bc (macOS), apt install bc (Linux). Required for cost calculations."
+      },
+      {
+        "issue": "Tokens per minute showing unrealistic values",
+        "solution": "This is normal at session start. Metric stabilizes after 2-3 minutes of usage. Very high values indicate batch processing."
+      }
+    ],
+    "requirements": [
+      "Bash shell with bc calculator",
+      "jq JSON processor",
+      "date command with -j flag (macOS) or --date (Linux)"
+    ],
+    "preview": "⏱  01:23:45 │ sonnet-4.5 │ 🔥 524/min │ $1.23/hr"
+  },
+  {
+    "slug": "simple-text-statusline",
+    "description": "Ultra-lightweight plain text statusline with no colors or special characters for maximum compatibility and minimal overhead",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-01",
+    "tags": [
+      "simple",
+      "plain-text",
+      "minimal",
+      "bash",
+      "lightweight",
+      "no-dependencies"
+    ],
+    "content": "#!/usr/bin/env bash\n\n# Simple Text Statusline for Claude Code\n# Plain text only - maximum compatibility\n\n# Read JSON from stdin\nread -r input\n\n# Extract values using bash built-ins (no jq required)\nmodel=$(echo \"$input\" | grep -o '\"model\":\"[^\"]*\"' | cut -d'\"' -f4)\ndir=$(echo \"$input\" | grep -o '\"path\":\"[^\"]*\"' | cut -d'\"' -f4 | sed \"s|$HOME|~|\")\ntokens=$(echo \"$input\" | grep -o '\"totalTokens\":[0-9]*' | cut -d':' -f2)\n\n# Default values if extraction fails\nmodel=${model:-\"unknown\"}\ndir=${dir:-\"~\"}\ntokens=${tokens:-\"0\"}\n\n# Build simple plain text status\necho \"[Model: $model] [Dir: $dir] [Tokens: $tokens]\"\n",
+    "title": "Simple Text Statusline",
+    "displayTitle": "Simple Text Statusline",
+    "source": "community",
+    "features": [
+      "Zero dependencies - pure bash implementation",
+      "No color codes or special characters",
+      "Works on any terminal including basic TTY",
+      "Extremely fast execution (<5ms)",
+      "Compatible with screen readers",
+      "No jq or external tools required",
+      "Perfect for SSH sessions or slow connections"
+    ],
+    "useCases": [
+      "SSH sessions over slow or unreliable connections",
+      "Legacy terminals without color support",
+      "Screen reader accessibility requirements",
+      "Embedded systems or resource-constrained environments",
+      "Debugging when color codes cause issues"
+    ],
+    "category": "statuslines",
+    "statuslineType": "simple",
+    "configuration": {
+      "format": "bash",
+      "refreshInterval": 300,
+      "position": "left"
+    },
+    "troubleshooting": [
+      {
+        "issue": "Values showing as empty or 'unknown'",
+        "solution": "JSON parsing relies on specific format. Ensure Claude Code is outputting standard JSON. Test with: echo '$input' to see raw JSON."
+      },
+      {
+        "issue": "Home directory not shortened to ~",
+        "solution": "Check that $HOME environment variable is set correctly: echo $HOME. If using sudo, HOME may not be preserved."
+      },
+      {
+        "issue": "grep or cut command not found",
+        "solution": "These are standard POSIX utilities. Install coreutils package: apt install coreutils (Linux) or ensure busybox is installed (embedded systems)."
+      },
+      {
+        "issue": "JSON parsing breaks when Claude Code changes output format",
+        "solution": "grep/cut parsing is fragile. Switch to jq-based statusline or use awk: awk 'BEGIN { FS=\"\\\"\"; RS=\",\" }; { if ($2 == \"model\") {print $4} }' for robust parsing."
+      },
+      {
+        "issue": "HOME not preserved when running script with sudo",
+        "solution": "Use sudo -H to set HOME or sudo -E to preserve variables. Add HOME to env_keep in /etc/sudoers for persistent fix. Test: sudo -H bash script.sh."
+      }
+    ],
+    "requirements": [
+      "Bash shell (any version)",
+      "Basic grep and cut utilities (pre-installed on all Unix systems)"
+    ],
+    "preview": "[Model: claude-sonnet-4.5] [Dir: ~/projects/my-app] [Tokens: 1234]"
+  },
+  {
+    "slug": "starship-powerline-theme",
+    "description": "Starship-inspired powerline statusline with Nerd Font glyphs, modular segments, and Git integration for Claude Code",
+    "author": "JSONbored",
+    "dateAdded": "2025-10-16",
+    "tags": [
+      "starship",
+      "powerline",
+      "nerd-fonts",
+      "git",
+      "theme"
+    ],
+    "content": "#!/usr/bin/env bash\n\n# Starship-Inspired Powerline Theme\n# Requires Nerd Font\n\nread -r input\n\n# Extract data\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"' | sed 's/claude-//' | sed 's/sonnet/snnt/' | sed 's/-4-5//')\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\nworkdir=$(echo \"$input\" | jq -r '.workspace.path // \".\"')\n\n# Git info\ncd \"$workdir\" 2>/dev/null\nif git rev-parse --git-dir > /dev/null 2>&1; then\n  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo \"detached\")\n  if [ -z \"$(git status --porcelain)\" ]; then\n    git_icon=\"\"\n    git_color=\"\\033[32m\"\n  else\n    git_icon=\"\"\n    git_color=\"\\033[33m\"\n  fi\n  git_segment=\"${git_color}  ${branch} ${git_icon}\\033[0m\"\nfi\n\n# Model segment\nmodel_segment=\"\\033[36m ${model}\\033[0m\"\n\n# Token segment with icon\ntoken_k=$((tokens / 1000))\ntoken_segment=\"\\033[35m ${token_k}k\\033[0m\"\n\n# Build powerline\necho -e \"${model_segment} ${token_segment}${git_segment}\"\n",
+    "title": "Starship Powerline Theme",
+    "displayTitle": "Starship Powerline Theme",
+    "source": "community",
+    "features": [
+      "Starship-inspired modular design",
+      "Nerd Font glyphs for icons",
+      "Git branch and status",
+      "Condensed model names",
+      "Token count in thousands",
+      "Powerline-style separators"
+    ],
+    "category": "statuslines",
+    "statuslineType": "custom",
+    "configuration": {
+      "format": "bash",
+      "refreshInterval": 1000,
+      "position": "left"
+    },
+    "troubleshooting": [
+      {
+        "issue": "Nerd Font glyphs showing as boxes or missing symbols",
+        "solution": "Install Nerd Font and configure terminal. Test: echo -e ' '. Set font to 'FiraCode Nerd Font Mono' or 'MesloLGS NF'. Run fc-cache -fv to refresh cache."
+      },
+      {
+        "issue": "Git status shows '(detached)' instead of branch name",
+        "solution": "You're in detached HEAD state (normal for commit checkouts). Run git branch -q to see state. Checkout branch: git checkout main or create: git checkout -b feature-name."
+      },
+      {
+        "issue": "Git icons not rendering correctly in VS Code terminal",
+        "solution": "Add to settings.json: \"terminal.integrated.fontFamily\": \"'FiraCode Nerd Font Mono'\". Restart VS Code. If issues persist, install: sudo apt install fonts-symbola."
+      },
+      {
+        "issue": "Statusline displays incorrectly after git operations",
+        "solution": "Increase refreshInterval if statusline lags git state. Use git status --porcelain for reliable scripting. Verify read access: test -r .git && echo OK."
+      },
+      {
+        "issue": "Model name abbreviation too aggressive or unclear",
+        "solution": "Modify sed patterns to preserve model info. Script shortens 'claude-sonnet-4-5' to 'snnt'. Keep full name by removing: | sed 's/sonnet/snnt/' line."
+      }
+    ],
+    "requirements": [
+      "Bash shell",
+      "jq",
+      "Nerd Font installed",
+      "Git"
+    ],
+    "preview": " snnt  156k  main "
+  }
+];
+
+export const statuslinesFullBySlug = new Map(statuslinesFull.map(item => [item.slug, item]));
+
+export function getStatuslineFullBySlug(slug: string) {
+  return statuslinesFullBySlug.get(slug) || null;
+}
+
+export type StatuslineFull = typeof statuslinesFull[number];

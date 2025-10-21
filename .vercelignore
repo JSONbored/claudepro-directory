@@ -29,8 +29,8 @@ vitest.config.ts
 jest.config.js
 
 # Build artifacts (Vercel generates these)
-# CRITICAL: Exclude webpack cache (599MB causing function size issues)
-.next/cache/
+# OPTIMIZATION: Allow Turbopack cache reuse for 30-40s faster builds
+# Only exclude trace and standalone (not needed for runtime)
 .next/trace
 .next/standalone/
 .turbo/

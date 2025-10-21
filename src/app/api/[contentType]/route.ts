@@ -1,13 +1,15 @@
-import {
-  agents,
-  collections,
-  commands,
-  hooks,
-  mcp,
-  rules,
-  skills,
-  statuslines,
-} from '@/generated/content';
+/**
+ * OPTIMIZATION: Import metadata-only files instead of full content
+ * API endpoints only need metadata fields, not full content (5-40x smaller imports)
+ */
+import { agentsMetadata } from '@/generated/agents-metadata';
+import { collectionsMetadata } from '@/generated/collections-metadata';
+import { commandsMetadata } from '@/generated/commands-metadata';
+import { hooksMetadata } from '@/generated/hooks-metadata';
+import { mcpMetadata } from '@/generated/mcp-metadata';
+import { rulesMetadata } from '@/generated/rules-metadata';
+import { skillsMetadata } from '@/generated/skills-metadata';
+import { statuslinesMetadata } from '@/generated/statuslines-metadata';
 import { contentCache } from '@/src/lib/cache.server';
 import { createApiRoute } from '@/src/lib/error-handler';
 import { rateLimiters } from '@/src/lib/rate-limiter.server';
@@ -15,16 +17,16 @@ import { apiSchemas } from '@/src/lib/security/validators';
 
 export const runtime = 'nodejs';
 
-// Content type mapping with async data getters
+// Content type mapping with async data getters (using metadata-only imports)
 const contentMap = {
-  'agents.json': { getData: () => agents, type: 'agent' },
-  'mcp.json': { getData: () => mcp, type: 'mcp' },
-  'hooks.json': { getData: () => hooks, type: 'hook' },
-  'commands.json': { getData: () => commands, type: 'command' },
-  'rules.json': { getData: () => rules, type: 'rule' },
-  'statuslines.json': { getData: () => statuslines, type: 'statusline' },
-  'collections.json': { getData: () => collections, type: 'collection' },
-  'skills.json': { getData: () => skills, type: 'skill' },
+  'agents.json': { getData: () => Promise.resolve(agentsMetadata), type: 'agent' },
+  'mcp.json': { getData: () => Promise.resolve(mcpMetadata), type: 'mcp' },
+  'hooks.json': { getData: () => Promise.resolve(hooksMetadata), type: 'hook' },
+  'commands.json': { getData: () => Promise.resolve(commandsMetadata), type: 'command' },
+  'rules.json': { getData: () => Promise.resolve(rulesMetadata), type: 'rule' },
+  'statuslines.json': { getData: () => Promise.resolve(statuslinesMetadata), type: 'statusline' },
+  'collections.json': { getData: () => Promise.resolve(collectionsMetadata), type: 'collection' },
+  'skills.json': { getData: () => Promise.resolve(skillsMetadata), type: 'skill' },
 } as const;
 
 const route = createApiRoute({

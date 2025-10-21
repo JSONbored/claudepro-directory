@@ -19,6 +19,7 @@ export async function createClient() {
 
   // In local environments without env vars, return a mock client that won't crash
   // This allows local dev AND local builds to succeed without Supabase
+  // FIXED: Use VERCEL/CI check instead of NODE_ENV (which is 'production' during build)
   if (!(supabaseUrl && supabaseAnonKey)) {
     const isLocal = !(process.env.VERCEL || process.env.CI);
     if (isLocal) {

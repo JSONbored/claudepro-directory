@@ -235,17 +235,55 @@ export type ConfigSubmissionData = z.output<typeof configSubmissionSchema>;
 
 /**
  * JSON-LD utilities (moved from previous version)
- * Production-grade: XSS validation + safeParse for round-trip safety
+ * Production-grade: XSS sanitization + safeParse for round-trip safety
+ *
+ * CRITICAL FIX: Recursively sanitize all string values BEFORE validation
+ * to prevent script tags in content from breaking JSON-LD rendering
  */
-export function validateJsonLdSafe(data: unknown): unknown {
-  const jsonString = JSON.stringify(data);
 
+/**
+ * Recursively sanitize object for JSON-LD safety
+ * Escapes HTML tags, script tags, and javascript: protocols in all string values
+ */
+function sanitizeForJsonLd(obj: unknown): unknown {
+  if (typeof obj === 'string') {
+    // Escape dangerous patterns in strings
+    return obj
+      .replace(/</g, '\\u003c') // Escape < to prevent any HTML tags
+      .replace(/>/g, '\\u003e') // Escape > for completeness
+      .replace(/javascript:/gi, 'javascript\\u003a'); // Escape javascript: protocol
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => sanitizeForJsonLd(item));
+  }
+
+  if (obj !== null && typeof obj === 'object') {
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      sanitized[key] = sanitizeForJsonLd(value);
+    }
+    return sanitized;
+  }
+
+  // Primitives (numbers, booleans, null) pass through unchanged
+  return obj;
+}
+
+export function validateJsonLdSafe(data: unknown): unknown {
+  // Sanitize BEFORE validation to prevent content with HTML from failing
+  const sanitized = sanitizeForJsonLd(data);
+
+  // Validate the sanitized data
+  const jsonString = JSON.stringify(sanitized);
+
+  // Additional validation checks (should never fail now after sanitization)
   if (/<script\b/i.test(jsonString)) {
-    throw new Error('Script tags are not allowed in JSON-LD data');
+    throw new Error('Script tags detected after sanitization (should not happen)');
   }
 
   if (/javascript:/i.test(jsonString)) {
-    throw new Error('JavaScript protocol not allowed in JSON-LD data');
+    throw new Error('JavaScript protocol detected after sanitization (should not happen)');
   }
 
   // Production-grade: safeParse with permissive unknown schema for round-trip validation
@@ -256,5 +294,6 @@ export function validateJsonLdSafe(data: unknown): unknown {
 
 export function serializeJsonLd(data: unknown): string {
   const validated = validateJsonLdSafe(data);
+  // Already sanitized in validateJsonLdSafe, but double-escape < for defense in depth
   return JSON.stringify(validated).replace(/</g, '\\u003c');
 }
