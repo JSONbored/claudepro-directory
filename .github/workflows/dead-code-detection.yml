@@ -88,7 +88,7 @@ jobs:
             }
 
             // Create comment on PR
-            const comment = `## 🔍 Dead Code Detection\n\nKnip detected unused code in this PR.\n\n### How to fix:\n1. Remove unused exports\n2. Delete unused files\n3. Update \`config/tools/knip.json\` if false positives\n\nRun locally: \`npm run analyze:unused\``;
+            const comment = `## 🔍 Dead Code Detection\n\nKnip detected unused code in this PR.\n\n### How to fix:\n1. Remove unused exports\n2. Delete unused files\n3. Update \`config/tools/knip.json\` if false positives\n\nRun locally: \`pnpm run analyze:unused\``;
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,

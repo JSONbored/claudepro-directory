@@ -21,9 +21,9 @@
   "type": "module",
   "engines": {
     "node": ">=22.0.0",
-    "pnpm": ">=9.0.0"
+    "pnpm": ">=10.0.0"
   },
-  "packageManager": "pnpm@9.15.0",
+  "packageManager": "pnpm@10.19.0+sha512.c9fc7236e92adf5c8af42fd5bf1612df99c2ceb62f27047032f4720b33f8eacdde311865e91c411f2774f618d82f320808ecb51718bfa82c060c4ba7c76a32b8",
   "imports": {
     "#lib/actions/user": {
       "storybook": "./src/lib/actions/user.actions.mock.ts",
@@ -143,7 +143,7 @@
     "analyze:unused": "npx knip -c config/tools/knip.json",
     "analyze:circular": "npx madge --circular --extensions ts,tsx src/",
     "analyze:circular-graph": "npx madge --circular --extensions ts,tsx --image circular-deps.svg src/",
-    "analyze:all": "npm run analyze:unused && npm run analyze:circular",
+    "analyze:all": "pnpm run analyze:unused && pnpm run analyze:circular",
     "a11y:audit": "lhci autorun --config=config/tools/lighthouserc.cjs",
     "a11y:ci": "lhci autorun --config=config/tools/lighthouserc.cjs --assert",
     "test": "vitest",
@@ -166,7 +166,7 @@
     "test:e2e:clean": "rm -rf playwright-report test-results",
     "test:e2e:report": "playwright show-report playwright-report",
     "test:e2e:codegen": "playwright codegen http://localhost:3000",
-    "test:all": "npm run test:unit && npm run test:e2e",
+    "test:all": "pnpm run test:unit && pnpm run test:e2e",
     "tech-debt:baseline": "config/tools/tech-debt/tracker.sh baseline",
     "tech-debt:check": "config/tools/tech-debt/tracker.sh check",
     "tech-debt:report": "config/tools/tech-debt/tracker.sh report",
@@ -238,6 +238,8 @@
     "tailwindcss": "^4.1.14",
     "tsx": "^4.20.6",
     "typescript": "5.9.3",
+    "vscode-oniguruma": "^2.0.1",
+    "nosecone": "^1.0.0-beta.13",
     "zod": "^4.1.12"
   },
   "devDependencies": {
