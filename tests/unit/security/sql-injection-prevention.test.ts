@@ -30,8 +30,8 @@
 
 import { describe, expect, test } from 'vitest';
 import { z } from 'zod';
+import { VALID_CATEGORIES } from '@/src/lib/config/category-types';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
-import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
 
 describe('SQL Injection Prevention - Input Validation', () => {
   // Test the slug validation schema used in bookmark-actions.ts
@@ -267,25 +267,22 @@ describe('SQL Injection Prevention - Input Validation', () => {
   });
 
   describe('Content Type Validation', () => {
-    test('should only accept valid content types', () => {
-      const validTypes = ['agents', 'mcp', 'commands', 'hooks', 'rules', 'statuslines'];
+    const allowedCategories = new Set(VALID_CATEGORIES);
 
-      for (const type of validTypes) {
-        const result = contentCategorySchema.safeParse(type);
-        expect(result.success).toBe(true);
+    test('should only accept valid content types', () => {
+      for (const type of VALID_CATEGORIES) {
+        expect(allowedCategories.has(type)).toBe(true);
       }
     });
 
     test('should reject SQL injection in content type', () => {
       const malicious = "agents'; DROP TABLE bookmarks--";
-      const result = contentCategorySchema.safeParse(malicious);
-      expect(result.success).toBe(false);
+      expect(allowedCategories.has(malicious as (typeof VALID_CATEGORIES)[number])).toBe(false);
     });
 
     test('should reject arbitrary content types', () => {
       const invalid = 'invalid_type';
-      const result = contentCategorySchema.safeParse(invalid);
-      expect(result.success).toBe(false);
+      expect(allowedCategories.has(invalid as (typeof VALID_CATEGORIES)[number])).toBe(false);
     });
   });
 

@@ -39,8 +39,6 @@ export async function generateStaticParams() {
   const guideCategories = [
     'use-cases',
     'tutorials',
-    'collections',
-    'categories',
     'workflows',
     'comparisons',
     'troubleshooting',
@@ -113,8 +111,6 @@ async function getSEOPageData(category: string, slug: string): Promise<SEOPageDa
   const pathMap: Record<string, string> = {
     'use-cases': 'use-cases',
     tutorials: 'tutorials',
-    collections: 'collections',
-    categories: 'categories',
     workflows: 'workflows',
     comparisons: 'comparisons',
     troubleshooting: 'troubleshooting',
@@ -122,39 +118,46 @@ async function getSEOPageData(category: string, slug: string): Promise<SEOPageDa
 
   if (!pathMap[category]) return null;
 
-  const cacheKey = `guide:${category}:${slug}`;
+  const cacheKey = `guide:v3:${category}:${slug}`;
 
-  return await contentCache.cacheWithRefresh(
-    cacheKey,
-    async () => {
-      try {
-        const mappedPath = pathMap[category];
-        if (!mappedPath) return null;
-
-        // Load JSON guide file
-        const jsonPath = path.join(process.cwd(), 'content', 'guides', mappedPath, `${slug}.json`);
-        const jsonContent = await fs.readFile(jsonPath, 'utf-8');
-        const json = JSON.parse(jsonContent);
-
-        return {
-          title: json.metadata.title || '',
-          seoTitle: json.metadata.seoTitle,
-          description: json.metadata.description || '',
-          keywords: json.metadata.keywords || [],
-          dateUpdated: json.metadata.dateUpdated || '',
-          author: json.metadata.author || APP_CONFIG.author,
-          readingTime: json.metadata.readingTime || '',
-          difficulty: json.metadata.difficulty || '',
-          category: json.metadata.category || category,
-          content: json, // Store full JSON for renderer
-          format: 'json' as const,
-        };
-      } catch (_error) {
+  const loadGuide = async () => {
+    try {
+      const mappedPath = pathMap[category];
+      if (!mappedPath) {
         return null;
       }
-    },
-    24 * 60 * 60 // Cache for 24 hours
-  );
+
+      const jsonPath = path.join(process.cwd(), 'content', 'guides', mappedPath, `${slug}.json`);
+      const jsonContent = await fs.readFile(jsonPath, 'utf-8');
+      const json = JSON.parse(jsonContent);
+
+      return {
+        title: json.metadata.title || '',
+        seoTitle: json.metadata.seoTitle,
+        description: json.metadata.description || '',
+        keywords: json.metadata.keywords || [],
+        dateUpdated: json.metadata.dateUpdated || '',
+        author: json.metadata.author || APP_CONFIG.author,
+        readingTime: json.metadata.readingTime || '',
+        difficulty: json.metadata.difficulty || '',
+        category: json.metadata.category || category,
+        content: json,
+        format: 'json' as const,
+      };
+    } catch (error) {
+      logger.error('Failed to load guide', error instanceof Error ? error : new Error(String(error)), {
+        category,
+        slug,
+        mappedPath: pathMap[category],
+      });
+      return null;
+    }
+  };
+
+  return await contentCache.cacheWithRefresh(cacheKey, loadGuide, {
+    ttl: 3600,
+    tags: ['guide', `guide:${category}`, `guide:${category}:${slug}`],
+  });
 }
 
 async function getRelatedGuides(
@@ -219,7 +222,15 @@ export async function generateMetadata({
 }: {
   params: Promise<{ category: string; slug: string }>;
 }): Promise<Metadata> {
-  const { category, slug } = await params;
+  const rawParams = await params;
+  const validationResult = guideParamsSchema.safeParse(rawParams);
+
+  if (!validationResult.success) {
+    // Return fallback metadata if params are invalid
+    return {};
+  }
+
+  const { category, slug } = validationResult.data;
 
   // Load guide data for metadata generation
   const guideData = await getSEOPageData(category, slug);
@@ -340,6 +351,19 @@ export default async function SEOGuidePage({
       ],
     };
 
+    // Calculate word count from JSON content blocks
+    const calculateWordCount = (json: any): number => {
+      try {
+        const blocks = json.sections || json.content?.blocks || [];
+        const text = blocks
+          .map((block: any) => block.content || '')
+          .join(' ');
+        return text.split(/\s+/).filter(Boolean).length;
+      } catch {
+        return 0;
+      }
+    };
+
     // Article structured data
     const articleData = {
       '@context': 'https://schema.org',
@@ -366,7 +390,7 @@ export default async function SEOGuidePage({
         '@id': `${APP_CONFIG.url}/guides/${category}/${slug}`,
       },
       articleSection: categoryLabels[category || ''] || 'Guide',
-      wordCount: data.content.split(/\s+/).length,
+      wordCount: calculateWordCount(data.content),
     };
 
     // Generate unique IDs based on the page slug to avoid conflicts

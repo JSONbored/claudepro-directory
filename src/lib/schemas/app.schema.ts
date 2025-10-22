@@ -80,6 +80,8 @@ export type LazyLoaderOptions<T> = {
  * SEO page data schema
  * @property seoTitle - Short title for <title> tag optimization (<60 chars), falls back to full title
  * @property title - Full title for H1 heading and longtail keywords
+ * @property content - Content data (string for MDX, object for JSON)
+ * @property format - Content format ('mdx' | 'json')
  */
 const seoPageDataSchema = z.object({
   title: nonEmptyString.max(200),
@@ -87,7 +89,8 @@ const seoPageDataSchema = z.object({
   description: nonEmptyString.max(500),
   keywords: z.array(shortString.max(50)).max(20),
   dateUpdated: shortString,
-  content: nonEmptyString,
+  content: z.unknown(),
+  format: z.enum(['mdx', 'json']).optional(),
   author: shortString.optional(),
   readingTime: shortString.optional(),
   difficulty: shortString.optional(),

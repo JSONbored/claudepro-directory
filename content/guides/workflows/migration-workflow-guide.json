@@ -16,7 +16,12 @@
     "author": "Claude Pro Directory",
     "category": "guides",
     "subcategory": "workflows",
-    "tags": ["workflow", "migration", "enterprise", "automation"],
+    "tags": [
+      "workflow",
+      "migration",
+      "enterprise",
+      "automation"
+    ],
     "readingTime": "18 min",
     "difficulty": "Advanced",
     "featured": true,
@@ -59,14 +64,35 @@
           "variant": "feature-grid",
           "title": "Migration Components",
           "description": "Core elements for successful platform transition",
-          "features": "[\n    {\n      title: \"Pre-Migration Assessment Framework\",\n      description: \"Cost-performance analysis handling API pricing comparisons and ROI calculations. Critical for justifying the 5-7.5x premium through 33% performance advantages.\",\n      badge: \"Foundation\"\n    },\n    {\n      title: \"Technical Migration Patterns\",\n      description: \"API wrapper implementation enabling OpenAI SDK compatibility and prompt translation. Integrates with existing codebases while maintaining backward compatibility.\",\n      badge: \"Integration\"\n    },\n    {\n      title: \"Team Enablement System\",\n      description: \"Phased rollout automation providing training, champion networks, and change management. Reduces resistance by 85% through structured adoption.\",\n      badge: \"Human-Centered\"\n    },\n    {\n      title: \"Performance Validation Engine\",\n      description: \"A/B testing framework ensuring quality metrics and business KPIs. Maintains 95% baseline performance throughout migration.\",\n      badge: \"Quality Assurance\"\n    }\n  ]",
+          "features": [
+            {
+              "title": "Pre-Migration Assessment Framework",
+              "description": "Cost-performance analysis handling API pricing comparisons and ROI calculations. Critical for justifying the 5-7.5x premium through 33% performance advantages.",
+              "badge": "Foundation"
+            },
+            {
+              "title": "Technical Migration Patterns",
+              "description": "API wrapper implementation enabling OpenAI SDK compatibility and prompt translation. Integrates with existing codebases while maintaining backward compatibility.",
+              "badge": "Integration"
+            },
+            {
+              "title": "Team Enablement System",
+              "description": "Phased rollout automation providing training, champion networks, and change management. Reduces resistance by 85% through structured adoption.",
+              "badge": "Human-Centered"
+            },
+            {
+              "title": "Performance Validation Engine",
+              "description": "A/B testing framework ensuring quality metrics and business KPIs. Maintains 95% baseline performance throughout migration.",
+              "badge": "Quality Assurance"
+            }
+          ],
           "columns": 2,
           "children": "<h3>Essential Migration Stack</h3>"
         }
       },
       {
         "type": "paragraph",
-        "content": "<h4>Migration Criteria</h4>           <p>Tool selection based on ISO 42001:2023 compliance, SOC 2 Type II certification requirements. Priority factors include zero data retention, HIPAA configurability, and cross-border data sovereignty.</p>         </div>       )     },     {       label: \"Claude Integration\",       value: \"claude\",       content: (         <div>           <h3>Claude-Powered Automation</h3>           <p>Strategic automation points transforming manual processes into Claude-assisted workflows. Claude handles complex reasoning, code generation, and multi-step analysis with 72.5% success rates.</p>"
+        "content": "<h4>Migration Criteria</h4>           Tool selection based on ISO 42001:2023 compliance, SOC 2 Type II certification requirements. Priority factors include zero data retention, HIPAA configurability, and cross-border data sovereignty.\n\n         </div>       )     },     {       label: \"Claude Integration\",       value: \"claude\",       content: (         <div>           <h3>Claude-Powered Automation</h3>           Strategic automation points transforming manual processes into Claude-assisted workflows. Claude handles complex reasoning, code generation, and multi-step analysis with 72.5% success rates."
       },
       {
         "type": "paragraph",
@@ -100,7 +126,12 @@
         "props": {
           "title": "Migration Performance Analysis",
           "description": "Before and after metrics from verified enterprise implementations",
-          "headers": ["Metric", "Before Migration", "After Claude 4", "Improvement"],
+          "headers": [
+            "Metric",
+            "Before Migration",
+            "After Claude 4",
+            "Improvement"
+          ],
           "data": [
             {
               "Metric": "Coding Success Rate (SWE-bench)",
@@ -138,27 +169,27 @@
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Challenge:</strong> Fragmented AI usage across multiple platforms with inconsistent results</p>           <p><strong>Implementation:</strong> Fuel iX platform offering 40+ AI models with Claude as preferred option</p>           <p><strong>Results:</strong> 100 billion tokens processed monthly, $90M+ measurable benefits, 500,000+ hours saved</p>"
+        "content": "**Challenge:** Fragmented AI usage across multiple platforms with inconsistent results\n\n           **Implementation:** Fuel iX platform offering 40+ AI models with Claude as preferred option\n\n           **Results:** 100 billion tokens processed monthly, $90M+ measurable benefits, 500,000+ hours saved"
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Lessons Learned:</strong> Universal translator approach connecting disparate systems drove adoption. Engineering teams ship code 30% faster with 40-minute average time savings per interaction.</p>         </div>       )     },     {       label: \"Bridgewater Associates\",       value: \"bridgewater\",       content: (         <div>           <p><strong>Company:</strong> World's Largest Hedge Fund</p>           <p><strong>Situation:</strong> Manual financial analysis bottlenecking investment decisions</p>           <p><strong>Approach:</strong> Investment Analyst Assistant via Amazon Bedrock with VPC isolation</p>           <p><strong>Outcome:</strong> 35x speedup in DCF model creation (6 hours to 10 minutes)</p>"
+        "content": "**Lessons Learned:** Universal translator approach connecting disparate systems drove adoption. Engineering teams ship code 30% faster with 40-minute average time savings per interaction.\n\n         </div>       )     },     {       label: \"Bridgewater Associates\",       value: \"bridgewater\",       content: (         <div>           **Company:** World's Largest Hedge Fund\n\n           **Situation:** Manual financial analysis bottlenecking investment decisions\n\n           **Approach:** Investment Analyst Assistant via Amazon Bedrock with VPC isolation\n\n           **Outcome:** 35x speedup in DCF model creation (6 hours to 10 minutes)"
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Implementation Highlights:</strong></p>           <ul>             <li>Analyst-level precision in automated investment analysis</li>             <li>Python script generation for complex financial modeling</li>             <li>50-70% reduction in time-to-insight for reports</li>           </ul>"
+        "content": "**Implementation Highlights:**\n\n                        - Analyst-level precision in automated investment analysis             - Python script generation for complex financial modeling             - 50-70% reduction in time-to-insight for reports"
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Scalability Insights:</strong> Workflow redesign around Claude capabilities rather than retrofitting existing processes proved critical for achieving 35x performance gains.</p>         </div>       )     },     {       label: \"Norwegian Sovereign Wealth\",       value: \"nbim\",       content: (         <div>           <p><strong>Fund:</strong> $1.8 Trillion Sovereign Wealth Fund (700 employees)</p>           <p><strong>Innovation:</strong> Mandatory AI adoption with CEO mandate</p>           <p><strong>Execution:</strong> 40 AI ambassadors driving department-level adoption</p>           <p><strong>Impact:</strong> $100M annual trading cost savings, 20% productivity gains</p>"
+        "content": "**Scalability Insights:** Workflow redesign around Claude capabilities rather than retrofitting existing processes proved critical for achieving 35x performance gains.\n\n         </div>       )     },     {       label: \"Norwegian Sovereign Wealth\",       value: \"nbim\",       content: (         <div>           **Fund:** $1.8 Trillion Sovereign Wealth Fund (700 employees)\n\n           **Innovation:** Mandatory AI adoption with CEO mandate\n\n           **Execution:** 40 AI ambassadors driving department-level adoption\n\n           **Impact:** $100M annual trading cost savings, 20% productivity gains"
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Breakthrough Results:</strong></p>           <ul>             <li>95% accuracy in automated voting decisions</li>             <li>Natural language querying of Snowflake data warehouse</li>             <li>Monitoring 9,000 companies across 16 languages</li>             <li>213,000 hours saved annually (20% productivity gain)</li>           </ul>"
+        "content": "**Breakthrough Results:**\n\n                        - 95% accuracy in automated voting decisions             - Natural language querying of Snowflake data warehouse             - Monitoring 9,000 companies across 16 languages             - 213,000 hours saved annually (20% productivity gain)"
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Growth Enablement:</strong> CEO's \"no AI, no promotion\" directive created urgency while ambassador network provided support structure for rapid adoption.</p>         </div>       )     }   ]} />"
+        "content": "**Growth Enablement:** CEO's \"no AI, no promotion\" directive created urgency while ambassador network provided support structure for rapid adoption.\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -178,7 +209,7 @@
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Root Cause:</strong> Surface-level cost comparison ignoring performance differences</p>           <p><strong>Solution:</strong> Calculate cost per successful outcome: Claude's 72.5% success rate vs 54.6% makes effective cost only 5.6x higher</p>           <p><strong>Prevention:</strong> Include batch processing (50% discount) and prompt caching (90% reduction) in TCO calculations</p>           <p><strong>Success Rate:</strong> 100% executive approval when presenting performance-adjusted costs</p>         </div>       ),       defaultOpen: true     },     {       title: \"Prompt Translation from ChatGPT Format\",       content: (         <div>           <p><strong>Technical Issue:</strong> Conversational GPT prompts underperform with Claude</p>           <p><strong>Diagnostic Steps:</strong> Analyze existing prompts for structure and clarity</p>           <p><strong>Resolution:</strong> Implement XML tag structure with context, task, and constraints sections</p>           <p><strong>Optimization:</strong> 35% first-pass accuracy improvement with structured prompts</p>         </div>       )     },     {       title: \"Team Resistance to Platform Change\",       content: (         <div>           <p><strong>Change Issue:</strong> Developer attachment to familiar ChatGPT/Copilot workflows</p>           <p><strong>Analysis Method:</strong> Survey resistance points and productivity concerns</p>           <p><strong>Strategy:</strong> OpenAI SDK compatibility allows gradual transition without workflow disruption</p>           <p><strong>Results:</strong> 95% adoption rate when maintaining familiar interfaces while improving performance</p>         </div>       )     }   ]} />"
+        "content": "**Root Cause:** Surface-level cost comparison ignoring performance differences\n\n           **Solution:** Calculate cost per successful outcome: Claude's 72.5% success rate vs 54.6% makes effective cost only 5.6x higher\n\n           **Prevention:** Include batch processing (50% discount) and prompt caching (90% reduction) in TCO calculations\n\n           **Success Rate:** 100% executive approval when presenting performance-adjusted costs\n\n         </div>       ),       defaultOpen: true     },     {       title: \"Prompt Translation from ChatGPT Format\",       content: (         <div>           **Technical Issue:** Conversational GPT prompts underperform with Claude\n\n           **Diagnostic Steps:** Analyze existing prompts for structure and clarity\n\n           **Resolution:** Implement XML tag structure with context, task, and constraints sections\n\n           **Optimization:** 35% first-pass accuracy improvement with structured prompts\n\n         </div>       )     },     {       title: \"Team Resistance to Platform Change\",       content: (         <div>           **Change Issue:** Developer attachment to familiar ChatGPT/Copilot workflows\n\n           **Analysis Method:** Survey resistance points and productivity concerns\n\n           **Strategy:** OpenAI SDK compatibility allows gradual transition without workflow disruption\n\n           **Results:** 95% adoption rate when maintaining familiar interfaces while improving performance\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",

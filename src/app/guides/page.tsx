@@ -64,13 +64,14 @@ async function getAllGuides(): Promise<UnifiedContentItem[]> {
           // This allows proper URL construction via getContentItemUrl() helper
           // URLs: /guides/{subcategory}/{slug} where subcategory is tutorials, comparisons, etc.
           //
-          // CRITICAL: slug must include subcategory prefix for Redis key matching
-          // Redis keys: views:guides:{category}/{slug}
-          // Example: views:guides:tutorials/desktop-mcp-setup
+          // Redis Key Architecture:
+          // - URL params: /guides/{category}/{slug} → category="tutorials", slug="desktop-mcp-setup"
+          // - Detail page constructs: guideSlug = `${category}/${slug}` → "tutorials/desktop-mcp-setup"
+          // - Therefore: slug should be JUST the filename (no subcategory prefix)
           guides.push({
             title: frontmatter.title || filename,
             description: frontmatter.description || '',
-            slug: `${category}/${filename}`, // Include subcategory for Redis key matching
+            slug: filename, // Just filename - subcategory added by getContentItemUrl()
             category: 'guides' as CategoryId, // Always 'guides' for parent category
             subcategory: category as
               | 'tutorials'

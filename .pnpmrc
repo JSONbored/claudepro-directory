@@ -12,7 +12,6 @@
 # - @arcjet/next (security/WAF)
 # - @nosecone/next (security headers)
 # - @storybook/nextjs (component dev)
-# - fumadocs-ui (documentation)
 # - next-safe-action (type-safe server actions)
 # - @vercel/analytics, @vercel/speed-insights
 #

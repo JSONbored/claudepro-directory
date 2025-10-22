@@ -177,6 +177,15 @@ export interface UnifiedCategoryConfig<
   // ===== DATA LOADING =====
   contentLoader: string;
 
+  // ===== SUBCATEGORIES (Optional) =====
+  /** Subcategory definitions for content types that support hierarchical organization */
+  subcategories?: ReadonlyArray<{
+    readonly id: string;
+    readonly title: string;
+    readonly icon: LucideIcon;
+    readonly description?: string;
+  }>;
+
   // Index signature for compatibility with MetadataContext
   [key: string]: unknown;
 }
@@ -686,6 +695,38 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     },
     urlSlug: 'guides',
     contentLoader: 'guides',
+    subcategories: [
+      {
+        id: 'use-cases',
+        title: 'Use Case',
+        icon: Sparkles,
+        description: 'Real-world Claude use cases and practical applications',
+      },
+      {
+        id: 'tutorials',
+        title: 'Tutorial',
+        icon: BookOpen,
+        description: 'Step-by-step tutorials and how-to guides',
+      },
+      {
+        id: 'workflows',
+        title: 'Workflow',
+        icon: Layers,
+        description: 'Workflow automation and process guides',
+      },
+      {
+        id: 'comparisons',
+        title: 'Comparison',
+        icon: FileText,
+        description: 'Feature comparisons and technology evaluations',
+      },
+      {
+        id: 'troubleshooting',
+        title: 'Troubleshooting',
+        icon: Terminal,
+        description: 'Troubleshooting guides and problem-solving',
+      },
+    ] as const,
   },
 
   jobs: {

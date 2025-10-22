@@ -16,7 +16,12 @@
     "author": "Claude Pro Directory",
     "category": "guides",
     "subcategory": "tutorials",
-    "tags": ["tutorial", "intermediate", "migration", "api"],
+    "tags": [
+      "tutorial",
+      "intermediate",
+      "migration",
+      "api"
+    ],
     "readingTime": "12 min",
     "difficulty": "intermediate",
     "featured": false,
@@ -55,7 +60,28 @@
           "variant": "feature-grid",
           "title": "Learning Outcomes",
           "description": "Skills and knowledge you'll master in this tutorial",
-          "features": "[\n    {\n      title: \"API Parameter Mapping\",\n      description: \"Convert OpenAI requests to Anthropic format with 100% compatibility for standard operations.\",\n      badge: \"Essential\"\n    },\n    {\n      title: \"XML Prompt Engineering\", \n      description: \"Transform ChatGPT prompts into Claude's XML format for improved output quality.\",\n      badge: \"Practical\"\n    },\n    {\n      title: \"Cost Optimization\",\n      description: \"Implement prompt caching and batching strategies for significant cost reduction.\",\n      badge: \"Advanced\"\n    },\n    {\n      title: \"Workflow Integration\",\n      description: \"Build hybrid systems leveraging both platforms for productivity improvements.\",\n      badge: \"Applied\"\n    }\n  ]",
+          "features": [
+            {
+              "title": "API Parameter Mapping",
+              "description": "Convert OpenAI requests to Anthropic format with 100% compatibility for standard operations.",
+              "badge": "Essential"
+            },
+            {
+              "title": "XML Prompt Engineering",
+              "description": "Transform ChatGPT prompts into Claude's XML format for improved output quality.",
+              "badge": "Practical"
+            },
+            {
+              "title": "Cost Optimization",
+              "description": "Implement prompt caching and batching strategies for significant cost reduction.",
+              "badge": "Advanced"
+            },
+            {
+              "title": "Workflow Integration",
+              "description": "Build hybrid systems leveraging both platforms for productivity improvements.",
+              "badge": "Applied"
+            }
+          ],
           "columns": 2,
           "children": "time: \"8 minutes\",\n      tip: \"Troubleshooting: Place instructions in human messages, not system prompts\"\n    },\n    {\n      title: \"Step 4: Optimize Performance and Costs\",\n      description: \"Enable prompt caching and batch processing for cost optimization and improved speed.\",\n      time: \"7 minutes\",\n      tip: \"Best practice: Cache system prompts for 5-minute windows at 0.1x cost\"\n    }\n  ]}\n/>"
         }
@@ -82,7 +108,7 @@
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Key benefits:</strong></p>           <ul>             <li>Clear instruction boundaries - reduced parsing errors</li>             <li>Explicit context separation - improved context understanding</li>             <li>Structured output format - better format compliance</li>           </ul>         </div>       ),       defaultOpen: true     },     {       title: \"When to Use This Approach\",       content: (         <div>           <p>Apply this migration when you need superior code generation or document analysis. It's particularly effective for multi-file codebases and long documents. Avoid when you need image generation or voice features.</p>           <p><strong>Ideal scenarios:</strong> Complex coding tasks, Document analysis over 50K tokens, Research and reasoning tasks</p>         </div>       )     },     {       title: \"Common Variations\",       content: (         <div>           <p>Adapt this tutorial for different needs:</p>           <ul>             <li><strong>High-volume operations:</strong> When processing 10K+ requests - implement batch processing</li>             <li><strong>Budget constraints:</strong> When cost matters most - use Haiku model exclusively</li>             <li><strong>Real-time applications:</strong> When speed critical - consider performance requirements</li>           </ul>         </div>       )     }   ]} />"
+        "content": "**Key benefits:**\n\n                        - Clear instruction boundaries - reduced parsing errors             - Explicit context separation - improved context understanding             - Structured output format - better format compliance                    </div>       ),       defaultOpen: true     },     {       title: \"When to Use This Approach\",       content: (         <div>           Apply this migration when you need superior code generation or document analysis. It's particularly effective for multi-file codebases and long documents. Avoid when you need image generation or voice features.\n\n           **Ideal scenarios:** Complex coding tasks, Document analysis over 50K tokens, Research and reasoning tasks\n\n         </div>       )     },     {       title: \"Common Variations\",       content: (         <div>           Adapt this tutorial for different needs:\n\n                        - **High-volume operations:** When processing 10K+ requests - implement batch processing             - **Budget constraints:** When cost matters most - use Haiku model exclusively             - **Real-time applications:** When speed critical - consider performance requirements                    </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -145,7 +171,7 @@
       },
       {
         "type": "paragraph",
-        "content": "- name: refinement       run: |         gpt-4o --format --optimize         claude-haiku --validate`               }             ]}           />           <p><strong>Outcome:</strong> Hybrid system with improved efficiency over single-platform approach</p>         </div>       )     }   ]} />"
+        "content": "- name: refinement       run: |         gpt-4o --format --optimize         claude-haiku --validate`               }             ]}           />           **Outcome:** Hybrid system with improved efficiency over single-platform approach\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -192,7 +218,28 @@
           "variant": "feature-grid",
           "title": "Success Criteria",
           "description": "How to verify your implementation works correctly",
-          "features": "[\n    {\n      title: \"Functional Test\",\n      description: \"API calls should complete successfully within 2 seconds for standard requests\",\n      badge: \"Required\"\n    },\n    {\n      title: \"Performance Check\", \n      description: \"Token usage should be reasonable compared to baseline expectations\",\n      badge: \"Important\"\n    },\n    {\n      title: \"Integration Validation\",\n      description: \"Both APIs should respond correctly when hybrid mode triggers\",\n      badge: \"Critical\"\n    },\n    {\n      title: \"Error Handling\",\n      description: \"Rate limits should retry automatically without complete failure\",\n      badge: \"Essential\"\n    }\n  ]",
+          "features": [
+            {
+              "title": "Functional Test",
+              "description": "API calls should complete successfully within 2 seconds for standard requests",
+              "badge": "Required"
+            },
+            {
+              "title": "Performance Check",
+              "description": "Token usage should be reasonable compared to baseline expectations",
+              "badge": "Important"
+            },
+            {
+              "title": "Integration Validation",
+              "description": "Both APIs should respond correctly when hybrid mode triggers",
+              "badge": "Critical"
+            },
+            {
+              "title": "Error Handling",
+              "description": "Rate limits should retry automatically without complete failure",
+              "badge": "Essential"
+            }
+          ],
           "columns": 2,
           "children": "**Congratulations!** You've mastered ChatGPT to Claude migration and can now leverage both platforms strategically. \n\n**What you achieved:**\n- ✅ Built working API migration adapter\n- ✅ Transformed prompts using XML structure \n- ✅ Implemented cost optimization with caching\n\n**Ready for more?** Explore our [tutorials collection](/guides/tutorials) or join our [community](/community) to share your implementation and get help with advanced use cases."
         }

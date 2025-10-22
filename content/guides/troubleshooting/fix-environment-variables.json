@@ -78,7 +78,28 @@
         "component": "DiagnosticFlow",
         "props": {
           "title": "Identify Your Configuration Issue",
-          "steps": "[\n    {\n      question: \"Error occurs during initial setup?\",\n      yes: \"Platform-specific installation issue - See Platform Configuration section\",\n      no: \"Continue to next question\"\n    },\n    {\n      question: \"Authentication fails after successful browser login?\",\n      yes: \"OAuth callback handling failure - Check firewall/proxy settings\",\n      no: \"Continue to next question\"\n    },\n    {\n      question: \"API key errors in SSH sessions?\",\n      yes: \"Token storage limitation - Use environment variable authentication\",\n      no: \"Continue to next question\"\n    },\n    {\n      question: \"Permission denied on file operations?\",\n      yes: \"Permission scope configuration needed - Review security rules\",\n      no: \"Check advanced debugging section\"\n    }\n  ]"
+          "steps": [
+            {
+              "question": "Error occurs during initial setup?",
+              "yes": "Platform-specific installation issue - See Platform Configuration section",
+              "no": "Continue to next question"
+            },
+            {
+              "question": "Authentication fails after successful browser login?",
+              "yes": "OAuth callback handling failure - Check firewall/proxy settings",
+              "no": "Continue to next question"
+            },
+            {
+              "question": "API key errors in SSH sessions?",
+              "yes": "Token storage limitation - Use environment variable authentication",
+              "no": "Continue to next question"
+            },
+            {
+              "question": "Permission denied on file operations?",
+              "yes": "Permission scope configuration needed - Review security rules",
+              "no": "Check advanced debugging section"
+            }
+          ]
         }
       },
       {
@@ -93,11 +114,11 @@
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Security Note:</strong> Consider implementing key rotation policies for enhanced security.</p>         </div>       )     },     {       title: \"Permission Configuration\",       content: (         <div>           <p><strong>Purpose:</strong> Set granular file access rules with proper security boundaries.</p>"
+        "content": "**Security Note:** Consider implementing key rotation policies for enhanced security.\n\n         </div>       )     },     {       title: \"Permission Configuration\",       content: (         <div>           **Purpose:** Set granular file access rules with proper security boundaries."
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Enterprise Override:</strong> Managed settings in /Library/Application Support/ClaudeCode enforce policies.</p>         </div>       )     },     {       title: \"Debug and Verify\",       content: (         <div>           <p><strong>Purpose:</strong> Validate configuration and identify remaining issues using diagnostic commands.</p>"
+        "content": "**Enterprise Override:** Managed settings in /Library/Application Support/ClaudeCode enforce policies.\n\n         </div>       )     },     {       title: \"Debug and Verify\",       content: (         <div>           **Purpose:** Validate configuration and identify remaining issues using diagnostic commands."
       },
       {
         "type": "heading",
@@ -141,11 +162,11 @@
       },
       {
         "type": "paragraph",
-        "content": "<h5>Common Fixes:</h5>           <ul>             <li><strong>OAuth Token Expiration:</strong> Run /logout then /login --force</li>             <li><strong>Config Mismatch:</strong> claude config set --global installMethod npm-global</li>             <li><strong>Keychain Issues (macOS):</strong> security delete-generic-password -a $USER -s \"Claude Code\"</li>             <li><strong>Credential Reset (Linux):</strong> rm -rf ~/.claude/credentials.json</li>           </ul>"
+        "content": "<h5>Common Fixes:</h5>                        - **OAuth Token Expiration:** Run /logout then /login --force             - **Config Mismatch:** claude config set --global installMethod npm-global             - **Keychain Issues (macOS):** security delete-generic-password -a $USER -s \"Claude Code\"             - **Credential Reset (Linux):** rm -rf ~/.claude/credentials.json"
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Success Indicators:</strong> Green status in /doctor output confirms proper configuration.</p>         </div>       )     }   ]} />"
+        "content": "**Success Indicators:** Green status in /doctor output confirms proper configuration.\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -182,11 +203,11 @@
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Container Isolation:</strong> Docker isolates Claude Code environment from system conflicts.</p>"
+        "content": "**Container Isolation:** Docker isolates Claude Code environment from system conflicts."
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Multi-Environment Script:</strong> Manage multiple Claude instances for different projects.</p>         </div>       )     },     {       title: \"Advanced Debugging\",       content: (         <div>           <p><strong>Deep Diagnostic Tools:</strong> Advanced commands help identify configuration issues.</p>"
+        "content": "**Multi-Environment Script:** Manage multiple Claude instances for different projects.\n\n         </div>       )     },     {       title: \"Advanced Debugging\",       content: (         <div>           **Deep Diagnostic Tools:** Advanced commands help identify configuration issues."
       },
       {
         "type": "heading",
@@ -200,7 +221,7 @@
       },
       {
         "type": "paragraph",
-        "content": "code: `curl -I https://claude.ai/oauth/callback nslookup claude.ai traceroute claude.ai`   }]} />         </div>       )     },     {       title: \"Enterprise Solutions\",       content: (         <div>           <p><strong>Team Configuration Management:</strong> Centralized settings for development teams.</p>"
+        "content": "code: `curl -I https://claude.ai/oauth/callback nslookup claude.ai traceroute claude.ai`   }]} />         </div>       )     },     {       title: \"Enterprise Solutions\",       content: (         <div>           **Team Configuration Management:** Centralized settings for development teams."
       },
       {
         "type": "paragraph",
@@ -221,7 +242,13 @@
         "component": "CodeGroup",
         "props": {
           "title": "diagnostic-commands.sh",
-          "examples": "[{\n    language: \"bash\",\n    filename: \"diagnostic-commands.sh\",\n    code: `# Essential diagnostic commands for Claude Code\n\n# Check overall configuration health\nclaude doctor\n\n# View all configuration settings\nclaude config list --all\n\n# Test authentication status\nclaude auth status --verbose\n\n# Verify environment variables\nenv | grep ANTHROPIC\n\n# Check file permissions\nclaude code --test-permissions ./\n\n# View OAuth token status\nclaude token info\n\n# Reset configuration completely\nclaude config reset --all\n\n# Force new authentication\nclaude /login --force\n\n# Check MCP server status\nclaude mcp status\n\n# View error logs\nclaude logs --tail 50\n\n# Test API connectivity\nclaude api test`\n  }]",
+          "examples": [
+            {
+              "language": "bash",
+              "filename": "diagnostic-commands.sh",
+              "code": "# Essential diagnostic commands for Claude Code\n\n# Check overall configuration health\nclaude doctor\n\n# View all configuration settings\nclaude config list --all\n\n# Test authentication status\nclaude auth status --verbose\n\n# Verify environment variables\nenv | grep ANTHROPIC\n\n# Check file permissions\nclaude code --test-permissions ./\n\n# View OAuth token status\nclaude token info\n\n# Reset configuration completely\nclaude config reset --all\n\n# Force new authentication\nclaude /login --force\n\n# Check MCP server status\nclaude mcp status\n\n# View error logs\nclaude logs --tail 50\n\n# Test API connectivity\nclaude api test"
+            }
+          ],
           "children": "sh -c \"npm install -g @anthropic-ai/claude-code &&\n             claude code --project /workspace\"\n    \nvolumes:\n  claude-config:`\n    }\n  ]}\n/>"
         }
       },
@@ -250,7 +277,7 @@
       },
       {
         "type": "paragraph",
-        "content": "export MCP_SERVERS=\"github,stackexchange,filesystem\"`   }]} />           <p>Run direnv allow to approve configuration. Settings load automatically per directory.</p>         </div>       )     }   ]} />"
+        "content": "export MCP_SERVERS=\"github,stackexchange,filesystem\"`   }]} />           Run direnv allow to approve configuration. Settings load automatically per directory.\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",

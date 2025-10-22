@@ -16,7 +16,12 @@
     "author": "Claude Pro Directory",
     "category": "guides",
     "subcategory": "tutorials",
-    "tags": ["tutorial", "intermediate", "configuration", "mcp-servers"],
+    "tags": [
+      "tutorial",
+      "intermediate",
+      "configuration",
+      "mcp-servers"
+    ],
     "readingTime": "12 min",
     "difficulty": "intermediate",
     "featured": false,
@@ -55,13 +60,34 @@
           "variant": "feature-grid",
           "title": "Learning Outcomes",
           "description": "Skills and knowledge you'll master in this tutorial",
-          "features": "[\n    {\n      title: \"Configuration File Management\",\n      description: \"Locate and create claude_desktop_config.json files on any platform. Understand JSON structure requirements.\",\n      badge: \"Essential\"\n    },\n    {\n      title: \"MCP Server Setup\", \n      description: \"Configure filesystem, GitHub, and database servers. Enable local tool access through Claude.\",\n      badge: \"Practical\"\n    },\n    {\n      title: \"Multi-Server Deployment\",\n      description: \"Combine multiple MCP servers for complex workflows. Manage server dependencies and conflicts.\",\n      badge: \"Advanced\"\n    },\n    {\n      title: \"Security Implementation\",\n      description: \"Secure API keys and credentials properly. Apply platform-specific security best practices.\",\n      badge: \"Applied\"\n    }\n  ]",
+          "features": [
+            {
+              "title": "Configuration File Management",
+              "description": "Locate and create claude_desktop_config.json files on any platform. Understand JSON structure requirements.",
+              "badge": "Essential"
+            },
+            {
+              "title": "MCP Server Setup",
+              "description": "Configure filesystem, GitHub, and database servers. Enable local tool access through Claude.",
+              "badge": "Practical"
+            },
+            {
+              "title": "Multi-Server Deployment",
+              "description": "Combine multiple MCP servers for complex workflows. Manage server dependencies and conflicts.",
+              "badge": "Advanced"
+            },
+            {
+              "title": "Security Implementation",
+              "description": "Secure API keys and credentials properly. Apply platform-specific security best practices.",
+              "badge": "Applied"
+            }
+          ],
           "columns": 2
         }
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Key benefits:</strong></p>           <ul>             <li>Stateless communication - maintains server independence</li>             <li>Type-safe messages - prevents runtime errors</li>             <li>Async support - enables non-blocking operations</li>           </ul>         </div>       ),       defaultOpen: true     },     {       title: \"When to Use Different Transport Methods\",       content: (         <div>           <p>Apply STDIO transport for local servers requiring direct system access. It's particularly effective for filesystem and database servers. Avoid when network isolation is required.</p>           <p><strong>Ideal scenarios:</strong> Local development, filesystem access, database connections</p>         </div>       )     },     {       title: \"Common Configuration Patterns\",       content: (         <div>           <p>Adapt this tutorial for different server types:</p>           <ul>             <li><strong>Database servers:</strong> Use DATABASE_URL environment variables - never hardcode credentials</li>             <li><strong>API integrations:</strong> Reference API keys from system environment - improves security</li>             <li><strong>Python servers:</strong> Use uvx instead of npx - handles Python package management</li>           </ul>         </div>       )     }   ]} />"
+        "content": "**Key benefits:**\n\n                        - Stateless communication - maintains server independence             - Type-safe messages - prevents runtime errors             - Async support - enables non-blocking operations                    </div>       ),       defaultOpen: true     },     {       title: \"When to Use Different Transport Methods\",       content: (         <div>           Apply STDIO transport for local servers requiring direct system access. It's particularly effective for filesystem and database servers. Avoid when network isolation is required.\n\n           **Ideal scenarios:** Local development, filesystem access, database connections\n\n         </div>       )     },     {       title: \"Common Configuration Patterns\",       content: (         <div>           Adapt this tutorial for different server types:\n\n                        - **Database servers:** Use DATABASE_URL environment variables - never hardcode credentials             - **API integrations:** Reference API keys from system environment - improves security             - **Python servers:** Use uvx instead of npx - handles Python package management                    </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -123,7 +149,28 @@
           "variant": "feature-grid",
           "title": "Success Criteria",
           "description": "How to verify your implementation works correctly",
-          "features": "[\n    {\n      title: \"Functional Test\",\n      description: \"Claude lists available MCP tools. Verify filesystem operations work within 30 seconds.\",\n      badge: \"Required\"\n    },\n    {\n      title: \"Performance Check\", \n      description: \"Server startup completes under 5 seconds. Monitor CPU usage stays below 10%.\",\n      badge: \"Important\"\n    },\n    {\n      title: \"Security Validation\",\n      description: \"No credentials appear in config files. Environment variables resolve correctly.\",\n      badge: \"Critical\"\n    },\n    {\n      title: \"Error Handling\",\n      description: \"Invalid paths show clear errors. Server failures don't crash Claude Desktop.\",\n      badge: \"Essential\"\n    }\n  ]",
+          "features": [
+            {
+              "title": "Functional Test",
+              "description": "Claude lists available MCP tools. Verify filesystem operations work within 30 seconds.",
+              "badge": "Required"
+            },
+            {
+              "title": "Performance Check",
+              "description": "Server startup completes under 5 seconds. Monitor CPU usage stays below 10%.",
+              "badge": "Important"
+            },
+            {
+              "title": "Security Validation",
+              "description": "No credentials appear in config files. Environment variables resolve correctly.",
+              "badge": "Critical"
+            },
+            {
+              "title": "Error Handling",
+              "description": "Invalid paths show clear errors. Server failures don't crash Claude Desktop.",
+              "badge": "Essential"
+            }
+          ],
           "columns": 2,
           "children": "**Congratulations!** You've mastered MCP server configuration and can now extend Claude Desktop with local tools. \n\n**What you achieved:**\n- ✅ Created working MCP server configurations\n- ✅ Implemented secure credential management \n- ✅ Deployed multiple servers successfully\n\n**Ready for more?** Explore our [tutorials collection](/guides/tutorials) or join our [community](/community) to share your implementation and get help with advanced use cases."
         }

@@ -16,7 +16,12 @@
     "author": "Claude Pro Directory",
     "category": "guides",
     "subcategory": "workflows",
-    "tags": ["workflow", "enterprise development", "advanced", "automation"],
+    "tags": [
+      "workflow",
+      "enterprise development",
+      "advanced",
+      "automation"
+    ],
     "readingTime": "12 min",
     "difficulty": "advanced",
     "featured": false,
@@ -59,30 +64,51 @@
           "variant": "feature-grid",
           "title": "Workflow Components",
           "description": "Core elements that make up this complete process",
-          "features": "[\n    {\n      title: \"CLAUDE.md Configuration System\",\n      description: \"Hierarchical documentation handling project-wide context and rules. Critical for maintaining 95% context accuracy across repositories.\",\n      badge: \"Documentation\"\n    },\n    {\n      title: \"Git Worktree Management\", \n      description: \"Parallel development system enabling isolated feature branches. Integrates with Claude sessions for zero-conflict parallel work.\",\n      badge: \"Version Control\"\n    },\n    {\n      title: \"MCP Server Integration\",\n      description: \"Model Context Protocol providing filesystem and GitHub access. Reduces manual operations by 71% through automation.\",\n      badge: \"Automation\"\n    },\n    {\n      title: \"Custom Hooks Framework\",\n      description: \"Quality assurance system ensuring code standards compliance. Maintains 98% test coverage through automated checks.\",\n      badge: \"Quality\"\n    }\n  ]",
+          "features": [
+            {
+              "title": "CLAUDE.md Configuration System",
+              "description": "Hierarchical documentation handling project-wide context and rules. Critical for maintaining 95% context accuracy across repositories.",
+              "badge": "Documentation"
+            },
+            {
+              "title": "Git Worktree Management",
+              "description": "Parallel development system enabling isolated feature branches. Integrates with Claude sessions for zero-conflict parallel work.",
+              "badge": "Version Control"
+            },
+            {
+              "title": "MCP Server Integration",
+              "description": "Model Context Protocol providing filesystem and GitHub access. Reduces manual operations by 71% through automation.",
+              "badge": "Automation"
+            },
+            {
+              "title": "Custom Hooks Framework",
+              "description": "Quality assurance system ensuring code standards compliance. Maintains 98% test coverage through automated checks.",
+              "badge": "Quality"
+            }
+          ],
           "columns": 2,
           "children": "<h4>Measured Productivity Improvements</h4>"
         }
       },
       {
         "type": "paragraph",
-        "content": "<p>Key metrics include 50-70% faster cross-repository development. Teams complete features in hours instead of days. Code review time reduced by 60% through automated checks.</p>         </div>       )     },     {       label: \"Quality Improvements\",       value: \"quality\",       content: (         <div>           <h4>Code Quality Metrics</h4>"
+        "content": "Key metrics include 50-70% faster cross-repository development. Teams complete features in hours instead of days. Code review time reduced by 60% through automated checks.\n\n         </div>       )     },     {       label: \"Quality Improvements\",       value: \"quality\",       content: (         <div>           <h4>Code Quality Metrics</h4>"
       },
       {
         "type": "paragraph",
-        "content": "<p>Test coverage increased from 60% to 98% average. Bug detection improved by 85% before production. Code consistency scores reached 95% across repositories.</p>"
+        "content": "Test coverage increased from 60% to 98% average. Bug detection improved by 85% before production. Code consistency scores reached 95% across repositories."
       },
       {
         "type": "paragraph",
-        "content": "<p>Automated linting catches 99% of style issues. Type checking prevents 90% of runtime errors. Security vulnerabilities reduced by 75% through automated scanning.</p>         </div>       )     },     {       label: \"Time Savings\",       value: \"time\",       content: (         <div>           <h4>Development Time Reduction</h4>"
+        "content": "Automated linting catches 99% of style issues. Type checking prevents 90% of runtime errors. Security vulnerabilities reduced by 75% through automated scanning.\n\n         </div>       )     },     {       label: \"Time Savings\",       value: \"time\",       content: (         <div>           <h4>Development Time Reduction</h4>"
       },
       {
         "type": "paragraph",
-        "content": "<p>Feature development accelerated by 79% at Rakuten. Pull request creation time reduced from hours to minutes. Context switching eliminated saving 2 hours daily per developer.</p>"
+        "content": "Feature development accelerated by 79% at Rakuten. Pull request creation time reduced from hours to minutes. Context switching eliminated saving 2 hours daily per developer."
       },
       {
         "type": "paragraph",
-        "content": "<p>Documentation updates automated saving 30x time investment. Code refactoring completed 10x faster with context awareness. Debugging time reduced by 50% through intelligent analysis.</p>         </div>       )     }   ]} />"
+        "content": "Documentation updates automated saving 30x time investment. Code refactoring completed 10x faster with context awareness. Debugging time reduced by 50% through intelligent analysis.\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -96,7 +122,28 @@
         "props": {
           "contentType": "accordion",
           "title": "Implementation Challenges",
-          "items": "[\n    {\n      title: \"How do I prevent context window overflow?\",\n      content: \"Implement token optimization through directory exclusions. Filter node_modules, dist, and build directories automatically. Monitor usage staying below 80% of limits for optimal performance. Use clear commands between major tasks resetting context.\",\n      category: \"performance\"\n    },\n    {\n      title: \"What if Claude makes incorrect changes?\",\n      content: \"Start with read-only permissions during onboarding phase. Implement approval workflows for critical codebases. Use Git worktrees for safe experimentation. Review all changes before merging to main branches.\",\n      category: \"safety\"\n    },\n    {\n      title: \"How do I handle multiple team members using Claude?\",\n      content: \"Configure team-wide CLAUDE.md for consistency. Use Git-ignored local overrides for personal preferences. Implement shared command libraries for common tasks. Establish code review processes for Claude-generated changes.\",\n      category: \"collaboration\"\n    },\n    {\n      title: \"Can Claude work with proprietary frameworks?\",\n      content: \"Document internal frameworks thoroughly in CLAUDE.md files. Create custom commands for framework-specific operations. Use example-driven documentation showing correct patterns. Build MCP servers for proprietary API integration.\",\n      category: \"customization\"\n    }\n  ]",
+          "items": [
+            {
+              "title": "How do I prevent context window overflow?",
+              "content": "Implement token optimization through directory exclusions. Filter node_modules, dist, and build directories automatically. Monitor usage staying below 80% of limits for optimal performance. Use clear commands between major tasks resetting context.",
+              "category": "performance"
+            },
+            {
+              "title": "What if Claude makes incorrect changes?",
+              "content": "Start with read-only permissions during onboarding phase. Implement approval workflows for critical codebases. Use Git worktrees for safe experimentation. Review all changes before merging to main branches.",
+              "category": "safety"
+            },
+            {
+              "title": "How do I handle multiple team members using Claude?",
+              "content": "Configure team-wide CLAUDE.md for consistency. Use Git-ignored local overrides for personal preferences. Implement shared command libraries for common tasks. Establish code review processes for Claude-generated changes.",
+              "category": "collaboration"
+            },
+            {
+              "title": "Can Claude work with proprietary frameworks?",
+              "content": "Document internal frameworks thoroughly in CLAUDE.md files. Create custom commands for framework-specific operations. Use example-driven documentation showing correct patterns. Build MCP servers for proprietary API integration.",
+              "category": "customization"
+            }
+          ],
           "children": "Track development velocity improvements measuring feature completion rates. Monitor code quality metrics including coverage and bug rates. Measure developer satisfaction through regular surveys and feedback. Calculate ROI comparing implementation costs against productivity gains.\n\nSuccess indicators include 30x+ productivity on specific tasks. Achieve 89% developer adoption within one month. Maintain 95%+ code quality scores consistently. Reduce time-to-market by minimum 50% overall."
         }
       },

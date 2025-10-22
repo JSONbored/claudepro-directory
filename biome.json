@@ -285,29 +285,6 @@
       }
     },
     {
-      "includes": ["*.mdx"],
-      "linter": {
-        "rules": {
-          "suspicious": {
-            "noExplicitAny": "off"
-          },
-          "complexity": {
-            "noBannedTypes": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": ["src/app/actions/**/*.ts"],
-      "linter": {
-        "rules": {
-          "complexity": {
-            "noBannedTypes": "off"
-          }
-        }
-      }
-    },
-    {
       "includes": ["scripts/**/*.ts", "scripts/**/*.js"],
       "linter": {
         "rules": {
@@ -326,15 +303,24 @@
       }
     },
     {
+      "includes": ["src/lib/actions/**/*.ts"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noBannedTypes": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": [
         "src/app/**/*.ts",
         "src/app/**/*.tsx",
         "src/lib/**/*.server.ts",
         "src/lib/**/*.server.tsx",
-        "src/components/template/code-group-server.tsx",
-        "src/components/template/step-guide.tsx",
-        "src/components/unified-detail-page/collection-detail-view.tsx",
-        "src/components/unified-detail-page/sections/configuration-section.tsx"
+        "src/components/content/code-group-server.tsx",
+        "src/components/content/step-guide.tsx",
+        "src/components/content/unified-detail-page/collection-detail-view.tsx"
       ],
       "linter": {
         "rules": {

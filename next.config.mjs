@@ -290,10 +290,6 @@ const nextConfig = {
       '@radix-ui/react-toggle',
       '@radix-ui/react-toggle-group',
       '@radix-ui/react-tooltip',
-      // Fumadocs packages for API documentation
-      'fumadocs-ui',
-      'fumadocs-core',
-      'fumadocs-openapi',
     ],
   },
 

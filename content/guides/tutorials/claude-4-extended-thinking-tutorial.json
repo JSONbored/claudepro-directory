@@ -16,7 +16,12 @@
     "author": "Claude Pro Directory",
     "category": "guides",
     "subcategory": "tutorials",
-    "tags": ["tutorial", "advanced", "api-implementation", "production-ready"],
+    "tags": [
+      "tutorial",
+      "advanced",
+      "api-implementation",
+      "production-ready"
+    ],
     "readingTime": "12 min",
     "difficulty": "intermediate",
     "featured": true,
@@ -55,13 +60,34 @@
           "variant": "feature-grid",
           "title": "Learning Outcomes",
           "description": "Skills and knowledge you'll master in this tutorial",
-          "features": "[\n    {\n      title: \"Extended Thinking API Implementation\",\n      description: \"Configure and deploy Claude's thinking API with controllable 1K-200K token budgets for 84.8% accuracy on complex problems\",\n      badge: \"Essential\"\n    },\n    {\n      title: \"Thinking Budget Optimization\",\n      description: \"Reduce operational costs by 60-70% using tiered budget allocation and smart caching strategies\",\n      badge: \"Practical\"\n    },\n    {\n      title: \"Production Workflow Integration\",\n      description: \"Build multi-hour coding sessions with tool use, achieving 74.5% SWE-bench accuracy like GitHub and Cursor\",\n      badge: \"Advanced\"\n    },\n    {\n      title: \"Hybrid Reasoning Architecture\",\n      description: \"Master Claude's unique toggle between instant responses and deep deliberation for optimal resource allocation\",\n      badge: \"Applied\"\n    }\n  ]",
+          "features": [
+            {
+              "title": "Extended Thinking API Implementation",
+              "description": "Configure and deploy Claude's thinking API with controllable 1K-200K token budgets for 84.8% accuracy on complex problems",
+              "badge": "Essential"
+            },
+            {
+              "title": "Thinking Budget Optimization",
+              "description": "Reduce operational costs by 60-70% using tiered budget allocation and smart caching strategies",
+              "badge": "Practical"
+            },
+            {
+              "title": "Production Workflow Integration",
+              "description": "Build multi-hour coding sessions with tool use, achieving 74.5% SWE-bench accuracy like GitHub and Cursor",
+              "badge": "Advanced"
+            },
+            {
+              "title": "Hybrid Reasoning Architecture",
+              "description": "Master Claude's unique toggle between instant responses and deep deliberation for optimal resource allocation",
+              "badge": "Applied"
+            }
+          ],
           "columns": 2
         }
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Key performance metrics:</strong></p>           <ul>             <li>74.5% accuracy on SWE-bench Verified - industry-leading for coding tasks</li>             <li>43.2% on Terminal-bench - outperforming GPT-4.1's 30.3%</li>             <li>78.0% on AIME 2025 mathematics - rising to 90% with high-compute mode</li>           </ul>         </div>       ),       defaultOpen: true     },     {       title: \"When to Use Extended Thinking vs. Instant Responses\",       content: (         <div>           <p>Apply extended thinking when you need deep reasoning, complex multi-file refactoring, or architectural decisions. It's particularly effective for debugging intricate issues and maintaining context across hours of work. Avoid for simple queries or real-time interactions.</p>           <p><strong>Ideal scenarios:</strong> Complex coding (32K+ tokens), architectural planning (16K tokens), critical bug fixes (8K tokens)</p>         </div>       )     },     {       title: \"Understanding Thinking Budget Allocation\",       content: (         <div>           <p>Optimal budget allocation follows logarithmic performance curves with diminishing returns beyond 32K tokens:</p>           <ul>             <li><strong>1K-4K tokens:</strong> Simple queries and basic reasoning - suitable for 80% of tasks</li>             <li><strong>8K-16K tokens:</strong> Complex analysis and coding - sweet spot for cost/performance</li>             <li><strong>16K-32K tokens:</strong> Critical architectural decisions - maximum practical benefit</li>             <li><strong>32K-200K tokens:</strong> Research tasks - rarely provides proportional value</li>           </ul>         </div>       )     }   ]} />"
+        "content": "**Key performance metrics:**\n\n                        - 74.5% accuracy on SWE-bench Verified - industry-leading for coding tasks             - 43.2% on Terminal-bench - outperforming GPT-4.1's 30.3%             - 78.0% on AIME 2025 mathematics - rising to 90% with high-compute mode                    </div>       ),       defaultOpen: true     },     {       title: \"When to Use Extended Thinking vs. Instant Responses\",       content: (         <div>           Apply extended thinking when you need deep reasoning, complex multi-file refactoring, or architectural decisions. It's particularly effective for debugging intricate issues and maintaining context across hours of work. Avoid for simple queries or real-time interactions.\n\n           **Ideal scenarios:** Complex coding (32K+ tokens), architectural planning (16K tokens), critical bug fixes (8K tokens)\n\n         </div>       )     },     {       title: \"Understanding Thinking Budget Allocation\",       content: (         <div>           Optimal budget allocation follows logarithmic performance curves with diminishing returns beyond 32K tokens:\n\n                        - **1K-4K tokens:** Simple queries and basic reasoning - suitable for 80% of tasks             - **8K-16K tokens:** Complex analysis and coding - sweet spot for cost/performance             - **16K-32K tokens:** Critical architectural decisions - maximum practical benefit             - **32K-200K tokens:** Research tasks - rarely provides proportional value                    </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -138,7 +164,7 @@
       },
       {
         "type": "paragraph",
-        "content": "- name: validation       cache_ttl: 3600  # 1-hour cache for iterations       thinking:         type: enabled         budget_tokens: 4000`               }             ]}           />           <p><strong>Outcome:</strong> Integrates with existing workflows achieving 54% productivity gains and 65% fewer unintended modifications, as reported by Augment Code</p>         </div>       )     }   ]} />"
+        "content": "- name: validation       cache_ttl: 3600  # 1-hour cache for iterations       thinking:         type: enabled         budget_tokens: 4000`               }             ]}           />           **Outcome:** Integrates with existing workflows achieving 54% productivity gains and 65% fewer unintended modifications, as reported by Augment Code\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -185,7 +211,28 @@
           "variant": "feature-grid",
           "title": "Success Criteria",
           "description": "How to verify your implementation works correctly",
-          "features": "[\n    {\n      title: \"Functional Test\",\n      description: \"Complex coding task should achieve 72-75% accuracy on SWE-bench Verified within 60 seconds\",\n      badge: \"Required\"\n    },\n    {\n      title: \"Performance Check\",\n      description: \"Thinking token usage should be within 10% of allocated budget when measured via API response\",\n      badge: \"Important\"\n    },\n    {\n      title: \"Integration Validation\",\n      description: \"Tool use with interleaved thinking should complete multi-step workflows without context loss\",\n      badge: \"Critical\"\n    },\n    {\n      title: \"Cost Efficiency\",\n      description: \"Caching should reduce repeated query costs by 85-90% without performance degradation\",\n      badge: \"Essential\"\n    }\n  ]",
+          "features": [
+            {
+              "title": "Functional Test",
+              "description": "Complex coding task should achieve 72-75% accuracy on SWE-bench Verified within 60 seconds",
+              "badge": "Required"
+            },
+            {
+              "title": "Performance Check",
+              "description": "Thinking token usage should be within 10% of allocated budget when measured via API response",
+              "badge": "Important"
+            },
+            {
+              "title": "Integration Validation",
+              "description": "Tool use with interleaved thinking should complete multi-step workflows without context loss",
+              "badge": "Critical"
+            },
+            {
+              "title": "Cost Efficiency",
+              "description": "Caching should reduce repeated query costs by 85-90% without performance degradation",
+              "badge": "Essential"
+            }
+          ],
           "columns": 2,
           "children": "**Congratulations!** You've mastered Claude 4's extended thinking API and can now build production systems achieving 74.5% coding accuracy.\n\n**What you achieved:**\n- ✅ Implemented extended thinking with 1K-200K token budgets\n- ✅ Reduced operational costs by 60-70% with smart optimization\n- ✅ Built production workflows matching GitHub and Cursor's implementations\n\n**Ready for more?** Explore our [tutorials collection](/guides/tutorials) to continue learning and discover how teams achieve 54% productivity gains with extended thinking."
         }

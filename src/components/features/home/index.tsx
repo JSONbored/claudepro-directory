@@ -256,15 +256,21 @@ function HomePageClientComponent({
           filteredResults={filteredResults}
           onClearSearch={handleClearSearch}
         />
-        {/* Featured Content Sections - Render immediately (above the fold) */}!isSearching &&{' '}
-        <LazyFeaturedSections categories={featuredByCategory || initialData} />
-        !isSearching && (
-        <LazyTabsSection
-          activeTab={activeTab}
-          filteredResults={filteredResults}
-          onTabChange={handleTabChange}
-        />
-        )
+        {/* Featured Content Sections - Render immediately (above the fold) */}
+        {!isSearching && (
+          <LazyFeaturedSections
+            categories={
+              Object.keys(featuredByCategory).length > 0 ? featuredByCategory : initialData
+            }
+          />
+        )}
+        {!isSearching && (
+          <LazyTabsSection
+            activeTab={activeTab}
+            filteredResults={filteredResults}
+            onTabChange={handleTabChange}
+          />
+        )}
       </section>
     </>
   );

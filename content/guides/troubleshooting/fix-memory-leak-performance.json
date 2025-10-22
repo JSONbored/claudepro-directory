@@ -76,19 +76,19 @@
       },
       {
         "type": "paragraph",
-        "content": "<h5>Symptom Checklist:</h5>           <ul>             <li><strong>Memory Usage:</strong> Check if Claude process exceeds 4GB RAM in Activity Monitor</li>             <li><strong>Response Time:</strong> Commands take over 3 seconds to execute</li>             <li><strong>Context Errors:</strong> \"Context window exceeded\" messages appear frequently</li>             <li><strong>Session Crashes:</strong> Claude terminates unexpectedly during operations</li>             <li><strong>File Loading:</strong> Adding files causes immediate performance drop</li>           </ul>"
+        "content": "<h5>Symptom Checklist:</h5>                        - **Memory Usage:** Check if Claude process exceeds 4GB RAM in Activity Monitor             - **Response Time:** Commands take over 3 seconds to execute             - **Context Errors:** \"Context window exceeded\" messages appear frequently             - **Session Crashes:** Claude terminates unexpectedly during operations             - **File Loading:** Adding files causes immediate performance drop"
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Common Issues Found:</strong> 85% of users experience memory leaks after 40 continuous messages</p>         </div>       ),       defaultOpen: true     },     {       title: \"Error Analysis\",       content: (         <div>           <p><strong>Purpose:</strong> Analyze error patterns to identify root cause from Claude's diagnostic system.</p>"
+        "content": "**Common Issues Found:** 85% of users experience memory leaks after 40 continuous messages\n\n         </div>       ),       defaultOpen: true     },     {       title: \"Error Analysis\",       content: (         <div>           **Purpose:** Analyze error patterns to identify root cause from Claude's diagnostic system."
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Diagnostic Tools:</strong> Use `claude doctor` for comprehensive system analysis and health check</p>         </div>       )     },     {       title: \"Log Analysis\",       content: (         <div>           <p><strong>Purpose:</strong> Examine logs for detailed error information using Claude's built-in logging system.</p>"
+        "content": "**Diagnostic Tools:** Use `claude doctor` for comprehensive system analysis and health check\n\n         </div>       )     },     {       title: \"Log Analysis\",       content: (         <div>           **Purpose:** Examine logs for detailed error information using Claude's built-in logging system."
       },
       {
         "type": "paragraph",
-        "content": "<h5>Log Locations:</h5>           <ul>             <li><strong>macOS:</strong> ~/Library/Logs/Claude/claude.log</li>             <li><strong>Linux:</strong> ~/.claude/logs/claude.log</li>             <li><strong>WSL2:</strong> /home/user/.claude/logs/claude.log</li>           </ul>"
+        "content": "<h5>Log Locations:</h5>                        - **macOS:** ~/Library/Logs/Claude/claude.log             - **Linux:** ~/.claude/logs/claude.log             - **WSL2:** /home/user/.claude/logs/claude.log"
       },
       {
         "type": "paragraph",
@@ -196,11 +196,11 @@
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Result:</strong> 40-70% token savings per development session achieved consistently</p>         </div>       )     },     {       label: \"/compact Command\",       content: (         <div>           <h4>Intelligent Context Compaction</h4>"
+        "content": "**Result:** 40-70% token savings per development session achieved consistently\n\n         </div>       )     },     {       label: \"/compact Command\",       content: (         <div>           <h4>Intelligent Context Compaction</h4>"
       },
       {
         "type": "paragraph",
-        "content": "<p>The /compact command summarizes conversation history intelligently. It maintains critical information while reducing tokens. Specify preservation focus for targeted compression. Use before major task transitions systematically. This achieves 60-80% context reduction effectively.</p>"
+        "content": "The /compact command summarizes conversation history intelligently. It maintains critical information while reducing tokens. Specify preservation focus for targeted compression. Use before major task transitions systematically. This achieves 60-80% context reduction effectively."
       },
       {
         "type": "paragraph",
@@ -228,11 +228,11 @@
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Best Practice:</strong> Compact every 40 messages or 2 hours consistently</p>         </div>       )     },     {       label: \"CLAUDE.md Configuration\",       content: (         <div>           <h4>Project Memory Configuration</h4>"
+        "content": "**Best Practice:** Compact every 40 messages or 2 hours consistently\n\n         </div>       )     },     {       label: \"CLAUDE.md Configuration\",       content: (         <div>           <h4>Project Memory Configuration</h4>"
       },
       {
         "type": "paragraph",
-        "content": "<p>CLAUDE.md files provide persistent project context. Keep files under 500 lines for efficiency. Include architectural decisions and coding standards. Add frequently used commands and workflows. This auto-loads essential context every session.</p>"
+        "content": "CLAUDE.md files provide persistent project context. Keep files under 500 lines for efficiency. Include architectural decisions and coding standards. Add frequently used commands and workflows. This auto-loads essential context every session."
       },
       {
         "type": "heading",
@@ -280,7 +280,7 @@
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Impact:</strong> Reduces repeated context loading by 60-80%</p>         </div>       )     }   ]} />"
+        "content": "**Impact:** Reduces repeated context loading by 60-80%\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -293,7 +293,12 @@
         "component": "CodeGroup",
         "props": {
           "title": "~/.claude/settings.json",
-          "examples": "[{\n    language: \"json\",\n    \n    code: `{\n  \"performance\": {\n    \"maxMemory\": \"4096\",\n    \"contextLimit\": \"800000\",\n    \"autoCompactThreshold\": \"0.8\",\n    \"sessionTimeout\": \"7200\"\n  },\n  \"commands\": {\n    \"bashTimeout\": \"30000\",\n    \"maxOutputTokens\": \"8192\",\n    \"disableNonEssentialCalls\": true\n  },\n  \"monitoring\": {\n    \"enableTelemetry\": true,\n    \"logLevel\": \"warn\",\n    \"metricsInterval\": \"60\"\n  }\n}`\n  }]"
+          "examples": [
+            {
+              "language": "json",
+              "code": "{\n  \"performance\": {\n    \"maxMemory\": \"4096\",\n    \"contextLimit\": \"800000\",\n    \"autoCompactThreshold\": \"0.8\",\n    \"sessionTimeout\": \"7200\"\n  },\n  \"commands\": {\n    \"bashTimeout\": \"30000\",\n    \"maxOutputTokens\": \"8192\",\n    \"disableNonEssentialCalls\": true\n  },\n  \"monitoring\": {\n    \"enableTelemetry\": true,\n    \"logLevel\": \"warn\",\n    \"metricsInterval\": \"60\"\n  }\n}"
+            }
+          ]
         }
       },
       {
@@ -320,7 +325,7 @@
       },
       {
         "type": "paragraph",
-        "content": "}]} />         </div>       )     },     {       title: \"Network Analysis\",       content: (         <div>           <p>Monitor API communication for latency issues. Check request/response sizes affecting performance. Identify timeout patterns causing session failures. Use network throttling for connection testing. This reveals communication bottlenecks clearly.</p>"
+        "content": "}]} />         </div>       )     },     {       title: \"Network Analysis\",       content: (         <div>           Monitor API communication for latency issues. Check request/response sizes affecting performance. Identify timeout patterns causing session failures. Use network throttling for connection testing. This reveals communication bottlenecks clearly."
       },
       {
         "type": "paragraph",
@@ -344,7 +349,7 @@
       },
       {
         "type": "paragraph",
-        "content": "mtr api.anthropic.com`   }]} />         </div>       )     },     {       title: \"Session Recovery\",       content: (         <div>           <p>Recover from corrupted session states safely. Backup critical work before attempting recovery. Clear cache directories preventing startup issues. Reset configuration to default values carefully. This restores functionality without data loss.</p>"
+        "content": "mtr api.anthropic.com`   }]} />         </div>       )     },     {       title: \"Session Recovery\",       content: (         <div>           Recover from corrupted session states safely. Backup critical work before attempting recovery. Clear cache directories preventing startup issues. Reset configuration to default values carefully. This restores functionality without data loss."
       },
       {
         "type": "paragraph",
@@ -381,7 +386,28 @@
         "component": "UnifiedContentBlock",
         "props": {
           "variant": "feature-grid",
-          "features": "[\n    {\n      title: \"Unbounded Memory Growth\",\n      description: \"JavaScript garbage collection fails to reclaim memory. Objects accumulate without proper cleanup. Occurs after processing large codebases continuously.\",\n      badge: \"65% frequency\"\n    },\n    {\n      title: \"Context Window Saturation\", \n      description: \"Million token limit reached during extended sessions. Historical conversations consume available capacity. Manifests as command failures and timeouts.\",\n      badge: \"25% frequency\"\n    },\n    {\n      title: \"WSL2 Memory Allocation\",\n      description: \"Windows Subsystem incorrectly manages memory boundaries. Default configurations lack proper limits. Prevention requires explicit .wslconfig tuning.\",\n      badge: \"8% frequency\"\n    },\n    {\n      title: \"Network Timeout Cascades\",\n      description: \"API timeouts trigger retry loops exponentially. Requests queue causing memory accumulation. Manifests during poor connectivity periods.\",\n      badge: \"2% frequency\"\n    }\n  ]",
+          "features": [
+            {
+              "title": "Unbounded Memory Growth",
+              "description": "JavaScript garbage collection fails to reclaim memory. Objects accumulate without proper cleanup. Occurs after processing large codebases continuously.",
+              "badge": "65% frequency"
+            },
+            {
+              "title": "Context Window Saturation",
+              "description": "Million token limit reached during extended sessions. Historical conversations consume available capacity. Manifests as command failures and timeouts.",
+              "badge": "25% frequency"
+            },
+            {
+              "title": "WSL2 Memory Allocation",
+              "description": "Windows Subsystem incorrectly manages memory boundaries. Default configurations lack proper limits. Prevention requires explicit .wslconfig tuning.",
+              "badge": "8% frequency"
+            },
+            {
+              "title": "Network Timeout Cascades",
+              "description": "API timeouts trigger retry loops exponentially. Requests queue causing memory accumulation. Manifests during poor connectivity periods.",
+              "badge": "2% frequency"
+            }
+          ],
           "columns": 2,
           "children": "**Proactive Context Management:** Run /compact every 40 messages systematically - Reduces memory usage by 60%\n\n**Session Hygiene:** Clear context between unrelated tasks immediately - Prevents 70% of overflow issues  \n\n**Resource Monitoring:** Track RAM usage with htop continuously - Early detection prevents system crashes"
         }
@@ -404,11 +430,11 @@
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Alternative Workflows:</strong> Leverage VS Code extension for lighter operations. Use web interface for planning phases. Reserve CLI for intensive coding sessions.</p>"
+        "content": "**Alternative Workflows:** Leverage VS Code extension for lighter operations. Use web interface for planning phases. Reserve CLI for intensive coding sessions."
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Emergency Options:</strong> Downgrade to previous stable versions temporarily. Use cloud-based development environments alternatively. Consider API-direct integration for automation.</p>         </div>       )     }   ]} />"
+        "content": "**Emergency Options:** Downgrade to previous stable versions temporarily. Use cloud-based development environments alternatively. Consider API-direct integration for automation.\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -430,7 +456,28 @@
         "props": {
           "variant": "quick-reference",
           "title": "Daily Optimization Checklist",
-          "items": "[\n    { label: \"Morning\", value: \"Clear previous session, load fresh CLAUDE.md\" },\n    { label: \"Every 40 messages\", value: \"Run /compact with preservation focus\" },\n    { label: \"Task switches\", value: \"Execute /clear between unrelated work\" },\n    { label: \"Every 2 hours\", value: \"Check memory usage with htop\" },\n    { label: \"Session end\", value: \"Create summary, clear for next user\" }\n  ]",
+          "items": [
+            {
+              "label": "Morning",
+              "value": "Clear previous session, load fresh CLAUDE.md"
+            },
+            {
+              "label": "Every 40 messages",
+              "value": "Run /compact with preservation focus"
+            },
+            {
+              "label": "Task switches",
+              "value": "Execute /clear between unrelated work"
+            },
+            {
+              "label": "Every 2 hours",
+              "value": "Check memory usage with htop"
+            },
+            {
+              "label": "Session end",
+              "value": "Create summary, clear for next user"
+            }
+          ],
           "children": "**Problem solved?** Great! Implement daily /compact routines to prevent recurrence.\n\n**Still having issues?** Join our [community](/community) for additional support or check Anthropic's status page.\n\n**Found a new solution?** Share it with the community to help others facing the same issue."
         }
       },

@@ -220,13 +220,6 @@ export const Navigation = () => {
                       }`}
                     />
                   </MotionDiv>
-                  <span
-                    className={`font-medium text-foreground transition-all duration-300 hidden xl:inline ${
-                      isScrolled ? 'text-base' : 'text-lg'
-                    }`}
-                  >
-                    {APP_CONFIG.domain}
-                  </span>
                 </PrefetchLink>
 
                 {/* Desktop Navigation - ONLY show at xl: (1280px+) */}

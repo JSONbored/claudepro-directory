@@ -14,7 +14,13 @@
     "author": "Claude Pro Directory",
     "category": "guides",
     "subcategory": "use-cases",
-    "tags": ["healthcare", "enterprise", "compliance", "documentation", "hipaa"],
+    "tags": [
+      "healthcare",
+      "enterprise",
+      "compliance",
+      "documentation",
+      "hipaa"
+    ],
     "readingTime": "12 min",
     "difficulty": "advanced",
     "featured": false,
@@ -56,7 +62,44 @@
         "props": {
           "title": "Healthcare Documentation Automation ROI",
           "description": "Proven financial returns from Claude implementations",
-          "metrics": "[\n    {\n      label: \"Documentation Speed\",\n      value: \"33x faster\",\n      change: \"+3200%\",\n      trend: \"up\"\n    },\n    {\n      label: \"Coding Accuracy\",\n      value: \"95%\",\n      change: \"+15%\",\n      trend: \"up\"\n    },\n    {\n      label: \"Prior Authorization\",\n      value: \"28 min\",\n      change: \"-90%\",\n      trend: \"up\"\n    },\n    {\n      label: \"Administrative Time\",\n      value: \"10%\",\n      change: \"-75%\",\n      trend: \"up\"\n    },\n    {\n      label: \"ROI (5 Years)\",\n      value: \"451-791%\",\n      change: \"+741%\",\n      trend: \"up\"\n    },\n    {\n      label: \"Payback Period\",\n      value: \"6-18 months\",\n      change: \"Fast\",\n      trend: \"up\"\n    }\n  ]"
+          "metrics": [
+            {
+              "label": "Documentation Speed",
+              "value": "33x faster",
+              "change": "+3200%",
+              "trend": "up"
+            },
+            {
+              "label": "Coding Accuracy",
+              "value": "95%",
+              "change": "+15%",
+              "trend": "up"
+            },
+            {
+              "label": "Prior Authorization",
+              "value": "28 min",
+              "change": "-90%",
+              "trend": "up"
+            },
+            {
+              "label": "Administrative Time",
+              "value": "10%",
+              "change": "-75%",
+              "trend": "up"
+            },
+            {
+              "label": "ROI (5 Years)",
+              "value": "451-791%",
+              "change": "+741%",
+              "trend": "up"
+            },
+            {
+              "label": "Payback Period",
+              "value": "6-18 months",
+              "change": "Fast",
+              "trend": "up"
+            }
+          ]
         }
       },
       {
@@ -91,7 +134,13 @@
         "props": {
           "title": "Healthcare AI Platform Comparison",
           "description": "Claude versus alternatives for healthcare documentation",
-          "headers": ["Feature", "Claude AI", "GPT-4", "Med-PaLM 2", "Custom Models"],
+          "headers": [
+            "Feature",
+            "Claude AI",
+            "GPT-4",
+            "Med-PaLM 2",
+            "Custom Models"
+          ],
           "data": [
             {
               "Feature": "HIPAA Compliance",

@@ -16,7 +16,12 @@
     "author": "Claude Pro Directory",
     "category": "guides",
     "subcategory": "tutorials",
-    "tags": ["tutorial", "advanced", "agent-development", "multi-agent"],
+    "tags": [
+      "tutorial",
+      "advanced",
+      "agent-development",
+      "multi-agent"
+    ],
     "readingTime": "25 min",
     "difficulty": "Advanced",
     "featured": true,
@@ -39,7 +44,7 @@
             "Production deployment - scale to 5,000 requests/second with 99.95% uptime",
             "30 minutes total with complete working code and $0.045 per complex task"
           ],
-          "children": "**Prerequisites:** Basic Python/JavaScript, API experience, Claude account<br />\n**Time Required:** 30 minutes active work<br />\n**Tools Needed:** Claude API key, MCP server, Docker (optional)<br />\n**Outcome:** Working multi-agent system processing tasks at $0.045 each"
+          "children": "**Prerequisites:** Basic Python/JavaScript, API experience, Claude account\n\n**Time Required:** 30 minutes active work\n\n**Tools Needed:** Claude API key, MCP server, Docker (optional)\n\n**Outcome:** Working multi-agent system processing tasks at $0.045 each"
         }
       },
       {
@@ -55,7 +60,28 @@
           "variant": "feature-grid",
           "title": "Claude Agent Development Outcomes",
           "description": "Skills and capabilities you'll master in this tutorial",
-          "features": "[\n    {\n      title: \"Multi-Agent Orchestration\",\n      description: \"Build orchestrator-worker patterns achieving 90.2% performance gains with parallel execution\",\n      badge: \"Essential\"\n    },\n    {\n      title: \"Subagents Implementation\",\n      description: \"Deploy specialized Claude subagents with isolated 200K token contexts for complex tasks\",\n      badge: \"Advanced\"\n    },\n    {\n      title: \"Context Management\",\n      description: \"Master context isolation preventing memory conflicts while maintaining global state\",\n      badge: \"Critical\"\n    },\n    {\n      title: \"Production Deployment\",\n      description: \"Scale to 5,000 requests/second with monitoring, retry logic, and 99.95% uptime\",\n      badge: \"Professional\"\n    }\n  ]",
+          "features": [
+            {
+              "title": "Multi-Agent Orchestration",
+              "description": "Build orchestrator-worker patterns achieving 90.2% performance gains with parallel execution",
+              "badge": "Essential"
+            },
+            {
+              "title": "Subagents Implementation",
+              "description": "Deploy specialized Claude subagents with isolated 200K token contexts for complex tasks",
+              "badge": "Advanced"
+            },
+            {
+              "title": "Context Management",
+              "description": "Master context isolation preventing memory conflicts while maintaining global state",
+              "badge": "Critical"
+            },
+            {
+              "title": "Production Deployment",
+              "description": "Scale to 5,000 requests/second with monitoring, retry logic, and 99.95% uptime",
+              "badge": "Professional"
+            }
+          ],
           "columns": 2,
           "children": "self.compress_context(agent_id)\n\n        # Add with caching for repeated content\n        cache_key = hash(content[:100])  # First 100 chars as key\n        if cache_key not in context['ephemeral_cache']:\n            context['messages'].append({\n                'content': content,\n                'priority': priority,\n                'timestamp': asyncio.get_event_loop().time()\n            })\n            context['token_count'] += token_estimate\n\n            # Cache for 90% token savings on repeated content\n            if priority > 5:\n                context['ephemeral_cache'][cache_key] = content\n\n    def compress_context(self, agent_id: str):\n        \"\"\"Compress context by 60-80% while preserving key information\"\"\"\n        context = self.agent_contexts[agent_id]\n\n        # Sort by priority and recency\n        context['messages'].sort(\n            key=lambda x: (x['priority'], x['timestamp']),\n            reverse=True\n        )\n\n        # Keep high-priority and recent messages\n        compressed = context['messages'][:50]  # Top 50 messages\n\n        # Summarize older messages\n        older_messages = context['messages'][50:]\n        if older_messages:\n            summary = self.summarize_messages(older_messages)\n            compressed.insert(0, {\n                'content': 'Summary of ' + str(len(older_messages)) + ' older messages: ' + summary,\n                'priority': 3,\n                'timestamp': asyncio.get_event_loop().time()\n            })\n\n        context['messages'] = compressed\n        context['token_count'] = sum(len(m['content']) // 4 for m in compressed)\n\n    def share_between_agents(self, from_id: str, to_id: str, fact: str):\n        \"\"\"Share specific facts between agents without context pollution\"\"\"\n        # Use reference pointers instead of copying\n        reference = {\n            'source': from_id,\n            'fact': fact,\n            'shared_at': asyncio.get_event_loop().time()\n        }\n\n        if to_id not in self.agent_contexts:\n            self.create_isolated_context(to_id)\n\n        self.agent_contexts[to_id]['priority_facts'].append(reference)"
         }
@@ -240,7 +266,7 @@
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Key performance drivers:</strong></p>           <ul>             <li>Parallel execution reduces research time by up to 90% for information-gathering</li>             <li>Specialized agents achieve higher accuracy through focused expertise</li>             <li>Independent context windows prevent memory conflicts increasing reliability</li>             <li>Dynamic resource allocation scales from 1 to 20+ agents automatically</li>           </ul>           <p><strong>Real metrics from production:</strong></p>           <ul>             <li>Lindy AI: 10x faster task completion versus manual processes</li>             <li>Anthropic internal: 2-3x productivity gains across 10+ departments</li>             <li>3 Amigo pattern: Enterprise applications in 3 hours vs weeks traditional</li>           </ul>         </div>       ),       defaultOpen: true     },     {       key: \"when-to-use\",       title: \"When to Use Claude Autonomous Agents\",       content: (         <div>           <p>Apply autonomous agents when you need complex reasoning, parallel processing, or sustained work sessions. They're particularly effective for research, code generation, and multi-step workflows. Avoid for simple single-response queries where overhead exceeds value.</p>           <p><strong>Ideal scenarios:</strong></p>           <ul>             <li>Complex projects requiring multiple specialized skills</li>             <li>Research tasks needing parallel information gathering</li>             <li>7-hour autonomous coding sessions with Claude Code</li>             <li>Business automation with 5,000+ app integrations</li>           </ul>           <p><strong>Cost considerations:</strong> Average $0.045 per complex task, $9.18/month API vs $20 Pro subscription</p>         </div>       )     },     {       key: \"model-selection\",       title: \"Claude 4 Model Selection Strategy\",       content: (         <div>           <p>Intelligent model routing reduces costs by 60-70% while maintaining quality:</p>           <ul>             <li><strong>Haiku ($0.25/$1.25):</strong> 70% of routine tasks - summaries, extraction, simple queries</li>             <li><strong>Sonnet 4 ($3/$15):</strong> 25% of tasks - moderate reasoning, code generation, analysis</li>             <li><strong>Opus 4.1 ($15/$75):</strong> 5% critical tasks - complex reasoning, architecture decisions</li>           </ul>           <p><strong>Performance benchmarks:</strong> Opus 4.1: 74.5% SWE-bench, Sonnet 4: 72.7% SWE-bench</p>         </div>       )     }   ]} />"
+        "content": "**Key performance drivers:**\n\n                        - Parallel execution reduces research time by up to 90% for information-gathering             - Specialized agents achieve higher accuracy through focused expertise             - Independent context windows prevent memory conflicts increasing reliability             - Dynamic resource allocation scales from 1 to 20+ agents automatically                      **Real metrics from production:**\n\n                        - Lindy AI: 10x faster task completion versus manual processes             - Anthropic internal: 2-3x productivity gains across 10+ departments             - 3 Amigo pattern: Enterprise applications in 3 hours vs weeks traditional                    </div>       ),       defaultOpen: true     },     {       key: \"when-to-use\",       title: \"When to Use Claude Autonomous Agents\",       content: (         <div>           Apply autonomous agents when you need complex reasoning, parallel processing, or sustained work sessions. They're particularly effective for research, code generation, and multi-step workflows. Avoid for simple single-response queries where overhead exceeds value.\n\n           **Ideal scenarios:**\n\n                        - Complex projects requiring multiple specialized skills             - Research tasks needing parallel information gathering             - 7-hour autonomous coding sessions with Claude Code             - Business automation with 5,000+ app integrations                      **Cost considerations:** Average $0.045 per complex task, $9.18/month API vs $20 Pro subscription\n\n         </div>       )     },     {       key: \"model-selection\",       title: \"Claude 4 Model Selection Strategy\",       content: (         <div>           Intelligent model routing reduces costs by 60-70% while maintaining quality:\n\n                        - **Haiku ($0.25/$1.25):** 70% of routine tasks - summaries, extraction, simple queries             - **Sonnet 4 ($3/$15):** 25% of tasks - moderate reasoning, code generation, analysis             - **Opus 4.1 ($15/$75):** 5% critical tasks - complex reasoning, architecture decisions                      **Performance benchmarks:** Opus 4.1: 74.5% SWE-bench, Sonnet 4: 72.7% SWE-bench\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -297,7 +323,7 @@
       },
       {
         "type": "paragraph",
-        "content": "},               {                 language: \"javascript\",                 filename: \"basic_agent.js\",                 code: `// Basic agent with MCP integration import Anthropic from '@anthropic-ai/sdk';"
+        "content": "},               {                 language: \"javascript\",                 filename: \"basic_agent.js\",                 code: `// Basic agent with MCP integration ;"
       },
       {
         "type": "paragraph",
@@ -527,7 +553,7 @@
       },
       {
         "type": "paragraph",
-        "content": "}             ]}           />           <p><strong>Outcome:</strong> Unlimited tool integration enabling agents to access 200+ enterprise applications with standardized protocols</p>         </div>       )     }   ]} />"
+        "content": "}             ]}           />           **Outcome:** Unlimited tool integration enabling agents to access 200+ enterprise applications with standardized protocols\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -542,7 +568,7 @@
           "contentType": "callout",
           "type": "warning",
           "title": "Common Issues and Solutions",
-          "children": "**Issue 1: 429 Rate Limit Errors with Multi-Agent Systems**<br />\n**Solution:** Implement exponential backoff with jitter (2^attempt seconds + 10% random). Use token bucket algorithm limiting to 50 RPM for Tier 1. This reduces 429 errors by 95%.\n\n**Issue 2: Context Window Overflow in Long Sessions**<br />\n**Solution:** Compress contexts by 60-80% using priority-based retention. Keep top 50 high-priority messages and summarize older content. Implement ephemeral caching for 90% token savings.\n\n**Issue 3: Subagent Memory Conflicts**<br />\n**Solution:** Enforce strict context isolation with independent 200K token windows per agent. Use reference pointers instead of copying data between agents. Orchestrator maintains global state separately.\n\n**Issue 4: High Token Costs with 15x Consumption**<br />\n**Solution:** Route 70% tasks to Haiku ($0.25/$1.25), 25% to Sonnet ($3/$15), reserve 5% for Opus ($15/$75). Implement prompt caching and batch processing. Average cost reduces to $0.045 per complex task."
+          "children": "**Issue 1: 429 Rate Limit Errors with Multi-Agent Systems**\n\n**Solution:** Implement exponential backoff with jitter (2^attempt seconds + 10% random). Use token bucket algorithm limiting to 50 RPM for Tier 1. This reduces 429 errors by 95%.\n\n**Issue 2: Context Window Overflow in Long Sessions**\n\n**Solution:** Compress contexts by 60-80% using priority-based retention. Keep top 50 high-priority messages and summarize older content. Implement ephemeral caching for 90% token savings.\n\n**Issue 3: Subagent Memory Conflicts**\n\n**Solution:** Enforce strict context isolation with independent 200K token windows per agent. Use reference pointers instead of copying data between agents. Orchestrator maintains global state separately.\n\n**Issue 4: High Token Costs with 15x Consumption**\n\n**Solution:** Route 70% tasks to Haiku ($0.25/$1.25), 25% to Sonnet ($3/$15), reserve 5% for Opus ($15/$75). Implement prompt caching and batch processing. Average cost reduces to $0.045 per complex task."
         }
       },
       {
@@ -574,7 +600,28 @@
           "variant": "feature-grid",
           "title": "Production Validation Criteria",
           "description": "Verify your autonomous agent implementation works correctly",
-          "features": "[\n    {\n      title: \"Performance Test\",\n      description: \"Multi-agent system should complete complex tasks 90% faster than single agent baseline\",\n      badge: \"Required\"\n    },\n    {\n      title: \"Cost Verification\",\n      description: \"Average task cost should be $0.03-0.06 with proper model routing and caching\",\n      badge: \"Critical\"\n    },\n    {\n      title: \"Reliability Check\",\n      description: \"System should achieve 99.95% uptime with retry logic handling all 429 errors\",\n      badge: \"Essential\"\n    },\n    {\n      title: \"Context Isolation\",\n      description: \"Subagents should maintain independent memories without cross-contamination\",\n      badge: \"Important\"\n    }\n  ]",
+          "features": [
+            {
+              "title": "Performance Test",
+              "description": "Multi-agent system should complete complex tasks 90% faster than single agent baseline",
+              "badge": "Required"
+            },
+            {
+              "title": "Cost Verification",
+              "description": "Average task cost should be $0.03-0.06 with proper model routing and caching",
+              "badge": "Critical"
+            },
+            {
+              "title": "Reliability Check",
+              "description": "System should achieve 99.95% uptime with retry logic handling all 429 errors",
+              "badge": "Essential"
+            },
+            {
+              "title": "Context Isolation",
+              "description": "Subagents should maintain independent memories without cross-contamination",
+              "badge": "Important"
+            }
+          ],
           "columns": 2,
           "children": "description: \"Prevent cascade failures with 30-second cooldown after 5 errors\"\n    }\n  ]}\n  columns={2}\n/>"
         }

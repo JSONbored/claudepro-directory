@@ -16,7 +16,12 @@
     "author": "Claude Pro Directory",
     "category": "guides",
     "subcategory": "troubleshooting",
-    "tags": ["troubleshooting", "mcp-servers", "connection-errors", "solutions"],
+    "tags": [
+      "troubleshooting",
+      "mcp-servers",
+      "connection-errors",
+      "solutions"
+    ],
     "readingTime": "12 min",
     "difficulty": "intermediate",
     "featured": false,
@@ -55,12 +60,34 @@
           "title": "Immediate Resolution Steps",
           "description": "Try these verified quick fixes first for immediate resolution",
           "totalTime": "5-10 minutes",
-          "steps": "[\n    {\n      title: \"Verify Current Status\",\n      description: \"Check MCP server status in Claude Desktop settings. Navigate to Settings → Developer → MCP Servers to confirm server disconnection status.\",\n      code: \"# Check Node.js and npx availability\\nnode --version\\n# Expected output: v18.0.0 or higher\\nnpx --version\\n# Expected output: 8.0.0 or higher\",\n      time: \"1 minute\",\n      tip: \"If Node.js version is below v18, update immediately for compatibility\"\n    },\n    {\n      title: \"Apply Primary Fix\", \n      description: \"For Windows users, wrap npx commands with cmd interpreter. This resolves many occurrences by enabling proper command execution.\",\n      code: \"// claude_desktop_config.json - Windows fix\\n{\\n  \\\"mcpServers\\\": {\\n    \\\"filesystem\\\": {\\n      \\\"command\\\": \\\"cmd\\\",\\n      \\\"args\\\": [\\\"/c\\\", \\\"npx\\\", \\\"-y\\\", \\\"@modelcontextprotocol/server-filesystem\\\", \\\"C:\\\\\\\\Users\\\\\\\\username\\\\\\\\Desktop\\\"]\\n    }\\n  }\\n}\",\n      time: \"2-3 minutes\",\n      tip: \"Always use double backslashes in Windows paths within JSON files\"\n    },\n    {\n      title: \"Confirm Resolution\",\n      description: \"Verify the fix worked by restarting Claude Desktop. Test server connection by checking MCP status indicator turns green.\",\n      code: \"# Test server independently\\nnpx -y @modelcontextprotocol/server-filesystem /test/path\\n# Success output: Server started on stdio transport\\n# If failing: Check error message for missing dependencies\",\n      time: \"1-2 minutes\",\n      tip: \"Green status indicator confirms successful connection establishment\"\n    }\n  ]"
+          "steps": [
+            {
+              "title": "Verify Current Status",
+              "description": "Check MCP server status in Claude Desktop settings. Navigate to Settings → Developer → MCP Servers to confirm server disconnection status.",
+              "code": "# Check Node.js and npx availability\nnode --version\n# Expected output: v18.0.0 or higher\nnpx --version\n# Expected output: 8.0.0 or higher",
+              "time": "1 minute",
+              "tip": "If Node.js version is below v18, update immediately for compatibility"
+            },
+            {
+              "title": "Apply Primary Fix",
+              "description": "For Windows users, wrap npx commands with cmd interpreter. This resolves many occurrences by enabling proper command execution.",
+              "code": "// claude_desktop_config.json - Windows fix\n{\n  \"mcpServers\": {\n    \"filesystem\": {\n      \"command\": \"cmd\",\n      \"args\": [\"/c\", \"npx\", \"-y\", \"@modelcontextprotocol/server-filesystem\", \"C:\\\\Users\\\\username\\\\Desktop\"]\n    }\n  }\n}",
+              "time": "2-3 minutes",
+              "tip": "Always use double backslashes in Windows paths within JSON files"
+            },
+            {
+              "title": "Confirm Resolution",
+              "description": "Verify the fix worked by restarting Claude Desktop. Test server connection by checking MCP status indicator turns green.",
+              "code": "# Test server independently\nnpx -y @modelcontextprotocol/server-filesystem /test/path\n# Success output: Server started on stdio transport\n# If failing: Check error message for missing dependencies",
+              "time": "1-2 minutes",
+              "tip": "Green status indicator confirms successful connection establishment"
+            }
+          ]
         }
       },
       {
         "type": "paragraph",
-        "content": "<h5>Check These Components:</h5>           <ul>             <li><strong>Node.js version:</strong> Run 'node --version' in terminal</li>             <li><strong>NPX availability:</strong> Test with 'npx --version' command</li>             <li><strong>Ripgrep installation:</strong> Verify with 'rg --version' command</li>           </ul>"
+        "content": "<h5>Check These Components:</h5>                        - **Node.js version:** Run 'node --version' in terminal             - **NPX availability:** Test with 'npx --version' command             - **Ripgrep installation:** Verify with 'rg --version' command"
       },
       {
         "type": "heading",
@@ -112,15 +139,15 @@
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Common Issues Found:</strong> Missing ripgrep, outdated Node.js, PATH configuration errors</p>         </div>       ),       defaultOpen: true     },     {       title: \"Error Analysis\",       content: (         <div>           <p><strong>Purpose:</strong> Analyze error patterns to identify root cause from JSON-RPC transport failures.</p>"
+        "content": "**Common Issues Found:** Missing ripgrep, outdated Node.js, PATH configuration errors\n\n         </div>       ),       defaultOpen: true     },     {       title: \"Error Analysis\",       content: (         <div>           **Purpose:** Analyze error patterns to identify root cause from JSON-RPC transport failures."
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Diagnostic Tools:</strong> MCP Inspector, Chrome DevTools console, system process monitor</p>         </div>       )     },     {       title: \"Log Analysis\",       content: (         <div>           <p><strong>Purpose:</strong> Examine logs for detailed error information using Claude Desktop's MCP logging system.</p>"
+        "content": "**Diagnostic Tools:** MCP Inspector, Chrome DevTools console, system process monitor\n\n         </div>       )     },     {       title: \"Log Analysis\",       content: (         <div>           **Purpose:** Examine logs for detailed error information using Claude Desktop's MCP logging system."
       },
       {
         "type": "paragraph",
-        "content": "<h5>Log Locations:</h5>           <ul>             <li><strong>macOS:</strong> ~/Library/Logs/Claude/mcp*.log</li>             <li><strong>Windows:</strong> %APPDATA%\\Claude\\logs\\</li>             <li><strong>Linux:</strong> ~/.config/Claude/logs/</li>           </ul>"
+        "content": "<h5>Log Locations:</h5>                        - **macOS:** ~/Library/Logs/Claude/mcp*.log             - **Windows:** %APPDATA%\\Claude\\logs\\             - **Linux:** ~/.config/Claude/logs/"
       },
       {
         "type": "heading",
@@ -197,7 +224,7 @@
       },
       {
         "type": "paragraph",
-        "content": "<h4>Configuration Resolution</h4>           <p>Configuration errors in claude_desktop_config.json require precise JSON formatting with absolute paths. Access through Settings → Developer → Edit Config.</p>"
+        "content": "<h4>Configuration Resolution</h4>           Configuration errors in claude_desktop_config.json require precise JSON formatting with absolute paths. Access through Settings → Developer → Edit Config."
       },
       {
         "type": "paragraph",
@@ -205,7 +232,7 @@
       },
       {
         "type": "paragraph",
-        "content": "<h4>Clean Reset Procedure</h4>           <p>Complete reset resolves corrupted npm cache issues and dependency conflicts. Required when configuration fixes fail repeatedly.</p>"
+        "content": "<h4>Clean Reset Procedure</h4>           Complete reset resolves corrupted npm cache issues and dependency conflicts. Required when configuration fixes fail repeatedly."
       },
       {
         "type": "paragraph",
@@ -213,7 +240,7 @@
       },
       {
         "type": "paragraph",
-        "content": "<h4>Advanced Troubleshooting</h4>           <p>Protocol-level debugging reveals stdout contamination issues and message parsing failures. Essential for persistent connection problems.</p>"
+        "content": "<h4>Advanced Troubleshooting</h4>           Protocol-level debugging reveals stdout contamination issues and message parsing failures. Essential for persistent connection problems."
       },
       {
         "type": "paragraph",
@@ -312,7 +339,28 @@
           "variant": "feature-grid",
           "title": "Common Root Causes",
           "description": "Understanding why this issue occurs based on support analysis",
-          "features": "[\n    {\n      title: \"Windows Command Execution\",\n      description: \"Windows GUI applications cannot execute npx directly without cmd wrapper. Common issue for Windows users when Claude Desktop spawns processes.\",\n      badge: \"Windows users\"\n    },\n    {\n      title: \"Stdout Stream Pollution\", \n      description: \"Console.log statements corrupt JSON-RPC message stream. Leading to garbled responses. Related to improper logging in MCP servers.\",\n      badge: \"Protocol issue\"\n    },\n    {\n      title: \"Missing Dependencies\",\n      description: \"Ripgrep or Node.js components not installed properly. Prevention requires complete dependency verification. Manifests as spawn errors.\",\n      badge: \"Dependencies\"\n    },\n    {\n      title: \"Path Resolution Failures\",\n      description: \"Relative paths and nvm version conflicts break execution. Complex interaction between Node.js versions. Manifests as module not found errors.\",\n      badge: \"Path issues\"\n    }\n  ]",
+          "features": [
+            {
+              "title": "Windows Command Execution",
+              "description": "Windows GUI applications cannot execute npx directly without cmd wrapper. Common issue for Windows users when Claude Desktop spawns processes.",
+              "badge": "Windows users"
+            },
+            {
+              "title": "Stdout Stream Pollution",
+              "description": "Console.log statements corrupt JSON-RPC message stream. Leading to garbled responses. Related to improper logging in MCP servers.",
+              "badge": "Protocol issue"
+            },
+            {
+              "title": "Missing Dependencies",
+              "description": "Ripgrep or Node.js components not installed properly. Prevention requires complete dependency verification. Manifests as spawn errors.",
+              "badge": "Dependencies"
+            },
+            {
+              "title": "Path Resolution Failures",
+              "description": "Relative paths and nvm version conflicts break execution. Complex interaction between Node.js versions. Manifests as module not found errors.",
+              "badge": "Path issues"
+            }
+          ],
           "columns": 2,
           "children": "**Use absolute paths always:** Full paths in configurations prevent ambiguity\n\n**Redirect server logs to stderr:** console.error() instead of console.log() prevents stream pollution\n\n**Pin Node.js version:** Use nvm with specific version (v20-22 recommended) for version consistency"
         }
@@ -335,15 +383,15 @@
       },
       {
         "type": "paragraph",
-        "content": "<ul>             <li><strong>WSL on Windows:</strong> Run MCP servers through WSL bash - Bypasses Windows command issues</li>             <li><strong>Docker containers:</strong> Isolated environment for MCP servers - Eliminates dependency conflicts</li>             <li><strong>Direct execution:</strong> Skip npx, use node directly with full paths - Avoids npx resolution problems</li>           </ul>"
+        "content": "- **WSL on Windows:** Run MCP servers through WSL bash - Bypasses Windows command issues             - **Docker containers:** Isolated environment for MCP servers - Eliminates dependency conflicts             - **Direct execution:** Skip npx, use node directly with full paths - Avoids npx resolution problems"
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Important:</strong> Workarounds may require additional setup and maintenance overhead.</p>         </div>       )     },     {       title: \"Edge Case Solutions\",       content: (         <div>           <p><strong>Unusual Scenarios:</strong> Corporate proxies, antivirus interference, or SELinux policies require specialized approaches.</p>"
+        "content": "**Important:** Workarounds may require additional setup and maintenance overhead.\n\n         </div>       )     },     {       title: \"Edge Case Solutions\",       content: (         <div>           **Unusual Scenarios:** Corporate proxies, antivirus interference, or SELinux policies require specialized approaches."
       },
       {
         "type": "paragraph",
-        "content": "<p>Corporate environments with restricted npm access require local package installation. Use offline npm packages or private registries.</p>"
+        "content": "Corporate environments with restricted npm access require local package installation. Use offline npm packages or private registries."
       },
       {
         "type": "heading",
@@ -381,11 +429,11 @@
       },
       {
         "type": "paragraph",
-        "content": "}             ]}           />         </div>       )     },     {       title: \"Community Solutions\",       content: (         <div>           <p><strong>Community-Verified Fixes:</strong> Silver Bullet approach creates self-contained Node.js installations verified by community users.</p>"
+        "content": "}             ]}           />         </div>       )     },     {       title: \"Community Solutions\",       content: (         <div>           **Community-Verified Fixes:** Silver Bullet approach creates self-contained Node.js installations verified by community users."
       },
       {
         "type": "paragraph",
-        "content": "<p>Community-developed wrapper scripts handle environment inconsistencies automatically. Available at github.com/modelcontextprotocol/community-solutions repository.</p>"
+        "content": "Community-developed wrapper scripts handle environment inconsistencies automatically. Available at github.com/modelcontextprotocol/community-solutions repository."
       },
       {
         "type": "heading",
@@ -400,7 +448,28 @@
           "variant": "feature-grid",
           "title": "Escalation Criteria",
           "description": "When to seek additional help based on official support guidelines",
-          "features": "[\n    {\n      title: \"Contact Official Support\",\n      description: \"After trying all fixes without success • Include full logs and config • Response within 24-48 hours\",\n      badge: \"Official\"\n    },\n    {\n      title: \"Community Forums\", \n      description: \"GitHub Discussions for MCP issues • Include error details and attempts • Active community responds within hours\",\n      badge: \"Community\"\n    },\n    {\n      title: \"GitHub Issues\",\n      description: \"Reproducible bugs only • Follow issue template exactly • Development team reviews weekly\",\n      badge: \"Development\"\n    },\n    {\n      title: \"Emergency Contacts\",\n      description: \"Production failures affecting enterprise • Use enterprise support channels • Priority response for paid plans\",\n      badge: \"Critical\"\n    }\n  ]",
+          "features": [
+            {
+              "title": "Contact Official Support",
+              "description": "After trying all fixes without success • Include full logs and config • Response within 24-48 hours",
+              "badge": "Official"
+            },
+            {
+              "title": "Community Forums",
+              "description": "GitHub Discussions for MCP issues • Include error details and attempts • Active community responds within hours",
+              "badge": "Community"
+            },
+            {
+              "title": "GitHub Issues",
+              "description": "Reproducible bugs only • Follow issue template exactly • Development team reviews weekly",
+              "badge": "Development"
+            },
+            {
+              "title": "Emergency Contacts",
+              "description": "Production failures affecting enterprise • Use enterprise support channels • Priority response for paid plans",
+              "badge": "Critical"
+            }
+          ],
           "columns": 2,
           "children": "**Problem solved?** Great! Consider implementing absolute paths and stderr logging to prevent recurrence.\n\n**Still having issues?** Join our [community](/community) for additional support or file a GitHub issue at github.com/modelcontextprotocol/issues.\n\n**Found a new solution?** Share it with the community to help others facing the same issue."
         }

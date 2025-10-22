@@ -16,7 +16,12 @@
     "author": "Claude Pro Directory",
     "category": "guides",
     "subcategory": "comparisons",
-    "tags": ["comparison", "cloud-development", "aws", "evaluation"],
+    "tags": [
+      "comparison",
+      "cloud-development",
+      "aws",
+      "evaluation"
+    ],
     "readingTime": "12 min",
     "difficulty": "intermediate",
     "featured": false,
@@ -101,11 +106,11 @@
       },
       {
         "type": "paragraph",
-        "content": "<h4>Pricing Structure</h4>           <p><strong>Free Tier:</strong> 50 monthly requests with basic features</p>           <p><strong>Professional:</strong> $19/month unlimited requests plus security scanning</p>           <p><strong>Enterprise:</strong> Custom pricing with IP indemnification and SSO</p>"
+        "content": "<h4>Pricing Structure</h4>           **Free Tier:** 50 monthly requests with basic features\n\n           **Professional:** $19/month unlimited requests plus security scanning\n\n           **Enterprise:** Custom pricing with IP indemnification and SSO"
       },
       {
         "type": "paragraph",
-        "content": "<h4>Best For</h4>           <p>AWS-centric teams building serverless applications, requiring native service integration. Ideal for organizations prioritizing security scanning and compliance.</p>         </div>       )     },     {       label: \"Gemini Code Assist\",       value: \"gemini\",       content: (         <div>           <h3>Overview</h3>           <p>Google Gemini Code Assist offers a 1-million token context window with strong GCP integration. Launched in 2024, it specializes in Kubernetes and container orchestration.</p>"
+        "content": "<h4>Best For</h4>           AWS-centric teams building serverless applications, requiring native service integration. Ideal for organizations prioritizing security scanning and compliance.\n\n         </div>       )     },     {       label: \"Gemini Code Assist\",       value: \"gemini\",       content: (         <div>           <h3>Overview</h3>           Google Gemini Code Assist offers a 1-million token context window with strong GCP integration. Launched in 2024, it specializes in Kubernetes and container orchestration."
       },
       {
         "type": "paragraph",
@@ -113,11 +118,11 @@
       },
       {
         "type": "paragraph",
-        "content": "<h4>Pricing Structure</h4>           <p><strong>Free Option:</strong> 180,000 completions monthly with 6,000 daily limit</p>           <p><strong>Standard Plans:</strong> $19/month for unlimited completions</p>           <p><strong>Enterprise:</strong> $45/month includes code customization and VPC controls</p>"
+        "content": "<h4>Pricing Structure</h4>           **Free Option:** 180,000 completions monthly with 6,000 daily limit\n\n           **Standard Plans:** $19/month for unlimited completions\n\n           **Enterprise:** $45/month includes code customization and VPC controls"
       },
       {
         "type": "paragraph",
-        "content": "<h4>Best For</h4>           <p>Google Cloud users, cost-conscious teams, and Kubernetes-heavy deployments. Perfect for startups maximizing free tier value.</p>         </div>       )     },     {       label: \"Claude Code\",       value: \"claude\",       content: (         <div>           <h3>Overview</h3>           <p>Claude Code delivers superior code quality with multi-cloud flexibility and agentic capabilities. Available through terminal-first interface with 200,000-token context.</p>"
+        "content": "<h4>Best For</h4>           Google Cloud users, cost-conscious teams, and Kubernetes-heavy deployments. Perfect for startups maximizing free tier value.\n\n         </div>       )     },     {       label: \"Claude Code\",       value: \"claude\",       content: (         <div>           <h3>Overview</h3>           Claude Code delivers superior code quality with multi-cloud flexibility and agentic capabilities. Available through terminal-first interface with 200,000-token context."
       },
       {
         "type": "paragraph",
@@ -125,11 +130,11 @@
       },
       {
         "type": "paragraph",
-        "content": "<h4>Pricing Structure</h4>           <p><strong>Professional:</strong> $40/month for individual developers</p>           <p><strong>Team Plans:</strong> $60/month per user (excludes Claude Code access)</p>           <p><strong>Enterprise:</strong> $200/month with advanced features and support</p>"
+        "content": "<h4>Pricing Structure</h4>           **Professional:** $40/month for individual developers\n\n           **Team Plans:** $60/month per user (excludes Claude Code access)\n\n           **Enterprise:** $200/month with advanced features and support"
       },
       {
         "type": "paragraph",
-        "content": "<h4>Best For</h4>           <p>Multi-cloud architectures, complex system design, and teams prioritizing code quality. Some enterprises report significant cost savings.</p>         </div>       )     }   ]} />"
+        "content": "<h4>Best For</h4>           Multi-cloud architectures, complex system design, and teams prioritizing code quality. Some enterprises report significant cost savings.\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -188,27 +193,27 @@
       },
       {
         "type": "paragraph",
-        "content": "<h5>Tool Performance:</h5>           <ul>             <li><strong>Amazon Q Developer:</strong> Native console integration generates complete functions with proper IAM - Rating: 5/5</li>             <li><strong>Gemini Code Assist:</strong> Basic Lambda support but misses AWS-specific optimizations - Rating: 2/5</li>             <li><strong>Claude Code:</strong> Excellent architectural understanding with AWS Bedrock integration - Rating: 4/5</li>           </ul>"
+        "content": "<h5>Tool Performance:</h5>                        - **Amazon Q Developer:** Native console integration generates complete functions with proper IAM - Rating: 5/5             - **Gemini Code Assist:** Basic Lambda support but misses AWS-specific optimizations - Rating: 2/5             - **Claude Code:** Excellent architectural understanding with AWS Bedrock integration - Rating: 4/5"
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Winner:</strong> Amazon Q Developer - Native AWS integration provides unmatched serverless development efficiency</p>"
+        "content": "**Winner:** Amazon Q Developer - Native AWS integration provides unmatched serverless development efficiency"
       },
       {
         "type": "paragraph",
-        "content": "<h5>Comparative Analysis:</h5>           <p>Claude Code excels with platform-agnostic Terraform generation handling cross-cloud networking. Q Developer and Gemini struggle outside their native ecosystems. Organizations report 40% faster multi-cloud deployments using Claude.</p>"
+        "content": "<h5>Comparative Analysis:</h5>           Claude Code excels with platform-agnostic Terraform generation handling cross-cloud networking. Q Developer and Gemini struggle outside their native ecosystems. Organizations report 40% faster multi-cloud deployments using Claude."
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Recommendation:</strong> Claude Code's superior multi-cloud understanding justifies premium pricing for hybrid architectures</p>         </div>       )     },     {       title: \"Infrastructure as Code Generation\",       content: (         <div>           <p><strong>Scenario:</strong> Creating production Terraform configurations for complex multi-region deployments</p>"
+        "content": "**Recommendation:** Claude Code's superior multi-cloud understanding justifies premium pricing for hybrid architectures\n\n         </div>       )     },     {       title: \"Infrastructure as Code Generation\",       content: (         <div>           **Scenario:** Creating production Terraform configurations for complex multi-region deployments"
       },
       {
         "type": "paragraph",
-        "content": "<h5>Results Summary:</h5>           <p>Claude generates production-ready Terraform with proper state management and security. Q Developer excels at CloudFormation but limited Terraform. Gemini handles basic configurations requiring manual corrections.</p>"
+        "content": "<h5>Results Summary:</h5>           Claude generates production-ready Terraform with proper state management and security. Q Developer excels at CloudFormation but limited Terraform. Gemini handles basic configurations requiring manual corrections."
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Best Choice:</strong> Claude Code for Terraform, Q Developer for CloudFormation based on native tool support</p>         </div>       )     }   ]} />"
+        "content": "**Best Choice:** Claude Code for Terraform, Q Developer for CloudFormation based on native tool support\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -242,7 +247,28 @@
           "variant": "feature-grid",
           "title": "Choose Based on Your Needs",
           "description": "Decision criteria to help select the right tool",
-          "features": "[\n    {\n      title: \"Choose Amazon Q Developer If:\",\n      description: \"AWS-only infrastructure • Need security scanning • Budget under $20/month • Serverless focus\",\n      badge: \"AWS Teams\"\n    },\n    {\n      title: \"Choose Gemini Code Assist If:\",\n      description: \"Google Cloud primary • Cost-sensitive team • Need 180K free completions • Kubernetes heavy\",\n      badge: \"GCP Users\"\n    },\n    {\n      title: \"Choose Claude Code If:\",\n      description: \"Multi-cloud architecture • Code quality priority • Complex systems • Budget flexibility\",\n      badge: \"Enterprise\"\n    },\n    {\n      title: \"Consider Multiple Tools If:\",\n      description: \"Hybrid cloud strategy • Mixed skill levels • Varying project complexity • Department autonomy\",\n      badge: \"Hybrid\"\n    }\n  ]",
+          "features": [
+            {
+              "title": "Choose Amazon Q Developer If:",
+              "description": "AWS-only infrastructure • Need security scanning • Budget under $20/month • Serverless focus",
+              "badge": "AWS Teams"
+            },
+            {
+              "title": "Choose Gemini Code Assist If:",
+              "description": "Google Cloud primary • Cost-sensitive team • Need 180K free completions • Kubernetes heavy",
+              "badge": "GCP Users"
+            },
+            {
+              "title": "Choose Claude Code If:",
+              "description": "Multi-cloud architecture • Code quality priority • Complex systems • Budget flexibility",
+              "badge": "Enterprise"
+            },
+            {
+              "title": "Consider Multiple Tools If:",
+              "description": "Hybrid cloud strategy • Mixed skill levels • Varying project complexity • Department autonomy",
+              "badge": "Hybrid"
+            }
+          ],
           "columns": 2,
           "children": "**Data Export:** Q Developer and Claude support code export; Gemini requires manual extraction  \n**Training Impact:** Teams need 1-2 weeks adapting to new platforms based on surveys  \n**Integration Changes:** AWS tools require minimal changes for Q Developer adoption  \n**Downtime Estimate:** Zero downtime for gradual adoption; 2-3 days for full switch"
         }

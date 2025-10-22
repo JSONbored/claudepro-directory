@@ -339,10 +339,11 @@ function UnifiedSidebarComponent({
           {/* Content-specific sections */}
           {mode === 'content' && validatedContentData && (
             <>
-              {/* Table of Contents */}
-              {validatedContentData.content &&
+              {/* Table of Contents - Only for MDX content (string format) */}
+              {typeof validatedContentData.content === 'string' &&
                 (() => {
-                  const headings = validatedContentData.content.match(/^##\s+(.+)$/gm);
+                  const content = validatedContentData.content as string;
+                  const headings = content.match(/^##\s+(.+)$/gm);
                   if (!headings || headings.length === 0) return null;
 
                   return (

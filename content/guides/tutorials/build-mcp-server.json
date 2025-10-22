@@ -63,8 +63,25 @@
           "title": "Before Starting This Tutorial",
           "estimatedTime": "60 minutes",
           "skillLevel": "advanced",
-          "items": "[\n    {\n      task: \"Claude Desktop installed (macOS, Windows, or Linux)\",\n      description: \"Version 1.0+ with MCP support enabled\"\n    },\n    {\n      task: \"Node.js v18+ or Python 3.11+ environment\",\n      description: \"TypeScript SDK v1.18.1 or Python MCP v1.2.0+\"\n    },\n    {\n      task: \"Familiarity with JSON-RPC and async programming\",\n      description: \"Understanding of protocol-based communication\"\n    },\n    {\n      task: \"Access to Claude Desktop config file\",\n      description: \"Located at ~/Library/Application Support/Claude/\"\n    }\n  ]",
-          "children": "// Validate and sanitize inputs\n    const sanitized = parameterize(query, params);\n    \n    // Execute with connection pooling\n    const result = await pool.query(sanitized);\n    \n    return {\n      content: [{\n        type: \"text\",\n        text: JSON.stringify(result.rows, null, 2)\n      }]\n    };\n  }\n);`,\n      notes: \"Always validate inputs despite AI context. Use parameterized queries preventing injection attacks.\"\n    },\n    {\n      number: 4,\n      title: \"Configure State Management\",\n      description: \"Implement session storage for production deployments.\",\n      timeEstimate: \"12 minutes\",\n      code: `// Redis State Management\nimport Redis from 'ioredis';\n\nconst redis = new Redis({\n  host: process.env.REDIS_HOST,\n  port: 6379,\n  maxRetriesPerRequest: 3\n});\n\n// Session middleware\nserver.use(async (context, next) => {\n  const sessionId = context.headers['x-session-id'];\n  context.state = await redis.get(sessionId) || {};\n  \n  await next();\n  \n  await redis.setex(sessionId, 3600, \n    JSON.stringify(context.state));\n});`,\n      notes: \"In-memory storage works for development only. Production requires Redis, DynamoDB, or Cloudflare Durable Objects.\"\n    },\n    {\n      number: 5,\n      title: \"Add Security Layers\",\n      description: \"Implement OAuth 2.1 with PKCE for secure authentication.\",\n      timeEstimate: \"10 minutes\",\n      code: `// OAuth 2.1 Implementation with PKCE\nimport { generateCodeChallenge } from './auth';\n\nserver.tool(\"authenticate\",\n  {\n    description: \"Initiate OAuth flow with PKCE\",\n    inputSchema: { \n      client_id: z.string(),\n      scope: z.string() \n    }\n  },\n  async ({ client_id, scope }) => {\n    const verifier = generateRandomString(128);\n    const challenge = await generateCodeChallenge(verifier);\n    \n    // Store verifier securely\n    await storeVerifier(verifier);\n    \n    const authUrl = buildAuthUrl({\n      client_id,\n      challenge,\n      challenge_method: 'S256',\n      scope\n    });\n    \n    return {\n      content: [{\n        type: \"text\",\n        text: \\`Authenticate at: \\${authUrl}\\`\n      }]\n    };\n  }\n);`,\n      notes: \"Never skip PKCE even for confidential clients. Verify audience claims preventing confused deputy attacks.\"\n    },\n    {\n      number: 6,\n      title: \"Configure Claude Desktop\",\n      description: \"Register your server in Claude's configuration file.\",\n      timeEstimate: \"5 minutes\",\n      code: `// ~/Library/Application Support/Claude/claude_desktop_config.json\n{\n  \"mcpServers\": {\n    \"custom-integration\": {\n      \"command\": \"node\",\n      \"args\": [\"/absolute/path/to/dist/index.js\"],\n      \"env\": {\n        \"DATABASE_URL\": \"\\${DATABASE_URL}\",\n        \"REDIS_HOST\": \"localhost\",\n        \"API_KEY\": \"\\${API_KEY}\"\n      }\n    }\n  }\n}`,\n      notes: \"Restart Claude Desktop after configuration changes. Check Developer Tools for connection status.\"\n    },\n    {\n      number: 7,\n      title: \"Test with MCP Inspector\",\n      description: \"Validate server functionality using the official debugging tool.\",\n      timeEstimate: \"5 minutes\",\n      code: `# Launch MCP Inspector\nnpx @modelcontextprotocol/inspector node dist/index.js"
+          "items": [
+            {
+              "task": "Claude Desktop installed (macOS, Windows, or Linux)",
+              "description": "Version 1.0+ with MCP support enabled"
+            },
+            {
+              "task": "Node.js v18+ or Python 3.11+ environment",
+              "description": "TypeScript SDK v1.18.1 or Python MCP v1.2.0+"
+            },
+            {
+              "task": "Familiarity with JSON-RPC and async programming",
+              "description": "Understanding of protocol-based communication"
+            },
+            {
+              "task": "Access to Claude Desktop config file",
+              "description": "Located at ~/Library/Application Support/Claude/"
+            }
+          ],
+          "children": "// Validate and sanitize inputs\n    const sanitized = parameterize(query, params);\n    \n    // Execute with connection pooling\n    const result = await pool.query(sanitized);\n    \n    return {\n      content: [{\n        type: \"text\",\n        text: JSON.stringify(result.rows, null, 2)\n      }]\n    };\n  }\n);`,\n      notes: \"Always validate inputs despite AI context. Use parameterized queries preventing injection attacks.\"\n    },\n    {\n      number: 4,\n      title: \"Configure State Management\",\n      description: \"Implement session storage for production deployments.\",\n      timeEstimate: \"12 minutes\",\n      code: `// Redis State Management\n;\n\nconst redis = new Redis({\n  host: process.env.REDIS_HOST,\n  port: 6379,\n  maxRetriesPerRequest: 3\n});\n\n// Session middleware\nserver.use(async (context, next) => {\n  const sessionId = context.headers['x-session-id'];\n  context.state = await redis.get(sessionId) || {};\n  \n  await next();\n  \n  await redis.setex(sessionId, 3600, \n    JSON.stringify(context.state));\n});`,\n      notes: \"In-memory storage works for development only. Production requires Redis, DynamoDB, or Cloudflare Durable Objects.\"\n    },\n    {\n      number: 5,\n      title: \"Add Security Layers\",\n      description: \"Implement OAuth 2.1 with PKCE for secure authentication.\",\n      timeEstimate: \"10 minutes\",\n      code: `// OAuth 2.1 Implementation with PKCE\n;\n\nserver.tool(\"authenticate\",\n  {\n    description: \"Initiate OAuth flow with PKCE\",\n    inputSchema: { \n      client_id: z.string(),\n      scope: z.string() \n    }\n  },\n  async ({ client_id, scope }) => {\n    const verifier = generateRandomString(128);\n    const challenge = await generateCodeChallenge(verifier);\n    \n    // Store verifier securely\n    await storeVerifier(verifier);\n    \n    const authUrl = buildAuthUrl({\n      client_id,\n      challenge,\n      challenge_method: 'S256',\n      scope\n    });\n    \n    return {\n      content: [{\n        type: \"text\",\n        text: \\`Authenticate at: \\${authUrl}\\`\n      }]\n    };\n  }\n);`,\n      notes: \"Never skip PKCE even for confidential clients. Verify audience claims preventing confused deputy attacks.\"\n    },\n    {\n      number: 6,\n      title: \"Configure Claude Desktop\",\n      description: \"Register your server in Claude's configuration file.\",\n      timeEstimate: \"5 minutes\",\n      code: `// ~/Library/Application Support/Claude/claude_desktop_config.json\n{\n  \"mcpServers\": {\n    \"custom-integration\": {\n      \"command\": \"node\",\n      \"args\": [\"/absolute/path/to/dist/index.js\"],\n      \"env\": {\n        \"DATABASE_URL\": \"\\${DATABASE_URL}\",\n        \"REDIS_HOST\": \"localhost\",\n        \"API_KEY\": \"\\${API_KEY}\"\n      }\n    }\n  }\n}`,\n      notes: \"Restart Claude Desktop after configuration changes. Check Developer Tools for connection status.\"\n    },\n    {\n      number: 7,\n      title: \"Test with MCP Inspector\",\n      description: \"Validate server functionality using the official debugging tool.\",\n      timeEstimate: \"5 minutes\",\n      code: `# Launch MCP Inspector\nnpx @modelcontextprotocol/inspector node dist/index.js"
         }
       },
       {
@@ -152,7 +169,28 @@
         "component": "Checklist",
         "props": {
           "type": "testing",
-          "items": "[\n    {\n      task: \"Unit test individual tool handlers\",\n      description: \"npm test -- --coverage - 100% coverage for tool logic, input validation verified\"\n    },\n    {\n      task: \"Integration test transport layer\",\n      description: \"npm run test:integration - All JSON-RPC methods respond correctly within 100ms\"\n    },\n    {\n      task: \"Load test with concurrent connections\",\n      description: \"artillery run load-test.yml - Handles 100 concurrent sessions maintaining <200ms response\"\n    },\n    {\n      task: \"Security scan for vulnerabilities\",\n      description: \"npm audit && snyk test - No high/critical vulnerabilities in dependencies\"\n    },\n    {\n      task: \"Validate Claude Desktop integration\",\n      description: \"Check Claude Developer Tools - Server connected, all tools visible in Claude interface\"\n    }\n  ]"
+          "items": [
+            {
+              "task": "Unit test individual tool handlers",
+              "description": "npm test -- --coverage - 100% coverage for tool logic, input validation verified"
+            },
+            {
+              "task": "Integration test transport layer",
+              "description": "npm run test:integration - All JSON-RPC methods respond correctly within 100ms"
+            },
+            {
+              "task": "Load test with concurrent connections",
+              "description": "artillery run load-test.yml - Handles 100 concurrent sessions maintaining <200ms response"
+            },
+            {
+              "task": "Security scan for vulnerabilities",
+              "description": "npm audit && snyk test - No high/critical vulnerabilities in dependencies"
+            },
+            {
+              "task": "Validate Claude Desktop integration",
+              "description": "Check Claude Developer Tools - Server connected, all tools visible in Claude interface"
+            }
+          ]
         }
       }
     ]

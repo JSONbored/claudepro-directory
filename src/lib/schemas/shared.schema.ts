@@ -11,6 +11,35 @@
  */
 
 import { z } from 'zod';
+
+/**
+ * Helper to preprocess stringified JSON arrays from malformed content files
+ *
+ * PRODUCTION FIX: Handles legacy content with stringified array props
+ * Instead of: { items: [...] }
+ * Content has: { items: "[...]" }
+ *
+ * @param fieldNames - Array field names to parse (e.g., ['items', 'features', 'steps'])
+ * @returns Zod preprocess function
+ */
+function parseStringifiedArrays(...fieldNames: string[]) {
+  return (val: any) => {
+    if (!val || typeof val !== 'object') return val;
+
+    const result = { ...val };
+    for (const fieldName of fieldNames) {
+      if (typeof result[fieldName] === 'string') {
+        try {
+          const parsed = Function(`"use strict"; return (${result[fieldName]})`)();
+          result[fieldName] = Array.isArray(parsed) ? parsed : [];
+        } catch {
+          result[fieldName] = [];
+        }
+      }
+    }
+    return result;
+  };
+}
 import { imageDimension } from '@/src/lib/schemas/primitives/base-numbers';
 import {
   codeString,
@@ -340,108 +369,129 @@ export const expertQuotePropsSchema = z
   .describe('Expert quote with author attribution and optional image');
 
 // Component Props Schemas
-export const featureGridPropsSchema = z
-  .object({
-    features: z
-      .array(featureSchema.describe('Individual feature in grid'))
-      .max(20)
-      .default([])
-      .describe('List of features to display'),
-    title: shortString.default('Key Features').describe('Grid section title'),
-    description: componentDescriptionString.describe('Grid section description'),
-    columns: z
-      .union([z.literal(2), z.literal(3), z.literal(4)])
-      .default(2)
-      .describe('Number of columns in feature grid layout'),
-  })
-  .describe('Feature grid component displaying features in responsive columns');
+export const featureGridPropsSchema = z.preprocess(
+  parseStringifiedArrays('features'),
+  z
+    .object({
+      features: z
+        .array(featureSchema.describe('Individual feature in grid'))
+        .max(20)
+        .default([])
+        .describe('List of features to display'),
+      title: shortString.default('Key Features').describe('Grid section title'),
+      description: componentDescriptionString.describe('Grid section description'),
+      columns: z
+        .union([z.literal(2), z.literal(3), z.literal(4)])
+        .default(2)
+        .describe('Number of columns in feature grid layout'),
+    })
+    .describe('Feature grid component displaying features in responsive columns')
+);
 
-export const accordionPropsSchema = z
-  .object({
-    items: z
-      .array(accordionItemSchema.describe('Individual accordion item'))
-      .max(20)
-      .default([])
-      .describe('List of accordion items'),
-    title: shortString.optional().describe('Optional accordion section title'),
-    description: componentDescriptionString.describe('Accordion section description'),
-    allowMultiple: z
-      .boolean()
-      .default(false)
-      .describe('Allow multiple accordion items open simultaneously'),
-  })
-  .describe('Accordion component with collapsible items');
+export const accordionPropsSchema = z.preprocess(
+  parseStringifiedArrays('items'),
+  z
+    .object({
+      items: z
+        .array(accordionItemSchema.describe('Individual accordion item'))
+        .max(20)
+        .default([])
+        .describe('List of accordion items'),
+      title: shortString.optional().describe('Optional accordion section title'),
+      description: componentDescriptionString.describe('Accordion section description'),
+      allowMultiple: z
+        .boolean()
+        .default(false)
+        .describe('Allow multiple accordion items open simultaneously'),
+    })
+    .describe('Accordion component with collapsible items')
+);
 
-export const stepGuidePropsSchema = z
-  .object({
-    steps: z
-      .array(guideStepSchema.describe('Individual guide step'))
-      .max(20)
-      .default([])
-      .describe('List of guide steps'),
-    title: shortString.default('Step-by-Step Guide').describe('Guide section title'),
-    description: componentDescriptionString.describe('Guide section description'),
-    totalTime: componentTimeString.describe('Total estimated time for all steps'),
-  })
-  .describe('Step-by-step guide component with timing information');
+export const stepGuidePropsSchema = z.preprocess(
+  parseStringifiedArrays('steps'),
+  z
+    .object({
+      steps: z
+        .array(guideStepSchema.describe('Individual guide step'))
+        .max(20)
+        .default([])
+        .describe('List of guide steps'),
+      title: shortString.default('Step-by-Step Guide').describe('Guide section title'),
+      description: componentDescriptionString.describe('Guide section description'),
+      totalTime: componentTimeString.describe('Total estimated time for all steps'),
+    })
+    .describe('Step-by-step guide component with timing information')
+);
 
-const codeGroupPropsSchema = z
-  .object({
-    examples: z
-      .array(codeExampleSchema.describe('Individual code example'))
-      .max(10)
-      .default([])
-      .describe('List of code examples in different languages'),
-    title: shortString.optional().describe('Optional code group title'),
-    description: componentDescriptionString.describe('Code group description'),
-  })
-  .describe('Code group component showing multiple language examples');
+const codeGroupPropsSchema = z.preprocess(
+  parseStringifiedArrays('examples'),
+  z
+    .object({
+      examples: z
+        .array(codeExampleSchema.describe('Individual code example'))
+        .max(10)
+        .default([])
+        .describe('List of code examples in different languages'),
+      title: shortString.optional().describe('Optional code group title'),
+      description: componentDescriptionString.describe('Code group description'),
+    })
+    .describe('Code group component showing multiple language examples')
+);
 
-export const comparisonTablePropsSchema = z
-  .object({
-    title: shortString.optional().describe('Optional comparison table title'),
-    description: componentDescriptionString.describe('Table description explaining comparison'),
-    headers: z
-      .array(componentValueString.describe('Column header text'))
-      .max(10)
-      .default([])
-      .describe('Column headers for comparison options'),
-    items: z
-      .array(comparisonItemSchema.describe('Individual comparison row'))
-      .max(50)
-      .default([])
-      .describe('Comparison table rows'),
-  })
-  .describe('Comparison table showing features across multiple options');
+export const comparisonTablePropsSchema = z.preprocess(
+  parseStringifiedArrays('headers', 'items'),
+  z
+    .object({
+      title: shortString.optional().describe('Optional comparison table title'),
+      description: componentDescriptionString.describe('Table description explaining comparison'),
+      headers: z
+        .array(componentValueString.describe('Column header text'))
+        .max(10)
+        .default([])
+        .describe('Column headers for comparison options'),
+      items: z
+        .array(comparisonItemSchema.describe('Individual comparison row'))
+        .max(50)
+        .default([])
+        .describe('Comparison table rows'),
+    })
+    .describe('Comparison table showing features across multiple options')
+);
 
-export const contentTabsPropsSchema = z
-  .object({
-    items: z
-      .array(tabItemSchema.describe('Individual tab'))
-      .max(10)
-      .default([])
-      .describe('List of tab items'),
-    title: shortString.optional().describe('Optional tabs section title'),
-    description: componentDescriptionString.describe('Tabs section description'),
-    defaultValue: componentValueString.optional().describe('Default active tab value'),
-  })
-  .describe('Tabbed content component for organizing information');
+export const contentTabsPropsSchema = z.preprocess(
+  parseStringifiedArrays('items'),
+  z
+    .object({
+      items: z
+        .array(tabItemSchema.describe('Individual tab'))
+        .max(10)
+        .default([])
+        .describe('List of tab items'),
+      title: shortString.optional().describe('Optional tabs section title'),
+      description: componentDescriptionString.describe('Tabs section description'),
+      defaultValue: componentValueString.optional().describe('Default active tab value'),
+    })
+    .describe('Tabbed content component for organizing information')
+);
 
-export const quickReferencePropsSchema = z
-  .object({
-    title: shortString.describe('Quick reference section title'),
-    description: componentDescriptionString.describe('Quick reference section description'),
-    items: z
-      .array(quickReferenceItemSchema.describe('Individual reference entry'))
-      .max(50)
-      .default([])
-      .describe('List of quick reference items'),
-    columns: z
-      .union([z.literal(1), z.literal(2)])
-      .default(1)
-      .describe('Number of columns in reference layout'),
-  })
-  .describe('Quick reference component for displaying key-value pairs');
+export const quickReferencePropsSchema = z.preprocess(
+  parseStringifiedArrays('items'),
+  z
+    .object({
+      title: shortString.describe('Quick reference section title'),
+      description: componentDescriptionString.describe('Quick reference section description'),
+      items: z
+        .array(quickReferenceItemSchema.describe('Individual reference entry'))
+        .max(50)
+        .default([])
+        .describe('List of quick reference items'),
+      columns: z
+        .union([z.literal(1), z.literal(2)])
+        .default(1)
+        .describe('Number of columns in reference layout'),
+    })
+    .describe('Quick reference component for displaying key-value pairs')
+);
 
 // FAQ Component Schemas
 const faqItemSchema = z
@@ -452,17 +502,20 @@ const faqItemSchema = z
   })
   .describe('Individual FAQ item with question and answer');
 
-export const faqPropsSchema = z
-  .object({
-    questions: z
-      .array(faqItemSchema.describe('Individual FAQ entry'))
-      .max(50)
-      .default([])
-      .describe('List of FAQ items'),
-    title: shortString.default('Frequently Asked Questions').describe('FAQ section title'),
-    description: componentDescriptionString.describe('FAQ section description'),
-  })
-  .describe('FAQ component displaying questions and answers');
+export const faqPropsSchema = z.preprocess(
+  parseStringifiedArrays('questions'),
+  z
+    .object({
+      questions: z
+        .array(faqItemSchema.describe('Individual FAQ entry'))
+        .max(50)
+        .default([])
+        .describe('List of FAQ items'),
+      title: shortString.default('Frequently Asked Questions').describe('FAQ section title'),
+      description: componentDescriptionString.describe('FAQ section description'),
+    })
+    .describe('FAQ component displaying questions and answers')
+);
 
 // Metrics Component Schemas
 const metricDataSchema = z
@@ -475,17 +528,20 @@ const metricDataSchema = z
   })
   .describe('Individual metric data with value and trend');
 
-export const metricsDisplayPropsSchema = z
-  .object({
-    title: shortString.optional().describe('Optional metrics section title'),
-    metrics: z
-      .array(metricDataSchema.describe('Individual metric'))
-      .max(20)
-      .default([])
-      .describe('List of metrics to display'),
-    description: mediumString.optional().describe('Optional metrics section description'),
-  })
-  .describe('Metrics display component showing performance or business metrics');
+export const metricsDisplayPropsSchema = z.preprocess(
+  parseStringifiedArrays('metrics'),
+  z
+    .object({
+      title: shortString.optional().describe('Optional metrics section title'),
+      metrics: z
+        .array(metricDataSchema.describe('Individual metric'))
+        .max(20)
+        .default([])
+        .describe('List of metrics to display'),
+      description: mediumString.optional().describe('Optional metrics section description'),
+    })
+    .describe('Metrics display component showing performance or business metrics')
+);
 
 // Checklist Component Schemas
 const checklistItemSchema = z
@@ -500,21 +556,24 @@ const checklistItemSchema = z
   })
   .describe('Individual checklist item with task, status, and priority');
 
-export const checklistPropsSchema = z
-  .object({
-    title: shortString.optional().describe('Optional checklist section title'),
-    items: z
-      .array(checklistItemSchema.describe('Individual checklist task'))
-      .min(1)
-      .max(50)
-      .describe('List of checklist items'),
-    description: componentDescriptionString.describe('Checklist section description'),
-    type: z
-      .enum(['prerequisites', 'security', 'testing'])
-      .default('prerequisites')
-      .describe('Checklist type for styling and semantic meaning'),
-  })
-  .describe('Checklist component for task tracking and prerequisites');
+export const checklistPropsSchema = z.preprocess(
+  parseStringifiedArrays('items'),
+  z
+    .object({
+      title: shortString.optional().describe('Optional checklist section title'),
+      items: z
+        .array(checklistItemSchema.describe('Individual checklist task'))
+        .min(1)
+        .max(50)
+        .describe('List of checklist items'),
+      description: componentDescriptionString.describe('Checklist section description'),
+      type: z
+        .enum(['prerequisites', 'security', 'testing'])
+        .default('prerequisites')
+        .describe('Checklist type for styling and semantic meaning'),
+    })
+    .describe('Checklist component for task tracking and prerequisites')
+);
 
 // CaseStudy Component Schemas
 const caseStudyMetricSchema = z
@@ -536,22 +595,25 @@ const caseStudyTestimonialSchema = z
   })
   .describe('Customer testimonial for case study');
 
-export const caseStudyPropsSchema = z
-  .object({
-    company: shortString.describe('Company or client name'),
-    industry: shortString.optional().describe('Industry or business sector'),
-    challenge: longString.describe('Business challenge or problem faced'),
-    solution: longString.describe('Solution implemented to address challenge'),
-    results: longString.describe('Results and outcomes achieved'),
-    metrics: z
-      .array(caseStudyMetricSchema.describe('Individual result metric'))
-      .max(10)
-      .optional()
-      .describe('Optional quantitative metrics showing impact'),
-    testimonial: caseStudyTestimonialSchema.optional().describe('Optional customer testimonial'),
-    logo: z.string().max(200).optional().describe('Optional company logo URL'),
-  })
-  .describe('Case study component showcasing customer success story');
+export const caseStudyPropsSchema = z.preprocess(
+  parseStringifiedArrays('metrics'),
+  z
+    .object({
+      company: shortString.describe('Company or client name'),
+      industry: shortString.optional().describe('Industry or business sector'),
+      challenge: longString.describe('Business challenge or problem faced'),
+      solution: longString.describe('Solution implemented to address challenge'),
+      results: longString.describe('Results and outcomes achieved'),
+      metrics: z
+        .array(caseStudyMetricSchema.describe('Individual result metric'))
+        .max(10)
+        .optional()
+        .describe('Optional quantitative metrics showing impact'),
+      testimonial: caseStudyTestimonialSchema.optional().describe('Optional customer testimonial'),
+      logo: z.string().max(200).optional().describe('Optional company logo URL'),
+    })
+    .describe('Case study component showcasing customer success story')
+);
 
 // Type exports for all UI components
 export type Feature = z.infer<typeof featureSchema>;
@@ -594,17 +656,20 @@ export const errorItemSchema = z
   })
   .describe('Individual error entry with code, message, and solution');
 
-export const errorTablePropsSchema = z
-  .object({
-    title: shortString.default('Common Errors & Solutions').describe('Error table section title'),
-    errors: z
-      .array(errorItemSchema.describe('Individual error entry'))
-      .min(1)
-      .max(50)
-      .describe('List of errors and solutions'),
-    description: componentDescriptionString.describe('Error table section description'),
-  })
-  .describe('Error table component displaying common errors and their solutions');
+export const errorTablePropsSchema = z.preprocess(
+  parseStringifiedArrays('errors'),
+  z
+    .object({
+      title: shortString.default('Common Errors & Solutions').describe('Error table section title'),
+      errors: z
+        .array(errorItemSchema.describe('Individual error entry'))
+        .min(1)
+        .max(50)
+        .describe('List of errors and solutions'),
+      description: componentDescriptionString.describe('Error table section description'),
+    })
+    .describe('Error table component displaying common errors and their solutions')
+);
 
 export type ErrorItem = z.infer<typeof errorItemSchema>;
 export type ErrorTableProps = z.infer<typeof errorTablePropsSchema>;
@@ -619,17 +684,20 @@ export const diagnosticStepSchema = z
   })
   .describe('Individual diagnostic step in troubleshooting flowchart');
 
-export const diagnosticFlowPropsSchema = z
-  .object({
-    title: shortString.default('Diagnostic Flow').describe('Diagnostic flow section title'),
-    steps: z
-      .array(diagnosticStepSchema.describe('Individual diagnostic step'))
-      .max(20)
-      .default([])
-      .describe('List of diagnostic steps in flowchart'),
-    description: componentDescriptionString.describe('Diagnostic flow section description'),
-  })
-  .describe('Diagnostic flowchart component for troubleshooting guidance');
+export const diagnosticFlowPropsSchema = z.preprocess(
+  parseStringifiedArrays('steps'),
+  z
+    .object({
+      title: shortString.default('Diagnostic Flow').describe('Diagnostic flow section title'),
+      steps: z
+        .array(diagnosticStepSchema.describe('Individual diagnostic step'))
+        .max(20)
+        .default([])
+        .describe('List of diagnostic steps in flowchart'),
+      description: componentDescriptionString.describe('Diagnostic flow section description'),
+    })
+    .describe('Diagnostic flowchart component for troubleshooting guidance')
+);
 
 export type DiagnosticStep = z.infer<typeof diagnosticStepSchema>;
 export type DiagnosticFlowProps = z.infer<typeof diagnosticFlowPropsSchema>;

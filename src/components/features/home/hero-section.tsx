@@ -83,16 +83,26 @@ export function HeroSection() {
           <MotionDiv ref={titleRef} style={{ opacity: titleOpacity }}>
             <h1 className="mb-4 md:mb-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-tight">
               <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                Claude Pro Directory
+                The home for Claude{' '}
               </span>
+              <RollingText
+                words={['beginners', 'developers', 'power users', 'builders', 'enthusiasts']}
+                duration={3000}
+                className="text-accent"
+              />
             </h1>
           </MotionDiv>
         ) : (
           <FallbackDiv ref={titleRef}>
             <h1 className="mb-4 md:mb-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-tight">
               <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                Claude Pro Directory
+                The home for Claude{' '}
               </span>
+              <RollingText
+                words={['beginners', 'developers', 'power users', 'builders', 'enthusiasts']}
+                duration={3000}
+                className="text-accent"
+              />
             </h1>
           </FallbackDiv>
         )}

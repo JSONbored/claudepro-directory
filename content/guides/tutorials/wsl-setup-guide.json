@@ -16,7 +16,12 @@
     "author": "Claude Pro Directory",
     "category": "guides",
     "subcategory": "tutorials",
-    "tags": ["tutorial", "intermediate", "wsl", "windows"],
+    "tags": [
+      "tutorial",
+      "intermediate",
+      "wsl",
+      "windows"
+    ],
     "readingTime": "12 min",
     "difficulty": "intermediate",
     "featured": false,
@@ -243,7 +248,7 @@
       },
       {
         "type": "paragraph",
-        "content": "}             ]}           />           <p><strong>Outcome:</strong> Persistent development sessions survive disconnections. Ideal for remote development scenarios.</p>         </div>       )     }   ]} />"
+        "content": "}             ]}           />           **Outcome:** Persistent development sessions survive disconnections. Ideal for remote development scenarios.\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -278,7 +283,7 @@
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Root Cause:</strong> Missing or outdated WSL2 kernel after Windows updates.</p>           <p><strong>Solution:</strong> Download WSL2 kernel update from Microsoft or run `wsl --update` in PowerShell.</p>           <p><strong>Prevention:</strong> Enable automatic WSL updates through Windows Update settings.</p>         </div>       ),       defaultOpen: true     },     {       title: \"DNS resolution failures in WSL\",       content: (         <div>           <p><strong>Symptoms:</strong> Cannot install packages, authentication fails, network timeouts.</p>           <p><strong>Fix:</strong> Configure manual DNS servers in /etc/resolv.conf with nameserver 8.8.8.8.</p>           <p><strong>Permanent Solution:</strong> Add `generateResolvConf = false` to /etc/wsl.conf.</p>         </div>       )     },     {       title: \"High memory usage by vmmem process\",       content: (         <div>           <p><strong>Issue:</strong> vmmem process consumes 8-16GB RAM during development.</p>           <p><strong>Configuration:</strong> Set memory=4GB in .wslconfig file in Windows user directory.</p>           <p><strong>Additional Option:</strong> Enable experimental sparse VHD support for 40-60% disk savings.</p>         </div>       )     },     {       title: \"File watching not working\",       content: (         <div>           <p><strong>Problem:</strong> Hot reload fails for projects on Windows filesystem.</p>           <p><strong>Solution:</strong> Move projects to Linux filesystem (~/projects) for inotify support.</p>           <p><strong>Workaround:</strong> Set CHOKIDAR_USEPOLLING=true for Windows mount compatibility.</p>         </div>       )     }   ]} />"
+        "content": "**Root Cause:** Missing or outdated WSL2 kernel after Windows updates.\n\n           **Solution:** Download WSL2 kernel update from Microsoft or run `wsl --update` in PowerShell.\n\n           **Prevention:** Enable automatic WSL updates through Windows Update settings.\n\n         </div>       ),       defaultOpen: true     },     {       title: \"DNS resolution failures in WSL\",       content: (         <div>           **Symptoms:** Cannot install packages, authentication fails, network timeouts.\n\n           **Fix:** Configure manual DNS servers in /etc/resolv.conf with nameserver 8.8.8.8.\n\n           **Permanent Solution:** Add `generateResolvConf = false` to /etc/wsl.conf.\n\n         </div>       )     },     {       title: \"High memory usage by vmmem process\",       content: (         <div>           **Issue:** vmmem process consumes 8-16GB RAM during development.\n\n           **Configuration:** Set memory=4GB in .wslconfig file in Windows user directory.\n\n           **Additional Option:** Enable experimental sparse VHD support for 40-60% disk savings.\n\n         </div>       )     },     {       title: \"File watching not working\",       content: (         <div>           **Problem:** Hot reload fails for projects on Windows filesystem.\n\n           **Solution:** Move projects to Linux filesystem (~/projects) for inotify support.\n\n           **Workaround:** Set CHOKIDAR_USEPOLLING=true for Windows mount compatibility.\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -310,7 +315,38 @@
           "variant": "quick-reference",
           "title": "WSL Claude Code Cheat Sheet",
           "description": "Essential commands and configurations",
-          "items": "[\n    {\n      label: \"Start Claude\",\n      value: \"cd ~/project && claude\",\n      description: \"Launch Claude in project directory for context awareness\"\n    },\n    {\n      label: \"Update Claude\", \n      value: \"claude migrate-installer\",\n      description: \"Migrate to native installer for automatic updates\"\n    },\n    {\n      label: \"Fix PATH Issues\",\n      value: \"export PATH=\\\"/usr/local/bin:$PATH\\\"\",\n      description: \"Prioritize Linux binaries over Windows executables\"\n    },\n    {\n      label: \"Check Performance\",\n      value: \"time find . -type f | wc -l\",\n      description: \"Measure filesystem performance - target <1 second\"\n    },\n    {\n      label: \"Restart WSL\",\n      value: \"wsl --shutdown && wsl\",\n      description: \"Full restart to apply configuration changes\"\n    },\n    {\n      label: \"Memory Management\",\n      value: \"memory=4GB in .wslconfig\",\n      description: \"Limit WSL memory usage for system stability\"\n    }\n  ]",
+          "items": [
+            {
+              "label": "Start Claude",
+              "value": "cd ~/project && claude",
+              "description": "Launch Claude in project directory for context awareness"
+            },
+            {
+              "label": "Update Claude",
+              "value": "claude migrate-installer",
+              "description": "Migrate to native installer for automatic updates"
+            },
+            {
+              "label": "Fix PATH Issues",
+              "value": "export PATH=\"/usr/local/bin:$PATH\"",
+              "description": "Prioritize Linux binaries over Windows executables"
+            },
+            {
+              "label": "Check Performance",
+              "value": "time find . -type f | wc -l",
+              "description": "Measure filesystem performance - target <1 second"
+            },
+            {
+              "label": "Restart WSL",
+              "value": "wsl --shutdown && wsl",
+              "description": "Full restart to apply configuration changes"
+            },
+            {
+              "label": "Memory Management",
+              "value": "memory=4GB in .wslconfig",
+              "description": "Limit WSL memory usage for system stability"
+            }
+          ],
           "columns": 2,
           "children": "**Performance Optimization:** Use Linux filesystem exclusively for 20x speed improvement. Projects in ~/dev run faster than /mnt/c/.\n\n**Security Best Practice:** Always configure npm to use user directories. Never use sudo with npm installations.\n\n**Scalability Pattern:** For teams, create shared .wslconfig templates. Standardize configurations across developer machines."
         }
@@ -332,7 +368,7 @@
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Ideal scenarios:</strong> Web development, AI/ML projects, cross-platform applications</p>         </div>       )     },     {       label: \"Common Variations\",       value: \"variations\",       content: (         <div>           <p>Adapt this tutorial for different needs:</p>           <ul>             <li><strong>Docker Integration:</strong> When using containers - install Docker Desktop with WSL2 backend</li>             <li><strong>Multiple Distributions:</strong> For testing - install Debian alongside Ubuntu</li>             <li><strong>GPU Support:</strong> For ML workflows - enable CUDA toolkit in WSL2</li>           </ul>         </div>       )     }   ]} />"
+        "content": "**Ideal scenarios:** Web development, AI/ML projects, cross-platform applications\n\n         </div>       )     },     {       label: \"Common Variations\",       value: \"variations\",       content: (         <div>           Adapt this tutorial for different needs:\n\n                        - **Docker Integration:** When using containers - install Docker Desktop with WSL2 backend             - **Multiple Distributions:** For testing - install Debian alongside Ubuntu             - **GPU Support:** For ML workflows - enable CUDA toolkit in WSL2                    </div>       )     }   ]} />"
       },
       {
         "type": "heading",

@@ -14,7 +14,12 @@
     "author": "Claude Pro Directory",
     "category": "guides",
     "subcategory": "comparisons",
-    "tags": ["comparison", "AI coding assistants", "developer tools", "evaluation"],
+    "tags": [
+      "comparison",
+      "AI coding assistants",
+      "developer tools",
+      "evaluation"
+    ],
     "readingTime": "12 min",
     "difficulty": "intermediate",
     "featured": false,
@@ -52,7 +57,13 @@
         "props": {
           "title": "Feature Comparison Overview",
           "description": "Side-by-side comparison of key features and capabilities",
-          "headers": ["Feature", "Claude Code", "Cursor", "Codeium", "Winner"],
+          "headers": [
+            "Feature",
+            "Claude Code",
+            "Cursor",
+            "Codeium",
+            "Winner"
+          ],
           "data": [
             {
               "Feature": "SWE-bench Score",
@@ -89,27 +100,27 @@
       },
       {
         "type": "paragraph",
-        "content": "<h4>Pricing Structure</h4>           <p><strong>Free Tier:</strong> None available</p>           <p><strong>Paid Plans:</strong> $20/month individual, $30/user team pricing</p>           <p><strong>Enterprise:</strong> Custom pricing with 500K context windows</p>"
+        "content": "<h4>Pricing Structure</h4>           **Free Tier:** None available\n\n           **Paid Plans:** $20/month individual, $30/user team pricing\n\n           **Enterprise:** Custom pricing with 500K context windows"
       },
       {
         "type": "paragraph",
-        "content": "<h4>Best For</h4>           <p>Experienced developers tackling complex problems. Ideal for system architecture, major refactoring, and analytical reasoning tasks requiring deep context understanding.</p>         </div>       )     },     {       label: \"Cursor\",       value: \"cursor\",       content: (         <div>           <h3>Overview</h3>           <p>Cursor functions as a complete IDE replacement built on VS Code. It provides deep AI integration with multi-file editing capabilities and autonomous agent modes.</p>"
+        "content": "<h4>Best For</h4>           Experienced developers tackling complex problems. Ideal for system architecture, major refactoring, and analytical reasoning tasks requiring deep context understanding.\n\n         </div>       )     },     {       label: \"Cursor\",       value: \"cursor\",       content: (         <div>           <h3>Overview</h3>           Cursor functions as a complete IDE replacement built on VS Code. It provides deep AI integration with multi-file editing capabilities and autonomous agent modes."
       },
       {
         "type": "paragraph",
-        "content": "<h4>Pricing Structure</h4>           <p><strong>Free Tier:</strong> Limited trial period only</p>           <p><strong>Paid Plans:</strong> $20/month individual, $40/user business tier</p>           <p><strong>Enterprise:</strong> Custom pricing with centralized management</p>"
+        "content": "<h4>Pricing Structure</h4>           **Free Tier:** Limited trial period only\n\n           **Paid Plans:** $20/month individual, $40/user business tier\n\n           **Enterprise:** Custom pricing with centralized management"
       },
       {
         "type": "paragraph",
-        "content": "<h4>Best For</h4>           <p>Teams wanting complete AI-IDE integration. Perfect for organizations ready to standardize tooling and developers comfortable with VS Code ecosystem migration.</p>         </div>       )     },     {       label: \"Codeium\",       value: \"codeium\",       content: (         <div>           <h3>Overview</h3>           <p>Codeium provides universal IDE support through extensions. Their November 2024 Windsurf Editor represents revolutionary advancement in autonomous development capabilities.</p>"
+        "content": "<h4>Best For</h4>           Teams wanting complete AI-IDE integration. Perfect for organizations ready to standardize tooling and developers comfortable with VS Code ecosystem migration.\n\n         </div>       )     },     {       label: \"Codeium\",       value: \"codeium\",       content: (         <div>           <h3>Overview</h3>           Codeium provides universal IDE support through extensions. Their November 2024 Windsurf Editor represents revolutionary advancement in autonomous development capabilities."
       },
       {
         "type": "paragraph",
-        "content": "<h4>Pricing Structure</h4>           <p><strong>Free Tier:</strong> Unlimited basic usage with 25 credits</p>           <p><strong>Paid Plans:</strong> $30/user teams with 500 prompt credits</p>           <p><strong>Enterprise:</strong> Custom pricing with dedicated support</p>"
+        "content": "<h4>Pricing Structure</h4>           **Free Tier:** Unlimited basic usage with 25 credits\n\n           **Paid Plans:** $30/user teams with 500 prompt credits\n\n           **Enterprise:** Custom pricing with dedicated support"
       },
       {
         "type": "paragraph",
-        "content": "<h4>Best For</h4>           <p>Budget-conscious developers and teams needing IDE flexibility. Excellent starting point for AI-assisted development with minimal investment and maximum compatibility.</p>         </div>       )     }   ]} />"
+        "content": "<h4>Best For</h4>           Budget-conscious developers and teams needing IDE flexibility. Excellent starting point for AI-assisted development with minimal investment and maximum compatibility.\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -129,27 +140,27 @@
       },
       {
         "type": "paragraph",
-        "content": "<h5>Tool Performance:</h5>           <ul>             <li><strong>Codeium:</strong> Free tier provides unlimited basic usage - Rating: 4/5</li>             <li><strong>GitHub Copilot:</strong> $10/month offers reliability and ecosystem - Rating: 3.5/5</li>             <li><strong>Claude Code:</strong> Superior reasoning at $20/month premium - Rating: 3/5</li>           </ul>"
+        "content": "<h5>Tool Performance:</h5>                        - **Codeium:** Free tier provides unlimited basic usage - Rating: 4/5             - **GitHub Copilot:** $10/month offers reliability and ecosystem - Rating: 3.5/5             - **Claude Code:** Superior reasoning at $20/month premium - Rating: 3/5"
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Winner:</strong> Codeium - Free tier covers most needs effectively</p>"
+        "content": "**Winner:** Codeium - Free tier covers most needs effectively"
       },
       {
         "type": "paragraph",
-        "content": "<h5>Comparative Analysis:</h5>           <p>Cursor Teams at $40/user provides best multi-file capabilities. GitHub Copilot Enterprise at $39/user offers comprehensive compliance. Claude Code Enterprise delivers 500K context windows for complex systems.</p>"
+        "content": "<h5>Comparative Analysis:</h5>           Cursor Teams at $40/user provides best multi-file capabilities. GitHub Copilot Enterprise at $39/user offers comprehensive compliance. Claude Code Enterprise delivers 500K context windows for complex systems."
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Recommendation:</strong> Cursor for small teams prioritizing productivity. GitHub Copilot for large organizations needing ecosystem integration.</p>         </div>       )     },     {       title: \"Data Science and ML Projects\",       content: (         <div>           <p><strong>Scenario:</strong> Python-heavy development with analytical requirements</p>"
+        "content": "**Recommendation:** Cursor for small teams prioritizing productivity. GitHub Copilot for large organizations needing ecosystem integration.\n\n         </div>       )     },     {       title: \"Data Science and ML Projects\",       content: (         <div>           **Scenario:** Python-heavy development with analytical requirements"
       },
       {
         "type": "paragraph",
-        "content": "<h5>Results Summary:</h5>           <p>Claude Code excels at analytical reasoning and complex algorithm implementation. Codeium offers free Jupyter support for experimentation. GitHub Copilot provides extensive training on scientific libraries.</p>"
+        "content": "<h5>Results Summary:</h5>           Claude Code excels at analytical reasoning and complex algorithm implementation. Codeium offers free Jupyter support for experimentation. GitHub Copilot provides extensive training on scientific libraries."
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Best Choice:</strong> Claude Code for complex analysis. Codeium for budget-conscious data scientists.</p>         </div>       )     }   ]} />"
+        "content": "**Best Choice:** Claude Code for complex analysis. Codeium for budget-conscious data scientists.\n\n         </div>       )     }   ]} />"
       },
       {
         "type": "heading",
@@ -169,11 +180,11 @@
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Need more specific guidance?</strong> Join our <a href=\"/community\">community</a> to discuss your requirements with users of all platforms.</p>"
+        "content": "**Need more specific guidance?** Join our <a href=\"/community\">community</a> to discuss your requirements with users of all platforms."
       },
       {
         "type": "paragraph",
-        "content": "<p><strong>Want hands-on experience?</strong> Codeium offers a free tier, while Cursor and Claude Code provide trials. Test with your actual codebase before committing.</p>"
+        "content": "**Want hands-on experience?** Codeium offers a free tier, while Cursor and Claude Code provide trials. Test with your actual codebase before committing."
       },
       {
         "type": "paragraph",
