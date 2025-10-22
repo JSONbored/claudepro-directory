@@ -95,13 +95,11 @@
     }
   },
   "scripts": {
-    "dev": "npm run build:content && npm run generate:service-worker && next dev --turbopack",
-    "build": "npm-run-all --parallel build:all:*",
-    "build:all:setup": "npm-run-all --parallel generate:service-worker generate:categories generate:events build:content generate:openapi",
-    "build:all:next": "next build --turbopack",
-    "build:all:apidocs": "tsx scripts/build/generate-fumadocs-api.ts",
+    "dev": "pnpm run build:content && pnpm run generate:service-worker && next dev --turbopack",
+    "build": "pnpm run build:setup && npm-run-all --parallel build:next build:api-docs",
+    "build:setup": "npm-run-all --parallel generate:service-worker generate:categories generate:events build:content generate:openapi",
     "build:next": "next build --turbopack",
-    "build:analyze": "TURBOPACK_STATS=1 npm run build",
+    "build:analyze": "TURBOPACK_STATS=1 pnpm run build",
     "build:content": "tsx scripts/build/build-content.ts",
     "build:api-docs": "tsx scripts/build/generate-fumadocs-api.ts",
     "generate:service-worker": "tsx scripts/build/generate-service-worker.ts",
