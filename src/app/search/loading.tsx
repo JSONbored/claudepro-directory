@@ -6,6 +6,8 @@
 import { ConfigCardSkeleton, Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
+const cardIds = Array.from({ length: 9 }, () => crypto.randomUUID());
+
 export default function Loading() {
   return (
     <div className="space-y-6">
@@ -14,8 +16,8 @@ export default function Loading() {
 
       {/* Results grid */}
       <div className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}>
-        {Array.from({ length: 9 }).map((_, i) => (
-          <ConfigCardSkeleton key={`search-result-${i}`} />
+        {cardIds.map((id) => (
+          <ConfigCardSkeleton key={id} />
         ))}
       </div>
     </div>

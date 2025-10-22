@@ -12,4 +12,7 @@
  * - 100x smaller bundle size
  */
 
-export { highlightCode } from './syntax-highlighting-starry';
+// Direct export to avoid barrel file pattern
+import { highlightCode as starryHighlightCode } from './syntax-highlighting-starry';
+
+export const highlightCode = starryHighlightCode;

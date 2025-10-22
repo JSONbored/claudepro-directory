@@ -5,6 +5,8 @@
 
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 
+const codeLineIds = Array.from({ length: 8 }, () => crypto.randomUUID());
+
 export default function Loading() {
   return (
     <div className="min-h-screen bg-background">
@@ -49,8 +51,8 @@ export default function Loading() {
             <div className="border rounded-lg p-6 space-y-4">
               <Skeleton size="sm" width="sm" />
               <div className="space-y-2">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <Skeleton key={`code-${i}`} size="sm" width={i % 3 === 0 ? '2/3' : '3xl'} />
+                {codeLineIds.map((id, i) => (
+                  <Skeleton key={id} size="sm" width={i % 3 === 0 ? '2/3' : '3xl'} />
                 ))}
               </div>
             </div>

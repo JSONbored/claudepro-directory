@@ -164,8 +164,16 @@ export const FallbackDiv = ({
   ref?: React.RefObject<HTMLDivElement | null>;
 }) => {
   // Filter out motion-specific props and only use plain HTML props
-  const { initial, animate, exit, whileHover, whileTap, transition, variants, ...htmlProps } =
-    props as Record<string, unknown>;
+  const {
+    initial: _initial,
+    animate: _animate,
+    exit: _exit,
+    whileHover: _whileHover,
+    whileTap: _whileTap,
+    transition: _transition,
+    variants: _variants,
+    ...htmlProps
+  } = props as Record<string, unknown>;
 
   // Only apply style if it's a plain React.CSSProperties object
   const plainStyle =

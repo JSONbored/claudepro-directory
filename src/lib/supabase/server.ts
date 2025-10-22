@@ -24,8 +24,11 @@ export async function createClient() {
     const isLocal = !(process.env.VERCEL || process.env.CI);
     if (isLocal) {
       // Suppress warning during builds - only log once at startup in dev
-      if (process.env.NODE_ENV === 'development' && !(globalThis as any).__supabaseWarningShown) {
-        (globalThis as any).__supabaseWarningShown = true;
+      if (
+        process.env.NODE_ENV === 'development' &&
+        !(globalThis as Record<string, unknown>).__supabaseWarningShown
+      ) {
+        (globalThis as Record<string, unknown>).__supabaseWarningShown = true;
         // biome-ignore lint/suspicious/noConsole: Intentional development warning for missing Supabase credentials
         console.warn(
           '⚠️  Supabase env vars not found - using mock server client (local environment). Database features will not work.'
@@ -33,7 +36,27 @@ export async function createClient() {
       }
       // Return a mock client that matches the Supabase client interface
       // Create chainable query builder
-      const createChainableQuery = (): any => ({
+      type ChainableQuery = {
+        eq: () => ChainableQuery;
+        neq: () => ChainableQuery;
+        gt: () => ChainableQuery;
+        gte: () => ChainableQuery;
+        lt: () => ChainableQuery;
+        lte: () => ChainableQuery;
+        like: () => ChainableQuery;
+        ilike: () => ChainableQuery;
+        is: () => ChainableQuery;
+        in: () => ChainableQuery;
+        contains: () => ChainableQuery;
+        containedBy: () => ChainableQuery;
+        order: () => ChainableQuery;
+        limit: () => ChainableQuery;
+        range: () => ChainableQuery;
+        single: () => Promise<{ data: null; error: null }>;
+        maybeSingle: () => Promise<{ data: null; error: null }>;
+      };
+
+      const createChainableQuery = (): ChainableQuery => ({
         eq: () => createChainableQuery(),
         neq: () => createChainableQuery(),
         gt: () => createChainableQuery(),
@@ -51,7 +74,6 @@ export async function createClient() {
         range: () => createChainableQuery(),
         single: async () => ({ data: null, error: null }),
         maybeSingle: async () => ({ data: null, error: null }),
-        then: async () => ({ data: [], error: null }),
       });
 
       return {

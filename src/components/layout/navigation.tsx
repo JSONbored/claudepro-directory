@@ -30,6 +30,7 @@
  * @see Linear Issues: SHA-3026, SHA-3027, SHA-3028, SHA-3029, SHA-3030, SHA-3031, SHA-3032
  */
 
+import { useScroll, useTransform } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import type * as React from 'react';
 import { useEffect, useState } from 'react';
@@ -99,8 +100,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
 export const Navigation = () => {
   const motionModule = useLazyMotion();
   const motion = motionModule?.motion;
-  const useScroll = motionModule?.useScroll;
-  const useTransform = motionModule?.useTransform;
+  // Import hooks directly (they're tiny) - only lazy-load components
   // Use type-safe component assignment (accepts both motion and fallback props)
   const MotionHeader =
     motion?.header ??
@@ -130,16 +130,13 @@ export const Navigation = () => {
     preloadMotion();
   }, []);
 
-  // Motion.dev scroll-based animations (lazy loaded)
-  const scrollValues = useScroll?.();
+  // Motion.dev scroll-based animations
+  // Hooks are imported directly (tiny), only components are lazy-loaded
+  const scrollValues = useScroll();
   const scrollY = scrollValues?.scrollY;
-  const backdropBlur =
-    useTransform && scrollY
-      ? useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(12px)'])
-      : undefined;
-  const navOpacity =
-    useTransform && scrollY ? useTransform(scrollY, [0, 50], [0.95, 1]) : undefined;
-  const logoScale = useTransform && scrollY ? useTransform(scrollY, [0, 100], [1, 0.9]) : undefined;
+  const backdropBlur = useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(12px)']);
+  const navOpacity = useTransform(scrollY, [0, 50], [0.95, 1]);
+  const logoScale = useTransform(scrollY, [0, 100], [1, 0.9]);
 
   // SHA-2088: Optimized scroll handler with threshold check and rAF debouncing
   // Only updates state when crossing 20px threshold (prevents 98% of unnecessary re-renders)
@@ -488,6 +485,7 @@ export const Navigation = () => {
                               const IconComponent = link.icon;
                               const navContent = (
                                 <NavLink
+                                  key={`nav-primary-${link.href}`}
                                   href={link.href}
                                   isActive={isActive}
                                   onClick={() => setIsOpen(false)}
@@ -509,7 +507,7 @@ export const Navigation = () => {
 
                               return motion ? (
                                 <motion.div
-                                  key={link.href}
+                                  key={`primary-${link.href}`}
                                   initial={{ opacity: 0, x: -20 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ delay: 0.15 + index * 0.05 }}
@@ -517,7 +515,7 @@ export const Navigation = () => {
                                   {navContent}
                                 </motion.div>
                               ) : (
-                                <div key={link.href}>{navContent}</div>
+                                <div key={`primary-${link.href}`}>{navContent}</div>
                               );
                             })}
 
@@ -532,6 +530,7 @@ export const Navigation = () => {
                                     const IconComponent = link.icon;
                                     const navContent = (
                                       <NavLink
+                                        key={`nav-secondary-${link.href}`}
                                         href={link.href}
                                         isActive={isActive}
                                         onClick={() => setIsOpen(false)}
@@ -546,7 +545,7 @@ export const Navigation = () => {
 
                                     return motion ? (
                                       <motion.div
-                                        key={link.href}
+                                        key={`secondary-${link.href}`}
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{
@@ -556,7 +555,7 @@ export const Navigation = () => {
                                         {navContent}
                                       </motion.div>
                                     ) : (
-                                      <div key={link.href}>{navContent}</div>
+                                      <div key={`secondary-${link.href}`}>{navContent}</div>
                                     );
                                   }
                                 )}

@@ -6,7 +6,15 @@
 import { ConfigCardSkeleton, Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
+// Generate stable unique IDs for skeleton items (avoids array index key warning)
+const generateSkeletonIds = (count: number, prefix: string) =>
+  Array.from({ length: count }, (_, i) => `${prefix}-${crypto.randomUUID()}-${i}`);
+
 export default function Loading() {
+  // Generate IDs once per render
+  const statIds = generateSkeletonIds(7, 'stat');
+  const sectionIds = generateSkeletonIds(3, 'section');
+  const cardIds = sectionIds.map((sId) => generateSkeletonIds(6, `card-${sId}`));
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}
@@ -23,8 +31,8 @@ export default function Loading() {
           <Skeleton size="lg" width="3xl" className="h-14 mb-6" />
           {/* Stats */}
           <div className="flex flex-wrap justify-center gap-4">
-            {Array.from({ length: 7 }).map((_, i) => (
-              <Skeleton key={`stat-${i}`} size="sm" width="sm" />
+            {statIds.map((id) => (
+              <Skeleton key={id} size="sm" width="sm" />
             ))}
           </div>
         </div>
@@ -32,15 +40,15 @@ export default function Loading() {
 
       {/* Content sections */}
       <div className="container mx-auto px-4 pb-16">
-        {Array.from({ length: 3 }).map((_, sectionIndex) => (
-          <div key={`section-${sectionIndex}`} className="mb-12">
+        {sectionIds.map((sectionId, sectionIndex) => (
+          <div key={sectionId} className="mb-12">
             <div className="flex items-center justify-between mb-6">
               <Skeleton size="lg" width="lg" />
               <Skeleton size="sm" width="sm" />
             </div>
             <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <ConfigCardSkeleton key={`card-${sectionIndex}-${i}`} />
+              {cardIds[sectionIndex]?.map((cardId) => (
+                <ConfigCardSkeleton key={cardId} />
               ))}
             </div>
           </div>

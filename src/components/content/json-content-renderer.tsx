@@ -68,8 +68,8 @@ function parseInlineMarkdown(text: string): ReactNode {
   // Order matters: links first (most specific), then bold, then italic
   const pattern = /\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*|_([^_]+)_/g;
 
-  let match: RegExpExecArray | null;
-  while ((match = pattern.exec(text)) !== null) {
+  let match: RegExpExecArray | null = pattern.exec(text);
+  while (match !== null) {
     // Add text before match
     if (match.index > lastIndex) {
       parts.push(text.slice(lastIndex, match.index));
@@ -112,6 +112,7 @@ function parseInlineMarkdown(text: string): ReactNode {
     }
 
     lastIndex = pattern.lastIndex;
+    match = pattern.exec(text);
   }
 
   // Add remaining text
@@ -201,8 +202,8 @@ function ListRenderer({ ordered, items }: ListSection) {
 
   return (
     <Tag className={listClass}>
-      {items.map((item, index) => (
-        <li key={index} className="leading-relaxed">
+      {items.map((item) => (
+        <li key={crypto.randomUUID()} className="leading-relaxed">
           {parseInlineMarkdown(item)}
         </li>
       ))}
@@ -253,9 +254,9 @@ function TableRenderer({ headers, rows }: TableSection) {
       <table className="w-full border-collapse border border-border rounded-lg overflow-hidden">
         <thead>
           <tr>
-            {headers.map((header, index) => (
+            {headers.map((header) => (
               <th
-                key={index}
+                key={crypto.randomUUID()}
                 className="border border-border bg-muted px-4 py-2 text-left font-semibold"
               >
                 {parseInlineMarkdown(header)}
@@ -264,10 +265,10 @@ function TableRenderer({ headers, rows }: TableSection) {
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {row.map((cell, cellIndex) => (
-                <td key={cellIndex} className="border border-border px-4 py-2">
+          {rows.map((row) => (
+            <tr key={crypto.randomUUID()}>
+              {row.map((cell) => (
+                <td key={crypto.randomUUID()} className="border border-border px-4 py-2">
                   {parseInlineMarkdown(cell)}
                 </td>
               ))}
@@ -284,36 +285,42 @@ function TableRenderer({ headers, rows }: TableSection) {
  * Routes to appropriate component based on component name
  */
 function ComponentRenderer({ component, props }: ComponentSection) {
+  // Type assertion: props are validated at build time by component schemas
+  // We use type assertions here because the props shape varies by component type
+  // and TypeScript can't narrow the union type based on the component string
+  // biome-ignore lint/suspicious/noExplicitAny: Props validated at build time by schemas
+  const componentProps = props as any;
+
   switch (component) {
     case 'UnifiedContentBox':
-      return <UnifiedContentBox {...(props as any)} />;
+      return <UnifiedContentBox {...componentProps} />;
 
     case 'UnifiedContentBlock':
-      return <UnifiedContentBlock {...(props as any)} />;
+      return <UnifiedContentBlock {...componentProps} />;
 
     case 'StepByStepGuide':
-      return <StepByStepGuide {...(props as any)} />;
+      return <StepByStepGuide {...componentProps} />;
 
     case 'Checklist':
-      return <Checklist {...(props as any)} />;
+      return <Checklist {...componentProps} />;
 
     case 'CodeGroup':
-      return <CodeGroup {...(props as any)} />;
+      return <CodeGroup {...componentProps} />;
 
     case 'ComparisonTable':
-      return <ComparisonTable {...(props as any)} />;
+      return <ComparisonTable {...componentProps} />;
 
     case 'DiagnosticFlow':
-      return <DiagnosticFlow {...(props as any)} />;
+      return <DiagnosticFlow {...componentProps} />;
 
     case 'ErrorTable':
-      return <ErrorTable {...(props as any)} />;
+      return <ErrorTable {...componentProps} />;
 
     case 'MetricsDisplay':
-      return <MetricsDisplay {...(props as any)} />;
+      return <MetricsDisplay {...componentProps} />;
 
     case 'SmartRelatedContent':
-      return <SmartRelatedContent {...(props as any)} />;
+      return <SmartRelatedContent {...componentProps} />;
 
     default:
       return null;
@@ -411,7 +418,7 @@ export function JsonContentRenderer({ json, className }: JsonContentRendererProp
   return (
     <article className={cn('prose prose-neutral dark:prose-invert max-w-none', className)}>
       {sections.map((section: ContentSection, index: number) => (
-        <SectionRenderer key={index} section={section} index={index} />
+        <SectionRenderer key={crypto.randomUUID()} section={section} index={index} />
       ))}
     </article>
   );

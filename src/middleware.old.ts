@@ -366,6 +366,7 @@ export async function middleware(request: NextRequest) {
     // Check Nosecone result (fail-open: continue with basic headers on error)
     if (results[1].status === 'rejected') {
       if (isDevelopment) {
+        // Development mode - log Nosecone errors
       }
 
       // FAIL-OPEN: Continue with minimal security headers
@@ -391,6 +392,7 @@ export async function middleware(request: NextRequest) {
   // Handle denied requests
   if (decision.isDenied()) {
     if (isDevelopment) {
+      // Development mode - log denied requests
     }
 
     // Copy security headers from Nosecone

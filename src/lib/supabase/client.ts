@@ -28,7 +28,27 @@ export function createClient() {
       }
       // Return a mock client that matches the Supabase client interface
       // Create chainable query builder
-      const createChainableQuery = (): any => ({
+      type ChainableQuery = {
+        eq: () => ChainableQuery;
+        neq: () => ChainableQuery;
+        gt: () => ChainableQuery;
+        gte: () => ChainableQuery;
+        lt: () => ChainableQuery;
+        lte: () => ChainableQuery;
+        like: () => ChainableQuery;
+        ilike: () => ChainableQuery;
+        is: () => ChainableQuery;
+        in: () => ChainableQuery;
+        contains: () => ChainableQuery;
+        containedBy: () => ChainableQuery;
+        order: () => ChainableQuery;
+        limit: () => ChainableQuery;
+        range: () => ChainableQuery;
+        single: () => Promise<{ data: null; error: null }>;
+        maybeSingle: () => Promise<{ data: null; error: null }>;
+      };
+
+      const createChainableQuery = (): ChainableQuery => ({
         eq: () => createChainableQuery(),
         neq: () => createChainableQuery(),
         gt: () => createChainableQuery(),
@@ -46,7 +66,6 @@ export function createClient() {
         range: () => createChainableQuery(),
         single: async () => ({ data: null, error: null }),
         maybeSingle: async () => ({ data: null, error: null }),
-        then: async () => ({ data: [], error: null }),
       });
 
       return {

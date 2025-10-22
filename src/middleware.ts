@@ -18,6 +18,7 @@ import arcjet, { detectBot, shield, tokenBucket } from '@arcjet/next';
 import * as nosecone from '@nosecone/next';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import type { Source } from 'nosecone';
 
 export const runtime = 'nodejs';
 
@@ -59,10 +60,10 @@ const noseconeMiddleware = nosecone.createMiddleware({
       ...nosecone.defaults.contentSecurityPolicy.directives,
       scriptSrc: [
         ...(nosecone.defaults.contentSecurityPolicy.directives.scriptSrc || []),
-        "'strict-dynamic'" as any,
-        'https://umami.claudepro.directory' as any,
-        'https://*.vercel-scripts.com' as any,
-        ...(isDevelopment ? ["'unsafe-eval'" as any] : []),
+        "'strict-dynamic'" as Source,
+        'https://umami.claudepro.directory' as Source,
+        'https://*.vercel-scripts.com' as Source,
+        ...(isDevelopment ? ["'unsafe-eval'" as Source] : []),
       ],
       upgradeInsecureRequests: isProduction,
     },
@@ -114,7 +115,9 @@ export async function middleware(request: NextRequest) {
 
   // Allow request with security headers
   const response = NextResponse.next();
-  securityHeaders.forEach((value, key) => response.headers.set(key, value));
+  for (const [key, value] of securityHeaders.entries()) {
+    response.headers.set(key, value);
+  }
   response.headers.set('x-pathname', pathname);
 
   return response;

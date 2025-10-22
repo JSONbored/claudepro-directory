@@ -39,9 +39,9 @@ export const Default: Story = {
         <p className="text-muted-foreground">
           The progress bar at the top shows how far you've scrolled through this content.
         </p>
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="p-6 border rounded-lg">
-            <h2 className="text-2xl font-semibold mb-2">Section {i + 1}</h2>
+        {Array.from({ length: 20 }, () => crypto.randomUUID()).map((id) => (
+          <div key={id} className="p-6 border rounded-lg">
+            <h2 className="text-2xl font-semibold mb-2">Section {id.slice(0, 8)}</h2>
             <p className="text-muted-foreground">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
               incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
@@ -66,9 +66,9 @@ export const Bold: Story = {
         <p className="text-muted-foreground">
           Thicker progress bar for better visibility on long articles.
         </p>
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="p-6 border rounded-lg">
-            <h2 className="text-2xl font-semibold mb-2">Section {i + 1}</h2>
+        {Array.from({ length: 20 }, () => crypto.randomUUID()).map((id) => (
+          <div key={id} className="p-6 border rounded-lg">
+            <h2 className="text-2xl font-semibold mb-2">Section {id.slice(0, 8)}</h2>
             <p className="text-muted-foreground">Content section...</p>
           </div>
         ))}
@@ -87,9 +87,9 @@ export const Bottom: Story = {
       <div className="container mx-auto px-4 py-12 space-y-4">
         <h1 className="text-4xl font-bold">Bottom Position</h1>
         <p className="text-muted-foreground">Progress bar appears at the bottom of the viewport.</p>
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="p-6 border rounded-lg">
-            <h2 className="text-2xl font-semibold mb-2">Section {i + 1}</h2>
+        {Array.from({ length: 20 }, () => crypto.randomUUID()).map((id) => (
+          <div key={id} className="p-6 border rounded-lg">
+            <h2 className="text-2xl font-semibold mb-2">Section {id.slice(0, 8)}</h2>
             <p className="text-muted-foreground">Content section...</p>
           </div>
         ))}
@@ -111,9 +111,9 @@ export const Subtle: Story = {
         <p className="text-muted-foreground">
           Minimal visual distraction while still providing progress feedback.
         </p>
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="p-6 border rounded-lg">
-            <h2 className="text-2xl font-semibold mb-2">Section {i + 1}</h2>
+        {Array.from({ length: 20 }, () => crypto.randomUUID()).map((id) => (
+          <div key={id} className="p-6 border rounded-lg">
+            <h2 className="text-2xl font-semibold mb-2">Section {id.slice(0, 8)}</h2>
             <p className="text-muted-foreground">Content section...</p>
           </div>
         ))}
@@ -134,9 +134,9 @@ export const Fast: Story = {
         <p className="text-muted-foreground">
           Scroll quickly to see the snappier, less bouncy animation.
         </p>
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="p-6 border rounded-lg">
-            <h2 className="text-2xl font-semibold mb-2">Section {i + 1}</h2>
+        {Array.from({ length: 20 }, () => crypto.randomUUID()).map((id) => (
+          <div key={id} className="p-6 border rounded-lg">
+            <h2 className="text-2xl font-semibold mb-2">Section {id.slice(0, 8)}</h2>
             <p className="text-muted-foreground">Content section...</p>
           </div>
         ))}
@@ -164,9 +164,9 @@ export const Custom: Story = {
       <div className="container mx-auto px-4 py-12 space-y-4">
         <h1 className="text-4xl font-bold">Custom Configuration</h1>
         <p className="text-muted-foreground">Primary color, 3px height, custom spring physics.</p>
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="p-6 border rounded-lg">
-            <h2 className="text-2xl font-semibold mb-2">Section {i + 1}</h2>
+        {Array.from({ length: 20 }, () => crypto.randomUUID()).map((id) => (
+          <div key={id} className="p-6 border rounded-lg">
+            <h2 className="text-2xl font-semibold mb-2">Section {id.slice(0, 8)}</h2>
             <p className="text-muted-foreground">Content section...</p>
           </div>
         ))}

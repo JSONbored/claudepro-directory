@@ -155,7 +155,11 @@ function getRatelimiter(actionName: string, maxRequests: number, windowSeconds: 
     ratelimitCache.set(cacheKey, limiter);
   }
 
-  return ratelimitCache.get(cacheKey)!;
+  const limiter = ratelimitCache.get(cacheKey);
+  if (!limiter) {
+    throw new Error(`Rate limiter not found for ${cacheKey}`);
+  }
+  return limiter;
 }
 
 async function checkRateLimit(

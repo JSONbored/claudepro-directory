@@ -38,7 +38,9 @@ interface CacheEntry {
 
 /**
  * localStorage cache manager
+ * This is a utility class with only static methods - no instances are created
  */
+// biome-ignore lint/complexity/noStaticOnlyClass: Utility class for namespacing cache methods
 class ViewCountsCache {
   private static readonly CACHE_KEY_PREFIX = 'stats:';
   private static readonly CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -246,7 +248,9 @@ async function flushBatch() {
 
         const resolvers = resolversMap.get(itemKey);
         if (resolvers) {
-          resolvers.forEach(({ resolve }) => resolve(entry));
+          for (const { resolve } of resolvers) {
+            resolve(entry);
+          }
           resolversMap.delete(itemKey);
         }
       }
@@ -254,7 +258,9 @@ async function flushBatch() {
       for (const itemKey of chunkKeys) {
         const resolvers = resolversMap.get(itemKey);
         if (resolvers) {
-          resolvers.forEach(({ reject }) => reject(error));
+          for (const { reject } of resolvers) {
+            reject(error);
+          }
           resolversMap.delete(itemKey);
         }
       }
@@ -263,9 +269,11 @@ async function flushBatch() {
 
   if (resolversMap.size > 0) {
     const fallbackError = new Error('Stats batch request not fulfilled');
-    resolversMap.forEach((resolvers) => {
-      resolvers.forEach(({ reject }) => reject(fallbackError));
-    });
+    for (const resolvers of resolversMap.values()) {
+      for (const { reject } of resolvers) {
+        reject(fallbackError);
+      }
+    }
   }
 }
 
@@ -324,10 +332,17 @@ export function useViewCounts(category: string, slug: string) {
       }
 
       // If stale but within 7 days, show stale data and refresh in background
-      requestCounts(category, slug).then((fresh) => {
-        setViewCount(fresh.viewCount);
-        setCopyCount(fresh.copyCount);
-      });
+      // Background refresh - intentionally not awaited, errors are caught
+      requestCounts(category, slug)
+        .then((fresh) => {
+          setViewCount(fresh.viewCount);
+          setCopyCount(fresh.copyCount);
+          return fresh;
+        })
+        .catch(() => {
+          // Silently fail - we already have stale data
+          return null;
+        });
       return;
     }
 
@@ -407,6 +422,7 @@ export function useBatchViewCounts(items: Array<{ category: string; slug: string
       return;
     }
 
+    // biome-ignore lint/nursery/noFloatingPromises: Intentional background batch fetch
     Promise.all(
       itemsToFetch.map((item) =>
         requestCounts(item.category, item.slug)

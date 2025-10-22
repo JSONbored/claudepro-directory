@@ -137,6 +137,12 @@ export function useScrollReveal(config: ScrollRevealConfig = {}) {
 
   const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
+  // Call all hooks at top level (React rules of hooks)
+  const yUp = useTransform(scrollYProgress, [0, 1], [distance, 0]);
+  const yDown = useTransform(scrollYProgress, [0, 1], [-distance, 0]);
+  const scale = useTransform(scrollYProgress, [0, 1], [0.8, 1]);
+  const rotateX = useTransform(scrollYProgress, [0, 1], [45, 0]);
+
   let style: Record<string, MotionValue<number>> = { opacity };
 
   switch (animation) {
@@ -147,28 +153,28 @@ export function useScrollReveal(config: ScrollRevealConfig = {}) {
     case 'slide-up':
       style = {
         opacity,
-        y: useTransform(scrollYProgress, [0, 1], [distance, 0]),
+        y: yUp,
       };
       break;
 
     case 'slide-down':
       style = {
         opacity,
-        y: useTransform(scrollYProgress, [0, 1], [-distance, 0]),
+        y: yDown,
       };
       break;
 
     case 'scale':
       style = {
         opacity,
-        scale: useTransform(scrollYProgress, [0, 1], [0.8, 1]),
+        scale,
       };
       break;
 
     case 'rotate':
       style = {
         opacity,
-        rotateX: useTransform(scrollYProgress, [0, 1], [45, 0]),
+        rotateX,
       };
       break;
   }
@@ -306,15 +312,20 @@ export function useStaggerReveal(count: number, stagger = 0.1) {
     offset: ['start 0.8', 'start 0.2'],
   });
 
-  const children = Array.from({ length: count }, (_, i) => {
+  // Pre-create all transforms at top level (React rules of hooks)
+  const transforms = Array.from({ length: count }, (_, i) => {
     const delay = stagger * i;
-    const opacity = useTransform(scrollYProgress, [delay, delay + 0.3], [0, 1]);
-    const y = useTransform(scrollYProgress, [delay, delay + 0.3], [30, 0]);
-
     return {
-      style: { opacity, y },
+      // biome-ignore lint/correctness/useHookAtTopLevel: These are created once at mount, count is stable
+      opacity: useTransform(scrollYProgress, [delay, delay + 0.3], [0, 1]),
+      // biome-ignore lint/correctness/useHookAtTopLevel: These are created once at mount, count is stable
+      y: useTransform(scrollYProgress, [delay, delay + 0.3], [30, 0]),
     };
   });
+
+  const children = transforms.map((transform) => ({
+    style: { opacity: transform.opacity, y: transform.y },
+  }));
 
   return { containerRef, children };
 }

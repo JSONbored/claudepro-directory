@@ -28,10 +28,10 @@ describe('Supabase Clients - Local Environment Fallback', () => {
 
   it('should return mock client when env vars missing in local environment (no VERCEL/CI)', async () => {
     // Simulate local environment without Supabase env vars
-    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    delete process.env.VERCEL;
-    delete process.env.CI;
+    process.env.NEXT_PUBLIC_SUPABASE_URL = '';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = '';
+    process.env.VERCEL = '';
+    process.env.CI = '';
 
     // This should NOT throw - it should return a mock client
     const { createClient: createBrowserClient } = await import('@/src/lib/supabase/client');
@@ -44,10 +44,10 @@ describe('Supabase Clients - Local Environment Fallback', () => {
 
   it('should return mock server client when env vars missing in local environment', async () => {
     // Simulate local environment without Supabase env vars
-    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    delete process.env.VERCEL;
-    delete process.env.CI;
+    process.env.NEXT_PUBLIC_SUPABASE_URL = '';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = '';
+    process.env.VERCEL = '';
+    process.env.CI = '';
 
     // This should NOT throw - it should return a mock client
     const { createClient: createServerClient } = await import('@/src/lib/supabase/server');
@@ -60,10 +60,10 @@ describe('Supabase Clients - Local Environment Fallback', () => {
 
   it('should return mock admin client when env vars missing in local environment', async () => {
     // Simulate local environment without Supabase env vars
-    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
-    delete process.env.VERCEL;
-    delete process.env.CI;
+    process.env.NEXT_PUBLIC_SUPABASE_URL = '';
+    process.env.SUPABASE_SERVICE_ROLE_KEY = '';
+    process.env.VERCEL = '';
+    process.env.CI = '';
 
     // This should NOT throw - it should return a mock client
     const { createClient: createAdminClient } = await import('@/src/lib/supabase/admin-client');
@@ -76,8 +76,8 @@ describe('Supabase Clients - Local Environment Fallback', () => {
 
   it('should throw error when env vars missing in CI environment', async () => {
     // Simulate CI environment without Supabase env vars
-    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    process.env.NEXT_PUBLIC_SUPABASE_URL = '';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = '';
     process.env.CI = 'true';
 
     const { createClient: createBrowserClient } = await import('@/src/lib/supabase/client');
@@ -88,8 +88,8 @@ describe('Supabase Clients - Local Environment Fallback', () => {
 
   it('should throw error when env vars missing in Vercel environment', async () => {
     // Simulate Vercel environment without Supabase env vars
-    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    process.env.NEXT_PUBLIC_SUPABASE_URL = '';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = '';
     process.env.VERCEL = '1';
 
     const { createClient: createBrowserClient } = await import('@/src/lib/supabase/client');

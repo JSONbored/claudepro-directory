@@ -5,6 +5,9 @@
 
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 
+const tagIds = Array.from({ length: 3 }, () => crypto.randomUUID());
+const textLineIds = Array.from({ length: 8 }, () => crypto.randomUUID());
+
 export default function Loading() {
   return (
     <div className="min-h-screen bg-background">
@@ -17,8 +20,8 @@ export default function Loading() {
               <Skeleton size="md" width="3xl" />
             </div>
             <div className="flex flex-wrap gap-2">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={`tag-${i}`} size="sm" width="xs" rounded="full" />
+              {tagIds.map((id) => (
+                <Skeleton key={id} size="sm" width="xs" rounded="full" />
               ))}
             </div>
           </div>
@@ -28,8 +31,8 @@ export default function Loading() {
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="border rounded-lg p-6 space-y-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={`text-${i}`} size="sm" width={i % 3 === 0 ? '2/3' : '3xl'} />
+            {textLineIds.map((id, i) => (
+              <Skeleton key={id} size="sm" width={i % 3 === 0 ? '2/3' : '3xl'} />
             ))}
           </div>
         </div>

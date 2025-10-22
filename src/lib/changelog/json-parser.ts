@@ -128,13 +128,14 @@ function parseTechnicalDetailsSection(markdown: string): ContentSection[] {
   // Split by h4 headers (####) to create accordion items
   const h4Regex = /####\s+(.+?)\n([\s\S]*?)(?=####|$)/g;
   const items: Array<{ title: string; content: string }> = [];
-  let match: RegExpExecArray | null;
+  let match: RegExpExecArray | null = h4Regex.exec(markdown);
 
-  while ((match = h4Regex.exec(markdown)) !== null) {
+  while (match !== null) {
     items.push({
       title: match[1]?.trim() || '',
       content: match[2]?.trim() || '',
     });
+    match = h4Regex.exec(markdown);
   }
 
   if (items.length > 0) {

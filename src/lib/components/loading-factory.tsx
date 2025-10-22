@@ -20,6 +20,7 @@
  * @module lib/components/loading-factory
  */
 
+import { useMemo } from 'react';
 import {
   ConfigCardSkeleton,
   ContentListSkeleton,
@@ -80,6 +81,12 @@ export function CategoryLoading({
   const selectedVariant = variant || 'grid3';
   const config = SKELETON_CONFIGS[selectedVariant] as SkeletonConfig;
 
+  // Generate stable unique IDs for cards
+  const cardIds = useMemo(
+    () => Array.from({ length: config.totalCards }, () => crypto.randomUUID()),
+    [config.totalCards]
+  );
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
@@ -94,8 +101,8 @@ export function CategoryLoading({
 
       {/* Content grid */}
       <div className={config.gridClass}>
-        {Array.from({ length: config.totalCards }).map((_, i) => (
-          <ConfigCardSkeleton key={`skeleton-card-${i}`} />
+        {cardIds.map((id) => (
+          <ConfigCardSkeleton key={id} />
         ))}
       </div>
     </div>
@@ -107,6 +114,8 @@ export function CategoryLoading({
  * Matches structure of /[category]/[slug] pages
  */
 export function DetailPageLoading() {
+  const codeLineIds = useMemo(() => Array.from({ length: 8 }, () => crypto.randomUUID()), []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -150,8 +159,8 @@ export function DetailPageLoading() {
             <div className="border rounded-lg p-6 space-y-4">
               <Skeleton size="sm" width="sm" />
               <div className="space-y-2">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <Skeleton key={`code-${i}`} size="sm" width={i % 3 === 0 ? '2/3' : '3xl'} />
+                {codeLineIds.map((id, i) => (
+                  <Skeleton key={id} size="sm" width={i % 3 === 0 ? '2/3' : '3xl'} />
                 ))}
               </div>
             </div>
@@ -176,6 +185,10 @@ export function DetailPageLoading() {
  * Matches structure of guide pages (more text-heavy)
  */
 export function GuideDetailLoading() {
+  const tagIds = useMemo(() => Array.from({ length: 5 }, () => crypto.randomUUID()), []);
+  const textLineIds = useMemo(() => Array.from({ length: 12 }, () => crypto.randomUUID()), []);
+  const sidebarIds = useMemo(() => Array.from({ length: 3 }, () => crypto.randomUUID()), []);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="border-b border-border/50 bg-card/30">
@@ -190,8 +203,8 @@ export function GuideDetailLoading() {
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={`tag-${i}`} size="sm" width="xs" rounded="full" />
+              {tagIds.map((id) => (
+                <Skeleton key={id} size="sm" width="xs" rounded="full" />
               ))}
             </div>
           </div>
@@ -202,16 +215,16 @@ export function GuideDetailLoading() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <div className="border rounded-lg p-6 space-y-4">
-              {Array.from({ length: 12 }).map((_, i) => (
-                <Skeleton key={`text-${i}`} size="sm" width={i % 4 === 0 ? '2/3' : '3xl'} />
+              {textLineIds.map((id, i) => (
+                <Skeleton key={id} size="sm" width={i % 4 === 0 ? '2/3' : '3xl'} />
               ))}
             </div>
           </div>
           <div className="space-y-6">
             <div className="border rounded-lg p-6 space-y-4">
               <Skeleton size="md" width="sm" />
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={`sidebar-${i}`} size="sm" width="3xl" />
+              {sidebarIds.map((id) => (
+                <Skeleton key={id} size="sm" width="3xl" />
               ))}
             </div>
           </div>
@@ -226,6 +239,8 @@ export function GuideDetailLoading() {
  * Matches structure of search page with filters
  */
 export function SearchResultsLoading() {
+  const resultIds = useMemo(() => Array.from({ length: 9 }, () => crypto.randomUUID()), []);
+
   return (
     <div className="space-y-6">
       {/* Results count */}
@@ -233,8 +248,8 @@ export function SearchResultsLoading() {
 
       {/* Results grid */}
       <div className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}>
-        {Array.from({ length: 9 }).map((_, i) => (
-          <ConfigCardSkeleton key={`search-result-${i}`} />
+        {resultIds.map((id) => (
+          <ConfigCardSkeleton key={id} />
         ))}
       </div>
     </div>
@@ -245,6 +260,13 @@ export function SearchResultsLoading() {
  * Homepage loading (complex with multiple sections)
  */
 export function HomePageLoading() {
+  const statIds = useMemo(() => Array.from({ length: 7 }, () => crypto.randomUUID()), []);
+  const sectionIds = useMemo(() => Array.from({ length: 3 }, () => crypto.randomUUID()), []);
+  const cardIdsBySect = useMemo(
+    () => sectionIds.map(() => Array.from({ length: 6 }, () => crypto.randomUUID())),
+    [sectionIds]
+  );
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}
@@ -261,8 +283,8 @@ export function HomePageLoading() {
           <Skeleton size="lg" width="3xl" className="h-14 mb-6" />
           {/* Stats */}
           <div className="flex flex-wrap justify-center gap-4">
-            {Array.from({ length: 7 }).map((_, i) => (
-              <Skeleton key={`stat-${i}`} size="sm" width="sm" />
+            {statIds.map((id) => (
+              <Skeleton key={id} size="sm" width="sm" />
             ))}
           </div>
         </div>
@@ -270,15 +292,15 @@ export function HomePageLoading() {
 
       {/* Content sections */}
       <div className="container mx-auto px-4 pb-16">
-        {Array.from({ length: 3 }).map((_, sectionIndex) => (
-          <div key={`section-${sectionIndex}`} className="mb-12">
+        {sectionIds.map((sectionId, sectionIndex) => (
+          <div key={sectionId} className="mb-12">
             <div className="flex items-center justify-between mb-6">
               <Skeleton size="lg" width="lg" />
               <Skeleton size="sm" width="sm" />
             </div>
             <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <ConfigCardSkeleton key={`card-${sectionIndex}-${i}`} />
+              {cardIdsBySect[sectionIndex]?.map((cardId) => (
+                <ConfigCardSkeleton key={cardId} />
               ))}
             </div>
           </div>
