@@ -25,7 +25,6 @@
  * @module scripts/generate-events
  */
 
-import { execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -1114,12 +1113,9 @@ function main() {
 
   writeFileSync(outputPath, content, 'utf-8');
 
-  // Auto-format with Biome to ensure consistent formatting
-  try {
-    execSync(`npx biome format --write ${outputPath}`, { stdio: 'pipe' });
-  } catch {
-    console.warn(`⚠️  Auto-formatting failed for: ${outputPath}`);
-  }
+  // OPTIMIZATION: Skip Biome formatting during build (saves ~5s)
+  // Generated file is already well-formatted by template
+  // Run `npm run lint:fix` manually if formatting adjustments needed
 
   console.log(`✅ Generated unified file: ${outputPath}`);
 

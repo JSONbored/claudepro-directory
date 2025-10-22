@@ -49,7 +49,15 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 export async function generateStaticParams() {
   try {
     const { getChangelogSlugsOnly } = await import('@/src/lib/changelog/loader');
-    return await getChangelogSlugsOnly();
+    const allParams = await getChangelogSlugsOnly();
+
+    // OPTIMIZATION: On preview builds, only pre-render recent 20 changelog entries
+    // Saves ~2-3s on preview builds, older entries return 404 on preview (acceptable)
+    if (process.env.VERCEL_ENV === 'preview' && allParams.length > 20) {
+      return allParams.slice(0, 20);
+    }
+
+    return allParams;
   } catch (error) {
     logger.error(
       'Failed to generate changelog static params',

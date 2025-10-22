@@ -135,6 +135,13 @@ export async function generateStaticParams() {
     }
   }
 
+  // OPTIMIZATION: On preview builds, only pre-render top 80 pages for faster builds
+  // Still fully static (no ISR), just generates fewer pages on preview
+  // Saves ~7-10s on preview builds, remaining pages return 404 on preview (acceptable)
+  if (process.env.VERCEL_ENV === 'preview') {
+    return allParams.slice(0, 80);
+  }
+
   return allParams;
 }
 

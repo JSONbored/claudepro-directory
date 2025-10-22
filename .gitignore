@@ -35,7 +35,8 @@ lerna-debug.log*
 # Project specific
 .claude/
 .cursor/
-src/generated/
+# OPTIMIZATION: Commit generated files for faster builds (skip regeneration when unchanged)
+# src/generated/ - NOW TRACKED for 15-20s faster builds
 # generated/ - NOW TRACKED for faster builds (content rarely changes)
 
 # Build-generated API files

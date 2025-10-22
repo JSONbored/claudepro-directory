@@ -304,12 +304,24 @@ async function processContentFile<T extends ContentType>(
         // Extract subcategory from file path (e.g., "tutorials/guide.json" → "tutorials")
         const subcategory = file.includes('/') ? file.split('/')[0] : undefined;
 
-        // Map JSON metadata to schema format
-        parsedData = {
-          ...json.metadata,
-          subcategory,
-          content: JSON.stringify(json), // Store full JSON for rendering
-        };
+        // Handle both nested (guides) and flat (agents, mcp, etc.) JSON structures
+        // Guides have: { metadata: {...}, content: { sections: [...] } }
+        // Others have: { slug: "...", title: "...", content: "...", ... }
+        if (json.metadata && typeof json.metadata === 'object') {
+          // Nested structure (guides)
+          // Store the full JSON for guides so we can access structured content sections
+          parsedData = {
+            ...json.metadata,
+            subcategory,
+            content: JSON.stringify(json), // Store full JSON for structured content rendering
+          };
+        } else {
+          // Flat structure (agents, mcp, rules, etc.)
+          parsedData = {
+            ...json,
+            subcategory,
+          };
+        }
       } else {
         // safeParse handles JSON.parse + Zod validation in one secure operation
         parsedData = safeParse(content, rawJsonSchema, {

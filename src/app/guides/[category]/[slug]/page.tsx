@@ -77,6 +77,13 @@ export async function generateStaticParams() {
     );
   }
 
+  // OPTIMIZATION: On preview builds, only pre-render first 15 guides for faster builds
+  // Still fully static (no ISR), just generates fewer pages on preview
+  // Saves ~3-5s on preview builds, remaining guides return 404 on preview (acceptable)
+  if (process.env.VERCEL_ENV === 'preview' && params.length > 15) {
+    return params.slice(0, 15);
+  }
+
   return params;
 }
 

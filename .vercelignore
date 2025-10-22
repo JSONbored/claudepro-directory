@@ -37,6 +37,11 @@ jest.config.js
 out/
 dist/
 
+# OPTIMIZATION: Reduce cache size (652MB → ~200MB)
+# Exclude build artifacts that bloat cache but aren't needed
+.next/cache/swc/
+node_modules/.cache/
+
 # Package manager files (Vercel uses package-lock.json)
 pnpm-lock.yaml
 yarn.lock

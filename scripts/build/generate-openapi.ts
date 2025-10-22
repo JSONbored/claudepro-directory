@@ -6,6 +6,9 @@
  * Build-time script that generates public/openapi.json from Zod schemas.
  * Runs as part of the build process (npm run build) to ensure up-to-date API docs.
  *
+ * OPTIMIZATION: Skip on preview builds (saves ~3s)
+ * OpenAPI spec rarely changes and isn't needed for preview deploys
+ *
  * Usage:
  *   npm run generate:openapi
  *   tsx scripts/generate-openapi.ts
@@ -19,6 +22,14 @@
  *   - Pretty-printed JSON for readability
  *   - Atomic write (temp file + rename) for safety
  */
+
+// OPTIMIZATION: Skip OpenAPI generation on preview builds
+if (process.env.VERCEL_ENV === 'preview') {
+  console.log('⚡ SKIP: OpenAPI generation (preview build)');
+  console.log('   → Using committed openapi.json');
+  console.log('   → Saves ~3 seconds build time');
+  process.exit(0);
+}
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
