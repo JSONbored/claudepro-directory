@@ -275,26 +275,6 @@ test.describe('Robots.txt - AI Crawler Configuration', () => {
       }
     }
   });
-
-  test('AI crawlers should have access to API docs', async ({ page }) => {
-    await page.goto('/robots.txt');
-    const content = await page.textContent('body');
-
-    expect(content, 'robots.txt should have content').toBeTruthy();
-    const data = parseRobotsTxt(content ?? '');
-
-    for (const crawler of aiCrawlers) {
-      const rule = findRule(data.rules, crawler.name);
-      if (rule) {
-        const hasApiDocsAccess = rule.allow.some(
-          (path) => path.includes('api-docs') || path.includes('openapi.json')
-        );
-        expect(hasApiDocsAccess, `${crawler.name} should have access to API documentation`).toBe(
-          true
-        );
-      }
-    }
-  });
 });
 
 // =============================================================================
@@ -349,7 +329,7 @@ test.describe('Robots.txt - General Crawler Configuration', () => {
     await page.goto('/robots.txt');
     const content = await page.textContent('body');
 
-    const apiRoutes = ['/api-docs', '/openapi.json', '/.well-known/api-catalog'];
+    const apiRoutes = ['/openapi.json', '/.well-known/api-catalog'];
 
     for (const route of apiRoutes) {
       // Escape backslash first, then all other special regex characters
@@ -527,7 +507,7 @@ test.describe('Robots.txt - Integration', () => {
   test('allowed routes should be accessible', async ({ page }) => {
     // Test that routes explicitly allowed in robots.txt are actually accessible
 
-    const routesToTest = ['/', '/agents', '/trending', '/api-docs'];
+    const routesToTest = ['/', '/agents', '/trending'];
 
     for (const route of routesToTest) {
       const response = await page.goto(route);

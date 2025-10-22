@@ -965,7 +965,6 @@ test.describe('New Routes SEO - Phase 5', () => {
     { path: '/companies', name: 'Companies' },
     { path: '/for-you', name: 'For You' },
     { path: '/partner', name: 'Partner' },
-    { path: '/api-docs', name: 'API Documentation' },
   ];
 
   for (const route of newRoutes) {

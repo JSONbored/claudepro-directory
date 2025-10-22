@@ -114,7 +114,7 @@ Explore different configuration types and understand when to use each.
 
 - Browse all configurations: ${APP_CONFIG.url}
 - Setup guides: ${APP_CONFIG.url}/guides
-- API documentation: ${APP_CONFIG.url}/api-docs
+- OpenAPI spec: ${APP_CONFIG.url}/openapi.json
 
 ---
 

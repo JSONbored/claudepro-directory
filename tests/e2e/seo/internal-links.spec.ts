@@ -503,7 +503,7 @@ test.describe('Link Depth - SEO', () => {
     await navigateToHomepage(page);
 
     // Important pages that should be easily reachable
-    const importantPages = ['/agents', '/mcp', '/trending', '/guides', '/api-docs'];
+    const importantPages = ['/agents', '/mcp', '/trending', '/guides'];
 
     for (const targetPage of importantPages) {
       // Check if page is linked directly from homepage (1 click)
@@ -524,7 +524,6 @@ test.describe('Link Depth - SEO', () => {
 
 test.describe('Hash/Fragment Links', () => {
   test('hash links should point to existing elements', async ({ page }) => {
-    await page.goto('/api-docs'); // Page likely to have hash links
     await waitForNetworkIdle(page);
 
     // Find all hash links on current page

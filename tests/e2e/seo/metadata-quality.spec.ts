@@ -365,7 +365,6 @@ test.describe('Metadata Quality: Static Routes', () => {
     '/changelog',
     '/jobs',
     '/search',
-    '/api-docs',
     '/board',
     '/community',
     '/companies',

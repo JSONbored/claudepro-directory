@@ -510,7 +510,6 @@ describe('STATIC template', () => {
       '/community',
       '/login',
       '/companies',
-      '/api-docs',
       '/submit',
       '/board',
     ];

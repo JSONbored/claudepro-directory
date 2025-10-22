@@ -13,7 +13,7 @@ import { Footer } from './footer';
  * - About section with app description
  * - Social links (GitHub, Discord, Open Source badge)
  * - Quick Links section (Guides, Collections, Changelog, Community, Submit)
- * - AI & Resources section (LLMs.txt, API Docs, Partner Program)
+ * - AI & Resources section (LLMs.txt, Partner Program)
  * - Bottom bar with copyright and AI-optimized content link
  * - llms.txt specification compliance for AI discoverability
  *
@@ -87,7 +87,7 @@ type Story = StoryObj<typeof meta>;
  * Columns:
  * 1. About - App name, description, social links, Open Source badge
  * 2. Quick Links - Guides, Collections, Changelog, Community, Submit
- * 3. AI & Resources - LLMs.txt (with Sparkles icon), API Docs, Partner Program
+ * 3. AI & Resources - LLMs.txt (with Sparkles icon), Partner Program
  *
  * Bottom Bar:
  * - Copyright notice with current year
@@ -274,7 +274,6 @@ export const CurrentYearDisplay: Story = {
  * - Community: ROUTES.COMMUNITY
  * - Submit: ROUTES.SUBMIT
  * - LLMs.txt: ROUTES.LLMS_TXT (×2)
- * - API Docs: ROUTES.API_DOCS
  * - Partner: ROUTES.PARTNER
  * - GitHub: SOCIAL_LINKS.github
  * - Discord: SOCIAL_LINKS.discord
@@ -489,7 +488,7 @@ export const AIResourcesSectionTest: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Tests AI & Resources section with LLMs.txt, API Docs, and Partner links.',
+        story: 'Tests AI & Resources section with LLMs.txt and Partner links.',
       },
     },
   },
@@ -501,9 +500,9 @@ export const AIResourcesSectionTest: Story = {
       await expect(heading).toBeInTheDocument();
     });
 
-    await step('Verify API Docs link is present', async () => {
-      const apiDocsLink = canvas.getByRole('link', { name: /api.*docs|documentation/i });
-      await expect(apiDocsLink).toBeInTheDocument();
+    await step('Verify Partner Program link is present', async () => {
+      const partnerLink = canvas.getByRole('link', { name: /partner/i });
+      await expect(partnerLink).toBeInTheDocument();
     });
   },
 };

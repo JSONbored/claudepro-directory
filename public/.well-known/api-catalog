@@ -5,7 +5,7 @@
       "description": "REST API for browsing and searching Claude configurations including agents, MCP servers, rules, commands, hooks, and statuslines. Provides programmatic access to the complete ClaudePro Directory catalog with full-text search, trending analytics, and type-safe schemas.",
       "versions": ["1.0.0"],
       "openAPISpec": "https://claudepro.directory/openapi.json",
-      "documentation": "https://claudepro.directory/api-docs",
+      "documentation": "https://claudepro.directory/openapi.json",
       "termsOfService": "https://claudepro.directory/terms",
       "contact": {
         "name": "ClaudePro Directory",

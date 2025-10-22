@@ -100,7 +100,7 @@ describe('generateOGImageUrl()', () => {
     });
 
     it('generates URL for API docs OG image', () => {
-      const url = generateOGImageUrl('/api-docs/getContentByCategory');
+      const url = generateOGImageUrl('/openapi');
       expect(url).toBe(`${BASE_URL}/og-images/og-image.webp`);
     });
   });

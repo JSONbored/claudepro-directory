@@ -552,27 +552,6 @@ describe('generatePageMetadata()', () => {
       expect(metadata.description).toContain('Model Context Protocol');
       expect(metadata.openGraph?.type).toBe('article');
     });
-
-    it('generates metadata for API docs page', async () => {
-      const context: MetadataContext = {
-        params: { slug: 'getContentByCategory' },
-        item: {
-          title: 'GET /api/{category}.json',
-          description:
-            'Retrieve paginated content items by category with REST API. Get agents, MCP servers, rules, commands, hooks, and statuslines with full filtering support.',
-          slug: 'getContentByCategory',
-        },
-      };
-
-      const metadata = await generatePageMetadata('/api-docs/:slug', context);
-
-      // /api-docs/:slug falls back to STATIC pattern (generic title)
-      expect(metadata.title).toBeDefined();
-      expect(metadata.title).toContain('Claude');
-      expect(metadata.description).toBeDefined();
-      expect(metadata.description?.length).toBeGreaterThanOrEqual(150);
-      expect(metadata.description?.length).toBeLessThanOrEqual(160);
-    });
   });
 
   describe('SEO Best Practices Validation', () => {

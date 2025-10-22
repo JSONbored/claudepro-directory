@@ -136,7 +136,6 @@ export async function generateAllSiteUrls(
     { path: 'guides', priority: 0.6, changefreq: 'weekly' as const },
     { path: 'companies', priority: 0.6, changefreq: 'weekly' as const },
     { path: 'board', priority: 0.5, changefreq: 'daily' as const },
-    { path: 'api-docs', priority: 0.9, changefreq: 'weekly' as const }, // High priority for developer docs
     { path: 'changelog', priority: 0.85, changefreq: 'daily' as const }, // High priority for recency signals
   ];
 
@@ -171,7 +170,7 @@ export async function generateAllSiteUrls(
 
   if (includeLlmsTxt) {
     // Static page llms.txt routes
-    const staticPagesWithLlmsTxt = ['api-docs', 'guides', 'tools/config-recommender'];
+    const staticPagesWithLlmsTxt = ['guides', 'tools/config-recommender'];
     staticPagesWithLlmsTxt.forEach((page) => {
       urls.push({
         loc: `${baseUrl || ''}/${page}/llms.txt`,

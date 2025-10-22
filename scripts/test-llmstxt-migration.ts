@@ -24,7 +24,6 @@ const TEST_URLS = [
   '/mcp/github-mcp-server/llms.txt', // Item detail (example)
   '/changelog/llms.txt', // Changelog index
   '/guides/llms.txt', // Guides index
-  '/api-docs/llms.txt', // API docs
   '/tools/config-recommender/llms.txt', // Config recommender
 ];
 

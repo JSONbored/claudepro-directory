@@ -277,7 +277,6 @@ export function getAllStaticRoutes(): string[] {
     '/for-you',
     '/jobs',
     '/partner',
-    '/api-docs',
     '/login',
     '/board',
     '/tools/config-recommender',

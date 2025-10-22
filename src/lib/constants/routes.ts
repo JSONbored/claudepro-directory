@@ -62,7 +62,6 @@ export const ROUTES = {
   ACCOUNT_SUBMISSIONS: '/account/submissions', // account
   TOOLS_CONFIG_RECOMMENDER: '/tools/config-recommender', // tools
   AUTH_AUTH_CODE_ERROR: '/auth/auth-code-error', // auth
-  API_DOCS: '/api-docs', // api
 } as const;
 
 // ============================================================================
@@ -227,7 +226,6 @@ export const ALL_STATIC_ROUTES = [
   '/account/submissions',
   '/tools/config-recommender',
   '/auth/auth-code-error',
-  '/api-docs',
 ] as const;
 
 export const ALL_DYNAMIC_ROUTE_PATTERNS = [
