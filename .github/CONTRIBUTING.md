@@ -129,19 +129,19 @@ Use kebab-case (lowercase with hyphens): `typescript-expert.json`, `react-code-r
 1. **Install dependencies:**
 
    ```bash
-   npm install
+   pnpm install
    ```
 
 2. **Build content:**
 
    ```bash
-   npm run build:content
+   pnpm run build:content
    ```
 
 3. **Run dev server:**
 
    ```bash
-   npm run dev
+   pnpm run dev
    ```
 
 4. **Verify your content:**

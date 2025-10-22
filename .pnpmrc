@@ -1,18 +1,12 @@
-# npm Configuration
-# This file configures npm behavior for the claudepro-directory project
-#
-# NOTE: This file MUST be in the project root. npm does not support
-# alternative locations for .npmrc (unlike other config files in /config/)
+# pnpm Configuration
+# This file configures pnpm behavior for the claudepro-directory project
 
 # ==============================================================================
 # Peer Dependency Handling
 # ==============================================================================
-# We're using Next.js 16 canary for advanced build optimizations (63% faster builds).
+# We're using Next.js 16 canary for advanced build optimizations (70%+ faster builds).
 # Some dependencies haven't updated their peer dependency ranges yet, but they're
 # fully compatible with Next.js 16 (it's backwards compatible with 14 and 15).
-#
-# This setting tells npm to proceed with installation despite peer dependency warnings.
-# All packages have been tested and work correctly with Next.js 16.
 #
 # Related packages with "invalid" peer deps (all working fine):
 # - @arcjet/next (security/WAF)
@@ -25,16 +19,24 @@
 # This will be removed when Next.js 16 becomes stable and packages update their
 # peer dependency ranges (estimated: January 2026).
 # ==============================================================================
-legacy-peer-deps=true
+auto-install-peers=true
+strict-peer-dependencies=false
 
 # ==============================================================================
-# Optional: Faster installs
+# Performance: Faster installs with symlinks
 # ==============================================================================
-# Disable progress bar for faster CI/CD builds
-# progress=false
+# pnpm uses hard links by default, which is already optimal
+# No additional configuration needed
 
-# Use lockfile for reproducible installs
-# package-lock=true
+# ==============================================================================
+# Hoisting Configuration
+# ==============================================================================
+# Use shamefully-hoist for maximum compatibility with tools expecting npm/yarn
+# This makes pnpm behave more like npm (all deps hoisted to node_modules root)
+shamefully-hoist=true
 
-# Save exact versions (already default for this project)
-# save-exact=true
+# ==============================================================================
+# Lockfile Configuration
+# ==============================================================================
+# Merge git conflict markers in lockfile automatically
+merge-git-branch-lockfiles=true

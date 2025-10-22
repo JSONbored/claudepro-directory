@@ -72,15 +72,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .next/cache
-          key: ${{ runner.os }}-nextjs-${{ inputs.cache-key-suffix }}-${{ hashFiles('package-lock.json', 'src/**/*.{ts,tsx}', 'next.config.mjs', 'tailwind.config.ts') }}
+          key: ${{ runner.os }}-nextjs-${{ inputs.cache-key-suffix }}-${{ hashFiles('pnpm-lock.yaml', 'src/**/*.{ts,tsx}', 'next.config.mjs', 'tailwind.config.ts') }}
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ inputs.cache-key-suffix }}-${{ hashFiles('package-lock.json') }}-
+            ${{ runner.os }}-nextjs-${{ inputs.cache-key-suffix }}-${{ hashFiles('pnpm-lock.yaml') }}-
             ${{ runner.os }}-nextjs-${{ inputs.cache-key-suffix }}-
             ${{ runner.os }}-nextjs-
 
       - name: Build Next.js application
         if: steps.check-restored.outputs.restored != 'true'
-        run: npm run build
+        run: pnpm run build
         env:
           NEXT_TELEMETRY_DISABLED: 1
 

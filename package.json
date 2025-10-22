@@ -21,8 +21,9 @@
   "type": "module",
   "engines": {
     "node": ">=22.0.0",
-    "npm": ">=10.0.0"
+    "pnpm": ">=9.0.0"
   },
+  "packageManager": "pnpm@9.15.0",
   "imports": {
     "#lib/actions/user": {
       "storybook": "./src/lib/actions/user.actions.mock.ts",
@@ -96,11 +97,10 @@
   "scripts": {
     "dev": "npm run build:content && npm run generate:service-worker && next dev --turbopack",
     "build": "npm-run-all --parallel build:all:*",
-    "build:all:setup": "npm-run-all generate:service-worker generate:categories --parallel generate:events build:content generate:openapi",
+    "build:all:setup": "npm-run-all --parallel generate:service-worker generate:categories generate:events build:content generate:openapi",
     "build:all:next": "next build --turbopack",
     "build:all:apidocs": "tsx scripts/build/generate-fumadocs-api.ts",
     "build:next": "next build --turbopack",
-    "build:setup": "npm-run-all generate:service-worker generate:categories --parallel generate:events build:content generate:openapi",
     "build:analyze": "TURBOPACK_STATS=1 npm run build",
     "build:content": "tsx scripts/build/build-content.ts",
     "build:api-docs": "tsx scripts/build/generate-fumadocs-api.ts",
