@@ -353,3 +353,23 @@ export async function getAllChangelogEntries(): Promise<ChangelogEntry[]> {
   const changelog = await parseChangelog();
   return changelog.entries;
 }
+
+/**
+ * Get all changelog entries in JSON format (structured sections)
+ *
+ * Converts markdown entries to structured JSON with components for beautiful rendering.
+ * Used by build system to generate changelog-full.ts.
+ *
+ * @returns Array of changelog entries with structured JSON sections
+ *
+ * @example
+ * const jsonEntries = await getAllChangelogEntriesJson();
+ * // Returns ChangelogJson[] with tabs, accordions, infoboxes
+ */
+export async function getAllChangelogEntriesJson(): Promise<
+  import('@/src/lib/schemas/changelog.schema').ChangelogJson[]
+> {
+  const entries = await getAllChangelogEntries();
+  const { convertChangelogEntriesToJson } = await import('./json-parser');
+  return convertChangelogEntriesToJson(entries);
+}

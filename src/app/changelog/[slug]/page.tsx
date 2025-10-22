@@ -31,7 +31,7 @@ import { BreadcrumbSchema } from '@/src/components/infra/structured-data/breadcr
 import { ChangelogArticleStructuredData } from '@/src/components/infra/structured-data/changelog-structured-data';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 import { Separator } from '@/src/components/primitives/separator';
-import { getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
+import { getChangelogJsonBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
@@ -69,12 +69,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
 
-  // Load changelog entry for metadata generation
-  const entry = await getChangelogEntryBySlug(slug);
-
+  // Changelog uses route-based metadata (no item schema needed)
   return generatePageMetadata('/changelog/:slug', {
     params: { slug },
-    item: entry || undefined,
     slug,
   });
 }
@@ -89,14 +86,14 @@ export default async function ChangelogEntryPage({
 }) {
   try {
     const { slug } = await params;
-    const entry = await getChangelogEntryBySlug(slug);
+    const entry = await getChangelogJsonBySlug(slug);
 
     // Show 404 if entry not found
     if (!entry) {
       notFound();
     }
 
-    const canonicalUrl = getChangelogUrl(entry.slug);
+    const canonicalUrl = getChangelogUrl(entry.metadata.slug);
 
     return (
       <>
@@ -104,7 +101,7 @@ export default async function ChangelogEntryPage({
         <ReadProgress />
 
         {/* View Tracker - Track page views */}
-        <UnifiedTracker variant="view" category="changelog" slug={entry.slug} />
+        <UnifiedTracker variant="view" category="changelog" slug={entry.metadata.slug} />
 
         {/* Structured Data - TechArticle Schema */}
         <ChangelogArticleStructuredData entry={entry} />
@@ -117,8 +114,8 @@ export default async function ChangelogEntryPage({
               url: `${APP_CONFIG.url}/changelog`,
             },
             {
-              name: entry.title,
-              url: `${APP_CONFIG.url}/changelog/${entry.slug}`,
+              name: entry.metadata.title,
+              url: `${APP_CONFIG.url}/changelog/${entry.metadata.slug}`,
             },
           ]}
         />
@@ -139,10 +136,10 @@ export default async function ChangelogEntryPage({
           <header className="space-y-4 pb-6">
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-sm text-muted-foreground`}>
               <Calendar className="h-4 w-4" />
-              <time dateTime={entry.date}>{formatChangelogDate(entry.date)}</time>
+              <time dateTime={entry.metadata.date}>{formatChangelogDate(entry.metadata.date)}</time>
             </div>
 
-            <h1 className="text-4xl font-bold tracking-tight">{entry.title}</h1>
+            <h1 className="text-4xl font-bold tracking-tight">{entry.metadata.title}</h1>
 
             {/* Canonical URL */}
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>

@@ -27,7 +27,7 @@ import {
   writeBuildOutput,
 } from '../../src/lib/build/category-processor.server.js';
 import { onBuildComplete } from '../../src/lib/cache.server.js';
-import { getAllChangelogEntries } from '../../src/lib/changelog/loader.js';
+import { getAllChangelogEntriesJson } from '../../src/lib/changelog/parser.js';
 import {
   type CategoryId,
   UNIFIED_CATEGORY_REGISTRY,
@@ -121,6 +121,30 @@ function generateFullContentFile(categoryId: CategoryId, items: readonly unknown
   const varName = categoryId.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
   const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
   const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
+
+  // Special handling for changelog - uses ChangelogJson type
+  if (categoryId === 'changelog') {
+    return `/**
+ * Auto-generated full content file
+ * Category: ${config.pluralTitle}
+ *
+ * DO NOT EDIT MANUALLY
+ * @see scripts/build-content.ts
+ */
+
+import type { ChangelogJson } from '@/src/lib/schemas/changelog.schema';
+
+export const ${varName}Full: ChangelogJson[] = ${JSON.stringify(items, null, 2)};
+
+export const ${varName}FullBySlug = new Map(${varName}Full.map(item => [item.metadata.slug, item]));
+
+export function get${capitalizedSingular}FullBySlug(slug: string) {
+  return ${varName}FullBySlug.get(slug) || null;
+}
+
+export type ${capitalizedSingular}Full = typeof ${varName}Full[number];
+`;
+  }
 
   return `/**
  * Auto-generated full content file
@@ -264,43 +288,23 @@ async function main(): Promise<void> {
       // Special handling for changelog: parse from CHANGELOG.md instead of content files
       if (result.category === 'changelog') {
         try {
-          logger.info('📋 Parsing changelog from CHANGELOG.md...');
-          const changelogEntries = await getAllChangelogEntries();
+          logger.info('📋 Parsing changelog from CHANGELOG.md (JSON format)...');
+          const changelogJsonEntries = await getAllChangelogEntriesJson();
 
-          // Transform changelog entries to metadata format
+          // Transform changelog JSON entries to metadata format
           // Expected: { slug, title, description, dateAdded }
-          const changelogMetadata = changelogEntries.map((entry) => ({
-            slug: entry.slug,
-            title: entry.title,
-            description: entry.tldr || entry.title,
-            dateAdded: entry.date,
+          const changelogMetadata = changelogJsonEntries.map((entry) => ({
+            slug: entry.metadata.slug,
+            title: entry.metadata.title,
+            description: entry.metadata.tldr || entry.metadata.title,
+            dateAdded: entry.metadata.date,
           }));
 
-          // Transform to full content format (matching GuideContent schema)
-          // Changelog uses GuideContent schema but has different source data
-          // Map changelog entries to GuideContent-compatible structure
-          const changelogFullContent = changelogEntries.map((entry) => ({
-            // Required base fields
-            slug: entry.slug,
-            title: entry.title,
-            description: entry.tldr || entry.title,
-            author: 'ClaudePro Directory',
-            dateAdded: entry.date,
-            tags: ['changelog', 'updates'],
-            content: entry.content,
-
-            // Required Guide-specific fields
-            category: 'guides' as const,
-            subcategory: 'use-cases' as const, // Changelog as use-case documentation
-            keywords: ['changelog', 'updates', 'features', 'improvements', 'release notes'],
-
-            // Optional but commonly expected fields
-            source: 'claudepro' as const,
-            displayTitle: entry.title,
-          }));
+          // Use structured JSON format directly (ChangelogJson[] with sections)
+          const changelogFullContent = changelogJsonEntries;
 
           // Update statistics
-          contentStats[result.category] = changelogEntries.length;
+          contentStats[result.category] = changelogJsonEntries.length;
 
           // Generate metadata file
           const metadataPath = join(GENERATED_DIR, `${result.category}-metadata.ts`);
@@ -313,7 +317,7 @@ async function main(): Promise<void> {
           await writeBuildOutput(fullPath, fullContent);
 
           logger.success(
-            `✓ ${config.pluralTitle}: ${changelogEntries.length} entries from CHANGELOG.md`
+            `✓ ${config.pluralTitle}: ${changelogJsonEntries.length} entries from CHANGELOG.md`
           );
         } catch (error) {
           logger.error(

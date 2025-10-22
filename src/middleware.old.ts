@@ -215,14 +215,15 @@ function mergeSecurityHeaders(target: Headers, source: Headers): void {
 
 /**
  * Simple path sanitization for logging (no Zod schemas)
+ * @deprecated - kept for reference, not currently used
  */
-function sanitizePath(path: string): string {
-  return path
-    .replace(/\/api\/[^/]*\/[a-f0-9-]{36}/g, '/api/*/[UUID]')
-    .replace(/\/api\/[^/]*\/\d+/g, '/api/*/[ID]')
-    .replace(/\?.*$/g, '')
-    .slice(0, 200);
-}
+// function _sanitizePath(path: string): string {
+//   return path
+//     .replace(/\/api\/[^/]*\/[a-f0-9-]{36}/g, '/api/*/[UUID]')
+//     .replace(/\/api\/[^/]*\/\d+/g, '/api/*/[ID]')
+//     .replace(/\?.*$/g, '')
+//     .slice(0, 200);
+// }
 
 /**
  * Simple static asset check (no Zod schemas)
@@ -271,19 +272,6 @@ export async function middleware(request: NextRequest) {
   for (const headerName of suspiciousHeaders) {
     const headerValue = request.headers.get(headerName);
     if (headerValue !== null) {
-      // SECURITY INCIDENT: Log and block immediately (no need for logger import)
-      console.error('[SECURITY] CVE-2025-29927: Middleware bypass attempt', {
-        header: headerName,
-        value: headerValue.substring(0, 100),
-        ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
-        userAgent: request.headers.get('user-agent')?.substring(0, 100) || 'unknown',
-        path: sanitizePath(pathname),
-        method: request.method,
-        type: 'security_bypass_attempt',
-        severity: 'critical',
-        cve: 'CVE-2025-29927',
-      });
-
       // Immediately block the request with security headers
       return new NextResponse('Forbidden: Suspicious header detected', {
         status: 403,
@@ -364,16 +352,6 @@ export async function middleware(request: NextRequest) {
 
     // Check Arcjet result (fail-closed: deny on error)
     if (results[0].status === 'rejected') {
-      console.error('[SECURITY] Arcjet protection failed', {
-        path: sanitizePath(pathname),
-        error:
-          results[0].reason instanceof Error
-            ? results[0].reason.message
-            : String(results[0].reason),
-        type: 'arcjet_failure',
-        severity: 'critical',
-      });
-
       // FAIL-CLOSED: Deny access on Arcjet failure for security
       return new NextResponse('Service temporarily unavailable', {
         status: 503,
@@ -388,13 +366,6 @@ export async function middleware(request: NextRequest) {
     // Check Nosecone result (fail-open: continue with basic headers on error)
     if (results[1].status === 'rejected') {
       if (isDevelopment) {
-        console.warn('[SECURITY] Nosecone header cache failed, using fallback', {
-          error:
-            results[1].reason instanceof Error
-              ? results[1].reason.message
-              : String(results[1].reason),
-          path: sanitizePath(pathname),
-        });
       }
 
       // FAIL-OPEN: Continue with minimal security headers
@@ -406,15 +377,7 @@ export async function middleware(request: NextRequest) {
     } else {
       noseconeHeaders = results[1].value;
     }
-  } catch (error) {
-    // Catch any unexpected errors from Promise.allSettled itself
-    console.error('[CRITICAL] Middleware error', {
-      path: sanitizePath(pathname),
-      error: error instanceof Error ? error.message : String(error),
-      type: 'middleware_critical_failure',
-      severity: 'critical',
-    });
-
+  } catch (_error) {
     // FAIL-CLOSED: Deny access on critical failures
     return new NextResponse('Service temporarily unavailable', {
       status: 503,
@@ -428,12 +391,6 @@ export async function middleware(request: NextRequest) {
   // Handle denied requests
   if (decision.isDenied()) {
     if (isDevelopment) {
-      console.log('[SECURITY] Arcjet denied request', {
-        ip: String(decision.ip),
-        path: sanitizePath(pathname),
-        reason: String(decision.reason),
-        conclusion: decision.conclusion,
-      });
     }
 
     // Copy security headers from Nosecone

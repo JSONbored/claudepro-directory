@@ -9,7 +9,7 @@ import { JsonContentRenderer } from '@/src/components/content/json-content-rende
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
-import { MDXContentProvider } from '@/src/components/infra/providers/mdx-content-provider';
+import { ContentProvider } from '@/src/components/infra/providers/content-context';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 // Removed unused import: CategoryGuidesPage
 import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar';
@@ -63,7 +63,12 @@ export async function generateStaticParams() {
             });
           }
         }
-      } catch {}
+      } catch (err) {
+        // Silently skip invalid directories during static generation
+        logger.debug(`Skipping invalid guide directory: ${category}`, {
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
     }
   } catch (error) {
     logger.error(
@@ -174,7 +179,12 @@ async function getRelatedGuides(
             try {
               const json = JSON.parse(content);
               title = json.metadata?.title;
-            } catch {}
+            } catch (err) {
+              // Silently skip if JSON parsing fails for title extraction
+              logger.debug(`Failed to parse guide content for title: ${fileSlug}`, {
+                error: err instanceof Error ? err.message : String(err),
+              });
+            }
 
             if (title) {
               relatedGuides.push({
@@ -443,9 +453,9 @@ export default async function SEOGuidePage({
                 <div className="lg:col-span-2 space-y-8">
                   <Card>
                     <CardContent className="pt-6">
-                      <MDXContentProvider category={category} slug={slug}>
+                      <ContentProvider category={category} slug={slug}>
                         <JsonContentRenderer json={data.content} className="" />
-                      </MDXContentProvider>
+                      </ContentProvider>
                     </CardContent>
                   </Card>
 

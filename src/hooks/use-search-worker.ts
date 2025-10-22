@@ -162,7 +162,7 @@ export function useSearchWorker(): UseSearchWorkerReturn {
         });
 
         // Send search request to worker
-        workerRef.current!.postMessage({
+        workerRef.current?.postMessage({
           type: 'search',
           query,
           items,

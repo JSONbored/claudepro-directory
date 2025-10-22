@@ -1,6 +1,18 @@
 /**
  * Changelog List Loading State
- * Uses centralized loading factory for consistency
+ * Matches changelog list page structure
  */
 
-export { ChangelogListLoading as default } from '@/src/lib/components/loading-factory';
+import {
+  ContentListSkeleton,
+  PageHeaderSkeleton,
+} from '@/src/components/primitives/loading-skeleton';
+
+export default function Loading() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <PageHeaderSkeleton />
+      <ContentListSkeleton count={8} />
+    </div>
+  );
+}

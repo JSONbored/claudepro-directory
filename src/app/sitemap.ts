@@ -32,6 +32,12 @@ import { generateAllSiteUrls } from '@/src/lib/build/url-generator.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 
 /**
+ * Static Generation - Sitemap generated at build time with pre-generated metadata
+ * No runtime operations, all data from generated files
+ */
+export const dynamic = 'force-static';
+
+/**
  * Generate dynamic sitemap from content metadata
  *
  * Next.js will automatically:

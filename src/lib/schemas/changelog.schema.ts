@@ -186,3 +186,71 @@ export const parsedChangelogSchema = z
   .describe('Complete parsed CHANGELOG.md with all entries and aggregated metadata');
 
 export type ParsedChangelog = z.infer<typeof parsedChangelogSchema>;
+
+// ==============================================================================
+// JSON CHANGELOG SCHEMAS (For structured rendering with JsonContentRenderer)
+// ==============================================================================
+
+/**
+ * Import ContentSection type from guide schema
+ * Changelog uses the same structured section format as guides
+ */
+import type { ContentSection } from '@/src/lib/schemas/content/guide.schema';
+
+/**
+ * Changelog JSON Metadata Schema
+ *
+ * Streamlined metadata for JSON-structured changelog entries.
+ * Focuses on essential fields needed for rendering with JsonContentRenderer.
+ */
+export const changelogJsonMetadataSchema = z
+  .object({
+    slug: slugString.describe('URL-safe identifier (e.g., 2025-10-18-pattern-based-seo)'),
+    date: isoDateString.describe('ISO date string (YYYY-MM-DD)'),
+    title: longString.describe('Entry title'),
+    tldr: mediumString.optional().describe('Brief TL;DR summary (1-2 sentences)'),
+    categories: z
+      .object({
+        Added: z.number().int().nonnegative().default(0).describe('Count of Added items'),
+        Changed: z.number().int().nonnegative().default(0).describe('Count of Changed items'),
+        Deprecated: z.number().int().nonnegative().default(0).describe('Count of Deprecated items'),
+        Removed: z.number().int().nonnegative().default(0).describe('Count of Removed items'),
+        Fixed: z.number().int().nonnegative().default(0).describe('Count of Fixed items'),
+        Security: z.number().int().nonnegative().default(0).describe('Count of Security items'),
+      })
+      .describe('Category counts for badge display'),
+  })
+  .describe('Metadata for JSON-structured changelog entry');
+
+export type ChangelogJsonMetadata = z.infer<typeof changelogJsonMetadataSchema>;
+
+/**
+ * Changelog JSON Content Schema
+ *
+ * Structured content sections reusing guide content types.
+ * Supports components (tabs, accordions, infoboxes), code blocks, etc.
+ */
+export const changelogJsonContentSchema = z
+  .object({
+    sections: z
+      .array(z.custom<ContentSection>())
+      .describe('Array of structured content sections (headings, paragraphs, components, etc.)'),
+  })
+  .describe('Structured content sections for rendering with JsonContentRenderer');
+
+export type ChangelogJsonContent = z.infer<typeof changelogJsonContentSchema>;
+
+/**
+ * Complete Changelog JSON Entry
+ *
+ * JSON-structured changelog entry for use with JsonContentRenderer.
+ * Replaces markdown string with structured sections.
+ */
+export const changelogJsonSchema = z
+  .object({
+    metadata: changelogJsonMetadataSchema.describe('Entry metadata'),
+    content: changelogJsonContentSchema.describe('Structured content sections'),
+  })
+  .describe('Complete JSON-structured changelog entry for rendering');
+
+export type ChangelogJson = z.infer<typeof changelogJsonSchema>;

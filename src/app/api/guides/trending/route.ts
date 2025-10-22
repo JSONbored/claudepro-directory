@@ -4,6 +4,7 @@ import { UI_CONFIG } from '@/src/lib/constants';
 import { CACHE_CONFIG } from '@/src/lib/constants/cache';
 import { createApiRoute } from '@/src/lib/error-handler';
 import { rateLimiters } from '@/src/lib/rate-limiter.server';
+import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import {
   createCursor,
   createPaginationMeta,
@@ -111,9 +112,9 @@ const route = createApiRoute({
       const guidesMetadata = await lazyContentLoaders.guides();
 
       // Calculate trending using Redis view counts
-      // Type assertion safe: getBatchTrendingData only reads slug/category from items
+      // Type assertion: getBatchTrendingData accepts UnifiedContentItem[] which guidesMetadata satisfies
       const trendingData = await getBatchTrendingData({
-        guides: guidesMetadata as any,
+        guides: guidesMetadata as unknown as UnifiedContentItem[],
       });
 
       // Extract trending items and paginate

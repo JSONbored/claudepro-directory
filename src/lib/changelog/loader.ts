@@ -312,3 +312,59 @@ export async function invalidateChangelogCache(): Promise<void> {
     );
   }
 }
+
+// ==============================================================================
+// JSON CHANGELOG LOADERS (New Architecture - Load from generated file)
+// ==============================================================================
+
+/**
+ * Get changelog entry in JSON format from generated file
+ *
+ * Loads pre-built ChangelogJson with structured sections for rendering.
+ * Much faster than parsing CHANGELOG.md at runtime.
+ *
+ * @param slug - Entry slug
+ * @returns ChangelogJson entry or null if not found
+ *
+ * @example
+ * const entry = await getChangelogJsonBySlug("2025-10-18-pattern-based-seo");
+ * // Use with JsonContentRenderer
+ */
+export async function getChangelogJsonBySlug(
+  slug: string
+): Promise<import('@/src/lib/schemas/changelog.schema').ChangelogJson | null> {
+  try {
+    const { getChangelogFullBySlug } = await import('@/generated/changelog-full');
+    return getChangelogFullBySlug(slug);
+  } catch (error) {
+    logger.error(
+      `Failed to load JSON changelog entry: ${slug}`,
+      error instanceof Error ? error : new Error(String(error))
+    );
+    return null;
+  }
+}
+
+/**
+ * Get all changelog entries in JSON format from generated file
+ *
+ * @returns Array of ChangelogJson entries
+ *
+ * @example
+ * const entries = await getAllChangelogJsonEntries();
+ * // Returns structured JSON with sections for rendering
+ */
+export async function getAllChangelogJsonEntries(): Promise<
+  import('@/src/lib/schemas/changelog.schema').ChangelogJson[]
+> {
+  try {
+    const { changelogFull } = await import('@/generated/changelog-full');
+    return changelogFull;
+  } catch (error) {
+    logger.error(
+      'Failed to load JSON changelog entries',
+      error instanceof Error ? error : new Error(String(error))
+    );
+    return [];
+  }
+}

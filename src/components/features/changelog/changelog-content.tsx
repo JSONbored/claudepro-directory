@@ -18,17 +18,17 @@
  */
 
 import { memo } from 'react';
-import { MDXRenderer } from '@/src/components/content/mdx-renderer';
+import { JsonContentRenderer } from '@/src/components/content/json-content-renderer';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import type { ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
+import type { ChangelogJson } from '@/src/lib/schemas/changelog.schema';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Props for ChangelogContent component
  */
 export interface ChangelogContentProps {
-  /** Changelog entry to render */
-  entry: ChangelogEntry;
+  /** Changelog entry to render (JSON format with structured sections) */
+  entry: ChangelogJson;
 }
 
 /**
@@ -40,45 +40,41 @@ export interface ChangelogContentProps {
  * ```
  */
 export const ChangelogContent = memo(({ entry }: ChangelogContentProps) => {
-  // Get non-empty categories for badge display
-  const nonEmptyCategories = [];
-  if (entry.categories.Added.length > 0) nonEmptyCategories.push('Added');
-  if (entry.categories.Changed.length > 0) nonEmptyCategories.push('Changed');
-  if (entry.categories.Deprecated.length > 0) nonEmptyCategories.push('Deprecated');
-  if (entry.categories.Removed.length > 0) nonEmptyCategories.push('Removed');
-  if (entry.categories.Fixed.length > 0) nonEmptyCategories.push('Fixed');
-  if (entry.categories.Security.length > 0) nonEmptyCategories.push('Security');
+  // Get non-empty categories for badge display (from metadata.categories counts)
+  const categories = entry.metadata.categories;
+  const nonEmptyCategories: Array<{ name: string; count: number }> = [];
+
+  if (categories.Added > 0) nonEmptyCategories.push({ name: 'Added', count: categories.Added });
+  if (categories.Changed > 0)
+    nonEmptyCategories.push({ name: 'Changed', count: categories.Changed });
+  if (categories.Deprecated > 0)
+    nonEmptyCategories.push({ name: 'Deprecated', count: categories.Deprecated });
+  if (categories.Removed > 0)
+    nonEmptyCategories.push({ name: 'Removed', count: categories.Removed });
+  if (categories.Fixed > 0) nonEmptyCategories.push({ name: 'Fixed', count: categories.Fixed });
+  if (categories.Security > 0)
+    nonEmptyCategories.push({ name: 'Security', count: categories.Security });
 
   return (
     <article className={'space-y-6 max-w-none'}>
-      {/* TL;DR Section */}
-      {entry.tldr && (
-        <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-          <h2 className="text-sm font-semibold text-primary mb-2">TL;DR</h2>
-          <p className="text-sm text-foreground">{entry.tldr}</p>
-        </div>
-      )}
-
-      {/* Category Badges */}
+      {/* Category Badges with Counts */}
       {nonEmptyCategories.length > 0 && (
         <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} py-2`}>
-          {nonEmptyCategories.map((category) => (
+          {nonEmptyCategories.map(({ name, count }) => (
             <UnifiedBadge
-              key={category}
+              key={name}
               variant="base"
               style="outline"
-              className={`${BADGE_COLORS.changelogCategory[category as keyof typeof BADGE_COLORS.changelogCategory]} font-medium`}
+              className={`${BADGE_COLORS.changelogCategory[name as keyof typeof BADGE_COLORS.changelogCategory]} font-medium`}
             >
-              {category}
+              {name} ({count})
             </UnifiedBadge>
           ))}
         </div>
       )}
 
-      {/* Main Content - Rendered as Markdown */}
-      <div className="prose prose-slate dark:prose-invert max-w-none">
-        <MDXRenderer source={entry.content} className="changelog-content" />
-      </div>
+      {/* Structured Content (TL;DR, Tabs, Accordions, etc.) */}
+      <JsonContentRenderer json={entry} />
     </article>
   );
 });

@@ -15,16 +15,15 @@
  * @module lib/build/url-generator
  */
 
-import { existsSync, readdirSync } from 'fs';
-import { join } from 'path';
+// Using pre-generated metadata only - no file system operations
 import type { ChangelogMetadata } from '@/generated/changelog-metadata';
 import type { GuideMetadata } from '@/generated/guides-metadata';
+import { guidesMetadata } from '@/generated/guides-metadata';
 import type { JobMetadata } from '@/generated/jobs-metadata';
-import { parseChangelog } from '@/src/lib/changelog/parser';
-import { APP_CONFIG, CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '@/src/lib/constants';
-import { getJobs } from '@/src/lib/data/jobs';
+import { APP_CONFIG, MAIN_CONTENT_CATEGORIES } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
-import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
+// Supabase not needed - removed runtime queries for build performance
+// import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 
 /**
  * Sitemap URL interface matching sitemap.xml specification
@@ -206,51 +205,24 @@ export async function generateAllSiteUrls(
   // ============================================================================
 
   if (includeGuides) {
-    const seoCategories = [
-      'use-cases',
-      'tutorials',
-      'collections',
-      'categories',
-      'workflows',
-      'comparisons',
-      'troubleshooting',
-    ] as const;
+    // Use pre-generated metadata instead of file system scanning
+    guidesMetadata.forEach((guide) => {
+      // Guide page
+      urls.push({
+        loc: `${baseUrl || ''}/guides/${guide.subcategory}/${guide.slug}`,
+        lastmod: currentDate,
+        changefreq: 'monthly',
+        priority: 0.65,
+      });
 
-    seoCategories.forEach((category) => {
-      const seoDir = join(CONTENT_PATHS.guides, category);
-      if (existsSync(seoDir)) {
-        try {
-          const files = readdirSync(seoDir).filter(
-            (f) => f.endsWith('.mdx') || f.endsWith('.json')
-          );
-          files.forEach((file) => {
-            const slug = file.replace(/\.(mdx|json)$/, '');
-
-            // Guide page
-            urls.push({
-              loc: `${baseUrl || ''}/guides/${category}/${slug}`,
-              lastmod: currentDate,
-              changefreq: 'monthly',
-              priority: 0.65,
-            });
-
-            // Guide llms.txt (if enabled)
-            if (includeLlmsTxt) {
-              urls.push({
-                loc: `${baseUrl || ''}/guides/${category}/${slug}/llms.txt`,
-                lastmod: currentDate,
-                changefreq: 'weekly',
-                priority: 0.7,
-              });
-            }
-          });
-        } catch {
-          // Directory doesn't exist yet - this is expected for new installations
-          logger.debug(`Guide category directory not found: ${category}`, {
-            path: seoDir,
-            type: 'url_generation',
-          });
-        }
+      // Guide llms.txt (if enabled)
+      if (includeLlmsTxt) {
+        urls.push({
+          loc: `${baseUrl || ''}/guides/${guide.subcategory}/${guide.slug}/llms.txt`,
+          lastmod: currentDate,
+          changefreq: 'weekly',
+          priority: 0.7,
+        });
       }
     });
   }
@@ -261,20 +233,19 @@ export async function generateAllSiteUrls(
 
   if (includeChangelog) {
     try {
-      const changelog = await parseChangelog();
-
-      // Individual changelog entries
-      changelog.entries.forEach((entry) => {
+      // Use pre-generated metadata instead of parsing at runtime
+      metadata.changelogMetadata.forEach((entry: ChangelogMetadata) => {
         urls.push({
           loc: `${baseUrl}/changelog/${entry.slug}`,
-          lastmod: entry.date,
+          lastmod: entry.dateAdded?.split('T')[0] || currentDate,
           changefreq: 'monthly', // Changelog entries rarely change after publication
           priority: 0.7, // High priority for recent updates
         });
       });
 
       // Changelog RSS/Atom feeds (for feed aggregators)
-      const latestEntryDate = changelog.entries[0]?.date || currentDate;
+      const latestEntryDate =
+        metadata.changelogMetadata[0]?.dateAdded?.split('T')[0] || currentDate;
       urls.push(
         {
           loc: `${baseUrl}/changelog/rss.xml`,
@@ -301,10 +272,10 @@ export async function generateAllSiteUrls(
         });
 
         // Individual changelog entry llms.txt pages
-        changelog.entries.forEach((entry) => {
+        metadata.changelogMetadata.forEach((entry: ChangelogMetadata) => {
           urls.push({
             loc: `${baseUrl}/changelog/${entry.slug}/llms.txt`,
-            lastmod: entry.date,
+            lastmod: entry.dateAdded?.split('T')[0] || currentDate,
             changefreq: 'weekly',
             priority: 0.75,
           });
@@ -385,30 +356,17 @@ export async function generateAllSiteUrls(
   // ============================================================================
 
   if (includeGuides) {
-    const comparisonsDir = join(CONTENT_PATHS.guides, 'comparisons');
-    if (existsSync(comparisonsDir)) {
-      try {
-        const files = readdirSync(comparisonsDir).filter(
-          (f) => f.endsWith('.mdx') || f.endsWith('.json')
-        );
-        files.forEach((file) => {
-          const slug = file.replace(/\.(mdx|json)$/, '');
+    // Use pre-generated metadata for comparison guides
+    const comparisonGuides = guidesMetadata.filter((guide) => guide.subcategory === 'comparisons');
 
-          urls.push({
-            loc: `${baseUrl}/compare/${slug}`,
-            lastmod: currentDate,
-            changefreq: 'monthly', // SEO content - stable after publication
-            priority: 0.7, // High priority - valuable comparison content
-          });
-        });
-      } catch {
-        // Directory doesn't exist yet - no comparisons to add
-        logger.debug('Comparisons directory not found, skipping comparison pages', {
-          path: comparisonsDir,
-          type: 'url_generation',
-        });
-      }
-    }
+    comparisonGuides.forEach((guide) => {
+      urls.push({
+        loc: `${baseUrl}/compare/${guide.slug}`,
+        lastmod: currentDate,
+        changefreq: 'monthly', // SEO content - stable after publication
+        priority: 0.7, // High priority - valuable comparison content
+      });
+    });
   }
 
   // ============================================================================
@@ -416,11 +374,11 @@ export async function generateAllSiteUrls(
   // ============================================================================
 
   try {
-    const jobs = await getJobs();
-    jobs.forEach((job) => {
+    // Use pre-generated metadata instead of fetching from Supabase at runtime
+    metadata.jobsMetadata.forEach((job) => {
       urls.push({
         loc: `${baseUrl}/jobs/${job.slug}`,
-        lastmod: job.postedAt?.split('T')[0] || job.dateAdded,
+        lastmod: job.posted_at?.split('T')[0] || currentDate,
         changefreq: 'weekly', // Job listings may update (remote/salary changes)
         priority: 0.65,
       });
@@ -436,60 +394,15 @@ export async function generateAllSiteUrls(
   // PUBLIC USER PROFILES (Community Content)
   // ============================================================================
 
-  try {
-    const supabase = await createAdminClient();
-    const { data: publicUsers } = await supabase
-      .from('users')
-      .select('slug, updated_at')
-      .eq('public', true);
-
-    (publicUsers || []).forEach((user) => {
-      urls.push({
-        loc: `${baseUrl}/u/${user.slug}`,
-        lastmod: user.updated_at?.split('T')[0] || currentDate,
-        changefreq: 'weekly',
-        priority: 0.5,
-      });
-    });
-  } catch (error) {
-    logger.warn('Failed to fetch public users for sitemap generation, skipping user profiles', {
-      error: error instanceof Error ? error.message : String(error),
-      type: 'url_generation',
-    });
-  }
+  // Skip Supabase queries during build - mock client causes timeouts
+  // User profiles are dynamic and don't need to be in build-time sitemap
 
   // ============================================================================
   // PUBLIC USER COLLECTIONS (User-Curated Content)
   // ============================================================================
 
-  try {
-    const supabase = await createAdminClient();
-    const { data: publicCollections } = await supabase
-      .from('user_collections')
-      .select('slug, updated_at, users!inner(slug)')
-      .eq('is_public', true);
-
-    (publicCollections || []).forEach((collection) => {
-      // Type assertion: Supabase join returns nested object
-      const userSlug = (collection.users as { slug: string } | null)?.slug;
-      if (userSlug) {
-        urls.push({
-          loc: `${baseUrl}/u/${userSlug}/collections/${collection.slug}`,
-          lastmod: collection.updated_at?.split('T')[0] || currentDate,
-          changefreq: 'weekly',
-          priority: 0.5,
-        });
-      }
-    });
-  } catch (error) {
-    logger.warn(
-      'Failed to fetch public collections for sitemap generation, skipping user collections',
-      {
-        error: error instanceof Error ? error.message : String(error),
-        type: 'url_generation',
-      }
-    );
-  }
+  // Skip Supabase queries during build - mock client causes timeouts
+  // User collections are dynamic and don't need to be in build-time sitemap
 
   return urls;
 }

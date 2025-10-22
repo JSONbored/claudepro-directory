@@ -13,7 +13,7 @@ import {
   buildChangelogArticleSchema,
   buildChangelogBlogSchema,
 } from '@/src/lib/changelog/structured-data';
-import type { ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
+import type { ChangelogEntry, ChangelogJson } from '@/src/lib/schemas/changelog.schema';
 import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
 
 /**
@@ -52,19 +52,38 @@ export async function ChangelogBlogStructuredData({ entries }: { entries: Change
  * Changelog Entry Page Structured Data
  *
  * Renders TechArticle schema for individual /changelog/[slug] pages.
+ * Accepts ChangelogJson format and converts to legacy format for schema builder.
  *
  * @param props - Component props
- * @param props.entry - Changelog entry
+ * @param props.entry - Changelog entry (JSON format)
  * @returns Script tag with JSON-LD
  */
-export async function ChangelogArticleStructuredData({ entry }: { entry: ChangelogEntry }) {
+export async function ChangelogArticleStructuredData({ entry }: { entry: ChangelogJson }) {
   // Extract nonce from CSP header for script security
   const headersList = await headers();
   const cspHeader = headersList.get('content-security-policy');
   const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
 
-  const schema = buildChangelogArticleSchema(entry);
-  const schemaId = `structured-data-changelog-${entry.slug}`;
+  // Convert ChangelogJson to legacy ChangelogEntry format for schema builder
+  const legacyEntry: ChangelogEntry = {
+    slug: entry.metadata.slug,
+    date: entry.metadata.date,
+    title: entry.metadata.title,
+    tldr: entry.metadata.tldr,
+    content: '', // Not needed for schema
+    rawContent: '', // Not needed for schema
+    categories: {
+      Added: Array(entry.metadata.categories.Added).fill({ content: '' }),
+      Changed: Array(entry.metadata.categories.Changed).fill({ content: '' }),
+      Deprecated: Array(entry.metadata.categories.Deprecated).fill({ content: '' }),
+      Removed: Array(entry.metadata.categories.Removed).fill({ content: '' }),
+      Fixed: Array(entry.metadata.categories.Fixed).fill({ content: '' }),
+      Security: Array(entry.metadata.categories.Security).fill({ content: '' }),
+    },
+  };
+
+  const schema = buildChangelogArticleSchema(legacyEntry);
+  const schemaId = `structured-data-changelog-${entry.metadata.slug}`;
 
   return (
     <Script

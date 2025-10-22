@@ -127,7 +127,13 @@ export async function GET(
     // Load JSON guide file
     const jsonPath = path.join(process.cwd(), 'content', 'guides', mappedPath, `${slug}.json`);
 
-    let frontmatter: any;
+    let frontmatter: {
+      title?: string;
+      description?: string;
+      keywords?: string[];
+      author?: string;
+      dateUpdated?: string;
+    };
     let content: string;
 
     try {

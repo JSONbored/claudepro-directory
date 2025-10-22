@@ -31,7 +31,7 @@ import {
   MetricsDisplay,
   SmartRelatedContent,
   StepByStepGuide,
-} from './mdx-components';
+} from './content-components';
 
 const meta = {
   title: 'UI/MDXComponents',

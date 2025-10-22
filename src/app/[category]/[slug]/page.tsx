@@ -119,7 +119,12 @@ export async function generateStaticParams() {
   // OPTIMIZATION: Use slug-only loader for 10x faster static param generation
   const { getContentSlugsOnly } = await import('@/src/lib/content/content-loaders');
 
-  for (const category of VALID_CATEGORIES) {
+  // Filter to only UnifiedContent categories (exclude guides, changelog, jobs which have dedicated routes)
+  const unifiedContentCategories = VALID_CATEGORIES.filter(
+    (cat) => !['guides', 'changelog', 'jobs'].includes(cat)
+  );
+
+  for (const category of unifiedContentCategories) {
     const items = await getContentSlugsOnly(category);
 
     for (const item of items) {

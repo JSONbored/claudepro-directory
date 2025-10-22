@@ -26,7 +26,6 @@ import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders
 import { type CategoryId, getAllCategoryIds } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import { featuredService } from '@/src/lib/services/featured.server';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 
 /**
@@ -79,7 +78,11 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
    */
 
   // Get all category IDs from registry (zero hardcoded lists)
-  const categoryIds = getAllCategoryIds();
+  // Filter out categories with dedicated routes (guides, changelog, jobs)
+  // These aren't part of the unified content display on homepage
+  const categoryIds = getAllCategoryIds().filter(
+    (id) => !['guides', 'changelog', 'jobs'].includes(id)
+  );
 
   // Initialize category data storage
   const categoryData: Record<CategoryId, UnifiedContentItem[]> = {} as Record<
@@ -90,23 +93,20 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
   let featuredByCategory: Record<string, UnifiedContentItem[]> = {};
 
   try {
-    // Build dynamic loader array from registry
-    const loaders = [
-      ...categoryIds.map((id) => lazyContentLoaders[id]()),
-      featuredService.loadCurrentFeaturedContentByCategory(),
-    ];
+    // Build dynamic loader array from registry (no featured service during build)
+    const loaders = categoryIds.map((id) => lazyContentLoaders[id]());
 
-    // Batch fetch all category data + featured content
+    // Batch fetch all category data
     const results = await batchFetch(loaders);
 
-    // Map results back to category IDs (last result is featured content)
+    // Map results back to category IDs
     categoryIds.forEach((id, index) => {
       categoryData[id] = (results[index] as UnifiedContentItem[]) || [];
     });
 
-    // Last result is featured content
-    featuredByCategory =
-      (results[results.length - 1] as Record<string, UnifiedContentItem[]>) || {};
+    // Featured content skipped during build - empty object
+    // In production with Supabase, this would be populated
+    featuredByCategory = {};
   } catch (error) {
     // Log error but continue with empty fallbacks to prevent page crash
     logger.error(

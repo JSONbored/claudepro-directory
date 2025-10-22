@@ -137,7 +137,7 @@ const contentPathsSchema = z.object({
   collections: z.string().startsWith('content/'),
   skills: z.string().startsWith('content/'),
 
-  // MDX guide content types (new structure)
+  // JSON guide content types
   guides: z.string().startsWith('content/'),
   tutorials: z.string().startsWith('content/guides/'),
   comparisons: z.string().startsWith('content/guides/'),
@@ -158,7 +158,7 @@ export const CONTENT_PATHS = contentPathsSchema.parse({
   collections: 'content/collections',
   skills: 'content/skills',
 
-  // MDX guide content (new structure)
+  // JSON guide content
   guides: 'content/guides',
   tutorials: 'content/guides/tutorials',
   comparisons: 'content/guides/comparisons',

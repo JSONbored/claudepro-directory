@@ -22,7 +22,7 @@ import {
   type ContentType,
   UNIFIED_CATEGORY_REGISTRY,
 } from '@/src/lib/config/category-config';
-import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
+// MDX support removed - all content is JSON now
 import { logger } from '@/src/lib/logger';
 import { generateSlugFromFilename } from '@/src/lib/schemas/content-generation.schema';
 import { slugToTitle } from '@/src/lib/utils';
@@ -294,12 +294,11 @@ async function processContentFile<T extends ContentType>(
       .describe('Raw content schema with passthrough for unknown fields');
 
     let parsedData: z.infer<typeof rawJsonSchema>;
-    const isMdx = file.endsWith('.mdx');
     const isJson = file.endsWith('.json');
 
     try {
       if (isJson) {
-        // Parse JSON guide format
+        // Parse JSON format (all content is JSON now)
         const json = JSON.parse(content);
 
         // Extract subcategory from file path (e.g., "tutorials/guide.json" → "tutorials")
@@ -311,22 +310,6 @@ async function processContentFile<T extends ContentType>(
           subcategory,
           content: JSON.stringify(json), // Store full JSON for rendering
         };
-      } else if (isMdx) {
-        // Parse MDX frontmatter for guides
-        const { frontmatter, content: mdxContent } = parseMDXFrontmatter(content);
-
-        // Extract subcategory from file path (e.g., "tutorials/guide.mdx" → "tutorials")
-        const subcategory = file.includes('/') ? file.split('/')[0] : undefined;
-
-        // Convert MDX frontmatter to match guide schema
-        parsedData = {
-          ...frontmatter,
-          content: mdxContent,
-          category: 'guides', // All MDX files are guides
-          subcategory,
-          // Fallback: dateAdded is required by base schema, use dateUpdated or current date
-          dateAdded: frontmatter.dateUpdated || new Date().toISOString().split('T')[0],
-        };
       } else {
         // safeParse handles JSON.parse + Zod validation in one secure operation
         parsedData = safeParse(content, rawJsonSchema, {
@@ -335,7 +318,7 @@ async function processContentFile<T extends ContentType>(
       }
     } catch (parseError) {
       throw new Error(
-        `${isMdx ? 'MDX' : 'JSON'} parse error: ${parseError instanceof Error ? parseError.message : String(parseError)}`
+        `JSON parse error: ${parseError instanceof Error ? parseError.message : String(parseError)}`
       );
     }
 

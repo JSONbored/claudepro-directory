@@ -19,10 +19,13 @@ export function createClient() {
   if (!(supabaseUrl && supabaseAnonKey)) {
     const isLocal = !(process.env.VERCEL || process.env.CI);
     if (isLocal) {
-      // biome-ignore lint/suspicious/noConsole: Intentional development warning for missing Supabase credentials
-      console.warn(
-        '⚠️  Supabase env vars not found - using mock client (local environment). Auth features will not work.'
-      );
+      // Suppress warning during builds - only show in dev server
+      if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+        // biome-ignore lint/suspicious/noConsole: Intentional development warning for missing Supabase credentials
+        console.warn(
+          '⚠️  Supabase env vars not found - using mock client (local environment). Auth features will not work.'
+        );
+      }
       // Return a mock client that matches the Supabase client interface
       // Create chainable query builder
       const createChainableQuery = (): any => ({

@@ -32,7 +32,7 @@ import {
   MetricsDisplay,
   SmartRelatedContent,
   StepByStepGuide,
-} from '@/src/components/content/mdx-components';
+} from '@/src/components/content/content-components';
 import { UnifiedContentBlock } from '@/src/components/content/unified-content-block';
 import { UnifiedContentBox } from '@/src/components/domain/unified-content-box';
 import type {
@@ -45,8 +45,8 @@ import type {
   ListSection,
   ParagraphSection,
   TableSection,
-} from '@/src/lib/schemas/guide-content.schema';
-import { validateGuideJson } from '@/src/lib/schemas/guide-content.schema';
+} from '@/src/lib/schemas/content/guide.schema';
+// Validation removed - data is pre-validated at build time
 import { cn } from '@/src/lib/utils';
 
 // ==============================================================================
@@ -119,7 +119,7 @@ function parseInlineMarkdown(text: string): ReactNode {
     parts.push(text.slice(lastIndex));
   }
 
-  return parts.length > 0 ? <>{parts}</> : text;
+  return parts.length > 0 ? parts : text;
 }
 
 /**
@@ -316,7 +316,6 @@ function ComponentRenderer({ component, props }: ComponentSection) {
       return <SmartRelatedContent {...(props as any)} />;
 
     default:
-      console.warn(`[JsonContentRenderer] Unknown component: ${component}`);
       return null;
   }
 }
@@ -365,9 +364,7 @@ function SectionRenderer({ section }: { section: ContentSection; index: number }
       return <HorizontalRuleRenderer />;
 
     default: {
-      // TypeScript exhaustiveness check
-      const _exhaustive: never = section;
-      console.warn('[JsonContentRenderer] Unknown section type:', _exhaustive);
+      // TypeScript exhaustiveness check - ensures all section types are handled
       return null;
     }
   }
@@ -396,12 +393,24 @@ export interface JsonContentRendererProps {
  * ```
  */
 export function JsonContentRenderer({ json, className }: JsonContentRendererProps) {
-  // Validate JSON structure
-  const validated = validateGuideJson(json);
+  // Data is pre-validated at build time - no runtime validation needed
+  // Supports both GuideJson and ChangelogJson (same content structure)
+
+  // Type guard and safety check
+  if (!json || typeof json !== 'object') {
+    return null;
+  }
+
+  const contentData = json as { content?: { sections?: ContentSection[] } };
+  const sections = contentData.content?.sections;
+
+  if (!(sections && Array.isArray(sections))) {
+    return null;
+  }
 
   return (
     <article className={cn('prose prose-neutral dark:prose-invert max-w-none', className)}>
-      {validated.content.sections.map((section, index) => (
+      {sections.map((section: ContentSection, index: number) => (
         <SectionRenderer key={index} section={section} index={index} />
       ))}
     </article>

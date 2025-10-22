@@ -1,6 +1,6 @@
 /**
  * Guide Content Schema
- * Based on SEO/tutorial MDX files structure and frontmatter
+ * Based on JSON guide files with structured content sections
  *
  * Phase 2: Refactored using base-content.schema.ts with shape destructuring
  */
@@ -17,7 +17,7 @@ import {
 /**
  * Guide Content Schema
  *
- * Matches MDX files with frontmatter in content/guides/ directory.
+ * Matches JSON files in content/guides/ directory.
  * Uses Zod v4 shape destructuring pattern for composition with base content schema.
  *
  * Inherited Fields from baseContentMetadataSchema:
@@ -26,7 +26,7 @@ import {
  * - author: Content creator
  * - dateAdded: ISO date when guide was added (fallback)
  * - tags: Required array of tags
- * - content: Full MDX content without frontmatter
+ * - content: Full JSON content as stringified structure
  * - title: Display title (overridden as required for guides)
  * - source: Content source type (overridden with 'claudepro' default)
  * - documentationUrl: Optional external documentation link
@@ -61,15 +61,12 @@ import {
  * - githubUrl: Optional GitHub repository URL
  * - relatedGuides: Array of related guide slugs (max 20)
  *
- * Category Types (matching template variations):
- * - tutorials: tutorial-template.mdx
- * - comparisons: comparison-template.mdx
- * - troubleshooting: troubleshooting-template.mdx
- * - use-cases: use-case-template.mdx
- * - workflows: workflow-template.mdx
- * - categories: category-template.mdx
- * - collections: collection-template.mdx
- * - guides: General guide category
+ * Category Types (guide subcategories):
+ * - tutorials: Step-by-step guides
+ * - comparisons: Feature and tool comparisons
+ * - troubleshooting: Problem-solving guides
+ * - use-cases: Industry and scenario guides
+ * - workflows: Process and migration guides
  */
 export const guideContentSchema = z.object({
   // Inherit all base content metadata fields using shape destructuring (Zod v4 best practice)
@@ -80,11 +77,11 @@ export const guideContentSchema = z.object({
 
   // Guide subcategory - required for routing and organization
   subcategory: z.enum([
-    'tutorials', // tutorial-template.mdx
-    'comparisons', // comparison-template.mdx
-    'troubleshooting', // troubleshooting-template.mdx
-    'use-cases', // use-case-template.mdx
-    'workflows', // workflow-template.mdx
+    'tutorials', // Step-by-step guides
+    'comparisons', // Feature and tool comparisons
+    'troubleshooting', // Problem-solving guides
+    'use-cases', // Industry and scenario guides
+    'workflows', // Process and migration guides
   ]),
 
   // Override: title is required for guides (not optional like in base)
@@ -129,3 +126,167 @@ export const guideContentSchema = z.object({
 });
 
 export type GuideContent = z.infer<typeof guideContentSchema>;
+
+// ==============================================================================
+// CONTENT SECTION SCHEMAS (For JSON Content Renderer)
+// ==============================================================================
+
+import { nonNegativeInt } from '@/src/lib/schemas/primitives/base-numbers';
+import {
+  codeString,
+  longString,
+  mediumString,
+  shortString,
+} from '@/src/lib/schemas/primitives/base-strings';
+
+/**
+ * Paragraph - Plain text with inline markdown formatting
+ * Supports: **bold**, _italic_, [links](url)
+ */
+const paragraphSectionSchema = z
+  .object({
+    type: z.literal('paragraph'),
+    content: longString.describe('Paragraph text with inline markdown (bold, italic, links)'),
+  })
+  .describe('Text paragraph with inline formatting');
+
+/**
+ * Heading - Section headings (h1-h6) with auto-generated anchor IDs
+ */
+const headingSectionSchema = z
+  .object({
+    type: z.literal('heading'),
+    level: z.number().int().min(1).max(6).describe('Heading level (1-6)'),
+    text: mediumString.describe('Heading text content'),
+    id: shortString.optional().describe('Anchor ID (auto-generated from text if not provided)'),
+  })
+  .describe('Section heading with anchor link support');
+
+/**
+ * Code Block - Syntax-highlighted code with language and optional metadata
+ */
+const codeSectionSchema = z
+  .object({
+    type: z.literal('code'),
+    language: shortString.describe('Programming language for syntax highlighting'),
+    code: codeString.describe('Code content'),
+    filename: shortString.optional().describe('Optional filename to display'),
+    highlight: z.array(nonNegativeInt).optional().describe('Line numbers to highlight'),
+  })
+  .describe('Code block with syntax highlighting');
+
+/**
+ * List - Ordered or unordered list with inline markdown in items
+ */
+const listSectionSchema = z
+  .object({
+    type: z.literal('list'),
+    ordered: z.boolean().default(false).describe('true for numbered lists, false for bullets'),
+    items: z
+      .array(mediumString.describe('List item with inline markdown'))
+      .min(1)
+      .describe('List items'),
+  })
+  .describe('Ordered or unordered list');
+
+/**
+ * Blockquote - Quoted text
+ */
+const blockquoteSectionSchema = z
+  .object({
+    type: z.literal('blockquote'),
+    content: longString.describe('Quoted text with inline markdown'),
+  })
+  .describe('Blockquote/quoted text');
+
+/**
+ * Image - Image with alt text, dimensions, and optional caption
+ */
+const imageSectionSchema = z
+  .object({
+    type: z.literal('image'),
+    src: shortString.describe('Image source URL or path'),
+    alt: mediumString.describe('Alt text for accessibility and SEO'),
+    width: nonNegativeInt.default(800).describe('Image width in pixels'),
+    height: nonNegativeInt.default(600).describe('Image height in pixels'),
+    caption: mediumString.optional().describe('Optional image caption'),
+  })
+  .describe('Image with metadata');
+
+/**
+ * Table - Tabular data with headers and rows
+ */
+const tableSectionSchema = z
+  .object({
+    type: z.literal('table'),
+    headers: z.array(shortString.describe('Column header')).describe('Table column headers'),
+    rows: z
+      .array(
+        z
+          .array(mediumString.describe('Cell content with inline markdown'))
+          .describe('Table row cells')
+      )
+      .describe('Table data rows'),
+  })
+  .describe('Table with headers and rows');
+
+/**
+ * Component - React component with validated props
+ */
+const componentSectionSchema = z
+  .object({
+    type: z.literal('component'),
+    component: z
+      .enum([
+        'UnifiedContentBox',
+        'UnifiedContentBlock',
+        'StepByStepGuide',
+        'Checklist',
+        'CodeGroup',
+        'ComparisonTable',
+        'DiagnosticFlow',
+        'ErrorTable',
+        'MetricsDisplay',
+        'SmartRelatedContent',
+      ])
+      .describe('React component name'),
+    props: z
+      .record(z.string(), z.any())
+      .describe('Component props (validated at render time against component schemas)'),
+  })
+  .describe('React component with props');
+
+/**
+ * Horizontal Rule - Section divider
+ */
+const horizontalRuleSectionSchema = z.object({
+  type: z.literal('hr'),
+});
+
+/**
+ * Content section - union of all section types
+ * The 'type' field is the discriminator.
+ */
+export const contentSectionSchema = z.union([
+  paragraphSectionSchema,
+  headingSectionSchema,
+  codeSectionSchema,
+  listSectionSchema,
+  blockquoteSectionSchema,
+  imageSectionSchema,
+  tableSectionSchema,
+  componentSectionSchema,
+  horizontalRuleSectionSchema,
+]);
+
+export type ContentSection = z.infer<typeof contentSectionSchema>;
+
+// Helper types for specific sections
+export type ParagraphSection = z.infer<typeof paragraphSectionSchema>;
+export type HeadingSection = z.infer<typeof headingSectionSchema>;
+export type CodeSection = z.infer<typeof codeSectionSchema>;
+export type ListSection = z.infer<typeof listSectionSchema>;
+export type BlockquoteSection = z.infer<typeof blockquoteSectionSchema>;
+export type ImageSection = z.infer<typeof imageSectionSchema>;
+export type TableSection = z.infer<typeof tableSectionSchema>;
+export type ComponentSection = z.infer<typeof componentSectionSchema>;

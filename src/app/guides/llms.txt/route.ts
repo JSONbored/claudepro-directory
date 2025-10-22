@@ -8,16 +8,15 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
-import { existsSync, readdirSync } from 'fs';
 import type { NextRequest } from 'next/server';
-import { join } from 'path';
-import { APP_CONFIG, CONTENT_PATHS } from '@/src/lib/constants';
+import { guidesMetadata } from '@/generated/guides-metadata';
+import { APP_CONFIG } from '@/src/lib/constants';
 import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
 /**
  * Runtime configuration
- * Use Node.js runtime for better performance with file system access
+ * Using Node.js runtime (edge incompatible due to error-handler dependencies)
  */
 export const runtime = 'nodejs';
 
@@ -78,40 +77,23 @@ The guides section provides detailed documentation for using Claude and the Clau
 
 `;
 
-    // Generate index for each category
+    // Generate index for each category using pre-generated metadata
     for (const category of GUIDE_CATEGORIES) {
-      const categoryDir = join(CONTENT_PATHS.guides, category.slug);
-
       guidesIndex += `\n## ${category.title}\n\n${category.description}\n\n`;
 
-      if (existsSync(categoryDir)) {
-        try {
-          const files = readdirSync(categoryDir).filter(
-            (f) => f.endsWith('.mdx') || f.endsWith('.json')
-          );
+      // Filter guides for this category
+      const categoryGuides = guidesMetadata.filter((guide) => guide.subcategory === category.slug);
 
-          if (files.length > 0) {
-            guidesIndex += 'Available guides:\n\n';
+      if (categoryGuides.length > 0) {
+        guidesIndex += 'Available guides:\n\n';
 
-            for (const file of files) {
-              const slug = file.replace(/\.(mdx|json)$/, '');
-              const title = slug
-                .split('-')
-                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
-
-              guidesIndex += `- ${title}\n`;
-              guidesIndex += `  URL: ${APP_CONFIG.url}/guides/${category.slug}/${slug}\n`;
-              guidesIndex += `  Machine-readable: ${APP_CONFIG.url}/guides/${category.slug}/${slug}/llms.txt\n\n`;
-            }
-          } else {
-            guidesIndex += 'No guides available in this category yet.\n\n';
-          }
-        } catch {
-          guidesIndex += 'Error reading guides in this category.\n\n';
+        for (const guide of categoryGuides) {
+          guidesIndex += `- ${guide.title}\n`;
+          guidesIndex += `  URL: ${APP_CONFIG.url}/guides/${guide.subcategory}/${guide.slug}\n`;
+          guidesIndex += `  Machine-readable: ${APP_CONFIG.url}/guides/${guide.subcategory}/${guide.slug}/llms.txt\n\n`;
         }
       } else {
-        guidesIndex += 'Category directory not found.\n\n';
+        guidesIndex += 'No guides available in this category yet.\n\n';
       }
     }
 

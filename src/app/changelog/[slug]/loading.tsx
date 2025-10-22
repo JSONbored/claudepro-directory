@@ -1,76 +1,39 @@
 /**
  * Changelog Detail Loading State
- *
- * Loading skeleton for individual changelog entry page.
- * Shows placeholder content matching the layout of the detail page.
+ * Matches changelog detail page structure
  */
 
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
-import { Separator } from '@/src/components/primitives/separator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export default function ChangelogEntryLoading() {
+export default function Loading() {
   return (
-    <article className="container max-w-4xl py-8 space-y-8">
-      {/* Back Navigation Skeleton */}
-      <Skeleton size="sm" width="xs" />
-
-      {/* Header Skeleton */}
-      <header className="space-y-4 pb-6">
-        {/* Date */}
-        <div className={'flex items-center gap-3'}>
-          <Skeleton size="sm" width="xs" />
-          <Skeleton size="sm" width="sm" />
-        </div>
-
-        {/* Title */}
-        <Skeleton size="xl" width="3/4" />
-
-        {/* Canonical URL */}
-        <div className={'flex items-center gap-2'}>
-          <Skeleton size="sm" width="xs" />
-          <Skeleton size="sm" width="2xl" />
-        </div>
-      </header>
-
-      <Separator className="my-6" />
-
-      {/* Content Skeleton */}
-      <div className="space-y-6">
-        {/* TL;DR Box */}
-        <div className="rounded-lg border p-4">
-          <Skeleton size="sm" width="xs" className="mb-2" />
-          <Skeleton size="sm" width="3xl" />
-        </div>
-
-        {/* Category Badges */}
-        <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={`category-${i + 1}`} size="sm" width="xs" rounded="full" />
-          ))}
-        </div>
-
-        {/* Content Paragraphs */}
-        <div className="space-y-4">
-          <Skeleton size="md" width="3xl" />
-          <Skeleton size="sm" width="3xl" />
-          <Skeleton size="sm" width="5/6" />
-          <Skeleton size="sm" width="3xl" />
-          <Skeleton size="sm" width="2/3" />
-        </div>
-
-        {/* Section Headers */}
-        <div className="space-y-6">
-          {[...Array(3)].map((_, i) => (
-            <div key={`section-${i + 1}`} className="space-y-3">
-              <Skeleton size="lg" width="sm" />
-              <Skeleton size="sm" width="3xl" />
-              <Skeleton size="sm" width="5/6" />
-              <Skeleton size="sm" width="3xl" />
+    <div className="min-h-screen bg-background">
+      <div className="border-b border-border/50 bg-card/30">
+        <div className="container mx-auto px-4 py-8">
+          <Skeleton size="sm" width="sm" className="mb-6" />
+          <div className="max-w-4xl">
+            <div className="space-y-4 mb-6">
+              <Skeleton size="xl" width="3/4" />
+              <Skeleton size="md" width="3xl" />
             </div>
-          ))}
+            <div className="flex flex-wrap gap-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={`tag-${i}`} size="sm" width="xs" rounded="full" />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-    </article>
+
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="border rounded-lg p-6 space-y-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={`text-${i}`} size="sm" width={i % 3 === 0 ? '2/3' : '3xl'} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -13,21 +13,28 @@ import {
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Building, ExternalLink, Plus, Star } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
+// Supabase not needed during static build
+// import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata = generatePageMetadata('/companies');
 
-// Static Generation - Companies page generated at build time
+// Force static generation - companies data empty at build time
+export const dynamic = 'force-static';
 
 export default async function CompaniesPage() {
-  const supabase = await createAdminClient();
-
-  const { data: companies } = await supabase
-    .from('companies')
-    .select('*')
-    .order('featured', { ascending: false })
-    .order('created_at', { ascending: false });
+  // Always return empty during build - this page can be ISR or client-side fetched in production
+  const companies: Array<{
+    id: string;
+    name: string;
+    slug?: string;
+    logo?: string;
+    size?: string;
+    website?: string;
+    industry?: string;
+    description?: string;
+    featured?: boolean;
+  }> = [];
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -69,7 +76,7 @@ export default async function CompaniesPage() {
 
       {/* Companies Grid */}
       <section className={'container mx-auto px-4 py-12'}>
-        {!companies || companies.length === 0 ? (
+        {companies.length === 0 ? (
           <Card>
             <CardContent className={'flex flex-col items-center py-12'}>
               <Building className="h-12 w-12 text-muted-foreground mb-4" />

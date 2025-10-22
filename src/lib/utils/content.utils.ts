@@ -6,7 +6,7 @@
  * Consolidates:
  * - transformers.ts (145 LOC) - Content schema → component transformations
  * - filename-generator.ts (350 LOC) - Secure filename generation
- * - guide-helpers.ts (138 LOC) - MDX frontmatter parsing
+ * - guide-helpers.ts (138 LOC) - Guide metadata parsing
  * - url-helpers.ts (90 LOC) - Centralized URL generation
  *
  * Total: 723 LOC consolidated
@@ -536,7 +536,7 @@ export function generateHookFilename(
 
 /**
  * Guide frontmatter structure
- * Parsed from MDX files using gray-matter
+ * Parsed from JSON guide files
  */
 export interface GuideFrontmatter {
   title: string;

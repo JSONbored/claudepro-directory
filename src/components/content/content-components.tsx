@@ -35,7 +35,7 @@
 
 import Link from 'next/link';
 import React, { lazy, Suspense } from 'react';
-import { useMDXContent } from '@/src/components/infra/providers/mdx-content-provider';
+import { useContentContext } from '@/src/components/infra/providers/content-context';
 import {
   ConfigCardSkeleton,
   Skeleton,
@@ -65,7 +65,7 @@ export function CopyableHeading({
   className,
   ...props
 }: MdxHeadingProps & { level: 1 | 2 | 3 }) {
-  const mdxContext = useMDXContent();
+  const mdxContext = useContentContext();
 
   const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
   const { copied, copy } = useCopyWithEmailCapture({
@@ -137,7 +137,7 @@ function ensureString(value: unknown): string {
  * Used in every MDX article with code examples
  */
 export function CopyableCodeBlock({ children, className, ...props }: MdxElementProps) {
-  const mdxContext = useMDXContent();
+  const mdxContext = useContentContext();
 
   const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
   const { copied, copy } = useCopyWithEmailCapture({

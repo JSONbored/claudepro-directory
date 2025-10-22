@@ -33,7 +33,8 @@
 'use client';
 
 import type * as MotionTypes from 'motion/react';
-import React, { useEffect, useState } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 
 // Module-level cache for motion library
 let cachedMotionModule: typeof MotionTypes | null = null;
@@ -51,8 +52,7 @@ export function preloadMotion() {
       cachedMotionModule = mod;
       return mod;
     })
-    .catch((error) => {
-      console.error('Failed to preload Motion.js:', error);
+    .catch((_error) => {
       return null;
     });
 }
@@ -120,8 +120,7 @@ export function useLazyMotion(): LazyMotionReturn {
           }
           setLoading(false);
         })
-        .catch((error) => {
-          console.error('Failed to load Motion.js:', error);
+        .catch((_error) => {
           setLoading(false);
         });
     }
@@ -155,10 +154,15 @@ export function useLazyMotion(): LazyMotionReturn {
  */
 
 // Properly typed fallback component that accepts all props (motion or HTML)
-export const FallbackDiv = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { children?: React.ReactNode }
->(({ children, className, style, ...props }, ref) => {
+export const FallbackDiv = ({
+  children,
+  className,
+  style,
+  ref,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & { children?: React.ReactNode } & {
+  ref?: React.RefObject<HTMLDivElement | null>;
+}) => {
   // Filter out motion-specific props and only use plain HTML props
   const { initial, animate, exit, whileHover, whileTap, transition, variants, ...htmlProps } =
     props as Record<string, unknown>;
@@ -179,7 +183,7 @@ export const FallbackDiv = React.forwardRef<
       {children}
     </div>
   );
-});
+};
 
 FallbackDiv.displayName = 'FallbackDiv';
 
