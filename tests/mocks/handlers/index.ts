@@ -31,7 +31,6 @@
 
 import { apiHandlers } from './api-handlers';
 import { authHandlers } from './auth-handlers';
-import { contentHandlers } from './content-handlers';
 import { externalHandlers } from './external-handlers';
 
 /**
@@ -39,8 +38,7 @@ import { externalHandlers } from './external-handlers';
  * Organized by feature domain for maintainability
  */
 export const handlers = [
-  ...contentHandlers, // /api/[contentType]/route.ts handlers
-  ...apiHandlers, // Other API route handlers
+  ...apiHandlers, // API route handlers
   ...authHandlers, // Authentication/authorization handlers
   ...externalHandlers, // External service handlers (Supabase, Redis, etc.)
 ];
@@ -48,4 +46,4 @@ export const handlers = [
 /**
  * Export individual handler groups for targeted testing
  */
-export { contentHandlers, apiHandlers, authHandlers, externalHandlers };
+export { apiHandlers, authHandlers, externalHandlers };

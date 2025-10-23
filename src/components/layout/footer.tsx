@@ -136,7 +136,6 @@ export function Footer() {
             <ul className={'space-y-3 md:space-y-2'}>
               {[
                 { href: ROUTES.LLMS_TXT, label: 'LLMs.txt', icon: Sparkles },
-                { href: ROUTES.API_DOCS, label: 'API Docs', icon: null },
                 { href: ROUTES.PARTNER, label: 'Partner Program', icon: null },
               ].map((link, index) => (
                 <motion.li

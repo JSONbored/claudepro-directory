@@ -37,8 +37,8 @@ jest.config.js
 out/
 dist/
 
-# Package manager files (Vercel uses package-lock.json)
-pnpm-lock.yaml
+# Package manager files (Vercel auto-detects via lock files)
+# DO NOT exclude pnpm-lock.yaml - required for pnpm detection
 yarn.lock
 .pnp
 .pnp.js
