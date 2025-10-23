@@ -504,11 +504,11 @@ export const guideContentSchema = z.object({
 
   // Guide subcategory - required for routing and organization
   subcategory: z.enum([
-    'tutorials', // tutorial-template.mdx
-    'comparisons', // comparison-template.mdx
-    'troubleshooting', // troubleshooting-template.mdx
-    'use-cases', // use-case-template.mdx
-    'workflows', // workflow-template.mdx
+    'tutorials', // Example: desktop-mcp-setup.json
+    'comparisons', // Example: claude-vs-copilot-python.json
+    'troubleshooting', // Example: fix-mcp-connection-errors.json
+    'use-cases', // Example: business-process-automation.json
+    'workflows', // Example: migration-workflow-guide.json
   ]),
 
   // Override: title is required for guides (not optional like in base)

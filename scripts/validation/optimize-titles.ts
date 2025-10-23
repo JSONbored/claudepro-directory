@@ -2,7 +2,7 @@
 
 /**
  * SEO Title Optimization Script
- * Enhances underutilized titles by updating source JSON/MDX files directly
+ * Enhances underutilized titles by updating source JSON files directly
  *
  * Usage:
  *   npm run optimize:titles           # Run optimization
@@ -73,41 +73,6 @@ async function updateJsonFile(filePath: string, seoTitle: string): Promise<void>
 }
 
 /**
- * Update seoTitle in MDX frontmatter
- */
-async function updateMdxFile(filePath: string, seoTitle: string): Promise<void> {
-  const content = await fs.readFile(filePath, 'utf-8');
-  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-
-  if (!frontmatterMatch) {
-    throw new Error(`No frontmatter found in ${filePath}`);
-  }
-
-  const frontmatter = frontmatterMatch[1];
-  const hasSeoTitle = frontmatter.includes('seoTitle:');
-
-  let newFrontmatter: string;
-  if (hasSeoTitle) {
-    // Update existing seoTitle
-    newFrontmatter = frontmatter.replace(/seoTitle:\s*["'].*["']/, `seoTitle: "${seoTitle}"`);
-  } else {
-    // Add seoTitle after title
-    const lines = frontmatter.split('\n');
-    const titleIndex = lines.findIndex((line) => line.startsWith('title:'));
-    if (titleIndex !== -1) {
-      lines.splice(titleIndex + 1, 0, `seoTitle: "${seoTitle}"`);
-      newFrontmatter = lines.join('\n');
-    } else {
-      newFrontmatter = `${frontmatter}\nseoTitle: "${seoTitle}"`;
-    }
-  }
-
-  const newContent = content.replace(/^---\n[\s\S]*?\n---/, `---\n${newFrontmatter}\n---`);
-
-  await fs.writeFile(filePath, newContent, 'utf-8');
-}
-
-/**
  * Optimize JSON content files
  */
 async function optimizeJsonContent(
@@ -172,7 +137,7 @@ async function optimizeJsonContent(
 }
 
 /**
- * Optimize MDX guide files
+ * Optimize JSON guide files
  */
 async function optimizeGuides(contentDir: string): Promise<OptimizationStats> {
   const stats: OptimizationStats = {
@@ -197,40 +162,21 @@ async function optimizeGuides(contentDir: string): Promise<OptimizationStats> {
     if (!stat.isDirectory()) continue;
 
     const files = await fs.readdir(categoryPath);
-    const mdxFiles = files.filter((f) => f.endsWith('.mdx'));
+    const jsonFiles = files.filter((f) => f.endsWith('.json'));
 
-    for (const file of mdxFiles) {
+    for (const file of jsonFiles) {
       const filePath = path.join(categoryPath, file);
       stats.total++;
 
       try {
         const content = await fs.readFile(filePath, 'utf-8');
-        const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+        // Production-grade: safeParse with Zod validation
+        const data = safeParse(content, contentItemSchema, {
+          strategy: ParseStrategy.VALIDATED_JSON,
+        }) as ContentItem;
+        data.category = 'guides';
 
-        if (!frontmatterMatch) {
-          stats.skipped++;
-          continue;
-        }
-
-        const frontmatter: { title?: string; seoTitle?: string } = {};
-        const lines = frontmatterMatch[1].split('\n');
-
-        for (const line of lines) {
-          const titleMatch = line.match(/^title:\s*["'](.+)["']/);
-          const seoTitleMatch = line.match(/^seoTitle:\s*["'](.+)["']/);
-          if (titleMatch) frontmatter.title = titleMatch[1];
-          if (seoTitleMatch) frontmatter.seoTitle = seoTitleMatch[1];
-        }
-
-        const item: ContentItem = {
-          title: frontmatter.title || file.replace('.mdx', ''),
-          seoTitle: frontmatter.seoTitle,
-          slug: file.replace('.mdx', ''),
-          tags: [], // Guides typically don't have tags in frontmatter
-          category: 'guides',
-        };
-
-        const result = enhanceTitle(item, 'guides' as ContentCategory);
+        const result = enhanceTitle(data, 'guides' as ContentCategory);
 
         if (result.enhanced && result.enhancedTitle) {
           if (DRY_RUN) {
@@ -240,7 +186,7 @@ async function optimizeGuides(contentDir: string): Promise<OptimizationStats> {
               `  Strategy: ${result.strategy}, Gain: +${result.gain} chars (${result.finalLength} total)`
             );
           } else {
-            await updateMdxFile(filePath, result.enhancedTitle);
+            await updateJsonFile(filePath, result.enhancedTitle);
             logger.success(`✅ ${file}: ${result.originalTitle} → ${result.enhancedTitle}`);
           }
           stats.enhanced++;

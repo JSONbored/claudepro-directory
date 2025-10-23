@@ -11,7 +11,6 @@
  */
 
 import { z } from 'zod';
-import { imageDimension } from '@/src/lib/schemas/primitives/base-numbers';
 import {
   codeString,
   extraLongString,
@@ -145,77 +144,6 @@ const rateLimitConfigSchema = z
   .describe('Configuration for API rate limiting including request limits and time windows');
 
 export type RateLimitConfig = z.infer<typeof rateLimitConfigSchema>;
-
-/**
- * MDX Component Props
- * Used for type-safe MDX component props
- */
-const mdxBasePropsSchema = z
-  .object({
-    className: z.string().default('').describe('CSS class names for styling'),
-    style: z
-      .record(
-        z.string().describe('CSS property name'),
-        z.union([z.string(), z.number()]).describe('CSS property value')
-      )
-      .default({})
-      .describe('Inline CSS styles object'),
-    'data-testid': z.string().optional().describe('Test identifier for testing frameworks'),
-    'aria-label': z.string().optional().describe('Accessible label for screen readers'),
-    'aria-labelledby': z.string().optional().describe('ID of element that labels this component'),
-    'aria-describedby': z
-      .string()
-      .optional()
-      .describe('ID of element that describes this component'),
-    role: z.string().optional().describe('ARIA role attribute for accessibility'),
-    tabIndex: z.number().optional().describe('Tab order index for keyboard navigation'),
-  })
-  .describe('Base props for MDX components including styling and accessibility attributes');
-
-export const mdxHeadingPropsSchema = mdxBasePropsSchema
-  .extend({
-    id: z.string().optional().describe('Unique identifier for heading anchor links'),
-    children: z.custom<React.ReactNode>().describe('Heading content'),
-  })
-  .describe('Props for MDX heading elements with anchor link support');
-
-export const mdxElementPropsSchema = mdxBasePropsSchema
-  .extend({
-    children: z.custom<React.ReactNode>().describe('Element content'),
-  })
-  .describe('Props for generic MDX elements');
-
-export const mdxLinkPropsSchema = mdxBasePropsSchema
-  .extend({
-    href: z.string().describe('Link destination URL'),
-    children: z.custom<React.ReactNode>().describe('Link text or content'),
-    target: z.string().optional().describe('Link target attribute (e.g., _blank for new tab)'),
-    rel: z.string().optional().describe('Link relationship attribute for security and SEO'),
-  })
-  .describe('Props for MDX link elements with URL and target attributes');
-
-export const mdxImagePropsSchema = mdxBasePropsSchema
-  .extend({
-    src: z.string().describe('Image source URL or path'),
-    alt: z.string().describe('Alternative text for accessibility and SEO'),
-    width: z
-      .union([imageDimension, z.string()])
-      .transform((val) => (typeof val === 'string' ? Number.parseInt(val, 10) : val))
-      .default(800)
-      .describe('Image width in pixels'),
-    height: z
-      .union([imageDimension, z.string()])
-      .transform((val) => (typeof val === 'string' ? Number.parseInt(val, 10) : val))
-      .default(600)
-      .describe('Image height in pixels'),
-  })
-  .describe('Props for MDX image elements with responsive dimensions');
-
-export type MdxBaseProps = z.infer<typeof mdxBasePropsSchema>;
-export type MdxHeadingProps = z.infer<typeof mdxHeadingPropsSchema>;
-export type MdxElementProps = z.infer<typeof mdxElementPropsSchema>;
-export type MdxLinkProps = z.infer<typeof mdxLinkPropsSchema>;
-export type MdxImageProps = z.infer<typeof mdxImagePropsSchema>;
 
 /**
  * UI Component Schemas

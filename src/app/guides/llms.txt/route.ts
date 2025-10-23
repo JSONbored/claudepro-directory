@@ -90,13 +90,13 @@ The guides section provides detailed documentation for using Claude and the Clau
 
       if (existsSync(categoryDir)) {
         try {
-          const files = readdirSync(categoryDir).filter((f) => f.endsWith('.mdx'));
+          const files = readdirSync(categoryDir).filter((f) => f.endsWith('.json'));
 
           if (files.length > 0) {
             guidesIndex += 'Available guides:\n\n';
 
             for (const file of files) {
-              const slug = file.replace('.mdx', '');
+              const slug = file.replace('.json', '');
               const title = slug
                 .split('-')
                 .map((word) => word.charAt(0).toUpperCase() + word.slice(1))

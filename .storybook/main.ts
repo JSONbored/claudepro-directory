@@ -21,7 +21,7 @@ import path from 'path';
 const config: StorybookConfig = {
   /**
    * Story file patterns
-   * Searches src/ for all .stories.tsx files (MDX pattern removed - not used)
+   * Searches src/ for all .stories.tsx files
    */
   stories: ['../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
 

@@ -282,33 +282,73 @@ async function main(): Promise<void> {
           // Transform to full content format (matching GuideContent schema)
           // Changelog uses GuideContent schema but has different source data
           // Map changelog entries to GuideContent-compatible structure
-          const changelogFullContent = changelogEntries.map((entry) => ({
-            // Required base fields
-            slug: entry.slug,
-            title: entry.title,
-            description: entry.tldr || entry.title,
-            author: 'ClaudePro Directory',
-            dateAdded: entry.date,
-            tags: ['changelog', 'updates'],
-            content: entry.content,
+          const changelogFullContent = changelogEntries.map((entry) => {
+            // Transform changelog categories into JSON sections
+            const sections: Array<any> = [];
 
-            // Required Guide-specific fields
-            category: 'guides' as const,
-            subcategory: 'use-cases' as const, // Changelog as use-case documentation
-            keywords: ['changelog', 'updates', 'features', 'improvements', 'release notes'],
+            // Add TL;DR section if present (using callout with info variant)
+            if (entry.tldr) {
+              sections.push({
+                type: 'callout',
+                variant: 'info',
+                title: 'TL;DR',
+                content: entry.tldr,
+              });
+            }
 
-            // Optional but commonly expected fields
-            source: 'claudepro' as const,
-            displayTitle: entry.title,
+            // Convert each category to a heading + text section
+            const categoryMap: Record<string, string> = {
+              Added: '✨ Added',
+              Changed: '🔄 Changed',
+              Fixed: '🐛 Fixed',
+              Removed: '🗑️ Removed',
+              Deprecated: '⚠️ Deprecated',
+              Security: '🔒 Security',
+            };
 
-            // Required sections field (changelog uses text section with content)
-            sections: [
-              {
-                type: 'text' as const,
-                content: entry.content,
-              },
-            ],
-          }));
+            // Process each category with items
+            for (const [category, items] of Object.entries(entry.categories)) {
+              if (items.length > 0) {
+                // Add heading for category
+                sections.push({
+                  type: 'heading',
+                  level: '3',
+                  content: categoryMap[category] || category,
+                });
+
+                // Build markdown list from items
+                const listContent = items.map((item) => `- ${item.content}`).join('\n');
+
+                sections.push({
+                  type: 'text',
+                  content: listContent,
+                });
+              }
+            }
+
+            return {
+              // Required base fields
+              slug: entry.slug,
+              title: entry.title,
+              description: entry.tldr || entry.title,
+              author: 'ClaudePro Directory',
+              dateAdded: entry.date,
+              tags: ['changelog', 'updates'],
+              content: entry.content,
+
+              // Required Guide-specific fields
+              category: 'guides' as const,
+              subcategory: 'use-cases' as const, // Changelog as use-case documentation
+              keywords: ['changelog', 'updates', 'features', 'improvements', 'release notes'],
+
+              // Optional but commonly expected fields
+              source: 'claudepro' as const,
+              displayTitle: entry.title,
+
+              // Required sections field - properly structured JSON sections
+              sections,
+            };
+          });
 
           // Update statistics
           contentStats[result.category] = changelogEntries.length;

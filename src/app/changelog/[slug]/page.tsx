@@ -99,6 +99,12 @@ export default async function ChangelogEntryPage({
       notFound();
     }
 
+    // Load generated full content with JSON sections
+    const { getChangelogFullContent } = await import('@/generated/content');
+    const fullContent = await getChangelogFullContent(slug);
+    // Extract sections with proper type casting
+    const sections = fullContent?.sections as any;
+
     const canonicalUrl = getChangelogUrl(entry.slug);
 
     return (
@@ -162,7 +168,7 @@ export default async function ChangelogEntryPage({
           <Separator className="my-6" />
 
           {/* Content */}
-          <ChangelogContent entry={entry} />
+          <ChangelogContent entry={entry} sections={sections} />
         </article>
       </>
     );

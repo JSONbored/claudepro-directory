@@ -1,12 +1,12 @@
 /**
  * Changelog Content Component
  *
- * Renders full changelog entry content with markdown support.
- * Wraps MDXRenderer with changelog-specific styling and structure.
+ * Renders full changelog entry content using JSON sections.
+ * Uses JSONSectionRenderer for consistent rendering with guides.
  *
  * Architecture:
- * - Uses existing MDXRenderer for markdown parsing
- * - Applies changelog-specific styles
+ * - Uses JSONSectionRenderer (same as guides)
+ * - Processes structured JSON sections from build system
  * - Displays categorized changes sections
  * - Server component (no client-side JS)
  *
@@ -15,16 +15,14 @@
  * - Semantic HTML structure
  * - Accessible headings hierarchy
  * - Optimized for SEO
+ * - No MDX dependencies
  */
 
 import { memo } from 'react';
-// TODO: Restore when changelog migration to JSON is complete
-// import { MDXRenderer } from '@/src/components/content/mdx-renderer';
-const MDXRenderer = ({ source, className }: { source: string; className?: string }) => (
-  <div className={className} dangerouslySetInnerHTML={{ __html: source }} />
-);
+import { JSONSectionRenderer } from '@/src/components/content/json-section-renderer';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import type { ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
+import type { GuideSection } from '@/src/lib/schemas/content/guide.schema';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
@@ -33,6 +31,8 @@ import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 export interface ChangelogContentProps {
   /** Changelog entry to render */
   entry: ChangelogEntry;
+  /** Optional JSON sections (from generated content) */
+  sections?: GuideSection[];
 }
 
 /**
@@ -40,10 +40,10 @@ export interface ChangelogContentProps {
  *
  * @example
  * ```tsx
- * <ChangelogContent entry={changelogEntry} />
+ * <ChangelogContent entry={changelogEntry} sections={sections} />
  * ```
  */
-export const ChangelogContent = memo(({ entry }: ChangelogContentProps) => {
+export const ChangelogContent = memo(({ entry, sections }: ChangelogContentProps) => {
   // Get non-empty categories for badge display
   const nonEmptyCategories = [];
   if (entry.categories.Added.length > 0) nonEmptyCategories.push('Added');
@@ -55,14 +55,6 @@ export const ChangelogContent = memo(({ entry }: ChangelogContentProps) => {
 
   return (
     <article className={'space-y-6 max-w-none'}>
-      {/* TL;DR Section */}
-      {entry.tldr && (
-        <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-          <h2 className="text-sm font-semibold text-primary mb-2">TL;DR</h2>
-          <p className="text-sm text-foreground">{entry.tldr}</p>
-        </div>
-      )}
-
       {/* Category Badges */}
       {nonEmptyCategories.length > 0 && (
         <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} py-2`}>
@@ -79,10 +71,17 @@ export const ChangelogContent = memo(({ entry }: ChangelogContentProps) => {
         </div>
       )}
 
-      {/* Main Content - Rendered as Markdown */}
-      <div className="prose prose-slate dark:prose-invert max-w-none">
-        <MDXRenderer source={entry.content} className="changelog-content" />
-      </div>
+      {/* Main Content - Rendered as JSON Sections */}
+      {sections && sections.length > 0 ? (
+        <div className="prose prose-slate dark:prose-invert max-w-none">
+          <JSONSectionRenderer sections={sections} />
+        </div>
+      ) : (
+        // Fallback for entries without sections (shouldn't happen after build)
+        <div className="prose prose-slate dark:prose-invert max-w-none">
+          <div dangerouslySetInnerHTML={{ __html: entry.content }} />
+        </div>
+      )}
     </article>
   );
 });
