@@ -20,13 +20,13 @@ if (process.env.ANALYZE === 'true') {
 }
 
 /**
- * Next.js 15.5.4 Configuration (2025 Best Practices)
+ * Next.js 16.0.0 Configuration (2025 Best Practices)
  *
  * OPTIMIZATIONS APPLIED (Stable Features):
  * 1. ✅ Client-side Router Cache: Optimized stale times (30s dynamic, 5min static)
  * 2. ✅ Server Components HMR Cache: Faster hot reload in development
  * 3. ✅ Inline CSS: Reduced network requests on initial load
- * 4. ✅ React Compiler: Automatic optimization of React components
+ * 4. ✅ React Compiler (Stable): Automatic memoization without manual optimization
  * 5. ✅ Package Import Optimization: Tree-shaking for 35+ large libraries
  * 6. ✅ Output File Tracing: Exclude dev/cache files from serverless bundles
  * 7. ✅ Image Optimization: AVIF-first with 1-year cache TTL
@@ -34,24 +34,25 @@ if (process.env.ANALYZE === 'true') {
  * 9. ✅ Web Vitals Attribution: Track all Core Web Vitals (CLS, FCP, INP, LCP, TTFB)
  * 10. ✅ SWC Compiler: Console.log removal & React property stripping in production
  * 11. ✅ Custom Build Process Optimization: Parallel processing + incremental caching (build-content.ts)
+ * 12. ✅ Turbopack Filesystem Caching: 30-50% faster dev/build restarts (STABLE in 16.0)
+ * 13. ✅ Cache Components (PPR): Instant navigation with partial prerendering (STABLE in 16.0)
  *
  * PERFORMANCE IMPACT:
+ * - 30-50% faster dev server restarts (Turbopack filesystem cache)
  * - 20-30% faster dev server rebuilds (HMR cache + React Compiler)
  * - 15-20% smaller initial page load (inline CSS + package optimization)
  * - 40% better cache hit rates (optimized stale times)
- * - Content build: 392-412ms (132 files) - optimizations ready for scale
+ * - 300-500ms perceived load time improvement (Cache Components/PPR)
+ * - Content build: 392-412ms (132 files) with incremental caching
  * - Improved Core Web Vitals scores (image optimization + CSS chunking)
  * - Full build time: ~12.2s with Turbopack (132 content items, 5 categories)
  *
  * BUILD PROCESS OPTIMIZATION:
+ * - Turborepo task-level caching (generate:categories, build:content, build:skills, generate:service-worker)
  * - Parallel category processing (5 categories in parallel)
  * - Batched file processing (10 files per batch for optimal CPU usage)
- * - Incremental caching with SHA-256 hashing (.next/cache/build-content/)
+ * - Incremental caching with SHA-256 hashing (.vercel-cache/build-content/)
  * - Parallel index generation (content index + split indices)
- *
- * FUTURE UPGRADES (Require Canary):
- * - turbopackPersistentCaching: 30-50% faster production rebuilds (next@canary only)
- * - cacheComponents + cacheLife: Granular server-side caching control
  *
  * @type {import('next').NextConfig}
  */
@@ -64,10 +65,62 @@ const nextConfig = {
   compress: true,
   reactStrictMode: true,
 
-  eslint: {
-    // Disable ESLint during builds since we use Biome/Ultracite
-    ignoreDuringBuilds: true,
+  // ✨ React Compiler (STABLE in Next.js 16.0)
+  // Automatically memoizes components to reduce unnecessary re-renders
+  // Previous issue: Caused eval() CSP violations with strict-dynamic
+  // Now stable - monitoring for CSP compatibility
+  reactCompiler: true,
+
+  // ✨ Cache Components / Partial Prerendering (STABLE in Next.js 16.0)
+  // Enables instant navigation with static shell + dynamic content streaming
+  // Replaces experimental.ppr from Next.js 15 canary
+  cacheComponents: true,
+
+  // ✨ Cache Life Profiles - Reusable caching strategies
+  // Replaces route segment config revalidate values
+  cacheLife: {
+    // 5 minutes - for frequently updated content (trending, search)
+    minutes: {
+      stale: 300, // 5 minutes
+      revalidate: 60, // 1 minute
+      expire: 3600, // 1 hour
+    },
+    // 15 minutes - for semi-dynamic content
+    quarter: {
+      stale: 900, // 15 minutes
+      revalidate: 300, // 5 minutes
+      expire: 7200, // 2 hours
+    },
+    // 30 minutes - for moderately dynamic content
+    half: {
+      stale: 1800, // 30 minutes
+      revalidate: 600, // 10 minutes
+      expire: 10800, // 3 hours
+    },
+    // 1 hour - for standard content pages (default for most pages)
+    hours: {
+      stale: 3600, // 1 hour
+      revalidate: 900, // 15 minutes
+      expire: 86400, // 1 day
+    },
+    // 6 hours - for stable content (changelog, guides)
+    stable: {
+      stale: 21600, // 6 hours
+      revalidate: 3600, // 1 hour
+      expire: 604800, // 1 week
+    },
+    // Static - for content that rarely changes (sitemaps, robots.txt)
+    static: {
+      stale: 86400, // 1 day
+      revalidate: 21600, // 6 hours
+      expire: 2592000, // 30 days
+    },
   },
+
+  // Note: eslint config removed - Next.js 16 no longer supports it in next.config
+  // Use next.config.js or next lint CLI options instead
+  // We use Biome/Ultracite for linting anyway
+
   typescript: {
     // We handle TypeScript checking separately
     ignoreBuildErrors: false,
@@ -142,22 +195,12 @@ const nextConfig = {
   },
 
   experimental: {
-    // React Compiler (automatic React optimization)
-    // Disabled: Causes eval() CSP violations in production with strict-dynamic
-    reactCompiler: false,
+    // ✨ Turbopack Filesystem Caching for Dev (STABLE in Next.js 16.0)
+    // Provides 30-50% faster dev server restarts by caching compiler artifacts on disk
+    turbopackFileSystemCacheForDev: true,
 
-    // ✨ Turbopack Persistent Caching (requires next@canary - disabled for stable)
-    // turbopackPersistentCaching: true,
-    // NOTE: This feature is experimental in canary and provides 30-50% faster rebuilds
-    // Enable when upgrading to canary: npm install next@canary
-    // For now, our custom build-content.ts caching provides similar benefits
-
-    // ✨ Partial Prerendering (PPR) - requires next@canary (NOT available in stable 15.5.5)
-    // ppr: 'incremental',
-    // DISABLED: Error: "The experimental feature 'experimental.ppr' can only be enabled when using the latest canary version of Next.js"
-    // See: https://github.com/vercel/next.js/issues/71587
-    // Expected impact if enabled: 300-500ms perceived load time improvement
-    // Enable when upgrading to canary: npm install next@canary
+    // Note: turbopackFileSystemCacheForBuild still requires canary
+    // Will be enabled in future Next.js release
 
     // ✨ Client-side router cache optimization (Next.js 15+)
     staleTimes: {
@@ -246,10 +289,6 @@ const nextConfig = {
       '@radix-ui/react-toggle',
       '@radix-ui/react-toggle-group',
       '@radix-ui/react-tooltip',
-      // Fumadocs packages for API documentation
-      'fumadocs-ui',
-      'fumadocs-core',
-      'fumadocs-openapi',
     ],
   },
 

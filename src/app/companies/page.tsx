@@ -1,3 +1,4 @@
+import { cacheLife } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -18,10 +19,10 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata = generatePageMetadata('/companies');
 
-// ISR - Static content (centralized config)
-export const revalidate = 3600;
-
 export default async function CompaniesPage() {
+  'use cache';
+  cacheLife('hours'); // 1 hour cache (replaces revalidate: 3600)
+
   const supabase = await createAdminClient();
 
   const { data: companies } = await supabase

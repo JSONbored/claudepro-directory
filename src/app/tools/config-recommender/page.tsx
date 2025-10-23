@@ -18,6 +18,7 @@
  */
 
 import type { Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import {
@@ -35,10 +36,10 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 // Generate metadata from centralized registry
 export const metadata: Metadata = generatePageMetadata('/tools/config-recommender');
 
-// ISR Configuration - Static page, no revalidation needed
-export const revalidate = false;
-
 export default function ConfigRecommenderPage() {
+  'use cache';
+  cacheLife('static'); // Static landing page (replaces revalidate: false)
+
   return (
     <div className={'min-h-screen bg-background'}>
       {/* Hero Section */}

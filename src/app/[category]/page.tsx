@@ -38,6 +38,7 @@
  * @see {@link file://../../lib/content-loaders.ts} - Content loading with caching
  */
 
+import { cacheLife } from 'next/cache';
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content-list-server';
 import { statsRedis } from '@/src/lib/cache.server';
@@ -45,13 +46,6 @@ import { isValidCategory, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/cat
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-
-/**
- * ISR Configuration - Category listing pages
- * Static configurations with view count updates - revalidate every 5 minutes
- * Balances fresh analytics with performance for category browsing
- */
-export const revalidate = 300;
 
 /**
  * ISR revalidation interval in seconds (4 hours)
@@ -114,6 +108,9 @@ export async function generateStaticParams() {
  * // }
  */
 export async function generateMetadata({ params }: { params: Promise<{ category: string }> }) {
+  'use cache';
+  cacheLife('minutes'); // 5 min cache (replaces revalidate: 300)
+
   const { category } = await params;
 
   // Validate category and load config
@@ -155,6 +152,9 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
  * // /statuslines → Lists all statuslines with search/filter
  */
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
+  'use cache';
+  cacheLife('minutes'); // 5 min cache (replaces revalidate: 300)
+
   const { category } = await params;
 
   // Validate category

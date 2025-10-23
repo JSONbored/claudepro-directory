@@ -25,6 +25,15 @@
         "scripts/build/build-content.ts",
         "src/lib/build/category-processor.server.ts"
       ],
+      "env": [
+        "ARCJET_KEY",
+        "RATE_LIMIT_SECRET",
+        "CACHE_WARM_AUTH_TOKEN",
+        "VIEW_COUNT_SALT",
+        "WEBHOOK_SECRET",
+        "CRON_SECRET",
+        "NODE_ENV"
+      ],
       "cache": true,
       "persistent": true
     },
@@ -65,5 +74,38 @@
     }
   },
   "globalDependencies": ["package.json", "pnpm-lock.yaml"],
-  "globalEnv": ["NODE_ENV"]
+  "globalEnv": [
+    "NODE_ENV",
+    "ARCJET_KEY",
+    "RATE_LIMIT_SECRET",
+    "CACHE_WARM_AUTH_TOKEN",
+    "VIEW_COUNT_SALT",
+    "WEBHOOK_SECRET",
+    "CRON_SECRET",
+    "KV_URL",
+    "KV_REST_API_TOKEN",
+    "KV_REST_API_URL",
+    "KV_REST_API_READ_ONLY_TOKEN",
+    "REDIS_URL",
+    "GITHUB_TOKEN",
+    "GITHUB_OWNER",
+    "GITHUB_REPO",
+    "GITHUB_BRANCH",
+    "RESEND_API_KEY",
+    "RESEND_AUDIENCE_ID",
+    "RESEND_WEBHOOK_SECRET",
+    "POSTGRES_URL",
+    "POSTGRES_PRISMA_URL",
+    "POSTGRES_URL_NON_POOLING",
+    "POSTGRES_USER",
+    "POSTGRES_PASSWORD",
+    "POSTGRES_DATABASE",
+    "POSTGRES_HOST",
+    "SUPABASE_URL",
+    "SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "SUPABASE_JWT_SECRET",
+    "BETTERSTACK_HEARTBEAT_WEEKLY_TASKS",
+    "BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE"
+  ]
 }

@@ -6,6 +6,7 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
+import { cacheLife } from 'next/cache';
 import type { NextRequest } from 'next/server';
 import {
   agents,
@@ -24,18 +25,6 @@ import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 /**
- * Runtime configuration
- * Use Node.js runtime for better performance with text generation
- */
-export const runtime = 'nodejs';
-
-/**
- * ISR revalidation
- * AI training data changes infrequently - revalidate every hour
- */
-export const revalidate = 3600;
-
-/**
  * Handle GET request for site-wide llms.txt
  *
  * @param request - Next.js request object
@@ -48,10 +37,13 @@ export const revalidate = 3600;
  *
  * Response format:
  * - Plain text (text/plain charset=utf-8)
- * - Cached for 1 hour via ISR
+ * - Cached for 1 hour via Cache Components
  * - Public cache headers for CDN distribution
  */
 export async function GET(request: NextRequest): Promise<Response> {
+  'use cache';
+  cacheLife('hours'); // 1 hour cache (stale: 3600s, revalidate: 900s, expire: 86400s)
+
   const requestLogger = logger.forRequest(request);
 
   try {

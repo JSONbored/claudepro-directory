@@ -7,6 +7,7 @@
 
 import fs from 'fs/promises';
 import type { Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import path from 'path';
 import { ContentListServer } from '@/src/components/content-list-server';
 import { statsRedis } from '@/src/lib/cache.server';
@@ -15,12 +16,6 @@ import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-
-/**
- * ISR Configuration - Guides listing page
- * Documentation content updates occasionally - revalidate every 30 minutes
- */
-export const revalidate = 1800;
 
 /**
  * Page metadata
@@ -112,6 +107,9 @@ async function getAllGuides(): Promise<UnifiedContentItem[]> {
  * Guides Index Page
  */
 export default async function GuidesPage() {
+  'use cache';
+  cacheLife('half'); // 30 min cache (replaces revalidate: 1800)
+
   // Load all guides
   const guidesData = await getAllGuides();
 

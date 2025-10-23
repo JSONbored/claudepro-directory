@@ -14,16 +14,12 @@
  * @see https://llmstxt.org - LLMs.txt specification
  */
 
+import { cacheLife } from 'next/cache';
 import { APP_CONFIG } from '@/src/lib/constants';
 
-export const runtime = 'edge';
-/**
- * ISR revalidation
- * Tool documentation changes infrequently - revalidate every 6 hours
- */
-export const revalidate = 21600;
-
 export async function GET() {
+  'use cache';
+  cacheLife('stable'); // 6 hour cache (replaces revalidate: 21600)
   const content = `# Configuration Recommender - ${APP_CONFIG.name}
 
 > AI-powered tool for finding the perfect Claude configuration

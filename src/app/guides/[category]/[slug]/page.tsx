@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import type { Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
@@ -24,13 +25,6 @@ import { ArrowLeft, BookOpen, Calendar, Eye, FileText, Tag, Users, Zap } from '@
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-
-/**
- * ISR Configuration - Guide detail pages
- * Documentation content updates occasionally - revalidate every 30 minutes
- */
-export const revalidate = 1800;
-export const dynamicParams = true;
 
 // Validation schema for guide parameters
 const guideParamsSchema = z.object({
@@ -196,6 +190,9 @@ export async function generateMetadata({
 }: {
   params: Promise<{ category: string; slug: string }>;
 }): Promise<Metadata> {
+  'use cache';
+  cacheLife('half'); // 30 min cache (replaces revalidate: 1800)
+
   const { category, slug } = await params;
 
   // Load guide data for metadata generation
@@ -214,6 +211,9 @@ export default async function SEOGuidePage({
 }: {
   params: Promise<{ category: string; slug: string }>;
 }) {
+  'use cache';
+  cacheLife('half'); // 30 min cache (replaces revalidate: 1800, dynamicParams: true)
+
   try {
     const rawParams = await params;
     const validationResult = guideParamsSchema.safeParse(rawParams);

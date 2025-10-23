@@ -23,6 +23,7 @@
  */
 
 import type { Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
@@ -39,9 +40,6 @@ import { ArrowLeft, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-
-// ISR - revalidate every 10 minutes
-export const revalidate = 900;
 
 /**
  * Generate static params for all changelog entries
@@ -70,6 +68,9 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
+  'use cache';
+  cacheLife('quarter'); // 15 min cache (replaces revalidate: 900)
+
   const { slug } = await params;
 
   // Load changelog entry for metadata generation
@@ -90,6 +91,9 @@ export default async function ChangelogEntryPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  'use cache';
+  cacheLife('quarter'); // 15 min cache (replaces revalidate: 900)
+
   try {
     const { slug } = await params;
     const entry = await getChangelogEntryBySlug(slug);

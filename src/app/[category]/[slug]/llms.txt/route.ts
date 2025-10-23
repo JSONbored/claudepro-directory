@@ -6,6 +6,7 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
+import { cacheLife } from 'next/cache';
 import type { NextRequest } from 'next/server';
 import { isValidCategory, VALID_CATEGORIES } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -23,17 +24,6 @@ import type {
   CollectionItemReference,
 } from '@/src/lib/schemas/content/collection.schema';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
-
-/**
- * Runtime configuration
- */
-export const runtime = 'nodejs';
-
-/**
- * ISR revalidation
- * Content detail pages update periodically - revalidate every 10 minutes
- */
-export const revalidate = 3600;
 
 /**
  * Generate static params for all category/slug combinations
@@ -80,6 +70,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ category: string; slug: string }> }
 ): Promise<Response> {
+  'use cache';
+  cacheLife('hours'); // 1 hour cache (replaces revalidate: 3600)
+
   const requestLogger = logger.forRequest(request);
 
   try {

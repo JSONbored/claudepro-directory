@@ -26,6 +26,7 @@
  * - AI-optimized structure
  */
 
+import { cacheLife } from 'next/cache';
 import type { NextRequest } from 'next/server';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
@@ -34,23 +35,15 @@ import { apiResponse } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
 /**
- * Runtime configuration
- */
-export const runtime = 'nodejs';
-
-/**
- * ISR revalidation
- * Changelog updates frequently - revalidate every 15 minutes
- */
-export const revalidate = 900;
-
-/**
  * Generate llms.txt for changelog index
  *
  * @param request - Next.js request object
  * @returns Plain text response with all changelog entries
  */
 export async function GET(request: NextRequest): Promise<Response> {
+  'use cache';
+  cacheLife('quarter'); // 15 min cache (replaces revalidate: 900)
+
   const requestLogger = logger.forRequest(request);
 
   try {

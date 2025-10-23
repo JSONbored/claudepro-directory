@@ -31,7 +31,6 @@ import { resendService } from '@/src/lib/services/resend.server';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 import { getCurrentWeekStart, getWeekEnd } from '@/src/lib/utils/data.utils';
 
-export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 interface TaskResult {

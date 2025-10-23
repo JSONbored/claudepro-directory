@@ -26,22 +26,13 @@
  * - AI-optimized structure
  */
 
+import { cacheLife } from 'next/cache';
 import type { NextRequest } from 'next/server';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { formatChangelogDateISO8601, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { apiResponse } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
-
-/**
- * Runtime configuration
- */
-export const runtime = 'nodejs';
-
-/**
- * ISR revalidation - Atom feed for SEO (centralized config)
- */
-export const revalidate = 21600;
 
 /**
  * Maximum number of entries to include in Atom feed
@@ -70,6 +61,9 @@ function escapeXml(text: string): string {
  * @returns Atom XML response
  */
 export async function GET(request: NextRequest): Promise<Response> {
+  'use cache';
+  cacheLife('stable'); // 6 hour cache (replaces revalidate: 21600)
+
   const requestLogger = logger.forRequest(request);
 
   try {

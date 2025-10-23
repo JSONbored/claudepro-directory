@@ -18,7 +18,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import { readdir, readFile, stat, mkdir } from 'node:fs/promises';
+import { mkdir, readdir, readFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -268,7 +268,7 @@ async function needsCategoryRebuild(
 
   try {
     const files = await readdir(categoryDir);
-    const jsonFiles = files.filter(f => f.endsWith('.json') && !f.includes('template'));
+    const jsonFiles = files.filter((f) => f.endsWith('.json') && !f.includes('template'));
 
     // Check if any file has changed
     for (const file of jsonFiles) {
@@ -292,8 +292,8 @@ async function needsCategoryRebuild(
     }
 
     // Check if files were deleted
-    const currentFiles = new Set(jsonFiles.map(f => join(categoryDir, f)));
-    const cachedFiles = Object.keys(cache.files).filter(f => f.startsWith(categoryDir));
+    const currentFiles = new Set(jsonFiles.map((f) => join(categoryDir, f)));
+    const cachedFiles = Object.keys(cache.files).filter((f) => f.startsWith(categoryDir));
     for (const cachedFile of cachedFiles) {
       if (!currentFiles.has(cachedFile)) {
         return true; // File was deleted
@@ -388,14 +388,14 @@ async function main(): Promise<void> {
     }
 
     const categoryConfigs = Object.values(UNIFIED_CATEGORY_REGISTRY);
-    logger.info(`🔄 Rebuilding ${categoriesToRebuild.length}/${categoryConfigs.length} categories...\n`);
+    logger.info(
+      `🔄 Rebuilding ${categoriesToRebuild.length}/${categoryConfigs.length} categories...\n`
+    );
     logger.info(`   Categories: ${categoriesToRebuild.join(', ')}\n`);
 
     // Build only changed categories in parallel
     const buildResults = await Promise.all(
-      categoriesToRebuild.map((id) =>
-        buildCategory(CONTENT_DIR, id, cache)
-      )
+      categoriesToRebuild.map((id) => buildCategory(CONTENT_DIR, id, cache))
     );
 
     // Update stats for rebuilt categories
@@ -569,24 +569,26 @@ async function main(): Promise<void> {
 
       try {
         const files = await readdir(categoryDir);
-        const jsonFiles = files.filter(f => f.endsWith('.json') && !f.includes('template'));
+        const jsonFiles = files.filter((f) => f.endsWith('.json') && !f.includes('template'));
 
         for (const file of jsonFiles) {
           const filePath = join(categoryDir, file);
           const [content, fileStat] = await Promise.all([
             readFile(filePath, 'utf-8'),
-            stat(filePath)
+            stat(filePath),
           ]);
 
           const hash = createHash('sha256').update(content, 'utf-8').digest('hex');
           fileHashes[filePath] = {
             hash,
-            mtime: fileStat.mtimeMs
+            mtime: fileStat.mtimeMs,
           };
         }
       } catch (error) {
         // Category directory may not exist (e.g., changelog is generated)
-        logger.debug(`Skipping hash collection for ${categoryId}: ${error instanceof Error ? error.message : String(error)}`);
+        logger.debug(
+          `Skipping hash collection for ${categoryId}: ${error instanceof Error ? error.message : String(error)}`
+        );
       }
     }
 
@@ -595,16 +597,18 @@ async function main(): Promise<void> {
       const changelogPath = join(ROOT_DIR, 'CHANGELOG.md');
       const [content, fileStat] = await Promise.all([
         readFile(changelogPath, 'utf-8'),
-        stat(changelogPath)
+        stat(changelogPath),
       ]);
 
       const hash = createHash('sha256').update(content, 'utf-8').digest('hex');
       fileHashes[changelogPath] = {
         hash,
-        mtime: fileStat.mtimeMs
+        mtime: fileStat.mtimeMs,
       };
     } catch (error) {
-      logger.debug(`Skipping CHANGELOG.md hash collection: ${error instanceof Error ? error.message : String(error)}`);
+      logger.debug(
+        `Skipping CHANGELOG.md hash collection: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
 
     // Save updated cache with file hashes

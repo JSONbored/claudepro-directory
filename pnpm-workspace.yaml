@@ -1,0 +1,3 @@
+ignoredBuiltDependencies:
+  - '@vercel/speed-insights'
+  - lefthook

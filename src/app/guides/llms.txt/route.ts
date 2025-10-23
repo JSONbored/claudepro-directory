@@ -9,23 +9,12 @@
  */
 
 import { existsSync, readdirSync } from 'fs';
+import { cacheLife } from 'next/cache';
 import type { NextRequest } from 'next/server';
 import { join } from 'path';
 import { APP_CONFIG, CONTENT_PATHS } from '@/src/lib/constants';
 import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
-
-/**
- * Runtime configuration
- * Use Node.js runtime for better performance with file system access
- */
-export const runtime = 'nodejs';
-
-/**
- * ISR revalidation
- * Guides index changes infrequently - revalidate every hour
- */
-export const revalidate = 3600;
 
 const GUIDE_CATEGORIES = [
   {
@@ -66,6 +55,9 @@ const GUIDE_CATEGORIES = [
  * following the llms.txt specification for AI-friendly consumption.
  */
 export async function GET(request: NextRequest): Promise<Response> {
+  'use cache';
+  cacheLife('hours'); // 1 hour cache (replaces revalidate: 3600)
+
   const requestLogger = logger.forRequest(request);
 
   try {

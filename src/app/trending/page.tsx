@@ -1,3 +1,4 @@
+import { cacheLife } from 'next/cache';
 import { Suspense } from 'react';
 import {
   agents,
@@ -29,9 +30,6 @@ import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 // Generate metadata from centralized registry
 export const metadata = generatePageMetadata('/trending');
-
-// ISR Configuration - Revalidate every 5 minutes for fresh Redis view counts
-export const revalidate = 900;
 
 /**
  * Load trending data using Redis-based view counts
@@ -156,6 +154,9 @@ async function getTrendingData(params: TrendingParams) {
 }
 
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
+  'use cache';
+  cacheLife('quarter'); // 15 min cache (replaces revalidate: 900)
+
   const rawParams = await searchParams;
 
   // Validate and parse search parameters with Zod

@@ -26,7 +26,6 @@ import { resendWebhookEventSchema } from '@/src/lib/schemas/webhook.schema';
 import { webhookService } from '@/src/lib/services/webhook.server';
 
 // Force Node.js runtime (required for Svix crypto operations)
-export const runtime = 'nodejs';
 
 /**
  * POST /api/webhooks/resend

@@ -25,7 +25,6 @@ import { logger } from '@/src/lib/logger';
 import { emailSequenceService } from '@/src/lib/services/email-sequence.server';
 import { createClient } from '@/src/lib/supabase/admin-client';
 
-export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 interface ExpiredJob {

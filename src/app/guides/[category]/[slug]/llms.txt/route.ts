@@ -7,6 +7,7 @@
  */
 
 import fs from 'fs/promises';
+import { cacheLife } from 'next/cache';
 import type { NextRequest } from 'next/server';
 import path from 'path';
 import { z } from 'zod';
@@ -17,19 +18,6 @@ import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { generateLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
-
-/**
- * Runtime configuration
- */
-export const runtime = 'nodejs';
-
-/**
- * ISR revalidation
- * Guide documentation updates occasionally - revalidate every 30 minutes
- */
-export const revalidate = 1800;
-
-export const dynamicParams = true;
 
 /**
  * Validation schema for guide parameters
@@ -63,6 +51,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ category: string; slug: string }> }
 ): Promise<Response> {
+  'use cache';
+  cacheLife('half'); // 30 min cache (replaces revalidate: 1800)
+
   const requestLogger = logger.forRequest(request);
 
   try {

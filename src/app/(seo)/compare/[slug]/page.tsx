@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import type { Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import path from 'path';
@@ -14,10 +15,6 @@ import { logger } from '@/src/lib/logger';
 import type { ComparisonData } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
-
-// ISR Configuration - Revalidate every 7 days for SEO pages
-export const dynamic = 'force-static'; // Force static generation
-export const dynamicParams = true; // Allow new pages to be generated on-demand
 
 async function getComparisonData(slug: string): Promise<ComparisonData | null> {
   try {
@@ -99,6 +96,9 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
+  'use cache';
+  cacheLife('static'); // Static content (replaces dynamic: 'force-static')
+
   const { slug } = await params;
 
   // Load comparison data for metadata generation
@@ -112,6 +112,9 @@ export async function generateMetadata({
 }
 
 export default async function ComparisonPage({ params }: { params: Promise<{ slug: string }> }) {
+  'use cache';
+  cacheLife('static'); // Static content (replaces dynamic: 'force-static', dynamicParams: true)
+
   const resolvedParams = await params;
   const data = await getComparisonData(resolvedParams.slug);
 

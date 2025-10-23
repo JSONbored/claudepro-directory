@@ -1,3 +1,4 @@
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
@@ -19,8 +20,6 @@ import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
 export const metadata = generatePageMetadata('/board');
 
-export const revalidate = 60;
-
 // Use the actual return type from the database function
 type PopularPost = {
   body: string;
@@ -36,6 +35,9 @@ type PopularPost = {
 };
 
 export default async function BoardPage() {
+  'use cache';
+  cacheLife('minutes'); // 1 min cache (replaces revalidate: 60)
+
   const supabase = await createAdminClient();
 
   // Get popular posts using database function

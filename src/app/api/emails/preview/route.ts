@@ -8,7 +8,6 @@
 
 // Force dynamic rendering - email templates use @react-email/components which should not be statically generated
 export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 import { z } from 'zod';
 import {

@@ -6,6 +6,7 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
+import { cacheLife } from 'next/cache';
 import type { NextRequest } from 'next/server';
 import { isValidCategory, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -14,17 +15,6 @@ import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { generateCategoryLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
-
-/**
- * Runtime configuration
- */
-export const runtime = 'nodejs';
-
-/**
- * ISR revalidation
- * Content indexes update periodically - revalidate every 10 minutes
- */
-export const revalidate = 3600;
 
 /**
  * Generate static params for all valid categories
@@ -49,6 +39,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ category: string }> }
 ): Promise<Response> {
+  'use cache';
+  cacheLife('hours'); // 1 hour cache (replaces revalidate: 3600)
+
   const requestLogger = logger.forRequest(request);
 
   try {
