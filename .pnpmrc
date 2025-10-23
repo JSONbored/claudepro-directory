@@ -1,0 +1,11 @@
+# pnpm configuration
+# Enable lifecycle scripts for essential build dependencies
+
+# Allow scripts for image processing (Next.js image optimization)
+enable-pre-post-scripts=true
+
+# Allow specific packages to run lifecycle scripts
+# These are essential for the build process
+lifecycle-scripts-allow-list[]=sharp
+lifecycle-scripts-allow-list[]=esbuild
+lifecycle-scripts-allow-list[]=lefthook
