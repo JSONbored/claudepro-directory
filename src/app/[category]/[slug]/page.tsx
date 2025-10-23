@@ -59,7 +59,6 @@
  * @see {@link file://../../../components/unified-detail-page/index.tsx} - Detail page component
  */
 
-import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedDetailPage } from '@/src/components/content/unified-detail-page';
@@ -164,9 +163,6 @@ export async function generateMetadata({
   params: Promise<{ category: string; slug: string }>;
 }) {
   const { category, slug } = await params;
-
-  // Access uncached data before new Date() (Cache Components requirement)
-  (await headers()).get('x-cache-marker');
 
   // Validate category at compile time
   if (!isValidCategory(category)) {

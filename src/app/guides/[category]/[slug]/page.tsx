@@ -1,7 +1,6 @@
 import fs from 'fs/promises';
 import type { Metadata } from 'next';
 import { cacheLife } from 'next/cache';
-import { headers } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
@@ -195,9 +194,6 @@ export async function generateMetadata({
   cacheLife('half'); // 30 min cache (replaces revalidate: 1800)
 
   const { category, slug } = await params;
-
-  // Access uncached data before new Date() (Cache Components requirement)
-  (await headers()).get('x-cache-marker');
 
   // Load guide data for metadata generation
   const guideData = await getSEOPageData(category, slug);

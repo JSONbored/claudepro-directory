@@ -24,7 +24,6 @@
 
 import type { Metadata } from 'next';
 import { cacheLife } from 'next/cache';
-import { headers } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
@@ -73,9 +72,6 @@ export async function generateMetadata({
   cacheLife('quarter'); // 15 min cache (replaces revalidate: 900)
 
   const { slug } = await params;
-
-  // Access uncached data before new Date() (Cache Components requirement)
-  (await headers()).get('x-cache-marker');
 
   // Load changelog entry for metadata generation
   const entry = await getChangelogEntryBySlug(slug);

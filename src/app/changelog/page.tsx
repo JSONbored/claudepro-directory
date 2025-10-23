@@ -24,7 +24,6 @@
 
 import type { Metadata } from 'next';
 import { cacheLife } from 'next/cache';
-import { headers } from 'next/headers';
 import Link from 'next/link';
 import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
@@ -41,9 +40,6 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 export async function generateMetadata(): Promise<Metadata> {
   'use cache';
   cacheLife('quarter'); // 15 min cache (replaces revalidate: 900)
-
-  // Access uncached data before new Date() (Cache Components requirement)
-  (await headers()).get('x-cache-marker');
 
   try {
     return generatePageMetadata('/changelog');
