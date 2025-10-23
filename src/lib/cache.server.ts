@@ -2033,29 +2033,22 @@ export const statsRedis = {
       'getViewCount'
     ),
 
-  getViewCounts: unstable_cache(
-    async (items: Array<{ category: string; slug: string }>) => {
-      if (!items.length) return {};
-      const keys = items.map((i) => `views:${i.category}:${i.slug}`);
-      const counts = await redis(
-        async (c) => await c.mget<(number | null)[]>(...keys),
-        () => new Array(items.length).fill(0) as (number | null)[],
-        'getViewCounts'
-      );
-      return items.reduce(
-        (acc, item, i) => {
-          acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
-          return acc;
-        },
-        {} as Record<string, number>
-      );
-    },
-    ['view-counts'],
-    {
-      revalidate: 3600,
-      tags: ['stats', 'view-counts'],
-    }
-  ),
+  getViewCounts: async (items: Array<{ category: string; slug: string }>) => {
+    if (!items.length) return {};
+    const keys = items.map((i) => `views:${i.category}:${i.slug}`);
+    const counts = await redis(
+      async (c) => await c.mget<(number | null)[]>(...keys),
+      () => new Array(items.length).fill(0) as (number | null)[],
+      'getViewCounts'
+    );
+    return items.reduce(
+      (acc, item, i) => {
+        acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+  },
 
   /**
    * Get daily view counts for multiple items (optimized MGET batch operation)
@@ -2169,29 +2162,22 @@ export const statsRedis = {
       'getCopyCount'
     ),
 
-  getCopyCounts: unstable_cache(
-    async (items: Array<{ category: string; slug: string }>) => {
-      if (!items.length) return {};
-      const keys = items.map((i) => `copies:${i.category}:${i.slug}`);
-      const counts = await redis(
-        async (c) => await c.mget<(number | null)[]>(...keys),
-        () => new Array(items.length).fill(0) as (number | null)[],
-        'getCopyCounts'
-      );
-      return items.reduce(
-        (acc, item, i) => {
-          acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
-          return acc;
-        },
-        {} as Record<string, number>
-      );
-    },
-    ['copy-counts'],
-    {
-      revalidate: 3600,
-      tags: ['stats', 'copy-counts'],
-    }
-  ),
+  getCopyCounts: async (items: Array<{ category: string; slug: string }>) => {
+    if (!items.length) return {};
+    const keys = items.map((i) => `copies:${i.category}:${i.slug}`);
+    const counts = await redis(
+      async (c) => await c.mget<(number | null)[]>(...keys),
+      () => new Array(items.length).fill(0) as (number | null)[],
+      'getCopyCounts'
+    );
+    return items.reduce(
+      (acc, item, i) => {
+        acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+  },
 
   /**
    * REMOVED: cleanupOldTrending() - No longer needed

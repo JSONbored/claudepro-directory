@@ -25,15 +25,7 @@
         "scripts/build/build-content.ts",
         "src/lib/build/category-processor.server.ts"
       ],
-      "env": [
-        "ARCJET_KEY",
-        "RATE_LIMIT_SECRET",
-        "CACHE_WARM_AUTH_TOKEN",
-        "VIEW_COUNT_SALT",
-        "WEBHOOK_SECRET",
-        "CRON_SECRET",
-        "NODE_ENV"
-      ],
+      "env": ["NODE_ENV"],
       "cache": true,
       "persistent": true
     },

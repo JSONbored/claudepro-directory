@@ -91,7 +91,6 @@ function generateMetadataFile(categoryId: CategoryId, metadata: readonly unknown
   return `/**
  * Auto-generated metadata file
  * Category: ${config.pluralTitle}
- * Generated: ${new Date().toISOString()}
  *
  * DO NOT EDIT MANUALLY
  * @see scripts/build-content.ts
@@ -128,7 +127,6 @@ function generateFullContentFile(categoryId: CategoryId, items: readonly unknown
   return `/**
  * Auto-generated full content file
  * Category: ${config.pluralTitle}
- * Generated: ${new Date().toISOString()}
  *
  * DO NOT EDIT MANUALLY
  * @see scripts/build-content.ts
@@ -160,7 +158,6 @@ function generateIndexFile(contentStats: ContentStats): string {
 
   return `/**
  * Auto-generated content index
- * Generated: ${new Date().toISOString()}
  *
  * Modern lazy loading architecture:
  * - Metadata loaded on-demand via metadataLoader
