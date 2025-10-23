@@ -31,6 +31,24 @@ const PUBLIC_DIR = path.join(PROJECT_ROOT, 'public/downloads/skills'); // Copy f
 const TEMP_DIR = path.join(PROJECT_ROOT, '.temp/skills');
 
 /**
+ * Check if skill needs to be rebuilt
+ * Returns true if JSON is newer than ZIP or ZIP doesn't exist
+ */
+async function needsRebuild(skill: SkillContent): Promise<boolean> {
+  const jsonPath = path.join(SKILLS_DIR, `${skill.slug}.json`);
+  const zipPath = path.join(OUTPUT_DIR, `${skill.slug}.zip`);
+
+  try {
+    const [jsonStat, zipStat] = await Promise.all([fs.stat(jsonPath), fs.stat(zipPath)]);
+    // Rebuild if JSON is newer than ZIP
+    return jsonStat.mtime > zipStat.mtime;
+  } catch {
+    // ZIP doesn't exist, needs rebuild
+    return true;
+  }
+}
+
+/**
  * Main execution
  */
 async function main() {
@@ -47,11 +65,26 @@ async function main() {
   const skills = await loadAllSkillsJson();
   console.log(`📦 Found ${skills.length} skills to process\n`);
 
-  // Generate packages for each skill
+  // Filter skills that need rebuilding
+  const skillsToRebuild: SkillContent[] = [];
+  for (const skill of skills) {
+    if (await needsRebuild(skill)) {
+      skillsToRebuild.push(skill);
+    }
+  }
+
+  if (skillsToRebuild.length === 0) {
+    console.log('✨ All skills up to date! No rebuild needed.\n');
+    return;
+  }
+
+  console.log(`🔄 Rebuilding ${skillsToRebuild.length}/${skills.length} skills\n`);
+
+  // Generate packages for each skill that needs rebuilding
   let successCount = 0;
   let failCount = 0;
 
-  for (const skill of skills) {
+  for (const skill of skillsToRebuild) {
     try {
       await generateSkillPackage(skill);
       successCount++;
@@ -62,8 +95,8 @@ async function main() {
     }
   }
 
-  // Copy ZIPs to public/ for Next.js serving
-  await copyZipsToPublic(skills);
+  // Copy ZIPs to public/ for Next.js serving (only rebuilt ones)
+  await copyZipsToPublic(skillsToRebuild);
 
   // Cleanup temp directory
   await cleanupTempDirectory();
@@ -72,8 +105,11 @@ async function main() {
   const duration = ((endTime - startTime) / 1000).toFixed(2);
 
   console.log('\n✨ Complete!');
-  console.log(`   Success: ${successCount}/${skills.length}`);
-  console.log(`   Failed: ${failCount}/${skills.length}`);
+  console.log(`   Rebuilt: ${successCount}/${skillsToRebuild.length}`);
+  console.log(
+    `   Skipped: ${skills.length - skillsToRebuild.length}/${skills.length} (up to date)`
+  );
+  console.log(`   Failed: ${failCount}/${skillsToRebuild.length}`);
   console.log(`   Duration: ${duration}s`);
   console.log(`   Primary: ${OUTPUT_DIR}`);
   console.log(`   Served: ${PUBLIC_DIR}`);
