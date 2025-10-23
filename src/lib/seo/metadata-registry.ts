@@ -19,7 +19,6 @@
  * @module lib/seo/metadata-registry
  */
 
-import { unstable_noStore } from 'next/cache';
 import { z } from 'zod';
 import { APP_CONFIG } from '@/src/lib/constants';
 
@@ -264,23 +263,20 @@ export const METADATA_DEFAULTS = {
  * Get current year for AI search optimization
  * ChatGPT often includes the current year when issuing Bing queries
  *
- * Note: Marks the route as dynamic to allow new Date() usage.
+ * Note: Returns hardcoded "2025" to avoid new Date() issues in static generation.
+ * Update this value annually or make pages dynamic to use runtime date.
  */
 export function getCurrentYear(): string {
-  unstable_noStore(); // Mark route as dynamic for new Date() usage
-  return new Date().getFullYear().toString();
+  return '2025';
 }
 
 /**
  * Get current month and year (e.g., "October 2025")
  * Useful for seasonal/time-sensitive content
  *
- * Note: Marks the route as dynamic to allow new Date() usage.
+ * Note: Returns hardcoded "2025" to avoid new Date() issues in static generation.
+ * Update this value annually or make pages dynamic to use runtime date.
  */
 export function getCurrentMonthYear(): string {
-  unstable_noStore(); // Mark route as dynamic for new Date() usage
-  const date = new Date();
-  const month = date.toLocaleString('en-US', { month: 'long' });
-  const year = date.getFullYear();
-  return `${month} ${year}`;
+  return 'October 2025';
 }
