@@ -69,10 +69,6 @@
       "storybook": "./src/lib/analytics/tracker.mock.ts",
       "default": "./src/lib/analytics/tracker.ts"
     },
-    "#lib/analytics/event-mapper": {
-      "storybook": "./src/lib/analytics/event-mapper.mock.js",
-      "default": "./src/lib/analytics/event-mapper.ts"
-    },
     "#lib/analytics/events.constants": {
       "storybook": "./src/lib/analytics/events.constants.mock.ts",
       "default": "./src/lib/analytics/events.constants.ts"

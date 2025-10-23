@@ -1,6 +1,8 @@
 /**
  * Universal Analytics Tracker
  * Provides a simple, consistent API for tracking events across the application
+ *
+ * UPDATED: Now supports consolidated events with typed payloads (Umami best practices)
  */
 
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
@@ -15,16 +17,20 @@ const IS_DEVELOPMENT = isDevelopment;
 const ENABLE_DEBUG = process.env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true';
 
 /**
- * Basic payload sanitization to remove PII
- * Simplified version - only filters out obvious PII keywords
+ * Payload sanitization with typed data support
+ *
+ * UPDATED: Preserves numbers, booleans, and dates (Umami best practices)
+ * Removes PII and converts Date objects to ISO strings
+ *
+ * @see https://umami.is/docs/track-events - "For numeric values, dates, or booleans, the JavaScript method is recommended"
  */
 function sanitizePayload(
   payload?: Record<string, unknown>
-): Record<string, string | number | boolean> {
+): Record<string, string | number | boolean | null> {
   if (!payload) return {};
 
   const PII_KEYWORDS = ['email', 'name', 'phone', 'address', 'ssn', 'credit', 'password'];
-  const sanitized: Record<string, string | number | boolean> = {};
+  const sanitized: Record<string, string | number | boolean | null> = {};
 
   for (const [key, value] of Object.entries(payload)) {
     // Skip PII keywords
@@ -33,10 +39,20 @@ function sanitizePayload(
       continue;
     }
 
-    // Only allow primitive values
-    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    // Preserve typed values (Umami best practice)
+    if (typeof value === 'string') {
       sanitized[key] = value;
+    } else if (typeof value === 'number') {
+      // Preserve numbers for numeric comparisons in dashboard
+      sanitized[key] = value;
+    } else if (typeof value === 'boolean') {
+      // Preserve booleans for filtering
+      sanitized[key] = value;
+    } else if (value instanceof Date) {
+      // Convert Date to ISO string
+      sanitized[key] = value.toISOString();
     }
+    // Ignore other types (objects, arrays, null, undefined)
   }
 
   return sanitized;
@@ -50,6 +66,7 @@ export function trackEvent<T extends EventName>(
   eventName: T,
   payload?: T extends keyof EventPayloads ? EventPayload<T> : Record<string, unknown>
 ): void {
+  // Check config
   const config = getEventConfig()[eventName];
 
   // Check if event is enabled
@@ -84,13 +101,18 @@ export function trackEvent<T extends EventName>(
       // Production tracking with Umami
       const sanitizedPayload = sanitizePayload(payload);
       window.umami?.track(eventName, sanitizedPayload);
+
+      if (ENABLE_DEBUG) {
+        logger.debug('[Analytics] Tracked:', {
+          event: eventName,
+          payload: JSON.stringify(sanitizedPayload),
+        });
+      }
     } else if (IS_DEVELOPMENT && ENABLE_DEBUG) {
       // Development logging
       logger.debug('[Analytics Dev]', {
         event: eventName,
         payload: JSON.stringify(payload),
-        category: config.category,
-        description: config.description,
       });
     }
   } catch (error) {

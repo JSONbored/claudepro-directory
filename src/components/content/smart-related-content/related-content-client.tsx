@@ -230,8 +230,7 @@ export function RelatedContentClient({
                         pathname,
                         itemUrl,
                         index + 1,
-                        item.score ?? 0,
-                        item.matchType
+                        item.score ?? 0
                       );
                     })
                     .catch(() => {

@@ -74,12 +74,16 @@ export function ProductionCodeBlock({
       const category = pathParts[0] || 'unknown';
       const slug = pathParts[1] || 'unknown';
 
-      Promise.all([import('#lib/analytics/event-mapper'), import('#lib/analytics/tracker')])
-        .then(([eventMapper, tracker]) => {
-          const eventName = eventMapper.getCopyCodeEvent(category);
-          tracker.trackEvent(eventName, {
+      Promise.all([
+        import('@/src/lib/analytics/events.constants'),
+        import('#lib/analytics/tracker'),
+      ])
+        .then(([events, tracker]) => {
+          // NEW: Use consolidated CODE_COPIED event with category as payload
+          tracker.trackEvent(events.EVENTS.CODE_COPIED, {
+            category,
             slug,
-            content_length: code.length,
+            contentLength: code.length, // NUMBER (camelCase for consistency)
             ...(language && { language }),
           });
         })

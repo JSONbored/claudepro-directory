@@ -105,14 +105,17 @@ export function UnifiedSearch({
         const category = pathname?.split('/')[1] || 'global';
 
         // Dynamic imports to avoid server-only module issues in Storybook
-        Promise.all([import('#lib/analytics/event-mapper'), import('#lib/analytics/tracker')])
-          .then(([{ getSearchEvent }, { trackEvent }]) => {
-            const eventName = getSearchEvent(category);
-            trackEvent(eventName, {
+        Promise.all([
+          import('@/src/lib/analytics/events.constants'),
+          import('#lib/analytics/tracker'),
+        ])
+          .then(([events, tracker]) => {
+            // NEW: Use consolidated SEARCH event with category as payload
+            tracker.trackEvent(events.EVENTS.SEARCH, {
+              category,
               query: sanitized.substring(0, 100), // Truncate for privacy
-              results_count: resultCount,
-              filters_applied: activeFilterCount > 0,
-              time_to_results: 0, // Could add performance timing if needed
+              resultsCount: resultCount, // NUMBER (camelCase for consistency)
+              filtersApplied: activeFilterCount > 0, // BOOLEAN
             });
           })
           .catch(() => {

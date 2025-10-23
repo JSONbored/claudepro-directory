@@ -426,13 +426,17 @@ function CopyMarkdownButton({
 
         // Track analytics (dynamic import for Storybook compatibility)
         const contentLength = result.data.markdown.length;
-        Promise.all([import('#lib/analytics/event-mapper'), import('#lib/analytics/tracker')])
-          .then(([eventMapper, tracker]) => {
-            tracker.trackEvent(eventMapper.getCopyMarkdownEvent(category), {
+        Promise.all([
+          import('@/src/lib/analytics/events.constants'),
+          import('#lib/analytics/tracker'),
+        ])
+          .then(([events, tracker]) => {
+            // NEW: Use consolidated event with category as payload (Umami best practices)
+            tracker.trackEvent(events.EVENTS.MARKDOWN_COPIED, {
+              category,
               slug,
-              include_metadata: includeMetadata,
-              include_footer: includeFooter,
-              content_length: contentLength,
+              contentLength, // NUMBER (not string)
+              copyCount: 1, // Track copy frequency
             });
           })
           .catch(() => {
@@ -511,14 +515,18 @@ function DownloadMarkdownButton({
         });
 
         // Track analytics (dynamic import for Storybook compatibility)
-        const filename = result.data.filename;
         const fileSize = blob.size;
-        Promise.all([import('#lib/analytics/event-mapper'), import('#lib/analytics/tracker')])
-          .then(([eventMapper, tracker]) => {
-            tracker.trackEvent(eventMapper.getDownloadMarkdownEvent(category), {
+        Promise.all([
+          import('@/src/lib/analytics/events.constants'),
+          import('#lib/analytics/tracker'),
+        ])
+          .then(([events, tracker]) => {
+            // NEW: Use consolidated event with category as payload (Umami best practices)
+            tracker.trackEvent(events.EVENTS.MARKDOWN_DOWNLOADED, {
+              category,
               slug,
-              filename,
-              file_size: fileSize,
+              fileSize, // NUMBER (not string)
+              downloadCount: 1, // Track download frequency
             });
           })
           .catch(() => {

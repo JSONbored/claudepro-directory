@@ -167,13 +167,19 @@ function PageViewVariant({
   useTrackingEffect(
     () => {
       // Dynamic imports for Storybook compatibility (analytics modules)
-      return Promise.all([import('#lib/analytics/event-mapper'), import('#lib/analytics/tracker')])
-        .then(([eventMapper, tracker]) => {
-          const eventName = eventMapper.getContentViewEvent(category);
-          tracker.trackEvent(eventName, {
+      return Promise.all([
+        import('#lib/analytics/events.constants'),
+        import('#lib/analytics/tracker'),
+      ])
+        .then(([events, tracker]) => {
+          // NEW: Use consolidated event with category as payload (Umami best practices)
+          tracker.trackEvent(events.EVENTS.CONTENT_VIEWED, {
+            category,
             slug,
             page: typeof window !== 'undefined' ? window.location.pathname : `/${category}/${slug}`,
             source: sourcePage || 'direct',
+            // Optional typed properties (numbers, booleans)
+            // viewCount, isFeatured, rating can be added here when available
           });
         })
         .catch(() => {
