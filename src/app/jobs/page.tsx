@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import Link from 'next/link';
 import { JobCard } from '@/src/components/domain/job-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -28,6 +29,9 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 export async function generateMetadata({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
   const params = parseSearchParams(jobsSearchSchema, rawParams, 'jobs page metadata');
+
+  // Access uncached data before new Date() (Cache Components requirement)
+  (await headers()).get('x-cache-marker');
 
   return generatePageMetadata('/jobs', {
     filters: {

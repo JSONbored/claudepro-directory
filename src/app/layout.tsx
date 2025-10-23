@@ -52,6 +52,9 @@ const inter = Inter({
 
 // Generate homepage metadata from centralized registry
 export async function generateMetadata(): Promise<Metadata> {
+  // Access uncached data before new Date() (Cache Components requirement)
+  (await headers()).get('x-cache-marker');
+
   const homeMetadata = generatePageMetadata('/');
 
   return {

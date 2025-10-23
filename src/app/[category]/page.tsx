@@ -39,6 +39,7 @@
  */
 
 import { cacheLife } from 'next/cache';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content-list-server';
 import { statsRedis } from '@/src/lib/cache.server';
@@ -112,6 +113,9 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
   cacheLife('minutes'); // 5 min cache (replaces revalidate: 300)
 
   const { category } = await params;
+
+  // Access uncached data before new Date() (Cache Components requirement)
+  (await headers()).get('x-cache-marker');
 
   // Validate category and load config
   if (!isValidCategory(category)) {

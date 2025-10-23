@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -27,6 +28,9 @@ interface UserProfilePageProps {
 
 export async function generateMetadata({ params }: UserProfilePageProps): Promise<Metadata> {
   const { slug } = await params;
+
+  // Access uncached data before new Date() (Cache Components requirement)
+  (await headers()).get('x-cache-marker');
 
   // Use generator with smart defaults for user profiles
   return generatePageMetadata('/u/:slug', {

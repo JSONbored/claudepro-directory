@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { sanitizers } from '@/src/lib/security/validators';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -41,6 +42,10 @@ interface SearchPageProps {
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
   const resolvedParams = await searchParams;
   const query = resolvedParams.q || '';
+
+  // Access uncached data before new Date() (Cache Components requirement)
+  (await headers()).get('x-cache-marker');
+
   return generatePageMetadata('/search', { params: { q: query } });
 }
 
