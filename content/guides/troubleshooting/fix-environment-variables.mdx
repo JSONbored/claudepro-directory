@@ -22,11 +22,11 @@ citationReady: true
 <UnifiedContentBlock
   variant="tldr">
 Claude Code configuration errors commonly affect authentication, OAuth handling, and permission settings. This guide provides platform-specific fixes for Windows WSL, macOS, and Linux. Security best practices protect API keys with layered approaches. Automated management with direnv simplifies environment setup.
-</TLDRSummary>
+</UnifiedContentBlock>
 
 <UnifiedContentBox contentType="callout" type="warning" title="Critical Configuration Alert">
 Configuration issues represent a significant portion of Claude Code support requests. OAuth callback failures and API key exposure risks remain top concerns. This guide addresses the most common configuration problems through proper setup patterns.
-</Callout>
+</UnifiedContentBox>
 
 ## Problem Overview
 
@@ -42,7 +42,7 @@ Configuration issues represent a significant portion of Claude Code support requ
   **Affected Versions:** Claude Code 3.0+, all platforms (Windows/macOS/Linux)
 
   **Impact Level:** Complete workflow disruption - no code generation possible
-</InfoBox>
+</UnifiedContentBox>
 
 ## Quick Diagnosis
 
@@ -358,7 +358,7 @@ claude /status`
 **Container-Based Development:** Docker ensures consistent environments - Prevents platform-specific issues entirely
 
 **Regular Validation Checks:** Run claude doctor weekly - Early detection of configuration drift
-</Callout>
+</UnifiedContentBox>
 
 ## Alternative Solutions
 
@@ -682,11 +682,11 @@ volumes:
   **Team Plans:** Enhanced usage limits per seat
 
   **Enterprise Plans:** Maximum usage with priority support
-  
+
   **Shared Configuration:** CLAUDE.md files define team standards
-  
+
   **Role Management:** Settings → Members for seat allocation
-</InfoBox>
+</UnifiedContentBox>
 
 <StepByStepGuide
   title="Team Environment Synchronization"
@@ -834,6 +834,6 @@ export MCP_SERVERS="github,stackexchange,filesystem"`
 **Still having issues?** Join our [community](/community) for additional support or contact Anthropic support for enterprise assistance.
 
 **Found a new solution?** Share it with the community to help others facing the same issue.
-</Callout>
+</UnifiedContentBox>
 
 *Last updated: September 2025 | Solutions verified against Claude Code 3.0+ | Found this helpful? Bookmark for future reference and explore more [troubleshooting guides](/guides/troubleshooting).*

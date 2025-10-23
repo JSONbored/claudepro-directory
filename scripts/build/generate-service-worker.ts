@@ -22,6 +22,8 @@
  * @see src/lib/constants/security.ts - Security configuration
  */
 
+import { createHash } from 'node:crypto';
+import { existsSync, mkdirSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -34,6 +36,8 @@ import { ParseStrategy, safeParse } from '../../src/lib/utils/data.utils.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT_DIR = join(__dirname, '../..');
+const CACHE_DIR = join(ROOT_DIR, '.next', 'cache');
+const HASH_FILE = join(CACHE_DIR, 'sw-hash.txt');
 
 /**
  * Service Worker Template
@@ -544,9 +548,25 @@ async function generateServiceWorker() {
       .replace('{{CONTENT_ROUTES}}', `[\n  ${contentRoutes.join(',\n  ')},\n]`)
       .replace('{{CATEGORY_PATTERN}}', categoryPattern);
 
+    // Incremental caching: Check if service worker content changed
+    const currentHash = createHash('sha256').update(serviceWorkerCode).digest('hex');
+    const previousHash = existsSync(HASH_FILE) ? await readFile(HASH_FILE, 'utf-8') : '';
+
+    if (currentHash === previousHash) {
+      logger.info('✓ Service worker unchanged, skipping generation');
+      logger.success(`✅ Service worker up-to-date (${Date.now() - startTime}ms)`);
+      return true;
+    }
+
     // Write to public/service-worker.js
     const outputPath = join(ROOT_DIR, 'public', 'service-worker.js');
     await writeFile(outputPath, serviceWorkerCode, 'utf-8');
+
+    // Save hash for next build
+    if (!existsSync(CACHE_DIR)) {
+      mkdirSync(CACHE_DIR, { recursive: true });
+    }
+    await writeFile(HASH_FILE, currentHash, 'utf-8');
 
     const duration = Date.now() - startTime;
     logger.success(`✅ Service worker generated in ${duration}ms`);

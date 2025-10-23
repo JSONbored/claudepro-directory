@@ -146,7 +146,7 @@ wsl --shutdown`
 <UnifiedContentBox contentType="callout" type="warning" title="Common Installation Error">
 **Error: WslRegisterDistribution failed with error: 0x80370114**  
 **Solution:** Enable Virtual Machine Platform feature. Run `dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart` in PowerShell as Administrator.
-</Callout>
+</UnifiedContentBox>
 
 ## Step 2: Configure Node.js Environment
 
@@ -600,7 +600,7 @@ echo "All checks complete!"`
 **Security Best Practice:** Always configure npm to use user directories. Never use sudo with npm installations.
 
 **Scalability Pattern:** For teams, create shared .wslconfig templates. Standardize configurations across developer machines.
-</Callout>
+</UnifiedContentBox>
 
 ## Next Steps
 
@@ -725,6 +725,6 @@ echo "All checks complete!"`
 - ✅ Claude Code running at optimal performance
 
 **Ready for more?** Explore our [tutorials collection](/guides/tutorials) or join our [community](/community) to share your setup and get help with advanced configurations.
-</Callout>
+</UnifiedContentBox>
 
 *Last updated: September 2025 | Found this helpful? Share it with your team and explore more [Claude tutorials](/guides/tutorials).*

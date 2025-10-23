@@ -11,7 +11,7 @@ keywords:
 dateUpdated: "2025-09-22"
 author: "Claude Pro Directory"
 category: "guides"
-subcategory: "tutorials"
+subcategory: "troubleshooting"
 tags:
   - "tutorial"
   - "beginner"
@@ -39,11 +39,11 @@ citationReady: true
 Master Claude Code installation without encountering common npm permission errors. By completion, you'll have Claude Code running in your terminal and understand PATH configuration fundamentals. This guide covers multiple installation methods, PATH configurations, and real-world troubleshooting scenarios.
 
 <UnifiedContentBox contentType="callout" type="info" title="Tutorial Requirements">
-**Prerequisites:** Basic terminal knowledge  
-**Time Required:** 15-25 minutes active work  
-**Tools Needed:** Node.js 18+, Terminal, Browser  
+**Prerequisites:** Basic terminal knowledge
+**Time Required:** 15-25 minutes active work
+**Tools Needed:** Node.js 18+, Terminal, Browser
 **Outcome:** Working Claude Code installation with proper PATH
-</Callout>
+</UnifiedContentBox>
 
 ## What You'll Learn
 
@@ -330,15 +330,15 @@ workflow:
 ## Troubleshooting Guide
 
 <UnifiedContentBox contentType="callout" type="warning" title="Common Issues and Solutions">
-**Issue 1: EACCES permission denied to /usr/local/lib**  
+**Issue 1: EACCES permission denied to /usr/local/lib**
 **Solution:** Never use sudo. Reconfigure npm prefix to ~/.npm-global directory. This fixes the root cause permanently.
 
-**Issue 2: claude: command not found after installation**  
+**Issue 2: claude: command not found after installation**
 **Solution:** Add npm global bin to PATH. Source your shell config file immediately.
 
-**Issue 3: Update installed. Restart to apply loop**  
+**Issue 3: Update installed. Restart to apply loop**
 **Solution:** Run claude migrate-installer command. Switches to native installer with working auto-updates.
-</Callout>
+</UnifiedContentBox>
 
 ## Advanced Techniques
 
@@ -348,7 +348,7 @@ workflow:
 **Security Best Practice:** Always configure API keys as environment variables. Never commit keys to version control.
 
 **Scalability Pattern:** Use Volta for team installations. Provides automatic version switching and improved shell startup.
-</Callout>
+</UnifiedContentBox>
 
 ## Validation and Testing
 
@@ -458,14 +458,14 @@ workflow:
 ---
 
 <UnifiedContentBox contentType="callout" type="success" title="Tutorial Complete!">
-**Congratulations!** You've mastered Claude Code installation without permission errors. 
+**Congratulations!** You've mastered Claude Code installation without permission errors.
 
 **What you achieved:**
 - ✅ Configured npm to avoid EACCES errors permanently
-- ✅ Installed Claude Code with proper PATH configuration 
+- ✅ Installed Claude Code with proper PATH configuration
 - ✅ Learned platform-specific installation methods
 
 **Ready for more?** Explore our [tutorials collection](/guides/tutorials) or join our [community](/community) to share your installation experience and help others overcome setup challenges.
-</Callout>
+</UnifiedContentBox>
 
 *Last updated: September 2025 | Found this helpful? Share it with developers struggling with Claude Code installation and explore more [Claude tutorials](/guides/tutorials).*

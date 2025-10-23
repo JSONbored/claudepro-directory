@@ -95,9 +95,11 @@
   },
   "scripts": {
     "dev": "npm run build:content && npm run generate:service-worker && next dev --turbopack",
-    "build": "npm run generate:categories && npm run generate:events && npm run build:content && npm run generate:service-worker && npm run generate:openapi && npm run build:api-docs && next build --turbopack",
+    "build:phase1": "npm-run-all --parallel generate:categories generate:events generate:openapi build:content",
+    "build:phase2": "npm-run-all --parallel generate:service-worker build:api-docs",
+    "build": "npm run build:phase1 && npm run build:phase2 && next build --turbopack",
     "build:analyze": "TURBOPACK_STATS=1 npm run build",
-    "build:content": "tsx scripts/build/build-content.ts",
+    "build:content": "node --import tsx scripts/build/build-content.ts",
     "build:api-docs": "tsx scripts/build/generate-fumadocs-api.ts",
     "generate:service-worker": "tsx scripts/build/generate-service-worker.ts",
     "generate:openapi": "tsx scripts/build/generate-openapi.ts",
@@ -236,6 +238,7 @@
     "tailwindcss": "^4.1.14",
     "tsx": "^4.20.6",
     "typescript": "5.9.3",
+    "vscode-oniguruma": "^2.0.1",
     "zod": "^4.1.12"
   },
   "devDependencies": {
@@ -268,6 +271,7 @@
     "knip": "^5.65.0",
     "lefthook": "^1.13.6",
     "msw": "^2.11.5",
+    "npm-run-all": "^4.1.5",
     "storybook": "^9.1.12",
     "ultracite": "^5.6.4",
     "vite-tsconfig-paths": "^5.1.4",

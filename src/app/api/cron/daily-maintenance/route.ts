@@ -7,13 +7,14 @@
  * Schedule: Daily at 3 AM UTC (0 3 * * *)
  * Configured in vercel.json
  *
- * Tasks performed (in sequence):
+ * Tasks performed (in parallel):
  * 1. Cache Warming - Pre-populate Redis cache for optimal performance
  * 2. Job Expiration - Mark expired job listings as inactive
  * 3. Email Sequences - Process onboarding and drip campaign emails
+ * 4. User Stats Refresh - Update materialized view for dashboard performance
  *
  * Performance:
- * - Sequential execution to avoid resource contention
+ * - Parallel execution for 2-3x faster completion (OPTIMIZATION 2025-10-22)
  * - Individual task error handling (one failure doesn't break others)
  * - Comprehensive logging for monitoring
  *
@@ -66,165 +67,229 @@ const route = createApiRoute({
       logger.info('Daily maintenance cron started');
 
       // ============================================
-      // TASK 1: CACHE WARMING
+      // OPTIMIZATION (2025-10-22): PARALLEL EXECUTION
+      // All 4 tasks are independent and can run in parallel
+      // BEFORE: Sequential execution (Task 1 → Task 2 → Task 3 → Task 4)
+      // AFTER: Parallel execution (Task 1 + Task 2 + Task 3 + Task 4 simultaneously)
+      // Expected speedup: 2-3x faster total execution time
       // ============================================
-      try {
-        const taskStart = performance.now();
-        logger.info('Task 1/3: Starting cache warming');
 
-        const cacheResult = await cacheWarmer.triggerManualWarming();
+      const taskPromises = [
+        // TASK 1: CACHE WARMING
+        (async (): Promise<TaskResult> => {
+          try {
+            const taskStart = performance.now();
+            logger.info('Task 1/4: Starting cache warming');
 
-        results.push({
-          task: 'cache_warming',
-          success: cacheResult.success ?? false,
-          duration_ms: Math.round(performance.now() - taskStart),
-          data: {
-            message: cacheResult.message,
-          },
-        });
+            const cacheResult = await cacheWarmer.triggerManualWarming();
 
-        logger.info('Task 1/3: Cache warming complete', {
-          success: cacheResult.success ? 'true' : 'false',
-          message: cacheResult.message ?? 'No message',
-        });
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(
-          'Task 1/3: Cache warming failed',
-          error instanceof Error ? error : new Error(String(error))
-        );
+            logger.info('Task 1/4: Cache warming complete', {
+              success: cacheResult.success ? 'true' : 'false',
+              message: cacheResult.message ?? 'No message',
+            });
 
-        results.push({
-          task: 'cache_warming',
-          success: false,
-          duration_ms: Math.round(performance.now() - overallStartTime),
-          error: errorMessage,
-        });
-      }
-
-      // ============================================
-      // TASK 2: EXPIRE JOBS
-      // ============================================
-      try {
-        const taskStart = performance.now();
-        logger.info('Task 2/3: Starting job expiration');
-
-        const supabase = await createClient();
-        const now = new Date().toISOString();
-
-        // Find all active jobs that have expired
-        const { data: expiredJobs, error: selectError } = await supabase
-          .from('jobs')
-          .select('id, slug, title, company, expires_at, user_id')
-          .eq('status', 'active')
-          .lt('expires_at', now)
-          .not('expires_at', 'is', null);
-
-        if (selectError) {
-          throw new Error(`Failed to query expired jobs: ${selectError.message}`);
-        }
-
-        // Update expired jobs if any found
-        let expiredCount = 0;
-        if (expiredJobs && expiredJobs.length > 0) {
-          const typedExpiredJobs = expiredJobs as ExpiredJob[];
-
-          const { error: updateError } = await supabase
-            .from('jobs')
-            .update({
-              status: 'expired',
-              active: false,
-            })
-            .in(
-              'id',
-              typedExpiredJobs.map((j) => j.id)
+            return {
+              task: 'cache_warming',
+              success: cacheResult.success ?? false,
+              duration_ms: Math.round(performance.now() - taskStart),
+              data: {
+                message: cacheResult.message,
+              },
+            };
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            logger.error(
+              'Task 1/4: Cache warming failed',
+              error instanceof Error ? error : new Error(String(error))
             );
 
-          if (updateError) {
-            throw new Error(`Failed to update expired jobs: ${updateError.message}`);
+            return {
+              task: 'cache_warming',
+              success: false,
+              duration_ms: Math.round(performance.now() - overallStartTime),
+              error: errorMessage,
+            };
           }
+        })(),
 
-          expiredCount = typedExpiredJobs.length;
-          logger.info(
-            `Expired ${expiredCount} jobs: ${typedExpiredJobs.map((j) => j.slug).join(', ')}`
-          );
-        }
+        // TASK 2: EXPIRE JOBS
+        (async (): Promise<TaskResult> => {
+          try {
+            const taskStart = performance.now();
+            logger.info('Task 2/4: Starting job expiration');
 
-        results.push({
-          task: 'expire_jobs',
-          success: true,
-          duration_ms: Math.round(performance.now() - taskStart),
-          data: {
-            expired_count: expiredCount,
-            jobs_expired:
-              expiredJobs?.map((j) => ({
-                id: j.id,
-                slug: j.slug,
-                title: j.title,
-              })) || [],
-          },
-        });
+            const supabase = await createClient();
+            const now = new Date().toISOString();
 
-        logger.info('Task 2/3: Job expiration complete', {
-          expired_count: expiredCount,
-        });
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(
-          'Task 2/3: Job expiration failed',
-          error instanceof Error ? error : new Error(String(error))
-        );
+            // Find all active jobs that have expired
+            const { data: expiredJobs, error: selectError } = await supabase
+              .from('jobs')
+              .select('id, slug, title, company, expires_at, user_id')
+              .eq('status', 'active')
+              .lt('expires_at', now)
+              .not('expires_at', 'is', null);
 
-        results.push({
-          task: 'expire_jobs',
-          success: false,
-          duration_ms: Math.round(performance.now() - overallStartTime),
-          error: errorMessage,
-        });
-      }
+            if (selectError) {
+              throw new Error(`Failed to query expired jobs: ${selectError.message}`);
+            }
 
-      // ============================================
-      // TASK 3: PROCESS EMAIL SEQUENCES
-      // ============================================
-      try {
-        const taskStart = performance.now();
-        logger.info('Task 3/3: Starting email sequence processing');
+            // Update expired jobs if any found
+            let expiredCount = 0;
+            if (expiredJobs && expiredJobs.length > 0) {
+              const typedExpiredJobs = expiredJobs as ExpiredJob[];
 
-        const emailResults = await emailSequenceService.processSequenceQueue();
+              const { error: updateError } = await supabase
+                .from('jobs')
+                .update({
+                  status: 'expired',
+                  active: false,
+                })
+                .in(
+                  'id',
+                  typedExpiredJobs.map((j) => j.id)
+                );
 
-        results.push({
-          task: 'process_email_sequences',
-          success: true,
-          duration_ms: Math.round(performance.now() - taskStart),
-          data: {
-            sent: emailResults.sent,
-            failed: emailResults.failed,
-            total: emailResults.sent + emailResults.failed,
-            success_rate:
-              emailResults.sent > 0
-                ? `${((emailResults.sent / (emailResults.sent + emailResults.failed)) * 100).toFixed(1)}%`
-                : '0%',
-          },
-        });
+              if (updateError) {
+                throw new Error(`Failed to update expired jobs: ${updateError.message}`);
+              }
 
-        logger.info('Task 3/3: Email sequence processing complete', {
-          sent: emailResults.sent,
-          failed: emailResults.failed,
-        });
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(
-          'Task 3/3: Email sequence processing failed',
-          error instanceof Error ? error : new Error(String(error))
-        );
+              expiredCount = typedExpiredJobs.length;
+              logger.info(
+                `Expired ${expiredCount} jobs: ${typedExpiredJobs.map((j) => j.slug).join(', ')}`
+              );
+            }
 
-        results.push({
-          task: 'process_email_sequences',
-          success: false,
-          duration_ms: Math.round(performance.now() - overallStartTime),
-          error: errorMessage,
-        });
-      }
+            logger.info('Task 2/4: Job expiration complete', {
+              expired_count: expiredCount,
+            });
+
+            return {
+              task: 'expire_jobs',
+              success: true,
+              duration_ms: Math.round(performance.now() - taskStart),
+              data: {
+                expired_count: expiredCount,
+                jobs_expired:
+                  expiredJobs?.map((j) => ({
+                    id: j.id,
+                    slug: j.slug,
+                    title: j.title,
+                  })) || [],
+              },
+            };
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            logger.error(
+              'Task 2/4: Job expiration failed',
+              error instanceof Error ? error : new Error(String(error))
+            );
+
+            return {
+              task: 'expire_jobs',
+              success: false,
+              duration_ms: Math.round(performance.now() - overallStartTime),
+              error: errorMessage,
+            };
+          }
+        })(),
+
+        // TASK 3: PROCESS EMAIL SEQUENCES
+        (async (): Promise<TaskResult> => {
+          try {
+            const taskStart = performance.now();
+            logger.info('Task 3/4: Starting email sequence processing');
+
+            const emailResults = await emailSequenceService.processSequenceQueue();
+
+            logger.info('Task 3/4: Email sequence processing complete', {
+              sent: emailResults.sent,
+              failed: emailResults.failed,
+            });
+
+            return {
+              task: 'process_email_sequences',
+              success: true,
+              duration_ms: Math.round(performance.now() - taskStart),
+              data: {
+                sent: emailResults.sent,
+                failed: emailResults.failed,
+                total: emailResults.sent + emailResults.failed,
+                success_rate:
+                  emailResults.sent > 0
+                    ? `${((emailResults.sent / (emailResults.sent + emailResults.failed)) * 100).toFixed(1)}%`
+                    : '0%',
+              },
+            };
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            logger.error(
+              'Task 3/4: Email sequence processing failed',
+              error instanceof Error ? error : new Error(String(error))
+            );
+
+            return {
+              task: 'process_email_sequences',
+              success: false,
+              duration_ms: Math.round(performance.now() - overallStartTime),
+              error: errorMessage,
+            };
+          }
+        })(),
+
+        // TASK 4: REFRESH USER STATS MATERIALIZED VIEW
+        (async (): Promise<TaskResult> => {
+          try {
+            const taskStart = performance.now();
+            logger.info('Task 4/4: Starting user stats refresh');
+
+            const supabase = await createClient();
+            const { data: refreshResult, error: rpcError } =
+              await supabase.rpc('refresh_user_stats');
+
+            if (rpcError) {
+              throw new Error(`RPC call failed: ${rpcError.message}`);
+            }
+
+            const result = Array.isArray(refreshResult) ? refreshResult[0] : refreshResult;
+
+            if (!result?.success) {
+              throw new Error(result?.message || 'Unknown error during refresh');
+            }
+
+            logger.info('Task 4/4: User stats refresh complete', {
+              rows_refreshed: result.rows_refreshed,
+              duration_ms: result.duration_ms,
+            });
+
+            return {
+              task: 'refresh_user_stats',
+              success: true,
+              duration_ms: Math.round(performance.now() - taskStart),
+              data: {
+                rows_refreshed: result.rows_refreshed,
+                refresh_duration_ms: result.duration_ms,
+              },
+            };
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            logger.error(
+              'Task 4/4: User stats refresh failed',
+              error instanceof Error ? error : new Error(String(error))
+            );
+
+            return {
+              task: 'refresh_user_stats',
+              success: false,
+              duration_ms: Math.round(performance.now() - overallStartTime),
+              error: errorMessage,
+            };
+          }
+        })(),
+      ];
+
+      // Execute all tasks in parallel and wait for completion
+      const taskResults = await Promise.all(taskPromises);
+      results.push(...taskResults);
 
       // ============================================
       // SUMMARY

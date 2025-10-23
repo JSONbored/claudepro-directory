@@ -24,11 +24,11 @@ import { Callout, InfoBox, Accordion, StepByStepGuide, CodeGroup, ComparisonTabl
 <UnifiedContentBlock
   variant="tldr">
 **Quick Fix:** Claude Code processes can consume 120GB RAM within 60 minutes. Clear context with `/clear` every 40 messages. Configure memory limits to 4096MB. Monitor RAM usage actively. Keep CLAUDE.md files under 5KB for optimal performance.
-</TLDRSummary>
+</UnifiedContentBlock>
 
 <UnifiedContentBox contentType="infobox" type="error" title="Critical Performance Issue">
 Claude Code experiences severe memory leaks causing system crashes. RAM usage grows from 300MB to 120GB within one hour. This affects macOS, Linux, and WSL2 environments. Immediate action prevents complete system failure.
-</InfoBox>
+</UnifiedContentBox>
 
 ## Identifying the Problem
 
@@ -460,10 +460,10 @@ claude doctor --repair`
 <UnifiedContentBox contentType="callout" type="success" title="Prevent Future Occurrences">
 **Proactive Context Management:** Run /compact every 40 messages systematically - Reduces memory usage by 60%
 
-**Session Hygiene:** Clear context between unrelated tasks immediately - Prevents 70% of overflow issues  
+**Session Hygiene:** Clear context between unrelated tasks immediately - Prevents 70% of overflow issues
 
 **Resource Monitoring:** Track RAM usage with htop continuously - Early detection prevents system crashes
-</Callout>
+</UnifiedContentBox>
 
 ## Alternative Solutions
 
@@ -574,6 +574,6 @@ done`
 **Still having issues?** Join our [community](/community) for additional support or check Anthropic's status page.
 
 **Found a new solution?** Share it with the community to help others facing the same issue.
-</Callout>
+</UnifiedContentBox>
 
 *Last updated: September 2025 | Solutions verified against Claude 4 documentation | Found this helpful? Bookmark for future reference and explore more [troubleshooting guides](/guides/troubleshooting).*

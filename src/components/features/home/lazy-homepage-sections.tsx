@@ -3,8 +3,9 @@ import { FeaturedSectionSkeleton, Skeleton } from '@/src/components/primitives/l
 
 /**
  * Lazy-loaded FeaturedSections with skeleton loading state
- * Client-only: Individual content pages are fully SSR'd for SEO
- * Reduces initial bundle by ~15-20KB, improves Time to Interactive
+ * OPTIMIZATION (2025-10-22): Enabled SSR for better perceived performance and SEO
+ * SSR renders content immediately, eliminating skeleton flash
+ * Code-splitting still reduces initial bundle by ~15-20KB
  */
 export const LazyFeaturedSections = dynamic(
   () =>
@@ -20,14 +21,15 @@ export const LazyFeaturedSections = dynamic(
         ))}
       </div>
     ),
-    ssr: false, // Client-only: Content already indexed via individual pages
+    ssr: true, // SSR enabled: Better UX and SEO, content rendered immediately
   }
 );
 
 /**
  * Lazy-loaded TabsSection with skeleton loading state
- * Client-only: Interactive tabs - users click to reveal content
- * Reduces initial bundle by ~10-15KB, improves Time to Interactive
+ * OPTIMIZATION (2025-10-22): Enabled SSR for better perceived performance
+ * SSR renders tabs immediately, eliminating skeleton flash
+ * Interactive functionality works client-side after hydration
  */
 export const LazyTabsSection = dynamic(
   () =>
@@ -47,7 +49,7 @@ export const LazyTabsSection = dynamic(
         <FeaturedSectionSkeleton />
       </div>
     ),
-    ssr: false, // Client-only: Interactive component, no SEO benefit
+    ssr: true, // SSR enabled: Better UX, tabs render immediately
   }
 );
 

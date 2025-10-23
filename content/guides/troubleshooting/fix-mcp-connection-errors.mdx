@@ -39,12 +39,12 @@ citationReady: true
 Experiencing MCP server disconnection error -32000 with Claude Desktop? This comprehensive guide provides proven solutions based on community reports and official Anthropic support resources. The issue typically manifests as garbled text messages, immediate disconnections, or server disconnect notifications.
 
 <UnifiedContentBox contentType="callout" type="error" title="Problem Summary">
-**Error:** Server disconnected. error -32000  
-**Symptoms:** Garbled messages, immediate disconnection, server fails to start  
-**Impact:** All MCP server functionality disabled  
-**Urgency:** High - blocks all local tool integrations  
+**Error:** Server disconnected. error -32000
+**Symptoms:** Garbled messages, immediate disconnection, server fails to start
+**Impact:** All MCP server functionality disabled
+**Urgency:** High - blocks all local tool integrations
 **Estimated Fix Time:** 5-10 minutes for basic cases
-</Callout>
+</UnifiedContentBox>
 
 ## Quick Fix (5-Minute Solution)
 
@@ -240,11 +240,11 @@ grep -i "error\\|failed\\|disconnect" ~/Library/Logs/Claude/mcp*.log
           
           <UnifiedContentBox contentType="callout" type="warning" title="Configuration Best Practices">
           **Use absolute paths:** Prevents ambiguity and version conflicts
-          
+
           **Platform-specific wrappers:** Windows requires cmd /c for npx execution
-          
+
           **Environment variables:** Set DEBUG=mcp:* for detailed troubleshooting
-          </Callout>
+          </UnifiedContentBox>
         </div>
       )
     },
@@ -260,11 +260,11 @@ grep -i "error\\|failed\\|disconnect" ~/Library/Logs/Claude/mcp*.log
           
           <UnifiedContentBox contentType="callout" type="error" title="Important: Data Backup">
           **Before proceeding:** Export any custom MCP server configurations
-          
+
           **Backup Command:** `cp -r ~/.mcp-servers ~/Desktop/mcp-backup`
-          
+
           **Recovery Process:** Restore configurations after clean installation
-          </Callout>
+          </UnifiedContentBox>
           
           <StepByStepGuide 
             title="Reset and Reinstall Process"
@@ -379,9 +379,9 @@ else:
           
           <UnifiedContentBox contentType="callout" type="tip" title="Advanced Troubleshooting Tips">
           **Use MCP Inspector:** Interactive debugging tool for protocol inspection
-          
+
           **Monitor stderr output:** All debug info must go to stderr, not stdout
-          </Callout>
+          </UnifiedContentBox>
         </div>
       )
     }
@@ -427,7 +427,7 @@ else:
 **Redirect server logs to stderr:** console.error() instead of console.log() prevents stream pollution
 
 **Pin Node.js version:** Use nvm with specific version (v20-22 recommended) for version consistency
-</Callout>
+</UnifiedContentBox>
 
 ## Alternative Solutions
 
@@ -489,7 +489,7 @@ export HTTPS_PROXY=http://proxy.company.com:8080
           
           <UnifiedContentBox contentType="callout" type="warning" title="Community Solution Disclaimer">
           These solutions are community-contributed and verified by MCP maintainers. Test in development environment before production use.
-          </Callout>
+          </UnifiedContentBox>
         </div>
       )
     }
@@ -601,6 +601,6 @@ export HTTPS_PROXY=http://proxy.company.com:8080
 **Still having issues?** Join our [community](/community) for additional support or file a GitHub issue at github.com/modelcontextprotocol/issues.
 
 **Found a new solution?** Share it with the community to help others facing the same issue.
-</Callout>
+</UnifiedContentBox>
 
 *Last updated: September 2025 | Solutions verified against MCP Protocol v2025-06-18 | Found this helpful? Bookmark for future reference and explore more [troubleshooting guides](/guides/troubleshooting).*

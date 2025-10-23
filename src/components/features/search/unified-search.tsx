@@ -78,14 +78,29 @@ export function UnifiedSearch({
   const filterPanelId = useId();
   const sortSelectId = useId();
 
-  // Debounced search with sanitization and analytics tracking
+  // OPTIMIZATION (2025-10-22): Reduced debounce from 300ms to 150ms for faster search response
+  // Separated analytics tracking to run independently without delaying search
+  // Debounced search with sanitization
   useEffect(() => {
     const timer = setTimeout(() => {
       // Use sync version for client-side sanitization
       const sanitized = sanitizers.sanitizeSearchQuerySync(localSearchQuery);
       onSearch(sanitized);
+    }, 150); // Reduced from 300ms to 150ms for better responsiveness
 
-      // Track search event with context-specific analytics (only for non-empty queries)
+    return () => clearTimeout(timer);
+  }, [localSearchQuery, onSearch]);
+
+  // Separate effect for analytics tracking (runs independently of search debounce)
+  // This prevents analytics from delaying search results
+  useEffect(() => {
+    // Only track non-empty queries
+    if (!localSearchQuery || localSearchQuery.length === 0) {
+      return;
+    }
+
+    const analyticsTimer = setTimeout(() => {
+      const sanitized = sanitizers.sanitizeSearchQuerySync(localSearchQuery);
       if (sanitized && sanitized.length > 0) {
         const category = pathname?.split('/')[1] || 'global';
 
@@ -104,10 +119,10 @@ export function UnifiedSearch({
             // Silent fail in Storybook - analytics not critical for component rendering
           });
       }
-    }, 300);
+    }, 500); // Longer debounce for analytics (500ms) - doesn't block search
 
-    return () => clearTimeout(timer);
-  }, [localSearchQuery, onSearch, resultCount, pathname, activeFilterCount]);
+    return () => clearTimeout(analyticsTimer);
+  }, [localSearchQuery, resultCount, pathname, activeFilterCount]);
 
   // Update ARIA live announcement for all search result scenarios
   useEffect(() => {
