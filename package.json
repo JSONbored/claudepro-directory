@@ -92,7 +92,7 @@
   },
   "scripts": {
     "dev": "pnpm build:content && pnpm generate:service-worker && next dev --turbopack",
-    "build:phase1": "npm-run-all --parallel generate:categories generate:events build:content",
+    "build:phase1": "npm-run-all --parallel generate:categories build:content",
     "build:phase2": "pnpm generate:service-worker",
     "build": "pnpm build:phase1 && pnpm build:phase2 && next build --turbopack",
     "build:analyze": "TURBOPACK_STATS=1 pnpm build",
@@ -264,6 +264,7 @@
     "lefthook": "^1.13.6",
     "msw": "^2.11.5",
     "npm-run-all": "^4.1.5",
+    "prettier": "^3.6.2",
     "storybook": "^9.1.12",
     "ultracite": "^5.6.4",
     "vite-tsconfig-paths": "^5.1.4",

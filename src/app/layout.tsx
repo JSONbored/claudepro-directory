@@ -126,6 +126,9 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} font-sans`}>
       <head>
+        {/* Viewport for responsive design */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+
         {/* PWA Manifest - Next.js generates at /manifest.webmanifest from src/app/manifest.ts */}
         {/* Manifest link is automatically injected by Next.js metadata API (line 109) */}
 
