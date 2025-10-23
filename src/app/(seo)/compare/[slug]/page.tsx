@@ -4,7 +4,6 @@ import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import path from 'path';
-import { z } from 'zod';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card } from '@/src/components/primitives/card';
@@ -14,7 +13,6 @@ import { ArrowLeft, Tags } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { ComparisonData } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 
 async function getComparisonData(slug: string): Promise<ComparisonData | null> {
   try {
@@ -57,37 +55,34 @@ async function getComparisonData(slug: string): Promise<ComparisonData | null> {
 }
 
 /**
- * Comparison metadata schema (Zod)
- * Production-grade runtime validation for static params generation
+ * Generate static params for all comparison pages
+ * Scans the comparisons directory to find all .json files
+ * Required for Cache Components: must return at least one param
  */
-const comparisonMetadataSchema = z.array(
-  z.object({
-    slug: z.string(),
-  })
-);
-
 export async function generateStaticParams() {
   try {
-    const metadataPath = path.join(
-      process.cwd(),
-      'content',
-      'guides',
-      'comparisons',
-      '_metadata.json'
-    );
-    const content = await fs.readFile(metadataPath, 'utf-8');
+    const comparisonsDir = path.join(process.cwd(), 'content', 'guides', 'comparisons');
+    const files = await fs.readdir(comparisonsDir);
 
-    // Production-grade: safeParse with Zod validation
-    const metadata = safeParse(content, comparisonMetadataSchema, {
-      strategy: ParseStrategy.VALIDATED_JSON,
-    });
+    // Filter for .json files (exclude _metadata.json if it exists)
+    const comparisonFiles = files
+      .filter((file) => file.endsWith('.json') && !file.startsWith('_'))
+      .map((file) => ({
+        slug: file.replace('.json', ''),
+      }));
 
-    return metadata.map((item) => ({
-      slug: item.slug,
-    }));
-  } catch (_error) {
-    // Return empty array if no comparisons generated yet
-    return [];
+    // Cache Components requires at least one param
+    // If no comparisons exist, return a placeholder to prevent build error
+    if (comparisonFiles.length === 0) {
+      logger.warn('No comparison files found - returning placeholder param');
+      return [{ slug: 'placeholder' }];
+    }
+
+    return comparisonFiles;
+  } catch (error) {
+    logger.error('Failed to generate comparison static params', error as Error);
+    // Return placeholder to prevent build failure with Cache Components
+    return [{ slug: 'placeholder' }];
   }
 }
 

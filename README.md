@@ -5,7 +5,7 @@
 # Claude Pro Directory
 
 **Discover and share the best Claude configurations**
-206+ expert rules, powerful MCP servers, specialized agents, automation hooks, and more.
+222+ expert rules, powerful MCP servers, specialized agents, automation hooks, and more.
 
 [![Mentioned in Awesome Claude Code](https://awesome.re/mentioned-badge.svg)](https://github.com/hesreallyhim/awesome-claude-code)
 
@@ -17,7 +17,7 @@
 
 ## 🎯 What is Claude Pro Directory?
 
-**Stop starting from scratch.** A searchable collection of 206+ pre-built Claude configurations with instant setup, task-specific optimization, and weekly community updates.
+**Stop starting from scratch.** A searchable collection of 222+ pre-built Claude configurations with instant setup, task-specific optimization, and weekly community updates.
 
 Whether you need Claude to review code like a senior engineer, write like a professional author, or analyze data like a scientist - find it in seconds, copy, and start using.
 
@@ -49,7 +49,7 @@ See our [Contributing Guide](.github/CONTRIBUTING.md) for detailed instructions.
 
 Browse all available Claude configurations by category:
 
-## 🤖 Agents (21)
+## 🤖 Agents (27)
 
 Specialized AI personas for specific development workflows and expert assistance
 
@@ -58,9 +58,13 @@ Specialized AI personas for specific development workflows and expert assistance
 - **[Api Builder Agent](https://claudepro.directory/agents/api-builder-agent)** - Specialized agent for designing, building, and optimizing RESTful APIs and GraphQL services with modern best practices
 - **[Autogen Conversation Agent Builder](https://claudepro.directory/agents/autogen-conversation-agent-builder)** - AutoGen v0.4 conversation agent specialist using actor model architecture for building multi-turn dialogue systems with cross-language messaging and real-time tool invocation
 - **[Backend Architect Agent](https://claudepro.directory/agents/backend-architect-agent)** - Expert backend architect specializing in scalable system design, microservices, API development, and infrastructure planning
+- **[Claude Haiku 45 Speed Optimizer Agent](https://claudepro.directory/agents/claude-haiku-45-speed-optimizer-agent)** - Speed-optimized agent leveraging Haiku 4.5's 2x performance and 3x cost savings, delivering 90% of Sonnet's agentic capability for rapid iterations.
+- **[Claude Mcp Skills Integration Agent](https://claudepro.directory/agents/claude-mcp-skills-integration-agent)** - MCP Skills integration specialist for remote server configuration, tool permissions, multi-MCP orchestration, and Claude Desktop ecosystem workflows.
+- **[Claude Md Knowledge Manager Agent](https://claudepro.directory/agents/claude-md-knowledge-manager-agent)** - CLAUDE.md specialist for creating, maintaining, and optimizing project-specific AI instructions that survive context compaction and guide development.
 - **[Cloud Infrastructure Architect Agent](https://claudepro.directory/agents/cloud-infrastructure-architect-agent)** - Multi-cloud infrastructure specialist focused on AWS, GCP, and Azure architecture, cost optimization, disaster recovery, high availability, and cloud-native design patterns
 - **[Code Reviewer Agent](https://claudepro.directory/agents/code-reviewer-agent)** - Expert code reviewer that provides thorough, constructive feedback on code quality, security, performance, and best practices
 - **[Codebase Migration Refactoring Agent](https://claudepro.directory/agents/codebase-migration-refactoring-agent)** - AI agent specialized in large-scale codebase migrations and behavior-preserving refactoring. Handles framework upgrades, library migrations, legacy code modernization, and systematic refactoring for Claude Code.
+- **[Context Window Optimizer Agent](https://claudepro.directory/agents/context-window-optimizer-agent)** - Context window optimization specialist managing 1M+ token conversations, preventing truncation with smart summarization and session management strategies.
 - **[Data Pipeline Engineering Agent](https://claudepro.directory/agents/data-pipeline-engineering-agent)** - Modern data pipeline specialist focused on real-time streaming, ETL/ELT orchestration, data quality validation, and scalable data infrastructure with Apache Airflow, dbt, and cloud-native tools
 - **[Database Specialist Agent](https://claudepro.directory/agents/database-specialist-agent)** - Expert database architect and optimizer specializing in SQL, NoSQL, performance tuning, and data modeling
 - **[Debugging Assistant Agent](https://claudepro.directory/agents/debugging-assistant-agent)** - Advanced debugging agent that helps identify, analyze, and resolve software bugs with systematic troubleshooting methodologies
@@ -71,6 +75,8 @@ Specialized AI personas for specific development workflows and expert assistance
 - **[Performance Optimizer Agent](https://claudepro.directory/agents/performance-optimizer-agent)** - Expert in application performance optimization, profiling, and system tuning across frontend, backend, and infrastructure
 - **[Product Management Ai Agent](https://claudepro.directory/agents/product-management-ai-agent)** - AI-powered product management specialist focused on user story generation, product analytics, roadmap prioritization, A/B testing, and data-driven decision making
 - **[Semantic Kernel Enterprise Agent](https://claudepro.directory/agents/semantic-kernel-enterprise-agent)** - Microsoft Semantic Kernel enterprise agent specialist for building Azure-native AI applications with multi-language SDK support, plugin governance, and enterprise-grade deployment
+- **[Slash Command Orchestrator Agent](https://claudepro.directory/agents/slash-command-orchestrator-agent)** - Slash command specialist for creating and orchestrating custom Claude workflows with dynamic arguments, conditional logic, and multi-step automation.
+- **[Subagent Factory Agent](https://claudepro.directory/agents/subagent-factory-agent)** - Subagent architecture specialist creating specialized agents for delegation, parallel execution, and modular task decomposition in Claude Code workflows.
 - **[Technical Documentation Writer Agent](https://claudepro.directory/agents/technical-documentation-writer-agent)** - Specialized in creating clear, comprehensive technical documentation for APIs, software, and complex systems
 - **[Test Automation Engineer Agent](https://claudepro.directory/agents/test-automation-engineer-agent)** - Expert in automated testing strategies, test frameworks, and quality assurance across unit, integration, and end-to-end testing
 - **[Ui Ux Design Expert Agent](https://claudepro.directory/agents/ui-ux-design-expert-agent)** - Specialized in creating beautiful, intuitive user interfaces and exceptional user experiences
@@ -239,15 +245,18 @@ Custom instructions and guidelines for specialized AI behaviors
 - **[Wcag Accessibility Auditor](https://claudepro.directory/rules/wcag-accessibility-auditor)** - Expert in WCAG 2.2 Level AA accessibility compliance, automated testing tools, ARIA patterns, and inclusive design for web applications
 - **[Windsurf Ai Native Ide Patterns](https://claudepro.directory/rules/windsurf-ai-native-ide-patterns)** - Windsurf AI-native IDE specialist with Cascade AI, multi-file context awareness, and Flow collaboration patterns for Claude integration
 
-## 📚 Skills (21)
+## 📚 Skills (26)
 
 Task-focused capability guides and specialized expertise
 
 - **[Audio Transcription and Summarization](https://claudepro.directory/skills/audio-transcription-summarization)** - Transcribe audio with Whisper/ffmpeg and produce structured, timestamped summaries and action items.
+- **[Bun Runtime Modern JavaScript](https://claudepro.directory/skills/bun-runtime-modern-javascript)** - Build high-performance JavaScript applications with Bun, the all-in-one runtime challenging Node.js. Native TypeScript support, built-in bundler, and 3x faster package installs.
 - **[CLI Data Viz Quickstart](https://claudepro.directory/skills/cli-data-viz-quickstart)** - Turn CSV/JSON into quick charts from the command line; export PNG/SVG for reports.
 - **[Cloudflare Workers AI Edge Functions](https://claudepro.directory/skills/cloudflare-workers-ai-edge)** - Deploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share.
 - **[CSV & Excel Data Wrangler](https://claudepro.directory/skills/csv-excel-data-wrangler)** - Clean, filter, join, pivot, and export CSV/XLSX data reliably with reproducible steps.
+- **[Cursor/Windsurf AI IDE Setup & Optimization](https://claudepro.directory/skills/cursor-windsurf-ai-ide-setup)** - Configure and optimize Cursor and Windsurf AI code editors for maximum productivity. Agent mode, composer features, keybindings, and AI-powered refactoring workflows.
 - **[DOCX Report Generator](https://claudepro.directory/skills/docx-report-generator)** - Fill templated DOCX with data to produce reports/invoices, with images and PDF export.
+- **[FastAPI Python Backend Expert](https://claudepro.directory/skills/fastapi-python-backend)** - Build high-performance async REST APIs with FastAPI, Python's fastest-growing web framework. Automatic OpenAPI docs, type validation with Pydantic, and async/await support.
 - **[GitHub Actions AI-Powered CI/CD Automation](https://claudepro.directory/skills/github-actions-ai-cicd)** - Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration.
 - **[Image OCR and Table Extraction](https://claudepro.directory/skills/image-ocr-table-extraction)** - Extract text and tabular data from images/scans using Tesseract and OpenCV with preprocessing.
 - **[JSON Schema Validation and Transformation](https://claudepro.directory/skills/json-schema-validation-transformation)** - Validate JSON with Ajv/Zod and perform safe, lossless schema migrations and transformations.
@@ -258,23 +267,30 @@ Task-focused capability guides and specialized expertise
 - **[PostgreSQL Query Optimization](https://claudepro.directory/skills/postgresql-query-optimization)** - Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and execution plan analysis.
 - **[REST API Client Harness](https://claudepro.directory/skills/rest-api-client-harness)** - Explore and script against REST APIs with auth, pagination, retries, and error handling.
 - **[Supabase Realtime Database Builder](https://claudepro.directory/skills/supabase-realtime-database)** - Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ developers.
+- **[Svelte/SvelteKit Full-Stack Developer](https://claudepro.directory/skills/svelte-sveltekit-fullstack)** - Build full-stack web apps with Svelte and SvelteKit. Minimal runtime overhead, reactive components, and server-side rendering. The most admired frontend framework of 2025.
 - **[tRPC Type-Safe API Builder](https://claudepro.directory/skills/trpc-type-safe-api)** - Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications.
 - **[V0 Rapid UI Prototyping Workflow](https://claudepro.directory/skills/v0-rapid-prototyping)** - Build production-ready React components and full pages in minutes using V0.dev AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integration.
+- **[Vite Build Optimization Specialist](https://claudepro.directory/skills/vite-build-optimization)** - Optimize frontend build performance with Vite's lightning-fast HMR, code splitting, and tree-shaking. Modern build tooling that's replaced Webpack as the developer favorite.
 - **[WebAssembly Module Development](https://claudepro.directory/skills/webassembly-module-development)** - Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads.
 - **[Website Content Crawler and Summarizer](https://claudepro.directory/skills/website-crawler-summarizer)** - Crawl domains respectfully, extract readable content, dedupe, and generate structured summaries.
 - **[Windsurf AI-Native Collaborative Development](https://claudepro.directory/skills/windsurf-collaborative-development)** - Master collaborative AI-assisted development with Windsurf IDE's Cascade AI, multi-file context awareness, and Flow patterns for team workflows.
 - **[Zod Schema Validator](https://claudepro.directory/skills/zod-schema-validator)** - Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference.
 
-## 💻 Statuslines (11)
+## 💻 Statuslines (16)
 
 Custom status bar displays for your Claude development environment
 
+- **[Accessibility First Statusline](https://claudepro.directory/statuslines/accessibility-first-statusline)** - WCAG-compliant accessible statusline with screen reader announcements, high-contrast colors, semantic labels, keyboard hints, and reduced motion support.
+- **[Ai Model Performance Dashboard](https://claudepro.directory/statuslines/ai-model-performance-dashboard)** - Multi-provider AI performance dashboard with context occupancy tracking, truncation warnings, TTFT latency, tokens/min rate, and model comparison metrics.
+- **[Block Timer Tracker](https://claudepro.directory/statuslines/block-timer-tracker)** - Claude 5-hour conversation block tracker with visual countdown, expiration warnings, and color-coded indicators to prevent unexpected session terminations.
+- **[Catppuccin Mocha Theme](https://claudepro.directory/statuslines/catppuccin-mocha-theme)** - Soothing Catppuccin Mocha theme statusline with 26 pastel colors, Powerline separators, and modular segments for Git, model info, and token tracking.
 - **[Docker Health Statusline](https://claudepro.directory/statuslines/docker-health-statusline)** - Docker statusline configuration for Claude Code CLI. Features real-time health monitoring, color-coded indicators, and container tracking. Production-ready.
 - **[Git Status Statusline](https://claudepro.directory/statuslines/git-status-statusline)** - Git-focused statusline showing branch, dirty status, ahead/behind indicators, and stash count alongside Claude session info
 - **[Mcp Server Status Monitor](https://claudepro.directory/statuslines/mcp-server-status-monitor)** - Real-time MCP server monitoring statusline showing connected servers, active tools, and performance metrics for Claude Code MCP integration
 - **[Minimal Powerline](https://claudepro.directory/statuslines/minimal-powerline)** - Clean, performance-optimized statusline with Powerline glyphs showing model, directory, and token count
 - **[Multi Line Statusline](https://claudepro.directory/statuslines/multi-line-statusline)** - Comprehensive multi-line statusline displaying detailed session information across two lines with organized sections and visual separators
 - **[Multi Provider Token Counter](https://claudepro.directory/statuslines/multi-provider-token-counter)** - Multi-provider AI token counter displaying real-time context usage for Claude (1M), GPT-4.1 (1M), Gemini 2.x (1M), and Grok 3 (1M) with 2025 verified limits
+- **[Oh My Zsh Robbyrussell](https://claudepro.directory/statuslines/oh-my-zsh-robbyrussell)** - Oh-My-Zsh robbyrussell theme replica with iconic arrow prompt, Git status indicators, and directory path for seamless Claude Code shell integration.
 - **[Python Rich Statusline](https://claudepro.directory/statuslines/python-rich-statusline)** - Feature-rich statusline using Python's Rich library for beautiful formatting, progress bars, and real-time token cost tracking
 - **[Real Time Cost Tracker](https://claudepro.directory/statuslines/real-time-cost-tracker)** - Real-time AI cost tracking statusline with per-session spend analytics, model pricing, and budget alerts
 - **[Session Timer Statusline](https://claudepro.directory/statuslines/session-timer-statusline)** - Time-tracking statusline showing elapsed session duration, tokens per minute rate, and estimated cost with productivity metrics
