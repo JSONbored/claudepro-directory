@@ -17,7 +17,8 @@
  * @see lib/build/category-processor.ts - Shared processing utilities
  */
 
-import { mkdir } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { readdir, readFile, stat, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -40,7 +41,8 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT_DIR = join(__dirname, '../..');
 const CONTENT_DIR = join(ROOT_DIR, 'content');
 const GENERATED_DIR = join(ROOT_DIR, 'generated');
-const CACHE_DIR = join(ROOT_DIR, '.next', 'cache', 'build-content');
+// Use .vercel-cache instead of .next/cache - Vercel preserves this between builds
+const CACHE_DIR = join(ROOT_DIR, '.vercel-cache', 'build-content');
 
 /**
  * Build statistics for reporting
@@ -225,8 +227,123 @@ export const contentStats: ContentStats = ${JSON.stringify(contentStats, null, 2
 }
 
 /**
+ * Check if a category needs rebuilding based on file changes
+ * Compares current file hashes against cached hashes
+ *
+ * @param categoryId - Category to check
+ * @param cache - Build cache with file hashes
+ * @returns true if category needs rebuild, false if up-to-date
+ */
+async function needsCategoryRebuild(
+  categoryId: CategoryId,
+  cache: Awaited<ReturnType<typeof loadBuildCache>> | null
+): Promise<boolean> {
+  // No cache = always rebuild
+  if (!cache) return true;
+
+  // Changelog: Check CHANGELOG.md file instead of JSON files
+  if (categoryId === 'changelog') {
+    const changelogPath = join(ROOT_DIR, 'CHANGELOG.md');
+    try {
+      const cachedFile = cache.files[changelogPath];
+      if (!cachedFile) return true; // Not in cache = rebuild
+
+      // Check mtime first (fast check)
+      const fileStat = await stat(changelogPath);
+      if (fileStat.mtimeMs !== cachedFile.mtime) {
+        // mtime changed - verify with hash
+        const content = await readFile(changelogPath, 'utf-8');
+        const hash = createHash('sha256').update(content, 'utf-8').digest('hex');
+        return hash !== cachedFile.hash; // Rebuild only if content changed
+      }
+
+      return false; // CHANGELOG.md unchanged
+    } catch (error) {
+      // CHANGELOG.md doesn't exist or can't be read - rebuild
+      return true;
+    }
+  }
+
+  const categoryDir = join(CONTENT_DIR, categoryId);
+
+  try {
+    const files = await readdir(categoryDir);
+    const jsonFiles = files.filter(f => f.endsWith('.json') && !f.includes('template'));
+
+    // Check if any file has changed
+    for (const file of jsonFiles) {
+      const filePath = join(categoryDir, file);
+      const cachedFile = cache.files[filePath];
+
+      // File not in cache = needs rebuild
+      if (!cachedFile) return true;
+
+      // Check mtime first (fast check)
+      const fileStat = await stat(filePath);
+      if (fileStat.mtimeMs !== cachedFile.mtime) {
+        // mtime changed - verify with hash (mtime can change without content change)
+        const content = await readFile(filePath, 'utf-8');
+        const hash = createHash('sha256').update(content, 'utf-8').digest('hex');
+
+        if (hash !== cachedFile.hash) {
+          return true; // Content actually changed
+        }
+      }
+    }
+
+    // Check if files were deleted
+    const currentFiles = new Set(jsonFiles.map(f => join(categoryDir, f)));
+    const cachedFiles = Object.keys(cache.files).filter(f => f.startsWith(categoryDir));
+    for (const cachedFile of cachedFiles) {
+      if (!currentFiles.has(cachedFile)) {
+        return true; // File was deleted
+      }
+    }
+
+    return false; // All files up-to-date
+  } catch (error) {
+    // Category directory doesn't exist or can't be read - skip rebuild
+    return false;
+  }
+}
+
+/**
+ * Load existing content stats from generated metadata files
+ * Used for incremental builds to preserve stats for unchanged categories
+ */
+async function loadExistingContentStats(): Promise<Record<string, number>> {
+  const stats: Record<string, number> = {};
+  const allCategories = Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[];
+
+  for (const categoryId of allCategories) {
+    const metadataPath = join(GENERATED_DIR, `${categoryId}-metadata.ts`);
+    try {
+      const content = await readFile(metadataPath, 'utf-8');
+      // Parse the metadata array to count items
+      // Format: export const {category}Metadata: Array<...> = [...];
+      const match = content.match(/export const \w+Metadata[^=]*=\s*\[([\s\S]*?)\];/);
+      if (match) {
+        const arrayContent = match[1].trim();
+        if (arrayContent === '') {
+          stats[categoryId] = 0;
+        } else {
+          // Count objects in array by counting opening braces at the start of items
+          const itemCount = (arrayContent.match(/\{[\s\S]*?\}/g) || []).length;
+          stats[categoryId] = itemCount;
+        }
+      }
+    } catch {
+      // Metadata file doesn't exist - will be generated on first build
+      stats[categoryId] = 0;
+    }
+  }
+
+  return stats;
+}
+
+/**
  * Main build function
- * Modern async pipeline with comprehensive error handling
+ * Modern async pipeline with comprehensive error handling and incremental builds
  */
 async function main(): Promise<void> {
   const buildStartTime = performance.now();
@@ -244,19 +361,44 @@ async function main(): Promise<void> {
       logger.info(`✓ Loaded build cache from ${cache.lastBuild}`);
     }
 
-    // Build all categories in parallel using modern config system
-    const categoryConfigs = Object.values(UNIFIED_CATEGORY_REGISTRY);
-    logger.info(`Building ${categoryConfigs.length} categories in parallel...\n`);
+    // Filter categories that need rebuilding (incremental builds)
+    const allCategories = Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[];
+    const categoriesToRebuild: CategoryId[] = [];
 
+    for (const categoryId of allCategories) {
+      if (await needsCategoryRebuild(categoryId, cache)) {
+        categoriesToRebuild.push(categoryId);
+      }
+    }
+
+    // Load existing content stats for all categories (including unchanged ones)
+    const contentStats = await loadExistingContentStats();
+    logger.debug(`✓ Loaded stats for ${Object.keys(contentStats).length} categories`);
+
+    // Check if any categories need rebuilding
+    if (categoriesToRebuild.length === 0) {
+      logger.info('✨ All content up to date! No rebuild needed.\n');
+
+      // Still generate main index file with existing stats
+      const indexPath = join(GENERATED_DIR, 'content.ts');
+      const indexContent = generateIndexFile(contentStats as ContentStats);
+      await writeBuildOutput(indexPath, indexContent);
+
+      process.exit(0);
+    }
+
+    const categoryConfigs = Object.values(UNIFIED_CATEGORY_REGISTRY);
+    logger.info(`🔄 Rebuilding ${categoriesToRebuild.length}/${categoryConfigs.length} categories...\n`);
+    logger.info(`   Categories: ${categoriesToRebuild.join(', ')}\n`);
+
+    // Build only changed categories in parallel
     const buildResults = await Promise.all(
-      (Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[]).map((id) =>
+      categoriesToRebuild.map((id) =>
         buildCategory(CONTENT_DIR, id, cache)
       )
     );
 
-    // Generate TypeScript files for each category
-    // MODERNIZATION: contentStats populated dynamically from UNIFIED_CATEGORY_REGISTRY (registry-driven)
-    const contentStats: Record<string, number> = {};
+    // Update stats for rebuilt categories
     let totalFiles = 0;
     let totalValid = 0;
     let totalInvalid = 0;
@@ -418,17 +560,62 @@ async function main(): Promise<void> {
     // This eliminates 676 KB of redundant generated files (596 KB + 80 KB split files)
     logger.info('\n✅ Content metadata generation complete (using lazy loaders)');
 
-    // Save updated cache
+    // Collect file hashes for incremental builds (cache invalidation)
+    logger.info('💾 Collecting file hashes for cache...');
+    const fileHashes: Record<string, { hash: string; mtime: number }> = {};
+
+    for (const categoryId of Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[]) {
+      const categoryDir = join(CONTENT_DIR, categoryId);
+
+      try {
+        const files = await readdir(categoryDir);
+        const jsonFiles = files.filter(f => f.endsWith('.json') && !f.includes('template'));
+
+        for (const file of jsonFiles) {
+          const filePath = join(categoryDir, file);
+          const [content, fileStat] = await Promise.all([
+            readFile(filePath, 'utf-8'),
+            stat(filePath)
+          ]);
+
+          const hash = createHash('sha256').update(content, 'utf-8').digest('hex');
+          fileHashes[filePath] = {
+            hash,
+            mtime: fileStat.mtimeMs
+          };
+        }
+      } catch (error) {
+        // Category directory may not exist (e.g., changelog is generated)
+        logger.debug(`Skipping hash collection for ${categoryId}: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+
+    // Add CHANGELOG.md to cache (for incremental changelog builds)
+    try {
+      const changelogPath = join(ROOT_DIR, 'CHANGELOG.md');
+      const [content, fileStat] = await Promise.all([
+        readFile(changelogPath, 'utf-8'),
+        stat(changelogPath)
+      ]);
+
+      const hash = createHash('sha256').update(content, 'utf-8').digest('hex');
+      fileHashes[changelogPath] = {
+        hash,
+        mtime: fileStat.mtimeMs
+      };
+    } catch (error) {
+      logger.debug(`Skipping CHANGELOG.md hash collection: ${error instanceof Error ? error.message : String(error)}`);
+    }
+
+    // Save updated cache with file hashes
     const newCache = {
       version: '1.0.0',
-      files: {},
+      files: fileHashes,
       lastBuild: new Date().toISOString(),
     };
 
-    // Note: File hashing for incremental builds would be implemented here
-    // This would collect content hashes for each file to enable smart cache invalidation
-
     await saveBuildCache(CACHE_DIR, newCache);
+    logger.info(`✓ Cached ${Object.keys(fileHashes).length} file hashes`);
 
     // Trigger cache invalidation for related content
     if (typeof onBuildComplete === 'function') {

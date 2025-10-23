@@ -69,6 +69,7 @@ coverage/
 .parcel-cache/
 .turbo/
 .temp/
+.vercel-cache/
 
 # Test artifacts
 test-results/

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "generate:categories": {
+      "outputs": [
+        "src/lib/config/category-types.ts",
+        "src/lib/ui-constants-categories.ts"
+      ],
+      "inputs": ["src/lib/config/category-config.ts"],
+      "cache": true
+    },
+    "build:content": {
+      "outputs": [
+        "generated/**",
+        "src/generated/**",
+        "public/static-api/**",
+        ".vercel-cache/build-content/**"
+      ],
+      "inputs": [
+        "content/**/*.json",
+        "!content/skills/*.zip",
+        "CHANGELOG.md",
+        "src/lib/schemas/**/*.ts",
+        "src/lib/config/category-config.ts",
+        "scripts/build/build-content.ts",
+        "src/lib/build/category-processor.server.ts"
+      ],
+      "cache": true,
+      "persistent": true
+    },
+    "build:skills": {
+      "outputs": [
+        "content/skills/*.zip",
+        "public/downloads/skills/*.zip"
+      ],
+      "inputs": [
+        "content/skills/*.json",
+        "scripts/build/generate-skill-packages.ts",
+        "src/lib/transformers/skill-to-md.ts"
+      ],
+      "cache": true,
+      "persistent": true
+    },
+    "generate:service-worker": {
+      "outputs": ["public/service-worker.js", ".next/cache/sw-hash.txt"],
+      "inputs": [
+        "scripts/build/generate-service-worker.ts",
+        "src/lib/config/category-config.ts",
+        "src/lib/constants/security.ts",
+        "package.json"
+      ],
+      "cache": true
+    },
+    "type-check": {
+      "outputs": ["**/*.tsbuildinfo"],
+      "cache": true
+    },
+    "lint": {
+      "outputs": [],
+      "cache": true
+    },
+    "test:unit": {
+      "outputs": ["coverage/**"],
+      "cache": true
+    }
+  },
+  "globalDependencies": ["package.json", "pnpm-lock.yaml"],
+  "globalEnv": ["NODE_ENV"]
+}
