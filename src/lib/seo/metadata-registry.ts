@@ -19,7 +19,6 @@
  * @module lib/seo/metadata-registry
  */
 
-import { headers } from 'next/headers';
 import { z } from 'zod';
 import { APP_CONFIG } from '@/src/lib/constants';
 
@@ -264,18 +263,9 @@ export const METADATA_DEFAULTS = {
  * Get current year for AI search optimization
  * ChatGPT often includes the current year when issuing Bing queries
  *
- * Note: Accesses headers() to make this function compatible with Cache Components.
- * This allows new Date() to be called after accessing uncached data.
+ * Note: Caller must access headers() before calling this function in cached routes.
  */
 export function getCurrentYear(): string {
-  // Access uncached data before calling new Date() (Cache Components requirement)
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    headers();
-  } catch {
-    // Headers not available - safe to ignore
-  }
-
   return new Date().getFullYear().toString();
 }
 
@@ -283,18 +273,9 @@ export function getCurrentYear(): string {
  * Get current month and year (e.g., "October 2025")
  * Useful for seasonal/time-sensitive content
  *
- * Note: Accesses headers() to make this function compatible with Cache Components.
- * This allows new Date() to be called after accessing uncached data.
+ * Note: Caller must access headers() before calling this function in cached routes.
  */
 export function getCurrentMonthYear(): string {
-  // Access uncached data before calling new Date() (Cache Components requirement)
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    headers();
-  } catch {
-    // Headers not available - safe to ignore
-  }
-
   const date = new Date();
   const month = date.toLocaleString('en-US', { month: 'long' });
   const year = date.getFullYear();

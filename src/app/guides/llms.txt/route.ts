@@ -10,6 +10,7 @@
 
 import { existsSync, readdirSync } from 'fs';
 import { cacheLife } from 'next/cache';
+import { headers } from 'next/headers';
 import { join } from 'path';
 import { APP_CONFIG, CONTENT_PATHS } from '@/src/lib/constants';
 import { handleApiError } from '@/src/lib/error-handler';
@@ -58,6 +59,8 @@ export async function GET(): Promise<Response> {
   cacheLife('hours'); // 1 hour cache (replaces revalidate: 3600)
 
   // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)
+  // Access uncached data before new Date() (Cache Components requirement)
+  (await headers()).get('x-cache-marker');
 
   try {
     logger.info('Guides llms.txt generation started');

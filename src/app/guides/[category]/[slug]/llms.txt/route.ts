@@ -8,6 +8,7 @@
 
 import fs from 'fs/promises';
 import { cacheLife } from 'next/cache';
+import { headers } from 'next/headers';
 import path from 'path';
 import { z } from 'zod';
 import { contentCache } from '@/src/lib/cache.server';
@@ -54,6 +55,8 @@ export async function GET(
   cacheLife('half'); // 30 min cache (replaces revalidate: 1800)
 
   // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)
+  // Access uncached data before new Date() (Cache Components requirement)
+  (await headers()).get('x-cache-marker');
 
   try {
     const rawParams = await context.params;

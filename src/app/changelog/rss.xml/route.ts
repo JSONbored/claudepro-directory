@@ -27,6 +27,7 @@
  */
 
 import { cacheLife } from 'next/cache';
+import { headers } from 'next/headers';
 import type { NextRequest } from 'next/server';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { formatChangelogDateRFC822, getChangelogUrl } from '@/src/lib/changelog/utils';
@@ -63,6 +64,9 @@ function escapeXml(text: string): string {
 export async function GET(request: NextRequest): Promise<Response> {
   'use cache';
   cacheLife('stable'); // 6 hour cache (replaces revalidate: 21600)
+
+  // Access uncached data before new Date() (Cache Components requirement)
+  (await headers()).get('x-cache-marker');
 
   const requestLogger = logger.forRequest(request);
 
