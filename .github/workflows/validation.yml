@@ -209,7 +209,7 @@ jobs:
 
       - name: Build content to verify generation
         if: steps.changed.outputs.any_changed == 'true'
-        run: npm run build:content
+        run: pnpm build:content
 
       - name: Auto-label by content type
         if: steps.changed.outputs.any_changed == 'true'

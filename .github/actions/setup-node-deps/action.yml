@@ -11,11 +11,11 @@ inputs:
     required: false
     default: 'false'
   install-args:
-    description: 'Additional arguments for npm ci'
+    description: 'Additional arguments for pnpm install'
     required: false
     default: ''
   production-only:
-    description: 'Install only production dependencies (--omit=dev)'
+    description: 'Install only production dependencies (--prod)'
     required: false
     default: 'false'
 
@@ -31,33 +31,38 @@ runs:
       uses: actions/setup-node@v5
       with:
         node-version: ${{ inputs.node-version }}
-        cache: 'npm'
+        cache: 'pnpm'
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10.19.0
 
     - name: Cache dependencies and build outputs
       id: cache-deps
       uses: actions/cache@v4
       with:
         path: |
-          ~/.npm
+          ~/.pnpm-store
           node_modules
           .next/cache
-        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.ts', '**/*.tsx', '!node_modules/**') }}
+        key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/*.ts', '**/*.tsx', '!node_modules/**') }}
         restore-keys: |
-          ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}-
-          ${{ runner.os }}-npm-
+          ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}-
+          ${{ runner.os }}-pnpm-
 
     - name: Install dependencies
       shell: bash
       run: |
         if [ "${{ inputs.production-only }}" = "true" ]; then
           echo "Installing production dependencies only..."
-          npm ci --ignore-scripts --omit=dev ${{ inputs.install-args }}
+          pnpm install --frozen-lockfile --prod ${{ inputs.install-args }}
         else
           echo "Installing all dependencies..."
-          npm ci ${{ inputs.install-args }}
+          pnpm install --frozen-lockfile ${{ inputs.install-args }}
         fi
 
     - name: Generate content metadata
       if: inputs.skip-build-content != 'true'
       shell: bash
-      run: npm run build:content
+      run: pnpm build:content

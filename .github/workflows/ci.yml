@@ -6,7 +6,7 @@ on:
     paths:
       - 'src/**'
       - 'package.json'
-      - 'package-lock.json'
+      - 'pnpm-lock.yaml'
       - 'tsconfig.json'
       - 'next.config.mjs'
       - '.github/**'
@@ -17,7 +17,7 @@ on:
     paths:
       - 'src/**'
       - 'package.json'
-      - 'package-lock.json'
+      - 'pnpm-lock.yaml'
       - 'tsconfig.json'
       - 'next.config.mjs'
       - '.github/**'
@@ -53,7 +53,7 @@ jobs:
       - uses: ./.github/actions/setup-node-deps
 
       - name: Run ${{ matrix.check }}
-        run: npm run ${{ matrix.check }}
+        run: pnpm ${{ matrix.check }}
 
   test:
     name: Test Suite
@@ -76,10 +76,10 @@ jobs:
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
             echo "Running tests with coverage (main branch)"
-            npm run test:coverage
+            pnpm test:coverage
           else
             echo "Running tests without coverage (PR/branch)"
-            npm run test:unit
+            pnpm test:unit
           fi
 
       - name: Skip tests (no relevant changes)

@@ -150,8 +150,8 @@ jobs:
 
     - uses: ./.github/actions/setup-node-deps
 
-    - name: Run npm audit
-      run: npm audit --audit-level=moderate
+    - name: Run pnpm audit
+      run: pnpm audit --audit-level=moderate
       continue-on-error: true
 
     - name: Upload audit results

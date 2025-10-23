@@ -80,7 +80,7 @@ jobs:
 
       - name: Build Next.js application
         if: steps.check-restored.outputs.restored != 'true'
-        run: npm run build
+        run: pnpm build
         env:
           NEXT_TELEMETRY_DISABLED: 1
 

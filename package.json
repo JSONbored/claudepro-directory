@@ -19,9 +19,10 @@
     "directory"
   ],
   "type": "module",
+  "packageManager": "pnpm@10.19.0",
   "engines": {
     "node": ">=22.0.0",
-    "npm": ">=10.0.0"
+    "pnpm": ">=10.0.0"
   },
   "imports": {
     "#lib/actions/user": {
@@ -94,11 +95,11 @@
     }
   },
   "scripts": {
-    "dev": "npm run build:content && npm run generate:service-worker && next dev --turbopack",
+    "dev": "pnpm build:content && pnpm generate:service-worker && next dev --turbopack",
     "build:phase1": "npm-run-all --parallel generate:categories generate:events generate:openapi build:content",
     "build:phase2": "npm-run-all --parallel generate:service-worker build:api-docs",
-    "build": "npm run build:phase1 && npm run build:phase2 && next build --turbopack",
-    "build:analyze": "TURBOPACK_STATS=1 npm run build",
+    "build": "pnpm build:phase1 && pnpm build:phase2 && next build --turbopack",
+    "build:analyze": "TURBOPACK_STATS=1 pnpm build",
     "build:content": "node --import tsx scripts/build/build-content.ts",
     "build:api-docs": "tsx scripts/build/generate-fumadocs-api.ts",
     "generate:service-worker": "tsx scripts/build/generate-service-worker.ts",
@@ -257,7 +258,6 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
-    "@types/dompurify": "^3.0.5",
     "@vitejs/plugin-react": "^5.0.4",
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",

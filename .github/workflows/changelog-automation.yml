@@ -185,7 +185,7 @@ jobs:
               '',
               '**Next Steps**:',
               '1. Check workflow logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
-              '2. Generate manually: `npm run changelog:generate`',
+              '2. Generate manually: `pnpm changelog:generate`',
               '3. Review configuration: `config/changelog/cliff.toml`',
               '',
               '**Common Issues**:',
