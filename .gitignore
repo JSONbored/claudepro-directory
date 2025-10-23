@@ -45,6 +45,9 @@ public/static-api/
 # Source ZIPs in content/skills/ are git-tracked for GitHub discoverability
 public/downloads/skills/*.zip
 
+# Exception: Allow skill ZIPs in content/skills/ (overrides global ~/.gitignore_global *.zip rule)
+!content/skills/*.zip
+
 # Dynamic sitemap served by src/app/sitemap.ts (do not commit generated file)
 public/sitemap.xml
 
