@@ -7,7 +7,6 @@
  */
 
 import { cacheLife } from 'next/cache';
-import type { NextRequest } from 'next/server';
 import { isValidCategory, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
@@ -36,22 +35,22 @@ export async function generateStaticParams() {
  * @returns Plain text response with category index
  */
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ category: string }> }
+  request: Request,
+  context: { params: Promise<{ category: string }> }
 ): Promise<Response> {
   'use cache';
   cacheLife('hours'); // 1 hour cache (replaces revalidate: 3600)
 
-  const requestLogger = logger.forRequest(request);
+  // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)
 
   try {
-    const { category } = await params;
+    const { category } = await context.params;
 
-    requestLogger.info('Category llms.txt generation started', { category });
+    logger.info('Category llms.txt generation started', { category });
 
     // Validate category
     if (!isValidCategory(category)) {
-      requestLogger.warn('Invalid category requested for llms.txt', {
+      logger.warn('Invalid category requested for llms.txt', {
         category,
       });
 
@@ -67,7 +66,7 @@ export async function GET(
 
     // Handle case where config is not found (should never happen with validation above)
     if (!config) {
-      requestLogger.error(
+      logger.error(
         'Category config not found despite validation',
         new Error('Config not found after validation'),
         { category }
@@ -107,7 +106,7 @@ export async function GET(
       }
     );
 
-    requestLogger.info('Category llms.txt generated successfully', {
+    logger.info('Category llms.txt generated successfully', {
       category,
       itemsCount: llmsItems.length,
       contentLength: llmsTxt.length,
@@ -120,9 +119,9 @@ export async function GET(
       cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
     });
   } catch (error: unknown) {
-    const { category } = await params.catch(() => ({ category: 'unknown' }));
+    const { category } = await context.params.catch(() => ({ category: 'unknown' }));
 
-    requestLogger.error(
+    logger.error(
       'Failed to generate category llms.txt',
       error instanceof Error ? error : new Error(String(error)),
       { category }

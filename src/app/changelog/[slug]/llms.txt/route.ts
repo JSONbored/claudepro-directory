@@ -27,7 +27,6 @@
  */
 
 import { cacheLife } from 'next/cache';
-import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
@@ -63,24 +62,24 @@ export async function generateStaticParams() {
  * @returns Plain text response with full entry content
  */
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  request: Request,
+  context: { params: Promise<{ slug: string }> }
 ): Promise<Response> {
   'use cache';
   cacheLife('quarter'); // 15 min cache (replaces revalidate: 900)
 
-  const requestLogger = logger.forRequest(request);
+  // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)
 
   try {
-    const { slug } = await params;
+    const { slug } = await context.params;
 
-    requestLogger.info('Changelog entry llms.txt generation started', { slug });
+    logger.info('Changelog entry llms.txt generation started', { slug });
 
     // Load changelog entry
     const entry = await getChangelogEntryBySlug(slug);
 
     if (!entry) {
-      requestLogger.warn('Changelog entry not found for llms.txt', { slug });
+      logger.warn('Changelog entry not found for llms.txt', { slug });
 
       return new NextResponse('Changelog entry not found', {
         status: 404,
@@ -148,7 +147,7 @@ ${entry.content}
 For more updates, visit: ${APP_CONFIG.url}/changelog
 `;
 
-    requestLogger.info('Changelog entry llms.txt generated successfully', {
+    logger.info('Changelog entry llms.txt generated successfully', {
       slug: entry.slug,
       size: Buffer.byteLength(llmsTxt, 'utf8'),
     });
@@ -163,7 +162,7 @@ For more updates, visit: ${APP_CONFIG.url}/changelog
       },
     });
   } catch (error) {
-    requestLogger.error(
+    logger.error(
       'Changelog entry llms.txt generation failed',
       error instanceof Error ? error : new Error(String(error))
     );

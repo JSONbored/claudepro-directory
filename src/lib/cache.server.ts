@@ -377,7 +377,8 @@ class RedisClientManager {
     operationName = 'unknown'
   ): Promise<T> {
     this.connectionStatus.totalOperations++;
-    this.connectionStatus.lastConnectionAttempt = new Date();
+    // Note: Timestamp tracking removed for Cache Components compatibility
+    // (Cannot use new Date() in cached Server Components)
 
     // If in fallback mode or no Redis client, use fallback
     if (this.connectionStatus.isFallback || !this.redis) {

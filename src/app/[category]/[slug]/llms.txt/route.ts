@@ -7,7 +7,6 @@
  */
 
 import { cacheLife } from 'next/cache';
-import type { NextRequest } from 'next/server';
 import { isValidCategory, VALID_CATEGORIES } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import {
@@ -67,22 +66,22 @@ export async function generateStaticParams() {
  * - Canonical URL for reference
  */
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ category: string; slug: string }> }
+  request: Request,
+  context: { params: Promise<{ category: string; slug: string }> }
 ): Promise<Response> {
   'use cache';
   cacheLife('hours'); // 1 hour cache (replaces revalidate: 3600)
 
-  const requestLogger = logger.forRequest(request);
+  // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)
 
   try {
-    const { category, slug } = await params;
+    const { category, slug } = await context.params;
 
-    requestLogger.info('Item llms.txt generation started', { category, slug });
+    logger.info('Item llms.txt generation started', { category, slug });
 
     // Validate category
     if (!isValidCategory(category)) {
-      requestLogger.warn('Invalid category requested for item llms.txt', {
+      logger.warn('Invalid category requested for item llms.txt', {
         category,
         slug,
       });
@@ -98,7 +97,7 @@ export async function GET(
     const item = await getContentBySlug(category, slug);
 
     if (!item) {
-      requestLogger.warn('Item not found for llms.txt', { category, slug });
+      logger.warn('Item not found for llms.txt', { category, slug });
 
       return apiResponse.raw('Content not found', {
         contentType: 'text/plain; charset=utf-8',
@@ -112,7 +111,7 @@ export async function GET(
 
     // Handle case where full content is not found
     if (!fullItem) {
-      requestLogger.warn('Full item content not found for llms.txt', {
+      logger.warn('Full item content not found for llms.txt', {
         category,
         slug,
       });
@@ -170,7 +169,7 @@ export async function GET(
               }
             } catch (error) {
               // If item fetch fails, use fallback
-              requestLogger.warn('Failed to fetch collection item details', {
+              logger.warn('Failed to fetch collection item details', {
                 category: itemRef.category,
                 slug: itemRef.slug,
                 error: error instanceof Error ? error.message : String(error),
@@ -215,7 +214,7 @@ export async function GET(
         sanitize: true,
       });
 
-      requestLogger.info('Collection llms.txt generated successfully', {
+      logger.info('Collection llms.txt generated successfully', {
         slug,
         contentLength: llmsTxt.length,
         itemsCount: collection.items?.length || 0,
@@ -257,7 +256,7 @@ export async function GET(
       sanitize: true, // Apply PII protection
     });
 
-    requestLogger.info('Item llms.txt generated successfully', {
+    logger.info('Item llms.txt generated successfully', {
       category,
       slug,
       contentLength: llmsTxt.length,
@@ -271,12 +270,12 @@ export async function GET(
       cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
     });
   } catch (error: unknown) {
-    const { category, slug } = await params.catch(() => ({
+    const { category, slug } = await context.params.catch(() => ({
       category: 'unknown',
       slug: 'unknown',
     }));
 
-    requestLogger.error(
+    logger.error(
       'Failed to generate item llms.txt',
       error instanceof Error ? error : new Error(String(error)),
       { category, slug }

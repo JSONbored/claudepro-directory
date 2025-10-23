@@ -27,7 +27,6 @@
  */
 
 import { cacheLife } from 'next/cache';
-import type { NextRequest } from 'next/server';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -40,14 +39,14 @@ import { logger } from '@/src/lib/logger';
  * @param request - Next.js request object
  * @returns Plain text response with all changelog entries
  */
-export async function GET(request: NextRequest): Promise<Response> {
+export async function GET(): Promise<Response> {
   'use cache';
   cacheLife('quarter'); // 15 min cache (replaces revalidate: 900)
 
-  const requestLogger = logger.forRequest(request);
+  // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)
 
   try {
-    requestLogger.info('Changelog llms.txt generation started');
+    logger.info('Changelog llms.txt generation started');
 
     // Load all changelog entries (cached with Redis)
     const entries = await getAllChangelogEntries();
@@ -119,7 +118,7 @@ This changelog follows the Keep a Changelog specification.
 Last generated: ${new Date().toISOString()}
 `;
 
-    requestLogger.info('Changelog llms.txt generated successfully', {
+    logger.info('Changelog llms.txt generated successfully', {
       entriesCount: entries.length,
       size: Buffer.byteLength(llmsTxt, 'utf8'),
     });
@@ -130,7 +129,7 @@ Last generated: ${new Date().toISOString()}
       cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
     });
   } catch (error) {
-    requestLogger.error(
+    logger.error(
       'Changelog llms.txt generation failed',
       error instanceof Error ? error : new Error(String(error))
     );

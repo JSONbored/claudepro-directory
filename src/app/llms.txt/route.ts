@@ -7,7 +7,6 @@
  */
 
 import { cacheLife } from 'next/cache';
-import type { NextRequest } from 'next/server';
 import {
   agents,
   collections,
@@ -40,14 +39,14 @@ import { batchLoadContent } from '@/src/lib/utils/batch.utils';
  * - Cached for 1 hour via Cache Components
  * - Public cache headers for CDN distribution
  */
-export async function GET(request: NextRequest): Promise<Response> {
+export async function GET(): Promise<Response> {
   'use cache';
   cacheLife('hours'); // 1 hour cache (stale: 3600s, revalidate: 900s, expire: 86400s)
 
-  const requestLogger = logger.forRequest(request);
+  // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)
 
   try {
-    requestLogger.info('Site llms.txt generation started');
+    logger.info('Site llms.txt generation started');
 
     // Gather category statistics - await all promises in parallel
     const {
@@ -126,7 +125,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     // Generate llms.txt content
     const llmsTxt = await generateSiteLLMsTxt(categoryStats);
 
-    requestLogger.info('Site llms.txt generated successfully', {
+    logger.info('Site llms.txt generated successfully', {
       categoriesCount: categoryStats.length,
       totalItems: categoryStats.reduce((sum, cat) => sum + cat.count, 0),
       contentLength: llmsTxt.length,
@@ -139,7 +138,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       cache: { sMaxAge: 3600, staleWhileRevalidate: 86400 },
     });
   } catch (error: unknown) {
-    requestLogger.error(
+    logger.error(
       'Failed to generate site llms.txt',
       error instanceof Error ? error : new Error(String(error))
     );

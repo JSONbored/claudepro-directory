@@ -8,7 +8,6 @@
 
 import fs from 'fs/promises';
 import { cacheLife } from 'next/cache';
-import type { NextRequest } from 'next/server';
 import path from 'path';
 import { z } from 'zod';
 import { contentCache } from '@/src/lib/cache.server';
@@ -48,26 +47,26 @@ const PATH_MAP: Record<string, string> = {
  * @returns Plain text response with guide content
  */
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ category: string; slug: string }> }
+  request: Request,
+  context: { params: Promise<{ category: string; slug: string }> }
 ): Promise<Response> {
   'use cache';
   cacheLife('half'); // 30 min cache (replaces revalidate: 1800)
 
-  const requestLogger = logger.forRequest(request);
+  // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)
 
   try {
-    const rawParams = await params;
+    const rawParams = await context.params;
     const { category, slug } = guideParamsSchema.parse(rawParams);
 
-    requestLogger.info('Guide llms.txt generation started', {
+    logger.info('Guide llms.txt generation started', {
       category,
       slug,
     });
 
     // Validate category
     if (!(category in PATH_MAP)) {
-      requestLogger.warn('Invalid guide category for llms.txt', { category });
+      logger.warn('Invalid guide category for llms.txt', { category });
 
       return apiResponse.raw('Guide category not found', {
         contentType: 'text/plain; charset=utf-8',
@@ -91,7 +90,7 @@ export async function GET(
       );
 
       if (cachedContent) {
-        requestLogger.info('Serving cached guide llms.txt', {
+        logger.info('Serving cached guide llms.txt', {
           category,
           slug,
         });
@@ -109,11 +108,9 @@ export async function GET(
     // Load guide content
     const mappedPath = PATH_MAP[category];
     if (!mappedPath) {
-      requestLogger.error(
-        'Invalid category path mapping',
-        new Error('Category not found in PATH_MAP'),
-        { category }
-      );
+      logger.error('Invalid category path mapping', new Error('Category not found in PATH_MAP'), {
+        category,
+      });
       return apiResponse.raw('Internal server error', {
         contentType: 'text/plain; charset=utf-8',
         status: 500,
@@ -126,7 +123,7 @@ export async function GET(
     try {
       fileContent = await fs.readFile(filePath, 'utf-8');
     } catch {
-      requestLogger.warn('Guide file not found for llms.txt', {
+      logger.warn('Guide file not found for llms.txt', {
         category,
         filename,
       });
@@ -187,7 +184,7 @@ export async function GET(
       600 // 10 minutes
     );
 
-    requestLogger.info('Guide llms.txt generated successfully', {
+    logger.info('Guide llms.txt generated successfully', {
       category,
       slug,
       contentLength: llmsTxt.length,
@@ -200,12 +197,12 @@ export async function GET(
       cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
     });
   } catch (error: unknown) {
-    const rawParams = await params.catch(() => ({
+    const rawParams = await context.params.catch(() => ({
       category: 'unknown',
       slug: 'unknown',
     }));
 
-    requestLogger.error(
+    logger.error(
       'Failed to generate guide llms.txt',
       error instanceof Error ? error : new Error(String(error)),
       { category: rawParams.category, slug: rawParams.slug }
