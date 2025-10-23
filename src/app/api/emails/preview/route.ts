@@ -4,10 +4,9 @@
  *
  * Security: Only accessible in development mode
  * Usage: GET /api/emails/preview?template=newsletter-welcome
+ *
+ * Note: This route is dynamic (no caching) as it's dev-only and renders email templates on-demand
  */
-
-// Force dynamic rendering - email templates use @react-email/components which should not be statically generated
-export const dynamic = 'force-dynamic';
 
 import { z } from 'zod';
 import {

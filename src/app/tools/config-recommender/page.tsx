@@ -36,7 +36,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 // Generate metadata from centralized registry
 export const metadata: Metadata = generatePageMetadata('/tools/config-recommender');
 
-export default function ConfigRecommenderPage() {
+export default async function ConfigRecommenderPage() {
   'use cache';
   cacheLife('static'); // Static landing page (replaces revalidate: false)
 
