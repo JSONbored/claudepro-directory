@@ -1,0 +1,107 @@
+{
+  "slug": "accessibility-first-statusline",
+  "description": "WCAG-compliant accessible statusline with screen reader announcements, high-contrast colors, semantic labels, keyboard hints, and reduced motion support.",
+  "category": "statuslines",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-23",
+  "tags": ["accessibility", "wcag", "screen-reader", "high-contrast", "inclusive", "a11y"],
+  "statuslineType": "simple",
+  "content": "#!/usr/bin/env bash\n\n# Accessibility-First Statusline for Claude Code\n# WCAG 2.1 AA compliant, screen reader friendly, high contrast\n\n# Read JSON from stdin\nread -r input\n\n# Extract values\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\ndir=$(echo \"$input\" | jq -r '.workspace.path // \"~\"' | sed \"s|$HOME|~|\")\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\n\n# Check for PREFERS_REDUCED_MOTION environment variable\nif [ \"$PREFERS_REDUCED_MOTION\" = \"1\" ]; then\n  # No animations, static display\n  animation=\"\"\nelse\n  # Minimal indicator (not flashing)\n  animation=\"▪\"\nfi\n\n# High contrast WCAG AA compliant colors\n# Contrast ratio > 4.5:1 against black background\n# Using basic ANSI colors for maximum compatibility\nWHITE_BOLD=\"\\033[1;37m\"    # Bright white (high contrast)\nCYAN_BOLD=\"\\033[1;36m\"     # Bright cyan (high contrast)\nYELLOW_BOLD=\"\\033[1;33m\"   # Bright yellow (high contrast)\nRESET=\"\\033[0m\"\n\n# Semantic labels (screen reader friendly)\nLABEL_MODEL=\"Model:\"\nLABEL_DIR=\"Directory:\"\nLABEL_TOKENS=\"Tokens:\"\n\n# Build statusline with semantic structure\nstatusline=\"\"\nstatusline+=\"${animation} \"  # Activity indicator (if motion enabled)\nstatusline+=\"${WHITE_BOLD}${LABEL_MODEL}${RESET} ${CYAN_BOLD}${model}${RESET} | \"\nstatusline+=\"${WHITE_BOLD}${LABEL_DIR}${RESET} ${CYAN_BOLD}${dir}${RESET} | \"\nstatusline+=\"${WHITE_BOLD}${LABEL_TOKENS}${RESET} ${YELLOW_BOLD}${tokens}${RESET}\"\n\n# Output for visual display\necho -e \"$statusline\"\n\n# Screen reader announcement (stderr for assistive tech)\n# Only announce on significant changes (every 1000 tokens)\ntoken_threshold=$((tokens / 1000 * 1000))\nif [ -f \"/tmp/claude_statusline_last_tokens\" ]; then\n  last_tokens=$(cat /tmp/claude_statusline_last_tokens)\nelse\n  last_tokens=0\nfi\n\nif [ $token_threshold -ne $((last_tokens / 1000 * 1000)) ]; then\n  # Announce to screen reader (ARIA live region style)\n  echo \"Status update: Using $model in directory $dir. Token count: $tokens.\" >&2\n  echo $tokens > /tmp/claude_statusline_last_tokens\nfi\n\n# Keyboard navigation hint (on first run)\nif [ ! -f \"/tmp/claude_statusline_initialized\" ]; then\n  echo \"Accessibility mode enabled. Press Ctrl+C to interrupt, Tab for completion suggestions.\" >&2\n  touch /tmp/claude_statusline_initialized\nfi",
+  "features": [
+    "WCAG 2.1 AA compliant high-contrast colors (4.5:1 ratio minimum)",
+    "Screen reader announcements via stderr for assistive technology",
+    "Semantic labels (Model:, Directory:, Tokens:) for context clarity",
+    "Reduced motion support via PREFERS_REDUCED_MOTION environment variable",
+    "Keyboard navigation hints for non-mouse users",
+    "Threshold-based announcements (every 1000 tokens) to reduce noise",
+    "Basic ANSI colors for maximum terminal compatibility",
+    "No complex Unicode characters or Powerline glyphs"
+  ],
+  "configuration": {
+    "format": "bash",
+    "refreshInterval": 2000,
+    "position": "left",
+    "colorScheme": "high-contrast-wcag"
+  },
+  "useCases": [
+    "Developers using screen readers (NVDA, JAWS, VoiceOver)",
+    "Users with visual impairments requiring high contrast",
+    "Teams enforcing WCAG accessibility compliance",
+    "Vestibular disorder users needing reduced motion",
+    "Keyboard-only navigation workflows",
+    "Inclusive design standard for enterprise environments",
+    "Testing accessibility of AI-assisted development tools"
+  ],
+  "requirements": [
+    "Bash shell",
+    "jq JSON processor",
+    "Terminal with ANSI color support (basic 16-color sufficient)",
+    "Screen reader software (optional, for announcements)",
+    "Write access to /tmp for state tracking"
+  ],
+  "preview": "▪ Model: claude-sonnet-4.5 | Directory: ~/projects/my-app | Tokens: 12450",
+  "troubleshooting": [
+    {
+      "issue": "Screen reader not announcing status updates",
+      "solution": "Verify screen reader configured to read stderr. Test: echo 'test' >&2. Check /tmp/claude_statusline_last_tokens exists and updates. Adjust announcement threshold (currently 1000 tokens) in script if too frequent/infrequent."
+    },
+    {
+      "issue": "Colors too dim or hard to read on terminal background",
+      "solution": "WCAG contrast ratios assume black/dark background. For light backgrounds, invert: Use dark colors instead. Test contrast: WebAIM contrast checker. Adjust ANSI codes: 30-37 (dark) vs 90-97 (bright). Check terminal theme."
+    },
+    {
+      "issue": "Animation indicator (▪) showing even with reduced motion enabled",
+      "solution": "Set environment variable: export PREFERS_REDUCED_MOTION=1. Add to ~/.bashrc or ~/.zshrc for persistence. Verify: echo $PREFERS_REDUCED_MOTION (should show 1). Restart Claude Code session after setting."
+    },
+    {
+      "issue": "Keyboard navigation hints appearing every session",
+      "solution": "Check /tmp/claude_statusline_initialized file exists and persists. Verify /tmp writable: touch /tmp/test && rm /tmp/test. On system reboot, /tmp clears - expected behavior. Move to ~/.cache/ for persistence across reboots."
+    },
+    {
+      "issue": "Semantic labels making statusline too verbose or crowded",
+      "solution": "Labels essential for screen readers but can be shortened: 'M:' instead of 'Model:', 'D:' for 'Directory:', 'T:' for 'Tokens:'. Balance visual brevity with semantic meaning. Test with screen reader first before removing labels."
+    }
+  ],
+  "documentationUrl": "https://www.w3.org/WAI/WCAG21/quickref/",
+  "source": "community",
+  "discoveryMetadata": {
+    "researchDate": "2025-10-23",
+    "trendingSources": [
+      {
+        "source": "accessibility_standards",
+        "evidence": "WCAG 2.1 AA compliance increasingly required for development tools, minimum 4.5:1 contrast ratio for text",
+        "url": "https://www.w3.org/WAI/WCAG21/quickref/",
+        "relevanceScore": "high"
+      },
+      {
+        "source": "developer_research",
+        "evidence": "Developer productivity research shows 85% use AI tools, accessibility in terminals becoming critical for inclusive teams",
+        "url": "https://blog.jetbrains.com/research/2025/10/state-of-developer-ecosystem-2025/",
+        "relevanceScore": "medium"
+      },
+      {
+        "source": "terminal_accessibility",
+        "evidence": "Screen reader support in terminal applications underserved, reduced motion preferences from vestibular disorder awareness",
+        "url": "https://www.w3.org/WAI/",
+        "relevanceScore": "high"
+      }
+    ],
+    "keywordResearch": {
+      "primaryKeywords": [
+        "accessible statusline",
+        "screen reader friendly",
+        "high contrast terminal",
+        "WCAG compliance",
+        "inclusive design"
+      ],
+      "searchVolume": "medium",
+      "competitionLevel": "low"
+    },
+    "gapAnalysis": {
+      "existingContent": ["simple-text-statusline"],
+      "identifiedGap": "Existing simple-text-statusline is plain text with no colors but lacks accessibility features: no screen reader announcements, no semantic labels, no WCAG contrast compliance, no reduced motion support, no keyboard hints. Accessibility in terminal UIs critical for inclusive development teams. 85% of developers use AI tools but accessibility largely ignored. No statusline specifically designed for assistive technology.",
+      "priority": "medium"
+    },
+    "approvalRationale": "Accessibility increasingly required in enterprise environments. WCAG compliance standards enforced. Low competition, underserved user segment. Demonstrates inclusive design leadership. User approved for addressing accessibility gap in AI development tools."
+  }
+}

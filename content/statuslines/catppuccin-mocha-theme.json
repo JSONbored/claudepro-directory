@@ -1,0 +1,108 @@
+{
+  "slug": "catppuccin-mocha-theme",
+  "description": "Soothing Catppuccin Mocha theme statusline with 26 pastel colors, Powerline separators, and modular segments for Git, model info, and token tracking.",
+  "category": "statuslines",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-23",
+  "tags": ["catppuccin", "mocha", "pastel", "theme", "powerline", "aesthetics"],
+  "statuslineType": "powerline",
+  "content": "#!/usr/bin/env bash\n\n# Catppuccin Mocha Theme Statusline for Claude Code\n# Official Catppuccin Mocha color palette (26 colors)\n# https://github.com/catppuccin/catppuccin\n\n# Read JSON from stdin\nread -r input\n\n# Extract values\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\ndir=$(echo \"$input\" | jq -r '.workspace.path // \"~\"' | sed \"s|$HOME|~|\")\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\ngit_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo \"\")\n\n# Catppuccin Mocha Palette (256-color approximations)\n# Base colors\nBASE=\"\\033[48;5;235m\"      # #1e1e2e\nMANTLE=\"\\033[48;5;234m\"    # #181825\nCRUST=\"\\033[48;5;233m\"     # #11111b\n\n# Text colors\nTEXT=\"\\033[38;5;205m\"      # #cdd6f4\nSUBTEXT1=\"\\033[38;5;189m\" # #bac2de\nSUBTEXT0=\"\\033[38;5;146m\" # #a6adc8\n\n# Accent colors\nLAVENDER=\"\\033[48;5;183m\"  # #b4befe\nBLUE=\"\\033[48;5;117m\"      # #89b4fa\nSAPPHIRE=\"\\033[48;5;116m\" # #74c7ec\nSKY=\"\\033[48;5;153m\"       # #89dceb\nTEAL=\"\\033[48;5;152m\"      # #94e2d5\nGREEN=\"\\033[48;5;151m\"     # #a6e3a1\nYELLOW=\"\\033[48;5;229m\"    # #f9e2af\nPEACH=\"\\033[48;5;216m\"     # #fab387\nMARRON=\"\\033[48;5;217m\"    # #eba0ac\nRED=\"\\033[48;5;210m\"       # #f38ba8\nMAUVE=\"\\033[48;5;183m\"     # #cba6f7\nPINK=\"\\033[48;5;218m\"      # #f5c2e7\nFLAMINGO=\"\\033[48;5;217m\" # #f2cdcd\nROSEWATER=\"\\033[48;5;224m\"# #f5e0dc\n\n# Foreground versions\nLAVENDER_FG=\"\\033[38;5;183m\"\nBLUE_FG=\"\\033[38;5;117m\"\nSAPPHIRE_FG=\"\\033[38;5;116m\"\nTEAL_FG=\"\\033[38;5;152m\"\nPEACH_FG=\"\\033[38;5;216m\"\n\nRESET=\"\\033[0m\"\nSEP=\"\\ue0b0\"  # Powerline separator\n\n# Build statusline\nstatusline=\"\"\n\n# Model segment (Lavender)\nstatusline+=\"${LAVENDER}${RESET}${TEXT} ${model} ${RESET}\"\nstatusline+=\"${LAVENDER_FG}${SEP}${RESET}\"\n\n# Directory segment (Blue)\nstatusline+=\" ${BLUE}${RESET}${TEXT}  ${dir} ${RESET}\"\nstatusline+=\"${BLUE_FG}${SEP}${RESET}\"\n\n# Git branch segment (Teal) - only if in git repo\nif [ -n \"$git_branch\" ]; then\n  statusline+=\" ${TEAL}${RESET}${TEXT}  ${git_branch} ${RESET}\"\n  statusline+=\"${TEAL_FG}${SEP}${RESET}\"\nfi\n\n# Token count segment (Peach)\nstatusline+=\" ${PEACH}${RESET}${TEXT}  ${tokens} ${RESET}\"\nstatusline+=\"${PEACH_FG}${SEP}${RESET}\"\n\necho -e \"$statusline\"",
+  "features": [
+    "Official Catppuccin Mocha color palette with 26 eye-candy colors",
+    "Powerline-style separators for seamless segment transitions",
+    "Modular segments: model, directory, Git branch, token count",
+    "Pastel aesthetics optimized for long coding sessions",
+    "Git integration with branch display",
+    "Nerd Font icons for visual clarity",
+    "Conditional rendering (Git segment only in repositories)",
+    "256-color terminal support for accurate palette reproduction"
+  ],
+  "configuration": {
+    "format": "bash",
+    "refreshInterval": 500,
+    "position": "left",
+    "colorScheme": "catppuccin-mocha"
+  },
+  "useCases": [
+    "Developers already using Catppuccin theme in editor/terminal",
+    "Users preferring soothing pastel aesthetics over harsh neon",
+    "Teams standardizing on Catppuccin design system",
+    "Visual continuity across Neovim, tmux, and Claude Code",
+    "Reducing eye strain during extended AI-assisted coding sessions"
+  ],
+  "requirements": [
+    "Bash shell",
+    "jq JSON processor",
+    "Git (optional, for branch display)",
+    "Terminal with 256-color support",
+    "Nerd Font (e.g., JetBrains Mono Nerd Font, FiraCode Nerd Font)"
+  ],
+  "preview": " claude-sonnet-4.5   ~/projects   main   12,450 ",
+  "troubleshooting": [
+    {
+      "issue": "Colors look washed out or incorrect compared to official palette",
+      "solution": "Verify terminal supports 256 colors with 'tput colors' (should return 256). Enable true color if available: export COLORTERM=truecolor. Check terminal theme doesn't override ANSI colors."
+    },
+    {
+      "issue": "Nerd Font icons showing as boxes or missing glyphs",
+      "solution": "Install Catppuccin-compatible Nerd Font from nerdfonts.com. Recommended: JetBrains Mono Nerd Font, FiraCode Nerd Font. Configure terminal to use installed font in preferences."
+    },
+    {
+      "issue": "Git branch not displaying even when in repository",
+      "solution": "Check Git installed: git --version. Verify you're in Git repo: git status. Ensure script has permission to execute git commands. Test manually: git rev-parse --abbrev-ref HEAD"
+    },
+    {
+      "issue": "Powerline separators misaligned or overlapping text",
+      "solution": "Verify Nerd Font properly installed with Powerline glyphs (U+E0B0-U+E0B3). Test separator: echo -e '\\ue0b0'. Disable font ligatures if enabled. Increase terminal line spacing if needed."
+    },
+    {
+      "issue": "Statusline disappears or flickers on refresh",
+      "solution": "Increase refreshInterval to 1000ms in configuration. Check script permissions: chmod +x statusline.sh. Verify jq installed: jq --version. Test script manually with sample JSON input."
+    }
+  ],
+  "documentationUrl": "https://github.com/catppuccin/catppuccin",
+  "source": "community",
+  "discoveryMetadata": {
+    "researchDate": "2025-10-23",
+    "trendingSources": [
+      {
+        "source": "github_trending",
+        "evidence": "catppuccin/nvim - 5.8k stars, catppuccin/tmux - 2.4k stars, community-driven pastel theme",
+        "url": "https://github.com/catppuccin/catppuccin",
+        "relevanceScore": "high"
+      },
+      {
+        "source": "github_search",
+        "evidence": "Multiple Catppuccin integrations for Neovim, tmux, terminal emulators trending in 2025",
+        "url": "https://github.com/topics/catppuccin",
+        "relevanceScore": "high"
+      },
+      {
+        "source": "developer_tools",
+        "evidence": "Catppuccin listed as popular theme system with 4 warm flavors (Latte, Frappe, Macchiato, Mocha) and 26 colors",
+        "url": "https://github.com/catppuccin/nvim",
+        "relevanceScore": "high"
+      }
+    ],
+    "keywordResearch": {
+      "primaryKeywords": [
+        "catppuccin theme",
+        "mocha statusline",
+        "pastel terminal theme",
+        "soothing statusline"
+      ],
+      "searchVolume": "high",
+      "competitionLevel": "medium"
+    },
+    "gapAnalysis": {
+      "existingContent": [
+        "starship-powerline-theme",
+        "minimal-powerline",
+        "python-rich-statusline"
+      ],
+      "identifiedGap": "No theme-specific statusline configurations exist. Catppuccin is one of the most popular terminal themes in 2025 with wide adoption across Neovim, tmux, and terminals. Users want visual continuity across their development environment. Existing statuslines offer functionality but no specific theme integration.",
+      "priority": "high"
+    },
+    "approvalRationale": "Catppuccin trending heavily on GitHub with 5.8k+ stars on nvim port and 2.4k+ on tmux port. High search volume for theme customization. Clear gap vs existing functional-only statuslines. User approved topic for addressing theme consistency needs."
+  }
+}

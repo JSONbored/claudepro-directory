@@ -65,11 +65,9 @@ async function getSEOPageData(category: string, slug: string): Promise<SEOPageDa
     troubleshooting: 'troubleshooting',
   };
 
-  const filename = `${slug}.mdx`;
-
   if (!pathMap[category]) return null;
 
-  const cacheKey = `guide:${category}:${slug}`;
+  const cacheKey = `guide:v4:${category}:${slug}`; // v4 = JSON support
 
   return await contentCache.cacheWithRefresh(
     cacheKey,
@@ -78,13 +76,44 @@ async function getSEOPageData(category: string, slug: string): Promise<SEOPageDa
         const mappedPath = pathMap[category];
         if (!mappedPath) return null;
 
-        const filePath = path.join(process.cwd(), 'content', 'guides', mappedPath, filename);
+        const baseDir = path.join(process.cwd(), 'content', 'guides', mappedPath);
 
-        // Read file directly - this avoids TOCTOU race condition
-        // If file doesn't exist or can't be read, catch block will handle it
-        const fileContent = await fs.readFile(filePath, 'utf-8');
+        // Try JSON first (new format), fallback to MDX
+        const jsonPath = path.join(baseDir, `${slug}.json`);
+        const mdxPath = path.join(baseDir, `${slug}.mdx`);
 
-        // Parse frontmatter using our MDX parser
+        let fileContent: string;
+        let isJson = false;
+
+        try {
+          fileContent = await fs.readFile(jsonPath, 'utf-8');
+          isJson = true;
+        } catch {
+          // JSON doesn't exist, try MDX
+          fileContent = await fs.readFile(mdxPath, 'utf-8');
+        }
+
+        if (isJson) {
+          // Parse JSON guide
+          const jsonData = JSON.parse(fileContent);
+
+          return {
+            title: jsonData.title || '',
+            seoTitle: jsonData.seoTitle,
+            description: jsonData.description || '',
+            keywords: Array.isArray(jsonData.keywords) ? jsonData.keywords : [],
+            dateUpdated: jsonData.dateUpdated || '',
+            author: jsonData.author || APP_CONFIG.author,
+            readingTime: jsonData.readingTime || '',
+            difficulty: jsonData.difficulty || '',
+            category: jsonData.category || category,
+            content: '', // JSON guides don't have raw content field
+            sections: jsonData.sections || [], // JSON guides have sections array
+            isJsonGuide: true,
+          };
+        }
+
+        // Parse MDX frontmatter
         const { frontmatter, content } = parseMDXFrontmatter(fileContent);
 
         return {
@@ -175,8 +204,8 @@ export async function generateStaticParams() {
       const files = await fs.readdir(dir);
 
       for (const file of files) {
-        if (file.endsWith('.mdx')) {
-          const slug = file.replace('.mdx', '');
+        if (file.endsWith('.json') || file.endsWith('.mdx')) {
+          const slug = file.replace(/\.(json|mdx)$/, '');
           paths.push({
             category,
             slug,
