@@ -1,0 +1,320 @@
+{
+  "slug": "fix-installation-errors",
+  "title": "How to Install Claude Code Without npm Permission Errors - Complete Tutorial 2025",
+  "seoTitle": "Fix Claude Code npm Errors",
+  "description": "Install Claude Code correctly in 15-25 minutes. Fix npm permission errors, configure PATH, and resolve 'command not found' issues with proven solutions.",
+  "keywords": [
+    "claude code installation tutorial",
+    "how to fix npm permission errors claude",
+    "step by step claude code setup guide",
+    "claude command not found fix 2025",
+    "claude code npm eacces error tutorial"
+  ],
+  "dateUpdated": "2025-09-22",
+  "author": "Claude Pro Directory",
+  "category": "guides",
+  "subcategory": "troubleshooting",
+  "tags": ["tutorial", "beginner", "installation", "troubleshooting"],
+  "readingTime": "12 min",
+  "difficulty": "beginner",
+  "featured": false,
+  "lastReviewed": "2025-09-22",
+  "aiOptimized": true,
+  "citationReady": true,
+  "sections": [
+    {
+      "type": "tldr",
+      "content": "This tutorial teaches you to install Claude Code without permission errors in 15-25 minutes. You'll learn platform-specific installation methods, fix npm EACCES errors, and configure PATH correctly. Perfect for developers encountering common installation issues.",
+      "keyPoints": [
+        "Native curl installer eliminates most npm permission issues",
+        "User-level npm configuration prevents EACCES errors permanently",
+        "Shell-specific PATH setup ensures 'command not found' resolution",
+        "15-25 minutes total with 6 verification steps"
+      ]
+    },
+    {
+      "type": "text",
+      "content": "Master Claude Code installation without encountering common npm permission errors. By completion, you'll have Claude Code running in your terminal and understand PATH configuration fundamentals. This guide covers multiple installation methods, PATH configurations, and real-world troubleshooting scenarios."
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "title": "Tutorial Requirements",
+      "content": "**Prerequisites:** Basic terminal knowledge\n**Time Required:** 15-25 minutes active work\n**Tools Needed:** Node.js 18+, Terminal, Browser\n**Outcome:** Working Claude Code installation with proper PATH"
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "What You'll Learn"
+    },
+    {
+      "type": "feature_grid",
+      "title": "Learning Outcomes",
+      "description": "Skills and knowledge you'll master in this tutorial",
+      "columns": "2",
+      "features": [
+        {
+          "title": "Platform-Specific Installation",
+          "description": "Master native curl installer for macOS and Linux. Configure WSL2 properly for Windows systems.",
+          "badge": "Essential"
+        },
+        {
+          "title": "npm Permission Resolution",
+          "description": "Fix EACCES errors without using sudo. Create user-level npm directories permanently.",
+          "badge": "Practical"
+        },
+        {
+          "title": "PATH Configuration Mastery",
+          "description": "Configure shell-specific PATH correctly. Debug 'command not found' errors systematically.",
+          "badge": "Advanced"
+        },
+        {
+          "title": "Version Management",
+          "description": "Use Volta or NVM for clean isolation. Prevent Node.js version conflicts completely.",
+          "badge": "Applied"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Step-by-Step Tutorial"
+    },
+    {
+      "type": "steps",
+      "title": "Complete Claude Code Installation",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Verify System Requirements",
+          "description": "Check Node.js version and operating system compatibility. This ensures your system meets Claude Code's Node.js 18+ requirement.\n\n**Pro tip:** Use node -v for shorter command. Install Node.js from nodejs.org if missing.",
+          "timeEstimate": "2-3 minutes",
+          "code": "# Check Node.js version\nnode --version\n# Should output: v18.0.0 or higher\n\n# Verify npm is installed\nnpm --version\n# Expected output: 8.0.0 or higher",
+          "language": "bash"
+        },
+        {
+          "number": 2,
+          "title": "Configure npm Directory",
+          "description": "Create user-level npm directory to prevent permission errors. This step eliminates most EACCES errors permanently.\n\n**Key insight:** Never use sudo with npm. User directories prevent all permission issues.",
+          "timeEstimate": "3-5 minutes",
+          "code": "# Create npm global directory\nmkdir ~/.npm-global\n\n# Configure npm to use it\nnpm config set prefix '~/.npm-global'\n\n# Add to PATH (for bash)\necho 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc\nsource ~/.bashrc",
+          "language": "bash"
+        },
+        {
+          "number": 3,
+          "title": "Install Claude Code",
+          "description": "Use the native installer for best results. This method provides automatic updates and better reliability.\n\n**Troubleshooting:** Use curl method for more reliable installation than npm.",
+          "timeEstimate": "5-7 minutes",
+          "code": "# Native installer (recommended)\ncurl -fsSL https://claude.ai/install.sh | bash\n\n# Alternative: npm installation\nnpm install -g @anthropic-ai/claude-code\n\n# Verify installation\nclaude --version",
+          "language": "bash"
+        },
+        {
+          "number": 4,
+          "title": "Configure PATH for Your Shell",
+          "description": "Add Claude to PATH based on your shell type. Modern macOS uses Zsh while Linux typically uses Bash.\n\n**Best practice:** Use ~/.zprofile on macOS to prevent path_helper issues.",
+          "timeEstimate": "3-5 minutes",
+          "code": "# For Zsh (macOS)\necho 'export PATH=\"$HOME/.local/bin:$PATH\"' >> ~/.zprofile\nsource ~/.zprofile\n\n# For Bash (Linux)\necho 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.bashrc\nsource ~/.bashrc\n\n# Verify PATH\necho $PATH | grep -E '(npm-global|.local)'",
+          "language": "bash"
+        },
+        {
+          "number": 5,
+          "title": "Verify and Troubleshoot",
+          "description": "Run diagnostics to confirm successful installation. Claude doctor provides comprehensive system checks.\n\n**Common issue:** Clear browser cookies if authentication fails repeatedly.",
+          "timeEstimate": "2-3 minutes",
+          "code": "# Run diagnostics\nclaude doctor\n\n# Test basic functionality\nclaude\n# Should open authentication in browser\n\n# Check installation location\nwhich claude\n# Should show: /home/user/.npm-global/bin/claude",
+          "language": "bash"
+        },
+        {
+          "number": 6,
+          "title": "First Project Setup",
+          "description": "Initialize Claude Code in your project directory. Configure API key or browser authentication method.\n\n**Best practice:** Create CLAUDE.md file for project-specific configuration.",
+          "timeEstimate": "3-5 minutes",
+          "code": "# Navigate to project\ncd ~/your-project\n\n# Start Claude Code\nclaude\n\n# Authenticate via browser\n# Select Claude Console option\n\n# Test with simple command\n# Type: \"Read package.json and summarize\"",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Key Concepts Explained"
+    },
+    {
+      "type": "text",
+      "content": "Understanding these concepts ensures you can adapt this tutorial to your specific needs and troubleshoot issues effectively."
+    },
+    {
+      "type": "accordion",
+      "title": "Core Concepts Deep Dive",
+      "description": "Essential knowledge for mastering this tutorial",
+      "items": [
+        {
+          "title": "Why npm Permission Errors Occur",
+          "content": "npm tries to install global packages in system directories by default. System directories require root access that npm shouldn't have. This creates EACCES errors affecting many installations.\n\n**Key benefits of user directories:**\n- No sudo required - eliminates permission cascades\n- Safer installation - protects system integrity\n- Easier uninstallation - simple directory removal",
+          "defaultOpen": true
+        },
+        {
+          "title": "When to Use Native vs npm Installation",
+          "content": "Choose native installer for production setups and automatic updates. Native installation offers more reliable results than npm. Use npm installation for version pinning or CI/CD pipelines.\n\n**Ideal scenarios:** Native for development machines, npm for Docker containers, Volta for team environments"
+        },
+        {
+          "title": "Common PATH Configuration Mistakes",
+          "content": "PATH mistakes cause 'command not found' errors after successful installation:\n\n- **Wrong config file:** Using ~/.bashrc on macOS - use ~/.zprofile instead\n- **Missing source command:** Forgetting to reload shell - run source command\n- **Path ordering issues:** System paths override user - place user paths first"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Practical Examples"
+    },
+    {
+      "type": "tabs",
+      "title": "Real-World Applications",
+      "description": "See how to apply this tutorial in different contexts",
+      "items": [
+        {
+          "label": "Basic Example",
+          "value": "basic",
+          "content": "<p><strong>Scenario:</strong> Fresh Ubuntu installation with no Node.js</p>\n\n<h4>Basic Implementation</h4>\n\n<p><strong>Bash (basic-setup.sh):</strong></p>\n<pre><code># Install Node.js first\ncurl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -\nsudo apt install -y nodejs\n\n# Configure npm directory\nmkdir ~/.npm-global\nnpm config set prefix '~/.npm-global'\necho 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc\nsource ~/.bashrc\n\n# Install Claude Code\nnpm install -g @anthropic-ai/claude-code\n\n# Expected result:\n# claude command available globally</code></pre>\n\n<p><strong>JavaScript (verify.js):</strong></p>\n<pre><code>// Verify installation programmatically\nconst { execSync } = require('child_process');\n\ntry {\n  const version = execSync('claude --version').toString();\n  console.log('Claude Code installed:', version);\n} catch (error) {\n  console.error('Installation failed:', error.message);\n}</code></pre>\n\n<p><strong>Outcome:</strong> Working Claude Code installation in 10 minutes without permission errors</p>"
+        },
+        {
+          "label": "Advanced Example",
+          "value": "advanced",
+          "content": "<p><strong>Scenario:</strong> macOS with Homebrew and multiple Node versions</p>\n\n<h4>Advanced Implementation</h4>\n\n<p><strong>TypeScript (advanced-setup.ts):</strong></p>\n<pre><code>// Install with Volta for version management\ninterface InstallConfig {\n  nodeVersion: string;\n  claudeVersion?: string;\n  autoUpdate: boolean;\n}\n\nconst config: InstallConfig = {\n  nodeVersion: '20.11.0',\n  claudeVersion: 'latest',\n  autoUpdate: true\n};\n\n// Installation script\nconst installCommands = [\n  'curl https://get.volta.sh | bash',\n  'volta install node@20',\n  'volta install @anthropic-ai/claude-code'\n];</code></pre>\n\n<p><strong>Bash (homebrew-fix.sh):</strong></p>\n<pre><code># Fix Homebrew symlink issues\nbrew unlink node\nbrew link --overwrite node\n\n# Create manual symlink if needed\nln -sf /opt/homebrew/bin/claude /usr/local/bin/claude\n\n# Add to Zsh profile\necho 'export PATH=\"/opt/homebrew/bin:$PATH\"' >> ~/.zprofile\nsource ~/.zprofile\n\n# Verify with full path\n/opt/homebrew/bin/claude --version</code></pre>\n\n<p><strong>Outcome:</strong> Clean installation with version isolation and Homebrew compatibility</p>"
+        },
+        {
+          "label": "WSL Integration",
+          "value": "integration",
+          "content": "<p><strong>Scenario:</strong> Windows 11 with WSL2 Ubuntu integration</p>\n\n<h4>Integration Pattern</h4>\n\n<p><strong>YAML (wsl-setup.yml):</strong></p>\n<pre><code># WSL2 configuration\nworkflow:\n  name: claude-code-wsl\n  steps:\n    - name: install-wsl\n      run: |\n        wsl --install -d Ubuntu\n        wsl --set-version Ubuntu 2\n    \n    - name: configure-nodejs\n      run: |\n        # Inside WSL\n        sudo apt update\n        sudo apt install nodejs npm\n        \n    - name: install-claude\n      run: |\n        mkdir ~/.npm-global\n        npm config set prefix '~/.npm-global'\n        export PATH=\"$HOME/.npm-global/bin:$PATH\"\n        npm install -g @anthropic-ai/claude-code</code></pre>\n\n<p><strong>Outcome:</strong> Windows integration with 100% Unix compatibility for Claude Code</p>"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Troubleshooting Guide"
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "title": "Common Issues and Solutions",
+      "content": "**Issue 1: EACCES permission denied to /usr/local/lib**\n**Solution:** Never use sudo. Reconfigure npm prefix to ~/.npm-global directory. This fixes the root cause permanently.\n\n**Issue 2: claude: command not found after installation**\n**Solution:** Add npm global bin to PATH. Source your shell config file immediately.\n\n**Issue 3: Update installed. Restart to apply loop**\n**Solution:** Run claude migrate-installer command. Switches to native installer with working auto-updates."
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Advanced Techniques"
+    },
+    {
+      "type": "callout",
+      "variant": "tip",
+      "title": "Professional Tips",
+      "content": "**Performance Optimization:** Consider pinning to a stable version for consistent performance. Test newer versions in development first.\n\n**Security Best Practice:** Always configure API keys as environment variables. Never commit keys to version control.\n\n**Scalability Pattern:** Use Volta for team installations. Provides automatic version switching and improved shell startup."
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Validation and Testing"
+    },
+    {
+      "type": "feature_grid",
+      "title": "Success Criteria",
+      "description": "How to verify your implementation works correctly",
+      "columns": "2",
+      "features": [
+        {
+          "title": "Version Check",
+          "description": "claude --version returns version number within 1 second",
+          "badge": "Required"
+        },
+        {
+          "title": "Doctor Diagnostics",
+          "description": "claude doctor shows all green checks without warnings",
+          "badge": "Important"
+        },
+        {
+          "title": "Authentication Test",
+          "description": "Browser opens for OAuth when running claude command",
+          "badge": "Critical"
+        },
+        {
+          "title": "Project Integration",
+          "description": "Claude reads local files without permission errors",
+          "badge": "Essential"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Next Steps and Learning Path"
+    },
+    {
+      "type": "faq",
+      "title": "Continue Your Learning Journey",
+      "description": "Common questions about advancing from this tutorial",
+      "questions": [
+        {
+          "question": "What should I learn next after completing this installation?",
+          "answer": "Configure MCP servers to extend Claude Code functionality. Start with filesystem server for local file access. Then add GitHub and memory servers for complete workflow. The learning path progresses through: Basic commands → MCP servers → Custom configurations.",
+          "category": "learning-path"
+        },
+        {
+          "question": "How can I practice these installation skills?",
+          "answer": "Create Docker containers to test installations repeatedly. Practice different shell configurations and PATH setups. Join the Claude Code community for installation challenges and solutions.",
+          "category": "practice"
+        },
+        {
+          "question": "What are the most common installation mistakes beginners make?",
+          "answer": "The top 3 mistakes are: Using sudo with npm (creates permission cascades), editing wrong shell config file (causes PATH issues), and mixing Windows/WSL Node.js (breaks execution). Each mistake teaches critical system administration concepts.",
+          "category": "troubleshooting"
+        },
+        {
+          "question": "How do I adapt this for team installations?",
+          "answer": "Use Volta for consistent team environments. Create installation scripts with your configuration. Document your team's specific PATH requirements. This ensures everyone has identical Claude Code setups.",
+          "category": "customization"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Related Learning Resources"
+    },
+    {
+      "type": "related_content",
+      "title": "Expand Your Knowledge",
+      "resources": [
+        {
+          "title": "Claude MCP Server Setup Guide",
+          "description": "Learn to configure Model Context Protocol servers",
+          "url": "/guides/tutorials/claude-mcp-server-setup-guide",
+          "type": "tutorial"
+        },
+        {
+          "title": "Desktop MCP Setup",
+          "description": "Set up MCP for Claude Desktop application",
+          "url": "/guides/tutorials/desktop-mcp-setup",
+          "type": "tutorial"
+        },
+        {
+          "title": "WSL Setup Guide",
+          "description": "Complete WSL2 configuration for Claude Code",
+          "url": "/guides/tutorials/wsl-setup-guide",
+          "type": "tutorial"
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "success",
+      "title": "Tutorial Complete!",
+      "content": "**Congratulations!** You've mastered Claude Code installation without permission errors.\n\n**What you achieved:**\n- ✅ Configured npm to avoid EACCES errors permanently\n- ✅ Installed Claude Code with proper PATH configuration\n- ✅ Learned platform-specific installation methods\n\n**Ready for more?** Explore our [tutorials collection](/guides/tutorials) or join our [community](/community) to share your installation experience and help others overcome setup challenges."
+    },
+    {
+      "type": "text",
+      "content": "*Last updated: September 2025 | Found this helpful? Share it with developers struggling with Claude Code installation and explore more [Claude tutorials](/guides/tutorials).*"
+    }
+  ]
+}

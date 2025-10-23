@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import path from 'path';
 import { z } from 'zod';
+import { JSONSectionRenderer } from '@/src/components/content/json-section-renderer';
 import { MDXRenderer } from '@/src/components/content/mdx-renderer';
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -466,17 +467,23 @@ export default async function SEOGuidePage({
                 <div className="lg:col-span-2 space-y-8">
                   <Card>
                     <CardContent className="pt-6">
-                      <MDXContentProvider category={category} slug={slug}>
-                        <MDXRenderer
-                          source={data.content}
-                          className=""
-                          pathname={`/guides/${category}/${slug}`}
-                          metadata={{
-                            tags: data.keywords || [], // Note: SEO pages use keywords field
-                            keywords: data.keywords || [],
-                          }}
-                        />
-                      </MDXContentProvider>
+                      {data.isJsonGuide && data.sections ? (
+                        // JSON-based guide - render sections array
+                        <JSONSectionRenderer sections={data.sections} />
+                      ) : (
+                        // MDX-based guide - render raw content
+                        <MDXContentProvider category={category} slug={slug}>
+                          <MDXRenderer
+                            source={data.content}
+                            className=""
+                            pathname={`/guides/${category}/${slug}`}
+                            metadata={{
+                              tags: data.keywords || [], // Note: SEO pages use keywords field
+                              keywords: data.keywords || [],
+                            }}
+                          />
+                        </MDXContentProvider>
+                      )}
                     </CardContent>
                   </Card>
 

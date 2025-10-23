@@ -1,0 +1,444 @@
+{
+  "slug": "fix-environment-variables",
+  "title": "Fix Claude Code Environment Variable Configuration Errors",
+  "seoTitle": "Fix Claude Environment Vars",
+  "description": "Debug Claude Code authentication failures, OAuth errors, and API key configuration issues with platform-specific solutions and automated management tools.",
+  "keywords": [
+    "Claude Code environment variables configuration",
+    "Claude Code API key environment variable setup",
+    "Claude Code permissions settings"
+  ],
+  "dateUpdated": "2025-09-22",
+  "author": "Claude Pro Directory",
+  "category": "guides",
+  "subcategory": "troubleshooting",
+  "tags": [
+    "environment-variables",
+    "configuration",
+    "api-keys",
+    "authentication",
+    "debugging",
+    "security"
+  ],
+  "readingTime": "8 min",
+  "difficulty": "intermediate",
+  "featured": false,
+  "lastReviewed": "2025-09-22",
+  "aiOptimized": true,
+  "citationReady": true,
+  "sections": [
+    {
+      "type": "tldr",
+      "content": "Claude Code configuration errors commonly affect authentication, OAuth handling, and permission settings. This guide provides platform-specific fixes for Windows WSL, macOS, and Linux. Security best practices protect API keys with layered approaches. Automated management with direnv simplifies environment setup."
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "title": "Critical Configuration Alert",
+      "content": "Configuration issues represent a significant portion of Claude Code support requests. OAuth callback failures and API key exposure risks remain top concerns. This guide addresses the most common configuration problems through proper setup patterns."
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Problem Overview"
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "title": "Claude Code Configuration Error Indicators",
+      "content": "**Primary Symptoms:** OAuth account information missing, API key not found errors, permission denied on file operations, MCP server connection failures\n\n**Common Triggers:** SSH environment limitations, corporate network restrictions, cross-platform path conflicts, expired OAuth tokens\n\n**Affected Versions:** Claude Code 3.0+, all platforms (Windows/macOS/Linux)\n\n**Impact Level:** Complete workflow disruption - no code generation possible"
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Quick Diagnosis"
+    },
+    {
+      "type": "accordion",
+      "title": "Identify Your Configuration Issue",
+      "items": [
+        {
+          "title": "Error occurs during initial setup?",
+          "content": "**Yes:** Platform-specific installation issue - See Platform Configuration section\n\n**No:** Continue to next question",
+          "defaultOpen": true
+        },
+        {
+          "title": "Authentication fails after successful browser login?",
+          "content": "**Yes:** OAuth callback handling failure - Check firewall/proxy settings\n\n**No:** Continue to next question"
+        },
+        {
+          "title": "API key errors in SSH sessions?",
+          "content": "**Yes:** Token storage limitation - Use environment variable authentication\n\n**No:** Continue to next question"
+        },
+        {
+          "title": "Permission denied on file operations?",
+          "content": "**Yes:** Permission scope configuration needed - Review security rules\n\n**No:** Check advanced debugging section"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Common Error Messages"
+    },
+    {
+      "type": "comparison_table",
+      "title": "Claude Code Configuration Errors",
+      "headers": ["Error Message", "Solution", "Code"],
+      "data": [
+        {
+          "Error Message": "OAuth account information not found in config",
+          "Solution": "Remove all Claude directories (~/.claude, ~/.npm-global/lib/node_modules/@anthropic-ai/). Clear npm cache. Reinstall fresh.",
+          "Code": "AUTH_001"
+        },
+        {
+          "Error Message": "Missing API key · Run /login",
+          "Solution": "Run /doctor command. Set install method: claude config set --global installMethod npm-global",
+          "Code": "AUTH_002"
+        },
+        {
+          "Error Message": "Permission denied: Cannot access file",
+          "Solution": "Configure permission scopes: Read(src/**), Edit(/docs/**), Deny(~/.env)",
+          "Code": "PERM_001"
+        },
+        {
+          "Error Message": "MCP server connection failed",
+          "Solution": "Set STACK_EXCHANGE_API_KEY and MAX_REQUEST_PER_WINDOW=30 in configuration",
+          "Code": "MCP_001"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Step-by-Step Solutions"
+    },
+    {
+      "type": "steps",
+      "title": "Complete Configuration Fix Process",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Platform-Specific Setup",
+          "description": "**Purpose:** Configure Claude Code for your operating system with optimal performance settings.\n\n**Windows WSL Configuration:**\n\nWSL 2 with Ubuntu provides better performance. Keep projects within WSL filesystem (~/).\n\n**macOS Native Installation:**\n\nKeychain automatically stores OAuth tokens securely. Terminal and iTerm2 integration works seamlessly.\n\n**Linux NPM Configuration:**\n\nAvoid sudo-related issues with dedicated npm directory. Alpine Linux requires additional packages.",
+          "timeEstimate": "5 minutes",
+          "code": "# Windows WSL .wslconfig\n[wsl2]\nmemory=8GB\nprocessors=4\nswap=2GB\nlocalhostForwarding=true\n\n# macOS Installation\ncurl -fsSL https://claude.ai/install.sh | bash\necho 'export PATH=\"$HOME/.claude/bin:$PATH\"' >> ~/.zshrc\nsource ~/.zshrc\n\n# Linux NPM Setup\nmkdir ~/.npm-global\nnpm config set prefix '~/.npm-global'\necho 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.bashrc\nsource ~/.bashrc",
+          "language": "bash"
+        },
+        {
+          "number": 2,
+          "title": "Authentication Configuration",
+          "description": "**Purpose:** Establish secure authentication with proper token management and API key storage.\n\n**Security Note:** Consider implementing key rotation policies for enhanced security.",
+          "code": "# Environment Variable Setup (.bashrc)\nexport ANTHROPIC_API_KEY=\"sk-ant-api-03-...\"\nexport ANTHROPIC_AUTH_TOKEN=\"custom-auth-token\"\nexport CLAUDE_CODE_API_KEY_HELPER_TTL_MS=3600000\n\n# API Key Helper Script (api-key-helper.sh)\n#!/bin/bash\n# Dynamic key generation from secure vault\nKEY=$(vault kv get -field=api_key secret/claude)\necho \"$KEY\"\n\n# Settings Configuration (.claude/settings.json)\n{\n  \"apiKeyHelper\": \"./api-key-helper.sh\",\n  \"mcpServers\": {\n    \"stackOverflow\": {\n      \"command\": \"npx\",\n      \"args\": [\"@modelcontextprotocol/server-stack-exchange\"],\n      \"env\": {\n        \"STACK_EXCHANGE_API_KEY\": \"your-key\",\n        \"MAX_REQUEST_PER_WINDOW\": \"30\"\n      }\n    }\n  }\n}",
+          "language": "bash"
+        },
+        {
+          "number": 3,
+          "title": "Permission Configuration",
+          "description": "**Purpose:** Set granular file access rules with proper security boundaries.\n\n**Enterprise Override:** Managed settings in /Library/Application Support/ClaudeCode enforce policies.",
+          "code": "# Project-Specific Permissions (.claude/settings.local.json)\n{\n  \"permissions\": {\n    \"fileAccess\": [\n      \"Read(src/**)\",\n      \"Edit(/docs/**)\",\n      \"Deny(~/.env)\",\n      \"Deny(**/*.key)\"\n    ],\n    \"commands\": [\n      \"Bash(npm run test:*)\",\n      \"Deny(rm -rf *)\"\n    ]\n  },\n  \"defaultMode\": \"acceptEdits\"\n}",
+          "language": "json"
+        },
+        {
+          "number": 4,
+          "title": "Debug and Verify",
+          "description": "**Purpose:** Validate configuration and identify remaining issues using diagnostic commands.\n\n**Common Fixes:**\n- **OAuth Token Expiration:** Run /logout then /login --force\n- **Config Mismatch:** claude config set --global installMethod npm-global\n- **Keychain Issues (macOS):** security delete-generic-password -a $USER -s \"Claude Code\"\n- **Credential Reset (Linux):** rm -rf ~/.claude/credentials.json\n\n**Success Indicators:** Green status in /doctor output confirms proper configuration.",
+          "code": "# Check configuration health\nclaude doctor\n\n# View current settings\nclaude config list --all\n\n# Test authentication\nclaude /login --force\n\n# Verify environment variables\nenv | grep ANTHROPIC\n\n# Check permission status\nclaude /status",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "comparison_table",
+      "title": "Permission Precedence",
+      "description": "Permission Rules Hierarchy",
+      "headers": ["Rule Type", "Priority", "Example", "Use Case"],
+      "data": [
+        {
+          "Rule Type": "Deny Rules",
+          "Priority": "Highest (1)",
+          "Example": "Deny(~/.env)",
+          "Use Case": "Block sensitive files absolutely"
+        },
+        {
+          "Rule Type": "Ask Rules",
+          "Priority": "Medium (2)",
+          "Example": "Ask(/etc/**)",
+          "Use Case": "Prompt for system file access"
+        },
+        {
+          "Rule Type": "Allow Rules",
+          "Priority": "Lowest (3)",
+          "Example": "Read(src/**)",
+          "Use Case": "Grant standard project access"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Common Root Causes"
+    },
+    {
+      "type": "feature_grid",
+      "title": "Why Configuration Errors Occur",
+      "columns": "2",
+      "features": [
+        {
+          "title": "OAuth Callback Blocking",
+          "description": "Corporate firewalls and proxy servers block OAuth callbacks from claude.ai. Network restrictions prevent token exchange completion.",
+          "badge": "Common issue"
+        },
+        {
+          "title": "Cross-Platform Path Conflicts",
+          "description": "Windows WSL mixes Linux and Windows paths causing significant performance degradation. File system boundaries create permission errors.",
+          "badge": "Cross-platform"
+        },
+        {
+          "title": "Token Storage Limitations",
+          "description": "SSH environments lack persistent token storage mechanisms. Credential files become inaccessible across sessions.",
+          "badge": "SSH sessions"
+        },
+        {
+          "title": "Permission Scope Misconfiguration",
+          "description": "Default security rules block legitimate file operations. Enterprise policies override user settings unexpectedly.",
+          "badge": "Configuration"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Prevention Strategies"
+    },
+    {
+      "type": "callout",
+      "variant": "success",
+      "title": "Prevent Future Configuration Issues",
+      "content": "**Automated Environment Management:** Use direnv for directory-based configuration loading\n\n**Container-Based Development:** Docker ensures consistent environments - Prevents platform-specific issues entirely\n\n**Regular Validation Checks:** Run claude doctor weekly - Early detection of configuration drift"
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Alternative Solutions"
+    },
+    {
+      "type": "accordion",
+      "title": "When Standard Fixes Don't Work",
+      "description": "Alternative approaches for persistent or unusual cases",
+      "items": [
+        {
+          "title": "Workaround Solutions",
+          "content": "**Temporary Solutions:** Direct JSON configuration bypasses CLI wizards for complex setups.\n\n**Manual Configuration Approach:**\n\n```json\n{\n  \"version\": \"1.0\",\n  \"authMethod\": \"apiKey\",\n  \"apiKey\": \"sk-ant-api-03-...\",\n  \"projects\": {\n    \"default\": {\n      \"path\": \"~/projects\",\n      \"permissions\": \"standard\"\n    }\n  },\n  \"customApiKeyResponses\": {},\n  \"mcpServers\": {}\n}\n```\n\n**Container Isolation:** Docker isolates Claude Code environment from system conflicts.\n\n```dockerfile\nFROM node:18-alpine\nRUN apk add --no-cache git python3 make g++\nRUN npm install -g @anthropic-ai/claude-code\nENV ANTHROPIC_API_KEY=\"your-key\"\nWORKDIR /workspace\nCMD [\"claude\", \"code\"]\n```\n\n**Multi-Environment Script:** Manage multiple Claude instances for different projects."
+        },
+        {
+          "title": "Advanced Debugging",
+          "content": "**Deep Diagnostic Tools:** Advanced commands help identify configuration issues.\n\n```bash\n#!/bin/bash\n# Complete diagnostic script\necho \"=== Claude Code Diagnostic ===\"\necho \"Node Version: $(node --version)\"\necho \"NPM Version: $(npm --version)\"\necho \"Claude Version: $(claude --version)\"\necho \"Config Location: $(claude config path)\"\necho \"Environment Variables:\"\nenv | grep -E \"(ANTHROPIC|CLAUDE)\" | sed 's/=.*/=***/'\necho \"Permission Test:\"\nclaude code --test-permissions ./test-file.txt\necho \"OAuth Status:\"\nclaude auth status --verbose\n```\n\n**Network Diagnostics:** Test OAuth callback accessibility.\n\n```bash\ncurl -I https://claude.ai/oauth/callback\nnslookup claude.ai\ntraceroute claude.ai\n```"
+        },
+        {
+          "title": "Enterprise Solutions",
+          "content": "**Team Configuration Management:** Centralized settings for development teams.\n\n**Shared Configuration Template (claude-team-config.yaml):**\n\n```yaml\nteam:\n  plan: enterprise\n  seats: variable\n  usage_limit: enterprise\n  \ndefaults:\n  install_method: npm-global\n  auth_method: sso\n  permissions:\n    - Read(src/**)\n    - Edit(docs/**)\n    - Deny(secrets/**)\n    \nenvironments:\n  development:\n    api_endpoint: https://dev.claude.ai\n    rate_limit: 100\n  production:\n    api_endpoint: https://api.anthropic.com\n    rate_limit: 30\n```\n\n**CI/CD Integration:** GitHub Actions automatically configure Claude Code.\n\n```yaml\nname: Claude Code Setup\non: [push]\njobs:\n  setup:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v3\n      - name: Configure Claude\n        env:\n          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}\n        run: |\n          npm install -g @anthropic-ai/claude-code\n          claude config set --global apiKey $ANTHROPIC_API_KEY\n          claude doctor\n```"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Diagnostic Commands"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "filename": "diagnostic-commands.sh",
+      "code": "# Essential diagnostic commands for Claude Code\n\n# Check overall configuration health\nclaude doctor\n\n# View all configuration settings\nclaude config list --all\n\n# Test authentication status\nclaude auth status --verbose\n\n# Verify environment variables\nenv | grep ANTHROPIC\n\n# Check file permissions\nclaude code --test-permissions ./\n\n# View OAuth token status\nclaude token info\n\n# Reset configuration completely\nclaude config reset --all\n\n# Force new authentication\nclaude /login --force\n\n# Check MCP server status\nclaude mcp status\n\n# View error logs\nclaude logs --tail 50\n\n# Test API connectivity\nclaude api test",
+      "showLineNumbers": true
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Security Best Practices"
+    },
+    {
+      "type": "checklist",
+      "checklistType": "requirements",
+      "title": "Protect Your Claude Code Configuration",
+      "items": [
+        {
+          "task": "Never commit .env files containing API keys",
+          "description": "Use .gitignore patterns: .env*, secrets/**, *.key to prevent exposure",
+          "required": true
+        },
+        {
+          "task": "Implement regular API key rotation policies",
+          "description": "Use vault integration or cloud secret managers for automatic rotation",
+          "required": true
+        },
+        {
+          "task": "Enable file access deny rules for sensitive paths",
+          "description": "Block ~/.ssh, ~/.aws, ~/.env with explicit deny permissions",
+          "required": true
+        },
+        {
+          "task": "Use separate API keys for each environment",
+          "description": "Development, staging, production require isolated credentials",
+          "required": false
+        },
+        {
+          "task": "Configure OAuth token expiration policies",
+          "description": "Set CLAUDE_CODE_API_KEY_HELPER_TTL_MS for automatic refresh",
+          "required": false
+        },
+        {
+          "task": "Audit permission scopes monthly",
+          "description": "Review file access patterns and command restrictions regularly",
+          "required": false
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Tool Configuration Examples"
+    },
+    {
+      "type": "code_group",
+      "title": "Platform-Specific Configuration Scripts",
+      "tabs": [
+        {
+          "label": "Windows WSL",
+          "language": "powershell",
+          "filename": "setup-wsl.ps1",
+          "code": "# Enable WSL and install Ubuntu\nwsl --install -d Ubuntu\nwsl --set-version Ubuntu 2\n\n# Configure WSL resources\n@\"\n[wsl2]\nmemory=8GB\nprocessors=4\nswap=2GB\nlocalhostForwarding=true\n\"@ | Out-File -FilePath \"$env:USERPROFILE\\.wslconfig\" -Encoding utf8\n\n# Install Claude Code in WSL\nwsl -d Ubuntu -e bash -c \"curl -fsSL https://claude.ai/install.sh | bash\""
+        },
+        {
+          "label": "macOS Keychain",
+          "language": "bash",
+          "filename": "setup-macos.sh",
+          "code": "#!/bin/bash\n# Store API key in Keychain\nsecurity add-generic-password \\\n  -a \"$USER\" \\\n  -s \"Claude Code API\" \\\n  -w \"sk-ant-api-03-...\"\n\n# Retrieve API key from Keychain\nexport ANTHROPIC_API_KEY=$(security find-generic-password \\\n  -a \"$USER\" \\\n  -s \"Claude Code API\" \\\n  -w)\n\n# Configure Claude to use Keychain\nclaude config set apiKeyHelper \"./keychain-helper.sh\""
+        },
+        {
+          "label": "Docker",
+          "language": "yaml",
+          "filename": "docker-compose.yml",
+          "code": "version: '3.8'\nservices:\n  claude:\n    image: node:18-alpine\n    volumes:\n      - ./workspace:/workspace\n      - claude-config:/home/node/.claude\n    environment:\n      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}\n      - NODE_ENV=development\n    command: >\n      sh -c \"npm install -g @anthropic-ai/claude-code &&\n             claude code --project /workspace\"\n    \nvolumes:\n  claude-config:"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Team Setup Guide"
+    },
+    {
+      "type": "callout",
+      "variant": "info",
+      "title": "Team and Enterprise Configuration",
+      "content": "**Team Plans:** Enhanced usage limits per seat\n\n**Enterprise Plans:** Maximum usage with priority support\n\n**Shared Configuration:** CLAUDE.md files define team standards\n\n**Role Management:** Settings → Members for seat allocation"
+    },
+    {
+      "type": "steps",
+      "title": "Team Environment Synchronization",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Create Team Configuration Template",
+          "description": "Commit .env.example to version control. Team members copy to .env locally.",
+          "code": "# Team Claude Code Configuration Template\nANTHROPIC_API_KEY=sk-ant-api-03-REPLACE_WITH_YOUR_KEY\nCLAUDE_PROJECT_PATH=/workspace\nCLAUDE_DEFAULT_MODEL=claude-3-sonnet\nCLAUDE_TEAM_ID=team_123456\nMAX_REQUEST_PER_WINDOW=30",
+          "language": "bash"
+        },
+        {
+          "number": 2,
+          "title": "Configure direnv for Auto-Loading",
+          "description": "Run direnv allow to approve configuration. Settings load automatically per directory.",
+          "code": "# Project-specific Claude configuration\nsource_up  # Inherit parent directory settings\ndotenv     # Load .env file\nexport CLAUDE_PROJECT=$(basename $PWD)\nexport CLAUDE_CONFIG_PATH=\"$PWD/.claude\"\n\n# Team-specific MCP servers\nexport MCP_SERVERS=\"github,stackexchange,filesystem\"",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Common Pitfalls"
+    },
+    {
+      "type": "callout",
+      "variant": "warning",
+      "title": "Critical Anti-Patterns to Avoid",
+      "content": "- Hardcoding API keys in source code - exposed in version control\n- Using same API key across all environments - security breach risk\n- Mixing Windows and WSL paths - causes significant performance degradation\n- Ignoring OAuth token expiration - leads to unexpected failures\n- Skipping permission configuration - enables unintended file access"
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "FAQ"
+    },
+    {
+      "type": "faq",
+      "questions": [
+        {
+          "question": "Why does Claude Code show 'OAuth account information not found' after successful browser login?",
+          "answer": "OAuth callback handling fails when corporate firewalls block return URLs. The browser completes authentication but Claude Code never receives tokens. Fix by removing ~/.claude directory, clearing npm cache, and reinstalling. Use API key authentication as fallback for restricted networks.",
+          "category": "authentication"
+        },
+        {
+          "question": "How do I fix 'Missing API key · Run /login' errors in SSH sessions?",
+          "answer": "SSH environments lack persistent token storage causing authentication failures. Export ANTHROPIC_API_KEY='sk-ant-api-03-...' in shell profile. Run claude config set --global installMethod npm-global to fix config mismatches. The /doctor command reveals specific configuration conflicts.",
+          "category": "ssh"
+        },
+        {
+          "question": "What causes WSL performance issues with Claude Code?",
+          "answer": "Cross-filesystem operations between Windows and Linux cause significant slowdowns. Keep projects within WSL filesystem (~/) not Windows mounts (/mnt/c/). Configure WSL 2 with adequate RAM allocation. Use native Linux paths exclusively for optimal performance.",
+          "category": "performance"
+        },
+        {
+          "question": "How do I configure Claude Code for team collaboration?",
+          "answer": "Team plans provide enhanced usage limits per seat. Create CLAUDE.md files for shared context. Use direnv for environment synchronization. Configure role-based access through Settings → Members. Implement .env.example templates for consistent team setup.",
+          "category": "team"
+        },
+        {
+          "question": "What security measures protect API keys in Claude Code?",
+          "answer": "Never commit credentials to version control using .gitignore patterns. Implement regular key rotation policies. Use separate keys per environment (dev/staging/prod). Enable apiKeyHelper scripts for dynamic generation. Configure deny rules for sensitive file paths.",
+          "category": "security"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": "2",
+      "content": "Related Issues and Solutions"
+    },
+    {
+      "type": "related_content",
+      "title": "Related Troubleshooting Guides",
+      "resources": [
+        {
+          "title": "Fix MCP Connection Errors",
+          "description": "Troubleshoot Model Context Protocol server connection failures",
+          "url": "/guides/troubleshooting/fix-mcp-connection-errors",
+          "type": "guide"
+        },
+        {
+          "title": "Fix Installation Errors",
+          "description": "Resolve Claude Code installation and setup issues",
+          "url": "/guides/troubleshooting/fix-installation-errors",
+          "type": "guide"
+        },
+        {
+          "title": "Fix Memory Leak Performance Issues",
+          "description": "Diagnose and fix Claude Code memory leaks and performance problems",
+          "url": "/guides/troubleshooting/fix-memory-leak-performance",
+          "type": "guide"
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "variant": "success",
+      "title": "Issue Resolved?",
+      "content": "**Problem solved?** Great! Consider implementing direnv for automatic environment management to prevent recurrence.\n\n**Still having issues?** Join our [community](/community) for additional support or contact Anthropic support for enterprise assistance.\n\n**Found a new solution?** Share it with the community to help others facing the same issue."
+    },
+    {
+      "type": "text",
+      "content": "*Last updated: September 2025 | Solutions verified against Claude Code 3.0+ | Found this helpful? Bookmark for future reference and explore more [troubleshooting guides](/guides/troubleshooting).*"
+    }
+  ]
+}

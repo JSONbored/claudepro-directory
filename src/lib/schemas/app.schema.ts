@@ -80,6 +80,9 @@ export type LazyLoaderOptions<T> = {
  * SEO page data schema
  * @property seoTitle - Short title for <title> tag optimization (<60 chars), falls back to full title
  * @property title - Full title for H1 heading and longtail keywords
+ * @property content - Raw MDX content (empty string for JSON guides)
+ * @property sections - JSON guide sections array (undefined for MDX guides)
+ * @property isJsonGuide - Flag indicating JSON-based guide (true) vs MDX guide (false/undefined)
  */
 const seoPageDataSchema = z.object({
   title: nonEmptyString.max(200),
@@ -87,11 +90,13 @@ const seoPageDataSchema = z.object({
   description: nonEmptyString.max(500),
   keywords: z.array(shortString.max(50)).max(20),
   dateUpdated: shortString,
-  content: nonEmptyString,
+  content: z.string(), // Changed from nonEmptyString - empty for JSON guides
   author: shortString.optional(),
   readingTime: shortString.optional(),
   difficulty: shortString.optional(),
   category: shortString.optional(),
+  sections: z.array(z.any()).optional(), // JSON guide sections
+  isJsonGuide: z.boolean().optional(), // Flag for JSON vs MDX
 });
 
 export type SEOPageData = z.infer<typeof seoPageDataSchema>;
