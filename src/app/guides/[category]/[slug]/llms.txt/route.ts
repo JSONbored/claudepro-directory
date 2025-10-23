@@ -12,7 +12,7 @@ import path from 'path';
 import { z } from 'zod';
 import { contentCache } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
+// MDX support removed - 100% JSON guides now
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { generateLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
@@ -85,8 +85,8 @@ export async function GET(
       });
     }
 
-    const filename = `${slug}.mdx`;
-    const cacheKey = `guide-llmstxt:v2:${category}:${slug}`; // v2: added Title field to metadata
+    const filename = `${slug}.json`;
+    const cacheKey = `guide-llmstxt:v3:${category}:${slug}`; // v3: JSON guides (no MDX)
 
     // Try cache first using cacheWithRefresh
     try {
@@ -147,20 +147,36 @@ export async function GET(
       });
     }
 
-    // Parse MDX frontmatter
-    const { frontmatter, content } = parseMDXFrontmatter(fileContent);
+    // Parse JSON guide
+    const jsonData = JSON.parse(fileContent);
 
-    // Transform to LLMsTxtItem format (with proper type handling)
+    // Convert sections to plain text content for LLMs
+    const sectionsText = jsonData.sections
+      ? jsonData.sections
+          .map((section: any) => {
+            if (section.type === 'text' || section.type === 'heading') {
+              return section.content;
+            }
+            if (section.type === 'code') {
+              return `\`\`\`${section.language}\n${section.code}\n\`\`\``;
+            }
+            return '';
+          })
+          .filter(Boolean)
+          .join('\n\n')
+      : '';
+
+    // Transform to LLMsTxtItem format
     const llmsItem: LLMsTxtItem = {
       slug,
-      title: (frontmatter.title as string | undefined) || slug,
-      description: (frontmatter.description as string | undefined) || '',
+      title: jsonData.title || slug,
+      description: jsonData.description || '',
       category: 'guides',
-      tags: Array.isArray(frontmatter.keywords) ? frontmatter.keywords : [],
-      author: (frontmatter.author as string | undefined) || APP_CONFIG.author,
-      dateAdded: (frontmatter.dateUpdated as string | undefined) || new Date().toISOString(),
+      tags: Array.isArray(jsonData.keywords) ? jsonData.keywords : [],
+      author: jsonData.author || APP_CONFIG.author,
+      dateAdded: jsonData.dateUpdated || new Date().toISOString(),
       url: `${APP_CONFIG.url}/guides/${category}/${slug}`,
-      content, // Full MDX content
+      content: sectionsText, // Converted sections to plain text
     };
 
     // Generate llms.txt content

@@ -10,7 +10,7 @@ import type { Metadata } from 'next';
 import path from 'path';
 import { ContentListServer } from '@/src/components/content-list-server';
 import { statsRedis } from '@/src/lib/cache.server';
-import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
+// MDX support removed - 100% JSON guides now
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
@@ -53,13 +53,13 @@ async function getAllGuides(): Promise<UnifiedContentItem[]> {
         const files = await fs.readdir(categoryPath);
 
         for (const file of files) {
-          if (!file.endsWith('.mdx')) continue;
+          if (!file.endsWith('.json')) continue;
 
           const filePath = path.join(categoryPath, file);
           const content = await fs.readFile(filePath, 'utf-8');
-          const { frontmatter } = parseMDXFrontmatter(content);
+          const jsonData = JSON.parse(content);
 
-          const filename = file.replace('.mdx', '');
+          const filename = file.replace('.json', '');
 
           // Transform to UnifiedContentItem format
           // IMPORTANT: Set category='guides' with subcategory field
@@ -70,8 +70,8 @@ async function getAllGuides(): Promise<UnifiedContentItem[]> {
           // Redis keys: views:guides:{subcategory}/{slug}
           // Example: views:guides:tutorials/desktop-mcp-setup
           guides.push({
-            title: frontmatter.title || filename,
-            description: frontmatter.description || '',
+            title: jsonData.title || filename,
+            description: jsonData.description || '',
             slug: filename, // Just filename - getContentItemUrl() adds subcategory to URL
             category: 'guides' as CategoryId, // Always 'guides' for parent category
             subcategory: category as
@@ -80,11 +80,11 @@ async function getAllGuides(): Promise<UnifiedContentItem[]> {
               | 'workflows'
               | 'use-cases'
               | 'troubleshooting', // Actual subcategory used by getContentItemUrl()
-            author: frontmatter.author || 'ClaudePro Directory',
+            author: jsonData.author || 'ClaudePro Directory',
             tags: [
               category.replace('-', ' '),
-              ...(frontmatter.difficulty ? [frontmatter.difficulty] : []),
-              ...(frontmatter.keywords || []),
+              ...(jsonData.difficulty ? [jsonData.difficulty] : []),
+              ...(jsonData.keywords || []),
             ].filter(Boolean),
             source: 'community',
             popularity: 85, // Default popularity for guides

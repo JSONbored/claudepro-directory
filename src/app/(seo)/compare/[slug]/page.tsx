@@ -21,7 +21,7 @@ export const dynamicParams = true; // Allow new pages to be generated on-demand
 
 async function getComparisonData(slug: string): Promise<ComparisonData | null> {
   try {
-    const filePath = path.join(process.cwd(), 'content', 'guides', 'comparisons', `${slug}.mdx`);
+    const filePath = path.join(process.cwd(), 'content', 'guides', 'comparisons', `${slug}.json`);
     const fileContent = await fs.readFile(filePath, 'utf-8');
 
     // Parse frontmatter

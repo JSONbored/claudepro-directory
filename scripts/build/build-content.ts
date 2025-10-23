@@ -300,6 +300,14 @@ async function main(): Promise<void> {
             // Optional but commonly expected fields
             source: 'claudepro' as const,
             displayTitle: entry.title,
+
+            // Required sections field (changelog uses text section with content)
+            sections: [
+              {
+                type: 'text' as const,
+                content: entry.content,
+              },
+            ],
           }));
 
           // Update statistics

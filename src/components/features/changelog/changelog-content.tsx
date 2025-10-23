@@ -18,7 +18,11 @@
  */
 
 import { memo } from 'react';
-import { MDXRenderer } from '@/src/components/content/mdx-renderer';
+// TODO: Restore when changelog migration to JSON is complete
+// import { MDXRenderer } from '@/src/components/content/mdx-renderer';
+const MDXRenderer = ({ source, className }: { source: string; className?: string }) => (
+  <div className={className} dangerouslySetInnerHTML={{ __html: source }} />
+);
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import type { ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';

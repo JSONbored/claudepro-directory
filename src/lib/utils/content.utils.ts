@@ -536,7 +536,7 @@ export function generateHookFilename(
 
 /**
  * Guide frontmatter structure
- * Parsed from MDX files using gray-matter
+ * Legacy interface - no longer used with 100% JSON guides
  */
 export interface GuideFrontmatter {
   title: string;

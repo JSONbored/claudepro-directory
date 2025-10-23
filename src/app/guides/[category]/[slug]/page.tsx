@@ -6,11 +6,10 @@ import Script from 'next/script';
 import path from 'path';
 import { z } from 'zod';
 import { JSONSectionRenderer } from '@/src/components/content/json-section-renderer';
-import { MDXRenderer } from '@/src/components/content/mdx-renderer';
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
-import { MDXContentProvider } from '@/src/components/infra/providers/mdx-content-provider';
+// MDXContentProvider removed - 100% JSON guides now
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 // Removed unused import: CategoryGuidesPage
 import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar';
@@ -20,7 +19,7 @@ import { SectionProgress } from '@/src/components/shared/section-progress';
 import { contentCache, statsRedis } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
-import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
+// MDX support removed - 100% JSON guides now
 import { ArrowLeft, BookOpen, Calendar, Eye, FileText, Tag, Users, Zap } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -78,56 +77,25 @@ async function getSEOPageData(category: string, slug: string): Promise<SEOPageDa
         if (!mappedPath) return null;
 
         const baseDir = path.join(process.cwd(), 'content', 'guides', mappedPath);
-
-        // Try JSON first (new format), fallback to MDX
         const jsonPath = path.join(baseDir, `${slug}.json`);
-        const mdxPath = path.join(baseDir, `${slug}.mdx`);
 
-        let fileContent: string;
-        let isJson = false;
-
-        try {
-          fileContent = await fs.readFile(jsonPath, 'utf-8');
-          isJson = true;
-        } catch {
-          // JSON doesn't exist, try MDX
-          fileContent = await fs.readFile(mdxPath, 'utf-8');
-        }
-
-        if (isJson) {
-          // Parse JSON guide
-          const jsonData = JSON.parse(fileContent);
-
-          return {
-            title: jsonData.title || '',
-            seoTitle: jsonData.seoTitle,
-            description: jsonData.description || '',
-            keywords: Array.isArray(jsonData.keywords) ? jsonData.keywords : [],
-            dateUpdated: jsonData.dateUpdated || '',
-            author: jsonData.author || APP_CONFIG.author,
-            readingTime: jsonData.readingTime || '',
-            difficulty: jsonData.difficulty || '',
-            category: jsonData.category || category,
-            content: '', // JSON guides don't have raw content field
-            sections: jsonData.sections || [], // JSON guides have sections array
-            isJsonGuide: true,
-          };
-        }
-
-        // Parse MDX frontmatter
-        const { frontmatter, content } = parseMDXFrontmatter(fileContent);
+        // Read JSON guide (100% JSON - no MDX fallback)
+        const fileContent = await fs.readFile(jsonPath, 'utf-8');
+        const jsonData = JSON.parse(fileContent);
 
         return {
-          title: frontmatter.title || '',
-          seoTitle: frontmatter.seoTitle, // Short title for <title> tag optimization
-          description: frontmatter.description || '',
-          keywords: Array.isArray(frontmatter.keywords) ? frontmatter.keywords : [],
-          dateUpdated: frontmatter.dateUpdated || '',
-          author: frontmatter.author || APP_CONFIG.author,
-          readingTime: frontmatter.readingTime || '',
-          difficulty: frontmatter.difficulty || '',
-          category: frontmatter.category || category,
-          content,
+          title: jsonData.title || '',
+          seoTitle: jsonData.seoTitle,
+          description: jsonData.description || '',
+          keywords: Array.isArray(jsonData.keywords) ? jsonData.keywords : [],
+          dateUpdated: jsonData.dateUpdated || '',
+          author: jsonData.author || APP_CONFIG.author,
+          readingTime: jsonData.readingTime || '',
+          difficulty: jsonData.difficulty || '',
+          category: jsonData.category || category,
+          content: '', // JSON guides use sections array
+          sections: jsonData.sections || [],
+          isJsonGuide: true,
         };
       } catch (_error) {
         return null;
@@ -158,20 +126,22 @@ async function getRelatedGuides(
         const files = await fs.readdir(dir);
 
         for (const file of files) {
-          const fileSlug = file.replace('.mdx', '');
-          if (file.endsWith('.mdx') && fileSlug !== currentSlug) {
-            const content = await fs.readFile(path.join(dir, file), 'utf-8');
-            const titleMatch = content.match(/title:\s*["']([^"']+)["']/);
+          if (file.endsWith('.json')) {
+            const fileSlug = file.replace('.json', '');
+            if (fileSlug !== currentSlug) {
+              const content = await fs.readFile(path.join(dir, file), 'utf-8');
+              const jsonData = JSON.parse(content);
 
-            if (titleMatch?.[1]) {
-              relatedGuides.push({
-                title: titleMatch[1],
-                slug: `/guides/${currentCategory}/${fileSlug}`,
-                category: currentCategory,
-              });
+              if (jsonData.title) {
+                relatedGuides.push({
+                  title: jsonData.title,
+                  slug: `/guides/${currentCategory}/${fileSlug}`,
+                  category: currentCategory,
+                });
+              }
+
+              if (relatedGuides.length >= limit) break;
             }
-
-            if (relatedGuides.length >= limit) break;
           }
         }
       } catch {
@@ -205,8 +175,8 @@ export async function generateStaticParams() {
       const files = await fs.readdir(dir);
 
       for (const file of files) {
-        if (file.endsWith('.json') || file.endsWith('.mdx')) {
-          const slug = file.replace(/\.(json|mdx)$/, '');
+        if (file.endsWith('.json')) {
+          const slug = file.replace(/\.json$/, '');
           paths.push({
             category,
             slug,
@@ -467,23 +437,8 @@ export default async function SEOGuidePage({
                 <div className="lg:col-span-2 space-y-8">
                   <Card>
                     <CardContent className="pt-6">
-                      {data.isJsonGuide && data.sections ? (
-                        // JSON-based guide - render sections array
-                        <JSONSectionRenderer sections={data.sections} />
-                      ) : (
-                        // MDX-based guide - render raw content
-                        <MDXContentProvider category={category} slug={slug}>
-                          <MDXRenderer
-                            source={data.content}
-                            className=""
-                            pathname={`/guides/${category}/${slug}`}
-                            metadata={{
-                              tags: data.keywords || [], // Note: SEO pages use keywords field
-                              keywords: data.keywords || [],
-                            }}
-                          />
-                        </MDXContentProvider>
-                      )}
+                      {/* 100% JSON guides - render sections array */}
+                      <JSONSectionRenderer sections={data.sections || []} />
                     </CardContent>
                   </Card>
 

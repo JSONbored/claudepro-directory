@@ -22,7 +22,7 @@ import {
   type ContentType,
   UNIFIED_CATEGORY_REGISTRY,
 } from '@/src/lib/config/category-config';
-import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
+// MDX support removed - 100% JSON content now
 import { logger } from '@/src/lib/logger';
 import { generateSlugFromFilename } from '@/src/lib/schemas/content-generation.schema';
 import { slugToTitle } from '@/src/lib/utils';
@@ -282,49 +282,28 @@ async function processContentFile<T extends ContentType>(
       }
     }
 
-    // Parse based on file type
+    // Parse JSON content (100% JSON - no MDX support)
     const rawJsonSchema = z
       .object({})
       .passthrough()
       .describe('Raw content schema with passthrough for unknown fields');
 
     let parsedData: z.infer<typeof rawJsonSchema>;
-    const isMdx = file.endsWith('.mdx');
 
     try {
-      if (isMdx) {
-        // Parse MDX frontmatter for guides
-        const { frontmatter, content: mdxContent } = parseMDXFrontmatter(content);
-
-        // Extract subcategory from file path (e.g., "tutorials/guide.mdx" → "tutorials")
-        const subcategory = file.includes('/') ? file.split('/')[0] : undefined;
-
-        // Convert MDX frontmatter to match guide schema
-        parsedData = {
-          ...frontmatter,
-          content: mdxContent,
-          category: 'guides', // All MDX files are guides
-          subcategory,
-          // Fallback: dateAdded is required by base schema, use dateUpdated or current date
-          dateAdded: frontmatter.dateUpdated || new Date().toISOString().split('T')[0],
-        };
-      } else {
-        // safeParse handles JSON.parse + Zod validation in one secure operation
-        parsedData = safeParse(content, rawJsonSchema, {
-          strategy: ParseStrategy.VALIDATED_JSON,
-        });
-      }
+      // safeParse handles JSON.parse + Zod validation in one secure operation
+      parsedData = safeParse(content, rawJsonSchema, {
+        strategy: ParseStrategy.VALIDATED_JSON,
+      });
     } catch (parseError) {
       throw new Error(
-        `${isMdx ? 'MDX' : 'JSON'} parse error: ${parseError instanceof Error ? parseError.message : String(parseError)}`
+        `JSON parse error: ${parseError instanceof Error ? parseError.message : String(parseError)}`
       );
     }
 
     // Auto-generate slug from filename if missing
     if (!parsedData.slug) {
-      // For MDX files with subdirectories, remove subdir prefix
-      const filenameOnly = file.includes('/') ? file.split('/')[1] : file;
-      parsedData.slug = generateSlugFromFilename(filenameOnly || file);
+      parsedData.slug = generateSlugFromFilename(file);
     }
 
     // Auto-generate title from slug if missing
@@ -439,12 +418,12 @@ async function processCategoryFiles<T extends ContentType>(
   // Read directory
   const files = await readdir(categoryDir);
 
-  // Security: Filter for valid content files (JSON or MDX for guides)
+  // Security: Filter for valid content files (JSON only)
   // Prevents execution of other file types and excludes templates
   let contentFiles: string[];
 
   if (config.id === 'guides') {
-    // For guides: Look for MDX files in subdirectories
+    // For guides: Look for JSON files in subdirectories
     const subdirs = ['tutorials', 'comparisons', 'workflows', 'use-cases', 'troubleshooting'];
     contentFiles = [];
 
@@ -452,17 +431,17 @@ async function processCategoryFiles<T extends ContentType>(
       const subdirPath = join(categoryDir, subdir);
       try {
         const subdirFiles = await readdir(subdirPath);
-        const mdxFiles = subdirFiles
+        const jsonFiles = subdirFiles
           .filter(
             (f) =>
-              f.endsWith('.mdx') &&
+              f.endsWith('.json') &&
               !f.includes('..') &&
               !f.startsWith('.') &&
               !f.includes('template') &&
-              /^[a-zA-Z0-9\-_]+\.mdx$/.test(f)
+              /^[a-zA-Z0-9\-_]+\.json$/.test(f)
           )
           .map((f) => `${subdir}/${f}`); // Prefix with subdir for routing
-        contentFiles.push(...mdxFiles);
+        contentFiles.push(...jsonFiles);
       } catch (error) {
         // Subdirectory doesn't exist or can't be read - skip it
         logger.debug(

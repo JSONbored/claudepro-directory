@@ -35,7 +35,13 @@
 
 import Link from 'next/link';
 import React, { lazy, Suspense } from 'react';
-import { useMDXContent } from '@/src/components/infra/providers/mdx-content-provider';
+// TODO: Restore when changelog migration to JSON is complete
+// import { useMDXContent } from '@/src/components/infra/providers/mdx-content-provider';
+const useMDXContent = () => ({
+  setContent: () => {},
+  category: undefined as string | undefined,
+  slug: undefined as string | undefined
+});
 import {
   ConfigCardSkeleton,
   Skeleton,
@@ -71,7 +77,7 @@ export function CopyableHeading({
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
       copyType: 'link',
-      ...(mdxContext && {
+      ...(mdxContext?.category && mdxContext?.slug && {
         category: mdxContext.category,
         slug: mdxContext.slug,
       }),
@@ -143,7 +149,7 @@ export function CopyableCodeBlock({ children, className, ...props }: MdxElementP
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
       copyType: 'code',
-      ...(mdxContext && {
+      ...(mdxContext?.category && mdxContext?.slug && {
         category: mdxContext.category,
         slug: mdxContext.slug,
       }),

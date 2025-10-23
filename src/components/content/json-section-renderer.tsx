@@ -24,12 +24,12 @@
 
 'use client';
 
-import type { GuideSection } from '@/src/lib/schemas/content/guide-json.schema';
+import { Checklist } from '@/src/components/content/checklist';
+import { ProductionCodeBlock } from '@/src/components/content/production-code-block';
 import { UnifiedContentBlock } from '@/src/components/content/unified-content-block';
 import { UnifiedContentBox } from '@/src/components/domain/unified-content-box';
 import { ComparisonTable } from '@/src/components/template/comparison-table';
-import { Checklist } from '@/src/components/content/checklist';
-import { ProductionCodeBlock } from '@/src/components/content/production-code-block';
+import type { GuideSection } from '@/src/lib/schemas/content/guide.schema';
 
 interface JSONSectionRendererProps {
   sections: GuideSection[];
@@ -108,18 +108,21 @@ function renderSection(section: GuideSection, index: number): React.ReactNode {
     // ============================================================================
     // CALLOUT SECTIONS
     // ============================================================================
-    case 'callout':
+    case 'callout': {
+      // Map guide schema variants to UnifiedContentBox supported types
+      const calloutType: 'info' | 'warning' | 'success' | 'error' | 'tip' =
+        section.variant === 'primary' || section.variant === 'important'
+          ? 'info' // Map unsupported variants to 'info'
+          : section.variant;
+
       return (
         <div key={key} id={section.id} className={section.className}>
-          <UnifiedContentBox
-            contentType="callout"
-            type={section.variant}
-            title={section.title}
-          >
+          <UnifiedContentBox contentType="callout" type={calloutType} title={section.title}>
             <div dangerouslySetInnerHTML={{ __html: section.content }} />
           </UnifiedContentBox>
         </div>
       );
+    }
 
     // ============================================================================
     // TLDR & FEATURE SECTIONS
@@ -136,7 +139,15 @@ function renderSection(section: GuideSection, index: number): React.ReactNode {
         </div>
       );
 
-    case 'feature_grid':
+    case 'feature_grid': {
+      // Handle columns as both string and number from schema
+      const columnsValue =
+        typeof section.columns === 'number'
+          ? section.columns
+          : section.columns
+            ? Number.parseInt(section.columns, 10)
+            : 3;
+
       return (
         <div key={key} id={section.id} className={section.className}>
           <UnifiedContentBlock
@@ -148,10 +159,11 @@ function renderSection(section: GuideSection, index: number): React.ReactNode {
               description: f.description,
               badge: f.badge,
             }))}
-            columns={(section.columns ? Number.parseInt(section.columns) : 3) as 2 | 3 | 4}
+            columns={columnsValue as 2 | 3 | 4}
           />
         </div>
       );
+    }
 
     case 'expert_quote':
       return (
@@ -170,25 +182,42 @@ function renderSection(section: GuideSection, index: number): React.ReactNode {
     // ============================================================================
     // COMPARISON & TABLE SECTIONS
     // ============================================================================
-    case 'comparison_table':
-      // Convert data format: Record<string, string>[] → items format
-      const items = section.data.map((row) => ({
-        feature: section.headers[0] ? row[section.headers[0]] || '' : '',
-        option1: section.headers[1] ? row[section.headers[1]] || '' : '',
-        option2: section.headers[2] ? row[section.headers[2]] || '' : '',
-        option3: section.headers[3] ? row[section.headers[3]] : undefined,
-      }));
+    case 'comparison_table': {
+      // Headers are optional in schema - provide fallback
+      const headers = section.headers || [];
+
+      // Convert data format (supports both Record<string, string>[] and string[][])
+      const items = section.data.map((row) => {
+        // Handle array format: [feature, option1, option2, option3?]
+        if (Array.isArray(row)) {
+          return {
+            feature: row[0] || '',
+            option1: row[1] || '',
+            option2: row[2] || '',
+            option3: row[3],
+          };
+        }
+
+        // Handle object format: { [headerKey]: value }
+        return {
+          feature: headers[0] ? row[headers[0]] || '' : '',
+          option1: headers[1] ? row[headers[1]] || '' : '',
+          option2: headers[2] ? row[headers[2]] || '' : '',
+          option3: headers[3] ? row[headers[3]] : undefined,
+        };
+      });
 
       return (
         <div key={key} id={section.id} className={section.className}>
           <ComparisonTable
             title={section.title}
             description={section.description}
-            headers={section.headers.slice(1)} // Exclude first header (feature name)
+            headers={headers.slice(1)} // Exclude first header (feature name)
             items={items}
           />
         </div>
       );
+    }
 
     // ============================================================================
     // INTERACTIVE SECTIONS (TABS, ACCORDION, FAQ)
@@ -309,21 +338,23 @@ function renderSection(section: GuideSection, index: number): React.ReactNode {
           {section.description && (
             <p className="text-muted-foreground mb-4">{section.description}</p>
           )}
-          <div className="grid gap-4">
-            {section.resources.map((r, idx) => (
-              <a
-                key={`${r.url}-${idx}`}
-                href={r.url}
-                target={r.external ? '_blank' : undefined}
-                rel={r.external ? 'noopener noreferrer' : undefined}
-                className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                <h4 className="font-semibold mb-1">{r.title}</h4>
-                <p className="text-sm text-muted-foreground mb-2">{r.description}</p>
-                <span className="text-xs text-primary uppercase">{r.type}</span>
-              </a>
-            ))}
-          </div>
+          {section.resources && section.resources.length > 0 && (
+            <div className="grid gap-4">
+              {section.resources.map((r, idx) => (
+                <a
+                  key={`${r.url}-${idx}`}
+                  href={r.url}
+                  target={r.external ? '_blank' : undefined}
+                  rel={r.external ? 'noopener noreferrer' : undefined}
+                  className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <h4 className="font-semibold mb-1">{r.title}</h4>
+                  <p className="text-sm text-muted-foreground mb-2">{r.description}</p>
+                  <span className="text-xs text-primary uppercase">{r.type}</span>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       );
 
