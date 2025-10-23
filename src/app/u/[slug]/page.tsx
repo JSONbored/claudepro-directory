@@ -121,7 +121,12 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
       <section className="relative">
         {profile.hero && (
           <div className="w-full h-48 bg-gradient-to-r from-primary/20 to-accent/20 relative">
-            <Image src={profile.hero} alt="Profile banner" fill className="object-cover" />
+            <Image
+              src={profile.hero}
+              alt={`${profile.name || slug}'s profile banner`}
+              fill
+              className="object-cover"
+            />
           </div>
         )}
 
@@ -131,7 +136,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               {profile.image ? (
                 <Image
                   src={profile.image}
-                  alt={profile.name || slug}
+                  alt={`${profile.name || slug}'s profile picture`}
                   width={96}
                   height={96}
                   className="w-24 h-24 rounded-full border-4 border-background object-cover"

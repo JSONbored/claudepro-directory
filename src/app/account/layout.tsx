@@ -122,7 +122,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
               {profile?.image ? (
                 <Image
                   src={profile.image}
-                  alt={profile.name || 'User'}
+                  alt={`${profile.name || 'User'}'s avatar`}
                   width={48}
                   height={48}
                   className="w-12 h-12 rounded-full object-cover"

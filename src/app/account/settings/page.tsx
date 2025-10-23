@@ -163,7 +163,7 @@ export default async function SettingsPage() {
             <div className="flex items-center gap-4">
               <Image
                 src={profile.image}
-                alt={profile.name || 'Profile'}
+                alt={`${profile.name || 'User'}'s profile picture`}
                 width={64}
                 height={64}
                 className="w-16 h-16 rounded-full object-cover"
