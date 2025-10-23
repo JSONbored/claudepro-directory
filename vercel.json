@@ -1,5 +1,6 @@
 {
   "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude).github/' ':(exclude)scripts/github-actions/' ':(exclude)templates/' ':(exclude)*.md' ':(exclude)LICENSE' ':(exclude).gitignore'",
+  "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm build",
   "outputDirectory": ".next",
   "framework": "nextjs",

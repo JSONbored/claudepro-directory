@@ -212,7 +212,6 @@ describe('Rate Limit Rules - Pattern Matching', () => {
       // Exact match should take precedence
       expect(getRateLimiterKey('/api/cache/warm')).toBe('admin');
     });
-
   });
 
   describe('Pattern Match Fallback', () => {

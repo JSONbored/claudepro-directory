@@ -6,7 +6,7 @@ on:
     paths:
       - 'src/**'
       - 'package.json'
-      - 'package-lock.json'
+      - 'pnpm-lock.yaml'
       - 'config/**'
       - '.github/**'
   pull_request:
@@ -14,7 +14,7 @@ on:
     paths:
       - 'src/**'
       - 'package.json'
-      - 'package-lock.json'
+      - 'pnpm-lock.yaml'
       - 'config/**'
       - '.github/**'
   schedule:
@@ -136,8 +136,8 @@ jobs:
         comment-summary-in-pr: always
         warn-only: true
 
-  npm-audit:
-    name: NPM Security Audit
+  pnpm-audit:
+    name: PNPM Security Audit
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [changes]
@@ -158,8 +158,8 @@ jobs:
       if: failure()
       uses: actions/upload-artifact@v4
       with:
-        name: npm-audit-results
-        path: npm-audit.json
+        name: pnpm-audit-results
+        path: pnpm-audit.json
         retention-days: 30
         if-no-files-found: ignore
 

@@ -72,7 +72,7 @@ desktop.ini
 # types/ - TypeScript types
 # styles/ - CSS files
 # package.json - build configuration
-# package-lock.json - dependency lock file
+# pnpm-lock.yaml - dependency lock file
 # tsconfig.json - TypeScript config
 # next.config.js - Next.js config
 # tailwind.config.ts - Tailwind config
