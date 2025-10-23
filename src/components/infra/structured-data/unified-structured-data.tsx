@@ -1,4 +1,3 @@
-import { headers } from 'next/headers';
 import Script from 'next/script';
 import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
 import {
@@ -14,11 +13,6 @@ import {
  * Configuration-driven approach using STRUCTURED_DATA_RULES from schema-types.ts
  */
 export async function UnifiedStructuredData({ item }: UnifiedStructuredDataProps) {
-  // Extract nonce from CSP header for script security
-  const headersList = await headers();
-  const cspHeader = headersList.get('content-security-policy');
-  const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
-
   // Generate all schemas using configuration-driven approach
   const schemas = generateAllSchemasForContent(item);
 
@@ -41,7 +35,6 @@ export async function UnifiedStructuredData({ item }: UnifiedStructuredDataProps
               __html: serializeJsonLd(schema),
             }}
             strategy="afterInteractive"
-            nonce={nonce}
           />
         );
       })}

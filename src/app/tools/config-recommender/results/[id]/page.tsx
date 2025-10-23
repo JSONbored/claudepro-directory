@@ -17,7 +17,6 @@
  */
 
 import type { Metadata } from 'next';
-import { cacheLife } from 'next/cache';
 import { notFound } from 'next/navigation';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { ResultsDisplay } from '@/src/components/tools/recommender/results-display';
@@ -42,9 +41,6 @@ interface PageProps {
  * to avoid thin content issues and infinite URL combinations
  */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  'use cache';
-  cacheLife('hours'); // 1 hour cache (replaces revalidate: 3600)
-
   const { id } = await params;
   const baseMetadata = generatePageMetadata('/tools/config-recommender/results/:id', {
     params: { id },
@@ -63,9 +59,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
  * Results page component
  */
 export default async function ResultsPage({ params, searchParams }: PageProps) {
-  'use cache';
-  cacheLife('hours'); // 1 hour cache (replaces revalidate: 3600)
-
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
 

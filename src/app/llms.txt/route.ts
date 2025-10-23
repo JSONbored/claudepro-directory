@@ -6,7 +6,6 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
-import { cacheLife } from 'next/cache';
 import {
   agents,
   collections,
@@ -40,11 +39,6 @@ import { batchLoadContent } from '@/src/lib/utils/batch.utils';
  * - Public cache headers for CDN distribution
  */
 export async function GET(): Promise<Response> {
-  'use cache';
-  cacheLife('hours'); // 1 hour cache (stale: 3600s, revalidate: 900s, expire: 86400s)
-
-  // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)
-
   try {
     logger.info('Site llms.txt generation started');
 

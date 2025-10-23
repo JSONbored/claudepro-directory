@@ -1,4 +1,3 @@
-import { cacheLife } from 'next/cache';
 import { Suspense } from 'react';
 import {
   agents,
@@ -154,9 +153,6 @@ async function getTrendingData(params: TrendingParams) {
 }
 
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
-  'use cache';
-  cacheLife('quarter'); // 15 min cache (replaces revalidate: 900)
-
   const rawParams = await searchParams;
 
   // Validate and parse search parameters with Zod

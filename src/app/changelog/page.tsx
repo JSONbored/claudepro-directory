@@ -23,7 +23,6 @@
  */
 
 import type { Metadata } from 'next';
-import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
@@ -38,9 +37,6 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
  * Generate metadata for changelog list page
  */
 export async function generateMetadata(): Promise<Metadata> {
-  'use cache';
-  cacheLife('quarter'); // 15 min cache (replaces revalidate: 900)
-
   try {
     return generatePageMetadata('/changelog');
   } catch (error) {
@@ -59,9 +55,6 @@ export async function generateMetadata(): Promise<Metadata> {
  * Changelog List Page Component
  */
 export default async function ChangelogPage() {
-  'use cache';
-  cacheLife('quarter'); // 15 min cache (replaces revalidate: 900)
-
   try {
     // Load all changelog entries (cached with Redis)
     const entries = await getAllChangelogEntries();

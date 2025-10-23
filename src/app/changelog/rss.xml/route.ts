@@ -26,8 +26,6 @@
  * - Logging for debugging
  */
 
-import { cacheLife } from 'next/cache';
-import { headers } from 'next/headers';
 import type { NextRequest } from 'next/server';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { formatChangelogDateRFC822, getChangelogUrl } from '@/src/lib/changelog/utils';
@@ -62,16 +60,8 @@ function escapeXml(text: string): string {
  * @returns RSS XML response
  */
 export async function GET(request: NextRequest): Promise<Response> {
-  'use cache';
-  cacheLife('stable'); // 6 hour cache (replaces revalidate: 21600)
-
-  // Access uncached data before new Date() (Cache Components requirement)
-  (await headers()).get('x-cache-marker');
-
-  const requestLogger = logger.forRequest(request);
-
   try {
-    requestLogger.info('RSS feed generation started');
+    logger.info('RSS feed generation started');
 
     // Load changelog entries (cached with Redis)
     const allEntries = await getAllChangelogEntries();
@@ -123,7 +113,7 @@ ${categories.map((cat) => `      <category>${escapeXml(cat)}</category>`).join('
   </channel>
 </rss>`;
 
-    requestLogger.info('RSS feed generated successfully', {
+    logger.info('RSS feed generated successfully', {
       entriesCount: entries.length,
     });
 
@@ -133,7 +123,7 @@ ${categories.map((cat) => `      <category>${escapeXml(cat)}</category>`).join('
       cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
     });
   } catch (error) {
-    requestLogger.error(
+    logger.error(
       'RSS feed generation failed',
       error instanceof Error ? error : new Error(String(error))
     );

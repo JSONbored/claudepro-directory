@@ -7,7 +7,6 @@
  * @module components/structured-data/changelog-structured-data
  */
 
-import { headers } from 'next/headers';
 import Script from 'next/script';
 import {
   buildChangelogArticleSchema,
@@ -26,11 +25,6 @@ import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
  * @returns Script tag with JSON-LD
  */
 export async function ChangelogBlogStructuredData({ entries }: { entries: ChangelogEntry[] }) {
-  // Extract nonce from CSP header for script security
-  const headersList = await headers();
-  const cspHeader = headersList.get('content-security-policy');
-  const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
-
   const schema = buildChangelogBlogSchema(entries);
   const schemaId = 'structured-data-changelog-blog';
 
@@ -43,7 +37,6 @@ export async function ChangelogBlogStructuredData({ entries }: { entries: Change
         __html: serializeJsonLd(schema),
       }}
       strategy="afterInteractive"
-      nonce={nonce}
     />
   );
 }
@@ -58,11 +51,6 @@ export async function ChangelogBlogStructuredData({ entries }: { entries: Change
  * @returns Script tag with JSON-LD
  */
 export async function ChangelogArticleStructuredData({ entry }: { entry: ChangelogEntry }) {
-  // Extract nonce from CSP header for script security
-  const headersList = await headers();
-  const cspHeader = headersList.get('content-security-policy');
-  const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
-
   const schema = buildChangelogArticleSchema(entry);
   const schemaId = `structured-data-changelog-${entry.slug}`;
 
@@ -75,7 +63,6 @@ export async function ChangelogArticleStructuredData({ entry }: { entry: Changel
         __html: serializeJsonLd(schema),
       }}
       strategy="afterInteractive"
-      nonce={nonce}
     />
   );
 }

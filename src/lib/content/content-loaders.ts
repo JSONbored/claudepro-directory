@@ -28,7 +28,6 @@ import { contentCache } from '@/src/lib/cache.server';
 import { getAllCategoryIds } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import { isNewContent } from '@/src/lib/utils/content.utils';
 
 /**
  * Cache TTL configuration
@@ -59,9 +58,12 @@ const CACHE_TTL = {
  * @returns Enriched items with isNew field
  */
 function enrichContentItems(items: UnifiedContentItem[]): UnifiedContentItem[] {
+  // PERFORMANCE: Skip isNew calculation during prerendering (Date.now() not allowed in Next.js 16)
+  // Components that need isNew should calculate it client-side or we make pages dynamic
+  // For now, set to undefined - components will handle gracefully
   return items.map((item) => ({
     ...item,
-    isNew: isNewContent(item.dateAdded),
+    isNew: undefined, // Calculated client-side if needed
   }));
 }
 

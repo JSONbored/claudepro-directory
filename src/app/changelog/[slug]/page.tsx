@@ -23,7 +23,6 @@
  */
 
 import type { Metadata } from 'next';
-import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
@@ -68,9 +67,6 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  'use cache';
-  cacheLife('quarter'); // 15 min cache (replaces revalidate: 900)
-
   const { slug } = await params;
 
   // Load changelog entry for metadata generation
@@ -91,9 +87,6 @@ export default async function ChangelogEntryPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  'use cache';
-  cacheLife('quarter'); // 15 min cache (replaces revalidate: 900)
-
   try {
     const { slug } = await params;
     const entry = await getChangelogEntryBySlug(slug);

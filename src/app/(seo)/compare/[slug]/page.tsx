@@ -1,6 +1,5 @@
 import fs from 'fs/promises';
 import type { Metadata } from 'next';
-import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import path from 'path';
@@ -91,9 +90,6 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  'use cache';
-  cacheLife('static'); // Static content (replaces dynamic: 'force-static')
-
   const { slug } = await params;
 
   // Load comparison data for metadata generation
@@ -107,9 +103,6 @@ export async function generateMetadata({
 }
 
 export default async function ComparisonPage({ params }: { params: Promise<{ slug: string }> }) {
-  'use cache';
-  cacheLife('static'); // Static content (replaces dynamic: 'force-static', dynamicParams: true)
-
   const resolvedParams = await params;
   const data = await getComparisonData(resolvedParams.slug);
 

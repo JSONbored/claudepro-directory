@@ -110,6 +110,9 @@ export function formatCopyCount(count: number): string {
 export function isNewContent(dateAdded?: string): boolean {
   if (!dateAdded) return false;
 
+  // PRODUCTION: Date.now() is safe here - this function is ONLY called at runtime
+  // During Next.js prerendering, enrichContentItems() sets isNew to undefined
+  // Components calculate isNew client-side or routes use dynamic rendering
   const now = Date.now();
   const added = new Date(dateAdded).getTime();
   const daysOld = (now - added) / (1000 * 60 * 60 * 24);

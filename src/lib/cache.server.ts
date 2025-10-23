@@ -220,6 +220,19 @@ function isPipelineError(value: unknown): value is Error {
 }
 
 /**
+ * Detect if we're in a prerendering context (static generation)
+ * During prerendering, we cannot use Date.now() or any time-based operations
+ * This check allows us to skip cache operations and load directly from files
+ */
+function isPrerenderingContext(): boolean {
+  // During Next.js static generation, cache operations should be bypassed
+  // We detect this by checking if we're in a build context
+  return (
+    process.env.NEXT_PHASE === 'phase-production-build' || process.env.NEXT_PHASE === 'phase-export'
+  );
+}
+
+/**
  * Redis Client Manager
  * Handles connection management, fallback logic, and operation retry
  */
@@ -506,6 +519,7 @@ class RedisClientManager {
     const data = this.fallbackStorage.get(key);
     if (!data) return null;
 
+    // Check expiry (only runs at runtime, skipped during prerendering via isEnabled checks)
     if (data.expiry > 0 && Date.now() > data.expiry) {
       this.fallbackStorage.delete(key);
       this.fallbackMemoryBytes -= data.size;
@@ -1909,7 +1923,9 @@ const redis = <T>(fn: (client: Redis) => Promise<T>, fallback: () => T | Promise
  * Unified stats operations
  */
 export const statsRedis = {
-  isEnabled: () => redisClient.getStatus().isConnected || redisClient.getStatus().isFallback,
+  isEnabled: () =>
+    !isPrerenderingContext() &&
+    (redisClient.getStatus().isConnected || redisClient.getStatus().isFallback),
   isConnected: () => redisClient.getStatus().isConnected,
 
   incrementView: (cat: string, slug: string) =>
@@ -2329,7 +2345,7 @@ const cache = {
 };
 
 export const contentCache = {
-  isEnabled: () => CacheServices.content !== null,
+  isEnabled: () => !isPrerenderingContext() && CacheServices.content !== null,
 
   // REMOVED: MDX cache methods (cacheMDX, getMDX, batchCacheMDX)
   // MDX compilation happens at build time with Next.js, not at runtime

@@ -71,10 +71,12 @@ const nextConfig = {
   // Now stable - monitoring for CSP compatibility
   reactCompiler: true,
 
-  // ✨ Cache Components / Partial Prerendering (STABLE in Next.js 16.0)
-  // Enables instant navigation with static shell + dynamic content streaming
+  // ✨ Cache Components / Partial Prerendering (DISABLED - incompatible with generateStaticParams)
+  // PRODUCTION: We use full static generation with generateStaticParams() for all routes
+  // Cache Components requires Suspense boundaries for params access, which conflicts with
+  // our static generation approach. Our pages are already fully cached at CDN level.
   // Replaces experimental.ppr from Next.js 15 canary
-  cacheComponents: true,
+  cacheComponents: false,
 
   // ✨ Cache Life Profiles - Reusable caching strategies
   // Replaces route segment config revalidate values

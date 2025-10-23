@@ -18,7 +18,6 @@
  */
 
 import type { Metadata } from 'next';
-import { cacheLife } from 'next/cache';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import {
@@ -37,9 +36,6 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 export const metadata: Metadata = generatePageMetadata('/tools/config-recommender');
 
 export default async function ConfigRecommenderPage() {
-  'use cache';
-  cacheLife('static'); // Static landing page (replaces revalidate: false)
-
   return (
     <div className={'min-h-screen bg-background'}>
       {/* Hero Section */}

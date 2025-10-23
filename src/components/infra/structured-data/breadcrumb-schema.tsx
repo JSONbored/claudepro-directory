@@ -14,7 +14,6 @@
  * @module components/structured-data/breadcrumb-schema
  */
 
-import { headers } from 'next/headers';
 import Script from 'next/script';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
@@ -48,10 +47,10 @@ export interface BreadcrumbSchemaProps {
  * ```
  */
 export async function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
-  // Extract nonce from CSP header for script security
-  const headersList = await headers();
-  const cspHeader = headersList.get('content-security-policy');
-  const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
+  // PRODUCTION: Skip nonce extraction in cached routes
+  // JSON-LD scripts don't need CSP nonces (they're not inline scripts)
+  // Nonce is only for inline script-src, not for application/ld+json
+  let nonce: string | undefined;
 
   // Always include Home as first breadcrumb
   const homeItem: BreadcrumbItem = {

@@ -14,12 +14,9 @@
  * @see https://llmstxt.org - LLMs.txt specification
  */
 
-import { cacheLife } from 'next/cache';
 import { APP_CONFIG } from '@/src/lib/constants';
 
 export async function GET() {
-  'use cache';
-  cacheLife('stable'); // 6 hour cache (replaces revalidate: 21600)
   const content = `# Configuration Recommender - ${APP_CONFIG.name}
 
 > AI-powered tool for finding the perfect Claude configuration

@@ -1,6 +1,5 @@
 import fs from 'fs/promises';
 import type { Metadata } from 'next';
-import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
@@ -190,9 +189,6 @@ export async function generateMetadata({
 }: {
   params: Promise<{ category: string; slug: string }>;
 }): Promise<Metadata> {
-  'use cache';
-  cacheLife('half'); // 30 min cache (replaces revalidate: 1800)
-
   const { category, slug } = await params;
 
   // Load guide data for metadata generation
@@ -211,9 +207,6 @@ export default async function SEOGuidePage({
 }: {
   params: Promise<{ category: string; slug: string }>;
 }) {
-  'use cache';
-  cacheLife('half'); // 30 min cache (replaces revalidate: 1800, dynamicParams: true)
-
   try {
     const rawParams = await params;
     const validationResult = guideParamsSchema.safeParse(rawParams);

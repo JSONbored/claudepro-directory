@@ -38,7 +38,6 @@
  * @see {@link file://../../lib/content-loaders.ts} - Content loading with caching
  */
 
-import { cacheLife } from 'next/cache';
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content-list-server';
 import { statsRedis } from '@/src/lib/cache.server';
@@ -108,9 +107,6 @@ export async function generateStaticParams() {
  * // }
  */
 export async function generateMetadata({ params }: { params: Promise<{ category: string }> }) {
-  'use cache';
-  cacheLife('minutes'); // 5 min cache (replaces revalidate: 300)
-
   const { category } = await params;
 
   // Validate category and load config
@@ -152,9 +148,6 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
  * // /statuslines → Lists all statuslines with search/filter
  */
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
-  'use cache';
-  cacheLife('minutes'); // 5 min cache (replaces revalidate: 300)
-
   const { category } = await params;
 
   // Validate category

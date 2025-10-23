@@ -26,8 +26,6 @@
  * - AI citation optimized
  */
 
-import { cacheLife } from 'next/cache';
-import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
@@ -66,13 +64,6 @@ export async function GET(
   request: Request,
   context: { params: Promise<{ slug: string }> }
 ): Promise<Response> {
-  'use cache';
-  cacheLife('quarter'); // 15 min cache (replaces revalidate: 900)
-
-  // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)
-  // Access uncached data before new Date() (Cache Components requirement)
-  (await headers()).get('x-cache-marker');
-
   try {
     const { slug } = await context.params;
 

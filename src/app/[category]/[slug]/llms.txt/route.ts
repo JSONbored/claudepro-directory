@@ -6,7 +6,6 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
-import { cacheLife } from 'next/cache';
 import { isValidCategory, VALID_CATEGORIES } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import {
@@ -69,9 +68,6 @@ export async function GET(
   request: Request,
   context: { params: Promise<{ category: string; slug: string }> }
 ): Promise<Response> {
-  'use cache';
-  cacheLife('hours'); // 1 hour cache (replaces revalidate: 3600)
-
   // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)
 
   try {

@@ -15,7 +15,6 @@
  * @see lib/config/category-config.ts - Single source of truth for categories
  */
 
-import { cacheLife } from 'next/cache';
 import { Suspense } from 'react';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { HomePageClient } from '@/src/components/features/home';
@@ -215,9 +214,6 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
 
 // Server component that renders layout with streaming
 export default async function HomePage({ searchParams }: HomePageProps) {
-  'use cache';
-  cacheLife('half'); // 30 min cache (replaces revalidate: 1800)
-
   // Extract and sanitize search query from URL
   const resolvedParams = await searchParams;
   const initialSearchQuery = resolvedParams.q || '';

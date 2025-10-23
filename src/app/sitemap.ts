@@ -16,7 +16,6 @@
  */
 
 import type { MetadataRoute } from 'next';
-import { cacheLife } from 'next/cache';
 // Import metadata from generated files (build-time)
 import { agentsMetadata } from '@/generated/agents-metadata';
 import { changelogMetadata } from '@/generated/changelog-metadata';
@@ -43,9 +42,6 @@ import { APP_CONFIG } from '@/src/lib/constants';
  * @returns Sitemap entries with URLs, lastModified, changeFrequency, priority
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  'use cache';
-  cacheLife('stable'); // 6 hour cache (replaces revalidate: 21600)
-
   const baseUrl = APP_CONFIG.url;
 
   // Generate all site URLs using centralized URL generator

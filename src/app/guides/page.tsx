@@ -7,7 +7,6 @@
 
 import fs from 'fs/promises';
 import type { Metadata } from 'next';
-import { cacheLife } from 'next/cache';
 import path from 'path';
 import { ContentListServer } from '@/src/components/content-list-server';
 import { statsRedis } from '@/src/lib/cache.server';
@@ -107,9 +106,6 @@ async function getAllGuides(): Promise<UnifiedContentItem[]> {
  * Guides Index Page
  */
 export default async function GuidesPage() {
-  'use cache';
-  cacheLife('half'); // 30 min cache (replaces revalidate: 1800)
-
   // Load all guides
   const guidesData = await getAllGuides();
 

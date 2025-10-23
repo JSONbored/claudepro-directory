@@ -260,12 +260,17 @@ export default async function DetailPage({
     notFound();
   }
 
-  // Optimized fetch strategy: Load critical content first, stream supplementary data
+  // Optimized fetch strategy: Load critical content first, then related data
   // Main content is loaded immediately for fastest initial render
   const fullItem = await getFullContentBySlug(category, slug);
   const itemData = fullItem || itemMeta;
 
-  // Related items and view count will be streamed via Suspense boundaries
+  // Load related items and view count for static generation
+  // These must be awaited for Next.js 16 static generation
+  const [relatedItems, viewCount] = await Promise.all([
+    getRelatedContent(category, slug, 3),
+    statsRedis.getViewCount(category, slug),
+  ]);
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles
@@ -322,11 +327,7 @@ export default async function DetailPage({
           },
         ]}
       />
-      <UnifiedDetailPage
-        item={itemData}
-        relatedItemsPromise={getRelatedContent(category, slug, 3)}
-        viewCountPromise={statsRedis.getViewCount(category, slug)}
-      />
+      <UnifiedDetailPage item={itemData} relatedItems={relatedItems} viewCount={viewCount} />
     </>
   );
 }

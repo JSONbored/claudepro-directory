@@ -26,8 +26,6 @@
  * - AI-optimized structure
  */
 
-import { cacheLife } from 'next/cache';
-import { headers } from 'next/headers';
 import type { NextRequest } from 'next/server';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { formatChangelogDateISO8601, getChangelogUrl } from '@/src/lib/changelog/utils';
@@ -62,16 +60,8 @@ function escapeXml(text: string): string {
  * @returns Atom XML response
  */
 export async function GET(request: NextRequest): Promise<Response> {
-  'use cache';
-  cacheLife('stable'); // 6 hour cache (replaces revalidate: 21600)
-
-  // Access uncached data before new Date() (Cache Components requirement)
-  (await headers()).get('x-cache-marker');
-
-  const requestLogger = logger.forRequest(request);
-
   try {
-    requestLogger.info('Atom feed generation started');
+    logger.info('Atom feed generation started');
 
     // Load changelog entries (cached with Redis)
     const allEntries = await getAllChangelogEntries();
@@ -132,7 +122,7 @@ ${categories.map((cat) => `    <category term="${escapeXml(cat)}" label="${escap
   .join('\n')}
 </feed>`;
 
-    requestLogger.info('Atom feed generated successfully', {
+    logger.info('Atom feed generated successfully', {
       entriesCount: entries.length,
     });
 
@@ -142,7 +132,7 @@ ${categories.map((cat) => `    <category term="${escapeXml(cat)}" label="${escap
       cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
     });
   } catch (error) {
-    requestLogger.error(
+    logger.error(
       'Atom feed generation failed',
       error instanceof Error ? error : new Error(String(error))
     );

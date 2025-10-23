@@ -26,8 +26,6 @@
  * - AI-optimized structure
  */
 
-import { cacheLife } from 'next/cache';
-import { headers } from 'next/headers';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -41,13 +39,6 @@ import { logger } from '@/src/lib/logger';
  * @returns Plain text response with all changelog entries
  */
 export async function GET(): Promise<Response> {
-  'use cache';
-  cacheLife('quarter'); // 15 min cache (replaces revalidate: 900)
-
-  // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)
-  // Access uncached data before new Date() (Cache Components requirement)
-  (await headers()).get('x-cache-marker');
-
   try {
     logger.info('Changelog llms.txt generation started');
 
