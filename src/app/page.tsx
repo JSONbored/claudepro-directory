@@ -24,7 +24,7 @@ import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 
 import { statsRedis } from '@/src/lib/cache.server';
-import { type CategoryId, getAllCategoryIds } from '@/src/lib/config/category-config';
+import { type CategoryId, getHomepageCategoryIds } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { featuredService } from '@/src/lib/services/featured.server';
@@ -65,8 +65,8 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
    * Adding "Skills" or any new category requires ZERO changes here
    */
 
-  // Get all category IDs from registry (zero hardcoded lists)
-  const categoryIds = getAllCategoryIds();
+  // Get homepage category IDs from registry (excludes guides, jobs, changelog)
+  const categoryIds = getHomepageCategoryIds();
 
   // Initialize category data storage
   const categoryData: Record<CategoryId, UnifiedContentItem[]> = {} as Record<

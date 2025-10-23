@@ -1923,9 +1923,9 @@ const redis = <T>(fn: (client: Redis) => Promise<T>, fallback: () => T | Promise
  * Unified stats operations
  */
 export const statsRedis = {
-  isEnabled: () =>
-    !isPrerenderingContext() &&
-    (redisClient.getStatus().isConnected || redisClient.getStatus().isFallback),
+  // Stats Redis should be available during build on Vercel (Redis connected via marketplace)
+  // Only contentCache needs isPrerenderingContext() check
+  isEnabled: () => redisClient.getStatus().isConnected || redisClient.getStatus().isFallback,
   isConnected: () => redisClient.getStatus().isConnected,
 
   incrementView: (cat: string, slug: string) =>

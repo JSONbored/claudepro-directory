@@ -114,6 +114,7 @@ export interface UnifiedCategoryConfig<
   description: string; // User-facing description
   icon: LucideIcon; // Lucide icon component
   colorScheme: string; // Tailwind color class (e.g., 'purple-500') for UI theming
+  showOnHomepage: boolean; // Whether category appears in homepage "All" section
 
   // ===== SEO =====
   keywords: string; // Comma-separated keywords
@@ -201,6 +202,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       "Browse specialized AI agents designed for specific tasks and workflows using Claude's capabilities.",
     icon: Sparkles,
     colorScheme: 'purple-500',
+    showOnHomepage: true,
     keywords: 'Claude agents, AI agents, specialized assistants, workflow automation, Claude AI',
     metaDescription:
       'Specialized Claude AI agents for October 2025. Community-contributed coding, writing, research, and automation configurations ready for Claude Desktop and Code.',
@@ -256,6 +258,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       "Model Context Protocol servers that extend Claude's capabilities with external tools and data sources.",
     icon: Code,
     colorScheme: 'green-500',
+    showOnHomepage: true,
     keywords: 'MCP servers, Model Context Protocol, Claude tools, API integration',
     metaDescription:
       'Model Context Protocol servers for October 2025. Extend Claude with GitHub, databases, APIs, and file systems. Official MCP integrations with setup guides.',
@@ -307,6 +310,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'Custom slash commands to enhance your Claude Code workflow with reusable prompts and actions.',
     icon: Terminal,
     colorScheme: 'orange-500',
+    showOnHomepage: true,
     keywords: 'Claude commands, slash commands, CLI tools, workflow automation',
     metaDescription:
       'Claude Code slash commands for October 2025. Workflow automation, code review, testing, and documentation. Community-built reusable prompts for development.',
@@ -357,6 +361,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     description: "Custom rules to guide Claude's behavior and responses in your projects.",
     icon: BookOpen,
     colorScheme: 'blue-500',
+    showOnHomepage: true,
     keywords: 'Claude rules, AI guidelines, project rules, behavior customization',
     metaDescription:
       'Claude AI rules for October 2025. Control behavior for coding standards, security, testing, and documentation. Community-curated guidelines for AI assistance.',
@@ -407,6 +412,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     description: 'Event-driven automation hooks that trigger during Claude Code operations.',
     icon: Webhook,
     colorScheme: 'blue-500',
+    showOnHomepage: true,
     keywords: 'Claude hooks, automation, webhooks, event triggers, CI/CD',
     metaDescription:
       'Claude Code automation hooks for October 2025. Event-driven scripts for git commits, testing, linting, and CI/CD integration. Shell scripts for dev workflows.',
@@ -458,6 +464,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'Customizable status line configurations for Claude Code CLI with real-time session information.',
     icon: Terminal,
     colorScheme: 'cyan-500',
+    showOnHomepage: true,
     keywords: 'Claude statuslines, CLI customization, terminal themes, status bar',
     metaDescription:
       'Claude Code CLI statuslines for October 2025. Beautiful terminal themes showing git info, project details, and session stats. Community-designed status bars.',
@@ -519,6 +526,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'Curated bundles of related content items organized by theme, use case, or workflow for easy discovery.',
     icon: Layers,
     colorScheme: 'indigo-500',
+    showOnHomepage: true,
     keywords: 'Claude collections, starter kits, workflows, bundles, curated content',
     metaDescription:
       'Curated Claude AI starter kits bundling agents, MCP servers, commands, and rules by use case. Complete workflow collections for web development and automation.',
@@ -579,6 +587,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'Task-focused capability guides for Claude (PDF, DOCX, PPTX, XLSX, and more) with requirements and runnable examples.',
     icon: BookOpen,
     colorScheme: 'emerald-500',
+    showOnHomepage: true,
     keywords: 'Claude skills, document processing, pdf, docx, pptx, xlsx, how-to, examples',
     metaDescription:
       'Practical Claude Skills for October 2025: PDF/DOCX/PPTX/XLSX workflows with exact dependencies, copy-pasteable code examples, and troubleshooting guides.',
@@ -636,6 +645,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'Comprehensive guides, tutorials, comparisons, and workflows for Claude. SEO-optimized content covering best practices, use cases, and troubleshooting.',
     icon: FileText,
     colorScheme: 'blue-500',
+    showOnHomepage: false,
     keywords:
       'Claude guides, tutorials, comparisons, workflows, use cases, troubleshooting, best practices',
     metaDescription:
@@ -696,6 +706,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'AI and Claude-related job listings. Find opportunities in AI development, prompt engineering, and Claude integration.',
     icon: Briefcase,
     colorScheme: 'indigo-500',
+    showOnHomepage: false,
     keywords: 'AI jobs, Claude jobs, prompt engineering, AI development, remote AI jobs',
     metaDescription:
       'AI job board for October 2025: Claude-related positions, prompt engineering roles, AI development opportunities. Remote and on-site positions available.',
@@ -747,6 +758,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'Product updates, new features, and improvements to the Claude Pro Directory platform.',
     icon: FileText,
     colorScheme: 'slate-500',
+    showOnHomepage: false,
     keywords: 'changelog, updates, new features, improvements, release notes',
     metaDescription:
       'Claude Pro Directory changelog for October 2025: Latest features, improvements, bug fixes, platform updates, new integrations, and performance enhancements.',
@@ -833,6 +845,14 @@ export function isValidCategory(category: string): category is CategoryId {
  */
 export function getAllCategoryIds(): CategoryId[] {
   return VALID_CATEGORIES;
+}
+
+/**
+ * Get category IDs that should appear on homepage "All" section
+ * Filters based on showOnHomepage flag in registry
+ */
+export function getHomepageCategoryIds(): CategoryId[] {
+  return VALID_CATEGORIES.filter((id) => UNIFIED_CATEGORY_REGISTRY[id].showOnHomepage);
 }
 
 // REMOVED: Registry validation check - no longer needed
