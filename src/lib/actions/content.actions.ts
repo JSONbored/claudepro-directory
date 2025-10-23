@@ -173,10 +173,6 @@ export const createCollection = authedAction
   .metadata({
     actionName: 'createCollection',
     category: 'user',
-    rateLimit: {
-      maxRequests: 20,
-      windowSeconds: 60,
-    },
   })
   .schema(collectionSchema)
   .action(async ({ parsedInput, ctx }) => {
@@ -221,10 +217,6 @@ export const updateCollection = authedAction
   .metadata({
     actionName: 'updateCollection',
     category: 'user',
-    rateLimit: {
-      maxRequests: 30,
-      windowSeconds: 60,
-    },
   })
   .schema(
     collectionSchema.extend({
@@ -294,10 +286,6 @@ export const deleteCollection = authedAction
   .metadata({
     actionName: 'deleteCollection',
     category: 'user',
-    rateLimit: {
-      maxRequests: 20,
-      windowSeconds: 60,
-    },
   })
   .schema(
     z.object({
@@ -342,10 +330,6 @@ export const addItemToCollection = authedAction
   .metadata({
     actionName: 'addItemToCollection',
     category: 'user',
-    rateLimit: {
-      maxRequests: 50,
-      windowSeconds: 60,
-    },
   })
   .schema(collectionItemSchema)
   .action(async ({ parsedInput, ctx }) => {
@@ -394,10 +378,6 @@ export const removeItemFromCollection = authedAction
   .metadata({
     actionName: 'removeItemFromCollection',
     category: 'user',
-    rateLimit: {
-      maxRequests: 50,
-      windowSeconds: 60,
-    },
   })
   .schema(
     z.object({
@@ -443,10 +423,6 @@ export const reorderCollectionItems = authedAction
   .metadata({
     actionName: 'reorderCollectionItems',
     category: 'user',
-    rateLimit: {
-      maxRequests: 30,
-      windowSeconds: 60,
-    },
   })
   .schema(reorderItemsSchema)
   .action(async ({ parsedInput, ctx }) => {
@@ -564,10 +540,6 @@ export const createReview = authedAction
   .metadata({
     actionName: 'createReview',
     category: 'user',
-    rateLimit: {
-      maxRequests: 10, // 10 reviews per hour
-      windowSeconds: 3600, // 1 hour
-    },
   })
   .schema(reviewInputSchema)
   .action(async ({ parsedInput, ctx }) => {
@@ -656,10 +628,6 @@ export const updateReview = authedAction
   .metadata({
     actionName: 'updateReview',
     category: 'user',
-    rateLimit: {
-      maxRequests: 10, // 10 updates per hour
-      windowSeconds: 3600, // 1 hour
-    },
   })
   .schema(reviewUpdateSchema)
   .action(async ({ parsedInput, ctx }) => {
@@ -734,10 +702,6 @@ export const deleteReview = authedAction
   .metadata({
     actionName: 'deleteReview',
     category: 'user',
-    rateLimit: {
-      maxRequests: 5, // 5 deletes per hour
-      windowSeconds: 3600, // 1 hour
-    },
   })
   .schema(reviewDeleteSchema)
   .action(async ({ parsedInput, ctx }) => {
@@ -796,10 +760,6 @@ export const markReviewHelpful = authedAction
   .metadata({
     actionName: 'markReviewHelpful',
     category: 'user',
-    rateLimit: {
-      maxRequests: 50, // 50 helpful votes per hour
-      windowSeconds: 3600, // 1 hour
-    },
   })
   .schema(helpfulVoteSchema)
   .action(async ({ parsedInput, ctx }) => {
@@ -875,10 +835,6 @@ export const getReviews = rateLimitedAction
   .metadata({
     actionName: 'getReviews',
     category: 'content',
-    rateLimit: {
-      maxRequests: 100, // 100 fetches per minute
-      windowSeconds: 60, // 1 minute
-    },
   })
   .schema(getReviewsSchema)
   .action(async ({ parsedInput }) => {
@@ -987,10 +943,6 @@ export const getAggregateRating = rateLimitedAction
   .metadata({
     actionName: 'getAggregateRating',
     category: 'content',
-    rateLimit: {
-      maxRequests: 200, // 200 fetches per minute
-      windowSeconds: 60, // 1 minute
-    },
   })
   .schema(
     z.object({

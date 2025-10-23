@@ -108,10 +108,6 @@ export const refreshProfileFromOAuth = authedAction
   .metadata({
     actionName: 'refreshProfileFromOAuth',
     category: 'user',
-    rateLimit: {
-      maxRequests: 5, // Limit to 5 refreshes per minute
-      windowSeconds: 60,
-    },
   })
   .schema(z.void())
   .action(async ({ ctx }) => {
@@ -281,10 +277,6 @@ export const addBookmarkBatch = authedAction
   .metadata({
     actionName: 'addBookmarkBatch',
     category: 'user',
-    rateLimit: {
-      maxRequests: 10, // Limited to prevent abuse
-      windowSeconds: 60,
-    },
   })
   .schema(
     z.object({

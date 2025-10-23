@@ -18,7 +18,6 @@ import { z } from 'zod';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
-import { type RateLimiter, withRateLimit } from '@/src/lib/rate-limiter.server';
 import { createRequestId, type RequestId } from '@/src/lib/schemas/branded-types.schema';
 import {
   determineErrorType,
@@ -713,7 +712,6 @@ type ApiMethodHandler<P = unknown, Q = unknown, H = unknown, B = unknown> = (
 
 export interface CreateApiRouteOptions<P = unknown, Q = unknown, H = unknown, B = unknown> {
   validate?: RouteValidationSchemas<P, Q, H, B>;
-  rateLimit?: { limiter?: RateLimiter };
   auth?: { type?: 'devOnly' | 'cron' };
   response?: ApiOkOptions;
   handlers: Partial<Record<HttpMethod, ApiMethodHandler<P, Q, H, B>>>;
@@ -749,7 +747,7 @@ function cloneWithHeaders(original: Response, headers: Record<string, string>): 
 export function createApiRoute<P = unknown, Q = unknown, H = unknown, B = unknown>(
   options: CreateApiRouteOptions<P, Q, H, B>
 ): Partial<Record<HttpMethod, NextRouteHandler<P>>> {
-  const { validate, rateLimit, auth, response, handlers } = options;
+  const { validate, auth, response, handlers } = options;
 
   const wrap = (
     method: HttpMethod,
@@ -842,24 +840,14 @@ export function createApiRoute<P = unknown, Q = unknown, H = unknown, B = unknow
           okRaw,
         };
 
-        // Invoke handler with optional rate limiting
-        const invoke = async (): Promise<Response> => {
-          const result = await handler(ctx);
-          if (isResponse(result)) {
-            return cloneWithHeaders(result, { 'X-Request-ID': requestId });
-          }
-          // Default success path uses envelope unless overridden at factory level
-          const useEnvelope = response?.envelope !== false;
-          const res = ok(result as unknown, { ...(response ?? {}), envelope: useEnvelope });
-          return res;
-        };
-
-        if (rateLimit?.limiter) {
-          // withRateLimit will also add X-RateLimit-* headers on success
-          return await withRateLimit(request, rateLimit.limiter, invoke);
+        // Invoke handler (rate limiting handled by Arcjet in middleware)
+        const result = await handler(ctx);
+        if (isResponse(result)) {
+          return cloneWithHeaders(result, { 'X-Request-ID': requestId });
         }
-
-        return await invoke();
+        // Default success path uses envelope unless overridden at factory level
+        const useEnvelope = response?.envelope !== false;
+        return ok(result as unknown, { ...(response ?? {}), envelope: useEnvelope });
       } catch (error) {
         return handleApiError(error instanceof Error ? error : new Error(String(error)), {
           route: url.pathname,

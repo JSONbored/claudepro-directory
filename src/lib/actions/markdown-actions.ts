@@ -201,22 +201,16 @@ export const copyMarkdownAction = rateLimitedAction
   .metadata({
     actionName: 'copyMarkdown',
     category: 'content',
-    rateLimit: {
-      maxRequests: 50, // 50 copies per minute
-      windowSeconds: 60,
-    },
   })
   .schema(markdownExportSchema)
   .action(
     async ({
       parsedInput: { category, slug, includeMetadata, includeFooter },
-      ctx,
     }): Promise<MarkdownExportResponse> => {
       try {
         logger.info('Copy markdown action started', {
           category,
           slug,
-          clientIP: ctx.clientIP,
         });
 
         // Check cache first
@@ -323,18 +317,13 @@ export const downloadMarkdownAction = rateLimitedAction
   .metadata({
     actionName: 'downloadMarkdown',
     category: 'content',
-    rateLimit: {
-      maxRequests: 30, // 30 downloads per minute (stricter than copy)
-      windowSeconds: 60,
-    },
   })
   .schema(markdownExportSchema.omit({ includeMetadata: true, includeFooter: true }))
-  .action(async ({ parsedInput: { category, slug }, ctx }): Promise<MarkdownExportResponse> => {
+  .action(async ({ parsedInput: { category, slug } }): Promise<MarkdownExportResponse> => {
     try {
       logger.info('Download markdown action started', {
         category,
         slug,
-        clientIP: ctx.clientIP,
       });
 
       // Always include metadata and footer for downloads

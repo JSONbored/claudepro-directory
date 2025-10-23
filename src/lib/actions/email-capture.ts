@@ -47,10 +47,6 @@ export const postCopyEmailCaptureAction = rateLimitedAction
   .metadata({
     actionName: 'postCopyEmailCapture',
     category: 'form',
-    rateLimit: {
-      maxRequests: 3,
-      windowSeconds: 300, // 5 minutes
-    },
   })
   .schema(postCopyEmailCaptureSchema)
   .action(

@@ -3,11 +3,10 @@
  * Handles webhook events from Resend (via Svix) for email deliverability and analytics
  *
  * Security Layers:
- * 1. Middleware (Arcjet) - Bot detection, WAF, general rate limiting
+ * 1. Middleware (Arcjet) - Bot detection, WAF, rate limiting (60 req/min)
  * 2. Svix Signature Verification - Cryptographic proof of authenticity
  * 3. Idempotency Protection - Redis-based replay attack prevention (24h TTL)
- * 4. Redis Rate Limiting - Per-event-type rate limits
- * 5. Zod Validation - Schema validation
+ * 4. Zod Validation - Schema validation
  *
  * Events Handled:
  * - email.bounced: Track and auto-remove bad emails
@@ -22,7 +21,6 @@ import { Webhook } from 'svix';
 import { redisClient } from '@/src/lib/cache.server';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
-import { rateLimiters } from '@/src/lib/rate-limiter.server';
 import { env } from '@/src/lib/schemas/env.schema';
 import { resendWebhookEventSchema } from '@/src/lib/schemas/webhook.schema';
 import { webhookService } from '@/src/lib/services/webhook.server';
@@ -149,24 +147,9 @@ export async function POST(request: NextRequest) {
     'webhook_idempotency_set'
   );
 
-  // Apply rate limiting based on event type
-  const isAnalyticsEvent = event.type === 'email.opened' || event.type === 'email.clicked';
-  const limiter = isAnalyticsEvent ? rateLimiters.webhookAnalytics : rateLimiters.webhookBounce;
-
-  const rateLimitCheck = await limiter.checkLimit(request);
-  if (!rateLimitCheck.success) {
-    logger.warn('Webhook rate limit exceeded', {
-      eventType: event.type,
-      limit: rateLimitCheck.limit,
-      retryAfter: rateLimitCheck.retryAfter,
-    });
-    return apiResponse.raw(null, {
-      contentType: 'application/json; charset=utf-8',
-      status: 429,
-      headers: { 'Retry-After': String(rateLimitCheck.retryAfter) },
-      cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
-    });
-  }
+  // REMOVED: Redis rate limiting (webhooks protected by Arcjet in middleware)
+  // Arcjet already provides comprehensive rate limiting for all requests
+  // Savings: ~10K Redis commands/month
 
   // Process webhook event asynchronously (don't block response)
   // Resend expects fast 200 responses (<5 seconds)

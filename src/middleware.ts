@@ -5,22 +5,16 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
-import { buildRateLimitConfig, isLLMsTxtRoute } from '@/src/lib/middleware/rate-limit-rules';
-import { rateLimiters } from '@/src/lib/rate-limiter.server';
 import { env, securityConfig } from '@/src/lib/schemas/env.schema';
 
 // Force Node.js runtime for middleware (Redis compression requires node:zlib)
 export const runtime = 'nodejs';
 
 import {
-  type ApiEndpointType,
-  classifyApiEndpoint,
   type RequestValidation,
-  requestPathSchema,
   sanitizePathForLogging,
   staticAssetSchema,
   validateRequest,
-  validateSearchQuery,
 } from '@/src/lib/schemas/middleware.schema';
 
 // Initialize Arcjet with comprehensive security rules
@@ -224,106 +218,10 @@ function mergeSecurityHeaders(target: Headers, source: Headers): void {
   });
 }
 
-/**
- * Apply endpoint-specific rate limiting based on the request path
- */
-async function applyEndpointRateLimit(
-  request: NextRequest,
-  pathname: string
-): Promise<Response | null> {
-  // Validate the pathname
-  try {
-    requestPathSchema.parse(pathname);
-  } catch (error) {
-    logger.error(
-      'Invalid pathname detected',
-      error instanceof z.ZodError
-        ? new Error('Pathname validation failed')
-        : new Error(String(error)),
-      {
-        pathname: sanitizePathForLogging(pathname),
-        type: 'validation',
-      }
-    );
-    return new NextResponse('Bad Request', { status: 400 });
-  }
-  // Classify the API endpoint type
-  const endpointType: ApiEndpointType = classifyApiEndpoint(pathname, request.method);
-
-  // Use centralized rate limit configuration
-  const rateLimitConfig = buildRateLimitConfig(rateLimiters);
-
-  // Check for exact path matches first
-  if (pathname in rateLimitConfig) {
-    const limiter = rateLimitConfig[pathname];
-    if (limiter) {
-      return limiter.middleware(request);
-    }
-  }
-
-  // LLMs.txt routes - moderate rate limiting to prevent scraping abuse
-  if (isLLMsTxtRoute(pathname)) {
-    return rateLimiters.llmstxt.middleware(request);
-  }
-
-  // Pattern-based matching using classified endpoint type
-  if (pathname.startsWith('/api/')) {
-    // Use endpoint classification for rate limiting
-    switch (endpointType) {
-      case 'admin':
-        return rateLimiters.admin.middleware(request);
-      case 'heavy_api':
-        return rateLimiters.heavyApi.middleware(request);
-      case 'search':
-        // Validate search query parameters if present
-        try {
-          const searchParams = new URLSearchParams(request.nextUrl.search);
-          validateSearchQuery(searchParams);
-        } catch (error) {
-          logger.error(
-            'Invalid search query',
-            error instanceof z.ZodError
-              ? new Error('Search query validation failed')
-              : new Error(String(error)),
-            {
-              pathname: sanitizePathForLogging(pathname),
-              type: 'search_validation',
-            }
-          );
-          return new NextResponse(
-            JSON.stringify({
-              success: false,
-              error: 'Bad Request',
-              message: 'Invalid search parameters',
-              code: 'SEARCH_VALIDATION_FAILED',
-              timestamp: new Date().toISOString(),
-            }),
-            {
-              status: 400,
-              headers: { 'content-type': 'application/json' },
-            }
-          );
-        }
-        return rateLimiters.search.middleware(request);
-      case 'submit':
-        return rateLimiters.submit.middleware(request);
-      case 'api':
-        // Dynamic content type routes (e.g., /api/[contentType])
-        if (pathname.match(/^\/api\/[^/]+\.json$/)) {
-          return rateLimiters.api.middleware(request);
-        }
-        return rateLimiters.api.middleware(request);
-      case 'static':
-        // No rate limiting for static assets
-        return null;
-      default:
-        return rateLimiters.api.middleware(request);
-    }
-  }
-
-  // No specific rate limiting for non-API endpoints
-  return null;
-}
+// REMOVED: Redis-based rate limiting (redundant with Arcjet tokenBucket)
+// Arcjet already provides comprehensive rate limiting in middleware (lines 60-66)
+// Savings: ~450K Redis commands/month
+// Defense-in-depth: Arcjet tokenBucket (60 req/min) + WAF + Bot Detection
 
 export async function middleware(request: NextRequest) {
   const startTime = isDevelopment ? performance.now() : 0;
@@ -595,14 +493,6 @@ export async function middleware(request: NextRequest) {
       status: 403,
       headers,
     });
-  }
-
-  // Apply endpoint-specific rate limiting after Arcjet
-  const rateLimitResponse = await applyEndpointRateLimit(request, pathname);
-  if (rateLimitResponse) {
-    // Merge security headers from Nosecone
-    mergeSecurityHeaders(rateLimitResponse.headers, noseconeHeaders);
-    return rateLimitResponse;
   }
 
   // Request allowed - create new response with pathname header for SmartRelatedContent component

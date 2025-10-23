@@ -8,10 +8,9 @@
  * Configured in vercel.json
  *
  * Tasks performed (in parallel):
- * 1. Cache Warming - Pre-populate Redis cache for optimal performance
- * 2. Job Expiration - Mark expired job listings as inactive
- * 3. Email Sequences - Process onboarding and drip campaign emails
- * 4. User Stats Refresh - Update materialized view for dashboard performance
+ * 1. Job Expiration - Mark expired job listings as inactive
+ * 2. Email Sequences - Process onboarding and drip campaign emails
+ * 3. User Stats Refresh - Update materialized view for dashboard performance
  *
  * Performance:
  * - Parallel execution for 2-3x faster completion (OPTIMIZATION 2025-10-22)
@@ -21,7 +20,6 @@
  * @module app/api/cron/daily-maintenance
  */
 
-import { cacheWarmer } from '@/src/lib/cache.server';
 import { createApiRoute } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { emailSequenceService } from '@/src/lib/services/email-sequence.server';
@@ -68,55 +66,21 @@ const route = createApiRoute({
 
       // ============================================
       // OPTIMIZATION (2025-10-22): PARALLEL EXECUTION
-      // All 4 tasks are independent and can run in parallel
-      // BEFORE: Sequential execution (Task 1 → Task 2 → Task 3 → Task 4)
-      // AFTER: Parallel execution (Task 1 + Task 2 + Task 3 + Task 4 simultaneously)
+      // All 3 tasks are independent and can run in parallel
+      // BEFORE: Sequential execution (Task 1 → Task 2 → Task 3)
+      // AFTER: Parallel execution (Task 1 + Task 2 + Task 3 simultaneously)
       // Expected speedup: 2-3x faster total execution time
+      // ============================================
+      // REMOVED: Cache warming task (~225K Redis commands/month saved)
+      // Next.js ISR already handles cache pre-population automatically
       // ============================================
 
       const taskPromises = [
-        // TASK 1: CACHE WARMING
+        // TASK 1: EXPIRE JOBS
         (async (): Promise<TaskResult> => {
           try {
             const taskStart = performance.now();
-            logger.info('Task 1/4: Starting cache warming');
-
-            const cacheResult = await cacheWarmer.triggerManualWarming();
-
-            logger.info('Task 1/4: Cache warming complete', {
-              success: cacheResult.success ? 'true' : 'false',
-              message: cacheResult.message ?? 'No message',
-            });
-
-            return {
-              task: 'cache_warming',
-              success: cacheResult.success ?? false,
-              duration_ms: Math.round(performance.now() - taskStart),
-              data: {
-                message: cacheResult.message,
-              },
-            };
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            logger.error(
-              'Task 1/4: Cache warming failed',
-              error instanceof Error ? error : new Error(String(error))
-            );
-
-            return {
-              task: 'cache_warming',
-              success: false,
-              duration_ms: Math.round(performance.now() - overallStartTime),
-              error: errorMessage,
-            };
-          }
-        })(),
-
-        // TASK 2: EXPIRE JOBS
-        (async (): Promise<TaskResult> => {
-          try {
-            const taskStart = performance.now();
-            logger.info('Task 2/4: Starting job expiration');
+            logger.info('Task 1/3: Starting job expiration');
 
             const supabase = await createClient();
             const now = new Date().toISOString();
@@ -159,7 +123,7 @@ const route = createApiRoute({
               );
             }
 
-            logger.info('Task 2/4: Job expiration complete', {
+            logger.info('Task 1/3: Job expiration complete', {
               expired_count: expiredCount,
             });
 
@@ -180,7 +144,7 @@ const route = createApiRoute({
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             logger.error(
-              'Task 2/4: Job expiration failed',
+              'Task 1/3: Job expiration failed',
               error instanceof Error ? error : new Error(String(error))
             );
 
@@ -193,15 +157,15 @@ const route = createApiRoute({
           }
         })(),
 
-        // TASK 3: PROCESS EMAIL SEQUENCES
+        // TASK 2: PROCESS EMAIL SEQUENCES
         (async (): Promise<TaskResult> => {
           try {
             const taskStart = performance.now();
-            logger.info('Task 3/4: Starting email sequence processing');
+            logger.info('Task 2/3: Starting email sequence processing');
 
             const emailResults = await emailSequenceService.processSequenceQueue();
 
-            logger.info('Task 3/4: Email sequence processing complete', {
+            logger.info('Task 2/3: Email sequence processing complete', {
               sent: emailResults.sent,
               failed: emailResults.failed,
             });
@@ -223,7 +187,7 @@ const route = createApiRoute({
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             logger.error(
-              'Task 3/4: Email sequence processing failed',
+              'Task 2/3: Email sequence processing failed',
               error instanceof Error ? error : new Error(String(error))
             );
 
@@ -236,11 +200,11 @@ const route = createApiRoute({
           }
         })(),
 
-        // TASK 4: REFRESH USER STATS MATERIALIZED VIEW
+        // TASK 3: REFRESH USER STATS MATERIALIZED VIEW
         (async (): Promise<TaskResult> => {
           try {
             const taskStart = performance.now();
-            logger.info('Task 4/4: Starting user stats refresh');
+            logger.info('Task 3/3: Starting user stats refresh');
 
             const supabase = await createClient();
             const { data: refreshResult, error: rpcError } =
@@ -256,7 +220,7 @@ const route = createApiRoute({
               throw new Error(result?.message || 'Unknown error during refresh');
             }
 
-            logger.info('Task 4/4: User stats refresh complete', {
+            logger.info('Task 3/3: User stats refresh complete', {
               rows_refreshed: result.rows_refreshed,
               duration_ms: result.duration_ms,
             });
@@ -273,7 +237,7 @@ const route = createApiRoute({
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             logger.error(
-              'Task 4/4: User stats refresh failed',
+              'Task 3/3: User stats refresh failed',
               error instanceof Error ? error : new Error(String(error))
             );
 

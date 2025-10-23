@@ -599,10 +599,6 @@ export const calculateUserAffinitiesAction = rateLimitedAction
   .metadata({
     actionName: 'calculateUserAffinities',
     category: 'user',
-    rateLimit: {
-      maxRequests: 5, // Very limited - expensive operation
-      windowSeconds: 3600, // Per hour
-    },
   })
   .schema(z.void())
   .action(async () => {
@@ -831,10 +827,6 @@ export const trackInteraction = rateLimitedAction
   .metadata({
     actionName: 'trackInteraction',
     category: 'analytics',
-    rateLimit: {
-      maxRequests: 200, // High volume for user tracking
-      windowSeconds: 60,
-    },
   })
   .schema(trackInteractionSchema)
   .action(async ({ parsedInput }: { parsedInput: TrackInteractionInput }) => {
@@ -1029,10 +1021,6 @@ export const generateConfigRecommendations = rateLimitedAction
   .metadata({
     actionName: 'generateConfigRecommendations',
     category: 'content',
-    rateLimit: {
-      maxRequests: 20, // Allow multiple quiz attempts
-      windowSeconds: 60, // Per minute
-    },
   })
   .schema(quizAnswersSchema)
   .action(async ({ parsedInput }: { parsedInput: QuizAnswers }) => {
@@ -1120,10 +1108,6 @@ export const trackRecommendationEvent = rateLimitedAction
   .metadata({
     actionName: 'trackRecommendationEvent',
     category: 'analytics',
-    rateLimit: {
-      maxRequests: 100,
-      windowSeconds: 60,
-    },
   })
   .schema(
     quizAnswersSchema.pick({

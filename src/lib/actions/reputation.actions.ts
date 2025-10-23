@@ -137,10 +137,6 @@ export const recalculateReputation = authedAction
   .metadata({
     actionName: 'recalculateReputation',
     category: 'reputation',
-    rateLimit: {
-      maxRequests: 5, // Max 5 recalculations per minute
-      windowSeconds: 60,
-    },
   })
   .schema(z.void())
   .action(async ({ ctx }) => {

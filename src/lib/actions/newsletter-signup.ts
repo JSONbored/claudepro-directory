@@ -38,10 +38,6 @@ export const subscribeToNewsletter = rateLimitedAction
   .metadata({
     actionName: 'subscribeToNewsletter',
     category: 'form',
-    rateLimit: {
-      maxRequests: 5,
-      windowSeconds: 300, // 5 minutes
-    },
   })
   .schema(newsletterSignupSchema)
   .action(async ({ parsedInput: { email, source, referrer } }) => {
