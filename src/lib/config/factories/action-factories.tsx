@@ -21,7 +21,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { BookOpen, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
+import { Download, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import type { ActionButtonConfig } from '@/src/lib/types/content-type-config';
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -154,6 +154,44 @@ export function createNotificationAction(
 }
 
 /**
+ * Create a download file action handler
+ *
+ * Triggers browser download of a file using window.location.href.
+ * Used for downloadable assets like skill ZIP packages.
+ *
+ * @param label - Button label text (e.g., "Download Skill")
+ * @param icon - React icon component to display
+ * @param pathTemplate - Download path template with {slug} placeholder
+ * @returns ActionButtonConfig with download handler
+ *
+ * @example
+ * ```tsx
+ * // skills category
+ * primaryAction: createDownloadAction(
+ *   'Download Skill',
+ *   <Download className={`h-4 w-4 mr-2`} />,
+ *   '/downloads/skills/{slug}.zip'
+ * )
+ * ```
+ */
+export function createDownloadAction(
+  label: string,
+  icon: ReactNode,
+  pathTemplate: string
+): ActionButtonConfig {
+  return {
+    label,
+    icon,
+    handler: (item: UnifiedContentItem) => {
+      if ('slug' in item && item.slug) {
+        const downloadPath = pathTemplate.replace('{slug}', item.slug);
+        window.location.href = downloadPath;
+      }
+    },
+  };
+}
+
+/**
  * Create a GitHub link action handler
  *
  * Standardizes GitHub repository link opening pattern.
@@ -246,11 +284,15 @@ export const commonActions = {
     createScrollAction('View Collection', <Layers className={'h-4 w-4 mr-2'} />, 'items'),
 
   /**
-   * Apply skill action (for skills category)
-   * Renamed from useSkill to avoid React hook naming convention
+   * Download skill ZIP package (for skills category)
+   * Downloads Claude Desktop-compatible SKILL.md package
    */
   applySkill: () =>
-    createScrollAction('Use Skill', <BookOpen className={'h-4 w-4 mr-2'} />, 'content'),
+    createDownloadAction(
+      'Download Skill',
+      <Download className={'h-4 w-4 mr-2'} />,
+      '/downloads/skills/{slug}.zip'
+    ),
 
   /**
    * View hooks on GitHub action (for hooks category)

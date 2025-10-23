@@ -41,6 +41,10 @@ generated/
 # Build-generated API files
 public/static-api/
 
+# Skill ZIP packages (build artifacts copied from content/skills/*.zip)
+# Source ZIPs in content/skills/ are git-tracked for GitHub discoverability
+public/downloads/skills/*.zip
+
 # Dynamic sitemap served by src/app/sitemap.ts (do not commit generated file)
 public/sitemap.xml
 
