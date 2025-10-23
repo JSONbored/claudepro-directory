@@ -42,9 +42,18 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
-  return jobs.map((job) => ({
+  const jobParams = jobs.map((job) => ({
     slug: job.slug,
   }));
+
+  // Cache Components requires at least one param
+  // If no jobs exist, return a placeholder to prevent build error
+  if (jobParams.length === 0) {
+    logger.warn('No jobs available - returning placeholder param for Cache Components');
+    return [{ slug: 'placeholder' }];
+  }
+
+  return jobParams;
 }
 
 // Enable ISR - revalidate every 4 hours
