@@ -78,55 +78,6 @@ export const EXACT_ROUTE_CONFIG: readonly ExactRouteConfig[] = [
     limiterKey: 'admin',
     description: 'Cache warming endpoint - admin operations only',
   },
-
-  // Heavy API endpoints (moderate restrictions)
-  {
-    path: '/api/all-configurations.json',
-    limiterKey: 'heavyApi',
-    description: 'All configurations - heavy dataset with moderate restrictions',
-  },
-  {
-    path: '/api/guides/trending',
-    limiterKey: 'heavyApi',
-    description: 'Trending guides - moderate usage endpoint',
-  },
-
-  // Standard API endpoints (generous limits)
-  {
-    path: '/api/agents.json',
-    limiterKey: 'api',
-    description: 'Agents API - standard usage',
-  },
-  {
-    path: '/api/mcp.json',
-    limiterKey: 'api',
-    description: 'MCP servers API - standard usage',
-  },
-  {
-    path: '/api/rules.json',
-    limiterKey: 'api',
-    description: 'Rules API - standard usage',
-  },
-  {
-    path: '/api/commands.json',
-    limiterKey: 'api',
-    description: 'Commands API - standard usage',
-  },
-  {
-    path: '/api/hooks.json',
-    limiterKey: 'api',
-    description: 'Hooks API - standard usage',
-  },
-  {
-    path: '/api/statuslines.json',
-    limiterKey: 'api',
-    description: 'Status lines API - standard usage',
-  },
-  {
-    path: '/api/collections.json',
-    limiterKey: 'api',
-    description: 'Collections API - standard usage',
-  },
 ] as const;
 
 // ============================================================================

@@ -1,6 +1,6 @@
 {
   "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude).github/' ':(exclude)scripts/github-actions/' ':(exclude)templates/' ':(exclude)*.md' ':(exclude)LICENSE' ':(exclude).gitignore'",
-  "installCommand": "corepack enable && corepack prepare pnpm@10.19.0 --activate && pnpm install --frozen-lockfile",
+  "installCommand": "corepack enable pnpm && corepack install -g pnpm@10.19.0 && pnpm install --frozen-lockfile",
   "buildCommand": "pnpm build",
   "outputDirectory": ".next",
   "framework": "nextjs",

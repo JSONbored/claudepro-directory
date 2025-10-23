@@ -60,35 +60,6 @@ export const SOCIAL_LINKS = socialLinksSchema.parse({
 });
 
 /**
- * API Configuration Schema
- */
-const apiConfigSchema = z.object({
-  baseUrl: z.string().url(),
-  endpoints: z.object({
-    agents: z.string().startsWith('/api/'),
-    mcp: z.string().startsWith('/api/'),
-    rules: z.string().startsWith('/api/'),
-    commands: z.string().startsWith('/api/'),
-    hooks: z.string().startsWith('/api/'),
-    skills: z.string().startsWith('/api/'),
-    allConfigurations: z.string().startsWith('/api/'),
-  }),
-});
-
-export const API_CONFIG = apiConfigSchema.parse({
-  baseUrl: 'https://claudepro.directory/api',
-  endpoints: {
-    agents: '/api/agents.json',
-    mcp: '/api/mcp.json',
-    rules: '/api/rules.json',
-    commands: '/api/commands.json',
-    hooks: '/api/hooks.json',
-    skills: '/api/skills.json',
-    allConfigurations: '/api/all-configurations.json',
-  },
-});
-
-/**
  * Claude Configuration Schema
  */
 const claudeConfigSchema = z.object({

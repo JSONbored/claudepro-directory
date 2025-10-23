@@ -71,10 +71,6 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: {
       ...homeMetadata.alternates,
       types: {
-        // OpenAPI 3.1.0 Specification for AI Discovery (RFC 9727)
-        'application/openapi+json': '/openapi.json',
-        // API Catalog for RFC 9727 Compliant Discovery
-        'application/json': '/.well-known/api-catalog',
         // LLMs.txt for AI-Optimized Plain Text Content (llmstxt.org)
         'text/plain': '/llms.txt',
       },
@@ -141,11 +137,6 @@ export default async function RootLayout({
 
         {/* Theme Color for Mobile Browsers */}
         <meta name="theme-color" content="#000000" />
-
-        {/* API Discovery Metadata for AI Crawlers (RFC 9727) */}
-        <meta name="api-spec" content="/openapi.json" />
-        <meta name="api-version" content="1.0.0" />
-        <meta name="api-catalog" content="/.well-known/api-catalog" />
 
         {/* Strategic Resource Hints - Only for confirmed external connections */}
 
