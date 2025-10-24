@@ -1,11 +1,16 @@
 /**
  * Notification Store - Zustand State Management
  *
- * Simple store for managing notification state:
- * - Active notifications
- * - Dismissed notification IDs (persisted in localStorage)
- * - Unread count
- * - Sheet open/close state
+ * ARCHITECTURE: Derived State Pattern (2025)
+ * - Stores computed values as state (not computed on access)
+ * - Updates derived state when dismissedIds changes
+ * - Prevents infinite re-render loops (React Error #185)
+ * - Components select stable state references
+ *
+ * Performance:
+ * - O(1) state access (no filtering on every render)
+ * - Memoized derived state updates only when dismissedIds changes
+ * - Stable array references prevent unnecessary component re-renders
  *
  * @module lib/stores/notification-store
  */
@@ -16,12 +21,25 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { getActiveNotifications, type Notification } from '@/src/config/notifications';
 
+/**
+ * Helper: Compute active notifications (non-dismissed)
+ */
+function computeActiveNotifications(dismissedIds: string[]): Notification[] {
+  return getActiveNotifications().filter((n) => !dismissedIds.includes(n.id));
+}
+
 export interface NotificationStore {
-  /** List of dismissed notification IDs */
+  /** List of dismissed notification IDs (persisted) */
   dismissedIds: string[];
 
   /** Whether the notification sheet is open */
   isSheetOpen: boolean;
+
+  /** Derived state: Active, non-dismissed notifications (STABLE REFERENCE) */
+  activeNotifications: Notification[];
+
+  /** Derived state: Unread count (STABLE VALUE) */
+  unreadCount: number;
 
   /** Dismiss a notification by ID */
   dismiss: (id: string) => void;
@@ -38,57 +56,68 @@ export interface NotificationStore {
   /** Toggle the notification sheet */
   toggleSheet: () => void;
 
-  /** Get active, non-dismissed notifications */
-  getActiveNotifications: () => Notification[];
-
-  /** Get unread count */
-  getUnreadCount: () => number;
-
   /** Check if notification is dismissed */
   isDismissed: (id: string) => boolean;
 }
 
 export const useNotificationStore = create<NotificationStore>()(
   persist(
-    (set, get) => ({
-      dismissedIds: [],
-      isSheetOpen: false,
+    (set, get) => {
+      // Initialize derived state
+      const initialDismissedIds: string[] = [];
+      const initialActiveNotifications = computeActiveNotifications(initialDismissedIds);
 
-      dismiss: (id: string) => {
-        set((state) => ({
-          dismissedIds: [...state.dismissedIds, id],
-        }));
-      },
+      return {
+        dismissedIds: initialDismissedIds,
+        isSheetOpen: false,
+        activeNotifications: initialActiveNotifications,
+        unreadCount: initialActiveNotifications.length,
 
-      dismissAll: () => {
-        const allIds = getActiveNotifications().map((n) => n.id);
-        set({ dismissedIds: allIds });
-      },
+        dismiss: (id: string) => {
+          set((state) => {
+            const newDismissedIds = [...state.dismissedIds, id];
+            const newActiveNotifications = computeActiveNotifications(newDismissedIds);
 
-      openSheet: () => set({ isSheetOpen: true }),
+            return {
+              dismissedIds: newDismissedIds,
+              activeNotifications: newActiveNotifications,
+              unreadCount: newActiveNotifications.length,
+            };
+          });
+        },
 
-      closeSheet: () => set({ isSheetOpen: false }),
+        dismissAll: () => {
+          const allIds = getActiveNotifications().map((n) => n.id);
+          set({
+            dismissedIds: allIds,
+            activeNotifications: [],
+            unreadCount: 0,
+          });
+        },
 
-      toggleSheet: () => set((state) => ({ isSheetOpen: !state.isSheetOpen })),
+        openSheet: () => set({ isSheetOpen: true }),
 
-      getActiveNotifications: () => {
-        const { dismissedIds } = get();
-        return getActiveNotifications().filter((n) => !dismissedIds.includes(n.id));
-      },
+        closeSheet: () => set({ isSheetOpen: false }),
 
-      getUnreadCount: () => {
-        const { dismissedIds } = get();
-        return getActiveNotifications().filter((n) => !dismissedIds.includes(n.id)).length;
-      },
+        toggleSheet: () => set((state) => ({ isSheetOpen: !state.isSheetOpen })),
 
-      isDismissed: (id: string) => {
-        const { dismissedIds } = get();
-        return dismissedIds.includes(id);
-      },
-    }),
+        isDismissed: (id: string) => {
+          const { dismissedIds } = get();
+          return dismissedIds.includes(id);
+        },
+      };
+    },
     {
       name: 'notification-storage', // localStorage key
       partialize: (state) => ({ dismissedIds: state.dismissedIds }), // Only persist dismissedIds
+      onRehydrateStorage: () => (state) => {
+        // After rehydration, recompute derived state from persisted dismissedIds
+        if (state) {
+          const activeNotifications = computeActiveNotifications(state.dismissedIds);
+          state.activeNotifications = activeNotifications;
+          state.unreadCount = activeNotifications.length;
+        }
+      },
     }
   )
 );

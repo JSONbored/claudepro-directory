@@ -77,6 +77,10 @@ export const categoryIdSchema = z
 /**
  * Cacheable categories - subset that supports Redis caching (generateFullContent=true)
  * These categories have full content generated at build time
+ *
+ * IMPORTANT: All categories EXCEPT 'jobs' are cacheable
+ * - jobs has generateFullContent: false (external API data)
+ * - All other 10 categories have generateFullContent: true
  */
 export const CACHEABLE_CATEGORIES = [
   'agents',
@@ -87,6 +91,8 @@ export const CACHEABLE_CATEGORIES = [
   'statuslines',
   'skills',
   'collections',
+  'guides',
+  'changelog',
 ] as const;
 
 export const cacheableCategorySchema = z

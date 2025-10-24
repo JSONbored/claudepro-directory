@@ -21,8 +21,9 @@ import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/n
 import { NotificationItem } from './notification-item';
 
 export function NotificationList() {
-  const activeNotifications = useNotificationStore((state: NotificationStore) =>
-    state.getActiveNotifications()
+  // ✅ Select stable state reference (not function call)
+  const activeNotifications = useNotificationStore(
+    (state: NotificationStore) => state.activeNotifications
   );
   const dismissAll = useNotificationStore((state: NotificationStore) => state.dismissAll);
 

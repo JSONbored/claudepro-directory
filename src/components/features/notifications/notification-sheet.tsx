@@ -28,7 +28,8 @@ import { NotificationList } from './notification-list';
 export function NotificationSheet() {
   const isSheetOpen = useNotificationStore((state: NotificationStore) => state.isSheetOpen);
   const closeSheet = useNotificationStore((state: NotificationStore) => state.closeSheet);
-  const unreadCount = useNotificationStore((state: NotificationStore) => state.getUnreadCount());
+  // ✅ Select stable state value (not function call)
+  const unreadCount = useNotificationStore((state: NotificationStore) => state.unreadCount);
 
   return (
     <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>

@@ -23,7 +23,8 @@ interface NotificationBadgeProps {
 }
 
 export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
-  const unreadCount = useNotificationStore((state: NotificationStore) => state.getUnreadCount());
+  // ✅ Select stable state value (not function call)
+  const unreadCount = useNotificationStore((state: NotificationStore) => state.unreadCount);
 
   if (unreadCount === 0) return null;
 

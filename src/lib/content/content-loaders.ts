@@ -169,15 +169,22 @@ export async function getContentByCategory(category: string): Promise<UnifiedCon
   try {
     // Try Redis cache first (production optimization)
     if (contentCache.isEnabled()) {
-      const cached = await contentCache.getContentMetadata<UnifiedContentItem[]>(category);
-      if (cached && Array.isArray(cached)) {
-        logger.debug('Content cache hit', {
+      try {
+        const cached = await contentCache.getContentMetadata<UnifiedContentItem[]>(category);
+        if (cached && Array.isArray(cached)) {
+          logger.debug('Content cache hit', {
+            category,
+            itemCount: cached.length,
+          });
+          // Note: Cached items already enriched, but verify isNew is fresh
+          // (Important: isNew changes daily, so we re-compute for cache hits)
+          return enrichContentItems(cached);
+        }
+      } catch (cacheError) {
+        logger.warn('Cache error, falling back to filesystem', {
           category,
-          itemCount: cached.length,
+          error: cacheError instanceof Error ? cacheError.message : String(cacheError),
         });
-        // Note: Cached items already enriched, but verify isNew is fresh
-        // (Important: isNew changes daily, so we re-compute for cache hits)
-        return enrichContentItems(cached);
       }
     }
 

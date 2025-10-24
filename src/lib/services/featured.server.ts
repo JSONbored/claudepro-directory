@@ -480,7 +480,7 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
     const featuredRecords = await getCurrentFeaturedConfigs();
 
     if (featuredRecords.length === 0) {
-      logger.info('No featured configs for current week - using popular content fallback');
+      logger.info('No featured configs for current week - using simple newest-first fallback');
 
       // Fallback: Load all content and get top 6 per category
       const [

@@ -22,7 +22,8 @@ import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/n
 import { NotificationBadge } from './notification-badge';
 
 export function NotificationFAB() {
-  const unreadCount = useNotificationStore((state: NotificationStore) => state.getUnreadCount());
+  // ✅ Select stable state value (not function call)
+  const unreadCount = useNotificationStore((state: NotificationStore) => state.unreadCount);
   const openSheet = useNotificationStore((state: NotificationStore) => state.openSheet);
 
   // Hide if no unread notifications

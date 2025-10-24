@@ -51,8 +51,9 @@ function markNotificationAsShown(id: string): void {
 }
 
 export function NotificationToastHandler() {
-  const activeNotifications = useNotificationStore((state: NotificationStore) =>
-    state.getActiveNotifications()
+  // ✅ Select stable state reference (not function call)
+  const activeNotifications = useNotificationStore(
+    (state: NotificationStore) => state.activeNotifications
   );
   const [hasShownToast, setHasShownToast] = useState(false);
 
