@@ -29,8 +29,8 @@ export function Footer() {
   return (
     <footer className={'border-t border-border/50 bg-background/95 backdrop-blur'}>
       <div className="container mx-auto px-4 py-8 md:py-12">
-        {/* Three-column grid with better mobile stacking */}
-        <div className="grid gap-8 md:gap-12 grid-cols-1 md:grid-cols-3">
+        {/* Four-column grid with better mobile stacking */}
+        <div className="grid gap-8 md:gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
           {/* About Section - Takes full width on mobile */}
           <motion.div
             className="text-center md:text-left"
@@ -82,7 +82,7 @@ export function Footer() {
             </div>
           </motion.div>
 
-          {/* Quick Links - Staggered fade-in */}
+          {/* Browse - All 8 main categories */}
           <motion.div
             className="text-center md:text-left"
             initial={{ opacity: 0, y: 20 }}
@@ -90,14 +90,17 @@ export function Footer() {
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.1 }}
           >
-            <h3 className={'font-semibold mb-4 text-lg md:text-base'}>Quick Links</h3>
+            <h3 className={'font-semibold mb-4 text-lg md:text-base'}>Browse</h3>
             <ul className={'space-y-3 md:space-y-2'}>
               {[
-                { href: ROUTES.GUIDES, label: 'Guides' },
+                { href: ROUTES.AGENTS, label: 'Agents' },
+                { href: ROUTES.MCP, label: 'MCP Servers' },
+                { href: ROUTES.COMMANDS, label: 'Commands' },
+                { href: ROUTES.RULES, label: 'Rules' },
+                { href: ROUTES.HOOKS, label: 'Hooks' },
+                { href: ROUTES.STATUSLINES, label: 'Statuslines' },
+                { href: ROUTES.SKILLS, label: 'Skills' },
                 { href: ROUTES.COLLECTIONS, label: 'Collections' },
-                { href: ROUTES.CHANGELOG, label: 'Changelog' },
-                { href: ROUTES.COMMUNITY, label: 'Community' },
-                { href: ROUTES.SUBMIT, label: 'Submit' },
               ].map((link, index) => (
                 <motion.li
                   key={link.href}
@@ -124,7 +127,7 @@ export function Footer() {
             </ul>
           </motion.div>
 
-          {/* AI & Resources */}
+          {/* Resources */}
           <motion.div
             className="text-center md:text-left"
             initial={{ opacity: 0, y: 20 }}
@@ -132,11 +135,15 @@ export function Footer() {
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.2 }}
           >
-            <h3 className={'font-semibold mb-4 text-lg md:text-base'}>AI & Resources</h3>
+            <h3 className={'font-semibold mb-4 text-lg md:text-base'}>Resources</h3>
             <ul className={'space-y-3 md:space-y-2'}>
               {[
-                { href: ROUTES.LLMS_TXT, label: 'LLMs.txt', icon: Sparkles },
+                { href: ROUTES.GUIDES, label: 'Guides', icon: null },
+                { href: ROUTES.CHANGELOG, label: 'Changelog', icon: null },
+                { href: ROUTES.COMMUNITY, label: 'Community', icon: null },
+                { href: ROUTES.SUBMIT, label: 'Submit Content', icon: null },
                 { href: ROUTES.PARTNER, label: 'Partner Program', icon: null },
+                { href: ROUTES.LLMS_TXT, label: 'LLMs.txt', icon: Sparkles },
               ].map((link, index) => (
                 <motion.li
                   key={link.href}
@@ -164,6 +171,47 @@ export function Footer() {
               ))}
             </ul>
           </motion.div>
+
+          {/* Support */}
+          <motion.div
+            className="text-center md:text-left"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+          >
+            <h3 className={'font-semibold mb-4 text-lg md:text-base'}>Support</h3>
+            <ul className={'space-y-3 md:space-y-2'}>
+              {[
+                { href: '/cookies', label: 'Cookie Policy' },
+                { href: '/contact', label: 'Contact Us' },
+                { href: '/help', label: 'Help Center' },
+                { href: '/accessibility', label: 'Accessibility' },
+              ].map((link, index) => (
+                <motion.li
+                  key={link.href}
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.25 + index * 0.05 }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05, x: 3 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                    className="inline-block"
+                  >
+                    <Link
+                      href={link.href}
+                      className="text-base md:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </motion.div>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
         </div>
 
         {/* Bottom Bar - Better mobile layout */}
@@ -176,9 +224,14 @@ export function Footer() {
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
         >
-          <p className={'text-sm text-muted-foreground text-center md:text-left'}>
-            © {currentYear} {APP_CONFIG.author}. All rights reserved.
-          </p>
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 text-sm text-muted-foreground">
+            <p>
+              © {currentYear} {APP_CONFIG.author}. All rights reserved.
+            </p>
+            <Link href="/sitemap.xml" className="hover:text-foreground transition-colors">
+              Sitemap
+            </Link>
+          </div>
           <motion.p className={'text-xs text-muted-foreground'} whileHover={{ scale: 1.05 }}>
             <Link
               href={ROUTES.LLMS_TXT}

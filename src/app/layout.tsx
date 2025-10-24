@@ -17,6 +17,7 @@ import './globals.css';
 import './view-transitions.css';
 import './micro-interactions.css';
 import './starry-night.css';
+import dynamic from 'next/dynamic';
 import { Toaster } from 'sonner';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
@@ -26,8 +27,17 @@ import { PwaInstallTracker } from '@/src/components/infra/pwa-install-tracker';
 import { OrganizationStructuredData } from '@/src/components/infra/structured-data/organization-schema';
 import { AnnouncementBanner } from '@/src/components/layout/announcement-banner';
 import { FloatingMobileSearch } from '@/src/components/layout/floating-mobile-search';
-import { Footer } from '@/src/components/layout/footer';
 import { Navigation } from '@/src/components/layout/navigation';
+
+// Lazy load footer component for better performance (5-10KB bundle reduction)
+const Footer = dynamic(
+  () => import('@/src/components/layout/footer').then((mod) => ({ default: mod.Footer })),
+  {
+    loading: () => null,
+    ssr: true, // Still render on server for SEO
+  }
+);
+
 import { StructuredData } from '@/src/components/shared/structured-data';
 import { UmamiScript } from '@/src/components/shared/umami-script';
 import { APP_CONFIG } from '@/src/lib/constants';

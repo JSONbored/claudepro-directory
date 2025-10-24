@@ -87,13 +87,6 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
     description: 'AI-powered task automation agents',
   },
   {
-    label: 'Skills',
-    href: '/skills',
-    icon: BookOpen,
-    description: 'Task-focused capability guides (PDF/DOCX/PPTX/XLSX)',
-    isNew: true,
-  },
-  {
     label: 'Commands',
     href: '/commands',
     icon: Zap,
@@ -118,22 +111,17 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
     description: 'Project rules and guidelines',
   },
   {
+    label: 'Skills',
+    href: '/skills',
+    icon: BookOpen,
+    description: 'Task-focused capability guides (PDF/DOCX/PPTX/XLSX)',
+    isNew: true,
+  },
+  {
     label: 'Statuslines',
     href: '/statuslines',
     icon: Terminal,
     description: 'Customizable editor status bars',
-  },
-  {
-    label: 'Collections',
-    href: '/collections',
-    icon: Layers,
-    description: 'Curated content bundles',
-  },
-  {
-    label: 'Guides',
-    href: '/guides',
-    icon: BookOpen,
-    description: 'Tutorials and how-to guides',
   },
 ];
 
@@ -144,6 +132,23 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
  * Grouped by category for better organization.
  */
 export const SECONDARY_NAVIGATION: NavigationGroup[] = [
+  {
+    heading: 'Browse',
+    links: [
+      {
+        label: 'Collections',
+        href: '/collections',
+        icon: Layers,
+        description: 'Curated content bundles',
+      },
+      {
+        label: 'Guides',
+        href: '/guides',
+        icon: BookOpen,
+        description: 'Tutorials and how-to guides',
+      },
+    ],
+  },
   {
     heading: 'Discover',
     links: [

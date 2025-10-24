@@ -235,9 +235,10 @@ export const UI_CLASSES = {
 
   /**
    * Grid Layouts
+   * Fixed spacing issues by removing auto-rows-fr and items-start
+   * which caused increasing gaps with Motion.dev stagger animations
    */
-  GRID_RESPONSIVE_3:
-    'grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start auto-rows-fr',
+  GRID_RESPONSIVE_3: 'grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
   GRID_RESPONSIVE_3_TIGHT: 'grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
   GRID_RESPONSIVE_4: 'grid gap-6 md:grid-cols-2 lg:grid-cols-4',
   GRID_RESPONSIVE_LIST: 'grid gap-6 md:grid-cols-2 lg:grid-cols-3 list-none',

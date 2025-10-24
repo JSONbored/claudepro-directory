@@ -37,9 +37,21 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
  *
  * @see Research Report: "shadcn Menu Components for Navigation"
  */
-export function NavigationCommandMenu() {
-  const [open, setOpen] = useState(false);
+interface NavigationCommandMenuProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function NavigationCommandMenu({
+  open: controlledOpen,
+  onOpenChange,
+}: NavigationCommandMenuProps = {}) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const router = useRouter();
+
+  // Use controlled state if provided, otherwise use internal state
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
 
   /**
    * Keyboard shortcut handler
@@ -50,13 +62,14 @@ export function NavigationCommandMenu() {
       // Check for Cmd+K (Mac) or Ctrl+K (Windows/Linux)
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((prevOpen) => !prevOpen);
+        // Toggle open state - handle both controlled and uncontrolled
+        setOpen(!open);
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [open, setOpen]);
 
   /**
    * Handle navigation selection

@@ -54,7 +54,6 @@ import {
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/primitives/sheet';
 import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
-import { useSearchShortcut } from '@/src/hooks/use-search-shortcut';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ChevronDown, DiscordIcon, Github, LogoIcon, Menu } from '@/src/lib/icons';
@@ -100,10 +99,8 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const pathname = usePathname();
-
-  // Global search keyboard shortcut (⌘K / Ctrl+K)
-  useSearchShortcut();
 
   // Motion.dev scroll-based animations (Phase 1.5 - October 2025)
   const { scrollY } = useScroll();
@@ -157,7 +154,7 @@ export const Navigation = () => {
       </a>
 
       {/* Global Command Menu (⌘K) */}
-      <NavigationCommandMenu />
+      <NavigationCommandMenu open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
 
       <motion.header
         className="sticky top-0 z-50 w-full pt-1 px-3 pb-3 will-change-transform contain-layout"
@@ -173,7 +170,7 @@ export const Navigation = () => {
           >
             <div className="px-3 md:px-4">
               <div
-                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-all duration-300 will-change-transform ${
+                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-[height] duration-300 will-change-auto ${
                   isScrolled ? 'h-11 md:h-12' : 'h-14 md:h-16'
                 }`}
               >
@@ -235,8 +232,8 @@ export const Navigation = () => {
                         <ChevronDown className="ml-1 h-3 w-3" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[600px] p-4">
-                      <div className="grid gap-6 md:grid-cols-2">
+                    <DropdownMenuContent align="end" className="w-[800px] p-4">
+                      <div className="grid gap-6 md:grid-cols-3">
                         {SECONDARY_NAVIGATION.map((group) => (
                           <div key={group.heading} className="space-y-3">
                             <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
@@ -251,7 +248,7 @@ export const Navigation = () => {
                                       href={link.href}
                                       prefetch={true}
                                       className={
-                                        'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg hover:bg-accent/10 hover:scale-[1.02] transition-all duration-200 group'
+                                        'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg hover:bg-accent/10 shadow-sm hover:shadow-md transition-shadow duration-200 group'
                                       }
                                     >
                                       {IconComponent && (
@@ -292,7 +289,7 @@ export const Navigation = () => {
                           href={ROUTES.SUBMIT}
                           prefetch={true}
                           className={
-                            'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg bg-accent/5 hover:bg-accent/10 hover:scale-[1.01] transition-all duration-200 group'
+                            'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg bg-accent/5 hover:bg-accent/10 shadow-sm hover:shadow-lg transition-shadow duration-200 group'
                           }
                         >
                           <div
@@ -368,23 +365,13 @@ export const Navigation = () => {
 
                 {/* Right Side Actions */}
                 <div className={'flex items-center gap-2 md:gap-3'}>
-                  {/* Global Search Trigger */}
+                  {/* Global Search Trigger - Opens Command Palette */}
                   <div className={'hidden md:block'}>
                     <SearchTrigger
                       variant="ghost"
                       size="sm"
                       showShortcut={!isScrolled}
-                      onClick={() => {
-                        // Trigger same behavior as ⌘K shortcut
-                        const searchInput = document.querySelector<HTMLInputElement>(
-                          'input[name="search"], input[type="search"]'
-                        );
-                        searchInput?.focus();
-                        searchInput?.scrollIntoView({
-                          behavior: 'smooth',
-                          block: 'center',
-                        });
-                      }}
+                      onClick={() => setCommandPaletteOpen(true)}
                     />
                   </div>
 
