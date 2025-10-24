@@ -371,14 +371,6 @@ async function processContentFile<T extends ContentType>(
       processingTimeMs: performance.now() - startTime,
     };
   } catch (error) {
-    // Log validation errors to console for local development debugging
-    console.error(`\n❌ Validation failed for ${file}:`);
-    console.error(error instanceof Error ? error.message : String(error));
-    if (error instanceof Error && 'issues' in error) {
-      // Zod validation error with detailed issues
-      console.error('Validation issues:', (error as any).issues);
-    }
-
     return {
       success: false,
       file,

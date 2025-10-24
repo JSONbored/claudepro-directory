@@ -64,6 +64,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
     >
       {/* Dismiss Button */}
       <button
+        type="button"
         onClick={handleDismiss}
         className={`
           absolute top-2 right-2

@@ -19,7 +19,7 @@
  */
 
 import { useSpring } from 'motion/react';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { cn } from '@/src/lib/utils';
 
 interface NumberTickerProps {
@@ -64,30 +64,40 @@ function NumberTickerComponent({
   prefix = '',
   suffix = '',
 }: NumberTickerProps) {
-  // Create spring-animated value
+  // Create spring-animated value - called at top level
   const spring = useSpring(0, { stiffness: 100, damping: 30 });
 
   // Subscribe to spring value changes and format to string
   const [displayValue, setDisplayValue] = useState(`${prefix}0${suffix}`);
 
+  // Store spring in ref to access stable reference in effects
+  const springRef = useRef(spring);
+  springRef.current = spring;
+
   useEffect(() => {
     // Subscribe to spring value changes
-    const unsubscribe = spring.on('change', (latest) => {
+    // Use springRef.current to get stable reference
+    const currentSpring = springRef.current;
+    const unsubscribe = currentSpring.on('change', (latest) => {
       const formattedValue = latest.toFixed(decimalPlaces);
       setDisplayValue(`${prefix}${formattedValue}${suffix}`);
     });
 
-    return unsubscribe;
-  }, [spring, decimalPlaces, prefix, suffix]);
+    return () => {
+      unsubscribe();
+    };
+  }, [decimalPlaces, prefix, suffix]);
 
   // Animate to target value on mount or when value changes
   useEffect(() => {
     const timer = setTimeout(() => {
-      spring.set(value);
+      springRef.current.set(value);
     }, delay);
 
-    return () => clearTimeout(timer);
-  }, [value, delay, spring]);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value, delay]);
 
   return (
     <span

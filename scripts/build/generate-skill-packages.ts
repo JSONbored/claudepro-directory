@@ -228,7 +228,7 @@ async function zipSkillFolder(slug: string, skillDirPath: string): Promise<strin
  * @param zipPath - Path to ZIP file
  * @param slug - Expected skill slug
  */
-async function validateZipStructure(zipPath: string, slug: string): Promise<void> {
+async function validateZipStructure(zipPath: string, _slug: string): Promise<void> {
   // Basic validation: check file exists and has non-zero size
   const stats = await fs.stat(zipPath);
   if (stats.size === 0) {

@@ -28,6 +28,16 @@ import {
   Skeleton,
 } from '@/src/components/primitives/loading-skeleton';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { getSkeletonKeys } from '@/src/lib/utils/skeleton-keys';
+
+// Pre-generate skeleton keys for common counts
+const KEYS_9 = getSkeletonKeys(9);
+const KEYS_8 = getSkeletonKeys(8);
+const KEYS_7 = getSkeletonKeys(7);
+const KEYS_6 = getSkeletonKeys(6);
+const KEYS_5 = getSkeletonKeys(5);
+const KEYS_12 = getSkeletonKeys(12);
+const KEYS_3 = getSkeletonKeys(3);
 
 /**
  * Skeleton configuration for different content types
@@ -95,7 +105,7 @@ export function CategoryLoading({
       {/* Content grid */}
       <div className={config.gridClass}>
         {Array.from({ length: config.totalCards }).map((_, i) => (
-          <ConfigCardSkeleton key={`skeleton-card-${i}`} />
+          <ConfigCardSkeleton key={KEYS_9[i]} />
         ))}
       </div>
     </div>
@@ -151,7 +161,7 @@ export function DetailPageLoading() {
               <Skeleton size="sm" width="sm" />
               <div className="space-y-2">
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <Skeleton key={`code-${i}`} size="sm" width={i % 3 === 0 ? '2/3' : '3xl'} />
+                  <Skeleton key={KEYS_8[i]} size="sm" width={i % 3 === 0 ? '2/3' : '3xl'} />
                 ))}
               </div>
             </div>
@@ -191,7 +201,7 @@ export function GuideDetailLoading() {
             </div>
             <div className="flex flex-wrap gap-2">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={`tag-${i}`} size="sm" width="xs" rounded="full" />
+                <Skeleton key={KEYS_5[i]} size="sm" width="xs" rounded="full" />
               ))}
             </div>
           </div>
@@ -203,7 +213,7 @@ export function GuideDetailLoading() {
           <div className="lg:col-span-2 space-y-6">
             <div className="border rounded-lg p-6 space-y-4">
               {Array.from({ length: 12 }).map((_, i) => (
-                <Skeleton key={`text-${i}`} size="sm" width={i % 4 === 0 ? '2/3' : '3xl'} />
+                <Skeleton key={KEYS_12[i]} size="sm" width={i % 4 === 0 ? '2/3' : '3xl'} />
               ))}
             </div>
           </div>
@@ -211,7 +221,7 @@ export function GuideDetailLoading() {
             <div className="border rounded-lg p-6 space-y-4">
               <Skeleton size="md" width="sm" />
               {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={`sidebar-${i}`} size="sm" width="3xl" />
+                <Skeleton key={KEYS_3[i]} size="sm" width="3xl" />
               ))}
             </div>
           </div>
@@ -234,7 +244,7 @@ export function SearchResultsLoading() {
       {/* Results grid */}
       <div className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}>
         {Array.from({ length: 9 }).map((_, i) => (
-          <ConfigCardSkeleton key={`search-result-${i}`} />
+          <ConfigCardSkeleton key={KEYS_9[i]} />
         ))}
       </div>
     </div>
@@ -262,7 +272,7 @@ export function HomePageLoading() {
           {/* Stats */}
           <div className="flex flex-wrap justify-center gap-4">
             {Array.from({ length: 7 }).map((_, i) => (
-              <Skeleton key={`stat-${i}`} size="sm" width="sm" />
+              <Skeleton key={KEYS_7[i]} size="sm" width="sm" />
             ))}
           </div>
         </div>
@@ -271,14 +281,14 @@ export function HomePageLoading() {
       {/* Content sections */}
       <div className="container mx-auto px-4 pb-16">
         {Array.from({ length: 3 }).map((_, sectionIndex) => (
-          <div key={`section-${sectionIndex}`} className="mb-12">
+          <div key={KEYS_3[sectionIndex]} className="mb-12">
             <div className="flex items-center justify-between mb-6">
               <Skeleton size="lg" width="lg" />
               <Skeleton size="sm" width="sm" />
             </div>
             <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
               {Array.from({ length: 6 }).map((_, i) => (
-                <ConfigCardSkeleton key={`card-${sectionIndex}-${i}`} />
+                <ConfigCardSkeleton key={KEYS_6[i]} />
               ))}
             </div>
           </div>

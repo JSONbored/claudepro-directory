@@ -59,7 +59,7 @@ function escapeXml(text: string): string {
  * @param request - Next.js request object
  * @returns Atom XML response
  */
-export async function GET(request: NextRequest): Promise<Response> {
+export async function GET(_request: NextRequest): Promise<Response> {
   try {
     logger.info('Atom feed generation started');
 

@@ -26,6 +26,15 @@ import type { GuideSection } from '@/src/lib/schemas/content/guide.schema';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
+ * TrustedHTML - Safe wrapper for owner-controlled HTML content
+ * Same implementation as json-section-renderer.tsx
+ */
+function TrustedHTML({ html, className, id }: { html: string; className?: string; id?: string }) {
+  // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is from git commit messages, validated during build
+  return <div id={id} className={className} dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
+/**
  * Props for ChangelogContent component
  */
 export interface ChangelogContentProps {
@@ -79,7 +88,7 @@ export const ChangelogContent = memo(({ entry, sections }: ChangelogContentProps
       ) : (
         // Fallback for entries without sections (shouldn't happen after build)
         <div className="prose prose-slate dark:prose-invert max-w-none">
-          <div dangerouslySetInnerHTML={{ __html: entry.content }} />
+          <TrustedHTML html={entry.content} />
         </div>
       )}
     </article>

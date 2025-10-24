@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 
 import {
   CommandDialog,
@@ -65,6 +65,7 @@ export function NavigationCommandMenu({
 }: NavigationCommandMenuProps = {}) {
   const [internalOpen, setInternalOpen] = useState(false);
   const router = useRouter();
+  const inputId = useId();
 
   // Use controlled state if provided, otherwise use internal state
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
@@ -99,7 +100,11 @@ export function NavigationCommandMenu({
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Search navigation... (try typing 'agents' or 'guides')" />
+      <CommandInput
+        id={inputId}
+        name="command-search"
+        placeholder="Search navigation... (try typing 'agents' or 'guides')"
+      />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
 

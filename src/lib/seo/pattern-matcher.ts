@@ -151,14 +151,13 @@ export function extractContext(
 
         // Create pseudo-category config for guides
         rawContext.categoryConfig = {
-          id: 'guides' as any,
           title: 'Guide', // Singular for title template
           pluralTitle: 'Guides', // Plural for SEO
           keywords: 'guides, tutorials, documentation, how-to',
           metaDescription: 'Learn how to use Claude AI with step-by-step guides and tutorials.',
-        } as any;
+        };
 
-        rawContext.category = 'guides' as any;
+        rawContext.category = 'guides';
         // Conditionally spread params only if they exist
         rawContext.params = {
           ...params,

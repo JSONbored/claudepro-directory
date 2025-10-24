@@ -202,21 +202,25 @@ export type UnifiedBadgeProps =
  * />
  * ```
  */
-export function UnifiedBadge(props: UnifiedBadgeProps) {
-  // Wrap all badges with hover animation
-  const BadgeWrapper = ({ children }: { children: React.ReactNode }) => (
-    <motion.div
-      className="inline-block"
-      whileHover={{
-        y: -2,
-        transition: { type: 'spring', stiffness: 400, damping: 17 },
-      }}
-      whileTap={{ scale: 0.95 }}
-    >
-      {children}
-    </motion.div>
-  );
 
+/**
+ * BadgeWrapper - Wrap badges with hover animation
+ * Extracted to module scope to avoid nested component definition
+ */
+const BadgeWrapper = ({ children }: { children: React.ReactNode }) => (
+  <motion.div
+    className="inline-block"
+    whileHover={{
+      y: -2,
+      transition: { type: 'spring', stiffness: 400, damping: 17 },
+    }}
+    whileTap={{ scale: 0.95 }}
+  >
+    {children}
+  </motion.div>
+);
+
+export function UnifiedBadge(props: UnifiedBadgeProps) {
   // Base badge variant
   if (props.variant === 'base') {
     return (

@@ -80,6 +80,8 @@ const IMG_SRC = [
   'https://www.claudepro.directory',
 ] as const;
 
+const FRAME_SRC = ['https://status.claudepro.directory'] as const;
+
 const BASE_CONNECT_SRC = [
   ...(nosecone.defaults.contentSecurityPolicy.directives.connectSrc || []),
   'wss://*.vercel.app', // WebSocket for HMR in preview
@@ -124,6 +126,7 @@ const noseconeConfig = {
       scriptSrc: isDevelopment ? DEV_SCRIPT_SRC : BASE_SCRIPT_SRC,
       imgSrc: IMG_SRC,
       connectSrc: env.VERCEL_ENV === 'preview' ? PREVIEW_CONNECT_SRC : BASE_CONNECT_SRC,
+      frameSrc: FRAME_SRC,
 
       // CSRF Protection: Restrict form submissions to same-origin only
       // This prevents forms from submitting to external domains (CSRF attack vector)

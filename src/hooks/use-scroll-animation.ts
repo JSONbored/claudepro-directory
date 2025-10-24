@@ -137,6 +137,12 @@ export function useScrollReveal(config: ScrollRevealConfig = {}) {
 
   const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
+  // Call all hooks unconditionally (Rules of Hooks)
+  const ySlideUp = useTransform(scrollYProgress, [0, 1], [distance, 0]);
+  const ySlideDown = useTransform(scrollYProgress, [0, 1], [-distance, 0]);
+  const scale = useTransform(scrollYProgress, [0, 1], [0.8, 1]);
+  const rotateX = useTransform(scrollYProgress, [0, 1], [45, 0]);
+
   let style: Record<string, MotionValue<number>> = { opacity };
 
   switch (animation) {
@@ -145,31 +151,19 @@ export function useScrollReveal(config: ScrollRevealConfig = {}) {
       break;
 
     case 'slide-up':
-      style = {
-        opacity,
-        y: useTransform(scrollYProgress, [0, 1], [distance, 0]),
-      };
+      style = { opacity, y: ySlideUp };
       break;
 
     case 'slide-down':
-      style = {
-        opacity,
-        y: useTransform(scrollYProgress, [0, 1], [-distance, 0]),
-      };
+      style = { opacity, y: ySlideDown };
       break;
 
     case 'scale':
-      style = {
-        opacity,
-        scale: useTransform(scrollYProgress, [0, 1], [0.8, 1]),
-      };
+      style = { opacity, scale };
       break;
 
     case 'rotate':
-      style = {
-        opacity,
-        rotateX: useTransform(scrollYProgress, [0, 1], [45, 0]),
-      };
+      style = { opacity, rotateX };
       break;
   }
 
@@ -278,43 +272,4 @@ export function useSectionProgress() {
   });
 
   return { ref, progress: scrollYProgress };
-}
-
-/**
- * Stagger children reveals (each child animates in sequence)
- * Returns array of refs and styles for children
- *
- * @param count - Number of children
- * @param stagger - Delay between each child (0-1)
- * @example
- * ```tsx
- * function List({ items }) {
- *   const children = useStaggerReveal(items.length, 0.1);
- *   return items.map((item, i) => (
- *     <motion.div key={i} ref={children[i].ref} style={children[i].style}>
- *       {item}
- *     </motion.div>
- *   ));
- * }
- * ```
- */
-export function useStaggerReveal(count: number, stagger = 0.1) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start 0.8', 'start 0.2'],
-  });
-
-  const children = Array.from({ length: count }, (_, i) => {
-    const delay = stagger * i;
-    const opacity = useTransform(scrollYProgress, [delay, delay + 0.3], [0, 1]);
-    const y = useTransform(scrollYProgress, [delay, delay + 0.3], [30, 0]);
-
-    return {
-      style: { opacity, y },
-    };
-  });
-
-  return { containerRef, children };
 }

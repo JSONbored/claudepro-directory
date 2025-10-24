@@ -138,8 +138,8 @@ export default function HelpPage() {
       <section className="mb-16">
         <h2 className="text-2xl font-semibold mb-6">Common Questions</h2>
         <div className="space-y-6">
-          {commonQuestions.map((item, index) => (
-            <Card key={index}>
+          {commonQuestions.map((item) => (
+            <Card key={item.question}>
               <CardHeader>
                 <CardTitle className="text-lg flex items-start gap-2">
                   <HelpCircle className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />

@@ -61,7 +61,7 @@ export async function generateStaticParams() {
  * @returns Plain text response with full entry content
  */
 export async function GET(
-  request: Request,
+  _request: Request,
   context: { params: Promise<{ slug: string }> }
 ): Promise<Response> {
   try {

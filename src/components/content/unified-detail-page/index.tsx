@@ -26,7 +26,7 @@ import { UnifiedReview } from '@/src/components/domain/unified-review';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
 import { detectLanguage } from '@/src/lib/content/language-detection';
-import { highlightCode } from '@/src/lib/content/syntax-highlighting';
+import { highlightCode } from '@/src/lib/content/syntax-highlighting-starry';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';

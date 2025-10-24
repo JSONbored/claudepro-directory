@@ -6,7 +6,10 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
+import { getSkeletonKeys } from '@/src/lib/utils/skeleton-keys';
 import { ReadProgress, ReadProgressPresets } from './read-progress';
+
+const SECTION_KEYS_20 = getSkeletonKeys(20);
 
 const meta: Meta<typeof ReadProgress> = {
   title: 'Content/ReadProgress',
@@ -40,7 +43,7 @@ export const Default: Story = {
           The progress bar at the top shows how far you've scrolled through this content.
         </p>
         {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="p-6 border rounded-lg">
+          <div key={SECTION_KEYS_20[i]} className="p-6 border rounded-lg">
             <h2 className="text-2xl font-semibold mb-2">Section {i + 1}</h2>
             <p className="text-muted-foreground">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
@@ -67,7 +70,7 @@ export const Bold: Story = {
           Thicker progress bar for better visibility on long articles.
         </p>
         {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="p-6 border rounded-lg">
+          <div key={SECTION_KEYS_20[i]} className="p-6 border rounded-lg">
             <h2 className="text-2xl font-semibold mb-2">Section {i + 1}</h2>
             <p className="text-muted-foreground">Content section...</p>
           </div>
@@ -88,7 +91,7 @@ export const Bottom: Story = {
         <h1 className="text-4xl font-bold">Bottom Position</h1>
         <p className="text-muted-foreground">Progress bar appears at the bottom of the viewport.</p>
         {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="p-6 border rounded-lg">
+          <div key={SECTION_KEYS_20[i]} className="p-6 border rounded-lg">
             <h2 className="text-2xl font-semibold mb-2">Section {i + 1}</h2>
             <p className="text-muted-foreground">Content section...</p>
           </div>
@@ -112,7 +115,7 @@ export const Subtle: Story = {
           Minimal visual distraction while still providing progress feedback.
         </p>
         {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="p-6 border rounded-lg">
+          <div key={SECTION_KEYS_20[i]} className="p-6 border rounded-lg">
             <h2 className="text-2xl font-semibold mb-2">Section {i + 1}</h2>
             <p className="text-muted-foreground">Content section...</p>
           </div>
@@ -135,7 +138,7 @@ export const Fast: Story = {
           Scroll quickly to see the snappier, less bouncy animation.
         </p>
         {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="p-6 border rounded-lg">
+          <div key={SECTION_KEYS_20[i]} className="p-6 border rounded-lg">
             <h2 className="text-2xl font-semibold mb-2">Section {i + 1}</h2>
             <p className="text-muted-foreground">Content section...</p>
           </div>
@@ -165,7 +168,7 @@ export const Custom: Story = {
         <h1 className="text-4xl font-bold">Custom Configuration</h1>
         <p className="text-muted-foreground">Primary color, 3px height, custom spring physics.</p>
         {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="p-6 border rounded-lg">
+          <div key={SECTION_KEYS_20[i]} className="p-6 border rounded-lg">
             <h2 className="text-2xl font-semibold mb-2">Section {i + 1}</h2>
             <p className="text-muted-foreground">Content section...</p>
           </div>

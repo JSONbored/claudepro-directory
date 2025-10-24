@@ -14,7 +14,7 @@
  * - Correct usage: Server components can import server-only code
  */
 
-import { highlightCode } from '@/src/lib/content/syntax-highlighting';
+import { highlightCode } from '@/src/lib/content/syntax-highlighting-starry';
 import type { CodeGroupProps } from '@/src/lib/schemas/shared.schema';
 import { batchMap } from '@/src/lib/utils/batch.utils';
 import { CodeGroup } from './code-group';

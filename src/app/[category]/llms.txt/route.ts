@@ -34,7 +34,7 @@ export async function generateStaticParams() {
  * @returns Plain text response with category index
  */
 export async function GET(
-  request: Request,
+  _request: Request,
   context: { params: Promise<{ category: string }> }
 ): Promise<Response> {
   // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)

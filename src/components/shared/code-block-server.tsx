@@ -12,7 +12,7 @@
  */
 
 import { ProductionCodeBlock } from '@/src/components/content/production-code-block';
-import { highlightCode } from '@/src/lib/content/syntax-highlighting';
+import { highlightCode } from '@/src/lib/content/syntax-highlighting-starry';
 
 export interface CodeBlockServerProps {
   code: string;

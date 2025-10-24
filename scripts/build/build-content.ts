@@ -255,7 +255,7 @@ async function needsCategoryRebuild(
       }
 
       return false; // CHANGELOG.md unchanged
-    } catch (error) {
+    } catch (_error) {
       // CHANGELOG.md doesn't exist or can't be read - rebuild
       return true;
     }
@@ -298,7 +298,7 @@ async function needsCategoryRebuild(
     }
 
     return false; // All files up-to-date
-  } catch (error) {
+  } catch (_error) {
     // Category directory doesn't exist or can't be read - skip rebuild
     return false;
   }
@@ -423,7 +423,13 @@ async function main(): Promise<void> {
           // Map changelog entries to GuideContent-compatible structure
           const changelogFullContent = changelogEntries.map((entry) => {
             // Transform changelog categories into JSON sections
-            const sections: Array<any> = [];
+            const sections: Array<{
+              type: string;
+              variant?: string;
+              title?: string;
+              level?: string;
+              content: string;
+            }> = [];
 
             // Add TL;DR section if present (using callout with info variant)
             if (entry.tldr) {
@@ -446,7 +452,10 @@ async function main(): Promise<void> {
             };
 
             // Process each category with items
-            for (const [category, items] of Object.entries(entry.categories)) {
+            for (const [category, items] of Object.entries(entry.categories) as [
+              string,
+              Array<{ content: string }>,
+            ][]) {
               if (items.length > 0) {
                 // Add heading for category
                 sections.push({

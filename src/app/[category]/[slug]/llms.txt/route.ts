@@ -65,7 +65,7 @@ export async function generateStaticParams() {
  * - Canonical URL for reference
  */
 export async function GET(
-  request: Request,
+  _request: Request,
   context: { params: Promise<{ category: string; slug: string }> }
 ): Promise<Response> {
   // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)

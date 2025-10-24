@@ -46,7 +46,7 @@ const PATH_MAP: Record<string, string> = {
  * @returns Plain text response with guide content
  */
 export async function GET(
-  request: Request,
+  _request: Request,
   context: { params: Promise<{ category: string; slug: string }> }
 ): Promise<Response> {
   // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)
@@ -136,8 +136,15 @@ export async function GET(
 
     // Convert sections to plain text content for LLMs
     const sectionsText = jsonData.sections
-      ? jsonData.sections
-          .map((section: any) => {
+      ? (
+          jsonData.sections as Array<{
+            type: string;
+            content?: string;
+            language?: string;
+            code?: string;
+          }>
+        )
+          .map((section) => {
             if (section.type === 'text' || section.type === 'heading') {
               return section.content;
             }
