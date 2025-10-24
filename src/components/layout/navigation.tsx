@@ -38,8 +38,8 @@ import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedButton } from '@/src/components/domain/unified-button';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
+import { ModeToggle } from '@/src/components/layout/mode-toggle';
 import { NavigationCommandMenu } from '@/src/components/layout/navigation-command-menu';
-import { ThemeToggle } from '@/src/components/layout/theme-toggle';
 import { UserMenu } from '@/src/components/layout/user-menu';
 import { Button } from '@/src/components/primitives/button';
 import {
@@ -162,9 +162,9 @@ export const Navigation = () => {
       >
         <div className="container mx-auto">
           <motion.nav
-            className={`rounded-2xl border border-border/50 bg-card/95 shadow-lg hover:shadow-xl transition-shadow duration-300 ${
-              isScrolled ? 'shadow-xl' : ''
-            }`}
+            className={
+              'rounded-2xl border border-border/50 bg-card/95 shadow-xl transition-colors duration-300'
+            }
             style={{ backdropFilter: backdropBlur }}
             aria-label="Main navigation container"
           >
@@ -178,23 +178,27 @@ export const Navigation = () => {
                 <Link
                   href={ROUTES.HOME}
                   prefetch={true}
-                  className="flex items-center gap-2 min-w-0 flex-shrink"
+                  className="flex items-center gap-2 flex-shrink-0"
                   aria-label="Claude Pro Directory - Go to homepage"
                 >
-                  <motion.div style={{ scale: logoScale }}>
+                  <motion.div style={{ scale: logoScale }} className="flex items-center gap-2">
+                    {/* Icon visible on ALL breakpoints */}
                     <LogoIcon
-                      className={`transition-all duration-300 flex-shrink-0 hidden xl:block ${
-                        isScrolled ? 'h-6 w-6' : 'h-8 w-8'
+                      className={`transition-all duration-300 flex-shrink-0 ${
+                        isScrolled
+                          ? 'h-8 w-8 md:h-7 md:w-7'
+                          : 'h-10 w-10 md:h-9 md:w-9 lg:h-10 lg:w-10'
                       }`}
                     />
+                    {/* Text shows ONLY on desktop (xl: 1280px+) */}
+                    <span
+                      className={`font-medium text-foreground transition-all duration-300 hidden xl:inline ${
+                        isScrolled ? 'text-base' : 'text-lg'
+                      }`}
+                    >
+                      {APP_CONFIG.domain}
+                    </span>
                   </motion.div>
-                  <span
-                    className={`font-medium text-foreground transition-all duration-300 hidden xl:inline ${
-                      isScrolled ? 'text-base' : 'text-lg'
-                    }`}
-                  >
-                    {APP_CONFIG.domain}
-                  </span>
                 </Link>
 
                 {/* Desktop Navigation - ONLY show at xl: (1280px+) */}
@@ -248,7 +252,7 @@ export const Navigation = () => {
                                       href={link.href}
                                       prefetch={true}
                                       className={
-                                        'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg hover:bg-accent/10 shadow-sm hover:shadow-md transition-shadow duration-200 group'
+                                        'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg hover:bg-accent/10 transition-colors duration-200 group'
                                       }
                                     >
                                       {IconComponent && (
@@ -268,7 +272,7 @@ export const Navigation = () => {
                                           {link.label}
                                         </div>
                                         {link.description && (
-                                          <div className="text-xs text-muted-foreground line-clamp-2">
+                                          <div className="text-xs text-muted-foreground group-hover:text-foreground/70 transition-colors line-clamp-2">
                                             {link.description}
                                           </div>
                                         )}
@@ -289,7 +293,7 @@ export const Navigation = () => {
                           href={ROUTES.SUBMIT}
                           prefetch={true}
                           className={
-                            'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg bg-accent/5 hover:bg-accent/10 shadow-sm hover:shadow-lg transition-shadow duration-200 group'
+                            'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg bg-accent/5 hover:bg-accent/10 transition-colors duration-200 group'
                           }
                         >
                           <div
@@ -389,7 +393,7 @@ export const Navigation = () => {
 
                   <UserMenu className={'hidden md:flex'} />
 
-                  <ThemeToggle />
+                  <ModeToggle />
 
                   {/* Mobile Menu - Show ONLY below md: (< 768px) */}
                   <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -550,7 +554,7 @@ export const Navigation = () => {
                               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                             >
                               <div className="w-full h-20 flex items-center justify-center rounded-2xl border border-border/40 bg-card">
-                                <ThemeToggle />
+                                <ModeToggle />
                               </div>
                             </motion.div>
                           </div>

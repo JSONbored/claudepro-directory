@@ -20,6 +20,9 @@ import './starry-night.css';
 import dynamic from 'next/dynamic';
 import { Toaster } from 'sonner';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { NotificationFAB } from '@/src/components/features/notifications/notification-fab';
+import { NotificationSheet } from '@/src/components/features/notifications/notification-sheet';
+import { NotificationToastHandler } from '@/src/components/features/notifications/notification-toast-handler';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { PerformanceOptimizer } from '@/src/components/infra/performance-optimizer';
 import { PostCopyEmailProvider } from '@/src/components/infra/providers/post-copy-email-provider';
@@ -28,6 +31,7 @@ import { OrganizationStructuredData } from '@/src/components/infra/structured-da
 import { AnnouncementBanner } from '@/src/components/layout/announcement-banner';
 import { FloatingMobileSearch } from '@/src/components/layout/floating-mobile-search';
 import { Navigation } from '@/src/components/layout/navigation';
+import { BackToTopButton } from '@/src/components/shared/back-to-top-button';
 
 // Lazy load footer component for better performance (5-10KB bundle reduction)
 const Footer = dynamic(
@@ -133,6 +137,10 @@ export default async function RootLayout({
   const cspHeader = headersList.get('content-security-policy');
   const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
 
+  // Detect auth routes - hide navigation/footer for clean auth experience
+  const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || '';
+  const isAuthRoute = pathname.startsWith('/login') || pathname.includes('/(auth)/');
+
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} font-sans`}>
       <head>
@@ -186,17 +194,21 @@ export default async function RootLayout({
                 Skip to main content
               </a>
               <div className={'min-h-screen bg-background flex flex-col'}>
-                <AnnouncementBanner />
-                <Navigation />
+                {!isAuthRoute && <AnnouncementBanner />}
+                {!isAuthRoute && <Navigation />}
                 {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
                 <main id="main-content" className="flex-1">
                   {children}
                 </main>
-                <Footer />
-                <FloatingMobileSearch />
+                {!isAuthRoute && <Footer />}
+                {!isAuthRoute && <FloatingMobileSearch />}
+                {!isAuthRoute && <BackToTopButton />}
+                {!isAuthRoute && <NotificationFAB />}
+                {!isAuthRoute && <NotificationSheet />}
               </div>
             </ErrorBoundary>
             <Toaster />
+            {!isAuthRoute && <NotificationToastHandler />}
             <UnifiedNewsletterCapture variant="footer-bar" source="footer" />
           </PostCopyEmailProvider>
         </ThemeProvider>

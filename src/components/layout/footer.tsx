@@ -232,15 +232,35 @@ export function Footer() {
               Sitemap
             </Link>
           </div>
-          <motion.p className={'text-xs text-muted-foreground'} whileHover={{ scale: 1.05 }}>
-            <Link
-              href={ROUTES.LLMS_TXT}
-              className="hover:text-foreground transition-colors inline-flex items-center gap-1.5"
-            >
-              <Sparkles className="h-3 w-3" />
-              AI-optimized content available
-            </Link>
-          </motion.p>
+
+          {/* Center: Status Badge + LLMs.txt */}
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            {/* BetterStack Status Badge */}
+            <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
+              <iframe
+                src="https://status.claudepro.directory/badge?theme=dark"
+                width="250"
+                height="30"
+                frameBorder="0"
+                scrolling="no"
+                title="System Status"
+                className="rounded-md"
+                loading="lazy"
+                style={{ colorScheme: 'normal' }}
+              />
+            </motion.div>
+
+            {/* LLMs.txt Link */}
+            <motion.p className={'text-xs text-muted-foreground'} whileHover={{ scale: 1.05 }}>
+              <Link
+                href={ROUTES.LLMS_TXT}
+                className="hover:text-foreground transition-colors inline-flex items-center gap-1.5"
+              >
+                <Sparkles className="h-3 w-3" />
+                AI-optimized content available
+              </Link>
+            </motion.p>
+          </div>
         </motion.div>
       </div>
     </footer>

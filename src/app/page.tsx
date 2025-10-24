@@ -24,7 +24,9 @@ import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 
 import { statsRedis } from '@/src/lib/cache.server';
+import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { type CategoryId, getHomepageCategoryIds } from '@/src/lib/config/category-config';
+import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { featuredService } from '@/src/lib/services/featured.server';
@@ -200,14 +202,38 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
     allConfigs,
   };
 
+  // Load guides and changelog counts
+  let guidesCount = 0;
+  let changelogCount = 0;
+
+  try {
+    const [guidesData, changelogData] = await batchFetch([
+      getContentByCategory('guides'),
+      getAllChangelogEntries(),
+    ]);
+    guidesCount = guidesData.length;
+    changelogCount = changelogData.length;
+  } catch (error) {
+    logger.error(
+      'Failed to load guides/changelog counts',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        source: 'HomePage',
+        operation: 'loadGuidesChangelogCounts',
+      }
+    );
+  }
+
   return (
     <HomePageClient
       initialData={initialData}
       initialSearchQuery={searchQuery}
       featuredByCategory={enrichedFeaturedByCategory}
-      stats={Object.fromEntries(
-        categoryIds.map((id) => [id, enrichedCategoryData[id]?.length || 0])
-      )}
+      stats={{
+        ...Object.fromEntries(categoryIds.map((id) => [id, enrichedCategoryData[id]?.length || 0])),
+        guides: guidesCount,
+        changelog: changelogCount,
+      }}
     />
   );
 }
