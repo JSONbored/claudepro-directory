@@ -928,3 +928,36 @@ export function getCategoryStatsConfig(): readonly CategoryStatsConfig[] {
     };
   });
 }
+
+/**
+ * Calculate total resource count from stats object
+ * Used for dynamic newsletter CTA copy
+ *
+ * @param stats - Stats object with category counts (from homepage)
+ * @returns Total number of resources across all categories
+ */
+export function getTotalResourceCount(stats: Record<string, number>): number {
+  return Object.values(stats).reduce((sum, count) => sum + count, 0);
+}
+
+/**
+ * Newsletter CTA Copy Configuration
+ * Honest, conversion-optimized messaging based on 2025 best practices
+ */
+export const NEWSLETTER_CTA_CONFIG = {
+  /** Headline for main CTA (3-5 words, benefit-driven) */
+  headline: 'Discover New Claude Tools',
+
+  /** Subheadline explaining value (single line) */
+  description:
+    'Weekly picks, exclusive guides, and early access to new features. Join our growing community.',
+
+  /** Button text (2-4 words, first-person for 371% higher conversion) */
+  buttonText: 'Count Me In',
+
+  /** Footer text (social proof without lying) */
+  footerText: 'No spam • Unsubscribe anytime',
+
+  /** Early adopter appeal for smaller sites */
+  earlyAdopterBadge: 'Founding Member Access',
+} as const;

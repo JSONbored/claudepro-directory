@@ -10,6 +10,8 @@
 
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { HeyClaudeLogo } from '@/src/components/layout/heyclaude-logo';
 import { ModeToggle } from '@/src/components/layout/mode-toggle';
@@ -27,6 +29,13 @@ import { DiscordIcon, ExternalLink, Github, Sparkles } from '@/src/lib/icons';
  */
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Wait for client-side mount to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <footer className={'border-t border-border/50 bg-background/95 backdrop-blur'}>
@@ -60,7 +69,7 @@ export function Footer() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    className="link-icon text-muted-foreground"
                     aria-label={social.label}
                   >
                     <social.icon className="h-5 w-5" />
@@ -117,7 +126,7 @@ export function Footer() {
                   >
                     <Link
                       href={link.href}
-                      className="text-base md:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="link-accent-underline text-base md:text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -204,7 +213,7 @@ export function Footer() {
                   >
                     <Link
                       href={link.href}
-                      className="text-base md:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="link-accent-underline text-base md:text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -225,27 +234,27 @@ export function Footer() {
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
         >
-          {/* Left: Copyright only */}
+          {/* Left: Copyright */}
           <div className="text-sm text-muted-foreground">
-            <p>
-              © {currentYear} {APP_CONFIG.author}. All rights reserved.
-            </p>
+            <p>© {currentYear} heyclau.de / Claude Pro Directory. All rights reserved.</p>
           </div>
 
           {/* Right: Status Badge */}
           <div className="flex items-center">
-            {/* BetterStack Status Badge */}
-            <iframe
-              src="https://status.claudepro.directory/badge?theme=dark"
-              width="250"
-              height="30"
-              frameBorder="0"
-              scrolling="no"
-              title="System Status"
-              className="rounded-md"
-              loading="lazy"
-              style={{ colorScheme: 'normal' }}
-            />
+            {/* BetterStack Status Badge - Theme-aware */}
+            {mounted && (
+              <iframe
+                src={`https://status.claudepro.directory/badge?theme=${resolvedTheme === 'light' ? 'light' : 'dark'}`}
+                width="250"
+                height="30"
+                frameBorder="0"
+                scrolling="no"
+                title="System Status"
+                className="rounded-md"
+                loading="lazy"
+                style={{ colorScheme: 'normal' }}
+              />
+            )}
           </div>
         </motion.div>
       </div>

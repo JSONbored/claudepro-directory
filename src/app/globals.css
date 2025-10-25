@@ -775,6 +775,40 @@
   }
 }
 
+/* Link Micro-Interaction Utilities */
+@layer utilities {
+  /* Custom accent underline (orange) on hover - matches navigation style */
+  .link-accent-underline {
+    position: relative;
+    display: inline-block;
+  }
+
+  .link-accent-underline::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--color-accent);
+    transition: width 0.3s ease;
+  }
+
+  .link-accent-underline:hover::after {
+    width: 100%;
+  }
+
+  /* Icon links - no underline, just color change */
+  .link-icon {
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .link-icon:hover {
+    color: var(--color-accent);
+  }
+}
+
 /* Component Classes */
 @layer components {
   /* Hero Section with Claude Orange Gradient */

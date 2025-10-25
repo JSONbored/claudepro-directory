@@ -49,6 +49,7 @@ import {
 } from '@/src/components/primitives/sheet';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
+import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
 import { Mail, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -461,7 +462,7 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
               <>Joining...</>
             ) : (
               <>
-                Get Updates
+                {NEWSLETTER_CTA_CONFIG.buttonText}
                 <Mail className="ml-2 h-4 w-4" aria-hidden="true" />
               </>
             )}
@@ -554,22 +555,29 @@ function FooterBarVariant({
       aria-label="Newsletter signup"
     >
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--color-accent)]/30 to-transparent" />
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 py-6 md:py-4">
         {/* Desktop layout */}
-        <div className="hidden md:flex items-center justify-between gap-4">
-          <p className="text-sm font-medium text-primary">
-            Get weekly updates on{' '}
-            <span className="text-[var(--color-accent-light)]">new tools & guides</span> — no spam,
-            unsubscribe anytime
-          </p>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
-            <FormVariant source={source} className="w-[400px]" />
+        <div className="hidden md:flex items-center justify-between gap-6 max-w-5xl mx-auto">
+          <div className="flex-shrink-0 flex items-center gap-3">
+            <div className="p-2.5 bg-accent/10 rounded-lg border border-accent/20">
+              <Mail className="h-5 w-5 text-accent" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-foreground">
+                {NEWSLETTER_CTA_CONFIG.headline}
+              </p>
+              <p className="text-sm text-muted-foreground">{NEWSLETTER_CTA_CONFIG.description}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <FormVariant source={source} className="min-w-[360px]" />
             {dismissible && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleDismiss}
                 aria-label="Dismiss newsletter signup"
+                className="flex-shrink-0"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
               </Button>
@@ -580,9 +588,12 @@ function FooterBarVariant({
         {/* Mobile layout */}
         <div className="flex md:hidden flex-col gap-3">
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-            <p className="text-sm font-medium text-primary">
-              <span className="text-[var(--color-accent-light)]">Weekly updates</span> on new tools
-            </p>
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4 text-accent flex-shrink-0" aria-hidden="true" />
+              <p className="text-sm font-medium text-foreground">
+                {NEWSLETTER_CTA_CONFIG.headline}
+              </p>
+            </div>
             {dismissible && (
               <Button
                 variant="ghost"
