@@ -7,7 +7,8 @@
         "src/lib/ui-constants-categories.ts"
       ],
       "inputs": ["src/lib/config/category-config.ts"],
-      "cache": true
+      "cache": true,
+      "passThroughEnv": ["VERCEL_DEPLOYMENT_ID"]
     },
     "build:content:exec": {
       "outputs": [
@@ -26,7 +27,8 @@
       ],
       "env": ["NODE_ENV"],
       "cache": true,
-      "persistent": true
+      "persistent": true,
+      "passThroughEnv": ["VERCEL_DEPLOYMENT_ID"]
     },
     "build:skills:exec": {
       "outputs": [
@@ -40,7 +42,8 @@
         "src/lib/transformers/skill-to-md.ts"
       ],
       "cache": true,
-      "persistent": true
+      "persistent": true,
+      "passThroughEnv": ["VERCEL_DEPLOYMENT_ID"]
     },
     "generate:service-worker:exec": {
       "outputs": ["public/service-worker.js", ".next/cache/sw-hash.txt"],
@@ -50,7 +53,8 @@
         "src/lib/constants/security.ts",
         "package.json"
       ],
-      "cache": true
+      "cache": true,
+      "passThroughEnv": ["VERCEL_DEPLOYMENT_ID"]
     },
     "type-check": {
       "outputs": ["**/*.tsbuildinfo"],
