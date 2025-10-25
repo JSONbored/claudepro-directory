@@ -1,7 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
-    "generate:categories": {
+    "generate:categories:exec": {
       "outputs": [
         "src/lib/config/category-types.ts",
         "src/lib/ui-constants-categories.ts"
@@ -9,7 +9,7 @@
       "inputs": ["src/lib/config/category-config.ts"],
       "cache": true
     },
-    "build:content": {
+    "build:content:exec": {
       "outputs": [
         "generated/**",
         "src/generated/**",
@@ -28,7 +28,7 @@
       "cache": true,
       "persistent": true
     },
-    "build:skills": {
+    "build:skills:exec": {
       "outputs": [
         "content/skills/*.zip",
         "public/downloads/skills/*.zip"
@@ -42,7 +42,7 @@
       "cache": true,
       "persistent": true
     },
-    "generate:service-worker": {
+    "generate:service-worker:exec": {
       "outputs": ["public/service-worker.js", ".next/cache/sw-hash.txt"],
       "inputs": [
         "scripts/build/generate-service-worker.ts",
@@ -99,5 +99,21 @@
     "SUPABASE_JWT_SECRET",
     "BETTERSTACK_HEARTBEAT_WEEKLY_TASKS",
     "BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE"
+  ],
+  "globalPassThroughEnv": [
+    "VERCEL",
+    "VERCEL_ENV",
+    "VERCEL_URL",
+    "VERCEL_DEPLOYMENT_ID",
+    "VERCEL_GIT_COMMIT_SHA",
+    "VERCEL_GIT_COMMIT_MESSAGE",
+    "VERCEL_GIT_COMMIT_AUTHOR_LOGIN",
+    "VERCEL_GIT_COMMIT_AUTHOR_NAME",
+    "VERCEL_GIT_REPO_SLUG",
+    "VERCEL_GIT_REPO_OWNER",
+    "VERCEL_GIT_REPO_ID",
+    "VERCEL_GIT_PULL_REQUEST_ID",
+    "CI",
+    "CONTINUOUS_INTEGRATION"
   ]
 }
