@@ -177,10 +177,9 @@ export default async function RootLayout({
           {await OrganizationStructuredData()}
         </Suspense>
         <ThemeProvider
-          attribute="class"
+          attribute="data-theme"
           defaultTheme="dark"
           enableSystem
-          disableTransitionOnChange
           storageKey="claudepro-theme"
           {...(nonce ? { nonce } : {})}
         >

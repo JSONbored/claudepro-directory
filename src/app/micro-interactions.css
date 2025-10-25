@@ -95,12 +95,12 @@ textarea {
  * =========================== */
 
 /* Subtle underline animation for text links */
-a:not([class*="button"]):not([class*="btn"]) {
+a:not([class*="button"]):not([class*="btn"]):not(.no-underline) {
   position: relative;
   text-decoration: none;
 }
 
-a:not([class*="button"]):not([class*="btn"])::after {
+a:not([class*="button"]):not([class*="btn"]):not(.no-underline)::after {
   content: "";
   position: absolute;
   bottom: 0;
@@ -113,7 +113,7 @@ a:not([class*="button"]):not([class*="btn"])::after {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-a:not([class*="button"]):not([class*="btn"]):hover::after {
+a:not([class*="button"]):not([class*="btn"]):not(.no-underline):hover::after {
   transform: scaleX(1);
   transform-origin: left;
 }
@@ -123,8 +123,12 @@ a:not([class*="button"]):not([class*="btn"]):hover::after {
  * =========================== */
 
 /* Smooth card lift on hover - Exclude navigation, search, and input elements */
-[class*="card"]:hover:not(nav):not(header):not([role="search"]):not(input):not(textarea):not(select),
-[class*="Card"]:hover:not(nav):not(header):not([role="search"]):not(input):not(textarea):not(select) {
+[class*="card"]:hover:not(nav):not(header):not([role="search"]):not(input):not(textarea):not(
+    select
+  ),
+[class*="Card"]:hover:not(nav):not(header):not([role="search"]):not(input):not(textarea):not(
+    select
+  ) {
   transform: translateY(-2px);
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
