@@ -38,7 +38,6 @@ import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedButton } from '@/src/components/domain/unified-button';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
-import { ModeToggle } from '@/src/components/layout/mode-toggle';
 import { NavigationCommandMenu } from '@/src/components/layout/navigation-command-menu';
 import { UserMenu } from '@/src/components/layout/user-menu';
 import { Button } from '@/src/components/primitives/button';
@@ -85,13 +84,15 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
 
   return (
     <PrefetchLink {...linkProps}>
-      {children}
-      <span
-        className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all duration-300 ${
-          active ? 'w-full' : 'w-0 group-hover:w-full'
-        }`}
-        aria-hidden="true"
-      />
+      <span className="relative inline-block">
+        {children}
+        <span
+          className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all duration-300 ${
+            active ? 'w-full' : 'w-0 group-hover:w-full'
+          }`}
+          aria-hidden="true"
+        />
+      </span>
     </PrefetchLink>
   );
 };
@@ -190,14 +191,6 @@ export const Navigation = () => {
                           : 'h-10 w-10 md:h-9 md:w-9 lg:h-10 lg:w-10'
                       }`}
                     />
-                    {/* Text shows ONLY on desktop (xl: 1280px+) */}
-                    <span
-                      className={`font-medium text-foreground transition-all duration-300 hidden xl:inline ${
-                        isScrolled ? 'text-base' : 'text-lg'
-                      }`}
-                    >
-                      {APP_CONFIG.domain}
-                    </span>
                   </motion.div>
                 </Link>
 
@@ -393,8 +386,6 @@ export const Navigation = () => {
 
                   <UserMenu className={'hidden md:flex'} />
 
-                  <ModeToggle />
-
                   {/* Mobile Menu - Show ONLY below md: (< 768px) */}
                   <Sheet open={isOpen} onOpenChange={setIsOpen}>
                     <SheetTrigger asChild>
@@ -549,14 +540,6 @@ export const Navigation = () => {
                                 </Button>
                               </motion.div>
                             ))}
-                            <motion.div
-                              whileTap={{ scale: 0.9 }}
-                              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                            >
-                              <div className="w-full h-20 flex items-center justify-center rounded-2xl border border-border/40 bg-card">
-                                <ModeToggle />
-                              </div>
-                            </motion.div>
                           </div>
                         </motion.div>
                       </div>

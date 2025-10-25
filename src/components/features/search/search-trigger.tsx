@@ -51,8 +51,8 @@ export function SearchTrigger({
 
   return (
     <Button variant={variant} onClick={onClick} className={`${sizeClasses[size]} ${className}`}>
-      <Search className="h-4 w-4 mr-2" />
-      Search
+      <Search className="h-4 w-4" />
+      <span className="sr-only">Search</span>
       {showShortcut && size !== 'sm' && (
         <div className={'ml-2 flex items-center gap-1'}>
           <kbd className={'px-1.5 py-0.5 text-xs bg-muted border rounded hidden sm:inline-block'}>

@@ -11,6 +11,7 @@
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { ModeToggle } from '@/src/components/layout/mode-toggle';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { DiscordIcon, ExternalLink, Github, Sparkles } from '@/src/lib/icons';
@@ -231,6 +232,7 @@ export function Footer() {
             <Link href="/sitemap.xml" className="hover:text-foreground transition-colors">
               Sitemap
             </Link>
+            <ModeToggle />
           </div>
 
           {/* Center: Status Badge + LLMs.txt */}
