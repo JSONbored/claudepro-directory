@@ -15,7 +15,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { GET } from '@/src/app/auth/callback/route';
+import { GET } from '@/src/app/(auth)/auth/callback/route';
 import { createClient } from '@/src/lib/supabase/server';
 
 // Mock Supabase server client

@@ -45,41 +45,35 @@ export function Footer() {
               {APP_CONFIG.description}
             </p>
 
-            {/* Social Icons - Larger on mobile */}
-            <div className="flex items-center justify-center md:justify-start gap-6 md:gap-4">
-              {[
-                { href: SOCIAL_LINKS.github || '#', icon: Github, label: 'GitHub' },
-                { href: SOCIAL_LINKS.discord || '#', icon: DiscordIcon, label: 'Discord' },
-              ].map((social) => (
-                <motion.div
-                  key={social.label}
-                  whileHover={{ scale: 1.15, y: -3 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                >
+            {/* Social Icons - Vertical stack */}
+            <div className="flex flex-col items-center md:items-start gap-4">
+              <div className="flex items-center gap-4">
+                {[
+                  { href: SOCIAL_LINKS.github || '#', icon: Github, label: 'GitHub' },
+                  { href: SOCIAL_LINKS.discord || '#', icon: DiscordIcon, label: 'Discord' },
+                ].map((social) => (
                   <Link
+                    key={social.label}
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-muted-foreground hover:text-foreground transition-colors"
                     aria-label={social.label}
                   >
-                    <social.icon className="h-7 w-7 md:h-5 md:w-5" />
+                    <social.icon className="h-5 w-5" />
                   </Link>
-                </motion.div>
-              ))}
-
-              {/* Open Source Badge - Hide on small mobile */}
-              <div className="hidden sm:block">
-                <UnifiedBadge
-                  variant="base"
-                  style="outline"
-                  className="border-accent/20 bg-accent/5 text-accent"
-                >
-                  <ExternalLink className="h-3 w-3 mr-1 text-accent" />
-                  Open Source
-                </UnifiedBadge>
+                ))}
               </div>
+
+              {/* Open Source Badge */}
+              <UnifiedBadge
+                variant="base"
+                style="outline"
+                className="border-accent/20 bg-accent/5 text-accent"
+              >
+                <ExternalLink className="h-3 w-3 mr-1 text-accent" />
+                Open Source
+              </UnifiedBadge>
             </div>
           </motion.div>
 
@@ -188,6 +182,7 @@ export function Footer() {
                 { href: '/contact', label: 'Contact Us' },
                 { href: '/help', label: 'Help Center' },
                 { href: '/accessibility', label: 'Accessibility' },
+                { href: '/sitemap.xml', label: 'Sitemap' },
               ].map((link, index) => (
                 <motion.li
                   key={link.href}
@@ -215,7 +210,7 @@ export function Footer() {
           </motion.div>
         </div>
 
-        {/* Bottom Bar - Better mobile layout */}
+        {/* Bottom Bar - Clean layout */}
         <motion.div
           className={
             'mt-8 md:mt-12 pt-6 border-t border-border/30 flex flex-col md:flex-row items-center justify-between gap-4'
@@ -225,43 +220,30 @@ export function Footer() {
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
         >
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 text-sm text-muted-foreground">
+          {/* Left: Copyright only */}
+          <div className="text-sm text-muted-foreground">
             <p>
               © {currentYear} {APP_CONFIG.author}. All rights reserved.
             </p>
-            <Link href="/sitemap.xml" className="hover:text-foreground transition-colors">
-              Sitemap
-            </Link>
-            <ModeToggle />
           </div>
 
-          {/* Center: Status Badge + LLMs.txt */}
-          <div className="flex flex-col md:flex-row items-center gap-4">
+          {/* Right: Status Badge + Theme Toggle */}
+          <div className="flex items-center gap-4">
             {/* BetterStack Status Badge */}
-            <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
-              <iframe
-                src="https://status.claudepro.directory/badge?theme=dark"
-                width="250"
-                height="30"
-                frameBorder="0"
-                scrolling="no"
-                title="System Status"
-                className="rounded-md"
-                loading="lazy"
-                style={{ colorScheme: 'normal' }}
-              />
-            </motion.div>
+            <iframe
+              src="https://status.claudepro.directory/badge?theme=dark"
+              width="250"
+              height="30"
+              frameBorder="0"
+              scrolling="no"
+              title="System Status"
+              className="rounded-md"
+              loading="lazy"
+              style={{ colorScheme: 'normal' }}
+            />
 
-            {/* LLMs.txt Link */}
-            <motion.p className={'text-xs text-muted-foreground'} whileHover={{ scale: 1.05 }}>
-              <Link
-                href={ROUTES.LLMS_TXT}
-                className="hover:text-foreground transition-colors inline-flex items-center gap-1.5"
-              >
-                <Sparkles className="h-3 w-3" />
-                AI-optimized content available
-              </Link>
-            </motion.p>
+            {/* Theme Toggle */}
+            <ModeToggle />
           </div>
         </motion.div>
       </div>

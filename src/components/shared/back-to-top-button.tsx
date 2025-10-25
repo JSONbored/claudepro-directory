@@ -7,7 +7,7 @@
  * Features:
  * - Smooth scroll animation
  * - Motion.dev spring physics
- * - Responsive positioning (bottom-right)
+ * - Responsive positioning (upper-right)
  * - WCAG 2.1 AA compliant (44x44px touch target)
  * - Performance optimized (rAF throttling, passive listeners)
  *
@@ -97,7 +97,7 @@ export function BackToTopButton({ threshold = 300, className = '' }: BackToTopBu
             damping: 17,
           }}
           className={`
-            fixed bottom-6 right-6 md:bottom-12 md:right-12 z-40
+            fixed top-20 right-6 md:top-24 md:right-12 z-40
             h-11 w-11 md:h-12 md:w-12
             rounded-full
             bg-card/95 backdrop-blur-md

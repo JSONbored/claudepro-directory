@@ -122,9 +122,9 @@ a:not([class*="button"]):not([class*="btn"]):hover::after {
  * Card Interactions
  * =========================== */
 
-/* Smooth card lift on hover */
-[class*="card"]:hover,
-[class*="Card"]:hover {
+/* Smooth card lift on hover - Exclude navigation and search containers */
+[class*="card"]:hover:not(nav):not(header):not([role="search"]),
+[class*="Card"]:hover:not(nav):not(header):not([role="search"]) {
   transform: translateY(-2px);
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
