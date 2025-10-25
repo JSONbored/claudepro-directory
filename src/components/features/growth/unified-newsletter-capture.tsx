@@ -291,21 +291,32 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
     // Inline Variant
     if (variant === 'inline') {
       return (
-        <Card className={cn('border-primary/20 bg-card/50', className)}>
-          <CardHeader className="pb-4">
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-2`}>
-              <div className="p-2 bg-primary/10 rounded-md">
+        <Card
+          className={cn(
+            'border-primary/20 bg-gradient-to-br from-primary/5 via-accent/5 to-background/95',
+            'backdrop-blur-sm shadow-lg',
+            className
+          )}
+        >
+          <CardHeader className="pb-5">
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-3`}>
+              <div className="p-2.5 bg-primary/10 rounded-lg border border-primary/20">
                 <Mail className="h-5 w-5 text-primary" aria-hidden="true" />
               </div>
-              <CardTitle className="text-xl">{finalHeadline}</CardTitle>
+              <CardTitle className="text-xl font-bold">{finalHeadline}</CardTitle>
             </div>
-            <CardDescription className="text-base">{finalDescription}</CardDescription>
+            <CardDescription className="text-base leading-relaxed">
+              {finalDescription}
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <FormVariant source={source} />
-            <p className="mt-3 text-xs text-muted-foreground">
-              Join our community of Claude power users. No spam, unsubscribe anytime.
-            </p>
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="font-semibold text-primary">1,000+</span> Claude enthusiasts
+              </span>
+              <span>No spam • Unsubscribe anytime</span>
+            </div>
           </CardContent>
         </Card>
       );
@@ -316,19 +327,22 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
       return (
         <div
           className={cn(
-            'flex items-center gap-4 justify-between p-4',
+            'flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-between p-4 sm:p-5',
             'bg-accent/5 border border-border/50 rounded-lg',
             className
           )}
         >
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} flex-1`}>
-            <Mail className="h-4 w-4 text-primary flex-shrink-0" aria-hidden="true" />
+          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} flex-1 min-w-0`}>
+            <Mail className="h-5 w-5 text-primary flex-shrink-0" aria-hidden="true" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{finalHeadline}</p>
               <p className="text-xs text-muted-foreground truncate">{finalDescription}</p>
             </div>
           </div>
-          <FormVariant source={source} className="w-[300px] flex-shrink-0" />
+          <FormVariant
+            source={source}
+            className="w-full sm:w-auto sm:min-w-[320px] sm:max-w-[400px]"
+          />
         </div>
       );
     }
@@ -338,24 +352,29 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
       return (
         <Card
           className={cn(
-            'h-full flex flex-col border-primary/20 bg-gradient-to-br from-primary/5 to-background',
+            'h-full flex flex-col border-primary/20 bg-gradient-to-br from-primary/5 via-accent/5 to-background/95',
+            'backdrop-blur-sm shadow-lg',
             className
           )}
         >
           <CardHeader className="flex-1">
             <div className="mb-4">
-              <div className="inline-flex p-3 bg-primary/10 rounded-lg">
+              <div className="inline-flex p-3 bg-primary/10 rounded-lg border border-primary/20">
                 <Mail className="h-6 w-6 text-primary" aria-hidden="true" />
               </div>
             </div>
-            <CardTitle className="text-xl mb-2">{finalHeadline}</CardTitle>
-            <CardDescription className="text-sm">{finalDescription}</CardDescription>
+            <CardTitle className="text-xl mb-3 font-bold">{finalHeadline}</CardTitle>
+            <CardDescription className="text-sm leading-relaxed">
+              {finalDescription}
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <FormVariant source={source} />
-            <p className="mt-3 text-xs text-muted-foreground text-center">
-              Join 1,000+ subscribers
-            </p>
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">
+                Join <span className="font-semibold text-primary">1,000+</span> subscribers
+              </p>
+            </div>
           </CardContent>
         </Card>
       );
@@ -433,12 +452,16 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
             error={!!error}
             {...(error ? { errorId } : {})}
           />
-          <Button type="submit" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+          >
             {isSubmitting ? (
-              <>Subscribing...</>
+              <>Joining...</>
             ) : (
               <>
-                Subscribe
+                Get Updates
                 <Mail className="ml-2 h-4 w-4" aria-hidden="true" />
               </>
             )}
