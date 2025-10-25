@@ -38,7 +38,7 @@ import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedButton } from '@/src/components/domain/unified-button';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
-import { HeyClaudeText } from '@/src/components/layout/heyclaude-text';
+import { HeyClaudeEffect } from '@/src/components/layout/heyclaude-effect';
 import { NavigationCommandMenu } from '@/src/components/layout/navigation-command-menu';
 import { UserMenu } from '@/src/components/layout/user-menu';
 import { Button } from '@/src/components/primitives/button';
@@ -56,7 +56,7 @@ import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
-import { ChevronDown, DiscordIcon, Github, LogoIcon, Menu } from '@/src/lib/icons';
+import { ChevronDown, DiscordIcon, Github, Menu } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface NavLinkProps {
@@ -180,29 +180,16 @@ export const Navigation = () => {
                 <Link
                   href={ROUTES.HOME}
                   prefetch={true}
-                  className="flex items-center gap-2 md:gap-3 flex-shrink-0 no-underline"
-                  aria-label="HeyClaude - Go to homepage"
+                  className="flex items-center flex-shrink-0 no-underline"
+                  aria-label="heyclaude - Go to homepage"
                 >
-                  <motion.div
-                    style={{ scale: logoScale }}
-                    className="flex items-center gap-2 md:gap-3"
-                  >
-                    {/* Icon visible on ALL breakpoints */}
-                    <LogoIcon
-                      className={`transition-all duration-300 flex-shrink-0 ${
-                        isScrolled
-                          ? 'h-8 w-8 md:h-7 md:w-7'
-                          : 'h-10 w-10 md:h-9 md:w-9 lg:h-10 lg:w-10'
+                  <motion.div style={{ scale: logoScale }}>
+                    <HeyClaudeEffect
+                      className={`transition-all duration-300 ${
+                        isScrolled ? 'h-10 md:h-12' : 'h-12 md:h-16'
                       }`}
+                      speed={0}
                     />
-
-                    {/* HeyClaude gradient text - hidden on mobile, visible md+ */}
-                    <div className="hidden md:block">
-                      <HeyClaudeText
-                        size={isScrolled ? 'sm' : 'md'}
-                        className="transition-all duration-300"
-                      />
-                    </div>
                   </motion.div>
                 </Link>
 
@@ -430,13 +417,12 @@ export const Navigation = () => {
                       <div className={'flex flex-col h-full pt-8'}>
                         {/* Header with Motion.dev fade-in */}
                         <motion.div
-                          className={'flex items-center gap-3 pb-8 px-1'}
+                          className={'flex items-center pb-8 px-1'}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.1 }}
                         >
-                          <LogoIcon className="h-10 w-10 flex-shrink-0" />
-                          <HeyClaudeText size="lg" />
+                          <HeyClaudeEffect className="h-16" speed={0} />
                         </motion.div>
 
                         {/* Main Navigation - Staggered animations */}
