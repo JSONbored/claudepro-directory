@@ -128,6 +128,7 @@ export async function generateAllSiteUrls(
   // STATIC PAGES
   // ============================================================================
 
+  // Core feature pages
   const staticPages = [
     { path: 'jobs', priority: 0.6, changefreq: 'weekly' as const },
     { path: 'community', priority: 0.6, changefreq: 'weekly' as const },
@@ -137,11 +138,57 @@ export async function generateAllSiteUrls(
     { path: 'guides', priority: 0.6, changefreq: 'weekly' as const },
     { path: 'companies', priority: 0.6, changefreq: 'weekly' as const },
     { path: 'board', priority: 0.5, changefreq: 'daily' as const },
-    { path: 'api-docs', priority: 0.9, changefreq: 'weekly' as const }, // High priority for developer docs
     { path: 'changelog', priority: 0.85, changefreq: 'daily' as const }, // High priority for recency signals
   ];
 
   staticPages.forEach((page) => {
+    urls.push({
+      loc: `${baseUrl || ''}/${page.path}`,
+      lastmod: currentDate,
+      changefreq: page.changefreq,
+      priority: page.priority,
+    });
+  });
+
+  // Legal & Compliance Pages (footer links)
+  const legalPages = [
+    { path: 'privacy', priority: 0.5, changefreq: 'monthly' as const },
+    { path: 'terms', priority: 0.5, changefreq: 'monthly' as const },
+    { path: 'cookies', priority: 0.4, changefreq: 'monthly' as const },
+  ];
+
+  legalPages.forEach((page) => {
+    urls.push({
+      loc: `${baseUrl || ''}/${page.path}`,
+      lastmod: currentDate,
+      changefreq: page.changefreq,
+      priority: page.priority,
+    });
+  });
+
+  // Support & Help Pages (footer links)
+  const supportPages = [
+    { path: 'contact', priority: 0.6, changefreq: 'monthly' as const },
+    { path: 'help', priority: 0.6, changefreq: 'monthly' as const },
+    { path: 'accessibility', priority: 0.5, changefreq: 'yearly' as const },
+  ];
+
+  supportPages.forEach((page) => {
+    urls.push({
+      loc: `${baseUrl || ''}/${page.path}`,
+      lastmod: currentDate,
+      changefreq: page.changefreq,
+      priority: page.priority,
+    });
+  });
+
+  // Utility Pages
+  const utilityPages = [
+    { path: 'search', priority: 0.7, changefreq: 'daily' as const },
+    { path: 'for-you', priority: 0.7, changefreq: 'daily' as const },
+  ];
+
+  utilityPages.forEach((page) => {
     urls.push({
       loc: `${baseUrl || ''}/${page.path}`,
       lastmod: currentDate,
@@ -172,7 +219,7 @@ export async function generateAllSiteUrls(
 
   if (includeLlmsTxt) {
     // Static page llms.txt routes
-    const staticPagesWithLlmsTxt = ['api-docs', 'guides', 'tools/config-recommender'];
+    const staticPagesWithLlmsTxt = ['guides', 'tools/config-recommender'];
     staticPagesWithLlmsTxt.forEach((page) => {
       urls.push({
         loc: `${baseUrl || ''}/${page}/llms.txt`,
