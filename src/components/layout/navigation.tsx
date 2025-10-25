@@ -38,7 +38,7 @@ import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedButton } from '@/src/components/domain/unified-button';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
-import { HeyClaudeEffect } from '@/src/components/layout/heyclaude-effect';
+import { HeyClaudeLogo } from '@/src/components/layout/heyclaude-logo';
 import { NavigationCommandMenu } from '@/src/components/layout/navigation-command-menu';
 import { UserMenu } from '@/src/components/layout/user-menu';
 import { Button } from '@/src/components/primitives/button';
@@ -184,12 +184,7 @@ export const Navigation = () => {
                   aria-label="heyclaude - Go to homepage"
                 >
                   <motion.div style={{ scale: logoScale }}>
-                    <HeyClaudeEffect
-                      className={`transition-all duration-300 ${
-                        isScrolled ? 'h-10 md:h-12' : 'h-12 md:h-16'
-                      }`}
-                      speed={0}
-                    />
+                    <HeyClaudeLogo size={isScrolled ? 'sm' : 'md'} duration={1.2} />
                   </motion.div>
                 </Link>
 
@@ -422,7 +417,7 @@ export const Navigation = () => {
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.1 }}
                         >
-                          <HeyClaudeEffect className="h-16" speed={0} />
+                          <HeyClaudeLogo size="lg" duration={1.2} />
                         </motion.div>
 
                         {/* Main Navigation - Staggered animations */}

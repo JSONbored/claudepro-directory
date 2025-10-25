@@ -11,7 +11,7 @@
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { HeyClaudeEffect } from '@/src/components/layout/heyclaude-effect';
+import { HeyClaudeLogo } from '@/src/components/layout/heyclaude-logo';
 import { ModeToggle } from '@/src/components/layout/mode-toggle';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
@@ -42,7 +42,7 @@ export function Footer() {
             transition={{ duration: 0.4 }}
           >
             <div className={'mb-4 flex justify-center md:justify-start'}>
-              <HeyClaudeEffect className="h-14" speed={0} />
+              <HeyClaudeLogo size="md" inView={true} duration={1.5} />
             </div>
             <p className={'text-sm md:text-xs text-muted-foreground mb-6 max-w-sm mx-auto md:mx-0'}>
               {APP_CONFIG.description}
