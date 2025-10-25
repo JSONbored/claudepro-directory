@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
@@ -8,9 +9,19 @@ import { z } from 'zod';
 import { JSONSectionRenderer } from '@/src/components/content/json-section-renderer';
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 // MDXContentProvider removed - 100% JSON guides now
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
+
+const UnifiedNewsletterCapture = dynamic(
+  () =>
+    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+      default: mod.UnifiedNewsletterCapture,
+    })),
+  {
+    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+  }
+);
+
 // Removed unused import: CategoryGuidesPage
 import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar';
 import { Button } from '@/src/components/primitives/button';

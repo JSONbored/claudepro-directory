@@ -1,5 +1,5 @@
 import Script from 'next/script';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
 
 /**
@@ -28,10 +28,10 @@ export async function OrganizationStructuredData() {
 
     // Contact and social media
     sameAs: [
-      'https://github.com/claudepro-directory',
-      'https://twitter.com/claudepro',
-      'https://linkedin.com/company/claudepro-directory',
-    ],
+      SOCIAL_LINKS.github,
+      ...(SOCIAL_LINKS.twitter ? [SOCIAL_LINKS.twitter] : []),
+      ...(SOCIAL_LINKS.discord ? [SOCIAL_LINKS.discord] : []),
+    ].filter(Boolean),
 
     // Publishing information
     publishingPrinciples: `${baseUrl}/about#publishing-principles`,

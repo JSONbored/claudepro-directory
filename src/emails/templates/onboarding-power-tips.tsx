@@ -8,6 +8,8 @@
 
 import { Button, Hr, Section, Text } from '@react-email/components';
 import type * as React from 'react';
+import { addUTMToURL } from '@/src/lib/utils/email-utm';
+import { EMAIL_UTM_TEMPLATES } from '@/src/lib/utils/utm-templates';
 import { BaseLayout } from '../layouts/base-layout';
 import {
   cardStyle,
@@ -41,8 +43,11 @@ export interface OnboardingPowerTipsProps {
  * Power User Tips Email Component (Step 3 of 5)
  */
 export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
+  const baseUrl = 'https://claudepro.directory';
+  const utm = EMAIL_UTM_TEMPLATES.ONBOARDING_POWER_TIPS;
+
   return (
-    <BaseLayout preview="Power User Tips - Advanced Claude Techniques & Best Practices">
+    <BaseLayout preview="Power User Tips - Advanced Claude Techniques & Best Practices" utm={utm}>
       {/* Hero section */}
       <Section style={heroSection}>
         <Text style={headingStyle}>Level Up Your Claude Game 💪</Text>
@@ -131,11 +136,17 @@ export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
           Dive deeper into MCP servers, custom hooks, and advanced automation techniques.
         </Text>
 
-        <Button href="https://claudepro.directory/mcp" style={primaryButtonStyle}>
+        <Button
+          href={addUTMToURL(`${baseUrl}/mcp`, { ...utm, content: 'mcp_cta' })}
+          style={primaryButtonStyle}
+        >
           Browse MCP Servers
         </Button>
 
-        <Button href="https://claudepro.directory/hooks" style={secondaryButtonStyle}>
+        <Button
+          href={addUTMToURL(`${baseUrl}/hooks`, { ...utm, content: 'hooks_cta' })}
+          style={secondaryButtonStyle}
+        >
           Explore Hooks
         </Button>
       </Section>

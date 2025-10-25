@@ -3,6 +3,7 @@ import * as nosecone from '@nosecone/next';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { EXTERNAL_SERVICES } from '@/src/lib/constants';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
 import { env, securityConfig } from '@/src/lib/schemas/env.schema';
@@ -62,37 +63,38 @@ const aj = arcjet({
 
 // OPTIMIZATION: Pre-compute CSP arrays at module level for better performance
 // Eliminates runtime array spread operations
+// Using centralized EXTERNAL_SERVICES constant for maintainability
 const BASE_SCRIPT_SRC = [
   ...(nosecone.defaults.contentSecurityPolicy.directives.scriptSrc || []),
   "'strict-dynamic'", // Allow nonce-based scripts to load additional scripts
-  'https://umami.claudepro.directory', // Umami analytics
-  'https://*.vercel-scripts.com', // Vercel analytics
-  'https://vercel.live', // Vercel toolbar
+  EXTERNAL_SERVICES.umami.analytics, // Umami analytics
+  EXTERNAL_SERVICES.vercel.scripts, // Vercel analytics
+  EXTERNAL_SERVICES.vercel.toolbar, // Vercel toolbar
 ] as const;
 
 const DEV_SCRIPT_SRC = [...BASE_SCRIPT_SRC, "'unsafe-eval'"] as const; // HMR/hot reload
 
 const IMG_SRC = [
   ...(nosecone.defaults.contentSecurityPolicy.directives.imgSrc || []),
-  'https://github.com',
-  'https://*.githubusercontent.com',
-  'https://claudepro.directory',
-  'https://www.claudepro.directory',
+  EXTERNAL_SERVICES.github.site,
+  EXTERNAL_SERVICES.github.userContent,
+  EXTERNAL_SERVICES.app.main,
+  EXTERNAL_SERVICES.app.www,
 ] as const;
 
-const FRAME_SRC = ['https://status.claudepro.directory'] as const;
+const FRAME_SRC = [EXTERNAL_SERVICES.betterstack.status] as const;
 
 const BASE_CONNECT_SRC = [
   ...(nosecone.defaults.contentSecurityPolicy.directives.connectSrc || []),
   'wss://*.vercel.app', // WebSocket for HMR in preview
   'wss://*.vercel-scripts.com', // Vercel live reload
-  'https://umami.claudepro.directory', // Umami analytics
-  'https://*.vercel-scripts.com', // Vercel analytics
-  'https://vercel.live', // Vercel toolbar
-  'https://api.github.com', // GitHub API
-  'https://*.supabase.co', // Supabase Auth API (OAuth callbacks)
-  'https://accounts.google.com', // Google OAuth (if enabled)
-  'https://github.com', // GitHub OAuth
+  EXTERNAL_SERVICES.umami.analytics, // Umami analytics
+  EXTERNAL_SERVICES.vercel.scripts, // Vercel analytics
+  EXTERNAL_SERVICES.vercel.toolbar, // Vercel toolbar
+  EXTERNAL_SERVICES.github.api, // GitHub API
+  EXTERNAL_SERVICES.supabase.pattern, // Supabase Auth API (OAuth callbacks)
+  EXTERNAL_SERVICES.google.accounts, // Google OAuth (if enabled)
+  EXTERNAL_SERVICES.github.site, // GitHub OAuth
 ] as const;
 
 const PREVIEW_CONNECT_SRC = [

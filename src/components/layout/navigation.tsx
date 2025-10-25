@@ -34,7 +34,7 @@ import { motion, useScroll, useTransform } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type * as React from 'react';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedButton } from '@/src/components/domain/unified-button';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
@@ -98,7 +98,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   );
 };
 
-export const Navigation = () => {
+const NavigationComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -223,14 +223,14 @@ export const Navigation = () => {
                         <ChevronDown className="ml-1 h-3 w-3" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[800px] p-4">
-                      <div className="grid gap-6 md:grid-cols-3">
+                    <DropdownMenuContent align="end" className="w-[520px] p-3">
+                      <div className="grid gap-4 md:grid-cols-2">
                         {SECONDARY_NAVIGATION.map((group) => (
-                          <div key={group.heading} className="space-y-3">
-                            <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
+                          <div key={group.heading} className="space-y-2">
+                            <DropdownMenuLabel className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-1">
                               {group.heading}
                             </DropdownMenuLabel>
-                            <DropdownMenuGroup className="space-y-1">
+                            <DropdownMenuGroup className="space-y-0.5">
                               {group.links.map((link) => {
                                 const IconComponent = link.icon;
                                 return (
@@ -239,27 +239,31 @@ export const Navigation = () => {
                                       href={link.href}
                                       prefetch={true}
                                       className={
-                                        'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg hover:bg-accent/10 transition-colors duration-200 group'
+                                        'flex items-center gap-2.5 w-full cursor-pointer px-2.5 py-2 rounded-md hover:bg-accent/10 transition-colors duration-150 group'
                                       }
                                     >
                                       {IconComponent && (
                                         <div
                                           className={
-                                            'flex h-10 w-10 items-center justify-center rounded-lg bg-muted group-hover:bg-accent/20 transition-colors flex-shrink-0'
+                                            'flex h-7 w-7 items-center justify-center rounded-md bg-muted/50 group-hover:bg-accent/15 transition-colors flex-shrink-0'
                                           }
                                         >
                                           <IconComponent
-                                            className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors"
+                                            className="h-3.5 w-3.5 text-muted-foreground group-hover:text-accent transition-colors"
                                             aria-hidden="true"
                                           />
                                         </div>
                                       )}
-                                      <div className={'flex flex-col items-start gap-1 flex-1'}>
-                                        <div className="font-medium group-hover:text-accent transition-colors">
+                                      <div
+                                        className={
+                                          'flex flex-col items-start gap-0.5 flex-1 min-w-0'
+                                        }
+                                      >
+                                        <div className="text-sm font-medium group-hover:text-accent transition-colors truncate w-full">
                                           {link.label}
                                         </div>
                                         {link.description && (
-                                          <div className="text-xs text-muted-foreground group-hover:text-foreground/70 transition-colors line-clamp-2">
+                                          <div className="text-[11px] text-muted-foreground/80 group-hover:text-foreground/60 transition-colors line-clamp-1">
                                             {link.description}
                                           </div>
                                         )}
@@ -273,23 +277,23 @@ export const Navigation = () => {
                         ))}
                       </div>
 
-                      {/* Submit Config - Standalone CTA */}
-                      <DropdownMenuSeparator className="my-4" />
+                      {/* Submit Config - Compact CTA */}
+                      <DropdownMenuSeparator className="my-2.5" />
                       <DropdownMenuItem asChild>
                         <Link
                           href={ROUTES.SUBMIT}
                           prefetch={true}
                           className={
-                            'flex items-start gap-3 w-full cursor-pointer p-3 rounded-lg bg-accent/5 hover:bg-accent/10 transition-colors duration-200 group'
+                            'flex items-center gap-2.5 w-full cursor-pointer px-2.5 py-2.5 rounded-md bg-accent/5 hover:bg-accent/10 transition-colors duration-150 group'
                           }
                         >
                           <div
                             className={
-                              'flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20 group-hover:bg-accent/30 transition-colors flex-shrink-0'
+                              'flex h-7 w-7 items-center justify-center rounded-md bg-accent/20 group-hover:bg-accent/30 transition-colors flex-shrink-0'
                             }
                           >
                             <svg
-                              className="h-5 w-5 text-accent"
+                              className="h-3.5 w-3.5 text-accent"
                               aria-hidden="true"
                               fill="none"
                               stroke="currentColor"
@@ -303,10 +307,10 @@ export const Navigation = () => {
                               />
                             </svg>
                           </div>
-                          <div className={'flex flex-col items-start gap-1 flex-1'}>
-                            <div className="font-medium text-accent">Submit Config</div>
-                            <div className="text-xs text-muted-foreground">
-                              Share your configuration with the community
+                          <div className={'flex flex-col items-start gap-0.5 flex-1'}>
+                            <div className="text-sm font-semibold text-accent">Submit Config</div>
+                            <div className="text-[11px] text-muted-foreground/80">
+                              Share with the community
                             </div>
                           </div>
                         </Link>
@@ -545,3 +549,6 @@ export const Navigation = () => {
     </>
   );
 };
+
+export const Navigation = memo(NavigationComponent);
+Navigation.displayName = 'Navigation';

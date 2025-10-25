@@ -24,11 +24,11 @@ import { Suspense } from 'react';
 import { UnifiedContentSection } from '@/src/components/content/unified-content-section';
 import { UnifiedReview } from '@/src/components/domain/unified-review';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { isValidCategory } from '@/src/lib/config/category-config';
 import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
 import { detectLanguage } from '@/src/lib/content/language-detection';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting-starry';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { getDisplayTitle } from '@/src/lib/utils';
@@ -485,14 +485,16 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Reviews & Ratings Section */}
-            <div className="mt-12 pt-12 border-t">
-              <UnifiedReview
-                variant="section"
-                contentType={item.category as CategoryId}
-                contentSlug={item.slug}
-                {...(currentUserId && { currentUserId })}
-              />
-            </div>
+            {isValidCategory(item.category) && (
+              <div className="mt-12 pt-12 border-t">
+                <UnifiedReview
+                  variant="section"
+                  contentType={item.category}
+                  contentSlug={item.slug}
+                  {...(currentUserId && { currentUserId })}
+                />
+              </div>
+            )}
 
             {/* Email CTA - Inline variant */}
             <UnifiedNewsletterCapture

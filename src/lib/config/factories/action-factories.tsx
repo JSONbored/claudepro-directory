@@ -21,6 +21,7 @@
  */
 
 import type { ReactNode } from 'react';
+import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { Download, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import type { ActionButtonConfig } from '@/src/lib/types/content-type-config';
@@ -204,11 +205,13 @@ export function createDownloadAction(
  *
  * @example
  * ```tsx
+ * import { SOCIAL_LINKS } from '@/src/lib/constants';
+ *
  * // hooks category
  * primaryAction: createGitHubLinkAction(
  *   'View on GitHub',
  *   <Webhook className={`h-4 w-4 mr-2`} />,
- *   'https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/{slug}.json'
+ *   `${SOCIAL_LINKS.github}/blob/main/content/hooks/{slug}.json`
  * )
  * ```
  */
@@ -299,7 +302,7 @@ export const commonActions = {
    */
   viewHookOnGitHub: () =>
     createGitHubLinkAction(
-      'https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/{slug}.json',
+      `${SOCIAL_LINKS.github}/blob/main/content/hooks/{slug}.json`,
       'View on GitHub',
       <Webhook className={'h-4 w-4 mr-2'} />
     ),

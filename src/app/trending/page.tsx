@@ -1,3 +1,4 @@
+import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import {
   agents,
@@ -10,8 +11,18 @@ import {
   statuslines,
 } from '@/generated/content';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { LazySection } from '@/src/components/infra/lazy-section';
+
+const UnifiedNewsletterCapture = dynamic(
+  () =>
+    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+      default: mod.UnifiedNewsletterCapture,
+    })),
+  {
+    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+  }
+);
+
 import { TrendingContent } from '@/src/components/shared/trending-content';
 import { statsRedis } from '@/src/lib/cache.server';
 import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';

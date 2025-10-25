@@ -90,6 +90,22 @@ export const EVENTS = {
   EMAIL_SUBSCRIBED_MODAL: 'email_subscribed_modal',
   EMAIL_SUBSCRIBED_CONTENT_PAGE: 'email_subscribed_content_page',
 
+  // Growth Tools - Interactive Lead Capture
+  EXIT_INTENT_SHOWN: 'exit_intent_shown',
+  EXIT_INTENT_DISMISSED: 'exit_intent_dismissed',
+  EXIT_INTENT_CONVERTED: 'exit_intent_converted',
+  SCROLL_TRIGGER_SHOWN: 'scroll_trigger_shown',
+  SCROLL_TRIGGER_CONVERTED: 'scroll_trigger_converted',
+  TIME_DELAYED_SHOWN: 'time_delayed_shown',
+  TIME_DELAYED_DISMISSED: 'time_delayed_dismissed',
+  TIME_DELAYED_CONVERTED: 'time_delayed_converted',
+  ROI_CALCULATOR_STARTED: 'roi_calculator_started',
+  ROI_CALCULATOR_COMPLETED: 'roi_calculator_completed',
+  ROI_CALCULATOR_EMAIL_CAPTURED: 'roi_calculator_email_captured',
+  SPONSORSHIP_CALCULATOR_STARTED: 'sponsorship_calculator_started',
+  SPONSORSHIP_CALCULATOR_COMPLETED: 'sponsorship_calculator_completed',
+  MEDIA_KIT_REQUESTED: 'media_kit_requested',
+
   // PWA / App Installation
   PWA_INSTALLABLE: 'pwa_installable',
   PWA_PROMPT_ACCEPTED: 'pwa_prompt_accepted',
@@ -336,6 +352,78 @@ function buildEventConfig(): Record<EventName, EventConfig> {
     },
     [EVENTS.EMAIL_SUBSCRIBED_CONTENT_PAGE]: {
       description: 'User subscribed from content detail page',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+
+    // Growth Tools - Interactive Lead Capture
+    [EVENTS.EXIT_INTENT_SHOWN]: {
+      description: 'Exit intent modal shown to user',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.EXIT_INTENT_DISMISSED]: {
+      description: 'User dismissed exit intent modal',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.EXIT_INTENT_CONVERTED]: {
+      description: 'User subscribed via exit intent modal',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.SCROLL_TRIGGER_SHOWN]: {
+      description: 'Scroll trigger capture shown at scroll depth',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.SCROLL_TRIGGER_CONVERTED]: {
+      description: 'User subscribed via scroll trigger',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.TIME_DELAYED_SHOWN]: {
+      description: 'Time-delayed modal shown after delay',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.TIME_DELAYED_DISMISSED]: {
+      description: 'User dismissed time-delayed modal',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.TIME_DELAYED_CONVERTED]: {
+      description: 'User subscribed via time-delayed modal',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.ROI_CALCULATOR_STARTED]: {
+      description: 'User started MCP ROI calculator',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.ROI_CALCULATOR_COMPLETED]: {
+      description: 'User completed MCP ROI calculator',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.ROI_CALCULATOR_EMAIL_CAPTURED]: {
+      description: 'Email captured via MCP ROI calculator',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.SPONSORSHIP_CALCULATOR_STARTED]: {
+      description: 'User started sponsorship ROI calculator',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.SPONSORSHIP_CALCULATOR_COMPLETED]: {
+      description: 'User completed sponsorship ROI calculator',
+      category: 'INTERACTION',
+      enabled: true,
+    },
+    [EVENTS.MEDIA_KIT_REQUESTED]: {
+      description: 'User requested media kit download',
       category: 'INTERACTION',
       enabled: true,
     },
@@ -661,6 +749,94 @@ export interface EventPayloads {
     referrer?: string;
     page?: string;
     category?: string;
+  };
+
+  // Growth Tools - Interactive Lead Capture
+  [EVENTS.EXIT_INTENT_SHOWN]: {
+    trigger_source: string;
+    trigger_context: string;
+    page: string;
+  };
+
+  [EVENTS.EXIT_INTENT_DISMISSED]: {
+    trigger_source: string;
+    dismissal_method: 'close_button' | 'overlay_click' | 'escape_key';
+    time_shown_ms: number;
+  };
+
+  [EVENTS.EXIT_INTENT_CONVERTED]: {
+    trigger_source: string;
+    contact_id?: string;
+    category?: string;
+  };
+
+  [EVENTS.SCROLL_TRIGGER_SHOWN]: {
+    trigger_source: string;
+    scroll_percentage: number;
+    trigger_context: string;
+    page: string;
+  };
+
+  [EVENTS.SCROLL_TRIGGER_CONVERTED]: {
+    trigger_source: string;
+    contact_id?: string;
+    category?: string;
+  };
+
+  [EVENTS.TIME_DELAYED_SHOWN]: {
+    trigger_source: string;
+    delay_ms: number;
+    trigger_context: string;
+    page: string;
+  };
+
+  [EVENTS.TIME_DELAYED_DISMISSED]: {
+    trigger_source: string;
+    dismissal_method: 'close_button' | 'overlay_click' | 'escape_key';
+    time_shown_ms: number;
+  };
+
+  [EVENTS.TIME_DELAYED_CONVERTED]: {
+    trigger_source: string;
+    contact_id?: string;
+    category?: string;
+  };
+
+  [EVENTS.ROI_CALCULATOR_STARTED]: {
+    trigger_source: string;
+    calculator_type: 'mcp' | 'sponsorship';
+  };
+
+  [EVENTS.ROI_CALCULATOR_COMPLETED]: {
+    trigger_source: string;
+    calculator_type: 'mcp' | 'sponsorship';
+    team_size?: string;
+    hours_per_week?: number;
+    hourly_rate?: number;
+    monthly_savings?: number;
+  };
+
+  [EVENTS.ROI_CALCULATOR_EMAIL_CAPTURED]: {
+    trigger_source: string;
+    calculator_type: 'mcp' | 'sponsorship';
+    monthly_savings?: number;
+    contact_id?: string;
+  };
+
+  [EVENTS.SPONSORSHIP_CALCULATOR_STARTED]: {
+    trigger_source: string;
+  };
+
+  [EVENTS.SPONSORSHIP_CALCULATOR_COMPLETED]: {
+    trigger_source: string;
+    budget: number;
+    estimated_conversions?: number;
+  };
+
+  [EVENTS.MEDIA_KIT_REQUESTED]: {
+    trigger_source: string;
+    budget_tier?: string;
+    contact_id?: string;
   };
 
   [EVENTS.PWA_INSTALLABLE]: {

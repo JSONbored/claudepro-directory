@@ -56,8 +56,8 @@ import { Card } from '@/src/components/primitives/card';
 import { Label } from '@/src/components/primitives/label';
 import { Rating, RatingButton } from '@/src/components/primitives/shadcn-io/rating';
 import { Textarea } from '@/src/components/primitives/textarea';
+import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
 import { Edit, Star, ThumbsUp, Trash } from '@/src/lib/icons';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatDistanceToNow } from '@/src/lib/utils/data.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -583,11 +583,16 @@ function ReviewCardItem({
     needsTruncation && !showFullText ? `${reviewText.slice(0, 200)}...` : reviewText;
 
   if (isEditing && isOwnReview) {
+    // Type guard validation - should never fail for reviews from database
+    if (!isValidCategory(review.content_type)) {
+      return null;
+    }
+
     return (
       <Card className="p-6">
         <UnifiedReview
           variant="form"
-          contentType={review.content_type as CategoryId}
+          contentType={review.content_type}
           contentSlug={review.content_slug}
           existingReview={{
             id: review.id,

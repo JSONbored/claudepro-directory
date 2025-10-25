@@ -144,8 +144,6 @@ export function ContentListServer<T extends UnifiedContentItem>({
               variant="hero"
               context="category-page"
               category={type}
-              headline={'Join 1,000+ Claude Power Users'}
-              description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
             />
           </LazySection>
         </Suspense>

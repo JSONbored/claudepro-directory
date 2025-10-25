@@ -5,7 +5,8 @@
  */
 
 import { z } from 'zod';
-import { type CategoryId, VALID_CATEGORIES } from '@/src/lib/config/category-types';
+import { isValidCategory } from '@/src/lib/config/category-config';
+import { VALID_CATEGORIES } from '@/src/lib/config/category-types';
 import { DOMPurify } from './html-sanitizer';
 import { VALIDATION_PATTERNS } from './patterns';
 
@@ -408,8 +409,8 @@ export const sanitizers = {
   sanitizeCategory: async (category: string): Promise<string | null> => {
     const sanitized = (await sanitizers.sanitizeFormInput(category, 50)).toLowerCase();
 
-    // Validate against UNIFIED_CATEGORY_REGISTRY (via VALID_CATEGORIES)
-    if (VALID_CATEGORIES.includes(sanitized as CategoryId)) {
+    // Type guard validation instead of type assertion
+    if (isValidCategory(sanitized)) {
       return sanitized;
     }
 

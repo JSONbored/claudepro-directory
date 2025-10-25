@@ -19,12 +19,50 @@ import './micro-interactions.css';
 import './starry-night.css';
 import dynamic from 'next/dynamic';
 import { Toaster } from 'sonner';
-import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
-import { NotificationFAB } from '@/src/components/features/notifications/notification-fab';
-import { NotificationSheet } from '@/src/components/features/notifications/notification-sheet';
-import { NotificationToastHandler } from '@/src/components/features/notifications/notification-toast-handler';
+
+const UnifiedNewsletterCapture = dynamic(
+  () =>
+    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+      default: mod.UnifiedNewsletterCapture,
+    })),
+  {
+    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+  }
+);
+
+// Lazy load notification system (40-50KB, only needed on interaction)
+// FAB, Sheet, and ToastHandler only render when user triggers notification
+const NotificationFAB = dynamic(
+  () =>
+    import('@/src/components/features/notifications/notification-fab').then((mod) => ({
+      default: mod.NotificationFAB,
+    })),
+  {
+    loading: () => null,
+  }
+);
+
+const NotificationSheet = dynamic(
+  () =>
+    import('@/src/components/features/notifications/notification-sheet').then((mod) => ({
+      default: mod.NotificationSheet,
+    })),
+  {
+    loading: () => null,
+  }
+);
+
+const NotificationToastHandler = dynamic(
+  () =>
+    import('@/src/components/features/notifications/notification-toast-handler').then((mod) => ({
+      default: mod.NotificationToastHandler,
+    })),
+  {
+    loading: () => null,
+  }
+);
+
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
-import { PerformanceOptimizer } from '@/src/components/infra/performance-optimizer';
 import { PostCopyEmailProvider } from '@/src/components/infra/providers/post-copy-email-provider';
 import { PwaInstallTracker } from '@/src/components/infra/pwa-install-tracker';
 import { OrganizationStructuredData } from '@/src/components/infra/structured-data/organization-schema';
@@ -214,7 +252,6 @@ export default async function RootLayout({
             <UnifiedNewsletterCapture variant="footer-bar" source="footer" />
           </PostCopyEmailProvider>
         </ThemeProvider>
-        <PerformanceOptimizer />
         <Analytics />
         <SpeedInsights />
         {/* Umami Analytics - Privacy-focused analytics (production only) */}

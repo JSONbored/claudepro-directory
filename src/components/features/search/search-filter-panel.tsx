@@ -13,7 +13,7 @@
  * - Apply/Clear actions
  */
 
-import { useId } from 'react';
+import { memo, useId } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Label } from '@/src/components/primitives/label';
@@ -43,7 +43,7 @@ export interface SearchFilterPanelProps {
   showActions?: boolean;
 }
 
-export function SearchFilterPanel({
+function SearchFilterPanelComponent({
   filters,
   availableTags = [],
   availableAuthors = [],
@@ -267,3 +267,27 @@ export function SearchFilterPanel({
     </section>
   );
 }
+
+/**
+ * Memoized export with custom comparison function
+ * Optimizes complex filter state re-renders
+ *
+ * Custom comparison skips function references since they change identity
+ * but not behavior between renders
+ */
+export const SearchFilterPanel = memo(SearchFilterPanelComponent, (prevProps, nextProps) => {
+  // Compare all props except function callbacks
+  return (
+    prevProps.activeFilterCount === nextProps.activeFilterCount &&
+    prevProps.showActions === nextProps.showActions &&
+    // Deep compare arrays
+    JSON.stringify(prevProps.availableTags) === JSON.stringify(nextProps.availableTags) &&
+    JSON.stringify(prevProps.availableAuthors) === JSON.stringify(nextProps.availableAuthors) &&
+    JSON.stringify(prevProps.availableCategories) ===
+      JSON.stringify(nextProps.availableCategories) &&
+    // Deep compare filters object (complex state)
+    JSON.stringify(prevProps.filters) === JSON.stringify(nextProps.filters)
+  );
+});
+
+SearchFilterPanel.displayName = 'SearchFilterPanel';

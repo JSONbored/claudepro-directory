@@ -26,6 +26,7 @@ import { Suspense } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
+import { isValidCategory } from '@/src/lib/config/category-config';
 import { getContentBySlug } from '@/src/lib/content/content-loaders';
 import { AlertTriangle, CheckCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -34,7 +35,6 @@ import type {
   CollectionContent,
   CollectionItemReference,
 } from '@/src/lib/schemas/content/collection.schema';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchMap } from '@/src/lib/utils/batch.utils';
 import { getViewTransitionStyle } from '@/src/lib/utils/view-transitions.utils';
@@ -71,7 +71,20 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
     collection.items,
     async (itemRef: CollectionItemReference): Promise<ItemWithData | null> => {
       try {
-        const item = await getContentBySlug(itemRef.category as CategoryId, itemRef.slug);
+        // Type guard validation
+        if (!isValidCategory(itemRef.category)) {
+          logger.error(
+            'Invalid category in collection item reference',
+            new Error('Invalid category'),
+            {
+              category: itemRef.category,
+              slug: itemRef.slug,
+            }
+          );
+          return null;
+        }
+
+        const item = await getContentBySlug(itemRef.category, itemRef.slug);
         return item ? { ...itemRef, data: item } : null;
       } catch (error) {
         logger.error('Failed to load collection item', error as Error, {

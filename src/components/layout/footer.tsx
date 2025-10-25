@@ -11,11 +11,11 @@
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { HeyClaudeLogo } from '@/src/components/layout/heyclaude-logo';
-import { ModeToggle } from '@/src/components/layout/mode-toggle';
-import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
+import { ThemeToggle } from '@/src/components/layout/theme-toggle';
+import { APP_CONFIG, EXTERNAL_SERVICES, SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { DiscordIcon, ExternalLink, Github, Sparkles } from '@/src/lib/icons';
 
@@ -27,7 +27,7 @@ import { DiscordIcon, ExternalLink, Github, Sparkles } from '@/src/lib/icons';
  * @remarks
  * Includes llms.txt link for AI assistant discoverability per LLMs.txt specification
  */
-export function Footer() {
+function FooterComponent() {
   const currentYear = new Date().getFullYear();
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -76,7 +76,7 @@ export function Footer() {
                   </Link>
                 ))}
                 {/* Theme Toggle */}
-                <ModeToggle />
+                <ThemeToggle />
               </div>
 
               {/* Open Source Badge */}
@@ -244,7 +244,7 @@ export function Footer() {
             {/* BetterStack Status Badge - Theme-aware */}
             {mounted && (
               <iframe
-                src={`https://status.claudepro.directory/badge?theme=${resolvedTheme === 'light' ? 'light' : 'dark'}`}
+                src={`${EXTERNAL_SERVICES.betterstack.status}/badge?theme=${resolvedTheme === 'light' ? 'light' : 'dark'}`}
                 width="250"
                 height="30"
                 frameBorder="0"
@@ -261,3 +261,6 @@ export function Footer() {
     </footer>
   );
 }
+
+export const Footer = memo(FooterComponent);
+Footer.displayName = 'Footer';

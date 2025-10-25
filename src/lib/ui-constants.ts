@@ -289,6 +289,54 @@ export const UI_CLASSES = {
    */
   TEXT_XS_MUTED: 'text-xs text-muted-foreground',
   TEXT_SM_MUTED: 'text-sm text-muted-foreground',
+  TEXT_MUTED: 'text-muted-foreground',
+  /**
+   * Spacing Utilities - Most common patterns
+   */
+  SPACE_Y_2: 'space-y-2',
+  SPACE_Y_3: 'space-y-3',
+  SPACE_Y_4: 'space-y-4',
+  SPACE_Y_6: 'space-y-6',
+  MB_4: 'mb-4',
+  MB_6: 'mb-6',
+  MB_8: 'mb-8',
+  /**
+   * Icon Sizes - Common patterns
+   */
+  ICON_SM: 'h-3 w-3',
+  ICON_SM_MR: 'h-3 w-3 mr-1',
+  ICON_MD: 'h-4 w-4',
+  ICON_MD_MR: 'h-4 w-4 mr-2',
+  ICON_LG: 'h-5 w-5',
+  ICON_LG_PRIMARY: 'h-5 w-5 text-primary',
+  ICON_SUCCESS_INDICATOR: 'h-4 w-4 text-green-500 mt-0.5',
+  /**
+   * Heading Styles - Common patterns
+   */
+  HEADING_2XL: 'text-2xl font-bold',
+  HEADING_2XL_MB: 'text-2xl font-bold mb-4',
+  HEADING_2XL_SEMIBOLD_MB: 'text-2xl font-semibold mb-4',
+  HEADING_LG_SEMIBOLD_MB: 'text-lg font-semibold mb-3',
+  /**
+   * Text Modifiers
+   */
+  TEXT_SM: 'text-sm',
+  TEXT_SM_MEDIUM: 'text-sm font-medium',
+  TEXT_XS: 'text-xs',
+  FONT_MEDIUM: 'font-medium',
+  /**
+   * Layout Utilities
+   */
+  FLEX_1: 'flex-1',
+  CONTAINER_PAGE: 'container mx-auto px-4 py-8',
+  /**
+   * Interactive Elements
+   */
+  INTERACTIVE_ITEM: 'px-4 py-3 border rounded-lg hover:bg-accent transition-colors text-left',
+  /**
+   * List Styles
+   */
+  LIST_DISC_SPACED: 'list-disc pl-6 space-y-2',
   /**
    * Code Block Styles - Production-grade patterns
    */

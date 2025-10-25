@@ -11,6 +11,8 @@
 
 import { Button, Hr, Section, Text } from '@react-email/components';
 import type * as React from 'react';
+import { addUTMToURL } from '@/src/lib/utils/email-utm';
+import { EMAIL_UTM_TEMPLATES } from '@/src/lib/utils/utm-templates';
 import { BaseLayout } from '../layouts/base-layout';
 import {
   contentSection,
@@ -100,8 +102,14 @@ export function WeeklyDigest({
   trendingContent,
   personalizedContent,
 }: WeeklyDigestProps) {
+  const baseUrl = 'https://claudepro.directory';
+  const utm = EMAIL_UTM_TEMPLATES.WEEKLY_DIGEST;
+
   return (
-    <BaseLayout preview={`This Week in Claude - ${weekOf} | New tools, trending content, and more`}>
+    <BaseLayout
+      preview={`This Week in Claude - ${weekOf} | New tools, trending content, and more`}
+      utm={utm}
+    >
       {/* Hero section */}
       <Section style={heroSection}>
         <Text style={headingStyle}>This Week in Claude 🚀</Text>
@@ -126,7 +134,10 @@ export function WeeklyDigest({
                 <Text style={itemCategoryStyle}>{item.category.toUpperCase()}</Text>
                 <Text style={itemTitleStyle}>{item.title}</Text>
                 <Text style={itemDescriptionStyle}>{item.description}</Text>
-                <Button href={item.url} style={itemButtonStyle}>
+                <Button
+                  href={addUTMToURL(item.url, { ...utm, content: `personalized_${item.slug}` })}
+                  style={itemButtonStyle}
+                >
                   View {item.category}
                 </Button>
               </Section>
@@ -151,7 +162,10 @@ export function WeeklyDigest({
                 <Text style={itemCategoryStyle}>{item.category.toUpperCase()}</Text>
                 <Text style={itemTitleStyle}>{item.title}</Text>
                 <Text style={itemDescriptionStyle}>{item.description}</Text>
-                <Button href={item.url} style={itemButtonStyle}>
+                <Button
+                  href={addUTMToURL(item.url, { ...utm, content: `new_${item.slug}` })}
+                  style={itemButtonStyle}
+                >
                   View {item.category}
                 </Button>
               </Section>
@@ -177,7 +191,10 @@ export function WeeklyDigest({
                 </div>
                 <Text style={itemTitleStyle}>{item.title}</Text>
                 <Text style={itemDescriptionStyle}>{item.description}</Text>
-                <Button href={item.url} style={itemButtonStyle}>
+                <Button
+                  href={addUTMToURL(item.url, { ...utm, content: `trending_${item.slug}` })}
+                  style={itemButtonStyle}
+                >
                   View {item.category}
                 </Button>
               </Section>
@@ -195,11 +212,17 @@ export function WeeklyDigest({
           Browse the complete directory to discover even more tools and configurations.
         </Text>
 
-        <Button href="https://claudepro.directory" style={primaryButtonStyle}>
+        <Button
+          href={addUTMToURL(baseUrl, { ...utm, content: 'browse_cta' })}
+          style={primaryButtonStyle}
+        >
           Browse Directory
         </Button>
 
-        <Button href="https://claudepro.directory/trending" style={secondaryButtonStyle}>
+        <Button
+          href={addUTMToURL(`${baseUrl}/trending`, { ...utm, content: 'trending_cta' })}
+          style={secondaryButtonStyle}
+        >
           View All Trending
         </Button>
       </Section>

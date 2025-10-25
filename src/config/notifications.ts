@@ -12,6 +12,8 @@
  * @module config/notifications
  */
 
+import { type LucideIcon, MessageSquare, Sparkles } from '@/src/lib/icons';
+
 export type NotificationType = 'announcement' | 'feedback';
 
 export type NotificationPriority = 'low' | 'medium' | 'high';
@@ -47,8 +49,8 @@ export interface Notification {
   /** Optional call-to-action */
   action?: NotificationAction;
 
-  /** Optional icon (lucide icon name) */
-  icon?: string;
+  /** Optional icon (LucideIcon component) */
+  icon?: LucideIcon;
 }
 
 /**
@@ -72,7 +74,7 @@ export const ACTIVE_NOTIFICATIONS: Notification[] = [
       label: 'Explore',
       href: '/agents',
     },
-    icon: 'Sparkles',
+    icon: Sparkles,
   },
 
   // FEEDBACK SOLICITATION
@@ -87,7 +89,7 @@ export const ACTIVE_NOTIFICATIONS: Notification[] = [
       label: 'Share Feedback',
       href: '/contact?source=notification',
     },
-    icon: 'MessageSquare',
+    icon: MessageSquare,
   },
 ];
 

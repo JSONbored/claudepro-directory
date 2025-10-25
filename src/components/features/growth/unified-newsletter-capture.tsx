@@ -173,8 +173,8 @@ function getContextualMessage(category?: string): {
       description: 'Get tutorials, tips, and guides delivered to your inbox weekly.',
     },
     default: {
-      headline: 'Stay Updated with ClaudePro',
-      description: 'Get weekly updates on new tools, guides, and community highlights.',
+      headline: NEWSLETTER_CTA_CONFIG.headline,
+      description: NEWSLETTER_CTA_CONFIG.description,
     },
   } as const satisfies Record<string, { headline: string; description: string }>;
 
@@ -282,9 +282,7 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
           <div className="max-w-md mx-auto">
             <FormVariant source={source} className="w-full" />
           </div>
-          <p className="mt-4 text-xs text-muted-foreground">
-            No spam. Unsubscribe anytime. Join 1,000+ Claude users.
-          </p>
+          <p className="mt-4 text-xs text-muted-foreground">{NEWSLETTER_CTA_CONFIG.footerText}</p>
         </div>
       );
     }
@@ -312,11 +310,8 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <FormVariant source={source} />
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <span className="font-semibold text-primary">1,000+</span> Claude enthusiasts
-              </span>
-              <span>No spam • Unsubscribe anytime</span>
+            <div className="text-xs text-muted-foreground text-center">
+              <span>{NEWSLETTER_CTA_CONFIG.footerText}</span>
             </div>
           </CardContent>
         </Card>
@@ -372,9 +367,7 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
           <CardContent className="space-y-4">
             <FormVariant source={source} />
             <div className="text-center">
-              <p className="text-xs text-muted-foreground">
-                Join <span className="font-semibold text-primary">1,000+</span> subscribers
-              </p>
+              <p className="text-xs text-muted-foreground">{NEWSLETTER_CTA_CONFIG.footerText}</p>
             </div>
           </CardContent>
         </Card>
@@ -448,7 +441,7 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={isSubmitting}
-            className="flex-1"
+            className="flex-1 min-w-0"
             aria-label="Email address"
             error={!!error}
             {...(error ? { errorId } : {})}
@@ -456,7 +449,7 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+            className="bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] whitespace-nowrap flex-shrink-0"
           >
             {isSubmitting ? (
               <>Joining...</>
@@ -769,10 +762,8 @@ function ModalVariant({
     <Sheet open={open} onOpenChange={handleDismiss}>
       <SheetContent side="bottom" className="sm:max-w-md sm:mx-auto">
         <SheetHeader>
-          <SheetTitle>Want more like this?</SheetTitle>
-          <SheetDescription>
-            Get the best Claude resources delivered to your inbox. No spam, unsubscribe anytime.
-          </SheetDescription>
+          <SheetTitle>{NEWSLETTER_CTA_CONFIG.headline}</SheetTitle>
+          <SheetDescription>{NEWSLETTER_CTA_CONFIG.description}</SheetDescription>
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -783,7 +774,7 @@ function ModalVariant({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
-              className="text-base"
+              className="text-base h-12"
               autoComplete="email"
               aria-label="Email address"
               required
@@ -794,9 +785,12 @@ function ModalVariant({
             <Button
               type="submit"
               disabled={isLoading || !email.trim()}
-              className={cn('flex-1', isLoading && 'opacity-50')}
+              className={cn(
+                'flex-1 bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90',
+                isLoading && 'opacity-50'
+              )}
             >
-              {isLoading ? 'Subscribing...' : 'Subscribe'}
+              {isLoading ? 'Joining...' : NEWSLETTER_CTA_CONFIG.buttonText}
             </Button>
             <Button
               type="button"

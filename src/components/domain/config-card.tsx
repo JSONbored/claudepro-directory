@@ -23,7 +23,7 @@ import { BorderBeam } from '@/src/components/magic/border-beam';
 import { Button } from '@/src/components/primitives/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { addBookmark } from '@/src/lib/actions/user.actions';
-import { type CategoryId, VALID_CATEGORIES } from '@/src/lib/config/category-config';
+import { isValidCategory } from '@/src/lib/config/category-config';
 import {
   Award,
   Copy as CopyIcon,
@@ -73,8 +73,8 @@ export const ConfigCard = memo(
     }, [targetPath, copy]);
 
     const handleSwipeLeftBookmark = useCallback(async () => {
-      // Validate category
-      if (!VALID_CATEGORIES.includes(item.category as CategoryId)) {
+      // Type guard validation
+      if (!isValidCategory(item.category)) {
         logger.error('Invalid content type for bookmark', new Error('Invalid content type'), {
           contentType: item.category,
           contentSlug: item.slug,
@@ -83,7 +83,7 @@ export const ConfigCard = memo(
         return;
       }
 
-      const validatedCategory = item.category as CategoryId;
+      const validatedCategory = item.category;
 
       try {
         const result = await addBookmark({
@@ -141,13 +141,14 @@ export const ConfigCard = memo(
 
     return (
       <div className="relative">
-        {/* Border Beam for #1 Featured Items */}
-        {isFeatured && featuredRank === 1 && (
+        {/* BorderBeam for Top 3 Most Popular (by view count or featured rank) */}
+        {((isFeatured && featuredRank && featuredRank <= 3) ||
+          (viewCount && viewCount > 0 && !isFeatured)) && (
           <BorderBeam
             size={200}
             duration={8}
-            colorFrom="#ffaa40"
-            colorTo="#ffd700"
+            colorFrom={featuredRank === 1 ? '#ffaa40' : '#9333ea'}
+            colorTo={featuredRank === 1 ? '#ffd700' : '#a855f7'}
             borderWidth={1.5}
           />
         )}

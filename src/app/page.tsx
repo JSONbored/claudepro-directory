@@ -17,7 +17,6 @@
 
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
-import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { HomePageClient } from '@/src/components/features/home';
 import { LazySection } from '@/src/components/infra/lazy-section';
 import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
@@ -29,6 +28,18 @@ const RollingText = dynamic(
   () => import('@/src/components/magic/rolling-text').then((mod) => ({ default: mod.RollingText })),
   {
     loading: () => <span className="text-accent">enthusiasts</span>, // Fallback text
+  }
+);
+
+// Lazy load newsletter component (below-the-fold, 15-20 KB bundle reduction)
+// Newsletter appears after hero fold, so delay loading until user scrolls
+const UnifiedNewsletterCapture = dynamic(
+  () =>
+    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+      default: mod.UnifiedNewsletterCapture,
+    })),
+  {
+    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
   }
 );
 
@@ -296,13 +307,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <section className={'container mx-auto px-4 py-12'}>
         <Suspense fallback={null}>
           <LazySection variant="fade-in" delay={0.15}>
-            <UnifiedNewsletterCapture
-              variant="hero"
-              source="homepage"
-              context="homepage"
-              headline="Join 1,000+ Claude Power Users"
-              description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
-            />
+            <UnifiedNewsletterCapture variant="hero" source="homepage" context="homepage" />
           </LazySection>
         </Suspense>
       </section>

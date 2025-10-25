@@ -18,8 +18,8 @@
  */
 
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import {
   Card,
   CardContent,
@@ -27,6 +27,17 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
+
+const UnifiedNewsletterCapture = dynamic(
+  () =>
+    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+      default: mod.UnifiedNewsletterCapture,
+    })),
+  {
+    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+  }
+);
+
 import { QuizForm } from '@/src/components/tools/recommender/quiz-form';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -205,8 +216,6 @@ export default async function ConfigRecommenderPage() {
           source="content_page"
           variant="hero"
           context="config-recommender-page"
-          headline="Join 1,000+ Claude Power Users"
-          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
         />
       </section>
     </div>

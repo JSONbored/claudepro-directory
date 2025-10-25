@@ -1525,23 +1525,6 @@
   }
 }
 
-@keyframes meteor {
-  0% {
-    transform: translateY(-200%) translateX(-200%) rotate(35deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) translateX(100vh) rotate(35deg);
-    opacity: 0;
-  }
-}
-
 @keyframes borderBeamSpin {
   0% {
     transform: rotate(0deg);
@@ -1631,10 +1614,6 @@
 
 .animate-pulse {
   animation: pulse-accent var(--duration-1000) var(--ease-in-out) infinite;
-}
-
-.animate-meteor {
-  animation: meteor 3s linear infinite;
 }
 
 .animate-shimmer {

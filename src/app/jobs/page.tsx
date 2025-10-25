@@ -1,8 +1,19 @@
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { JobCard } from '@/src/components/domain/job-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { Button } from '@/src/components/primitives/button';
+
+const UnifiedNewsletterCapture = dynamic(
+  () =>
+    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+      default: mod.UnifiedNewsletterCapture,
+    })),
+  {
+    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+  }
+);
+
 import { Card, CardContent } from '@/src/components/primitives/card';
 import { Input } from '@/src/components/primitives/input';
 import {
@@ -381,13 +392,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
-        <UnifiedNewsletterCapture
-          source="content_page"
-          variant="hero"
-          context="jobs-page"
-          headline="Join 1,000+ Claude Power Users"
-          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
-        />
+        <UnifiedNewsletterCapture source="content_page" variant="hero" context="jobs-page" />
       </section>
     </div>
   );

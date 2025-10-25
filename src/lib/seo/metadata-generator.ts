@@ -14,6 +14,7 @@
 
 import type { Metadata } from 'next';
 import { z } from 'zod';
+import { isValidCategory } from '@/src/lib/config/category-config';
 import { type ValidatedMetadata, validatedMetadataSchema } from '@/src/lib/config/seo-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
@@ -153,7 +154,16 @@ function getContentSchemaForRoute(
 ): { category: CategoryId; schema: Record<string, unknown> } | null {
   // Extract category from route pattern
   if (route === '/:category/:slug' && context?.params?.category && context?.item) {
-    const category = context.params.category as CategoryId;
+    const categoryParam = context.params.category;
+
+    // Handle Next.js params which can be string | string[]
+    const category = Array.isArray(categoryParam) ? categoryParam[0] : categoryParam;
+
+    // Type guard validation (handles undefined from array access)
+    if (!(category && isValidCategory(category))) {
+      return null;
+    }
+
     return {
       category,
       schema: context.item as Record<string, unknown>,

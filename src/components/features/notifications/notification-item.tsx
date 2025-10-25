@@ -20,7 +20,7 @@ import { motion } from 'motion/react';
 import Link from 'next/link';
 import { Button } from '@/src/components/primitives/button';
 import type { Notification } from '@/src/config/notifications';
-import { Bell, MessageSquare, Sparkles, X } from '@/src/lib/icons';
+import { Bell, X } from '@/src/lib/icons';
 import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
 
 interface NotificationItemProps {
@@ -31,10 +31,8 @@ export function NotificationItem({ notification }: NotificationItemProps) {
   const dismiss = useNotificationStore((state: NotificationStore) => state.dismiss);
   const closeSheet = useNotificationStore((state: NotificationStore) => state.closeSheet);
 
-  // Simple icon selection - no unnecessary abstraction
-  let Icon = Bell;
-  if (notification.icon === 'Sparkles') Icon = Sparkles;
-  if (notification.icon === 'MessageSquare') Icon = MessageSquare;
+  // Type-safe icon rendering - use provided icon or fallback to Bell
+  const Icon = notification.icon ?? Bell;
 
   const handleDismiss = () => {
     dismiss(notification.id);

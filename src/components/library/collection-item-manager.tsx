@@ -25,8 +25,8 @@ import {
   removeItemFromCollection,
   reorderCollectionItems,
 } from '@/src/lib/actions/content.actions';
+import type { CategoryId } from '@/src/lib/config/category-config';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@/src/lib/icons';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -81,6 +81,7 @@ export function CollectionItemManager({
 
     startTransition(async () => {
       try {
+        // Server-side schema validation handles content_type validation via categoryIdSchema
         const result = await addItemToCollection({
           collection_id: collectionId,
           content_type: bookmark.content_type as CategoryId,

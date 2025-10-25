@@ -1,6 +1,17 @@
+import dynamic from 'next/dynamic';
 import { redirect } from 'next/navigation';
-import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { NewPostForm } from '@/src/components/forms/new-post-form';
+
+const UnifiedNewsletterCapture = dynamic(
+  () =>
+    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+      default: mod.UnifiedNewsletterCapture,
+    })),
+  {
+    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+  }
+);
+
 import { createPost } from '@/src/lib/actions/content.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
@@ -41,13 +52,7 @@ export default function NewPostPage() {
 
         {/* Email CTA - Footer section (matching homepage pattern) */}
         <section className={'mx-auto px-4 py-12'}>
-          <UnifiedNewsletterCapture
-            source="content_page"
-            variant="hero"
-            context="board-new-page"
-            headline="Join 1,000+ Claude Power Users"
-            description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
-          />
+          <UnifiedNewsletterCapture source="content_page" variant="hero" context="board-new-page" />
         </section>
       </div>
     </div>

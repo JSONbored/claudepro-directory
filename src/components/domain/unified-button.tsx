@@ -48,7 +48,7 @@ import { usePostCopyEmail } from '#lib/providers/post-copy-email';
 import { createClient } from '#lib/supabase/client';
 import { Button } from '@/src/components/primitives/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
-import { type CategoryId, VALID_CATEGORIES } from '@/src/lib/config/category-types';
+import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import {
   ArrowLeft,
@@ -667,8 +667,8 @@ function BookmarkButton({
   const handleToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    // Validate category - early return if invalid
-    if (!VALID_CATEGORIES.includes(contentType as CategoryId)) {
+    // Type guard validation
+    if (!isValidCategory(contentType)) {
       logger.error('Invalid content type', new Error('Invalid content type'), {
         contentType,
         contentSlug,
@@ -677,8 +677,7 @@ function BookmarkButton({
       return;
     }
 
-    // Safe to cast after validation
-    const validatedCategory = contentType as CategoryId;
+    const validatedCategory = contentType;
 
     startTransition(async () => {
       try {

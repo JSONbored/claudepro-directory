@@ -9,6 +9,7 @@
  */
 
 import { Octokit } from '@octokit/rest';
+import { EXTERNAL_SERVICES } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 
 /**
@@ -37,7 +38,7 @@ export function getOctokit(): Octokit {
   return new Octokit({
     auth: token,
     userAgent: 'claudepro-directory-bot/1.0.0',
-    baseUrl: 'https://api.github.com',
+    baseUrl: EXTERNAL_SERVICES.github.api,
     log: {
       debug: (message) => logger.debug(`GitHub API: ${message}`),
       info: (message) => logger.info(`GitHub API: ${message}`),

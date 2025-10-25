@@ -18,6 +18,7 @@ import { memo } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
+import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';
@@ -70,9 +71,9 @@ export const DetailSidebar = memo(function DetailSidebar({
 
   // Default sidebar using SidebarCard with inline configuration
   const githubUrl = config.metadata?.githubPathPrefix
-    ? `https://github.com/JSONbored/claudepro-directory/blob/main/${config.metadata.githubPathPrefix}/${item.slug}.json`
+    ? `${SOCIAL_LINKS.github}/blob/main/${config.metadata.githubPathPrefix}/${item.slug}.json`
     : item.category
-      ? `https://github.com/JSONbored/claudepro-directory/blob/main/content/${item.category}/${item.slug}.json`
+      ? `${SOCIAL_LINKS.github}/blob/main/content/${item.category}/${item.slug}.json`
       : null;
 
   const showGitHubLink = config.metadata?.showGitHubLink ?? true;

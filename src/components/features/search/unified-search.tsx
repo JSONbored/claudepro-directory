@@ -12,7 +12,7 @@
  */
 
 import { usePathname } from 'next/navigation';
-import { useCallback, useEffect, useId, useState } from 'react';
+import { memo, useCallback, useEffect, useId, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
@@ -41,7 +41,7 @@ const SearchErrorFallback = () => (
   <div className="p-4 text-center text-muted-foreground">Error loading search</div>
 );
 
-export function UnifiedSearch({
+function UnifiedSearchComponent({
   placeholder = 'Search...',
   onSearch,
   onFiltersChange,
@@ -288,3 +288,29 @@ export function UnifiedSearch({
     </ErrorBoundary>
   );
 }
+
+/**
+ * Memoized export with custom comparison function
+ * Prevents re-renders when parent state changes but props remain equal
+ *
+ * Custom comparison skips function references (onSearch, onFiltersChange)
+ * since they're callbacks that change identity but not behavior
+ */
+export const UnifiedSearch = memo(UnifiedSearchComponent, (prevProps, nextProps) => {
+  // Compare all props except function callbacks
+  return (
+    prevProps.placeholder === nextProps.placeholder &&
+    prevProps.resultCount === nextProps.resultCount &&
+    prevProps.className === nextProps.className &&
+    prevProps.showFilters === nextProps.showFilters &&
+    // Deep compare arrays
+    JSON.stringify(prevProps.availableTags) === JSON.stringify(nextProps.availableTags) &&
+    JSON.stringify(prevProps.availableAuthors) === JSON.stringify(nextProps.availableAuthors) &&
+    JSON.stringify(prevProps.availableCategories) ===
+      JSON.stringify(nextProps.availableCategories) &&
+    // Deep compare filters object
+    JSON.stringify(prevProps.filters) === JSON.stringify(nextProps.filters)
+  );
+});
+
+UnifiedSearch.displayName = 'UnifiedSearch';

@@ -15,12 +15,13 @@
 'use client';
 
 import { AnimatePresence, motion } from 'motion/react';
+import { memo } from 'react';
 import { Button } from '@/src/components/primitives/button';
 import type { Notification } from '@/src/config/notifications';
 import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
 import { NotificationItem } from './notification-item';
 
-export function NotificationList() {
+function NotificationListComponent() {
   // ✅ Select stable state reference (not function call)
   const activeNotifications = useNotificationStore(
     (state: NotificationStore) => state.activeNotifications
@@ -57,3 +58,6 @@ export function NotificationList() {
     </div>
   );
 }
+
+export const NotificationList = memo(NotificationListComponent);
+NotificationList.displayName = 'NotificationList';

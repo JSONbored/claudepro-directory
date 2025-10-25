@@ -1,9 +1,9 @@
 import { headers } from 'next/headers';
 import Script from 'next/script';
+import { isValidCategory } from '@/src/lib/config/category-config';
 import { SEO_CONFIG } from '@/src/lib/config/seo-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 interface StructuredDataProps {
@@ -82,7 +82,10 @@ export async function StructuredData({
           datePublished: data.dateAdded,
           dateModified: data.lastModified || data.dateAdded,
           keywords: data.tags?.join(', '),
-          url: `${baseUrl}${getContentItemUrl({ category: (data.category as CategoryId) || 'agents', slug: data.slug || '' })}`,
+          url: `${baseUrl}${getContentItemUrl({
+            category: data.category && isValidCategory(data.category) ? data.category : 'agents',
+            slug: data.slug || '',
+          })}`,
         };
 
       case 'itemList':
@@ -100,7 +103,11 @@ export async function StructuredData({
               '@type': 'SoftwareApplication',
               name: item.title || item.name || 'Unknown',
               description: item.description,
-              url: `${baseUrl}${getContentItemUrl({ category: (item.category as CategoryId) || 'agents', slug: item.slug || '' })}`,
+              url: `${baseUrl}${getContentItemUrl({
+                category:
+                  item.category && isValidCategory(item.category) ? item.category : 'agents',
+                slug: item.slug || '',
+              })}`,
               author: {
                 '@type': 'Person',
                 name: item.author,
@@ -129,7 +136,10 @@ export async function StructuredData({
           },
           mainEntityOfPage: {
             '@type': 'WebPage',
-            '@id': `${baseUrl}${getContentItemUrl({ category: (data.category as CategoryId) || 'agents', slug: data.slug || '' })}`,
+            '@id': `${baseUrl}${getContentItemUrl({
+              category: data.category && isValidCategory(data.category) ? data.category : 'agents',
+              slug: data.slug || '',
+            })}`,
           },
           keywords: data.tags?.join(', '),
         };
