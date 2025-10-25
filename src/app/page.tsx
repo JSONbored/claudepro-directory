@@ -15,13 +15,22 @@
  * @see lib/config/category-config.ts - Single source of truth for categories
  */
 
+import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { HomePageClient } from '@/src/components/features/home';
-import { HeroSection } from '@/src/components/features/home/hero-section';
 import { LazySection } from '@/src/components/infra/lazy-section';
 import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
+
+// Lazy load animations to improve LCP (40-60 KB saved from initial bundle)
+// RollingText uses Framer Motion and impacts homepage First Load
+const RollingText = dynamic(
+  () => import('@/src/components/magic/rolling-text').then((mod) => ({ default: mod.RollingText })),
+  {
+    loading: () => <span className="text-accent">enthusiasts</span>, // Fallback text
+  }
+);
 
 import { statsRedis } from '@/src/lib/cache.server';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
@@ -248,8 +257,32 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     <div className={'min-h-screen bg-background'}>
       {/* Hero + Search Section */}
       <div className="relative overflow-hidden">
-        {/* Hero with Parallax Scroll Effects */}
-        <HeroSection />
+        {/* Static Hero Section - Server Rendered - Streams immediately */}
+        <section className={'relative border-b border-border/50'} aria-label="Homepage hero">
+          {/* Content Layer */}
+          <div className={'relative container mx-auto px-4 py-10 sm:py-16 lg:py-24'}>
+            <div className={'text-center max-w-4xl mx-auto'}>
+              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 text-foreground tracking-tight">
+                The home for Claude{' '}
+                <RollingText
+                  words={['enthusiasts', 'developers', 'power users', 'beginners', 'builders']}
+                  duration={3000}
+                  className="text-accent"
+                />
+              </h1>
+
+              <p
+                className={
+                  'text-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto'
+                }
+              >
+                Discover and share the best Claude configurations. Explore expert rules, browse
+                powerful MCP servers, find specialized agents and commands, discover automation
+                hooks, and connect with the community building the future of AI.
+              </p>
+            </div>
+          </div>
+        </section>
 
         {/* Content Section - Streams independently after hero */}
         <div className={'relative'}>

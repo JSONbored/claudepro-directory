@@ -16,12 +16,8 @@ const Input = ({ className, type, ref, error, errorId, onFocus, onBlur, ...props
   const [isFocused, setIsFocused] = useState(false);
 
   return (
-    <motion.div
-      className="relative"
-      animate={isFocused ? { scale: 1.01 } : { scale: 1 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-    >
-      {/* Glow effect on focus */}
+    <div className="relative">
+      {/* Glow effect on focus - No layout shift, pure visual enhancement */}
       {isFocused && (
         <motion.div
           className="absolute -inset-0.5 bg-gradient-to-r from-accent/50 to-primary/50 rounded-md blur-sm -z-10"
@@ -51,7 +47,7 @@ const Input = ({ className, type, ref, error, errorId, onFocus, onBlur, ...props
         }}
         {...props}
       />
-    </motion.div>
+    </div>
   );
 };
 Input.displayName = 'Input';
