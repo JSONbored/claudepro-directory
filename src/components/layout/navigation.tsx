@@ -179,7 +179,7 @@ export const Navigation = () => {
                 <Link
                   href={ROUTES.HOME}
                   prefetch={true}
-                  className="flex items-center gap-2 flex-shrink-0"
+                  className="flex items-center gap-2 flex-shrink-0 no-underline"
                   aria-label="Claude Pro Directory - Go to homepage"
                 >
                   <motion.div style={{ scale: logoScale }} className="flex items-center gap-2">

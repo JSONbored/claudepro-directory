@@ -187,12 +187,23 @@ async function writeSkillMdFile(skillDirPath: string, content: string): Promise<
  *     └── skill-name/
  *         └── SKILL.md
  *
+ * DETERMINISTIC OUTPUT:
+ * Uses fixed timestamp (2024-01-01) for all files to ensure identical ZIPs
+ * for identical content. This prevents cache invalidation from timestamp changes.
+ *
  * @param slug - Skill slug
  * @param skillDirPath - Path to skill directory
  * @returns Path to generated ZIP file
  */
 async function zipSkillFolder(slug: string, skillDirPath: string): Promise<string> {
   const zipPath = path.join(OUTPUT_DIR, `${slug}.zip`);
+
+  // Fixed date for deterministic ZIP output (prevents timestamp-based cache misses)
+  const FIXED_DATE = new Date('2024-01-01T00:00:00.000Z');
+
+  // Read SKILL.md content
+  const skillMdPath = path.join(skillDirPath, 'SKILL.md');
+  const skillMdContent = await fs.readFile(skillMdPath, 'utf-8');
 
   return new Promise((resolve, reject) => {
     const output = createWriteStream(zipPath);
@@ -210,8 +221,13 @@ async function zipSkillFolder(slug: string, skillDirPath: string): Promise<strin
 
     archive.pipe(output);
 
-    // Add directory with name (creates skill-name/ as root in ZIP)
-    archive.directory(skillDirPath, slug);
+    // Add file with fixed timestamp for deterministic output
+    // This ensures identical content produces byte-identical ZIPs
+    archive.append(skillMdContent, {
+      name: `${slug}/SKILL.md`,
+      date: FIXED_DATE, // ← CRITICAL: Same date every time
+      mode: 0o644, // Standard file permissions
+    });
 
     archive.finalize();
   });

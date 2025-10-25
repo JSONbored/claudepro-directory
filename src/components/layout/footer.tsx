@@ -45,7 +45,7 @@ export function Footer() {
               {APP_CONFIG.description}
             </p>
 
-            {/* Social Icons - Vertical stack */}
+            {/* Social Icons + Theme Toggle + Badge - Vertical stack */}
             <div className="flex flex-col items-center md:items-start gap-4">
               <div className="flex items-center gap-4">
                 {[
@@ -63,6 +63,8 @@ export function Footer() {
                     <social.icon className="h-5 w-5" />
                   </Link>
                 ))}
+                {/* Theme Toggle */}
+                <ModeToggle />
               </div>
 
               {/* Open Source Badge */}
@@ -227,8 +229,8 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Right: Status Badge + Theme Toggle */}
-          <div className="flex items-center gap-4">
+          {/* Right: Status Badge */}
+          <div className="flex items-center">
             {/* BetterStack Status Badge */}
             <iframe
               src="https://status.claudepro.directory/badge?theme=dark"
@@ -241,9 +243,6 @@ export function Footer() {
               loading="lazy"
               style={{ colorScheme: 'normal' }}
             />
-
-            {/* Theme Toggle */}
-            <ModeToggle />
           </div>
         </motion.div>
       </div>

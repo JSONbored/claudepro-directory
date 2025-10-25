@@ -181,6 +181,7 @@ export default async function RootLayout({
           defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
+          storageKey="claudepro-theme"
           {...(nonce ? { nonce } : {})}
         >
           <PostCopyEmailProvider>

@@ -18,7 +18,6 @@
       ],
       "inputs": [
         "content/**/*.json",
-        "!content/skills/*.zip",
         "CHANGELOG.md",
         "src/lib/schemas/**/*.ts",
         "src/lib/config/category-config.ts",
@@ -36,6 +35,7 @@
       ],
       "inputs": [
         "content/skills/*.json",
+        "content/skills/*.zip",
         "scripts/build/generate-skill-packages.ts",
         "src/lib/transformers/skill-to-md.ts"
       ],

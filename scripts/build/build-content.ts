@@ -245,16 +245,10 @@ async function needsCategoryRebuild(
       const cachedFile = cache.files[changelogPath];
       if (!cachedFile) return true; // Not in cache = rebuild
 
-      // Check mtime first (fast check)
-      const fileStat = await stat(changelogPath);
-      if (fileStat.mtimeMs !== cachedFile.mtime) {
-        // mtime changed - verify with hash
-        const content = await readFile(changelogPath, 'utf-8');
-        const hash = createHash('sha256').update(content, 'utf-8').digest('hex');
-        return hash !== cachedFile.hash; // Rebuild only if content changed
-      }
-
-      return false; // CHANGELOG.md unchanged
+      // Check content hash directly (more reliable than mtime)
+      const content = await readFile(changelogPath, 'utf-8');
+      const hash = createHash('sha256').update(content, 'utf-8').digest('hex');
+      return hash !== cachedFile.hash; // Rebuild only if content changed
     } catch (_error) {
       // CHANGELOG.md doesn't exist or can't be read - rebuild
       return true;
@@ -275,16 +269,13 @@ async function needsCategoryRebuild(
       // File not in cache = needs rebuild
       if (!cachedFile) return true;
 
-      // Check mtime first (fast check)
-      const fileStat = await stat(filePath);
-      if (fileStat.mtimeMs !== cachedFile.mtime) {
-        // mtime changed - verify with hash (mtime can change without content change)
-        const content = await readFile(filePath, 'utf-8');
-        const hash = createHash('sha256').update(content, 'utf-8').digest('hex');
+      // Check content hash directly (more reliable than mtime)
+      // mtime can change from Git operations, IDE saves, etc. without content changes
+      const content = await readFile(filePath, 'utf-8');
+      const hash = createHash('sha256').update(content, 'utf-8').digest('hex');
 
-        if (hash !== cachedFile.hash) {
-          return true; // Content actually changed
-        }
+      if (hash !== cachedFile.hash) {
+        return true; // Content actually changed
       }
     }
 
