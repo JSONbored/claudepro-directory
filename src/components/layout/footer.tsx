@@ -11,6 +11,7 @@
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { HeyClaudeText } from '@/src/components/layout/heyclaude-text';
 import { ModeToggle } from '@/src/components/layout/mode-toggle';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
@@ -40,7 +41,9 @@ export function Footer() {
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
           >
-            <h3 className={'font-semibold mb-4 text-lg md:text-base'}>{APP_CONFIG.name}</h3>
+            <h3 className={'mb-4'}>
+              <HeyClaudeText size="md" />
+            </h3>
             <p className={'text-sm md:text-xs text-muted-foreground mb-6 max-w-sm mx-auto md:mx-0'}>
               {APP_CONFIG.description}
             </p>

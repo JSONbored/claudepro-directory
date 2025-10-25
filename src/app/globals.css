@@ -765,6 +765,16 @@
   }
 }
 
+/* Global Link Reset - Removes Browser Default Underlines */
+@layer base {
+  /* Remove default browser underlines from all links
+     Component-level classes (like .claude-link with hover:underline) will still work
+     Custom accent underlines in navigation will display correctly without double underlines */
+  a {
+    text-decoration: none;
+  }
+}
+
 /* Component Classes */
 @layer components {
   /* Hero Section with Claude Orange Gradient */

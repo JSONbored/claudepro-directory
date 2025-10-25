@@ -38,6 +38,7 @@ import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedButton } from '@/src/components/domain/unified-button';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
+import { HeyClaudeText } from '@/src/components/layout/heyclaude-text';
 import { NavigationCommandMenu } from '@/src/components/layout/navigation-command-menu';
 import { UserMenu } from '@/src/components/layout/user-menu';
 import { Button } from '@/src/components/primitives/button';
@@ -53,7 +54,7 @@ import {
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/primitives/sheet';
 import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
-import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
+import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ChevronDown, DiscordIcon, Github, LogoIcon, Menu } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -72,7 +73,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   const linkProps = {
     href,
     prefetch: true,
-    className: `group relative px-2 py-1 text-sm font-medium transition-colors duration-200 ${
+    className: `group relative px-2 py-1 text-sm font-medium transition-colors duration-200 no-underline ${
       active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
     } ${className}`,
     ...(active && { 'aria-current': 'page' as const }),
@@ -179,10 +180,13 @@ export const Navigation = () => {
                 <Link
                   href={ROUTES.HOME}
                   prefetch={true}
-                  className="flex items-center gap-2 flex-shrink-0 no-underline"
-                  aria-label="Claude Pro Directory - Go to homepage"
+                  className="flex items-center gap-2 md:gap-3 flex-shrink-0 no-underline"
+                  aria-label="HeyClaude - Go to homepage"
                 >
-                  <motion.div style={{ scale: logoScale }} className="flex items-center gap-2">
+                  <motion.div
+                    style={{ scale: logoScale }}
+                    className="flex items-center gap-2 md:gap-3"
+                  >
                     {/* Icon visible on ALL breakpoints */}
                     <LogoIcon
                       className={`transition-all duration-300 flex-shrink-0 ${
@@ -191,6 +195,14 @@ export const Navigation = () => {
                           : 'h-10 w-10 md:h-9 md:w-9 lg:h-10 lg:w-10'
                       }`}
                     />
+
+                    {/* HeyClaude gradient text - hidden on mobile, visible md+ */}
+                    <div className="hidden md:block">
+                      <HeyClaudeText
+                        size={isScrolled ? 'sm' : 'md'}
+                        className="transition-all duration-300"
+                      />
+                    </div>
                   </motion.div>
                 </Link>
 
@@ -424,9 +436,7 @@ export const Navigation = () => {
                           transition={{ delay: 0.1 }}
                         >
                           <LogoIcon className="h-10 w-10 flex-shrink-0" />
-                          <span className={'font-semibold text-xl text-foreground'}>
-                            {APP_CONFIG.domain}
-                          </span>
+                          <HeyClaudeText size="lg" />
                         </motion.div>
 
                         {/* Main Navigation - Staggered animations */}
