@@ -265,10 +265,23 @@ select:focus {
  * Dark Mode Transitions
  * =========================== */
 
-/* Smooth color transitions for theme changes */
-* {
+/* Smooth color transitions for theme changes - OPT-IN ONLY for performance */
+/* Only apply to interactive and themeable elements, not universal selector */
+button:not([data-no-transition]),
+a:not([data-no-transition]),
+input:not([data-no-transition]),
+textarea:not([data-no-transition]),
+select:not([data-no-transition]),
+[role="button"]:not([data-no-transition]),
+[class*="card"]:not([data-no-transition]),
+[class*="Card"]:not([data-no-transition]),
+nav,
+header,
+footer,
+aside,
+[data-theme-transition] {
   transition-property: background-color, border-color, color, fill, stroke;
-  transition-duration: 0.2s;
+  transition-duration: 0.15s;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 

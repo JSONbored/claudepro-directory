@@ -140,10 +140,20 @@
  * Theme Toggle Transition
  * =========================== */
 
-/* Circular expansion from click point (already implemented) */
+/* Circular expansion from click point - OPTIMIZED for performance */
 ::view-transition-old(theme-toggle),
 ::view-transition-new(theme-toggle) {
-  animation-duration: 0.5s;
+  animation-duration: 0.2s; /* Reduced from 0.5s for snappier feel */
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Only apply GPU acceleration to root transition, not all elements */
+::view-transition-old(root),
+::view-transition-new(root) {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  animation-duration: 0.2s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ===========================
@@ -157,18 +167,6 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-}
-
-/* ===========================
- * Performance Optimizations
- * =========================== */
-
-/* Force GPU acceleration for smooth transitions */
-::view-transition-old(*),
-::view-transition-new(*) {
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  -webkit-font-smoothing: antialiased;
 }
 
 /* ===========================

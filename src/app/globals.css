@@ -1242,17 +1242,8 @@
     font-weight: 600;
   }
 
-  /* Smooth theme transition */
-  .theme-transition,
-  .theme-transition *,
-  .theme-transition *::before,
-  .theme-transition *::after {
-    transition:
-      background-color 300ms ease-in-out,
-      border-color 300ms ease-in-out,
-      color 300ms ease-in-out,
-      box-shadow 300ms ease-in-out !important;
-  }
+  /* Smooth theme transition - REMOVED conflicting universal selector */
+  /* Now handled by micro-interactions.css with targeted selectors for better performance */
 
   /* ========================================
      VIEW TRANSITIONS API - CIRCLE BLUR ANIMATION
