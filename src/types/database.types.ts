@@ -388,6 +388,7 @@ export type Database = {
       jobs: {
         Row: {
           active: boolean | null;
+          admin_notes: string | null;
           benefits: Json;
           category: string;
           click_count: number | null;
@@ -404,6 +405,11 @@ export type Database = {
           link: string;
           location: string | null;
           order: number | null;
+          payment_amount: number | null;
+          payment_date: string | null;
+          payment_method: string | null;
+          payment_reference: string | null;
+          payment_status: string;
           plan: string;
           posted_at: string | null;
           remote: boolean | null;
@@ -421,6 +427,7 @@ export type Database = {
         };
         Insert: {
           active?: boolean | null;
+          admin_notes?: string | null;
           benefits?: Json;
           category: string;
           click_count?: number | null;
@@ -437,6 +444,11 @@ export type Database = {
           link: string;
           location?: string | null;
           order?: number | null;
+          payment_amount?: number | null;
+          payment_date?: string | null;
+          payment_method?: string | null;
+          payment_reference?: string | null;
+          payment_status?: string;
           plan?: string;
           posted_at?: string | null;
           remote?: boolean | null;
@@ -454,6 +466,7 @@ export type Database = {
         };
         Update: {
           active?: boolean | null;
+          admin_notes?: string | null;
           benefits?: Json;
           category?: string;
           click_count?: number | null;
@@ -470,6 +483,11 @@ export type Database = {
           link?: string;
           location?: string | null;
           order?: number | null;
+          payment_amount?: number | null;
+          payment_date?: string | null;
+          payment_method?: string | null;
+          payment_reference?: string | null;
+          payment_status?: string;
           plan?: string;
           posted_at?: string | null;
           remote?: boolean | null;

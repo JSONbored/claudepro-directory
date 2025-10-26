@@ -55,7 +55,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
         </div>
         <UnifiedCardGrid
           items={featuredItems}
-          cardComponent={ConfigCard}
+          renderCard={(item, index) => <ConfigCard item={item} showBorderBeam={index < 3} />}
           variant="normal"
           ariaLabel={`Featured ${title}`}
           prefetchCount={3}

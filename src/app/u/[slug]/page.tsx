@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { BadgeGrid } from '@/src/components/features/badges/badge-grid';
 import { ReputationBreakdown } from '@/src/components/features/reputation/reputation-breakdown';
-import { Button } from '@/src/components/primitives/button';
+import { FollowButton } from '@/src/components/features/social/follow-button';
 import {
   Card,
   CardContent,
@@ -16,14 +16,34 @@ import { getPublicUserBadges } from '@/src/lib/actions/badges.actions';
 import { getUserReputation } from '@/src/lib/actions/reputation.actions';
 import { FolderOpen, Globe, MessageSquare, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
+import { UserRepository } from '@/src/lib/repositories/user.repository';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
+
+/**
+ * Tier badge configuration (shared with ProfileCard)
+ */
+const TIER_CONFIG = {
+  free: { label: 'Free', className: 'border-muted-foreground/20 text-muted-foreground' },
+  pro: {
+    label: 'Pro',
+    className:
+      'border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 text-amber-600 dark:text-amber-400',
+  },
+  enterprise: {
+    label: 'Enterprise',
+    className:
+      'border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600 dark:text-purple-400',
+  },
+} as const;
 
 interface UserProfilePageProps {
   params: Promise<{ slug: string }>;
 }
+
+export const revalidate = 3600; // 1 hour ISR
 
 export async function generateMetadata({ params }: UserProfilePageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -36,84 +56,130 @@ export async function generateMetadata({ params }: UserProfilePageProps): Promis
 
 export default async function UserProfilePage({ params }: UserProfilePageProps) {
   const { slug } = await params;
-  const supabase = await createAdminClient();
+  const userRepo = new UserRepository();
+  const supabase = await createClient();
 
   // Get current user (if logged in)
-  const currentUserClient = await createClient();
   const {
     data: { user: currentUser },
-  } = await currentUserClient.auth.getUser();
+  } = await supabase.auth.getUser();
 
-  // Get profile data
-  const { data: profile } = await supabase
-    .from('users')
-    .select('*')
-    .eq('slug', slug)
-    .eq('public', true) // Only show public profiles
-    .single();
-
-  if (!profile) {
+  // Fetch profile using repository pattern
+  const profileResult = await userRepo.findBySlug(slug);
+  if (!(profileResult.success && profileResult.data && profileResult.data.public)) {
     notFound();
   }
+  const profile = profileResult.data;
 
-  // Get follower/following counts
-  const { count: followerCount } = await supabase
-    .from('followers')
-    .select('*', { count: 'exact', head: true })
-    .eq('following_id', profile.id);
+  // Batch fetch all profile data in parallel
+  const [
+    followerCountResult,
+    followingCountResult,
+    postsResult,
+    collectionsResult,
+    contributionsResult,
+    isFollowingResult,
+    reputationResult,
+    badgesResult,
+  ] = await batchFetch([
+    // Follower count
+    (async () => {
+      const res = await supabase
+        .from('followers')
+        .select('*', { count: 'exact', head: true })
+        .eq('following_id', profile.id);
+      return res.count || 0;
+    })(),
 
-  const { count: followingCount } = await supabase
-    .from('followers')
-    .select('*', { count: 'exact', head: true })
-    .eq('follower_id', profile.id);
+    // Following count
+    (async () => {
+      const res = await supabase
+        .from('followers')
+        .select('*', { count: 'exact', head: true })
+        .eq('follower_id', profile.id);
+      return res.count || 0;
+    })(),
 
-  // Get user's posts
-  const { data: posts } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('user_id', profile.id)
-    .order('created_at', { ascending: false })
-    .limit(10);
+    // User's posts
+    (async () => {
+      const res = await supabase
+        .from('posts')
+        .select('*')
+        .eq('user_id', profile.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      return res.data || [];
+    })(),
 
-  // Get user's public collections
-  const { data: collections } = await supabase
-    .from('user_collections')
-    .select('*')
-    .eq('user_id', profile.id)
-    .eq('is_public', true)
-    .order('created_at', { ascending: false })
-    .limit(6);
+    // User's public collections
+    (async () => {
+      const res = await supabase
+        .from('user_collections')
+        .select('*')
+        .eq('user_id', profile.id)
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .limit(6);
+      return res.data || [];
+    })(),
 
-  // Check if current user is following
-  let isFollowing = false;
-  if (currentUser) {
-    const { data } = await supabase
-      .from('followers')
-      .select('id')
-      .eq('follower_id', currentUser.id)
-      .eq('following_id', profile.id)
-      .single();
+    // User's content contributions
+    (async () => {
+      const res = await supabase
+        .from('user_content')
+        .select('*')
+        .eq('user_id', profile.id)
+        .eq('active', true)
+        .order('created_at', { ascending: false })
+        .limit(12);
+      return res.data || [];
+    })(),
 
-    isFollowing = !!data;
-  }
+    // Is following check
+    currentUser
+      ? (async () => {
+          const res = await supabase
+            .from('followers')
+            .select('id')
+            .eq('follower_id', currentUser.id)
+            .eq('following_id', profile.id)
+            .single();
+          return !!res.data;
+        })()
+      : Promise.resolve(false),
+
+    // Reputation data
+    getUserReputation(profile.id).catch((error) => {
+      logger.error(
+        'Failed to fetch reputation for profile',
+        error instanceof Error ? error : new Error(String(error)),
+        { profileId: profile.id }
+      );
+      return null;
+    }),
+
+    // User badges
+    getPublicUserBadges(profile.id, { featuredOnly: false }).catch((error) => {
+      logger.error(
+        'Failed to fetch badges for profile',
+        error instanceof Error ? error : new Error(String(error)),
+        { profileId: profile.id }
+      );
+      return [];
+    }),
+  ]);
+
+  const followerCount = followerCountResult;
+  const followingCount = followingCountResult;
+  const posts = postsResult;
+  const collections = collectionsResult;
+  const contributions = contributionsResult;
+  const isFollowing = isFollowingResult;
+  const reputationData = reputationResult;
+  const userBadges = badgesResult;
 
   // Check if current user is the profile owner
   const isOwner = currentUser?.id === profile.id;
-
-  // Fetch reputation breakdown and badges
-  let reputationData = null;
-  let userBadges: Awaited<ReturnType<typeof getPublicUserBadges>> = [];
-
-  try {
-    reputationData = await getUserReputation(profile.id);
-    userBadges = await getPublicUserBadges(profile.id, { featuredOnly: false });
-  } catch (error) {
-    logger.error(
-      'Failed to fetch reputation/badges for profile',
-      error instanceof Error ? error : new Error(String(error)),
-      { profileId: profile.id }
-    );
-  }
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -192,10 +258,12 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               </div>
             </div>
 
-            {currentUser && currentUser.id !== profile.id && (
-              <Button variant={isFollowing ? 'outline' : 'default'} disabled>
-                {isFollowing ? 'Following' : 'Follow'}
-              </Button>
+            {currentUser && currentUser.id !== profile.id && profile.slug && (
+              <FollowButton
+                userId={profile.id}
+                userSlug={profile.slug}
+                initialIsFollowing={isFollowing}
+              />
             )}
           </div>
         </div>
@@ -222,9 +290,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Posts</span>
+                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Contributions</span>
                   <UnifiedBadge variant="base" style="secondary">
-                    {posts?.length || 0}
+                    {contributions?.length || 0}
                   </UnifiedBadge>
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
@@ -234,15 +302,22 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   </UnifiedBadge>
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Account Tier</span>
-                  <UnifiedBadge
-                    variant="base"
-                    style={profile.tier === 'pro' ? 'default' : 'secondary'}
-                  >
-                    {profile.tier
-                      ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
-                      : 'Free'}
+                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Posts</span>
+                  <UnifiedBadge variant="base" style="secondary">
+                    {posts?.length || 0}
                   </UnifiedBadge>
+                </div>
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Account Tier</span>
+                  {(() => {
+                    const tier = (profile.tier || 'free') as 'free' | 'pro' | 'enterprise';
+                    const tierConfig = TIER_CONFIG[tier];
+                    return (
+                      <UnifiedBadge variant="base" style="outline" className={tierConfig.className}>
+                        {tierConfig.label}
+                      </UnifiedBadge>
+                    );
+                  })()}
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Member since</span>
@@ -355,6 +430,44 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 </div>
               )}
             </div>
+
+            {/* Content Contributions */}
+            {contributions && contributions.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold mb-4">Contributions</h2>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {contributions.map((item) => (
+                    <Card key={item.id} className={UI_CLASSES.CARD_INTERACTIVE}>
+                      <a href={`/${item.content_type}/${item.slug}`}>
+                        <CardHeader>
+                          <div className={'flex items-center justify-between mb-2'}>
+                            <UnifiedBadge variant="base" style="secondary" className="text-xs">
+                              {item.content_type}
+                            </UnifiedBadge>
+                            {item.featured && (
+                              <UnifiedBadge variant="base" style="default" className="text-xs">
+                                Featured
+                              </UnifiedBadge>
+                            )}
+                          </div>
+                          <CardTitle className="text-base">{item.name}</CardTitle>
+                          <CardDescription className="line-clamp-2 text-xs">
+                            {item.description}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className={'flex items-center gap-2 text-xs text-muted-foreground'}>
+                            <span>{item.view_count || 0} views</span>
+                            <span>•</span>
+                            <span>{item.download_count || 0} downloads</span>
+                          </div>
+                        </CardContent>
+                      </a>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Badges Section */}
             {userBadges.length > 0 && (

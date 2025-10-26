@@ -50,6 +50,7 @@ export const ConfigCard = memo(
     renderSponsoredWrapper,
     enableSwipeGestures = false, // Enable mobile swipe gestures (copy/bookmark)
     useViewTransitions = true, // Enable smooth page morphing with View Transitions API (Baseline as of October 2025)
+    showBorderBeam = false, // Position-based BorderBeam animation (top 3 featured items)
   }: ConfigCardProps) => {
     const displayTitle = getDisplayTitle(item);
     const targetPath = getContentItemUrl(item);
@@ -141,9 +142,8 @@ export const ConfigCard = memo(
 
     return (
       <div className="relative">
-        {/* BorderBeam for Top 3 Most Popular (by view count or featured rank) */}
-        {((isFeatured && featuredRank && featuredRank <= 3) ||
-          (viewCount && viewCount > 0 && !isFeatured)) && (
+        {/* BorderBeam animation - position-based (top 3 featured items per category) */}
+        {showBorderBeam && (
           <BorderBeam
             duration={8}
             colorFrom={featuredRank === 1 ? '#ffaa40' : '#9333ea'}
@@ -157,6 +157,7 @@ export const ConfigCard = memo(
           displayTitle={displayTitle}
           description={item.description}
           author={item.author}
+          {...(item.authorProfileUrl && { authorProfileUrl: item.authorProfileUrl })}
           {...(item.source && { source: item.source })}
           {...(item.tags && { tags: item.tags })}
           variant={variant}

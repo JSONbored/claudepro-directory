@@ -49,6 +49,13 @@ const baseSubmissionFields = {
     .max(100, 'Author name must be less than 100 characters')
     .transform(trimString),
 
+  authorProfileUrl: z
+    .string()
+    .url('Must be a valid URL (e.g., https://github.com/username)')
+    .optional()
+    .or(z.literal(''))
+    .transform((val) => (val === '' ? undefined : val)),
+
   github: z
     .string()
     .optional()

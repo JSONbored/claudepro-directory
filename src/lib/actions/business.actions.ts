@@ -615,6 +615,7 @@ export const createJob = rateLimitedAction
       .substring(0, 100);
 
     // Create via repository (includes caching and automatic error handling)
+    // All jobs go to pending_review with unpaid status (payment required workflow)
     const result = await jobRepository.create({
       user_id: user.id,
       title: parsedInput.title,
@@ -637,14 +638,17 @@ export const createJob = rateLimitedAction
       contact_email: parsedInput.contact_email ?? null,
       company_logo: parsedInput.company_logo ?? null,
       company_id: parsedInput.company_id ?? null,
-      plan: parsedInput.plan,
-      active: parsedInput.plan === 'standard',
-      status: parsedInput.plan === 'standard' ? 'active' : 'draft',
-      posted_at: parsedInput.plan === 'standard' ? new Date().toISOString() : null,
-      expires_at:
-        parsedInput.plan === 'standard'
-          ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-          : null,
+      plan: 'standard', // Single pricing tier: $299/30-day
+      active: false, // Activated after payment + admin approval
+      status: 'pending_review', // All jobs enter review queue
+      payment_status: 'unpaid', // Default payment status
+      payment_amount: 299.0, // Fixed price: $299/30-day listing
+      payment_method: null, // Set when payment received (polar/mercury_invoice/manual)
+      payment_date: null, // Set when payment confirmed
+      payment_reference: null, // Set to invoice/order ID when paid
+      admin_notes: null, // Internal notes for admin review
+      posted_at: null, // Set after approval + payment
+      expires_at: null, // Set after approval (30 days from posted_at)
     });
 
     if (!result.success) {
@@ -660,8 +664,9 @@ export const createJob = rateLimitedAction
     return {
       success: true,
       job: data,
-      // For paid tiers, would redirect to checkout (skipped for now)
-      requiresPayment: parsedInput.plan !== 'standard',
+      requiresPayment: true, // All jobs require payment ($299/30-day)
+      message:
+        'Job submitted for review! You will receive payment instructions via email after admin approval.',
     };
   });
 

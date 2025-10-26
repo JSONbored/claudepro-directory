@@ -38,6 +38,9 @@ export const unifiedContentItemSchema = z
     // Production note: Using .optional() only (not .nullable()) for clean type semantics
     // Absence is represented by omitted property, not null value
     author: z.string().describe('Name or identifier of the content creator or contributor'),
+    authorProfileUrl: optionalUrlString.describe(
+      'Optional URL to author profile (GitHub, personal site, etc.). Falls back to site default if not provided.'
+    ),
     dateAdded: z
       .string()
       .optional()

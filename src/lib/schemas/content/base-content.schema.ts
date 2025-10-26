@@ -233,6 +233,13 @@ export const baseContentMetadataSchema = z
     slug: slugString.describe('URL-safe identifier for the content item'),
     description: nonEmptyString.describe('Content description or summary'),
     author: nonEmptyString.describe('Content creator or maintainer name'),
+    authorProfileUrl: z
+      .string()
+      .url()
+      .optional()
+      .describe(
+        'Optional URL to author profile (GitHub, personal site, etc.). Falls back to site default if not provided.'
+      ),
     dateAdded: isoDateString.describe('ISO 8601 date when content was added to directory'),
     tags: requiredTagArray.describe(
       'Array of content tags for categorization and search (min 1 tag)'

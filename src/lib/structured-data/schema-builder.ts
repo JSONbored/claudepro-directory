@@ -15,7 +15,8 @@ const SCHEMA_CONTEXT = 'https://schema.org' as const;
  */
 function buildAuthor(
   authorName?: string,
-  githubUrl?: string
+  githubUrl?: string,
+  authorProfileUrl?: string
 ): {
   '@type': 'Person' | 'Organization';
   name: string;
@@ -23,11 +24,12 @@ function buildAuthor(
   sameAs?: string;
 } {
   const isAnthropicOrg = githubUrl?.includes('github.com/anthropics');
+  const profileUrl = authorProfileUrl || githubUrl;
 
   return {
     '@type': isAnthropicOrg ? 'Organization' : 'Person',
     name: authorName || 'Unknown',
-    ...(githubUrl && { url: githubUrl, sameAs: githubUrl }),
+    ...(profileUrl && { url: profileUrl, sameAs: profileUrl }),
   };
 }
 
@@ -63,6 +65,7 @@ export interface SoftwareApplicationConfig {
   operatingSystem?: string;
   keywords: string[];
   author?: string;
+  authorProfileUrl?: string;
   githubUrl?: string | undefined;
   dateAdded?: string;
   lastModified?: string | undefined;
@@ -88,7 +91,7 @@ export function buildSoftwareApplication(config: SoftwareApplicationConfig) {
     datePublished: config.dateAdded,
     dateModified: config.lastModified || config.dateAdded,
     keywords: config.keywords.join(', '),
-    author: buildAuthor(config.author, config.githubUrl),
+    author: buildAuthor(config.author, config.githubUrl, config.authorProfileUrl),
     featureList: config.features?.join(', '),
     softwareRequirements: config.requirements?.join(', ') || 'Claude Desktop or Claude Code',
     offers: {

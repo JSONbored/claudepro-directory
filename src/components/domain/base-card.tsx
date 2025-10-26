@@ -68,6 +68,12 @@ export interface BaseCardProps {
   author?: string;
 
   /**
+   * Author profile URL (GitHub, personal site, etc.)
+   * Falls back to SOCIAL_LINKS.authorProfile if not provided
+   */
+  authorProfileUrl?: string;
+
+  /**
    * Content source (e.g., "official", "community")
    */
   source?: string;
@@ -240,6 +246,7 @@ export const BaseCard = memo(
     displayTitle,
     description,
     author,
+    authorProfileUrl,
     source,
     tags,
     maxVisibleTags = 4,
@@ -394,7 +401,7 @@ export const BaseCard = memo(
                   <span>
                     by{' '}
                     <a
-                      href={SOCIAL_LINKS.authorProfile}
+                      href={authorProfileUrl || SOCIAL_LINKS.authorProfile}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="hover:underline hover:text-foreground transition-colors"

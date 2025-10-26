@@ -237,6 +237,14 @@ export const COMMON_FIELDS: FieldDefinition[] = [
   },
   {
     type: 'text',
+    name: 'authorProfileUrl',
+    label: 'Author Profile URL (optional)',
+    placeholder: 'https://github.com/username or your personal site',
+    gridColumn: 'half',
+    helpText: 'Link to your profile (auto-filled for signed-in users)',
+  },
+  {
+    type: 'text',
     name: 'github',
     label: 'GitHub Repository (optional)',
     placeholder: 'https://github.com/username/repo',

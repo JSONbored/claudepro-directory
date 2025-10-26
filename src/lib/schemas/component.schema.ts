@@ -49,6 +49,11 @@ export interface ConfigCardProps {
    * @default false
    */
   useViewTransitions?: boolean;
+  /**
+   * Show BorderBeam animation (reserved for top 3 featured items)
+   * @default false
+   */
+  showBorderBeam?: boolean;
 }
 
 // Re-export commonly used types from ./components

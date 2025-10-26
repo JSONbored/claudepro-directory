@@ -17,6 +17,7 @@
 
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
+import { TopContributors } from '@/src/components/features/community/top-contributors';
 import { HomePageClient } from '@/src/components/features/home';
 import { LazySection } from '@/src/components/infra/lazy-section';
 import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
@@ -28,6 +29,16 @@ const RollingText = dynamic(
   () => import('@/src/components/magic/rolling-text').then((mod) => ({ default: mod.RollingText })),
   {
     loading: () => <span className="text-accent">enthusiasts</span>, // Fallback text
+  }
+);
+
+// Lazy load NumberTicker for members counter
+const NumberTicker = dynamic(
+  () =>
+    import('@/src/components/magic/number-ticker').then((mod) => ({ default: mod.NumberTicker })),
+  {
+    loading: () => <span className="font-semibold text-accent">0</span>, // Fallback
+    ssr: false, // Client-only for animation
   }
 );
 
@@ -268,6 +279,21 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const resolvedParams = await searchParams;
   const initialSearchQuery = resolvedParams.q || '';
 
+  // Fetch total member count for hero section and top contributors
+  const supabase = await import('@/src/lib/supabase/server').then((mod) => mod.createClient());
+  const [memberCountResult, topContributorsResult] = await Promise.all([
+    (await supabase).from('users').select('*', { count: 'exact', head: true }).eq('public', true),
+    (await supabase)
+      .from('users')
+      .select('*')
+      .eq('public', true)
+      .order('reputation_score', { ascending: false })
+      .limit(6),
+  ]);
+
+  const memberCount = memberCountResult.count;
+  const topContributors = topContributorsResult.data || [];
+
   return (
     <div className={'min-h-screen bg-background'}>
       {/* Hero + Search Section */}
@@ -288,12 +314,18 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
               <p
                 className={
-                  'text-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto'
+                  'text-sm sm:text-base lg:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed'
                 }
               >
-                Discover and share the best Claude configurations. Explore expert rules, browse
-                powerful MCP servers, find specialized agents and commands, discover automation
-                hooks, and connect with the community building the future of AI.
+                Join{' '}
+                <NumberTicker
+                  value={memberCount || 0}
+                  className="font-semibold text-accent"
+                  suffix="+"
+                />{' '}
+                members discovering and sharing the best Claude configurations. Explore expert
+                rules, powerful MCP servers, specialized agents, automation hooks, and connect with
+                the community building the future of AI.
               </p>
             </div>
           </div>
@@ -306,6 +338,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </Suspense>
         </div>
       </div>
+
+      {/* Top Contributors Section */}
+      {topContributors.length > 0 && <TopContributors contributors={topContributors as never[]} />}
 
       {/* Email CTA - Beautiful fade-in with spring physics */}
       <section className={'container mx-auto px-4 py-12'}>

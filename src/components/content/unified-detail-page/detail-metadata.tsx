@@ -49,7 +49,7 @@ export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <User className="h-4 w-4" />
               <a
-                href={SOCIAL_LINKS.authorProfile}
+                href={item.authorProfileUrl || SOCIAL_LINKS.authorProfile}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:underline hover:text-foreground transition-colors"

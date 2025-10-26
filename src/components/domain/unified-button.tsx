@@ -488,6 +488,25 @@ function DownloadMarkdownButton({
   const [isSuccess, setIsSuccess] = useState(false);
   const { executeAsync, status } = useAction(downloadMarkdownAction);
 
+  // Skills category: Direct link to ZIP file
+  if (category === 'skills') {
+    const zipUrl = `/downloads/skills/${slug}.zip`;
+    return (
+      <Button
+        variant={buttonVariant}
+        size={size}
+        asChild
+        disabled={disabled}
+        className={cn('gap-2 transition-all', className)}
+      >
+        <a href={zipUrl} download>
+          {showIcon && <Download className="h-4 w-4" />}
+          <span>Download ZIP</span>
+        </a>
+      </Button>
+    );
+  }
+
   const handleClick = async () => {
     if (status === 'executing') return;
 

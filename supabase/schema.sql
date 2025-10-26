@@ -161,16 +161,24 @@ CREATE TABLE IF NOT EXISTS public.jobs (
   -- Business fields
   plan TEXT NOT NULL DEFAULT 'standard', -- 'standard', 'featured', 'premium'
   active BOOLEAN DEFAULT false, -- Activated after payment (or true for standard)
-  status TEXT DEFAULT 'draft', -- 'draft', 'active', 'expired', 'paused'
+  status TEXT DEFAULT 'draft', -- 'draft', 'pending_review', 'active', 'expired', 'rejected'
   posted_at TIMESTAMPTZ,
   expires_at TIMESTAMPTZ,
   featured BOOLEAN DEFAULT false,
   "order" INTEGER DEFAULT 0, -- For manual ordering
-  
+
+  -- Payment fields (added 2025-01-26)
+  payment_status TEXT NOT NULL DEFAULT 'unpaid' CHECK (payment_status IN ('unpaid', 'paid', 'refunded')),
+  payment_method TEXT CHECK (payment_method IN ('polar', 'mercury_invoice', 'manual')),
+  payment_date TIMESTAMPTZ,
+  payment_amount NUMERIC(10, 2),
+  payment_reference TEXT,
+  admin_notes TEXT,
+
   -- Analytics (denormalized)
   view_count INTEGER DEFAULT 0,
   click_count INTEGER DEFAULT 0,
-  
+
   -- Audit
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
@@ -588,6 +596,8 @@ CREATE INDEX IF NOT EXISTS idx_jobs_status ON public.jobs(status);
 CREATE INDEX IF NOT EXISTS idx_jobs_active ON public.jobs(active) WHERE active = true;
 CREATE INDEX IF NOT EXISTS idx_jobs_expires_at ON public.jobs(expires_at);
 CREATE INDEX IF NOT EXISTS idx_jobs_plan ON public.jobs(plan);
+CREATE INDEX IF NOT EXISTS idx_jobs_pending_review ON public.jobs(status, created_at DESC) WHERE status = 'pending_review';
+CREATE INDEX IF NOT EXISTS idx_jobs_payment_status ON public.jobs(payment_status, created_at DESC);
 
 -- User MCPs
 CREATE INDEX IF NOT EXISTS idx_user_mcps_slug ON public.user_mcps(slug);
