@@ -26,14 +26,9 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction, rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
-import { collectionRepository } from '@/src/lib/repositories/collection.repository';
-import { commentRepository } from '@/src/lib/repositories/comment.repository';
-import { postRepository } from '@/src/lib/repositories/post.repository';
-import { reviewRepository } from '@/src/lib/repositories/review.repository';
-import { userInteractionRepository } from '@/src/lib/repositories/user-interaction.repository';
-import { voteRepository } from '@/src/lib/repositories/vote.repository';
 import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives/base-strings';
 import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
+import { createClient } from '@/src/lib/supabase/server';
 
 // =====================================================
 // COLLECTION SCHEMAS
@@ -179,34 +174,38 @@ export const createCollection = authedAction
     const { name, slug, description, is_public } = parsedInput;
     const { userId } = ctx;
 
-    // Create collection via repository
-    const result = await collectionRepository.create({
-      user_id: userId,
-      name,
-      slug: slug ?? name.toLowerCase().replace(/\s+/g, '-'),
-      description: description ?? null,
-      is_public,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      item_count: 0,
-      bookmark_count: 0,
-      view_count: 0,
-    });
+    const supabase = await createClient();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to create collection');
+    // Create collection - database handles timestamps and default counts
+    const { data: collection, error } = await supabase
+      .from('user_collections')
+      .insert({
+        user_id: userId,
+        name,
+        slug: slug ?? name.toLowerCase().replace(/\s+/g, '-'),
+        description: description ?? null,
+        is_public,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === '23505') {
+        throw new Error('A collection with this slug already exists');
+      }
+      throw new Error(`Failed to create collection: ${error.message}`);
     }
 
     // Revalidate account pages
     revalidatePath('/account');
     revalidatePath('/account/library');
-    if (result.data?.is_public) {
+    if (collection?.is_public) {
       revalidatePath('/u/[slug]', 'page');
     }
 
     return {
       success: true,
-      collection: result.data,
+      collection,
     };
   });
 
@@ -227,15 +226,7 @@ export const updateCollection = authedAction
     const { id, name, slug, description, is_public } = parsedInput;
     const { userId } = ctx;
 
-    // Verify ownership (RLS will enforce, but check early for better UX)
-    const existingResult = await collectionRepository.findById(id);
-    if (!(existingResult.success && existingResult.data)) {
-      throw new Error('Collection not found or you do not have permission to update it');
-    }
-
-    if (existingResult.data.user_id !== userId) {
-      throw new Error('You do not have permission to update this collection');
-    }
+    const supabase = await createClient();
 
     // Build update object conditionally to avoid exactOptionalPropertyTypes issues
     const updateData: {
@@ -253,29 +244,36 @@ export const updateCollection = authedAction
       updateData.slug = slug;
     }
 
-    // Update collection via repository
-    const result = await collectionRepository.update(id, updateData);
+    // Update collection with ownership verification (atomic)
+    const { data: collection, error } = await supabase
+      .from('user_collections')
+      .update(updateData)
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select()
+      .single();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to update collection');
-    }
-
-    // Ensure data exists before accessing properties
-    if (!result.data) {
-      throw new Error('Update succeeded but no data returned');
+    if (error) {
+      if (error.code === 'PGRST116') {
+        throw new Error('Collection not found or you do not have permission to update it');
+      }
+      if (error.code === '23505') {
+        throw new Error('A collection with this slug already exists');
+      }
+      throw new Error(`Failed to update collection: ${error.message}`);
     }
 
     // Revalidate relevant pages
     revalidatePath('/account');
     revalidatePath('/account/library');
-    revalidatePath(`/account/library/${result.data.slug}`);
-    if (result.data.is_public) {
+    revalidatePath(`/account/library/${collection.slug}`);
+    if (collection.is_public) {
       revalidatePath('/u/[slug]', 'page');
     }
 
     return {
       success: true,
-      collection: result.data,
+      collection,
     };
   });
 
@@ -296,21 +294,17 @@ export const deleteCollection = authedAction
     const { id } = parsedInput;
     const { userId } = ctx;
 
-    // Verify ownership before deletion
-    const existingResult = await collectionRepository.findById(id);
-    if (!(existingResult.success && existingResult.data)) {
-      throw new Error('Collection not found or you do not have permission to delete it');
-    }
+    const supabase = await createClient();
 
-    if (existingResult.data.user_id !== userId) {
-      throw new Error('You do not have permission to delete this collection');
-    }
+    // Delete collection with ownership verification (CASCADE will delete items)
+    const { error } = await supabase
+      .from('user_collections')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId);
 
-    // Delete collection via repository (CASCADE will delete items)
-    const result = await collectionRepository.delete(id);
-
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to delete collection');
+    if (error) {
+      throw new Error(`Failed to delete collection: ${error.message}`);
     }
 
     // Revalidate account pages
@@ -336,28 +330,42 @@ export const addItemToCollection = authedAction
     const { collection_id, content_type, content_slug, notes, order } = parsedInput;
     const { userId } = ctx;
 
+    const supabase = await createClient();
+
     // Verify collection belongs to user
-    const collectionResult = await collectionRepository.findById(collection_id);
-    if (!(collectionResult.success && collectionResult.data)) {
+    const { data: collection, error: checkError } = await supabase
+      .from('user_collections')
+      .select('user_id')
+      .eq('id', collection_id)
+      .single();
+
+    if (checkError || !collection) {
       throw new Error('Collection not found or you do not have permission');
     }
 
-    if (collectionResult.data.user_id !== userId) {
+    if (collection.user_id !== userId) {
       throw new Error('You do not have permission to add items to this collection');
     }
 
-    // Add item via repository (unique constraint prevents duplicates)
-    const result = await collectionRepository.addItem({
-      collection_id,
-      user_id: userId,
-      content_type,
-      content_slug,
-      notes: notes || null,
-      order,
-    });
+    // Add item (unique constraint prevents duplicates)
+    const { data: item, error } = await supabase
+      .from('collection_items')
+      .insert({
+        collection_id,
+        user_id: userId,
+        content_type,
+        content_slug,
+        notes: notes || null,
+        order,
+      })
+      .select()
+      .single();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to add item to collection');
+    if (error) {
+      if (error.code === '23505') {
+        throw new Error('Item already exists in collection');
+      }
+      throw new Error(`Failed to add item to collection: ${error.message}`);
     }
 
     // Revalidate collection pages
@@ -367,7 +375,7 @@ export const addItemToCollection = authedAction
 
     return {
       success: true,
-      item: result.data,
+      item,
     };
   });
 
@@ -389,21 +397,28 @@ export const removeItemFromCollection = authedAction
     const { id, collection_id } = parsedInput;
     const { userId } = ctx;
 
+    const supabase = await createClient();
+
     // Verify collection ownership
-    const collectionResult = await collectionRepository.findById(collection_id);
-    if (!(collectionResult.success && collectionResult.data)) {
+    const { data: collection, error: checkError } = await supabase
+      .from('user_collections')
+      .select('user_id')
+      .eq('id', collection_id)
+      .single();
+
+    if (checkError || !collection) {
       throw new Error('Collection not found or you do not have permission');
     }
 
-    if (collectionResult.data.user_id !== userId) {
+    if (collection.user_id !== userId) {
       throw new Error('You do not have permission to remove items from this collection');
     }
 
-    // Remove item via repository
-    const result = await collectionRepository.removeItem(id);
+    // Remove item
+    const { error } = await supabase.from('collection_items').delete().eq('id', id);
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to remove item from collection');
+    if (error) {
+      throw new Error(`Failed to remove item from collection: ${error.message}`);
     }
 
     // Revalidate collection pages
@@ -429,23 +444,39 @@ export const reorderCollectionItems = authedAction
     const { collection_id, items } = parsedInput;
     const { userId } = ctx;
 
+    const supabase = await createClient();
+
     // Verify collection belongs to user
-    const collectionResult = await collectionRepository.findById(collection_id);
-    if (!(collectionResult.success && collectionResult.data)) {
+    const { data: collection, error: checkError } = await supabase
+      .from('user_collections')
+      .select('user_id')
+      .eq('id', collection_id)
+      .single();
+
+    if (checkError || !collection) {
       throw new Error('Collection not found or you do not have permission');
     }
 
-    if (collectionResult.data.user_id !== userId) {
+    if (collection.user_id !== userId) {
       throw new Error('You do not have permission to reorder items in this collection');
     }
 
-    // OPTIMIZATION: Batch operation (N queries → batch operation)
-    // Repository handles batch updates efficiently using Promise.all
+    // OPTIMIZATION: Batch operation (N queries → parallel batch)
     // Performance gain: Significant for collections with 10-50 items
-    const result = await collectionRepository.reorderItems(collection_id, items);
+    const updates = items.map((item) =>
+      supabase
+        .from('collection_items')
+        .update({ order: item.order })
+        .eq('id', item.id)
+        .eq('collection_id', collection_id)
+    );
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to reorder collection items');
+    const results = await Promise.all(updates);
+
+    // Check for errors
+    const errors = results.filter((r) => r.error);
+    if (errors.length > 0) {
+      throw new Error(`Failed to reorder items: ${errors[0]?.error?.message}`);
     }
 
     // Revalidate collection pages
@@ -473,16 +504,17 @@ export async function getUserCollections() {
     return [];
   }
 
-  const result = await collectionRepository.findByUser(user.id, {
-    sortBy: 'created_at',
-    sortOrder: 'desc',
-  });
+  const { data, error } = await supabase
+    .from('user_collections')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
 
-  if (!result.success) {
-    throw new Error(result.error || 'Failed to fetch user collections');
+  if (error) {
+    throw new Error(`Failed to fetch user collections: ${error.message}`);
   }
 
-  return result.data || [];
+  return data || [];
 }
 
 /**
@@ -496,16 +528,29 @@ export async function getCollectionWithItems(collectionId: string) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Get collection with items via repository (includes caching)
-  const result = await collectionRepository.findByIdWithItems(collectionId);
+  // Get collection with items (optimized JOIN query)
+  const { data, error } = await supabase
+    .from('user_collections')
+    .select(
+      `
+      *,
+      items:collection_items(*)
+    `
+    )
+    .eq('id', collectionId)
+    .order('order', { referencedTable: 'collection_items', ascending: true })
+    .single();
 
-  if (!(result.success && result.data)) {
-    throw new Error(result.error || 'Collection not found');
+  if (error) {
+    if (error.code === 'PGRST116') {
+      throw new Error('Collection not found');
+    }
+    throw new Error(`Failed to fetch collection: ${error.message}`);
   }
 
   return {
-    ...result.data,
-    isOwner: user?.id === result.data.user_id,
+    ...data,
+    isOwner: user?.id === data.user_id,
   };
 }
 
@@ -514,16 +559,32 @@ export async function getCollectionWithItems(collectionId: string) {
  * Optimized: Single JOIN query batches user lookup, collection lookup, and items fetch
  */
 export async function getPublicCollectionBySlug(userSlug: string, collectionSlug: string) {
-  const result = await collectionRepository.findPublicByUserSlugAndCollectionSlug(
-    userSlug,
-    collectionSlug
-  );
+  const { createClient } = await import('@/src/lib/supabase/server');
+  const supabase = await createClient();
 
-  if (!(result.success && result.data)) {
-    throw new Error(result.error || 'Collection not found');
+  const { data, error } = await supabase
+    .from('user_collections')
+    .select(
+      `
+      *,
+      items:collection_items(*),
+      user:users!user_collections_user_id_fkey(slug)
+    `
+    )
+    .eq('slug', collectionSlug)
+    .eq('is_public', true)
+    .eq('users.slug', userSlug)
+    .order('order', { referencedTable: 'collection_items', ascending: true })
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      throw new Error('Collection not found');
+    }
+    throw new Error(`Failed to fetch public collection: ${error.message}`);
   }
 
-  return result.data;
+  return data;
 }
 
 // ============================================
@@ -546,44 +607,63 @@ export const createReview = authedAction
     const { content_type, content_slug, rating, review_text } = parsedInput;
     const { userId } = ctx;
 
-    // Check if user has already reviewed this content
-    const existingResult = await reviewRepository.findByUserAndContent(
-      userId,
-      content_type,
-      content_slug
-    );
+    const supabase = await createClient();
 
-    if (existingResult.success && existingResult.data) {
+    // Check if user has already reviewed this content
+    const { data: existingReview, error: checkError } = await supabase
+      .from('review_ratings')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('content_type', content_type)
+      .eq('content_slug', content_slug)
+      .single();
+
+    if (checkError && checkError.code !== 'PGRST116') {
+      throw new Error(`Failed to check for existing review: ${checkError.message}`);
+    }
+
+    if (existingReview) {
       throw new Error(
         'You have already reviewed this content. Use the update action to modify your review.'
       );
     }
 
-    // Create review via repository
-    const result = await reviewRepository.create({
-      user_id: userId,
-      content_type,
-      content_slug,
-      rating,
-      review_text: review_text || null,
-      helpful_count: 0,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    });
+    // Create review
+    const { data: review, error } = await supabase
+      .from('review_ratings')
+      .insert({
+        user_id: userId,
+        content_type,
+        content_slug,
+        rating,
+        review_text: review_text || null,
+        helpful_count: 0,
+      })
+      .select()
+      .single();
 
-    if (!result.success) {
-      logger.error('Failed to create review', new Error(result.error || 'Unknown error'), {
+    if (error) {
+      logger.error('Failed to create review', new Error(error.message), {
         userId,
         content_type,
         content_slug,
-        error: result.error ?? '',
+        error: error.message,
       });
-      throw new Error(result.error || 'Failed to create review. Please try again.');
+      throw new Error(`Failed to create review: ${error.message}`);
     }
 
     // Track interaction for personalization (fire-and-forget)
-    userInteractionRepository
-      .track(content_type, content_slug, 'view', userId, undefined, { source: 'review_creation' })
+    createClient()
+      .then((supabaseForTracking) =>
+        supabaseForTracking.from('user_interactions').insert({
+          content_type,
+          content_slug,
+          interaction_type: 'view',
+          user_id: userId,
+          session_id: null,
+          metadata: { source: 'review_creation' },
+        })
+      )
       .catch((err) => {
         logger.warn('Failed to track interaction for review', undefined, {
           userId,
@@ -599,13 +679,13 @@ export const createReview = authedAction
     revalidateTag(`reviews:${content_type}:${content_slug}`, 'max');
 
     // Ensure data exists before accessing properties
-    if (!result.data) {
+    if (!review) {
       throw new Error('Review created but no data returned');
     }
 
     logger.info('Review created', {
       userId,
-      reviewId: result.data.id,
+      reviewId: review.id,
       content_type,
       content_slug,
       rating,
@@ -614,7 +694,7 @@ export const createReview = authedAction
 
     return {
       success: true,
-      review: result.data,
+      review,
     };
   });
 
@@ -634,16 +714,7 @@ export const updateReview = authedAction
     const { review_id, rating, review_text } = parsedInput;
     const { userId } = ctx;
 
-    // Fetch existing review to verify ownership
-    const existingResult = await reviewRepository.findById(review_id);
-
-    if (!(existingResult.success && existingResult.data)) {
-      throw new Error('Review not found');
-    }
-
-    if (existingResult.data.user_id !== userId) {
-      throw new Error('You can only update your own reviews');
-    }
+    const supabase = await createClient();
 
     // Build update object
     const updateData: { rating?: number; review_text?: string | null } = {};
@@ -659,37 +730,43 @@ export const updateReview = authedAction
       throw new Error('No updates provided');
     }
 
-    // Update review via repository
-    const result = await reviewRepository.update(review_id, updateData);
+    // Update review with ownership verification
+    const { data: review, error } = await supabase
+      .from('review_ratings')
+      .update(updateData)
+      .eq('id', review_id)
+      .eq('user_id', userId)
+      .select()
+      .single();
 
-    if (!result.success) {
-      logger.error('Failed to update review', new Error(result.error || 'Unknown error'), {
+    if (error) {
+      if (error.code === 'PGRST116') {
+        throw new Error('Review not found or you do not have permission to update it');
+      }
+      logger.error('Failed to update review', new Error(error.message), {
         userId,
         reviewId: review_id,
-        error: result.error ?? '',
+        error: error.message,
       });
-      throw new Error(result.error || 'Failed to update review. Please try again.');
+      throw new Error(`Failed to update review: ${error.message}`);
     }
 
     // Revalidate detail page and list pages
-    revalidatePath(`/${existingResult.data.content_type}/${existingResult.data.content_slug}`);
-    revalidatePath(`/${existingResult.data.content_type}`);
-    revalidateTag(
-      `reviews:${existingResult.data.content_type}:${existingResult.data.content_slug}`,
-      'max'
-    );
+    revalidatePath(`/${review.content_type}/${review.content_slug}`);
+    revalidatePath(`/${review.content_type}`);
+    revalidateTag(`reviews:${review.content_type}:${review.content_slug}`, 'max');
 
     logger.info('Review updated', {
       userId,
       reviewId: review_id,
-      content_type: existingResult.data.content_type,
-      content_slug: existingResult.data.content_slug,
+      content_type: review.content_type,
+      content_slug: review.content_slug,
       updatedFields: Object.keys(updateData).join(', '),
     });
 
     return {
       success: true,
-      review: result.data,
+      review,
     };
   });
 
@@ -709,42 +786,45 @@ export const deleteReview = authedAction
     const { review_id } = parsedInput;
     const { userId } = ctx;
 
-    // Fetch existing review to verify ownership
-    const existingResult = await reviewRepository.findById(review_id);
+    const supabase = await createClient();
 
-    if (!(existingResult.success && existingResult.data)) {
+    // First fetch review to get content info for revalidation
+    const { data: reviewToDelete, error: fetchError } = await supabase
+      .from('review_ratings')
+      .select('content_type, content_slug, user_id')
+      .eq('id', review_id)
+      .single();
+
+    if (fetchError || !reviewToDelete) {
       throw new Error('Review not found');
     }
 
-    if (existingResult.data.user_id !== userId) {
+    if (reviewToDelete.user_id !== userId) {
       throw new Error('You can only delete your own reviews');
     }
 
-    // Delete review via repository (cascades to helpful votes)
-    const result = await reviewRepository.delete(review_id);
+    // Delete review (cascades to helpful votes via foreign key)
+    const { error } = await supabase.from('review_ratings').delete().eq('id', review_id);
 
-    if (!result.success) {
-      logger.error('Failed to delete review', new Error(result.error || 'Unknown error'), {
+    if (error) {
+      logger.error('Failed to delete review', new Error(error.message), {
         userId,
         reviewId: review_id,
-        error: result.error ?? '',
+        error: error.message,
       });
-      throw new Error(result.error || 'Failed to delete review. Please try again.');
+      throw new Error(`Failed to delete review: ${error.message}`);
     }
 
     // Revalidate detail page and list pages
-    revalidatePath(`/${existingResult.data.content_type}/${existingResult.data.content_slug}`);
-    revalidatePath(`/${existingResult.data.content_type}`);
-    revalidateTag(
-      `reviews:${existingResult.data.content_type}:${existingResult.data.content_slug}`,
-      'max'
-    );
+    revalidatePath(`/${reviewToDelete.content_type}/${reviewToDelete.content_slug}`);
+    revalidatePath(`/${reviewToDelete.content_type}`);
+    revalidateTag(`reviews:${reviewToDelete.content_type}:${reviewToDelete.content_slug}`, 'max');
 
     logger.info('Review deleted', {
       userId,
       reviewId: review_id,
-      content_type: existingResult.data.content_type,
-      content_slug: existingResult.data.content_slug,
+      content_type: reviewToDelete.content_type,
+      content_slug: reviewToDelete.content_slug,
     });
 
     return {
@@ -768,47 +848,63 @@ export const markReviewHelpful = authedAction
     const { review_id, helpful } = parsedInput;
     const { userId } = ctx;
 
-    // Get review to verify it exists
-    const reviewResult = await reviewRepository.findById(review_id);
+    const supabase = await createClient();
 
-    if (!(reviewResult.success && reviewResult.data)) {
+    // Get review to verify it exists and get author
+    const { data: review, error: fetchError } = await supabase
+      .from('review_ratings')
+      .select('user_id, content_type, content_slug')
+      .eq('id', review_id)
+      .single();
+
+    if (fetchError || !review) {
       throw new Error('Review not found');
     }
 
     // Prevent users from voting on their own reviews
-    if (reviewResult.data.user_id === userId) {
+    if (review.user_id === userId) {
       throw new Error('You cannot vote on your own review');
     }
 
     if (helpful) {
-      // Add helpful vote via repository
-      const result = await reviewRepository.addHelpfulVote(review_id, userId);
-
-      if (!result.success) {
-        logger.error('Failed to add helpful vote', new Error(result.error || 'Unknown error'), {
-          userId,
-          reviewId: review_id,
-          error: result.error ?? '',
-        });
-        throw new Error(result.error || 'Failed to mark review as helpful. Please try again.');
-      }
-
-      logger.info('Review marked helpful', {
-        userId,
-        reviewId: review_id,
-        reviewAuthor: reviewResult.data.user_id,
+      // Add helpful vote
+      const { error } = await supabase.from('review_helpful_votes').insert({
+        review_id,
+        user_id: userId,
       });
-    } else {
-      // Remove helpful vote via repository
-      const result = await reviewRepository.removeHelpfulVote(review_id, userId);
 
-      if (!result.success) {
-        logger.error('Failed to remove helpful vote', new Error(result.error || 'Unknown error'), {
+      if (error) {
+        // Ignore duplicate key errors (user already voted)
+        if (error.code !== '23505') {
+          logger.error('Failed to add helpful vote', new Error(error.message), {
+            userId,
+            reviewId: review_id,
+            error: error.message,
+          });
+          throw new Error(`Failed to mark review as helpful: ${error.message}`);
+        }
+      } else {
+        logger.info('Review marked helpful', {
           userId,
           reviewId: review_id,
-          error: result.error ?? '',
+          reviewAuthor: review.user_id,
         });
-        throw new Error(result.error || 'Failed to remove helpful vote. Please try again.');
+      }
+    } else {
+      // Remove helpful vote
+      const { error } = await supabase
+        .from('review_helpful_votes')
+        .delete()
+        .eq('review_id', review_id)
+        .eq('user_id', userId);
+
+      if (error) {
+        logger.error('Failed to remove helpful vote', new Error(error.message), {
+          userId,
+          reviewId: review_id,
+          error: error.message,
+        });
+        throw new Error(`Failed to remove helpful vote: ${error.message}`);
       }
 
       logger.info('Helpful vote removed', {
@@ -818,11 +914,8 @@ export const markReviewHelpful = authedAction
     }
 
     // Revalidate detail page (helpful count changed)
-    revalidatePath(`/${reviewResult.data.content_type}/${reviewResult.data.content_slug}`);
-    revalidateTag(
-      `reviews:${reviewResult.data.content_type}:${reviewResult.data.content_slug}`,
-      'max'
-    );
+    revalidatePath(`/${review.content_type}/${review.content_slug}`);
+    revalidateTag(`reviews:${review.content_type}:${review.content_slug}`, 'max');
 
     return {
       success: true,
@@ -1020,31 +1113,47 @@ export const createPost = authedAction
     const { title, content, url } = parsedInput;
     const { userId } = ctx;
 
-    // Check for duplicate URL submissions via repository (includes caching)
+    const supabase = await createClient();
+
+    // Check for duplicate URL submissions
     if (url) {
-      const existingResult = await postRepository.findByUrl(url);
-      if (existingResult.success && existingResult.data) {
+      const { data: existing, error: checkError } = await supabase
+        .from('posts')
+        .select('id')
+        .eq('url', url)
+        .limit(1)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw new Error(`Failed to check for duplicate URL: ${checkError.message}`);
+      }
+
+      if (existing) {
         throw new Error('This URL has already been submitted');
       }
     }
 
-    // Create via repository (includes caching and automatic error handling)
-    const result = await postRepository.create({
-      user_id: userId,
-      title,
-      content: content || null,
-      url: url || null,
-    });
+    // Create post
+    const { data: post, error } = await supabase
+      .from('posts')
+      .insert({
+        user_id: userId,
+        title,
+        content: content || null,
+        url: url || null,
+      })
+      .select()
+      .single();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to create post');
+    if (error) {
+      throw new Error(`Failed to create post: ${error.message}`);
     }
 
     revalidatePath('/board');
 
     return {
       success: true,
-      post: result.data,
+      post,
     };
   });
 
@@ -1061,21 +1170,29 @@ export const updatePost = authedAction
     const { id, title, content } = parsedInput;
     const { userId } = ctx;
 
-    // Update via repository with ownership verification (includes caching)
-    const result = await postRepository.updateByOwner(id, userId, {
-      ...(title && { title }),
-      ...(content !== undefined && { content }),
-    });
+    const supabase = await createClient();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to update post');
+    // Update with ownership verification
+    const { data: post, error } = await supabase
+      .from('posts')
+      .update({
+        ...(title && { title }),
+        ...(content !== undefined && { content }),
+      })
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update post: ${error.message}`);
     }
 
     revalidatePath('/board');
 
     return {
       success: true,
-      post: result.data,
+      post,
     };
   });
 
@@ -1092,11 +1209,13 @@ export const deletePost = authedAction
     const { id } = parsedInput;
     const { userId } = ctx;
 
-    // Delete via repository with ownership verification (includes cache invalidation)
-    const result = await postRepository.deleteByOwner(id, userId);
+    const supabase = await createClient();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to delete post');
+    // Delete with ownership verification
+    const { error } = await supabase.from('posts').delete().eq('id', id).eq('user_id', userId);
+
+    if (error) {
+      throw new Error(`Failed to delete post: ${error.message}`);
     }
 
     revalidatePath('/board');
@@ -1124,22 +1243,31 @@ export const votePost = authedAction
     const { post_id, action } = parsedInput;
     const { userId } = ctx;
 
+    const supabase = await createClient();
+
     if (action === 'vote') {
-      // Add vote via repository (includes duplicate detection)
-      const result = await voteRepository.create({
+      // Add vote - PostgREST handles duplicate detection via unique constraint
+      const { error } = await supabase.from('votes').insert({
         user_id: userId,
         post_id,
       });
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to vote');
+      if (error) {
+        if (error.code === '23505') {
+          throw new Error('You have already voted on this post');
+        }
+        throw new Error(`Failed to vote: ${error.message}`);
       }
     } else {
-      // Remove vote via repository (includes cache invalidation)
-      const result = await voteRepository.deleteByUserAndPost(userId, post_id);
+      // Remove vote
+      const { error } = await supabase
+        .from('votes')
+        .delete()
+        .eq('user_id', userId)
+        .eq('post_id', post_id);
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to remove vote');
+      if (error) {
+        throw new Error(`Failed to remove vote: ${error.message}`);
       }
     }
 
@@ -1169,22 +1297,27 @@ export const createComment = authedAction
     const { post_id, content } = parsedInput;
     const { userId } = ctx;
 
-    // Create via repository (includes caching and automatic error handling)
-    const result = await commentRepository.create({
-      user_id: userId,
-      post_id,
-      content,
-    });
+    const supabase = await createClient();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to create comment');
+    const { data: comment, error } = await supabase
+      .from('comments')
+      .insert({
+        user_id: userId,
+        post_id,
+        content,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to create comment: ${error.message}`);
     }
 
     revalidatePath('/board');
 
     return {
       success: true,
-      comment: result.data,
+      comment,
     };
   });
 
@@ -1201,11 +1334,13 @@ export const deleteComment = authedAction
     const { id } = parsedInput;
     const { userId } = ctx;
 
-    // Delete via repository with ownership verification (includes cache invalidation)
-    const result = await commentRepository.deleteByOwner(id, userId);
+    const supabase = await createClient();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to delete comment');
+    // Delete with ownership verification - PostgREST enforces both conditions atomically
+    const { error } = await supabase.from('comments').delete().eq('id', id).eq('user_id', userId);
+
+    if (error) {
+      throw new Error(`Failed to delete comment: ${error.message}`);
     }
 
     revalidatePath('/board');

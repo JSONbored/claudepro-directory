@@ -1,7 +1,21 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import type { UserBadgeWithBadge } from '@/src/lib/repositories/user-badge.repository';
 import { BadgeGrid } from './badge-grid';
+
+/** UserBadge with badge details joined */
+type UserBadgeWithBadge = {
+  id: string;
+  badge_id: string;
+  earned_at: string;
+  featured: boolean | null;
+  badges: {
+    slug: string;
+    name: string;
+    description: string;
+    icon: string | null;
+    category: string;
+  };
+};
 
 /**
  * Badge Grid Stories

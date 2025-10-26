@@ -32,7 +32,6 @@ import {
   type ReputationCriteria,
 } from '@/src/lib/config/badges.config';
 import { logger } from '@/src/lib/logger';
-import { userBadgeRepository } from '@/src/lib/repositories/user-badge.repository';
 import { createClient } from '@/src/lib/supabase/server';
 
 // =============================================================================
@@ -311,16 +310,22 @@ async function awardBadge(
     }
 
     // Award badge (will fail silently if already awarded due to unique constraint)
-    const result = await userBadgeRepository.create({
-      user_id: userId,
-      badge_id: badge.id,
-      featured: false,
-      metadata: null,
-    });
+    const now = new Date().toISOString();
+    const { data: userBadge, error: insertError } = await supabase
+      .from('user_badges')
+      .insert({
+        user_id: userId,
+        badge_id: badge.id,
+        featured: false,
+        metadata: null,
+        earned_at: now,
+      })
+      .select()
+      .single();
 
-    if (!result.success) {
+    if (insertError) {
       // Check if error is due to duplicate (user already has badge)
-      if (result.error?.includes('already has this badge')) {
+      if (insertError.code === '23505') {
         return {
           success: false,
           reason: 'Already awarded',
@@ -328,20 +333,20 @@ async function awardBadge(
       }
 
       // Other error
-      logger.error('Failed to award badge', new Error(result.error), {
+      logger.error('Failed to award badge', new Error(insertError.message), {
         userId,
         badgeSlug,
       });
       return {
         success: false,
-        reason: result.error || 'Unknown error',
+        reason: insertError.message || 'Unknown error',
       };
     }
 
     logger.info('Badge awarded', {
       userId,
       badgeSlug,
-      userBadgeId: result.data?.id || 'unknown',
+      userBadgeId: userBadge?.id || 'unknown',
     });
 
     // TODO: Track badge award analytics when analytics events are added

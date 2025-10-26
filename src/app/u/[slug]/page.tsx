@@ -16,7 +16,6 @@ import { getPublicUserBadges } from '@/src/lib/actions/badges.actions';
 import { getUserReputation } from '@/src/lib/actions/reputation.actions';
 import { FolderOpen, Globe, MessageSquare, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import { UserRepository } from '@/src/lib/repositories/user.repository';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -62,7 +61,6 @@ export async function generateMetadata({ params }: UserProfilePageProps): Promis
 
 export default async function UserProfilePage({ params }: UserProfilePageProps) {
   const { slug } = await params;
-  const userRepo = new UserRepository();
   const supabase = await createClient();
 
   // Get current user (if logged in)
@@ -70,12 +68,16 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     data: { user: currentUser },
   } = await supabase.auth.getUser();
 
-  // Fetch profile using repository pattern
-  const profileResult = await userRepo.findBySlug(slug);
-  if (!(profileResult.success && profileResult.data && profileResult.data.public)) {
+  // Fetch profile by slug
+  const { data: profile, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (error || !profile || !profile.public) {
     notFound();
   }
-  const profile = profileResult.data;
 
   // Batch fetch all profile data in parallel
   const [

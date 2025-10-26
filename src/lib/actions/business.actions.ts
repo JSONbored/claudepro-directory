@@ -25,11 +25,6 @@ import {
   generatePRTitle,
 } from '@/src/lib/github/pr-template';
 import { logger } from '@/src/lib/logger';
-import { type Company, companyRepository } from '@/src/lib/repositories/company.repository';
-import { jobRepository } from '@/src/lib/repositories/job.repository';
-import { sponsoredContentRepository } from '@/src/lib/repositories/sponsored-content.repository';
-import { submissionRepository } from '@/src/lib/repositories/submission.repository';
-import { userRepository } from '@/src/lib/repositories/user.repository';
 import {
   createJobSchema,
   toggleJobStatusSchema,
@@ -46,6 +41,8 @@ import {
   topContributorSchema,
 } from '@/src/lib/schemas/submission-stats.schema';
 import { createClient } from '@/src/lib/supabase/server';
+import type { CompanyInsert, CompanyUpdate } from '@/src/lib/types/company.types';
+import type { SubmissionInsert } from '@/src/lib/types/submission.types';
 import type { Database } from '@/src/types/database.types';
 
 // ============================================
@@ -85,9 +82,8 @@ export const submitConfiguration = rateLimitedAction
       throw new Error('You must be signed in to submit content');
     }
 
-    // Get user profile for attribution via repository (includes caching)
-    const profileResult = await userRepository.findById(user.id);
-    const profile = profileResult.success ? profileResult.data : null;
+    // Get user profile for attribution
+    const { data: profile } = await supabase.from('users').select('*').eq('id', user.id).single();
 
     // 2. Generate slug from name
     const slug = generateSlug(parsedInput.name);
@@ -206,27 +202,31 @@ export const submitConfiguration = rateLimitedAction
       );
     }
 
-    // 10. Track submission in database via repository (includes caching)
-    const submissionResult = await submissionRepository.create({
-      user_id: user.id,
-      content_type: parsedInput.type,
-      content_slug: slug,
-      content_name: parsedInput.name,
-      pr_number: prNumber,
-      pr_url: prUrl,
-      branch_name: branchName,
-      status: 'pending',
-      merged_at: null,
-      rejection_reason: null,
-      submission_data: {
-        ...parsedInput,
-        slug,
-        formatted_content: contentFile,
-      },
-    });
+    // 10. Track submission in database (database defaults handle timestamps)
+    const { error: submissionError } = await supabase
+      .from('submissions')
+      .insert({
+        user_id: user.id,
+        content_type: parsedInput.type,
+        content_slug: slug,
+        content_name: parsedInput.name,
+        pr_number: prNumber,
+        pr_url: prUrl,
+        branch_name: branchName,
+        status: 'pending',
+        merged_at: null,
+        rejection_reason: null,
+        submission_data: {
+          ...parsedInput,
+          slug,
+          formatted_content: contentFile,
+        },
+      } as SubmissionInsert)
+      .select()
+      .single();
 
-    if (!submissionResult.success) {
-      logger.error('Failed to track submission in database', new Error(submissionResult.error));
+    if (submissionError) {
+      logger.error('Failed to track submission in database', submissionError);
       // Don't throw - PR was created successfully, just log the error
     }
 
@@ -259,15 +259,19 @@ export async function getUserSubmissions() {
     return [];
   }
 
-  // Fetch via repository (includes caching and automatic sorting)
-  const result = await submissionRepository.findByUser(user.id);
+  // Fetch submissions with automatic sorting
+  const { data: submissions, error } = await supabase
+    .from('submissions')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
 
-  if (!result.success) {
-    logger.error('Failed to fetch user submissions', new Error(result.error));
+  if (error) {
+    logger.error('Failed to fetch user submissions', error);
     return [];
   }
 
-  return result.data || [];
+  return submissions || [];
 }
 
 // ============================================
@@ -287,14 +291,44 @@ export const getSubmissionStats = rateLimitedAction
   .outputSchema(submissionStatsSchema)
   .action(async () => {
     try {
-      // Fetch via repository (includes caching and parallel queries)
-      const result = await submissionRepository.getStats();
+      const supabase = await createClient();
 
-      if (!(result.success && result.data)) {
-        throw new Error(result.error || 'Failed to fetch submission stats');
+      // Parallel queries for performance
+      const [totalResult, pendingResult, mergedWeekResult] = await Promise.all([
+        // Total submissions (all time)
+        supabase
+          .from('submissions')
+          .select('id', { count: 'exact', head: true }),
+
+        // Pending review
+        supabase
+          .from('submissions')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'pending'),
+
+        // Merged this week
+        supabase
+          .from('submissions')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'merged')
+          .gte('merged_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+      ]);
+
+      if (totalResult.error) {
+        throw new Error(`Failed to count total submissions: ${totalResult.error.message}`);
+      }
+      if (pendingResult.error) {
+        throw new Error(`Failed to count pending submissions: ${pendingResult.error.message}`);
+      }
+      if (mergedWeekResult.error) {
+        throw new Error(`Failed to count merged submissions: ${mergedWeekResult.error.message}`);
       }
 
-      return result.data;
+      return {
+        total: totalResult.count || 0,
+        pending: pendingResult.count || 0,
+        mergedThisWeek: mergedWeekResult.count || 0,
+      };
     } catch (error) {
       logger.error(
         'Failed to fetch submission stats',
@@ -321,15 +355,44 @@ export const getRecentMerged = rateLimitedAction
   .outputSchema(z.array(recentMergedSchema))
   .action(async ({ parsedInput }: { parsedInput: { limit: number } }) => {
     try {
-      // Fetch via repository (includes caching and user joins)
-      const result = await submissionRepository.getRecentMerged(parsedInput.limit);
+      const supabase = await createClient();
 
-      if (!(result.success && result.data)) {
-        throw new Error(result.error || 'Failed to fetch recent merged');
+      // Fetch recent merged with user joins
+      const { data, error } = await supabase
+        .from('submissions')
+        .select(
+          `
+          id,
+          content_name,
+          content_type,
+          merged_at,
+          user_id,
+          users!inner (
+            name,
+            slug
+          )
+        `
+        )
+        .eq('status', 'merged')
+        .not('merged_at', 'is', null)
+        .order('merged_at', { ascending: false })
+        .limit(parsedInput.limit);
+
+      if (error) {
+        throw new Error(`Failed to fetch recent merged: ${error.message}`);
       }
 
+      // Define type for Supabase query result with joined users table
+      type SubmissionWithMergedAt = {
+        id: string;
+        content_name: string;
+        content_type: string;
+        merged_at: string;
+        users: { name: string | null; slug: string | null };
+      };
+
       // Transform to match schema with content type validation
-      const transformed: RecentMerged[] = result.data.map((item) => {
+      const transformed: RecentMerged[] = ((data || []) as SubmissionWithMergedAt[]).map((item) => {
         const validContentType = [
           'agents',
           'mcp',
@@ -354,7 +417,13 @@ export const getRecentMerged = rateLimitedAction
           content_name: item.content_name,
           content_type: validContentType,
           merged_at: item.merged_at,
-          user: item.user,
+          user:
+            item.users?.name && item.users?.slug
+              ? {
+                  name: item.users.name,
+                  slug: item.users.slug,
+                }
+              : null,
         };
       });
 
@@ -385,19 +454,50 @@ export const getTopContributors = rateLimitedAction
   .outputSchema(z.array(topContributorSchema))
   .action(async ({ parsedInput }: { parsedInput: { limit: number } }) => {
     try {
-      // Fetch via repository (includes caching, grouping, and sorting)
-      const result = await submissionRepository.getTopContributors(parsedInput.limit);
+      const supabase = await createClient();
 
-      if (!(result.success && result.data)) {
-        throw new Error(result.error || 'Failed to fetch top contributors');
+      // Count merged submissions per user
+      const { data, error } = await supabase
+        .from('submissions')
+        .select('user_id, users!inner(name, slug)')
+        .eq('status', 'merged');
+
+      if (error) {
+        throw new Error(`Failed to fetch contributors: ${error.message}`);
       }
 
-      // Transform to match schema format
-      const contributors: TopContributor[] = result.data.map((item) => ({
-        rank: item.rank,
-        name: item.name,
-        slug: item.slug,
-        mergedCount: item.mergedCount,
+      // Group by user and count
+      const userCounts = new Map<string, { name: string; slug: string; count: number }>();
+
+      // Define type for Supabase query result with joined users table
+      type TopContributorSubmission = {
+        users: { name: string | null; slug: string | null };
+      };
+
+      for (const submission of data || []) {
+        const user = (submission as TopContributorSubmission).users;
+        if (!(user?.name && user?.slug)) continue;
+
+        const existing = userCounts.get(user.slug) || {
+          name: user.name,
+          slug: user.slug,
+          count: 0,
+        };
+        existing.count++;
+        userCounts.set(user.slug, existing);
+      }
+
+      // Sort by count and get top N
+      const sorted = Array.from(userCounts.values())
+        .sort((a, b) => b.count - a.count)
+        .slice(0, parsedInput.limit);
+
+      // Transform to schema format with ranks
+      const contributors: TopContributor[] = sorted.map((user, index) => ({
+        rank: index + 1,
+        name: user.name,
+        slug: user.slug,
+        mergedCount: user.count,
       }));
 
       return contributors;
@@ -473,21 +573,28 @@ export const createCompany = rateLimitedAction
         .replace(/\s+/g, '-')
         .replace(/[^a-z0-9-]/g, '');
 
-    // Create via repository (includes caching and automatic error handling)
-    const result = await companyRepository.create({
-      owner_id: user.id,
-      name: parsedInput.name,
-      slug: generatedSlug,
-      logo: parsedInput.logo ?? null,
-      website: parsedInput.website ?? null,
-      description: parsedInput.description ?? null,
-      size: parsedInput.size ?? null,
-      industry: parsedInput.industry ?? null,
-      using_cursor_since: parsedInput.using_cursor_since ?? null,
-    });
+    // Create company (database defaults handle timestamps)
+    const { data: company, error: createError } = await supabase
+      .from('companies')
+      .insert({
+        owner_id: user.id,
+        name: parsedInput.name,
+        slug: generatedSlug,
+        logo: parsedInput.logo ?? null,
+        website: parsedInput.website ?? null,
+        description: parsedInput.description ?? null,
+        size: parsedInput.size ?? null,
+        industry: parsedInput.industry ?? null,
+        using_cursor_since: parsedInput.using_cursor_since ?? null,
+      } as CompanyInsert)
+      .select()
+      .single();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to create company');
+    if (createError) {
+      if (createError.code === '23505') {
+        throw new Error('A company with this name or slug already exists');
+      }
+      throw new Error(`Failed to create company: ${createError.message}`);
     }
 
     revalidatePath('/companies');
@@ -495,7 +602,7 @@ export const createCompany = rateLimitedAction
 
     return {
       success: true,
-      company: result.data,
+      company,
     };
   });
 
@@ -524,20 +631,32 @@ export const updateCompany = rateLimitedAction
     // Filter out undefined values to avoid exactOptionalPropertyTypes issues
     const updateData = Object.fromEntries(
       Object.entries(updates).filter(([_, value]) => value !== undefined)
-    ) as Partial<Company>;
+    ) as CompanyUpdate;
 
-    // Update via repository with ownership verification (includes caching)
-    const result = await companyRepository.updateByOwner(id, user.id, updateData);
+    // Update with atomic ownership verification
+    const { data: company, error: updateError } = await supabase
+      .from('companies')
+      .update({
+        ...updateData,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .eq('owner_id', user.id)
+      .select()
+      .single();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to update company');
+    if (updateError) {
+      if (updateError.code === 'PGRST116') {
+        throw new Error('Company not found or you do not have permission to update it');
+      }
+      throw new Error(`Failed to update company: ${updateError.message}`);
     }
 
-    if (!result.data) {
-      throw new Error('Company data not returned');
+    if (!company) {
+      throw new Error('Company not found or you do not have permission to update it');
     }
 
-    const data = result.data;
+    const data = company;
 
     revalidatePath('/companies');
     revalidatePath(`/companies/${data.slug}`);
@@ -563,17 +682,18 @@ export async function getUserCompanies() {
     return [];
   }
 
-  // Fetch via repository (includes caching)
-  const result = await companyRepository.findByOwner(user.id, {
-    sortBy: 'created_at',
-    sortOrder: 'desc',
-  });
+  // Fetch companies owned by user
+  const { data: companies, error } = await supabase
+    .from('companies')
+    .select('*')
+    .eq('owner_id', user.id)
+    .order('created_at', { ascending: false });
 
-  if (!result.success) {
-    throw new Error(result.error || 'Failed to fetch user companies');
+  if (error) {
+    throw new Error(`Failed to fetch user companies: ${error.message}`);
   }
 
-  return result.data || [];
+  return companies || [];
 }
 
 // ============================================
@@ -614,48 +734,49 @@ export const createJob = rateLimitedAction
       .replace(/[^a-z0-9-]/g, '')
       .substring(0, 100);
 
-    // Create via repository (includes caching and automatic error handling)
-    // All jobs go to pending_review with unpaid status (payment required workflow)
-    const result = await jobRepository.create({
-      user_id: user.id,
-      title: parsedInput.title,
-      slug: generatedSlug,
-      company: parsedInput.company,
-      location: parsedInput.location ?? null,
-      description: parsedInput.description,
-      salary: parsedInput.salary ?? null,
-      remote: parsedInput.remote,
-      type: parsedInput.type,
-      workplace: parsedInput.workplace ?? null,
-      experience: parsedInput.experience ?? null,
-      category: parsedInput.category,
-      tags: parsedInput.tags as unknown as Database['public']['Tables']['jobs']['Row']['tags'],
-      requirements:
-        parsedInput.requirements as unknown as Database['public']['Tables']['jobs']['Row']['requirements'],
-      benefits:
-        parsedInput.benefits as unknown as Database['public']['Tables']['jobs']['Row']['benefits'],
-      link: parsedInput.link,
-      contact_email: parsedInput.contact_email ?? null,
-      company_logo: parsedInput.company_logo ?? null,
-      company_id: parsedInput.company_id ?? null,
-      plan: 'standard', // Single pricing tier: $299/30-day
-      active: false, // Activated after payment + admin approval
-      status: 'pending_review', // All jobs enter review queue
-      payment_status: 'unpaid', // Default payment status
-      payment_amount: 299.0, // Fixed price: $299/30-day listing
-      payment_method: null, // Set when payment received (polar/mercury_invoice/manual)
-      payment_date: null, // Set when payment confirmed
-      payment_reference: null, // Set to invoice/order ID when paid
-      admin_notes: null, // Internal notes for admin review
-      posted_at: null, // Set after approval + payment
-      expires_at: null, // Set after approval (30 days from posted_at)
-    });
+    // Create job - all jobs go to pending_review with unpaid status (payment required workflow)
+    const { data, error } = await supabase
+      .from('jobs')
+      .insert({
+        user_id: user.id,
+        title: parsedInput.title,
+        slug: generatedSlug,
+        company: parsedInput.company,
+        location: parsedInput.location ?? null,
+        description: parsedInput.description,
+        salary: parsedInput.salary ?? null,
+        remote: parsedInput.remote,
+        type: parsedInput.type,
+        workplace: parsedInput.workplace ?? null,
+        experience: parsedInput.experience ?? null,
+        category: parsedInput.category,
+        tags: parsedInput.tags as unknown as Database['public']['Tables']['jobs']['Row']['tags'],
+        requirements:
+          parsedInput.requirements as unknown as Database['public']['Tables']['jobs']['Row']['requirements'],
+        benefits:
+          parsedInput.benefits as unknown as Database['public']['Tables']['jobs']['Row']['benefits'],
+        link: parsedInput.link,
+        contact_email: parsedInput.contact_email ?? null,
+        company_logo: parsedInput.company_logo ?? null,
+        company_id: parsedInput.company_id ?? null,
+        plan: 'standard', // Single pricing tier: $299/30-day
+        active: false, // Activated after payment + admin approval
+        status: 'pending_review', // All jobs enter review queue
+        payment_status: 'unpaid', // Default payment status
+        payment_amount: 299.0, // Fixed price: $299/30-day listing
+        payment_method: null, // Set when payment received (polar/mercury_invoice/manual)
+        payment_date: null, // Set when payment confirmed
+        payment_reference: null, // Set to invoice/order ID when paid
+        admin_notes: null, // Internal notes for admin review
+        posted_at: null, // Set after approval + payment
+        expires_at: null, // Set after approval (30 days from posted_at)
+      })
+      .select()
+      .single();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to create job');
+    if (error) {
+      throw new Error(`Failed to create job: ${error.message}`);
     }
-
-    const data = result.data;
 
     // Revalidate jobs pages
     revalidatePath('/jobs');
@@ -719,18 +840,22 @@ export const updateJob = rateLimitedAction
       }
     }
 
-    // Update via repository with ownership verification (includes caching)
-    const result = await jobRepository.updateByOwner(id, user.id, updateData);
+    // Update with ownership verification
+    const { data, error } = await supabase
+      .from('jobs')
+      .update(updateData)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to update job');
+    if (error) {
+      throw new Error(`Failed to update job: ${error.message}`);
     }
 
-    if (!result.data) {
+    if (!data) {
       throw new Error('Job data not returned');
     }
-
-    const data = result.data;
 
     // Revalidate pages
     revalidatePath('/jobs');
@@ -763,15 +888,21 @@ export const toggleJobStatus = rateLimitedAction
       throw new Error('You must be signed in to manage jobs');
     }
 
-    // Update via repository with ownership verification (includes caching)
-    const result = await jobRepository.updateByOwner(id, user.id, {
-      status,
-      // If activating, set posted_at if not already set
-      ...(status === 'active' ? { posted_at: new Date().toISOString() } : {}),
-    });
+    // Update with ownership verification
+    const { data: job, error } = await supabase
+      .from('jobs')
+      .update({
+        status,
+        // If activating, set posted_at if not already set
+        ...(status === 'active' ? { posted_at: new Date().toISOString() } : {}),
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to update job status');
+    if (error) {
+      throw new Error(`Failed to update job status: ${error.message}`);
     }
 
     revalidatePath('/jobs');
@@ -779,7 +910,7 @@ export const toggleJobStatus = rateLimitedAction
 
     return {
       success: true,
-      job: result.data,
+      job,
     };
   });
 
@@ -803,21 +934,15 @@ export const deleteJob = rateLimitedAction
       throw new Error('You must be signed in to delete jobs');
     }
 
-    // First verify ownership
-    const jobResult = await jobRepository.findById(id);
-    if (!(jobResult.success && jobResult.data)) {
-      throw new Error('Job not found');
-    }
+    // Soft delete with ownership verification (set status='deleted')
+    const { error } = await supabase
+      .from('jobs')
+      .update({ status: 'deleted' })
+      .eq('id', id)
+      .eq('user_id', user.id);
 
-    if (jobResult.data.user_id !== user.id) {
-      throw new Error('You do not have permission to delete this job');
-    }
-
-    // Soft delete via repository (includes cache invalidation)
-    const result = await jobRepository.delete(id, true);
-
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to delete job');
+    if (error) {
+      throw new Error(`Failed to delete job: ${error.message}`);
     }
 
     revalidatePath('/jobs');
@@ -843,17 +968,19 @@ export async function getUserJobs() {
     return [];
   }
 
-  // Fetch via repository (includes caching and automatic filtering)
-  const result = await jobRepository.findActiveByUser(user.id, {
-    sortBy: 'created_at',
-    sortOrder: 'desc',
-  });
+  // Fetch user's active jobs (excludes deleted)
+  const { data, error } = await supabase
+    .from('jobs')
+    .select('*')
+    .eq('user_id', user.id)
+    .neq('status', 'deleted')
+    .order('created_at', { ascending: false });
 
-  if (!result.success) {
-    throw new Error(result.error || 'Failed to fetch user jobs');
+  if (error) {
+    throw new Error(`Failed to fetch user jobs: ${error.message}`);
   }
 
-  return result.data || [];
+  return data || [];
 }
 
 // ============================================
@@ -889,15 +1016,31 @@ export const trackSponsoredImpression = rateLimitedAction
       data: { user },
     } = await supabase.auth.getUser();
 
-    // Track impression via repository (fire-and-forget)
-    const result = await sponsoredContentRepository.trackImpression({
+    // Track impression (fire-and-forget, best-effort)
+    const { error: insertError } = await supabase.from('sponsored_impressions').insert({
       sponsored_id,
       user_id: user?.id || null,
       page_url: page_url || null,
       position: position || null,
     });
 
-    return { success: result.success ? result.data : false };
+    if (insertError) {
+      // Best-effort tracking - don't throw
+      return { success: false };
+    }
+
+    // Increment count on sponsored_content (fire-and-forget)
+    supabase
+      .rpc('increment', {
+        table_name: 'sponsored_content',
+        row_id: sponsored_id,
+        column_name: 'impression_count',
+      })
+      .then(() => {
+        // Silent success
+      });
+
+    return { success: true };
   });
 
 /**
@@ -917,26 +1060,62 @@ export const trackSponsoredClick = rateLimitedAction
       data: { user },
     } = await supabase.auth.getUser();
 
-    // Track click via repository (fire-and-forget)
-    const result = await sponsoredContentRepository.trackClick({
+    // Track click (fire-and-forget, best-effort)
+    const { error: insertError } = await supabase.from('sponsored_clicks').insert({
       sponsored_id,
       user_id: user?.id || null,
       target_url,
     });
 
-    return { success: result.success ? result.data : false };
+    if (insertError) {
+      // Best-effort tracking - don't throw
+      return { success: false };
+    }
+
+    // Increment count on sponsored_content (fire-and-forget)
+    supabase
+      .rpc('increment', {
+        table_name: 'sponsored_content',
+        row_id: sponsored_id,
+        column_name: 'click_count',
+      })
+      .then(() => {
+        // Silent success
+      });
+
+    return { success: true };
   });
 
 /**
  * Get active sponsored content for injection
  */
 export async function getActiveSponsoredContent(limit = 5) {
-  // Fetch via repository (includes caching, date filtering, and impression limit filtering)
-  const result = await sponsoredContentRepository.findActive(limit);
+  const supabase = await createClient();
+  const now = new Date().toISOString();
 
-  if (!result.success) {
+  // Fetch active sponsored content within date range
+  const { data, error } = await supabase
+    .from('sponsored_content')
+    .select('*')
+    .eq('active', true)
+    .lte('start_date', now)
+    .gte('end_date', now)
+    .order('tier', { ascending: true }) // Premium first
+    .limit(limit);
+
+  if (error) {
+    logger.warn('Failed to fetch active sponsored content', undefined, { error: error.message });
     return [];
   }
 
-  return result.data || [];
+  // Filter out items that hit impression limit
+  const filtered = (data || []).filter((item) => {
+    const impressionCount = item.impression_count ?? 0;
+    if (item.impression_limit && impressionCount >= item.impression_limit) {
+      return false;
+    }
+    return true;
+  });
+
+  return filtered;
 }

@@ -27,11 +27,14 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
-import { activityRepository } from '@/src/lib/repositories/activity.repository';
-import { bookmarkRepository } from '@/src/lib/repositories/bookmark.repository';
-import { followerRepository } from '@/src/lib/repositories/follower.repository';
-import { type User, userRepository } from '@/src/lib/repositories/user.repository';
-import { userInteractionRepository } from '@/src/lib/repositories/user-interaction.repository';
+import type {
+  Activity,
+  ActivitySummary,
+  CommentActivity,
+  PostActivity,
+  SubmissionActivity,
+  VoteActivity,
+} from '@/src/lib/schemas/activity.schema';
 import {
   activityFilterSchema,
   activitySummarySchema,
@@ -41,6 +44,8 @@ import { userIdSchema } from '@/src/lib/schemas/branded-types.schema';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import { updateProfileSchema } from '@/src/lib/schemas/profile.schema';
 import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
+import { createClient } from '@/src/lib/supabase/server';
+import type { User, UserUpdate } from '@/src/lib/types/user.types';
 import { batchAll } from '@/src/lib/utils/batch.utils';
 
 // ============================================
@@ -76,18 +81,31 @@ export const updateProfile = authedAction
       }
     }
 
-    // Update via repository (includes caching and automatic error handling)
-    const result = await userRepository.update(userId, updateData);
+    const supabase = await createClient();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to update profile');
+    // Filter out undefined values to avoid exactOptionalPropertyTypes issues
+    const filteredUpdateData = Object.fromEntries(
+      Object.entries({
+        ...updateData,
+        updated_at: new Date().toISOString(),
+      }).filter(([_, value]) => value !== undefined)
+    ) as UserUpdate;
+
+    // Update user profile directly
+    const { data, error } = await supabase
+      .from('users')
+      .update(filteredUpdateData)
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update profile: ${error.message}`);
     }
 
-    if (!result.data) {
+    if (!data) {
       throw new Error('Profile data not returned');
     }
-
-    const data = result.data;
 
     // Revalidate relevant paths
     revalidatePath(`/u/${data.slug}`);
@@ -113,14 +131,27 @@ export const refreshProfileFromOAuth = authedAction
   .action(async ({ ctx }) => {
     const { userId } = ctx;
 
-    // Refresh via repository (includes cache invalidation and syncing)
-    const result = await userRepository.refreshFromOAuth(userId);
+    const supabase = await createClient();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to refresh profile');
+    // Call the database function that syncs from auth.users
+    const { error: rpcError } = await supabase.rpc('refresh_profile_from_oauth', {
+      user_id: userId,
+    });
+
+    if (rpcError) {
+      throw new Error(`Failed to refresh profile from OAuth: ${rpcError.message}`);
     }
 
-    const profile = result.data;
+    // Fetch the updated user
+    const { data: profile, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to fetch refreshed user: ${error.message}`);
+    }
 
     // Revalidate paths
     if (profile?.slug) {
@@ -165,22 +196,39 @@ export const addBookmark = authedAction
     const { content_type, content_slug, notes } = parsedInput;
     const { userId } = ctx;
 
-    // Create bookmark via repository
-    const result = await bookmarkRepository.create({
-      user_id: userId,
-      content_type,
-      content_slug,
-      notes: notes || null,
-      created_at: new Date().toISOString(),
-    });
+    const supabase = await createClient();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to create bookmark');
+    const { data: bookmark, error } = await supabase
+      .from('bookmarks')
+      .insert({
+        user_id: userId,
+        content_type,
+        content_slug,
+        notes: notes || null,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      // Handle duplicate constraint
+      if (error.code === '23505') {
+        throw new Error('Bookmark already exists');
+      }
+      throw new Error(`Failed to create bookmark: ${error.message}`);
     }
 
     // Track interaction for personalization (fire-and-forget)
-    userInteractionRepository
-      .track(content_type, content_slug, 'bookmark', userId, undefined, {})
+    createClient()
+      .then((supabaseForTracking) =>
+        supabaseForTracking.from('user_interactions').insert({
+          content_type,
+          content_slug,
+          interaction_type: 'bookmark',
+          user_id: userId,
+          session_id: null,
+          metadata: null,
+        })
+      )
       .catch((err) => {
         logger.warn('Failed to track bookmark interaction', undefined, {
           content_type,
@@ -199,7 +247,7 @@ export const addBookmark = authedAction
 
     return {
       success: true,
-      bookmark: result.data,
+      bookmark,
     };
   });
 
@@ -221,15 +269,17 @@ export const removeBookmark = authedAction
     const { content_type, content_slug } = parsedInput;
     const { userId } = ctx;
 
-    // Delete bookmark via repository
-    const result = await bookmarkRepository.deleteByUserAndContent(
-      userId,
-      content_type,
-      content_slug
-    );
+    const supabase = await createClient();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to remove bookmark');
+    const { error } = await supabase
+      .from('bookmarks')
+      .delete()
+      .eq('user_id', userId)
+      .eq('content_type', content_type)
+      .eq('content_slug', content_slug);
+
+    if (error) {
+      throw new Error(`Failed to delete bookmark: ${error.message}`);
     }
 
     // Revalidate account pages
@@ -263,10 +313,21 @@ export async function isBookmarked(content_type: string, content_slug: string): 
     return false;
   }
 
-  // Check via repository
-  const result = await bookmarkRepository.findByUserAndContent(user.id, content_type, content_slug);
+  // Check bookmark existence
+  const { data, error } = await supabase
+    .from('bookmarks')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('content_type', content_type)
+    .eq('content_slug', content_slug)
+    .single();
 
-  return result.success && result.data !== null;
+  if (error && error.code !== 'PGRST116') {
+    // Log error but don't throw - return false for robustness
+    logger.warn('Failed to check bookmark', undefined, { error: error.message });
+  }
+
+  return data !== null;
 }
 
 /**
@@ -399,25 +460,34 @@ export const toggleFollow = authedAction
       throw new Error('You cannot follow yourself');
     }
 
+    const supabase = await createClient();
+
     if (action === 'follow') {
-      // Create follow relationship via repository (includes caching)
-      const result = await followerRepository.create({
+      // Create follow relationship
+      const { error } = await supabase.from('followers').insert({
         follower_id: userId,
         following_id: user_id,
       });
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to follow user');
+      if (error) {
+        if (error.code === '23505') {
+          throw new Error('You are already following this user');
+        }
+        throw new Error(`Failed to follow user: ${error.message}`);
       }
 
       // TODO: Send email notification (if user has follow_email enabled)
       // This would use resendService similar to existing email flows
     } else {
-      // Delete follow relationship via repository (includes cache invalidation)
-      const result = await followerRepository.deleteByUserIds(userId, user_id);
+      // Delete follow relationship
+      const { error } = await supabase
+        .from('followers')
+        .delete()
+        .eq('follower_id', userId)
+        .eq('following_id', user_id);
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to unfollow user');
+      if (error) {
+        throw new Error(`Failed to unfollow user: ${error.message}`);
       }
     }
 
@@ -431,7 +501,7 @@ export const toggleFollow = authedAction
   });
 
 /**
- * Check if current user follows another user via repository (includes caching)
+ * Check if current user follows another user
  */
 export async function isFollowing(user_id: string): Promise<boolean> {
   const { createClient } = await import('@/src/lib/supabase/server');
@@ -448,10 +518,19 @@ export async function isFollowing(user_id: string): Promise<boolean> {
   // Validate user_id at boundary
   const validatedUserId = userIdSchema.parse(user_id);
 
-  // Check via repository (includes caching)
-  const result = await followerRepository.isFollowing(user.id, validatedUserId);
+  // Check if follow relationship exists
+  const { data, error } = await supabase
+    .from('followers')
+    .select('id')
+    .eq('follower_id', user.id)
+    .eq('following_id', validatedUserId)
+    .single();
 
-  return result.success ? (result.data ?? false) : false;
+  if (error && error.code !== 'PGRST116') {
+    logger.warn('Failed to check follow status', undefined, { error: error.message });
+  }
+
+  return data !== null;
 }
 
 // ============================================
@@ -471,14 +550,76 @@ export const getActivitySummary = authedAction
   .action(async ({ ctx }) => {
     const { userId } = ctx;
 
-    // Fetch via repository (includes caching and parallel queries)
-    const result = await activityRepository.getSummary(userId);
+    const supabase = await createClient();
 
-    if (!(result.success && result.data)) {
-      throw new Error(result.error || 'Failed to fetch activity summary');
+    // Run all count queries in parallel for performance
+    const [postsResult, commentsResult, votesResult, submissionsResult, mergedResult] =
+      await Promise.all([
+        // Posts count
+        supabase
+          .from('posts')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId),
+
+        // Comments count
+        supabase
+          .from('comments')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId),
+
+        // Votes count
+        supabase
+          .from('votes')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId),
+
+        // Total submissions
+        supabase
+          .from('submissions')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId),
+
+        // Merged submissions
+        supabase
+          .from('submissions')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .eq('status', 'merged'),
+      ]);
+
+    // Check for errors
+    if (postsResult.error) {
+      throw new Error(`Failed to count posts: ${postsResult.error.message}`);
+    }
+    if (commentsResult.error) {
+      throw new Error(`Failed to count comments: ${commentsResult.error.message}`);
+    }
+    if (votesResult.error) {
+      throw new Error(`Failed to count votes: ${votesResult.error.message}`);
+    }
+    if (submissionsResult.error) {
+      throw new Error(`Failed to count submissions: ${submissionsResult.error.message}`);
+    }
+    if (mergedResult.error) {
+      throw new Error(`Failed to count merged submissions: ${mergedResult.error.message}`);
     }
 
-    return result.data;
+    const postsCount = postsResult.count || 0;
+    const commentsCount = commentsResult.count || 0;
+    const votesCount = votesResult.count || 0;
+    const submissionsCount = submissionsResult.count || 0;
+    const mergedCount = mergedResult.count || 0;
+
+    const summary: ActivitySummary = {
+      total_posts: postsCount,
+      total_comments: commentsCount,
+      total_votes: votesCount,
+      total_submissions: submissionsCount,
+      merged_submissions: mergedCount,
+      total_activity: postsCount + commentsCount + votesCount + submissionsCount,
+    };
+
+    return summary;
   });
 
 /**
@@ -491,19 +632,141 @@ export const getActivityTimeline = authedAction
   })
   .schema(activityFilterSchema)
   .outputSchema(activityTimelineResponseSchema)
-  .action(async ({ parsedInput: { type, limit, offset }, ctx }) => {
+  .action(async ({ parsedInput: { type, limit = 20, offset = 0 }, ctx }) => {
     const { userId } = ctx;
 
-    // Fetch via repository (includes type filtering, sorting, and pagination)
-    const result = await activityRepository.getTimeline(userId, {
-      ...(type ? { type } : {}),
-      limit,
-      offset,
-    });
+    const supabase = await createClient();
+    const activities: Activity[] = [];
 
-    if (!(result.success && result.data)) {
-      throw new Error(result.error || 'Failed to fetch activity timeline');
+    // Fetch posts if no filter or filter is 'post'
+    if (!type || type === 'post') {
+      const { data: posts, error } = await supabase
+        .from('posts')
+        .select('id, title, url, vote_count, comment_count, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+        .range(offset, offset + limit - 1);
+
+      if (error) {
+        throw new Error(`Failed to fetch posts: ${error.message}`);
+      }
+
+      if (posts) {
+        activities.push(
+          ...posts.map(
+            (post): PostActivity => ({
+              id: post.id,
+              type: 'post',
+              title: post.title,
+              url: post.url,
+              vote_count: post.vote_count ?? 0,
+              comment_count: post.comment_count ?? 0,
+              created_at: post.created_at,
+            })
+          )
+        );
+      }
     }
 
-    return result.data;
+    // Fetch comments if no filter or filter is 'comment'
+    if (!type || type === 'comment') {
+      const { data: comments, error } = await supabase
+        .from('comments')
+        .select('id, content, post_id, created_at, posts(title)')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+        .range(offset, offset + limit - 1);
+
+      if (error) {
+        throw new Error(`Failed to fetch comments: ${error.message}`);
+      }
+
+      if (comments) {
+        activities.push(
+          ...comments.map(
+            (comment): CommentActivity => ({
+              id: comment.id,
+              type: 'comment',
+              content: comment.content,
+              post_id: comment.post_id,
+              post_title: (comment.posts as { title?: string } | null)?.title || 'Unknown Post',
+              created_at: comment.created_at,
+            })
+          )
+        );
+      }
+    }
+
+    // Fetch votes if no filter or filter is 'vote'
+    if (!type || type === 'vote') {
+      const { data: votes, error } = await supabase
+        .from('votes')
+        .select('id, post_id, created_at, posts(title)')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+        .range(offset, offset + limit - 1);
+
+      if (error) {
+        throw new Error(`Failed to fetch votes: ${error.message}`);
+      }
+
+      if (votes) {
+        activities.push(
+          ...votes.map(
+            (vote): VoteActivity => ({
+              id: vote.id,
+              type: 'vote',
+              post_id: vote.post_id,
+              post_title: (vote.posts as { title?: string } | null)?.title || 'Unknown Post',
+              created_at: vote.created_at,
+            })
+          )
+        );
+      }
+    }
+
+    // Fetch submissions if no filter or filter is 'submission'
+    if (!type || type === 'submission') {
+      const { data: submissions, error } = await supabase
+        .from('submissions')
+        .select('id, content_type, content_name, status, pr_url, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+        .range(offset, offset + limit - 1);
+
+      if (error) {
+        throw new Error(`Failed to fetch submissions: ${error.message}`);
+      }
+
+      if (submissions) {
+        activities.push(
+          ...submissions.map(
+            (submission): SubmissionActivity => ({
+              id: submission.id,
+              type: 'submission',
+              content_type: submission.content_type,
+              content_name: submission.content_name,
+              status: submission.status as 'pending' | 'approved' | 'rejected' | 'merged',
+              pr_url: submission.pr_url,
+              created_at: submission.created_at,
+            })
+          )
+        );
+      }
+    }
+
+    // Sort all activities by date
+    activities.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    // Apply limit after sorting
+    const limitedActivities = activities.slice(0, limit);
+
+    return {
+      activities: limitedActivities,
+      hasMore: activities.length > limit,
+    };
   });

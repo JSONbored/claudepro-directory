@@ -41,13 +41,27 @@ import {
   BADGE_REGISTRY,
   type BadgeDefinition,
 } from '@/src/lib/config/badges.config';
-import type { UserBadgeWithBadge } from '@/src/lib/repositories/user-badge.repository';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 // =============================================================================
 // TYPES
 // =============================================================================
+
+/** UserBadge with badge details joined */
+type UserBadgeWithBadge = {
+  id: string;
+  badge_id: string;
+  earned_at: string;
+  featured: boolean | null;
+  badges: {
+    slug: string;
+    name: string;
+    description: string;
+    icon: string | null;
+    category: string;
+  };
+};
 
 export interface BadgeGridProps {
   /** User badges with badge details */

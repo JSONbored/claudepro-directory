@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { statsRedis } from '@/src/lib/cache.server';
+import { isValidCategory } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import {
   buildUserContext,
@@ -22,13 +23,9 @@ import {
 import type { PersonalizedContentItem } from '@/src/lib/personalization/types';
 import { getUsageBasedRecommendations } from '@/src/lib/personalization/usage-based-recommender';
 import { generateRecommendations } from '@/src/lib/recommender/algorithm';
-import { bookmarkRepository } from '@/src/lib/repositories/bookmark.repository';
-import { contentSimilarityRepository } from '@/src/lib/repositories/content-similarity.repository';
-import { userRepository } from '@/src/lib/repositories/user.repository';
-import { userAffinityRepository } from '@/src/lib/repositories/user-affinity.repository';
-import { userInteractionRepository } from '@/src/lib/repositories/user-interaction.repository';
 import { sessionIdSchema, toContentId } from '@/src/lib/schemas/branded-types.schema';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import type { InteractionType } from '@/src/lib/schemas/interaction.schema';
 import {
   type AffinityScore,
   type ForYouFeedResponse,
@@ -45,6 +42,7 @@ import {
   userAffinitiesResponseSchema,
 } from '@/src/lib/schemas/personalization.schema';
 import { type QuizAnswers, quizAnswersSchema } from '@/src/lib/schemas/recommender.schema';
+import type { SimilarityResult } from '@/src/lib/schemas/similarity.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
@@ -168,13 +166,18 @@ export const getForYouFeed = rateLimitedAction
           // Enrich with view counts
           const enrichedContent = await statsRedis.enrichWithViewCounts(allContent);
 
-          // Fetch user affinities via repository (includes caching)
-          const affinitiesResult = await userAffinityRepository.findByUser(userId, {
-            minScore: 20,
-            limit: 50,
-            sortBy: 'affinity_score',
-            sortOrder: 'desc',
-          });
+          const supabaseCached = await createClient();
+
+          // Fetch user affinities
+          const { data: affinitiesData } = await supabaseCached
+            .from('user_affinities')
+            .select('*')
+            .eq('user_id', userId)
+            .gte('affinity_score', 20)
+            .order('affinity_score', { ascending: false })
+            .limit(50);
+
+          const affinitiesResult = { success: true, data: affinitiesData || [] };
 
           const affinities = affinitiesResult.success
             ? (affinitiesResult.data || []).map((a) => ({
@@ -184,27 +187,34 @@ export const getForYouFeed = rateLimitedAction
               }))
             : [];
 
-          // Fetch bookmarks via repository (includes caching)
-          const bookmarksResult = await bookmarkRepository.findByUser(userId);
-          const bookmarks = bookmarksResult.success
-            ? (bookmarksResult.data || []).map((b) => ({
+          // Fetch bookmarks
+          const supabase = await createClient();
+          const { data: bookmarksData, error: bookmarksError } = await supabase
+            .from('bookmarks')
+            .select('content_type, content_slug')
+            .eq('user_id', userId);
+
+          const bookmarks = bookmarksError
+            ? []
+            : (bookmarksData || []).map((b) => ({
                 content_type: b.content_type,
                 content_slug: b.content_slug,
-              }))
-            : [];
+              }));
 
-          // Fetch recent views (last 7 days) via repository (includes caching)
+          // Fetch recent views (last 7 days)
           const sevenDaysAgo = new Date();
           sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-          const recentViewsResult = await userInteractionRepository.findByUser(userId, {
-            limit: 1000, // Large limit to capture all recent views
-            sortBy: 'created_at',
-            sortOrder: 'desc',
-          });
+          const { data: recentInteractions, error: interactionsError } = await supabase
+            .from('user_interactions')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(1000);
 
-          const recentViews = recentViewsResult.success
-            ? (recentViewsResult.data || [])
+          const recentViews = interactionsError
+            ? []
+            : (recentInteractions || [])
                 .filter(
                   (interaction) =>
                     interaction.interaction_type === 'view' &&
@@ -213,8 +223,7 @@ export const getForYouFeed = rateLimitedAction
                 .map((interaction) => ({
                   content_type: interaction.content_type,
                   content_slug: interaction.content_slug,
-                }))
-            : [];
+                }));
 
           // Fetch user profile interests
           const { data: profile } = await supabase
@@ -363,18 +372,50 @@ export const getSimilarConfigs = rateLimitedAction
   .outputSchema(similarConfigsResponseSchema)
   .action(async ({ parsedInput }: { parsedInput: z.infer<typeof similarConfigsQuerySchema> }) => {
     try {
-      // Check database for pre-computed similarities via repository (includes caching)
-      const similaritiesResult = await contentSimilarityRepository.findSimilarContent(
-        parsedInput.content_type,
-        parsedInput.content_slug,
-        {
-          limit: parsedInput.limit,
-          sortBy: 'similarity_score',
-          sortOrder: 'desc',
-        }
-      );
+      // Check database for pre-computed similarities
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from('content_similarities')
+        .select('*')
+        .eq('content_a_type', parsedInput.content_type)
+        .eq('content_a_slug', parsedInput.content_slug)
+        .order('similarity_score', { ascending: false })
+        .limit(parsedInput.limit);
 
-      const similarities = similaritiesResult.success ? similaritiesResult.data : null;
+      if (error) {
+        throw new Error(`Failed to find similar content: ${error.message}`);
+      }
+
+      // Transform to SimilarityResult format
+      const similarities: SimilarityResult[] | null =
+        data
+          ?.map((sim) => {
+            // Validate category type from database
+            if (!isValidCategory(sim.content_b_type)) {
+              logger.warn('Invalid category type in similarity data', undefined, {
+                content_b_type: sim.content_b_type,
+                content_a_slug: sim.content_a_slug,
+                content_b_slug: sim.content_b_slug,
+              });
+              return null;
+            }
+
+            const result: SimilarityResult = {
+              content_slug: sim.content_b_slug,
+              content_type: sim.content_b_type,
+              similarity_score: sim.similarity_score,
+              calculated_at: sim.calculated_at,
+            };
+            if (
+              typeof sim.similarity_factors === 'object' &&
+              sim.similarity_factors !== null &&
+              !Array.isArray(sim.similarity_factors)
+            ) {
+              result.similarity_factors = sim.similarity_factors as Record<string, unknown>;
+            }
+            return result;
+          })
+          .filter((r): r is SimilarityResult => r !== null) || null;
 
       if (similarities && similarities.length > 0) {
         // Return pre-computed similarities
@@ -462,13 +503,16 @@ export const getUsageRecommendations = rateLimitedAction
           );
         }
 
-        // Get user affinities if authenticated via repository (includes caching)
+        // Get user affinities if authenticated
         const userAffinities = new Map<string, number>();
         if (user) {
-          const affinitiesResult = await userAffinityRepository.findByUser(user.id);
+          const { data: affinities } = await supabase
+            .from('user_affinities')
+            .select('*')
+            .eq('user_id', user.id);
 
-          if (affinitiesResult.success && affinitiesResult.data) {
-            for (const aff of affinitiesResult.data) {
+          if (affinities) {
+            for (const aff of affinities) {
               userAffinities.set(`${aff.content_type}:${aff.content_slug}`, aff.affinity_score);
             }
           }
@@ -555,20 +599,21 @@ export const getUserAffinities = rateLimitedAction
       throw new Error('You must be signed in to view affinities');
     }
 
-    // Fetch via repository (includes 5-minute caching automatically)
-    const result = await userAffinityRepository.findByUser(user.id, {
-      minScore: min_score,
-      limit,
-      sortBy: 'affinity_score',
-      sortOrder: 'desc',
-    });
+    // Fetch user affinities
+    const { data: userAffinities, error } = await supabase
+      .from('user_affinities')
+      .select('*')
+      .eq('user_id', user.id)
+      .gte('affinity_score', min_score)
+      .order('affinity_score', { ascending: false })
+      .limit(limit);
 
-    if (!result.success) {
-      logger.error('Failed to fetch user affinities', undefined, { error: result.error ?? '' });
-      throw new Error('Failed to fetch affinities');
+    if (error) {
+      logger.error('Failed to fetch user affinities', undefined, { error: error.message });
+      throw new Error(`Failed to fetch affinities: ${error.message}`);
     }
 
-    const affinities = result.data || [];
+    const affinities = userAffinities || [];
 
     const response: UserAffinitiesResponse = {
       affinities: affinities as AffinityScore[],
@@ -661,18 +706,16 @@ export async function getContentAffinity(
     return null;
   }
 
-  // Fetch via repository (includes caching)
-  const result = await userAffinityRepository.findByUserAndContent(
-    user.id,
-    contentType,
-    contentSlug
-  );
+  // Fetch affinity score
+  const { data: affinity } = await supabase
+    .from('user_affinities')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('content_type', contentType)
+    .eq('content_slug', contentSlug)
+    .single();
 
-  if (!(result.success && result.data)) {
-    return null;
-  }
-
-  return result.data.affinity_score;
+  return affinity?.affinity_score ?? null;
 }
 
 /**
@@ -690,16 +733,18 @@ export async function getUserFavoriteCategories(): Promise<string[]> {
     return [];
   }
 
-  // Fetch via repository (includes caching)
-  const result = await userAffinityRepository.findByUser(user.id, {
-    minScore: 30, // Only meaningful affinities
-  });
+  // Fetch user affinities
+  const { data: affinities, error } = await supabase
+    .from('user_affinities')
+    .select('*')
+    .eq('user_id', user.id)
+    .gte('affinity_score', 30); // Only meaningful affinities
 
-  if (!result.success) {
+  if (error) {
     return [];
   }
 
-  const data = result.data || [];
+  const data = affinities || [];
 
   if (data.length === 0) {
     return [];
@@ -768,35 +813,27 @@ export const trackInteraction = rateLimitedAction
         };
       }
 
-      // Track interaction via repository
-      const result = await userInteractionRepository.track(
-        parsedInput.content_type,
-        parsedInput.content_slug,
-        parsedInput.interaction_type as
-          | 'view'
-          | 'click'
-          | 'bookmark'
-          | 'share'
-          | 'download'
-          | 'like'
-          | 'upvote'
-          | 'downvote',
-        user.id,
-        parsedInput.session_id || undefined,
-        parsedInput.metadata || {}
-      );
+      // Track interaction (fire-and-forget for analytics)
+      const { error } = await supabase.from('user_interactions').insert({
+        content_type: parsedInput.content_type,
+        content_slug: parsedInput.content_slug,
+        interaction_type: parsedInput.interaction_type as InteractionType,
+        user_id: user.id,
+        session_id: parsedInput.session_id || null,
+        metadata: parsedInput.metadata || null,
+      });
 
-      if (!(result.success && result.data)) {
+      if (error) {
         logger.error('Failed to track interaction', undefined, {
           content_type: parsedInput.content_type,
           content_slug: parsedInput.content_slug,
           interaction_type: parsedInput.interaction_type,
-          error: result.error ?? '',
+          error: error.message,
         });
 
         return {
           success: false,
-          message: result.error || 'Failed to track interaction',
+          message: `Failed to track interaction: ${error.message}`,
         };
       }
 
@@ -831,22 +868,23 @@ export async function getUserRecentInteractions(limit = 20): Promise<TrackIntera
     return [];
   }
 
-  // Get interactions via repository (includes caching)
-  const result = await userInteractionRepository.findByUser(user.id, {
-    limit,
-    sortBy: 'created_at',
-    sortOrder: 'desc',
-  });
+  // Get interactions
+  const { data, error } = await supabase
+    .from('user_interactions')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(limit);
 
-  if (!result.success) {
+  if (error) {
     logger.error('Failed to fetch user interactions', undefined, {
-      error: result.error ?? '',
+      error: error.message,
     });
     return [];
   }
 
   // Transform database results to match TrackInteractionInput type
-  return (result.data || []).map((item) => ({
+  return (data || []).map((item) => ({
     content_type: item.content_type as TrackInteractionInput['content_type'],
     content_slug: toContentId(item.content_slug),
     interaction_type: item.interaction_type as TrackInteractionInput['interaction_type'],
@@ -886,12 +924,15 @@ export async function getUserInteractionSummary(): Promise<{
   }
 
   try {
-    // Get stats via repository (includes caching)
-    const result = await userInteractionRepository.getStats({ userId: user.id });
+    // Get interaction stats
+    const { data, error } = await supabase
+      .from('user_interactions')
+      .select('*')
+      .eq('user_id', user.id);
 
-    if (!(result.success && result.data)) {
+    if (error) {
       logger.error('Failed to fetch interaction summary', undefined, {
-        error: result.error ?? '',
+        error: error.message,
       });
       return {
         total_interactions: 0,
@@ -902,14 +943,24 @@ export async function getUserInteractionSummary(): Promise<{
       };
     }
 
-    const stats = result.data;
+    const interactions = data || [];
+
+    // Calculate stats
+    const byType: Record<string, number> = {};
+    interactions.forEach((i) => {
+      byType[i.interaction_type] = (byType[i.interaction_type] || 0) + 1;
+    });
+
+    const uniqueContentItems = new Set(
+      interactions.map((i) => `${i.content_type}:${i.content_slug}`)
+    ).size;
 
     return {
-      total_interactions: stats.total_interactions,
-      views: stats.by_type.view || 0,
-      copies: stats.by_type.copy || 0,
-      bookmarks: stats.by_type.bookmark || 0,
-      unique_content_items: stats.unique_users, // Note: This is a misnomer in the response type
+      total_interactions: interactions.length,
+      views: byType.view || 0,
+      copies: byType.copy || 0,
+      bookmarks: byType.bookmark || 0,
+      unique_content_items: uniqueContentItems,
     };
   } catch (error) {
     logger.error(
@@ -990,11 +1041,17 @@ export const generateConfigRecommendations = rateLimitedAction
           ...(answers.focusAreas || []),
         ].filter(Boolean);
 
-        // Update user interests via repository (non-blocking fire-and-forget)
-        userRepository
-          .update(user.id, {
-            interests: Array.from(new Set(interestTags)).slice(0, 10), // Max 10 interests
-          })
+        // Update user interests (non-blocking fire-and-forget)
+        createClient()
+          .then((supabase) =>
+            supabase
+              .from('users')
+              .update({
+                interests: Array.from(new Set(interestTags)).slice(0, 10), // Max 10 interests
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', user.id)
+          )
           .catch(() => {
             logger.warn('Failed to update user interests from quiz', undefined, {
               user_id: user.id,

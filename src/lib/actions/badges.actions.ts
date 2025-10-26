@@ -20,11 +20,23 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import { getAutoAwardBadges } from '@/src/lib/config/badges.config';
-import {
-  type UserBadgeWithBadge,
-  userBadgeRepository,
-} from '@/src/lib/repositories/user-badge.repository';
 import { userIdSchema } from '@/src/lib/schemas/branded-types.schema';
+import { createClient } from '@/src/lib/supabase/server';
+
+// UserBadge with badge details joined
+type UserBadgeWithBadge = {
+  id: string;
+  badge_id: string;
+  earned_at: string;
+  featured: boolean | null;
+  badges: {
+    slug: string;
+    name: string;
+    description: string;
+    icon: string | null;
+    category: string;
+  };
+};
 
 // =============================================================================
 // GET USER BADGES
@@ -47,18 +59,36 @@ export const getUserBadges = authedAction
   .action(async ({ parsedInput: { limit, offset }, ctx }) => {
     const { userId } = ctx;
 
-    const result = await userBadgeRepository.findByUserWithBadgeDetails(userId, {
-      limit: limit ?? 100,
-      offset: offset ?? 0,
-    });
+    const supabase = await createClient();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to fetch user badges');
+    const { data, error } = await supabase
+      .from('user_badges')
+      .select(
+        `
+        id,
+        badge_id,
+        earned_at,
+        featured,
+        badges!inner (
+          slug,
+          name,
+          description,
+          icon,
+          category
+        )
+      `
+      )
+      .eq('user_id', userId)
+      .order('earned_at', { ascending: false })
+      .range(offset ?? 0, (offset ?? 0) + (limit ?? 100) - 1);
+
+    if (error) {
+      throw new Error(`Failed to fetch user badges: ${error.message}`);
     }
 
     return {
-      badges: result.data || [],
-      total: result.data?.length || 0,
+      badges: (data || []) as UserBadgeWithBadge[],
+      total: data?.length || 0,
     };
   });
 
@@ -82,14 +112,36 @@ export const getFeaturedBadges = authedAction
   .action(async ({ parsedInput: { limit }, ctx }) => {
     const { userId } = ctx;
 
-    const result = await userBadgeRepository.findFeaturedByUser(userId, { limit });
+    const supabase = await createClient();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to fetch featured badges');
+    const { data, error } = await supabase
+      .from('user_badges')
+      .select(
+        `
+        id,
+        badge_id,
+        earned_at,
+        featured,
+        badges!inner (
+          slug,
+          name,
+          description,
+          icon,
+          category
+        )
+      `
+      )
+      .eq('user_id', userId)
+      .eq('featured', true)
+      .order('earned_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      throw new Error(`Failed to fetch featured badges: ${error.message}`);
     }
 
     return {
-      badges: result.data || [],
+      badges: (data || []) as UserBadgeWithBadge[],
     };
   });
 
@@ -115,30 +167,45 @@ export const toggleBadgeFeatured = authedAction
   .action(async ({ parsedInput: { badgeId, featured }, ctx }) => {
     const { userId } = ctx;
 
-    // Verify this badge belongs to the user
-    const badgeResult = await userBadgeRepository.findById(badgeId);
+    const supabase = await createClient();
 
-    if (!(badgeResult.success && badgeResult.data)) {
+    // Verify this badge belongs to the user
+    const { data: badge, error: checkError } = await supabase
+      .from('user_badges')
+      .select('user_id')
+      .eq('id', badgeId)
+      .single();
+
+    if (checkError || !badge) {
       throw new Error('Badge not found');
     }
 
-    if (badgeResult.data.user_id !== userId) {
+    if (badge.user_id !== userId) {
       throw new Error('Unauthorized: This badge does not belong to you');
     }
 
     // If featuring, check limit (max 5 featured badges)
     if (featured) {
-      const featuredResult = await userBadgeRepository.findFeaturedByUser(userId);
-      if (featuredResult.success && (featuredResult.data?.length || 0) >= 5) {
+      const { count, error: countError } = await supabase
+        .from('user_badges')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('featured', true);
+
+      if (countError) {
+        throw new Error(`Failed to check featured badges: ${countError.message}`);
+      }
+
+      if ((count || 0) >= 5) {
         throw new Error('You can only feature up to 5 badges');
       }
     }
 
     // Toggle featured status
-    const result = await userBadgeRepository.toggleFeatured(badgeId, featured);
+    const { error } = await supabase.from('user_badges').update({ featured }).eq('id', badgeId);
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to update featured status');
+    if (error) {
+      throw new Error(`Failed to update featured status: ${error.message}`);
     }
 
     // Revalidate profile pages
@@ -167,16 +234,28 @@ export const checkBadgeEligibility = authedAction
   .action(async ({ ctx }) => {
     const { userId } = ctx;
 
-    // Get user's current badges
-    const userBadgesResult = await userBadgeRepository.findByUserWithBadgeDetails(userId);
+    const supabase = await createClient();
 
-    if (!userBadgesResult.success) {
-      throw new Error('Failed to fetch user badges');
+    // Get user's current badges with badge details
+    const { data: userBadges, error } = await supabase
+      .from('user_badges')
+      .select(
+        `
+        badges!inner (slug)
+      `
+      )
+      .eq('user_id', userId);
+
+    if (error) {
+      throw new Error(`Failed to fetch user badges: ${error.message}`);
     }
 
     // Create set of earned badge slugs
+    type UserBadgeWithSlug = { badges: { slug: string } | null };
     const earnedBadgeSlugs = new Set(
-      (userBadgesResult.data || []).map((userBadge) => userBadge.badges?.slug).filter(Boolean)
+      ((userBadges as UserBadgeWithSlug[]) || [])
+        .map((ub) => ub.badges?.slug)
+        .filter((slug): slug is string => Boolean(slug))
     );
 
     // Get all auto-award badges and filter out already earned ones
@@ -214,14 +293,33 @@ export const getRecentlyEarnedBadges = authedAction
   .action(async ({ parsedInput: { since }, ctx }) => {
     const { userId } = ctx;
 
-    const result = await userBadgeRepository.findRecentlyEarned(userId, since);
+    const supabase = await createClient();
+    const sinceTime = since || new Date(Date.now() - 5 * 60 * 1000).toISOString();
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to fetch recently earned badges');
+    const { data, error } = await supabase
+      .from('user_badges')
+      .select(
+        `
+        id,
+        earned_at,
+        badge:badges (
+          slug,
+          name,
+          description,
+          icon
+        )
+      `
+      )
+      .eq('user_id', userId)
+      .gte('earned_at', sinceTime)
+      .order('earned_at', { ascending: false });
+
+    if (error) {
+      throw new Error(`Failed to fetch recently earned badges: ${error.message}`);
     }
 
     return {
-      badges: result.data || [],
+      badges: data || [],
     };
   });
 
@@ -240,22 +338,45 @@ export async function getPublicUserBadges(
   // Validate input
   const validatedUserId = userIdSchema.parse(targetUserId);
 
-  // Fetch appropriate badges
-  const result = options?.featuredOnly
-    ? await userBadgeRepository.findFeaturedByUser(
-        validatedUserId,
-        options.limit !== undefined ? { limit: options.limit } : undefined
+  const supabase = await createClient();
+  let query = supabase
+    .from('user_badges')
+    .select(
+      `
+      id,
+      badge_id,
+      earned_at,
+      featured,
+      badges!inner (
+        slug,
+        name,
+        description,
+        icon,
+        category
       )
-    : await userBadgeRepository.findByUserWithBadgeDetails(
-        validatedUserId,
-        options?.limit !== undefined ? { limit: options.limit } : undefined
-      );
+    `
+    )
+    .eq('user_id', validatedUserId);
 
-  if (!result.success) {
-    throw new Error(result.error || 'Failed to fetch user badges');
+  // Filter by featured if requested
+  if (options?.featuredOnly) {
+    query = query.eq('featured', true);
   }
 
-  return result.data || [];
+  // Apply limit if specified
+  if (options?.limit) {
+    query = query.limit(options.limit);
+  }
+
+  query = query.order('earned_at', { ascending: false });
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error(`Failed to fetch user badges: ${error.message}`);
+  }
+
+  return (data || []) as UserBadgeWithBadge[];
 }
 
 /**
@@ -266,13 +387,18 @@ export async function userHasBadge(userId: string, badgeId: string): Promise<boo
   const validatedUserId = userIdSchema.parse(userId);
   const validatedBadgeId = z.string().uuid().parse(badgeId);
 
-  const result = await userBadgeRepository.hasUserBadge(validatedUserId, validatedBadgeId);
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from('user_badges')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', validatedUserId)
+    .eq('badge_id', validatedBadgeId);
 
-  if (!result.success) {
+  if (error) {
     return false;
   }
 
-  return result.data ?? false;
+  return (count || 0) > 0;
 }
 
 // =============================================================================

@@ -23,9 +23,9 @@ import {
 } from '@/src/components/primitives/card';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Briefcase, Building, ExternalLink, Plus, Star, TrendingUp } from '@/src/lib/icons';
-import { companyRepository } from '@/src/lib/repositories/company.repository';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
+import type { CompanyJobStats } from '@/src/lib/types/company.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata = generatePageMetadata('/companies');
@@ -45,12 +45,17 @@ export default async function CompaniesPage() {
 
   // Fetch job stats using materialized view (performance optimized)
   const companyIds = companies?.map((c) => c.id) || [];
-  const statsResult = await companyRepository.getJobStatsBulk(companyIds);
-  const statsMap = new Map(
-    statsResult.success && statsResult.data
-      ? statsResult.data.map((stat) => [stat.company_id, stat])
-      : []
-  );
+
+  let stats: CompanyJobStats[] = [];
+  if (companyIds.length > 0) {
+    const { data } = await supabase
+      .from('company_job_stats')
+      .select('*')
+      .in('company_id', companyIds);
+    stats = data || [];
+  }
+
+  const statsMap = new Map(stats.map((stat) => [stat.company_id, stat]));
 
   return (
     <div className={'min-h-screen bg-background'}>

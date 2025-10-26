@@ -2,31 +2,52 @@ import { Suspense } from 'react';
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
 import { ProfileSearchClient } from '@/src/components/features/community/profile-search-client';
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
-import { UserRepository } from '@/src/lib/repositories/user.repository';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { batchFetch } from '@/src/lib/utils/batch.utils';
+import { createClient } from '@/src/lib/supabase/server';
 
 export const metadata = generatePageMetadata('/community/directory');
 
 export const revalidate = 3600; // 1 hour ISR
 
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
-  const userRepo = new UserRepository();
+  const supabase = await createClient();
 
   // Performance optimization: Use server-side full-text search when query provided
   // Otherwise fetch all users for client-side browsing
-  const [publicUsersResult, topContributorsResult, newMembersResult] = await batchFetch([
+  const [publicUsersResult, topContributorsResult, newMembersResult] = await Promise.all([
+    // Search users OR find public users
     searchQuery
-      ? userRepo.searchUsers(searchQuery, 100) // PostgreSQL full-text search with pg_trgm
-      : userRepo.findPublicUsers({ limit: 100, sortBy: 'created_at', sortOrder: 'desc' }),
-    userRepo.getTopByReputation(10),
-    userRepo.findPublicUsers({ limit: 10, sortBy: 'created_at', sortOrder: 'desc' }),
+      ? supabase.rpc('search_users', {
+          search_query: searchQuery,
+          result_limit: 100,
+        })
+      : supabase
+          .from('users')
+          .select('*')
+          .eq('public', true)
+          .order('created_at', { ascending: false })
+          .limit(100),
+
+    // Top contributors by reputation
+    supabase
+      .from('users')
+      .select('*')
+      .order('reputation_score', { ascending: false })
+      .limit(10),
+
+    // New members
+    supabase
+      .from('users')
+      .select('*')
+      .eq('public', true)
+      .order('created_at', { ascending: false })
+      .limit(10),
   ]);
 
-  // Extract data from repository results
-  const publicUsers = publicUsersResult.success ? publicUsersResult.data || [] : [];
-  const topContributors = topContributorsResult.success ? topContributorsResult.data || [] : [];
-  const newMembers = newMembersResult.success ? newMembersResult.data || [] : [];
+  // Extract data from query results
+  const publicUsers = publicUsersResult.data || [];
+  const topContributors = topContributorsResult.data || [];
+  const newMembers = newMembersResult.data || [];
 
   // Combine and deduplicate
   // When searching, use search results directly (already ranked by relevance)

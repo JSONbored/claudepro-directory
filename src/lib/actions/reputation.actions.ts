@@ -29,8 +29,8 @@ import {
   reputationBreakdownSchema,
 } from '@/src/lib/config/reputation.config';
 import { logger } from '@/src/lib/logger';
-import { reputationRepository } from '@/src/lib/repositories/reputation.repository';
 import { userIdSchema } from '@/src/lib/schemas/branded-types.schema';
+import { createClient } from '@/src/lib/supabase/server';
 
 // =============================================================================
 // GET REPUTATION BREAKDOWN
@@ -65,14 +65,76 @@ export const getReputationBreakdown = authedAction
   .action(async ({ ctx }) => {
     const { userId } = ctx;
 
-    // Fetch breakdown from repository
-    const result = await reputationRepository.getBreakdown(userId);
+    // Fetch breakdown using direct PostgREST queries
+    const supabase = await createClient();
 
-    if (!(result.success && result.data)) {
-      throw new Error(result.error || 'Failed to fetch reputation breakdown');
+    // Run all queries in parallel for performance
+    const [postsResult, votesResult, commentsResult, submissionsResult] = await Promise.all([
+      // Posts count
+      supabase
+        .from('posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId),
+
+      // Total votes received on user's posts
+      supabase
+        .from('posts')
+        .select('vote_count')
+        .eq('user_id', userId),
+
+      // Comments count
+      supabase
+        .from('comments')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId),
+
+      // Merged submissions count
+      supabase
+        .from('submissions')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('status', 'merged'),
+    ]);
+
+    // Check for errors
+    if (postsResult.error) {
+      throw new Error(`Failed to fetch posts: ${postsResult.error.message}`);
+    }
+    if (votesResult.error) {
+      throw new Error(`Failed to fetch votes: ${votesResult.error.message}`);
+    }
+    if (commentsResult.error) {
+      throw new Error(`Failed to fetch comments: ${commentsResult.error.message}`);
+    }
+    if (submissionsResult.error) {
+      throw new Error(`Failed to fetch submissions: ${submissionsResult.error.message}`);
     }
 
-    const breakdown = result.data;
+    // Calculate points
+    const REPUTATION_POINTS = {
+      POST: 10,
+      VOTE: 5,
+      COMMENT: 2,
+      SUBMISSION: 20,
+    } as const;
+
+    const postCount = postsResult.count || 0;
+    const totalVotes =
+      votesResult.data?.reduce((sum, post) => sum + (post.vote_count || 0), 0) || 0;
+    const commentCount = commentsResult.count || 0;
+    const mergedCount = submissionsResult.count || 0;
+
+    const breakdown: ReputationBreakdown = {
+      from_posts: postCount * REPUTATION_POINTS.POST,
+      from_votes_received: totalVotes * REPUTATION_POINTS.VOTE,
+      from_comments: commentCount * REPUTATION_POINTS.COMMENT,
+      from_submissions: mergedCount * REPUTATION_POINTS.SUBMISSION,
+      total:
+        postCount * REPUTATION_POINTS.POST +
+        totalVotes * REPUTATION_POINTS.VOTE +
+        commentCount * REPUTATION_POINTS.COMMENT +
+        mergedCount * REPUTATION_POINTS.SUBMISSION,
+    };
 
     // Calculate tier information
     const currentTier = getReputationTier(breakdown.total);
@@ -114,13 +176,40 @@ export const getActivityCounts = authedAction
   .action(async ({ ctx }) => {
     const { userId } = ctx;
 
-    const result = await reputationRepository.getActivityCounts(userId);
+    const supabase = await createClient();
 
-    if (!(result.success && result.data)) {
-      throw new Error(result.error || 'Failed to fetch activity counts');
+    // Run all queries in parallel
+    const [postsResult, votesResult, commentsResult, submissionsResult] = await Promise.all([
+      supabase.from('posts').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase.from('posts').select('vote_count').eq('user_id', userId),
+      supabase.from('comments').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase
+        .from('submissions')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('status', 'merged'),
+    ]);
+
+    // Check for errors
+    if (postsResult.error) {
+      throw new Error(`Failed to fetch posts: ${postsResult.error.message}`);
+    }
+    if (votesResult.error) {
+      throw new Error(`Failed to fetch votes: ${votesResult.error.message}`);
+    }
+    if (commentsResult.error) {
+      throw new Error(`Failed to fetch comments: ${commentsResult.error.message}`);
+    }
+    if (submissionsResult.error) {
+      throw new Error(`Failed to fetch submissions: ${submissionsResult.error.message}`);
     }
 
-    return result.data;
+    return {
+      posts: postsResult.count || 0,
+      votes: votesResult.data?.reduce((sum, post) => sum + (post.vote_count || 0), 0) || 0,
+      comments: commentsResult.count || 0,
+      submissions: submissionsResult.count || 0,
+    };
   });
 
 // =============================================================================
@@ -144,16 +233,21 @@ export const recalculateReputation = authedAction
 
     logger.info('Recalculating reputation', { userId });
 
-    const result = await reputationRepository.recalculate(userId);
+    const supabase = await createClient();
 
-    if (!result.success || result.data === undefined) {
-      logger.error('Failed to recalculate reputation', new Error(result.error || 'Unknown error'), {
+    // Call the database RPC function
+    const { data, error } = await supabase.rpc('calculate_user_reputation', {
+      target_user_id: userId,
+    });
+
+    if (error) {
+      logger.error('Failed to recalculate reputation', new Error(error.message), {
         userId,
       });
-      throw new Error(result.error || 'Failed to recalculate reputation');
+      throw new Error(`Failed to recalculate reputation: ${error.message}`);
     }
 
-    const newScore = result.data;
+    const newScore = (data as number) || 0;
 
     logger.info(`Reputation recalculated for user ${userId}: ${newScore}`);
 
@@ -184,22 +278,71 @@ export async function getUserReputation(targetUserId: string): Promise<{
   // Validate input
   const validatedUserId = userIdSchema.parse(targetUserId);
 
-  // Fetch breakdown and counts in parallel
-  const [breakdownResult, countsResult] = await Promise.all([
-    reputationRepository.getBreakdown(validatedUserId),
-    reputationRepository.getActivityCounts(validatedUserId),
+  const supabase = await createClient();
+
+  // Fetch all data in parallel (single round trip)
+  const [postsResult, votesResult, commentsResult, submissionsResult] = await Promise.all([
+    supabase
+      .from('posts')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', validatedUserId),
+    supabase.from('posts').select('vote_count').eq('user_id', validatedUserId),
+    supabase
+      .from('comments')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', validatedUserId),
+    supabase
+      .from('submissions')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', validatedUserId)
+      .eq('status', 'merged'),
   ]);
 
-  if (!(breakdownResult.success && breakdownResult.data)) {
-    throw new Error(breakdownResult.error || 'Failed to fetch reputation breakdown');
+  // Check for errors
+  if (postsResult.error) {
+    throw new Error(`Failed to fetch posts: ${postsResult.error.message}`);
+  }
+  if (votesResult.error) {
+    throw new Error(`Failed to fetch votes: ${votesResult.error.message}`);
+  }
+  if (commentsResult.error) {
+    throw new Error(`Failed to fetch comments: ${commentsResult.error.message}`);
+  }
+  if (submissionsResult.error) {
+    throw new Error(`Failed to fetch submissions: ${submissionsResult.error.message}`);
   }
 
-  if (!(countsResult.success && countsResult.data)) {
-    throw new Error(countsResult.error || 'Failed to fetch activity counts');
-  }
+  // Calculate counts and points
+  const REPUTATION_POINTS = {
+    POST: 10,
+    VOTE: 5,
+    COMMENT: 2,
+    SUBMISSION: 20,
+  } as const;
 
-  const breakdown = breakdownResult.data;
-  const activityCounts = countsResult.data;
+  const postCount = postsResult.count || 0;
+  const totalVotes = votesResult.data?.reduce((sum, post) => sum + (post.vote_count || 0), 0) || 0;
+  const commentCount = commentsResult.count || 0;
+  const mergedCount = submissionsResult.count || 0;
+
+  const breakdown: ReputationBreakdown = {
+    from_posts: postCount * REPUTATION_POINTS.POST,
+    from_votes_received: totalVotes * REPUTATION_POINTS.VOTE,
+    from_comments: commentCount * REPUTATION_POINTS.COMMENT,
+    from_submissions: mergedCount * REPUTATION_POINTS.SUBMISSION,
+    total:
+      postCount * REPUTATION_POINTS.POST +
+      totalVotes * REPUTATION_POINTS.VOTE +
+      commentCount * REPUTATION_POINTS.COMMENT +
+      mergedCount * REPUTATION_POINTS.SUBMISSION,
+  };
+
+  const activityCounts: ActivityCounts = {
+    posts: postCount,
+    votes: totalVotes,
+    comments: commentCount,
+    submissions: mergedCount,
+  };
 
   // Calculate tier info
   const tier = getReputationTier(breakdown.total);
