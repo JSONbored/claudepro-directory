@@ -284,7 +284,7 @@ export const ConfigCard = memo(
           renderMetadataBadges={() => (
             <>
               {/* View count badge */}
-              {behavior.showViewCount && viewCount !== undefined && (
+              {behavior.showViewCount && viewCount !== undefined && viewCount > 0 && (
                 <button
                   type="button"
                   onClick={(e) => e.stopPropagation()}

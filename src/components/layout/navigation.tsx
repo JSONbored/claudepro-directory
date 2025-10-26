@@ -56,7 +56,15 @@ import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
-import { ChevronDown, DiscordIcon, Github, Menu } from '@/src/lib/icons';
+import {
+  ChevronDown,
+  DiscordIcon,
+  Github,
+  Handshake,
+  Menu,
+  Sparkles,
+  Users,
+} from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface NavLinkProps {
@@ -193,23 +201,86 @@ const NavigationComponent = () => {
                   className={`hidden xl:flex ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} lg:gap-4 text-sm lg:text-base`}
                   aria-label="Primary navigation"
                 >
-                  {PRIMARY_NAVIGATION.map((link) => (
-                    <NavLink
-                      key={link.href}
-                      href={link.href}
-                      isActive={isActive}
-                      onClick={() => setIsOpen(false)}
-                    >
-                      {link.isNew ? (
-                        <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
-                          {link.label}
-                          <UnifiedBadge variant="new-indicator" label={`New: ${link.label}`} />
-                        </span>
-                      ) : (
-                        link.label
-                      )}
-                    </NavLink>
-                  ))}
+                  {PRIMARY_NAVIGATION.map((link) => {
+                    // Render dropdown for links with children (e.g., Configs)
+                    if (link.children && link.children.length > 0) {
+                      return (
+                        <DropdownMenu key={link.label}>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors px-2 py-1 text-sm font-medium"
+                              aria-label={`Open ${link.label} menu`}
+                            >
+                              {link.label}
+                              <ChevronDown className="ml-1 h-3 w-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start" className="w-[480px] p-3">
+                            <div className="grid grid-cols-2 gap-2">
+                              {link.children.map((child) => {
+                                const ChildIcon = child.icon;
+                                return (
+                                  <DropdownMenuItem key={child.href} asChild>
+                                    <Link
+                                      href={child.href}
+                                      prefetch={true}
+                                      className="flex items-center gap-2.5 w-full cursor-pointer px-2.5 py-2 rounded-md hover:bg-accent/10 transition-colors duration-150 group"
+                                    >
+                                      {ChildIcon && (
+                                        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-muted/50 group-hover:bg-accent/15 transition-colors flex-shrink-0">
+                                          <ChildIcon
+                                            className="h-3.5 w-3.5 text-muted-foreground group-hover:text-accent transition-colors"
+                                            aria-hidden="true"
+                                          />
+                                        </div>
+                                      )}
+                                      <div className="flex flex-col items-start gap-0.5 flex-1 min-w-0">
+                                        <div className="text-sm font-medium group-hover:text-accent transition-colors truncate w-full flex items-center gap-1.5">
+                                          {child.label}
+                                          {child.isNew && (
+                                            <UnifiedBadge
+                                              variant="new-indicator"
+                                              label={`New: ${child.label}`}
+                                            />
+                                          )}
+                                        </div>
+                                        {child.description && (
+                                          <div className="text-[11px] text-muted-foreground/80 group-hover:text-foreground/60 transition-colors line-clamp-1">
+                                            {child.description}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </Link>
+                                  </DropdownMenuItem>
+                                );
+                              })}
+                            </div>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      );
+                    }
+
+                    // Render regular link for items without children
+                    return (
+                      <NavLink
+                        key={link.href}
+                        href={link.href}
+                        isActive={isActive}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        {link.isNew ? (
+                          <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
+                            {link.label}
+                            <UnifiedBadge variant="new-indicator" label={`New: ${link.label}`} />
+                          </span>
+                        ) : (
+                          link.label
+                        )}
+                      </NavLink>
+                    );
+                  })}
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -223,8 +294,31 @@ const NavigationComponent = () => {
                         <ChevronDown className="ml-1 h-3 w-3" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[520px] p-3">
-                      <div className="grid gap-4 md:grid-cols-2">
+                    <DropdownMenuContent align="end" className="w-[560px] p-4">
+                      {/* Featured "For You" Card - shadcn navbar-02 pattern */}
+                      <Link
+                        href="/for-you"
+                        prefetch={true}
+                        className="mb-4 block p-4 rounded-lg bg-gradient-to-br from-accent/10 via-accent/5 to-transparent border border-accent/20 hover:border-accent/30 transition-all duration-300 group no-underline"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20 group-hover:bg-accent/30 transition-colors flex-shrink-0">
+                            <Sparkles className="h-5 w-5 text-accent" aria-hidden="true" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors mb-1">
+                              For You
+                            </div>
+                            <div className="text-xs text-muted-foreground/90 leading-relaxed">
+                              AI-powered personalized recommendations based on your interests and
+                              browsing history
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+
+                      {/* 2-column grid for quick links */}
+                      <div className="grid gap-4 grid-cols-2 mb-3">
                         {SECONDARY_NAVIGATION.map((group) => (
                           <div key={group.heading} className="space-y-2">
                             <DropdownMenuLabel className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-1">
@@ -277,44 +371,36 @@ const NavigationComponent = () => {
                         ))}
                       </div>
 
-                      {/* Submit Config - Compact CTA */}
+                      {/* Footer Links - Community & Partner Program */}
                       <DropdownMenuSeparator className="my-2.5" />
-                      <DropdownMenuItem asChild>
+                      <div className="grid grid-cols-2 gap-2">
                         <Link
-                          href={ROUTES.SUBMIT}
+                          href="/community"
                           prefetch={true}
-                          className={
-                            'flex items-center gap-2.5 w-full cursor-pointer px-2.5 py-2.5 rounded-md bg-accent/5 hover:bg-accent/10 transition-colors duration-150 group'
-                          }
+                          className="flex items-center gap-2 px-3 py-2.5 rounded-md hover:bg-accent/10 transition-colors group no-underline"
                         >
-                          <div
-                            className={
-                              'flex h-7 w-7 items-center justify-center rounded-md bg-accent/20 group-hover:bg-accent/30 transition-colors flex-shrink-0'
-                            }
-                          >
-                            <svg
-                              className="h-3.5 w-3.5 text-accent"
-                              aria-hidden="true"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 4v16m8-8H4"
-                              />
-                            </svg>
-                          </div>
-                          <div className={'flex flex-col items-start gap-0.5 flex-1'}>
-                            <div className="text-sm font-semibold text-accent">Submit Config</div>
-                            <div className="text-[11px] text-muted-foreground/80">
-                              Share with the community
-                            </div>
+                          <Users
+                            className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors"
+                            aria-hidden="true"
+                          />
+                          <div className="text-sm font-medium text-foreground group-hover:text-accent transition-colors">
+                            Community
                           </div>
                         </Link>
-                      </DropdownMenuItem>
+                        <Link
+                          href="/partner"
+                          prefetch={true}
+                          className="flex items-center gap-2 px-3 py-2.5 rounded-md hover:bg-accent/10 transition-colors group no-underline"
+                        >
+                          <Handshake
+                            className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors"
+                            aria-hidden="true"
+                          />
+                          <div className="text-sm font-medium text-foreground group-hover:text-accent transition-colors">
+                            Partner Program
+                          </div>
+                        </Link>
+                      </div>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </nav>

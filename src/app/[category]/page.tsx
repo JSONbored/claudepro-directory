@@ -46,6 +46,9 @@ import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
+// Revalidate every 24 hours for fresh content (Redis stats cached separately at 10-min intervals)
+export const revalidate = 86400;
+
 /**
  * ISR revalidation interval in seconds (4 hours)
  *

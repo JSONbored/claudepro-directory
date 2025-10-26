@@ -68,7 +68,10 @@ function NumberTickerComponent({
   const spring = useSpring(0, { stiffness: 100, damping: 30 });
 
   // Subscribe to spring value changes and format to string
-  const [displayValue, setDisplayValue] = useState(`${prefix}0${suffix}`);
+  // Start with actual value to prevent "0" flash (production fix)
+  const [displayValue, setDisplayValue] = useState(
+    `${prefix}${value.toFixed(decimalPlaces)}${suffix}`
+  );
 
   // Store spring in ref to access stable reference in effects
   const springRef = useRef(spring);

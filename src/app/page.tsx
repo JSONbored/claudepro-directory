@@ -52,6 +52,9 @@ import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-it
 import { featuredService } from '@/src/lib/services/featured.server';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 
+// Revalidate every 24 hours for fresh content (Redis stats cached separately at 10-min intervals)
+export const revalidate = 86400;
+
 /**
  * Category metadata type - Dynamically derived from registry
  * Modern approach: Generic type that works for all categories
