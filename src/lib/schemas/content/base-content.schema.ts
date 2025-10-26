@@ -113,17 +113,19 @@ export const baseUsageExampleSchema = z
  *
  * Discovery Fields:
  * - researchDate: When discovery research was conducted
- * - trendingSources: Minimum 2 trending sources researched with evidence
+ * - trendingSources: MINIMUM 4 sources (1 official Anthropic docs + 3 trending sources)
  * - keywordResearch: Keyword validation data (volume, competition)
  * - gapAnalysis: Content gap justification
  * - approvalRationale: Why this topic was chosen (min 100 chars)
  *
- * Workflow:
- * 1. discover_trending_topics → Find trending topics from 2+ sources
+ * Updated 5-Step Workflow:
+ * 0. review_official_docs → Check official docs.claude.com for category (MANDATORY FIRST SOURCE)
+ * 1. discover_trending_topics → Find trending topics from 3+ sources (GitHub, Reddit, HN, etc.)
  * 2. keyword_research → Validate search demand and competition
  * 3. gap_analysis → Identify what gap this fills vs existing content
- * 4. User approval → Get explicit approval before drafting
+ * 4. user_approval → Get explicit approval before drafting
  *
+ * CRITICAL: The first trendingSource MUST be "anthropic_official_docs" with official docs URL.
  * This field is REQUIRED (not optional) to enforce discovery-first workflow.
  */
 export const discoveryMetadataSchema = z
@@ -134,14 +136,16 @@ export const discoveryMetadataSchema = z
         z.object({
           source: nonEmptyString
             .max(100)
-            .describe('Source name (github_trending, reddit_programming, hackernews, dev_to)'),
+            .describe(
+              'Source name (anthropic_official_docs, github_trending, reddit_programming, hackernews, dev_to, medium). FIRST source MUST be anthropic_official_docs.'
+            ),
           evidence: nonEmptyString
             .max(500)
             .describe(
-              'What was found (trending repo name, popular thread title, article headline, etc.)'
+              'What was found (official capability confirmed, trending repo name, popular thread title, article headline, etc.)'
             ),
           url: optionalUrlString.describe(
-            'Optional link to evidence (GitHub repo, Reddit thread, etc.)'
+            'Link to evidence (docs.claude.com URL for official docs, GitHub repo, Reddit thread, etc.)'
           ),
           relevanceScore: z
             .enum(['high', 'medium', 'low'])
@@ -149,9 +153,11 @@ export const discoveryMetadataSchema = z
             .describe('How relevant this source is to the content gap'),
         })
       )
-      .min(2)
+      .min(4)
       .max(10)
-      .describe('Minimum 2 trending sources researched (max 10 for thoroughness)'),
+      .describe(
+        'MINIMUM 4 trending sources required: 1 anthropic_official_docs (MUST be first) + 3 trending sources (GitHub/Reddit/HN/Dev.to/Medium). Max 10 for thoroughness.'
+      ),
     keywordResearch: z
       .object({
         primaryKeywords: z

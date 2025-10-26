@@ -5,15 +5,43 @@
  * Used to identify high-value content opportunities before they become saturated.
  *
  * Architecture:
- * - WebSearch integration for real-time trend discovery
+ * - STEP 0: Official Anthropic documentation review (MANDATORY FIRST)
+ * - WebSearch integration for real-time trend discovery (3+ sources minimum)
  * - Multi-source aggregation with weighted scoring
  * - Keyword research for longtail opportunities
  * - Content gap analysis to avoid duplication
+ *
+ * Updated 5-Step Discovery Workflow:
+ * 0. Review official docs.claude.com for category (BLOCKING REQUIREMENT)
+ * 1. Discover trending topics from 3+ sources (GitHub, Reddit, HN, Dev.to, Medium)
+ * 2. Perform keyword research with search volume/competition analysis
+ * 3. Complete gap analysis vs existing content
+ * 4. Get user approval before proceeding
  *
  * @module config/content/discovery/trend-detection
  */
 
 import type { CategoryId } from '@/src/lib/config/category-types';
+
+/**
+ * Official Anthropic Documentation URLs
+ *
+ * MANDATORY FIRST SOURCE for all content discovery.
+ * Must be included as first entry in discoveryMetadata.trendingSources.
+ */
+export const OFFICIAL_DOCS_URLS: Record<CategoryId, string> = {
+  agents: 'https://docs.claude.com/en/docs/claude-code/sub-agents',
+  mcp: 'https://docs.claude.com/en/docs/claude-code/mcp',
+  commands: 'https://docs.claude.com/en/docs/claude-code/slash-commands',
+  rules: 'https://docs.claude.com/en/docs/claude-code/settings',
+  hooks: 'https://docs.claude.com/en/docs/claude-code/hooks',
+  statuslines: 'https://docs.claude.com/en/docs/claude-code/statusline',
+  skills: 'https://docs.claude.com/en/docs/claude-code/skills',
+  collections: 'https://docs.claude.com/en/docs/claude-code/plugins',
+  guides: '', // No official docs (manually curated)
+  jobs: '', // No official docs (manually curated)
+  changelog: '', // No official docs (auto-generated from git)
+} as const;
 
 /**
  * Trending Topic Source Configuration

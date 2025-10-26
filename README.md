@@ -5,7 +5,7 @@
 # Claude Pro Directory
 
 **Discover and share the best Claude configurations**
-232+ expert rules, powerful MCP servers, specialized agents, automation hooks, and more.
+242+ expert rules, powerful MCP servers, specialized agents, automation hooks, and more.
 
 [![Mentioned in Awesome Claude Code](https://awesome.re/mentioned-badge.svg)](https://github.com/hesreallyhim/awesome-claude-code)
 
@@ -17,7 +17,7 @@
 
 ## 🎯 What is Claude Pro Directory?
 
-**Stop starting from scratch.** A searchable collection of 232+ pre-built Claude configurations with instant setup, task-specific optimization, and weekly community updates.
+**Stop starting from scratch.** A searchable collection of 242+ pre-built Claude configurations with instant setup, task-specific optimization, and weekly community updates.
 
 Whether you need Claude to review code like a senior engineer, write like a professional author, or analyze data like a scientist - find it in seconds, copy, and start using.
 
@@ -286,26 +286,36 @@ Task-focused capability guides and specialized expertise
 - **[Windsurf AI-Native Collaborative Development](https://claudepro.directory/skills/windsurf-collaborative-development)** - Master collaborative AI-assisted development with Windsurf IDE's Cascade AI, multi-file context awareness, and Flow patterns for team workflows.
 - **[Zod Schema Validator](https://claudepro.directory/skills/zod-schema-validator)** - Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference.
 
-## 💻 Statuslines (16)
+## 💻 Statuslines (26)
 
 Custom status bar displays for your Claude development environment
 
 - **[Accessibility First Statusline](https://claudepro.directory/statuslines/accessibility-first-statusline)** - WCAG-compliant accessible statusline with screen reader announcements, high-contrast colors, semantic labels, keyboard hints, and reduced motion support.
 - **[Ai Model Performance Dashboard](https://claudepro.directory/statuslines/ai-model-performance-dashboard)** - Multi-provider AI performance dashboard with context occupancy tracking, truncation warnings, TTFT latency, tokens/min rate, and model comparison metrics.
+- **[Api Latency Breakdown](https://claudepro.directory/statuslines/api-latency-breakdown)** - API latency breakdown monitor showing network time vs processing time split, p95 latency tracking, and performance bottleneck detection for Claude Code sessions.
 - **[Block Timer Tracker](https://claudepro.directory/statuslines/block-timer-tracker)** - Claude 5-hour conversation block tracker with visual countdown, expiration warnings, and color-coded indicators to prevent unexpected session terminations.
+- **[Burn Rate Monitor](https://claudepro.directory/statuslines/burn-rate-monitor)** - Real-time burn rate monitor showing cost per minute, tokens per minute, and projected daily spend to prevent budget overruns during Claude Code sessions.
+- **[Cache Efficiency Monitor](https://claudepro.directory/statuslines/cache-efficiency-monitor)** - Claude Code prompt caching efficiency monitor tracking cache hits, write efficiency, and cost savings with visual hit rate indicators and optimization recommendations.
 - **[Catppuccin Mocha Theme](https://claudepro.directory/statuslines/catppuccin-mocha-theme)** - Soothing Catppuccin Mocha theme statusline with 26 pastel colors, Powerline separators, and modular segments for Git, model info, and token tracking.
+- **[Daily Usage Percentage Tracker](https://claudepro.directory/statuslines/daily-usage-percentage-tracker)** - Claude Code daily usage quota tracker showing percentage of daily limit consumed with visual progress bar, time remaining, and budget pacing indicators.
 - **[Docker Health Statusline](https://claudepro.directory/statuslines/docker-health-statusline)** - Docker statusline configuration for Claude Code CLI. Features real-time health monitoring, color-coded indicators, and container tracking. Production-ready.
+- **[Five Hour Window Tracker](https://claudepro.directory/statuslines/five-hour-window-tracker)** - Claude Code 5-hour rolling session window tracker with visual progress bar, time remaining countdown, and expiry warnings for usage management.
 - **[Git Status Statusline](https://claudepro.directory/statuslines/git-status-statusline)** - Git-focused statusline showing branch, dirty status, ahead/behind indicators, and stash count alongside Claude session info
+- **[Lines Per Minute Tracker](https://claudepro.directory/statuslines/lines-per-minute-tracker)** - Real-time coding velocity monitor tracking lines added/removed per minute with productivity scoring and daily output projection for Claude Code sessions.
 - **[Mcp Server Status Monitor](https://claudepro.directory/statuslines/mcp-server-status-monitor)** - Real-time MCP server monitoring statusline showing connected servers, active tools, and performance metrics for Claude Code MCP integration
 - **[Minimal Powerline](https://claudepro.directory/statuslines/minimal-powerline)** - Clean, performance-optimized statusline with Powerline glyphs showing model, directory, and token count
+- **[Model Switch History Tracker](https://claudepro.directory/statuslines/model-switch-history-tracker)** - Claude Code model switch detector tracking transitions between Opus/Sonnet/Haiku with switch count, current model indicator, and cost impact visualization.
 - **[Multi Line Statusline](https://claudepro.directory/statuslines/multi-line-statusline)** - Comprehensive multi-line statusline displaying detailed session information across two lines with organized sections and visual separators
 - **[Multi Provider Token Counter](https://claudepro.directory/statuslines/multi-provider-token-counter)** - Multi-provider AI token counter displaying real-time context usage for Claude (1M), GPT-4.1 (1M), Gemini 2.x (1M), and Grok 3 (1M) with 2025 verified limits
+- **[Multi Session Overlap Indicator](https://claudepro.directory/statuslines/multi-session-overlap-indicator)** - Claude Code multi-session overlap detector showing concurrent active sessions with visual indicators, session count, and workspace collision warnings for budget management.
 - **[Oh My Zsh Robbyrussell](https://claudepro.directory/statuslines/oh-my-zsh-robbyrussell)** - Oh-My-Zsh robbyrussell theme replica with iconic arrow prompt, Git status indicators, and directory path for seamless Claude Code shell integration.
 - **[Python Rich Statusline](https://claudepro.directory/statuslines/python-rich-statusline)** - Feature-rich statusline using Python's Rich library for beautiful formatting, progress bars, and real-time token cost tracking
 - **[Real Time Cost Tracker](https://claudepro.directory/statuslines/real-time-cost-tracker)** - Real-time AI cost tracking statusline with per-session spend analytics, model pricing, and budget alerts
+- **[Session Health Score](https://claudepro.directory/statuslines/session-health-score)** - Claude Code session health aggregator providing A-F grade based on cost efficiency, latency performance, productivity velocity, and cache utilization with actionable recommendations.
 - **[Session Timer Statusline](https://claudepro.directory/statuslines/session-timer-statusline)** - Time-tracking statusline showing elapsed session duration, tokens per minute rate, and estimated cost with productivity metrics
 - **[Simple Text Statusline](https://claudepro.directory/statuslines/simple-text-statusline)** - Ultra-lightweight plain text statusline with no colors or special characters for maximum compatibility and minimal overhead
 - **[Starship Powerline Theme](https://claudepro.directory/statuslines/starship-powerline-theme)** - Starship-inspired powerline statusline with Nerd Font glyphs, modular segments, and Git integration for Claude Code
+- **[Workspace Project Depth Indicator](https://claudepro.directory/statuslines/workspace-project-depth-indicator)** - Claude Code workspace depth tracker showing monorepo navigation level, project root detection, and directory depth visualization for context awareness.
 
 ## 📦 Collections (9)
 

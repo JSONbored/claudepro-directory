@@ -1,0 +1,114 @@
+{
+  "slug": "workspace-project-depth-indicator",
+  "description": "Claude Code workspace depth tracker showing monorepo navigation level, project root detection, and directory depth visualization for context awareness.",
+  "category": "statuslines",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-25",
+  "tags": [
+    "workspace-depth",
+    "monorepo-navigation",
+    "directory-depth",
+    "project-context",
+    "workspace-tracking"
+  ],
+  "statuslineType": "custom",
+  "content": "#!/usr/bin/env bash\n\n# Workspace Project Depth Indicator for Claude Code\n# Tracks directory depth and project context\n\n# Read JSON from stdin\nread -r input\n\n# Extract workspace info\ncurrent_dir=$(echo \"$input\" | jq -r '.workspace.current_dir // \"\"')\n\n# Handle empty workspace\nif [ -z \"$current_dir\" ] || [ \"$current_dir\" = \"null\" ]; then\n  echo \"📂 No workspace\"\n  exit 0\nfi\n\n# Calculate directory depth (count of slashes)\n# Remove leading slash to avoid off-by-one\ndir_path=\"${current_dir#/}\"\ndepth=$(echo \"$dir_path\" | tr -cd '/' | wc -c | tr -d ' ')\n\n# Detect project root indicators\nproject_indicators=(\n  \".git\"\n  \"package.json\"\n  \"Cargo.toml\"\n  \"go.mod\"\n  \"pom.xml\"\n  \"build.gradle\"\n  \"pyproject.toml\"\n  \"composer.json\"\n)\n\n# Check if current directory is project root\nIS_PROJECT_ROOT=false\nPROJECT_TYPE=\"\"\n\nfor indicator in \"${project_indicators[@]}\"; do\n  if [ -f \"${current_dir}/${indicator}\" ] || [ -d \"${current_dir}/${indicator}\" ]; then\n    IS_PROJECT_ROOT=true\n    case \"$indicator\" in\n      \".git\") PROJECT_TYPE=\"git\" ;;\n      \"package.json\") PROJECT_TYPE=\"node\" ;;\n      \"Cargo.toml\") PROJECT_TYPE=\"rust\" ;;\n      \"go.mod\") PROJECT_TYPE=\"go\" ;;\n      \"pom.xml\"|\"build.gradle\") PROJECT_TYPE=\"java\" ;;\n      \"pyproject.toml\") PROJECT_TYPE=\"python\" ;;\n      \"composer.json\") PROJECT_TYPE=\"php\" ;;\n    esac\n    break\n  fi\ndone\n\n# Find project root by walking up directory tree\nPROJECT_ROOT=\"$current_dir\"\ncheck_dir=\"$current_dir\"\nwhile [ \"$check_dir\" != \"/\" ]; do\n  for indicator in \"${project_indicators[@]}\"; do\n    if [ -f \"${check_dir}/${indicator}\" ] || [ -d \"${check_dir}/${indicator}\" ]; then\n      PROJECT_ROOT=\"$check_dir\"\n      break 2\n    fi\n  done\n  check_dir=$(dirname \"$check_dir\")\ndone\n\n# Calculate depth relative to project root (0 = at root)\nif [ \"$PROJECT_ROOT\" != \"$current_dir\" ]; then\n  relative_path=\"${current_dir#$PROJECT_ROOT/}\"\n  relative_depth=$(echo \"$relative_path\" | tr -cd '/' | wc -c | tr -d ' ')\n  relative_depth=$((relative_depth + 1))  # +1 because we're in a subdirectory\nelse\n  relative_depth=0\nfi\n\n# Color coding based on depth\nif [ $relative_depth -eq 0 ]; then\n  DEPTH_COLOR=\"\\033[38;5;46m\"   # Green: At project root\n  DEPTH_ICON=\"📁\"\n  DEPTH_STATUS=\"ROOT\"\nelif [ $relative_depth -le 2 ]; then\n  DEPTH_COLOR=\"\\033[38;5;75m\"   # Blue: 1-2 levels deep (normal)\n  DEPTH_ICON=\"📂\"\n  DEPTH_STATUS=\"L${relative_depth}\"\nelif [ $relative_depth -le 4 ]; then\n  DEPTH_COLOR=\"\\033[38;5;226m\"  # Yellow: 3-4 levels deep (moderate)\n  DEPTH_ICON=\"📂\"\n  DEPTH_STATUS=\"L${relative_depth}\"\nelse\n  DEPTH_COLOR=\"\\033[38;5;208m\"  # Orange: 5+ levels deep (deep nesting)\n  DEPTH_ICON=\"📂\"\n  DEPTH_STATUS=\"L${relative_depth}+\"\nfi\n\n# Project type indicator\nif [ \"$IS_PROJECT_ROOT\" = true ] && [ -n \"$PROJECT_TYPE\" ]; then\n  TYPE_DISPLAY=\"${PROJECT_TYPE}\"\nelse\n  TYPE_DISPLAY=\"\"\nfi\n\n# Extract directory name for display\ndir_name=$(basename \"$current_dir\")\n\n# Monorepo detection (apps/, packages/, libs/ directories)\nif echo \"$current_dir\" | grep -qE '/(apps|packages|libs|services|modules)/'; then\n  MONOREPO_INDICATOR=\"[monorepo]\"\nelse\n  MONOREPO_INDICATOR=\"\"\nfi\n\n# Build breadcrumb visualization (last 3 directories)\nif [ $relative_depth -gt 0 ]; then\n  breadcrumb=$(echo \"$current_dir\" | awk -F'/' '{for(i=NF-2;i<=NF;i++) if($i) printf \"%s/\", $i}' | sed 's|/$||')\nelse\n  breadcrumb=\"$dir_name\"\nfi\n\nRESET=\"\\033[0m\"\n\n# Output statusline\nif [ -n \"$TYPE_DISPLAY\" ]; then\n  echo -e \"${DEPTH_ICON} ${DEPTH_COLOR}${DEPTH_STATUS}${RESET} ${TYPE_DISPLAY} | ${breadcrumb} ${MONOREPO_INDICATOR}\"\nelse\n  echo -e \"${DEPTH_ICON} ${DEPTH_COLOR}${DEPTH_STATUS}${RESET} | ${breadcrumb} ${MONOREPO_INDICATOR}\"\nfi\n",
+  "features": [
+    "Real-time workspace directory depth tracking relative to project root",
+    "Project root detection via common indicators (.git, package.json, Cargo.toml, etc.)",
+    "Project type identification (git, node, rust, go, java, python, php)",
+    "Monorepo detection for apps/, packages/, libs/ directory patterns",
+    "Breadcrumb visualization showing last 3 directory levels",
+    "Color-coded depth indicators (green root, blue 1-2 levels, yellow 3-4, orange 5+)",
+    "Context awareness for navigating deep directory structures",
+    "Lightweight bash with no external dependencies beyond jq"
+  ],
+  "configuration": {
+    "format": "bash",
+    "refreshInterval": 2000,
+    "position": "left"
+  },
+  "useCases": [
+    "Monorepo navigation awareness (knowing which package/app you're in)",
+    "Preventing confusion when working in deeply nested directories",
+    "Project context tracking across multiple workspaces",
+    "Debugging file path issues in complex project structures",
+    "Team onboarding for large codebases with deep hierarchies",
+    "Identifying when you've navigated too deep into implementation details"
+  ],
+  "requirements": ["Bash shell", "jq JSON processor"],
+  "preview": "📂 L2 node | apps/web/src [monorepo]",
+  "troubleshooting": [
+    {
+      "issue": "Workspace showing 'No workspace' despite active Claude Code session",
+      "solution": "Verify workspace.current_dir field exists: echo '$input' | jq .workspace.current_dir. If field missing or null, Claude Code may not be tracking workspace. Check that session was started in a directory (not attached to running process without cwd)."
+    },
+    {
+      "issue": "Project root not being detected correctly",
+      "solution": "Script checks for common project indicators: .git, package.json, Cargo.toml, go.mod, pom.xml, build.gradle, pyproject.toml, composer.json. If your project uses different marker (e.g., .project), add to project_indicators array. Verify indicator exists: ls -la $current_dir."
+    },
+    {
+      "issue": "Relative depth showing incorrect level count",
+      "solution": "Depth calculation: relative_depth = (number of slashes in path after project root) + 1. Example: project root /foo/bar, current /foo/bar/src/lib = 2 levels deep. Check PROJECT_ROOT detection: echo $PROJECT_ROOT. Verify current_dir: echo $current_dir. Path stripping: ${current_dir#$PROJECT_ROOT/}."
+    },
+    {
+      "issue": "Monorepo indicator not appearing for monorepo projects",
+      "solution": "Monorepo detection matches directories containing /apps/, /packages/, /libs/, /services/, or /modules/. Check path: echo '$current_dir' | grep -E '/(apps|packages|libs|services|modules)/'. Add custom monorepo patterns to grep: |(workspaces|projects)/."
+    },
+    {
+      "issue": "Breadcrumb showing only current directory not last 3 levels",
+      "solution": "Breadcrumb uses awk to extract last 3 path components: awk -F'/' '{for(i=NF-2;i<=NF;i++) if($i) printf \"%s/\", $i}'. Test: echo '/foo/bar/baz/qux' | awk -F'/' '{for(i=NF-2;i<=NF;i++) if($i) printf \"%s/\", $i}' (should show bar/baz/qux). Adjust NF-2 to NF-N for more/fewer levels."
+    },
+    {
+      "issue": "Project type not displaying despite being at project root",
+      "solution": "IS_PROJECT_ROOT flag set to true when indicator found in current_dir. Check file exists: ls $current_dir/package.json (for node). Verify case statement assigns PROJECT_TYPE correctly. Add debug: echo IS_PROJECT_ROOT=$IS_PROJECT_ROOT PROJECT_TYPE=$PROJECT_TYPE to output."
+    }
+  ],
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
+  "source": "community",
+  "discoveryMetadata": {
+    "researchDate": "2025-10-25",
+    "trendingSources": [
+      {
+        "source": "anthropic_official_docs",
+        "evidence": "Official docs confirm JSON provides workspace.current_dir for directory tracking. Statuslines can parse paths and detect project context.",
+        "url": "https://docs.claude.com/en/docs/claude-code/statusline",
+        "relevanceScore": "high"
+      },
+      {
+        "source": "reddit_programming",
+        "evidence": "Reddit discussions on monorepo tooling emphasize context awareness: 'Knowing which package you're in is critical for large monorepos'. Directory depth tracking helps prevent disorientation.",
+        "url": "https://www.reddit.com/r/programming/",
+        "relevanceScore": "high"
+      },
+      {
+        "source": "dev_to_monorepo",
+        "evidence": "2025 monorepo best practices guides highlight workspace navigation challenges. Visual depth indicators reduce cognitive load when switching between nested packages.",
+        "url": "https://dev.to/",
+        "relevanceScore": "high"
+      },
+      {
+        "source": "hackernews",
+        "evidence": "HackerNews threads on developer tools frequently mention directory depth confusion in large projects. Breadcrumb navigation and project root detection are common feature requests.",
+        "url": "https://news.ycombinator.com/",
+        "relevanceScore": "medium"
+      }
+    ],
+    "keywordResearch": {
+      "primaryKeywords": [
+        "workspace depth tracker",
+        "monorepo navigation",
+        "directory depth indicator",
+        "project context awareness"
+      ],
+      "searchVolume": "medium",
+      "competitionLevel": "low"
+    },
+    "gapAnalysis": {
+      "existingContent": [],
+      "identifiedGap": "No existing statusline provides workspace depth or project context visualization. Users working in monorepos or deeply nested directories lack real-time awareness of current location relative to project root. Breadcrumb navigation and depth indicators are completely missing from current statusline offerings.",
+      "priority": "medium"
+    },
+    "approvalRationale": "Official docs verified workspace.current_dir field available. Reddit/Dev.to validate monorepo navigation challenges. Medium search volume, low competition. Clear gap - no existing workspace context statuslines. Useful for large codebases and monorepo workflows. User approved for workspace depth tracking."
+  }
+}

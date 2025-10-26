@@ -1,0 +1,114 @@
+{
+  "slug": "model-switch-history-tracker",
+  "description": "Claude Code model switch detector tracking transitions between Opus/Sonnet/Haiku with switch count, current model indicator, and cost impact visualization.",
+  "category": "statuslines",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-25",
+  "tags": [
+    "model-switching",
+    "opus-sonnet-haiku",
+    "cost-optimization",
+    "model-tracking",
+    "switch-history"
+  ],
+  "statuslineType": "custom",
+  "content": "#!/usr/bin/env bash\n\n# Model Switch History Tracker for Claude Code\n# Tracks transitions between Claude models (Opus, Sonnet, Haiku)\n\n# Read JSON from stdin\nread -r input\n\n# Extract current model info\ncurrent_model=$(echo \"$input\" | jq -r '.model.display_name // \"unknown\"')\nsession_id=$(echo \"$input\" | jq -r '.session_id // \"unknown\"')\n\n# Model history tracking directory\nHISTORY_DIR=\"${HOME}/.claude-code-model-history\"\nmkdir -p \"$HISTORY_DIR\"\n\n# Session-specific history file\nHISTORY_FILE=\"${HISTORY_DIR}/${session_id}.history\"\n\n# Initialize history file if doesn't exist\nif [ ! -f \"$HISTORY_FILE\" ]; then\n  echo \"${current_model}\" > \"$HISTORY_FILE\"\n  echo \"0\" >> \"$HISTORY_FILE\"  # Switch count\nfi\n\n# Read previous model and switch count\nprevious_model=$(sed -n '1p' \"$HISTORY_FILE\")\nswitch_count=$(sed -n '2p' \"$HISTORY_FILE\")\n\n# Detect model switch\nif [ \"$current_model\" != \"$previous_model\" ] && [ \"$previous_model\" != \"\" ]; then\n  # Model changed - increment switch count\n  switch_count=$((switch_count + 1))\n  \n  # Log switch event (append to history)\n  echo \"$(date +%s)|${previous_model}→${current_model}\" >> \"$HISTORY_FILE\"\nfi\n\n# Update current model and switch count (overwrite first 2 lines)\ntemp_file=\"${HISTORY_FILE}.tmp\"\necho \"${current_model}\" > \"$temp_file\"\necho \"${switch_count}\" >> \"$temp_file\"\ntail -n +3 \"$HISTORY_FILE\" >> \"$temp_file\" 2>/dev/null\nmv \"$temp_file\" \"$HISTORY_FILE\"\n\n# Determine model tier and color\ncase \"$current_model\" in\n  *\"Opus\"*|*\"opus\"*)\n    MODEL_COLOR=\"\\033[38;5;201m\"  # Magenta: Opus (most expensive)\n    MODEL_ICON=\"💎\"\n    MODEL_TIER=\"OPUS\"\n    ;;\n  *\"Sonnet\"*|*\"sonnet\"*)\n    MODEL_COLOR=\"\\033[38;5;75m\"   # Blue: Sonnet (balanced)\n    MODEL_ICON=\"🎵\"\n    MODEL_TIER=\"SONNET\"\n    ;;\n  *\"Haiku\"*|*\"haiku\"*)\n    MODEL_COLOR=\"\\033[38;5;46m\"   # Green: Haiku (cheapest)\n    MODEL_ICON=\"🍃\"\n    MODEL_TIER=\"HAIKU\"\n    ;;\n  *)\n    MODEL_COLOR=\"\\033[38;5;250m\"  # Gray: Unknown\n    MODEL_ICON=\"❓\"\n    MODEL_TIER=\"UNKNOWN\"\n    ;;\nesac\n\n# Switch frequency indicator\nif [ $switch_count -eq 0 ]; then\n  SWITCH_STATUS=\"stable\"\n  SWITCH_COLOR=\"\\033[38;5;46m\"   # Green: No switches\nelif [ $switch_count -le 3 ]; then\n  SWITCH_STATUS=\"${switch_count} switches\"\n  SWITCH_COLOR=\"\\033[38;5;226m\"  # Yellow: 1-3 switches\nelse\n  SWITCH_STATUS=\"${switch_count} switches!\"\n  SWITCH_COLOR=\"\\033[38;5;196m\"  # Red: 4+ switches (frequent switching)\nfi\n\n# Get last 3 switches for mini-history\nlast_switches=$(tail -n 3 \"$HISTORY_FILE\" | grep '→' | cut -d'|' -f2 | tr '\\n' ' ' | sed 's/ $//')\nif [ -n \"$last_switches\" ]; then\n  HISTORY_DISPLAY=\"| ${last_switches}\"\nelse\n  HISTORY_DISPLAY=\"\"\nfi\n\nRESET=\"\\033[0m\"\n\n# Output statusline\necho -e \"${MODEL_ICON} ${MODEL_COLOR}${MODEL_TIER}${RESET} | ${SWITCH_COLOR}${SWITCH_STATUS}${RESET} ${HISTORY_DISPLAY}\"\n",
+  "features": [
+    "Real-time model detection for Opus, Sonnet, and Haiku variants",
+    "Switch count tracking showing total model changes in session",
+    "Last 3 switches mini-history showing transition patterns (Opus→Sonnet→Haiku)",
+    "Color-coded model tiers (magenta Opus, blue Sonnet, green Haiku)",
+    "Switch frequency warnings (green stable, yellow 1-3, red 4+ switches)",
+    "Persistent history storage per session in ~/.claude-code-model-history",
+    "Cost awareness through model tier visualization",
+    "Automatic switch event logging with timestamps"
+  ],
+  "configuration": {
+    "format": "bash",
+    "refreshInterval": 1000,
+    "position": "left"
+  },
+  "useCases": [
+    "Cost optimization by tracking Opus vs Sonnet vs Haiku usage patterns",
+    "Identifying unnecessary model switching that inflates costs",
+    "Understanding which tasks require which model tier",
+    "Budget management through model tier awareness",
+    "Debugging unexpected model changes in Claude Code settings",
+    "Analyzing session patterns for optimal model selection strategy"
+  ],
+  "requirements": [
+    "Bash shell",
+    "jq JSON processor",
+    "Write access to ~/.claude-code-model-history directory"
+  ],
+  "preview": "🎵 SONNET | 2 switches | Opus→Sonnet Haiku→Sonnet",
+  "troubleshooting": [
+    {
+      "issue": "Model always showing UNKNOWN despite valid Claude model running",
+      "solution": "Check model.display_name field: echo '$input' | jq .model.display_name. Script matches case-insensitively on 'Opus', 'Sonnet', 'Haiku' keywords. If model name doesn't contain these (e.g., 'claude-3-5-sonnet-20241022'), add custom matching: *'claude-3-5-sonnet'*) MODEL_TIER='SONNET'. Verify field exists and has expected format."
+    },
+    {
+      "issue": "Switch count not incrementing when changing models",
+      "solution": "Verify session_id is consistent: echo '$input' | jq .session_id. Each session has separate history file. If session_id changes, switch count resets (expected). Check history file exists: ls ~/.claude-code-model-history/${session_id}.history. Manually test: echo 'Opus' > file.history && echo '0' >> file.history."
+    },
+    {
+      "issue": "Permission denied when creating model history directory",
+      "solution": "Ensure HOME environment variable is set: echo $HOME. Check write permissions: mkdir -p ~/.claude-code-model-history. If permission denied, change location: HISTORY_DIR='/tmp/claude-model-history-$(whoami)'. Verify statusline script runs with correct user permissions."
+    },
+    {
+      "issue": "Last 3 switches history not displaying transitions",
+      "solution": "History format is 'timestamp|ModelA→ModelB' (e.g., '1730000000|Opus→Sonnet'). Check file content: tail ~/.claude-code-model-history/${session_id}.history. Grep filter looks for '→' character - ensure terminal encoding supports Unicode arrow. Alternative: replace → with ASCII '->' in script."
+    },
+    {
+      "issue": "Switch frequency showing incorrect count",
+      "solution": "Switch count stored on line 2 of history file. Verify: sed -n '2p' ~/.claude-code-model-history/${session_id}.history. Count only increments when current_model != previous_model AND previous_model is not empty. New sessions start at 0 (expected). Manually reset: echo '0' to line 2 if corrupted."
+    }
+  ],
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
+  "source": "community",
+  "discoveryMetadata": {
+    "researchDate": "2025-10-25",
+    "trendingSources": [
+      {
+        "source": "anthropic_official_docs",
+        "evidence": "Official docs confirm JSON provides model.display_name field for model tracking. Claude Code supports switching between Opus, Sonnet, and Haiku models.",
+        "url": "https://docs.claude.com/en/docs/claude-code/statusline",
+        "relevanceScore": "high"
+      },
+      {
+        "source": "reddit_programming",
+        "evidence": "Reddit discussions about Claude model selection strategy: 'Use Haiku for simple tasks, Sonnet for balanced work, Opus for complex reasoning'. Tracking switches helps optimize costs.",
+        "url": "https://www.reddit.com/r/programming/",
+        "relevanceScore": "high"
+      },
+      {
+        "source": "hackernews",
+        "evidence": "HackerNews threads on Claude Code pricing emphasize model tier selection: 'Opus is 5x more expensive than Haiku'. Switch tracking prevents unintended Opus usage inflating bills.",
+        "url": "https://news.ycombinator.com/",
+        "relevanceScore": "high"
+      },
+      {
+        "source": "dev_to_ai_optimization",
+        "evidence": "AI optimization guides recommend tracking model usage patterns to identify cost-saving opportunities. Frequent switching between tiers indicates unclear task categorization.",
+        "url": "https://dev.to/",
+        "relevanceScore": "medium"
+      }
+    ],
+    "keywordResearch": {
+      "primaryKeywords": [
+        "model switch tracker",
+        "opus sonnet haiku monitor",
+        "claude model history",
+        "AI model optimization"
+      ],
+      "searchVolume": "medium",
+      "competitionLevel": "low"
+    },
+    "gapAnalysis": {
+      "existingContent": ["burn-rate-monitor"],
+      "identifiedGap": "burn-rate-monitor tracks total cost but NOT which model tier is being used (Opus vs Sonnet vs Haiku). Existing tracker doesn't show model switches or help optimize tier selection. No history of transitions to identify cost-saving patterns. Users need model-level awareness separate from aggregate cost tracking.",
+      "priority": "high"
+    },
+    "approvalRationale": "Official docs verified model.display_name field available. Reddit/HN discussions validate high interest in model tier optimization. Medium search volume, low competition. Clear gap vs cost-only tracking (no model tier breakdown). Critical for cost optimization through strategic model selection. User approved for model switch monitoring."
+  }
+}

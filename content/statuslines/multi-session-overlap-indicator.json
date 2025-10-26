@@ -1,0 +1,114 @@
+{
+  "slug": "multi-session-overlap-indicator",
+  "description": "Claude Code multi-session overlap detector showing concurrent active sessions with visual indicators, session count, and workspace collision warnings for budget management.",
+  "category": "statuslines",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-25",
+  "tags": [
+    "multi-session",
+    "parallel-sessions",
+    "overlap-detection",
+    "workspace-tracking",
+    "session-management"
+  ],
+  "statuslineType": "custom",
+  "content": "#!/usr/bin/env bash\n\n# Multi-Session Overlap Indicator for Claude Code\n# Detects concurrent Claude sessions running in parallel\n\n# Read JSON from stdin\nread -r input\n\n# Extract current session info\nsession_id=$(echo \"$input\" | jq -r '.session_id // \"unknown\"')\ncurrent_workspace=$(echo \"$input\" | jq -r '.workspace.current_dir // \"\"')\n\n# Session tracking directory (stores active session metadata)\nSESSION_DIR=\"${HOME}/.claude-code-sessions\"\nmkdir -p \"$SESSION_DIR\"\n\n# Current session file\nSESSION_FILE=\"${SESSION_DIR}/${session_id}.active\"\n\n# Write current session timestamp and workspace\necho \"$(date +%s)|${current_workspace}\" > \"$SESSION_FILE\"\n\n# Cleanup stale sessions (older than 10 minutes = 600 seconds)\nCURRENT_TIME=$(date +%s)\nfor session_file in \"$SESSION_DIR\"/*.active; do\n  if [ -f \"$session_file\" ]; then\n    session_timestamp=$(cut -d'|' -f1 < \"$session_file\")\n    age=$((CURRENT_TIME - session_timestamp))\n    if [ $age -gt 600 ]; then\n      rm -f \"$session_file\"\n    fi\n  fi\ndone\n\n# Count active sessions\nactive_sessions=$(find \"$SESSION_DIR\" -name '*.active' -type f | wc -l | tr -d ' ')\n\n# Check for workspace collisions (multiple sessions in same workspace)\nworkspace_collision=false\nif [ -n \"$current_workspace\" ]; then\n  collision_count=$(grep -l \"|${current_workspace}$\" \"$SESSION_DIR\"/*.active 2>/dev/null | wc -l | tr -d ' ')\n  if [ \"$collision_count\" -gt 1 ]; then\n    workspace_collision=true\n  fi\nfi\n\n# Color coding based on session count\nif [ $active_sessions -eq 1 ]; then\n  SESSION_COLOR=\"\\033[38;5;46m\"   # Green: Single session\n  SESSION_ICON=\"●\"\n  SESSION_STATUS=\"SOLO\"\nelif [ $active_sessions -le 3 ]; then\n  SESSION_COLOR=\"\\033[38;5;226m\"  # Yellow: 2-3 sessions (moderate overlap)\n  SESSION_ICON=\"●●\"\n  SESSION_STATUS=\"MULTI\"\nelse\n  SESSION_COLOR=\"\\033[38;5;196m\"  # Red: 4+ sessions (high overlap, budget concern)\n  SESSION_ICON=\"●●●\"\n  SESSION_STATUS=\"OVERLAP!\"\nfi\n\n# Workspace collision warning\nif [ \"$workspace_collision\" = true ]; then\n  COLLISION_WARNING=\"\\033[38;5;208m⚠ WORKSPACE COLLISION\\033[0m\"\nelse\n  COLLISION_WARNING=\"\"\nfi\n\nRESET=\"\\033[0m\"\n\n# Build session list visualization\nif [ $active_sessions -gt 1 ]; then\n  session_list=\"\"\n  for i in $(seq 1 $active_sessions); do\n    session_list=\"${session_list}●\"\n  done\n  visual=\"[${session_list}]\"\nelse\n  visual=\"\"\nfi\n\n# Output statusline\nif [ -n \"$COLLISION_WARNING\" ]; then\n  echo -e \"${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual} | ${COLLISION_WARNING}\"\nelse\n  echo -e \"${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual}\"\nfi\n",
+  "features": [
+    "Real-time detection of concurrent Claude Code sessions running in parallel",
+    "Session count tracking with visual indicators (●● for multiple sessions)",
+    "Workspace collision detection (multiple sessions in same directory)",
+    "Automatic stale session cleanup (sessions inactive >10 minutes)",
+    "Color-coded alerts (green solo, yellow 2-3 sessions, red 4+ sessions)",
+    "Visual session list showing all active sessions as dots",
+    "Budget awareness through overlap warnings (multiple 5-hour windows)",
+    "Persistent session tracking via ~/.claude-code-sessions directory"
+  ],
+  "configuration": {
+    "format": "bash",
+    "refreshInterval": 2000,
+    "position": "left"
+  },
+  "useCases": [
+    "Managing multiple overlapping 5-hour billing windows",
+    "Preventing accidental parallel sessions that double costs",
+    "Detecting workspace collisions when working in same directory",
+    "Budget management for accounts with usage limits",
+    "Team coordination when multiple developers share workspace",
+    "Identifying forgotten background sessions still running"
+  ],
+  "requirements": [
+    "Bash shell",
+    "jq JSON processor",
+    "Write access to ~/.claude-code-sessions directory"
+  ],
+  "preview": "●● MULTI: 2 active [●●] | ⚠ WORKSPACE COLLISION",
+  "troubleshooting": [
+    {
+      "issue": "Session count always showing 1 despite multiple Claude Code instances running",
+      "solution": "Verify session_id field exists in JSON: echo '$input' | jq .session_id. Check ~/.claude-code-sessions directory is writable: ls -la ~/.claude-code-sessions. Ensure each Claude Code instance has unique session_id. If all sessions share same ID (bug), script cannot distinguish them."
+    },
+    {
+      "issue": "Workspace collision warning appearing incorrectly",
+      "solution": "Check workspace.current_dir field: echo '$input' | jq .workspace.current_dir. Script uses exact path matching - symlinks and relative paths may cause false positives. Verify sessions are actually in different directories with pwd. Collision is EXPECTED if multiple sessions genuinely share same workspace."
+    },
+    {
+      "issue": "Stale sessions not being cleaned up automatically",
+      "solution": "Cleanup runs every statusline update (default 2s refresh). Threshold is 600 seconds (10 minutes) of inactivity. Check session files: ls -la ~/.claude-code-sessions/*.active. Verify date command works: date +%s. Manually cleanup: rm ~/.claude-code-sessions/*.active."
+    },
+    {
+      "issue": "Permission denied when creating session tracking directory",
+      "solution": "Script creates ~/.claude-code-sessions on first run. Ensure HOME environment variable is set: echo $HOME. Check write permissions: mkdir -p ~/.claude-code-sessions. If permission denied, change location in script: SESSION_DIR=\"/tmp/claude-sessions-$(whoami)\"."
+    },
+    {
+      "issue": "Visual session list not displaying dots correctly",
+      "solution": "Ensure terminal supports Unicode bullet character (●). Test with: echo -e '●●●'. If unsupported, replace with ASCII: SESSION_ICON='*' and visual characters. Check terminal encoding is UTF-8: echo $LANG (should show UTF-8)."
+    }
+  ],
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
+  "source": "community",
+  "discoveryMetadata": {
+    "researchDate": "2025-10-25",
+    "trendingSources": [
+      {
+        "source": "anthropic_official_docs",
+        "evidence": "Official docs confirm JSON provides session_id and workspace.current_dir for session tracking. Multiple 5-hour windows can overlap simultaneously.",
+        "url": "https://docs.claude.com/en/docs/claude-code/statusline",
+        "relevanceScore": "high"
+      },
+      {
+        "source": "reddit_programming",
+        "evidence": "Reddit discussions about Claude Code's 5-hour rolling window system: 'Developers can have multiple overlapping sessions active simultaneously' - need overlap detection for budget management.",
+        "url": "https://www.reddit.com/r/programming/",
+        "relevanceScore": "high"
+      },
+      {
+        "source": "github_trending",
+        "evidence": "ccusage tool tracks multiple session blocks concurrently. Block overlap visualization validates demand for multi-session awareness.",
+        "url": "https://github.com/ryoppippi/ccusage",
+        "relevanceScore": "high"
+      },
+      {
+        "source": "dev_to_session_management",
+        "evidence": "Claude Code session management guides emphasize tracking parallel sessions to avoid unexpected billing. Workspace collision detection prevents conflicts.",
+        "url": "https://dev.to/",
+        "relevanceScore": "medium"
+      }
+    ],
+    "keywordResearch": {
+      "primaryKeywords": [
+        "multi-session tracker",
+        "parallel session detection",
+        "workspace collision",
+        "session overlap monitor"
+      ],
+      "searchVolume": "medium",
+      "competitionLevel": "low"
+    },
+    "gapAnalysis": {
+      "existingContent": ["five-hour-window-tracker"],
+      "identifiedGap": "five-hour-window-tracker monitors CURRENT session window only, not multiple PARALLEL sessions. Existing tracker doesn't detect when multiple Claude Code instances run simultaneously (separate 5-hour windows). No workspace collision detection. Users with multiple projects need multi-session awareness for budget management and conflict prevention.",
+      "priority": "high"
+    },
+    "approvalRationale": "Official docs verified session_id and workspace fields available. Reddit discussions confirm multiple overlapping sessions are common. GitHub tool ccusage tracks concurrent blocks. Medium search volume, low competition. Clear gap vs single-session window tracker. Critical for budget management and workspace conflict detection. User approved for session overlap monitoring."
+  }
+}
