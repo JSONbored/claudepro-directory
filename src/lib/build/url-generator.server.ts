@@ -21,7 +21,12 @@ import type { ChangelogMetadata } from '@/generated/changelog-metadata';
 import type { GuideMetadata } from '@/generated/guides-metadata';
 import type { JobMetadata } from '@/generated/jobs-metadata';
 import { parseChangelog } from '@/src/lib/changelog/parser';
-import { APP_CONFIG, CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '@/src/lib/constants';
+import {
+  APP_CONFIG,
+  CONTENT_PATHS,
+  MAIN_CONTENT_CATEGORIES,
+  SITEMAP_CONFIG,
+} from '@/src/lib/constants';
 import { getJobs } from '@/src/lib/data/jobs';
 import { logger } from '@/src/lib/logger';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
@@ -74,6 +79,199 @@ export interface UrlGeneratorConfig {
   includeChangelog?: boolean;
   includeLlmsTxt?: boolean;
   includeTools?: boolean;
+  includeAutodiscoveredRoutes?: boolean; // NEW: Enable automated route discovery
+}
+
+// ============================================================================
+// AUTOMATED ROUTE DISCOVERY
+// ============================================================================
+
+/**
+ * Check if route matches any exclusion pattern
+ *
+ * Supports wildcards (*) and exact matches.
+ * Patterns like "/account/*" match "/account/settings", "/account/library", etc.
+ */
+function matchesExclusionPattern(route: string, pattern: string): boolean {
+  // Remove route groups from route (e.g., "(auth)/login" -> "/login")
+  const cleanRoute = route.replace(/\([^)]+\)\//g, '');
+
+  // Exact match
+  if (pattern === cleanRoute) return true;
+
+  // Wildcard matching
+  if (pattern.includes('*')) {
+    const regexPattern = pattern
+      .replace(/\*/g, '.*') // * becomes .*
+      .replace(/\//g, '\\/'); // Escape forward slashes
+    return new RegExp(`^${regexPattern}$`).test(cleanRoute);
+  }
+
+  return false;
+}
+
+/**
+ * Discover all routes from app directory
+ *
+ * Scans for page.tsx files and extracts route paths.
+ * Excludes route groups (folders with parentheses).
+ *
+ * @returns Array of discovered route paths (e.g., ["/", "/trending", "/ph-bundle"])
+ */
+function discoverAppRoutes(): string[] {
+  const appDir = join(process.cwd(), 'src', 'app');
+  const routes: string[] = [];
+
+  function scanDirectory(dir: string, routePath = ''): void {
+    try {
+      const entries = readdirSync(dir, { withFileTypes: true });
+
+      for (const entry of entries) {
+        const fullPath = join(dir, entry.name);
+
+        if (entry.isDirectory()) {
+          // Skip route groups (folders with parentheses)
+          if (entry.name.startsWith('(') && entry.name.endsWith(')')) {
+            // Scan inside route group but don't add to path
+            scanDirectory(fullPath, routePath);
+            continue;
+          }
+
+          // Skip dynamic segments for now (handled separately)
+          if (entry.name.startsWith('[') && entry.name.endsWith(']')) {
+            continue;
+          }
+
+          // Recursively scan subdirectory
+          const newPath = `${routePath}/${entry.name}`;
+          scanDirectory(fullPath, newPath);
+        } else if (entry.name === 'page.tsx') {
+          // Found a page route
+          const route = routePath || '/';
+          routes.push(route);
+        }
+      }
+    } catch (error) {
+      logger.warn(`Failed to scan directory ${dir}`, {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  scanDirectory(appDir);
+  return routes.sort();
+}
+
+/**
+ * Generate URLs for user profiles
+ *
+ * Queries Supabase for public user profiles.
+ */
+async function generateUserProfileUrls(
+  baseUrl: string,
+  priority: number,
+  changefreq: SitemapUrl['changefreq']
+): Promise<SitemapUrl[]> {
+  try {
+    const supabase = await createAdminClient();
+
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('slug, updated_at')
+      .eq('public', true)
+      .not('slug', 'is', null);
+
+    if (error) {
+      logger.error('Failed to fetch user profiles for sitemap', error);
+      return [];
+    }
+
+    if (!users || users.length === 0) {
+      logger.info('No public user profiles found for sitemap');
+      return [];
+    }
+
+    const urls = users.map((user) => ({
+      loc: `${baseUrl}/u/${user.slug}`,
+      lastmod: user.updated_at || new Date().toISOString(),
+      changefreq,
+      priority,
+    }));
+
+    logger.info(`Generated ${urls.length} user profile URLs`);
+    return urls;
+  } catch (error) {
+    logger.error(
+      'Error generating user profile URLs',
+      error instanceof Error ? error : new Error(String(error))
+    );
+    return [];
+  }
+}
+
+/**
+ * Generate URLs for comparison pages
+ *
+ * Reads comparison JSON files from content/guides/comparisons/
+ */
+async function generateComparisonUrls(
+  baseUrl: string,
+  priority: number,
+  changefreq: SitemapUrl['changefreq']
+): Promise<SitemapUrl[]> {
+  try {
+    const fs = await import('fs/promises');
+    const path = await import('path');
+
+    const comparisonsDir = path.join(process.cwd(), 'content', 'guides', 'comparisons');
+
+    // Check if directory exists
+    try {
+      await fs.access(comparisonsDir);
+    } catch {
+      return []; // Directory doesn't exist yet
+    }
+
+    const files = await fs.readdir(comparisonsDir);
+    const jsonFiles = files.filter((f) => f.endsWith('.json'));
+
+    return jsonFiles.map((file) => ({
+      loc: `${baseUrl}/compare/${file.replace('.json', '')}`,
+      lastmod: new Date().toISOString(),
+      changefreq,
+      priority,
+    }));
+  } catch (error) {
+    logger.error(
+      'Error generating comparison URLs',
+      error instanceof Error ? error : new Error(String(error))
+    );
+    return [];
+  }
+}
+
+/**
+ * Get priority for route based on configuration
+ */
+function getRoutePriority(route: string): number {
+  for (const [pattern, priority] of Object.entries(SITEMAP_CONFIG.priorityOverrides)) {
+    if (pattern === route || matchesExclusionPattern(route, pattern)) {
+      return priority;
+    }
+  }
+  return 0.5; // Default priority
+}
+
+/**
+ * Get changefreq for route based on configuration
+ */
+function getRouteChangefreq(route: string): SitemapUrl['changefreq'] {
+  for (const [pattern, changefreq] of Object.entries(SITEMAP_CONFIG.changefreqOverrides)) {
+    if (pattern === route || matchesExclusionPattern(route, pattern)) {
+      return changefreq;
+    }
+  }
+  return 'weekly'; // Default changefreq
 }
 
 /**
@@ -92,126 +290,82 @@ export async function generateAllSiteUrls(
     includeGuides = true,
     includeChangelog = true,
     includeLlmsTxt = true,
-    includeTools = true,
+    includeAutodiscoveredRoutes = true, // Enable by default
   } = config;
 
   const urls: SitemapUrl[] = [];
   const currentDate = new Date().toISOString().split('T')[0] || '';
 
   // ============================================================================
-  // CORE PAGES
+  // AUTOMATED ROUTE DISCOVERY (NEW - Configuration-Driven)
   // ============================================================================
 
-  // Homepage (highest priority)
-  urls.push({
-    loc: baseUrl || '',
-    lastmod: currentDate,
-    changefreq: 'daily',
-    priority: 1.0,
-  });
+  if (includeAutodiscoveredRoutes) {
+    logger.info('Starting automated route discovery...');
+
+    // Discover all routes from app directory
+    const discoveredRoutes = discoverAppRoutes();
+    logger.info(`Discovered ${discoveredRoutes.length} routes from app directory`);
+
+    // Filter out excluded routes
+    const includedRoutes = discoveredRoutes.filter((route) => {
+      const isExcluded = SITEMAP_CONFIG.excludePatterns.some((pattern) =>
+        matchesExclusionPattern(route, pattern)
+      );
+      return !isExcluded;
+    });
+
+    logger.info(
+      `Included ${includedRoutes.length} routes after exclusion filtering (excluded ${discoveredRoutes.length - includedRoutes.length})`
+    );
+
+    // Add all included routes with configuration-based priority/changefreq
+    includedRoutes.forEach((route) => {
+      urls.push({
+        loc: `${baseUrl || ''}${route}`,
+        lastmod: currentDate,
+        changefreq: getRouteChangefreq(route),
+        priority: getRoutePriority(route),
+      });
+    });
+
+    // Add dynamic routes (user profiles, comparisons)
+    try {
+      const [userProfiles, comparisons] = await Promise.all([
+        generateUserProfileUrls(
+          baseUrl || APP_CONFIG.url,
+          getRoutePriority('/u/*'),
+          getRouteChangefreq('/u/*')
+        ),
+        generateComparisonUrls(
+          baseUrl || APP_CONFIG.url,
+          getRoutePriority('/compare/*'),
+          getRouteChangefreq('/compare/*')
+        ),
+      ]);
+
+      urls.push(...userProfiles, ...comparisons);
+      logger.info(
+        `Added ${userProfiles.length} user profiles and ${comparisons.length} comparison pages`
+      );
+    } catch (error) {
+      logger.error(
+        'Failed to generate dynamic routes',
+        error instanceof Error ? error : new Error(String(error))
+      );
+    }
+
+    logger.info(`Total URLs from automated discovery: ${urls.length}`);
+  }
 
   // ============================================================================
-  // CATEGORY PAGES
+  // LEGACY CONTENT GENERATION (Keep for content detail pages)
   // ============================================================================
 
   const categories = [...MAIN_CONTENT_CATEGORIES];
-  categories.forEach((category) => {
-    urls.push({
-      loc: `${baseUrl || ''}/${category}`,
-      lastmod: currentDate,
-      changefreq: 'daily',
-      priority: 0.8,
-    });
-  });
-
-  // ============================================================================
-  // STATIC PAGES
-  // ============================================================================
-
-  // Core feature pages
-  const staticPages = [
-    { path: 'jobs', priority: 0.6, changefreq: 'weekly' as const },
-    { path: 'community', priority: 0.6, changefreq: 'weekly' as const },
-    { path: 'trending', priority: 0.6, changefreq: 'weekly' as const },
-    { path: 'submit', priority: 0.6, changefreq: 'weekly' as const },
-    { path: 'partner', priority: 0.6, changefreq: 'weekly' as const },
-    { path: 'guides', priority: 0.6, changefreq: 'weekly' as const },
-    { path: 'companies', priority: 0.6, changefreq: 'weekly' as const },
-    { path: 'board', priority: 0.5, changefreq: 'daily' as const },
-    { path: 'changelog', priority: 0.85, changefreq: 'daily' as const }, // High priority for recency signals
-  ];
-
-  staticPages.forEach((page) => {
-    urls.push({
-      loc: `${baseUrl || ''}/${page.path}`,
-      lastmod: currentDate,
-      changefreq: page.changefreq,
-      priority: page.priority,
-    });
-  });
-
-  // Legal & Compliance Pages (footer links)
-  const legalPages = [
-    { path: 'privacy', priority: 0.5, changefreq: 'monthly' as const },
-    { path: 'terms', priority: 0.5, changefreq: 'monthly' as const },
-    { path: 'cookies', priority: 0.4, changefreq: 'monthly' as const },
-  ];
-
-  legalPages.forEach((page) => {
-    urls.push({
-      loc: `${baseUrl || ''}/${page.path}`,
-      lastmod: currentDate,
-      changefreq: page.changefreq,
-      priority: page.priority,
-    });
-  });
-
-  // Support & Help Pages (footer links)
-  const supportPages = [
-    { path: 'contact', priority: 0.6, changefreq: 'monthly' as const },
-    { path: 'help', priority: 0.6, changefreq: 'monthly' as const },
-    { path: 'accessibility', priority: 0.5, changefreq: 'yearly' as const },
-  ];
-
-  supportPages.forEach((page) => {
-    urls.push({
-      loc: `${baseUrl || ''}/${page.path}`,
-      lastmod: currentDate,
-      changefreq: page.changefreq,
-      priority: page.priority,
-    });
-  });
-
-  // Utility Pages
-  const utilityPages = [
-    { path: 'search', priority: 0.7, changefreq: 'daily' as const },
-    { path: 'for-you', priority: 0.7, changefreq: 'daily' as const },
-  ];
-
-  utilityPages.forEach((page) => {
-    urls.push({
-      loc: `${baseUrl || ''}/${page.path}`,
-      lastmod: currentDate,
-      changefreq: page.changefreq,
-      priority: page.priority,
-    });
-  });
-
-  // ============================================================================
-  // TOOLS PAGES (Interactive Features)
-  // ============================================================================
-
-  if (includeTools) {
-    const toolPages = ['tools/config-recommender'];
-    toolPages.forEach((page) => {
-      urls.push({
-        loc: `${baseUrl || ''}/${page}`,
-        lastmod: currentDate,
-        changefreq: 'monthly', // Static tool landing page
-        priority: 0.8, // High priority - valuable interactive feature
-      });
-    });
-  }
+  // Note: Static pages (homepage, categories, legal, contact, etc.)
+  // are now handled by automated route discovery above.
+  // This section only handles content detail pages (agents/slug, mcp/slug, etc.)
 
   // ============================================================================
   // LLMS.TXT ROUTES (AI Discovery)

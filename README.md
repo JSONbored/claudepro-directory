@@ -5,7 +5,7 @@
 # Claude Pro Directory
 
 **Discover and share the best Claude configurations**
-222+ expert rules, powerful MCP servers, specialized agents, automation hooks, and more.
+232+ expert rules, powerful MCP servers, specialized agents, automation hooks, and more.
 
 [![Mentioned in Awesome Claude Code](https://awesome.re/mentioned-badge.svg)](https://github.com/hesreallyhim/awesome-claude-code)
 
@@ -17,7 +17,7 @@
 
 ## 🎯 What is Claude Pro Directory?
 
-**Stop starting from scratch.** A searchable collection of 222+ pre-built Claude configurations with instant setup, task-specific optimization, and weekly community updates.
+**Stop starting from scratch.** A searchable collection of 232+ pre-built Claude configurations with instant setup, task-specific optimization, and weekly community updates.
 
 Whether you need Claude to review code like a senior engineer, write like a professional author, or analyze data like a scientist - find it in seconds, copy, and start using.
 
@@ -196,23 +196,33 @@ Event-driven automation scripts that run on specific triggers
 - **[Webpack Bundle Analyzer](https://claudepro.directory/hooks/webpack-bundle-analyzer)** - Analyzes webpack bundle size when webpack config or entry files are modified
 - **[Workflow Completion Report](https://claudepro.directory/hooks/workflow-completion-report)** - Generates a comprehensive report when Claude Code workflow stops, including files modified, tests run, and git status
 
-## 🔧 Commands (16)
+## 🔧 Commands (26)
 
 Quick-action slash commands for common development tasks
 
 - **[Autogen Workflow](https://claudepro.directory/commands/autogen-workflow)** - Orchestrate multi-agent workflows using Microsoft AutoGen v0.4 with role-based task delegation, conversation patterns, and collaborative problem solving
+- **[Checkpoint Manager](https://claudepro.directory/commands/checkpoint-manager)** - Manage Claude Code checkpoints to safely rewind code changes, restore conversation states, and explore alternatives without fear using ESC+ESC or /rewind commands
+- **[Claudemd Builder](https://claudepro.directory/commands/claudemd-builder)** - Generate project-specific CLAUDE.md files with coding standards, architecture notes, and context preservation for team-wide AI consistency and efficient onboarding
+- **[Context Analyzer](https://claudepro.directory/commands/context-analyzer)** - Analyze codebase context with agentic search to understand architecture, patterns, and dependencies before major refactors or feature implementations
 - **[Cursor Rules](https://claudepro.directory/commands/cursor-rules)** - Generate .cursorrules files for AI-native development with project-specific patterns, coding standards, and intelligent context awareness
 - **[Debug](https://claudepro.directory/commands/debug)** - Advanced debugging assistant with root cause analysis, step-by-step troubleshooting, and automated fix suggestions
 - **[Docs](https://claudepro.directory/commands/docs)** - Intelligent documentation generator with API specs, code examples, tutorials, and interactive guides
 - **[Explain](https://claudepro.directory/commands/explain)** - Intelligent code explanation with visual diagrams, step-by-step breakdowns, and interactive examples
 - **[Generate Tests](https://claudepro.directory/commands/generate-tests)** - Automatically generate comprehensive test suites including unit tests, integration tests, and edge cases with multiple testing framework support
 - **[Git Smart Commit](https://claudepro.directory/commands/git-smart-commit)** - Intelligently analyzes changes and creates well-formatted git commits with conventional commit messages
+- **[Hooks Generator](https://claudepro.directory/commands/hooks-generator)** - Create automated Claude Code hooks that execute shell commands at specific lifecycle points for deterministic control over formatting, testing, linting, and notifications
+- **[Mcp Setup](https://claudepro.directory/commands/mcp-setup)** - Configure and connect MCP servers to Claude Code with OAuth authentication, tool access, and remote server support for seamless external integrations
 - **[Mintlify Docs](https://claudepro.directory/commands/mintlify-docs)** - Generate beautiful, searchable documentation using Mintlify with AI-powered content generation, API reference automation, and MDX components
 - **[Optimize](https://claudepro.directory/commands/optimize)** - Advanced performance optimization with bottleneck analysis, memory profiling, and automated improvements
+- **[Plan Mode](https://claudepro.directory/commands/plan-mode)** - Activate Claude's extended thinking mode with multi-level planning depth from 'think' to 'ultrathink' for comprehensive strategy creation before implementation
 - **[Refactor](https://claudepro.directory/commands/refactor)** - Intelligent code refactoring command that analyzes code structure and applies best practices for improved maintainability and performance
 - **[Review](https://claudepro.directory/commands/review)** - Comprehensive code review with security analysis, performance optimization, and best practices validation
 - **[Security](https://claudepro.directory/commands/security)** - Comprehensive security audit with vulnerability detection, threat analysis, and automated remediation recommendations
 - **[Security Audit](https://claudepro.directory/commands/security-audit)** - Deploy 100 specialized sub-agents for comprehensive enterprise-grade security, performance, and optimization audit of production codebase
+- **[Skills Installer](https://claudepro.directory/commands/skills-installer)** - Install and manage Claude Code Agent Skills - specialized knowledge packages that extend Claude's capabilities with domain expertise and progressive disclosure
+- **[Slash Command Gen](https://claudepro.directory/commands/slash-command-gen)** - Create custom slash commands for Claude Code with templates, arguments, frontmatter metadata, and team-shared workflows stored in .claude/commands directory
+- **[Subagent Create](https://claudepro.directory/commands/subagent-create)** - Create specialized Claude Code subagents with custom system prompts, scoped tool access, and independent context for parallel task execution and workflow orchestration
+- **[Tdd Workflow](https://claudepro.directory/commands/tdd-workflow)** - Implement test-driven development workflows with Claude Code using red-green-refactor cycles, automatic test generation, and AI-guided iteration until all tests pass
 - **[Test Advanced](https://claudepro.directory/commands/test-advanced)** - Advanced test suite generator with property-based testing, mutation testing, and intelligent test case discovery
 - **[V0 Generate](https://claudepro.directory/commands/v0-generate)** - Generate production-ready React components from natural language using V0.dev patterns with shadcn/ui, TailwindCSS, and TypeScript
 - **[Zod Audit](https://claudepro.directory/commands/zod-audit)** - Production codebase auditor specialized in Zod schema validation coverage, security vulnerability detection, and dead code elimination
