@@ -164,6 +164,36 @@ class AnalyticsQueueService {
       logger.info('View queue flushed successfully', {
         itemCount: snapshot.size,
       });
+
+      // OPTIMIZATION: On-demand revalidation of affected pages
+      // Only revalidate if we actually flushed data to Redis
+      // This keeps cached pages fresh without constant Redis queries
+      try {
+        const { revalidatePath } = await import('next/cache');
+        const affectedCategories = new Set<string>();
+
+        for (const entry of snapshot.values()) {
+          affectedCategories.add(entry.category);
+        }
+
+        // Revalidate homepage (shows all categories)
+        revalidatePath('/', 'page');
+
+        // Revalidate affected category pages
+        for (const category of affectedCategories) {
+          revalidatePath(`/${category}`, 'page');
+        }
+
+        logger.info('Cache revalidation triggered', {
+          affectedCategories: Array.from(affectedCategories).join(', '),
+        });
+      } catch (revalidateError) {
+        // Non-critical: Log but don't fail the flush
+        logger.warn('Cache revalidation failed (non-critical)', {
+          error:
+            revalidateError instanceof Error ? revalidateError.message : String(revalidateError),
+        });
+      }
     } catch (error) {
       logger.error(
         'Failed to flush view queue',

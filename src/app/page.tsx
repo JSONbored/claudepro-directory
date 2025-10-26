@@ -52,8 +52,9 @@ import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-it
 import { featuredService } from '@/src/lib/services/featured.server';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 
-// Revalidate every 24 hours for fresh content (Redis stats cached separately at 10-min intervals)
-export const revalidate = 86400;
+// Revalidate every 1 hour for fresher analytics while keeping Redis usage low
+// ISR cache reduces Redis queries significantly (only fetches on cache miss)
+export const revalidate = 3600; // 1 hour
 
 /**
  * Category metadata type - Dynamically derived from registry

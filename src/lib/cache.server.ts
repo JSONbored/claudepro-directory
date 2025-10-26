@@ -2035,30 +2035,19 @@ export const statsRedis = {
 
   getViewCounts: async (items: Array<{ category: string; slug: string }>) => {
     if (!items.length) return {};
-
-    // Cache Redis queries for 10 minutes to reduce command usage
-    return unstable_cache(
-      async () => {
-        const keys = items.map((i) => `views:${i.category}:${i.slug}`);
-        const counts = await redis(
-          async (c) => await c.mget<(number | null)[]>(...keys),
-          () => new Array(items.length).fill(0) as (number | null)[],
-          'getViewCounts'
-        );
-        return items.reduce(
-          (acc, item, i) => {
-            acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
-            return acc;
-          },
-          {} as Record<string, number>
-        );
+    const keys = items.map((i) => `views:${i.category}:${i.slug}`);
+    const counts = await redis(
+      async (c) => await c.mget<(number | null)[]>(...keys),
+      () => new Array(items.length).fill(0) as (number | null)[],
+      'getViewCounts'
+    );
+    return items.reduce(
+      (acc, item, i) => {
+        acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
+        return acc;
       },
-      [`view-counts-${items.map((i) => `${i.category}:${i.slug}`).join(',')}`],
-      {
-        revalidate: 600, // 10 minutes
-        tags: ['stats', 'view-counts'],
-      }
-    )();
+      {} as Record<string, number>
+    );
   },
 
   /**
@@ -2175,30 +2164,19 @@ export const statsRedis = {
 
   getCopyCounts: async (items: Array<{ category: string; slug: string }>) => {
     if (!items.length) return {};
-
-    // Cache Redis queries for 10 minutes to reduce command usage
-    return unstable_cache(
-      async () => {
-        const keys = items.map((i) => `copies:${i.category}:${i.slug}`);
-        const counts = await redis(
-          async (c) => await c.mget<(number | null)[]>(...keys),
-          () => new Array(items.length).fill(0) as (number | null)[],
-          'getCopyCounts'
-        );
-        return items.reduce(
-          (acc, item, i) => {
-            acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
-            return acc;
-          },
-          {} as Record<string, number>
-        );
+    const keys = items.map((i) => `copies:${i.category}:${i.slug}`);
+    const counts = await redis(
+      async (c) => await c.mget<(number | null)[]>(...keys),
+      () => new Array(items.length).fill(0) as (number | null)[],
+      'getCopyCounts'
+    );
+    return items.reduce(
+      (acc, item, i) => {
+        acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
+        return acc;
       },
-      [`copy-counts-${items.map((i) => `${i.category}:${i.slug}`).join(',')}`],
-      {
-        revalidate: 600, // 10 minutes
-        tags: ['stats', 'copy-counts'],
-      }
-    )();
+      {} as Record<string, number>
+    );
   },
 
   /**
