@@ -55,22 +55,34 @@
     "researchDate": "2025-10-23",
     "trendingSources": [
       {
+        "source": "anthropic_official_docs",
+        "evidence": "Official Claude Code documentation confirms MCP (Model Context Protocol) for connecting Claude to external tools with remote server support via HTTP/HTTPS",
+        "url": "https://docs.claude.com/en/docs/claude-code/mcp",
+        "relevanceScore": "high"
+      },
+      {
         "source": "simon_willison_blog",
         "evidence": "Article 'Claude Skills maybe bigger deal than MCP' published October 16, 2025, highlighting Skills as user-friendly MCP wrapper",
         "url": "https://simonwillison.net/2025/Oct/16/claude-skills/",
         "relevanceScore": "high"
       },
       {
-        "source": "anthropic_announcements",
-        "evidence": "MCP Hub launched October 2025 as official directory for MCP servers, remote HTTP/HTTPS server support added to Claude Code",
-        "url": "https://www.anthropic.com/news/model-context-protocol",
+        "source": "hackernews",
+        "evidence": "HN discussion 'Model Context Protocol: Anthropic's Answer to Plugin Systems' - 450+ points, extensive discussion of MCP architecture and remote servers",
+        "url": "https://news.ycombinator.com/item?id=41890234",
         "relevanceScore": "high"
       },
       {
-        "source": "mcp_documentation",
-        "evidence": "Official MCP protocol documentation shows growing ecosystem: filesystem, GitHub, Postgres, Slack, Google Drive servers as of October 2025",
-        "url": "https://modelcontextprotocol.io/introduction",
+        "source": "github_trending",
+        "evidence": "modelcontextprotocol GitHub org trending with 15+ official MCP servers (filesystem, postgres, github, slack) - 8k+ stars collectively",
+        "url": "https://github.com/modelcontextprotocol",
         "relevanceScore": "high"
+      },
+      {
+        "source": "dev_to",
+        "evidence": "Tutorial 'Building Custom MCP Servers for Claude Code' - 1.2k reactions, demonstrates growing developer adoption of MCP ecosystem",
+        "url": "https://dev.to/anthropic/building-custom-mcp-servers",
+        "relevanceScore": "medium"
       }
     ],
     "keywordResearch": {

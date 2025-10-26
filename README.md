@@ -5,7 +5,7 @@
 # Claude Pro Directory
 
 **Discover and share the best Claude configurations**
-242+ expert rules, powerful MCP servers, specialized agents, automation hooks, and more.
+255+ expert rules, powerful MCP servers, specialized agents, automation hooks, and more.
 
 [![Mentioned in Awesome Claude Code](https://awesome.re/mentioned-badge.svg)](https://github.com/hesreallyhim/awesome-claude-code)
 
@@ -17,7 +17,7 @@
 
 ## 🎯 What is Claude Pro Directory?
 
-**Stop starting from scratch.** A searchable collection of 242+ pre-built Claude configurations with instant setup, task-specific optimization, and weekly community updates.
+**Stop starting from scratch.** A searchable collection of 255+ pre-built Claude configurations with instant setup, task-specific optimization, and weekly community updates.
 
 Whether you need Claude to review code like a senior engineer, write like a professional author, or analyze data like a scientist - find it in seconds, copy, and start using.
 
@@ -49,10 +49,11 @@ See our [Contributing Guide](.github/CONTRIBUTING.md) for detailed instructions.
 
 Browse all available Claude configurations by category:
 
-## 🤖 Agents (27)
+## 🤖 Agents (37)
 
 Specialized AI personas for specific development workflows and expert assistance
 
+- **[Agent Skills Framework Engineer](https://claudepro.directory/agents/agent-skills-framework-engineer)** - Agent Skills framework specialist for creating procedural knowledge files, domain-specific expertise, and skill-based agent capabilities using Anthropic's new Skills system.
 - **[Ai Code Review Security Agent](https://claudepro.directory/agents/ai-code-review-security-agent)** - AI-powered code review specialist focusing on security vulnerabilities, OWASP Top 10, static analysis, secrets detection, and automated security best practices enforcement
 - **[Ai Devops Automation Engineer Agent](https://claudepro.directory/agents/ai-devops-automation-engineer-agent)** - AI-powered DevOps automation specialist focused on predictive analytics, self-healing systems, CI/CD optimization, and intelligent infrastructure management
 - **[Api Builder Agent](https://claudepro.directory/agents/api-builder-agent)** - Specialized agent for designing, building, and optimizing RESTful APIs and GraphQL services with modern best practices
@@ -69,17 +70,26 @@ Specialized AI personas for specific development workflows and expert assistance
 - **[Database Specialist Agent](https://claudepro.directory/agents/database-specialist-agent)** - Expert database architect and optimizer specializing in SQL, NoSQL, performance tuning, and data modeling
 - **[Debugging Assistant Agent](https://claudepro.directory/agents/debugging-assistant-agent)** - Advanced debugging agent that helps identify, analyze, and resolve software bugs with systematic troubleshooting methodologies
 - **[Domain Specialist Ai Agents](https://claudepro.directory/agents/domain-specialist-ai-agents)** - Industry-specific AI agents for healthcare, legal, and financial domains with specialized knowledge, compliance automation, and regulatory requirements
+- **[Extended Thinking Orchestrator](https://claudepro.directory/agents/extended-thinking-orchestrator)** - Orchestrate Extended Thinking modes with adaptive budget allocation. Manages 'think', 'think hard', and 'ultrathink' levels for complexity-driven deep reasoning workflows.
 - **[Frontend Specialist Agent](https://claudepro.directory/agents/frontend-specialist-agent)** - Expert frontend developer specializing in modern JavaScript frameworks, UI/UX implementation, and performance optimization
 - **[Full Stack Ai Development Agent](https://claudepro.directory/agents/full-stack-ai-development-agent)** - Full-stack AI development specialist bridging frontend, backend, and AI/ML with AI-assisted coding workflows, intelligent code generation, and end-to-end type safety
+- **[Github Copilot Interop Bridge](https://claudepro.directory/agents/github-copilot-interop-bridge)** - Bridge Claude Code and GitHub Copilot workflows with Haiku 4.5 integration. Enables cross-platform agent coordination, model switching, and hybrid enterprise workflows.
+- **[Life Sciences Research Specialist](https://claudepro.directory/agents/life-sciences-research-specialist)** - Automate biomedical research workflows with Claude for Life Sciences. Reduces research validation and literature analysis from days to minutes for scientific teams.
 - **[Multi Agent Orchestration Specialist](https://claudepro.directory/agents/multi-agent-orchestration-specialist)** - Multi-agent orchestration specialist using LangGraph and CrewAI for complex, stateful workflows with graph-driven reasoning and role-based agent coordination
+- **[Parallel Subagent Distributor](https://claudepro.directory/agents/parallel-subagent-distributor)** - Parallel subagent workload distribution specialist coordinating concurrent Claude Code subagents for massive speedups using native parallel execution capabilities.
 - **[Performance Optimizer Agent](https://claudepro.directory/agents/performance-optimizer-agent)** - Expert in application performance optimization, profiling, and system tuning across frontend, backend, and infrastructure
+- **[Plugin Ecosystem Architect](https://claudepro.directory/agents/plugin-ecosystem-architect)** - Design and publish Claude Code plugins for the October 2025 marketplace launch. Handles plugin bundling, custom tool integration, and marketplace distribution workflows.
 - **[Product Management Ai Agent](https://claudepro.directory/agents/product-management-ai-agent)** - AI-powered product management specialist focused on user story generation, product analytics, roadmap prioritization, A/B testing, and data-driven decision making
+- **[Production Reliability Engineer](https://claudepro.directory/agents/production-reliability-engineer)** - Ensure production deployment reliability with SRE best practices. Monitors deployments, implements self-healing systems, and manages incident response for Claude Code apps.
+- **[Prompt Optimization Specialist](https://claudepro.directory/agents/prompt-optimization-specialist)** - Optimize agent prompts and system instructions with meta-prompting techniques. Improves prompt performance through A/B testing, chaining, and ROI measurement.
 - **[Semantic Kernel Enterprise Agent](https://claudepro.directory/agents/semantic-kernel-enterprise-agent)** - Microsoft Semantic Kernel enterprise agent specialist for building Azure-native AI applications with multi-language SDK support, plugin governance, and enterprise-grade deployment
 - **[Slash Command Orchestrator Agent](https://claudepro.directory/agents/slash-command-orchestrator-agent)** - Slash command specialist for creating and orchestrating custom Claude workflows with dynamic arguments, conditional logic, and multi-step automation.
 - **[Subagent Factory Agent](https://claudepro.directory/agents/subagent-factory-agent)** - Subagent architecture specialist creating specialized agents for delegation, parallel execution, and modular task decomposition in Claude Code workflows.
 - **[Technical Documentation Writer Agent](https://claudepro.directory/agents/technical-documentation-writer-agent)** - Specialized in creating clear, comprehensive technical documentation for APIs, software, and complex systems
 - **[Test Automation Engineer Agent](https://claudepro.directory/agents/test-automation-engineer-agent)** - Expert in automated testing strategies, test frameworks, and quality assurance across unit, integration, and end-to-end testing
+- **[Token Cost Budget Optimizer](https://claudepro.directory/agents/token-cost-budget-optimizer)** - Analyze and optimize token costs with real-time budget tracking. Provides cost projection, usage analytics, and model selection recommendations using Sonnet/Haiku pricing.
 - **[Ui Ux Design Expert Agent](https://claudepro.directory/agents/ui-ux-design-expert-agent)** - Specialized in creating beautiful, intuitive user interfaces and exceptional user experiences
+- **[Web Async Agent Coordinator](https://claudepro.directory/agents/web-async-agent-coordinator)** - Web-based asynchronous agent coordinator leveraging Claude Code for Web's browser interface for managing long-running autonomous coding tasks with async workflows.
 
 ## ⚙️ MCP Servers (40)
 
@@ -227,12 +237,13 @@ Quick-action slash commands for common development tasks
 - **[V0 Generate](https://claudepro.directory/commands/v0-generate)** - Generate production-ready React components from natural language using V0.dev patterns with shadcn/ui, TailwindCSS, and TypeScript
 - **[Zod Audit](https://claudepro.directory/commands/zod-audit)** - Production codebase auditor specialized in Zod schema validation coverage, security vulnerability detection, and dead code elimination
 
-## 📜 Rules (23)
+## 📜 Rules (26)
 
 Custom instructions and guidelines for specialized AI behaviors
 
 - **[Ai Prompt Engineering Expert](https://claudepro.directory/rules/ai-prompt-engineering-expert)** - Expert in AI prompt engineering with focus on coding tasks, test-driven development patterns, iterative refinement, and context management for optimal AI assistance
 - **[Api Design Expert](https://claudepro.directory/rules/api-design-expert)** - Transform Claude into a comprehensive API design specialist focused on RESTful APIs, GraphQL, OpenAPI, and modern API architecture patterns
+- **[Api First Development Architect](https://claudepro.directory/rules/api-first-development-architect)** - API-first development expert with OpenAPI/Swagger schema design, tRPC type-safe procedures, REST best practices, GraphQL federation, and contract-driven development for scalable backend architectures.
 - **[Aws Cloud Architect](https://claudepro.directory/rules/aws-cloud-architect)** - Expert AWS architect with deep knowledge of cloud services, best practices, and Well-Architected Framework
 - **[Biome Strict Linting Rules](https://claudepro.directory/rules/biome-strict-linting-rules)** - Biome linting rules configuration for code quality validation. Strict enforcement, custom overrides, VCS integration, and automated fixes for TypeScript.
 - **[Code Review Expert](https://claudepro.directory/rules/code-review-expert)** - Comprehensive code review rules for thorough analysis and constructive feedback
@@ -242,6 +253,7 @@ Custom instructions and guidelines for specialized AI behaviors
 - **[Graphql Federation Specialist](https://claudepro.directory/rules/graphql-federation-specialist)** - Expert in GraphQL Federation architecture for microservices, specializing in Apollo Federation, schema composition, and distributed graph patterns
 - **[Kubernetes Devsecops Engineer](https://claudepro.directory/rules/kubernetes-devsecops-engineer)** - Expert in Kubernetes DevSecOps with GitOps workflows, pod security standards, RBAC, secret management, and automated security scanning for production clusters
 - **[Mobile App Development Expert](https://claudepro.directory/rules/mobile-app-development-expert)** - Expert in iOS, Android, and cross-platform mobile development with React Native, Flutter, and native frameworks
+- **[Monorepo Workspace Manager](https://claudepro.directory/rules/monorepo-workspace-manager)** - Monorepo workspace management expert with Turborepo, pnpm workspaces, Nx integration, package coordination, and cross-package dependency optimization for scalable multi-package repositories.
 - **[Nextjs 15 Performance Architect](https://claudepro.directory/rules/nextjs-15-performance-architect)** - Expert in Next.js 15 performance optimization with Turbopack, partial prerendering, advanced caching strategies, and Core Web Vitals excellence
 - **[Production Codebase Auditor](https://claudepro.directory/rules/production-codebase-auditor)** - Expert in comprehensive production codebase analysis with Zod validation enforcement, security vulnerability detection, and code consolidation strategies
 - **[Python Data Science Expert](https://claudepro.directory/rules/python-data-science-expert)** - Transform Claude into a data science specialist with expertise in Python, machine learning, and data analysis
@@ -251,6 +263,7 @@ Custom instructions and guidelines for specialized AI behaviors
 - **[Security Auditor Penetration Tester](https://claudepro.directory/rules/security-auditor-penetration-tester)** - Configure Claude as a security expert for vulnerability assessment, penetration testing, and security best practices
 - **[Security First React Components](https://claudepro.directory/rules/security-first-react-components)** - Security-first React component architect with XSS prevention, CSP integration, input sanitization, and OWASP Top 10 mitigation patterns
 - **[Terraform Infrastructure Architect](https://claudepro.directory/rules/terraform-infrastructure-architect)** - Expert in Terraform infrastructure as code with AI-assisted generation, modular patterns, state management, and multi-cloud deployments
+- **[Test Driven Development Enforcer](https://claudepro.directory/rules/test-driven-development-enforcer)** - Test-driven development expert enforcing red-green-refactor cycles, Vitest/Jest configuration, test coverage requirements, mocking strategies, and test-first coding discipline for robust software development.
 - **[Typescript 5x Strict Mode Expert](https://claudepro.directory/rules/typescript-5x-strict-mode-expert)** - TypeScript 5.x strict mode expert with template literal types, strict null checks, type guards, and ESLint integration for enterprise-grade type safety
 - **[Wcag Accessibility Auditor](https://claudepro.directory/rules/wcag-accessibility-auditor)** - Expert in WCAG 2.2 Level AA accessibility compliance, automated testing tools, ARIA patterns, and inclusive design for web applications
 - **[Windsurf Ai Native Ide Patterns](https://claudepro.directory/rules/windsurf-ai-native-ide-patterns)** - Windsurf AI-native IDE specialist with Cascade AI, multi-file context awareness, and Flow collaboration patterns for Claude integration
