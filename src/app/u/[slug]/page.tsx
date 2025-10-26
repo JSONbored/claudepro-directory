@@ -43,7 +43,13 @@ interface UserProfilePageProps {
   params: Promise<{ slug: string }>;
 }
 
-export const revalidate = 3600; // 1 hour ISR
+/**
+ * ISR revalidation interval for user profile pages
+ *
+ * @constant {number}
+ * @description Pages revalidate every 30 minutes for fresher user data while maintaining edge caching benefits.
+ */
+export const revalidate = 1800; // 30 minutes
 
 export async function generateMetadata({ params }: UserProfilePageProps): Promise<Metadata> {
   const { slug } = await params;

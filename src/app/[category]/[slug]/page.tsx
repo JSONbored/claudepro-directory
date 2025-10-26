@@ -21,7 +21,7 @@
  * Static Generation: All detail pages are pre-rendered at build time via generateStaticParams()
  * which iterates through all categories and their items to generate 138 static HTML files.
  *
- * ISR (Incremental Static Regeneration): Pages revalidate every 4 hours (14400s) to pick up
+ * ISR (Incremental Static Regeneration): Pages revalidate every 6 hours (21600s) to pick up
  * content updates without requiring a full rebuild. Stale content is served while revalidating.
  *
  * Data Flow:
@@ -84,15 +84,13 @@ import type { CollectionContent } from '@/src/lib/schemas/content/collection.sch
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**
- * Dynamic Rendering (No ISR)
+ * ISR revalidation interval for content detail pages
  *
- * @description
- * This page uses dynamic rendering because the root layout has `await connection()`,
- * which opts out of static generation. This enables per-request nonces for strict CSP.
- * All pages are rendered on-demand with Redis caching for performance.
- *
- * @see {@link file://./../../layout.tsx} - Root layout with connection()
+ * @constant {number}
+ * @description Pages revalidate every 6 hours. Pre-rendered at build time and served from CDN edge.
+ * @see {@link https://nextjs.org/docs/app/building-your-application/data-fetching/incremental-static-regeneration}
  */
+export const revalidate = 21600; // 6 hours
 
 /**
  * Generate static params for all category/slug combinations

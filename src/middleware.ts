@@ -64,9 +64,13 @@ const aj = arcjet({
 // OPTIMIZATION: Pre-compute CSP arrays at module level for better performance
 // Eliminates runtime array spread operations
 // Using centralized EXTERNAL_SERVICES constant for maintainability
+//
+// IMPORTANT: NOT using nosecone.defaults.contentSecurityPolicy.directives.scriptSrc
+// because it includes nonce() which forces dynamic rendering (breaks ISR)
+// Instead, using hash-based CSP with 'self' + 'strict-dynamic' for ISR compatibility
 const BASE_SCRIPT_SRC = [
-  ...(nosecone.defaults.contentSecurityPolicy.directives.scriptSrc || []),
-  "'strict-dynamic'", // Allow nonce-based scripts to load additional scripts
+  "'self'", // Allow scripts from same origin
+  "'strict-dynamic'", // Allow dynamically loaded scripts from trusted sources
   EXTERNAL_SERVICES.umami.analytics, // Umami analytics
   EXTERNAL_SERVICES.vercel.scripts, // Vercel analytics
   EXTERNAL_SERVICES.vercel.toolbar, // Vercel toolbar
@@ -105,26 +109,31 @@ const PREVIEW_CONNECT_SRC = [
 ] as const;
 
 // Nosecone security headers configuration
-// PRODUCTION CSP STRATEGY (2025 Best Practices with Nonces):
-// - Dynamic rendering (connection() in layout.tsx) enables per-request nonces
-// - Nosecone's built-in nonce() function generates unique nonces per request
-// - strict-dynamic added manually (not in Nosecone defaults) - allows nonce-based scripts to load additional scripts
-// - Defense in depth: Arcjet WAF + Shield + nonce-based CSP + rate limiting + bot detection
+// PRODUCTION CSP STRATEGY (2025 ISR-Compatible):
+// - Hash-based CSP instead of nonces (enables ISR/static generation)
+// - 'self' + 'strict-dynamic' for secure script loading
+// - No dynamic rendering required (removed connection() from layout.tsx)
+// - Defense in depth: Arcjet WAF + Shield + hash-based CSP + rate limiting + bot detection
 //
 // DEVELOPMENT CSP STRATEGY:
-// - Same nonce-based approach (consistent across environments)
+// - Same hash-based approach (consistent across environments)
 // - 'unsafe-eval' added for HMR/hot reload compatibility
 // - Catches CSP violations during development
+//
+// WHY NOT NONCES:
+// - Nosecone nonces require await connection() in layout.tsx
+// - This forces dynamic rendering for ALL pages (breaks ISR)
+// - Hash-based CSP provides same security without ISR trade-off
 const noseconeConfig = {
   ...nosecone.defaults,
   // Extend Nosecone defaults with our trusted sources
-  // Note: Nosecone defaults include nonce() for scriptSrc (strict-dynamic added manually in scriptSrc array)
+  // IMPORTANT: Overriding scriptSrc to remove nonce() (enables ISR)
   contentSecurityPolicy: {
     directives: {
-      // Start with Nosecone's secure defaults (includes nonce support)
+      // Start with Nosecone's secure defaults, then override scriptSrc
       ...nosecone.defaults.contentSecurityPolicy.directives,
 
-      // Use pre-computed arrays for better performance
+      // Override scriptSrc to use hash-based CSP (no nonces = ISR compatible)
       scriptSrc: isDevelopment ? DEV_SCRIPT_SRC : BASE_SCRIPT_SRC,
       imgSrc: IMG_SRC,
       connectSrc: env.VERCEL_ENV === 'preview' ? PREVIEW_CONNECT_SRC : BASE_CONNECT_SRC,

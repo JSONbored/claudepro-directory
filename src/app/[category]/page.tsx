@@ -46,20 +46,13 @@ import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-// Revalidate every 1 hour for fresher analytics while keeping Redis usage low
-// ISR cache reduces Redis queries significantly (only fetches on cache miss)
-export const revalidate = 3600; // 1 hour
-
 /**
- * ISR revalidation interval in seconds (4 hours)
- *
- * @description
- * Revalidate every 4 hours (14400 seconds) to pick up new content.
- * Balances freshness with build frequency - content doesn't change often enough
- * to warrant hourly revalidation, but 4 hours ensures same-day updates appear.
+ * ISR revalidation interval for category listing pages
  *
  * @constant {number}
+ * @description Pages revalidate every 1 hour to pick up new content and analytics updates.
  */
+export const revalidate = 3600; // 1 hour
 
 /**
  * Generate static params for all valid categories

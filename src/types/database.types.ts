@@ -518,6 +518,13 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'jobs_company_id_fkey';
+            columns: ['company_id'];
+            isOneToOne: false;
+            referencedRelation: 'company_job_stats';
+            referencedColumns: ['company_id'];
+          },
+          {
             foreignKeyName: 'jobs_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
@@ -1369,6 +1376,13 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'user_mcps_company_id_fkey';
+            columns: ['company_id'];
+            isOneToOne: false;
+            referencedRelation: 'company_job_stats';
+            referencedColumns: ['company_id'];
+          },
+          {
             foreignKeyName: 'user_mcps_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
@@ -1551,6 +1565,44 @@ export type Database = {
       };
     };
     Views: {
+      company_job_stats: {
+        Row: {
+          active_jobs: number | null;
+          avg_salary_min: number | null;
+          click_through_rate: number | null;
+          company_id: string | null;
+          company_name: string | null;
+          company_slug: string | null;
+          contract_jobs: number | null;
+          featured_jobs: number | null;
+          first_job_posted_at: string | null;
+          full_time_jobs: number | null;
+          internship_jobs: number | null;
+          last_refreshed_at: string | null;
+          latest_job_posted_at: string | null;
+          part_time_jobs: number | null;
+          remote_jobs: number | null;
+          total_clicks: number | null;
+          total_jobs: number | null;
+          total_views: number | null;
+          workplace_hybrid: number | null;
+          workplace_onsite: number | null;
+          workplace_remote: number | null;
+        };
+        Relationships: [];
+      };
+      content_popularity: {
+        Row: {
+          avg_rating: number | null;
+          bookmark_count: number | null;
+          content_slug: string | null;
+          content_type: string | null;
+          last_refreshed: string | null;
+          popularity_score: number | null;
+          rating_count: number | null;
+        };
+        Relationships: [];
+      };
       user_stats: {
         Row: {
           account_age_days: number | null;
@@ -1620,6 +1672,15 @@ export type Database = {
       is_following: {
         Args: { follower_id: string; following_id: string };
         Returns: boolean;
+      };
+      refresh_content_popularity: {
+        Args: never;
+        Returns: {
+          duration_ms: number;
+          message: string;
+          rows_refreshed: number;
+          success: boolean;
+        }[];
       };
       refresh_profile_from_oauth: {
         Args: { user_id: string };

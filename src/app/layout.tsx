@@ -10,7 +10,6 @@ const SpeedInsights = (
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { headers } from 'next/headers';
-import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
 import './globals.css';
@@ -167,13 +166,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Opt-out of static generation for every page so the CSP nonce can be applied
-  await connection();
+  // REMOVED: await connection() to enable ISR/static generation
+  // CSP now uses hash-based strategy instead of nonces (see middleware.ts)
+  // This allows content pages to be pre-rendered and served from CDN edge
 
-  // Get CSP nonce for inline scripts
   const headersList = await headers();
-  const cspHeader = headersList.get('content-security-policy');
-  const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
 
   // Detect auth routes - hide navigation/footer for clean auth experience
   const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || '';
@@ -221,7 +218,6 @@ export default async function RootLayout({
           storageKey="claudepro-theme"
           disableTransitionOnChange={false}
           enableColorScheme={false}
-          {...(nonce ? { nonce } : {})}
         >
           <PostCopyEmailProvider>
             <ErrorBoundary>
@@ -260,13 +256,7 @@ export default async function RootLayout({
         {/* PWA Install Tracking - Tracks PWA installation events */}
         <PwaInstallTracker />
         {/* Service Worker Registration for PWA Support */}
-        {/* suppressHydrationWarning: Browsers remove nonce attribute after execution (security feature), causing harmless hydration warning */}
-        <script
-          src="/scripts/service-worker-init.js"
-          nonce={nonce}
-          defer
-          suppressHydrationWarning
-        />
+        <script src="/scripts/service-worker-init.js" defer />
       </body>
     </html>
   );

@@ -22,21 +22,35 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { ROUTES } from '@/src/lib/constants/routes';
-import { Building, ExternalLink, Plus, Star } from '@/src/lib/icons';
+import { Briefcase, Building, ExternalLink, Plus, Star, TrendingUp } from '@/src/lib/icons';
+import { companyRepository } from '@/src/lib/repositories/company.repository';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata = generatePageMetadata('/companies');
 
+// ISR: Revalidate every 1 hour (materialized view refreshes hourly)
+export const revalidate = 3600;
+
 export default async function CompaniesPage() {
   const supabase = await createAdminClient();
 
+  // Fetch companies
   const { data: companies } = await supabase
     .from('companies')
     .select('*')
     .order('featured', { ascending: false })
     .order('created_at', { ascending: false });
+
+  // Fetch job stats using materialized view (performance optimized)
+  const companyIds = companies?.map((c) => c.id) || [];
+  const statsResult = await companyRepository.getJobStatsBulk(companyIds);
+  const statsMap = new Map(
+    statsResult.success && statsResult.data
+      ? statsResult.data.map((stat) => [stat.company_id, stat])
+      : []
+  );
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -138,6 +152,35 @@ export default async function CompaniesPage() {
                       {company.description}
                     </p>
                   )}
+
+                  {/* Job Statistics from Materialized View */}
+                  {(() => {
+                    const stats = statsMap.get(company.id);
+                    if (stats && (stats.active_jobs ?? 0) > 0) {
+                      return (
+                        <div className={'flex flex-wrap gap-2 mb-4'}>
+                          <UnifiedBadge variant="base" style="secondary" className="text-xs">
+                            <Briefcase className="h-3 w-3 mr-1" />
+                            {stats.active_jobs} Active {stats.active_jobs === 1 ? 'Job' : 'Jobs'}
+                          </UnifiedBadge>
+
+                          {stats.total_views !== null && stats.total_views > 0 && (
+                            <UnifiedBadge variant="base" style="outline" className="text-xs">
+                              <TrendingUp className="h-3 w-3 mr-1" />
+                              {stats.total_views.toLocaleString()} views
+                            </UnifiedBadge>
+                          )}
+
+                          {stats.remote_jobs !== null && stats.remote_jobs > 0 && (
+                            <UnifiedBadge variant="base" style="outline" className="text-xs">
+                              {stats.remote_jobs} Remote
+                            </UnifiedBadge>
+                          )}
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
 
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     {company.size && (
