@@ -526,6 +526,41 @@ export class UserRepository extends CachedRepository<User, string> {
       return (count || 0) === 0;
     });
   }
+
+  /**
+   * Full-text search users with relevance ranking
+   * Uses PostgreSQL full-text search with ts_rank for relevance scoring
+   *
+   * @param query - Search query string
+   * @param limit - Maximum number of results (default: 20)
+   * @returns Users matching query, sorted by relevance
+   *
+   * Features:
+   * - Typo-tolerant fuzzy matching via pg_trgm
+   * - Relevance ranking via ts_rank
+   * - Weighted search: name (A) > bio (B) > work (C) > interests (D)
+   * - Only returns public profiles
+   */
+  async searchUsers(
+    query: string,
+    limit = 20
+  ): Promise<RepositoryResult<Database['public']['Functions']['search_users']['Returns']>> {
+    return this.executeOperation('searchUsers', async () => {
+      const supabase = await createClient();
+
+      // Call the PostgreSQL function created in migration
+      const { data, error } = await supabase.rpc('search_users', {
+        search_query: query,
+        result_limit: limit,
+      });
+
+      if (error) {
+        throw new Error(`Full-text search failed: ${error.message}`);
+      }
+
+      return data || [];
+    });
+  }
 }
 
 /**

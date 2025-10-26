@@ -145,7 +145,14 @@ export class JobRepository extends CachedRepository<Job, string> {
   async create(
     data: Omit<
       Job,
-      'id' | 'created_at' | 'updated_at' | 'view_count' | 'click_count' | 'featured' | 'order'
+      | 'id'
+      | 'created_at'
+      | 'updated_at'
+      | 'view_count'
+      | 'click_count'
+      | 'featured'
+      | 'order'
+      | 'search_vector'
     >
   ): Promise<RepositoryResult<Job>> {
     return this.executeOperation('create', async () => {

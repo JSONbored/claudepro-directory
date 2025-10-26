@@ -13,9 +13,12 @@ export const revalidate = 3600; // 1 hour ISR
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
   const userRepo = new UserRepository();
 
-  // Fetch public users with stats (uses materialized view for performance)
+  // Performance optimization: Use server-side full-text search when query provided
+  // Otherwise fetch all users for client-side browsing
   const [publicUsersResult, topContributorsResult, newMembersResult] = await batchFetch([
-    userRepo.findPublicUsers({ limit: 100, sortBy: 'created_at', sortOrder: 'desc' }),
+    searchQuery
+      ? userRepo.searchUsers(searchQuery, 100) // PostgreSQL full-text search with pg_trgm
+      : userRepo.findPublicUsers({ limit: 100, sortBy: 'created_at', sortOrder: 'desc' }),
     userRepo.getTopByReputation(10),
     userRepo.findPublicUsers({ limit: 10, sortBy: 'created_at', sortOrder: 'desc' }),
   ]);
@@ -26,10 +29,13 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
   const newMembers = newMembersResult.success ? newMembersResult.data || [] : [];
 
   // Combine and deduplicate
-  const allUsers = [
-    ...topContributors,
-    ...publicUsers.filter((u) => !topContributors.some((tc) => tc.slug === u.slug)),
-  ];
+  // When searching, use search results directly (already ranked by relevance)
+  const allUsers = searchQuery
+    ? publicUsers
+    : [
+        ...topContributors,
+        ...publicUsers.filter((u) => !topContributors.some((tc) => tc.slug === u.slug)),
+      ];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -45,7 +51,7 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Main Content - User Grid */}
         <div className="lg:col-span-3">
-          <ProfileSearchClient users={allUsers} initialSearchQuery={searchQuery} />
+          <ProfileSearchClient users={allUsers} />
         </div>
 
         {/* Sidebar - Desktop only */}

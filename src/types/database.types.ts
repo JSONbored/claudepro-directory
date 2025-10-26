@@ -201,6 +201,7 @@ export type Database = {
           logo: string | null;
           name: string;
           owner_id: string | null;
+          search_vector: unknown;
           size: string | null;
           slug: string;
           updated_at: string;
@@ -216,6 +217,7 @@ export type Database = {
           logo?: string | null;
           name: string;
           owner_id?: string | null;
+          search_vector?: unknown;
           size?: string | null;
           slug: string;
           updated_at?: string;
@@ -231,6 +233,7 @@ export type Database = {
           logo?: string | null;
           name?: string;
           owner_id?: string | null;
+          search_vector?: unknown;
           size?: string | null;
           slug?: string;
           updated_at?: string;
@@ -415,6 +418,7 @@ export type Database = {
           remote: boolean | null;
           requirements: Json;
           salary: string | null;
+          search_vector: unknown;
           slug: string;
           status: string | null;
           tags: Json;
@@ -454,6 +458,7 @@ export type Database = {
           remote?: boolean | null;
           requirements?: Json;
           salary?: string | null;
+          search_vector?: unknown;
           slug: string;
           status?: string | null;
           tags?: Json;
@@ -493,6 +498,7 @@ export type Database = {
           remote?: boolean | null;
           requirements?: Json;
           salary?: string | null;
+          search_vector?: unknown;
           slug?: string;
           status?: string | null;
           tags?: Json;
@@ -1447,6 +1453,7 @@ export type Database = {
           name: string | null;
           public: boolean | null;
           reputation_score: number | null;
+          search_vector: unknown;
           slug: string | null;
           social_x_link: string | null;
           status: string | null;
@@ -1467,6 +1474,7 @@ export type Database = {
           name?: string | null;
           public?: boolean | null;
           reputation_score?: number | null;
+          search_vector?: unknown;
           slug?: string | null;
           social_x_link?: string | null;
           status?: string | null;
@@ -1487,6 +1495,7 @@ export type Database = {
           name?: string | null;
           public?: boolean | null;
           reputation_score?: number | null;
+          search_vector?: unknown;
           slug?: string | null;
           social_x_link?: string | null;
           status?: string | null;
@@ -1633,6 +1642,113 @@ export type Database = {
           success: boolean;
         }[];
       };
+      search_companies: {
+        Args: { result_limit?: number; search_query: string };
+        Returns: {
+          created_at: string;
+          description: string | null;
+          featured: boolean | null;
+          id: string;
+          industry: string | null;
+          logo: string | null;
+          name: string;
+          owner_id: string | null;
+          search_vector: unknown;
+          size: string | null;
+          slug: string;
+          updated_at: string;
+          using_cursor_since: string | null;
+          website: string | null;
+        }[];
+        SetofOptions: {
+          from: '*';
+          to: 'companies';
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
+      search_jobs: {
+        Args: { result_limit?: number; search_query: string };
+        Returns: {
+          active: boolean | null;
+          admin_notes: string | null;
+          benefits: Json;
+          category: string;
+          click_count: number | null;
+          company: string;
+          company_id: string | null;
+          company_logo: string | null;
+          contact_email: string | null;
+          created_at: string;
+          description: string;
+          experience: string | null;
+          expires_at: string | null;
+          featured: boolean | null;
+          id: string;
+          link: string;
+          location: string | null;
+          order: number | null;
+          payment_amount: number | null;
+          payment_date: string | null;
+          payment_method: string | null;
+          payment_reference: string | null;
+          payment_status: string;
+          plan: string;
+          posted_at: string | null;
+          remote: boolean | null;
+          requirements: Json;
+          salary: string | null;
+          search_vector: unknown;
+          slug: string;
+          status: string | null;
+          tags: Json;
+          title: string;
+          type: string;
+          updated_at: string;
+          user_id: string | null;
+          view_count: number | null;
+          workplace: string | null;
+        }[];
+        SetofOptions: {
+          from: '*';
+          to: 'jobs';
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
+      search_users: {
+        Args: { result_limit?: number; search_query: string };
+        Returns: {
+          bio: string | null;
+          created_at: string;
+          email: string | null;
+          follow_email: boolean | null;
+          hero: string | null;
+          id: string;
+          image: string | null;
+          interests: Json | null;
+          name: string | null;
+          public: boolean | null;
+          reputation_score: number | null;
+          search_vector: unknown;
+          slug: string | null;
+          social_x_link: string | null;
+          status: string | null;
+          tier: string | null;
+          updated_at: string;
+          website: string | null;
+          work: string | null;
+        }[];
+        SetofOptions: {
+          from: '*';
+          to: 'users';
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
+      show_limit: { Args: never; Returns: number };
+      show_trgm: { Args: { '': string }; Returns: string[] };
+      unaccent: { Args: { '': string }; Returns: string };
     };
     Enums: {
       [_ in never]: never;

@@ -35,6 +35,8 @@ GRANT ALL ON SCHEMA public TO public;
 -- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS "pg_trgm"; -- Fuzzy/typo-tolerant search
+CREATE EXTENSION IF NOT EXISTS "unaccent"; -- International character search
 
 -- =====================================================
 -- CORE TABLES
@@ -59,6 +61,15 @@ CREATE TABLE IF NOT EXISTS public.users (
   status TEXT DEFAULT 'active', -- active, suspended, deleted
   public BOOLEAN DEFAULT true, -- Public profile visibility
   follow_email BOOLEAN DEFAULT true, -- Email notifications for new followers
+
+  -- Full-text search (added 2025-10-27)
+  search_vector tsvector GENERATED ALWAYS AS (
+    setweight(to_tsvector('english', COALESCE(name, '')), 'A') ||
+    setweight(to_tsvector('english', COALESCE(bio, '')), 'B') ||
+    setweight(to_tsvector('english', COALESCE(work, '')), 'C') ||
+    setweight(to_tsvector('english', COALESCE(interests::text, '')), 'D')
+  ) STORED,
+
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
@@ -129,6 +140,14 @@ CREATE TABLE IF NOT EXISTS public.companies (
   industry TEXT,
   using_cursor_since DATE,
   featured BOOLEAN DEFAULT false, -- PAID feature
+
+  -- Full-text search (added 2025-10-27)
+  search_vector tsvector GENERATED ALWAYS AS (
+    setweight(to_tsvector('english', COALESCE(name, '')), 'A') ||
+    setweight(to_tsvector('english', COALESCE(description, '')), 'B') ||
+    setweight(to_tsvector('english', COALESCE(industry, '')), 'C')
+  ) STORED,
+
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
@@ -167,13 +186,22 @@ CREATE TABLE IF NOT EXISTS public.jobs (
   featured BOOLEAN DEFAULT false,
   "order" INTEGER DEFAULT 0, -- For manual ordering
 
-  -- Payment fields (added 2025-01-26)
+  -- Payment fields (added 2025-10-26)
   payment_status TEXT NOT NULL DEFAULT 'unpaid' CHECK (payment_status IN ('unpaid', 'paid', 'refunded')),
   payment_method TEXT CHECK (payment_method IN ('polar', 'mercury_invoice', 'manual')),
   payment_date TIMESTAMPTZ,
   payment_amount NUMERIC(10, 2),
   payment_reference TEXT,
   admin_notes TEXT,
+
+  -- Full-text search (added 2025-10-27)
+  search_vector tsvector GENERATED ALWAYS AS (
+    setweight(to_tsvector('english', COALESCE(title, '')), 'A') ||
+    setweight(to_tsvector('english', COALESCE(company, '')), 'A') ||
+    setweight(to_tsvector('english', COALESCE(description, '')), 'B') ||
+    setweight(to_tsvector('english', COALESCE(category, '')), 'C') ||
+    setweight(to_tsvector('english', COALESCE(tags::text, '')), 'D')
+  ) STORED,
 
   -- Analytics (denormalized)
   view_count INTEGER DEFAULT 0,
@@ -556,6 +584,9 @@ CREATE INDEX IF NOT EXISTS idx_users_slug ON public.users(slug);
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
 CREATE INDEX IF NOT EXISTS idx_users_reputation ON public.users(reputation_score DESC);
 CREATE INDEX IF NOT EXISTS idx_users_tier ON public.users(tier);
+CREATE INDEX IF NOT EXISTS idx_users_search_vector ON public.users USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS idx_users_name_trgm ON public.users USING GIN(name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_users_bio_trgm ON public.users USING GIN(bio gin_trgm_ops);
 
 -- Bookmarks (optimized for 5-8x speedup on existence checks)
 CREATE INDEX IF NOT EXISTS idx_bookmarks_user_id ON public.bookmarks(user_id);
@@ -587,6 +618,8 @@ CREATE INDEX IF NOT EXISTS idx_followers_following_id ON public.followers(follow
 CREATE INDEX IF NOT EXISTS idx_companies_slug ON public.companies(slug);
 CREATE INDEX IF NOT EXISTS idx_companies_owner_id ON public.companies(owner_id);
 CREATE INDEX IF NOT EXISTS idx_companies_featured ON public.companies(featured) WHERE featured = true;
+CREATE INDEX IF NOT EXISTS idx_companies_search_vector ON public.companies USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS idx_companies_name_trgm ON public.companies USING GIN(name gin_trgm_ops);
 
 -- Jobs
 CREATE INDEX IF NOT EXISTS idx_jobs_slug ON public.jobs(slug);
@@ -598,6 +631,8 @@ CREATE INDEX IF NOT EXISTS idx_jobs_expires_at ON public.jobs(expires_at);
 CREATE INDEX IF NOT EXISTS idx_jobs_plan ON public.jobs(plan);
 CREATE INDEX IF NOT EXISTS idx_jobs_pending_review ON public.jobs(status, created_at DESC) WHERE status = 'pending_review';
 CREATE INDEX IF NOT EXISTS idx_jobs_payment_status ON public.jobs(payment_status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_jobs_search_vector ON public.jobs USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS idx_jobs_title_trgm ON public.jobs USING GIN(title gin_trgm_ops);
 
 -- User MCPs
 CREATE INDEX IF NOT EXISTS idx_user_mcps_slug ON public.user_mcps(slug);
@@ -1517,6 +1552,93 @@ $$;
 
 GRANT SELECT ON public.user_stats TO authenticated, anon;
 GRANT EXECUTE ON FUNCTION public.refresh_user_stats() TO authenticated, service_role;
+
+-- =====================================================
+-- FULL-TEXT SEARCH FUNCTIONS
+-- Added: 2025-10-27
+-- =====================================================
+
+-- Full-text search for users with typo tolerance and relevance ranking
+CREATE OR REPLACE FUNCTION public.search_users(
+  search_query TEXT,
+  result_limit INTEGER DEFAULT 20
+)
+RETURNS SETOF public.users
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT u.*
+  FROM public.users u
+  WHERE
+    u.public = true
+    AND u.search_vector @@ plainto_tsquery('english', search_query)
+  ORDER BY
+    ts_rank(u.search_vector, plainto_tsquery('english', search_query)) DESC,
+    u.reputation_score DESC
+  LIMIT result_limit;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.search_users(TEXT, INTEGER) TO authenticated, anon;
+
+-- Full-text search for companies with typo tolerance and relevance ranking
+CREATE OR REPLACE FUNCTION public.search_companies(
+  search_query TEXT,
+  result_limit INTEGER DEFAULT 20
+)
+RETURNS SETOF public.companies
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT c.*
+  FROM public.companies c
+  WHERE
+    c.search_vector @@ plainto_tsquery('english', search_query)
+  ORDER BY
+    ts_rank(c.search_vector, plainto_tsquery('english', search_query)) DESC,
+    c.featured DESC NULLS LAST,
+    c.created_at DESC
+  LIMIT result_limit;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.search_companies(TEXT, INTEGER) TO authenticated, anon;
+
+-- Full-text search for jobs with typo tolerance and relevance ranking
+CREATE OR REPLACE FUNCTION public.search_jobs(
+  search_query TEXT,
+  result_limit INTEGER DEFAULT 20
+)
+RETURNS SETOF public.jobs
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT j.*
+  FROM public.jobs j
+  WHERE
+    j.status = 'active'
+    AND j.search_vector @@ plainto_tsquery('english', search_query)
+  ORDER BY
+    ts_rank(j.search_vector, plainto_tsquery('english', search_query)) DESC,
+    j.featured DESC NULLS LAST,
+    j.created_at DESC
+  LIMIT result_limit;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.search_jobs(TEXT, INTEGER) TO authenticated, anon;
 
 -- =====================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES

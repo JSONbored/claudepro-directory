@@ -146,7 +146,7 @@ export class CompanyRepository extends CachedRepository<Company, string> {
    * Create new company
    */
   async create(
-    data: Omit<Company, 'id' | 'created_at' | 'updated_at' | 'featured'>
+    data: Omit<Company, 'id' | 'created_at' | 'updated_at' | 'featured' | 'search_vector'>
   ): Promise<RepositoryResult<Company>> {
     return this.executeOperation('create', async () => {
       const supabase = await createClient();
@@ -459,6 +459,40 @@ export class CompanyRepository extends CachedRepository<Company, string> {
       }
 
       return (count || 0) === 0;
+    });
+  }
+
+  /**
+   * Full-text search companies with relevance ranking
+   * Uses PostgreSQL full-text search with ts_rank for relevance scoring
+   *
+   * @param query - Search query string
+   * @param limit - Maximum number of results (default: 20)
+   * @returns Companies matching query, sorted by relevance
+   *
+   * Features:
+   * - Typo-tolerant fuzzy matching via pg_trgm
+   * - Relevance ranking via ts_rank
+   * - Weighted search: name (A) > description (B) > industry (C)
+   */
+  async searchCompanies(
+    query: string,
+    limit = 20
+  ): Promise<RepositoryResult<Database['public']['Functions']['search_companies']['Returns']>> {
+    return this.executeOperation('searchCompanies', async () => {
+      const supabase = await createClient();
+
+      // Call the PostgreSQL function created in migration
+      const { data, error } = await supabase.rpc('search_companies', {
+        search_query: query,
+        result_limit: limit,
+      });
+
+      if (error) {
+        throw new Error(`Full-text search failed: ${error.message}`);
+      }
+
+      return data || [];
     });
   }
 }
