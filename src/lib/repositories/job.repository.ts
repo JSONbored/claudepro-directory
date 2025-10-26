@@ -16,7 +16,7 @@
 
 import { UI_CONFIG } from '@/src/lib/constants';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -40,9 +40,9 @@ export type JobUpdate = Database['public']['Tables']['jobs']['Update'];
  * JobRepository
  * Handles all job listing data access
  */
-export class JobRepository extends CachedRepository<Job, string> {
+export class JobRepository extends BaseRepository<Job, string> {
   constructor() {
-    super('JobRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('JobRepository');
   }
 
   /**
@@ -50,10 +50,6 @@ export class JobRepository extends CachedRepository<Job, string> {
    */
   async findById(id: string): Promise<RepositoryResult<Job | null>> {
     return this.executeOperation('findById', async () => {
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase.from('jobs').select('*').eq('id', id).single();
 
@@ -65,9 +61,7 @@ export class JobRepository extends CachedRepository<Job, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
         if (data.slug) {
-          this.setCache(this.getCacheKey('slug', data.slug), data);
         }
       }
 
@@ -174,9 +168,7 @@ export class JobRepository extends CachedRepository<Job, string> {
       }
 
       if (job) {
-        this.setCache(this.getCacheKey('id', job.id), job);
         if (job.slug) {
-          this.setCache(this.getCacheKey('slug', job.slug), job);
         }
       }
 
@@ -205,18 +197,13 @@ export class JobRepository extends CachedRepository<Job, string> {
         throw new Error(`Failed to update job: ${error.message}`);
       }
 
-      this.clearCache(this.getCacheKey('id', id));
       if (job?.slug) {
-        this.clearCache(this.getCacheKey('slug', job.slug));
       }
       if (job?.user_id) {
-        this.clearCache(this.getCacheKey('user', job.user_id));
       }
 
       if (job) {
-        this.setCache(this.getCacheKey('id', job.id), job);
         if (job.slug) {
-          this.setCache(this.getCacheKey('slug', job.slug), job);
         }
       }
 
@@ -251,12 +238,9 @@ export class JobRepository extends CachedRepository<Job, string> {
         }
       }
 
-      this.clearCache(this.getCacheKey('id', id));
       if (job?.slug) {
-        this.clearCache(this.getCacheKey('slug', job.slug));
       }
       if (job?.user_id) {
-        this.clearCache(this.getCacheKey('user', job.user_id));
       }
 
       return true;
@@ -308,10 +292,6 @@ export class JobRepository extends CachedRepository<Job, string> {
    */
   async findBySlug(slug: string): Promise<RepositoryResult<Job | null>> {
     return this.executeOperation('findBySlug', async () => {
-      const cacheKey = this.getCacheKey('slug', slug);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase.from('jobs').select('*').eq('slug', slug).single();
 
@@ -323,8 +303,6 @@ export class JobRepository extends CachedRepository<Job, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
-        this.setCache(this.getCacheKey('id', data.id), data);
       }
 
       return data;
@@ -423,16 +401,11 @@ export class JobRepository extends CachedRepository<Job, string> {
         throw new Error(`Failed to update job: ${error.message}`);
       }
 
-      this.clearCache(this.getCacheKey('id', id));
       if (job?.slug) {
-        this.clearCache(this.getCacheKey('slug', job.slug));
       }
-      this.clearCache(this.getCacheKey('user', userId));
 
       if (job) {
-        this.setCache(this.getCacheKey('id', job.id), job);
         if (job.slug) {
-          this.setCache(this.getCacheKey('slug', job.slug), job);
         }
       }
 
@@ -445,10 +418,6 @@ export class JobRepository extends CachedRepository<Job, string> {
    */
   async getFeatured(limit = 10): Promise<RepositoryResult<Job[]>> {
     return this.executeOperation('getFeatured', async () => {
-      const cacheKey = this.getCacheKey('featured', String(limit));
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return Array.isArray(cached) ? cached : [cached];
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('jobs')
@@ -461,10 +430,6 @@ export class JobRepository extends CachedRepository<Job, string> {
 
       if (error) {
         throw new Error(`Failed to get featured jobs: ${error.message}`);
-      }
-
-      if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data || [];

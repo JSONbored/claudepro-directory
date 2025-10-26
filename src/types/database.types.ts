@@ -3,6 +3,54 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      affinity_config: {
+        Row: {
+          id: number;
+          max_bookmarks: number | null;
+          max_copies: number | null;
+          max_time_spent_seconds: number | null;
+          max_views: number | null;
+          min_score_threshold: number | null;
+          recency_half_life_days: number | null;
+          updated_at: string | null;
+          weight_bookmarks: number | null;
+          weight_copies: number | null;
+          weight_recency: number | null;
+          weight_time_spent: number | null;
+          weight_views: number | null;
+        };
+        Insert: {
+          id?: number;
+          max_bookmarks?: number | null;
+          max_copies?: number | null;
+          max_time_spent_seconds?: number | null;
+          max_views?: number | null;
+          min_score_threshold?: number | null;
+          recency_half_life_days?: number | null;
+          updated_at?: string | null;
+          weight_bookmarks?: number | null;
+          weight_copies?: number | null;
+          weight_recency?: number | null;
+          weight_time_spent?: number | null;
+          weight_views?: number | null;
+        };
+        Update: {
+          id?: number;
+          max_bookmarks?: number | null;
+          max_copies?: number | null;
+          max_time_spent_seconds?: number | null;
+          max_views?: number | null;
+          min_score_threshold?: number | null;
+          recency_half_life_days?: number | null;
+          updated_at?: string | null;
+          weight_bookmarks?: number | null;
+          weight_copies?: number | null;
+          weight_recency?: number | null;
+          weight_time_spent?: number | null;
+          weight_views?: number | null;
+        };
+        Relationships: [];
+      };
       badges: {
         Row: {
           active: boolean | null;
@@ -1908,6 +1956,42 @@ export type Database = {
           user_id: string;
         }[];
       };
+      batch_update_user_affinity_scores: {
+        Args: { p_max_users?: number; p_user_ids: string[] };
+        Returns: {
+          inserted_count: number;
+          processing_time_ms: number;
+          total_affinity_count: number;
+          updated_count: number;
+          user_id: string;
+        }[];
+      };
+      calculate_affinity_score_for_content: {
+        Args: {
+          p_content_slug: string;
+          p_content_type: string;
+          p_user_id: string;
+        };
+        Returns: {
+          affinity_score: number;
+          breakdown: Json;
+          component_scores: Json;
+          content_slug: string;
+          content_type: string;
+          interaction_summary: Json;
+          user_id: string;
+        }[];
+      };
+      calculate_all_user_affinities: {
+        Args: { p_user_id: string };
+        Returns: {
+          affinity_score: number;
+          breakdown: Json;
+          content_slug: string;
+          content_type: string;
+          interaction_summary: Json;
+        }[];
+      };
       calculate_user_reputation: {
         Args: { target_user_id: string };
         Returns: number;
@@ -2118,6 +2202,14 @@ export type Database = {
       show_limit: { Args: never; Returns: number };
       show_trgm: { Args: { '': string }; Returns: string[] };
       unaccent: { Args: { '': string }; Returns: string };
+      update_user_affinity_scores: {
+        Args: { p_user_id: string };
+        Returns: {
+          inserted_count: number;
+          total_affinity_count: number;
+          updated_count: number;
+        }[];
+      };
     };
     Enums: {
       [_ in never]: never;

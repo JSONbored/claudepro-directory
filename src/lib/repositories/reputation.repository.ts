@@ -14,7 +14,7 @@
  * @module repositories/reputation
  */
 
-import { CachedRepository, type RepositoryResult } from '@/src/lib/repositories/base.repository';
+import { BaseRepository, type RepositoryResult } from '@/src/lib/repositories/base.repository';
 import { createClient } from '@/src/lib/supabase/server';
 
 // =====================================================
@@ -46,9 +46,9 @@ const REPUTATION_POINTS = {
  * ReputationRepository
  * Handles reputation calculation and breakdown queries
  */
-export class ReputationRepository extends CachedRepository<ReputationBreakdown, string> {
+export class ReputationRepository extends BaseRepository<ReputationBreakdown, string> {
   constructor() {
-    super('ReputationRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('ReputationRepository');
   }
 
   /**
@@ -57,10 +57,6 @@ export class ReputationRepository extends CachedRepository<ReputationBreakdown, 
    */
   async getBreakdown(userId: string): Promise<RepositoryResult<ReputationBreakdown>> {
     return this.executeOperation('getBreakdown', async () => {
-      const cacheKey = this.getCacheKey('breakdown', userId);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
 
       // Run all queries in parallel for performance
@@ -124,9 +120,6 @@ export class ReputationRepository extends CachedRepository<ReputationBreakdown, 
           mergedCount * REPUTATION_POINTS.SUBMISSION,
       };
 
-      // Cache the result
-      this.setCache(cacheKey, breakdown);
-
       return breakdown;
     });
   }
@@ -147,9 +140,6 @@ export class ReputationRepository extends CachedRepository<ReputationBreakdown, 
       if (error) {
         throw new Error(`Failed to recalculate reputation: ${error.message}`);
       }
-
-      // Clear cache for this user's breakdown
-      this.clearCache(this.getCacheKey('breakdown', userId));
 
       return (data as number) || 0;
     });

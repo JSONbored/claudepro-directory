@@ -16,7 +16,7 @@
 
 import { UI_CONFIG } from '@/src/lib/constants';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -46,9 +46,9 @@ export interface FollowerStats {
  * FollowerRepository
  * Handles all follower relationship data access
  */
-export class FollowerRepository extends CachedRepository<Follower, string> {
+export class FollowerRepository extends BaseRepository<Follower, string> {
   constructor() {
-    super('FollowerRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('FollowerRepository');
   }
 
   /**
@@ -56,10 +56,6 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
    */
   async findById(id: string): Promise<RepositoryResult<Follower | null>> {
     return this.executeOperation('findById', async () => {
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache<Follower>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase.from('followers').select('*').eq('id', id).single();
 
@@ -71,7 +67,6 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -166,12 +161,6 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
         throw new Error(`Failed to create follower relationship: ${error.message}`);
       }
 
-      // Invalidate follower/following caches
-      this.clearCache(this.getCacheKey('followers', data.following_id));
-      this.clearCache(this.getCacheKey('following', data.follower_id));
-      this.clearCache(this.getCacheKey('stats', data.following_id));
-      this.clearCache(this.getCacheKey('stats', data.follower_id));
-
       return follower;
     });
   }
@@ -193,13 +182,7 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
         throw new Error(`Failed to update follower relationship: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (follower) {
-        this.clearCache(this.getCacheKey('followers', follower.following_id));
-        this.clearCache(this.getCacheKey('following', follower.follower_id));
-        this.clearCache(this.getCacheKey('stats', follower.following_id));
-        this.clearCache(this.getCacheKey('stats', follower.follower_id));
       }
 
       return follower;
@@ -211,7 +194,6 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
    */
   async delete(id: string, _soft?: boolean): Promise<RepositoryResult<boolean>> {
     return this.executeOperation('delete', async () => {
-      // Get follower first for cache invalidation
       const followerResult = await this.findById(id);
       const follower = followerResult.success ? followerResult.data : null;
 
@@ -222,13 +204,7 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
         throw new Error(`Failed to delete follower relationship: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (follower) {
-        this.clearCache(this.getCacheKey('followers', follower.following_id));
-        this.clearCache(this.getCacheKey('following', follower.follower_id));
-        this.clearCache(this.getCacheKey('stats', follower.following_id));
-        this.clearCache(this.getCacheKey('stats', follower.follower_id));
       }
 
       return true;
@@ -284,9 +260,6 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
   ): Promise<RepositoryResult<Follower[]>> {
     return this.executeOperation('getFollowers', async () => {
       if (!(options?.offset || options?.limit)) {
-        const cacheKey = this.getCacheKey('followers', userId);
-        const cached = this.getFromCache<Follower[]>(cacheKey);
-        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -314,8 +287,6 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
       }
 
       if (!(options?.offset || options?.limit) && data) {
-        const cacheKey = this.getCacheKey('followers', userId);
-        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -331,9 +302,6 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
   ): Promise<RepositoryResult<Follower[]>> {
     return this.executeOperation('getFollowing', async () => {
       if (!(options?.offset || options?.limit)) {
-        const cacheKey = this.getCacheKey('following', userId);
-        const cached = this.getFromCache<Follower[]>(cacheKey);
-        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -361,8 +329,6 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
       }
 
       if (!(options?.offset || options?.limit) && data) {
-        const cacheKey = this.getCacheKey('following', userId);
-        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -374,10 +340,6 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
    */
   async isFollowing(followerId: string, followingId: string): Promise<RepositoryResult<boolean>> {
     return this.executeOperation('isFollowing', async () => {
-      const cacheKey = this.getCacheKey('is-following', `${followerId}:${followingId}`);
-      const cached = this.getFromCache<boolean>(cacheKey);
-      if (cached !== null && cached !== undefined) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('followers')
@@ -391,7 +353,6 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
       }
 
       const isFollowing = !!data;
-      this.setCache(cacheKey, isFollowing);
 
       return isFollowing;
     });
@@ -402,10 +363,6 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
    */
   async getStats(userId: string): Promise<RepositoryResult<FollowerStats>> {
     return this.executeOperation('getStats', async () => {
-      const cacheKey = this.getCacheKey('stats', userId);
-      const cached = this.getFromCache<FollowerStats>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
 
       // Get follower count (users following this user)
@@ -433,8 +390,6 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
         following_count: followingCount || 0,
       };
 
-      this.setCache(cacheKey, stats);
-
       return stats;
     });
   }
@@ -457,13 +412,6 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
       if (error) {
         throw new Error(`Failed to delete follow relationship: ${error.message}`);
       }
-
-      // Clear caches
-      this.clearCache(this.getCacheKey('followers', followingId));
-      this.clearCache(this.getCacheKey('following', followerId));
-      this.clearCache(this.getCacheKey('is-following', `${followerId}:${followingId}`));
-      this.clearCache(this.getCacheKey('stats', followingId));
-      this.clearCache(this.getCacheKey('stats', followerId));
 
       return true;
     });
@@ -495,11 +443,6 @@ export class FollowerRepository extends CachedRepository<Follower, string> {
       if (error2) {
         throw new Error(`Failed to delete following relationships: ${error2.message}`);
       }
-
-      // Clear cache
-      this.clearCache(this.getCacheKey('followers', userId));
-      this.clearCache(this.getCacheKey('following', userId));
-      this.clearCache(this.getCacheKey('stats', userId));
 
       return (count1 || 0) + (count2 || 0);
     });

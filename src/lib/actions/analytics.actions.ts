@@ -14,10 +14,6 @@ import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { statsRedis } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
 import {
-  calculateUserAffinities,
-  validateAffinityScore,
-} from '@/src/lib/personalization/affinity-scorer';
-import {
   buildUserContext,
   generateColdStartRecommendations,
   generateForYouFeed,
@@ -585,8 +581,12 @@ export const getUserAffinities = rateLimitedAction
 
 /**
  * Calculate and update affinity scores for current user
- * This is an expensive operation and should be called sparingly
- * (typically via cron job or after significant interaction events)
+ * Now uses database-native SQL function for better performance
+ *
+ * ARCHITECTURE (2025-10-26): Migrated from application-side calculation
+ * - Before: TypeScript algorithm + multiple DB round-trips (~100 LOC)
+ * - After: Single RPC call to update_user_affinity_scores() function
+ * - Benefits: Faster execution, no memory overhead, enables pg_cron automation
  */
 export const calculateUserAffinitiesAction = rateLimitedAction
   .metadata({
@@ -606,104 +606,33 @@ export const calculateUserAffinitiesAction = rateLimitedAction
     }
 
     try {
-      // Fetch all user interactions via repository (includes caching)
-      const interactionsResult = await userInteractionRepository.findByUser(user.id, {
-        sortBy: 'created_at',
-        sortOrder: 'desc',
+      // Call database function to calculate and persist affinities
+      const { data, error } = await supabase.rpc('update_user_affinity_scores', {
+        p_user_id: user.id,
       });
 
-      if (!interactionsResult.success) {
-        throw new Error(
-          `Failed to fetch interactions: ${interactionsResult.error || 'Unknown error'}`
-        );
+      if (error) {
+        throw new Error(`Failed to calculate affinities: ${error.message}`);
       }
 
-      const interactions = interactionsResult.data || [];
+      const result = data?.[0];
+      const insertedCount = result?.inserted_count || 0;
+      const updatedCount = result?.updated_count || 0;
+      const totalCount = result?.total_affinity_count || 0;
 
-      if (interactions.length === 0) {
-        return {
-          success: true,
-          message: 'No interactions found',
-          affinities_calculated: 0,
-        };
-      }
-
-      // Group interactions by content item
-      const interactionsByContent = new Map<
-        string,
-        {
-          content_type: string;
-          content_slug: string;
-          interactions: Array<{
-            interaction_type: string;
-            metadata: Record<string, unknown>;
-            created_at: string;
-          }>;
-        }
-      >();
-
-      for (const interaction of interactions) {
-        const key = `${interaction.content_type}:${interaction.content_slug}`;
-        if (!interactionsByContent.has(key)) {
-          interactionsByContent.set(key, {
-            content_type: interaction.content_type,
-            content_slug: interaction.content_slug,
-            interactions: [],
-          });
-        }
-        const contentData = interactionsByContent.get(key);
-        if (contentData) {
-          contentData.interactions.push({
-            interaction_type: interaction.interaction_type,
-            metadata: interaction.metadata as Record<string, unknown>,
-            created_at: interaction.created_at,
-          });
-        }
-      }
-
-      // Calculate affinities
-      const affinities = calculateUserAffinities(interactionsByContent);
-
-      // Upsert to database via repository
-      const upsertPromises = affinities.map(async (affinity) => {
-        if (!validateAffinityScore(affinity.affinity_score)) {
-          logger.warn('Invalid affinity score calculated', undefined, {
-            content_type: affinity.content_type,
-            content_slug: affinity.content_slug,
-            score: affinity.affinity_score,
-          });
-          return;
-        }
-
-        const result = await userAffinityRepository.upsert(
-          user.id,
-          affinity.content_type,
-          affinity.content_slug,
-          affinity.affinity_score,
-          affinity.breakdown as Record<string, unknown>
-        );
-
-        if (!result.success) {
-          logger.error('Failed to upsert affinity', undefined, {
-            content_type: affinity.content_type,
-            content_slug: affinity.content_slug,
-            error: result.error ?? '',
-          });
-        }
-      });
-
-      await batchFetch(upsertPromises);
-
-      logger.info('User affinities calculated', {
+      logger.info('User affinities calculated via SQL function', {
         user_id: user.id,
-        affinities_count: affinities.length,
-        total_interactions: interactions.length,
+        inserted_count: insertedCount,
+        updated_count: updatedCount,
+        total_affinity_count: totalCount,
       });
 
       return {
         success: true,
-        message: 'Affinities calculated successfully',
-        affinities_calculated: affinities.length,
+        message: `Affinities calculated successfully (${insertedCount} new, ${updatedCount} updated)`,
+        affinities_calculated: totalCount,
+        inserted_count: insertedCount,
+        updated_count: updatedCount,
       };
     } catch (error) {
       logger.error(

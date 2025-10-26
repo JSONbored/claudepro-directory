@@ -16,7 +16,7 @@
 
 import { UI_CONFIG } from '@/src/lib/constants';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -67,9 +67,9 @@ export type BadgeEarnedItem = {
  * UserBadgeRepository
  * Handles all user badge assignment data access
  */
-export class UserBadgeRepository extends CachedRepository<UserBadge, string> {
+export class UserBadgeRepository extends BaseRepository<UserBadge, string> {
   constructor() {
-    super('UserBadgeRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('UserBadgeRepository');
   }
 
   /**
@@ -77,10 +77,6 @@ export class UserBadgeRepository extends CachedRepository<UserBadge, string> {
    */
   async findById(id: string): Promise<RepositoryResult<UserBadge | null>> {
     return this.executeOperation('findById', async () => {
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache<UserBadge>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase.from('user_badges').select('*').eq('id', id).single();
 
@@ -92,7 +88,6 @@ export class UserBadgeRepository extends CachedRepository<UserBadge, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -188,8 +183,6 @@ export class UserBadgeRepository extends CachedRepository<UserBadge, string> {
       }
 
       if (userBadge) {
-        this.setCache(this.getCacheKey('id', userBadge.id), userBadge);
-        this.clearCache(this.getCacheKey('user', userBadge.user_id));
       }
 
       return userBadge;
@@ -214,13 +207,10 @@ export class UserBadgeRepository extends CachedRepository<UserBadge, string> {
         throw new Error(`Failed to update user badge: ${error.message}`);
       }
 
-      this.clearCache(this.getCacheKey('id', id));
       if (userBadge?.user_id) {
-        this.clearCache(this.getCacheKey('user', userBadge.user_id));
       }
 
       if (userBadge) {
-        this.setCache(this.getCacheKey('id', userBadge.id), userBadge);
       }
 
       return userBadge;
@@ -242,9 +232,7 @@ export class UserBadgeRepository extends CachedRepository<UserBadge, string> {
         throw new Error(`Failed to revoke badge: ${error.message}`);
       }
 
-      this.clearCache(this.getCacheKey('id', id));
       if (userBadge?.user_id) {
-        this.clearCache(this.getCacheKey('user', userBadge.user_id));
       }
 
       return true;
@@ -493,13 +481,10 @@ export class UserBadgeRepository extends CachedRepository<UserBadge, string> {
         throw new Error(`Failed to toggle featured status: ${error.message}`);
       }
 
-      this.clearCache(this.getCacheKey('id', id));
       if (userBadge?.user_id) {
-        this.clearCache(this.getCacheKey('user', userBadge.user_id));
       }
 
       if (userBadge) {
-        this.setCache(this.getCacheKey('id', userBadge.id), userBadge);
       }
 
       return userBadge;

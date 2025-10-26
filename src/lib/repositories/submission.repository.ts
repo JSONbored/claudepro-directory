@@ -16,7 +16,7 @@
 
 import { UI_CONFIG } from '@/src/lib/constants';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -40,9 +40,9 @@ export type SubmissionUpdate = Database['public']['Tables']['submissions']['Upda
  * SubmissionRepository
  * Handles all content submission data access
  */
-export class SubmissionRepository extends CachedRepository<Submission, string> {
+export class SubmissionRepository extends BaseRepository<Submission, string> {
   constructor() {
-    super('SubmissionRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('SubmissionRepository');
   }
 
   /**
@@ -50,10 +50,6 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
    */
   async findById(id: string): Promise<RepositoryResult<Submission | null>> {
     return this.executeOperation('findById', async () => {
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache<Submission>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase.from('submissions').select('*').eq('id', id).single();
 
@@ -65,7 +61,6 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -161,9 +156,6 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
       }
 
       if (submission) {
-        this.setCache(this.getCacheKey('id', submission.id), submission);
-        // Clear user cache
-        this.clearCache(this.getCacheKey('user', submission.user_id));
       }
 
       return submission;
@@ -191,13 +183,10 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
         throw new Error(`Failed to update submission: ${error.message}`);
       }
 
-      this.clearCache(this.getCacheKey('id', id));
       if (submission?.user_id) {
-        this.clearCache(this.getCacheKey('user', submission.user_id));
       }
 
       if (submission) {
-        this.setCache(this.getCacheKey('id', submission.id), submission);
       }
 
       return submission;
@@ -219,9 +208,7 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
         throw new Error(`Failed to delete submission: ${error.message}`);
       }
 
-      this.clearCache(this.getCacheKey('id', id));
       if (submission?.user_id) {
-        this.clearCache(this.getCacheKey('user', submission.user_id));
       }
 
       return true;
@@ -276,10 +263,6 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
     options?: QueryOptions
   ): Promise<RepositoryResult<Submission[]>> {
     return this.executeOperation('findByUser', async () => {
-      const cacheKey = this.getCacheKey('user', userId);
-      const cached = this.getFromCache<Submission[]>(cacheKey);
-      if (cached && !options) return cached;
-
       const supabase = await createClient();
       let query = supabase.from('submissions').select('*').eq('user_id', userId);
 
@@ -300,10 +283,6 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
 
       if (error) {
         throw new Error(`Failed to find user submissions: ${error.message}`);
-      }
-
-      if (data && !options) {
-        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -422,13 +401,10 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
         throw new Error(`Failed to update submission status: ${error.message}`);
       }
 
-      this.clearCache(this.getCacheKey('id', id));
       if (submission?.user_id) {
-        this.clearCache(this.getCacheKey('user', submission.user_id));
       }
 
       if (submission) {
-        this.setCache(this.getCacheKey('id', submission.id), submission);
       }
 
       return submission;
@@ -471,14 +447,6 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
     }>
   > {
     return this.executeOperation('getStats', async () => {
-      const cacheKey = this.getCacheKey('stats', 'all');
-      const cached = this.getFromCache<{
-        total: number;
-        pending: number;
-        mergedThisWeek: number;
-      }>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
 
       // Parallel queries for speed
@@ -518,7 +486,6 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
         mergedThisWeek: mergedWeekResult.count || 0,
       };
 
-      this.setCache(cacheKey, stats);
       return stats;
     });
   }

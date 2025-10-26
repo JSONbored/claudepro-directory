@@ -18,7 +18,7 @@ import { isValidCategory } from '@/src/lib/config/category-config';
 import { UI_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -59,9 +59,9 @@ export interface SimilarityResult {
  * ContentSimilarityRepository
  * Handles all content similarity data access for recommendations
  */
-export class ContentSimilarityRepository extends CachedRepository<ContentSimilarity, string> {
+export class ContentSimilarityRepository extends BaseRepository<ContentSimilarity, string> {
   constructor() {
-    super('ContentSimilarityRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('ContentSimilarityRepository');
   }
 
   /**
@@ -69,10 +69,6 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
    */
   async findById(id: string): Promise<RepositoryResult<ContentSimilarity | null>> {
     return this.executeOperation('findById', async () => {
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache<ContentSimilarity>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('content_similarities')
@@ -88,7 +84,6 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -187,10 +182,6 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
         throw new Error(`Failed to create similarity: ${error.message}`);
       }
 
-      // Invalidate cache for both content items
-      this.clearCache(this.getCacheKey('content', `${data.content_a_type}:${data.content_a_slug}`));
-      this.clearCache(this.getCacheKey('content', `${data.content_b_type}:${data.content_b_slug}`));
-
       return similarity;
     });
   }
@@ -218,17 +209,6 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
         throw new Error(`Failed to update similarity: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
-      if (similarity) {
-        this.clearCache(
-          this.getCacheKey('content', `${similarity.content_a_type}:${similarity.content_a_slug}`)
-        );
-        this.clearCache(
-          this.getCacheKey('content', `${similarity.content_b_type}:${similarity.content_b_slug}`)
-        );
-      }
-
       return similarity;
     });
   }
@@ -238,26 +218,11 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
    */
   async delete(id: string, _soft?: boolean): Promise<RepositoryResult<boolean>> {
     return this.executeOperation('delete', async () => {
-      // Get similarity first for cache invalidation
-      const similarityResult = await this.findById(id);
-      const similarity = similarityResult.success ? similarityResult.data : null;
-
       const supabase = await createClient();
       const { error } = await supabase.from('content_similarities').delete().eq('id', id);
 
       if (error) {
         throw new Error(`Failed to delete similarity: ${error.message}`);
-      }
-
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
-      if (similarity) {
-        this.clearCache(
-          this.getCacheKey('content', `${similarity.content_a_type}:${similarity.content_a_slug}`)
-        );
-        this.clearCache(
-          this.getCacheKey('content', `${similarity.content_b_type}:${similarity.content_b_slug}`)
-        );
       }
 
       return true;
@@ -314,9 +279,6 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
   ): Promise<RepositoryResult<SimilarityResult[]>> {
     return this.executeOperation('findSimilarContent', async (): Promise<SimilarityResult[]> => {
       if (!(options?.offset || options?.limit || options?.minScore)) {
-        const cacheKey = this.getCacheKey('content', `${contentType}:${contentSlug}`);
-        const cached = this.getFromCache<SimilarityResult[]>(cacheKey);
-        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -384,8 +346,6 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
           .filter((r): r is SimilarityResult => r !== null) || [];
 
       if (!(options?.offset || options?.limit || options?.minScore) && results.length > 0) {
-        const cacheKey = this.getCacheKey('content', `${contentType}:${contentSlug}`);
-        this.setCache(cacheKey, results);
       }
 
       return results;
@@ -537,10 +497,6 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
         throw new Error(`Failed to upsert similarity: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('content', `${contentAType}:${contentASlug}`));
-      this.clearCache(this.getCacheKey('content', `${contentBType}:${contentBSlug}`));
-
       return data;
     });
   }
@@ -582,14 +538,10 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
         throw new Error(`Failed to batch upsert similarities: ${error.message}`);
       }
 
-      // Clear all related caches
       const uniqueContent = new Set<string>();
       for (const sim of similarities) {
         uniqueContent.add(`${sim.content_a_type}:${sim.content_a_slug}`);
         uniqueContent.add(`${sim.content_b_type}:${sim.content_b_slug}`);
-      }
-      for (const key of uniqueContent) {
-        this.clearCache(this.getCacheKey('content', key));
       }
 
       return data?.length || 0;
@@ -627,9 +579,6 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
       if (error2) {
         throw new Error(`Failed to delete similarities (reverse): ${error2.message}`);
       }
-
-      // Clear cache
-      this.clearCache(this.getCacheKey('content', `${contentType}:${contentSlug}`));
 
       return (count1 || 0) + (count2 || 0);
     });

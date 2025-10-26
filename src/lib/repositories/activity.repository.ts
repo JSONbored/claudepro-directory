@@ -15,7 +15,7 @@
  * @module repositories/activity
  */
 
-import { CachedRepository, type RepositoryResult } from '@/src/lib/repositories/base.repository';
+import { BaseRepository, type RepositoryResult } from '@/src/lib/repositories/base.repository';
 import { createClient } from '@/src/lib/supabase/server';
 
 // =====================================================
@@ -80,9 +80,9 @@ export type Activity = PostActivity | CommentActivity | VoteActivity | Submissio
  * ActivityRepository
  * Handles user activity aggregation and timeline queries
  */
-export class ActivityRepository extends CachedRepository<ActivitySummary, string> {
+export class ActivityRepository extends BaseRepository<ActivitySummary, string> {
   constructor() {
-    super('ActivityRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('ActivityRepository');
   }
 
   /**
@@ -91,10 +91,6 @@ export class ActivityRepository extends CachedRepository<ActivitySummary, string
    */
   async getSummary(userId: string): Promise<RepositoryResult<ActivitySummary>> {
     return this.executeOperation('getSummary', async () => {
-      const cacheKey = this.getCacheKey('summary', userId);
-      const cached = this.getFromCache<ActivitySummary>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
 
       // Run all count queries in parallel for performance
@@ -163,9 +159,6 @@ export class ActivityRepository extends CachedRepository<ActivitySummary, string
         merged_submissions: mergedCount,
         total_activity: postsCount + commentsCount + votesCount + submissionsCount,
       };
-
-      // Cache the result
-      this.setCache(cacheKey, summary);
 
       return summary;
     });

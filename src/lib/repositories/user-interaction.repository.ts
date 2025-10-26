@@ -18,7 +18,7 @@ import { z } from 'zod';
 import { UI_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -64,9 +64,9 @@ export interface InteractionStats {
  * UserInteractionRepository
  * Handles all user interaction tracking and analytics
  */
-export class UserInteractionRepository extends CachedRepository<UserInteraction, string> {
+export class UserInteractionRepository extends BaseRepository<UserInteraction, string> {
   constructor() {
-    super('UserInteractionRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('UserInteractionRepository');
   }
 
   /**
@@ -74,10 +74,6 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
    */
   async findById(id: string): Promise<RepositoryResult<UserInteraction | null>> {
     return this.executeOperation('findById', async () => {
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('user_interactions')
@@ -93,7 +89,6 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -183,13 +178,8 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
         throw new Error(`Failed to create interaction: ${error.message}`);
       }
 
-      // Clear user cache if user_id is present
       if (data.user_id) {
-        this.clearCache(this.getCacheKey('user', data.user_id));
       }
-
-      // Clear content cache
-      this.clearCache(this.getCacheKey('content', `${data.content_type}:${data.content_slug}`));
 
       return interaction;
     });
@@ -215,10 +205,7 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
         throw new Error(`Failed to update interaction: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (interaction?.user_id) {
-        this.clearCache(this.getCacheKey('user', interaction.user_id));
       }
 
       return interaction;
@@ -230,7 +217,6 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
    */
   async delete(id: string, _soft?: boolean): Promise<RepositoryResult<boolean>> {
     return this.executeOperation('delete', async () => {
-      // Get interaction first for cache invalidation
       const interactionResult = await this.findById(id);
       const interaction = interactionResult.success ? interactionResult.data : null;
 
@@ -241,10 +227,7 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
         throw new Error(`Failed to delete interaction: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (interaction?.user_id) {
-        this.clearCache(this.getCacheKey('user', interaction.user_id));
       }
 
       return true;
@@ -299,12 +282,6 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
     options?: QueryOptions
   ): Promise<RepositoryResult<UserInteraction[]>> {
     return this.executeOperation('findByUser', async () => {
-      if (!(options?.offset || options?.limit)) {
-        const cacheKey = this.getCacheKey('user', userId);
-        const cached = this.getFromCache(cacheKey);
-        if (cached) return Array.isArray(cached) ? cached : [cached];
-      }
-
       const supabase = await createClient();
       let query = supabase.from('user_interactions').select('*').eq('user_id', userId);
 
@@ -329,11 +306,6 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
         throw new Error(`Failed to find user interactions: ${error.message}`);
       }
 
-      if (!(options?.offset || options?.limit) && data) {
-        const cacheKey = this.getCacheKey('user', userId);
-        this.setCache(cacheKey, data);
-      }
-
       return data || [];
     });
   }
@@ -347,12 +319,6 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
     options?: QueryOptions
   ): Promise<RepositoryResult<UserInteraction[]>> {
     return this.executeOperation('findByContent', async () => {
-      if (!(options?.offset || options?.limit)) {
-        const cacheKey = this.getCacheKey('content', `${contentType}:${contentSlug}`);
-        const cached = this.getFromCache(cacheKey);
-        if (cached) return Array.isArray(cached) ? cached : [cached];
-      }
-
       const supabase = await createClient();
       let query = supabase
         .from('user_interactions')
@@ -379,11 +345,6 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
 
       if (error) {
         throw new Error(`Failed to find content interactions: ${error.message}`);
-      }
-
-      if (!(options?.offset || options?.limit) && data) {
-        const cacheKey = this.getCacheKey('content', `${contentType}:${contentSlug}`);
-        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -577,9 +538,6 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
       if (error) {
         throw new Error(`Failed to delete user interactions: ${error.message}`);
       }
-
-      // Clear cache
-      this.clearCache(this.getCacheKey('user', userId));
 
       return true;
     });

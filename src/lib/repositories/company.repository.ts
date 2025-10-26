@@ -16,7 +16,7 @@
 
 import { UI_CONFIG } from '@/src/lib/constants';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -43,9 +43,9 @@ export type CompanyJobStats = Database['public']['Views']['company_job_stats']['
  * CompanyRepository
  * Handles all company profile data access
  */
-export class CompanyRepository extends CachedRepository<Company, string> {
+export class CompanyRepository extends BaseRepository<Company, string> {
   constructor() {
-    super('CompanyRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('CompanyRepository');
   }
 
   /**
@@ -53,10 +53,6 @@ export class CompanyRepository extends CachedRepository<Company, string> {
    */
   async findById(id: string): Promise<RepositoryResult<Company | null>> {
     return this.executeOperation('findById', async () => {
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase.from('companies').select('*').eq('id', id).single();
 
@@ -68,10 +64,7 @@ export class CompanyRepository extends CachedRepository<Company, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
-        // Also cache by slug
         if (data.slug) {
-          this.setCache(this.getCacheKey('slug', data.slug), data);
         }
       }
 
@@ -172,11 +165,8 @@ export class CompanyRepository extends CachedRepository<Company, string> {
         throw new Error(`Failed to create company: ${error.message}`);
       }
 
-      // Cache the new company
       if (company) {
-        this.setCache(this.getCacheKey('id', company.id), company);
         if (company.slug) {
-          this.setCache(this.getCacheKey('slug', company.slug), company);
         }
       }
 
@@ -205,20 +195,13 @@ export class CompanyRepository extends CachedRepository<Company, string> {
         throw new Error(`Failed to update company: ${error.message}`);
       }
 
-      // Clear all caches for this company
-      this.clearCache(this.getCacheKey('id', id));
       if (company?.slug) {
-        this.clearCache(this.getCacheKey('slug', company.slug));
       }
       if (company?.owner_id) {
-        this.clearCache(this.getCacheKey('owner', company.owner_id));
       }
 
-      // Cache the updated company
       if (company) {
-        this.setCache(this.getCacheKey('id', company.id), company);
         if (company.slug) {
-          this.setCache(this.getCacheKey('slug', company.slug), company);
         }
       }
 
@@ -231,7 +214,6 @@ export class CompanyRepository extends CachedRepository<Company, string> {
    */
   async delete(id: string, _soft?: boolean): Promise<RepositoryResult<boolean>> {
     return this.executeOperation('delete', async () => {
-      // Get company first for cache invalidation
       const companyResult = await this.findById(id);
       const company = companyResult.success ? companyResult.data : null;
 
@@ -242,13 +224,9 @@ export class CompanyRepository extends CachedRepository<Company, string> {
         throw new Error(`Failed to delete company: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (company?.slug) {
-        this.clearCache(this.getCacheKey('slug', company.slug));
       }
       if (company?.owner_id) {
-        this.clearCache(this.getCacheKey('owner', company.owner_id));
       }
 
       return true;
@@ -300,10 +278,6 @@ export class CompanyRepository extends CachedRepository<Company, string> {
    */
   async findBySlug(slug: string): Promise<RepositoryResult<Company | null>> {
     return this.executeOperation('findBySlug', async () => {
-      const cacheKey = this.getCacheKey('slug', slug);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('companies')
@@ -319,9 +293,6 @@ export class CompanyRepository extends CachedRepository<Company, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
-        // Also cache by ID
-        this.setCache(this.getCacheKey('id', data.id), data);
       }
 
       return data;
@@ -392,18 +363,11 @@ export class CompanyRepository extends CachedRepository<Company, string> {
         throw new Error(`Failed to update company: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (company?.slug) {
-        this.clearCache(this.getCacheKey('slug', company.slug));
       }
-      this.clearCache(this.getCacheKey('owner', ownerId));
 
-      // Cache the updated company
       if (company) {
-        this.setCache(this.getCacheKey('id', company.id), company);
         if (company.slug) {
-          this.setCache(this.getCacheKey('slug', company.slug), company);
         }
       }
 
@@ -416,10 +380,6 @@ export class CompanyRepository extends CachedRepository<Company, string> {
    */
   async getFeatured(limit = 10): Promise<RepositoryResult<Company[]>> {
     return this.executeOperation('getFeatured', async () => {
-      const cacheKey = this.getCacheKey('featured', String(limit));
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return Array.isArray(cached) ? cached : [cached];
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('companies')
@@ -430,10 +390,6 @@ export class CompanyRepository extends CachedRepository<Company, string> {
 
       if (error) {
         throw new Error(`Failed to get featured companies: ${error.message}`);
-      }
-
-      if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data || [];

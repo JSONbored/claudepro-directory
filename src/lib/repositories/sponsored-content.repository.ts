@@ -17,7 +17,7 @@
 
 import { UI_CONFIG } from '@/src/lib/constants';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -50,9 +50,9 @@ export type SponsoredClickInsert = Database['public']['Tables']['sponsored_click
  * SponsoredContentRepository
  * Handles all sponsored content data access
  */
-export class SponsoredContentRepository extends CachedRepository<SponsoredContent, string> {
+export class SponsoredContentRepository extends BaseRepository<SponsoredContent, string> {
   constructor() {
-    super('SponsoredContentRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('SponsoredContentRepository');
   }
 
   /**
@@ -60,10 +60,6 @@ export class SponsoredContentRepository extends CachedRepository<SponsoredConten
    */
   async findById(id: string): Promise<RepositoryResult<SponsoredContent | null>> {
     return this.executeOperation('findById', async () => {
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('sponsored_content')
@@ -79,7 +75,6 @@ export class SponsoredContentRepository extends CachedRepository<SponsoredConten
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -172,8 +167,6 @@ export class SponsoredContentRepository extends CachedRepository<SponsoredConten
       }
 
       if (content) {
-        this.setCache(this.getCacheKey('id', content.id), content);
-        this.clearCache(this.getCacheKey('active', 'all'));
       }
 
       return content;
@@ -201,11 +194,7 @@ export class SponsoredContentRepository extends CachedRepository<SponsoredConten
         throw new Error(`Failed to update sponsored content: ${error.message}`);
       }
 
-      this.clearCache(this.getCacheKey('id', id));
-      this.clearCache(this.getCacheKey('active', 'all'));
-
       if (content) {
-        this.setCache(this.getCacheKey('id', content.id), content);
       }
 
       return content;
@@ -223,9 +212,6 @@ export class SponsoredContentRepository extends CachedRepository<SponsoredConten
       if (error) {
         throw new Error(`Failed to delete sponsored content: ${error.message}`);
       }
-
-      this.clearCache(this.getCacheKey('id', id));
-      this.clearCache(this.getCacheKey('active', 'all'));
 
       return true;
     });
@@ -277,10 +263,6 @@ export class SponsoredContentRepository extends CachedRepository<SponsoredConten
    */
   async findActive(limit = 5): Promise<RepositoryResult<SponsoredContent[]>> {
     return this.executeOperation('findActive', async () => {
-      const cacheKey = this.getCacheKey('active', `limit-${limit}`);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return Array.isArray(cached) ? cached : [cached];
-
       const supabase = await createClient();
       const now = new Date().toISOString();
 
@@ -305,8 +287,6 @@ export class SponsoredContentRepository extends CachedRepository<SponsoredConten
         }
         return true;
       });
-
-      this.setCache(cacheKey, filtered);
 
       return filtered;
     });
@@ -349,9 +329,6 @@ export class SponsoredContentRepository extends CachedRepository<SponsoredConten
           // Silent fail - don't block on counter increment
         });
 
-      // Clear cache for this content
-      this.clearCache(this.getCacheKey('id', data.sponsored_id));
-
       return true;
     });
   }
@@ -390,9 +367,6 @@ export class SponsoredContentRepository extends CachedRepository<SponsoredConten
         .then(() => {
           // Silent fail - don't block on counter increment
         });
-
-      // Clear cache for this content
-      this.clearCache(this.getCacheKey('id', data.sponsored_id));
 
       return true;
     });

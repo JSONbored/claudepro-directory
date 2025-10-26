@@ -124,6 +124,203 @@ COMMENT ON FUNCTION "public"."batch_recalculate_reputation"("user_ids" "uuid"[])
 
 
 
+CREATE OR REPLACE FUNCTION "public"."batch_update_user_affinity_scores"("p_user_ids" "uuid"[], "p_max_users" integer DEFAULT 100) RETURNS TABLE("user_id" "uuid", "inserted_count" integer, "updated_count" integer, "total_affinity_count" integer, "processing_time_ms" integer)
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_user_id UUID;
+  v_start_time TIMESTAMPTZ;
+  v_processing_time INTEGER;
+BEGIN
+  -- Security: Enforce batch size limit
+  IF array_length(p_user_ids, 1) > p_max_users THEN
+    RAISE EXCEPTION 'Maximum % users per batch. Requested: %', p_max_users, array_length(p_user_ids, 1);
+  END IF;
+
+  -- Process each user
+  FOREACH v_user_id IN ARRAY p_user_ids
+  LOOP
+    v_start_time := clock_timestamp();
+
+    -- Calculate and update affinities
+    RETURN QUERY
+    SELECT
+      v_user_id,
+      result.inserted_count,
+      result.updated_count,
+      result.total_affinity_count,
+      EXTRACT(MILLISECONDS FROM (clock_timestamp() - v_start_time))::INTEGER
+    FROM public.update_user_affinity_scores(v_user_id) AS result;
+  END LOOP;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."batch_update_user_affinity_scores"("p_user_ids" "uuid"[], "p_max_users" integer) OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."batch_update_user_affinity_scores"("p_user_ids" "uuid"[], "p_max_users" integer) IS 'Batch processes affinity score updates for multiple users. Used by pg_cron job (SUPABASE-015). Max 100 users per batch. Returns processing statistics per user.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."calculate_affinity_score_for_content"("p_user_id" "uuid", "p_content_type" "text", "p_content_slug" "text") RETURNS TABLE("user_id" "uuid", "content_type" "text", "content_slug" "text", "affinity_score" integer, "breakdown" "jsonb", "component_scores" "jsonb", "interaction_summary" "jsonb")
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_config RECORD;
+  v_views INTEGER;
+  v_bookmarks INTEGER;
+  v_copies INTEGER;
+  v_time_spent_seconds NUMERIC;
+  v_last_interaction TIMESTAMPTZ;
+  v_days_since_last NUMERIC;
+
+  -- Component scores (0-1 range)
+  v_view_score NUMERIC;
+  v_time_score NUMERIC;
+  v_bookmark_score NUMERIC;
+  v_copy_score NUMERIC;
+  v_recency_score NUMERIC;
+
+  -- Weighted scores (0-1 range)
+  v_weighted_total NUMERIC;
+  v_final_score INTEGER;
+BEGIN
+  -- Load configuration
+  SELECT * INTO v_config FROM public.affinity_config WHERE id = 1;
+
+  -- Aggregate interactions for this content
+  SELECT
+    COUNT(*) FILTER (WHERE interaction_type = 'view') AS views,
+    COUNT(*) FILTER (WHERE interaction_type = 'bookmark') AS bookmarks,
+    COUNT(*) FILTER (WHERE interaction_type = 'copy') AS copies,
+    COALESCE(SUM((metadata->>'time_spent_seconds')::INTEGER) FILTER (WHERE interaction_type = 'time_spent'), 0) AS time_spent,
+    MAX(created_at) AS last_interaction
+  INTO v_views, v_bookmarks, v_copies, v_time_spent_seconds, v_last_interaction
+  FROM public.user_interactions
+  WHERE
+    user_interactions.user_id = p_user_id
+    AND user_interactions.content_type = p_content_type
+    AND user_interactions.content_slug = p_content_slug
+    AND interaction_type IN ('view', 'bookmark', 'copy', 'time_spent');
+
+  -- Return NULL if no interactions found
+  IF v_views IS NULL OR v_views = 0 THEN
+    RETURN;
+  END IF;
+
+  -- Calculate component scores (0-1 range, capped at threshold)
+  v_view_score := LEAST(v_views::NUMERIC / v_config.max_views, 1.0);
+  v_time_score := LEAST(v_time_spent_seconds / v_config.max_time_spent_seconds, 1.0);
+  v_bookmark_score := LEAST(v_bookmarks::NUMERIC / v_config.max_bookmarks, 1.0);
+  v_copy_score := LEAST(v_copies::NUMERIC / v_config.max_copies, 1.0);
+
+  -- Calculate recency boost using exponential decay
+  -- Formula: exp(-ln(2) * (days_since_last / half_life_days))
+  v_days_since_last := EXTRACT(EPOCH FROM (NOW() - v_last_interaction)) / 86400.0;
+  v_recency_score := EXP(-LN(2) * (v_days_since_last / v_config.recency_half_life_days));
+
+  -- Calculate weighted total (0-1 range)
+  v_weighted_total :=
+    (v_view_score * v_config.weight_views) +
+    (v_time_score * v_config.weight_time_spent) +
+    (v_bookmark_score * v_config.weight_bookmarks) +
+    (v_copy_score * v_config.weight_copies) +
+    (v_recency_score * v_config.weight_recency);
+
+  -- Convert to 0-100 range
+  v_final_score := ROUND(v_weighted_total * 100)::INTEGER;
+
+  -- Return result only if above minimum threshold
+  IF v_final_score >= v_config.min_score_threshold THEN
+    RETURN QUERY SELECT
+      p_user_id,
+      p_content_type,
+      p_content_slug,
+      v_final_score,
+      -- Breakdown: weighted contribution of each component (0-100 scale)
+      jsonb_build_object(
+        'views', ROUND(v_view_score * v_config.weight_views * 100),
+        'bookmarks', ROUND(v_bookmark_score * v_config.weight_bookmarks * 100),
+        'copies', ROUND(v_copy_score * v_config.weight_copies * 100),
+        'time_spent', ROUND(v_time_score * v_config.weight_time_spent * 100),
+        'recency_boost', ROUND(v_recency_score * v_config.weight_recency * 100)
+      ),
+      -- Component scores: raw 0-1 scores before weighting
+      jsonb_build_object(
+        'view_score', v_view_score,
+        'time_score', v_time_score,
+        'bookmark_score', v_bookmark_score,
+        'copy_score', v_copy_score,
+        'recency_score', v_recency_score
+      ),
+      -- Interaction summary: raw counts
+      jsonb_build_object(
+        'views', v_views,
+        'bookmarks', v_bookmarks,
+        'copies', v_copies,
+        'time_spent_seconds', v_time_spent_seconds,
+        'days_since_last_interaction', ROUND(v_days_since_last, 2),
+        'last_interaction', v_last_interaction
+      );
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."calculate_affinity_score_for_content"("p_user_id" "uuid", "p_content_type" "text", "p_content_slug" "text") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."calculate_affinity_score_for_content"("p_user_id" "uuid", "p_content_type" "text", "p_content_slug" "text") IS 'Calculates affinity score for a specific user-content pair. Replaces calculateAffinityScore() from affinity-scorer.ts. Returns NULL if no interactions or score below threshold.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."calculate_all_user_affinities"("p_user_id" "uuid") RETURNS TABLE("content_type" "text", "content_slug" "text", "affinity_score" integer, "breakdown" "jsonb", "interaction_summary" "jsonb")
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    aff.content_type,
+    aff.content_slug,
+    aff.affinity_score,
+    aff.breakdown,
+    aff.interaction_summary
+  FROM (
+    -- Get distinct content items user has interacted with
+    SELECT DISTINCT
+      ui.content_type,
+      ui.content_slug
+    FROM public.user_interactions ui
+    WHERE
+      ui.user_id = p_user_id
+      AND ui.interaction_type IN ('view', 'bookmark', 'copy', 'time_spent')
+  ) AS distinct_content
+  -- Calculate affinity for each content item
+  CROSS JOIN LATERAL (
+    SELECT *
+    FROM public.calculate_affinity_score_for_content(
+      p_user_id,
+      distinct_content.content_type,
+      distinct_content.content_slug
+    )
+  ) AS aff
+  WHERE aff.affinity_score IS NOT NULL
+  ORDER BY aff.affinity_score DESC;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."calculate_all_user_affinities"("p_user_id" "uuid") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."calculate_all_user_affinities"("p_user_id" "uuid") IS 'Calculates affinities for ALL content a user has interacted with. Replaces calculateUserAffinities() from affinity-scorer.ts. Returns sorted by affinity_score DESC.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."calculate_user_reputation"("target_user_id" "uuid") RETURNS integer
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -1157,6 +1354,90 @@ $$;
 ALTER FUNCTION "public"."update_updated_at_column"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."update_user_affinity_scores"("p_user_id" "uuid") RETURNS TABLE("inserted_count" integer, "updated_count" integer, "total_affinity_count" integer)
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_inserted INTEGER := 0;
+  v_updated INTEGER := 0;
+  v_total INTEGER := 0;
+BEGIN
+  -- Calculate all affinities and upsert to user_affinity table
+  WITH calculated_affinities AS (
+    SELECT * FROM public.calculate_all_user_affinities(p_user_id)
+  ),
+  upsert_results AS (
+    INSERT INTO public.user_affinity (
+      user_id,
+      content_type,
+      content_slug,
+      affinity_score,
+      last_calculated_at
+    )
+    SELECT
+      p_user_id,
+      content_type,
+      content_slug,
+      affinity_score,
+      NOW()
+    FROM calculated_affinities
+    ON CONFLICT (user_id, content_type, content_slug)
+    DO UPDATE SET
+      affinity_score = EXCLUDED.affinity_score,
+      last_calculated_at = EXCLUDED.last_calculated_at,
+      updated_at = NOW()
+    RETURNING
+      CASE WHEN user_affinity.created_at = user_affinity.updated_at THEN 1 ELSE 0 END as is_insert
+  )
+  SELECT
+    SUM(is_insert)::INTEGER,
+    SUM(CASE WHEN is_insert = 0 THEN 1 ELSE 0 END)::INTEGER,
+    COUNT(*)::INTEGER
+  INTO v_inserted, v_updated, v_total
+  FROM upsert_results;
+
+  -- Return summary
+  RETURN QUERY SELECT
+    COALESCE(v_inserted, 0),
+    COALESCE(v_updated, 0),
+    COALESCE(v_total, 0);
+END;
+$$;
+
+
+ALTER FUNCTION "public"."update_user_affinity_scores"("p_user_id" "uuid") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."update_user_affinity_scores"("p_user_id" "uuid") IS 'Calculates all affinities for a user and persists to user_affinity table. Used by pg_cron job (SUPABASE-015) and on-demand calculations. Returns count of inserted/updated records.';
+
+
+
+CREATE TABLE IF NOT EXISTS "public"."affinity_config" (
+    "id" integer DEFAULT 1 NOT NULL,
+    "weight_views" numeric(3,2) DEFAULT 0.20,
+    "weight_time_spent" numeric(3,2) DEFAULT 0.25,
+    "weight_bookmarks" numeric(3,2) DEFAULT 0.30,
+    "weight_copies" numeric(3,2) DEFAULT 0.15,
+    "weight_recency" numeric(3,2) DEFAULT 0.10,
+    "max_views" integer DEFAULT 10,
+    "max_time_spent_seconds" integer DEFAULT 300,
+    "max_bookmarks" integer DEFAULT 1,
+    "max_copies" integer DEFAULT 3,
+    "recency_half_life_days" integer DEFAULT 30,
+    "min_score_threshold" integer DEFAULT 10,
+    "updated_at" timestamp with time zone DEFAULT "now"(),
+    CONSTRAINT "single_row_check" CHECK (("id" = 1))
+);
+
+
+ALTER TABLE "public"."affinity_config" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."affinity_config" IS 'Configuration for affinity scoring algorithm. Single-row table with default weights and thresholds matching affinity-scorer.ts';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."badges" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "slug" "text" NOT NULL,
@@ -1879,6 +2160,11 @@ CREATE MATERIALIZED VIEW "public"."user_stats" AS
 ALTER MATERIALIZED VIEW "public"."user_stats" OWNER TO "postgres";
 
 
+ALTER TABLE ONLY "public"."affinity_config"
+    ADD CONSTRAINT "affinity_config_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."badges"
     ADD CONSTRAINT "badges_pkey" PRIMARY KEY ("id");
 
@@ -2525,6 +2811,14 @@ CREATE INDEX "idx_user_content_type" ON "public"."user_content" USING "btree" ("
 
 
 CREATE INDEX "idx_user_content_user_id" ON "public"."user_content" USING "btree" ("user_id");
+
+
+
+CREATE INDEX "idx_user_interactions_affinity_lookup" ON "public"."user_interactions" USING "btree" ("user_id", "content_type", "content_slug", "interaction_type") WHERE ("interaction_type" = ANY (ARRAY['view'::"text", 'bookmark'::"text", 'copy'::"text", 'time_spent'::"text"]));
+
+
+
+COMMENT ON INDEX "public"."idx_user_interactions_affinity_lookup" IS 'Optimizes affinity score calculation queries. Filters only relevant interaction types.';
 
 
 
@@ -3518,6 +3812,20 @@ GRANT ALL ON FUNCTION "public"."batch_recalculate_reputation"("user_ids" "uuid"[
 
 
 
+GRANT ALL ON FUNCTION "public"."batch_update_user_affinity_scores"("p_user_ids" "uuid"[], "p_max_users" integer) TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."calculate_affinity_score_for_content"("p_user_id" "uuid", "p_content_type" "text", "p_content_slug" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."calculate_affinity_score_for_content"("p_user_id" "uuid", "p_content_type" "text", "p_content_slug" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."calculate_all_user_affinities"("p_user_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."calculate_all_user_affinities"("p_user_id" "uuid") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."calculate_user_reputation"("target_user_id" "uuid") TO "authenticated";
 
 
@@ -3602,6 +3910,8 @@ GRANT ALL ON FUNCTION "public"."search_users"("search_query" "text", "result_lim
 
 
 
+GRANT ALL ON FUNCTION "public"."update_user_affinity_scores"("p_user_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_user_affinity_scores"("p_user_id" "uuid") TO "service_role";
 
 
 
@@ -3626,6 +3936,14 @@ GRANT ALL ON FUNCTION "public"."search_users"("search_query" "text", "result_lim
 
 
 
+
+
+
+
+
+
+GRANT SELECT ON TABLE "public"."affinity_config" TO "authenticated";
+GRANT ALL ON TABLE "public"."affinity_config" TO "service_role";
 
 
 

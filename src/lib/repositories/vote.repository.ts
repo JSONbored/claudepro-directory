@@ -16,7 +16,7 @@
 
 import { UI_CONFIG } from '@/src/lib/constants';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -40,9 +40,9 @@ export type VoteUpdate = Database['public']['Tables']['votes']['Update'];
  * VoteRepository
  * Handles all vote data access
  */
-export class VoteRepository extends CachedRepository<Vote, string> {
+export class VoteRepository extends BaseRepository<Vote, string> {
   constructor() {
-    super('VoteRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('VoteRepository');
   }
 
   /**
@@ -50,10 +50,6 @@ export class VoteRepository extends CachedRepository<Vote, string> {
    */
   async findById(id: string): Promise<RepositoryResult<Vote | null>> {
     return this.executeOperation('findById', async () => {
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase.from('votes').select('*').eq('id', id).single();
 
@@ -65,7 +61,6 @@ export class VoteRepository extends CachedRepository<Vote, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -161,9 +156,7 @@ export class VoteRepository extends CachedRepository<Vote, string> {
         throw new Error(`Failed to create vote: ${error.message}`);
       }
 
-      // Invalidate related caches
       if (vote) {
-        this.clearCache(this.getCacheKey('user-post', `${vote.user_id}:${vote.post_id}`));
       }
 
       return vote;
@@ -188,9 +181,6 @@ export class VoteRepository extends CachedRepository<Vote, string> {
         throw new Error(`Failed to update vote: ${error.message}`);
       }
 
-      // Clear cache
-      this.clearCache(this.getCacheKey('id', id));
-
       return vote;
     });
   }
@@ -200,7 +190,6 @@ export class VoteRepository extends CachedRepository<Vote, string> {
    */
   async delete(id: string, _soft?: boolean): Promise<RepositoryResult<boolean>> {
     return this.executeOperation('delete', async () => {
-      // Get vote first for cache invalidation
       const voteResult = await this.findById(id);
       const vote = voteResult.success ? voteResult.data : null;
 
@@ -211,10 +200,7 @@ export class VoteRepository extends CachedRepository<Vote, string> {
         throw new Error(`Failed to delete vote: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (vote) {
-        this.clearCache(this.getCacheKey('user-post', `${vote.user_id}:${vote.post_id}`));
       }
 
       return true;
@@ -266,10 +252,6 @@ export class VoteRepository extends CachedRepository<Vote, string> {
    */
   async findByUserAndPost(userId: string, postId: string): Promise<RepositoryResult<Vote | null>> {
     return this.executeOperation('findByUserAndPost', async () => {
-      const cacheKey = this.getCacheKey('user-post', `${userId}:${postId}`);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('votes')
@@ -286,7 +268,6 @@ export class VoteRepository extends CachedRepository<Vote, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -308,9 +289,6 @@ export class VoteRepository extends CachedRepository<Vote, string> {
       if (error) {
         throw new Error(`Failed to delete vote: ${error.message}`);
       }
-
-      // Clear cache
-      this.clearCache(this.getCacheKey('user-post', `${userId}:${postId}`));
 
       return true;
     });

@@ -16,7 +16,7 @@
 
 import { UI_CONFIG } from '@/src/lib/constants';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -67,9 +67,9 @@ export interface ReviewStats {
  * ReviewRepository
  * Handles all review data access with caching and aggregations
  */
-export class ReviewRepository extends CachedRepository<Review, string> {
+export class ReviewRepository extends BaseRepository<Review, string> {
   constructor() {
-    super('ReviewRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('ReviewRepository');
   }
 
   /**
@@ -77,10 +77,6 @@ export class ReviewRepository extends CachedRepository<Review, string> {
    */
   async findById(id: string): Promise<RepositoryResult<Review | null>> {
     return this.executeOperation('findById', async () => {
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache<Review>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('review_ratings')
@@ -96,7 +92,6 @@ export class ReviewRepository extends CachedRepository<Review, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -186,11 +181,6 @@ export class ReviewRepository extends CachedRepository<Review, string> {
         throw new Error(`Failed to create review: ${error.message}`);
       }
 
-      // Clear content reviews cache
-      this.clearCache(this.getCacheKey('content', `${data.content_type}:${data.content_slug}`));
-      this.clearCache(this.getCacheKey('user', data.user_id));
-      this.clearCache(this.getCacheKey('stats', `${data.content_type}:${data.content_slug}`));
-
       return review;
     });
   }
@@ -215,14 +205,7 @@ export class ReviewRepository extends CachedRepository<Review, string> {
         throw new Error(`Failed to update review: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (review) {
-        this.clearCache(
-          this.getCacheKey('content', `${review.content_type}:${review.content_slug}`)
-        );
-        this.clearCache(this.getCacheKey('user', review.user_id));
-        this.clearCache(this.getCacheKey('stats', `${review.content_type}:${review.content_slug}`));
       }
 
       return review;
@@ -234,7 +217,6 @@ export class ReviewRepository extends CachedRepository<Review, string> {
    */
   async delete(id: string, _soft?: boolean): Promise<RepositoryResult<boolean>> {
     return this.executeOperation('delete', async () => {
-      // Get review first for cache invalidation
       const reviewResult = await this.findById(id);
       const review = reviewResult.success ? reviewResult.data : null;
 
@@ -245,14 +227,7 @@ export class ReviewRepository extends CachedRepository<Review, string> {
         throw new Error(`Failed to delete review: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (review) {
-        this.clearCache(
-          this.getCacheKey('content', `${review.content_type}:${review.content_slug}`)
-        );
-        this.clearCache(this.getCacheKey('user', review.user_id));
-        this.clearCache(this.getCacheKey('stats', `${review.content_type}:${review.content_slug}`));
       }
 
       return true;
@@ -309,9 +284,6 @@ export class ReviewRepository extends CachedRepository<Review, string> {
   ): Promise<RepositoryResult<Review[]>> {
     return this.executeOperation('findByContent', async () => {
       if (!(options?.offset || options?.limit)) {
-        const cacheKey = this.getCacheKey('content', `${contentType}:${contentSlug}`);
-        const cached = this.getFromCache<Review[]>(cacheKey);
-        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -343,8 +315,6 @@ export class ReviewRepository extends CachedRepository<Review, string> {
       }
 
       if (!(options?.offset || options?.limit) && data) {
-        const cacheKey = this.getCacheKey('content', `${contentType}:${contentSlug}`);
-        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -360,10 +330,6 @@ export class ReviewRepository extends CachedRepository<Review, string> {
     contentSlug: string
   ): Promise<RepositoryResult<Review | null>> {
     return this.executeOperation('findByUserAndContent', async () => {
-      const cacheKey = this.getCacheKey('user-content', `${userId}:${contentType}:${contentSlug}`);
-      const cached = this.getFromCache<Review>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('review_ratings')
@@ -381,7 +347,6 @@ export class ReviewRepository extends CachedRepository<Review, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -394,9 +359,6 @@ export class ReviewRepository extends CachedRepository<Review, string> {
   async findByUser(userId: string, options?: QueryOptions): Promise<RepositoryResult<Review[]>> {
     return this.executeOperation('findByUser', async () => {
       if (!(options?.offset || options?.limit)) {
-        const cacheKey = this.getCacheKey('user', userId);
-        const cached = this.getFromCache<Review[]>(cacheKey);
-        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -424,8 +386,6 @@ export class ReviewRepository extends CachedRepository<Review, string> {
       }
 
       if (!(options?.offset || options?.limit) && data) {
-        const cacheKey = this.getCacheKey('user', userId);
-        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -437,10 +397,6 @@ export class ReviewRepository extends CachedRepository<Review, string> {
    */
   async getStats(contentType: string, contentSlug: string): Promise<RepositoryResult<ReviewStats>> {
     return this.executeOperation('getStats', async () => {
-      const cacheKey = this.getCacheKey('stats', `${contentType}:${contentSlug}`);
-      const cached = this.getFromCache<ReviewStats>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data: reviews, error } = await supabase
         .from('review_ratings')
@@ -479,9 +435,6 @@ export class ReviewRepository extends CachedRepository<Review, string> {
         rating_distribution: distribution,
       };
 
-      // Cache the stats
-      this.setCache(cacheKey, stats);
-
       return stats;
     });
   }
@@ -513,10 +466,6 @@ export class ReviewRepository extends CachedRepository<Review, string> {
         throw new Error(`Failed to increment helpful count: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', reviewId));
-      this.clearCache(this.getCacheKey('content', `${review.content_type}:${review.content_slug}`));
-
       return data;
     });
   }
@@ -547,10 +496,6 @@ export class ReviewRepository extends CachedRepository<Review, string> {
       if (error) {
         throw new Error(`Failed to decrement helpful count: ${error.message}`);
       }
-
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', reviewId));
-      this.clearCache(this.getCacheKey('content', `${review.content_type}:${review.content_slug}`));
 
       return data;
     });

@@ -16,7 +16,7 @@
 
 import { UI_CONFIG } from '@/src/lib/constants';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -40,9 +40,9 @@ export type CommentUpdate = Database['public']['Tables']['comments']['Update'];
  * CommentRepository
  * Handles all comment data access
  */
-export class CommentRepository extends CachedRepository<Comment, string> {
+export class CommentRepository extends BaseRepository<Comment, string> {
   constructor() {
-    super('CommentRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('CommentRepository');
   }
 
   /**
@@ -50,10 +50,6 @@ export class CommentRepository extends CachedRepository<Comment, string> {
    */
   async findById(id: string): Promise<RepositoryResult<Comment | null>> {
     return this.executeOperation('findById', async () => {
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase.from('comments').select('*').eq('id', id).single();
 
@@ -65,7 +61,6 @@ export class CommentRepository extends CachedRepository<Comment, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -162,9 +157,7 @@ export class CommentRepository extends CachedRepository<Comment, string> {
         throw new Error(`Failed to create comment: ${error.message}`);
       }
 
-      // Invalidate post comments cache
       if (comment) {
-        this.clearCache(this.getCacheKey('post', comment.post_id));
       }
 
       return comment;
@@ -192,10 +185,7 @@ export class CommentRepository extends CachedRepository<Comment, string> {
         throw new Error(`Failed to update comment: ${error.message}`);
       }
 
-      // Clear cache
-      this.clearCache(this.getCacheKey('id', id));
       if (comment) {
-        this.clearCache(this.getCacheKey('post', comment.post_id));
       }
 
       return comment;
@@ -207,7 +197,6 @@ export class CommentRepository extends CachedRepository<Comment, string> {
    */
   async delete(id: string, _soft?: boolean): Promise<RepositoryResult<boolean>> {
     return this.executeOperation('delete', async () => {
-      // Get comment first for cache invalidation
       const commentResult = await this.findById(id);
       const comment = commentResult.success ? commentResult.data : null;
 
@@ -218,10 +207,7 @@ export class CommentRepository extends CachedRepository<Comment, string> {
         throw new Error(`Failed to delete comment: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (comment) {
-        this.clearCache(this.getCacheKey('post', comment.post_id));
       }
 
       return true;
@@ -339,7 +325,6 @@ export class CommentRepository extends CachedRepository<Comment, string> {
    */
   async deleteByOwner(id: string, userId: string): Promise<RepositoryResult<boolean>> {
     return this.executeOperation('deleteByOwner', async () => {
-      // Get comment first for cache invalidation
       const commentResult = await this.findById(id);
       const comment = commentResult.success ? commentResult.data : null;
 
@@ -350,10 +335,7 @@ export class CommentRepository extends CachedRepository<Comment, string> {
         throw new Error(`Failed to delete comment: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (comment) {
-        this.clearCache(this.getCacheKey('post', comment.post_id));
       }
 
       return true;

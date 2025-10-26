@@ -16,7 +16,7 @@
 
 import { UI_CONFIG } from '@/src/lib/constants';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -51,9 +51,9 @@ export interface UserStats {
  * UserRepository
  * Handles all user profile data access
  */
-export class UserRepository extends CachedRepository<User, string> {
+export class UserRepository extends BaseRepository<User, string> {
   constructor() {
-    super('UserRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('UserRepository');
   }
 
   /**
@@ -61,10 +61,6 @@ export class UserRepository extends CachedRepository<User, string> {
    */
   async findById(id: string): Promise<RepositoryResult<User | null>> {
     return this.executeOperation('findById', async () => {
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase.from('users').select('*').eq('id', id).single();
 
@@ -76,10 +72,7 @@ export class UserRepository extends CachedRepository<User, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
-        // Also cache by slug if available
         if (data.slug) {
-          this.setCache(this.getCacheKey('slug', data.slug), data);
         }
       }
 
@@ -180,11 +173,8 @@ export class UserRepository extends CachedRepository<User, string> {
         throw new Error(`Failed to create user: ${error.message}`);
       }
 
-      // Cache the new user
       if (user) {
-        this.setCache(this.getCacheKey('id', user.id), user);
         if (user.slug) {
-          this.setCache(this.getCacheKey('slug', user.slug), user);
         }
       }
 
@@ -218,21 +208,13 @@ export class UserRepository extends CachedRepository<User, string> {
         throw new Error(`Failed to update user: ${error.message}`);
       }
 
-      // Clear all caches for this user
-      this.clearCache(this.getCacheKey('id', id));
       if (user?.slug) {
-        this.clearCache(this.getCacheKey('slug', user.slug));
       }
-      // Also clear old slug cache if slug was changed
       if (data.slug && data.slug !== user?.slug) {
-        this.clearCache(this.getCacheKey('slug', data.slug));
       }
 
-      // Cache the updated user
       if (user) {
-        this.setCache(this.getCacheKey('id', user.id), user);
         if (user.slug) {
-          this.setCache(this.getCacheKey('slug', user.slug), user);
         }
       }
 
@@ -245,7 +227,6 @@ export class UserRepository extends CachedRepository<User, string> {
    */
   async delete(id: string, _soft?: boolean): Promise<RepositoryResult<boolean>> {
     return this.executeOperation('delete', async () => {
-      // Get user first for cache invalidation
       const userResult = await this.findById(id);
       const user = userResult.success ? userResult.data : null;
 
@@ -256,10 +237,7 @@ export class UserRepository extends CachedRepository<User, string> {
         throw new Error(`Failed to delete user: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (user?.slug) {
-        this.clearCache(this.getCacheKey('slug', user.slug));
       }
 
       return true;
@@ -311,10 +289,6 @@ export class UserRepository extends CachedRepository<User, string> {
    */
   async findBySlug(slug: string): Promise<RepositoryResult<User | null>> {
     return this.executeOperation('findBySlug', async () => {
-      const cacheKey = this.getCacheKey('slug', slug);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase.from('users').select('*').eq('slug', slug).single();
 
@@ -326,9 +300,6 @@ export class UserRepository extends CachedRepository<User, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
-        // Also cache by ID
-        this.setCache(this.getCacheKey('id', data.id), data);
       }
 
       return data;
@@ -340,10 +311,6 @@ export class UserRepository extends CachedRepository<User, string> {
    */
   async findByEmail(email: string): Promise<RepositoryResult<User | null>> {
     return this.executeOperation('findByEmail', async () => {
-      const cacheKey = this.getCacheKey('email', email);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase.from('users').select('*').eq('email', email).single();
 
@@ -355,11 +322,7 @@ export class UserRepository extends CachedRepository<User, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
-        // Also cache by ID and slug
-        this.setCache(this.getCacheKey('id', data.id), data);
         if (data.slug) {
-          this.setCache(this.getCacheKey('slug', data.slug), data);
         }
       }
 
@@ -391,17 +354,11 @@ export class UserRepository extends CachedRepository<User, string> {
         throw new Error(`Failed to fetch refreshed user: ${error.message}`);
       }
 
-      // Clear all caches for this user
-      this.clearCache(this.getCacheKey('id', userId));
       if (data?.slug) {
-        this.clearCache(this.getCacheKey('slug', data.slug));
       }
 
-      // Cache the refreshed user
       if (data) {
-        this.setCache(this.getCacheKey('id', data.id), data);
         if (data.slug) {
-          this.setCache(this.getCacheKey('slug', data.slug), data);
         }
       }
 
@@ -447,10 +404,6 @@ export class UserRepository extends CachedRepository<User, string> {
    */
   async getTopByReputation(limit = 10): Promise<RepositoryResult<User[]>> {
     return this.executeOperation('getTopByReputation', async () => {
-      const cacheKey = this.getCacheKey('top-reputation', String(limit));
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return Array.isArray(cached) ? cached : [cached];
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('users')
@@ -460,10 +413,6 @@ export class UserRepository extends CachedRepository<User, string> {
 
       if (error) {
         throw new Error(`Failed to get top users: ${error.message}`);
-      }
-
-      if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -491,12 +440,8 @@ export class UserRepository extends CachedRepository<User, string> {
         throw new Error(`Failed to update reputation: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', userId));
       if (data?.slug) {
-        this.clearCache(this.getCacheKey('slug', data.slug));
       }
-      this.clearCache(this.getCacheKey('top-reputation', '10'));
 
       return data;
     });

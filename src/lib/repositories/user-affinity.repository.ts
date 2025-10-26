@@ -16,7 +16,7 @@
 
 import { UI_CONFIG } from '@/src/lib/constants';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -53,9 +53,9 @@ export interface AffinityStats {
  * UserAffinityRepository
  * Handles all user affinity data access for personalization
  */
-export class UserAffinityRepository extends CachedRepository<UserAffinity, string> {
+export class UserAffinityRepository extends BaseRepository<UserAffinity, string> {
   constructor() {
-    super('UserAffinityRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('UserAffinityRepository');
   }
 
   /**
@@ -63,10 +63,6 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
    */
   async findById(id: string): Promise<RepositoryResult<UserAffinity | null>> {
     return this.executeOperation('findById', async () => {
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache<UserAffinity>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('user_affinities')
@@ -82,7 +78,6 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -179,9 +174,6 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
         throw new Error(`Failed to create affinity: ${error.message}`);
       }
 
-      // Invalidate user's affinities cache
-      this.clearCache(this.getCacheKey('user', data.user_id));
-
       return affinity;
     });
   }
@@ -206,15 +198,6 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
         throw new Error(`Failed to update affinity: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
-      if (affinity) {
-        this.clearCache(this.getCacheKey('user', affinity.user_id));
-        this.clearCache(
-          this.getCacheKey('content', `${affinity.content_type}:${affinity.content_slug}`)
-        );
-      }
-
       return affinity;
     });
   }
@@ -224,24 +207,11 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
    */
   async delete(id: string, _soft?: boolean): Promise<RepositoryResult<boolean>> {
     return this.executeOperation('delete', async () => {
-      // Get affinity first for cache invalidation
-      const affinityResult = await this.findById(id);
-      const affinity = affinityResult.success ? affinityResult.data : null;
-
       const supabase = await createClient();
       const { error } = await supabase.from('user_affinities').delete().eq('id', id);
 
       if (error) {
         throw new Error(`Failed to delete affinity: ${error.message}`);
-      }
-
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
-      if (affinity) {
-        this.clearCache(this.getCacheKey('user', affinity.user_id));
-        this.clearCache(
-          this.getCacheKey('content', `${affinity.content_type}:${affinity.content_slug}`)
-        );
       }
 
       return true;
@@ -297,9 +267,6 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
   ): Promise<RepositoryResult<UserAffinity[]>> {
     return this.executeOperation('findByUser', async () => {
       if (!(options?.offset || options?.limit || options?.minScore)) {
-        const cacheKey = this.getCacheKey('user', userId);
-        const cached = this.getFromCache<UserAffinity[]>(cacheKey);
-        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -332,8 +299,6 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
       }
 
       if (!(options?.offset || options?.limit || options?.minScore) && data) {
-        const cacheKey = this.getCacheKey('user', userId);
-        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -349,10 +314,6 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
     contentSlug: string
   ): Promise<RepositoryResult<UserAffinity | null>> {
     return this.executeOperation('findByUserAndContent', async () => {
-      const cacheKey = this.getCacheKey('user-content', `${userId}:${contentType}:${contentSlug}`);
-      const cached = this.getFromCache<UserAffinity>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('user_affinities')
@@ -370,7 +331,6 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -452,10 +412,6 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
         throw new Error(`Failed to upsert affinity: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('user', userId));
-      this.clearCache(this.getCacheKey('user-content', `${userId}:${contentType}:${contentSlug}`));
-
       return data;
     });
   }
@@ -465,10 +421,6 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
    */
   async getStats(userId: string): Promise<RepositoryResult<AffinityStats>> {
     return this.executeOperation('getStats', async () => {
-      const cacheKey = this.getCacheKey('stats', userId);
-      const cached = this.getFromCache<AffinityStats>(cacheKey);
-      if (cached) return cached;
-
       const affinitiesResult = await this.findByUser(userId);
       if (!affinitiesResult.success) {
         throw new Error('Failed to fetch affinities for stats');
@@ -524,8 +476,6 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
         top_content: topContent,
       };
 
-      this.setCache(cacheKey, stats);
-
       return stats;
     });
   }
@@ -544,9 +494,6 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
       if (error) {
         throw new Error(`Failed to delete user affinities: ${error.message}`);
       }
-
-      // Clear cache
-      this.clearCache(this.getCacheKey('user', userId));
 
       return count || 0;
     });
@@ -605,21 +552,6 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
     >
   > {
     return this.executeOperation('getAggregatedScores', async () => {
-      const cacheKey = this.getCacheKey('aggregated', userId);
-      const cached =
-        this.getFromCache<
-          Array<{
-            content_type: string;
-            total_affinities: number;
-            avg_affinity_score: number;
-            max_affinity_score: number;
-            top_content_slugs: string[];
-            top_affinity_scores: number[];
-            last_calculated_at: string;
-          }>
-        >(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('user_affinity_scores')
@@ -664,8 +596,6 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
           top_affinity_scores: row.top_affinity_scores,
           last_calculated_at: row.last_calculated_at,
         }));
-
-      this.setCache(cacheKey, result);
 
       return result;
     });

@@ -16,7 +16,7 @@
 
 import { UI_CONFIG } from '@/src/lib/constants';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -40,9 +40,9 @@ export type PostUpdate = Database['public']['Tables']['posts']['Update'];
  * PostRepository
  * Handles all community board post data access
  */
-export class PostRepository extends CachedRepository<Post, string> {
+export class PostRepository extends BaseRepository<Post, string> {
   constructor() {
-    super('PostRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('PostRepository');
   }
 
   /**
@@ -50,10 +50,6 @@ export class PostRepository extends CachedRepository<Post, string> {
    */
   async findById(id: string): Promise<RepositoryResult<Post | null>> {
     return this.executeOperation('findById', async () => {
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase.from('posts').select('*').eq('id', id).single();
 
@@ -65,7 +61,6 @@ export class PostRepository extends CachedRepository<Post, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -162,9 +157,7 @@ export class PostRepository extends CachedRepository<Post, string> {
         throw new Error(`Failed to create post: ${error.message}`);
       }
 
-      // Cache the new post
       if (post) {
-        this.setCache(this.getCacheKey('id', post.id), post);
       }
 
       return post;
@@ -192,12 +185,7 @@ export class PostRepository extends CachedRepository<Post, string> {
         throw new Error(`Failed to update post: ${error.message}`);
       }
 
-      // Clear cache
-      this.clearCache(this.getCacheKey('id', id));
-
-      // Cache the updated post
       if (post) {
-        this.setCache(this.getCacheKey('id', post.id), post);
       }
 
       return post;
@@ -215,9 +203,6 @@ export class PostRepository extends CachedRepository<Post, string> {
       if (error) {
         throw new Error(`Failed to delete post: ${error.message}`);
       }
-
-      // Clear cache
-      this.clearCache(this.getCacheKey('id', id));
 
       return true;
     });
@@ -301,10 +286,6 @@ export class PostRepository extends CachedRepository<Post, string> {
    */
   async findByUrl(url: string): Promise<RepositoryResult<Post | null>> {
     return this.executeOperation('findByUrl', async () => {
-      const cacheKey = this.getCacheKey('url', url);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('posts')
@@ -321,8 +302,6 @@ export class PostRepository extends CachedRepository<Post, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
-        this.setCache(this.getCacheKey('id', data.id), data);
       }
 
       return data;
@@ -355,12 +334,7 @@ export class PostRepository extends CachedRepository<Post, string> {
         throw new Error(`Failed to update post: ${error.message}`);
       }
 
-      // Clear cache
-      this.clearCache(this.getCacheKey('id', id));
-
-      // Cache the updated post
       if (post) {
-        this.setCache(this.getCacheKey('id', post.id), post);
       }
 
       return post;
@@ -379,9 +353,6 @@ export class PostRepository extends CachedRepository<Post, string> {
         throw new Error(`Failed to delete post: ${error.message}`);
       }
 
-      // Clear cache
-      this.clearCache(this.getCacheKey('id', id));
-
       return true;
     });
   }
@@ -391,10 +362,6 @@ export class PostRepository extends CachedRepository<Post, string> {
    */
   async getPopular(limit = 20): Promise<RepositoryResult<Post[]>> {
     return this.executeOperation('getPopular', async () => {
-      const cacheKey = this.getCacheKey('popular', String(limit));
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return Array.isArray(cached) ? cached : [cached];
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('posts')
@@ -405,10 +372,6 @@ export class PostRepository extends CachedRepository<Post, string> {
 
       if (error) {
         throw new Error(`Failed to get popular posts: ${error.message}`);
-      }
-
-      if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data || [];

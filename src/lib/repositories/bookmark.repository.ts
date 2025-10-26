@@ -17,7 +17,7 @@
 import { z } from 'zod';
 import { UI_CONFIG } from '@/src/lib/constants';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -50,9 +50,9 @@ export type BookmarkFilter = z.infer<typeof bookmarkFilterSchema>;
  * BookmarkRepository
  * Handles all bookmark data access with caching and performance monitoring
  */
-export class BookmarkRepository extends CachedRepository<Bookmark, string> {
+export class BookmarkRepository extends BaseRepository<Bookmark, string> {
   constructor() {
-    super('BookmarkRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('BookmarkRepository');
   }
 
   /**
@@ -60,11 +60,6 @@ export class BookmarkRepository extends CachedRepository<Bookmark, string> {
    */
   async findById(id: string): Promise<RepositoryResult<Bookmark | null>> {
     return this.executeOperation('findById', async () => {
-      // Check cache first
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase.from('bookmarks').select('*').eq('id', id).single();
 
@@ -76,9 +71,7 @@ export class BookmarkRepository extends CachedRepository<Bookmark, string> {
         throw new Error(`Failed to find bookmark: ${error.message}`);
       }
 
-      // Cache the result
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -173,9 +166,6 @@ export class BookmarkRepository extends CachedRepository<Bookmark, string> {
         throw new Error(`Failed to create bookmark: ${error.message}`);
       }
 
-      // Invalidate user's bookmark cache
-      this.clearCache(this.getCacheKey('user', data.user_id));
-
       return bookmark;
     });
   }
@@ -197,10 +187,7 @@ export class BookmarkRepository extends CachedRepository<Bookmark, string> {
         throw new Error(`Failed to update bookmark: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (bookmark) {
-        this.clearCache(this.getCacheKey('user', bookmark.user_id));
       }
 
       return bookmark;
@@ -212,7 +199,6 @@ export class BookmarkRepository extends CachedRepository<Bookmark, string> {
    */
   async delete(id: string, _soft?: boolean): Promise<RepositoryResult<boolean>> {
     return this.executeOperation('delete', async () => {
-      // Get bookmark first to invalidate user cache
       const bookmarkResult = await this.findById(id);
       const bookmark = bookmarkResult.success ? bookmarkResult.data : null;
 
@@ -223,10 +209,7 @@ export class BookmarkRepository extends CachedRepository<Bookmark, string> {
         throw new Error(`Failed to delete bookmark: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (bookmark) {
-        this.clearCache(this.getCacheKey('user', bookmark.user_id));
       }
 
       return true;
@@ -279,13 +262,6 @@ export class BookmarkRepository extends CachedRepository<Bookmark, string> {
    */
   async findByUser(userId: string, options?: QueryOptions): Promise<RepositoryResult<Bookmark[]>> {
     return this.executeOperation('findByUser', async () => {
-      // Check cache first (if no pagination/sorting)
-      if (!(options?.offset || options?.limit)) {
-        const cacheKey = this.getCacheKey('user', userId);
-        const cached = this.getFromCache(cacheKey);
-        if (cached) return Array.isArray(cached) ? cached : [cached];
-      }
-
       const supabase = await createClient();
       let query = supabase.from('bookmarks').select('*').eq('user_id', userId);
 
@@ -312,12 +288,6 @@ export class BookmarkRepository extends CachedRepository<Bookmark, string> {
         throw new Error(`Failed to find user bookmarks: ${error.message}`);
       }
 
-      // Cache if no pagination
-      if (!(options?.offset || options?.limit) && data) {
-        const cacheKey = this.getCacheKey('user', userId);
-        this.setCache(cacheKey, data);
-      }
-
       return data || [];
     });
   }
@@ -332,10 +302,6 @@ export class BookmarkRepository extends CachedRepository<Bookmark, string> {
     contentSlug: string
   ): Promise<RepositoryResult<Bookmark | null>> {
     return this.executeOperation('findByUserAndContent', async () => {
-      const cacheKey = this.getCacheKey('user-content', `${userId}:${contentType}:${contentSlug}`);
-      const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('bookmarks')
@@ -352,9 +318,7 @@ export class BookmarkRepository extends CachedRepository<Bookmark, string> {
         throw new Error(`Failed to find bookmark: ${error.message}`);
       }
 
-      // Cache the result
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -382,10 +346,6 @@ export class BookmarkRepository extends CachedRepository<Bookmark, string> {
       if (error) {
         throw new Error(`Failed to delete bookmark: ${error.message}`);
       }
-
-      // Clear caches
-      this.clearCache(this.getCacheKey('user-content', `${userId}:${contentType}:${contentSlug}`));
-      this.clearCache(this.getCacheKey('user', userId));
 
       return true;
     });

@@ -16,7 +16,7 @@
 
 import { UI_CONFIG } from '@/src/lib/constants';
 import {
-  CachedRepository,
+  BaseRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
@@ -50,9 +50,9 @@ export type CollectionWithItems = Collection & {
  * CollectionRepository
  * Handles all collection and collection item data access
  */
-export class CollectionRepository extends CachedRepository<Collection, string> {
+export class CollectionRepository extends BaseRepository<Collection, string> {
   constructor() {
-    super('CollectionRepository', 5 * 60 * 1000); // 5-minute cache TTL
+    super('CollectionRepository');
   }
 
   /**
@@ -60,10 +60,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
    */
   async findById(id: string): Promise<RepositoryResult<Collection | null>> {
     return this.executeOperation('findById', async () => {
-      const cacheKey = this.getCacheKey('id', id);
-      const cached = this.getFromCache<Collection>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('user_collections')
@@ -79,7 +75,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -171,9 +166,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
         throw new Error(`Failed to create collection: ${error.message}`);
       }
 
-      // Invalidate user's collections cache
-      this.clearCache(this.getCacheKey('user', data.user_id));
-
       return collection;
     });
   }
@@ -201,11 +193,7 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
         throw new Error(`Failed to update collection: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (collection) {
-        this.clearCache(this.getCacheKey('user', collection.user_id));
-        this.clearCache(this.getCacheKey('slug', `${collection.user_id}:${collection.slug}`));
       }
 
       return collection;
@@ -217,7 +205,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
    */
   async delete(id: string, _soft?: boolean): Promise<RepositoryResult<boolean>> {
     return this.executeOperation('delete', async () => {
-      // Get collection first for cache invalidation
       const collectionResult = await this.findById(id);
       const collection = collectionResult.success ? collectionResult.data : null;
 
@@ -228,11 +215,7 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
         throw new Error(`Failed to delete collection: ${error.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', id));
       if (collection) {
-        this.clearCache(this.getCacheKey('user', collection.user_id));
-        this.clearCache(this.getCacheKey('slug', `${collection.user_id}:${collection.slug}`));
       }
 
       return true;
@@ -288,9 +271,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
   ): Promise<RepositoryResult<Collection[]>> {
     return this.executeOperation('findByUser', async () => {
       if (!(options?.offset || options?.limit)) {
-        const cacheKey = this.getCacheKey('user', userId);
-        const cached = this.getFromCache<Collection[]>(cacheKey);
-        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -318,8 +298,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
       }
 
       if (!(options?.offset || options?.limit) && data) {
-        const cacheKey = this.getCacheKey('user', userId);
-        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -334,10 +312,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
     slug: string
   ): Promise<RepositoryResult<Collection | null>> {
     return this.executeOperation('findByUserAndSlug', async () => {
-      const cacheKey = this.getCacheKey('slug', `${userId}:${slug}`);
-      const cached = this.getFromCache<Collection>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('user_collections')
@@ -354,7 +328,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -417,10 +390,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
         throw new Error(`Failed to add item to collection: ${error.message}`);
       }
 
-      // Invalidate collection cache
-      this.clearCache(this.getCacheKey('id', item.collection_id));
-      this.clearCache(this.getCacheKey('items', item.collection_id));
-
       return data;
     });
   }
@@ -430,7 +399,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
    */
   async removeItem(itemId: string): Promise<RepositoryResult<boolean>> {
     return this.executeOperation('removeItem', async () => {
-      // Get item first for cache invalidation
       const supabase = await createClient();
       const { data: item } = await supabase
         .from('collection_items')
@@ -444,10 +412,7 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
         throw new Error(`Failed to remove item from collection: ${error.message}`);
       }
 
-      // Clear caches
       if (item) {
-        this.clearCache(this.getCacheKey('id', item.collection_id));
-        this.clearCache(this.getCacheKey('items', item.collection_id));
       }
 
       return true;
@@ -463,9 +428,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
   ): Promise<RepositoryResult<CollectionItem[]>> {
     return this.executeOperation('getItems', async (): Promise<CollectionItem[]> => {
       if (!(options?.offset || options?.limit)) {
-        const cacheKey = this.getCacheKey('items', collectionId);
-        const cached = this.getFromCache<CollectionItem[]>(cacheKey);
-        if (cached) return cached;
       }
 
       const supabase = await createClient();
@@ -493,8 +455,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
       }
 
       if (!(options?.offset || options?.limit) && data) {
-        const cacheKey = this.getCacheKey('items', collectionId);
-        this.setCache(cacheKey, data);
       }
 
       return data || [];
@@ -517,10 +477,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
       if (error) {
         throw new Error(`Failed to update item order: ${error.message}`);
       }
-
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', data.collection_id));
-      this.clearCache(this.getCacheKey('items', data.collection_id));
 
       return data;
     });
@@ -553,10 +509,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
         throw new Error(`Failed to reorder items: ${errors[0]?.error?.message}`);
       }
 
-      // Clear caches
-      this.clearCache(this.getCacheKey('id', collectionId));
-      this.clearCache(this.getCacheKey('items', collectionId));
-
       return true;
     });
   }
@@ -566,10 +518,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
    */
   async findByIdWithItems(id: string): Promise<RepositoryResult<CollectionWithItems | null>> {
     return this.executeOperation('findByIdWithItems', async () => {
-      const cacheKey = this.getCacheKey('with-items', id);
-      const cached = this.getFromCache<CollectionWithItems>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('user_collections')
@@ -591,7 +539,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
@@ -607,10 +554,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
     collectionSlug: string
   ): Promise<RepositoryResult<CollectionWithItems | null>> {
     return this.executeOperation('findPublicByUserSlugAndCollectionSlug', async () => {
-      const cacheKey = this.getCacheKey('public-user-slug', `${userSlug}:${collectionSlug}`);
-      const cached = this.getFromCache<CollectionWithItems>(cacheKey);
-      if (cached) return cached;
-
       const supabase = await createClient();
       const { data, error } = await supabase
         .from('user_collections')
@@ -635,7 +578,6 @@ export class CollectionRepository extends CachedRepository<Collection, string> {
       }
 
       if (data) {
-        this.setCache(cacheKey, data);
       }
 
       return data;
