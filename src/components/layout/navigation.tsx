@@ -57,6 +57,7 @@ import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigatio
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import {
+  Briefcase,
   ChevronDown,
   DiscordIcon,
   Github,
@@ -371,9 +372,9 @@ const NavigationComponent = () => {
                         ))}
                       </div>
 
-                      {/* Footer Links - Community & Partner Program */}
+                      {/* Footer Links - Community, Partner Program, Consulting */}
                       <DropdownMenuSeparator className="my-2.5" />
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-3 gap-2">
                         <Link
                           href="/community"
                           prefetch={true}
@@ -398,6 +399,19 @@ const NavigationComponent = () => {
                           />
                           <div className="text-sm font-medium text-foreground group-hover:text-accent transition-colors">
                             Partner Program
+                          </div>
+                        </Link>
+                        <Link
+                          href="/consulting"
+                          prefetch={true}
+                          className="flex items-center gap-2 px-3 py-2.5 rounded-md hover:bg-accent/10 transition-colors group no-underline"
+                        >
+                          <Briefcase
+                            className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors"
+                            aria-hidden="true"
+                          />
+                          <div className="text-sm font-medium text-foreground group-hover:text-accent transition-colors">
+                            Consulting
                           </div>
                         </Link>
                       </div>

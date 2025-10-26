@@ -145,7 +145,6 @@ export const ConfigCard = memo(
         {((isFeatured && featuredRank && featuredRank <= 3) ||
           (viewCount && viewCount > 0 && !isFeatured)) && (
           <BorderBeam
-            size={200}
             duration={8}
             colorFrom={featuredRank === 1 ? '#ffaa40' : '#9333ea'}
             colorTo={featuredRank === 1 ? '#ffd700' : '#a855f7'}
@@ -284,7 +283,7 @@ export const ConfigCard = memo(
           renderMetadataBadges={() => (
             <>
               {/* View count badge */}
-              {behavior.showViewCount && viewCount !== undefined && viewCount > 0 && (
+              {behavior.showViewCount && viewCount !== undefined && (
                 <button
                   type="button"
                   onClick={(e) => e.stopPropagation()}

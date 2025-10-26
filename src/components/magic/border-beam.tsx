@@ -50,40 +50,48 @@ interface BorderBeamProps {
 
 export function BorderBeam({
   className,
-  size = 200,
   duration = 8,
   delay = 0,
   colorFrom = '#ffaa40',
   colorTo = '#9c40ff',
   borderWidth = 1.5,
-}: BorderBeamProps) {
-  // Create a single beam that travels around the entire perimeter
-  // Using CSS offset-path for smooth, continuous animation
+}: Omit<BorderBeamProps, 'size'>) {
+  // Animated gradient border that traces the full perimeter
+  // Using Motion.dev for universal browser compatibility
   return (
-    <div
-      className={cn('pointer-events-none absolute inset-0 rounded-[inherit]', className)}
+    <motion.div
+      className={cn(
+        'pointer-events-none absolute inset-0 rounded-[inherit] overflow-hidden',
+        className
+      )}
       style={{
-        padding: `${borderWidth}px`,
+        padding: borderWidth,
       }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay }}
     >
       <motion.div
-        className="absolute"
-        style={{
-          width: `${size}px`,
-          height: `${borderWidth}px`,
-          background: `linear-gradient(to right, transparent, ${colorFrom}, ${colorTo}, ${colorFrom}, transparent)`,
-          offsetPath: 'rect(0 100% 100% 0 round 0.5rem)',
-          offsetRotate: '0deg',
-        }}
-        initial={{ offsetDistance: '0%' }}
-        animate={{ offsetDistance: '100%' }}
+        className="h-full w-full"
+        style={
+          {
+            background: `conic-gradient(from var(--angle), transparent 0%, ${colorFrom} 5%, ${colorTo} 10%, ${colorFrom} 15%, transparent 20%, transparent 100%)`,
+            ['--angle' as string]: '0deg',
+          } satisfies Record<string, string>
+        }
+        animate={
+          {
+            ['--angle' as string]: '360deg',
+          } satisfies Record<string, string>
+        }
         transition={{
           duration,
-          delay,
           repeat: Number.POSITIVE_INFINITY,
           ease: 'linear',
         }}
-      />
-    </div>
+      >
+        <div className="h-full w-full bg-background rounded-[inherit]" />
+      </motion.div>
+    </motion.div>
   );
 }

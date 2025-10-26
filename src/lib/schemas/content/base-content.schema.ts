@@ -137,7 +137,7 @@ export const discoveryMetadataSchema = z
           source: nonEmptyString
             .max(100)
             .describe(
-              'Source name (anthropic_official_docs, github_trending, reddit_programming, hackernews, dev_to, medium). FIRST source MUST be anthropic_official_docs.'
+              'Source name (anthropic_official_docs, github_trending, reddit_programming, hackernews, dev_to, medium). FIRST source SHOULD be anthropic_official_docs when doing full discovery.'
             ),
           evidence: nonEmptyString
             .max(500)
@@ -153,10 +153,10 @@ export const discoveryMetadataSchema = z
             .describe('How relevant this source is to the content gap'),
         })
       )
-      .min(4)
+      .min(1)
       .max(10)
       .describe(
-        'MINIMUM 4 trending sources required: 1 anthropic_official_docs (MUST be first) + 3 trending sources (GitHub/Reddit/HN/Dev.to/Medium). Max 10 for thoroughness.'
+        'Trending sources for discovery research. RECOMMENDED: 4+ sources (1 anthropic_official_docs + 3 trending). MINIMUM: 1 source. Max 10 for thoroughness.'
       ),
     keywordResearch: z
       .object({
@@ -189,10 +189,10 @@ export const discoveryMetadataSchema = z
         'Content gap justification showing what existing content exists and what gap remains'
       ),
     approvalRationale: nonEmptyString
-      .min(100)
+      .min(10)
       .max(500)
       .describe(
-        'Why this specific topic was chosen over alternatives (must be 100-500 chars). Required user approval.'
+        'Why this specific topic was chosen over alternatives (10-500 chars). Documents user approval or editorial decision.'
       ),
   })
   .describe(

@@ -192,6 +192,7 @@ function FooterComponent() {
             <h3 className={'font-semibold mb-4 text-lg md:text-base'}>Support</h3>
             <ul className={'space-y-3 md:space-y-2'}>
               {[
+                { href: '/consulting', label: 'Work with JSONbored' },
                 { href: '/cookies', label: 'Cookie Policy' },
                 { href: '/contact', label: 'Contact Us' },
                 { href: '/help', label: 'Help Center' },
