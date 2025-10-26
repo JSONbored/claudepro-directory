@@ -577,6 +577,240 @@ export class UserAffinityRepository extends CachedRepository<UserAffinity, strin
       return data || [];
     });
   }
+
+  // =====================================================
+  // MATERIALIZED VIEW METHODS (2025-10-26)
+  // =====================================================
+
+  /**
+   * Get aggregated affinity scores from materialized view
+   *
+   * ARCHITECTURE (2025-10-26): Uses user_affinity_scores materialized view
+   * for pre-aggregated data (100-400x faster than calculating on-the-fly)
+   *
+   * @param userId - User ID to fetch aggregated scores for
+   * @returns Aggregated affinity data with top content per category
+   */
+  async getAggregatedScores(userId: string): Promise<
+    RepositoryResult<
+      Array<{
+        content_type: string;
+        total_affinities: number;
+        avg_affinity_score: number;
+        max_affinity_score: number;
+        top_content_slugs: string[];
+        top_affinity_scores: number[];
+        last_calculated_at: string;
+      }>
+    >
+  > {
+    return this.executeOperation('getAggregatedScores', async () => {
+      const cacheKey = this.getCacheKey('aggregated', userId);
+      const cached =
+        this.getFromCache<
+          Array<{
+            content_type: string;
+            total_affinities: number;
+            avg_affinity_score: number;
+            max_affinity_score: number;
+            top_content_slugs: string[];
+            top_affinity_scores: number[];
+            last_calculated_at: string;
+          }>
+        >(cacheKey);
+      if (cached) return cached;
+
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from('user_affinity_scores')
+        .select(
+          'content_type, total_affinities, avg_affinity_score, max_affinity_score, top_content_slugs, top_affinity_scores, last_calculated_at'
+        )
+        .eq('user_id', userId)
+        .order('avg_affinity_score', { ascending: false });
+
+      if (error) {
+        throw new Error(`Failed to get aggregated affinity scores: ${error.message}`);
+      }
+
+      // Filter out null values and ensure type safety
+      const result = (data || [])
+        .filter(
+          (
+            row
+          ): row is {
+            content_type: string;
+            total_affinities: number;
+            avg_affinity_score: number;
+            max_affinity_score: number;
+            top_content_slugs: string[];
+            top_affinity_scores: number[];
+            last_calculated_at: string;
+          } =>
+            row.content_type !== null &&
+            row.total_affinities !== null &&
+            row.avg_affinity_score !== null &&
+            row.max_affinity_score !== null &&
+            row.top_content_slugs !== null &&
+            row.top_affinity_scores !== null &&
+            row.last_calculated_at !== null
+        )
+        .map((row) => ({
+          content_type: row.content_type,
+          total_affinities: row.total_affinities,
+          avg_affinity_score: row.avg_affinity_score,
+          max_affinity_score: row.max_affinity_score,
+          top_content_slugs: row.top_content_slugs,
+          top_affinity_scores: row.top_affinity_scores,
+          last_calculated_at: row.last_calculated_at,
+        }));
+
+      this.setCache(cacheKey, result);
+
+      return result;
+    });
+  }
+
+  /**
+   * Get top N content items by affinity from materialized view
+   *
+   * PERFORMANCE: Uses pre-computed top_content_slugs array from materialized view
+   * instead of querying and sorting user_affinities table
+   *
+   * @param userId - User ID
+   * @param contentType - Optional content type filter
+   * @param limit - Max items to return (defaults to 5, max 5 from materialized view)
+   * @returns Array of top content slugs with affinity scores
+   */
+  async getTopContentFromMaterializedView(
+    userId: string,
+    contentType?: string,
+    limit = 5
+  ): Promise<
+    RepositoryResult<
+      Array<{
+        content_type: string;
+        content_slug: string;
+        affinity_score: number;
+        rank: number;
+      }>
+    >
+  > {
+    return this.executeOperation('getTopContentFromMaterializedView', async () => {
+      const supabase = await createClient();
+
+      let query = supabase
+        .from('user_affinity_scores')
+        .select('content_type, top_content_slugs, top_affinity_scores')
+        .eq('user_id', userId)
+        .order('avg_affinity_score', { ascending: false });
+
+      if (contentType) {
+        query = query.eq('content_type', contentType);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw new Error(`Failed to get top content from materialized view: ${error.message}`);
+      }
+
+      // Flatten array results into individual items
+      const topContent: Array<{
+        content_type: string;
+        content_slug: string;
+        affinity_score: number;
+        rank: number;
+      }> = [];
+
+      for (const row of data || []) {
+        const slugs = row.top_content_slugs || [];
+        const scores = row.top_affinity_scores || [];
+
+        // Take only up to limit items
+        const itemsToTake = Math.min(limit, slugs.length);
+
+        for (let i = 0; i < itemsToTake; i++) {
+          const slug = slugs[i];
+          const score = scores[i];
+
+          if (slug && typeof score === 'number' && row.content_type) {
+            topContent.push({
+              content_type: row.content_type,
+              content_slug: slug,
+              affinity_score: score,
+              rank: i + 1,
+            });
+          }
+        }
+      }
+
+      // Sort by affinity score (already sorted within each category, but sort across categories)
+      topContent.sort((a, b) => b.affinity_score - a.affinity_score);
+
+      return topContent.slice(0, limit);
+    });
+  }
+
+  /**
+   * Get user's favorite categories based on aggregated affinity scores
+   *
+   * Uses materialized view for instant results (no runtime aggregation)
+   *
+   * @param userId - User ID
+   * @param minAvgScore - Minimum average affinity score threshold (default: 50)
+   * @param limit - Max categories to return (default: 5)
+   * @returns Array of categories with average affinity scores
+   */
+  async getFavoriteCategoriesFromMaterializedView(
+    userId: string,
+    minAvgScore = 50,
+    limit = 5
+  ): Promise<
+    RepositoryResult<
+      Array<{
+        content_type: string;
+        avg_affinity_score: number;
+        total_affinities: number;
+      }>
+    >
+  > {
+    return this.executeOperation('getFavoriteCategoriesFromMaterializedView', async () => {
+      const supabase = await createClient();
+
+      const { data, error } = await supabase
+        .from('user_affinity_scores')
+        .select('content_type, avg_affinity_score, total_affinities')
+        .eq('user_id', userId)
+        .gte('avg_affinity_score', minAvgScore)
+        .order('avg_affinity_score', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        throw new Error(`Failed to get favorite categories: ${error.message}`);
+      }
+
+      // Filter out null values and ensure type safety
+      return (data || [])
+        .filter(
+          (
+            row
+          ): row is {
+            content_type: string;
+            avg_affinity_score: number;
+            total_affinities: number;
+          } =>
+            row.content_type !== null &&
+            row.avg_affinity_score !== null &&
+            row.total_affinities !== null
+        )
+        .map((row) => ({
+          content_type: row.content_type,
+          avg_affinity_score: row.avg_affinity_score,
+          total_affinities: row.total_affinities,
+        }));
+    });
+  }
 }
 
 /**

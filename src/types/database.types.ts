@@ -75,6 +75,13 @@ export type Database = {
             foreignKeyName: 'bookmarks_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'bookmarks_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_stats';
             referencedColumns: ['user_id'];
           },
@@ -130,6 +137,13 @@ export type Database = {
             foreignKeyName: 'collection_items_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'collection_items_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_stats';
             referencedColumns: ['user_id'];
           },
@@ -174,6 +188,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'posts';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'comments_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'comments_user_id_fkey';
@@ -241,6 +262,13 @@ export type Database = {
           website?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: 'companies_owner_id_fkey';
+            columns: ['owner_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
           {
             foreignKeyName: 'companies_owner_id_fkey';
             columns: ['owner_id'];
@@ -362,6 +390,13 @@ export type Database = {
             foreignKeyName: 'followers_follower_id_fkey';
             columns: ['follower_id'];
             isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'followers_follower_id_fkey';
+            columns: ['follower_id'];
+            isOneToOne: false;
             referencedRelation: 'user_stats';
             referencedColumns: ['user_id'];
           },
@@ -371,6 +406,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'followers_following_id_fkey';
+            columns: ['following_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'followers_following_id_fkey';
@@ -528,6 +570,13 @@ export type Database = {
             foreignKeyName: 'jobs_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'jobs_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_stats';
             referencedColumns: ['user_id'];
           },
@@ -594,6 +643,13 @@ export type Database = {
             foreignKeyName: 'payments_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'payments_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_stats';
             referencedColumns: ['user_id'];
           },
@@ -645,6 +701,13 @@ export type Database = {
             foreignKeyName: 'posts_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'posts_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_stats';
             referencedColumns: ['user_id'];
           },
@@ -683,6 +746,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'review_ratings';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'review_helpful_votes_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'review_helpful_votes_user_id_fkey';
@@ -739,6 +809,13 @@ export type Database = {
             foreignKeyName: 'review_ratings_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'review_ratings_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_stats';
             referencedColumns: ['user_id'];
           },
@@ -780,6 +857,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'sponsored_content';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'sponsored_clicks_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'sponsored_clicks_user_id_fkey';
@@ -848,6 +932,13 @@ export type Database = {
             foreignKeyName: 'sponsored_content_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'sponsored_content_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_stats';
             referencedColumns: ['user_id'];
           },
@@ -892,6 +983,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'sponsored_content';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'sponsored_impressions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'sponsored_impressions_user_id_fkey';
@@ -959,6 +1057,13 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: 'submissions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
           {
             foreignKeyName: 'submissions_user_id_fkey';
             columns: ['user_id'];
@@ -1032,6 +1137,13 @@ export type Database = {
             foreignKeyName: 'subscriptions_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'subscriptions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_stats';
             referencedColumns: ['user_id'];
           },
@@ -1073,6 +1185,13 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: 'user_affinities_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
           {
             foreignKeyName: 'user_affinities_user_id_fkey';
             columns: ['user_id'];
@@ -1121,6 +1240,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'badges';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'user_badges_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'user_badges_user_id_fkey';
@@ -1179,6 +1305,13 @@ export type Database = {
           view_count?: number;
         };
         Relationships: [
+          {
+            foreignKeyName: 'user_collections_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
           {
             foreignKeyName: 'user_collections_user_id_fkey';
             columns: ['user_id'];
@@ -1252,6 +1385,13 @@ export type Database = {
             foreignKeyName: 'user_content_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'user_content_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_stats';
             referencedColumns: ['user_id'];
           },
@@ -1296,6 +1436,13 @@ export type Database = {
           user_id?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: 'user_interactions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
           {
             foreignKeyName: 'user_interactions_user_id_fkey';
             columns: ['user_id'];
@@ -1386,6 +1533,13 @@ export type Database = {
             foreignKeyName: 'user_mcps_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'user_mcps_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_stats';
             referencedColumns: ['user_id'];
           },
@@ -1428,6 +1582,13 @@ export type Database = {
             foreignKeyName: 'user_similarities_user_a_id_fkey';
             columns: ['user_a_id'];
             isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'user_similarities_user_a_id_fkey';
+            columns: ['user_a_id'];
+            isOneToOne: false;
             referencedRelation: 'user_stats';
             referencedColumns: ['user_id'];
           },
@@ -1437,6 +1598,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'user_similarities_user_b_id_fkey';
+            columns: ['user_b_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'user_similarities_user_b_id_fkey';
@@ -1551,6 +1719,13 @@ export type Database = {
             foreignKeyName: 'votes_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'votes_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
             referencedRelation: 'user_stats';
             referencedColumns: ['user_id'];
           },
@@ -1603,6 +1778,104 @@ export type Database = {
         };
         Relationships: [];
       };
+      recommended_content: {
+        Row: {
+          content_slug: string | null;
+          content_type: string | null;
+          last_refreshed: string | null;
+          popularity_score: number | null;
+          recommendation_score: number | null;
+          user_affinity: number | null;
+          user_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_affinities_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'user_affinities_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'user_affinities_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      trending_content_24h: {
+        Row: {
+          bookmark_count_24h: number | null;
+          content_slug: string | null;
+          content_type: string | null;
+          last_refreshed: string | null;
+          latest_activity_at: string | null;
+          post_count_24h: number | null;
+          trending_score: number | null;
+          vote_count_24h: number | null;
+        };
+        Relationships: [];
+      };
+      user_affinity_scores: {
+        Row: {
+          avg_affinity_score: number | null;
+          content_type: string | null;
+          last_calculated_at: string | null;
+          last_refreshed: string | null;
+          max_affinity_score: number | null;
+          top_affinity_scores: number[] | null;
+          top_content_slugs: string[] | null;
+          total_affinities: number | null;
+          user_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_affinities_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'user_affinities_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'user_affinities_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      user_badge_stats: {
+        Row: {
+          bookmarks_received: number | null;
+          comments: number | null;
+          followers: number | null;
+          last_updated: string | null;
+          posts: number | null;
+          reputation: number | null;
+          reviews: number | null;
+          submissions: number | null;
+          user_id: string | null;
+          votes_received: number | null;
+        };
+        Relationships: [];
+      };
       user_stats: {
         Row: {
           account_age_days: number | null;
@@ -1628,6 +1901,13 @@ export type Database = {
       };
     };
     Functions: {
+      batch_recalculate_reputation: {
+        Args: { user_ids: string[] };
+        Returns: {
+          new_reputation_score: number;
+          user_id: string;
+        }[];
+      };
       calculate_user_reputation: {
         Args: { target_user_id: string };
         Returns: number;
@@ -1643,6 +1923,34 @@ export type Database = {
         Returns: {
           bookmark_count: number;
           content_slug: string;
+        }[];
+      };
+      get_bulk_user_stats: {
+        Args: { user_ids: string[] };
+        Returns: {
+          bookmarks_received: number;
+          comments: number;
+          followers: number;
+          posts: number;
+          reputation: number;
+          reviews: number;
+          submissions: number;
+          user_id: string;
+          votes_received: number;
+        }[];
+      };
+      get_bulk_user_stats_realtime: {
+        Args: { user_ids: string[] };
+        Returns: {
+          bookmarks_received: number;
+          comments: number;
+          followers: number;
+          posts: number;
+          reputation: number;
+          reviews: number;
+          submissions: number;
+          user_id: string;
+          votes_received: number;
         }[];
       };
       get_popular_posts: {

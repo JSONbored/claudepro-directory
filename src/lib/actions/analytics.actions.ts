@@ -250,8 +250,10 @@ export const getForYouFeed = rateLimitedAction
             .slice(0, 3)
             .map((item) => item.category);
 
-          // Build user context
-          const userContext = buildUserContext(
+          // Build user context (kept for potential future use)
+          // Note: Current implementation uses materialized views directly via userId
+          // This context building is preserved for fallback scenarios
+          buildUserContext(
             userId,
             affinities || [],
             bookmarks || [],
@@ -269,7 +271,7 @@ export const getForYouFeed = rateLimitedAction
           );
 
           // Check if user has sufficient personalization data
-          const hasHistory = hasPersonalizationData(userContext);
+          const hasHistory = await hasPersonalizationData(userId);
 
           let recommendations: Array<
             UnifiedContentItem & {
@@ -279,21 +281,12 @@ export const getForYouFeed = rateLimitedAction
             }
           >;
           if (hasHistory) {
-            // Generate personalized recommendations
-            // Note: Collaborative recommendations would require pre-computed data
-            const collaborativeRecs = new Map<string, number>(); // Placeholder
-
-            recommendations = generateForYouFeed(
-              enrichedContent,
-              userContext,
-              collaborativeRecs,
-              trendingSet,
-              {
-                limit: parsedInput.limit,
-                ...(parsedInput.category ? { category_filter: parsedInput.category } : {}),
-                exclude_bookmarked: parsedInput.exclude_bookmarked,
-              }
-            );
+            // Generate personalized recommendations using materialized views
+            recommendations = await generateForYouFeed(enrichedContent, userId, {
+              limit: parsedInput.limit,
+              ...(parsedInput.category ? { category_filter: parsedInput.category } : {}),
+              exclude_bookmarked: parsedInput.exclude_bookmarked,
+            });
           } else {
             // Cold start: use trending + interests
             recommendations = generateColdStartRecommendations(

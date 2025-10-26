@@ -132,12 +132,12 @@ async function getTrendingData(params: TrendingParams) {
       { includeSponsored: true } // Enable sponsored content injection
     );
 
-    const algorithm = trendingData.metadata.redisEnabled ? 'redis-views' : 'popularity-fallback';
+    const algorithm = trendingData.metadata.algorithm;
     logger.info(`Loaded trending data using ${algorithm}`, {
       trendingCount: trendingData.trending.length,
       popularCount: trendingData.popular.length,
       recentCount: trendingData.recent.length,
-      redisEnabled: trendingData.metadata.redisEnabled,
+      algorithm,
       totalCount,
     });
 

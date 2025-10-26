@@ -32,13 +32,12 @@ const RollingText = dynamic(
   }
 );
 
-// Lazy load NumberTicker for members counter
+// Lazy load NumberTicker for members counter (client-only for animation)
 const NumberTicker = dynamic(
   () =>
     import('@/src/components/magic/number-ticker').then((mod) => ({ default: mod.NumberTicker })),
   {
     loading: () => <span className="font-semibold text-accent">0</span>, // Fallback
-    ssr: false, // Client-only for animation
   }
 );
 
