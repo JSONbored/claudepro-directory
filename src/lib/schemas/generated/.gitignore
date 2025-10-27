@@ -1,0 +1,8 @@
+# Supazod Generated Files
+#
+# These files ARE tracked in git intentionally for:
+# - Code review visibility
+# - CI/CD performance
+# - Consistent deployments
+#
+# To regenerate: pnpm generate:zod

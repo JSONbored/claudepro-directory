@@ -86,8 +86,8 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
         if (mode === 'create') {
           const result = await createCollection({
             name: name.trim(),
-            slug: slug.trim() || undefined,
-            description: description.trim() || undefined,
+            slug: slug.trim(),
+            description: description.trim() || null,
             is_public: isPublic,
           });
 
@@ -105,7 +105,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             id: collection.id,
             name: name.trim(),
             slug: slug.trim(),
-            description: description.trim() || undefined,
+            description: description.trim() || null,
             is_public: isPublic,
           });
 

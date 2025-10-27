@@ -26,140 +26,25 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction, rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
-import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives/base-strings';
+import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
+import {
+  collectionInsertTransformSchema,
+  collectionItemInsertTransformSchema,
+  createPostSchema,
+  getReviewsSchema,
+  helpfulVoteSchema,
+  reorderItemsSchema,
+  reviewDeleteSchema,
+  reviewInsertTransformSchema,
+  reviewUpdateInputSchema,
+  updatePostSchema,
+} from '@/src/lib/schemas/transforms/data-normalization.schema';
 import { createClient } from '@/src/lib/supabase/server';
 
 // =====================================================
-// COLLECTION SCHEMAS
-// =====================================================
-
-const collectionSchema = z.object({
-  name: nonEmptyString
-    .min(2, 'Collection name must be at least 2 characters')
-    .max(100, 'Collection name must be less than 100 characters')
-    .transform((val: string) => val.trim()),
-  slug: nonEmptyString
-    .min(2, 'Slug must be at least 2 characters')
-    .max(100, 'Slug must be less than 100 characters')
-    .regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens')
-    .optional(),
-  description: z
-    .string()
-    .max(500, 'Description must be less than 500 characters')
-    .optional()
-    .transform((val: string | undefined) => val?.trim()),
-  is_public: z.boolean().default(false),
-});
-
-const collectionItemSchema = z.object({
-  collection_id: z.string().uuid('Invalid collection ID'),
-  content_type: categoryIdSchema,
-  content_slug: nonEmptyString
-    .max(200, 'Content slug is too long')
-    .regex(
-      /^[a-zA-Z0-9-_/]+$/,
-      'Slug can only contain letters, numbers, hyphens, underscores, and forward slashes'
-    )
-    .transform((val: string) => val.toLowerCase().trim()),
-  notes: z.string().max(500, 'Notes must be less than 500 characters').optional(),
-  order: z.number().int().min(0).default(0),
-});
-
-const reorderItemsSchema = z.object({
-  collection_id: z.string().uuid('Invalid collection ID'),
-  items: z.array(
-    z.object({
-      id: z.string().uuid(),
-      order: z.number().int().min(0),
-    })
-  ),
-});
-
-// =====================================================
-// REVIEW SCHEMAS
-// =====================================================
-
-const reviewInputSchema = z.object({
-  content_type: categoryIdSchema,
-  content_slug: nonEmptyString
-    .max(200, 'Content slug is too long')
-    .regex(
-      /^[a-zA-Z0-9-_/]+$/,
-      'Slug can only contain letters, numbers, hyphens, underscores, and forward slashes'
-    )
-    .transform((val: string) => val.toLowerCase().trim()),
-  rating: z
-    .number()
-    .int('Rating must be a whole number')
-    .min(1, 'Rating must be at least 1 star')
-    .max(5, 'Rating must be at most 5 stars'),
-  review_text: z
-    .string()
-    .max(2000, 'Review text must be 2000 characters or less')
-    .optional()
-    .transform((val) => (val ? val.trim() : undefined)),
-});
-
-const reviewUpdateSchema = z.object({
-  review_id: z.string().uuid('Invalid review ID'),
-  rating: z
-    .number()
-    .int('Rating must be a whole number')
-    .min(1, 'Rating must be at least 1 star')
-    .max(5, 'Rating must be at most 5 stars')
-    .optional(),
-  review_text: z
-    .string()
-    .max(2000, 'Review text must be 2000 characters or less')
-    .optional()
-    .transform((val) => (val ? val.trim() : undefined)),
-});
-
-const reviewDeleteSchema = z.object({
-  review_id: z.string().uuid('Invalid review ID'),
-});
-
-const helpfulVoteSchema = z.object({
-  review_id: z.string().uuid('Invalid review ID'),
-  helpful: z.boolean().describe('true to mark helpful, false to remove vote'),
-});
-
-const getReviewsSchema = z.object({
-  content_type: categoryIdSchema,
-  content_slug: nonEmptyString.max(200),
-  sort_by: z.enum(['recent', 'helpful', 'rating_high', 'rating_low']).default('recent'),
-  limit: z.number().int().min(1).max(100).default(20),
-  offset: z.number().int().min(0).default(0),
-});
-
-// =====================================================
-// POST SCHEMAS
-// =====================================================
-
-const createPostSchema = z
-  .object({
-    title: nonEmptyString.min(3).max(300, 'Title must be less than 300 characters'),
-    content: z
-      .string()
-      .max(5000, 'Content must be less than 5000 characters')
-      .nullable()
-      .optional(),
-    url: urlString.nullable().optional(),
-  })
-  .refine((data) => data.content || data.url, {
-    message: 'Post must have either content or a URL',
-  });
-
-const updatePostSchema = z.object({
-  id: z.string().uuid(),
-  title: nonEmptyString.min(3).max(300).optional(),
-  content: z.string().max(5000).nullable().optional(),
-});
-
-// ============================================
 // COLLECTION ACTIONS
-// ============================================
+// =====================================================
 
 /**
  * Create a new collection
@@ -169,7 +54,7 @@ export const createCollection = authedAction
     actionName: 'createCollection',
     category: 'user',
   })
-  .schema(collectionSchema)
+  .schema(collectionInsertTransformSchema)
   .action(async ({ parsedInput, ctx }) => {
     const { name, slug, description, is_public } = parsedInput;
     const { userId } = ctx;
@@ -218,7 +103,7 @@ export const updateCollection = authedAction
     category: 'user',
   })
   .schema(
-    collectionSchema.extend({
+    collectionInsertTransformSchema.extend({
       id: z.string().uuid('Invalid collection ID'),
     })
   )
@@ -325,7 +210,7 @@ export const addItemToCollection = authedAction
     actionName: 'addItemToCollection',
     category: 'user',
   })
-  .schema(collectionItemSchema)
+  .schema(collectionItemInsertTransformSchema)
   .action(async ({ parsedInput, ctx }) => {
     const { collection_id, content_type, content_slug, notes, order } = parsedInput;
     const { userId } = ctx;
@@ -602,7 +487,7 @@ export const createReview = authedAction
     actionName: 'createReview',
     category: 'user',
   })
-  .schema(reviewInputSchema)
+  .schema(reviewInsertTransformSchema)
   .action(async ({ parsedInput, ctx }) => {
     const { content_type, content_slug, rating, review_text } = parsedInput;
     const { userId } = ctx;
@@ -709,7 +594,7 @@ export const updateReview = authedAction
     actionName: 'updateReview',
     category: 'user',
   })
-  .schema(reviewUpdateSchema)
+  .schema(reviewUpdateInputSchema)
   .action(async ({ parsedInput, ctx }) => {
     const { review_id, rating, review_text } = parsedInput;
     const { userId } = ctx;

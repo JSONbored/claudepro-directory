@@ -18,12 +18,30 @@
 
 import type { NextRequest } from 'next/server';
 import { Webhook } from 'svix';
+import { z } from 'zod';
 import { redisClient } from '@/src/lib/cache.server';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { env } from '@/src/lib/schemas/env.schema';
-import { resendWebhookEventSchema } from '@/src/lib/schemas/webhook.schema';
+import { publicWebhookEventsInsertSchema } from '@/src/lib/schemas/generated/db-schemas';
 import { webhookService } from '@/src/lib/services/webhook.server';
+
+// Create validation schema from database schema (for webhook payload structure)
+// Database schema defines the structure, we validate incoming data against it
+const resendWebhookEventSchema = z.object({
+  type: publicWebhookEventsInsertSchema.shape.type,
+  created_at: z.string().datetime(),
+  data: z
+    .object({
+      created_at: z.string().datetime().optional(),
+      email_id: z.string().uuid().optional(),
+      from: z.string().email().optional(),
+      to: z.union([z.string().email(), z.array(z.string().email())]).optional(),
+      subject: z.string().optional(),
+      // Flexible for different event types
+    })
+    .passthrough(), // Allow additional fields per event type
+});
 
 // Force Node.js runtime (required for Svix crypto operations)
 
@@ -119,7 +137,7 @@ export async function POST(request: NextRequest) {
     logger.info('Webhook already processed - idempotent response', undefined, {
       svixId,
       eventType: event.type,
-      emailId: event.data.email_id,
+      emailId: event.data.email_id ?? 'unknown',
     });
     // Return success to acknowledge receipt (prevent retries)
     return apiResponse.okRaw(
@@ -152,17 +170,20 @@ export async function POST(request: NextRequest) {
 
   // Process webhook event asynchronously (don't block response)
   // Resend expects fast 200 responses (<5 seconds)
-  webhookService.processEvent(event).catch((err) => {
-    logger.error(
-      'Webhook event processing failed',
-      err instanceof Error ? err : new Error(String(err)),
-      {
-        eventType: event.type,
-        emailId: event.data.email_id,
-        svixId,
-      }
-    );
-  });
+  // Type is validated by Zod schema, safe to pass to service
+  webhookService
+    .processEvent(event as Parameters<typeof webhookService.processEvent>[0])
+    .catch((err) => {
+      logger.error(
+        'Webhook event processing failed',
+        err instanceof Error ? err : new Error(String(err)),
+        {
+          eventType: event.type,
+          emailId: event.data.email_id ?? 'unknown',
+          svixId,
+        }
+      );
+    });
 
   // Return success immediately (no envelope for webhook acknowledgement)
   return apiResponse.okRaw(

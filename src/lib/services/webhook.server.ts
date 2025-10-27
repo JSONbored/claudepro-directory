@@ -9,16 +9,41 @@
  */
 
 import { createHash } from 'node:crypto';
+import type { z } from 'zod';
 import { redisClient } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
-import type {
-  BounceEvent,
-  ClickEvent,
-  ComplaintEvent,
-  OpenEvent,
-  ResendWebhookEvent,
-} from '@/src/lib/schemas/webhook.schema';
+import type { publicWebhookEventsInsertSchema } from '@/src/lib/schemas/generated/db-schemas';
 import { emailSequenceService } from './email-sequence.server';
+
+// Base type from database (data is JSONB in database for flexibility)
+type WebhookEventBase = z.infer<typeof publicWebhookEventsInsertSchema>;
+
+// Resend webhook data structure (extends database JSONB with known fields)
+// Database stores as JSONB, TypeScript adds type safety for service layer
+type ResendWebhookData = {
+  created_at?: string;
+  email_id?: string;
+  from?: string;
+  to?: string | string[];
+  subject?: string;
+  bounce_type?: 'hard' | 'soft';
+  error?: string;
+  feedback_type?: string;
+  link?: string;
+  ip_address?: string;
+  user_agent?: string;
+  attempt?: number;
+};
+
+// Extend database type with Resend-specific data structure
+type ResendWebhookEvent = Omit<WebhookEventBase, 'data'> & {
+  data: ResendWebhookData;
+};
+
+type BounceEvent = ResendWebhookEvent & { type: 'email.bounced' };
+type ComplaintEvent = ResendWebhookEvent & { type: 'email.complained' };
+type ClickEvent = ResendWebhookEvent & { type: 'email.clicked' };
+type OpenEvent = ResendWebhookEvent & { type: 'email.opened' };
 
 /**
  * WebhookService
@@ -31,7 +56,7 @@ class WebhookService {
   async processEvent(event: ResendWebhookEvent): Promise<void> {
     logger.info('Processing webhook event', {
       type: event.type,
-      emailId: event.data.email_id,
+      emailId: event.data.email_id ?? 'unknown',
       timestamp: event.created_at,
     });
 
@@ -179,14 +204,14 @@ class WebhookService {
   private async handleClick(event: ClickEvent): Promise<void> {
     const email = this.extractEmail(event.data.to);
     const emailHash = this.hashEmail(email);
-    const link = event.data.link;
+    const link = event.data.link ?? '';
 
     // Track in Redis using pipeline - global counter + link tracking
     await redisClient.executeOperation(
       async (redis) => {
         const pipeline = redis.pipeline();
         pipeline.incr('email:stats:clicks');
-        pipeline.hincrby('email:link_clicks', link, 1);
+        if (link) pipeline.hincrby('email:link_clicks', link, 1);
         await pipeline.exec();
 
         return {};
@@ -274,9 +299,10 @@ class WebhookService {
   }
 
   /**
-   * Extract email from 'to' field (can be string or array)
+   * Extract email from 'to' field (can be string, array, or undefined)
    */
-  private extractEmail(to: string | string[]): string {
+  private extractEmail(to: string | string[] | undefined): string {
+    if (!to) return '';
     return Array.isArray(to) ? (to[0] ?? '') : to;
   }
 

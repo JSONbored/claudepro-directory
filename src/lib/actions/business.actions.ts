@@ -31,19 +31,79 @@ import {
   updateJobSchema,
 } from '@/src/lib/schemas/content/job.schema';
 import { configSubmissionSchema } from '@/src/lib/schemas/form.schema';
-import { nonNegativeInt } from '@/src/lib/schemas/primitives/base-numbers';
-import { nonEmptyString, slugString, urlString } from '@/src/lib/schemas/primitives/base-strings';
 import {
-  type RecentMerged,
-  recentMergedSchema,
-  submissionStatsSchema,
-  type TopContributor,
-  topContributorSchema,
-} from '@/src/lib/schemas/submission-stats.schema';
+  publicCompaniesInsertSchema,
+  publicCompaniesUpdateSchema,
+  publicSponsoredClicksInsertSchema,
+  publicSponsoredImpressionsInsertSchema,
+} from '@/src/lib/schemas/generated/db-schemas';
+import { nonNegativeInt } from '@/src/lib/schemas/primitives/base-numbers';
+
+// ============================================
+// SUBMISSION STATS TYPES (Database-First)
+// ============================================
+
+// Leaderboard types (derived from database tables, not materialized views)
+type RecentMerged = {
+  id: string;
+  content_name: string;
+  content_type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'collections';
+  merged_at: string;
+  user: {
+    name: string;
+    slug: string;
+  } | null;
+};
+
+type TopContributor = {
+  rank: number;
+  name: string;
+  slug: string;
+  mergedCount: number;
+};
+
+// Zod schemas for validation
+const submissionStatsSchema = z.object({
+  total: z.number(),
+  pending: z.number(),
+  mergedThisWeek: z.number(),
+});
+
+const recentMergedSchema = z.object({
+  id: z.string(),
+  content_name: z.string(),
+  content_type: z.enum([
+    'agents',
+    'mcp',
+    'rules',
+    'commands',
+    'hooks',
+    'statuslines',
+    'collections',
+  ]),
+  merged_at: z.string(),
+  user: z
+    .object({
+      name: z.string(),
+      slug: z.string(),
+    })
+    .nullable(),
+});
+
+const topContributorSchema = z.object({
+  rank: z.number(),
+  name: z.string(),
+  slug: z.string(),
+  mergedCount: z.number(),
+});
+
 import { createClient } from '@/src/lib/supabase/server';
-import type { CompanyInsert, CompanyUpdate } from '@/src/lib/types/company.types';
-import type { SubmissionInsert } from '@/src/lib/types/submission.types';
 import type { Database } from '@/src/types/database.types';
+
+// Database-first types (from generated database schema)
+type CompanyInsert = Database['public']['Tables']['companies']['Insert'];
+type CompanyUpdate = Database['public']['Tables']['companies']['Update'];
+type SubmissionInsert = Database['public']['Tables']['submissions']['Insert'];
 
 // ============================================
 // SUBMISSION ACTIONS
@@ -294,40 +354,21 @@ export const getSubmissionStats = rateLimitedAction
       const supabase = await createClient();
 
       // Parallel queries for performance
-      const [totalResult, pendingResult, mergedWeekResult] = await Promise.all([
-        // Total submissions (all time)
-        supabase
-          .from('submissions')
-          .select('id', { count: 'exact', head: true }),
+      // Query materialized view (replaces 3 parallel queries with 1)
+      // View is refreshed hourly via pg_cron
+      const { data, error } = await supabase
+        .from('submission_stats_summary')
+        .select('total, pending, merged_this_week')
+        .single();
 
-        // Pending review
-        supabase
-          .from('submissions')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'pending'),
-
-        // Merged this week
-        supabase
-          .from('submissions')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'merged')
-          .gte('merged_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
-      ]);
-
-      if (totalResult.error) {
-        throw new Error(`Failed to count total submissions: ${totalResult.error.message}`);
-      }
-      if (pendingResult.error) {
-        throw new Error(`Failed to count pending submissions: ${pendingResult.error.message}`);
-      }
-      if (mergedWeekResult.error) {
-        throw new Error(`Failed to count merged submissions: ${mergedWeekResult.error.message}`);
+      if (error) {
+        throw new Error(`Failed to fetch submission stats: ${error.message}`);
       }
 
       return {
-        total: totalResult.count || 0,
-        pending: pendingResult.count || 0,
-        mergedThisWeek: mergedWeekResult.count || 0,
+        total: data?.total ?? 0,
+        pending: data?.pending ?? 0,
+        mergedThisWeek: data?.merged_this_week ?? 0,
       };
     } catch (error) {
       logger.error(
@@ -514,15 +555,12 @@ export const getTopContributors = rateLimitedAction
 // COMPANY ACTIONS
 // ============================================
 
-// Company schemas
-const createCompanySchema = z.object({
-  name: nonEmptyString.min(2).max(200),
-  slug: slugString.optional(),
-  logo: urlString.nullable().optional(),
-  website: urlString.nullable().optional(),
+// Company schemas - Generated base + business rules
+const createCompanySchema = publicCompaniesInsertSchema.extend({
+  name: z.string().min(2).max(200),
+  logo: z.string().url().nullable().optional(),
+  website: z.string().url().nullable().optional(),
   description: z.string().max(1000).nullable().optional(),
-  size: z.enum(['1-10', '11-50', '51-200', '201-500', '500+']).nullable().optional(),
-  industry: nonEmptyString.max(100).nullable().optional(),
   using_cursor_since: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -530,14 +568,12 @@ const createCompanySchema = z.object({
     .optional(),
 });
 
-const updateCompanySchema = z.object({
+const updateCompanySchema = publicCompaniesUpdateSchema.extend({
   id: z.string().uuid(),
-  name: nonEmptyString.min(2).max(200).optional(),
-  logo: urlString.nullable().optional(),
-  website: urlString.nullable().optional(),
+  name: z.string().min(2).max(200).optional(),
+  logo: z.string().url().nullable().optional(),
+  website: z.string().url().nullable().optional(),
   description: z.string().max(1000).nullable().optional(),
-  size: z.enum(['1-10', '11-50', '51-200', '201-500', '500+']).nullable().optional(),
-  industry: nonEmptyString.max(100).nullable().optional(),
   using_cursor_since: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -987,14 +1023,13 @@ export async function getUserJobs() {
 // SPONSORED CONTENT ACTIONS
 // ============================================
 
-const trackImpressionSchema = z.object({
-  sponsored_id: z.string().uuid(),
-  page_url: z.string().max(500).optional(),
+// Sponsored content tracking schemas - Generated base + validation
+const trackImpressionSchema = publicSponsoredImpressionsInsertSchema.extend({
   position: z.number().int().min(0).max(100).optional(),
+  page_url: z.string().max(500).optional(),
 });
 
-const trackClickSchema = z.object({
-  sponsored_id: z.string().uuid(),
+const trackClickSchema = publicSponsoredClicksInsertSchema.extend({
   target_url: z.string().max(500),
 });
 

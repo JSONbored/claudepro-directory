@@ -22,21 +22,42 @@ import { authedAction } from '@/src/lib/actions/safe-action';
 import { getAutoAwardBadges } from '@/src/lib/config/badges.config';
 import { userIdSchema } from '@/src/lib/schemas/branded-types.schema';
 import { createClient } from '@/src/lib/supabase/server';
+import { validateRows } from '@/src/lib/supabase/validators';
 
-// UserBadge with badge details joined
-type UserBadgeWithBadge = {
-  id: string;
-  badge_id: string;
-  earned_at: string;
-  featured: boolean | null;
-  badges: {
-    slug: string;
-    name: string;
-    description: string;
-    icon: string | null;
-    category: string;
-  };
-};
+// =============================================================================
+// VALIDATION SCHEMAS
+// =============================================================================
+
+/**
+ * UserBadge with badge details joined
+ * Schema for runtime validation of Supabase query results
+ */
+const userBadgeWithBadgeSchema = z.object({
+  id: z.string(),
+  badge_id: z.string(),
+  earned_at: z.string(),
+  featured: z.boolean().nullable(),
+  badges: z.object({
+    slug: z.string(),
+    name: z.string(),
+    description: z.string(),
+    icon: z.string().nullable(),
+    category: z.string(),
+  }),
+});
+
+type UserBadgeWithBadge = z.infer<typeof userBadgeWithBadgeSchema>;
+
+/**
+ * UserBadge with only badge slug (for eligibility checks)
+ */
+const userBadgeWithSlugSchema = z.object({
+  badges: z
+    .object({
+      slug: z.string(),
+    })
+    .nullable(),
+});
 
 // =============================================================================
 // GET USER BADGES
@@ -86,9 +107,13 @@ export const getUserBadges = authedAction
       throw new Error(`Failed to fetch user badges: ${error.message}`);
     }
 
+    const validatedBadges = validateRows(userBadgeWithBadgeSchema, data, {
+      schemaName: 'UserBadgeWithBadge',
+    });
+
     return {
-      badges: (data || []) as UserBadgeWithBadge[],
-      total: data?.length || 0,
+      badges: validatedBadges,
+      total: validatedBadges.length,
     };
   });
 
@@ -140,8 +165,12 @@ export const getFeaturedBadges = authedAction
       throw new Error(`Failed to fetch featured badges: ${error.message}`);
     }
 
+    const validatedBadges = validateRows(userBadgeWithBadgeSchema, data, {
+      schemaName: 'UserBadgeWithBadge',
+    });
+
     return {
-      badges: (data || []) as UserBadgeWithBadge[],
+      badges: validatedBadges,
     };
   });
 
@@ -251,9 +280,12 @@ export const checkBadgeEligibility = authedAction
     }
 
     // Create set of earned badge slugs
-    type UserBadgeWithSlug = { badges: { slug: string } | null };
+    const validatedUserBadges = validateRows(userBadgeWithSlugSchema, userBadges, {
+      schemaName: 'UserBadgeWithSlug',
+    });
+
     const earnedBadgeSlugs = new Set(
-      ((userBadges as UserBadgeWithSlug[]) || [])
+      validatedUserBadges
         .map((ub) => ub.badges?.slug)
         .filter((slug): slug is string => Boolean(slug))
     );
@@ -376,7 +408,9 @@ export async function getPublicUserBadges(
     throw new Error(`Failed to fetch user badges: ${error.message}`);
   }
 
-  return (data || []) as UserBadgeWithBadge[];
+  return validateRows(userBadgeWithBadgeSchema, data, {
+    schemaName: 'UserBadgeWithBadge',
+  });
 }
 
 /**

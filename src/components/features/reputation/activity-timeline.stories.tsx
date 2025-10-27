@@ -1,7 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, userEvent, within } from 'storybook/test';
-import type { Activity } from '@/src/lib/schemas/activity.schema';
+import type { Database } from '@/src/types/database.types';
 import { ActivityTimeline } from './activity-timeline';
+
+// Activity types from database tables (database-first)
+type PostActivity = Database['public']['Tables']['posts']['Row'] & { type: 'post' };
+type CommentActivity = Database['public']['Tables']['comments']['Row'] & { type: 'comment' };
+type VoteActivity = Database['public']['Tables']['votes']['Row'] & { type: 'vote' };
+type SubmissionActivity = Database['public']['Tables']['submissions']['Row'] & {
+  type: 'submission';
+};
+type Activity = PostActivity | CommentActivity | VoteActivity | SubmissionActivity;
 
 /**
  * ActivityTimeline Component Stories

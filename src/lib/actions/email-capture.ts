@@ -1,7 +1,8 @@
 'use server';
 
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { postCopyEmailCaptureSchema } from '@/src/lib/schemas/email-capture.schema';
+import { publicNewsletterSubscriptionsInsertSchema } from '@/src/lib/schemas/generated/db-schemas';
+import { normalizeEmail } from '@/src/lib/schemas/primitives/sanitization-transforms';
 import { emailOrchestrationService } from '@/src/lib/services/email-orchestration.server';
 
 /**
@@ -48,18 +49,31 @@ export const postCopyEmailCaptureAction = rateLimitedAction
     actionName: 'postCopyEmailCapture',
     category: 'form',
   })
-  .schema(postCopyEmailCaptureSchema)
+  .schema(
+    // Use auto-generated schema from database, pick client-submitted fields including copy context
+    publicNewsletterSubscriptionsInsertSchema.pick({
+      email: true,
+      source: true,
+      referrer: true,
+      copy_type: true,
+      copy_category: true,
+      copy_slug: true,
+    })
+  )
   .action(
-    async ({ parsedInput: { email, source, referrer, copyType, copyCategory, copySlug } }) => {
+    async ({ parsedInput: { email, source, referrer, copy_type, copy_category, copy_slug } }) => {
+      // Transform email (normalize to lowercase, trim) before processing
+      const normalizedEmail = normalizeEmail(email);
+
       // Use unified orchestration service with copy analytics
       return await emailOrchestrationService.subscribeWithOrchestration({
-        email,
+        email: normalizedEmail,
         metadata: {
           ...(source && { source }),
           ...(referrer && { referrer }),
-          ...(copyType && { copyType }),
-          ...(copyCategory && { copyCategory }),
-          ...(copySlug && { copySlug }),
+          ...(copy_type && { copyType: copy_type }), // Map snake_case to camelCase for service
+          ...(copy_category && { copyCategory: copy_category }),
+          ...(copy_slug && { copySlug: copy_slug }),
         },
         includeCopyAnalytics: true,
         logContext: ' (post-copy)',

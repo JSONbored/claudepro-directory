@@ -469,6 +469,17 @@ $$;
 ALTER FUNCTION "public"."cleanup_old_interactions"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."extract_tags_for_search"("tags" "jsonb") RETURNS "text"
+    LANGUAGE "sql" IMMUTABLE PARALLEL SAFE
+    AS $$
+  SELECT COALESCE(string_agg(value::text, ' '), '')
+  FROM jsonb_array_elements_text(COALESCE(tags, '[]'::jsonb))
+$$;
+
+
+ALTER FUNCTION "public"."extract_tags_for_search"("tags" "jsonb") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."generate_collection_slug"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -986,14 +997,53 @@ CREATE TABLE IF NOT EXISTS "public"."companies" (
     "featured" boolean DEFAULT false,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "search_vector" "tsvector" GENERATED ALWAYS AS ((("setweight"("to_tsvector"('"english"'::"regconfig", COALESCE("name", ''::"text")), 'A'::"char") || "setweight"("to_tsvector"('"english"'::"regconfig", COALESCE("description", ''::"text")), 'B'::"char")) || "setweight"("to_tsvector"('"english"'::"regconfig", COALESCE("industry", ''::"text")), 'C'::"char"))) STORED
+    "search_vector" "tsvector" GENERATED ALWAYS AS ((("setweight"("to_tsvector"('"english"'::"regconfig", COALESCE("name", ''::"text")), 'A'::"char") || "setweight"("to_tsvector"('"english"'::"regconfig", COALESCE("description", ''::"text")), 'B'::"char")) || "setweight"("to_tsvector"('"english"'::"regconfig", COALESCE("industry", ''::"text")), 'C'::"char"))) STORED,
+    CONSTRAINT "companies_description_length" CHECK ((("description" IS NULL) OR ("length"("description") <= 1000))),
+    CONSTRAINT "companies_industry_length" CHECK ((("industry" IS NULL) OR ("length"("industry") <= 100))),
+    CONSTRAINT "companies_logo_url" CHECK ((("logo" IS NULL) OR ("logo" ~ '^https?://[^\s]+$'::"text"))),
+    CONSTRAINT "companies_name_length" CHECK ((("length"("name") >= 2) AND ("length"("name") <= 200))),
+    CONSTRAINT "companies_size_enum" CHECK ((("size" IS NULL) OR ("size" = ANY (ARRAY['1-10'::"text", '11-50'::"text", '51-200'::"text", '201-500'::"text", '500+'::"text"])))),
+    CONSTRAINT "companies_slug_pattern" CHECK (("slug" ~ '^[a-z0-9\-]+$'::"text")),
+    CONSTRAINT "companies_website_url" CHECK ((("website" IS NULL) OR ("website" ~ '^https?://[^\s]+$'::"text")))
 );
 
 
 ALTER TABLE "public"."companies" OWNER TO "postgres";
 
 
+COMMENT ON COLUMN "public"."companies"."using_cursor_since" IS 'Date when company started using Cursor (PostgreSQL DATE type)';
+
+
+
 COMMENT ON COLUMN "public"."companies"."search_vector" IS 'Full-text search vector (auto-maintained): name(A) + description(B) + industry(C)';
+
+
+
+COMMENT ON CONSTRAINT "companies_description_length" ON "public"."companies" IS 'Enforces description max 1000 characters';
+
+
+
+COMMENT ON CONSTRAINT "companies_industry_length" ON "public"."companies" IS 'Enforces industry max 100 characters';
+
+
+
+COMMENT ON CONSTRAINT "companies_logo_url" ON "public"."companies" IS 'Enforces logo must be valid HTTP/HTTPS URL if provided';
+
+
+
+COMMENT ON CONSTRAINT "companies_name_length" ON "public"."companies" IS 'Enforces company name between 2-200 characters';
+
+
+
+COMMENT ON CONSTRAINT "companies_size_enum" ON "public"."companies" IS 'Enforces valid company size ranges';
+
+
+
+COMMENT ON CONSTRAINT "companies_slug_pattern" ON "public"."companies" IS 'Enforces slug format: lowercase letters, numbers, hyphens only';
+
+
+
+COMMENT ON CONSTRAINT "companies_website_url" ON "public"."companies" IS 'Enforces website must be valid HTTP/HTTPS URL if provided';
 
 
 
@@ -1206,6 +1256,33 @@ $$;
 
 
 ALTER FUNCTION "public"."update_collection_item_count"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."update_content_items_updated_at"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."update_content_items_updated_at"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."update_newsletter_updated_at"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."update_newsletter_updated_at"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."update_post_vote_count"() RETURNS "trigger"
@@ -1463,11 +1540,21 @@ CREATE TABLE IF NOT EXISTS "public"."bookmarks" (
     "content_type" "text" NOT NULL,
     "content_slug" "text" NOT NULL,
     "notes" "text",
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "bookmarks_content_slug_pattern" CHECK ((("content_slug" ~ '^[a-zA-Z0-9\-_/]+$'::"text") AND ("length"("content_slug") <= 200))),
+    CONSTRAINT "bookmarks_notes_length" CHECK ((("notes" IS NULL) OR ("length"("notes") <= 500)))
 );
 
 
 ALTER TABLE "public"."bookmarks" OWNER TO "postgres";
+
+
+COMMENT ON CONSTRAINT "bookmarks_content_slug_pattern" ON "public"."bookmarks" IS 'Enforces content slug format: letters, numbers, hyphens, underscores, slashes (max 200 chars)';
+
+
+
+COMMENT ON CONSTRAINT "bookmarks_notes_length" ON "public"."bookmarks" IS 'Enforces notes max 500 characters';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."collection_items" (
@@ -1479,11 +1566,30 @@ CREATE TABLE IF NOT EXISTS "public"."collection_items" (
     "order" integer DEFAULT 0 NOT NULL,
     "notes" "text",
     "added_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    CONSTRAINT "collection_items_notes_check" CHECK (("char_length"("notes") <= 500))
+    CONSTRAINT "collection_items_content_slug_pattern" CHECK ((("content_slug" ~ '^[a-zA-Z0-9\-_/]+$'::"text") AND ("length"("content_slug") <= 200))),
+    CONSTRAINT "collection_items_notes_check" CHECK (("char_length"("notes") <= 500)),
+    CONSTRAINT "collection_items_notes_length" CHECK ((("notes" IS NULL) OR ("length"("notes") <= 500))),
+    CONSTRAINT "collection_items_order_min" CHECK (("order" >= 0))
 );
 
 
 ALTER TABLE "public"."collection_items" OWNER TO "postgres";
+
+
+COMMENT ON COLUMN "public"."collection_items"."order" IS 'Display order within collection (default: 0, non-negative, NOT NULL)';
+
+
+
+COMMENT ON CONSTRAINT "collection_items_content_slug_pattern" ON "public"."collection_items" IS 'Enforces content slug format: letters, numbers, hyphens, underscores, slashes (max 200 chars)';
+
+
+
+COMMENT ON CONSTRAINT "collection_items_notes_length" ON "public"."collection_items" IS 'Enforces notes max 500 characters';
+
+
+
+COMMENT ON CONSTRAINT "collection_items_order_min" ON "public"."collection_items" IS 'Enforces order must be non-negative';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."comments" (
@@ -1539,6 +1645,49 @@ CREATE MATERIALIZED VIEW "public"."company_job_stats" AS
 
 
 ALTER MATERIALIZED VIEW "public"."company_job_stats" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."content_items" (
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+    "category" "text" NOT NULL,
+    "slug" "text" NOT NULL,
+    "data" "jsonb" NOT NULL,
+    "git_hash" "text" NOT NULL,
+    "synced_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "search_vector" "tsvector" GENERATED ALWAYS AS ((("setweight"("to_tsvector"('"english"'::"regconfig", COALESCE(("data" ->> 'name'::"text"), ("data" ->> 'title'::"text"), ''::"text")), 'A'::"char") || "setweight"("to_tsvector"('"english"'::"regconfig", COALESCE(("data" ->> 'description'::"text"), ''::"text")), 'B'::"char")) || "setweight"("to_tsvector"('"english"'::"regconfig", "public"."extract_tags_for_search"(("data" -> 'tags'::"text"))), 'C'::"char"))) STORED,
+    CONSTRAINT "content_items_category_check" CHECK (("category" = ANY (ARRAY['agents'::"text", 'mcp'::"text", 'commands'::"text", 'rules'::"text", 'hooks'::"text", 'statuslines'::"text", 'skills'::"text", 'collections'::"text", 'guides'::"text", 'jobs'::"text", 'changelog'::"text"]))),
+    CONSTRAINT "content_items_git_hash_check" CHECK (("length"("git_hash") = 64)),
+    CONSTRAINT "content_items_slug_check" CHECK ((("length"("slug") > 0) AND ("length"("slug") <= 255)))
+);
+
+
+ALTER TABLE "public"."content_items" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."content_items" IS 'Content directory items synced from Git /content/*.json files. Serves as database source for content delivery instead of /generated/*.ts imports. Enables PostgreSQL full-text search, SQL filtering, and real-time updates.';
+
+
+
+COMMENT ON COLUMN "public"."content_items"."category" IS 'Content category (agents, mcp, commands, etc). Maps to /content/{category}/ directory.';
+
+
+
+COMMENT ON COLUMN "public"."content_items"."slug" IS 'URL-safe slug identifier. Maps to /content/{category}/{slug}.json filename.';
+
+
+
+COMMENT ON COLUMN "public"."content_items"."data" IS 'Full JSON content object. Stored as JSONB for query flexibility and schema evolution.';
+
+
+
+COMMENT ON COLUMN "public"."content_items"."git_hash" IS 'SHA256 hash of source JSON file. Used for incremental sync (only update if hash changed).';
+
+
+
+COMMENT ON COLUMN "public"."content_items"."search_vector" IS 'Auto-generated full-text search vector. Combines name, description, and tags with weighted ranking.';
+
 
 
 CREATE MATERIALIZED VIEW "public"."content_popularity" AS
@@ -1614,6 +1763,67 @@ CREATE TABLE IF NOT EXISTS "public"."followers" (
 ALTER TABLE "public"."followers" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."newsletter_subscriptions" (
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+    "email" "text" NOT NULL,
+    "source" "text",
+    "referrer" "text",
+    "copy_type" "text",
+    "copy_category" "text",
+    "copy_slug" "text",
+    "status" "text" DEFAULT 'active'::"text" NOT NULL,
+    "confirmed" boolean DEFAULT false,
+    "confirmation_token" "text",
+    "confirmed_at" timestamp with time zone,
+    "ip_address" "inet",
+    "user_agent" "text",
+    "consent_given" boolean DEFAULT true,
+    "subscribed_at" timestamp with time zone DEFAULT "now"(),
+    "unsubscribed_at" timestamp with time zone,
+    "last_email_sent_at" timestamp with time zone,
+    "created_at" timestamp with time zone DEFAULT "now"(),
+    "updated_at" timestamp with time zone DEFAULT "now"(),
+    CONSTRAINT "newsletter_subscriptions_copy_category_check" CHECK ((("copy_category" IS NULL) OR ("length"("copy_category") <= 50))),
+    CONSTRAINT "newsletter_subscriptions_copy_slug_check" CHECK ((("copy_slug" IS NULL) OR ("length"("copy_slug") <= 200))),
+    CONSTRAINT "newsletter_subscriptions_copy_type_check" CHECK ((("copy_type" IS NULL) OR ("copy_type" = ANY (ARRAY['llmstxt'::"text", 'markdown'::"text", 'code'::"text", 'link'::"text"])))),
+    CONSTRAINT "newsletter_subscriptions_email_check" CHECK ((("length"("email") >= 5) AND ("length"("email") <= 254) AND ("email" ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'::"text"))),
+    CONSTRAINT "newsletter_subscriptions_referrer_check" CHECK ((("referrer" IS NULL) OR ("length"("referrer") <= 500))),
+    CONSTRAINT "newsletter_subscriptions_source_check" CHECK ((("source" IS NULL) OR ("source" = ANY (ARRAY['footer'::"text", 'homepage'::"text", 'modal'::"text", 'content_page'::"text", 'inline'::"text", 'post_copy'::"text"])))),
+    CONSTRAINT "newsletter_subscriptions_status_check" CHECK (("status" = ANY (ARRAY['active'::"text", 'unsubscribed'::"text", 'bounced'::"text", 'complained'::"text"])))
+);
+
+
+ALTER TABLE "public"."newsletter_subscriptions" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."newsletter_subscriptions" IS 'Email newsletter subscriptions with GDPR compliance and signup attribution tracking';
+
+
+
+COMMENT ON COLUMN "public"."newsletter_subscriptions"."email" IS 'Normalized email address (lowercase, trimmed) - RFC 5322 compliant';
+
+
+
+COMMENT ON COLUMN "public"."newsletter_subscriptions"."source" IS 'Signup source for conversion attribution (footer, homepage, modal, etc.)';
+
+
+
+COMMENT ON COLUMN "public"."newsletter_subscriptions"."copy_type" IS 'Type of content copied when email captured (llmstxt, markdown, code, link)';
+
+
+
+COMMENT ON COLUMN "public"."newsletter_subscriptions"."status" IS 'Subscription status: active, unsubscribed, bounced, complained';
+
+
+
+COMMENT ON COLUMN "public"."newsletter_subscriptions"."ip_address" IS 'IP address at signup time (GDPR compliance)';
+
+
+
+COMMENT ON COLUMN "public"."newsletter_subscriptions"."consent_given" IS 'Explicit consent flag (GDPR compliance)';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."payments" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "user_id" "uuid",
@@ -1644,11 +1854,21 @@ CREATE TABLE IF NOT EXISTS "public"."posts" (
     "vote_count" integer DEFAULT 0,
     "comment_count" integer DEFAULT 0,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "posts_content_length" CHECK ((("content" IS NULL) OR ("length"("content") <= 5000))),
+    CONSTRAINT "posts_title_length" CHECK ((("length"("title") >= 3) AND ("length"("title") <= 300)))
 );
 
 
 ALTER TABLE "public"."posts" OWNER TO "postgres";
+
+
+COMMENT ON CONSTRAINT "posts_content_length" ON "public"."posts" IS 'Enforces post content max 5000 characters';
+
+
+
+COMMENT ON CONSTRAINT "posts_title_length" ON "public"."posts" IS 'Enforces post title between 3-300 characters';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."user_affinities" (
@@ -1736,13 +1956,28 @@ CREATE TABLE IF NOT EXISTS "public"."review_ratings" (
     "helpful_count" integer DEFAULT 0 NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "review_ratings_content_slug_pattern" CHECK ((("content_slug" ~ '^[a-zA-Z0-9\-_/]+$'::"text") AND ("length"("content_slug") <= 200))),
     CONSTRAINT "review_ratings_content_type_check" CHECK (("content_type" = ANY (ARRAY['agents'::"text", 'mcp'::"text", 'rules'::"text", 'commands'::"text", 'hooks'::"text", 'statuslines'::"text", 'collections'::"text", 'guides'::"text"]))),
     CONSTRAINT "review_ratings_helpful_count_check" CHECK (("helpful_count" >= 0)),
-    CONSTRAINT "review_ratings_rating_check" CHECK ((("rating" >= 1) AND ("rating" <= 5)))
+    CONSTRAINT "review_ratings_rating_check" CHECK ((("rating" >= 1) AND ("rating" <= 5))),
+    CONSTRAINT "review_ratings_rating_range" CHECK ((("rating" >= 1) AND ("rating" <= 5))),
+    CONSTRAINT "review_ratings_review_text_length" CHECK ((("review_text" IS NULL) OR ("length"("review_text") <= 2000)))
 );
 
 
 ALTER TABLE "public"."review_ratings" OWNER TO "postgres";
+
+
+COMMENT ON CONSTRAINT "review_ratings_content_slug_pattern" ON "public"."review_ratings" IS 'Enforces content slug format: letters, numbers, hyphens, underscores, slashes (max 200 chars)';
+
+
+
+COMMENT ON CONSTRAINT "review_ratings_rating_range" ON "public"."review_ratings" IS 'Enforces rating must be 1-5 stars';
+
+
+
+COMMENT ON CONSTRAINT "review_ratings_review_text_length" ON "public"."review_ratings" IS 'Enforces review text max 2000 characters';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."sponsored_clicks" (
@@ -1750,11 +1985,16 @@ CREATE TABLE IF NOT EXISTS "public"."sponsored_clicks" (
     "sponsored_id" "uuid" NOT NULL,
     "user_id" "uuid",
     "target_url" "text",
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "sponsored_clicks_target_url_length" CHECK (("length"("target_url") <= 500))
 );
 
 
 ALTER TABLE "public"."sponsored_clicks" OWNER TO "postgres";
+
+
+COMMENT ON CONSTRAINT "sponsored_clicks_target_url_length" ON "public"."sponsored_clicks" IS 'Enforces target URL max 500 characters';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."sponsored_content" (
@@ -1783,11 +2023,21 @@ CREATE TABLE IF NOT EXISTS "public"."sponsored_impressions" (
     "user_id" "uuid",
     "page_url" "text",
     "position" integer,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "sponsored_impressions_page_url_length" CHECK ((("page_url" IS NULL) OR ("length"("page_url") <= 500))),
+    CONSTRAINT "sponsored_impressions_position_range" CHECK ((("position" IS NULL) OR (("position" >= 0) AND ("position" <= 100))))
 );
 
 
 ALTER TABLE "public"."sponsored_impressions" OWNER TO "postgres";
+
+
+COMMENT ON CONSTRAINT "sponsored_impressions_page_url_length" ON "public"."sponsored_impressions" IS 'Enforces page URL max 500 characters';
+
+
+
+COMMENT ON CONSTRAINT "sponsored_impressions_position_range" ON "public"."sponsored_impressions" IS 'Enforces position between 0-100 if provided';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."submissions" (
@@ -1811,6 +2061,38 @@ CREATE TABLE IF NOT EXISTS "public"."submissions" (
 
 
 ALTER TABLE "public"."submissions" OWNER TO "postgres";
+
+
+CREATE MATERIALIZED VIEW "public"."submission_stats_summary" AS
+ SELECT "count"(*) AS "total",
+    "count"(*) FILTER (WHERE ("status" = 'pending'::"text")) AS "pending",
+    "count"(*) FILTER (WHERE (("status" = 'merged'::"text") AND ("merged_at" >= ("now"() - '7 days'::interval)))) AS "merged_this_week",
+    "now"() AS "last_refreshed_at"
+   FROM "public"."submissions"
+  WITH NO DATA;
+
+
+ALTER MATERIALIZED VIEW "public"."submission_stats_summary" OWNER TO "postgres";
+
+
+COMMENT ON MATERIALIZED VIEW "public"."submission_stats_summary" IS 'Aggregated submission statistics for dashboard - refreshed hourly via pg_cron';
+
+
+
+COMMENT ON COLUMN "public"."submission_stats_summary"."total" IS 'Total number of submissions across all statuses';
+
+
+
+COMMENT ON COLUMN "public"."submission_stats_summary"."pending" IS 'Number of submissions with status=pending awaiting review';
+
+
+
+COMMENT ON COLUMN "public"."submission_stats_summary"."merged_this_week" IS 'Number of submissions merged in the last 7 days';
+
+
+
+COMMENT ON COLUMN "public"."submission_stats_summary"."last_refreshed_at" IS 'Timestamp of last materialized view refresh (updated hourly)';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."subscriptions" (
@@ -1876,6 +2158,75 @@ COMMENT ON COLUMN "public"."trending_content_24h"."trending_score" IS 'Weighted 
 
 
 COMMENT ON COLUMN "public"."trending_content_24h"."latest_activity_at" IS 'Most recent activity timestamp (bookmark, post, or vote). Used for recency bonus calculation.';
+
+
+
+CREATE MATERIALIZED VIEW "public"."user_activity_summary" AS
+ SELECT "u"."id" AS "user_id",
+    COALESCE("p"."total_posts", (0)::bigint) AS "total_posts",
+    COALESCE("c"."total_comments", (0)::bigint) AS "total_comments",
+    COALESCE("v"."total_votes", (0)::bigint) AS "total_votes",
+    COALESCE("s"."total_submissions", (0)::bigint) AS "total_submissions",
+    COALESCE("s"."merged_submissions", (0)::bigint) AS "merged_submissions",
+    (((COALESCE("p"."total_posts", (0)::bigint) + COALESCE("c"."total_comments", (0)::bigint)) + COALESCE("v"."total_votes", (0)::bigint)) + COALESCE("s"."total_submissions", (0)::bigint)) AS "total_activity",
+    "now"() AS "last_refreshed_at"
+   FROM (((("public"."users" "u"
+     LEFT JOIN ( SELECT "posts"."user_id",
+            "count"(*) AS "total_posts"
+           FROM "public"."posts"
+          GROUP BY "posts"."user_id") "p" ON (("u"."id" = "p"."user_id")))
+     LEFT JOIN ( SELECT "comments"."user_id",
+            "count"(*) AS "total_comments"
+           FROM "public"."comments"
+          GROUP BY "comments"."user_id") "c" ON (("u"."id" = "c"."user_id")))
+     LEFT JOIN ( SELECT "votes"."user_id",
+            "count"(*) AS "total_votes"
+           FROM "public"."votes"
+          GROUP BY "votes"."user_id") "v" ON (("u"."id" = "v"."user_id")))
+     LEFT JOIN ( SELECT "submissions"."user_id",
+            "count"(*) AS "total_submissions",
+            "count"(*) FILTER (WHERE ("submissions"."status" = 'merged'::"text")) AS "merged_submissions"
+           FROM "public"."submissions"
+          GROUP BY "submissions"."user_id") "s" ON (("u"."id" = "s"."user_id")))
+  WITH NO DATA;
+
+
+ALTER MATERIALIZED VIEW "public"."user_activity_summary" OWNER TO "postgres";
+
+
+COMMENT ON MATERIALIZED VIEW "public"."user_activity_summary" IS 'Aggregated user activity statistics - refreshed daily via pg_cron. Replaces 5 parallel queries with 1 indexed query.';
+
+
+
+COMMENT ON COLUMN "public"."user_activity_summary"."user_id" IS 'User ID (foreign key to users.id)';
+
+
+
+COMMENT ON COLUMN "public"."user_activity_summary"."total_posts" IS 'Total number of posts created by user';
+
+
+
+COMMENT ON COLUMN "public"."user_activity_summary"."total_comments" IS 'Total number of comments created by user';
+
+
+
+COMMENT ON COLUMN "public"."user_activity_summary"."total_votes" IS 'Total number of votes cast by user (upvotes + downvotes)';
+
+
+
+COMMENT ON COLUMN "public"."user_activity_summary"."total_submissions" IS 'Total number of content submissions by user (all statuses)';
+
+
+
+COMMENT ON COLUMN "public"."user_activity_summary"."merged_submissions" IS 'Number of submissions approved and merged into production';
+
+
+
+COMMENT ON COLUMN "public"."user_activity_summary"."total_activity" IS 'Sum of all activity types (posts + comments + votes + submissions)';
+
+
+
+COMMENT ON COLUMN "public"."user_activity_summary"."last_refreshed_at" IS 'Timestamp of last materialized view refresh (updated daily at 2 AM UTC)';
 
 
 
@@ -2012,12 +2363,31 @@ CREATE TABLE IF NOT EXISTS "public"."user_collections" (
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     CONSTRAINT "user_collections_description_check" CHECK (("char_length"("description") <= 500)),
+    CONSTRAINT "user_collections_description_length" CHECK ((("description" IS NULL) OR ("length"("description") <= 500))),
     CONSTRAINT "user_collections_name_check" CHECK ((("char_length"("name") >= 2) AND ("char_length"("name") <= 100))),
-    CONSTRAINT "user_collections_slug_check" CHECK ((("char_length"("slug") >= 2) AND ("char_length"("slug") <= 100)))
+    CONSTRAINT "user_collections_name_length" CHECK ((("length"("name") >= 2) AND ("length"("name") <= 100))),
+    CONSTRAINT "user_collections_slug_check" CHECK ((("char_length"("slug") >= 2) AND ("char_length"("slug") <= 100))),
+    CONSTRAINT "user_collections_slug_pattern" CHECK ((("length"("slug") >= 2) AND ("length"("slug") <= 100) AND ("slug" ~ '^[a-z0-9\-]+$'::"text")))
 );
 
 
 ALTER TABLE "public"."user_collections" OWNER TO "postgres";
+
+
+COMMENT ON COLUMN "public"."user_collections"."is_public" IS 'Whether collection is publicly visible (default: false, NOT NULL)';
+
+
+
+COMMENT ON CONSTRAINT "user_collections_description_length" ON "public"."user_collections" IS 'Enforces description max 500 characters';
+
+
+
+COMMENT ON CONSTRAINT "user_collections_name_length" ON "public"."user_collections" IS 'Enforces collection name between 2-100 characters';
+
+
+
+COMMENT ON CONSTRAINT "user_collections_slug_pattern" ON "public"."user_collections" IS 'Enforces slug format: 2-100 chars, lowercase letters, numbers, hyphens only';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."user_content" (
@@ -2160,6 +2530,48 @@ CREATE MATERIALIZED VIEW "public"."user_stats" AS
 ALTER MATERIALIZED VIEW "public"."user_stats" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."webhook_events" (
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+    "type" "text" NOT NULL,
+    "created_at" timestamp with time zone NOT NULL,
+    "data" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
+    "processed" boolean DEFAULT false,
+    "processed_at" timestamp with time zone,
+    "error" "text",
+    "retry_count" integer DEFAULT 0,
+    "next_retry_at" timestamp with time zone,
+    "received_at" timestamp with time zone DEFAULT "now"(),
+    "svix_id" "text",
+    CONSTRAINT "valid_processed_at" CHECK (((("processed" = true) AND ("processed_at" IS NOT NULL)) OR (("processed" = false) AND ("processed_at" IS NULL)))),
+    CONSTRAINT "webhook_events_data_check" CHECK (("jsonb_typeof"("data") = 'object'::"text")),
+    CONSTRAINT "webhook_events_retry_count_check" CHECK (("retry_count" >= 0)),
+    CONSTRAINT "webhook_events_type_check" CHECK (("type" = ANY (ARRAY['email.sent'::"text", 'email.delivered'::"text", 'email.delivery_delayed'::"text", 'email.complained'::"text", 'email.bounced'::"text", 'email.opened'::"text", 'email.clicked'::"text"])))
+);
+
+
+ALTER TABLE "public"."webhook_events" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."webhook_events" IS 'Stores Resend webhook events with nested data structure matching Resend payload';
+
+
+
+COMMENT ON COLUMN "public"."webhook_events"."type" IS 'Event type from Resend (email.sent, email.delivered, etc)';
+
+
+
+COMMENT ON COLUMN "public"."webhook_events"."created_at" IS 'Event timestamp from Resend (when event occurred)';
+
+
+
+COMMENT ON COLUMN "public"."webhook_events"."data" IS 'Nested event data object from Resend payload (email_id, to, from, subject, etc)';
+
+
+
+COMMENT ON COLUMN "public"."webhook_events"."svix_id" IS 'Svix webhook ID for idempotency checks (prevents duplicate processing)';
+
+
+
 ALTER TABLE ONLY "public"."affinity_config"
     ADD CONSTRAINT "affinity_config_pkey" PRIMARY KEY ("id");
 
@@ -2210,6 +2622,16 @@ ALTER TABLE ONLY "public"."companies"
 
 
 
+ALTER TABLE ONLY "public"."content_items"
+    ADD CONSTRAINT "content_items_category_slug_unique" UNIQUE ("category", "slug");
+
+
+
+ALTER TABLE ONLY "public"."content_items"
+    ADD CONSTRAINT "content_items_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."content_similarities"
     ADD CONSTRAINT "content_similarities_content_a_type_content_a_slug_content__key" UNIQUE ("content_a_type", "content_a_slug", "content_b_type", "content_b_slug");
 
@@ -2247,6 +2669,16 @@ ALTER TABLE ONLY "public"."jobs"
 
 ALTER TABLE ONLY "public"."jobs"
     ADD CONSTRAINT "jobs_slug_key" UNIQUE ("slug");
+
+
+
+ALTER TABLE ONLY "public"."newsletter_subscriptions"
+    ADD CONSTRAINT "newsletter_subscriptions_email_key" UNIQUE ("email");
+
+
+
+ALTER TABLE ONLY "public"."newsletter_subscriptions"
+    ADD CONSTRAINT "newsletter_subscriptions_pkey" PRIMARY KEY ("id");
 
 
 
@@ -2410,6 +2842,16 @@ ALTER TABLE ONLY "public"."votes"
 
 
 
+ALTER TABLE ONLY "public"."webhook_events"
+    ADD CONSTRAINT "webhook_events_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."webhook_events"
+    ADD CONSTRAINT "webhook_events_svix_id_key" UNIQUE ("svix_id");
+
+
+
 CREATE INDEX "idx_badges_active" ON "public"."badges" USING "btree" ("active") WHERE ("active" = true);
 
 
@@ -2419,6 +2861,10 @@ CREATE INDEX "idx_badges_category" ON "public"."badges" USING "btree" ("category
 
 
 CREATE INDEX "idx_bookmarks_content" ON "public"."bookmarks" USING "btree" ("content_type", "content_slug");
+
+
+
+CREATE INDEX "idx_bookmarks_content_slug" ON "public"."bookmarks" USING "btree" ("content_slug");
 
 
 
@@ -2442,6 +2888,10 @@ CREATE INDEX "idx_collection_items_content" ON "public"."collection_items" USING
 
 
 
+CREATE INDEX "idx_collection_items_content_slug" ON "public"."collection_items" USING "btree" ("content_slug");
+
+
+
 CREATE INDEX "idx_collection_items_order" ON "public"."collection_items" USING "btree" ("collection_id", "order");
 
 
@@ -2459,6 +2909,10 @@ CREATE INDEX "idx_comments_user_id" ON "public"."comments" USING "btree" ("user_
 
 
 CREATE INDEX "idx_companies_featured" ON "public"."companies" USING "btree" ("featured") WHERE ("featured" = true);
+
+
+
+CREATE INDEX "idx_companies_name" ON "public"."companies" USING "btree" ("name");
 
 
 
@@ -2491,6 +2945,34 @@ CREATE UNIQUE INDEX "idx_company_job_stats_company_slug" ON "public"."company_jo
 
 
 CREATE INDEX "idx_company_job_stats_total_views" ON "public"."company_job_stats" USING "btree" ("total_views" DESC) WHERE ("total_views" > 0);
+
+
+
+CREATE INDEX "idx_content_items_category" ON "public"."content_items" USING "btree" ("category");
+
+
+
+CREATE INDEX "idx_content_items_category_slug" ON "public"."content_items" USING "btree" ("category", "slug");
+
+
+
+CREATE INDEX "idx_content_items_data_gin" ON "public"."content_items" USING "gin" ("data");
+
+
+
+CREATE INDEX "idx_content_items_git_hash" ON "public"."content_items" USING "btree" ("git_hash");
+
+
+
+CREATE INDEX "idx_content_items_search_vector" ON "public"."content_items" USING "gin" ("search_vector");
+
+
+
+CREATE INDEX "idx_content_items_slug" ON "public"."content_items" USING "btree" ("slug");
+
+
+
+CREATE INDEX "idx_content_items_synced_at" ON "public"."content_items" USING "btree" ("synced_at" DESC);
 
 
 
@@ -2586,6 +3068,22 @@ CREATE INDEX "idx_jobs_user_id" ON "public"."jobs" USING "btree" ("user_id");
 
 
 
+CREATE INDEX "idx_newsletter_confirmation_token" ON "public"."newsletter_subscriptions" USING "btree" ("confirmation_token") WHERE ("confirmation_token" IS NOT NULL);
+
+
+
+CREATE INDEX "idx_newsletter_source" ON "public"."newsletter_subscriptions" USING "btree" ("source") WHERE ("source" IS NOT NULL);
+
+
+
+CREATE INDEX "idx_newsletter_status" ON "public"."newsletter_subscriptions" USING "btree" ("status") WHERE ("status" = 'active'::"text");
+
+
+
+CREATE INDEX "idx_newsletter_subscribed_at" ON "public"."newsletter_subscriptions" USING "btree" ("subscribed_at" DESC);
+
+
+
 CREATE INDEX "idx_payments_polar_transaction_id" ON "public"."payments" USING "btree" ("polar_transaction_id");
 
 
@@ -2642,6 +3140,10 @@ CREATE INDEX "idx_review_ratings_content" ON "public"."review_ratings" USING "bt
 
 
 
+CREATE INDEX "idx_review_ratings_content_slug_rating" ON "public"."review_ratings" USING "btree" ("content_slug", "rating");
+
+
+
 CREATE INDEX "idx_review_ratings_helpful" ON "public"."review_ratings" USING "btree" ("helpful_count" DESC) WHERE ("helpful_count" > 0);
 
 
@@ -2679,6 +3181,10 @@ CREATE INDEX "idx_sponsored_impressions_sponsored_id" ON "public"."sponsored_imp
 
 
 CREATE INDEX "idx_sponsored_impressions_user_id" ON "public"."sponsored_impressions" USING "btree" ("user_id");
+
+
+
+CREATE UNIQUE INDEX "idx_submission_stats_summary_singleton" ON "public"."submission_stats_summary" USING "btree" ((1));
 
 
 
@@ -2727,6 +3233,14 @@ CREATE INDEX "idx_trending_content_24h_type" ON "public"."trending_content_24h" 
 
 
 CREATE UNIQUE INDEX "idx_trending_content_24h_unique" ON "public"."trending_content_24h" USING "btree" ("content_type", "content_slug");
+
+
+
+CREATE INDEX "idx_user_activity_summary_total_activity" ON "public"."user_activity_summary" USING "btree" ("total_activity" DESC);
+
+
+
+CREATE UNIQUE INDEX "idx_user_activity_summary_user_id" ON "public"."user_activity_summary" USING "btree" ("user_id");
 
 
 
@@ -2926,6 +3440,26 @@ CREATE INDEX "idx_votes_user_id" ON "public"."votes" USING "btree" ("user_id");
 
 
 
+CREATE INDEX "idx_webhook_events_created_at" ON "public"."webhook_events" USING "btree" ("created_at" DESC);
+
+
+
+CREATE INDEX "idx_webhook_events_data" ON "public"."webhook_events" USING "gin" ("data");
+
+
+
+CREATE INDEX "idx_webhook_events_next_retry" ON "public"."webhook_events" USING "btree" ("next_retry_at") WHERE ("next_retry_at" IS NOT NULL);
+
+
+
+CREATE INDEX "idx_webhook_events_processed" ON "public"."webhook_events" USING "btree" ("processed") WHERE ("processed" = false);
+
+
+
+CREATE INDEX "idx_webhook_events_type" ON "public"."webhook_events" USING "btree" ("type");
+
+
+
 CREATE STATISTICS "public"."stats_user_affinities_user_score_type" (ndistinct, dependencies) ON "user_id", "content_type", "affinity_score" FROM "public"."user_affinities";
 
 
@@ -2951,6 +3485,10 @@ CREATE OR REPLACE TRIGGER "generate_user_mcp_slug" BEFORE INSERT ON "public"."us
 
 
 CREATE OR REPLACE TRIGGER "generate_users_slug" BEFORE INSERT OR UPDATE ON "public"."users" FOR EACH ROW EXECUTE FUNCTION "public"."generate_user_slug"();
+
+
+
+CREATE OR REPLACE TRIGGER "newsletter_updated_at_trigger" BEFORE UPDATE ON "public"."newsletter_subscriptions" FOR EACH ROW EXECUTE FUNCTION "public"."update_newsletter_updated_at"();
 
 
 
@@ -3003,6 +3541,10 @@ CREATE OR REPLACE TRIGGER "update_comments_updated_at" BEFORE UPDATE ON "public"
 
 
 CREATE OR REPLACE TRIGGER "update_companies_updated_at" BEFORE UPDATE ON "public"."companies" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
+
+
+
+CREATE OR REPLACE TRIGGER "update_content_items_updated_at_trigger" BEFORE UPDATE ON "public"."content_items" FOR EACH ROW EXECUTE FUNCTION "public"."update_content_items_updated_at"();
 
 
 
@@ -3237,11 +3779,19 @@ CREATE POLICY "Active user content is viewable by everyone" ON "public"."user_co
 
 
 
+CREATE POLICY "Allow webhook inserts from external services" ON "public"."webhook_events" FOR INSERT WITH CHECK (true);
+
+
+
 CREATE POLICY "Anyone can record sponsored clicks" ON "public"."sponsored_clicks" FOR INSERT WITH CHECK (true);
 
 
 
 CREATE POLICY "Anyone can record sponsored impressions" ON "public"."sponsored_impressions" FOR INSERT WITH CHECK (true);
+
+
+
+CREATE POLICY "Anyone can subscribe" ON "public"."newsletter_subscriptions" FOR INSERT WITH CHECK (true);
 
 
 
@@ -3281,6 +3831,10 @@ CREATE POLICY "Company owners can update their companies" ON "public"."companies
 
 
 
+CREATE POLICY "Content is publicly readable" ON "public"."content_items" FOR SELECT USING (true);
+
+
+
 CREATE POLICY "Content similarities are viewable by everyone" ON "public"."content_similarities" FOR SELECT USING (true);
 
 
@@ -3310,6 +3864,14 @@ CREATE POLICY "Public users are viewable by everyone" ON "public"."users" FOR SE
 
 
 CREATE POLICY "Reviews are viewable by everyone" ON "public"."review_ratings" FOR SELECT USING (true);
+
+
+
+CREATE POLICY "Service role can manage content" ON "public"."content_items" TO "service_role" USING (true) WITH CHECK (true);
+
+
+
+CREATE POLICY "Service role can manage webhook events" ON "public"."webhook_events" USING (true);
 
 
 
@@ -3417,6 +3979,10 @@ CREATE POLICY "Users can insert their own interactions" ON "public"."user_intera
 
 
 
+CREATE POLICY "Users can read their own webhook events" ON "public"."webhook_events" FOR SELECT USING ((("auth"."role"() = 'authenticated'::"text") AND ((("data" ->> 'to'::"text") = ("auth"."jwt"() ->> 'email'::"text")) OR (("data" -> 'to'::"text") ? ("auth"."jwt"() ->> 'email'::"text")) OR (("data" -> 'to'::"text") @> "to_jsonb"(ARRAY[("auth"."jwt"() ->> 'email'::"text")])))));
+
+
+
 CREATE POLICY "Users can remove their helpful votes" ON "public"."review_helpful_votes" FOR DELETE TO "authenticated" USING (("user_id" = ( SELECT "auth"."uid"() AS "uid")));
 
 
@@ -3426,6 +3992,10 @@ CREATE POLICY "Users can remove their own votes" ON "public"."votes" FOR DELETE 
 
 
 CREATE POLICY "Users can unfollow others" ON "public"."followers" FOR DELETE USING ((( SELECT "auth"."uid"() AS "uid") = "follower_id"));
+
+
+
+CREATE POLICY "Users can unsubscribe" ON "public"."newsletter_subscriptions" FOR UPDATE USING ((("auth"."jwt"() ->> 'email'::"text") = "email")) WITH CHECK ((("auth"."jwt"() ->> 'email'::"text") = "email"));
 
 
 
@@ -3487,6 +4057,10 @@ CREATE POLICY "Users can view their own interactions" ON "public"."user_interact
 
 
 
+CREATE POLICY "Users can view their own newsletter subscription" ON "public"."newsletter_subscriptions" FOR SELECT USING ((("auth"."jwt"() ->> 'email'::"text") = "email"));
+
+
+
 CREATE POLICY "Users can view their own payments" ON "public"."payments" FOR SELECT USING ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
@@ -3518,6 +4092,9 @@ ALTER TABLE "public"."comments" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."companies" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "public"."content_items" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."content_similarities" ENABLE ROW LEVEL SECURITY;
 
 
@@ -3528,6 +4105,9 @@ ALTER TABLE "public"."followers" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."jobs" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."newsletter_subscriptions" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."payments" ENABLE ROW LEVEL SECURITY;
@@ -3582,6 +4162,9 @@ ALTER TABLE "public"."users" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."votes" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."webhook_events" ENABLE ROW LEVEL SECURITY;
 
 
 
@@ -4032,6 +4615,11 @@ GRANT SELECT ON TABLE "public"."submissions" TO "authenticated";
 
 
 
+GRANT SELECT ON TABLE "public"."submission_stats_summary" TO "authenticated";
+GRANT SELECT ON TABLE "public"."submission_stats_summary" TO "anon";
+
+
+
 GRANT SELECT ON TABLE "public"."subscriptions" TO "authenticated";
 
 
@@ -4042,6 +4630,11 @@ GRANT SELECT,INSERT,DELETE ON TABLE "public"."votes" TO "authenticated";
 
 GRANT SELECT ON TABLE "public"."trending_content_24h" TO "authenticated";
 GRANT ALL ON TABLE "public"."trending_content_24h" TO "service_role";
+
+
+
+GRANT SELECT ON TABLE "public"."user_activity_summary" TO "authenticated";
+GRANT SELECT ON TABLE "public"."user_activity_summary" TO "anon";
 
 
 

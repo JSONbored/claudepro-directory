@@ -25,8 +25,11 @@ import { ROUTES } from '@/src/lib/constants/routes';
 import { Briefcase, Building, ExternalLink, Plus, Star, TrendingUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
-import type { CompanyJobStats } from '@/src/lib/types/company.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Database } from '@/src/types/database.types';
+
+// Database-first types (from generated database schema)
+type CompanyJobStats = Database['public']['Views']['company_job_stats']['Row'];
 
 export const metadata = generatePageMetadata('/companies');
 

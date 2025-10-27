@@ -706,9 +706,9 @@ function ModalVariant({
       email: email.trim(),
       source: 'post_copy',
       ...(referrer && { referrer }),
-      copyType,
-      ...(category && { copyCategory: category }),
-      ...(slug && { copySlug: slug }),
+      copy_type: copyType,
+      ...(category && { copy_category: category }),
+      ...(slug && { copy_slug: slug }),
     });
   };
 

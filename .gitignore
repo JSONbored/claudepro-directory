@@ -35,8 +35,6 @@ lerna-debug.log*
 # Project specific
 .claude/
 .cursor/
-src/generated/
-generated/
 
 # Build-generated API files
 public/static-api/

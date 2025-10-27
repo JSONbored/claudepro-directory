@@ -108,7 +108,15 @@ export default async function ActivityPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ActivityTimeline initialActivities={activities} summary={summary} />
+          <ActivityTimeline
+            initialActivities={activities}
+            summary={{
+              total_posts: summary.total_posts ?? 0,
+              total_comments: summary.total_comments ?? 0,
+              total_votes: summary.total_votes ?? 0,
+              total_submissions: summary.total_submissions ?? 0,
+            }}
+          />
         </CardContent>
       </Card>
     </div>

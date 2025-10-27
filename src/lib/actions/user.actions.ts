@@ -27,26 +27,58 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
-import type {
-  Activity,
-  ActivitySummary,
-  CommentActivity,
-  PostActivity,
-  SubmissionActivity,
-  VoteActivity,
-} from '@/src/lib/schemas/activity.schema';
-import {
-  activityFilterSchema,
-  activitySummarySchema,
-  activityTimelineResponseSchema,
-} from '@/src/lib/schemas/activity.schema';
+import { publicUserActivitySummaryRowSchema } from '@/src/lib/schemas/generated/db-schemas';
+import type { Database } from '@/src/types/database.types';
+
+// ActivitySummary from materialized view (internal only - not exported from 'use server' file)
+const activitySummarySchema = publicUserActivitySummaryRowSchema.pick({
+  total_posts: true,
+  total_comments: true,
+  total_votes: true,
+  total_submissions: true,
+  merged_submissions: true,
+  total_activity: true,
+});
+
+type ActivitySummary = z.infer<typeof activitySummarySchema>;
+
+// Activity types - Database-first (internal to this file only)
+// Components using these types should define them inline with Database types
+type PostActivity = Database['public']['Tables']['posts']['Row'] & { type: 'post' };
+type CommentActivity = Database['public']['Tables']['comments']['Row'] & { type: 'comment' };
+type VoteActivity = Database['public']['Tables']['votes']['Row'] & { type: 'vote' };
+type SubmissionActivity = Database['public']['Tables']['submissions']['Row'] & {
+  type: 'submission';
+};
+type Activity = PostActivity | CommentActivity | VoteActivity | SubmissionActivity;
+
+// Activity filter schema (for timeline queries)
+const activityFilterSchema = z.object({
+  type: z.enum(['post', 'comment', 'vote', 'submission']).optional(),
+  limit: z.number().int().positive().max(100).default(50),
+  offset: z.number().int().nonnegative().default(0),
+});
+
+const activityTimelineResponseSchema = z.object({
+  activities: z.array(z.any()), // Union types complex, validated at runtime
+  hasMore: z.boolean(),
+  total: z.number(),
+});
+
 import { userIdSchema } from '@/src/lib/schemas/branded-types.schema';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import { updateProfileSchema } from '@/src/lib/schemas/profile.schema';
 import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
+import {
+  bookmarkInsertTransformSchema,
+  removeBookmarkSchema,
+} from '@/src/lib/schemas/transforms/data-normalization.schema';
 import { createClient } from '@/src/lib/supabase/server';
-import type { User, UserUpdate } from '@/src/lib/types/user.types';
 import { batchAll } from '@/src/lib/utils/batch.utils';
+
+// Database-first types (from generated database schema)
+type User = Database['public']['Tables']['users']['Row'];
+type UserUpdate = Database['public']['Tables']['users']['Update'];
 
 // ============================================
 // PROFILE ACTIONS
@@ -170,19 +202,6 @@ export const refreshProfileFromOAuth = authedAction
 // BOOKMARK ACTIONS
 // ============================================
 
-// Bookmark schema
-const bookmarkSchema = z.object({
-  content_type: categoryIdSchema,
-  content_slug: nonEmptyString
-    .max(200, 'Content slug is too long')
-    .regex(
-      /^[a-zA-Z0-9-_/]+$/,
-      'Slug can only contain letters, numbers, hyphens, underscores, and forward slashes'
-    )
-    .transform((val: string) => val.toLowerCase().trim()),
-  notes: z.string().max(500).optional(),
-});
-
 /**
  * Add a bookmark
  */
@@ -191,7 +210,7 @@ export const addBookmark = authedAction
     actionName: 'addBookmark',
     category: 'user',
   })
-  .schema(bookmarkSchema)
+  .schema(bookmarkInsertTransformSchema)
   .action(async ({ parsedInput, ctx }) => {
     const { content_type, content_slug, notes } = parsedInput;
     const { userId } = ctx;
@@ -254,11 +273,6 @@ export const addBookmark = authedAction
 /**
  * Remove a bookmark
  */
-const removeBookmarkSchema = z.object({
-  content_type: categoryIdSchema,
-  content_slug: nonEmptyString,
-});
-
 export const removeBookmark = authedAction
   .metadata({
     actionName: 'removeBookmark',
@@ -552,71 +566,27 @@ export const getActivitySummary = authedAction
 
     const supabase = await createClient();
 
-    // Run all count queries in parallel for performance
-    const [postsResult, commentsResult, votesResult, submissionsResult, mergedResult] =
-      await Promise.all([
-        // Posts count
-        supabase
-          .from('posts')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', userId),
+    // Query materialized view (replaces 5 parallel queries with 1 indexed query)
+    // View is refreshed daily at 2 AM UTC via pg_cron
+    const { data, error } = await supabase
+      .from('user_activity_summary')
+      .select(
+        'total_posts, total_comments, total_votes, total_submissions, merged_submissions, total_activity'
+      )
+      .eq('user_id', userId)
+      .single();
 
-        // Comments count
-        supabase
-          .from('comments')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', userId),
-
-        // Votes count
-        supabase
-          .from('votes')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', userId),
-
-        // Total submissions
-        supabase
-          .from('submissions')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', userId),
-
-        // Merged submissions
-        supabase
-          .from('submissions')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .eq('status', 'merged'),
-      ]);
-
-    // Check for errors
-    if (postsResult.error) {
-      throw new Error(`Failed to count posts: ${postsResult.error.message}`);
+    if (error) {
+      throw new Error(`Failed to fetch user activity summary: ${error.message}`);
     }
-    if (commentsResult.error) {
-      throw new Error(`Failed to count comments: ${commentsResult.error.message}`);
-    }
-    if (votesResult.error) {
-      throw new Error(`Failed to count votes: ${votesResult.error.message}`);
-    }
-    if (submissionsResult.error) {
-      throw new Error(`Failed to count submissions: ${submissionsResult.error.message}`);
-    }
-    if (mergedResult.error) {
-      throw new Error(`Failed to count merged submissions: ${mergedResult.error.message}`);
-    }
-
-    const postsCount = postsResult.count || 0;
-    const commentsCount = commentsResult.count || 0;
-    const votesCount = votesResult.count || 0;
-    const submissionsCount = submissionsResult.count || 0;
-    const mergedCount = mergedResult.count || 0;
 
     const summary: ActivitySummary = {
-      total_posts: postsCount,
-      total_comments: commentsCount,
-      total_votes: votesCount,
-      total_submissions: submissionsCount,
-      merged_submissions: mergedCount,
-      total_activity: postsCount + commentsCount + votesCount + submissionsCount,
+      total_posts: data?.total_posts ?? 0,
+      total_comments: data?.total_comments ?? 0,
+      total_votes: data?.total_votes ?? 0,
+      total_submissions: data?.total_submissions ?? 0,
+      merged_submissions: data?.merged_submissions ?? 0,
+      total_activity: data?.total_activity ?? 0,
     };
 
     return summary;
@@ -642,7 +612,7 @@ export const getActivityTimeline = authedAction
     if (!type || type === 'post') {
       const { data: posts, error } = await supabase
         .from('posts')
-        .select('id, title, url, vote_count, comment_count, created_at')
+        .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(limit)
@@ -653,19 +623,7 @@ export const getActivityTimeline = authedAction
       }
 
       if (posts) {
-        activities.push(
-          ...posts.map(
-            (post): PostActivity => ({
-              id: post.id,
-              type: 'post',
-              title: post.title,
-              url: post.url,
-              vote_count: post.vote_count ?? 0,
-              comment_count: post.comment_count ?? 0,
-              created_at: post.created_at,
-            })
-          )
-        );
+        activities.push(...posts.map((post): PostActivity => ({ ...post, type: 'post' })));
       }
     }
 
@@ -673,7 +631,7 @@ export const getActivityTimeline = authedAction
     if (!type || type === 'comment') {
       const { data: comments, error } = await supabase
         .from('comments')
-        .select('id, content, post_id, created_at, posts(title)')
+        .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(limit)
@@ -685,16 +643,7 @@ export const getActivityTimeline = authedAction
 
       if (comments) {
         activities.push(
-          ...comments.map(
-            (comment): CommentActivity => ({
-              id: comment.id,
-              type: 'comment',
-              content: comment.content,
-              post_id: comment.post_id,
-              post_title: (comment.posts as { title?: string } | null)?.title || 'Unknown Post',
-              created_at: comment.created_at,
-            })
-          )
+          ...comments.map((comment): CommentActivity => ({ ...comment, type: 'comment' }))
         );
       }
     }
@@ -703,7 +652,7 @@ export const getActivityTimeline = authedAction
     if (!type || type === 'vote') {
       const { data: votes, error } = await supabase
         .from('votes')
-        .select('id, post_id, created_at, posts(title)')
+        .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(limit)
@@ -714,17 +663,7 @@ export const getActivityTimeline = authedAction
       }
 
       if (votes) {
-        activities.push(
-          ...votes.map(
-            (vote): VoteActivity => ({
-              id: vote.id,
-              type: 'vote',
-              post_id: vote.post_id,
-              post_title: (vote.posts as { title?: string } | null)?.title || 'Unknown Post',
-              created_at: vote.created_at,
-            })
-          )
-        );
+        activities.push(...votes.map((vote): VoteActivity => ({ ...vote, type: 'vote' })));
       }
     }
 
@@ -732,7 +671,7 @@ export const getActivityTimeline = authedAction
     if (!type || type === 'submission') {
       const { data: submissions, error } = await supabase
         .from('submissions')
-        .select('id, content_type, content_name, status, pr_url, created_at')
+        .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(limit)
@@ -745,15 +684,7 @@ export const getActivityTimeline = authedAction
       if (submissions) {
         activities.push(
           ...submissions.map(
-            (submission): SubmissionActivity => ({
-              id: submission.id,
-              type: 'submission',
-              content_type: submission.content_type,
-              content_name: submission.content_name,
-              status: submission.status as 'pending' | 'approved' | 'rejected' | 'merged',
-              pr_url: submission.pr_url,
-              created_at: submission.created_at,
-            })
+            (submission): SubmissionActivity => ({ ...submission, type: 'submission' })
           )
         );
       }
@@ -768,5 +699,6 @@ export const getActivityTimeline = authedAction
     return {
       activities: limitedActivities,
       hasMore: activities.length > limit,
+      total: activities.length,
     };
   });

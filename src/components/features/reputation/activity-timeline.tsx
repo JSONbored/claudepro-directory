@@ -10,8 +10,18 @@ import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent } from '@/src/components/primitives/card';
 import { ExternalLink, FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
-import type { Activity, ActivityType } from '@/src/lib/schemas/activity.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Database } from '@/src/types/database.types';
+
+// Activity types from database tables (database-first)
+type PostActivity = Database['public']['Tables']['posts']['Row'] & { type: 'post' };
+type CommentActivity = Database['public']['Tables']['comments']['Row'] & { type: 'comment' };
+type VoteActivity = Database['public']['Tables']['votes']['Row'] & { type: 'vote' };
+type SubmissionActivity = Database['public']['Tables']['submissions']['Row'] & {
+  type: 'submission';
+};
+type Activity = PostActivity | CommentActivity | VoteActivity | SubmissionActivity;
+type ActivityType = 'post' | 'comment' | 'vote' | 'submission';
 
 interface ActivityTimelineProps {
   initialActivities: Activity[];
@@ -187,12 +197,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                     {activity.type === 'comment' && (
                       <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2}>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-muted-foreground mb-1">
-                            Commented on{' '}
-                            <span className="font-medium text-foreground">
-                              {activity.post_title}
-                            </span>
-                          </p>
+                          <p className="text-sm text-muted-foreground mb-1">Commented on a post</p>
                           <p className="text-sm line-clamp-2">{activity.content}</p>
                         </div>
                         <UnifiedBadge
@@ -207,9 +212,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
 
                     {activity.type === 'vote' && (
                       <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2}>
-                        <p className="text-sm">
-                          Upvoted <span className="font-medium">{activity.post_title}</span>
-                        </p>
+                        <p className="text-sm">Upvoted a post</p>
                         <UnifiedBadge
                           variant="base"
                           style="outline"

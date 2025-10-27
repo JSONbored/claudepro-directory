@@ -1,7 +1,8 @@
 'use server';
 
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { newsletterSignupSchema } from '@/src/lib/schemas/newsletter.schema';
+import { publicNewsletterSubscriptionsInsertSchema } from '@/src/lib/schemas/generated/db-schemas';
+import { normalizeEmail } from '@/src/lib/schemas/primitives/sanitization-transforms';
 import { emailOrchestrationService } from '@/src/lib/services/email-orchestration.server';
 
 /**
@@ -39,11 +40,21 @@ export const subscribeToNewsletter = rateLimitedAction
     actionName: 'subscribeToNewsletter',
     category: 'form',
   })
-  .schema(newsletterSignupSchema)
+  .schema(
+    // Use auto-generated schema from database, pick only client-submitted fields
+    publicNewsletterSubscriptionsInsertSchema.pick({
+      email: true,
+      source: true,
+      referrer: true,
+    })
+  )
   .action(async ({ parsedInput: { email, source, referrer } }) => {
+    // Transform email (normalize to lowercase, trim) before processing
+    const normalizedEmail = normalizeEmail(email);
+
     // Use unified orchestration service
     return await emailOrchestrationService.subscribeWithOrchestration({
-      email,
+      email: normalizedEmail,
       metadata: {
         ...(source && { source }),
         ...(referrer && { referrer }),
