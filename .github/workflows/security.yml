@@ -66,7 +66,7 @@ jobs:
         skip-build-content: 'true'
 
     - name: Download build artifact
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v6
       with:
         name: ${{ needs.build-for-codeql.outputs.artifact-name }}
         path: ./

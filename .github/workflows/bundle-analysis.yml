@@ -80,7 +80,7 @@ jobs:
 
     steps:
       - name: Download base build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: ${{ needs.build-base.outputs.artifact-name }}
           path: base-build-cache/
@@ -108,7 +108,7 @@ jobs:
           skip-build-content: 'true'
 
       - name: Download PR build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: ${{ needs.build-pr.outputs.artifact-name }}
           path: .next-pr
@@ -146,7 +146,7 @@ jobs:
 
       - name: Download base build artifact (if freshly built)
         if: needs.check-base-cache.outputs.cache-hit != 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: ${{ needs.build-base.outputs.artifact-name }}
           path: base-build-cache/
