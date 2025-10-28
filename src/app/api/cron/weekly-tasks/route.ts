@@ -123,10 +123,13 @@ const route = createApiRoute({
             }
 
             // Call PostgreSQL function to get featured scores (replaces TypeScript scoring logic)
-            const { data: featuredScores, error: rpcError } = await supabase.rpc('get_featured_content', {
-              p_category: name,
-              p_limit: 10,
-            });
+            const { data: featuredScores, error: rpcError } = await supabase.rpc(
+              'get_featured_content',
+              {
+                p_category: name,
+                p_limit: 10,
+              }
+            );
 
             if (rpcError || !featuredScores || featuredScores.length === 0) {
               logger.warn(`No featured scores for ${name}`, {
@@ -181,9 +184,7 @@ const route = createApiRoute({
               },
             }));
 
-            const { error: insertError } = await supabase
-              .from('featured_configs')
-              .insert(records);
+            const { error: insertError } = await supabase.from('featured_configs').insert(records);
 
             if (insertError) {
               throw new Error(`Failed to store featured selections: ${insertError.message}`);

@@ -17,8 +17,8 @@
  */
 
 import { z } from 'zod';
-import { nonNegativeInt, positiveInt, isoDatetimeString, nonEmptyString } from '../primitives';
 import type { slugString } from '../primitives';
+import { isoDatetimeString, nonEmptyString, nonNegativeInt, positiveInt } from '../primitives';
 
 /**
  * ============================================================================

@@ -118,7 +118,9 @@ async function scanAllKeys(): Promise<string[]> {
  * @param key - Redis key
  * @returns Parsed key data or null if invalid pattern
  */
-function parseRedisKey(key: string): { category: string; slug: string; date?: string; keyType: 'total' | 'daily' } | null {
+function parseRedisKey(
+  key: string
+): { category: string; slug: string; date?: string; keyType: 'total' | 'daily' } | null {
   const parts = key.split(':');
 
   if (parts.length === 2) {
@@ -128,7 +130,8 @@ function parseRedisKey(key: string): { category: string; slug: string; date?: st
       slug: parts[1],
       keyType: 'total',
     };
-  } else if (parts.length === 3) {
+  }
+  if (parts.length === 3) {
     // Daily views key: "category:slug:YYYY-MM-DD"
     const datePattern = /^\d{4}-\d{2}-\d{2}$/;
     if (datePattern.test(parts[2])) {
@@ -157,7 +160,7 @@ async function getViewCount(key: string): Promise<number> {
   try {
     // GET is safe: read-only
     const value = await statsRedis.client.get(key);
-    return value ? parseInt(value as string, 10) : 0;
+    return value ? Number.parseInt(value as string, 10) : 0;
   } catch (error) {
     console.warn(`Warning: Failed to get value for key "${key}":`, error);
     return 0;
@@ -271,16 +274,18 @@ function writeExportFile(summary: ExportSummary): void {
 
   fs.writeFileSync(filepath, JSON.stringify(summary, null, 2), 'utf-8');
 
-  console.log(`✅ Export complete!\n`);
+  console.log('✅ Export complete!\n');
   console.log(`📄 File: ${filepath}`);
-  console.log(`📊 Summary:`);
+  console.log('📊 Summary:');
   console.log(`   - Total keys: ${summary.totalKeys}`);
   console.log(`   - Total views: ${summary.totalViewCount.toLocaleString()}`);
   console.log(`   - Daily keys: ${summary.dailyKeys}`);
   console.log(`   - Total (aggregated) keys: ${summary.totalKeys_aggregated}`);
-  console.log(`\n📦 Category breakdown:`);
+  console.log('\n📦 Category breakdown:');
 
-  for (const [category, count] of Object.entries(summary.categoryCounts).sort((a, b) => b[1] - a[1])) {
+  for (const [category, count] of Object.entries(summary.categoryCounts).sort(
+    (a, b) => b[1] - a[1]
+  )) {
     console.log(`   - ${category}: ${count.toLocaleString()} views`);
   }
 
@@ -297,7 +302,7 @@ async function main() {
   console.log('═══════════════════════════════════════════════════════════\n');
 
   // Verify environment variables (Vercel KV)
-  if (!process.env.KV_REST_API_URL || !process.env.KV_REST_API_TOKEN) {
+  if (!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)) {
     console.error('❌ ERROR: Missing required environment variables:\n');
     console.error('   KV_REST_API_URL');
     console.error('   KV_REST_API_TOKEN\n');

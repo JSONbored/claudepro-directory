@@ -21,9 +21,9 @@ import {
 } from '@/src/lib/actions/business.actions';
 import { CheckCircle, Clock, Lightbulb, Medal, TrendingUp, Trophy } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
-import { createClient } from '@/src/lib/supabase/server';
 import type { Database } from '@/src/types/database.types';
 
 const SUBMISSION_TIPS = [

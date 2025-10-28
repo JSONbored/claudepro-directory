@@ -142,7 +142,7 @@ class ProgressIndicator {
     }, 80);
   }
 
-  stop(finalMessage: string, icon: string = '✓'): void {
+  stop(finalMessage: string, icon = '✓'): void {
     if (this.interval) {
       clearInterval(this.interval);
       this.interval = null;
@@ -320,7 +320,7 @@ function generateSchemaDump(isForce: boolean): StepResult {
     writeFileSync(SCHEMA_FILE, output, 'utf-8');
 
     // Validate
-    if (!output.includes('CREATE TABLE') && !output.includes('CREATE MATERIALIZED VIEW')) {
+    if (!(output.includes('CREATE TABLE') || output.includes('CREATE MATERIALIZED VIEW'))) {
       throw new Error('Generated schema appears invalid');
     }
 
@@ -399,7 +399,7 @@ function generateTypes(isForce: boolean): StepResult {
     writeFileSync(TYPES_FILE, output, 'utf-8');
 
     // Validate
-    if (!output.includes('export type') && !output.includes('export interface')) {
+    if (!(output.includes('export type') || output.includes('export interface'))) {
       throw new Error('Generated types appear invalid');
     }
 
@@ -499,7 +499,9 @@ function generateZodSchemas(isForce: boolean): StepResult {
 
     // Validate
     const schemasContent = readFileSync(ZOD_OUTPUT_FILE, 'utf-8');
-    if (!schemasContent.includes('import { z } from') || !schemasContent.includes('export const')) {
+    if (
+      !(schemasContent.includes('import { z } from') && schemasContent.includes('export const'))
+    ) {
       throw new Error('Generated Zod schemas appear invalid');
     }
 
@@ -545,9 +547,9 @@ async function main() {
   const skipZod = args.includes('--skip-zod');
 
   // Determine which operations to run
-  const runDump = onlyDump || (!onlyTypes && !onlyZod && !skipDump);
-  const runTypes = onlyTypes || (!onlyDump && !onlyZod && !skipTypes);
-  const runZod = onlyZod || (!onlyDump && !onlyTypes && !skipZod);
+  const runDump = onlyDump || !(onlyTypes || onlyZod || skipDump);
+  const runTypes = onlyTypes || !(onlyDump || onlyZod || skipTypes);
+  const runZod = onlyZod || !(onlyDump || onlyTypes || skipZod);
 
   console.log('🔄 Database Schema Sync\n');
   console.log('Configuration:');
@@ -566,7 +568,9 @@ async function main() {
       const currentSchemaHash = getSchemaHash();
 
       if (currentSchemaHash) {
-        const schemaUpToDate = readHash(SCHEMA_HASH_FILE) === currentSchemaHash && readHash(TYPES_HASH_FILE) === currentSchemaHash;
+        const schemaUpToDate =
+          readHash(SCHEMA_HASH_FILE) === currentSchemaHash &&
+          readHash(TYPES_HASH_FILE) === currentSchemaHash;
 
         // Check Zod separately (depends on types content, not schema)
         let zodUpToDate = false;
@@ -631,7 +635,9 @@ async function main() {
     }
 
     console.log(`\nTotal Duration: ${overallDuration}ms (${(overallDuration / 1000).toFixed(2)}s)`);
-    console.log(`Completed: ${completedSteps} | Skipped: ${skippedSteps} | Failed: ${failedSteps}\n`);
+    console.log(
+      `Completed: ${completedSteps} | Skipped: ${skippedSteps} | Failed: ${failedSteps}\n`
+    );
 
     if (failedSteps === 0) {
       console.log('✅ Database schema sync completed successfully!\n');

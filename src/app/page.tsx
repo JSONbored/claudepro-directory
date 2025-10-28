@@ -107,7 +107,7 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
   // Initialize category data storage
   const categoryData: Record<CategoryId, ContentItem[]> = {} as Record<CategoryId, ContentItem[]>;
 
-  let featuredByCategory: Record<string, ContentItem[]> = {};
+  const featuredByCategory: Record<string, ContentItem[]> = {};
 
   try {
     // Build dynamic loader array from registry
@@ -175,8 +175,10 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
       for (const [category, items] of Object.entries(tempFeaturedByCategory)) {
         featuredByCategory[category] = items
           .sort((a, b) => {
-            const aRank = (a as ContentItem & { _featured?: { rank: number } })._featured?.rank ?? 999;
-            const bRank = (b as ContentItem & { _featured?: { rank: number } })._featured?.rank ?? 999;
+            const aRank =
+              (a as ContentItem & { _featured?: { rank: number } })._featured?.rank ?? 999;
+            const bRank =
+              (b as ContentItem & { _featured?: { rank: number } })._featured?.rank ?? 999;
             return aRank - bRank;
           })
           .slice(0, 6);

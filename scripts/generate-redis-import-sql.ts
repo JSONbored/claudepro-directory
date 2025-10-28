@@ -59,9 +59,13 @@ function generateInsertStatements(viewCounts: ViewCountEntry[]): string {
   const statements: string[] = [];
 
   // Header
-  statements.push('-- ============================================================================');
+  statements.push(
+    '-- ============================================================================'
+  );
   statements.push('-- Redis View Counts Import');
-  statements.push('-- ============================================================================');
+  statements.push(
+    '-- ============================================================================'
+  );
   statements.push('--');
   statements.push('-- Imports historical view counts from Redis into user_interactions table');
   statements.push('-- Strategy: Create individual interaction records with timestamps spread');
@@ -70,9 +74,13 @@ function generateInsertStatements(viewCounts: ViewCountEntry[]): string {
   statements.push(`-- Source: ${REDIS_EXPORT_FILE}`);
   statements.push(`-- Generated: ${new Date().toISOString()}`);
   statements.push(`-- Total view count keys: ${viewCounts.length}`);
-  statements.push(`-- Total interactions to insert: ${viewCounts.reduce((sum, v) => sum + v.count, 0).toLocaleString()}`);
+  statements.push(
+    `-- Total interactions to insert: ${viewCounts.reduce((sum, v) => sum + v.count, 0).toLocaleString()}`
+  );
   statements.push('--');
-  statements.push('-- ============================================================================');
+  statements.push(
+    '-- ============================================================================'
+  );
   statements.push('');
 
   // Batch inserts (1000 rows per INSERT for performance)
@@ -90,14 +98,14 @@ function generateInsertStatements(viewCounts: ViewCountEntry[]): string {
     for (let i = 0; i < count; i++) {
       const timestamp = randomPastTimestamp(DAYS_TO_SPREAD);
 
-      values.push(
-        `  ('${category}', '${slug}', 'view', '${timestamp}')`
-      );
+      values.push(`  ('${category}', '${slug}', 'view', '${timestamp}')`);
 
       // Flush batch when full
       if (values.length >= BATCH_SIZE) {
         statements.push(`-- Batch insert for ${category}:${slug} (${values.length} rows)`);
-        statements.push('INSERT INTO user_interactions (content_type, content_slug, interaction_type, created_at)');
+        statements.push(
+          'INSERT INTO user_interactions (content_type, content_slug, interaction_type, created_at)'
+        );
         statements.push('VALUES');
         statements.push(values.join(',\n'));
         statements.push('ON CONFLICT DO NOTHING;');
@@ -111,7 +119,9 @@ function generateInsertStatements(viewCounts: ViewCountEntry[]): string {
     // Flush remaining values for this entry
     if (values.length > 0) {
       statements.push(`-- Insert for ${category}:${slug} (${values.length} rows)`);
-      statements.push('INSERT INTO user_interactions (content_type, content_slug, interaction_type, created_at)');
+      statements.push(
+        'INSERT INTO user_interactions (content_type, content_slug, interaction_type, created_at)'
+      );
       statements.push('VALUES');
       statements.push(values.join(',\n'));
       statements.push('ON CONFLICT DO NOTHING;');
@@ -122,16 +132,26 @@ function generateInsertStatements(viewCounts: ViewCountEntry[]): string {
   }
 
   // Footer
-  statements.push('-- ============================================================================');
+  statements.push(
+    '-- ============================================================================'
+  );
   statements.push('-- Summary');
-  statements.push('-- ============================================================================');
+  statements.push(
+    '-- ============================================================================'
+  );
   statements.push(`-- Total rows inserted: ${totalInserted.toLocaleString()}`);
   statements.push('--');
   statements.push('-- Next steps:');
   statements.push('-- 1. Run this migration in Supabase SQL editor');
-  statements.push('-- 2. Refresh materialized view: REFRESH MATERIALIZED VIEW CONCURRENTLY mv_featured_scores;');
-  statements.push('-- 3. Verify data: SELECT content_type, COUNT(*) FROM user_interactions GROUP BY content_type;');
-  statements.push('-- ============================================================================');
+  statements.push(
+    '-- 2. Refresh materialized view: REFRESH MATERIALIZED VIEW CONCURRENTLY mv_featured_scores;'
+  );
+  statements.push(
+    '-- 3. Verify data: SELECT content_type, COUNT(*) FROM user_interactions GROUP BY content_type;'
+  );
+  statements.push(
+    '-- ============================================================================'
+  );
 
   return statements.join('\n');
 }
@@ -177,10 +197,13 @@ async function main() {
 
   // Calculate stats
   const totalViews = viewCounts.reduce((sum, v) => sum + v.count, 0);
-  const byCategory = viewCounts.reduce((acc, v) => {
-    acc[v.category] = (acc[v.category] || 0) + v.count;
-    return acc;
-  }, {} as Record<string, number>);
+  const byCategory = viewCounts.reduce(
+    (acc, v) => {
+      acc[v.category] = (acc[v.category] || 0) + v.count;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   console.log('📊 View counts by category:');
   for (const [category, count] of Object.entries(byCategory).sort((a, b) => b[1] - a[1])) {
@@ -209,7 +232,9 @@ async function main() {
   console.log('   1. Review the migration file');
   console.log('   2. Run in Supabase SQL editor (copy/paste or upload)');
   console.log('   3. REFRESH MATERIALIZED VIEW CONCURRENTLY mv_featured_scores;');
-  console.log('   4. Verify: SELECT content_type, COUNT(*) FROM user_interactions GROUP BY content_type;\n');
+  console.log(
+    '   4. Verify: SELECT content_type, COUNT(*) FROM user_interactions GROUP BY content_type;\n'
+  );
 
   console.log('🎉 Done!');
 }
