@@ -20,13 +20,13 @@ import {
 } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Briefcase, ExternalLink } from '@/src/lib/icons';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface FeaturedSectionProps {
   title: string;
   href: string;
-  items: readonly UnifiedContentItem[];
+  items: readonly ContentItem[];
 }
 
 /**
@@ -72,7 +72,7 @@ FeaturedSection.displayName = 'FeaturedSection';
  * This allows any number of categories without hardcoding
  */
 interface FeaturedSectionsProps {
-  categories: Record<string, readonly UnifiedContentItem[]>;
+  categories: Record<string, readonly ContentItem[]>;
 }
 
 const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories }) => {

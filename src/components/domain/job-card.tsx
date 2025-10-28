@@ -32,9 +32,9 @@ export const JobCard = memo(({ job }: JobCardProps) => {
         <div className={'flex items-start justify-between'}>
           <div className="flex-1">
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-2`}>
-              {job.companyLogo && (
+              {job.company_logo && (
                 <Image
-                  src={job.companyLogo}
+                  src={job.company_logo}
                   alt={`${job.company} logo`}
                   width={48}
                   height={48}
@@ -62,7 +62,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 <Clock className="h-4 w-4" />
-                {formatRelativeDate(job.postedAt)}
+                {formatRelativeDate(job.posted_at)}
               </div>
               {job.salary && (
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>

@@ -32,7 +32,7 @@ export const llmsTxtItemSchema = z
     category: z.string().min(1).describe('Content category (agents, mcp, rules, etc)'),
     tags: z.array(z.string()).default([]).describe('Content tags'),
     author: z.string().optional().describe('Content author'),
-    dateAdded: z.string().optional().describe('Date added (ISO format)'),
+    date_added: z.string().optional().describe('Date added (ISO format)'),
     url: z.string().url().optional().describe('Full URL to content'),
   })
   .describe('Content item for llms.txt generation - no length limits for AI consumption');
@@ -177,8 +177,8 @@ export async function generateLLMsTxt(
         metadata.push(`**Author:** ${validatedItem.author}`);
       }
 
-      if (validatedItem.dateAdded) {
-        metadata.push(`**Added:** ${formatDate(validatedItem.dateAdded)}`);
+      if (validatedItem.date_added) {
+        metadata.push(`**Added:** ${formatDate(validatedItem.date_added)}`);
       }
 
       if (validatedItem.tags && validatedItem.tags.length > 0 && opts.includeTags) {

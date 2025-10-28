@@ -9,7 +9,7 @@ import {
   optionalUrlString,
   shortString,
   slugString,
-} from '@/src/lib/schemas/primitives/base-strings';
+} from '@/src/lib/schemas/primitives';
 
 /**
  * Next.js 15 compatible page props - EXACTLY matches Next.js generated types

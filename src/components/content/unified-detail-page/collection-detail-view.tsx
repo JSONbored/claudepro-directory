@@ -27,23 +27,24 @@ import { ConfigCard } from '@/src/components/domain/config-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { isValidCategory } from '@/src/lib/config/category-config';
-import { getContentBySlug } from '@/src/lib/content/content-loaders';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { getContentBySlug } from '@/src/lib/content/supabase-content-loader';
 import { AlertTriangle, CheckCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import type {
-  CollectionContent,
-  CollectionItemReference,
-} from '@/src/lib/schemas/content/collection.schema';
+
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchMap } from '@/src/lib/utils/batch.utils';
 import { getViewTransitionStyle } from '@/src/lib/utils/view-transitions.utils';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Item with loaded content data
  */
-interface ItemWithData extends CollectionItemReference {
-  data: UnifiedContentItem;
+interface ItemWithData {
+  category: string;
+  slug: string;
+  reason?: string;
+  data: ContentItem;
 }
 
 import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
@@ -53,7 +54,7 @@ import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
  */
 export interface CollectionDetailViewProps {
   /** Collection content with all metadata */
-  collection: CollectionContent;
+  collection: Database['public']['Tables']['collections']['Row'];
 }
 
 /**
@@ -67,29 +68,32 @@ export interface CollectionDetailViewProps {
  */
 export async function CollectionDetailView({ collection }: CollectionDetailViewProps) {
   // Load all referenced items with full content (parallel batch operation)
+  // collection.items is Json[] from database, each item has {category, slug, reason?}
   const itemsWithContent = await batchMap(
-    collection.items,
-    async (itemRef: CollectionItemReference): Promise<ItemWithData | null> => {
+    collection.items || [],
+    async (itemRef): Promise<ItemWithData | null> => {
+      const refData = itemRef as { category: string; slug: string; reason?: string };
+
       try {
         // Type guard validation
-        if (!isValidCategory(itemRef.category)) {
+        if (!isValidCategory(refData.category)) {
           logger.error(
             'Invalid category in collection item reference',
             new Error('Invalid category'),
             {
-              category: itemRef.category,
-              slug: itemRef.slug,
+              category: refData.category,
+              slug: refData.slug,
             }
           );
           return null;
         }
 
-        const item = await getContentBySlug(itemRef.category, itemRef.slug);
-        return item ? { ...itemRef, data: item } : null;
+        const item = await getContentBySlug(refData.category, refData.slug);
+        return item ? { ...refData, data: item } : null;
       } catch (error) {
         logger.error('Failed to load collection item', error as Error, {
-          category: itemRef.category,
-          slug: itemRef.slug,
+          category: refData.category,
+          slug: refData.slug,
         });
         return null;
       }
@@ -192,14 +196,14 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
       </div>
 
       {/* Installation Order Section */}
-      {collection.installationOrder && collection.installationOrder.length > 0 && (
+      {collection.installation_order && collection.installation_order.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-xl">Recommended Installation Order</CardTitle>
           </CardHeader>
           <CardContent>
             <ol className="space-y-2">
-              {collection.installationOrder.map((slug: string, index: number) => {
+              {collection.installation_order.map((slug: string, index: number) => {
                 const item = validItems.find((i: ItemWithData) => i?.slug === slug);
                 return (
                   <li key={slug} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
@@ -231,25 +235,29 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                {collection.compatibility.claudeDesktop ? (
+                {(collection.compatibility as { claudeDesktop?: boolean }).claudeDesktop ? (
                   <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
                 ) : (
                   <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
                 )}
                 <span className="text-sm text-muted-foreground">
                   Claude Desktop{' '}
-                  {collection.compatibility.claudeDesktop ? '(Supported)' : '(Not Supported)'}
+                  {(collection.compatibility as { claudeDesktop?: boolean }).claudeDesktop
+                    ? '(Supported)'
+                    : '(Not Supported)'}
                 </span>
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                {collection.compatibility.claudeCode ? (
+                {(collection.compatibility as { claudeCode?: boolean }).claudeCode ? (
                   <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
                 ) : (
                   <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
                 )}
                 <span className="text-sm text-muted-foreground">
                   Claude Code{' '}
-                  {collection.compatibility.claudeCode ? '(Supported)' : '(Not Supported)'}
+                  {(collection.compatibility as { claudeCode?: boolean }).claudeCode
+                    ? '(Supported)'
+                    : '(Not Supported)'}
                 </span>
               </div>
             </div>

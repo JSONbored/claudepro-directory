@@ -19,7 +19,8 @@
  */
 
 import { z } from 'zod';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 
 // REMOVED: import { transforms } from '@/src/lib/security/validators';
@@ -99,7 +100,7 @@ export function formatCopyCount(count: number): string {
  * Checks if content is new (0-7 days old)
  * Used to display "NEW" badge on recent content across the site
  *
- * @param dateAdded - ISO date string of when content was added
+ * @param date_added - ISO date string of when content was added
  * @returns True if content is 0-7 days old
  *
  * @example
@@ -107,14 +108,14 @@ export function formatCopyCount(count: number): string {
  * isNewContent('2025-10-01') // false (if today is 2025-10-16)
  * isNewContent(undefined) // false
  */
-export function isNewContent(dateAdded?: string): boolean {
-  if (!dateAdded) return false;
+export function isNewContent(date_added?: string): boolean {
+  if (!date_added) return false;
 
   // PRODUCTION: Date.now() is safe here - this function is ONLY called at runtime
   // During Next.js prerendering, enrichContentItems() sets isNew to undefined
   // Components calculate isNew client-side or routes use dynamic rendering
   const now = Date.now();
-  const added = new Date(dateAdded).getTime();
+  const added = new Date(date_added).getTime();
   const daysOld = (now - added) / (1000 * 60 * 60 * 24);
 
   return daysOld >= 0 && daysOld <= 7;
@@ -228,7 +229,7 @@ const MCP_SECTION_LABELS = {
  */
 export interface FilenameGeneratorOptions {
   /** Content item metadata */
-  item: UnifiedContentItem;
+  item: ContentItem;
   /** Detected or specified language */
   language: string;
   /** Optional format hint for specialized filename patterns */
@@ -278,7 +279,7 @@ function sanitizeFilename(input: string | undefined): string {
  *
  * PERFORMANCE: Pure function, minimal regex operations
  *
- * @param hookType - Hook type in PascalCase (e.g., "PostToolUse")
+ * @param hook_type - Hook type in PascalCase (e.g., "PostToolUse")
  * @returns Kebab-case string (e.g., "post-tool-use")
  *
  * @example
@@ -287,8 +288,8 @@ function sanitizeFilename(input: string | undefined): string {
  * convertHookTypeToKebab("SessionStart") // "session-start"
  * ```
  */
-function convertHookTypeToKebab(hookType: string): string {
-  return hookType
+function convertHookTypeToKebab(hook_type: string): string {
+  return hook_type
     .replace(/([A-Z])/g, '-$1')
     .toLowerCase()
     .replace(/^-/, '');
@@ -314,7 +315,7 @@ function getExtensionFromLanguage(language: string): string {
 interface FilenameRule {
   /** Suffix to append to identifier (e.g., '-config') */
   suffix: string;
-  /** Whether to use hookType field for filename (hooks only) */
+  /** Whether to use hook_type field for filename (hooks only) */
   useHookType?: boolean;
 }
 
@@ -327,12 +328,12 @@ interface FilenameRule {
  * Architecture:
  * - Partial mapping allows fallback to default for unknown categories
  * - Configuration-driven: Add category → filename automatically works
- * - Special handling: hookType extraction for hooks category
+ * - Special handling: hook_type extraction for hooks category
  * - Consistent patterns: Config categories use '-config' suffix
  *
  * Filename Patterns:
  * - Config categories (mcp, agents, commands, rules): {slug}-config.{ext}
- * - Hooks: {hookType}.{ext} or {slug}.{ext}
+ * - Hooks: {hook_type}.{ext} or {slug}.{ext}
  * - Guide subcategories: {slug}.{ext}
  * - Unknown/default: example.{ext}
  *
@@ -345,7 +346,7 @@ const FILENAME_RULES: Partial<Record<string, FilenameRule>> = {
   commands: { suffix: '-config' },
   rules: { suffix: '-config' },
 
-  // Hooks - use hookType for semantic naming
+  // Hooks - use hook_type for semantic naming
   hooks: { suffix: '', useHookType: true },
 
   // Guide subcategories - simple slug-based naming
@@ -384,9 +385,9 @@ const FILENAME_RULES: Partial<Record<string, FilenameRule>> = {
  * });
  * // Returns: "github-mcp-server-config.json"
  *
- * // Hook with hookType (uses hookType field from registry rule)
+ * // Hook with hook_type (uses hook_type field from registry rule)
  * generateFilename({
- *   item: { category: 'hooks', slug: 'post-tool-use', hookType: 'PostToolUse', ... },
+ *   item: { category: 'hooks', slug: 'post-tool-use', hook_type: 'PostToolUse', ... },
  *   language: 'bash'
  * });
  * // Returns: "post-tool-use.sh"
@@ -426,11 +427,11 @@ export function generateFilename(options: FilenameGeneratorOptions): string {
   // Registry-driven filename generation
   const rule = FILENAME_RULES[category];
 
-  // Handle hookType special case if configured
+  // Handle hook_type special case if configured
   if (rule?.useHookType) {
-    const hookType = 'hookType' in item ? (item as { hookType?: string }).hookType : undefined;
-    if (hookType && typeof hookType === 'string') {
-      const hookSlug = convertHookTypeToKebab(hookType);
+    const hook_type = 'hook_type' in item ? (item as { hook_type?: string }).hook_type : undefined;
+    if (hook_type && typeof hook_type === 'string') {
+      const hookSlug = convertHookTypeToKebab(hook_type);
       return `${sanitizeFilename(hookSlug)}.${ext}`;
     }
   }
@@ -466,7 +467,7 @@ export function generateFilename(options: FilenameGeneratorOptions): string {
  * ```
  */
 export function generateMultiFormatFilename(
-  item: UnifiedContentItem,
+  item: ContentItem,
   sectionKey: string,
   language: string
 ): string {
@@ -498,7 +499,7 @@ export function generateMultiFormatFilename(
  * ```typescript
  * // Hook configuration JSON
  * generateHookFilename(
- *   { category: 'hooks', slug: 'post-tool-use', hookType: 'PostToolUse', ... },
+ *   { category: 'hooks', slug: 'post-tool-use', hook_type: 'PostToolUse', ... },
  *   'hookConfig',
  *   'json'
  * );
@@ -506,7 +507,7 @@ export function generateMultiFormatFilename(
  *
  * // Hook script content
  * generateHookFilename(
- *   { category: 'hooks', hookType: 'PostToolUse', ... },
+ *   { category: 'hooks', hook_type: 'PostToolUse', ... },
  *   'scriptContent',
  *   'bash'
  * );
@@ -514,17 +515,17 @@ export function generateMultiFormatFilename(
  * ```
  */
 export function generateHookFilename(
-  item: UnifiedContentItem,
+  item: ContentItem,
   contentType: 'hookConfig' | 'scriptContent',
   language: string
 ): string {
   const ext = getExtensionFromLanguage(language);
-  const hookType = 'hookType' in item ? (item as { hookType?: string }).hookType : undefined;
+  const hook_type = 'hook_type' in item ? (item as { hook_type?: string }).hook_type : undefined;
   const suffix = contentType === 'hookConfig' ? 'config' : 'script';
 
-  // Use hookType for semantic naming
-  if (hookType && typeof hookType === 'string') {
-    const hookSlug = convertHookTypeToKebab(hookType);
+  // Use hook_type for semantic naming
+  if (hook_type && typeof hook_type === 'string') {
+    const hookSlug = convertHookTypeToKebab(hook_type);
     return `${sanitizeFilename(hookSlug)}-${suffix}.${ext}`;
   }
 

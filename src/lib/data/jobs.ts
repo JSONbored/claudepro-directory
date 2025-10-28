@@ -6,10 +6,10 @@
  */
 
 import { logger } from '@/src/lib/logger';
-import { type JobContent, jobContentSchema } from '@/src/lib/schemas/content/job.schema';
 import { createClient } from '@/src/lib/supabase/server';
+import type { Database } from '@/src/types/database.types';
 
-export type Job = JobContent;
+export type Job = Database['public']['Tables']['jobs']['Row'];
 
 /**
  * Get all active jobs
@@ -31,8 +31,7 @@ export async function getJobs(): Promise<Job[]> {
       return [];
     }
 
-    // Transform database records to JobContent type
-    return (data || []).map((job) => jobContentSchema.parse(job));
+    return data || [];
   } catch (error) {
     logger.error('Error in getJobs', error instanceof Error ? error : new Error(String(error)));
     return [];
@@ -57,7 +56,7 @@ export async function getJobBySlug(slug: string): Promise<Job | undefined> {
       return undefined;
     }
 
-    return jobContentSchema.parse(data);
+    return data;
   } catch (error) {
     logger.error(
       'Error in getJobBySlug',
@@ -89,7 +88,7 @@ export async function getFeaturedJobs(): Promise<Job[]> {
       return [];
     }
 
-    return (data || []).map((job) => jobContentSchema.parse(job));
+    return data || [];
   } catch (error) {
     logger.error(
       'Error in getFeaturedJobs',
@@ -119,7 +118,7 @@ export async function getJobsByCategory(category: string): Promise<Job[]> {
       return [];
     }
 
-    return (data || []).map((job) => jobContentSchema.parse(job));
+    return data || [];
   } catch (error) {
     logger.error(
       'Error in getJobsByCategory',

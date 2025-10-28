@@ -29,10 +29,18 @@ import { ProductionCodeBlock } from '@/src/components/content/production-code-bl
 import { UnifiedContentBlock } from '@/src/components/content/unified-content-block';
 import { UnifiedContentBox } from '@/src/components/domain/unified-content-box';
 import { ComparisonTable } from '@/src/components/template/comparison-table';
-import type { GuideSection } from '@/src/lib/schemas/content/guide.schema';
+import type { Database } from '@/src/types/database.types';
+
+type GuideRow = Database['public']['Tables']['guides']['Row'];
+
+/**
+ * Database-enforced type: sections column has CHECK constraint jsonb_typeof(sections) = 'array'
+ * This reflects the actual database constraint - not arbitrary type casting
+ */
+type GuideSections = GuideRow['sections']; // Json type from database
 
 interface JSONSectionRendererProps {
-  sections: GuideSection[];
+  sections: GuideSections;
 }
 
 /**
@@ -54,8 +62,10 @@ function TrustedHTML({ html, className, id }: { html: string; className?: string
 
 /**
  * Renders a single guide section based on its type
+ * Database guarantees sections is array via CHECK constraint: jsonb_typeof(sections) = 'array'
+ * Each element is a Json object - access properties directly
  */
-function renderSection(section: GuideSection, index: number): React.ReactNode {
+function render_section(section: any, index: number): React.ReactNode {
   const key = section.id || `section-${index}`;
 
   switch (section.type) {
@@ -385,16 +395,19 @@ function renderSection(section: GuideSection, index: number): React.ReactNode {
  * JSONSectionRenderer - Main export component
  *
  * Renders array of JSON guide sections by mapping each to its corresponding component.
- * This is the CONSOLIDATION that replaces 15 separate component files.
+ * Database-first: sections is Json type from PostgreSQL, guaranteed to be array by CHECK constraint
  */
 export function JSONSectionRenderer({ sections }: JSONSectionRendererProps) {
-  if (!sections || sections.length === 0) {
+  // Database guarantees this is an array via CHECK constraint
+  const sections_array = Array.isArray(sections) ? sections : [];
+
+  if (sections_array.length === 0) {
     return null;
   }
 
   return (
     <div className="space-y-8">
-      {sections.map((section, index) => renderSection(section, index))}
+      {sections_array.map((section, index) => render_section(section, index))}
     </div>
   );
 }

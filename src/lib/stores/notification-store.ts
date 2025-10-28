@@ -1,6 +1,9 @@
 /**
  * Notification Store - Zustand State Management
  *
+ * Database-first: Fetches notifications from Supabase using Tables<'notifications'>
+ * No manual types - everything from generated database.types.ts
+ *
  * ARCHITECTURE: Derived State Pattern (2025)
  * - Stores computed values as state (not computed on access)
  * - Updates derived state when dismissedIds changes
@@ -19,13 +22,43 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { getActiveNotifications, type Notification } from '@/src/config/notifications';
+import { createClient } from '@/src/lib/supabase/client';
+import type { Tables } from '@/src/types/database.types';
+
+// Type alias for cleaner code
+type Notification = Tables<'notifications'>;
+
+/**
+ * Fetch active notifications from database (client-side)
+ */
+async function fetchActiveNotifications(): Promise<Notification[]> {
+  const supabase = createClient();
+  const now = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('active', true)
+    .or(`expires_at.is.null,expires_at.gte.${now}`)
+    .order('priority', { ascending: false }) // high > medium > low
+    .order('created_at', { ascending: true }); // oldest first
+
+  if (error) {
+    console.error('Failed to load notifications:', error);
+    return [];
+  }
+
+  return data || [];
+}
 
 /**
  * Helper: Compute active notifications (non-dismissed)
  */
-function computeActiveNotifications(dismissedIds: string[]): Notification[] {
-  return getActiveNotifications().filter((n) => !dismissedIds.includes(n.id));
+function computeActiveNotifications(
+  allNotifications: Notification[],
+  dismissedIds: string[]
+): Notification[] {
+  return allNotifications.filter((n) => !dismissedIds.includes(n.id));
 }
 
 export interface NotificationStore {
@@ -35,11 +68,17 @@ export interface NotificationStore {
   /** Whether the notification sheet is open */
   isSheetOpen: boolean;
 
+  /** All notifications from database */
+  allNotifications: Notification[];
+
   /** Derived state: Active, non-dismissed notifications (STABLE REFERENCE) */
   activeNotifications: Notification[];
 
   /** Derived state: Unread count (STABLE VALUE) */
   unreadCount: number;
+
+  /** Fetch notifications from database */
+  fetchNotifications: () => Promise<void>;
 
   /** Dismiss a notification by ID */
   dismiss: (id: string) => void;
@@ -65,18 +104,41 @@ export const useNotificationStore = create<NotificationStore>()(
     (set, get) => {
       // Initialize derived state
       const initialDismissedIds: string[] = [];
-      const initialActiveNotifications = computeActiveNotifications(initialDismissedIds);
+      const initialAllNotifications: Notification[] = [];
+      const initialActiveNotifications = computeActiveNotifications(
+        initialAllNotifications,
+        initialDismissedIds
+      );
 
       return {
         dismissedIds: initialDismissedIds,
         isSheetOpen: false,
+        allNotifications: initialAllNotifications,
         activeNotifications: initialActiveNotifications,
         unreadCount: initialActiveNotifications.length,
+
+        fetchNotifications: async () => {
+          const notifications = await fetchActiveNotifications();
+          set((state) => {
+            const newActiveNotifications = computeActiveNotifications(
+              notifications,
+              state.dismissedIds
+            );
+            return {
+              allNotifications: notifications,
+              activeNotifications: newActiveNotifications,
+              unreadCount: newActiveNotifications.length,
+            };
+          });
+        },
 
         dismiss: (id: string) => {
           set((state) => {
             const newDismissedIds = [...state.dismissedIds, id];
-            const newActiveNotifications = computeActiveNotifications(newDismissedIds);
+            const newActiveNotifications = computeActiveNotifications(
+              state.allNotifications,
+              newDismissedIds
+            );
 
             return {
               dismissedIds: newDismissedIds,
@@ -87,11 +149,13 @@ export const useNotificationStore = create<NotificationStore>()(
         },
 
         dismissAll: () => {
-          const allIds = getActiveNotifications().map((n) => n.id);
-          set({
-            dismissedIds: allIds,
-            activeNotifications: [],
-            unreadCount: 0,
+          set((state) => {
+            const allIds = state.allNotifications.map((n) => n.id);
+            return {
+              dismissedIds: allIds,
+              activeNotifications: [],
+              unreadCount: 0,
+            };
           });
         },
 
@@ -111,11 +175,9 @@ export const useNotificationStore = create<NotificationStore>()(
       name: 'notification-storage', // localStorage key
       partialize: (state) => ({ dismissedIds: state.dismissedIds }), // Only persist dismissedIds
       onRehydrateStorage: () => (state) => {
-        // After rehydration, recompute derived state from persisted dismissedIds
+        // After rehydration, fetch notifications from database
         if (state) {
-          const activeNotifications = computeActiveNotifications(state.dismissedIds);
-          state.activeNotifications = activeNotifications;
-          state.unreadCount = activeNotifications.length;
+          state.fetchNotifications();
         }
       },
     }

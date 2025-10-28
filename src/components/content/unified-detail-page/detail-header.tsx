@@ -11,13 +11,13 @@
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/schemas/component.schema';
 import type { ContentTypeConfig } from '@/src/lib/types/content-type-config';
 import { DetailHeaderActions } from './detail-header-actions';
 
 export interface DetailHeaderProps {
   displayTitle: string;
-  item: UnifiedContentItem;
+  item: ContentItem;
   config: ContentTypeConfig;
   onCopyContent?: (() => Promise<void>) | undefined;
 }

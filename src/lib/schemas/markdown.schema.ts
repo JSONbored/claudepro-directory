@@ -7,8 +7,7 @@
  */
 
 import { z } from 'zod';
-import { nonEmptyStringArray } from './primitives/base-arrays';
-import { nonEmptyString, shortString } from './primitives/base-strings';
+import { nonEmptyString, nonEmptyStringArray, shortString } from './primitives';
 
 /**
  * MDX frontmatter schema

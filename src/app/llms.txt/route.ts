@@ -6,21 +6,11 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
-import {
-  agents,
-  collections,
-  commands,
-  hooks,
-  mcp,
-  rules,
-  skills,
-  statuslines,
-} from '@/generated/content';
+import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { generateSiteLLMsTxt } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
-import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 /**
  * Handle GET request for site-wide llms.txt
@@ -42,25 +32,26 @@ export async function GET(): Promise<Response> {
   try {
     logger.info('Site llms.txt generation started');
 
-    // Gather category statistics - await all promises in parallel
-    const {
-      mcp: mcpItems,
-      commands: commandsItems,
-      hooks: hooksItems,
-      rules: rulesItems,
-      agents: agentsItems,
-      statuslines: statuslinesItems,
-      collections: collectionsItems,
-    } = await batchLoadContent({
-      mcp,
-      commands,
-      hooks,
-      rules,
-      agents,
-      statuslines,
-      collections,
-      skills,
-    });
+    // Fetch all content from Supabase (parallel queries with ISR caching)
+    const [
+      mcpItems,
+      commandsItems,
+      hooksItems,
+      rulesItems,
+      agentsItems,
+      statuslinesItems,
+      collectionsItems,
+      skillsItems,
+    ] = await Promise.all([
+      getContentByCategory('mcp'),
+      getContentByCategory('commands'),
+      getContentByCategory('hooks'),
+      getContentByCategory('rules'),
+      getContentByCategory('agents'),
+      getContentByCategory('statuslines'),
+      getContentByCategory('collections'),
+      getContentByCategory('skills'),
+    ]);
 
     const categoryStats = [
       {
@@ -109,7 +100,7 @@ export async function GET(): Promise<Response> {
       },
       {
         name: 'Skills',
-        count: (await skills).length,
+        count: skillsItems.length,
         url: '/skills',
         description:
           'Task-focused capability guides with dependencies, examples, and troubleshooting for document/data workflows',

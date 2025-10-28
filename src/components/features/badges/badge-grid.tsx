@@ -19,7 +19,7 @@
 'use client';
 
 import { Info, Lock, Star } from 'lucide-react';
-import { memo, useState, useTransition } from 'react';
+import { memo, useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { toggleBadgeFeatured } from '#lib/actions/badges';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -36,13 +36,41 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/primitives/tooltip';
-import {
-  BADGE_RARITY_COLORS,
-  BADGE_REGISTRY,
-  type BadgeDefinition,
-} from '@/src/lib/config/badges.config';
+import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import type { Tables } from '@/src/types/database.types';
+
+type Badge = Tables<'badges'>;
+
+// Rarity color mapping (moved from config)
+const BADGE_RARITY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  common: {
+    bg: 'bg-gray-50 dark:bg-gray-900/30',
+    text: 'text-gray-900 dark:text-gray-100',
+    border: 'border-gray-200 dark:border-gray-800',
+  },
+  uncommon: {
+    bg: 'bg-green-50 dark:bg-green-900/30',
+    text: 'text-green-900 dark:text-green-100',
+    border: 'border-green-200 dark:border-green-800',
+  },
+  rare: {
+    bg: 'bg-blue-50 dark:bg-blue-900/30',
+    text: 'text-blue-900 dark:text-blue-100',
+    border: 'border-blue-200 dark:border-blue-800',
+  },
+  epic: {
+    bg: 'bg-purple-50 dark:bg-purple-900/30',
+    text: 'text-purple-900 dark:text-purple-100',
+    border: 'border-purple-200 dark:border-purple-800',
+  },
+  legendary: {
+    bg: 'bg-yellow-50 dark:bg-yellow-900/30',
+    text: 'text-yellow-900 dark:text-yellow-100',
+    border: 'border-yellow-200 dark:border-yellow-800',
+  },
+};
 
 // =============================================================================
 // TYPES
@@ -79,8 +107,8 @@ export interface BadgeGridProps {
 interface BadgeCardProps {
   /** User badge with details */
   userBadge: UserBadgeWithBadge;
-  /** Badge definition from registry */
-  badgeDefinition?: BadgeDefinition;
+  /** Badge from database */
+  badgeDetail?: Badge;
   /** Can edit featured status */
   canEdit: boolean;
   /** Callback when featured status changes */
@@ -93,7 +121,7 @@ interface BadgeCardProps {
 
 const BadgeCard = memo(function BadgeCard({
   userBadge,
-  badgeDefinition,
+  badgeDetail,
   canEdit,
   onFeaturedChange,
 }: BadgeCardProps) {
@@ -129,7 +157,7 @@ const BadgeCard = memo(function BadgeCard({
     });
   };
 
-  const rarity = badgeDefinition?.rarity || 'common';
+  const rarity = badgeDetail?.rarity || 'common';
   const rarityColors = BADGE_RARITY_COLORS[rarity];
 
   const Container = canEdit ? 'button' : 'div';
@@ -147,8 +175,8 @@ const BadgeCard = memo(function BadgeCard({
       onClick={canEdit ? handleToggleFeatured : undefined}
       aria-label={
         canEdit
-          ? `${badgeDefinition?.name || 'Badge'}. ${isFeatured ? 'Featured' : 'Not featured'}. Click to ${isFeatured ? 'unfeature' : 'feature'}`
-          : badgeDefinition?.name || 'Badge'
+          ? `${badgeDetail?.name || 'Badge'}. ${isFeatured ? 'Featured' : 'Not featured'}. Click to ${isFeatured ? 'unfeature' : 'feature'}`
+          : badgeDetail?.name || 'Badge'
       }
     >
       {/* Featured Star */}
@@ -161,21 +189,17 @@ const BadgeCard = memo(function BadgeCard({
       {/* Badge Content */}
       <div className="flex flex-col items-center text-center space-y-2">
         {/* Badge Icon */}
-        <div
-          className="text-4xl"
-          role="img"
-          aria-label={`${badgeDefinition?.name || 'Badge'} icon`}
-        >
-          {badgeDefinition?.icon || '🏆'}
+        <div className="text-4xl" role="img" aria-label={`${badgeDetail?.name || 'Badge'} icon`}>
+          {badgeDetail?.icon || '🏆'}
         </div>
 
         {/* Badge Name */}
         <div className="space-y-1">
           <h3 className={cn('font-semibold text-sm', rarityColors.text)}>
-            {badgeDefinition?.name || 'Unknown Badge'}
+            {badgeDetail?.name || 'Unknown Badge'}
           </h3>
           <p className="text-xs text-muted-foreground line-clamp-2">
-            {badgeDefinition?.description || 'Badge description'}
+            {badgeDetail?.description || 'Badge description'}
           </p>
         </div>
 
@@ -256,6 +280,33 @@ export const BadgeGrid = memo(function BadgeGrid({
 }: BadgeGridProps) {
   // Filter badges
   const displayedBadges = featuredOnly ? badges.filter((b) => b.featured) : badges;
+  const [badgeDetails, setBadgeDetails] = useState<Map<string, Badge>>(new Map());
+
+  // Fetch badge details on mount
+  useEffect(() => {
+    const fetchBadgeDetails = async () => {
+      const supabase = createClient();
+      const slugs = displayedBadges
+        .map((b) => b.badges?.slug)
+        .filter((s): s is string => Boolean(s));
+
+      if (slugs.length > 0) {
+        const { data } = await supabase.from('badges').select('*').in('slug', slugs);
+
+        if (data) {
+          const detailsMap = new Map<string, Badge>();
+          for (const badge of data) {
+            detailsMap.set(badge.slug, badge);
+          }
+          setBadgeDetails(detailsMap);
+        }
+      }
+    };
+
+    fetchBadgeDetails().catch(() => {
+      // Silently fail - badges will show with default icon/name
+    });
+  }, [displayedBadges]);
 
   const handleFeaturedChange = () => {
     // Refresh badge list (optimistic update already handled in BadgeCard)
@@ -324,22 +375,14 @@ export const BadgeGrid = memo(function BadgeGrid({
           /* Badge Grid */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {displayedBadges.map((userBadge) => {
-              // Look up badge definition from registry
-              // In production, this should come from the join query
-              const badgeDefinition = Object.values(BADGE_REGISTRY).find(
-                (def) => def.slug === userBadge.badges?.slug
-              );
-
-              // Skip if badge definition not found
-              if (!badgeDefinition) {
-                return null;
-              }
+              // Look up badge detail from fetched data
+              const badgeDetail = badgeDetails.get(userBadge.badges?.slug || '');
 
               return (
                 <BadgeCard
                   key={userBadge.id}
                   userBadge={userBadge}
-                  badgeDefinition={badgeDefinition}
+                  badgeDetail={badgeDetail}
                   canEdit={canEdit}
                   onFeaturedChange={handleFeaturedChange}
                 />

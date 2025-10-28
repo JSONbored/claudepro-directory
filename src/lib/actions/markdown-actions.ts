@@ -19,7 +19,7 @@
 import { z } from 'zod';
 import { contentCache } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { getContentBySlug } from '@/src/lib/content/content-loaders';
+import { getContentBySlug } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { rateLimitedAction } from './safe-action';
 
@@ -63,7 +63,7 @@ function generateMarkdownContent(
     description?: string | undefined;
     category: string;
     author?: string | undefined;
-    dateAdded?: string | undefined;
+    date_added?: string | undefined;
     tags?: string[] | undefined;
     content?: string | undefined;
     features?: string[] | undefined;
@@ -82,8 +82,8 @@ function generateMarkdownContent(
   if (options.includeMetadata) {
     sections.push('---');
     sections.push(`title: "${item.title || item.slug}"`);
-    if (item.seoTitle) {
-      sections.push(`seoTitle: "${item.seoTitle}"`);
+    if (item.seo_title) {
+      sections.push(`seoTitle: "${item.seo_title}"`);
     }
     if (item.description) {
       // Security: Escape backslashes FIRST, then quotes (order matters for YAML injection prevention)
@@ -95,8 +95,8 @@ function generateMarkdownContent(
     if (item.author) {
       sections.push(`author: ${item.author}`);
     }
-    if (item.dateAdded) {
-      sections.push(`dateAdded: ${item.dateAdded}`);
+    if (item.date_added) {
+      sections.push(`date_added: ${item.date_added}`);
     }
     if (item.tags && item.tags.length > 0) {
       sections.push('tags:');
@@ -120,8 +120,8 @@ function generateMarkdownContent(
   sections.push('## Metadata\n');
   sections.push(`- **Category**: ${item.category}`);
   sections.push(`- **Author**: ${item.author || 'Community'}`);
-  if (item.dateAdded) {
-    sections.push(`- **Date Added**: ${item.dateAdded}`);
+  if (item.date_added) {
+    sections.push(`- **Date Added**: ${item.date_added}`);
   }
   sections.push(`- **URL**: ${APP_CONFIG.url}/${item.category}/${item.slug}\n`);
 
@@ -141,9 +141,9 @@ function generateMarkdownContent(
   }
 
   // Use Cases
-  if (item.useCases && Array.isArray(item.useCases) && item.useCases.length > 0) {
+  if (item.use_cases && Array.isArray(item.use_cases) && item.use_cases.length > 0) {
     sections.push('## Use Cases\n');
-    for (const useCase of item.useCases) {
+    for (const useCase of item.use_cases) {
       sections.push(`- ${useCase}`);
     }
     sections.push('');

@@ -74,13 +74,12 @@ import {
 } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import {
+  type ContentItem,
   getContentByCategory,
   getContentBySlug,
   getFullContentBySlug,
-  getRelatedContent,
-} from '@/src/lib/content/content-loaders';
+} from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
-import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**
@@ -258,23 +257,26 @@ export default async function DetailPage({
     notFound();
   }
 
-  // Optimized fetch strategy: Load critical content first, then related data
-  // Main content is loaded immediately for fastest initial render
+  // Optimized fetch strategy: Load full content from individual table (ALL fields)
+  // Use getFullContentBySlug to get category-specific fields like configuration, content, etc.
   const fullItem = await getFullContentBySlug(category, slug);
-  const itemData = fullItem || itemMeta;
+  const itemData = (fullItem || itemMeta) as ContentItem; // Fallback to metadata if full item fails
 
-  // Load related items and view count for static generation
-  // These must be awaited for Next.js 16 static generation
-  const [relatedItems, viewCount] = await Promise.all([
-    getRelatedContent(category, slug, 3),
-    statsRedis.getViewCount(category, slug),
-  ]);
+  // Load view count for static generation
+  // Related content removed - function doesn't exist after migration
+  const viewCount = await statsRedis.getViewCount(category, slug);
+  const relatedItems: ContentItem[] = [];
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles
 
+  // Type-safe breadcrumb name with discriminated union
+  const breadcrumbName =
+    fullItem && 'display_title' in fullItem ? fullItem.display_title : itemData.title;
+
   // Conditional rendering: Collections use specialized CollectionDetailView
-  if (category === 'collections') {
+  // TypeScript narrows fullItem type based on category check
+  if (category === 'collections' && fullItem && fullItem.category === 'collections') {
     return (
       <>
         {/* Read Progress Bar - Shows reading progress at top of page */}
@@ -282,9 +284,7 @@ export default async function DetailPage({
 
         <UnifiedTracker variant="view" category={category} slug={slug} />
         <UnifiedTracker variant="page-view" category={category} slug={slug} />
-        <UnifiedStructuredData
-          item={itemData as Parameters<typeof UnifiedStructuredData>[0]['item']}
-        />
+        <UnifiedStructuredData item={fullItem} />
         <BreadcrumbSchema
           items={[
             {
@@ -292,12 +292,12 @@ export default async function DetailPage({
               url: `${APP_CONFIG.url}/${category}`,
             },
             {
-              name: itemData.displayTitle || itemData.title || slug,
+              name: breadcrumbName || slug,
               url: `${APP_CONFIG.url}/${category}/${slug}`,
             },
           ]}
         />
-        <CollectionDetailView collection={itemData as CollectionContent} />
+        <CollectionDetailView collection={fullItem} />
       </>
     );
   }
@@ -310,9 +310,7 @@ export default async function DetailPage({
 
       <UnifiedTracker variant="view" category={category} slug={slug} />
       <UnifiedTracker variant="page-view" category={category} slug={slug} />
-      <UnifiedStructuredData
-        item={itemData as Parameters<typeof UnifiedStructuredData>[0]['item']}
-      />
+      <UnifiedStructuredData item={fullItem || itemData} />
       <BreadcrumbSchema
         items={[
           {
@@ -320,12 +318,16 @@ export default async function DetailPage({
             url: `${APP_CONFIG.url}/${category}`,
           },
           {
-            name: itemData.displayTitle || itemData.title || slug,
+            name: breadcrumbName || slug,
             url: `${APP_CONFIG.url}/${category}/${slug}`,
           },
         ]}
       />
-      <UnifiedDetailPage item={itemData} relatedItems={relatedItems} viewCount={viewCount} />
+      <UnifiedDetailPage
+        item={fullItem || itemData}
+        relatedItems={relatedItems}
+        viewCount={viewCount}
+      />
     </>
   );
 }

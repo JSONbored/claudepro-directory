@@ -12,7 +12,6 @@ import {
 } from '@/src/components/primitives/card';
 import { createErrorBoundaryFallback } from '@/src/lib/error-handler/client';
 import { AlertTriangle, Home, RefreshCw } from '@/src/lib/icons';
-import { umamiEventDataSchema } from '@/src/lib/schemas/analytics.schema';
 import type { ErrorBoundaryProps, ErrorFallbackProps } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -81,19 +80,15 @@ export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps) {
       componentStack: errorInfo.componentStack || '',
     });
 
-    // Track error boundary triggers in Umami with validated data
+    // Track error boundary triggers in Umami
     if (window?.umami) {
-      const eventData = umamiEventDataSchema.safeParse({
+      window.umami.track('error_boundary_triggered', {
         error_type: error.name || 'Unknown',
         error_message: error.message?.substring(0, 100) || 'No message',
         page: window.location.pathname,
         component_stack_depth: errorInfo.componentStack?.split('\n').length || 0,
         request_id: errorResponse.requestId || null,
       });
-
-      if (eventData.success) {
-        window.umami?.track('error_boundary_triggered', eventData.data);
-      }
     }
   }, []);
 

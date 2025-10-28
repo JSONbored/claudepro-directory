@@ -65,7 +65,7 @@ import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { PostCopyEmailProvider } from '@/src/components/infra/providers/post-copy-email-provider';
 import { PwaInstallTracker } from '@/src/components/infra/pwa-install-tracker';
 import { OrganizationStructuredData } from '@/src/components/infra/structured-data/organization-schema';
-import { AnnouncementBanner } from '@/src/components/layout/announcement-banner';
+import { AnnouncementBanner } from '@/src/components/layout/announcement-banner-server';
 import { FloatingMobileSearch } from '@/src/components/layout/floating-mobile-search';
 import { Navigation } from '@/src/components/layout/navigation';
 import { BackToTopButton } from '@/src/components/shared/back-to-top-button';

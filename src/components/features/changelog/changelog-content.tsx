@@ -21,8 +21,12 @@
 import { memo } from 'react';
 import { JSONSectionRenderer } from '@/src/components/content/json-section-renderer';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import type { ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
-import type { GuideSection } from '@/src/lib/schemas/content/guide.schema';
+import type { ChangelogEntry } from '@/src/lib/changelog/loader';
+import type { Database } from '@/src/types/database.types';
+
+type GuideRow = Database['public']['Tables']['guides']['Row'];
+type GuideSection = GuideRow['sections'];
+
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**

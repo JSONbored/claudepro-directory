@@ -15,6 +15,7 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
+import { z } from 'zod';
 import { BaseCard } from '@/src/components/domain/base-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedButton } from '@/src/components/domain/unified-button';
@@ -56,9 +57,37 @@ import {
   Sparkles,
   TrendingUp,
 } from '@/src/lib/icons';
-import type { RecommendationResponse } from '@/src/lib/schemas/recommender.schema';
+import { publicGetRecommendationsReturnsSchema } from '@/src/lib/schemas/generated/db-schemas';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
+
+// Type based on database function return + UI enrichment
+type RecommendationResponse = {
+  results: Array<{
+    slug: string;
+    title: string;
+    description: string;
+    category: string;
+    matchScore: number;
+    matchPercentage: number;
+    rank: number;
+    reasons: Array<{ type: string; message: string }>;
+    primaryReason: string;
+    author: string;
+    tags: string[];
+  }>;
+  totalMatches: number;
+  answers: Record<string, unknown>;
+  id: string;
+  generatedAt: string;
+  algorithm: string;
+  summary: {
+    topCategory: string;
+    avgMatchScore: number;
+    diversityScore: number;
+  };
+};
+
 import { toasts } from '@/src/lib/utils/toast.utils';
 import { ShareResults } from './share-results';
 

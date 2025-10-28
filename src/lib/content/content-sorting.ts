@@ -28,12 +28,12 @@ export function sortByPopularity<T extends ContentItem>(items: readonly T[] | T[
   );
 }
 
-export function sortByNewest<T extends { createdAt?: string; date?: string }>(
+export function sortByNewest<T extends { created_at?: string; date?: string }>(
   items: readonly T[] | T[]
 ): T[] {
   return [...items].sort((a, b) => {
-    const dateA = new Date(a.createdAt ?? a.date ?? '1970-01-01').getTime();
-    const dateB = new Date(b.createdAt ?? b.date ?? '1970-01-01').getTime();
+    const dateA = new Date(a.created_at ?? a.date ?? '1970-01-01').getTime();
+    const dateB = new Date(b.created_at ?? b.date ?? '1970-01-01').getTime();
     return dateB - dateA;
   });
 }

@@ -373,7 +373,7 @@ const COMMANDS_CONFIG: ContentTypeConfig = {
 
 /**
  * Hooks content type configuration
- * Schema: hooksSubmissionSchema (hookScript, hookType, triggeredBy)
+ * Schema: hooksSubmissionSchema (hookScript, hook_type, triggeredBy)
  */
 const HOOKS_CONFIG: ContentTypeConfig = {
   fields: [
@@ -391,7 +391,7 @@ const HOOKS_CONFIG: ContentTypeConfig = {
     },
     {
       type: 'select',
-      name: 'hookType',
+      name: 'hook_type',
       label: 'Hook Type *',
       required: true,
       options: [
@@ -414,7 +414,7 @@ const HOOKS_CONFIG: ContentTypeConfig = {
 
 /**
  * Statuslines content type configuration
- * Schema: statuslinesSubmissionSchema (statuslineScript, statuslineType, refreshInterval, position)
+ * Schema: statuslinesSubmissionSchema (statuslineScript, statusline_type, refreshInterval, position)
  */
 const STATUSLINES_CONFIG: ContentTypeConfig = {
   fields: [
@@ -431,7 +431,7 @@ const STATUSLINES_CONFIG: ContentTypeConfig = {
     },
     {
       type: 'select',
-      name: 'statuslineType',
+      name: 'statusline_type',
       label: 'Type',
       options: [
         { value: 'custom', label: 'Custom' },

@@ -17,7 +17,10 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { memo } from 'react';
 import { Button } from '@/src/components/primitives/button';
-import type { Notification } from '@/src/config/notifications';
+import type { Tables } from '@/src/types/database.types';
+
+type Notification = Tables<'notifications'>;
+
 import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
 import { NotificationItem } from './notification-item';
 

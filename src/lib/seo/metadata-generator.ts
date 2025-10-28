@@ -825,7 +825,7 @@ export function generateMetadataFromPattern(
   if (classification.pattern === 'CONTENT_DETAIL' && context.item) {
     const item = context.item as {
       author?: string;
-      dateAdded?: string;
+      date_added?: string;
       lastModified?: string;
     };
 
@@ -835,11 +835,11 @@ export function generateMetadataFromPattern(
     }
 
     // Add article timestamps to OpenGraph
-    if (item.dateAdded || item.lastModified) {
+    if (item.date_added || item.lastModified) {
       metadata.openGraph = {
         ...metadata.openGraph,
         type: 'article',
-        ...(item.dateAdded && { publishedTime: item.dateAdded }),
+        ...(item.date_added && { publishedTime: item.date_added }),
         ...(item.lastModified && { modifiedTime: item.lastModified }),
         ...(item.author && { authors: [item.author] }),
       };

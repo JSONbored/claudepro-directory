@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { Calendar, Eye, Tag, User } from '@/src/lib/icons';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatViewCount } from '@/src/lib/utils/content.utils';
 import { formatDate } from '@/src/lib/utils/data.utils';
@@ -22,7 +22,7 @@ import { formatDate } from '@/src/lib/utils/data.utils';
  * Schema for DetailMetadata props
  */
 const detailMetadataPropsSchema = z.object({
-  item: z.custom<UnifiedContentItem>(),
+  item: z.custom<ContentItem>(),
   viewCount: z.number().optional(),
 });
 
@@ -35,7 +35,7 @@ export type DetailMetadataProps = z.infer<typeof detailMetadataPropsSchema>;
  * No React.memo needed - server components don't re-render
  */
 export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
-  const hasMetadata = item.author || item.dateAdded || viewCount !== undefined;
+  const hasMetadata = item.author || item.date_added || viewCount !== undefined;
   const hasTags = item.tags && item.tags.length > 0;
 
   if (!(hasMetadata || hasTags)) return null;
@@ -49,7 +49,7 @@ export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <User className="h-4 w-4" />
               <a
-                href={item.authorProfileUrl || SOCIAL_LINKS.authorProfile}
+                href={item.author_profile_url || SOCIAL_LINKS.authorProfile}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:underline hover:text-foreground transition-colors"
@@ -58,10 +58,10 @@ export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
               </a>
             </div>
           )}
-          {item.dateAdded && (
+          {item.date_added && (
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Calendar className="h-4 w-4" />
-              <span>{formatDate(item.dateAdded)}</span>
+              <span>{formatDate(item.date_added)}</span>
             </div>
           )}
           {viewCount !== undefined && viewCount > 0 && (

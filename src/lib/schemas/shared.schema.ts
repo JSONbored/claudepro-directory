@@ -13,6 +13,11 @@
 import { z } from 'zod';
 import {
   codeString,
+  componentDescriptionString,
+  componentLabelString,
+  componentTimeString,
+  componentTitleString,
+  componentValueString,
   extraLongString,
   longString,
   mediumString,
@@ -20,14 +25,7 @@ import {
   shortString,
   ultraLongString,
   veryLongCodeString,
-} from '@/src/lib/schemas/primitives/base-strings';
-import {
-  componentDescriptionString,
-  componentLabelString,
-  componentTimeString,
-  componentTitleString,
-  componentValueString,
-} from '@/src/lib/schemas/primitives/ui-component-primitives';
+} from '@/src/lib/schemas/primitives';
 
 /**
  * Content Categories
@@ -129,27 +127,6 @@ export const appContentTypeSchema = z
   .describe('Application content types for routing and middleware processing');
 
 export type AppContentType = z.infer<typeof appContentTypeSchema>;
-
-/**
- * Rate Limit Configuration
- * Used across: api, middleware
- */
-const rateLimitConfigSchema = z
-  .object({
-    maxRequests: z
-      .number()
-      .int()
-      .positive()
-      .describe('Maximum number of requests allowed within the time window'),
-    windowMs: z.number().int().positive().describe('Time window in milliseconds for rate limiting'),
-    message: z
-      .string()
-      .optional()
-      .describe('Custom error message shown when rate limit is exceeded'),
-  })
-  .describe('Configuration for API rate limiting including request limits and time windows');
-
-export type RateLimitConfig = z.infer<typeof rateLimitConfigSchema>;
 
 /**
  * UI Component Schemas

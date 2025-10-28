@@ -9,8 +9,9 @@
  * 4. Category Browse - "Since you're exploring [category]..."
  */
 
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+
 import { findSimilarConfigs } from './similar-configs';
 import type { PersonalizedContentItem } from './types';
 
@@ -68,8 +69,8 @@ export const COMPLEMENTARITY_RULES: Record<
  * @param limit - Number of recommendations
  */
 export function generateAfterBookmarkRecommendations(
-  bookmarkedItem: UnifiedContentItem,
-  allContent: UnifiedContentItem[],
+  bookmarkedItem: ContentItem,
+  allContent: ContentItem[],
   coBookmarkData: Map<string, number>,
   limit = 3
 ): PersonalizedContentItem[] {
@@ -102,8 +103,8 @@ export function generateAfterBookmarkRecommendations(
  * @param limit - Number of recommendations
  */
 export function generateAfterCopyRecommendations(
-  copiedItem: UnifiedContentItem,
-  allContent: UnifiedContentItem[],
+  copiedItem: ContentItem,
+  allContent: ContentItem[],
   _userContext?: { favorite_categories: string[]; interests: string[] },
   limit = 3
 ): PersonalizedContentItem[] {
@@ -154,8 +155,8 @@ export function generateAfterCopyRecommendations(
  * @param limit - Number of recommendations
  */
 export function generateExtendedTimeRecommendations(
-  currentItem: UnifiedContentItem,
-  allContent: UnifiedContentItem[],
+  currentItem: ContentItem,
+  allContent: ContentItem[],
   timeSpent: number,
   limit = 4
 ): PersonalizedContentItem[] {
@@ -197,7 +198,7 @@ export function generateExtendedTimeRecommendations(
  */
 export function generateCategoryBrowseRecommendations(
   category: string,
-  allContent: UnifiedContentItem[],
+  allContent: ContentItem[],
   userAffinities: Map<string, number>,
   limit = 6
 ): PersonalizedContentItem[] {
@@ -233,8 +234,8 @@ export function generateCategoryBrowseRecommendations(
  * @param limit - Number of recommendations
  */
 export function detectMissingComplementaryItems(
-  bookmarkedItems: UnifiedContentItem[],
-  allContent: UnifiedContentItem[],
+  bookmarkedItems: ContentItem[],
+  allContent: ContentItem[],
   limit = 5
 ): PersonalizedContentItem[] {
   // Analyze user's bookmarked categories
@@ -283,13 +284,13 @@ export function detectMissingComplementaryItems(
 export function getUsageBasedRecommendations(
   trigger: RecommendationTrigger,
   context: {
-    current_item?: UnifiedContentItem;
+    current_item?: ContentItem;
     category?: string;
     time_spent?: number;
-    all_content: UnifiedContentItem[];
+    all_content: ContentItem[];
     user_affinities?: Map<string, number>;
     co_bookmark_data?: Map<string, number>;
-    bookmarked_items?: UnifiedContentItem[];
+    bookmarked_items?: ContentItem[];
   }
 ): PersonalizedContentItem[] {
   const { current_item, category, time_spent, all_content, user_affinities, co_bookmark_data } =

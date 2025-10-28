@@ -24,7 +24,6 @@
  */
 
 import { NewsletterWelcome } from '@/src/emails/templates/newsletter-welcome';
-import { EVENTS, type EventName } from '@/src/lib/analytics/events.constants';
 import { logger } from '@/src/lib/logger';
 import { emailSequenceService } from '@/src/lib/services/email-sequence.server';
 import { resendService } from '@/src/lib/services/resend.server';
@@ -255,7 +254,7 @@ class EmailOrchestrationService {
     copySlug?: string;
   }):
     | {
-        event: EventName;
+        event: string;
         [key: string]: string | undefined;
       }
     | undefined {
@@ -267,7 +266,7 @@ class EmailOrchestrationService {
       return undefined; // Regular newsletter signups don't need analytics tracking
     }
 
-    const event: EventName = EVENTS.EMAIL_SUBSCRIBED_POST_COPY;
+    const event = 'email_subscribed_post_copy';
 
     // Build event properties
     const eventProperties: Record<string, string | undefined> = {
@@ -280,7 +279,7 @@ class EmailOrchestrationService {
     };
 
     return eventProperties as {
-      event: EventName;
+      event: string;
       [key: string]: string | undefined;
     };
   }

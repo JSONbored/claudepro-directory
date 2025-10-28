@@ -45,7 +45,7 @@ const agentConfig: Partial<ContentTypeConfigRegistry['agents']> = {
   sections: {
     features: true,
     installation: true,
-    useCases: true,
+    use_cases: true,
     configuration: true,
     security: false,
     troubleshooting: false,
@@ -71,7 +71,7 @@ const agentConfig: Partial<ContentTypeConfigRegistry['agents']> = {
       requirements: ['Claude Code or Claude SDK', 'Access to specified tools and functions'],
     }),
 
-    useCases: createUseCasesGenerator([
+    use_cases: createUseCasesGenerator([
       'Automate specialized development workflows',
       'Provide expert guidance in specific domains',
       'Enhance code quality and maintainability',
@@ -109,7 +109,7 @@ const commandConfig: Partial<ContentTypeConfigRegistry['commands']> = {
   sections: {
     features: true,
     installation: true,
-    useCases: true,
+    use_cases: true,
     configuration: false,
     security: false,
     troubleshooting: true,
@@ -135,7 +135,7 @@ const commandConfig: Partial<ContentTypeConfigRegistry['commands']> = {
       requirements: ['Claude Code CLI', 'Command-specific dependencies (see content below)'],
     }),
 
-    useCases: createUseCasesGenerator(
+    use_cases: createUseCasesGenerator(
       [
         'Execute {title} to automate repetitive tasks',
         'Integrate {title} into development workflows',
@@ -175,7 +175,7 @@ const hookConfig: Partial<ContentTypeConfigRegistry['hooks']> = {
   sections: {
     features: true,
     installation: true,
-    useCases: true,
+    use_cases: true,
     configuration: true,
     security: false,
     troubleshooting: true,
@@ -204,7 +204,7 @@ const hookConfig: Partial<ContentTypeConfigRegistry['hooks']> = {
       ],
     }),
 
-    useCases: createUseCasesGenerator([
+    use_cases: createUseCasesGenerator([
       'Automate code formatting and quality checks',
       'Trigger workflows on specific events',
       'Integrate with external tools and services',
@@ -236,7 +236,7 @@ const mcpConfig: Partial<ContentTypeConfigRegistry['mcp']> = {
   sections: {
     features: true,
     installation: true,
-    useCases: true,
+    use_cases: true,
     configuration: true,
     security: true,
     troubleshooting: true,
@@ -266,7 +266,7 @@ const mcpConfig: Partial<ContentTypeConfigRegistry['mcp']> = {
       ],
     }),
 
-    useCases: createUseCasesGenerator([
+    use_cases: createUseCasesGenerator([
       'Access external data sources and APIs',
       'Integrate with third-party services',
       'Extend Claude capabilities with custom tools',
@@ -305,7 +305,7 @@ const ruleConfig: Partial<ContentTypeConfigRegistry['rules']> = {
   sections: {
     features: false,
     installation: false,
-    useCases: true,
+    use_cases: true,
     configuration: true,
     security: false,
     troubleshooting: false,
@@ -313,7 +313,7 @@ const ruleConfig: Partial<ContentTypeConfigRegistry['rules']> = {
   },
 
   generators: {
-    useCases: createUseCasesGenerator(
+    use_cases: createUseCasesGenerator(
       [
         'Improve code quality and consistency',
         'Provide specialized guidance in your domain',
@@ -344,7 +344,7 @@ const statuslineConfig: Partial<ContentTypeConfigRegistry['statuslines']> = {
   sections: {
     features: true,
     installation: true,
-    useCases: true,
+    use_cases: true,
     configuration: true,
     security: false,
     troubleshooting: true,
@@ -378,7 +378,7 @@ const statuslineConfig: Partial<ContentTypeConfigRegistry['statuslines']> = {
       requirements: ['Claude Code CLI', 'Bash shell', 'Terminal with color support'],
     }),
 
-    useCases: createUseCasesGenerator([
+    use_cases: createUseCasesGenerator([
       'Display real-time session information in CLI',
       'Customize terminal appearance and branding',
       'Show project context and status at a glance',
@@ -431,7 +431,7 @@ const collectionConfig: Partial<ContentTypeConfigRegistry['collections']> = {
   sections: {
     features: false,
     installation: false,
-    useCases: true,
+    use_cases: true,
     configuration: false,
     security: false,
     troubleshooting: false,
@@ -439,7 +439,7 @@ const collectionConfig: Partial<ContentTypeConfigRegistry['collections']> = {
   },
 
   generators: {
-    useCases: createUseCasesGenerator([
+    use_cases: createUseCasesGenerator([
       'Quick start with pre-configured bundles',
       'Explore curated workflows and best practices',
       'Discover related content organized by theme',
@@ -460,7 +460,7 @@ const skillConfig: Partial<ContentTypeConfigRegistry['skills']> = {
   sections: {
     features: true,
     installation: true,
-    useCases: true,
+    use_cases: true,
     configuration: false,
     security: false,
     troubleshooting: true,
@@ -468,7 +468,7 @@ const skillConfig: Partial<ContentTypeConfigRegistry['skills']> = {
   },
 
   generators: {
-    useCases: createUseCasesGenerator(
+    use_cases: createUseCasesGenerator(
       [
         'Apply {title} in real-world workflows',
         'Automate tedious document tasks',
@@ -488,7 +488,7 @@ const skillConfig: Partial<ContentTypeConfigRegistry['skills']> = {
       },
       requirements:
         'requirements' in item &&
-        Array.isArray(item.requirements) &&
+        item.requirements &&
         item.requirements.length > 0 &&
         item.requirements.every((r): r is string => typeof r === 'string')
           ? item.requirements

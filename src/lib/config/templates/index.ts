@@ -95,7 +95,7 @@ const commandTemplateSchema = baseTemplateSchema.extend({
 const hookTemplateSchema = baseTemplateSchema.extend({
   type: z.literal('hook'),
   hookScript: z.string(),
-  hookType: z.enum(['pre-tool-use', 'post-tool-use', 'pre-command', 'post-command']),
+  hook_type: z.enum(['pre-tool-use', 'post-tool-use', 'pre-command', 'post-command']),
   triggeredBy: z.string().optional(),
 });
 
@@ -106,7 +106,7 @@ const hookTemplateSchema = baseTemplateSchema.extend({
 const statuslineTemplateSchema = baseTemplateSchema.extend({
   type: z.literal('statusline'),
   statuslineScript: z.string(),
-  statuslineType: z.enum(['custom', 'minimal', 'extended']),
+  statusline_type: z.enum(['custom', 'minimal', 'extended']),
   refreshInterval: z.string(),
   position: z.enum(['left', 'right']),
 });

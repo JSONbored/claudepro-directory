@@ -20,7 +20,7 @@ import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/schemas/component.schema';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
@@ -29,8 +29,8 @@ import { getContentItemUrl } from '@/src/lib/utils/content.utils';
  * Props for DetailSidebar
  */
 export interface DetailSidebarProps {
-  item: UnifiedContentItem;
-  relatedItems: UnifiedContentItem[];
+  item: ContentItem;
+  relatedItems: ContentItem[];
   config: {
     typeName: string;
     metadata?:
@@ -43,8 +43,8 @@ export interface DetailSidebarProps {
   };
   customRenderer?:
     | ((
-        item: UnifiedContentItem,
-        relatedItems: UnifiedContentItem[],
+        item: ContentItem,
+        relatedItems: ContentItem[],
         router: ReturnType<typeof useRouter>
       ) => React.ReactNode)
     | undefined;
@@ -80,12 +80,12 @@ export const DetailSidebar = memo(function DetailSidebar({
   const hasConfiguration = 'configuration' in item && typeof item.configuration === 'object';
   const hasPackage = 'package' in item && item.package;
   const hasAuth = 'requiresAuth' in item;
-  const hasPermissions = 'permissions' in item && Array.isArray(item.permissions);
+  const hasPermissions = 'permissions' in item;
 
   return (
     <div className="space-y-6">
       {/* Resources Card */}
-      {!!(showGitHubLink || item.documentationUrl) && (
+      {!!(showGitHubLink || item.documentation_url) && (
         <Card>
           <CardHeader>
             <CardTitle>Resources</CardTitle>
@@ -99,9 +99,9 @@ export const DetailSidebar = memo(function DetailSidebar({
                 </a>
               </Button>
             )}
-            {item.documentationUrl && (
+            {item.documentation_url && (
               <Button variant="outline" className="w-full justify-start" asChild>
-                <a href={item.documentationUrl} target="_blank" rel="noopener noreferrer">
+                <a href={item.documentation_url} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Documentation
                 </a>

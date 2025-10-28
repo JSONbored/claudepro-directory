@@ -25,6 +25,7 @@ import { BaseCard } from '@/src/components/domain/base-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { CategoryFilter } from '@/src/components/features/changelog/category-filter';
 import { Tabs, TabsContent } from '@/src/components/primitives/tabs';
+import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/changelog/loader';
 import {
   formatChangelogDateShort,
   getChangelogPath,
@@ -32,7 +33,6 @@ import {
   getRelativeTime,
 } from '@/src/lib/changelog/utils';
 import { ArrowRight, Calendar } from '@/src/lib/icons';
-import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**

@@ -17,7 +17,10 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import type { Notification } from '@/src/config/notifications';
+import type { Tables } from '@/src/types/database.types';
+
+type Notification = Tables<'notifications'>;
+
 import { Bell } from '@/src/lib/icons';
 import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
 
@@ -78,12 +81,12 @@ export function NotificationToastHandler() {
         description: notification.message,
         icon: <Bell className="h-4 w-4" />,
         duration: 5000,
-        action: notification.action
+        action: notification.action_label
           ? {
-              label: notification.action.label,
+              label: notification.action_label,
               onClick: () => {
-                if (notification.action?.href) {
-                  window.location.href = notification.action.href;
+                if (notification.action_href) {
+                  window.location.href = notification.action_href;
                 }
               },
             }

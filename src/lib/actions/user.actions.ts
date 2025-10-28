@@ -28,7 +28,7 @@ import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
 import { publicUserActivitySummaryRowSchema } from '@/src/lib/schemas/generated/db-schemas';
-import type { Database } from '@/src/types/database.types';
+import type { Database, Tables } from '@/src/types/database.types';
 
 // ActivitySummary from materialized view (internal only - not exported from 'use server' file)
 const activitySummarySchema = publicUserActivitySummaryRowSchema.pick({
@@ -65,14 +65,37 @@ const activityTimelineResponseSchema = z.object({
   total: z.number(),
 });
 
-import { userIdSchema } from '@/src/lib/schemas/branded-types.schema';
-import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
-import { updateProfileSchema } from '@/src/lib/schemas/profile.schema';
+import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
 import {
   bookmarkInsertTransformSchema,
   removeBookmarkSchema,
 } from '@/src/lib/schemas/transforms/data-normalization.schema';
+
+// ========================================================================
+// INLINE SCHEMAS (moved from profile.schema.ts - database-first approach)
+// ========================================================================
+
+/**
+ * Profile update schema
+ * Validates user profile updates before database mutation
+ * Database-first: Mirrors profiles table structure with runtime validation
+ */
+const updateProfileSchema = z.object({
+  display_name: z
+    .string()
+    .min(1, 'Name is required')
+    .max(100, 'Name must be less than 100 characters')
+    .optional(),
+  bio: z.string().max(500, 'Bio must be less than 500 characters').or(z.literal('')).optional(),
+  work: z.string().max(100, 'Work must be less than 100 characters').or(z.literal('')).optional(),
+  website: z.string().url('Website must be a valid URL').or(z.literal('')).optional(),
+  social_x_link: z.string().url('X/Twitter link must be a valid URL').or(z.literal('')).optional(),
+  interests: z.array(z.string().min(1).max(30)).max(10, 'Maximum 10 interests allowed').optional(),
+  profile_public: z.boolean().optional(),
+  follow_email: z.boolean().optional(),
+});
+
 import { createClient } from '@/src/lib/supabase/server';
 import { batchAll } from '@/src/lib/utils/batch.utils';
 
@@ -453,8 +476,8 @@ export const addBookmarkBatch = authedAction
 
 const followSchema = z.object({
   action: z.enum(['follow', 'unfollow']),
-  user_id: userIdSchema,
-  slug: z.string(), // User slug for revalidation
+  user_id: nonEmptyString.uuid(),
+  slug: z.string(),
 });
 
 /**
@@ -529,8 +552,7 @@ export async function isFollowing(user_id: string): Promise<boolean> {
     return false;
   }
 
-  // Validate user_id at boundary
-  const validatedUserId = userIdSchema.parse(user_id);
+  const validatedUserId = nonEmptyString.uuid().parse(user_id);
 
   // Check if follow relationship exists
   const { data, error } = await supabase

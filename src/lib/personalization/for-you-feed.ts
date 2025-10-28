@@ -30,8 +30,9 @@
  * - Fallback 2: Static popularity (if all else fails)
  */
 
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+
 import { createClient } from '@/src/lib/supabase/server';
 import type { PersonalizedContentItem } from './types';
 
@@ -92,12 +93,12 @@ export interface UserContext {
  * @returns Personalized recommendations with scores
  */
 export async function generateForYouFeed(
-  allContent: UnifiedContentItem[],
+  allContent: ContentItem[],
   userId: string,
   options: Partial<ForYouOptions> = {}
 ): Promise<
   Array<
-    UnifiedContentItem & {
+    ContentItem & {
       recommendation_source: PersonalizedContentItem['recommendation_source'];
       recommendation_reason: string;
       affinity_score: number;
@@ -137,7 +138,7 @@ export async function generateForYouFeed(
     }
 
     // Create content map for quick lookups
-    const contentMap = new Map<string, UnifiedContentItem>();
+    const contentMap = new Map<string, ContentItem>();
     for (const item of allContent) {
       const key = `${item.category}:${item.slug}`;
       contentMap.set(key, item);
@@ -145,7 +146,7 @@ export async function generateForYouFeed(
 
     // Match recommendations with full content metadata
     const recommendedItems: Array<
-      UnifiedContentItem & {
+      ContentItem & {
         recommendation_source: PersonalizedContentItem['recommendation_source'];
         recommendation_reason: string;
         affinity_score: number;
@@ -218,7 +219,7 @@ export async function generateForYouFeed(
  * Prevents all recommendations being from same category
  */
 function applyDiversityFilter<
-  T extends UnifiedContentItem & {
+  T extends ContentItem & {
     recommendation_source: PersonalizedContentItem['recommendation_source'];
     recommendation_reason: string;
     affinity_score: number;
@@ -336,19 +337,19 @@ export async function hasPersonalizationData(userId: string): Promise<boolean> {
  * Uses trending + interest-based filtering
  */
 export function generateColdStartRecommendations(
-  allContent: UnifiedContentItem[],
+  allContent: ContentItem[],
   profileInterests: string[],
   trendingItems: Set<string>,
   limit: number
 ): Array<
-  UnifiedContentItem & {
+  ContentItem & {
     recommendation_source: 'trending';
     recommendation_reason: string;
     affinity_score: number;
   }
 > {
   const scoredItems: Array<{
-    item: UnifiedContentItem;
+    item: ContentItem;
     score: number;
   }> = [];
 

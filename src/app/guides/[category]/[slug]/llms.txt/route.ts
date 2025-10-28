@@ -165,7 +165,7 @@ export async function GET(
       category: 'guides',
       tags: Array.isArray(jsonData.keywords) ? jsonData.keywords : [],
       author: jsonData.author || APP_CONFIG.author,
-      dateAdded: jsonData.dateUpdated || new Date().toISOString(),
+      date_added: jsonData.dateUpdated || new Date().toISOString(),
       url: `${APP_CONFIG.url}/guides/${category}/${slug}`,
       content: sectionsText, // Converted sections to plain text
     };

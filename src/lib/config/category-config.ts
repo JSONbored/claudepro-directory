@@ -54,40 +54,35 @@ import {
   Terminal,
   Webhook,
 } from '@/src/lib/icons';
-import { type AgentContent, agentContentSchema } from '@/src/lib/schemas/content/agent.schema';
 import {
-  type CollectionContent,
-  collectionContentSchema,
-} from '@/src/lib/schemas/content/collection.schema';
-import {
-  type CommandContent,
-  commandContentSchema,
-} from '@/src/lib/schemas/content/command.schema';
-import { type GuideContent, guideContentSchema } from '@/src/lib/schemas/content/guide.schema';
-import { type HookContent, hookContentSchema } from '@/src/lib/schemas/content/hook.schema';
-import { type Job, jobSchema } from '@/src/lib/schemas/content/job.schema';
-import { type McpContent, mcpContentSchema } from '@/src/lib/schemas/content/mcp.schema';
-import { type RuleContent, ruleContentSchema } from '@/src/lib/schemas/content/rule.schema';
-import { type SkillContent, skillContentSchema } from '@/src/lib/schemas/content/skill.schema';
-import {
-  type StatuslineContent,
-  statuslineContentSchema,
-} from '@/src/lib/schemas/content/statusline.schema';
+  publicAgentsRowSchema,
+  publicChangelogRowSchema,
+  publicCollectionsRowSchema,
+  publicCommandsRowSchema,
+  publicGuidesRowSchema,
+  publicHooksRowSchema,
+  publicJobsRowSchema,
+  publicMcpRowSchema,
+  publicRulesRowSchema,
+  publicSkillsRowSchema,
+  publicStatuslinesRowSchema,
+} from '@/src/lib/schemas/generated/db-schemas';
+import type { Database } from '@/src/types/database.types';
 /**
  * Content type discriminated union
  * Modern TypeScript pattern for type-safe content handling
  */
 export type ContentType =
-  | AgentContent
-  | McpContent
-  | HookContent
-  | CommandContent
-  | RuleContent
-  | StatuslineContent
-  | CollectionContent
-  | SkillContent
-  | GuideContent
-  | Job;
+  | Database['public']['Tables']['agents']['Row']
+  | Database['public']['Tables']['mcp']['Row']
+  | Database['public']['Tables']['hooks']['Row']
+  | Database['public']['Tables']['commands']['Row']
+  | Database['public']['Tables']['rules']['Row']
+  | Database['public']['Tables']['statuslines']['Row']
+  | Database['public']['Tables']['collections']['Row']
+  | Database['public']['Tables']['skills']['Row']
+  | Database['public']['Tables']['guides']['Row']
+  | Database['public']['Tables']['jobs']['Row'];
 
 /**
  * Unified Category Configuration Interface
@@ -206,8 +201,8 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     keywords: 'Claude agents, AI agents, specialized assistants, workflow automation, Claude AI',
     metaDescription:
       'Specialized Claude AI agents for October 2025. Community-contributed coding, writing, research, and automation configurations ready for Claude Desktop and Code.',
-    schema: agentContentSchema,
-    typeName: 'AgentContent',
+    schema: publicAgentsRowSchema,
+    typeName: 'Database["public"]["Tables"]["agents"]["Row"]',
     generateFullContent: true,
     metadataFields: [
       'slug',
@@ -217,7 +212,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'author',
       'tags',
       'category',
-      'dateAdded',
+      'date_added',
       'source',
     ] as const,
     buildConfig: {
@@ -262,8 +257,8 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     keywords: 'MCP servers, Model Context Protocol, Claude tools, API integration',
     metaDescription:
       'Model Context Protocol servers for October 2025. Extend Claude with GitHub, databases, APIs, and file systems. Official MCP integrations with setup guides.',
-    schema: mcpContentSchema,
-    typeName: 'McpContent',
+    schema: publicMcpRowSchema,
+    typeName: 'Database["public"]["Tables"]["mcp"]["Row"]',
     generateFullContent: true,
     metadataFields: [
       'slug',
@@ -273,7 +268,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'author',
       'tags',
       'category',
-      'dateAdded',
+      'date_added',
       'source',
     ] as const,
     buildConfig: {
@@ -314,8 +309,8 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     keywords: 'Claude commands, slash commands, CLI tools, workflow automation',
     metaDescription:
       'Claude Code slash commands for October 2025. Workflow automation, code review, testing, and documentation. Community-built reusable prompts for development.',
-    schema: commandContentSchema,
-    typeName: 'CommandContent',
+    schema: publicCommandsRowSchema,
+    typeName: 'Database["public"]["Tables"]["commands"]["Row"]',
     generateFullContent: true,
     metadataFields: [
       'slug',
@@ -325,7 +320,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'author',
       'tags',
       'category',
-      'dateAdded',
+      'date_added',
       'source',
     ] as const,
     buildConfig: {
@@ -365,8 +360,8 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     keywords: 'Claude rules, AI guidelines, project rules, behavior customization',
     metaDescription:
       'Claude AI rules for October 2025. Control behavior for coding standards, security, testing, and documentation. Community-curated guidelines for AI assistance.',
-    schema: ruleContentSchema,
-    typeName: 'RuleContent',
+    schema: publicRulesRowSchema,
+    typeName: 'Database["public"]["Tables"]["rules"]["Row"]',
     generateFullContent: true,
     metadataFields: [
       'slug',
@@ -376,7 +371,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'author',
       'tags',
       'category',
-      'dateAdded',
+      'date_added',
       'source',
     ] as const,
     buildConfig: {
@@ -416,8 +411,8 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     keywords: 'Claude hooks, automation, webhooks, event triggers, CI/CD',
     metaDescription:
       'Claude Code automation hooks for October 2025. Event-driven scripts for git commits, testing, linting, and CI/CD integration. Shell scripts for dev workflows.',
-    schema: hookContentSchema,
-    typeName: 'HookContent',
+    schema: publicHooksRowSchema,
+    typeName: 'Database["public"]["Tables"]["hooks"]["Row"]',
     generateFullContent: true,
     metadataFields: [
       'slug',
@@ -427,7 +422,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'author',
       'tags',
       'category',
-      'dateAdded',
+      'date_added',
       'source',
     ] as const,
     buildConfig: {
@@ -468,8 +463,8 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     keywords: 'Claude statuslines, CLI customization, terminal themes, status bar',
     metaDescription:
       'Claude Code CLI statuslines for October 2025. Beautiful terminal themes showing git info, project details, and session stats. Community-designed status bars.',
-    schema: statuslineContentSchema,
-    typeName: 'StatuslineContent',
+    schema: publicStatuslinesRowSchema,
+    typeName: 'Database["public"]["Tables"]["statuslines"]["Row"]',
     generateFullContent: true,
     metadataFields: [
       'slug',
@@ -479,7 +474,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'author',
       'tags',
       'category',
-      'dateAdded',
+      'date_added',
       'source',
     ] as const,
     buildConfig: {
@@ -530,8 +525,8 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     keywords: 'Claude collections, starter kits, workflows, bundles, curated content',
     metaDescription:
       'Curated Claude AI starter kits bundling agents, MCP servers, commands, and rules by use case. Complete workflow collections for web development and automation.',
-    schema: collectionContentSchema,
-    typeName: 'CollectionContent',
+    schema: publicCollectionsRowSchema,
+    typeName: 'Database["public"]["Tables"]["collections"]["Row"]',
     generateFullContent: true,
     metadataFields: [
       'slug',
@@ -541,7 +536,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'author',
       'tags',
       'category',
-      'dateAdded',
+      'date_added',
       'source',
       'collectionType',
       'difficulty',
@@ -591,8 +586,8 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     keywords: 'Claude skills, document processing, pdf, docx, pptx, xlsx, how-to, examples',
     metaDescription:
       'Practical Claude Skills for October 2025: PDF/DOCX/PPTX/XLSX workflows with exact dependencies, copy-pasteable code examples, and troubleshooting guides.',
-    schema: skillContentSchema,
-    typeName: 'SkillContent',
+    schema: publicSkillsRowSchema,
+    typeName: 'Database["public"]["Tables"]["skills"]["Row"]',
     generateFullContent: true,
     metadataFields: [
       'slug',
@@ -602,7 +597,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'author',
       'tags',
       'category',
-      'dateAdded',
+      'date_added',
       'source',
     ] as const,
     buildConfig: {
@@ -650,8 +645,8 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'Claude guides, tutorials, comparisons, workflows, use cases, troubleshooting, best practices',
     metaDescription:
       'Expert Claude guides for October 2025: In-depth tutorials, feature comparisons, workflow automation, use case examples, troubleshooting, and best practices.',
-    schema: guideContentSchema,
-    typeName: 'GuideContent',
+    schema: publicGuidesRowSchema,
+    typeName: 'Database["public"]["Tables"]["guides"]["Row"]',
     generateFullContent: true,
     metadataFields: [
       'slug',
@@ -662,7 +657,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
       'tags',
       'category',
       'subcategory',
-      'dateAdded',
+      'date_added',
       'source',
       'keywords',
       'difficulty',
@@ -710,8 +705,8 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     keywords: 'AI jobs, Claude jobs, prompt engineering, AI development, remote AI jobs',
     metaDescription:
       'AI job board for October 2025: Claude-related positions, prompt engineering roles, AI development opportunities. Remote and on-site positions available.',
-    schema: jobSchema,
-    typeName: 'Job',
+    schema: publicJobsRowSchema,
+    typeName: 'Database["public"]["Tables"]["jobs"]["Row"]',
     generateFullContent: false,
     metadataFields: [
       'id',
@@ -762,10 +757,10 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     keywords: 'changelog, updates, new features, improvements, release notes',
     metaDescription:
       'Claude Pro Directory changelog for October 2025: Latest features, improvements, bug fixes, platform updates, new integrations, and performance enhancements.',
-    schema: guideContentSchema, // Reuse guide schema (changelog is markdown content)
-    typeName: 'GuideContent',
+    schema: publicChangelogRowSchema,
+    typeName: 'Database["public"]["Tables"]["changelog"]["Row"]',
     generateFullContent: true,
-    metadataFields: ['slug', 'title', 'description', 'dateAdded'] as const,
+    metadataFields: ['slug', 'title', 'description', 'date_added'] as const,
     buildConfig: {
       batchSize: 5,
       enableCache: true,

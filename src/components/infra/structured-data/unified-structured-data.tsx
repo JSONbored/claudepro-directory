@@ -1,9 +1,9 @@
 import Script from 'next/script';
-import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
 import {
   generateAllSchemasForContent,
   type UnifiedStructuredDataProps,
 } from '@/src/lib/structured-data/schema-types';
+import { serializeJsonLd } from '@/src/lib/utils/jsonld.utils';
 
 /**
  * Unified Structured Data Component

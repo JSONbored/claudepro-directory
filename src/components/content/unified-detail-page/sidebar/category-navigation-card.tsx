@@ -66,7 +66,7 @@ import {
   TooltipTrigger,
 } from '@/src/components/primitives/tooltip';
 import type { LucideIcon } from '@/src/lib/icons';
-import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
+import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**

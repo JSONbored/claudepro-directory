@@ -66,7 +66,7 @@ export async function generateMetadata({ params }: PublicCollectionPageProps): P
     ? {
         name: collection.name,
         description: collection.description ?? undefined,
-        dateAdded: collection.created_at,
+        date_added: collection.created_at,
         lastModified: collection.updated_at,
       }
     : undefined;

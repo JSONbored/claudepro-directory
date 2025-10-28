@@ -354,7 +354,7 @@ const buildCommandTemplate: ContentTemplateBuilder<'commands'> = (data) => ({
  */
 const buildHookTemplate: ContentTemplateBuilder<'hooks'> = (data) => ({
   content: data.hookScript,
-  hookType: data.hookType,
+  hook_type: data.hook_type,
   triggeredBy: data.triggeredBy,
 });
 
@@ -367,7 +367,7 @@ const buildHookTemplate: ContentTemplateBuilder<'hooks'> = (data) => ({
  */
 const buildStatuslineTemplate: ContentTemplateBuilder<'statuslines'> = (data) => ({
   content: data.statuslineScript,
-  statuslineType: data.statuslineType,
+  statusline_type: data.statusline_type,
   configuration: {
     format: 'bash' as const,
     refreshInterval: data.refreshInterval,
@@ -455,8 +455,8 @@ type ContentTemplateRegistry = {
  * Template Patterns:
  * - AI types (agents, rules): content + configuration (temperature, maxTokens)
  * - Commands: content only (markdown)
- * - Hooks: content + hookType + triggeredBy
- * - Statuslines: content + statuslineType + configuration (display settings)
+ * - Hooks: content + hook_type + triggeredBy
+ * - Statuslines: content + statusline_type + configuration (display settings)
  * - MCP: npmPackage + serverType + installation + tools (complex structure)
  *
  * Type Safety:
@@ -523,7 +523,7 @@ export function formatContentFile(data: ConfigSubmissionData & { slug: string })
     description: data.description,
     category: data.type,
     author: data.author,
-    dateAdded: new Date().toISOString().split('T')[0],
+    date_added: new Date().toISOString().split('T')[0],
     tags: data.tags,
     ...(data.github ? { github: data.github } : {}),
     source: 'community' as const,
@@ -557,7 +557,7 @@ const contentFileValidationSchema = z.object({
   description: z.string().min(1),
   category: z.string().min(1),
   author: z.string().min(1),
-  dateAdded: z.string().min(1),
+  date_added: z.string().min(1),
   tags: z.array(z.string()),
 });
 

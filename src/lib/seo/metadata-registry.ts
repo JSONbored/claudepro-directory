@@ -52,7 +52,7 @@ export interface MetadataContext {
         description?: string | undefined;
         tags?: string[] | undefined;
         author?: string | undefined;
-        dateAdded?: string | undefined;
+        date_added?: string | undefined;
         lastModified?: string | undefined;
         [key: string]: unknown;
       }

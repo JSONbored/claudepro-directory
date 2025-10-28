@@ -21,7 +21,6 @@ import { TopContributors } from '@/src/components/features/community/top-contrib
 import { HomePageClient } from '@/src/components/features/home';
 import { LazySection } from '@/src/components/infra/lazy-section';
 import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
-import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 
 // Lazy load animations to improve LCP (40-60 KB saved from initial bundle)
 // RollingText uses Framer Motion and impacts homepage First Load
@@ -56,11 +55,12 @@ const UnifiedNewsletterCapture = dynamic(
 import { statsRedis } from '@/src/lib/cache.server';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { type CategoryId, getHomepageCategoryIds } from '@/src/lib/config/category-config';
-import { getContentByCategory } from '@/src/lib/content/content-loaders';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import { featuredService } from '@/src/lib/services/featured.server';
-import { batchFetch } from '@/src/lib/utils/batch.utils';
+import { createClient } from '@/src/lib/supabase/server';
+import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
+import { getCurrentWeekStartISO } from '@/src/lib/utils/data.utils';
 
 // Revalidate every 1 hour for fresher analytics while keeping Redis usage low
 // ISR cache reduces Redis queries significantly (only fetches on cache miss)
@@ -70,7 +70,7 @@ export const revalidate = 3600; // 1 hour
  * Category metadata type - Dynamically derived from registry
  * Modern approach: Generic type that works for all categories
  */
-type CategoryMetadata = UnifiedContentItem & { category: CategoryId };
+type CategoryMetadata = ContentItem & { category: CategoryId };
 
 /**
  * Enriched metadata with analytics data
@@ -105,31 +105,83 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
   const categoryIds = getHomepageCategoryIds();
 
   // Initialize category data storage
-  const categoryData: Record<CategoryId, UnifiedContentItem[]> = {} as Record<
-    CategoryId,
-    UnifiedContentItem[]
-  >;
+  const categoryData: Record<CategoryId, ContentItem[]> = {} as Record<CategoryId, ContentItem[]>;
 
-  let featuredByCategory: Record<string, UnifiedContentItem[]> = {};
+  let featuredByCategory: Record<string, ContentItem[]> = {};
 
   try {
     // Build dynamic loader array from registry
-    const loaders = [
-      ...categoryIds.map((id) => lazyContentLoaders[id]()),
-      featuredService.loadCurrentFeaturedContentByCategory(),
-    ];
+    const loaders = categoryIds.map((id) => getContentByCategory(id));
 
-    // Batch fetch all category data + featured content
+    // Batch fetch all category data
     const results = await batchFetch(loaders);
 
-    // Map results back to category IDs (last result is featured content)
+    // Map results back to category IDs
     categoryIds.forEach((id, index) => {
-      categoryData[id] = (results[index] as UnifiedContentItem[]) || [];
+      categoryData[id] = (results[index] as ContentItem[]) || [];
     });
 
-    // Last result is featured content
-    featuredByCategory =
-      (results[results.length - 1] as Record<string, UnifiedContentItem[]>) || {};
+    // Load featured content directly from database (no abstraction layer)
+    const supabase = await createClient();
+    const weekStart = getCurrentWeekStartISO();
+
+    const { data: featuredRecords, error: featuredError } = await supabase
+      .from('featured_configs')
+      .select('content_type, content_slug, rank, final_score')
+      .eq('week_start', weekStart)
+      .order('rank', { ascending: true });
+
+    if (!featuredError && featuredRecords && featuredRecords.length > 0) {
+      // Load all content in parallel to enrich featured records
+      const contentByCategory = await batchMap(categoryIds, async (category) => ({
+        category,
+        items: categoryData[category] || [],
+      }));
+
+      // Create lookup map: category:slug -> content item
+      const contentMap = new Map<string, ContentItem>();
+      for (const { category, items } of contentByCategory) {
+        for (const item of items) {
+          contentMap.set(`${category}:${item.slug}`, item);
+        }
+      }
+
+      // Group featured records by category
+      const tempFeaturedByCategory: Record<string, ContentItem[]> = {};
+
+      for (const record of featuredRecords) {
+        const key = `${record.content_type}:${record.content_slug}`;
+        const item = contentMap.get(key);
+
+        if (item) {
+          if (!tempFeaturedByCategory[record.content_type]) {
+            tempFeaturedByCategory[record.content_type] = [];
+          }
+
+          // Add featured metadata
+          const enrichedItem = {
+            ...item,
+            _featured: {
+              rank: record.rank,
+              score: record.final_score,
+            },
+          } as ContentItem;
+
+          tempFeaturedByCategory[record.content_type]?.push(enrichedItem);
+        }
+      }
+
+      // Limit to top 6 per category and sort by rank
+      for (const [category, items] of Object.entries(tempFeaturedByCategory)) {
+        featuredByCategory[category] = items
+          .sort((a, b) => {
+            const aRank = (a as ContentItem & { _featured?: { rank: number } })._featured?.rank ?? 999;
+            const bRank = (b as ContentItem & { _featured?: { rank: number } })._featured?.rank ?? 999;
+            return aRank - bRank;
+          })
+          .slice(0, 6);
+      }
+    }
   } catch (error) {
     // Log error but continue with empty fallbacks to prevent page crash
     logger.error(
@@ -160,7 +212,7 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
     CategoryId,
     EnrichedMetadata[]
   >;
-  let enrichedFeaturedByCategory: Record<string, UnifiedContentItem[]> = {};
+  let enrichedFeaturedByCategory: Record<string, ContentItem[]> = {};
 
   try {
     // Build unified enrichment loaders for categories AND featured content
@@ -170,7 +222,7 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
 
     const featuredEntries = Object.entries(featuredByCategory);
     const featuredEnrichmentLoaders = featuredEntries.map(([, items]) =>
-      statsRedis.enrichWithAllCounts(items as UnifiedContentItem[])
+      statsRedis.enrichWithAllCounts(items as ContentItem[])
     );
 
     // Single parallel batch for ALL enrichment (categories + featured)
@@ -189,7 +241,7 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
 
     // Map featured results
     featuredEntries.forEach(([category], index) => {
-      enrichedFeaturedByCategory[category] = (featuredResults[index] as UnifiedContentItem[]) || [];
+      enrichedFeaturedByCategory[category] = (featuredResults[index] as ContentItem[]) || [];
     });
   } catch (error) {
     // Log error and fallback to data without enrichment
@@ -228,10 +280,10 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
 
   // Deduplicate by slug (last occurrence wins)
   const allConfigsMap = new Map(allConfigsWithDuplicates.map((item) => [item.slug, item]));
-  const allConfigs = Array.from(allConfigsMap.values()) as UnifiedContentItem[];
+  const allConfigs = Array.from(allConfigsMap.values()) as ContentItem[];
 
   // Build initial data object (no transformation needed - displayTitle computed at build time)
-  const initialData: Record<string, UnifiedContentItem[]> = {
+  const initialData: Record<string, ContentItem[]> = {
     ...enrichedCategoryData,
     allConfigs,
   };

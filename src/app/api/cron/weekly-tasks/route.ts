@@ -21,13 +21,14 @@
 
 import { WeeklyDigest } from '@/src/emails/templates/weekly-digest';
 import { getAllCategoryIds } from '@/src/lib/config/category-config';
-import { getContentByCategory } from '@/src/lib/content/content-loaders';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { createApiRoute } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { env } from '@/src/lib/schemas/env.schema';
 import { digestService } from '@/src/lib/services/digest.server';
-import { type FeaturedContentItem, featuredService } from '@/src/lib/services/featured.server';
 import { resendService } from '@/src/lib/services/resend.server';
+import { createClient } from '@/src/lib/supabase/server';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 import { getCurrentWeekStart, getWeekEnd } from '@/src/lib/utils/data.utils';
 
@@ -37,6 +38,20 @@ interface TaskResult {
   duration_ms: number;
   data?: Record<string, unknown>;
   error?: string;
+}
+
+/**
+ * Featured content item with scoring metadata
+ * Extends ContentItem with _featured property for featured content scores
+ */
+interface FeaturedContentItem extends ContentItem {
+  _featured?: {
+    trendingScore: number;
+    ratingScore: number;
+    engagementScore: number;
+    freshnessScore: number;
+    finalScore: number;
+  };
 }
 
 /**
@@ -97,6 +112,8 @@ const route = createApiRoute({
           error?: string;
         }> = [];
 
+        const supabase = await createClient();
+
         for (const { name, items } of categories) {
           try {
             if (items.length === 0) {
@@ -105,18 +122,78 @@ const route = createApiRoute({
               continue;
             }
 
-            const featured = await featuredService.calculateFeaturedForCategory(name, items, {
-              limit: 10,
+            // Call PostgreSQL function to get featured scores (replaces TypeScript scoring logic)
+            const { data: featuredScores, error: rpcError } = await supabase.rpc('get_featured_content', {
+              p_category: name,
+              p_limit: 10,
             });
 
-            // Store featured selections in database
-            await featuredService.storeFeaturedSelections(name, featured, weekStart);
+            if (rpcError || !featuredScores || featuredScores.length === 0) {
+              logger.warn(`No featured scores for ${name}`, {
+                error: rpcError?.message || 'No scores returned',
+                category: name,
+              });
+              featuredResults.push({ category: name, featured: [] });
+              continue;
+            }
+
+            // Enrich database scores with full content items
+            const featured = featuredScores
+              .map((score): FeaturedContentItem | null => {
+                const item = items.find((i) => i.slug === score.content_slug);
+                if (!item) return null;
+
+                return {
+                  ...item,
+                  _featured: {
+                    trendingScore: Number(score.trending_score),
+                    ratingScore: Number(score.rating_score),
+                    engagementScore: Number(score.engagement_score),
+                    freshnessScore: Number(score.freshness_score),
+                    finalScore: Number(score.final_score),
+                  },
+                };
+              })
+              .filter((item): item is FeaturedContentItem => item !== null);
+
+            // Store featured selections in database (direct insert - no abstraction)
+            const records = featured.map((item, index) => ({
+              content_type: name,
+              content_slug: item.slug,
+              rank: index + 1,
+              final_score: item._featured?.finalScore ?? 0,
+              trending_score: item._featured?.trendingScore ?? 0,
+              rating_score: item._featured?.ratingScore ?? 0,
+              engagement_score: item._featured?.engagementScore ?? 0,
+              freshness_score: item._featured?.freshnessScore ?? 0,
+              week_start: weekStart.toISOString().split('T')[0],
+              week_end: weekEnd.toISOString().split('T')[0],
+              calculated_at: new Date().toISOString(),
+              calculation_metadata: {
+                views: Number(featuredScores[index]?.total_views ?? 0),
+                growthRate: Number(featuredScores[index]?.growth_rate_pct ?? 0),
+                engagement: {
+                  bookmarks: Number(featuredScores[index]?.bookmark_count ?? 0),
+                  copies: Number(featuredScores[index]?.copy_count ?? 0),
+                  comments: Number(featuredScores[index]?.comment_count ?? 0),
+                },
+                daysOld: Number(featuredScores[index]?.days_old ?? 0),
+              },
+            }));
+
+            const { error: insertError } = await supabase
+              .from('featured_configs')
+              .insert(records);
+
+            if (insertError) {
+              throw new Error(`Failed to store featured selections: ${insertError.message}`);
+            }
 
             featuredResults.push({ category: name, featured });
             logger.info(`Featured ${name} calculated and stored`, {
               count: featured.length,
               topSlug: featured[0]?.slug ?? 'N/A',
-              topScore: featured[0]?.finalScore?.toFixed(2) ?? 'N/A',
+              topScore: featured[0]?._featured?.finalScore?.toFixed(2) ?? 'N/A',
             });
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
@@ -148,7 +225,7 @@ const route = createApiRoute({
                 top_item: r.featured[0]
                   ? {
                       slug: r.featured[0].slug,
-                      final_score: r.featured[0].finalScore.toFixed(2),
+                      final_score: r.featured[0]._featured?.finalScore?.toFixed(2) ?? 'N/A',
                     }
                   : null,
                 error: r.error,

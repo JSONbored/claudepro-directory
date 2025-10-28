@@ -610,7 +610,7 @@ export const AnimationProgressTest: Story = {
       const ticker = canvasElement.querySelector('span[aria-live="polite"]');
       if (ticker) {
         // After 100ms of 1000ms animation, value should be > 0
-        const text = ticker.textContent || '';
+        const text = ticker.textContent || ';
         const numericValue = Number.parseFloat(text);
         await expect(numericValue).toBeGreaterThan(0);
       }
@@ -643,7 +643,7 @@ export const PrefixSuffixTest: Story = {
     await step('Verify prefix and suffix are present', async () => {
       const ticker = canvasElement.querySelector('span[aria-live="polite"]');
       if (ticker) {
-        const text = ticker.textContent || '';
+        const text = ticker.textContent || ';
         await expect(text).toContain('$');
         await expect(text).toContain('K');
       }

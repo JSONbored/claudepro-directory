@@ -151,17 +151,18 @@ export default async function JobPage({ params }: PageProps) {
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                   <Calendar className="h-4 w-4" />
-                  <span>Posted {job.postedAt}</span>
+                  <span>Posted {job.posted_at}</span>
                 </div>
               </div>
 
               {/* Tags */}
               <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-                {job.tags.map((skill) => (
-                  <UnifiedBadge key={skill} variant="base" style="secondary">
-                    {skill}
-                  </UnifiedBadge>
-                ))}
+                {job.tags &&
+                  job.tags.map((skill) => (
+                    <UnifiedBadge key={String(skill)} variant="base" style="secondary">
+                      {String(skill)}
+                    </UnifiedBadge>
+                  ))}
               </div>
             </div>
           </div>
@@ -189,12 +190,13 @@ export default async function JobPage({ params }: PageProps) {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {job.requirements.map((req) => (
-                      <li key={req} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-                        <span className="text-accent mt-1">•</span>
-                        <span>{req}</span>
-                      </li>
-                    ))}
+                    {job.requirements &&
+                      job.requirements.map((req) => (
+                        <li key={String(req)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+                          <span className="text-accent mt-1">•</span>
+                          <span>{String(req)}</span>
+                        </li>
+                      ))}
                   </ul>
                 </CardContent>
               </Card>
@@ -208,9 +210,9 @@ export default async function JobPage({ params }: PageProps) {
                   <CardContent>
                     <ul className="space-y-2">
                       {job.benefits.map((benefit) => (
-                        <li key={benefit} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+                        <li key={String(benefit)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                           <span className="text-green-500 mt-1">✓</span>
-                          <span>{benefit}</span>
+                          <span>{String(benefit)}</span>
                         </li>
                       ))}
                     </ul>
@@ -228,14 +230,14 @@ export default async function JobPage({ params }: PageProps) {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <Button className="w-full" asChild>
-                    <a href={job.applyUrl} target="_blank" rel="noopener noreferrer">
+                    <a href={job.link} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className={'h-4 w-4 mr-2'} />
                       Apply Now
                     </a>
                   </Button>
-                  {job.contactEmail && (
+                  {job.contact_email && (
                     <Button variant="outline" className="w-full" asChild>
-                      <a href={`mailto:${job.contactEmail}`}>
+                      <a href={`mailto:${job.contact_email}`}>
                         <Building2 className={'h-4 w-4 mr-2'} />
                         Contact Company
                       </a>

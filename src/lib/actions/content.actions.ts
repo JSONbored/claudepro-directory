@@ -26,7 +26,7 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction, rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
-import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
+import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
 import {
   collectionInsertTransformSchema,

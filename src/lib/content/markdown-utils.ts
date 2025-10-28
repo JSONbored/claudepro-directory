@@ -6,7 +6,7 @@
 import { marked } from 'marked';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
-import { nonNegativeInt } from '@/src/lib/schemas/primitives/base-numbers';
+import { nonNegativeInt } from '@/src/lib/schemas/primitives';
 import { DOMPurify } from '@/src/lib/security/html-sanitizer';
 
 /**

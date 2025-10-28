@@ -24,11 +24,11 @@ import {
 } from '@/src/lib/config/category-config';
 // MDX support removed - 100% JSON content now
 import { logger } from '@/src/lib/logger';
-import { generateSlugFromFilename } from '@/src/lib/schemas/content-generation.schema';
 import { slugToTitle } from '@/src/lib/utils';
 import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
 import { generateDisplayTitle } from '@/src/lib/utils/content.utils';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
+import { generateSlugFromFilename } from '@/src/lib/utils/slug.utils';
 
 /**
  * Build category configuration type (for generic usage in category-processor)
@@ -318,7 +318,7 @@ async function processContentFile<T extends ContentType>(
     // This eliminates runtime transformation overhead - computed once at build time
     if (typeof parsedData.title === 'string' || typeof parsedData.slug === 'string') {
       const sourceText = (parsedData.title as string) || slugToTitle(parsedData.slug as string);
-      parsedData.displayTitle = generateDisplayTitle(sourceText);
+      parsedData.display_title = generateDisplayTitle(sourceText);
     }
 
     // Validate with category-specific schema
@@ -332,7 +332,7 @@ async function processContentFile<T extends ContentType>(
         category?: string;
       };
       const title = contentItem.title;
-      const seoTitle = contentItem.seoTitle;
+      const seoTitle = contentItem.seo_title;
       const category = config.id;
 
       // Calculate max title length for this category (based on metadata-registry.ts pattern)

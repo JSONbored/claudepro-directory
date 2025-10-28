@@ -8,12 +8,12 @@
  */
 
 import Script from 'next/script';
+import type { ChangelogEntry } from '@/src/lib/changelog/loader';
 import {
   buildChangelogArticleSchema,
   buildChangelogBlogSchema,
 } from '@/src/lib/changelog/structured-data';
-import type { ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
-import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
+import { serializeJsonLd } from '@/src/lib/utils/jsonld.utils';
 
 /**
  * Changelog List Page Structured Data

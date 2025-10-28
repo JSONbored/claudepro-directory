@@ -1,12 +1,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { memo } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
-import { useLocalSearch } from '@/src/hooks/use-search';
 
 const UnifiedSearch = dynamic(
   () =>
@@ -20,10 +19,7 @@ const UnifiedSearch = dynamic(
 );
 
 import { HelpCircle } from '@/src/lib/icons';
-import type {
-  ContentSearchClientProps,
-  UnifiedContentItem,
-} from '@/src/lib/schemas/component.schema';
+import type { ContentItem, ContentSearchClientProps } from '@/src/lib/schemas/component.schema';
 import { ICON_NAME_MAP } from '@/src/lib/ui-constants';
 
 /**
@@ -37,18 +33,34 @@ import { ICON_NAME_MAP } from '@/src/lib/ui-constants';
  * - Memoized to prevent re-renders when parent state changes
  * - Only re-renders when items/searchPlaceholder/title/icon props change
  */
-function ContentSearchClientComponent<T extends UnifiedContentItem>({
+function ContentSearchClientComponent<T extends ContentItem>({
   items,
   searchPlaceholder,
   title,
   icon,
 }: ContentSearchClientProps<T>) {
-  // Use consolidated search hook
-  const { filters, searchResults, filterOptions, handleSearch, handleFiltersChange } =
-    // biome-ignore lint/suspicious/noExplicitAny: Generic constraint too complex for UnifiedContentItem union
-    useLocalSearch(items as any);
+  // Local state for search (no server call needed - data already provided)
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState({});
 
-  const filteredItems = searchResults as T[];
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
+
+  const handleFiltersChange = useCallback((newFilters: any) => {
+    setFilters(newFilters);
+  }, []);
+
+  // Simple client-side filtering since data is already provided
+  const filteredItems = items.filter((item) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      item.title?.toLowerCase().includes(query) || item.description?.toLowerCase().includes(query)
+    );
+  }) as T[];
+
+  const filterOptions = { tags: [], authors: [], categories: [] };
 
   return (
     <div className="space-y-8">

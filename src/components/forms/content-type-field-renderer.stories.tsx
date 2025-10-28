@@ -260,7 +260,7 @@ export const GridLayoutThird: Story = {
       fields: [
         {
           type: 'select',
-          name: 'statuslineType',
+          name: 'statusline_type',
           label: 'Type',
           options: [
             { value: 'custom', label: 'Custom' },

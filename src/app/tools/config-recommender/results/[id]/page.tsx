@@ -18,17 +18,21 @@
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { ResultsDisplay } from '@/src/components/tools/recommender/results-display';
-import { statsRedis } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { ROUTES } from '@/src/lib/constants/routes';
 import { logger } from '@/src/lib/logger';
-import { generateRecommendations } from '@/src/lib/recommender/algorithm';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import { decodeQuizAnswers } from '@/src/lib/schemas/recommender.schema';
+import { getRecommendations } from '@/src/lib/recommender/database-recommender';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { batchFetch } from '@/src/lib/utils/batch.utils';
+
+// Decode base64url quiz answers
+function decodeQuizAnswers(encoded: string) {
+  try {
+    const json = Buffer.from(encoded, 'base64url').toString('utf-8');
+    return JSON.parse(json);
+  } catch {
+    throw new Error('Invalid quiz answers encoding');
+  }
+}
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -80,59 +84,43 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
   }
 
   try {
-    // Load all configurations
-    const [
-      agentsData,
-      mcpData,
-      rulesData,
-      commandsData,
-      hooksData,
-      statuslinesData,
-      collectionsData,
-    ] = await batchFetch([
-      lazyContentLoaders.agents(),
-      lazyContentLoaders.mcp(),
-      lazyContentLoaders.rules(),
-      lazyContentLoaders.commands(),
-      lazyContentLoaders.hooks(),
-      lazyContentLoaders.statuslines(),
-      lazyContentLoaders.collections(),
-    ]);
+    // Call PostgreSQL recommendation function (refreshed every 6 hours)
+    const dbResults = await getRecommendations({
+      useCase: answers.useCase,
+      experienceLevel: answers.experienceLevel,
+      toolPreferences: answers.toolPreferences,
+      integrations: answers.integrations || [],
+      focusAreas: answers.focusAreas || [],
+      limit: 20,
+    });
 
-    // Combine all configurations with category tags
-    const allConfigs: UnifiedContentItem[] = [
-      ...(agentsData as UnifiedContentItem[]).map((item) => ({
-        ...item,
-        category: 'agents' as const,
+    // Transform to expected format for ResultsDisplay component
+    const recommendations = {
+      results: dbResults.map((item, index) => ({
+        slug: item.slug,
+        title: item.title,
+        description: item.description,
+        category: item.category,
+        matchScore: item.match_score,
+        matchPercentage: item.match_percentage,
+        rank: index + 1,
+        reasons: [{ type: 'use-case-match' as const, message: item.primary_reason }],
+        primaryReason: item.primary_reason,
+        author: item.author,
+        tags: item.tags,
       })),
-      ...(mcpData as UnifiedContentItem[]).map((item) => ({ ...item, category: 'mcp' as const })),
-      ...(rulesData as UnifiedContentItem[]).map((item) => ({
-        ...item,
-        category: 'rules' as const,
-      })),
-      ...(commandsData as UnifiedContentItem[]).map((item) => ({
-        ...item,
-        category: 'commands' as const,
-      })),
-      ...(hooksData as UnifiedContentItem[]).map((item) => ({
-        ...item,
-        category: 'hooks' as const,
-      })),
-      ...(statuslinesData as UnifiedContentItem[]).map((item) => ({
-        ...item,
-        category: 'statuslines' as const,
-      })),
-      ...(collectionsData as UnifiedContentItem[]).map((item) => ({
-        ...item,
-        category: 'collections' as const,
-      })),
-    ];
-
-    // Enrich with view counts from Redis
-    const enrichedConfigs = await statsRedis.enrichWithViewCounts(allConfigs);
-
-    // Generate recommendations
-    const recommendations = await generateRecommendations(answers, enrichedConfigs);
+      totalMatches: dbResults.length,
+      answers,
+      id: resolvedParams.id,
+      generatedAt: new Date().toISOString(),
+      algorithm: 'rule-based' as const,
+      summary: {
+        topCategory: dbResults[0]?.category || 'agents',
+        avgMatchScore:
+          Math.round(dbResults.reduce((sum, r) => sum + r.match_score, 0) / dbResults.length) || 0,
+        diversityScore: Math.round((new Set(dbResults.map((r) => r.category)).size / 8) * 100),
+      },
+    };
 
     // Build shareable URL
     const shareUrl = `${APP_CONFIG.url}/tools/config-recommender/results/${resolvedParams.id}?answers=${resolvedSearchParams.answers}`;

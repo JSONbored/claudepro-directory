@@ -14,6 +14,7 @@ const UnifiedNewsletterCapture = dynamic(
   }
 );
 
+import { z } from 'zod';
 import { Card, CardContent } from '@/src/components/primitives/card';
 import { Input } from '@/src/components/primitives/input';
 import {
@@ -28,11 +29,44 @@ import { getJobs, type Job } from '@/src/lib/data/jobs';
 import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
-import {
-  type JobsSearchParams,
-  jobsSearchSchema,
-  parseSearchParams,
-} from '@/src/lib/schemas/search.schema';
+
+// Inline jobs search schema (was in search.schema.ts)
+const jobsSearchSchema = z.object({
+  q: z.string().optional(),
+  query: z.string().optional(),
+  search: z.string().optional(),
+  location: z.string().optional(),
+  category: z.string().optional().default('all'),
+  remote: z.union([z.boolean(), z.string().transform((val) => val === 'true')]).optional(),
+  experience: z.enum(['entry', 'mid', 'senior', 'lead', 'any']).optional().default('any'),
+  employment: z
+    .enum(['fulltime', 'parttime', 'contract', 'freelance', 'any'])
+    .optional()
+    .default('any'),
+  page: z
+    .union([z.string(), z.number()])
+    .transform((val) => Number(val))
+    .pipe(z.number().int().positive())
+    .optional()
+    .default(1),
+  limit: z
+    .union([z.string(), z.number()])
+    .transform((val) => Number(val))
+    .pipe(z.number().int().positive().max(100))
+    .optional()
+    .default(20),
+});
+
+type JobsSearchParams = z.infer<typeof jobsSearchSchema>;
+
+function parseSearchParams<T extends z.ZodType>(schema: T, params: unknown): z.infer<T> {
+  try {
+    return schema.parse(params);
+  } catch {
+    return schema.parse({});
+  }
+}
+
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -59,7 +93,8 @@ function filterJobs(jobs: Job[], params: JobsSearchParams): Job[] {
       !searchQuery ||
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (job.tags &&
+        job.tags.some((tag) => String(tag).toLowerCase().includes(searchQuery.toLowerCase()))) ||
       (params.location && job.location?.toLowerCase().includes(params.location.toLowerCase()));
 
     // Handle category filtering with the validated enum

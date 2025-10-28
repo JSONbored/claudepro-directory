@@ -12,7 +12,7 @@ import { ContentListServer } from '@/src/components/content-list-server';
 import { statsRedis } from '@/src/lib/cache.server';
 // MDX support removed - 100% JSON guides now
 import { logger } from '@/src/lib/logger';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/schemas/component.schema';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
@@ -33,10 +33,10 @@ const GUIDE_CATEGORIES = [
 ] as const;
 
 /**
- * Load all guides and transform to UnifiedContentItem format
+ * Load all guides and transform to ContentItem format
  */
-async function getAllGuides(): Promise<UnifiedContentItem[]> {
-  const guides: UnifiedContentItem[] = [];
+async function getAllGuides(): Promise<ContentItem[]> {
+  const guides: ContentItem[] = [];
   const guidesDir = path.join(process.cwd(), 'content', 'guides');
 
   try {
@@ -55,7 +55,7 @@ async function getAllGuides(): Promise<UnifiedContentItem[]> {
 
           const filename = file.replace('.json', '');
 
-          // Transform to UnifiedContentItem format
+          // Transform to ContentItem format
           // IMPORTANT: Set category='guides' with subcategory field
           // This allows proper URL construction via getContentItemUrl() helper
           // URLs: /guides/{subcategory}/{slug} where subcategory is tutorials, comparisons, etc.

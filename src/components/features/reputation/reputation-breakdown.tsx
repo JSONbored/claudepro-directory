@@ -18,7 +18,7 @@
 'use client';
 
 import { FileText, MessageSquare, Star, ThumbsUp, TrendingUp, Trophy } from 'lucide-react';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { HorizontalBarChart } from '@/src/components/domain/horizontal-bar-chart';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import {
@@ -28,15 +28,21 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import {
-  getNextTier,
-  getReputationTier,
-  getTierProgress,
-  REPUTATION_POINTS,
-  type ReputationBreakdown as ReputationBreakdownType,
-} from '@/src/lib/config/reputation.config';
+import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import type { Tables } from '@/src/types/database.types';
+
+type ReputationAction = Tables<'reputation_actions'>;
+type ReputationTier = Tables<'reputation_tiers'>;
+
+type ReputationBreakdownType = {
+  from_posts: number;
+  from_votes_received: number;
+  from_comments: number;
+  from_submissions: number;
+  total: number;
+};
 
 // =============================================================================
 // TYPES
@@ -111,9 +117,65 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
   showProgress = true,
   className,
 }: ReputationBreakdownProps) {
-  const currentTier = getReputationTier(breakdown.total);
-  const nextTier = getNextTier(breakdown.total);
-  const progress = getTierProgress(breakdown.total);
+  const [tiers, setTiers] = useState<ReputationTier[]>([]);
+  const [points, setPoints] = useState<Record<string, number>>({});
+
+  // Fetch tiers and points from database
+  useEffect(() => {
+    const fetchData = async () => {
+      const supabase = createClient();
+      const [tiersResult, pointsResult] = await Promise.all([
+        supabase
+          .from('reputation_tiers')
+          .select('*')
+          .eq('active', true)
+          .order('order', { ascending: true }),
+        supabase.from('reputation_actions').select('action_type, points').eq('active', true),
+      ]);
+
+      if (tiersResult.data) setTiers(tiersResult.data);
+      if (pointsResult.data) {
+        const pointsMap: Record<string, number> = {};
+        for (const action of pointsResult.data) {
+          pointsMap[action.action_type] = action.points;
+        }
+        setPoints(pointsMap);
+      }
+    };
+
+    fetchData().catch(() => {
+      // Silently fail - will show default values
+    });
+  }, []);
+
+  const currentTier =
+    tiers.find(
+      (tier) =>
+        breakdown.total >= tier.min_score &&
+        (tier.max_score === null || breakdown.total <= tier.max_score)
+    ) || tiers[0];
+
+  const currentIndex = currentTier ? tiers.findIndex((t) => t.name === currentTier.name) : -1;
+  const nextTierData =
+    currentIndex >= 0 && currentIndex < tiers.length - 1 ? tiers[currentIndex + 1] : null;
+  const nextTier = nextTierData
+    ? {
+        tier: nextTierData,
+        pointsNeeded: nextTierData.min_score - breakdown.total,
+      }
+    : null;
+
+  const progress =
+    currentTier && currentTier.max_score !== null
+      ? Math.min(
+          100,
+          Math.round(
+            ((breakdown.total - currentTier.min_score) /
+              (currentTier.max_score - currentTier.min_score)) *
+              100
+          )
+        )
+      : 100;
 
   // Prepare chart data for breakdown visualization
   const chartData = [
@@ -159,7 +221,7 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
             style="secondary"
             className={cn(
               'text-base font-bold px-3 py-1',
-              TIER_COLORS[currentTier.name] || TIER_COLORS.Newcomer
+              TIER_COLORS[currentTier?.name || 'Newcomer'] || TIER_COLORS.Newcomer
             )}
           >
             {breakdown.total}
@@ -175,13 +237,18 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
             <UnifiedBadge
               variant="base"
               style="outline"
-              className={cn('gap-1.5', TIER_COLORS[currentTier.name] || TIER_COLORS.Newcomer)}
+              className={cn(
+                'gap-1.5',
+                TIER_COLORS[currentTier?.name || 'Newcomer'] || TIER_COLORS.Newcomer
+              )}
             >
-              <span className="text-base">{currentTier.icon}</span>
-              {currentTier.name}
+              <span className="text-base">{currentTier?.icon || '🌱'}</span>
+              {currentTier?.name || 'Newcomer'}
             </UnifiedBadge>
           </div>
-          <p className="text-xs text-muted-foreground">{currentTier.description}</p>
+          <p className="text-xs text-muted-foreground">
+            {currentTier?.description || 'Just getting started'}
+          </p>
         </div>
 
         {/* Progress to Next Tier */}
@@ -266,15 +333,13 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
               <div className="mt-3 space-y-2 text-xs text-muted-foreground">
                 <p>Points are earned for different activities:</p>
                 <ul className="space-y-1 ml-4">
-                  <li>• Create a post: +{REPUTATION_POINTS.POST} points</li>
-                  <li>• Receive an upvote: +{REPUTATION_POINTS.VOTE_RECEIVED} points</li>
-                  <li>• Write a comment: +{REPUTATION_POINTS.COMMENT} points</li>
-                  <li>• Get submission merged: +{REPUTATION_POINTS.SUBMISSION_MERGED} points</li>
-                  <li>• Write a review: +{REPUTATION_POINTS.REVIEW} points</li>
-                  <li>
-                    • Content bookmarked by others: +{REPUTATION_POINTS.BOOKMARK_RECEIVED} points
-                  </li>
-                  <li>• Gain a follower: +{REPUTATION_POINTS.FOLLOWER} point</li>
+                  <li>• Create a post: +{points.post || 10} points</li>
+                  <li>• Receive an upvote: +{points.vote_received || 5} points</li>
+                  <li>• Write a comment: +{points.comment || 2} points</li>
+                  <li>• Get submission merged: +{points.submission_merged || 20} points</li>
+                  <li>• Write a review: +{points.review || 5} points</li>
+                  <li>• Content bookmarked by others: +{points.bookmark_received || 3} points</li>
+                  <li>• Gain a follower: +{points.follower || 1} point</li>
                 </ul>
               </div>
             </details>

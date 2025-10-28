@@ -23,6 +23,8 @@ import { CheckCircle, Clock, Lightbulb, Medal, TrendingUp, Trophy } from '@/src/
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
+import { createClient } from '@/src/lib/supabase/server';
+import type { Database } from '@/src/types/database.types';
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',

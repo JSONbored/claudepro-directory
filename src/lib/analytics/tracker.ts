@@ -1,20 +1,107 @@
 /**
  * Universal Analytics Tracker
- * Provides a simple, consistent API for tracking events across the application
+ * Database-driven event tracking with runtime configuration
  *
- * UPDATED: Now supports consolidated events with typed payloads (Umami best practices)
+ * **Database-First Architecture:**
+ * - Event configuration loaded from analytics_events table
+ * - No hardcoded event definitions - database is source of truth
+ * - Event names are plain strings (no EVENTS const needed)
+ * - Full autocomplete via Umami dashboard, not TypeScript
+ *
+ * @module lib/analytics/tracker
  */
 
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
-import type { EventName, EventPayload, EventPayloads } from './events.constants';
-import { getEventConfig } from './events.constants';
+import { createClient } from '@/src/lib/supabase/client';
 import { isUmamiAvailable } from './umami';
+
+/**
+ * Event configuration from database
+ */
+interface EventConfig {
+  description: string;
+  category: string;
+  enabled: boolean;
+  sampleRate?: number | null;
+  debugOnly?: boolean;
+}
 
 // Environment checks using client-safe helpers
 const IS_PRODUCTION = isProduction;
 const IS_DEVELOPMENT = isDevelopment;
 const ENABLE_DEBUG = process.env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true';
+
+/**
+ * Cache for event config (loaded from database)
+ */
+let _eventConfigCache: Record<string, EventConfig> | null = null;
+let _configFetchPromise: Promise<Record<string, EventConfig>> | null = null;
+
+/**
+ * Fetch event configurations from database
+ * Queries analytics_events table for runtime configuration
+ */
+async function fetchEventConfig(): Promise<Record<string, EventConfig>> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('analytics_events')
+    .select('event_name, description, category, enabled, sample_rate, debug_only');
+
+  const config: Record<string, EventConfig> = {};
+  for (const event of data || []) {
+    config[event.event_name] = {
+      description: event.description,
+      category: event.category,
+      enabled: event.enabled,
+      sampleRate: event.sample_rate,
+      debugOnly: event.debug_only,
+    };
+  }
+  return config;
+}
+
+/**
+ * Build default event config (fallback if DB unavailable)
+ * Enables all events by default for graceful degradation
+ */
+function buildDefaultConfig(eventName: string): EventConfig {
+  return {
+    description: eventName.replace(/_/g, ' '),
+    category: 'INTERACTION',
+    enabled: true,
+    sampleRate: null,
+    debugOnly: false,
+  };
+}
+
+/**
+ * Get event configuration with caching
+ * Returns cached config if available, otherwise returns default and fetches in background
+ */
+function getEventConfig(eventName: string): EventConfig {
+  // Return cached config if available
+  if (_eventConfigCache && _eventConfigCache[eventName]) {
+    return _eventConfigCache[eventName];
+  }
+
+  // Start fetch if not already in progress
+  if (!_configFetchPromise) {
+    _configFetchPromise = fetchEventConfig()
+      .then((config) => {
+        _eventConfigCache = config;
+        return config;
+      })
+      .catch(() => {
+        // Fallback to empty cache on error
+        _eventConfigCache = {};
+        return {};
+      });
+  }
+
+  // Return default config immediately while DB fetch completes
+  return buildDefaultConfig(eventName);
+}
 
 /**
  * Payload sanitization with typed data support
@@ -61,13 +148,13 @@ function sanitizePayload(
 /**
  * Universal tracking function that all components can use
  * Provides automatic validation, sampling, and error handling
+ *
+ * @param eventName - Event name (e.g., 'content_viewed', 'code_copied')
+ * @param payload - Event payload with custom properties
  */
-export function trackEvent<T extends EventName>(
-  eventName: T,
-  payload?: T extends keyof EventPayloads ? EventPayload<T> : Record<string, unknown>
-): void {
+export function trackEvent(eventName: string, payload?: Record<string, unknown>): void {
   // Check config
-  const config = getEventConfig()[eventName];
+  const config = getEventConfig(eventName);
 
   // Check if event is enabled
   if (!config?.enabled) {

@@ -15,6 +15,8 @@
       "dist/**/*",
       "generated/**/*",
       "src/generated/**/*",
+      "src/lib/schemas/generated/**/*",
+      "src/types/database.types.ts",
       "node_modules/**/*",
       "test-results/**/*",
       "playwright-report/**/*",
@@ -98,7 +100,7 @@
       "complexity": {
         "noBannedTypes": "error",
         "noExtraBooleanCast": "error",
-        "noForEach": "off",
+        "noForEach": "warn",
         "noStaticOnlyClass": "error",
         "noThisInStatic": "error",
         "noUselessCatch": "error",
@@ -113,7 +115,7 @@
         "noUselessThisAlias": "error",
         "noUselessTypeConstraint": "error",
         "noVoid": "error",
-        "useArrowFunction": "off",
+        "useArrowFunction": "warn",
         "useFlatMap": "error",
         "useLiteralKeys": "error",
         "useOptionalChain": "error",
@@ -170,7 +172,7 @@
         "noInferrableTypes": "warn",
         "noNamespace": "off",
         "noNegationElse": "warn",
-        "noNonNullAssertion": "warn",
+        "noNonNullAssertion": "error",
         "noParameterAssign": "error",
         "noParameterProperties": "off",
         "noRestrictedGlobals": "off",
@@ -188,6 +190,17 @@
               {
                 "group": ["**/lib/security/validators", "**/lib/security/validators.ts"],
                 "message": "⛔ validators.ts is server-only (async DOMPurify). Use @/src/lib/security/validators-sync for client components."
+              },
+              {
+                "group": [
+                  "**/lib/schemas/content/**/*.schema.ts",
+                  "**/lib/schemas/content/*.schema.ts"
+                ],
+                "message": "⛔ DEPRECATED: Manual content schemas are obsolete. Import from @/src/lib/schemas/generated/db-schemas.ts (auto-generated from database) instead."
+              },
+              {
+                "group": ["**/generated/**", "**/src/generated/**"],
+                "message": "⛔ DEPRECATED: /generated directory is obsolete. Content now lives in Supabase database. Use supabase-content-loader.ts instead."
               }
             ]
           }
@@ -256,7 +269,8 @@
         "noUnresolvedImports": "off",
         "noDuplicateDependencies": "error",
         "noImportCycles": "error",
-        "noReactForwardRef": "warn"
+        "noReactForwardRef": "warn",
+        "useSortedClasses": "warn"
       }
     }
   },
@@ -340,6 +354,50 @@
         "rules": {
           "style": {
             "noRestrictedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "src/lib/content/supabase-content-loader.ts",
+        "scripts/sync/sync-content-supabase-client.ts",
+        "src/lib/config/category-types.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noNonNullAssertion": "warn"
+          },
+          "complexity": {
+            "noBannedTypes": "warn"
+          },
+          "suspicious": {
+            "noExplicitAny": "warn"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "src/lib/schemas/factories/client-input-schema.factory.ts",
+        "src/lib/security/html-sanitizer.ts",
+        "src/components/content-search-client.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "warn"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/lib/supabase/validators.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
           }
         }
       }

@@ -13,12 +13,12 @@
  * - Eliminates response duplication across 8+ API routes
  */
 
+import { randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
-import { createRequestId, type RequestId } from '@/src/lib/schemas/branded-types.schema';
 import {
   determineErrorType,
   type ErrorContext,
@@ -166,7 +166,7 @@ export class ErrorHandler {
    */
   private handleZodError(
     zodError: z.ZodError,
-    requestId: RequestId,
+    requestId: string,
     config: ErrorHandlerConfig
   ): ErrorResponse {
     const details = zodError.issues.map((issue) => ({
@@ -195,7 +195,7 @@ export class ErrorHandler {
    */
   private handleValidationError(
     validationError: ValidationError,
-    requestId: RequestId,
+    requestId: string,
     config: ErrorHandlerConfig
   ): ErrorResponse {
     return this.handleZodError(validationError.details, requestId, {
@@ -210,7 +210,7 @@ export class ErrorHandler {
   private handleGenericError(
     error: Error,
     errorType: ErrorType,
-    requestId: RequestId,
+    requestId: string,
     config: ErrorHandlerConfig
   ): ErrorResponse {
     const userMessage =
@@ -239,7 +239,7 @@ export class ErrorHandler {
   /**
    * Create fallback error response when error handler fails
    */
-  private createFallbackErrorResponse(requestId?: RequestId): ErrorResponse {
+  private createFallbackErrorResponse(requestId?: string): ErrorResponse {
     return {
       success: false,
       error: 'Internal Server Error',
@@ -308,8 +308,8 @@ export class ErrorHandler {
   /**
    * Generate unique request ID
    */
-  private generateRequestId(): RequestId {
-    return createRequestId();
+  private generateRequestId(): string {
+    return randomUUID();
   }
 
   /**
@@ -380,7 +380,7 @@ export class ErrorHandler {
   ): NextResponse {
     const url = new URL(request.url);
     const headerRequestId = request.headers.get('x-request-id');
-    const requestId = headerRequestId ? (headerRequestId as RequestId) : this.generateRequestId();
+    const requestId = headerRequestId || this.generateRequestId();
 
     const fullConfig: ErrorHandlerConfig = {
       route: url.pathname,

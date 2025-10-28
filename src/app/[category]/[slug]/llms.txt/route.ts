@@ -6,22 +6,23 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
-import { isValidCategory, VALID_CATEGORIES } from '@/src/lib/config/category-config';
+import {
+  type CategoryId,
+  isValidCategory,
+  VALID_CATEGORIES,
+} from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import {
   getContentByCategory,
   getContentBySlug,
   getFullContentBySlug,
-} from '@/src/lib/content/content-loaders';
+} from '@/src/lib/content/supabase-content-loader';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { buildRichContent, type ContentItem } from '@/src/lib/llms-txt/content-builder';
 import { generateLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
-import type {
-  CollectionContent,
-  CollectionItemReference,
-} from '@/src/lib/schemas/content/collection.schema';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Generate static params for all category/slug combinations
@@ -102,7 +103,7 @@ export async function GET(
       });
     }
 
-    // Get full content (includes markdown content field)
+    // Get full content (includes markdown content field and ALL category-specific fields)
     const fullItem = await getFullContentBySlug(category, slug);
 
     // Handle case where full content is not found
@@ -121,7 +122,7 @@ export async function GET(
 
     // Collections require special handling with embedded items
     if (category === 'collections') {
-      const collection = fullItem as CollectionContent;
+      const collection = fullItem as Database['public']['Tables']['collections']['Row'];
 
       // Build detailed content including all embedded items (NO TRUNCATION)
       let detailedContent = '';
@@ -129,50 +130,54 @@ export async function GET(
       if (collection.items && collection.items.length > 0) {
         detailedContent += 'INCLUDED ITEMS\n--------------\n\n';
 
-        // Group items by category
-        const itemsByCategory = collection.items.reduce(
-          (acc: Record<string, CollectionItemReference[]>, item: CollectionItemReference) => {
-            const itemCategory = item.category || 'other';
-            if (!acc[itemCategory]) acc[itemCategory] = [];
-            acc[itemCategory].push(item);
-            return acc;
-          },
-          {} as Record<string, CollectionItemReference[]>
-        );
+        // Group items by category - items is Json[] from database
+        const itemsByCategory: Record<string, typeof collection.items> = {};
+        for (const item of collection.items) {
+          const itemCategory = (item as { category?: string }).category || 'other';
+          if (!itemsByCategory[itemCategory]) {
+            itemsByCategory[itemCategory] = [];
+          }
+          itemsByCategory[itemCategory].push(item);
+        }
 
         // Fetch actual item details and build full content (NO TRUNCATION)
         for (const [itemCategory, items] of Object.entries(itemsByCategory)) {
           detailedContent += `${itemCategory.toUpperCase()}:\n`;
-          for (const itemRef of items as CollectionItemReference[]) {
+          for (const itemRef of items) {
+            const refData = itemRef as { category: string; slug: string; reason?: string };
+
             // Fetch the actual item to get title and description
             try {
-              const actualItem = await getContentBySlug(itemRef.category, itemRef.slug);
+              const actualItem = await getContentBySlug(
+                refData.category as CategoryId,
+                refData.slug
+              );
               if (actualItem) {
-                detailedContent += `• ${actualItem.title || actualItem.name || itemRef.slug}\n`;
+                detailedContent += `• ${actualItem.title || refData.slug}\n`;
                 // Include FULL description - no truncation for AI consumption
                 if (actualItem.description) {
                   detailedContent += `  ${actualItem.description}\n`;
                 }
-                if (itemRef.reason) {
-                  detailedContent += `  Reason: ${itemRef.reason}\n`;
+                if (refData.reason) {
+                  detailedContent += `  Reason: ${refData.reason}\n`;
                 }
               } else {
                 // Fallback if item not found
-                detailedContent += `• ${itemRef.slug}\n`;
-                if (itemRef.reason) {
-                  detailedContent += `  ${itemRef.reason}\n`;
+                detailedContent += `• ${refData.slug}\n`;
+                if (refData.reason) {
+                  detailedContent += `  ${refData.reason}\n`;
                 }
               }
             } catch (error) {
               // If item fetch fails, use fallback
               logger.warn('Failed to fetch collection item details', {
-                category: itemRef.category,
-                slug: itemRef.slug,
+                category: refData.category,
+                slug: refData.slug,
                 error: error instanceof Error ? error.message : String(error),
               });
-              detailedContent += `• ${itemRef.slug}\n`;
-              if (itemRef.reason) {
-                detailedContent += `  ${itemRef.reason}\n`;
+              detailedContent += `• ${refData.slug}\n`;
+              if (refData.reason) {
+                detailedContent += `  ${refData.reason}\n`;
               }
             }
           }
@@ -196,7 +201,7 @@ export async function GET(
         category: 'collections',
         tags: collection.tags || [],
         author: collection.author || undefined,
-        dateAdded: collection.dateAdded || undefined,
+        date_added: collection.date_added || undefined,
         url: `${APP_CONFIG.url}/collections/${slug}`,
       };
 
@@ -226,20 +231,24 @@ export async function GET(
 
     // Default handling for all other categories
     // Build rich content from ALL structured fields (features, installation, config, etc.)
-    const richContent = buildRichContent(fullItem as ContentItem);
+    const richContent = buildRichContent(fullItem);
 
     // Transform to LLMsTxtItem format with rich content
+    // Handle union type fields safely with 'in' checks
     const llmsItem: LLMsTxtItem = {
       slug: fullItem.slug,
-      title: fullItem.title || fullItem.name || fullItem.slug,
+      title: ('title' in fullItem ? fullItem.title : null) || fullItem.slug,
       description: fullItem.description,
       category: fullItem.category,
-      tags: fullItem.tags || [],
-      author: fullItem.author,
-      dateAdded: fullItem.dateAdded,
+      tags: Array.isArray(fullItem.tags) ? fullItem.tags : [],
+      author: 'author' in fullItem && fullItem.author ? fullItem.author : undefined,
+      date_added: 'date_added' in fullItem && fullItem.date_added ? fullItem.date_added : undefined,
       url: `${APP_CONFIG.url}/${category}/${slug}`,
       // Include FULL rich content from all fields
-      content: richContent,
+      content:
+        'content' in fullItem && typeof fullItem.content === 'string'
+          ? fullItem.content
+          : richContent,
     };
 
     // Generate llms.txt content with full details

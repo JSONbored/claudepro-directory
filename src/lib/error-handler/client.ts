@@ -13,8 +13,8 @@
  * @see {@link src/lib/logger.ts} - Production logger (client-safe)
  */
 
+import { randomUUID } from 'node:crypto';
 import { logger } from '@/src/lib/logger';
-import { createRequestId } from '@/src/lib/schemas/branded-types.schema';
 import {
   determineErrorType,
   type ErrorContext,
@@ -62,8 +62,7 @@ export function createErrorBoundaryFallback(
     // Determine error type for context
     const errorType = determineErrorType(error);
 
-    // Generate request ID for correlation
-    const requestId = createRequestId();
+    const requestId = randomUUID();
 
     // Create error context
     const baseContext: ErrorContext = {
@@ -116,7 +115,7 @@ export function createErrorBoundaryFallback(
       message: 'An unexpected error occurred',
       code: 'INT_FALLBACK',
       timestamp: new Date().toISOString(),
-      requestId: createRequestId(),
+      requestId: randomUUID(),
     };
   }
 }

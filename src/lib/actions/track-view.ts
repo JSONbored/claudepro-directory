@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { statsRedis } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
-import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
+import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
 import { analyticsQueue } from '@/src/lib/services/analytics-queue.server';
 import { createClient } from '@/src/lib/supabase/server';

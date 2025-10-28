@@ -81,7 +81,7 @@ import {
   Terminal,
   Zap,
 } from '@/src/lib/icons';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/schemas/component.schema';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -195,7 +195,7 @@ export type UnifiedContentSectionProps =
   | {
       variant: 'installation';
       installation: InstallationSteps;
-      item: UnifiedContentItem;
+      item: ContentItem;
       className?: string;
     };
 

@@ -11,7 +11,11 @@ import { FormField } from '@/src/components/forms/utilities/form-field';
 import { ListItemManager } from '@/src/components/forms/utilities/list-item-manager';
 import { ToggleField } from '@/src/components/forms/utilities/toggle-field';
 import { Button } from '@/src/components/primitives/button';
-import type { ProfileData } from '@/src/lib/schemas/profile.schema';
+import type { Tables } from '@/src/types/database.types';
+
+// Database-first: ProfileData is just the profiles table row type
+type ProfileData = Tables<'profiles'>;
+
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface ProfileEditFormProps {

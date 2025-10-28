@@ -76,7 +76,7 @@ export const metadataContextSchema = z
         description: z.string().optional(),
         tags: z.array(z.string()).optional(),
         author: z.string().optional(),
-        dateAdded: z.string().optional(),
+        date_added: z.string().optional(),
         lastModified: z.string().optional(),
       })
       .catchall(z.unknown())

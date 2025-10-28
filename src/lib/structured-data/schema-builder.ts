@@ -16,7 +16,7 @@ const SCHEMA_CONTEXT = 'https://schema.org' as const;
 function buildAuthor(
   authorName?: string,
   githubUrl?: string,
-  authorProfileUrl?: string
+  author_profile_url?: string
 ): {
   '@type': 'Person' | 'Organization';
   name: string;
@@ -24,7 +24,7 @@ function buildAuthor(
   sameAs?: string;
 } {
   const isAnthropicOrg = githubUrl?.includes('github.com/anthropics');
-  const profileUrl = authorProfileUrl || githubUrl;
+  const profileUrl = author_profile_url || githubUrl;
 
   return {
     '@type': isAnthropicOrg ? 'Organization' : 'Person',
@@ -65,9 +65,9 @@ export interface SoftwareApplicationConfig {
   operatingSystem?: string;
   keywords: string[];
   author?: string;
-  authorProfileUrl?: string;
+  author_profile_url?: string;
   githubUrl?: string | undefined;
-  dateAdded?: string;
+  date_added?: string;
   lastModified?: string | undefined;
   features?: string[] | undefined;
   requirements?: string[] | undefined;
@@ -88,10 +88,10 @@ export function buildSoftwareApplication(config: SoftwareApplicationConfig) {
     applicationSubCategory: config.applicationSubCategory,
     operatingSystem: config.operatingSystem || 'Claude Desktop / Claude Code',
     url: `${baseUrl}/${config.category}/${config.slug}`,
-    datePublished: config.dateAdded,
-    dateModified: config.lastModified || config.dateAdded,
+    datePublished: config.date_added,
+    dateModified: config.lastModified || config.date_added,
     keywords: config.keywords.join(', '),
-    author: buildAuthor(config.author, config.githubUrl, config.authorProfileUrl),
+    author: buildAuthor(config.author, config.githubUrl, config.author_profile_url),
     featureList: config.features?.join(', '),
     softwareRequirements: config.requirements?.join(', ') || 'Claude Desktop or Claude Code',
     offers: {

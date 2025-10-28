@@ -34,7 +34,8 @@ import { memo, useEffect } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
@@ -46,14 +47,14 @@ export type GridVariant = 'normal' | 'tight' | 'wide' | 'list';
 /**
  * Base props shared by all variants
  *
- * **ARCHITECTURAL DECISION: UnifiedContentItem Only**
- * This component requires UnifiedContentItem - NOT a generic GridItem.
+ * **ARCHITECTURAL DECISION: ContentItem Only**
+ * This component requires ContentItem - NOT a generic GridItem.
  * Previous generic approach created type complexity for zero benefit.
- * All 12 usage sites pass UnifiedContentItem objects.
+ * All 12 usage sites pass ContentItem objects.
  */
 interface BaseGridProps {
   /** Array of items to display */
-  items: readonly UnifiedContentItem[];
+  items: readonly ContentItem[];
 
   /** Grid layout variant (default: 'normal') */
   variant?: GridVariant;
@@ -77,7 +78,7 @@ interface BaseGridProps {
   /** ARIA label for the grid section */
   ariaLabel?: string;
   /** Function to extract unique key from item (default: uses slug) */
-  keyExtractor?: (item: UnifiedContentItem, index: number) => string | number;
+  keyExtractor?: (item: ContentItem, index: number) => string | number;
 
   /** Number of items to prefetch for faster navigation (default: 0) */
   prefetchCount?: number;
@@ -100,7 +101,7 @@ type CardRenderingProps =
     }
   | {
       /** Custom render function */
-      renderCard: (item: UnifiedContentItem, index: number) => ReactNode;
+      renderCard: (item: ContentItem, index: number) => ReactNode;
       cardComponent?: never;
     };
 
@@ -123,7 +124,7 @@ const GRID_VARIANTS: Record<GridVariant, string> = {
 /**
  * UnifiedCardGrid Component
  *
- * Renders UnifiedContentItem objects in a responsive CSS Grid with optional infinite scroll.
+ * Renders ContentItem objects in a responsive CSS Grid with optional infinite scroll.
  * Designed for maximum reusability and type safety.
  *
  * @example
@@ -203,8 +204,8 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
   // Determine items to display
   const displayedItems = infiniteScroll ? items.slice(0, displayCount) : items;
 
-  // Default key extractor uses slug (standard across all UnifiedContentItem)
-  const getKey = keyExtractor || ((item: UnifiedContentItem, index: number) => item.slug || index);
+  // Default key extractor uses slug (standard across all ContentItem)
+  const getKey = keyExtractor || ((item: ContentItem, index: number) => item.slug || index);
 
   // Empty state
   if (items.length === 0 && !loading) {

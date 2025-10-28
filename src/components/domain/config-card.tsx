@@ -109,7 +109,7 @@ export const ConfigCard = memo(
       }
     }, [item.category, item.slug, router]);
 
-    // Extract sponsored metadata - UnifiedContentItem already includes these properties
+    // Extract sponsored metadata - ContentItem already includes these properties
     const { isSponsored, sponsoredId, sponsorTier, position, viewCount } = item;
 
     // copyCount is a runtime property added by analytics (not in schema)
@@ -157,7 +157,7 @@ export const ConfigCard = memo(
           displayTitle={displayTitle}
           description={item.description}
           author={item.author}
-          {...(item.authorProfileUrl && { authorProfileUrl: item.authorProfileUrl })}
+          {...(item.author_profile_url && { authorProfileUrl: item.author_profile_url })}
           {...(item.source && { source: item.source })}
           {...(item.tags && { tags: item.tags })}
           variant={variant}
@@ -370,14 +370,14 @@ export const ConfigCard = memo(
                 </Button>
               )}
 
-              {item.documentationUrl && (
+              {item.documentation_url && (
                 <Button
                   variant="ghost"
                   size="sm"
                   className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.open(item.documentationUrl, '_blank');
+                    window.open(item.documentation_url, '_blank');
                   }}
                   aria-label={`View ${displayTitle} documentation`}
                 >

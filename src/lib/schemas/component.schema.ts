@@ -9,9 +9,10 @@
  */
 
 import { z } from 'zod';
-import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import type { TrendingContentItem } from '@/src/lib/trending/calculator.server';
-import type { UnifiedContentItem } from './components/content-item.schema';
+
 import type { HomePageClientProps } from './components/page-props.schema';
 import type { SortOption } from './content-filter.schema';
 import { type CategoryId, categoryIdSchema } from './shared.schema';
@@ -21,7 +22,7 @@ import { type CategoryId, categoryIdSchema } from './shared.schema';
  * Used for displaying configuration cards in lists
  */
 export interface ConfigCardProps {
-  item: UnifiedContentItem;
+  item: ContentItem;
   variant?: 'default' | 'detailed';
   showCategory?: boolean;
   showActions?: boolean;
@@ -57,11 +58,11 @@ export interface ConfigCardProps {
 }
 
 // Re-export commonly used types from ./components
-export type { HomePageClientProps, UnifiedContentItem };
+export type { HomePageClientProps, ContentItem };
 
 // ContentListWithLoadMore component props
 export interface ContentListWithLoadMoreProps {
-  items: UnifiedContentItem[];
+  items: ContentItem[];
   initialCount?: number;
   loadMoreCount?: number;
   gridCols?: string;
@@ -142,7 +143,7 @@ export type ViewTrackerProps = z.infer<typeof viewTrackerPropsSchema>;
 /**
  * Content list server props
  */
-export type ContentListServerProps<T extends UnifiedContentItem = UnifiedContentItem> = {
+export type ContentListServerProps<T extends ContentItem = ContentItem> = {
   title: string;
   description: string;
   icon: string;
@@ -158,7 +159,7 @@ export type ContentListServerProps<T extends UnifiedContentItem = UnifiedContent
 /**
  * Related configs props
  */
-export type RelatedConfigsProps<T extends UnifiedContentItem = UnifiedContentItem> = {
+export type RelatedConfigsProps<T extends ContentItem = ContentItem> = {
   configs: T[];
   title?: string;
   type?: CategoryId;
@@ -170,15 +171,15 @@ export type RelatedConfigsProps<T extends UnifiedContentItem = UnifiedContentIte
 export type FloatingSearchSidebarProps = {
   isOpen: boolean;
   onClose: () => void;
-  items: UnifiedContentItem[];
-  onItemSelect: (item: UnifiedContentItem) => void;
+  items: ContentItem[];
+  onItemSelect: (item: ContentItem) => void;
   placeholder?: string;
 };
 
 /**
  * Content search client props
  */
-export type ContentSearchClientProps<T extends UnifiedContentItem = UnifiedContentItem> = {
+export type ContentSearchClientProps<T extends ContentItem = ContentItem> = {
   items: readonly T[] | T[];
   type: CategoryId;
   searchPlaceholder: string;
@@ -189,7 +190,7 @@ export type ContentSearchClientProps<T extends UnifiedContentItem = UnifiedConte
 /**
  * Content sidebar props
  */
-export type ContentSidebarProps<T extends UnifiedContentItem = UnifiedContentItem> = {
+export type ContentSidebarProps<T extends ContentItem = ContentItem> = {
   item: T;
   relatedItems: T[];
   type: import('./shared.schema').CategoryId;
@@ -229,7 +230,7 @@ export interface SearchOptions {
 }
 
 export interface UseSearchProps {
-  data: UnifiedContentItem[];
+  data: ContentItem[];
   searchOptions?: SearchOptions;
   initialQuery?: string; // Initial search query from URL (for SearchAction schema integration)
 }

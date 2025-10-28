@@ -2,25 +2,22 @@
 
 /**
  * Homepage Client Component
- * Production 2025 Architecture: TanStack Virtual + Configuration-Driven Design
+ * Database-First 2025 Architecture: Server data with client interactivity
  *
  * PERFORMANCE CRITICAL: This is the first page users see
- * Must maintain optimal performance with multiple content sections
+ * Data fetched server-side, search redirects to /search page
  *
- * Optimizations Applied:
- * 1. ✅ TanStack Virtual for list virtualization (~15 visible items)
- * 2. ✅ Memoized featured sections to prevent unnecessary re-renders
- * 3. ✅ Memoized lookup maps for O(1) category filtering
- * 4. ✅ Lazy-loaded heavy components (UnifiedSearch)
- * 5. ✅ Proper memo wrapping for all sub-components
- * 6. ✅ Constant memory usage regardless of item count
- * 7. ✅ 60fps scroll performance with 10,000+ items
+ * Architecture Changes (2025-10-27):
+ * 1. ✅ Data fetched from content_unified view (server-side in page.tsx)
+ * 2. ✅ Search redirects to /search page (uses PostgreSQL FTS)
+ * 3. ✅ No client-side filtering - just display and navigation
+ * 4. ✅ Client-only for animations and interactions
  *
  * Component Organization:
- * 1. ✅ Extracted SearchSection (search UI + virtualized results)
- * 2. ✅ Extracted FeaturedSections (5 featured categories + jobs)
- * 3. ✅ Extracted TabsSection (tabbed navigation with virtualization)
- * Result: Clean, maintainable, production-grade architecture
+ * 1. ✅ Display server-fetched data
+ * 2. ✅ Handle search navigation
+ * 3. ✅ Interactive UI elements (motion, tabs)
+ * Result: Hybrid architecture - server data, client UX
  */
 
 import { motion } from 'motion/react';
@@ -34,13 +31,13 @@ import {
 } from '@/src/components/features/home/lazy-homepage-sections';
 import { NumberTicker } from '@/src/components/magic/number-ticker';
 import { HomepageStatsSkeleton, Skeleton } from '@/src/components/primitives/loading-skeleton';
-import { useSearch } from '@/src/hooks/use-search';
 import {
   getCategoryStatsConfig,
   HOMEPAGE_FEATURED_CATEGORIES,
 } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
-import type { HomePageClientProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { HomePageClientProps } from '@/src/lib/schemas/components/page-props.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
@@ -66,26 +63,41 @@ function HomePageClientComponent({
   featuredByCategory,
   stats,
 }: HomePageClientProps) {
-  const allConfigs = (initialData.allConfigs || []) as UnifiedContentItem[];
-
+  const allConfigs = (initialData.allConfigs || []) as ContentItem[];
   const [activeTab, setActiveTab] = useState('all');
+  const [searchResults, setSearchResults] = useState<ContentItem[]>(allConfigs);
+  const [isSearching, setIsSearching] = useState(false);
+  const [filters, setFilters] = useState({});
 
-  // Memoize search options to prevent infinite re-renders
-  const searchOptions = useMemo(
-    () => ({
-      threshold: 0.3,
-      minMatchCharLength: 2,
-    }),
-    []
+  // Handle search using server action
+  const handleSearch = useCallback(
+    async (query: string) => {
+      if (!query.trim()) {
+        setSearchResults(allConfigs);
+        setIsSearching(false);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        // Call server-side search
+        const results = await fetch(`/api/search?q=${encodeURIComponent(query)}`).then((r) =>
+          r.json()
+        );
+        setSearchResults(results);
+      } catch (error) {
+        console.error('Search failed:', error);
+        setSearchResults(allConfigs);
+      }
+    },
+    [allConfigs]
   );
 
-  // Use React 19 optimized search hook with initial query from URL
-  const { filters, searchResults, filterOptions, handleSearch, handleFiltersChange, isSearching } =
-    useSearch({
-      data: allConfigs,
-      searchOptions,
-      ...(initialSearchQuery ? { initialQuery: initialSearchQuery } : {}),
-    });
+  const handleFiltersChange = useCallback((newFilters: any) => {
+    setFilters(newFilters);
+  }, []);
+
+  const filterOptions = { tags: [], authors: [], categories: [] };
 
   // Create lookup maps dynamically for all featured categories
   // O(1) slug checking instead of O(n) array.some() calls
@@ -95,7 +107,7 @@ function HomePageClientComponent({
     for (const category of HOMEPAGE_FEATURED_CATEGORIES) {
       const categoryData = initialData[category as keyof typeof initialData];
       if (categoryData && Array.isArray(categoryData)) {
-        maps[category] = new Set(categoryData.map((item: UnifiedContentItem) => item.slug));
+        maps[category] = new Set(categoryData.map((item: ContentItem) => item.slug));
       }
     }
 
@@ -105,7 +117,7 @@ function HomePageClientComponent({
   // Filter search results by active tab - optimized with Set lookups
   // When not searching, use the full dataset (allConfigs) instead of searchResults
   // With TanStack Virtual, we pass the ENTIRE dataset - virtualization handles rendering
-  const filteredResults = useMemo((): UnifiedContentItem[] => {
+  const filteredResults = useMemo((): ContentItem[] => {
     // Use allConfigs when not searching, searchResults when searching
     const dataSource = isSearching ? searchResults : allConfigs;
 

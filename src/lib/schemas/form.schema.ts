@@ -6,10 +6,10 @@
  */
 
 import { z } from 'zod';
-import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
+import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import {
-  hookTypeFormSchema,
-  statuslineTypeFormSchema,
+  hook_typeFormSchema,
+  statusline_typeFormSchema,
 } from '@/src/lib/schemas/primitives/content-enums';
 import {
   trimOptionalStringOrEmpty,
@@ -49,7 +49,7 @@ const baseSubmissionFields = {
     .max(100, 'Author name must be less than 100 characters')
     .transform(trimString),
 
-  authorProfileUrl: z
+  author_profile_url: z
     .string()
     .url('Must be a valid URL (e.g., https://github.com/username)')
     .optional()
@@ -135,7 +135,7 @@ export const hooksSubmissionSchema = z.object({
     .min(20, 'Hook script must be at least 20 characters')
     .max(5000, 'Hook script is too long'),
 
-  hookType: hookTypeFormSchema,
+  hook_type: hook_typeFormSchema,
   triggeredBy: z
     .string()
     .optional()
@@ -160,7 +160,7 @@ export const statuslinesSubmissionSchema = z.object({
     .min(20, 'Statusline script must be at least 20 characters')
     .max(5000, 'Statusline script is too long'),
 
-  statuslineType: statuslineTypeFormSchema,
+  statusline_type: statusline_typeFormSchema,
   refreshInterval: z.coerce.number().min(100).max(10000).default(1000),
   position: z.enum(['left', 'right']).default('left'),
 });

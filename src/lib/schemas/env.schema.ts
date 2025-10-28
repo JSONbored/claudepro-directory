@@ -5,7 +5,7 @@
  */
 
 import { z } from 'zod';
-import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives/base-strings';
+import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives';
 
 // Logger import - must be lazy to avoid circular dependency during env initialization
 function getLogger(): {

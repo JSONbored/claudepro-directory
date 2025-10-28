@@ -72,9 +72,9 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
           experience:
             (job.experience as 'Entry' | 'Mid' | 'Senior' | 'Lead' | 'Executive') ?? undefined,
           category: job.category,
-          tags: Array.isArray(job.tags) ? (job.tags as string[]) : [],
-          requirements: Array.isArray(job.requirements) ? (job.requirements as string[]) : [],
-          benefits: Array.isArray(job.benefits) ? (job.benefits as string[]) : [],
+          tags: job.tags as string[],
+          requirements: job.requirements as string[],
+          benefits: job.benefits as string[],
           link: job.link,
           contact_email: job.contact_email ?? undefined,
           company_logo: job.company_logo ?? undefined,

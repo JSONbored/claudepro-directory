@@ -12,7 +12,7 @@ import { z } from 'zod';
  * Hook Type Enum - Hook Lifecycle Events
  * Used in: hook.schema.ts, content-item.schema.ts, form.schema.ts
  */
-export const hookTypeSchema = z.enum([
+export const hook_typeSchema = z.enum([
   'PostToolUse',
   'PreToolUse',
   'SessionStart',
@@ -24,12 +24,12 @@ export const hookTypeSchema = z.enum([
   'SubagentStop',
 ]);
 
-export type HookType = z.infer<typeof hookTypeSchema>;
+export type HookType = z.infer<typeof hook_typeSchema>;
 
 /**
  * Hook Type Form Schema - Kebab-case variant for forms
  */
-export const hookTypeFormSchema = z.enum([
+export const hook_typeFormSchema = z.enum([
   'post-tool-use',
   'pre-tool-use',
   'session-start',
@@ -41,12 +41,12 @@ export const hookTypeFormSchema = z.enum([
   'subagent-stop',
 ]);
 
-export type HookTypeForm = z.infer<typeof hookTypeFormSchema>;
+export type HookTypeForm = z.infer<typeof hook_typeFormSchema>;
 
 /**
  * Statusline Type Enum
  */
-export const statuslineTypeSchema = z.enum([
+export const statusline_typeSchema = z.enum([
   'minimal',
   'powerline',
   'custom',
@@ -55,9 +55,9 @@ export const statuslineTypeSchema = z.enum([
   'extended',
 ]);
 
-export type StatuslineType = z.infer<typeof statuslineTypeSchema>;
+export type StatuslineType = z.infer<typeof statusline_typeSchema>;
 
-export const statuslineTypeFormSchema = statuslineTypeSchema
+export const statusline_typeFormSchema = statusline_typeSchema
   .extract(['custom', 'minimal', 'extended'])
   .default('custom');
 

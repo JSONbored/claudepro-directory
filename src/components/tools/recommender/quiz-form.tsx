@@ -18,23 +18,37 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
+import { z } from 'zod';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { Separator } from '@/src/components/primitives/separator';
 import { generateConfigRecommendations } from '@/src/lib/actions/analytics.actions';
 import { ArrowLeft, ArrowRight, Loader2, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import {
-  type ExperienceLevel,
-  encodeQuizAnswers,
-  type FocusArea,
-  type IntegrationNeed,
-  type QuizAnswers,
-  quizAnswersSchema,
-  type TeamSize,
-  type ToolPreference,
-  type UseCase,
-} from '@/src/lib/schemas/recommender.schema';
+import { publicGetRecommendationsArgsSchema } from '@/src/lib/schemas/generated/db-schemas';
+
+// Use auto-generated schema with UI-friendly field names
+const quizAnswersSchema = publicGetRecommendationsArgsSchema
+  .omit({ p_use_case: true, p_experience_level: true, p_tool_preferences: true })
+  .extend({
+    useCase: z.string(),
+    experienceLevel: z.string(),
+    toolPreferences: z.array(z.string()).min(1).max(5),
+    timestamp: z.string().datetime().optional(),
+  });
+
+type QuizAnswers = z.infer<typeof quizAnswersSchema>;
+type UseCase = string;
+type ExperienceLevel = string;
+type ToolPreference = string;
+type IntegrationNeed = string;
+type FocusArea = string;
+type TeamSize = string;
+
+function encodeQuizAnswers(answers: QuizAnswers): string {
+  return Buffer.from(JSON.stringify(answers)).toString('base64url');
+}
+
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import { QuestionCard } from './question-card';

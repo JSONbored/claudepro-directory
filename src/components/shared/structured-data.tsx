@@ -3,8 +3,8 @@ import Script from 'next/script';
 import { isValidCategory } from '@/src/lib/config/category-config';
 import { SEO_CONFIG } from '@/src/lib/config/seo-config';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
+import { serializeJsonLd } from '@/src/lib/utils/jsonld.utils';
 
 interface StructuredDataProps {
   type?: string;
@@ -79,8 +79,8 @@ export async function StructuredData({
             '@type': 'Person',
             name: data.author,
           },
-          datePublished: data.dateAdded,
-          dateModified: data.lastModified || data.dateAdded,
+          datePublished: data.date_added,
+          dateModified: data.lastModified || data.date_added,
           keywords: data.tags?.join(', '),
           url: `${baseUrl}${getContentItemUrl({
             category: data.category && isValidCategory(data.category) ? data.category : 'agents',
@@ -127,8 +127,8 @@ export async function StructuredData({
             '@type': 'Person',
             name: data.author,
           },
-          datePublished: data.dateAdded,
-          dateModified: data.lastModified || data.dateAdded,
+          datePublished: data.date_added,
+          dateModified: data.lastModified || data.date_added,
           publisher: {
             '@type': 'Organization',
             name: APP_CONFIG.name,

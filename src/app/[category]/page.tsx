@@ -42,7 +42,7 @@ import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content-list-server';
 import { statsRedis } from '@/src/lib/cache.server';
 import { isValidCategory, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
-import { getContentByCategory } from '@/src/lib/content/content-loaders';
+import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 

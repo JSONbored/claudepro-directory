@@ -10,7 +10,11 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { RefreshCw } from '@/src/lib/icons';
-import type { ProfileData } from '@/src/lib/schemas/profile.schema';
+import type { Tables } from '@/src/types/database.types';
+
+// Database-first: ProfileData is just the profiles table row type
+type ProfileData = Tables<'profiles'>;
+
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

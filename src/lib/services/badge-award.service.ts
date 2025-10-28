@@ -22,17 +22,56 @@
  * @module services/badge-award
  */
 
-import {
-  type AwardCriteria,
-  type BadgeDefinition,
-  type CompositeCriteria,
-  type CountCriteria,
-  getAutoAwardBadges,
-  getBadge,
-  type ReputationCriteria,
-} from '@/src/lib/config/badges.config';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
+import type { Tables } from '@/src/types/database.types';
+
+// Type aliases from database
+type Badge = Tables<'badges'>;
+type BadgeCriteria = Badge['criteria'];
+
+// =============================================================================
+// DATABASE QUERIES (inline, no helper files)
+// =============================================================================
+
+/**
+ * Get all active badges from database
+ */
+async function getAllBadges(): Promise<Badge[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('badges')
+    .select('*')
+    .eq('active', true)
+    .order('order', { ascending: true });
+
+  if (error) {
+    logger.error('Failed to fetch badges', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+/**
+ * Get badge by slug from database
+ */
+async function getBadgeBySlug(slug: string): Promise<Badge | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('badges')
+    .select('*')
+    .eq('slug', slug)
+    .eq('active', true)
+    .maybeSingle();
+
+  if (error) {
+    logger.error('Failed to fetch badge', error, { slug });
+    return null;
+  }
+
+  return data;
+}
 
 // =============================================================================
 // TYPES
@@ -223,7 +262,7 @@ async function getBulkUserStats(userIds: string[]): Promise<Map<string, UserStat
 /**
  * Evaluate if user meets badge criteria
  */
-function evaluateCriteria(criteria: AwardCriteria, stats: UserStats): boolean {
+function evaluateCriteria(criteria: any, stats: UserStats): boolean {
   switch (criteria.type) {
     case 'reputation':
       return evaluateReputationCriteria(criteria, stats);
@@ -252,14 +291,14 @@ function evaluateCriteria(criteria: AwardCriteria, stats: UserStats): boolean {
 /**
  * Evaluate reputation-based criteria
  */
-function evaluateReputationCriteria(criteria: ReputationCriteria, stats: UserStats): boolean {
+function evaluateReputationCriteria(criteria: any, stats: UserStats): boolean {
   return stats.reputation >= criteria.minScore;
 }
 
 /**
  * Evaluate count-based criteria
  */
-function evaluateCountCriteria(criteria: CountCriteria, stats: UserStats): boolean {
+function evaluateCountCriteria(criteria: any, stats: UserStats): boolean {
   const metricValue = stats[criteria.metric];
   return metricValue >= criteria.minCount;
 }
@@ -267,7 +306,7 @@ function evaluateCountCriteria(criteria: CountCriteria, stats: UserStats): boole
 /**
  * Evaluate composite criteria (multiple conditions)
  */
-function evaluateCompositeCriteria(criteria: CompositeCriteria, stats: UserStats): boolean {
+function evaluateCompositeCriteria(criteria: any, stats: UserStats): boolean {
   const results = criteria.conditions.map((condition) => evaluateCriteria(condition, stats));
 
   if (criteria.requireAll) {
@@ -399,15 +438,15 @@ export async function checkAndAwardBadges(
     // Get user statistics
     const stats = await getUserStats(userId);
 
-    // Get all auto-awardable badges
-    const autoAwardBadges = getAutoAwardBadges();
+    // Get all active badges from database
+    const allBadges = await getAllBadges();
 
     // Filter badges based on trigger for optimization
-    const relevantBadges = filterBadgesByTrigger(autoAwardBadges, trigger);
+    const relevantBadges = filterBadgesByTrigger(allBadges, trigger);
 
     logger.info('Evaluating badges', {
       userId,
-      totalBadges: autoAwardBadges.length,
+      totalBadges: allBadges.length,
       relevantBadges: relevantBadges.length,
     });
 
@@ -455,10 +494,7 @@ export async function checkAndAwardBadges(
  * Filter badges by trigger type for optimization
  * Only check badges that could be affected by this trigger
  */
-function filterBadgesByTrigger(
-  badges: BadgeDefinition[],
-  trigger: BadgeCheckTrigger
-): BadgeDefinition[] {
+function filterBadgesByTrigger(badges: Badge[], trigger: BadgeCheckTrigger): Badge[] {
   // Manual trigger = check all badges
   if (trigger === 'manual') {
     return badges;
@@ -510,14 +546,14 @@ export async function awardSpecificBadge(
   badgeSlug: string
 ): Promise<BadgeAwardResult> {
   try {
-    const badge = getBadge(badgeSlug);
+    const badge = await getBadgeBySlug(badgeSlug);
 
     if (!badge) {
       return {
         badgeSlug,
         badgeName: 'Unknown',
         awarded: false,
-        reason: 'Badge not found in configuration',
+        reason: 'Badge not found in database',
       };
     }
 
@@ -585,12 +621,12 @@ export async function batchCheckAndAwardBadges(
       returnedStats: bulkStats.size,
     });
 
-    // STEP 2: Get all auto-awardable badges (same for all users)
-    const autoAwardBadges = getAutoAwardBadges();
-    const relevantBadges = filterBadgesByTrigger(autoAwardBadges, trigger);
+    // STEP 2: Get all active badges from database (same for all users)
+    const allBadges = await getAllBadges();
+    const relevantBadges = filterBadgesByTrigger(allBadges, trigger);
 
     logger.info('Evaluating badges for batch', {
-      totalBadges: autoAwardBadges.length,
+      totalBadges: allBadges.length,
       relevantBadges: relevantBadges.length,
     });
 

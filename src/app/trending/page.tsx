@@ -1,17 +1,8 @@
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
-import {
-  agents,
-  collections,
-  commands,
-  hooks,
-  mcp,
-  rules,
-  skills,
-  statuslines,
-} from '@/generated/content';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { LazySection } from '@/src/components/infra/lazy-section';
+import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 
 const UnifiedNewsletterCapture = dynamic(
   () =>
@@ -23,20 +14,45 @@ const UnifiedNewsletterCapture = dynamic(
   }
 );
 
+import { z } from 'zod';
 import { TrendingContent } from '@/src/components/shared/trending-content';
 import { statsRedis } from '@/src/lib/cache.server';
 import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
-import {
-  parseSearchParams,
-  type TrendingParams,
-  trendingParamsSchema,
-} from '@/src/lib/schemas/search.schema';
+
+// Inline trending params schema (was in search.schema.ts)
+const trendingParamsSchema = z.object({
+  category: z.string().optional(),
+  period: z.enum(['today', 'week', 'month', 'year', 'all']).optional().default('week'),
+  metric: z.enum(['views', 'likes', 'shares', 'downloads', 'all']).optional().default('views'),
+  page: z
+    .union([z.string(), z.number()])
+    .transform((val) => Number(val))
+    .pipe(z.number().int().positive())
+    .optional()
+    .default(1),
+  limit: z
+    .union([z.string(), z.number()])
+    .transform((val) => Number(val))
+    .pipe(z.number().int().positive().max(100))
+    .optional()
+    .default(20),
+});
+
+type TrendingParams = z.infer<typeof trendingParamsSchema>;
+
+function parseSearchParams<T extends z.ZodType>(schema: T, params: unknown): z.infer<T> {
+  try {
+    return schema.parse(params);
+  } catch {
+    return schema.parse({});
+  }
+}
+
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { getBatchTrendingData } from '@/src/lib/trending/calculator.server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 // Generate metadata from centralized registry
 export const metadata = generatePageMetadata('/trending');
@@ -61,26 +77,26 @@ async function getTrendingData(params: TrendingParams) {
   }
 
   try {
-    // Await all content promises (single fetch for both trending data and total count)
-    const {
-      rules: rulesData,
-      mcp: mcpData,
-      agents: agentsData,
-      commands: commandsData,
-      hooks: hooksData,
-      statuslines: statuslinesData,
-      collections: collectionsData,
-      skills: skillsData,
-    } = await batchLoadContent({
-      rules,
-      mcp,
-      agents,
-      commands,
-      hooks,
-      statuslines,
-      collections,
-      skills,
-    });
+    // Fetch all content from Supabase (parallel queries with ISR caching)
+    const [
+      rulesData,
+      mcpData,
+      agentsData,
+      commandsData,
+      hooksData,
+      statuslinesData,
+      collectionsData,
+      skillsData,
+    ] = await Promise.all([
+      getContentByCategory('rules'),
+      getContentByCategory('mcp'),
+      getContentByCategory('agents'),
+      getContentByCategory('commands'),
+      getContentByCategory('hooks'),
+      getContentByCategory('statuslines'),
+      getContentByCategory('collections'),
+      getContentByCategory('skills'),
+    ]);
 
     // Calculate total count
     const totalCount =
@@ -94,40 +110,17 @@ async function getTrendingData(params: TrendingParams) {
       skillsData.length;
 
     // Use Redis-based trending calculator with sponsored content injection
+    // Note: getContentByCategory() already includes category field from database
     const trendingData = await getBatchTrendingData(
       {
-        agents: agentsData.map((item: { [key: string]: unknown }) => ({
-          ...item,
-          category: 'agents' as const,
-        })),
-        mcp: mcpData.map((item: { [key: string]: unknown }) => ({
-          ...item,
-          category: 'mcp' as const,
-        })),
-        rules: rulesData.map((item: { [key: string]: unknown }) => ({
-          ...item,
-          category: 'rules' as const,
-        })),
-        commands: commandsData.map((item: { [key: string]: unknown }) => ({
-          ...item,
-          category: 'commands' as const,
-        })),
-        hooks: hooksData.map((item: { [key: string]: unknown }) => ({
-          ...item,
-          category: 'hooks' as const,
-        })),
-        statuslines: statuslinesData.map((item: { [key: string]: unknown }) => ({
-          ...item,
-          category: 'statuslines' as const,
-        })),
-        collections: collectionsData.map((item: { [key: string]: unknown }) => ({
-          ...item,
-          category: 'collections' as const,
-        })),
-        skills: skillsData.map((item: { [key: string]: unknown }) => ({
-          ...item,
-          category: 'skills' as const,
-        })),
+        agents: agentsData,
+        mcp: mcpData,
+        rules: rulesData,
+        commands: commandsData,
+        hooks: hooksData,
+        statuslines: statuslinesData,
+        collections: collectionsData,
+        skills: skillsData,
       },
       { includeSponsored: true } // Enable sponsored content injection
     );

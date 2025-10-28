@@ -89,7 +89,7 @@ async function getSEOPageData(category: string, slug: string): Promise<SEOPageDa
 
         return {
           title: jsonData.title || '',
-          seoTitle: jsonData.seoTitle,
+          seoTitle: jsonData.seo_title,
           description: jsonData.description || '',
           keywords: Array.isArray(jsonData.keywords) ? jsonData.keywords : [],
           dateUpdated: jsonData.dateUpdated || '',

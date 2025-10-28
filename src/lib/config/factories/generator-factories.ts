@@ -20,7 +20,8 @@
  * @see lib/config/content-type-configs.tsx - Consumer of these factories
  */
 
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+
 import type { GeneratorConfig, TroubleshootingItem } from '@/src/lib/types/content-type-config';
 import { getDisplayTitle } from '@/src/lib/utils';
 
@@ -68,31 +69,31 @@ export interface UseCasesGeneratorOptions {
  *
  * Consolidates the pattern used by all 8 categories with intelligent fallback.
  * Supports three generation modes:
- * 1. Item-based: Use item.useCases if present
+ * 1. Item-based: Use item.use_cases if present
  * 2. Tag-based: Generate from item.tags using mapping (rules pattern)
  * 3. Title-based: Personalize defaults with item title (commands/skills pattern)
  * 4. Fallback: Return provided defaults
  *
  * @param defaults - Default use cases when item doesn't provide any
  * @param options - Generation options (tag mapping, title personalization)
- * @returns Generator function compatible with GeneratorConfig['useCases']
+ * @returns Generator function compatible with GeneratorConfig['use_cases']
  *
  * @example
  * ```typescript
  * // Simple fallback (agents, hooks, mcp, statuslines, collections)
- * useCases: createUseCasesGenerator([
+ * use_cases: createUseCasesGenerator([
  *   'Automate specialized development workflows',
  *   'Provide expert guidance in specific domains',
  * ])
  *
  * // With title personalization (commands, skills)
- * useCases: createUseCasesGenerator(
+ * use_cases: createUseCasesGenerator(
  *   ['Execute {title} to automate repetitive tasks'],
  *   { useDisplayTitle: true }
  * )
  *
  * // With tag-based generation (rules)
- * useCases: createUseCasesGenerator(
+ * use_cases: createUseCasesGenerator(
  *   ['Improve code quality and consistency'],
  *   {
  *     tagMapping: {
@@ -106,21 +107,21 @@ export interface UseCasesGeneratorOptions {
 export function createUseCasesGenerator(
   defaults: string[],
   options: UseCasesGeneratorOptions = {}
-): NonNullable<GeneratorConfig['useCases']> {
+): NonNullable<GeneratorConfig['use_cases']> {
   const {
     useDisplayTitle = false,
     tagMapping,
     strategy = ['item', 'tags', 'title', 'defaults'],
   } = options;
 
-  return (item: UnifiedContentItem): string[] => {
+  return (item: ContentItem): string[] => {
     // Process strategies in order
     for (const strat of strategy) {
       switch (strat) {
         case 'item': {
-          // Strategy 1: Use item.useCases if present
-          if ('useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0) {
-            return item.useCases;
+          // Strategy 1: Use item.use_cases if present
+          if ('use_cases' in item && item.use_cases && item.use_cases.length > 0) {
+            return item.use_cases;
           }
           break;
         }
@@ -222,13 +223,9 @@ export function createTroubleshootingGenerator(
 ): NonNullable<GeneratorConfig['troubleshooting']> {
   const { useDisplayTitle = false, additionalItems = [] } = options;
 
-  return (item: UnifiedContentItem): TroubleshootingItem[] => {
+  return (item: ContentItem): TroubleshootingItem[] => {
     // Check if item has custom troubleshooting
-    if (
-      'troubleshooting' in item &&
-      Array.isArray(item.troubleshooting) &&
-      item.troubleshooting.length > 0
-    ) {
+    if ('troubleshooting' in item && item.troubleshooting.length > 0) {
       return item.troubleshooting as TroubleshootingItem[];
     }
 

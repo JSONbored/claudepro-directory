@@ -31,8 +31,9 @@
 
 import { z } from 'zod';
 import { statsRedis } from '@/src/lib/cache.server';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
@@ -40,7 +41,7 @@ import { batchFetch } from '@/src/lib/utils/batch.utils';
 /**
  * Content item with view count and growth rate data
  */
-export interface TrendingContentItem extends UnifiedContentItem {
+export interface TrendingContentItem extends ContentItem {
   viewCount?: number | undefined;
   growthRate?: number | undefined;
   trendingScore?: number | undefined;
@@ -88,7 +89,7 @@ export const trendingOptionsSchema = z
  * ARCHITECTURE (2025-10-26): Uses Supabase materialized view instead of Redis.
  * Pre-computed trending scores refresh every 30 minutes via pg_cron.
  *
- * @param {UnifiedContentItem[]} allContent - Array of all content items to analyze
+ * @param {ContentItem[]} allContent - Array of all content items to analyze
  * @param {TrendingOptions} [options] - Configuration options
  * @returns {Promise<TrendingContentItem[]>} Sorted array of trending items
  *
@@ -107,7 +108,7 @@ export const trendingOptionsSchema = z
  * - If Redis unavailable: Fall back to static popularity
  */
 async function getTrendingContent(
-  allContent: UnifiedContentItem[],
+  allContent: ContentItem[],
   options: TrendingOptions = {}
 ): Promise<TrendingContentItem[]> {
   const { limit = 12, fallbackToPopularity = true } = options;
@@ -135,7 +136,7 @@ async function getTrendingContent(
     }
 
     // Create map for quick lookups
-    const contentMap = new Map<string, UnifiedContentItem>();
+    const contentMap = new Map<string, ContentItem>();
     for (const item of allContent) {
       const key = `${item.category}:${item.slug}`;
       contentMap.set(key, item);
@@ -187,7 +188,7 @@ async function getTrendingContent(
  * Used when materialized view is empty or fails
  */
 async function getTrendingFromRedis(
-  allContent: UnifiedContentItem[],
+  allContent: ContentItem[],
   limit: number,
   fallbackToPopularity: boolean
 ): Promise<TrendingContentItem[]> {
@@ -265,12 +266,12 @@ async function getTrendingFromRedis(
  * ARCHITECTURE (2025-10-26): Uses Supabase materialized view for all-time popularity.
  * Pre-computed popularity scores refresh every 6 hours via pg_cron.
  *
- * @param {UnifiedContentItem[]} allContent - Array of all content items
+ * @param {ContentItem[]} allContent - Array of all content items
  * @param {TrendingOptions} [options] - Configuration options
  * @returns {Promise<TrendingContentItem[]>} Sorted array by popularity
  */
 async function getPopularContent(
-  allContent: UnifiedContentItem[],
+  allContent: ContentItem[],
   options: TrendingOptions = {}
 ): Promise<TrendingContentItem[]> {
   const { limit = 12, fallbackToPopularity = true } = options;
@@ -296,7 +297,7 @@ async function getPopularContent(
     }
 
     // Create map for quick lookups
-    const contentMap = new Map<string, UnifiedContentItem>();
+    const contentMap = new Map<string, ContentItem>();
     for (const item of allContent) {
       const key = `${item.category}:${item.slug}`;
       contentMap.set(key, item);
@@ -342,7 +343,7 @@ async function getPopularContent(
  * Fallback: Calculate popular from Redis view counts
  */
 async function getPopularFromRedis(
-  allContent: UnifiedContentItem[],
+  allContent: ContentItem[],
   limit: number,
   fallbackToPopularity: boolean
 ): Promise<TrendingContentItem[]> {
@@ -409,17 +410,17 @@ async function getPopularFromRedis(
  * Enriches with view counts from Redis for consistent display
  */
 async function getRecentContent(
-  allContent: UnifiedContentItem[],
+  allContent: ContentItem[],
   options: TrendingOptions = {}
 ): Promise<TrendingContentItem[]> {
   const { limit = 12 } = options;
 
   try {
     const sorted = allContent
-      .filter((item) => item.dateAdded)
+      .filter((item) => item.date_added)
       .sort((a, b) => {
-        const dateA = new Date(a.dateAdded || 0).getTime();
-        const dateB = new Date(b.dateAdded || 0).getTime();
+        const dateA = new Date(a.date_added || 0).getTime();
+        const dateB = new Date(b.date_added || 0).getTime();
         return dateB - dateA;
       })
       .slice(0, limit);
@@ -470,10 +471,7 @@ async function getRecentContent(
 /**
  * Fallback trending using static popularity field
  */
-function getFallbackTrending(
-  allContent: UnifiedContentItem[],
-  limit: number
-): TrendingContentItem[] {
+function getFallbackTrending(allContent: ContentItem[], limit: number): TrendingContentItem[] {
   const sorted = [...allContent]
     .filter((item) => typeof item.popularity === 'number' && item.popularity > 0)
     .sort((a, b) => {
@@ -495,10 +493,7 @@ function getFallbackTrending(
 /**
  * Fallback popular using static popularity field
  */
-function getFallbackPopular(
-  allContent: UnifiedContentItem[],
-  limit: number
-): TrendingContentItem[] {
+function getFallbackPopular(allContent: ContentItem[], limit: number): TrendingContentItem[] {
   return getFallbackTrending(allContent, limit);
 }
 
@@ -506,7 +501,7 @@ function getFallbackPopular(
  * Interleave sponsored content into organic results
  * Maintains 1 sponsored per 5 organic ratio (20% max)
  */
-function interleaveSponsored<T extends UnifiedContentItem>(
+function interleaveSponsored<T extends ContentItem>(
   organic: T[],
   sponsored: Array<{ content_id: string; tier: string; sponsored_id: string }>,
   contentMap: Map<string, T>
@@ -608,12 +603,10 @@ async function getActiveSponsored(): Promise<
  * Uses Supabase materialized views for optimal performance
  */
 export async function getBatchTrendingData(
-  contentByCategory: Partial<Record<CategoryId, UnifiedContentItem[]>>,
+  contentByCategory: Partial<Record<CategoryId, ContentItem[]>>,
   options?: { includeSponsored?: boolean }
 ) {
-  const allContent = Object.values(contentByCategory)
-    .flat()
-    .filter(Boolean) as UnifiedContentItem[];
+  const allContent = Object.values(contentByCategory).flat().filter(Boolean) as ContentItem[];
 
   // Run all calculations in parallel
   const [trending, popular, recent, sponsored] = await batchFetch([
@@ -624,7 +617,7 @@ export async function getBatchTrendingData(
   ]);
 
   // Create content map for quick lookups
-  const contentMap = new Map<string, UnifiedContentItem>();
+  const contentMap = new Map<string, ContentItem>();
   for (const item of allContent) {
     contentMap.set(item.slug, item);
   }

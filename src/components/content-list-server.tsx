@@ -8,13 +8,10 @@ import { Button } from '@/src/components/primitives/button';
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ExternalLink, HelpCircle } from '@/src/lib/icons';
-import type {
-  ContentListServerProps,
-  UnifiedContentItem,
-} from '@/src/lib/schemas/component.schema';
+import type { ContentItem, ContentListServerProps } from '@/src/lib/schemas/component.schema';
 import { ICON_NAME_MAP, UI_CLASSES } from '@/src/lib/ui-constants';
 
-function ContentHeroSection<T extends UnifiedContentItem>({
+function ContentHeroSection<T extends ContentItem>({
   title,
   description,
   icon,
@@ -99,7 +96,7 @@ function ContentSearchSkeleton() {
   );
 }
 
-export function ContentListServer<T extends UnifiedContentItem>({
+export function ContentListServer<T extends ContentItem>({
   title,
   description,
   icon,

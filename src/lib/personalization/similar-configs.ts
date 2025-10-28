@@ -11,7 +11,8 @@
  * 6. Popularity Correlation (5%) - Similar popularity levels
  */
 
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+
 import { calculateJaccardSimilarity } from './collaborative-filter';
 
 /**
@@ -142,8 +143,8 @@ function calculatePopularityCorrelation(
  * @returns Similarity score and factor breakdown
  */
 export function calculateContentSimilarity(
-  itemA: UnifiedContentItem,
-  itemB: UnifiedContentItem,
+  itemA: ContentItem,
+  itemB: ContentItem,
   coBookmarkFrequency = 0
 ): {
   similarity_score: number;
@@ -198,17 +199,17 @@ export function calculateContentSimilarity(
  * @returns Array of similar items with scores
  */
 export function findSimilarConfigs(
-  sourceItem: UnifiedContentItem,
-  allItems: UnifiedContentItem[],
+  sourceItem: ContentItem,
+  allItems: ContentItem[],
   coBookmarkData?: Map<string, number>,
   limit = 6
 ): Array<{
-  item: UnifiedContentItem;
+  item: ContentItem;
   similarity_score: number;
   factors: Record<string, number>;
 }> {
   const similarItems: Array<{
-    item: UnifiedContentItem;
+    item: ContentItem;
     similarity_score: number;
     factors: Record<string, number>;
   }> = [];

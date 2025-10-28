@@ -485,7 +485,7 @@ export const METADATA_TEMPLATES: Record<RoutePattern, MetadataTemplate> = {
         name?: string;
       };
 
-      const displayTitle = item.seoTitle || item.title || item.name || 'Content';
+      const displayTitle = item.seo_title || item.title || item.name || 'Content';
       const categoryConfig = context.categoryConfig;
       const categoryName = categoryConfig?.title || 'Content';
 

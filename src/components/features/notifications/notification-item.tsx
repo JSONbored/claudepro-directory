@@ -19,7 +19,10 @@
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { Button } from '@/src/components/primitives/button';
-import type { Notification } from '@/src/config/notifications';
+import type { Tables } from '@/src/types/database.types';
+
+type Notification = Tables<'notifications'>;
+
 import { Bell, X } from '@/src/lib/icons';
 import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
 
@@ -31,8 +34,9 @@ export function NotificationItem({ notification }: NotificationItemProps) {
   const dismiss = useNotificationStore((state: NotificationStore) => state.dismiss);
   const closeSheet = useNotificationStore((state: NotificationStore) => state.closeSheet);
 
-  // Type-safe icon rendering - use provided icon or fallback to Bell
-  const Icon = notification.icon ?? Bell;
+  // Icon rendering - notification.icon is string name, would need dynamic import
+  // For now, always use Bell - TODO: implement dynamic icon loading
+  const Icon = Bell;
 
   const handleDismiss = () => {
     dismiss(notification.id);
@@ -106,15 +110,15 @@ export function NotificationItem({ notification }: NotificationItemProps) {
           <p className="text-xs text-muted-foreground leading-relaxed">{notification.message}</p>
 
           {/* Action Button */}
-          {notification.action && (
+          {notification.action_label && (
             <div className="pt-2">
-              {notification.action.href ? (
+              {notification.action_href ? (
                 <Button asChild variant="outline" size="sm" onClick={handleActionClick}>
-                  <Link href={notification.action.href}>{notification.action.label}</Link>
+                  <Link href={notification.action_href}>{notification.action_label}</Link>
                 </Button>
               ) : (
                 <Button variant="outline" size="sm" onClick={handleActionClick}>
-                  {notification.action.label}
+                  {notification.action_label}
                 </Button>
               )}
             </div>

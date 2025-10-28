@@ -2,13 +2,13 @@
  * Related Content Analytics Events
  * Feature-specific event tracking for related content functionality
  *
- * UPDATED: Migrated to consolidated events (Umami best practices)
- * - Before: 22 events (11 RELATED_VIEW_ON_{category} + 11 RELATED_CLICK_FROM_{category})
- * - After: 2 events (RELATED_VIEWED + RELATED_CLICKED) with category payload
+ * **Database-First Architecture:**
+ * - Event configuration loaded from analytics_events table
+ * - Event names are plain strings (database-driven)
+ * - Uses consolidated events (Umami best practices)
  */
 
 import { trackEvent } from '#lib/analytics/tracker';
-import { EVENTS } from '@/src/lib/analytics/events.constants';
 
 /**
  * Track related content section view with consolidated analytics
@@ -25,8 +25,8 @@ export const trackRelatedContentView = (
   const sourceCategory = pathParts[0] || 'unknown';
   const sourceSlug = pathParts[1] || 'unknown';
 
-  // NEW: Consolidated event with typed data
-  trackEvent(EVENTS.RELATED_VIEWED, {
+  // Consolidated event with typed data
+  trackEvent('related_viewed', {
     category: sourceCategory,
     slug: sourceSlug,
     impressionCount: itemsShown, // NUMBER (not string)
@@ -53,8 +53,8 @@ export const trackRelatedContentClick = (
   const targetCategory = targetPathParts[0] || 'unknown';
   const targetSlug = targetPathParts[1] || 'unknown';
 
-  // NEW: Consolidated event with typed data
-  trackEvent(EVENTS.RELATED_CLICKED, {
+  // Consolidated event with typed data
+  trackEvent('related_clicked', {
     category: sourceCategory,
     slug: sourceSlug,
     targetCategory,

@@ -26,11 +26,11 @@ import {
   UNIFIED_CATEGORY_REGISTRY,
 } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/schemas/component.schema';
 
 interface TabsSectionProps {
   activeTab: string;
-  filteredResults: readonly UnifiedContentItem[];
+  filteredResults: readonly ContentItem[];
   onTabChange: (value: string) => void;
 }
 
@@ -96,7 +96,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
               emptyMessage={`No ${categoryName} found. Try adjusting your filters.`}
               ariaLabel={`${categoryName} results`}
               keyExtractor={(item) => item.slug}
-              renderCard={(item: UnifiedContentItem) => (
+              renderCard={(item: ContentItem) => (
                 <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
               )}
             />

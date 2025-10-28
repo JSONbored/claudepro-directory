@@ -25,19 +25,16 @@ import {
   generatePRTitle,
 } from '@/src/lib/github/pr-template';
 import { logger } from '@/src/lib/logger';
-import {
-  createJobSchema,
-  toggleJobStatusSchema,
-  updateJobSchema,
-} from '@/src/lib/schemas/content/job.schema';
 import { configSubmissionSchema } from '@/src/lib/schemas/form.schema';
 import {
   publicCompaniesInsertSchema,
   publicCompaniesUpdateSchema,
+  publicJobsInsertSchema,
+  publicJobsUpdateSchema,
   publicSponsoredClicksInsertSchema,
   publicSponsoredImpressionsInsertSchema,
 } from '@/src/lib/schemas/generated/db-schemas';
-import { nonNegativeInt } from '@/src/lib/schemas/primitives/base-numbers';
+import { nonNegativeInt } from '@/src/lib/schemas/primitives';
 
 // ============================================
 // SUBMISSION STATS TYPES (Database-First)
@@ -750,7 +747,7 @@ export const createJob = rateLimitedAction
     actionName: 'createJob',
     category: 'form',
   })
-  .schema(createJobSchema)
+  .schema(publicJobsInsertSchema)
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
 
@@ -836,7 +833,7 @@ export const updateJob = rateLimitedAction
     actionName: 'updateJob',
     category: 'form',
   })
-  .schema(updateJobSchema)
+  .schema(publicJobsUpdateSchema)
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
 
@@ -912,7 +909,7 @@ export const toggleJobStatus = rateLimitedAction
     actionName: 'toggleJobStatus',
     category: 'form',
   })
-  .schema(toggleJobStatusSchema)
+  .schema(publicJobsUpdateSchema.pick({ id: true, active: true }))
   .action(async ({ parsedInput: { id, status } }) => {
     const supabase = await createClient();
 

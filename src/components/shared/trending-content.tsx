@@ -6,7 +6,7 @@ import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import { Clock, Star, TrendingUp } from '@/src/lib/icons';
-import type { TrendingContentProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem, TrendingContentProps } from '@/src/lib/schemas/component.schema';
 
 /**
  * Trending Content Component
@@ -74,7 +74,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
                   </UnifiedBadge>
                 )}
                 <ConfigCard
-                  item={{ ...item, position: index } as UnifiedContentItem}
+                  item={{ ...item, position: index } as ContentItem}
                   variant="default"
                   showCategory={true}
                   showActions={false}
@@ -104,7 +104,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
             renderCard={(item, index) => (
               <ConfigCard
                 key={item.slug}
-                item={{ ...item, position: index } as UnifiedContentItem}
+                item={{ ...item, position: index } as ContentItem}
                 variant="default"
                 showCategory={true}
                 showActions={false}
@@ -133,7 +133,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
             renderCard={(item, index) => (
               <ConfigCard
                 key={item.slug}
-                item={{ ...item, position: index } as UnifiedContentItem}
+                item={{ ...item, position: index } as ContentItem}
                 variant="default"
                 showCategory={true}
                 showActions={false}

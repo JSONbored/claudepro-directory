@@ -14,7 +14,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
-import { EVENTS } from '@/src/lib/analytics/events.constants';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ForYouFeedResponse } from '@/src/lib/schemas/personalization.schema';
@@ -44,7 +43,7 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
 
   // Track page view
   useEffect(() => {
-    trackEvent(EVENTS.PERSONALIZATION_FOR_YOU_VIEWED, {
+    trackEvent('personalization_for_you_viewed', {
       items_shown: initialData.recommendations.length,
       algorithm_version: 'v1.0',
       user_has_history: initialData.user_has_history,

@@ -27,8 +27,9 @@ import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unifi
 import { isValidCategory } from '@/src/lib/config/category-config';
 import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
 import { detectLanguage } from '@/src/lib/content/language-detection';
+import type { FullContentItem } from '@/src/lib/content/supabase-content-loader';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting-starry';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/schemas/component.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { getDisplayTitle } from '@/src/lib/utils';
@@ -45,10 +46,10 @@ import { DetailMetadata } from './detail-metadata';
 import { DetailSidebar } from './sidebar/detail-sidebar';
 
 export interface UnifiedDetailPageProps {
-  item: UnifiedContentItem;
-  relatedItems?: UnifiedContentItem[];
+  item: ContentItem | FullContentItem; // Accept view data or full table row
+  relatedItems?: ContentItem[];
   viewCount?: number;
-  relatedItemsPromise?: Promise<UnifiedContentItem[]>;
+  relatedItemsPromise?: Promise<ContentItem[]>;
   viewCountPromise?: Promise<number>;
 }
 
@@ -59,7 +60,7 @@ async function ViewCountMetadata({
   item,
   viewCountPromise,
 }: {
-  item: UnifiedContentItem;
+  item: ContentItem | FullContentItem;
   viewCountPromise: Promise<number>;
 }) {
   const viewCount = await viewCountPromise;
@@ -74,8 +75,8 @@ async function SidebarWithRelated({
   relatedItemsPromise,
   config,
 }: {
-  item: UnifiedContentItem;
-  relatedItemsPromise: Promise<UnifiedContentItem[]>;
+  item: ContentItem | FullContentItem;
+  relatedItemsPromise: Promise<ContentItem[]>;
   config: {
     typeName: string;
     metadata?:
@@ -124,33 +125,29 @@ export async function UnifiedDetailPage({
 
   const useCases = (() => {
     if (!config) return [];
-    return 'useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0
-      ? item.useCases
-      : // biome-ignore lint/correctness/useHookAtTopLevel: config.generators.useCases is a generator function, not a React hook - false positive due to "use" in property name
-        config.generators.useCases?.(item) || [];
+    return 'use_cases' in item && item.use_cases && item.use_cases.length > 0
+      ? item.use_cases
+      : // biome-ignore lint/correctness/useHookAtTopLevel: config.generators.use_cases is a generator function, not a React hook - false positive due to "use" in property name
+        config.generators.use_cases?.(item) || [];
   })();
 
   const features = (() => {
     if (!config) return [];
-    return 'features' in item && Array.isArray(item.features) && item.features.length > 0
+    return 'features' in item && item.features && item.features.length > 0
       ? item.features
       : config.generators.features?.(item) || [];
   })();
 
   const troubleshooting = (() => {
     if (!config) return [];
-    return 'troubleshooting' in item &&
-      Array.isArray(item.troubleshooting) &&
-      item.troubleshooting.length > 0
+    return 'troubleshooting' in item && item.troubleshooting && item.troubleshooting.length > 0
       ? item.troubleshooting
       : config.generators.troubleshooting?.(item) || [];
   })();
 
   const requirements = (() => {
     if (!config) return [];
-    return 'requirements' in item &&
-      Array.isArray(item.requirements) &&
-      item.requirements.length > 0
+    return 'requirements' in item && item.requirements && item.requirements.length > 0
       ? item.requirements
       : config.generators.requirements?.(item) || [];
   })();
@@ -288,7 +285,7 @@ export async function UnifiedDetailPage({
   // Pre-process usage examples highlighting (UsageExamplesSection data)
   const examplesData = await (async () => {
     if (
-      !('examples' in item && Array.isArray(item.examples)) ||
+      !('examples' in item) ||
       item.examples.length === 0 ||
       !item.examples.every((ex) => typeof ex === 'object' && 'code' in ex)
     ) {
@@ -447,7 +444,7 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Use Cases Section */}
-            {config.sections.useCases && useCases.length > 0 && (
+            {config.sections.use_cases && useCases.length > 0 && (
               <UnifiedContentSection
                 variant="bullets"
                 title="Use Cases"
@@ -459,7 +456,7 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Security Section (MCP-specific) */}
-            {config.sections.security && 'security' in item && Array.isArray(item.security) && (
+            {config.sections.security && 'security' in item && (
               <UnifiedContentSection
                 variant="bullets"
                 title="Security Best Practices"

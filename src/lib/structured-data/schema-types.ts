@@ -3,14 +3,7 @@
  * Type definitions for unified structured data generation
  */
 
-import type { AgentContent } from '@/src/lib/schemas/content/agent.schema';
-import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
-import type { CommandContent } from '@/src/lib/schemas/content/command.schema';
-import type { HookContent } from '@/src/lib/schemas/content/hook.schema';
-import type { McpContent } from '@/src/lib/schemas/content/mcp.schema';
-import type { RuleContent } from '@/src/lib/schemas/content/rule.schema';
-import type { SkillContent } from '@/src/lib/schemas/content/skill.schema';
-import type { StatuslineContent } from '@/src/lib/schemas/content/statusline.schema';
+import type { ContentItem, FullContentItem } from '@/src/lib/content/supabase-content-loader';
 import {
   buildBreadcrumb,
   buildCreativeWork,
@@ -23,19 +16,13 @@ import {
   type SchemaObject,
 } from '@/src/lib/structured-data/schema-builder';
 import { getContentItemUrl, transformMcpConfigForDisplay } from '@/src/lib/utils/content.utils';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Discriminated union for all content types
+ * DATABASE-FIRST: Accepts both FullContentItem (from individual tables) and ContentItem (from content_unified view)
  */
-export type UnifiedContent =
-  | ({ category: 'agents' } & AgentContent)
-  | ({ category: 'collections' } & CollectionContent)
-  | ({ category: 'commands' } & CommandContent)
-  | ({ category: 'hooks' } & HookContent)
-  | ({ category: 'mcp' } & McpContent)
-  | ({ category: 'rules' } & RuleContent)
-  | ({ category: 'statuslines' } & StatuslineContent)
-  | ({ category: 'skills' } & SkillContent);
+export type UnifiedContent = FullContentItem | ContentItem;
 
 /**
  * Props for unified structured data component
@@ -49,43 +36,49 @@ export interface UnifiedStructuredDataProps {
  */
 export function isAgentContent(
   item: UnifiedContent
-): item is AgentContent & { category: 'agents' } {
+): item is Database['public']['Tables']['agents']['Row'] & { category: 'agents' } {
   return item.category === 'agents';
 }
 
 export function isCommandContent(
   item: UnifiedContent
-): item is CommandContent & { category: 'commands' } {
+): item is Database['public']['Tables']['commands']['Row'] & { category: 'commands' } {
   return item.category === 'commands';
 }
 
 export function isCollectionContent(
   item: UnifiedContent
-): item is CollectionContent & { category: 'collections' } {
+): item is Database['public']['Tables']['collections']['Row'] & { category: 'collections' } {
   return item.category === 'collections';
 }
 
-export function isHookContent(item: UnifiedContent): item is HookContent & { category: 'hooks' } {
+export function isHookContent(
+  item: UnifiedContent
+): item is Database['public']['Tables']['hooks']['Row'] & { category: 'hooks' } {
   return item.category === 'hooks';
 }
 
-export function isMcpContent(item: UnifiedContent): item is McpContent & { category: 'mcp' } {
+export function isMcpContent(
+  item: UnifiedContent
+): item is Database['public']['Tables']['mcp']['Row'] & { category: 'mcp' } {
   return item.category === 'mcp';
 }
 
-export function isRuleContent(item: UnifiedContent): item is RuleContent & { category: 'rules' } {
+export function isRuleContent(
+  item: UnifiedContent
+): item is Database['public']['Tables']['rules']['Row'] & { category: 'rules' } {
   return item.category === 'rules';
 }
 
 export function isStatuslineContent(
   item: UnifiedContent
-): item is StatuslineContent & { category: 'statuslines' } {
+): item is Database['public']['Tables']['statuslines']['Row'] & { category: 'statuslines' } {
   return item.category === 'statuslines';
 }
 
 export function isSkillContent(
   item: UnifiedContent
-): item is SkillContent & { category: 'skills' } {
+): item is Database['public']['Tables']['skills']['Row'] & { category: 'skills' } {
   return item.category === 'skills';
 }
 
@@ -94,14 +87,14 @@ export function isSkillContent(
  * Used for FAQPage schema generation
  */
 export function hasContentTroubleshooting(item: UnifiedContent): item is (
-  | AgentContent
-  | CollectionContent
-  | CommandContent
-  | HookContent
-  | McpContent
-  | RuleContent
-  | SkillContent
-  | StatuslineContent
+  | Database['public']['Tables']['agents']['Row']
+  | Database['public']['Tables']['collections']['Row']
+  | Database['public']['Tables']['commands']['Row']
+  | Database['public']['Tables']['hooks']['Row']
+  | Database['public']['Tables']['mcp']['Row']
+  | Database['public']['Tables']['rules']['Row']
+  | Database['public']['Tables']['skills']['Row']
+  | Database['public']['Tables']['statuslines']['Row']
 ) & {
   troubleshooting: Array<{ issue: string; solution: string }>;
 } {
@@ -318,12 +311,12 @@ export const STRUCTURED_DATA_RULES: Record<UnifiedContent['category'], Structure
     },
     extractors: {
       applicationSubCategory: (item) =>
-        isHookContent(item) ? `${item.hookType || 'Hook'} - Claude Hook` : 'Claude Hook',
+        isHookContent(item) ? `${item.hook_type || 'Hook'} - Claude Hook` : 'Claude Hook',
       keywords: (item) => {
-        const hookType = isHookContent(item) ? item.hookType : undefined;
+        const hook_type = isHookContent(item) ? item.hook_type : undefined;
         return [
           'Claude Hook',
-          hookType || 'Hook',
+          hook_type || 'Hook',
           'Automation',
           item.category,
           'Claude',
@@ -402,15 +395,15 @@ export const STRUCTURED_DATA_RULES: Record<UnifiedContent['category'], Structure
     extractors: {
       applicationSubCategory: (item) =>
         isStatuslineContent(item)
-          ? `${item.statuslineType || 'Statusline'} - CLI Statusline`
+          ? `${item.statusline_type || 'Statusline'} - CLI Statusline`
           : 'CLI Statusline',
       keywords: (item) => {
-        const statuslineType = isStatuslineContent(item) ? item.statuslineType : undefined;
+        const statusline_type = isStatuslineContent(item) ? item.statusline_type : undefined;
         return [
           'Claude Statusline',
           'CLI Statusline',
           'Terminal Customization',
-          statuslineType || 'Statusline',
+          statusline_type || 'Statusline',
           item.category,
           'Claude',
           ...(item.tags || []),
@@ -485,7 +478,7 @@ export function generateAllSchemasForContent(item: UnifiedContent): SchemaObject
         keywords: rules.extractors.keywords(item),
         author: item.author,
         githubUrl: itemGithubUrl,
-        dateAdded: item.dateAdded,
+        date_added: item.date_added,
         lastModified: itemLastModified,
         features: itemFeatures,
         requirements: rules.extractors.requirements(item),
@@ -607,7 +600,7 @@ function generateSourceCodeSchemas(
         slug: item.slug,
         category: item.category,
         name: `${displayName} - Script`,
-        description: `${item.hookType || 'Hook'} script for Claude`,
+        description: `${item.hook_type || 'Hook'} script for Claude`,
         programmingLanguage: 'Shell Script',
         code: item.configuration.scriptContent,
         encodingFormat: 'text/x-shellscript',
@@ -683,7 +676,7 @@ function generateSourceCodeSchemas(
         slug: item.slug,
         category: item.category,
         name: `${displayName} - Script`,
-        description: `${item.statuslineType || 'Statusline'} script for Claude Code`,
+        description: `${item.statusline_type || 'Statusline'} script for Claude Code`,
         programmingLanguage: item.configuration?.format === 'python' ? 'Python' : 'Shell Script',
         code: item.content,
         encodingFormat:

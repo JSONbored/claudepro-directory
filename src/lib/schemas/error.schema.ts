@@ -8,8 +8,9 @@
 
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
-import { isoDatetimeString, nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
-import { requestIdSchema } from './branded-types.schema';
+import { isoDatetimeString, nonEmptyString } from '@/src/lib/schemas/primitives';
+
+const requestIdSchema = nonEmptyString.uuid();
 
 /**
  * Security constants for error handling
@@ -432,7 +433,7 @@ const errorResponseSchema = z
 export type {
   ErrorSeverity,
   ErrorType,
-} from './primitives/performance-primitives';
+} from './primitives';
 export type ErrorContext = z.infer<typeof errorContextSchema>;
 export type SanitizedError = z.infer<typeof sanitizedErrorSchema>;
 export type ErrorHandlerConfig = z.infer<typeof errorHandlerConfigSchema>;

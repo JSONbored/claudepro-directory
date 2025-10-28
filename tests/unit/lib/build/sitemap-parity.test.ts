@@ -20,38 +20,20 @@
  */
 
 import { describe, expect, it } from 'vitest';
-// Import metadata from generated files
-import { agentsMetadata } from '@/generated/agents-metadata';
-import { collectionsMetadata } from '@/generated/collections-metadata';
-import { commandsMetadata } from '@/generated/commands-metadata';
-import { hooksMetadata } from '@/generated/hooks-metadata';
-import { mcpMetadata } from '@/generated/mcp-metadata';
-import { rulesMetadata } from '@/generated/rules-metadata';
-import { statuslinesMetadata } from '@/generated/statuslines-metadata';
 import { generateAllSiteUrls } from '@/src/lib/build/url-generator.server';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 
 describe('Sitemap Parity Test', () => {
   describe('Dynamic Sitemap Generation', () => {
     it('generates URLs using centralized URL generator', async () => {
-      const urls = await generateAllSiteUrls(
-        {
-          agentsMetadata,
-          collectionsMetadata,
-          commandsMetadata,
-          hooksMetadata,
-          mcpMetadata,
-          rulesMetadata,
-          statuslinesMetadata,
-        },
-        {
-          baseUrl: APP_CONFIG.url,
-          includeGuides: true,
-          includeChangelog: true,
-          includeLlmsTxt: true,
-          includeTools: true,
-        }
-      );
+      const urls = await generateAllSiteUrls({
+        baseUrl: APP_CONFIG.url,
+        includeGuides: true,
+        includeChangelog: true,
+        includeLlmsTxt: true,
+        includeTools: true,
+      });
 
       expect(urls).toBeDefined();
       expect(Array.isArray(urls)).toBe(true);
@@ -59,18 +41,7 @@ describe('Sitemap Parity Test', () => {
     });
 
     it('includes all required URL fields', async () => {
-      const urls = await generateAllSiteUrls(
-        {
-          agentsMetadata,
-          collectionsMetadata,
-          commandsMetadata,
-          hooksMetadata,
-          mcpMetadata,
-          rulesMetadata,
-          statuslinesMetadata,
-        },
-        { baseUrl: APP_CONFIG.url }
-      );
+      const urls = await generateAllSiteUrls({ baseUrl: APP_CONFIG.url });
 
       // Check first URL has all required fields
       const firstUrl = urls[0];
@@ -88,18 +59,7 @@ describe('Sitemap Parity Test', () => {
     });
 
     it('generates unique URLs (no duplicates)', async () => {
-      const urls = await generateAllSiteUrls(
-        {
-          agentsMetadata,
-          collectionsMetadata,
-          commandsMetadata,
-          hooksMetadata,
-          mcpMetadata,
-          rulesMetadata,
-          statuslinesMetadata,
-        },
-        { baseUrl: APP_CONFIG.url }
-      );
+      const urls = await generateAllSiteUrls({ baseUrl: APP_CONFIG.url });
 
       const urlSet = new Set(urls.map((u) => u.loc));
       expect(urlSet.size).toBe(urls.length); // No duplicates
@@ -108,18 +68,7 @@ describe('Sitemap Parity Test', () => {
 
   describe('URL Structure Validation', () => {
     it('includes homepage with highest priority', async () => {
-      const urls = await generateAllSiteUrls(
-        {
-          agentsMetadata,
-          collectionsMetadata,
-          commandsMetadata,
-          hooksMetadata,
-          mcpMetadata,
-          rulesMetadata,
-          statuslinesMetadata,
-        },
-        { baseUrl: APP_CONFIG.url }
-      );
+      const urls = await generateAllSiteUrls({ baseUrl: APP_CONFIG.url });
 
       const homepage = urls.find((u) => u.loc === APP_CONFIG.url);
       expect(homepage).toBeDefined();
@@ -128,18 +77,7 @@ describe('Sitemap Parity Test', () => {
     });
 
     it('includes all main category pages', async () => {
-      const urls = await generateAllSiteUrls(
-        {
-          agentsMetadata,
-          collectionsMetadata,
-          commandsMetadata,
-          hooksMetadata,
-          mcpMetadata,
-          rulesMetadata,
-          statuslinesMetadata,
-        },
-        { baseUrl: APP_CONFIG.url }
-      );
+      const urls = await generateAllSiteUrls({ baseUrl: APP_CONFIG.url });
 
       const categories = [
         'agents',
@@ -158,18 +96,9 @@ describe('Sitemap Parity Test', () => {
     });
 
     it('includes all content item pages', async () => {
-      const urls = await generateAllSiteUrls(
-        {
-          agentsMetadata,
-          collectionsMetadata,
-          commandsMetadata,
-          hooksMetadata,
-          mcpMetadata,
-          rulesMetadata,
-          statuslinesMetadata,
-        },
-        { baseUrl: APP_CONFIG.url }
-      );
+      const urls = await generateAllSiteUrls({ baseUrl: APP_CONFIG.url });
+      const agentsMetadata = await getContentByCategory('agents');
+      const mcpMetadata = await getContentByCategory('mcp');
 
       // Check agents
       expect(agentsMetadata.length).toBeGreaterThan(0);
@@ -188,21 +117,11 @@ describe('Sitemap Parity Test', () => {
     });
 
     it('includes llms.txt routes when enabled', async () => {
-      const urls = await generateAllSiteUrls(
-        {
-          agentsMetadata,
-          collectionsMetadata,
-          commandsMetadata,
-          hooksMetadata,
-          mcpMetadata,
-          rulesMetadata,
-          statuslinesMetadata,
-        },
-        {
-          baseUrl: APP_CONFIG.url,
-          includeLlmsTxt: true,
-        }
-      );
+      const urls = await generateAllSiteUrls({
+        baseUrl: APP_CONFIG.url,
+        includeLlmsTxt: true,
+      });
+      const agentsMetadata = await getContentByCategory('agents');
 
       // Site-wide llms.txt
       const siteLlmsTxt = urls.find((u) => u.loc === `${APP_CONFIG.url}/llms.txt`);
@@ -224,18 +143,8 @@ describe('Sitemap Parity Test', () => {
     });
 
     it('includes collection pages', async () => {
-      const urls = await generateAllSiteUrls(
-        {
-          agentsMetadata,
-          collectionsMetadata,
-          commandsMetadata,
-          hooksMetadata,
-          mcpMetadata,
-          rulesMetadata,
-          statuslinesMetadata,
-        },
-        { baseUrl: APP_CONFIG.url }
-      );
+      const urls = await generateAllSiteUrls({ baseUrl: APP_CONFIG.url });
+      const collectionsMetadata = await getContentByCategory('collections');
 
       const collectionsPage = urls.find((u) => u.loc === `${APP_CONFIG.url}/collections`);
       expect(collectionsPage).toBeDefined();
@@ -253,24 +162,13 @@ describe('Sitemap Parity Test', () => {
 
   describe('URL Count Validation', () => {
     it('generates expected number of URLs (±10 tolerance for growth)', async () => {
-      const dynamicUrls = await generateAllSiteUrls(
-        {
-          agentsMetadata,
-          collectionsMetadata,
-          commandsMetadata,
-          hooksMetadata,
-          mcpMetadata,
-          rulesMetadata,
-          statuslinesMetadata,
-        },
-        {
-          baseUrl: APP_CONFIG.url,
-          includeGuides: true,
-          includeChangelog: true,
-          includeLlmsTxt: true,
-          includeTools: true,
-        }
-      );
+      const dynamicUrls = await generateAllSiteUrls({
+        baseUrl: APP_CONFIG.url,
+        includeGuides: true,
+        includeChangelog: true,
+        includeLlmsTxt: true,
+        includeTools: true,
+      });
 
       // Baseline: 427 URLs (2025-10-11 - verified from last static generation)
       // NOTE: Update this baseline when you add significant new content sections
@@ -286,24 +184,13 @@ describe('Sitemap Parity Test', () => {
     });
 
     it('includes all critical routes', async () => {
-      const urls = await generateAllSiteUrls(
-        {
-          agentsMetadata,
-          collectionsMetadata,
-          commandsMetadata,
-          hooksMetadata,
-          mcpMetadata,
-          rulesMetadata,
-          statuslinesMetadata,
-        },
-        {
-          baseUrl: APP_CONFIG.url,
-          includeGuides: true,
-          includeChangelog: true,
-          includeLlmsTxt: true,
-          includeTools: true,
-        }
-      );
+      const urls = await generateAllSiteUrls({
+        baseUrl: APP_CONFIG.url,
+        includeGuides: true,
+        includeChangelog: true,
+        includeLlmsTxt: true,
+        includeTools: true,
+      });
 
       const urlSet = new Set(urls.map((u) => u.loc));
 
@@ -327,18 +214,7 @@ describe('Sitemap Parity Test', () => {
 
   describe('SEO Metadata Validation', () => {
     it('uses proper ISO date format for lastmod', async () => {
-      const urls = await generateAllSiteUrls(
-        {
-          agentsMetadata,
-          collectionsMetadata,
-          commandsMetadata,
-          hooksMetadata,
-          mcpMetadata,
-          rulesMetadata,
-          statuslinesMetadata,
-        },
-        { baseUrl: APP_CONFIG.url }
-      );
+      const urls = await generateAllSiteUrls({ baseUrl: APP_CONFIG.url });
 
       // Check date format: YYYY-MM-DD
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -349,18 +225,7 @@ describe('Sitemap Parity Test', () => {
     });
 
     it('uses valid changefreq values', async () => {
-      const urls = await generateAllSiteUrls(
-        {
-          agentsMetadata,
-          collectionsMetadata,
-          commandsMetadata,
-          hooksMetadata,
-          mcpMetadata,
-          rulesMetadata,
-          statuslinesMetadata,
-        },
-        { baseUrl: APP_CONFIG.url }
-      );
+      const urls = await generateAllSiteUrls({ baseUrl: APP_CONFIG.url });
 
       const validFreqs = [
         'always',
@@ -378,18 +243,7 @@ describe('Sitemap Parity Test', () => {
     });
 
     it('uses valid priority range (0.0 to 1.0)', async () => {
-      const urls = await generateAllSiteUrls(
-        {
-          agentsMetadata,
-          collectionsMetadata,
-          commandsMetadata,
-          hooksMetadata,
-          mcpMetadata,
-          rulesMetadata,
-          statuslinesMetadata,
-        },
-        { baseUrl: APP_CONFIG.url }
-      );
+      const urls = await generateAllSiteUrls({ baseUrl: APP_CONFIG.url });
 
       for (const url of urls) {
         expect(url.priority).toBeGreaterThanOrEqual(0.0);

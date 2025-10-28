@@ -19,30 +19,29 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
-import { getAutoAwardBadges } from '@/src/lib/config/badges.config';
-import { userIdSchema } from '@/src/lib/schemas/branded-types.schema';
+import {
+  publicBadgesRowSchema,
+  publicUserBadgesRowSchema,
+} from '@/src/lib/schemas/generated/db-schemas';
+import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import { createClient } from '@/src/lib/supabase/server';
 import { validateRows } from '@/src/lib/supabase/validators';
 
 // =============================================================================
-// VALIDATION SCHEMAS
+// VALIDATION SCHEMAS (Database-First)
 // =============================================================================
 
 /**
  * UserBadge with badge details joined
- * Schema for runtime validation of Supabase query results
+ * Uses db-schemas + extends for join structure
  */
-const userBadgeWithBadgeSchema = z.object({
-  id: z.string(),
-  badge_id: z.string(),
-  earned_at: z.string(),
-  featured: z.boolean().nullable(),
-  badges: z.object({
-    slug: z.string(),
-    name: z.string(),
-    description: z.string(),
-    icon: z.string().nullable(),
-    category: z.string(),
+const userBadgeWithBadgeSchema = publicUserBadgesRowSchema.extend({
+  badges: publicBadgesRowSchema.pick({
+    slug: true,
+    name: true,
+    description: true,
+    icon: true,
+    category: true,
   }),
 });
 
@@ -52,9 +51,9 @@ type UserBadgeWithBadge = z.infer<typeof userBadgeWithBadgeSchema>;
  * UserBadge with only badge slug (for eligibility checks)
  */
 const userBadgeWithSlugSchema = z.object({
-  badges: z
-    .object({
-      slug: z.string(),
+  badges: publicBadgesRowSchema
+    .pick({
+      slug: true,
     })
     .nullable(),
 });
@@ -367,8 +366,7 @@ export async function getPublicUserBadges(
   targetUserId: string,
   options?: { limit?: number; featuredOnly?: boolean }
 ): Promise<UserBadgeWithBadge[]> {
-  // Validate input
-  const validatedUserId = userIdSchema.parse(targetUserId);
+  const validatedUserId = nonEmptyString.uuid().parse(targetUserId);
 
   const supabase = await createClient();
   let query = supabase
@@ -417,8 +415,7 @@ export async function getPublicUserBadges(
  * Check if user has specific badge (public)
  */
 export async function userHasBadge(userId: string, badgeId: string): Promise<boolean> {
-  // Validate inputs
-  const validatedUserId = userIdSchema.parse(userId);
+  const validatedUserId = nonEmptyString.uuid().parse(userId);
   const validatedBadgeId = z.string().uuid().parse(badgeId);
 
   const supabase = await createClient();

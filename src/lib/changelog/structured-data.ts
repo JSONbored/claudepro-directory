@@ -18,9 +18,9 @@
  * - Follows existing structured-data patterns
  */
 
+import type { ChangelogEntry } from '@/src/lib/changelog/loader';
 import { formatChangelogDateISO8601, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
-import type { ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
 
 /**
  * Base schema context

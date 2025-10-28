@@ -8,8 +8,9 @@
  */
 
 import type { ReactNode } from 'react';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import type { LucideIcon } from '@/src/lib/icons';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 
 /**
@@ -45,7 +46,7 @@ export interface InstallationSteps {
 export interface ActionButtonConfig {
   label: string;
   icon: ReactNode;
-  handler: (item: UnifiedContentItem) => void | Promise<void>;
+  handler: (item: ContentItem) => void | Promise<void>;
 }
 
 /**
@@ -54,7 +55,7 @@ export interface ActionButtonConfig {
 export interface SectionConfig {
   features: boolean;
   installation: boolean;
-  useCases: boolean;
+  use_cases: boolean;
   configuration: boolean;
   security: boolean;
   troubleshooting: boolean;
@@ -65,25 +66,25 @@ export interface SectionConfig {
  * Generator functions for auto-generating content
  */
 export interface GeneratorConfig {
-  installation?: (item: UnifiedContentItem) => InstallationSteps;
-  useCases?: (item: UnifiedContentItem) => string[];
-  features?: (item: UnifiedContentItem) => string[];
-  troubleshooting?: (item: UnifiedContentItem) => TroubleshootingItem[];
-  requirements?: (item: UnifiedContentItem) => string[];
+  installation?: (item: ContentItem) => InstallationSteps;
+  use_cases?: (item: ContentItem) => string[];
+  features?: (item: ContentItem) => string[];
+  troubleshooting?: (item: ContentItem) => TroubleshootingItem[];
+  requirements?: (item: ContentItem) => string[];
 }
 
 /**
  * Custom renderer functions for specialized content
  */
 export interface RendererConfig {
-  configRenderer?: (item: UnifiedContentItem, handlers?: Record<string, () => void>) => ReactNode;
+  configRenderer?: (item: ContentItem, handlers?: Record<string, () => void>) => ReactNode;
   sidebarRenderer?: (
-    item: UnifiedContentItem,
-    relatedItems: UnifiedContentItem[],
+    item: ContentItem,
+    relatedItems: ContentItem[],
     router: { push: (path: string) => void; back: () => void }
   ) => ReactNode;
-  installationRenderer?: (item: UnifiedContentItem, installation: InstallationSteps) => ReactNode;
-  useCasesRenderer?: (item: UnifiedContentItem, useCases: string[]) => ReactNode;
+  installationRenderer?: (item: ContentItem, installation: InstallationSteps) => ReactNode;
+  useCasesRenderer?: (item: ContentItem, use_cases: string[]) => ReactNode;
 }
 
 /**

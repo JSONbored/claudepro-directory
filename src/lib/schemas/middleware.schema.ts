@@ -7,8 +7,7 @@
  */
 
 import { z } from 'zod';
-import { nonNegativeInt, positiveInt } from './primitives/base-numbers';
-import { nonEmptyString } from './primitives/base-strings';
+import { nonEmptyString, nonNegativeInt, positiveInt } from './primitives';
 import { parseContentType } from './primitives/sanitization-transforms';
 import { categoryIdSchema } from './shared.schema';
 
@@ -149,30 +148,9 @@ export const staticAssetSchema = z
   .describe('Path to static assets including Next.js resources, images, and common web files');
 
 /**
- * Rate limit configuration
- */
-export const middlewareRateLimitConfigSchema = z
-  .object({
-    windowMs: positiveInt
-      .min(1000)
-      .max(3600000)
-      .describe('Time window in milliseconds for rate limiting (1 second to 1 hour)'), // 1 second to 1 hour
-    maxRequests: positiveInt
-      .max(10000)
-      .describe('Maximum number of requests allowed within the time window'),
-    skipFailedRequests: z
-      .boolean()
-      .optional()
-      .describe('Whether to exclude failed requests from rate limit count'),
-    skipSuccessfulRequests: z
-      .boolean()
-      .optional()
-      .describe('Whether to exclude successful requests from rate limit count'),
-  })
-  .describe('Configuration options for rate limiting middleware behavior');
-
-/**
  * Arcjet decision types
+ * NOTE: Rate limiting handled by Arcjet tokenBucket in middleware.ts
+ * Removed redundant middlewareRateLimitConfigSchema (unused, Arcjet provides this)
  */
 const arcjetDecisionSchema = z
   .object({
@@ -398,7 +376,6 @@ export type RequestPath = z.infer<typeof requestPathSchema>;
 export type IpAddress = z.infer<typeof ipAddressSchema>;
 export type UserAgent = z.infer<typeof userAgentSchema>;
 export type MiddlewareContentType = z.infer<typeof httpContentTypeSchema>;
-export type MiddlewareRateLimitConfig = z.infer<typeof middlewareRateLimitConfigSchema>;
 export type RequestValidation = z.infer<typeof requestValidationSchema>;
 export type SearchQueryValidation = z.infer<typeof searchQueryValidationSchema>;
 export type ApiEndpointType = z.infer<typeof apiEndpointTypeSchema>;

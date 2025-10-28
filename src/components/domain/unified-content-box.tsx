@@ -43,7 +43,6 @@ import {
   Star,
   Zap,
 } from '@/src/lib/icons';
-import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
 import type {
   AccordionProps,
   CalloutProps,
@@ -58,6 +57,7 @@ import {
 } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import { serializeJsonLd } from '@/src/lib/utils/jsonld.utils';
 
 /**
  * ==============================================================================

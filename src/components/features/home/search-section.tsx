@@ -13,12 +13,12 @@ import { ConfigCard } from '@/src/components/domain/config-card';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { Button } from '@/src/components/primitives/button';
 import { Search } from '@/src/lib/icons';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface SearchSectionProps {
   isSearching: boolean;
-  filteredResults: readonly UnifiedContentItem[];
+  filteredResults: readonly ContentItem[];
   onClearSearch: () => void;
 }
 
@@ -50,7 +50,7 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
           emptyMessage="No results found"
           ariaLabel="Search results"
           keyExtractor={(item) => item.slug}
-          renderCard={(item: UnifiedContentItem) => (
+          renderCard={(item: ContentItem) => (
             <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
           )}
         />

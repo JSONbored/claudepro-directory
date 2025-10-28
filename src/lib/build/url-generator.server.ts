@@ -17,9 +17,6 @@
 
 import { existsSync, readdirSync } from 'fs';
 import { join } from 'path';
-import type { ChangelogMetadata } from '@/generated/changelog-metadata';
-import type { GuideMetadata } from '@/generated/guides-metadata';
-import type { JobMetadata } from '@/generated/jobs-metadata';
 import { parseChangelog } from '@/src/lib/changelog/parser';
 import {
   APP_CONFIG,
@@ -27,6 +24,7 @@ import {
   MAIN_CONTENT_CATEGORIES,
   SITEMAP_CONFIG,
 } from '@/src/lib/constants';
+import { getAllContent } from '@/src/lib/content/supabase-content-loader';
 import { getJobs } from '@/src/lib/data/jobs';
 import { logger } from '@/src/lib/logger';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
@@ -42,33 +40,14 @@ export interface SitemapUrl {
 }
 
 /**
- * Metadata required for URL generation
+ * Metadata fields required for URL generation
  *
- * NOTE: Uses minimal metadata types from generated files (Pick<> subsets for performance)
- * All metadata exports include: slug (required), category/dateAdded (optional, varies by type)
+ * NOTE: Now uses Supabase content_items directly via getAllContent()
+ * All content items have: slug, category, dateAdded (from JSONB data field)
  *
- * Updated: Now includes all 11 categories (agents, changelog, collections, commands,
- * guides, hooks, jobs, mcp, rules, skills, statuslines)
- *
- * Field variations:
- * - Standard content (agents, mcp, etc.): slug, category, dateAdded
- * - Changelog: slug, dateAdded (no category - uses special routing)
- * - Guides: slug, category, subcategory, dateAdded
- * - Jobs: slug, posted_at (no category or dateAdded - from Supabase)
+ * Replaced: UrlGeneratorMetadata interface (11 metadata arrays)
+ * With: Direct database queries via getAllContent() - Single source of truth
  */
-export interface UrlGeneratorMetadata {
-  agentsMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
-  changelogMetadata: ChangelogMetadata[]; // Uses generated type (slug, title, description, dateAdded)
-  collectionsMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
-  commandsMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
-  guidesMetadata: GuideMetadata[]; // Uses generated type (includes subcategory)
-  hooksMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
-  jobsMetadata: JobMetadata[]; // Uses generated type (Supabase schema with id, posted_at, etc.)
-  mcpMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
-  rulesMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
-  skillsMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
-  statuslinesMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
-}
 
 /**
  * Configuration for URL generation
@@ -277,14 +256,12 @@ function getRouteChangefreq(route: string): SitemapUrl['changefreq'] {
 /**
  * Generate all site URLs for sitemap/indexnow
  *
- * @param metadata - Content metadata from generated files
  * @param config - Optional configuration to control URL generation
  * @returns Array of sitemap URLs with metadata
+ *
+ * NOTE: Now fetches content directly from Supabase instead of generated metadata files
  */
-export async function generateAllSiteUrls(
-  metadata: UrlGeneratorMetadata,
-  config: UrlGeneratorConfig = {}
-): Promise<SitemapUrl[]> {
+export async function generateAllSiteUrls(config: UrlGeneratorConfig = {}): Promise<SitemapUrl[]> {
   const {
     baseUrl = APP_CONFIG.url,
     includeGuides = true,
@@ -518,24 +495,17 @@ export async function generateAllSiteUrls(
   }
 
   // ============================================================================
-  // CONTENT ITEMS (Agents, MCP, Rules, Commands, Hooks, Statuslines)
+  // CONTENT ITEMS (All Categories from Supabase)
   // ============================================================================
 
-  const allContent = [
-    ...metadata.rulesMetadata,
-    ...metadata.mcpMetadata,
-    ...metadata.agentsMetadata,
-    ...metadata.commandsMetadata,
-    ...metadata.hooksMetadata,
-    ...metadata.statuslinesMetadata,
-    ...metadata.skillsMetadata,
-  ];
+  // Fetch all content from Supabase (single query with ISR cache)
+  const allContent = await getAllContent();
 
-  // Add non-collection content items
+  // Add all content item pages
   allContent.forEach((item) => {
     urls.push({
       loc: `${baseUrl}/${item.category}/${item.slug}`,
-      lastmod: (item.dateAdded || new Date().toISOString()).split('T')[0] || '',
+      lastmod: (item.date_added || new Date().toISOString()).split('T')[0] || '',
       changefreq: 'weekly',
       priority: 0.7,
     });
@@ -546,34 +516,8 @@ export async function generateAllSiteUrls(
     allContent.forEach((item) => {
       urls.push({
         loc: `${baseUrl}/${item.category}/${item.slug}/llms.txt`,
-        lastmod: (item.dateAdded || new Date().toISOString()).split('T')[0] || '',
+        lastmod: (item.date_added || new Date().toISOString()).split('T')[0] || '',
         changefreq: 'daily',
-        priority: 0.75,
-      });
-    });
-  }
-
-  // ============================================================================
-  // COLLECTION PAGES
-  // ============================================================================
-
-  // Add collection pages separately
-  metadata.collectionsMetadata.forEach((collection) => {
-    urls.push({
-      loc: `${baseUrl}/collections/${collection.slug}`,
-      lastmod: (collection.dateAdded || new Date().toISOString()).split('T')[0] || '',
-      changefreq: 'weekly',
-      priority: 0.7,
-    });
-  });
-
-  // Collection llms.txt pages (if enabled)
-  if (includeLlmsTxt) {
-    metadata.collectionsMetadata.forEach((collection) => {
-      urls.push({
-        loc: `${baseUrl}/collections/${collection.slug}/llms.txt`,
-        lastmod: (collection.dateAdded || new Date().toISOString()).split('T')[0] || '',
-        changefreq: 'weekly',
         priority: 0.75,
       });
     });
@@ -617,7 +561,7 @@ export async function generateAllSiteUrls(
     jobs.forEach((job) => {
       urls.push({
         loc: `${baseUrl}/jobs/${job.slug}`,
-        lastmod: job.postedAt?.split('T')[0] || job.dateAdded,
+        lastmod: job.posted_at?.split('T')[0] || job.date_added,
         changefreq: 'weekly', // Job listings may update (remote/salary changes)
         priority: 0.65,
       });

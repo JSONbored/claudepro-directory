@@ -22,16 +22,17 @@
 
 import type { ReactNode } from 'react';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { Download, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+
 import type { ActionButtonConfig } from '@/src/lib/types/content-type-config';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 /**
  * Content extractor function type
- * Extracts content string from UnifiedContentItem for copying
+ * Extracts content string from ContentItem for copying
  */
-export type ContentExtractor = (item: UnifiedContentItem) => string;
+export type ContentExtractor = (item: ContentItem) => string;
 
 /**
  * Create a copy-to-clipboard action handler
@@ -68,7 +69,7 @@ export function createCopyAction(
   return {
     label,
     icon,
-    handler: async (item: UnifiedContentItem) => {
+    handler: async (item: ContentItem) => {
       const content = contentExtractor(item);
       await navigator.clipboard.writeText(content);
       toasts.raw.success(successTitle, {
@@ -183,7 +184,7 @@ export function createDownloadAction(
   return {
     label,
     icon,
-    handler: (item: UnifiedContentItem) => {
+    handler: (item: ContentItem) => {
       if ('slug' in item && item.slug) {
         const downloadPath = pathTemplate.replace('{slug}', item.slug);
         window.location.href = downloadPath;
@@ -223,7 +224,7 @@ export function createGitHubLinkAction(
   return {
     label,
     icon,
-    handler: (item: UnifiedContentItem) => {
+    handler: (item: ContentItem) => {
       if ('slug' in item && item.slug) {
         const url = pathTemplate.replace('{slug}', item.slug);
         window.open(url, '_blank');

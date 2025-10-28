@@ -7,9 +7,8 @@
  */
 
 import { z } from 'zod';
+import { nonNegativeInt, positiveInt, slugString, viewCount } from '@/src/lib/schemas/primitives';
 import { cacheKeyString, KEY_LIMITS } from '@/src/lib/schemas/primitives/api-cache-primitives';
-import { nonNegativeInt, positiveInt, viewCount } from '@/src/lib/schemas/primitives/base-numbers';
-import { slugString } from '@/src/lib/schemas/primitives/base-strings';
 
 /**
  * Security constants for cache operations

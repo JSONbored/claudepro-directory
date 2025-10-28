@@ -26,7 +26,10 @@ import {
   SelectValue,
 } from '@/src/components/primitives/select';
 import { ROUTES } from '@/src/lib/constants/routes';
-import type { CreateJobInput } from '@/src/lib/schemas/content/job.schema';
+import type { Database } from '@/src/types/database.types';
+
+type CreateJobInput = Database['public']['Tables']['jobs']['Insert'];
+
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 

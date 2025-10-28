@@ -11,23 +11,18 @@
  */
 
 import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
-import type { AgentContent } from '@/src/lib/schemas/content/agent.schema';
-import type { CommandContent } from '@/src/lib/schemas/content/command.schema';
-import type { HookContent } from '@/src/lib/schemas/content/hook.schema';
-import type { McpContent } from '@/src/lib/schemas/content/mcp.schema';
-import type { RuleContent } from '@/src/lib/schemas/content/rule.schema';
-import type { StatuslineContent } from '@/src/lib/schemas/content/statusline.schema';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Union type for all content items
  */
 export type ContentItem =
-  | McpContent
-  | AgentContent
-  | HookContent
-  | CommandContent
-  | RuleContent
-  | StatuslineContent;
+  | Database['public']['Tables']['mcp']['Row']
+  | Database['public']['Tables']['agents']['Row']
+  | Database['public']['Tables']['commands']['Row']
+  | Database['public']['Tables']['rules']['Row']
+  | Database['public']['Tables']['hooks']['Row']
+  | Database['public']['Tables']['statuslines']['Row'];
 
 /**
  * Type-safe installation configuration types
@@ -164,7 +159,9 @@ type Example = CodeExample | RuleExample | string;
  * Section order mirrors the page rendering for optimal LLM citation accuracy
  * Uses generators from content-type-configs to fill missing fields (matches UnifiedDetailPage exactly)
  */
-export function buildRichContent(item: ContentItem): string {
+import type { FullContentItem } from '@/src/lib/content/supabase-content-loader';
+
+export function buildRichContent(item: ContentItem | FullContentItem): string {
   const sections: string[] = [];
 
   // Get content type config for generators (matches UnifiedDetailPage line 49)
@@ -174,28 +171,26 @@ export function buildRichContent(item: ContentItem): string {
   // Extract generator functions first to avoid conditional calls
   const genFeatures = config?.generators.features;
   const genRequirements = config?.generators.requirements;
-  const genUseCases = config?.generators.useCases;
+  const genUseCases = config?.generators.use_cases;
   const genTroubleshooting = config?.generators.troubleshooting;
 
   const features =
-    'features' in item && Array.isArray(item.features) && item.features.length > 0
+    'features' in item && item.features && item.features.length > 0
       ? item.features
       : genFeatures?.(item) || [];
 
   const requirements =
-    'requirements' in item && Array.isArray(item.requirements) && item.requirements.length > 0
+    'requirements' in item && item.requirements && item.requirements.length > 0
       ? item.requirements
       : genRequirements?.(item) || [];
 
   const useCases =
-    'useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0
-      ? item.useCases
+    'use_cases' in item && item.use_cases && item.use_cases.length > 0
+      ? item.use_cases
       : genUseCases?.(item) || [];
 
   const troubleshooting =
-    'troubleshooting' in item &&
-    Array.isArray(item.troubleshooting) &&
-    item.troubleshooting.length > 0
+    'troubleshooting' in item && item.troubleshooting && item.troubleshooting.length > 0
       ? item.troubleshooting
       : genTroubleshooting?.(item) || [];
 
@@ -241,7 +236,7 @@ export function buildRichContent(item: ContentItem): string {
 
   // 6. USE CASES SECTION (matches UnifiedDetailPage lines 195-204)
   // Uses generated useCases if not in schema
-  if (config?.sections.useCases && useCases.length > 0) {
+  if (config?.sections.use_cases && useCases.length > 0) {
     sections.push(formatBulletList('USE CASES', useCases));
   }
 
@@ -525,8 +520,8 @@ function formatHookConfiguration(config: HookConfiguration): string {
   if (config.hookConfig?.hooks) {
     lines.push('Hook Configuration:', '');
 
-    for (const [hookType, hookConfigValue] of Object.entries(config.hookConfig.hooks)) {
-      lines.push(`Hook Type: ${hookType}`);
+    for (const [hook_type, hookConfigValue] of Object.entries(config.hookConfig.hooks)) {
+      lines.push(`Hook Type: ${hook_type}`);
 
       // Handle both single config and array of configs
       const configs = Array.isArray(hookConfigValue) ? hookConfigValue : [hookConfigValue];
@@ -696,13 +691,13 @@ function buildTechnicalDetails(item: ContentItem): string {
   }
 
   // Hook type
-  if (item.category === 'hooks' && 'hookType' in item) {
-    lines.push(`Hook Type: ${item.hookType}`);
+  if (item.category === 'hooks' && 'hook_type' in item) {
+    lines.push(`Hook Type: ${item.hook_type}`);
   }
 
   // Statusline type
-  if (item.category === 'statuslines' && 'statuslineType' in item) {
-    lines.push(`Statusline Type: ${item.statuslineType}`);
+  if (item.category === 'statuslines' && 'statusline_type' in item) {
+    lines.push(`Statusline Type: ${item.statusline_type}`);
   }
 
   // Authentication (MCP)
@@ -769,8 +764,8 @@ function buildTechnicalDetails(item: ContentItem): string {
   }
 
   // Documentation URL
-  if ('documentationUrl' in item && item.documentationUrl) {
-    lines.push(`Documentation: ${item.documentationUrl}`);
+  if ('documentationUrl' in item && item.documentation_url) {
+    lines.push(`Documentation: ${item.documentation_url}`);
   }
 
   // GitHub URL (commands, rules)

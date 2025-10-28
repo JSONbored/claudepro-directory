@@ -6,7 +6,6 @@
  */
 
 import { logger } from '@/src/lib/logger';
-import type { RequestId } from '@/src/lib/schemas/branded-types.schema';
 import { isProduction } from '@/src/lib/schemas/env.schema';
 import {
   determineErrorType,
@@ -183,7 +182,7 @@ export class ErrorSanitizer {
    */
   public sanitizeError(
     inputError: unknown,
-    requestId: RequestId,
+    requestId: string,
     context: ErrorContext = {}
   ): SanitizedError {
     const error = this.normalizeError(inputError);
@@ -252,7 +251,7 @@ const errorSanitizer = ErrorSanitizer.getInstance();
  */
 export function sanitizeApiError(
   error: unknown,
-  requestId: RequestId,
+  requestId: string,
   context: ErrorContext = {}
 ): SanitizedError {
   return errorSanitizer.sanitizeError(error, requestId, context);

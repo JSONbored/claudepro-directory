@@ -7,7 +7,7 @@
  * @see https://support.claude.com/en/articles/12512198-how-to-create-custom-skills
  */
 
-import type { SkillContent } from '@/src/lib/schemas/content/skill.schema';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Transform skill JSON to SKILL.md format
@@ -15,7 +15,9 @@ import type { SkillContent } from '@/src/lib/schemas/content/skill.schema';
  * @param skill - Validated skill content from JSON
  * @returns Complete SKILL.md file content
  */
-export function transformSkillToMarkdown(skill: SkillContent): string {
+export function transformSkillToMarkdown(
+  skill: Database['public']['Tables']['skills']['Row']
+): string {
   const frontmatter = generateYamlFrontmatter(skill);
   const body = generateMarkdownBody(skill);
 
@@ -49,7 +51,7 @@ description: ${escapedDescription}
  * 1. Main content (from JSON content field)
  * 2. Prerequisites (from requirements array)
  * 3. Features (from features array)
- * 4. Use Cases (from useCases array)
+ * 4. Use Cases (from use_cases array)
  * 5. Examples (from examples array with syntax highlighting)
  * 6. Troubleshooting (from troubleshooting array)
  * 7. Learn More (from documentationUrl)
@@ -72,8 +74,8 @@ export function generateMarkdownBody(skill: SkillContent): string {
   const features = generateFeaturesSection(skill.features);
   if (features) sections.push(features);
 
-  const useCases = generateUseCasesSection(skill.useCases);
-  if (useCases) sections.push(useCases);
+  const use_cases = generateUseCasesSection(skill.use_cases);
+  if (use_cases) sections.push(use_cases);
 
   const examples = generateExamplesSection(skill.examples);
   if (examples) sections.push(examples);
@@ -81,7 +83,7 @@ export function generateMarkdownBody(skill: SkillContent): string {
   const troubleshooting = generateTroubleshootingSection(skill.troubleshooting);
   if (troubleshooting) sections.push(troubleshooting);
 
-  const learnMore = generateLearnMoreSection(skill.documentationUrl);
+  const learnMore = generateLearnMoreSection(skill.documentation_url);
   if (learnMore) sections.push(learnMore);
 
   return sections.filter(Boolean).join('\n\n');
@@ -116,15 +118,15 @@ export function generateFeaturesSection(features: string[] | undefined): string 
 }
 
 /**
- * Generate Use Cases section from useCases array
+ * Generate Use Cases section from use_cases array
  *
- * @param useCases - Array of use case strings
+ * @param use_cases - Array of use case strings
  * @returns Markdown section or empty string
  */
-export function generateUseCasesSection(useCases: string[] | undefined): string {
-  if (!useCases || useCases.length === 0) return '';
+export function generateUseCasesSection(use_cases: string[] | undefined): string {
+  if (!use_cases || use_cases.length === 0) return '';
 
-  const items = useCases.map((useCase) => `- ${useCase}`).join('\n');
+  const items = use_cases.map((useCase) => `- ${useCase}`).join('\n');
 
   return `## Use Cases\n\n${items}`;
 }

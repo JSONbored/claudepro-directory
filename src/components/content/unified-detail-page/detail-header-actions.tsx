@@ -20,13 +20,13 @@ import type { CopyType } from '@/src/components/features/growth/unified-newslett
 import { Button } from '@/src/components/primitives/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { ArrowLeft, Check, Copy } from '@/src/lib/icons';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/schemas/component.schema';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 /**
  * Determine copy type based on content item structure
  */
-function determineCopyType(item: UnifiedContentItem): CopyType {
+function determineCopyType(item: ContentItem): CopyType {
   // Check if item has content or configuration (indicates code/config copy)
   if ('content' in item && item.content) return 'code';
   if ('configuration' in item && item.configuration) return 'code';
@@ -43,7 +43,7 @@ export interface SerializableAction {
 }
 
 export interface DetailHeaderActionsProps {
-  item: UnifiedContentItem;
+  item: ContentItem;
   typeName: string;
   category: string;
   hasContent: boolean;

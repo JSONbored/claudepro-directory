@@ -8,13 +8,12 @@
 
 import { z } from 'zod';
 import { baseUsageExampleSchema } from '@/src/lib/schemas/content/base-content.schema';
-import { stringArray } from '@/src/lib/schemas/primitives/base-arrays';
-import { optionalUrlString } from '@/src/lib/schemas/primitives/base-strings';
+import { optionalUrlString, stringArray } from '@/src/lib/schemas/primitives';
 import {
   difficultyLevelSchema,
-  hookTypeSchema,
+  hook_typeSchema,
   mcpServerTypeSchema,
-  statuslineTypeSchema,
+  statusline_typeSchema,
 } from '@/src/lib/schemas/primitives/content-enums';
 import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
 
@@ -38,10 +37,10 @@ export const unifiedContentItemSchema = z
     // Production note: Using .optional() only (not .nullable()) for clean type semantics
     // Absence is represented by omitted property, not null value
     author: z.string().describe('Name or identifier of the content creator or contributor'),
-    authorProfileUrl: optionalUrlString.describe(
+    author_profile_url: optionalUrlString.describe(
       'Optional URL to author profile (GitHub, personal site, etc.). Falls back to site default if not provided.'
     ),
-    dateAdded: z
+    date_added: z
       .string()
       .optional()
       .describe('ISO date string when content was added to the directory'), // Optional for guides
@@ -113,7 +112,7 @@ export const unifiedContentItemSchema = z
 
     // Features and capabilities
     features: stringArray.optional().describe('List of key features or capabilities provided'),
-    useCases: stringArray.optional().describe('Common use cases or application scenarios'),
+    use_cases: stringArray.optional().describe('Common use cases or application scenarios'),
     requirements: stringArray.optional().describe('Prerequisites or dependencies needed for usage'),
 
     // URLs and documentation
@@ -129,12 +128,12 @@ export const unifiedContentItemSchema = z
       .describe('Flexible configuration object with type-specific settings'),
 
     // Hook-specific properties
-    hookType: hookTypeSchema
+    hook_type: hook_typeSchema
       .optional()
       .describe('Type of hook lifecycle event for Claude Code extensions'),
 
     // Statusline-specific properties
-    statuslineType: statuslineTypeSchema
+    statusline_type: statusline_typeSchema
       .optional()
       .describe('Visual style or complexity level of the statusline display'),
     preview: z
@@ -339,4 +338,4 @@ export const unifiedContentItemSchema = z
   })
   .describe('Unified schema for all content types with optional type-specific properties');
 
-export type UnifiedContentItem = z.infer<typeof unifiedContentItemSchema>;
+export type ContentItem = z.infer<typeof unifiedContentItemSchema>;

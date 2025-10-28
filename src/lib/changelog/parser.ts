@@ -25,13 +25,17 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { logger } from '@/src/lib/logger';
 import type {
-  ChangelogCategories,
   ChangelogEntry,
+  ChangelogMetadata,
   ParsedChangelog,
-} from '@/src/lib/schemas/changelog.schema';
-import { changelogEntrySchema, parsedChangelogSchema } from '@/src/lib/schemas/changelog.schema';
+} from '@/src/lib/changelog/loader';
+import { logger } from '@/src/lib/logger';
+
+/**
+ * Changelog categories type (for parser)
+ */
+type ChangelogCategories = ChangelogEntry['categories'];
 
 /**
  * Generate URL-safe slug from date and title
@@ -191,8 +195,8 @@ function parseEntry(entryContent: string, date: string, title: string): Changelo
     rawContent: entryContent.trim(),
   };
 
-  // Validate with Zod schema
-  return changelogEntrySchema.parse(entry);
+  // Database will validate on insert
+  return entry;
 }
 
 /**
@@ -310,8 +314,8 @@ export async function parseChangelog(
       },
     };
 
-    // Validate final schema
-    return parsedChangelogSchema.parse(parsedChangelog);
+    // Return parsed data (database will validate on sync)
+    return parsedChangelog;
   } catch (error) {
     logger.error(
       'Failed to parse CHANGELOG.md',

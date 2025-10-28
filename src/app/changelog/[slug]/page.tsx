@@ -37,7 +37,11 @@ import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ArrowLeft, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import type { GuideSection } from '@/src/lib/schemas/content/guide.schema';
+import type { Database } from '@/src/types/database.types';
+
+type GuideRow = Database['public']['Tables']['guides']['Row'];
+type GuideSection = GuideRow['sections'];
+
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

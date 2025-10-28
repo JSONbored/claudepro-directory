@@ -23,7 +23,7 @@ import {
   publicReviewRatingsInsertSchema,
   publicUserCollectionsInsertSchema,
 } from '@/src/lib/schemas/generated/db-schemas';
-import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives/base-strings';
+import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives';
 import {
   normalizeString,
   trimOptionalString,

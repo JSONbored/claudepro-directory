@@ -108,3 +108,5 @@ config/tools/tech-debt/.history.json
 
 *storybook.log
 storybook-static
+
+MIGRATION_GUIDE.md

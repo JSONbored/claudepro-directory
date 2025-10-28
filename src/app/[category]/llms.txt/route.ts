@@ -8,7 +8,7 @@
 
 import { isValidCategory, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { getContentByCategory } from '@/src/lib/content/content-loaders';
+import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { generateCategoryLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
@@ -80,12 +80,12 @@ export async function GET(
     // Transform items to LLMsTxtItem format
     const llmsItems: LLMsTxtItem[] = items.map((item) => ({
       slug: item.slug,
-      title: item.title || item.name || item.slug,
+      title: item.title || item.slug,
       description: item.description,
       category: item.category,
-      tags: item.tags || [],
+      tags: item.tags,
       author: item.author,
-      dateAdded: item.dateAdded,
+      date_added: item.date_added,
       url: `${APP_CONFIG.url}/${category}/${item.slug}`,
     }));
 

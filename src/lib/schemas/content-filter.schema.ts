@@ -6,7 +6,7 @@
 
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
-import { nonEmptyString, shortString } from '@/src/lib/schemas/primitives/base-strings';
+import { nonEmptyString, shortString } from '@/src/lib/schemas/primitives';
 
 /**
  * UI Sort/Filter types (preserved from deprecated hooks)

@@ -22,7 +22,7 @@
 import { memo, useMemo } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
-import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
+import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/changelog/loader';
 
 /**
  * Props for CategoryFilter component

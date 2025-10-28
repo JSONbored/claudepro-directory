@@ -19,18 +19,98 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
-import {
-  type ActivityCounts,
-  activityCountsSchema,
-  getNextTier,
-  getReputationTier,
-  getTierProgress,
-  type ReputationBreakdown,
-  reputationBreakdownSchema,
-} from '@/src/lib/config/reputation.config';
 import { logger } from '@/src/lib/logger';
-import { userIdSchema } from '@/src/lib/schemas/branded-types.schema';
+import { publicPostsRowSchema } from '@/src/lib/schemas/generated/db-schemas';
+import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import { createClient } from '@/src/lib/supabase/server';
+import { validateRows } from '@/src/lib/supabase/validators';
+import type { Tables } from '@/src/types/database.types';
+
+// Database-driven types
+type ReputationAction = Tables<'reputation_actions'>;
+type ReputationTier = Tables<'reputation_tiers'>;
+
+// Schemas for validation
+const reputationBreakdownSchema = z.object({
+  from_posts: z.number().int().nonnegative(),
+  from_votes_received: z.number().int().nonnegative(),
+  from_comments: z.number().int().nonnegative(),
+  from_submissions: z.number().int().nonnegative(),
+  total: z.number().int().nonnegative(),
+});
+
+type ReputationBreakdown = z.infer<typeof reputationBreakdownSchema>;
+
+const activityCountsSchema = z.object({
+  posts: z.number().int().nonnegative(),
+  votes: z.number().int().nonnegative(),
+  comments: z.number().int().nonnegative(),
+  submissions: z.number().int().nonnegative(),
+});
+
+type ActivityCounts = z.infer<typeof activityCountsSchema>;
+
+// Inline DB queries (NO helper files)
+async function getReputationPoints(): Promise<Record<string, number>> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('reputation_actions')
+    .select('action_type, points')
+    .eq('active', true);
+
+  const points: Record<string, number> = {};
+  for (const action of data || []) {
+    points[action.action_type] = action.points;
+  }
+  return points;
+}
+
+async function getReputationTiers(): Promise<ReputationTier[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('reputation_tiers')
+    .select('*')
+    .eq('active', true)
+    .order('order', { ascending: true });
+
+  return data || [];
+}
+
+function getReputationTier(score: number, tiers: ReputationTier[]): ReputationTier {
+  return (
+    tiers.find(
+      (tier) => score >= tier.min_score && (tier.max_score === null || score <= tier.max_score)
+    ) || tiers[0]!
+  );
+}
+
+function getNextTier(currentScore: number, tiers: ReputationTier[]) {
+  const currentTier = getReputationTier(currentScore, tiers);
+  const currentIndex = tiers.findIndex((t) => t.name === currentTier.name);
+
+  if (currentIndex === tiers.length - 1) {
+    return null;
+  }
+
+  const nextTier = tiers[currentIndex + 1]!;
+  const pointsNeeded = nextTier.min_score - currentScore;
+
+  return {
+    tier: nextTier,
+    pointsNeeded,
+  };
+}
+
+function getTierProgress(currentScore: number, tiers: ReputationTier[]): number {
+  const currentTier = getReputationTier(currentScore, tiers);
+  if (currentTier.max_score === null) {
+    return 100;
+  }
+
+  const tierRange = currentTier.max_score - currentTier.min_score;
+  const scoreInTier = currentScore - currentTier.min_score;
+  return Math.min(100, Math.round((scoreInTier / tierRange) * 100));
+}
 
 // =============================================================================
 // GET REPUTATION BREAKDOWN
@@ -65,8 +145,11 @@ export const getReputationBreakdown = authedAction
   .action(async ({ ctx }) => {
     const { userId } = ctx;
 
-    // Fetch breakdown using direct PostgREST queries
     const supabase = await createClient();
+
+    // Fetch reputation points from database
+    const points = await getReputationPoints();
+    const tiers = await getReputationTiers();
 
     // Run all queries in parallel for performance
     const [postsResult, votesResult, commentsResult, submissionsResult] = await Promise.all([
@@ -110,36 +193,36 @@ export const getReputationBreakdown = authedAction
       throw new Error(`Failed to fetch submissions: ${submissionsResult.error.message}`);
     }
 
-    // Calculate points
-    const REPUTATION_POINTS = {
-      POST: 10,
-      VOTE: 5,
-      COMMENT: 2,
-      SUBMISSION: 20,
-    } as const;
-
+    // Calculate points using database values
     const postCount = postsResult.count || 0;
-    const totalVotes =
-      votesResult.data?.reduce((sum, post) => sum + (post.vote_count || 0), 0) || 0;
+
+    // Validate votes data
+    const validated_votes = validateRows(
+      publicPostsRowSchema.pick({ vote_count: true }),
+      votesResult.data || [],
+      { schemaName: 'PostVoteCount' }
+    );
+    const totalVotes = validated_votes.reduce((sum, post) => sum + (post.vote_count || 0), 0);
+
     const commentCount = commentsResult.count || 0;
     const mergedCount = submissionsResult.count || 0;
 
     const breakdown: ReputationBreakdown = {
-      from_posts: postCount * REPUTATION_POINTS.POST,
-      from_votes_received: totalVotes * REPUTATION_POINTS.VOTE,
-      from_comments: commentCount * REPUTATION_POINTS.COMMENT,
-      from_submissions: mergedCount * REPUTATION_POINTS.SUBMISSION,
+      from_posts: postCount * (points.post || 0),
+      from_votes_received: totalVotes * (points.vote_received || 0),
+      from_comments: commentCount * (points.comment || 0),
+      from_submissions: mergedCount * (points.submission_merged || 0),
       total:
-        postCount * REPUTATION_POINTS.POST +
-        totalVotes * REPUTATION_POINTS.VOTE +
-        commentCount * REPUTATION_POINTS.COMMENT +
-        mergedCount * REPUTATION_POINTS.SUBMISSION,
+        postCount * (points.post || 0) +
+        totalVotes * (points.vote_received || 0) +
+        commentCount * (points.comment || 0) +
+        mergedCount * (points.submission_merged || 0),
     };
 
     // Calculate tier information
-    const currentTier = getReputationTier(breakdown.total);
-    const nextTier = getNextTier(breakdown.total);
-    const progress = getTierProgress(breakdown.total);
+    const currentTier = getReputationTier(breakdown.total, tiers);
+    const nextTier = getNextTier(breakdown.total, tiers);
+    const progress = getTierProgress(breakdown.total, tiers);
 
     return {
       ...breakdown,
@@ -271,14 +354,18 @@ export const recalculateReputation = authedAction
  */
 export async function getUserReputation(targetUserId: string): Promise<{
   breakdown: ReputationBreakdown;
-  tier: ReturnType<typeof getReputationTier>;
+  tier: ReputationTier;
   progress: number;
   activityCounts: ActivityCounts;
 }> {
   // Validate input
-  const validatedUserId = userIdSchema.parse(targetUserId);
+  const validatedUserId = nonEmptyString.uuid().parse(targetUserId);
 
   const supabase = await createClient();
+
+  // Fetch reputation points from database
+  const points = await getReputationPoints();
+  const tiers = await getReputationTiers();
 
   // Fetch all data in parallel (single round trip)
   const [postsResult, votesResult, commentsResult, submissionsResult] = await Promise.all([
@@ -312,29 +399,22 @@ export async function getUserReputation(targetUserId: string): Promise<{
     throw new Error(`Failed to fetch submissions: ${submissionsResult.error.message}`);
   }
 
-  // Calculate counts and points
-  const REPUTATION_POINTS = {
-    POST: 10,
-    VOTE: 5,
-    COMMENT: 2,
-    SUBMISSION: 20,
-  } as const;
-
+  // Calculate counts and points using database values
   const postCount = postsResult.count || 0;
   const totalVotes = votesResult.data?.reduce((sum, post) => sum + (post.vote_count || 0), 0) || 0;
   const commentCount = commentsResult.count || 0;
   const mergedCount = submissionsResult.count || 0;
 
   const breakdown: ReputationBreakdown = {
-    from_posts: postCount * REPUTATION_POINTS.POST,
-    from_votes_received: totalVotes * REPUTATION_POINTS.VOTE,
-    from_comments: commentCount * REPUTATION_POINTS.COMMENT,
-    from_submissions: mergedCount * REPUTATION_POINTS.SUBMISSION,
+    from_posts: postCount * (points.post || 0),
+    from_votes_received: totalVotes * (points.vote_received || 0),
+    from_comments: commentCount * (points.comment || 0),
+    from_submissions: mergedCount * (points.submission_merged || 0),
     total:
-      postCount * REPUTATION_POINTS.POST +
-      totalVotes * REPUTATION_POINTS.VOTE +
-      commentCount * REPUTATION_POINTS.COMMENT +
-      mergedCount * REPUTATION_POINTS.SUBMISSION,
+      postCount * (points.post || 0) +
+      totalVotes * (points.vote_received || 0) +
+      commentCount * (points.comment || 0) +
+      mergedCount * (points.submission_merged || 0),
   };
 
   const activityCounts: ActivityCounts = {
@@ -345,8 +425,8 @@ export async function getUserReputation(targetUserId: string): Promise<{
   };
 
   // Calculate tier info
-  const tier = getReputationTier(breakdown.total);
-  const progress = getTierProgress(breakdown.total);
+  const tier = getReputationTier(breakdown.total, tiers);
+  const progress = getTierProgress(breakdown.total, tiers);
 
   return {
     breakdown,

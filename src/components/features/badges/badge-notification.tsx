@@ -23,13 +23,41 @@ import { motion } from 'motion/react';
 import { memo, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { getRecentlyEarnedBadges } from '@/src/lib/actions/badges.actions';
-import {
-  BADGE_RARITY_COLORS,
-  BADGE_REGISTRY,
-  type BadgeDefinition,
-} from '@/src/lib/config/badges.config';
 import { logger } from '@/src/lib/logger';
+import { createClient } from '@/src/lib/supabase/client';
 import { cn } from '@/src/lib/utils';
+import type { Tables } from '@/src/types/database.types';
+
+type Badge = Tables<'badges'>;
+
+// Rarity color mapping (moved from config)
+const BADGE_RARITY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  common: {
+    bg: 'bg-gray-50 dark:bg-gray-900/30',
+    text: 'text-gray-900 dark:text-gray-100',
+    border: 'border-gray-200 dark:border-gray-800',
+  },
+  uncommon: {
+    bg: 'bg-green-50 dark:bg-green-900/30',
+    text: 'text-green-900 dark:text-green-100',
+    border: 'border-green-200 dark:border-green-800',
+  },
+  rare: {
+    bg: 'bg-blue-50 dark:bg-blue-900/30',
+    text: 'text-blue-900 dark:text-blue-100',
+    border: 'border-blue-200 dark:border-blue-800',
+  },
+  epic: {
+    bg: 'bg-purple-50 dark:bg-purple-900/30',
+    text: 'text-purple-900 dark:text-purple-100',
+    border: 'border-purple-200 dark:border-purple-800',
+  },
+  legendary: {
+    bg: 'bg-yellow-50 dark:bg-yellow-900/30',
+    text: 'text-yellow-900 dark:text-yellow-100',
+    border: 'border-yellow-200 dark:border-yellow-800',
+  },
+};
 
 // =============================================================================
 // TYPES
@@ -47,8 +75,8 @@ export interface BadgeNotificationProviderProps {
 }
 
 interface BadgeToastProps {
-  /** Badge definition */
-  badge: BadgeDefinition;
+  /** Badge from database */
+  badge: Badge;
   /** Earned date */
   earnedAt: Date;
 }
@@ -67,7 +95,7 @@ interface BadgeToastProps {
  * - Earned timestamp
  */
 const BadgeToastContent = memo(function BadgeToastContent({ badge, earnedAt }: BadgeToastProps) {
-  const rarityColors = BADGE_RARITY_COLORS[badge.rarity];
+  const rarityColors = BADGE_RARITY_COLORS[badge.rarity || 'common'];
 
   return (
     <div className="flex items-start gap-3 p-2">
@@ -182,27 +210,34 @@ export const BadgeNotificationProvider = memo(function BadgeNotificationProvider
           (userBadge) => !shownBadgesRef.current.has(userBadge.id)
         );
 
-        for (const userBadge of newBadges) {
-          // Look up badge definition from registry
-          const badgeDefinition = Object.values(BADGE_REGISTRY).find(
-            (def) => def.slug === userBadge.badge?.slug
-          );
+        // Fetch badge details from database
+        const supabase = createClient();
+        const badgeSlugs = newBadges
+          .map((ub) => ub.badge?.slug)
+          .filter((slug): slug is string => Boolean(slug));
 
-          if (badgeDefinition) {
-            // Show toast notification
-            toast(
-              <BadgeToastContent
-                badge={badgeDefinition}
-                earnedAt={new Date(userBadge.earned_at)}
-              />,
-              {
-                duration: 6000, // 6 seconds
-                className: 'badge-earned-toast',
-              }
-            );
+        if (badgeSlugs.length > 0) {
+          const { data: badgeDetails } = await supabase
+            .from('badges')
+            .select('*')
+            .in('slug', badgeSlugs);
 
-            // Track shown badge
-            shownBadgesRef.current.add(userBadge.id);
+          for (const userBadge of newBadges) {
+            const badgeDetail = badgeDetails?.find((b) => b.slug === userBadge.badge?.slug);
+
+            if (badgeDetail) {
+              // Show toast notification
+              toast(
+                <BadgeToastContent badge={badgeDetail} earnedAt={new Date(userBadge.earned_at)} />,
+                {
+                  duration: 6000, // 6 seconds
+                  className: 'badge-earned-toast',
+                }
+              );
+
+              // Track shown badge
+              shownBadgesRef.current.add(userBadge.id);
+            }
           }
         }
       }
@@ -276,28 +311,36 @@ export function useBadgeNotifications() {
           (userBadge) => !shownBadgesRef.current.has(userBadge.id)
         );
 
-        for (const userBadge of newBadges) {
-          const badgeDefinition = Object.values(BADGE_REGISTRY).find(
-            (def) => def.slug === userBadge.badge?.slug
-          );
+        // Fetch badge details from database
+        const supabase = createClient();
+        const badgeSlugs = newBadges
+          .map((ub) => ub.badge?.slug)
+          .filter((slug): slug is string => Boolean(slug));
 
-          if (badgeDefinition) {
-            toast(
-              <BadgeToastContent
-                badge={badgeDefinition}
-                earnedAt={new Date(userBadge.earned_at)}
-              />,
-              {
-                duration: 6000,
-                className: 'badge-earned-toast',
-              }
-            );
+        if (badgeSlugs.length > 0) {
+          const { data: badgeDetails } = await supabase
+            .from('badges')
+            .select('*')
+            .in('slug', badgeSlugs);
 
-            shownBadgesRef.current.add(userBadge.id);
+          for (const userBadge of newBadges) {
+            const badgeDetail = badgeDetails?.find((b) => b.slug === userBadge.badge?.slug);
+
+            if (badgeDetail) {
+              toast(
+                <BadgeToastContent badge={badgeDetail} earnedAt={new Date(userBadge.earned_at)} />,
+                {
+                  duration: 6000,
+                  className: 'badge-earned-toast',
+                }
+              );
+
+              shownBadgesRef.current.add(userBadge.id);
+            }
           }
-        }
 
-        return newBadges.length;
+          return newBadges.length;
+        }
       }
 
       return 0;
