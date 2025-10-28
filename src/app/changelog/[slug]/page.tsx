@@ -12,7 +12,7 @@
  *
  * Performance:
  * - ISR: 600s (10 minutes) for fresh content
- * - Redis-cached entry loading
+ * - Database-cached entry loading
  * - Static params generation
  *
  * Production Standards:
@@ -37,11 +37,6 @@ import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ArrowLeft, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import type { Database } from '@/src/types/database.types';
-
-type GuideRow = Database['public']['Tables']['guides']['Row'];
-type GuideSection = GuideRow['sections'];
-
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -100,12 +95,6 @@ export default async function ChangelogEntryPage({
     if (!entry) {
       notFound();
     }
-
-    // Load generated full content with JSON sections
-    const { getChangelogFullContent } = await import('@/generated/content');
-    const fullContent = await getChangelogFullContent(slug);
-    // Extract sections with proper type casting
-    const sections = fullContent?.sections as GuideSection[] | undefined;
 
     const canonicalUrl = getChangelogUrl(entry.slug);
 
@@ -170,7 +159,7 @@ export default async function ChangelogEntryPage({
           <Separator className="my-6" />
 
           {/* Content */}
-          <ChangelogContent entry={entry} {...(sections !== undefined && { sections })} />
+          <ChangelogContent entry={entry} />
         </article>
       </>
     );

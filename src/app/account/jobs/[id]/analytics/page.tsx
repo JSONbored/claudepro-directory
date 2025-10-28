@@ -1,3 +1,7 @@
+/**
+ * Job Analytics Page - Display view/click metrics for job postings.
+ */
+
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -9,41 +13,35 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
+import type { Database } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/account/jobs/:id/analytics');
 
 interface JobAnalyticsPageProps {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ id: string }>;
 }
 
 export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps) {
   const resolvedParams = await params;
   const supabase = await createClient();
 
-  // Get current user
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect('/login');
-  }
+  if (!user) redirect('/login');
 
-  // Fetch the job (RLS ensures user owns this job)
-  const { data: job, error } = await supabase
+  const { data, error } = await supabase
     .from('jobs')
     .select('*')
     .eq('id', resolvedParams.id)
     .eq('user_id', user.id)
     .single();
 
-  if (error || !job) {
-    notFound();
-  }
+  if (error || !data) notFound();
 
-  // Calculate CTR (Click-Through Rate) with null safety
+  const job = data as Database['public']['Tables']['jobs']['Row'];
+
   const viewCount = job.view_count ?? 0;
   const clickCount = job.click_count ?? 0;
   const ctr = viewCount > 0 ? ((clickCount / viewCount) * 100).toFixed(2) : '0.00';
@@ -54,7 +52,6 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <Button variant="ghost" size="sm" asChild className="mb-4">
           <Link href={ROUTES.ACCOUNT_JOBS}>
@@ -62,7 +59,6 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             Back to Jobs
           </Link>
         </Button>
-
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
           <div>
             <h1 className="text-3xl font-bold mb-2">Job Analytics</h1>
@@ -79,7 +75,6 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
         </div>
       </div>
 
-      {/* Job Info Card */}
       <Card>
         <CardHeader>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
@@ -127,7 +122,6 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
         </CardContent>
       </Card>
 
-      {/* Analytics Overview */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -165,7 +159,6 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
         </Card>
       </div>
 
-      {/* Performance Insights */}
       <Card>
         <CardHeader>
           <CardTitle>Performance Insights</CardTitle>

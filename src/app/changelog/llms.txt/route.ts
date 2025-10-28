@@ -16,7 +16,7 @@
  *
  * Performance:
  * - ISR: 600s (10 minutes)
- * - Redis-cached entry loading
+ * - Database-cached entry loading
  * - Optimized for Claude, ChatGPT, Perplexity citation
  *
  * Production Standards:
@@ -42,7 +42,7 @@ export async function GET(): Promise<Response> {
   try {
     logger.info('Changelog llms.txt generation started');
 
-    // Load all changelog entries (cached with Redis)
+    // Load all changelog entries (database-cached)
     const entries = await getAllChangelogEntries();
 
     // Build plain text content following llmstxt.org spec

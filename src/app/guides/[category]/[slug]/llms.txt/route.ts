@@ -1,17 +1,11 @@
 /**
- * Guides LLMs.txt Route Handler
- * Generates AI-optimized plain text for guide content
- *
- * @route GET /guides/[category]/[slug]/llms.txt
- * @see {@link https://llmstxt.org} - LLMs.txt specification
+ * Guides LLMs.txt Route Handler - Zero caching ceremony
  */
 
 import fs from 'fs/promises';
 import path from 'path';
 import { z } from 'zod';
-import { contentCache } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
-// MDX support removed - 100% JSON guides now
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { generateLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
@@ -72,34 +66,6 @@ export async function GET(
     }
 
     const filename = `${slug}.json`;
-    const cacheKey = `guide-llmstxt:v3:${category}:${slug}`; // v3: JSON guides (no MDX)
-
-    // Try cache first using cacheWithRefresh
-    try {
-      const cachedContent = await contentCache.cacheWithRefresh<string>(
-        cacheKey,
-        async () => {
-          // This will be executed if cache miss - we'll generate content below
-          return null as unknown as string;
-        },
-        600 // 10 minutes
-      );
-
-      if (cachedContent) {
-        logger.info('Serving cached guide llms.txt', {
-          category,
-          slug,
-        });
-
-        return apiResponse.raw(cachedContent, {
-          contentType: 'text/plain; charset=utf-8',
-          headers: { 'X-Robots-Tag': 'index, follow', 'X-Cache': 'HIT' },
-          cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
-        });
-      }
-    } catch {
-      // Cache miss or error - continue to generate content
-    }
 
     // Load guide content
     const mappedPath = PATH_MAP[category];
@@ -176,27 +142,13 @@ export async function GET(
       includeDescription: true,
       includeTags: true,
       includeUrl: true,
-      includeContent: true, // Full content for guides
+      includeContent: true,
       sanitize: true,
     });
 
-    // Cache the result using cacheWithRefresh (no direct set method available)
-    await contentCache.cacheWithRefresh(
-      cacheKey,
-      async () => llmsTxt,
-      600 // 10 minutes
-    );
-
-    logger.info('Guide llms.txt generated successfully', {
-      category,
-      slug,
-      contentLength: llmsTxt.length,
-    });
-
-    // Return plain text response
     return apiResponse.raw(llmsTxt, {
       contentType: 'text/plain; charset=utf-8',
-      headers: { 'X-Robots-Tag': 'index, follow', 'X-Cache': 'MISS' },
+      headers: { 'X-Robots-Tag': 'index, follow' },
       cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
     });
   } catch (error: unknown) {

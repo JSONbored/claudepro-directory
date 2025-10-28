@@ -19,7 +19,15 @@
  * @module app/api/cron/weekly-tasks
  */
 
-import { WeeklyDigest } from '@/src/emails/templates/weekly-digest';
+/**
+ * Weekly Tasks Cron - Featured content calculation and digest distribution.
+ */
+
+import {
+  type DigestContentItem,
+  type DigestTrendingItem,
+  WeeklyDigest,
+} from '@/src/emails/templates/weekly-digest';
 import { getAllCategoryIds } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
@@ -31,6 +39,7 @@ import { resendService } from '@/src/lib/services/resend.server';
 import { createClient } from '@/src/lib/supabase/server';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 import { getCurrentWeekStart, getWeekEnd } from '@/src/lib/utils/data.utils';
+import type { Database } from '@/src/types/database.types';
 
 interface TaskResult {
   task: string;
@@ -159,30 +168,29 @@ const route = createApiRoute({
               })
               .filter((item): item is FeaturedContentItem => item !== null);
 
-            // Store featured selections in database (direct insert - no abstraction)
-            const records = featured.map((item, index) => ({
-              content_type: name,
-              content_slug: item.slug,
-              rank: index + 1,
-              final_score: item._featured?.finalScore ?? 0,
-              trending_score: item._featured?.trendingScore ?? 0,
-              rating_score: item._featured?.ratingScore ?? 0,
-              engagement_score: item._featured?.engagementScore ?? 0,
-              freshness_score: item._featured?.freshnessScore ?? 0,
-              week_start: weekStart.toISOString().split('T')[0],
-              week_end: weekEnd.toISOString().split('T')[0],
-              calculated_at: new Date().toISOString(),
-              calculation_metadata: {
-                views: Number(featuredScores[index]?.total_views ?? 0),
-                growthRate: Number(featuredScores[index]?.growth_rate_pct ?? 0),
-                engagement: {
-                  bookmarks: Number(featuredScores[index]?.bookmark_count ?? 0),
-                  copies: Number(featuredScores[index]?.copy_count ?? 0),
-                  comments: Number(featuredScores[index]?.comment_count ?? 0),
+            const records: Database['public']['Tables']['featured_configs']['Insert'][] =
+              featured.map((item, index) => ({
+                content_type: name,
+                content_slug: item.slug,
+                rank: index + 1,
+                final_score: item._featured?.finalScore ?? 0,
+                trending_score: item._featured?.trendingScore ?? 0,
+                rating_score: item._featured?.ratingScore ?? 0,
+                engagement_score: item._featured?.engagementScore ?? 0,
+                freshness_score: item._featured?.freshnessScore ?? 0,
+                week_start: weekStart.toISOString().split('T')[0] ?? '',
+                week_end: weekEnd.toISOString().split('T')[0] ?? '',
+                calculation_metadata: {
+                  views: Number(featuredScores[index]?.total_views ?? 0),
+                  growthRate: Number(featuredScores[index]?.growth_rate_pct ?? 0),
+                  engagement: {
+                    bookmarks: Number(featuredScores[index]?.bookmark_count ?? 0),
+                    copies: Number(featuredScores[index]?.copy_count ?? 0),
+                    comments: Number(featuredScores[index]?.comment_count ?? 0),
+                  },
+                  daysOld: Number(featuredScores[index]?.days_old ?? 0),
                 },
-                daysOld: Number(featuredScores[index]?.days_old ?? 0),
-              },
-            }));
+              }));
 
             const { error: insertError } = await supabase.from('featured_configs').insert(records);
 
@@ -263,9 +271,17 @@ const route = createApiRoute({
 
         // Generate digest content for previous week
         const weekStart = digestService.getStartOfPreviousWeek();
-        const digest = await digestService.generateDigest(weekStart);
+        const digestData = await digestService.generateDigest(weekStart);
 
-        // Check if we have content to send
+        const digest =
+          typeof digestData === 'object' && digestData !== null && !Array.isArray(digestData)
+            ? (digestData as unknown as {
+                weekOf: string;
+                newContent: DigestContentItem[];
+                trendingContent: DigestTrendingItem[];
+              })
+            : { weekOf: '', newContent: [], trendingContent: [] };
+
         if (digest.newContent.length === 0 && digest.trendingContent.length === 0) {
           logger.warn('No content for weekly digest - skipping send', {
             weekOf: digest.weekOf,
@@ -309,17 +325,22 @@ const route = createApiRoute({
               trending: digest.trendingContent.length,
             });
 
-            // Send emails in batches
             const emailResults = await resendService.sendBatchEmails(
               subscribers,
               `This Week in Claude - ${digest.weekOf}`,
-              WeeklyDigest({ email: '{email}', ...digest }),
+              WeeklyDigest({
+                email: '{email}',
+                weekOf: digest.weekOf,
+                newContent: digest.newContent,
+                trendingContent: digest.trendingContent,
+                personalizedContent: [],
+              }),
               {
                 tags: [
                   { name: 'template', value: 'weekly_digest' },
                   { name: 'week', value: digest.weekOf },
                 ],
-                delayMs: 1000, // 1 second delay between batches
+                delayMs: 1000,
               }
             );
 

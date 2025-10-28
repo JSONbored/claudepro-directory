@@ -289,16 +289,6 @@
   },
   "overrides": [
     {
-      "includes": ["src/lib/redis.ts"],
-      "linter": {
-        "rules": {
-          "performance": {
-            "noBarrelFile": "off"
-          }
-        }
-      }
-    },
-    {
       "includes": ["*.mdx"],
       "linter": {
         "rules": {

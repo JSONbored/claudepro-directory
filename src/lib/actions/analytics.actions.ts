@@ -10,19 +10,11 @@
 import { unstable_cache } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { statsRedis } from '@/src/lib/cache.server';
 import { isValidCategory } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
-import {
-  buildUserContext,
-  generateColdStartRecommendations,
-  generateForYouFeed,
-  hasPersonalizationData,
-} from '@/src/lib/personalization/for-you-feed';
 import type { PersonalizedContentItem } from '@/src/lib/personalization/types';
-import { getUsageBasedRecommendations } from '@/src/lib/personalization/usage-based-recommender';
 import { getRecommendations } from '@/src/lib/recommender/database-recommender';
 import {
   publicBookmarksRowSchema,
@@ -49,6 +41,7 @@ import {
 } from '@/src/lib/schemas/personalization.schema';
 import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
+import { createClient } from '@/src/lib/supabase/server';
 import type { Database } from '@/src/types/database.types';
 
 // ========================================================================
@@ -209,8 +202,23 @@ export const getForYouFeed = rateLimitedAction
           // Load all content via private helper (eliminates 48 LOC duplication)
           const allContent = await loadAllContentCached();
 
-          // Enrich with view counts
-          const enrichedContent = await statsRedis.enrichWithViewCounts(allContent);
+          // Enrich with view counts from mv_analytics_summary
+          const supabaseAnalytics = await createClient();
+          const { data: analyticsData } = await supabaseAnalytics
+            .from('mv_analytics_summary')
+            .select('category, slug, view_count');
+
+          const analyticsMap = new Map<string, number>();
+          if (analyticsData) {
+            for (const row of analyticsData) {
+              analyticsMap.set(`${row.category}:${row.slug}`, row.view_count ?? 0);
+            }
+          }
+
+          const enrichedContent = allContent.map((item) => ({
+            ...item,
+            viewCount: analyticsMap.get(`${item.category}:${item.slug}`) ?? 0,
+          }));
 
           const supabaseCached = await createClient();
 
@@ -332,28 +340,21 @@ export const getForYouFeed = rateLimitedAction
             .slice(0, 3)
             .map((item) => item.category);
 
-          // Build user context (kept for potential future use)
-          // Note: Current implementation uses materialized views directly via userId
-          // This context building is preserved for fallback scenarios
-          buildUserContext(
-            userId,
-            affinities || [],
-            bookmarks || [],
-            recentViews || [],
-            profileInterests,
-            favoriteCategories
-          );
+          // Query recommended_content view directly (database-first)
+          let query = supabaseCached
+            .from('recommended_content')
+            .select(
+              'content_type, content_slug, recommendation_score, user_affinity, popularity_score'
+            )
+            .eq('user_id', userId)
+            .order('recommendation_score', { ascending: false })
+            .limit(parsedInput.limit * 2);
 
-          // OPTIMIZATION: Calculate trending from enriched content (already has viewCount)
-          // Items with viewCount > 100 are considered trending (simple threshold)
-          const trendingSet = new Set<string>(
-            enrichedContent
-              .filter((item) => (item.viewCount || 0) > 100)
-              .map((item) => `${item.category}:${item.slug}`)
-          );
+          if (parsedInput.category) {
+            query = query.eq('content_type', parsedInput.category);
+          }
 
-          // Check if user has sufficient personalization data
-          const hasHistory = await hasPersonalizationData(userId);
+          const { data: dbRecommendations } = await query;
 
           let recommendations: Array<
             ContentItem & {
@@ -362,21 +363,71 @@ export const getForYouFeed = rateLimitedAction
               affinity_score?: number;
             }
           >;
-          if (hasHistory) {
-            // Generate personalized recommendations using materialized views
-            recommendations = await generateForYouFeed(enrichedContent, userId, {
-              limit: parsedInput.limit,
-              ...(parsedInput.category ? { category_filter: parsedInput.category } : {}),
-              exclude_bookmarked: parsedInput.exclude_bookmarked,
-            });
+
+          if (dbRecommendations && dbRecommendations.length > 0) {
+            // Map database recommendations to content items
+            const contentMap = new Map<string, ContentItem>();
+            for (const item of enrichedContent) {
+              contentMap.set(`${item.category}:${item.slug}`, item);
+            }
+
+            recommendations = dbRecommendations
+              .map((rec) => {
+                const content = contentMap.get(`${rec.content_type}:${rec.content_slug}`);
+                if (!content) return null;
+
+                const source: PersonalizedContentItem['recommendation_source'] =
+                  (rec.user_affinity || 0) > 70 ? 'affinity' : 'collaborative';
+                const reason =
+                  (rec.user_affinity || 0) > 70
+                    ? 'Based on your past interactions'
+                    : 'Popular with users like you';
+
+                return {
+                  ...content,
+                  recommendation_source: source,
+                  recommendation_reason: reason,
+                  affinity_score: rec.recommendation_score || 0,
+                };
+              })
+              .filter((r): r is NonNullable<typeof r> => r !== null)
+              .slice(0, parsedInput.limit);
           } else {
-            // Cold start: use trending + interests
-            recommendations = generateColdStartRecommendations(
-              enrichedContent,
-              profileInterests,
-              trendingSet,
-              parsedInput.limit
+            // Cold start: trending + interests (inline)
+            const trendingSet = new Set<string>(
+              enrichedContent
+                .filter((item) => (item.viewCount || 0) > 100)
+                .map((item) => `${item.category}:${item.slug}`)
             );
+
+            const scoredItems = enrichedContent.map((item) => {
+              const itemKey = `${item.category}:${item.slug}`;
+              let score = 0;
+
+              if (trendingSet.has(itemKey)) score += 60;
+              score += (item.popularity || 0) * 0.3;
+
+              if (profileInterests.length > 0) {
+                const itemTags = (item.tags || []).map((t) => t.toLowerCase());
+                const matchedInterests = profileInterests.filter((interest) =>
+                  itemTags.some((tag) => tag.includes(interest.toLowerCase()))
+                );
+                score += (matchedInterests.length / profileInterests.length) * 40;
+              }
+
+              return { item, score };
+            });
+
+            recommendations = scoredItems
+              .filter((s) => s.score > 20)
+              .sort((a, b) => b.score - a.score)
+              .slice(0, parsedInput.limit)
+              .map((s) => ({
+                ...s.item,
+                recommendation_source: 'trending' as const,
+                recommendation_reason: 'Popular in the community',
+                affinity_score: s.score,
+              }));
           }
 
           const response: ForYouFeedResponse = {
@@ -414,7 +465,7 @@ export const getForYouFeed = rateLimitedAction
                 )
               ),
             ],
-            user_has_history: hasHistory,
+            user_has_history: dbRecommendations && dbRecommendations.length > 0,
             generated_at: new Date().toISOString(),
           };
 
@@ -609,14 +660,64 @@ export const getUsageRecommendations = rateLimitedAction
           }
         }
 
-        // Generate recommendations
-        const recommendations = getUsageBasedRecommendations(parsedInput.trigger, {
-          ...(currentItem ? { current_item: currentItem } : {}),
-          ...(parsedInput.category ? { category: parsedInput.category } : {}),
-          ...(parsedInput.time_spent !== undefined ? { time_spent: parsedInput.time_spent } : {}),
-          all_content: allContent,
-          ...(userAffinities.size > 0 ? { user_affinities: userAffinities } : {}),
-        });
+        // Generate recommendations from database view
+        let recommendations: Array<
+          ContentItem & {
+            recommendation_source?: PersonalizedContentItem['recommendation_source'];
+            recommendation_reason?: string;
+            affinity_score?: number;
+          }
+        > = [];
+
+        if (user) {
+          let query = supabase
+            .from('recommended_content')
+            .select('content_type, content_slug, recommendation_score')
+            .eq('user_id', user.id)
+            .order('recommendation_score', { ascending: false })
+            .limit(3);
+
+          if (parsedInput.category) {
+            query = query.eq('content_type', parsedInput.category);
+          }
+
+          const { data } = await query;
+
+          if (data && data.length > 0) {
+            const contentMap = new Map<string, ContentItem>();
+            for (const item of allContent) {
+              contentMap.set(`${item.category}:${item.slug}`, item);
+            }
+
+            recommendations = data
+              .map((rec) => {
+                const content = contentMap.get(`${rec.content_type}:${rec.content_slug}`);
+                if (!content) return null;
+                return {
+                  ...content,
+                  recommendation_source: 'affinity' as const,
+                  recommendation_reason: 'Based on your interests',
+                  affinity_score: rec.recommendation_score || 0,
+                };
+              })
+              .filter((r): r is NonNullable<typeof r> => r !== null);
+          }
+        }
+
+        // Fallback to trending if no recommendations
+        if (recommendations.length === 0) {
+          const trendingItems = allContent
+            .filter((item) => (item.popularity || 0) > 50)
+            .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
+            .slice(0, 3);
+
+          recommendations = trendingItems.map((item) => ({
+            ...item,
+            recommendation_source: 'trending' as const,
+            recommendation_reason: 'Popular in the community',
+            affinity_score: item.popularity || 0,
+          }));
+        }
 
         const response: UsageRecommendationResponse = {
           recommendations: recommendations.map((rec: PersonalizedContentItem) => ({

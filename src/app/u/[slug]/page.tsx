@@ -1,3 +1,8 @@
+/**
+ * User Profile Page - Database-First User Profiles
+ * All data from Supabase with parallel batch fetching, reputation from PostgreSQL RPC.
+ */
+
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -20,23 +25,6 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
-
-/**
- * Tier badge configuration (shared with ProfileCard)
- */
-const TIER_CONFIG = {
-  free: { label: 'Free', className: 'border-muted-foreground/20 text-muted-foreground' },
-  pro: {
-    label: 'Pro',
-    className:
-      'border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 text-amber-600 dark:text-amber-400',
-  },
-  enterprise: {
-    label: 'Enterprise',
-    className:
-      'border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600 dark:text-purple-400',
-  },
-} as const;
 
 interface UserProfilePageProps {
   params: Promise<{ slug: string }>;
@@ -89,6 +77,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     isFollowingResult,
     reputationResult,
     badgesResult,
+    tierConfigsResult,
   ] = await batchFetch([
     // Follower count
     (async () => {
@@ -175,6 +164,12 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
       );
       return [];
     }),
+
+    // Tier display configs
+    (async () => {
+      const res = await supabase.from('tier_display_config').select('*').eq('active', true);
+      return res.data || [];
+    })(),
   ]);
 
   const followerCount = followerCountResult;
@@ -185,6 +180,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   const isFollowing = isFollowingResult;
   const reputationData = reputationResult;
   const userBadges = badgesResult;
+  const tierConfigs = Object.fromEntries(
+    tierConfigsResult.map((t) => [t.tier, { label: t.label, className: t.css_classes }])
+  );
 
   // Check if current user is the profile owner
   const isOwner = currentUser?.id === profile.id;
@@ -282,14 +280,15 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Stats sidebar */}
           <div className="space-y-4">
-            {/* Reputation Breakdown */}
-            {reputationData && (
-              <ReputationBreakdown
-                breakdown={reputationData.breakdown}
-                showDetails={true}
-                showProgress={true}
-              />
-            )}
+            {reputationData &&
+              typeof reputationData === 'object' &&
+              'breakdown' in reputationData && (
+                <ReputationBreakdown
+                  breakdown={reputationData.breakdown as any}
+                  showDetails={true}
+                  showProgress={true}
+                />
+              )}
 
             {/* Quick Stats Card */}
             <Card>
@@ -318,8 +317,8 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Account Tier</span>
                   {(() => {
-                    const tier = (profile.tier || 'free') as 'free' | 'pro' | 'enterprise';
-                    const tierConfig = TIER_CONFIG[tier];
+                    const tier = profile.tier || 'free';
+                    const tierConfig = tierConfigs[tier] || { label: 'Free', className: 'border-muted-foreground/20 text-muted-foreground' };
                     return (
                       <UnifiedBadge variant="base" style="outline" className={tierConfig.className}>
                         {tierConfig.label}

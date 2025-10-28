@@ -144,7 +144,7 @@ function UnifiedSidebarComponent({
     async function fetchTrendingData() {
       setIsLoadingTrending(true);
       try {
-        // Fetch trending guides from API route (not direct Redis - client-safe)
+        // Fetch trending guides from API route (client-safe database query)
         const response = await fetch('/api/guides/trending?category=guides&limit=5');
 
         if (!response.ok) return; // Silent fail for optional enhancement

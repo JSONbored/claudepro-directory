@@ -1,62 +1,5 @@
 /**
- * Dynamic Content Detail Page - Unified Route Handler
- *
- * @description
- * This file implements the detail page component of the dynamic routing system.
- * A single route `[category]/[slug]` handles all 138 detail pages across 6 categories
- * (agents, mcp, commands, rules, hooks, statuslines) instead of requiring separate route files.
- *
- * Key Features:
- * - Unified detail page rendering for all content types
- * - Server-side syntax highlighting with Shiki
- * - Redis-cached content loading with 2-hour TTL
- * - Related content recommendations
- * - View tracking and analytics
- * - Structured data (JSON-LD) for SEO
- * - Dynamic OpenGraph images per item
- *
- * @architecture
- * Route Pattern: /[category]/[slug] → /agents/code-reviewer-agent, /mcp/filesystem-server, etc.
- *
- * Static Generation: All detail pages are pre-rendered at build time via generateStaticParams()
- * which iterates through all categories and their items to generate 138 static HTML files.
- *
- * ISR (Incremental Static Regeneration): Pages revalidate every 6 hours (21600s) to pick up
- * content updates without requiring a full rebuild. Stale content is served while revalidating.
- *
- * Data Flow:
- * 1. Category & slug validation
- * 2. Load item metadata (cached, ~0.10ms)
- * 3. Parallel fetch (30-40ms faster than sequential):
- *    - Load full content with syntax highlighting
- *    - Load 3 related items from same category
- *    - Fetch view count from Redis
- * 4. Transform data for component interface
- * 5. Render with view tracking + structured data
- *
- * @performance
- * Build Time: ~11.7s for all 187 pages (138 detail pages included)
- * Page Size: 4.99 kB per detail page (outstanding - minimal client JS)
- * First Load JS: 337 kB (shared bundle + detail page bundle)
- * Cache Hit: ~0.10ms (Redis) vs ~20ms (file system)
- * TTFB: <100ms (static pages served from CDN)
- * Syntax Highlighting: Server-side with Shiki (zero client cost)
- *
- * @example
- * // Data flow for /agents/code-reviewer-agent request:
- * // 1. isValidCategory('agents') → validates category
- * // 2. getCategoryConfig('agents') → loads config
- * // 3. getContentBySlug('agents', 'code-reviewer-agent') → cached metadata
- * // 4. getFullContentBySlug('agents', 'code-reviewer-agent') → full content with code
- * // 5. getRelatedContent('agents', 'code-reviewer-agent', 3) → 3 related agents
- * // 6. transformForDetailPage() → prepares data for component
- * // 7. UnifiedDetailPage → renders with syntax highlighting
- *
- * @see {@link https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes}
- * @see {@link file://../page.tsx} - List page counterpart
- * @see {@link file://../../../lib/content-loaders.ts} - Content loading with caching
- * @see {@link file://../../../lib/transformers.ts} - Data transformation utilities
- * @see {@link file://../../../components/unified-detail-page/index.tsx} - Detail page component
+ * Content Detail Page - Unified route for [category]/[slug] with database-cached content and view tracking.
  */
 
 import { notFound } from 'next/navigation';
@@ -66,7 +9,6 @@ import { CollectionDetailView } from '@/src/components/content/unified-detail-pa
 import { BreadcrumbSchema } from '@/src/components/infra/structured-data/breadcrumb-schema';
 import { UnifiedStructuredData } from '@/src/components/infra/structured-data/unified-structured-data';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
-import { statsRedis } from '@/src/lib/cache.server';
 import {
   isValidCategory,
   UNIFIED_CATEGORY_REGISTRY,
@@ -81,15 +23,9 @@ import {
 } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { createClient } from '@/src/lib/supabase/server';
 
-/**
- * ISR revalidation interval for content detail pages
- *
- * @constant {number}
- * @description Pages revalidate every 6 hours. Pre-rendered at build time and served from CDN edge.
- * @see {@link https://nextjs.org/docs/app/building-your-application/data-fetching/incremental-static-regeneration}
- */
-export const revalidate = 21600; // 6 hours
+export const revalidate = 21600;
 
 /**
  * Generate static params for all category/slug combinations
@@ -112,7 +48,7 @@ export const revalidate = 21600; // 6 hours
  *
  * @performance
  * Build-time only execution - runs once during `npm run build`
- * Uses Redis-cached content loading (96.5% faster than file system)
+ * Uses database-cached content loading
  */
 export async function generateStaticParams() {
   const allParams: Array<{ category: string; slug: string }> = [];
@@ -186,18 +122,18 @@ export async function generateMetadata({
  *
  * @description
  * Server component that renders a detail page for a specific content item.
- * Handles validation, content loading with Redis caching, related content fetching,
+ * Handles validation, content loading from database, related content fetching,
  * data transformation, and rendering with view tracking and structured data.
  * Returns 404 if category or item is invalid.
  *
  * Data Flow:
  * 1. **Validation**: Validates category exists in VALID_CATEGORIES
  * 2. **Config Loading**: Loads category configuration
- * 3. **Metadata Loading**: Loads item metadata from Redis cache (~0.10ms) or file system (~20ms)
+ * 3. **Metadata Loading**: Loads item metadata from database (~5-20ms)
  * 4. **Parallel Data Fetching** (30-40ms gain via batchFetch):
  *    - Full content with syntax-highlighted code blocks
  *    - 3 related items from same category
- *    - View count from Redis
+ *    - View count from database
  * 5. **Transformation**: Transforms data for UnifiedDetailPage component interface
  * 6. **Rendering**: Renders with ViewTracker, StructuredData, and DetailPage components
  *
@@ -216,7 +152,7 @@ export async function generateMetadata({
  *
  * @performance
  * - Page Size: 4.99 kB (outstanding performance)
- * - Cache Hit: ~0.10ms (Redis item cache)
+ * - Cache Hit: ~5-20ms (database cache)
  * - Cache Miss: ~20ms (file system + JSON parse)
  * - Syntax Highlighting: Server-side with Shiki (zero client cost)
  * - Related Content: Cached with category data
@@ -262,9 +198,14 @@ export default async function DetailPage({
   const fullItem = await getFullContentBySlug(category, slug);
   const itemData = (fullItem || itemMeta) as ContentItem; // Fallback to metadata if full item fails
 
-  // Load view count for static generation
-  // Related content removed - function doesn't exist after migration
-  const viewCount = await statsRedis.getViewCount(category, slug);
+  const supabase = await createClient();
+  const { data: analyticsData } = await supabase
+    .from('mv_analytics_summary')
+    .select('view_count')
+    .eq('category', category)
+    .eq('slug', slug)
+    .maybeSingle<{ view_count: number | null }>();
+  const viewCount = analyticsData?.view_count ?? 0;
   const relatedItems: ContentItem[] = [];
 
   // No transformation needed - displayTitle computed at build time

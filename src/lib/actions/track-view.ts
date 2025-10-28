@@ -2,11 +2,9 @@
 
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { statsRedis } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
 import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
-import { analyticsQueue } from '@/src/lib/services/analytics-queue.server';
 import { createClient } from '@/src/lib/supabase/server';
 
 /**
@@ -48,19 +46,8 @@ export const trackView = rateLimitedAction
   .schema(trackingParamsSchema)
   .action(async ({ parsedInput }: { parsedInput: z.infer<typeof trackingParamsSchema> }) => {
     const { category, slug } = parsedInput;
-    if (!statsRedis.isEnabled()) {
-      return {
-        success: false,
-        message: 'Stats tracking not enabled',
-      };
-    }
 
-    // OPTIMIZATION: Queue view instead of immediate Redis write
-    // Views are batched and flushed every 5 minutes
-    // This reduces Redis commands by 95% with acceptable 5-minute delay
-    analyticsQueue.queueView(category, slug);
-
-    // Track interaction for personalization (non-blocking)
+    // Direct PostgreSQL insert - no queue needed
     const supabase = await createClient();
     const {
       data: { user },
@@ -88,8 +75,7 @@ export const trackView = rateLimitedAction
 
     return {
       success: true,
-      message: 'View queued for processing',
-      // Note: viewCount no longer returned immediately (batched)
+      message: 'View tracked successfully',
     };
   });
 
@@ -118,18 +104,8 @@ export const trackCopy = rateLimitedAction
   .schema(trackingParamsSchema)
   .action(async ({ parsedInput }: { parsedInput: z.infer<typeof trackingParamsSchema> }) => {
     const { category, slug } = parsedInput;
-    if (!statsRedis.isEnabled()) {
-      return {
-        success: false,
-        message: 'Stats tracking not enabled',
-      };
-    }
 
-    // OPTIMIZATION: Queue copy instead of immediate Redis write
-    // Copies are batched and flushed every 5 minutes
-    analyticsQueue.queueCopy(category, slug);
-
-    // Track interaction for personalization (non-blocking)
+    // Direct PostgreSQL insert - no queue needed
     const supabase = await createClient();
     const {
       data: { user },
@@ -157,6 +133,6 @@ export const trackCopy = rateLimitedAction
 
     return {
       success: true,
-      message: 'Copy queued for processing',
+      message: 'Copy tracked successfully',
     };
   });

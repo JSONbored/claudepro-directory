@@ -12,7 +12,7 @@
  *
  * Performance:
  * - ISR: 300s (5 minutes) for fresh content
- * - Redis-cached entry loading
+ * - Database-cached entry loading
  * - Static generation at build time
  *
  * Production Standards:
@@ -67,7 +67,7 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function ChangelogPage() {
   try {
-    // Load all changelog entries (cached with Redis)
+    // Load all changelog entries (database-cached)
     const entries = await getAllChangelogEntries();
 
     return (

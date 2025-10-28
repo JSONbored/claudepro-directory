@@ -1,8 +1,20 @@
+/**
+ * Trending Page - Database-First RPC Architecture
+ * Single RPC call to get_trending_page() - all logic in PostgreSQL
+ */
+
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { LazySection } from '@/src/components/infra/lazy-section';
-import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
+import { TrendingContent } from '@/src/components/shared/trending-content';
+import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
+import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { createClient } from '@/src/lib/supabase/server';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Database } from '@/src/types/database.types';
 
 const UnifiedNewsletterCapture = dynamic(
   () =>
@@ -14,174 +26,53 @@ const UnifiedNewsletterCapture = dynamic(
   }
 );
 
-import { z } from 'zod';
-import { TrendingContent } from '@/src/components/shared/trending-content';
-import { statsRedis } from '@/src/lib/cache.server';
-import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
-import { logger } from '@/src/lib/logger';
-import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
-
-// Inline trending params schema (was in search.schema.ts)
-const trendingParamsSchema = z.object({
-  category: z.string().optional(),
-  period: z.enum(['today', 'week', 'month', 'year', 'all']).optional().default('week'),
-  metric: z.enum(['views', 'likes', 'shares', 'downloads', 'all']).optional().default('views'),
-  page: z
-    .union([z.string(), z.number()])
-    .transform((val) => Number(val))
-    .pipe(z.number().int().positive())
-    .optional()
-    .default(1),
-  limit: z
-    .union([z.string(), z.number()])
-    .transform((val) => Number(val))
-    .pipe(z.number().int().positive().max(100))
-    .optional()
-    .default(20),
-});
-
-type TrendingParams = z.infer<typeof trendingParamsSchema>;
-
-function parseSearchParams<T extends z.ZodType>(schema: T, params: unknown): z.infer<T> {
-  try {
-    return schema.parse(params);
-  } catch {
-    return schema.parse({});
-  }
-}
-
-import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { getBatchTrendingData } from '@/src/lib/trending/calculator.server';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-
-// Generate metadata from centralized registry
 export const metadata = generatePageMetadata('/trending');
 
-/**
- * Load trending data using Redis-based view counts
- *
- * @description Queries Redis for real-time view counts and calculates trending content
- * based on actual user engagement. Automatically falls back to static popularity field
- * if Redis is unavailable. Also returns total count to avoid duplicate content fetching.
- */
-async function getTrendingData(params: TrendingParams) {
-  // Log trending data access for analytics
-  if (Object.keys(params).length > 0) {
-    logger.info('Trending data accessed with parameters', {
-      period: params.period,
-      metric: params.metric,
-      category: params.category,
-      page: params.page,
-      limit: params.limit,
-    });
-  }
-
-  try {
-    // Fetch all content from Supabase (parallel queries with ISR caching)
-    const [
-      rulesData,
-      mcpData,
-      agentsData,
-      commandsData,
-      hooksData,
-      statuslinesData,
-      collectionsData,
-      skillsData,
-    ] = await Promise.all([
-      getContentByCategory('rules'),
-      getContentByCategory('mcp'),
-      getContentByCategory('agents'),
-      getContentByCategory('commands'),
-      getContentByCategory('hooks'),
-      getContentByCategory('statuslines'),
-      getContentByCategory('collections'),
-      getContentByCategory('skills'),
-    ]);
-
-    // Calculate total count
-    const totalCount =
-      rulesData.length +
-      mcpData.length +
-      agentsData.length +
-      commandsData.length +
-      hooksData.length +
-      statuslinesData.length +
-      collectionsData.length +
-      skillsData.length;
-
-    // Use Redis-based trending calculator with sponsored content injection
-    // Note: getContentByCategory() already includes category field from database
-    const trendingData = await getBatchTrendingData(
-      {
-        agents: agentsData,
-        mcp: mcpData,
-        rules: rulesData,
-        commands: commandsData,
-        hooks: hooksData,
-        statuslines: statuslinesData,
-        collections: collectionsData,
-        skills: skillsData,
-      },
-      { includeSponsored: true } // Enable sponsored content injection
-    );
-
-    const algorithm = trendingData.metadata.algorithm;
-    logger.info(`Loaded trending data using ${algorithm}`, {
-      trendingCount: trendingData.trending.length,
-      popularCount: trendingData.popular.length,
-      recentCount: trendingData.recent.length,
-      algorithm,
-      totalCount,
-    });
-
-    return {
-      trending: trendingData.trending,
-      popular: trendingData.popular,
-      recent: trendingData.recent,
-      totalCount,
-    };
-  } catch (error) {
-    logger.error(
-      'Failed to load trending data',
-      error instanceof Error ? error : new Error(String(error))
-    );
-
-    // Ultimate fallback - return empty arrays
-    return {
-      trending: [],
-      popular: [],
-      recent: [],
-      totalCount: 0,
-    };
-  }
-}
+type TrendingPeriod = Database['public']['Enums']['trending_period'];
+type TrendingMetric = Database['public']['Enums']['trending_metric'];
 
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
+  const supabase = await createClient();
 
-  // Validate and parse search parameters with Zod
-  const params = parseSearchParams(trendingParamsSchema, rawParams, 'trending page');
+  const period = (rawParams?.period as TrendingPeriod) || 'week';
+  const metric = (rawParams?.metric as TrendingMetric) || 'views';
+  const category = rawParams?.category as string | undefined;
+  const page = Number(rawParams?.page) || 1;
+  const limit = Math.min(Number(rawParams?.limit) || 20, 100);
 
-  // Log validated parameters for monitoring
   logger.info('Trending page accessed', {
-    period: params.period,
-    metric: params.metric,
-    category: params.category,
-    page: params.page,
-    limit: params.limit,
+    period,
+    metric,
+    ...(category && { category }),
+    page,
+    limit,
   });
 
-  const { trending, popular, recent, totalCount } = await getTrendingData(params);
+  const { data, error } = await supabase.rpc('get_trending_page', {
+    p_period: period,
+    p_metric: metric,
+    ...(category && { p_category: category }),
+    p_page: page,
+    p_limit: limit,
+  });
 
-  const [enrichedTrending = [], enrichedPopular = [], enrichedRecent = []] =
-    await statsRedis.enrichMultipleDatasets([trending, popular, recent]);
+  if (error) {
+    logger.error('Failed to fetch trending page data', error);
+  }
 
-  // This is a server component, so we'll use a static ID
+  const pageData = (data as any) || {
+    trending: [],
+    popular: [],
+    recent: [],
+    totalCount: 0,
+    metadata: { period, metric, category: null, page, limit, algorithm: 'fallback' },
+  };
+
   const pageTitleId = 'trending-page-title';
 
   return (
     <div className={'min-h-screen bg-background'}>
-      {/* Hero Section */}
       <section className={'relative py-24 px-4 overflow-hidden'} aria-labelledby={pageTitleId}>
         <div className={'container mx-auto text-center'}>
           <div className={'max-w-3xl mx-auto'}>
@@ -219,7 +110,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
               <li>
                 <UnifiedBadge variant="base" style="secondary">
                   <Users className="h-3 w-3 mr-1" aria-hidden="true" />
-                  {totalCount} total configs
+                  {pageData.totalCount} total configs
                 </UnifiedBadge>
               </li>
             </ul>
@@ -227,7 +118,6 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
         </div>
       </section>
 
-      {/* Trending Content - Slide up animation for below-fold */}
       <section
         className={'container mx-auto px-4 py-16'}
         aria-label="Trending configurations content"
@@ -235,15 +125,14 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
         <Suspense fallback={null}>
           <LazySection variant="slide-up" delay={0.1}>
             <TrendingContent
-              trending={enrichedTrending}
-              popular={enrichedPopular}
-              recent={enrichedRecent}
+              trending={pageData.trending}
+              popular={pageData.popular}
+              recent={pageData.recent}
             />
           </LazySection>
         </Suspense>
       </section>
 
-      {/* Email CTA - Fade in animation */}
       <section className={'container mx-auto px-4 py-12'}>
         <Suspense fallback={null}>
           <LazySection variant="fade-in" delay={0.15}>

@@ -65,6 +65,7 @@ const activityTimelineResponseSchema = z.object({
   total: z.number(),
 });
 
+import { publicUsersUpdateSchema } from '@/src/lib/schemas/generated/db-schemas';
 import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
 import {
@@ -73,27 +74,21 @@ import {
 } from '@/src/lib/schemas/transforms/data-normalization.schema';
 
 // ========================================================================
-// INLINE SCHEMAS (moved from profile.schema.ts - database-first approach)
+// INLINE SCHEMAS (database-first approach)
 // ========================================================================
 
 /**
- * Profile update schema
- * Validates user profile updates before database mutation
- * Database-first: Mirrors profiles table structure with runtime validation
+ * Profile update schema - Uses generated database schema
  */
-const updateProfileSchema = z.object({
-  display_name: z
-    .string()
-    .min(1, 'Name is required')
-    .max(100, 'Name must be less than 100 characters')
-    .optional(),
-  bio: z.string().max(500, 'Bio must be less than 500 characters').or(z.literal('')).optional(),
-  work: z.string().max(100, 'Work must be less than 100 characters').or(z.literal('')).optional(),
-  website: z.string().url('Website must be a valid URL').or(z.literal('')).optional(),
-  social_x_link: z.string().url('X/Twitter link must be a valid URL').or(z.literal('')).optional(),
-  interests: z.array(z.string().min(1).max(30)).max(10, 'Maximum 10 interests allowed').optional(),
-  profile_public: z.boolean().optional(),
-  follow_email: z.boolean().optional(),
+const updateProfileSchema = publicUsersUpdateSchema.pick({
+  display_name: true,
+  bio: true,
+  work: true,
+  website: true,
+  social_x_link: true,
+  interests: true,
+  profile_public: true,
+  follow_email: true,
 });
 
 import { createClient } from '@/src/lib/supabase/server';

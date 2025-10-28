@@ -104,7 +104,7 @@ export default function ConsultingPage() {
             <ul className="space-y-2 text-muted-foreground">
               <li>• Modern web apps (Next.js, React, TypeScript)</li>
               <li>• API design and implementation (REST, GraphQL, tRPC)</li>
-              <li>• Database architecture (PostgreSQL, D1, Redis)</li>
+              <li>• Database architecture (PostgreSQL, D1)</li>
               <li>• Real-time systems (WebSockets, Server-Sent Events)</li>
             </ul>
           </div>

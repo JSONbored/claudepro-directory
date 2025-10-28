@@ -7,7 +7,7 @@
  * October 2025 Production Standards:
  * - next-safe-action for type safety and validation
  * - Rate limiting: 50 requests per 60 seconds per IP
- * - Redis caching for performance
+ * - Database caching for performance
  * - Comprehensive logging and error handling
  * - Analytics-ready action tracking
  *
@@ -17,7 +17,6 @@
 'use server';
 
 import { z } from 'zod';
-import { contentCache } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { getContentBySlug } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
@@ -208,65 +207,18 @@ export const copyMarkdownAction = rateLimitedAction
       parsedInput: { category, slug, includeMetadata, includeFooter },
     }): Promise<MarkdownExportResponse> => {
       try {
-        logger.info('Copy markdown action started', {
-          category,
-          slug,
-        });
-
-        // Check cache first
-        const cacheKey = `markdown:copy:${category}:${slug}:${includeMetadata}:${includeFooter}`;
-        if (contentCache.isEnabled()) {
-          const cached = await contentCache.getAPIResponse<string>(cacheKey);
-          if (cached) {
-            logger.info('Serving cached markdown for copy', {
-              category,
-              slug,
-              source: 'redis-cache',
-            });
-            return {
-              success: true,
-              markdown: cached,
-              filename: `${slug}.md`,
-              length: cached.length,
-            };
-          }
-        }
-
-        // Load content
         const item = await getContentBySlug(category, slug);
 
         if (!item) {
-          logger.warn('Content not found for markdown copy', {
-            category,
-            slug,
-          });
           return {
             success: false,
             error: `Content not found: ${category}/${slug}`,
           };
         }
 
-        // Generate markdown
         const markdown = generateMarkdownContent(item, {
           includeMetadata,
           includeFooter,
-        });
-
-        // Cache the result for 1 hour
-        if (contentCache.isEnabled()) {
-          await contentCache.cacheAPIResponse(cacheKey, markdown, 3600).catch((err) =>
-            logger.warn('Failed to cache markdown', {
-              category,
-              slug,
-              error: err,
-            })
-          );
-        }
-
-        logger.info('Markdown copy action completed', {
-          category,
-          slug,
-          length: markdown.length,
         });
 
         return {
@@ -321,65 +273,18 @@ export const downloadMarkdownAction = rateLimitedAction
   .schema(markdownExportSchema.omit({ includeMetadata: true, includeFooter: true }))
   .action(async ({ parsedInput: { category, slug } }): Promise<MarkdownExportResponse> => {
     try {
-      logger.info('Download markdown action started', {
-        category,
-        slug,
-      });
-
-      // Always include metadata and footer for downloads
-      const cacheKey = `markdown:download:${category}:${slug}`;
-      if (contentCache.isEnabled()) {
-        const cached = await contentCache.getAPIResponse<string>(cacheKey);
-        if (cached) {
-          logger.info('Serving cached markdown for download', {
-            category,
-            slug,
-            source: 'redis-cache',
-          });
-          return {
-            success: true,
-            markdown: cached,
-            filename: `${slug}.md`,
-            length: cached.length,
-          };
-        }
-      }
-
-      // Load content
       const item = await getContentBySlug(category, slug);
 
       if (!item) {
-        logger.warn('Content not found for markdown download', {
-          category,
-          slug,
-        });
         return {
           success: false,
           error: `Content not found: ${category}/${slug}`,
         };
       }
 
-      // Generate markdown with full metadata and footer
       const markdown = generateMarkdownContent(item, {
         includeMetadata: true,
         includeFooter: true,
-      });
-
-      // Cache the result for 1 hour
-      if (contentCache.isEnabled()) {
-        await contentCache.cacheAPIResponse(cacheKey, markdown, 3600).catch((err) =>
-          logger.warn('Failed to cache markdown', {
-            category,
-            slug,
-            error: err,
-          })
-        );
-      }
-
-      logger.info('Markdown download action completed', {
-        category,
-        slug,
-        length: markdown.length,
       });
 
       return {

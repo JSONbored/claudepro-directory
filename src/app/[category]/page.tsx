@@ -22,14 +22,14 @@
  * Build Time: ~11.7s for all 187 pages (including 6 category pages)
  * Page Size: 7 kB per category page (minimal client JavaScript)
  * First Load JS: 382 kB (shared bundle + category page bundle)
- * Cache Hit: ~1.66ms (Redis) vs 48ms (file system)
+ * Cache Hit: ~5-20ms (database) vs 48ms (file system)
  * TTFB: <100ms (static pages served from CDN)
  *
  * @example
  * // Data flow for /agents request:
  * // 1. isValidCategory('agents') → validates category exists
  * // 2. getCategoryConfig('agents') → loads display config
- * // 3. getContentByCategory('agents') → loads items with Redis caching
+ * // 3. getContentByCategory('agents') → loads items from database
  * // 4. ContentListServer → renders list with search/filters
  *
  * @see {@link https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes}
@@ -40,11 +40,11 @@
 
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content-list-server';
-import { statsRedis } from '@/src/lib/cache.server';
 import { isValidCategory, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { createClient } from '@/src/lib/supabase/server';
 
 /**
  * ISR revalidation interval for category listing pages
@@ -128,7 +128,7 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
  *
  * @description
  * Server component that renders a list of content items for a given category.
- * Handles validation, config loading, content fetching with Redis caching, and rendering.
+ * Handles validation, config loading, content fetching from database, and rendering.
  * Returns 404 if category is invalid.
  *
  * @param {Object} props - Component props
@@ -162,13 +162,45 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   // Load content for this category
   const itemsData = await getContentByCategory(category);
 
-  // Enrich with view and copy counts from Redis (parallel batch operation)
-  const items = await statsRedis.enrichWithAllCounts(
-    itemsData.map((item) => ({
+  const supabase = await createClient();
+  const { data: analyticsData } = await supabase
+    .from('mv_analytics_summary')
+    .select('category, slug, view_count, copy_count')
+    .eq('category', category)
+    .returns<
+      Array<{
+        category: string | null;
+        slug: string | null;
+        view_count: number | null;
+        copy_count: number | null;
+      }>
+    >();
+
+  const analyticsMap = new Map<string, { viewCount: number; copyCount: number }>();
+  if (analyticsData) {
+    for (const row of analyticsData) {
+      if (row.category && row.slug) {
+        analyticsMap.set(`${row.category}:${row.slug}`, {
+          viewCount: row.view_count ?? 0,
+          copyCount: row.copy_count ?? 0,
+        });
+      }
+    }
+  }
+
+  // Merge analytics with items
+  const items = itemsData.map((item) => {
+    const analytics = analyticsMap.get(`${category}:${item.slug}`) ?? {
+      viewCount: 0,
+      copyCount: 0,
+    };
+    return {
       ...item,
       category,
-    }))
-  );
+      viewCount: analytics.viewCount,
+      copyCount: analytics.copyCount,
+    };
+  });
 
   // Process badges (handle dynamic count badges)
   const badges = config.listPage.badges.map((badge) => {

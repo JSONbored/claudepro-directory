@@ -1,9 +1,5 @@
 /**
- * Item Detail LLMs.txt Route Handler
- * Generates AI-optimized plain text for individual content items
- *
- * @route GET /[category]/[slug]/llms.txt
- * @see {@link https://llmstxt.org} - LLMs.txt specification
+ * LLMs.txt Route - Generates AI-optimized plain text for individual content items.
  */
 
 import {
@@ -18,21 +14,12 @@ import {
   getFullContentBySlug,
 } from '@/src/lib/content/supabase-content-loader';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
-import { buildRichContent, type ContentItem } from '@/src/lib/llms-txt/content-builder';
+import { buildRichContent } from '@/src/lib/llms-txt/content-builder';
 import { generateLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 import type { Database } from '@/src/types/database.types';
 
-/**
- * Generate static params for all category/slug combinations
- *
- * @returns Array of category/slug params for static generation
- *
- * @remarks
- * Generates params for all 168+ detail pages across all categories.
- * This ensures llms.txt routes are pre-rendered at build time.
- */
 export async function generateStaticParams() {
   const allParams: Array<{ category: string; slug: string }> = [];
 
@@ -50,33 +37,15 @@ export async function generateStaticParams() {
   return allParams;
 }
 
-/**
- * Handle GET request for item detail llms.txt
- *
- * @param request - Next.js request object
- * @param context - Route context with category and slug params
- * @returns Plain text response with full item content
- *
- * @remarks
- * This route generates complete llms.txt content for individual items including:
- * - Full metadata (category, author, tags, date)
- * - Complete description
- * - Full content (markdown converted to plain text)
- * - PII sanitization applied
- * - Canonical URL for reference
- */
 export async function GET(
   _request: Request,
   context: { params: Promise<{ category: string; slug: string }> }
 ): Promise<Response> {
-  // Note: Cannot use logger.forRequest() in cached routes (Request object not accessible)
-
   try {
     const { category, slug } = await context.params;
 
     logger.info('Item llms.txt generation started', { category, slug });
 
-    // Validate category
     if (!isValidCategory(category)) {
       logger.warn('Invalid category requested for item llms.txt', {
         category,
@@ -90,7 +59,6 @@ export async function GET(
       });
     }
 
-    // Get item metadata first (fast, cached)
     const item = await getContentBySlug(category, slug);
 
     if (!item) {
@@ -103,10 +71,8 @@ export async function GET(
       });
     }
 
-    // Get full content (includes markdown content field and ALL category-specific fields)
     const fullItem = await getFullContentBySlug(category, slug);
 
-    // Handle case where full content is not found
     if (!fullItem) {
       logger.warn('Full item content not found for llms.txt', {
         category,
@@ -233,22 +199,16 @@ export async function GET(
     // Build rich content from ALL structured fields (features, installation, config, etc.)
     const richContent = buildRichContent(fullItem);
 
-    // Transform to LLMsTxtItem format with rich content
-    // Handle union type fields safely with 'in' checks
     const llmsItem: LLMsTxtItem = {
       slug: fullItem.slug,
       title: ('title' in fullItem ? fullItem.title : null) || fullItem.slug,
       description: fullItem.description,
       category: fullItem.category,
-      tags: Array.isArray(fullItem.tags) ? fullItem.tags : [],
+      tags: (fullItem.tags as string[]) ?? [],
       author: 'author' in fullItem && fullItem.author ? fullItem.author : undefined,
       date_added: 'date_added' in fullItem && fullItem.date_added ? fullItem.date_added : undefined,
       url: `${APP_CONFIG.url}/${category}/${slug}`,
-      // Include FULL rich content from all fields
-      content:
-        'content' in fullItem && typeof fullItem.content === 'string'
-          ? fullItem.content
-          : richContent,
+      content: richContent,
     };
 
     // Generate llms.txt content with full details
@@ -265,7 +225,6 @@ export async function GET(
       category,
       slug,
       contentLength: llmsTxt.length,
-      hasFullContent: !!fullItem.content,
     });
 
     // Return plain text response

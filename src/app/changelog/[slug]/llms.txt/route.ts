@@ -16,7 +16,7 @@
  *
  * Performance:
  * - ISR: 600s (10 minutes)
- * - Redis-cached entry loading
+ * - Database-cached entry loading
  * - Static params generation
  *
  * Production Standards:

@@ -1,11 +1,9 @@
 /**
- * Search API Route - Server-side PostgreSQL FTS
- *
- * Provides JSON API for client components to fetch search results
- * using server-side searchContent() function
+ * Search API Route - Database-First RPC via search_content_optimized()
  */
 
 import { type NextRequest, NextResponse } from 'next/server';
+import type { SearchFilters } from '@/src/lib/search/server-search';
 import { searchContent } from '@/src/lib/search/server-search';
 
 export async function GET(request: NextRequest) {
@@ -13,22 +11,15 @@ export async function GET(request: NextRequest) {
   const query = searchParams.get('q') || '';
   const category = searchParams.get('category');
   const tags = searchParams.get('tags')?.split(',').filter(Boolean);
-  const sort = (searchParams.get('sort') || 'relevance') as 'relevance' | 'newest' | 'alphabetical';
+  const sort = searchParams.get('sort') as SearchFilters['sort'];
 
   try {
-    // Build filters object conditionally to satisfy exactOptionalPropertyTypes
-    const filters: Parameters<typeof searchContent>[1] = {
-      sort,
-      limit: 50,
-    };
+    const filters: SearchFilters = {};
 
-    if (category) {
-      filters.categories = [category as any];
-    }
-
-    if (tags && tags.length > 0) {
-      filters.tags = tags;
-    }
+    if (sort) filters.sort = sort;
+    if (category) filters.p_categories = [category];
+    if (tags && tags.length > 0) filters.p_tags = tags;
+    filters.p_limit = 50;
 
     const results = await searchContent(query, filters);
 

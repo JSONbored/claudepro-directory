@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
 import { ArrowLeft } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
+import type { Tables } from '@/src/types/database.types';
 
 interface EditCollectionPageProps {
   params: Promise<{ slug: string }>;
@@ -29,24 +30,23 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
     redirect('/login');
   }
 
-  // Get collection
   const { data: collection } = await supabase
     .from('user_collections')
     .select('*')
     .eq('user_id', user.id)
     .eq('slug', slug)
-    .single();
+    .maybeSingle<Tables<'user_collections'>>();
 
   if (!collection) {
     notFound();
   }
 
-  // Get user's bookmarks
   const { data: bookmarks } = await supabase
     .from('bookmarks')
     .select('*')
     .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .returns<Array<Tables<'bookmarks'>>>();
 
   return (
     <div className="space-y-6">

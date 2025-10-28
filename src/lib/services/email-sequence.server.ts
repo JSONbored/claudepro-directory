@@ -1,48 +1,20 @@
 /**
- * Email Sequence Service
- *
- * Manages automated email sequences (onboarding, drip campaigns, etc.)
- * Uses Redis for state management and scheduling.
- *
- * Features:
- * - 5-email onboarding sequence
- * - Redis-based state storage
- * - Daily cron processing (Vercel free tier compatible)
- * - Automatic enrollment on signup
- * - Graceful unsubscribe handling
- *
- * @module lib/services/email-sequence.service
+ * Email Sequence Service - Database-First Architecture
+ * PostgreSQL-based email sequence scheduling with auto-generated schemas.
  */
 
 import type { ReactElement } from 'react';
-import { z } from 'zod';
-import { CacheServices, redisClient } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
+import {
+  publicEmailSequenceScheduleInsertSchema,
+  publicEmailSequencesInsertSchema,
+  publicEmailSequencesRowSchema,
+} from '@/src/lib/schemas/generated/db-schemas';
 import { resendService } from '@/src/lib/services/resend.server';
+import { createClient } from '@/src/lib/supabase/server';
+import type { Tables } from '@/src/types/database.types';
 
-/**
- * Email sequence cache - Uses session cache (24h TTL, gzip compression)
- * Appropriate for user-specific data with medium-term persistence
- */
-const emailCache = CacheServices.session;
-
-/**
- * Email sequence state schema (Zod)
- */
-const emailSequenceSchema = z.object({
-  sequenceId: z.string(),
-  email: z.string().email(),
-  currentStep: z.number().int().min(1).max(5),
-  totalSteps: z.number().int().min(1).max(5),
-  startedAt: z.string().datetime(),
-  lastSentAt: z.string().datetime().nullable(),
-  status: z.enum(['active', 'completed', 'cancelled']),
-});
-
-/**
- * Email sequence state
- */
-export type EmailSequence = z.infer<typeof emailSequenceSchema>;
+export type EmailSequence = Tables<'email_sequences'>;
 
 /**
  * Sequence delays in seconds (converted from days)
@@ -87,49 +59,50 @@ class EmailSequenceService {
 
   /**
    * Enroll subscriber in onboarding sequence
-   *
-   * @param email - Subscriber email address
-   * @returns Promise that resolves when enrollment is complete
    */
   async enrollInSequence(email: string): Promise<void> {
     try {
-      const sequence: EmailSequence = {
-        sequenceId: this.SEQUENCE_ID,
+      const supabase = await createClient();
+      const now = new Date().toISOString();
+
+      const sequenceData = publicEmailSequencesInsertSchema.parse({
+        sequence_id: this.SEQUENCE_ID,
         email,
-        currentStep: 1, // Welcome email already sent
-        totalSteps: 5,
-        startedAt: new Date().toISOString(),
-        lastSentAt: new Date().toISOString(), // Welcome just sent
+        current_step: 1,
+        total_steps: 5,
+        started_at: now,
+        last_sent_at: now,
         status: 'active',
-      };
-
-      const key = `email_sequence:${this.SEQUENCE_ID}:${email}`;
-
-      await redisClient.executeOperation(
-        async (redis) => {
-          await redis.set(key, JSON.stringify(sequence), {
-            ex: 90 * 86400, // 90 days TTL
-          });
-
-          // Schedule step 2 (2 days from now)
-          const dueAt = Date.now() + SEQUENCE_DELAYS.step2 * 1000;
-          await redis.zadd(`email_sequence:due:${this.SEQUENCE_ID}:2`, {
-            score: dueAt,
-            member: email,
-          });
-        },
-        () => {
-          logger.error('Failed to enroll in email sequence', undefined, {
-            email,
-          });
-        },
-        'email_sequence_enroll'
-      );
-
-      logger.info('Enrolled in email sequence', {
-        email,
-        sequenceId: this.SEQUENCE_ID,
       });
+
+      const { error: sequenceError } = await supabase.from('email_sequences').insert(sequenceData);
+
+      if (sequenceError) {
+        logger.error('Failed to create email sequence', new Error(sequenceError.message), {
+          email,
+        });
+        return;
+      }
+
+      const dueAt = new Date(Date.now() + SEQUENCE_DELAYS.step2 * 1000).toISOString();
+      const scheduleData = publicEmailSequenceScheduleInsertSchema.parse({
+        sequence_id: this.SEQUENCE_ID,
+        email,
+        step: 2,
+        due_at: dueAt,
+        processed: false,
+      });
+
+      const { error: scheduleError } = await supabase
+        .from('email_sequence_schedule')
+        .insert(scheduleData);
+
+      if (scheduleError) {
+        logger.error('Failed to schedule email', new Error(scheduleError.message), { email });
+        return;
+      }
+
+      logger.info('Enrolled in email sequence', { email, sequenceId: this.SEQUENCE_ID });
     } catch (error) {
       logger.error(
         'Email sequence enrollment error',
@@ -141,65 +114,59 @@ class EmailSequenceService {
 
   /**
    * Process email sequence queue (called by daily cron)
-   *
-   * @returns Promise with send results
    */
   async processSequenceQueue(): Promise<{ sent: number; failed: number }> {
     let sentCount = 0;
     let failedCount = 0;
 
     try {
-      // Process each step (2-5, step 1 is welcome email)
-      for (let step = 2; step <= 5; step++) {
-        const now = Date.now();
-        const dueKey = `email_sequence:due:${this.SEQUENCE_ID}:${step}`;
+      const supabase = await createClient();
+      const now = new Date().toISOString();
 
-        // Get all emails due for this step
-        const dueEmails = await redisClient.executeOperation(
-          async (redis) => {
-            // Get all emails with score <= now
-            return await redis.zrange(dueKey, 0, now, {
-              byScore: true,
-            });
-          },
-          () => [],
-          'email_sequence_get_due'
-        );
+      // Get all due emails (due_at <= now AND processed = false)
+      const { data: dueEmails, error } = await supabase
+        .from('email_sequence_schedule')
+        .select('id, email, step')
+        .eq('sequence_id', this.SEQUENCE_ID)
+        .eq('processed', false)
+        .lte('due_at', now)
+        .order('due_at', { ascending: true });
 
-        if (dueEmails.length === 0) continue;
+      if (error) {
+        logger.error('Failed to fetch due emails', new Error(error.message));
+        return { sent: 0, failed: 0 };
+      }
 
-        logger.info(`Processing sequence step ${step}`, {
-          dueCount: dueEmails.length,
-          sequenceId: this.SEQUENCE_ID,
-        });
+      if (!dueEmails || dueEmails.length === 0) {
+        return { sent: 0, failed: 0 };
+      }
 
-        // Send emails
-        for (const email of dueEmails) {
-          try {
-            await this.sendSequenceEmail(email, step);
-            sentCount++;
+      logger.info('Processing email sequence queue', {
+        dueCount: dueEmails.length,
+        sequenceId: this.SEQUENCE_ID,
+      });
 
-            // Remove from due queue
-            await redisClient.executeOperation(
-              async (redis) => {
-                await redis.zrem(dueKey, email);
-              },
-              () => {
-                // Silent fallback - already logged in main error handler
-              },
-              'email_sequence_remove_due'
-            );
+      // Send emails
+      for (const { id, email, step } of dueEmails) {
+        try {
+          await this.sendSequenceEmail(email, step);
+          sentCount++;
 
-            // Rate limit: 100ms delay between emails
-            await new Promise((resolve) => setTimeout(resolve, 100));
-          } catch (error) {
-            logger.error('Failed to send sequence email', undefined, {
-              email,
-              step,
-              error: error instanceof Error ? error.message : String(error),
-            });
-            failedCount++;
-          }
+          // Mark as processed
+          await supabase
+            .from('email_sequence_schedule')
+            .update({ processed: true, processed_at: new Date().toISOString() })
+            .eq('id', id);
+
+          // Rate limit: 100ms delay between emails
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        } catch (error) {
+          logger.error('Failed to send sequence email', undefined, {
+            email,
+            step,
+            error: error instanceof Error ? error.message : String(error),
+          });
+          failedCount++;
         }
       }
 
@@ -222,18 +189,19 @@ class EmailSequenceService {
 
   /**
    * Send specific sequence email
-   *
-   * @param email - Recipient email address
-   * @param step - Step number (2-5)
    */
   private async sendSequenceEmail(email: string, step: number): Promise<void> {
-    // Get sequence state with schema validation
-    const key = `email_sequence:${this.SEQUENCE_ID}:${email}`;
+    const supabase = await createClient();
 
-    // Production-grade: CacheService handles compression, XSS protection, and Zod validation
-    const sequenceData = await emailCache.getTyped<EmailSequence>(key, emailSequenceSchema);
+    // Get sequence state
+    const { data: sequenceData, error } = await supabase
+      .from('email_sequences')
+      .select('status, current_step')
+      .eq('sequence_id', this.SEQUENCE_ID)
+      .eq('email', email)
+      .maybeSingle();
 
-    if (!sequenceData || sequenceData.status !== 'active') {
+    if (error || !sequenceData || sequenceData.status !== 'active') {
       logger.warn('Sequence not active or not found', { email, step });
       return;
     }
@@ -273,40 +241,31 @@ class EmailSequenceService {
     }
 
     // Update sequence state
-    const updatedSequence: EmailSequence = {
-      ...sequenceData,
-      currentStep: step,
-      lastSentAt: new Date().toISOString(),
-      status: step === 5 ? 'completed' : 'active',
-    };
+    await supabase
+      .from('email_sequences')
+      .update({
+        current_step: step,
+        last_sent_at: new Date().toISOString(),
+        status: step === 5 ? 'completed' : 'active',
+      })
+      .eq('sequence_id', this.SEQUENCE_ID)
+      .eq('email', email);
 
-    await redisClient.executeOperation(
-      async (redis) => {
-        await redis.set(key, JSON.stringify(updatedSequence), {
-          ex: 90 * 86400,
-        });
+    // Schedule next step if not complete
+    if (step < 5) {
+      const nextStep = step + 1;
+      const delayKey = `step${nextStep}` as keyof typeof SEQUENCE_DELAYS;
+      const delay = SEQUENCE_DELAYS[delayKey];
+      const dueAt = new Date(Date.now() + delay * 1000).toISOString();
 
-        // Schedule next step if not complete
-        if (step < 5) {
-          const nextStep = step + 1;
-          const delayKey = `step${nextStep}` as keyof typeof SEQUENCE_DELAYS;
-          const delay = SEQUENCE_DELAYS[delayKey];
-          const dueAt = Date.now() + delay * 1000;
-
-          await redis.zadd(`email_sequence:due:${this.SEQUENCE_ID}:${nextStep}`, {
-            score: dueAt,
-            member: email,
-          });
-        }
-      },
-      () => {
-        logger.error('Failed to update sequence state', undefined, {
-          email,
-          step,
-        });
-      },
-      'email_sequence_update'
-    );
+      await supabase.from('email_sequence_schedule').insert({
+        sequence_id: this.SEQUENCE_ID,
+        email,
+        step: nextStep,
+        due_at: dueAt,
+        processed: false,
+      });
+    }
 
     logger.info('Sequence email sent', {
       email,
@@ -318,38 +277,27 @@ class EmailSequenceService {
 
   /**
    * Cancel sequence for email (e.g., on unsubscribe)
-   *
-   * @param email - Email address to cancel
    */
   async cancelSequence(email: string): Promise<void> {
     try {
-      const key = `email_sequence:${this.SEQUENCE_ID}:${email}`;
+      const supabase = await createClient();
 
-      // Get with schema validation
-      const sequence = await emailCache.getTyped<EmailSequence>(key, emailSequenceSchema);
+      // Update sequence status to cancelled
+      await supabase
+        .from('email_sequences')
+        .update({ status: 'cancelled' })
+        .eq('sequence_id', this.SEQUENCE_ID)
+        .eq('email', email);
 
-      if (sequence) {
-        // Update status and save back
-        sequence.status = 'cancelled';
-        await emailCache.set(key, sequence, 90 * 86400); // 90 days TTL
-      }
+      // Mark all pending scheduled emails as processed (effectively cancelling them)
+      await supabase
+        .from('email_sequence_schedule')
+        .update({ processed: true, processed_at: new Date().toISOString() })
+        .eq('sequence_id', this.SEQUENCE_ID)
+        .eq('email', email)
+        .eq('processed', false);
 
-      // Remove from due queues (direct Redis operations for sorted sets)
-      // TODO: Consider adding sorted set operations to CacheService
-      for (let step = 2; step <= 5; step++) {
-        await redisClient.executeOperation(
-          async (redis) => {
-            await redis.zrem(`email_sequence:due:${this.SEQUENCE_ID}:${step}`, email);
-          },
-          () => null, // Fallback: gracefully handle Redis unavailability
-          'email_sequence_cancel_zrem'
-        );
-      }
-
-      logger.info('Sequence cancelled', {
-        email,
-        sequenceId: this.SEQUENCE_ID,
-      });
+      logger.info('Sequence cancelled', { email, sequenceId: this.SEQUENCE_ID });
     } catch (error) {
       logger.error(
         'Cancel sequence error',

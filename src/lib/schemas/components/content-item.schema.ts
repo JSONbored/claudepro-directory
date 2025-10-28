@@ -73,7 +73,7 @@ export const unifiedContentItemSchema = z
     lastModified: z.string().optional().describe('ISO date string when content was last updated'), // last modification date
 
     // Analytics properties
-    viewCount: z.number().optional().describe('Number of views from Redis analytics'),
+    viewCount: z.number().optional().describe('Number of views from PostgreSQL analytics'),
     position: z.number().optional().describe('Position in feed for tracking purposes'),
     growthRate: z
       .number()

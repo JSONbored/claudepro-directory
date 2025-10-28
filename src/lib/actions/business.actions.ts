@@ -1,10 +1,7 @@
 'use server';
 
 /**
- * Business Actions
- * Consolidated server actions for all business-related functionality
- *
- * Consolidates: Submissions (2 actions), Submission Stats (3 actions), Companies (3 actions), Jobs (5 actions), Sponsored (3 actions)
+ * Business Actions - Server actions for submissions, companies, jobs, and sponsored content.
  */
 
 import { revalidatePath } from 'next/cache';
@@ -35,6 +32,7 @@ import {
   publicSponsoredImpressionsInsertSchema,
 } from '@/src/lib/schemas/generated/db-schemas';
 import { nonNegativeInt } from '@/src/lib/schemas/primitives';
+import type { Tables } from '@/src/types/database.types';
 
 // ============================================
 // SUBMISSION STATS TYPES (Database-First)
@@ -986,11 +984,7 @@ export const deleteJob = rateLimitedAction
     };
   });
 
-/**
- * Get user's jobs (for account management)
- * Not a server action - just a helper function
- */
-export async function getUserJobs() {
+export async function getUserJobs(): Promise<Array<Tables<'jobs'>>> {
   const supabase = await createClient();
 
   const {
@@ -1001,7 +995,6 @@ export async function getUserJobs() {
     return [];
   }
 
-  // Fetch user's active jobs (excludes deleted)
   const { data, error } = await supabase
     .from('jobs')
     .select('*')

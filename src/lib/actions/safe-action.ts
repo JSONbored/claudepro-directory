@@ -4,7 +4,7 @@
  * Production-grade server action client with:
  * - Automatic validation with Zod schemas
  * - Centralized logging middleware
- * - Rate limiting middleware (Redis-based)
+ * - Rate limiting middleware (Arcjet-based)
  * - Authentication middleware (Supabase integration)
  * - Consistent error handling
  * - Full TypeScript type inference
@@ -31,7 +31,7 @@
  *   - Complements CSRF protection with resource abuse prevention
  *
  * Additional Security:
- * - Rate limiting: Redis-based atomic operations (100 req/60s per IP)
+ * - Rate limiting: Arcjet tokenBucket (60 req/60s with burst capacity)
  * - Input validation: Zod schema enforcement on all inputs
  * - Error sanitization: Production-safe error messages (no stack traces)
  * - Session validation: Supabase auth integration for authenticated actions
@@ -69,10 +69,8 @@ const actionMetadataSchema = z.object({
 
 export type ActionMetadata = z.infer<typeof actionMetadataSchema>;
 
-// REMOVED: Redis-based rate limiting for Server Actions (~50K commands/month)
-// Relying on Arcjet tokenBucket in middleware for all rate limiting
+// Rate limiting handled by Arcjet tokenBucket in middleware
 // Arcjet provides: 60 req/min burst capacity with token bucket algorithm
-// Savings: ~50K Redis commands/month
 
 /**
  * Base action client with logging and error handling
@@ -268,8 +266,8 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
  *   })
  *   .schema(trackingParamsSchema)
  *   .action(async ({ parsedInput: { category, slug } }) => {
- *     const viewCount = await statsRedis.incrementView(category, slug);
- *     return { success: true, viewCount };
+ *     await supabase.from('user_interactions').insert({ category, slug, interaction_type: 'view' });
+ *     return { success: true };
  *   });
  * ```
  *

@@ -635,8 +635,6 @@ export async function batchFetchSettled<T extends readonly Promise<unknown>[]>(
 // CRON TASK EXECUTOR (dependency-resolving, ~150 LOC)
 // ============================================
 
-import { redisClient } from '@/src/lib/cache.server';
-
 export interface CronTask {
   id: string;
   dependsOn?: string[];
@@ -669,22 +667,9 @@ export interface CronExecutorSummary {
   results: CronTaskResult[];
 }
 
-/** Acquire a distributed lock using Redis SETNX semantics. */
+/** Distributed lock - Not implemented (cron executor currently unused) */
 async function acquireLock(lockKey: string, ttlSec: number): Promise<boolean> {
-  try {
-    const acquired = await redisClient.executeOperation(
-      async (redis) => {
-        // Upstash Redis: SET with NX and EX via set(key, value, { nx: true, ex: ttl })
-        const res = await redis.set(lockKey, String(Date.now()), { nx: true, ex: ttlSec });
-        return res === 'OK';
-      },
-      async () => false,
-      'cron_lock_acquire'
-    );
-    return acquired;
-  } catch {
-    return false;
-  }
+  return true; // No-op - would use PostgreSQL advisory locks if needed
 }
 
 /** Topologically sort tasks (Kahn's algorithm). Throws on cycles/unknown deps. */

@@ -10,7 +10,7 @@
  * - Performant: Pre-rendered on server
  *
  * **Architecture:**
- * - Server Component: Uses batchMap from batch.utils (imports cache.server)
+ * - Server Component: Uses batchMap from batch.utils
  * - NOT Storybook-compatible (requires server-side execution)
  * - Correct usage: Server components can import server-only code
  */

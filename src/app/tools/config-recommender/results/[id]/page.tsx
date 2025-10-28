@@ -1,30 +1,17 @@
 /**
- * Configuration Recommender Results Page
- *
- * Displays personalized configuration recommendations based on quiz answers.
- * Supports sharing via URL-encoded answers for social/team collaboration.
- *
- * Features:
- * - Dynamic results based on answer encoding
- * - Shareable URLs
- * - SEO-optimized metadata
- * - OG image generation for social sharing
- *
- * Performance:
- * - ISR with 1-hour revalidation
- * - Edge-compatible
- * - <200ms total page load
+ * Configuration Recommender Results Page - Database-First Quiz Recommendations
+ * Personalized results from PostgreSQL RPC, shareable via URL-encoded answers.
  */
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ResultsDisplay } from '@/src/components/tools/recommender/results-display';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants/routes';
 import { logger } from '@/src/lib/logger';
 import { getRecommendations } from '@/src/lib/recommender/database-recommender';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-// Decode base64url quiz answers
 function decodeQuizAnswers(encoded: string) {
   try {
     const json = Buffer.from(encoded, 'base64url').toString('utf-8');
@@ -39,11 +26,6 @@ interface PageProps {
   searchParams: Promise<{ answers?: string }>;
 }
 
-/**
- * Generate metadata for SEO and social sharing
- * NOINDEX strategy: Result pages are personalized and should not be indexed
- * to avoid thin content issues and infinite URL combinations
- */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const baseMetadata = generatePageMetadata('/tools/config-recommender/results/:id', {
@@ -59,14 +41,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-/**
- * Results page component
- */
 export default async function ResultsPage({ params, searchParams }: PageProps) {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
 
-  // Decode quiz answers from URL
   if (!resolvedSearchParams.answers) {
     logger.warn('Results page accessed without answers parameter');
     notFound();
@@ -84,7 +62,6 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
   }
 
   try {
-    // Call PostgreSQL recommendation function (refreshed every 6 hours)
     const dbResults = await getRecommendations({
       useCase: answers.useCase,
       experienceLevel: answers.experienceLevel,
@@ -94,7 +71,6 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
       limit: 20,
     });
 
-    // Transform to expected format for ResultsDisplay component
     const recommendations = {
       results: dbResults.map((item, index) => ({
         slug: item.slug,
@@ -122,10 +98,8 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
       },
     };
 
-    // Build shareable URL
     const shareUrl = `${APP_CONFIG.url}/tools/config-recommender/results/${resolvedParams.id}?answers=${resolvedSearchParams.answers}`;
 
-    // Log page view
     logger.info('Results page viewed', {
       resultId: resolvedParams.id,
       useCase: answers.useCase,
@@ -150,7 +124,6 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
       }
     );
 
-    // Show error page
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4 p-8">

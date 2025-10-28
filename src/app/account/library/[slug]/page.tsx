@@ -16,6 +16,7 @@ import { ArrowLeft, Edit, Share2 } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database.types';
 
 interface CollectionPageProps {
   params: Promise<{ slug: string }>;
@@ -38,31 +39,30 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     redirect('/login');
   }
 
-  // Get collection
   const { data: collection } = await supabase
     .from('user_collections')
     .select('*')
     .eq('user_id', user.id)
     .eq('slug', slug)
-    .single();
+    .maybeSingle<Tables<'user_collections'>>();
 
   if (!collection) {
     notFound();
   }
 
-  // Get collection items
   const { data: items } = await supabase
     .from('collection_items')
     .select('*')
     .eq('collection_id', collection.id)
-    .order('order', { ascending: true });
+    .order('order', { ascending: true })
+    .returns<Array<Tables<'collection_items'>>>();
 
-  // Get available bookmarks to add
   const { data: bookmarks } = await supabase
     .from('bookmarks')
     .select('*')
     .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .returns<Array<Tables<'bookmarks'>>>();
 
   const shareUrl = collection.is_public
     ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://claudepro.directory'}/u/${user.id}/collections/${collection.slug}`

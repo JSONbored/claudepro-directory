@@ -27,13 +27,13 @@ import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar'
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent } from '@/src/components/primitives/card';
 import { SectionProgress } from '@/src/components/shared/section-progress';
-import { contentCache, statsRedis } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 // MDX support removed - 100% JSON guides now
 import { ArrowLeft, BookOpen, Calendar, Eye, FileText, Tag, Users, Zap } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Validation schema for guide parameters
@@ -71,42 +71,33 @@ async function getSEOPageData(category: string, slug: string): Promise<SEOPageDa
 
   if (!pathMap[category]) return null;
 
-  const cacheKey = `guide:v4:${category}:${slug}`; // v4 = JSON support
+  try {
+    const mappedPath = pathMap[category];
+    if (!mappedPath) return null;
 
-  return await contentCache.cacheWithRefresh(
-    cacheKey,
-    async () => {
-      try {
-        const mappedPath = pathMap[category];
-        if (!mappedPath) return null;
+    const baseDir = path.join(process.cwd(), 'content', 'guides', mappedPath);
+    const jsonPath = path.join(baseDir, `${slug}.json`);
 
-        const baseDir = path.join(process.cwd(), 'content', 'guides', mappedPath);
-        const jsonPath = path.join(baseDir, `${slug}.json`);
+    const fileContent = await fs.readFile(jsonPath, 'utf-8');
+    const jsonData = JSON.parse(fileContent);
 
-        // Read JSON guide (100% JSON - no MDX fallback)
-        const fileContent = await fs.readFile(jsonPath, 'utf-8');
-        const jsonData = JSON.parse(fileContent);
-
-        return {
-          title: jsonData.title || '',
-          seoTitle: jsonData.seo_title,
-          description: jsonData.description || '',
-          keywords: Array.isArray(jsonData.keywords) ? jsonData.keywords : [],
-          dateUpdated: jsonData.dateUpdated || '',
-          author: jsonData.author || APP_CONFIG.author,
-          readingTime: jsonData.readingTime || '',
-          difficulty: jsonData.difficulty || '',
-          category: jsonData.category || category,
-          content: '', // JSON guides use sections array
-          sections: jsonData.sections || [],
-          isJsonGuide: true,
-        };
-      } catch (_error) {
-        return null;
-      }
-    },
-    24 * 60 * 60 // Cache for 24 hours
-  );
+    return {
+      title: jsonData.title || '',
+      seoTitle: jsonData.seo_title,
+      description: jsonData.description || '',
+      keywords: Array.isArray(jsonData.keywords) ? jsonData.keywords : [],
+      dateUpdated: jsonData.dateUpdated || '',
+      author: jsonData.author || APP_CONFIG.author,
+      readingTime: jsonData.readingTime || '',
+      difficulty: jsonData.difficulty || '',
+      category: jsonData.category || category,
+      content: '',
+      sections: jsonData.sections || [],
+      isJsonGuide: true,
+    };
+  } catch (_error) {
+    return null;
+  }
 }
 
 async function getRelatedGuides(
@@ -116,46 +107,37 @@ async function getRelatedGuides(
 ): Promise<RelatedGuide[]> {
   if (!currentCategory) return [];
 
-  const cacheKey = `related:${currentCategory}:${currentSlug}:${limit}`;
+  const relatedGuides: RelatedGuide[] = [];
 
-  return await contentCache.cacheWithRefresh(
-    cacheKey,
-    async () => {
-      const relatedGuides: RelatedGuide[] = [];
+  try {
+    const dir = path.join(process.cwd(), 'content', 'guides', currentCategory);
 
-      try {
-        const dir = path.join(process.cwd(), 'content', 'guides', currentCategory);
+    const files = await fs.readdir(dir);
 
-        // Read directory directly - catch will handle if it doesn't exist
-        const files = await fs.readdir(dir);
+    for (const file of files) {
+      if (file.endsWith('.json')) {
+        const fileSlug = file.replace('.json', '');
+        if (fileSlug !== currentSlug) {
+          const content = await fs.readFile(path.join(dir, file), 'utf-8');
+          const jsonData = JSON.parse(content);
 
-        for (const file of files) {
-          if (file.endsWith('.json')) {
-            const fileSlug = file.replace('.json', '');
-            if (fileSlug !== currentSlug) {
-              const content = await fs.readFile(path.join(dir, file), 'utf-8');
-              const jsonData = JSON.parse(content);
-
-              if (jsonData.title) {
-                relatedGuides.push({
-                  title: jsonData.title,
-                  slug: `/guides/${currentCategory}/${fileSlug}`,
-                  category: currentCategory,
-                });
-              }
-
-              if (relatedGuides.length >= limit) break;
-            }
+          if (jsonData.title) {
+            relatedGuides.push({
+              title: jsonData.title,
+              slug: `/guides/${currentCategory}/${fileSlug}`,
+              category: currentCategory,
+            });
           }
-        }
-      } catch {
-        // Directory doesn't exist
-      }
 
-      return relatedGuides;
-    },
-    4 * 60 * 60 // Cache for 4 hours
-  );
+          if (relatedGuides.length >= limit) break;
+        }
+      }
+    }
+  } catch {
+    // Directory doesn't exist
+  }
+
+  return relatedGuides;
 }
 
 export async function generateStaticParams() {
@@ -265,9 +247,16 @@ export default async function SEOGuidePage({
     const Icon = (category && categoryIcons[category]) || BookOpen;
     const relatedGuides = await getRelatedGuides(category, slug);
 
-    // Fetch view count for this guide from Redis
+    // Fetch view count from materialized view
     const guideSlug = `${category}/${slug}`; // e.g., "tutorials/desktop-mcp-setup"
-    const viewCount = await statsRedis.getViewCount('guides', guideSlug);
+    const supabase = await createClient();
+    const { data: analyticsData } = await supabase
+      .from('mv_analytics_summary')
+      .select('view_count')
+      .eq('category', 'guides')
+      .eq('slug', guideSlug)
+      .maybeSingle();
+    const viewCount = analyticsData?.view_count ?? 0;
 
     // Format date if available
     const formatDate = (dateStr: string) => {

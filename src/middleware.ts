@@ -8,7 +8,7 @@ import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
 import { env, securityConfig } from '@/src/lib/schemas/env.schema';
 
-// Force Node.js runtime for middleware (Redis compression requires node:zlib)
+// Force Node.js runtime for middleware
 export const runtime = 'nodejs';
 
 import {
@@ -232,10 +232,7 @@ function mergeSecurityHeaders(target: Headers, source: Headers): void {
   });
 }
 
-// REMOVED: Redis-based rate limiting (redundant with Arcjet tokenBucket)
-// Arcjet already provides comprehensive rate limiting in middleware (lines 60-66)
-// Savings: ~450K Redis commands/month
-// Defense-in-depth: Arcjet tokenBucket (60 req/min) + WAF + Bot Detection
+// Arcjet provides comprehensive rate limiting via tokenBucket (60 req/min) + WAF + Bot Detection
 
 export async function middleware(request: NextRequest) {
   const startTime = isDevelopment ? performance.now() : 0;

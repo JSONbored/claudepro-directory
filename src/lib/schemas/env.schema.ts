@@ -43,14 +43,6 @@ const serverEnvSchema = z
       .default('development')
       .describe('Application runtime environment mode'),
 
-    // Redis/Upstash configuration
-    KV_REST_API_URL: urlString
-      .optional()
-      .describe('Upstash Redis REST API endpoint URL for key-value storage'),
-    KV_REST_API_TOKEN: nonEmptyString
-      .optional()
-      .describe('Authentication token for Upstash Redis REST API'),
-
     // Arcjet security - Required in production for rate limiting and DDoS protection
     ARCJET_KEY: nonEmptyString
       .optional()

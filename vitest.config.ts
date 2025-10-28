@@ -76,7 +76,6 @@ export default defineConfig({
         'tests/',
         '**/*.d.ts',
         '**/*.config.*',
-        '**/*.stories.tsx',
         '**/mockData/**',
         'src/app/**', // Exclude App Router (test with E2E)
         'src/middleware.ts', // Test with E2E

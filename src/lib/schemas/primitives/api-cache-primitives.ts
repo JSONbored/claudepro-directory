@@ -127,7 +127,7 @@ export const KEY_LIMITS = {
 
 /**
  * Cache key validator
- * Used for: Redis cache keys, general cache identifiers
+ * Used for: Cache keys, general cache identifiers
  * Pattern: alphanumeric + : _ - / .
  * Common in: All cache operations
  */
@@ -135,7 +135,7 @@ export const cacheKeyString = nonEmptyString
   .max(KEY_LIMITS.MAX_KEY_LENGTH, 'Cache key too long')
   .regex(KEY_PATTERNS.CACHE_KEY, 'Invalid cache key format')
   .refine((key) => !key.includes('\0'), 'Null bytes not allowed in cache key')
-  .describe('Redis-compatible cache key with alphanumeric and safe special chars');
+  .describe('Cache key with alphanumeric and safe special chars');
 
 /**
  * Category validator

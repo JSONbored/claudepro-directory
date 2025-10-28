@@ -5,7 +5,7 @@
  * Security Layers:
  * 1. Middleware (Arcjet) - Bot detection, WAF, rate limiting (60 req/min)
  * 2. Svix Signature Verification - Cryptographic proof of authenticity
- * 3. Idempotency Protection - Redis-based replay attack prevention (24h TTL)
+ * 3. Idempotency Protection - Database UNIQUE constraint on svix_id prevents replay attacks
  * 4. Zod Validation - Schema validation
  *
  * Events Handled:
@@ -19,7 +19,6 @@
 import type { NextRequest } from 'next/server';
 import { Webhook } from 'svix';
 import { z } from 'zod';
-import { redisClient } from '@/src/lib/cache.server';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { env } from '@/src/lib/schemas/env.schema';
@@ -119,54 +118,11 @@ export async function POST(request: NextRequest) {
 
   const event = validatedEvent.data;
 
-  // Idempotency check - prevent replay attacks and duplicate processing
-  // Use svix-id as unique identifier (Svix guarantees uniqueness)
-  const idempotencyKey = `webhook:processed:${event.type}:${event.data.email_id}:${svixId}`;
+  // Idempotency via PostgreSQL UNIQUE constraint on svix_id
+  // Database automatically rejects duplicate svix_id inserts
 
-  // Check if this webhook has already been processed
-  const alreadyProcessed = await redisClient.executeOperation(
-    async (redis) => {
-      const exists = await redis.get(idempotencyKey);
-      return exists !== null;
-    },
-    async () => false, // Fallback if Redis unavailable - allow processing but log warning
-    'webhook_idempotency_check'
-  );
-
-  if (alreadyProcessed) {
-    logger.info('Webhook already processed - idempotent response', undefined, {
-      svixId,
-      eventType: event.type,
-      emailId: event.data.email_id ?? 'unknown',
-    });
-    // Return success to acknowledge receipt (prevent retries)
-    return apiResponse.okRaw(
-      {
-        received: true,
-        alreadyProcessed: true,
-        eventType: event.type,
-        timestamp: new Date().toISOString(),
-      },
-      { sMaxAge: 0, staleWhileRevalidate: 0 }
-    );
-  }
-
-  // Mark webhook as processed (24 hour TTL to prevent indefinite storage growth)
-  await redisClient.executeOperation(
-    async (redis) => {
-      await redis.setex(idempotencyKey, 86400, '1'); // 24 hours in seconds
-    },
-    async () => {
-      logger.warn('Failed to set webhook idempotency key - processing will continue', undefined, {
-        svixId,
-      });
-    },
-    'webhook_idempotency_set'
-  );
-
-  // REMOVED: Redis rate limiting (webhooks protected by Arcjet in middleware)
-  // Arcjet already provides comprehensive rate limiting for all requests
-  // Savings: ~10K Redis commands/month
+  // Rate limiting handled by Arcjet in middleware
+  // Arcjet provides comprehensive rate limiting for all requests
 
   // Process webhook event asynchronously (don't block response)
   // Resend expects fast 200 responses (<5 seconds)

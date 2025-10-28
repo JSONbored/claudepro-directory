@@ -73,7 +73,7 @@ export const categoryIdSchema = z
   .describe('All valid categories - derived from UNIFIED_CATEGORY_REGISTRY');
 
 /**
- * Cacheable categories - subset that supports Redis caching (generateFullContent=true)
+ * Cacheable categories - subset that supports content generation (generateFullContent=true)
  * These categories have full content generated at build time
  *
  * IMPORTANT: All categories EXCEPT 'jobs' are cacheable
@@ -95,7 +95,7 @@ export const CACHEABLE_CATEGORIES = [
 
 export const cacheableCategorySchema = z
   .enum(CACHEABLE_CATEGORIES)
-  .describe('Content categories that support Redis caching (where generateFullContent=true)');
+  .describe('Content categories that support content generation (where generateFullContent=true)');
 
 /**
  * Guide Subcategories - Used ONLY for organizing guides under /guides route

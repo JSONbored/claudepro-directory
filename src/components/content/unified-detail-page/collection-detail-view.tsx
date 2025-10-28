@@ -7,7 +7,7 @@
  * Renders collection-specific sections: prerequisites, embedded items, installation order, compatibility.
  *
  * **Architecture:**
- * - Server Component: Uses batchFetch from batch.utils (imports cache.server)
+ * - Server Component: Uses batchFetch from batch.utils
  * - NOT Storybook-compatible (requires server-side execution)
  * - Follows composition pattern from unified-detail-page
  * - Reuses ConfigCard for embedded item display

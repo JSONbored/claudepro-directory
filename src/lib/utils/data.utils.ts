@@ -154,7 +154,7 @@ function parseWithUnsafeJSON<T = unknown>(str: string): T {
  * @throws Error if all parsing strategies fail
  *
  * @example
- * const data = safeParse<UserData>(redisValue);
+ * const data = safeParse<UserData>(jsonString);
  * const validated = safeParse(apiResponse, userSchema, { strategy: ParseStrategy.VALIDATED_JSON });
  */
 export function safeParse<T = unknown>(

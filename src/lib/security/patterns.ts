@@ -46,7 +46,7 @@ export const VALIDATION_PATTERNS = {
   // Safe search query (no SQL injection patterns)
   SEARCH_QUERY: /^[a-zA-Z0-9\s\-_.,!?()[\]{}'"]*$/,
 
-  // Cache keys (Redis-safe)
+  // Cache keys
   CACHE_KEY: /^[a-zA-Z0-9:_-]{1,250}$/,
 
   // Auth tokens (base64 format)
@@ -71,7 +71,6 @@ export const SENSITIVE_PATTERNS = [
   /postgres:\/\/[^@]+@[^/]+\/[^?]+/gi,
   /mysql:\/\/[^@]+@[^/]+\/[^?]+/gi,
   /mongodb:\/\/[^@]+@[^/]+\/[^?]+/gi,
-  /redis:\/\/[^@]*@?[^/]+\/[0-9]+/gi,
   /\b(user|username|password|passwd|pass|pwd|secret|key|token)[:=]\s*['"]*[a-zA-Z0-9_\-+/=]{4,}['"]*\b/gi,
 
   // API keys and tokens

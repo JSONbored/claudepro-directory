@@ -151,7 +151,7 @@ export const baseSchemas = {
     .string()
     .regex(VALIDATION_PATTERNS.CACHE_KEY, 'Invalid cache key format')
     .describe(
-      'Redis-compatible cache key. Alphanumeric with colons, hyphens, and underscores for namespace separation.'
+      'Cache key with alphanumeric characters, colons, hyphens, and underscores for namespace separation.'
     ),
 
   // Auth token validation
@@ -209,7 +209,7 @@ export const apiSchemas = {
         .default(false)
         .describe('Force cache refresh even if cache is warm (default: false)'),
     })
-    .describe('Cache warming API parameters for pre-loading content into Redis'),
+    .describe('Cache warming API parameters for pre-loading content'),
 
   // Pagination query parameters
   paginationQuery: z

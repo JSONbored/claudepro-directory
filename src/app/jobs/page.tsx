@@ -1,8 +1,30 @@
+/**
+ * Jobs Listing Page - Database-First Job Board
+ * Single RPC call to filter_jobs() - all filtering in PostgreSQL
+ */
+
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { JobCard } from '@/src/components/domain/job-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
+import { Card, CardContent } from '@/src/components/primitives/card';
+import { Input } from '@/src/components/primitives/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/src/components/primitives/select';
+import { ROUTES } from '@/src/lib/constants/routes';
+import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
+import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { createClient } from '@/src/lib/supabase/server';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Database } from '@/src/types/database.types';
 
 const UnifiedNewsletterCapture = dynamic(
   () =>
@@ -14,154 +36,82 @@ const UnifiedNewsletterCapture = dynamic(
   }
 );
 
-import { z } from 'zod';
-import { Card, CardContent } from '@/src/components/primitives/card';
-import { Input } from '@/src/components/primitives/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/src/components/primitives/select';
-import { ROUTES } from '@/src/lib/constants/routes';
-import { getJobs, type Job } from '@/src/lib/data/jobs';
-import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@/src/lib/icons';
-import { logger } from '@/src/lib/logger';
-import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
-
-// Inline jobs search schema (was in search.schema.ts)
-const jobsSearchSchema = z.object({
-  q: z.string().optional(),
-  query: z.string().optional(),
-  search: z.string().optional(),
-  location: z.string().optional(),
-  category: z.string().optional().default('all'),
-  remote: z.union([z.boolean(), z.string().transform((val) => val === 'true')]).optional(),
-  experience: z.enum(['entry', 'mid', 'senior', 'lead', 'any']).optional().default('any'),
-  employment: z
-    .enum(['fulltime', 'parttime', 'contract', 'freelance', 'any'])
-    .optional()
-    .default('any'),
-  page: z
-    .union([z.string(), z.number()])
-    .transform((val) => Number(val))
-    .pipe(z.number().int().positive())
-    .optional()
-    .default(1),
-  limit: z
-    .union([z.string(), z.number()])
-    .transform((val) => Number(val))
-    .pipe(z.number().int().positive().max(100))
-    .optional()
-    .default(20),
-});
-
-type JobsSearchParams = z.infer<typeof jobsSearchSchema>;
-
-function parseSearchParams<T extends z.ZodType>(schema: T, params: unknown): z.infer<T> {
-  try {
-    return schema.parse(params);
-  } catch {
-    return schema.parse({});
-  }
-}
-
-import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+type JobRow = Database['public']['Tables']['jobs']['Row'];
 
 export async function generateMetadata({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
-  const params = parseSearchParams(jobsSearchSchema, rawParams, 'jobs page metadata');
-
   return generatePageMetadata('/jobs', {
     filters: {
-      category: (params as JobsSearchParams).category,
-      remote: params.remote,
+      category: rawParams?.category as string | undefined,
+      remote: rawParams?.remote === 'true',
     },
-  });
-}
-
-// Enable ISR - revalidate every 4 hours for job listings
-
-// Server-side filtering function
-function filterJobs(jobs: Job[], params: JobsSearchParams): Job[] {
-  return jobs.filter((job) => {
-    // Use validated search query - combined from q, query, or search fields
-    const searchQuery = params.q || params.query || params.search || params.location;
-    const matchesSearch =
-      !searchQuery ||
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (job.tags &&
-        job.tags.some((tag) => String(tag).toLowerCase().includes(searchQuery.toLowerCase()))) ||
-      (params.location && job.location?.toLowerCase().includes(params.location.toLowerCase()));
-
-    // Handle category filtering with the validated enum
-    const matchesCategory =
-      !params.category || params.category === 'all' || job.category === params.category;
-
-    // Handle employment type
-    const matchesType =
-      !params.employment ||
-      params.employment === 'any' ||
-      job.type === params.employment.replace('-', ' '); // Convert 'full-time' to 'full time'
-
-    // Handle remote filtering with validated boolean
-    const matchesRemote = params.remote !== true || job.remote === true;
-
-    // Handle experience level filtering - skip since Job type doesn't have level field
-    const matchesExperience = !params.experience || params.experience === 'any';
-
-    return matchesSearch && matchesCategory && matchesType && matchesRemote && matchesExperience;
   });
 }
 
 export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
+  const supabase = await createClient();
 
-  // Validate and parse search parameters with Zod
-  const params = parseSearchParams(jobsSearchSchema, rawParams, 'jobs page');
+  const searchQuery =
+    (rawParams?.q as string) || (rawParams?.query as string) || (rawParams?.search as string);
+  const category = rawParams?.category as string | undefined;
+  const employment = rawParams?.employment as string | undefined;
+  const experience = rawParams?.experience as string | undefined;
+  const remote = rawParams?.remote === 'true';
+  const page = Number(rawParams?.page) || 1;
+  const limit = Math.min(Number(rawParams?.limit) || 20, 100);
+  const offset = (page - 1) * limit;
 
-  // Fetch jobs from database
-  const allJobs = await getJobs();
-
-  // Log validated parameters for monitoring
-  logger.info('Jobs page accessed', {
-    search: params.q || params.query || params.search || '',
-    location: params.location || '',
-    category: params.category,
-    employment: params.employment,
-    remote: params.remote ? 'true' : 'false',
-    experience: params.experience,
-    page: params.page,
-    limit: params.limit,
-    totalJobs: allJobs.length,
+  const { data: filteredJobs, error } = await supabase.rpc('filter_jobs', {
+    ...(searchQuery && { p_search_query: searchQuery }),
+    ...(category && category !== 'all' && { p_category: category }),
+    ...(employment && employment !== 'any' && { p_employment_type: employment }),
+    ...(remote && { p_remote_only: remote }),
+    ...(experience && experience !== 'any' && { p_experience_level: experience }),
+    p_limit: limit,
+    p_offset: offset,
   });
 
-  const filteredJobs = filterJobs(allJobs, params);
+  if (error) {
+    logger.error('Failed to filter jobs', error);
+  }
 
-  // Generate stable, unique IDs for accessibility
+  const jobs = (filteredJobs || []) as JobRow[];
+
+  const { count: totalJobs } = await supabase
+    .from('jobs')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'active')
+    .eq('active', true);
+
+  logger.info('Jobs page accessed', {
+    ...(searchQuery && { search: searchQuery }),
+    ...(category && { category }),
+    ...(employment && { employment }),
+    ...(remote && { remote }),
+    ...(experience && { experience }),
+    page,
+    limit,
+    totalJobs: totalJobs || 0,
+    filteredCount: jobs.length,
+  });
+
   const baseId = 'jobs-page';
   const searchInputId = `${baseId}-search`;
   const categoryFilterId = `${baseId}-category`;
   const employmentFilterId = `${baseId}-employment`;
 
-  // Build current filter URL for form actions with validated params
   const buildFilterUrl = (newParams: Record<string, string | boolean | undefined>) => {
     const urlParams = new URLSearchParams();
 
-    // Convert validated params back to URL-compatible strings
     const currentParams: Record<string, string | undefined> = {
-      search: params.search || params.q || params.query || undefined,
-      location: params.location,
-      category: params.category !== 'all' ? params.category : undefined,
-      employment: params.employment !== 'any' ? params.employment : undefined,
-      experience: params.experience !== 'any' ? params.experience : undefined,
-      remote: params.remote === true ? 'true' : undefined,
+      search: searchQuery,
+      category: category !== 'all' ? category : undefined,
+      employment: employment !== 'any' ? employment : undefined,
+      experience: experience !== 'any' ? experience : undefined,
+      remote: remote ? 'true' : undefined,
     };
 
-    // Merge with new params
     const merged = { ...currentParams, ...newParams };
 
     Object.entries(merged).forEach(([key, value]) => {
@@ -175,7 +125,6 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
 
   return (
     <div className={'min-h-screen bg-background'}>
-      {/* Hero Section - Server Rendered */}
       <section className={UI_CLASSES.CONTAINER_OVERFLOW_BORDER}>
         <div className={'container mx-auto px-4 py-20'}>
           <div className={'text-center max-w-3xl mx-auto'}>
@@ -195,7 +144,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             <div className={'flex flex-wrap justify-center gap-2 mb-8'}>
               <UnifiedBadge variant="base" style="secondary">
                 <Briefcase className="h-3 w-3 mr-1" />
-                {allJobs.length} Jobs Available
+                {totalJobs || 0} Jobs Available
               </UnifiedBadge>
               <UnifiedBadge variant="base" style="outline">
                 Community Driven
@@ -215,8 +164,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
         </div>
       </section>
 
-      {/* Filters Section */}
-      {allJobs.length > 0 && (
+      {(totalJobs || 0) > 0 && (
         <section className={'px-4 pb-8'}>
           <div className={'container mx-auto'}>
             <Card className="card-gradient glow-effect">
@@ -228,12 +176,12 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                       id={searchInputId}
                       name="search"
                       placeholder="Search jobs, companies, or skills..."
-                      defaultValue={params.search || params.q || params.query || ''}
+                      defaultValue={searchQuery || ''}
                       className="pl-10"
                     />
                   </div>
 
-                  <Select name="category" defaultValue={params.category || 'all'}>
+                  <Select name="category" defaultValue={category || 'all'}>
                     <SelectTrigger id={categoryFilterId} aria-label="Filter jobs by category">
                       <Filter className={'h-4 w-4 mr-2'} />
                       <SelectValue placeholder="Category" />
@@ -249,7 +197,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                     </SelectContent>
                   </Select>
 
-                  <Select name="employment" defaultValue={params.employment || 'any'}>
+                  <Select name="employment" defaultValue={employment || 'any'}>
                     <SelectTrigger
                       id={employmentFilterId}
                       aria-label="Filter jobs by employment type"
@@ -269,13 +217,13 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   <div className={UI_CLASSES.FLEX_GAP_2}>
                     <Button
                       type="button"
-                      variant={params.remote === true ? 'default' : 'outline'}
+                      variant={remote ? 'default' : 'outline'}
                       className="flex-1"
                       asChild
                     >
                       <Link
                         href={buildFilterUrl({
-                          remote: params.remote === true ? undefined : 'true',
+                          remote: remote ? undefined : 'true',
                         })}
                       >
                         <MapPin className={'h-4 w-4 mr-2'} />
@@ -288,19 +236,15 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   </div>
                 </form>
 
-                {/* Active Filters */}
-                {(params.search ||
-                  params.q ||
-                  params.query ||
-                  params.location ||
-                  (params.category && params.category !== 'all') ||
-                  (params.employment && params.employment !== 'any') ||
-                  params.remote) && (
+                {(searchQuery ||
+                  (category && category !== 'all') ||
+                  (employment && employment !== 'any') ||
+                  remote) && (
                   <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4 pt-4 border-t border-border`}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Active filters:</span>
-                    {(params.search || params.q || params.query) && (
+                    {searchQuery && (
                       <UnifiedBadge variant="base" style="secondary">
-                        Search: {params.search || params.q || params.query}
+                        Search: {searchQuery}
                         <Link
                           href={buildFilterUrl({ search: undefined })}
                           className="ml-1 hover:text-destructive"
@@ -310,9 +254,9 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         </Link>
                       </UnifiedBadge>
                     )}
-                    {params.category && params.category !== 'all' && (
+                    {category && category !== 'all' && (
                       <UnifiedBadge variant="base" style="secondary">
-                        {params.category.charAt(0).toUpperCase() + params.category.slice(1)}
+                        {category.charAt(0).toUpperCase() + category.slice(1)}
                         <Link
                           href={buildFilterUrl({ category: undefined })}
                           className="ml-1 hover:text-destructive"
@@ -322,10 +266,10 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         </Link>
                       </UnifiedBadge>
                     )}
-                    {params.employment && params.employment !== 'any' && (
+                    {employment && employment !== 'any' && (
                       <UnifiedBadge variant="base" style="secondary">
-                        {params.employment.charAt(0).toUpperCase() +
-                          params.employment.slice(1).replace('time', ' Time')}
+                        {employment.charAt(0).toUpperCase() +
+                          employment.slice(1).replace('time', ' Time')}
                         <Link
                           href={buildFilterUrl({ employment: undefined })}
                           className="ml-1 hover:text-destructive"
@@ -335,7 +279,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         </Link>
                       </UnifiedBadge>
                     )}
-                    {params.remote === true && (
+                    {remote && (
                       <UnifiedBadge variant="base" style="secondary">
                         Remote
                         <Link
@@ -360,11 +304,9 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
         </section>
       )}
 
-      {/* Jobs Content */}
       <section className={'container mx-auto px-4 py-12'}>
         <div className="space-y-8">
-          {allJobs.length === 0 ? (
-            /* Empty State */
+          {(totalJobs || 0) === 0 ? (
             <Card>
               <CardContent className={'flex flex-col items-center justify-center py-24'}>
                 <div className={'p-4 bg-accent/10 rounded-full mb-6'}>
@@ -389,8 +331,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                 </div>
               </CardContent>
             </Card>
-          ) : filteredJobs.length === 0 ? (
-            /* No Results State */
+          ) : jobs.length === 0 ? (
             <Card>
               <CardContent className={'flex flex-col items-center justify-center py-16'}>
                 <Briefcase className={'h-16 w-16 text-muted-foreground mb-4'} />
@@ -404,19 +345,18 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
               </CardContent>
             </Card>
           ) : (
-            /* Jobs Results */
             <>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                 <div>
                   <h2 className="text-2xl font-bold">
-                    {filteredJobs.length} {filteredJobs.length === 1 ? 'Job' : 'Jobs'} Found
+                    {jobs.length} {jobs.length === 1 ? 'Job' : 'Jobs'} Found
                   </h2>
                   <p className="text-muted-foreground">Showing all available positions</p>
                 </div>
               </div>
 
               <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
-                {filteredJobs.map((job) => (
+                {jobs.map((job) => (
                   <JobCard key={job.slug} job={job} />
                 ))}
               </div>
@@ -425,7 +365,6 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
         </div>
       </section>
 
-      {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
         <UnifiedNewsletterCapture source="content_page" variant="hero" context="jobs-page" />
       </section>

@@ -53,7 +53,6 @@
  * - Respects prefers-reduced-motion automatically
  *
  * @see unified-detail-page/index.tsx - Data layer (async processing, lines 108-291)
- * @see unified-content-section.stories.tsx - Comprehensive Storybook documentation
  */
 
 import { motion } from 'motion/react';

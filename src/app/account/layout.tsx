@@ -1,3 +1,7 @@
+/**
+ * Account Layout - Protected dashboard layout with sidebar navigation.
+ */
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -16,62 +20,59 @@ import {
 } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Database } from '@/src/types/database.types';
+
+type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
 
-  // Auth protection: Check if user is authenticated (moved from middleware for better performance)
   const {
     data: { user },
     error: userError,
   } = await supabase.auth.getUser();
 
-  // Handle auth errors or missing user
-  if (userError || !user) {
-    redirect('/login');
-  }
+  if (userError || !user) redirect('/login');
 
-  // Session refresh: Refresh tokens that expire within 1 hour to prevent unexpected logouts
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
   if (session?.expires_at) {
     const expiresIn = session.expires_at - Math.floor(Date.now() / 1000);
-
     if (expiresIn < 3600) {
-      // Less than 1 hour until expiration - refresh the session
       await supabase.auth.refreshSession();
     }
   }
 
-  // Get user profile data - with automatic initialization if missing
-  let { data: profile, error: profileError } = await supabase
+  let profile: Pick<Tables<'users'>, 'name' | 'slug' | 'image'> | null = null;
+
+  const { data: existingProfile } = await supabase
     .from('users')
     .select('name, slug, image')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
-  // If no profile exists, create one automatically
-  if (profileError || !profile) {
-    const now = new Date().toISOString();
+  if (existingProfile) {
+    profile = existingProfile;
+  } else {
+    const userInsert: Database['public']['Tables']['users']['Insert'] = {
+      id: user.id,
+      email: user.email ?? null,
+      name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+      image: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+    };
+
+    await supabase.from('users').upsert(userInsert);
+
     const { data: newProfile } = await supabase
       .from('users')
-      .insert({
-        id: user.id,
-        email: user.email ?? null,
-        name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
-        image: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
-        created_at: now,
-        updated_at: now,
-      })
       .select('name, slug, image')
+      .eq('id', user.id)
       .single();
-
-    profile = newProfile || null;
+    profile = newProfile;
   }
 
-  // Check if user has any sponsored campaigns
   const { data: sponsorships } = await supabase
     .from('sponsored_content')
     .select('id')
@@ -86,7 +87,6 @@ export default async function AccountLayout({ children }: { children: React.Reac
     { name: 'Library', href: '/account/library', icon: Bookmark },
     { name: 'Jobs', href: '/account/jobs', icon: Briefcase },
     { name: 'Submissions', href: '/account/submissions', icon: Send },
-    // Only show Sponsorships if user has campaigns (admin grants access after payment)
     ...(hasSponsorships
       ? [{ name: 'Sponsorships', href: '/account/sponsorships', icon: TrendingUp }]
       : []),
@@ -95,7 +95,6 @@ export default async function AccountLayout({ children }: { children: React.Reac
 
   return (
     <div className={'min-h-screen bg-background'}>
-      {/* Top navigation */}
       <div className={'border-b px-4 py-4'}>
         <div className={'container mx-auto flex items-center justify-between'}>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -116,7 +115,6 @@ export default async function AccountLayout({ children }: { children: React.Reac
 
       <div className={'container mx-auto px-4 py-8'}>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Sidebar */}
           <Card className="md:col-span-1 h-fit p-4">
             <div className={'flex items-center gap-3 mb-6 pb-4 border-b'}>
               {profile?.image ? (
@@ -149,8 +147,6 @@ export default async function AccountLayout({ children }: { children: React.Reac
               ))}
             </nav>
           </Card>
-
-          {/* Main content */}
           <div className="md:col-span-3">{children}</div>
         </div>
       </div>

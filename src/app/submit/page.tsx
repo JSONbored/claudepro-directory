@@ -1,3 +1,8 @@
+/**
+ * Submit Page - Database-First Community Submissions
+ * All stats/recent/contributors from Supabase server actions.
+ */
+
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -21,10 +26,8 @@ import {
 } from '@/src/lib/actions/business.actions';
 import { CheckCircle, Clock, Lightbulb, Medal, TrendingUp, Trophy } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
-import type { Database } from '@/src/types/database.types';
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',
@@ -55,25 +58,9 @@ function formatTimeAgo(dateString: string): string {
   return `${Math.floor(seconds / 604800)}w ago`;
 }
 
-// SEO Metadata - SHA-2961
 export const metadata = generatePageMetadata('/submit');
 
-/**
- * Submit Page - Server Component
- * Fetches sidebar data in parallel on server for performance
- *
- * RESPONSIVE DESIGN:
- * - Desktop (≥1024px): Two-column layout (form + sticky sidebar)
- * - Tablet (768-1023px): Single column, sidebar below form
- * - Mobile (<768px): Single column, sidebar below form, optimized spacing
- *
- * PERFORMANCE:
- * - Server-side data fetching (parallel queries)
- * - Edge caching (5-10 min TTL)
- * - Minimal client-side JavaScript
- */
 export default async function SubmitPage() {
-  // Fetch sidebar data in parallel (cached for 5-10 min)
   const [statsResult, recentResult, contributorsResult] = await batchFetch([
     getSubmissionStats({}),
     getRecentMerged({ limit: 5 }),
@@ -96,24 +83,11 @@ export default async function SubmitPage() {
         </p>
       </div>
 
-      {/* Two-column layout: Form + Sidebar */}
-      {/* 
-        BREAKPOINTS:
-        - Mobile (<1024px): Single column, form first, sidebar second
-        - Desktop (≥1024px): Two columns, form left (flexible), sidebar right (380px fixed), sticky sidebar
-      */}
       <div className="grid lg:grid-cols-[1fr_380px] gap-6 lg:gap-8 items-start">
-        {/* LEFT COLUMN: Form (appears first on all screen sizes) */}
         <div className="w-full min-w-0">
           <SubmitFormClient />
         </div>
 
-        {/* RIGHT COLUMN: Sidebar */}
-        {/* 
-          RESPONSIVE BEHAVIOR:
-          - Mobile/Tablet: Appears below form, full width
-          - Desktop: Sticky sidebar at top-24, fixed width 380px
-        */}
         <aside className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit">
           {/* Stats Card */}
           <Card>

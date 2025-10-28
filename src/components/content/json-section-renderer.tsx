@@ -1,25 +1,5 @@
 /**
- * JSON Section Renderer - Configuration-Driven Guide Content
- *
- * CONSOLIDATION GOAL: Replace 15 component files with 1 configuration-driven renderer
- * - Before: ~2,125 LOC across 15 files (separate components per section type)
- * - After: ~540 LOC in this single file (75% reduction)
- *
- * HOW IT WORKS:
- * - Takes JSON sections array from guide.json files
- * - Renders each section via switch statement mapping to existing components
- * - Zero new components created - reuses UnifiedContentBlock, ComparisonTable, etc.
- *
- * ARCHITECTURE:
- * - Data-driven: JSON controls what renders, not hardcoded JSX
- * - Type-safe: Zod schemas validate all section data
- * - Extensible: New section types = add case to switch, no new files
- * - Tree-shakeable: Only imports components actually used in sections
- *
- * USAGE:
- * ```tsx
- * <JSONSectionRenderer sections={guide.sections} />
- * ```
+ * JSON Section Renderer - Database JSONB sections with CHECK constraint validation
  */
 
 'use client';
@@ -32,39 +12,17 @@ import { ComparisonTable } from '@/src/components/template/comparison-table';
 import type { Database } from '@/src/types/database.types';
 
 type GuideRow = Database['public']['Tables']['guides']['Row'];
-
-/**
- * Database-enforced type: sections column has CHECK constraint jsonb_typeof(sections) = 'array'
- * This reflects the actual database constraint - not arbitrary type casting
- */
-type GuideSections = GuideRow['sections']; // Json type from database
+type GuideSections = GuideRow['sections'];
 
 interface JSONSectionRendererProps {
   sections: GuideSections;
 }
 
-/**
- * TrustedHTML - Safe wrapper for owner-controlled HTML content
- *
- * SECURITY CONTEXT:
- * - Content source: JSON files in /content/ directory (build-time validated)
- * - Content control: Site owners only (not user input)
- * - Validation: Schema-validated during build process
- * - Sanitization: Not required (trusted source)
- *
- * This component exists solely to satisfy the noDangerouslySetInnerHtml linter rule
- * while documenting that this HTML is from a trusted, controlled source.
- */
 function TrustedHTML({ html, className, id }: { html: string; className?: string; id?: string }) {
   // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is from owner-controlled JSON files, not user input
   return <div id={id} className={className} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-/**
- * Renders a single guide section based on its type
- * Database guarantees sections is array via CHECK constraint: jsonb_typeof(sections) = 'array'
- * Each element is a Json object - access properties directly
- */
 function render_section(section: any, index: number): React.ReactNode {
   const key = section.id || `section-${index}`;
 
@@ -108,12 +66,11 @@ function render_section(section: any, index: number): React.ReactNode {
       );
 
     case 'code_group':
-      // Simplified - render as tabs manually
       return (
         <div key={key} id={section.id} className={section.className}>
           {section.title && <h3 className="text-lg font-semibold mb-4">{section.title}</h3>}
           <div className="border rounded-lg overflow-hidden">
-            {section.tabs.map((tab, idx) => (
+            {section.tabs.map((tab: any, idx: number) => (
               <details key={`${tab.label}-${idx}`} className="border-b last:border-0">
                 <summary className="px-4 py-3 cursor-pointer hover:bg-muted/50 font-medium">
                   {tab.label} {tab.filename && `• ${tab.filename}`}
@@ -167,7 +124,6 @@ function render_section(section: any, index: number): React.ReactNode {
       );
 
     case 'feature_grid': {
-      // Handle columns as both string and number from schema
       const columnsValue =
         typeof section.columns === 'number'
           ? section.columns
@@ -181,7 +137,7 @@ function render_section(section: any, index: number): React.ReactNode {
             variant="feature-grid"
             title={section.title || 'Key Features'}
             description={section.description || ''}
-            features={section.features.map((f) => ({
+            features={section.features.map((f: any) => ({
               title: f.title,
               description: f.description,
               badge: f.badge,
@@ -210,12 +166,9 @@ function render_section(section: any, index: number): React.ReactNode {
     // COMPARISON & TABLE SECTIONS
     // ============================================================================
     case 'comparison_table': {
-      // Headers are optional in schema - provide fallback
       const headers = section.headers || [];
 
-      // Convert data format (supports both Record<string, string>[] and string[][])
-      const items = section.data.map((row) => {
-        // Handle array format: [feature, option1, option2, option3?]
+      const items = section.data.map((row: any) => {
         if (Array.isArray(row)) {
           return {
             feature: row[0] || '',
@@ -225,7 +178,6 @@ function render_section(section: any, index: number): React.ReactNode {
           };
         }
 
-        // Handle object format: { [headerKey]: value }
         return {
           feature: headers[0] ? row[headers[0]] || '' : '',
           option1: headers[1] ? row[headers[1]] || '' : '',
@@ -250,7 +202,6 @@ function render_section(section: any, index: number): React.ReactNode {
     // INTERACTIVE SECTIONS (TABS, ACCORDION, FAQ)
     // ============================================================================
     case 'tabs':
-      // Simplified - render as accordion-style for now
       return (
         <div key={key} id={section.id} className={section.className}>
           {section.title && <h3 className="text-lg font-semibold mb-4">{section.title}</h3>}
@@ -258,7 +209,7 @@ function render_section(section: any, index: number): React.ReactNode {
             <p className="text-muted-foreground mb-4">{section.description}</p>
           )}
           <div className="border rounded-lg overflow-hidden">
-            {section.items.map((item, idx) => (
+            {section.items.map((item: any, idx: number) => (
               <details key={`${item.value}-${idx}`} className="border-b last:border-0">
                 <summary className="px-4 py-3 cursor-pointer hover:bg-muted/50 font-medium">
                   {item.label}
@@ -277,7 +228,7 @@ function render_section(section: any, index: number): React.ReactNode {
             contentType="accordion"
             title={section.title}
             description={section.description || ''}
-            items={section.items.map((item) => ({
+            items={section.items.map((item: any) => ({
               title: item.title,
               content: <TrustedHTML html={item.content} />,
               defaultOpen: item.defaultOpen ?? false,
@@ -294,7 +245,7 @@ function render_section(section: any, index: number): React.ReactNode {
             contentType="faq"
             title={section.title || 'Frequently Asked Questions'}
             description={section.description || ''}
-            questions={section.questions.map((q) => ({
+            questions={section.questions.map((q: any) => ({
               question: q.question,
               answer: q.answer,
               category: q.category,
@@ -307,12 +258,11 @@ function render_section(section: any, index: number): React.ReactNode {
     // STEP-BY-STEP & CHECKLIST SECTIONS
     // ============================================================================
     case 'steps':
-      // Simplified step-by-step (since StepByStepGuide is async server component)
       return (
         <div key={key} id={section.id} className={section.className}>
           {section.title && <h3 className="text-lg font-semibold mb-4">{section.title}</h3>}
           <div className="space-y-6">
-            {section.steps.map((step) => (
+            {section.steps.map((step: any) => (
               <div key={step.number} className="border-l-4 border-primary pl-6">
                 <h4 className="text-lg font-semibold mb-2">
                   Step {step.number}: {step.title}
@@ -338,14 +288,12 @@ function render_section(section: any, index: number): React.ReactNode {
       );
 
     case 'checklist':
-      // Note: JSON schema supports more types than component, but component only accepts these 3
-      // Always default to 'prerequisites' for unsupported types
       return (
         <div key={key} id={section.id} className={section.className}>
           <Checklist
             title={section.title}
-            type="prerequisites" // Component only supports prerequisites|security|testing
-            items={section.items.map((item) => ({
+            type="prerequisites"
+            items={section.items.map((item: any) => ({
               task: item.task,
               description: item.description,
               completed: false, // User will check these off
@@ -367,7 +315,7 @@ function render_section(section: any, index: number): React.ReactNode {
           )}
           {section.resources && section.resources.length > 0 && (
             <div className="grid gap-4">
-              {section.resources.map((r, idx) => (
+              {section.resources.map((r: any, idx: number) => (
                 <a
                   key={`${r.url}-${idx}`}
                   href={r.url}
@@ -386,19 +334,11 @@ function render_section(section: any, index: number): React.ReactNode {
       );
 
     default:
-      // TypeScript exhaustiveness check - should never reach here
       return null;
   }
 }
 
-/**
- * JSONSectionRenderer - Main export component
- *
- * Renders array of JSON guide sections by mapping each to its corresponding component.
- * Database-first: sections is Json type from PostgreSQL, guaranteed to be array by CHECK constraint
- */
 export function JSONSectionRenderer({ sections }: JSONSectionRendererProps) {
-  // Database guarantees this is an array via CHECK constraint
   const sections_array = Array.isArray(sections) ? sections : [];
 
   if (sections_array.length === 0) {

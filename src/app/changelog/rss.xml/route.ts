@@ -16,7 +16,7 @@
  *
  * Performance:
  * - ISR: 600s (10 minutes)
- * - Redis-cached entry loading
+ * - Database-cached entry loading
  * - CDATA wrapping for HTML content
  *
  * Production Standards:
@@ -63,7 +63,7 @@ export async function GET(_request: NextRequest): Promise<Response> {
   try {
     logger.info('RSS feed generation started');
 
-    // Load changelog entries (cached with Redis)
+    // Load changelog entries (database-cached)
     const allEntries = await getAllChangelogEntries();
 
     // Limit to last 50 entries
