@@ -65,11 +65,9 @@ const nextConfig = {
   compress: true,
   reactStrictMode: true,
 
-  // ✨ React Compiler (STABLE in Next.js 16.0)
-  // Automatically memoizes components to reduce unnecessary re-renders
-  // Previous issue: Caused eval() CSP violations with strict-dynamic
-  // Now stable - monitoring for CSP compatibility
-  reactCompiler: true,
+  // ✨ React Compiler (DISABLED - causes CSP eval violations)
+  // TODO: Re-enable when CSP-compatible or configure CSP to allow
+  reactCompiler: false,
 
   // ✨ Cache Components / Partial Prerendering (DISABLED - incompatible with generateStaticParams)
   // PRODUCTION: We use full static generation with generateStaticParams() for all routes

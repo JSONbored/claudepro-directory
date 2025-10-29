@@ -94,43 +94,36 @@ export interface ContentFilters {
  * @returns Array of enriched content items
  */
 export async function getContentByCategory(category: CategoryId): Promise<ContentItem[]> {
-  return unstable_cache(
-    async () => {
-      try {
-        const supabase = createAnonClient();
+  // TEMPORARY: Removed unstable_cache to debug empty content issue
+  // TODO: Re-add caching once content loads correctly
+  try {
+    const supabase = createAnonClient();
 
-        logger.info(`Fetching enriched content for category: ${category}`);
+    logger.info(`Fetching enriched content for category: ${category}`);
 
-        // Use enriched content RPC - single query with all data
-        const { data, error } = await supabase.rpc('get_enriched_content', {
-          p_category: category,
-          p_limit: 1000, // Large limit for category pages
-          p_offset: 0,
-        });
+    // Use enriched content RPC - single query with all data
+    const { data, error } = await supabase.rpc('get_enriched_content', {
+      p_category: category,
+      p_limit: 1000, // Large limit for category pages
+      p_offset: 0,
+    });
 
-        if (error) {
-          logger.error(`Failed to fetch enriched content for category: ${category}`, error);
-          return [];
-        }
-
-        logger.info(`Fetched ${Array.isArray(data) ? data.length : 0} items for ${category}`);
-
-        // RPC returns JSONB array - already enriched with analytics, sponsorship, etc.
-        return (data || []) as ContentItem[];
-      } catch (error) {
-        logger.error(
-          `Error in getContentByCategory(${category})`,
-          error instanceof Error ? error : new Error(String(error))
-        );
-        return [];
-      }
-    },
-    [`enriched-content-${category}-v2`], // v2: cache bust after migration
-    {
-      revalidate: 3600, // 1 hour ISR cache
-      tags: [`content-${category}`],
+    if (error) {
+      logger.error(`Failed to fetch enriched content for category: ${category}`, error);
+      return [];
     }
-  )();
+
+    logger.info(`Fetched ${Array.isArray(data) ? data.length : 0} items for ${category}`);
+
+    // RPC returns JSONB array - already enriched with analytics, sponsorship, etc.
+    return (data || []) as ContentItem[];
+  } catch (error) {
+    logger.error(
+      `Error in getContentByCategory(${category})`,
+      error instanceof Error ? error : new Error(String(error))
+    );
+    return [];
+  }
 }
 
 /**
