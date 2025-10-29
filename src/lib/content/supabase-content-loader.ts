@@ -99,6 +99,8 @@ export async function getContentByCategory(category: CategoryId): Promise<Conten
       try {
         const supabase = createAnonClient();
 
+        logger.info(`Fetching enriched content for category: ${category}`);
+
         // Use enriched content RPC - single query with all data
         const { data, error } = await supabase.rpc('get_enriched_content', {
           p_category: category,
@@ -110,6 +112,8 @@ export async function getContentByCategory(category: CategoryId): Promise<Conten
           logger.error(`Failed to fetch enriched content for category: ${category}`, error);
           return [];
         }
+
+        logger.info(`Fetched ${Array.isArray(data) ? data.length : 0} items for ${category}`);
 
         // RPC returns JSONB array - already enriched with analytics, sponsorship, etc.
         return (data || []) as ContentItem[];
