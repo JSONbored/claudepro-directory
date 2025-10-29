@@ -40,7 +40,7 @@ import { type CategoryId, getHomepageCategoryIds } from '@/src/lib/config/catego
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
 import { getCurrentWeekStartISO } from '@/src/lib/utils/data.utils';
 
@@ -70,7 +70,7 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
       categoryData[id] = (results[index] as ContentItem[]) || [];
     });
 
-    const supabase = await createClient();
+    const supabase = createAnonClient();
     const weekStart = getCurrentWeekStartISO();
 
     const { data: featuredRecords, error: featuredError } = await supabase
@@ -142,7 +142,7 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
     });
   }
 
-  const supabase = await createClient();
+  const supabase = createAnonClient();
   const { data: analyticsData } = await supabase
     .from('mv_analytics_summary')
     .select('category, slug, view_count, copy_count');

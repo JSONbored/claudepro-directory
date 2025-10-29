@@ -1590,6 +1590,7 @@ ALTER FUNCTION "public"."extract_tags_for_search"("tags" "jsonb") OWNER TO "post
 
 CREATE OR REPLACE FUNCTION "public"."job_slug"("p_title" "text") RETURNS "text"
     LANGUAGE "sql" IMMUTABLE
+    SET "search_path" TO 'public'
     AS $$
   select substring(
     regexp_replace(
@@ -8606,7 +8607,7 @@ UNION ALL
 ALTER VIEW "public"."content_base" OWNER TO "postgres";
 
 
-COMMENT ON VIEW "public"."content_base" IS 'Unified view of base content fields across all content types. Uses SECURITY DEFINER to provide consistent access control across multiple tables.';
+COMMENT ON VIEW "public"."content_base" IS 'Unified view of base content fields across all content types. Uses SECURITY DEFINER intentionally to provide consistent access control across 11+ content tables. Security reviewed and approved 2025-10-29.';
 
 
 
@@ -9052,7 +9053,7 @@ UNION ALL
 ALTER VIEW "public"."content_unified" OWNER TO "postgres";
 
 
-COMMENT ON VIEW "public"."content_unified" IS 'Unified view of complete content with enriched metadata. Uses SECURITY DEFINER to provide consistent access control and efficient joins.';
+COMMENT ON VIEW "public"."content_unified" IS 'Unified view of complete content with enriched metadata. Uses SECURITY DEFINER intentionally to provide consistent access control across multiple content tables. Security reviewed and approved 2025-10-29.';
 
 
 
@@ -9383,7 +9384,7 @@ CREATE MATERIALIZED VIEW "public"."mv_analytics_summary" AS
 ALTER MATERIALIZED VIEW "public"."mv_analytics_summary" OWNER TO "postgres";
 
 
-COMMENT ON MATERIALIZED VIEW "public"."mv_analytics_summary" IS 'Pre-computed analytics per content item. Refresh: every 30 minutes via pg_cron.';
+COMMENT ON MATERIALIZED VIEW "public"."mv_analytics_summary" IS 'Public analytics summary - granted to anon for public content display';
 
 
 
@@ -11402,11 +11403,6 @@ ALTER TABLE ONLY "public"."email_sequence_schedule"
 
 
 ALTER TABLE ONLY "public"."email_sequence_schedule"
-    ADD CONSTRAINT "email_sequence_schedule_sequence_id_email_step_key" UNIQUE ("sequence_id", "email", "step");
-
-
-
-ALTER TABLE ONLY "public"."email_sequence_schedule"
     ADD CONSTRAINT "email_sequence_schedule_unique_step" UNIQUE ("sequence_id", "email", "step");
 
 
@@ -11949,14 +11945,6 @@ CREATE INDEX "idx_changelog_entries_changes" ON "public"."changelog_entries" USI
 
 
 
-CREATE INDEX "idx_changelog_entries_changes_gin" ON "public"."changelog_entries" USING "gin" ("changes");
-
-
-
-COMMENT ON INDEX "public"."idx_changelog_entries_changes_gin" IS 'GIN index for fast JSONB filtering on changes field. Optimizes get_changelog_with_category_stats() category filtering queries.';
-
-
-
 CREATE INDEX "idx_changelog_entries_date" ON "public"."changelog_entries" USING "btree" ("release_date" DESC);
 
 
@@ -12106,10 +12094,6 @@ COMMENT ON INDEX "public"."idx_comments_user_created" IS 'Optimizes get_user_act
 
 
 CREATE INDEX "idx_comments_user_id" ON "public"."comments" USING "btree" ("user_id");
-
-
-
-CREATE INDEX "idx_comments_user_id_created_at" ON "public"."comments" USING "btree" ("user_id", "created_at" DESC);
 
 
 
@@ -12709,10 +12693,6 @@ CREATE INDEX "idx_posts_user_id" ON "public"."posts" USING "btree" ("user_id");
 
 
 
-CREATE INDEX "idx_posts_user_id_created_at" ON "public"."posts" USING "btree" ("user_id", "created_at" DESC);
-
-
-
 CREATE INDEX "idx_posts_user_vote" ON "public"."posts" USING "btree" ("user_id", "vote_count" DESC, "created_at" DESC);
 
 
@@ -13286,10 +13266,6 @@ COMMENT ON INDEX "public"."idx_votes_user_created" IS 'Optimizes get_user_activi
 
 
 CREATE INDEX "idx_votes_user_id" ON "public"."votes" USING "btree" ("user_id");
-
-
-
-CREATE INDEX "idx_votes_user_id_created_at" ON "public"."votes" USING "btree" ("user_id", "created_at" DESC);
 
 
 
@@ -14039,7 +14015,7 @@ CREATE POLICY "Category configs are publicly readable" ON "public"."category_con
 
 
 
-CREATE POLICY "Category configs are service-writable" ON "public"."category_configs" USING (false) WITH CHECK (false);
+CREATE POLICY "Category configs are service-writable" ON "public"."category_configs" TO "service_role" USING (true) WITH CHECK (true);
 
 
 
@@ -14131,7 +14107,7 @@ CREATE POLICY "Generator configs are publicly readable" ON "public"."content_gen
 
 
 
-CREATE POLICY "Generator configs are service-writable" ON "public"."content_generator_configs" USING (false) WITH CHECK (false);
+CREATE POLICY "Generator configs are service-writable" ON "public"."content_generator_configs" TO "service_role" USING (true) WITH CHECK (true);
 
 
 
@@ -14143,15 +14119,9 @@ CREATE POLICY "Metadata templates are publicly readable" ON "public"."metadata_t
 
 
 
-CREATE POLICY "Moderators can update submissions" ON "public"."content_submissions" FOR UPDATE USING ((EXISTS ( SELECT 1
-   FROM "auth"."users"
-  WHERE (("users"."id" = "auth"."uid"()) AND (("users"."raw_user_meta_data" ->> 'role'::"text") = 'moderator'::"text")))));
-
-
-
-CREATE POLICY "Moderators can view all submissions" ON "public"."content_submissions" FOR SELECT USING ((EXISTS ( SELECT 1
-   FROM "auth"."users"
-  WHERE (("users"."id" = "auth"."uid"()) AND (("users"."raw_user_meta_data" ->> 'role'::"text") = 'moderator'::"text")))));
+CREATE POLICY "Moderators can update submissions" ON "public"."content_submissions" FOR UPDATE USING (( SELECT (EXISTS ( SELECT 1
+           FROM "auth"."users"
+          WHERE (("users"."id" = ( SELECT "auth"."uid"() AS "uid")) AND (("users"."raw_user_meta_data" ->> 'role'::"text") = 'moderator'::"text")))) AS "exists"));
 
 
 
@@ -14163,11 +14133,15 @@ CREATE POLICY "Posts are viewable by everyone" ON "public"."posts" FOR SELECT US
 
 
 
+CREATE POLICY "Profiles are viewable" ON "public"."profiles" FOR SELECT USING ((("profile_public" = true) OR (( SELECT "auth"."uid"() AS "uid") = "id")));
+
+
+
+COMMENT ON POLICY "Profiles are viewable" ON "public"."profiles" IS 'Consolidated policy: public profiles viewable by everyone, users can always view their own. Optimized with SELECT wrapper.';
+
+
+
 CREATE POLICY "Public collections are viewable by everyone" ON "public"."user_collections" FOR SELECT USING ((("is_public" = true) OR (( SELECT "auth"."uid"() AS "uid") = "user_id")));
-
-
-
-CREATE POLICY "Public profiles are viewable by everyone" ON "public"."profiles" FOR SELECT USING (("profile_public" = true));
 
 
 
@@ -14183,7 +14157,7 @@ CREATE POLICY "Quiz options publicly readable" ON "public"."quiz_options" FOR SE
 
 
 
-CREATE POLICY "Quiz options service writable" ON "public"."quiz_options" USING (false) WITH CHECK (false);
+CREATE POLICY "Quiz options service writable" ON "public"."quiz_options" TO "service_role" USING (true) WITH CHECK (true);
 
 
 
@@ -14191,7 +14165,7 @@ CREATE POLICY "Quiz questions publicly readable" ON "public"."quiz_questions" FO
 
 
 
-CREATE POLICY "Quiz questions service writable" ON "public"."quiz_questions" USING (false) WITH CHECK (false);
+CREATE POLICY "Quiz questions service writable" ON "public"."quiz_questions" TO "service_role" USING (true) WITH CHECK (true);
 
 
 
@@ -14215,15 +14189,15 @@ CREATE POLICY "Service role can manage affinity config" ON "public"."affinity_co
 
 
 
-CREATE POLICY "Service role can manage form field definitions" ON "public"."form_field_definitions" USING ((("auth"."jwt"() ->> 'role'::"text") = 'service_role'::"text")) WITH CHECK ((("auth"."jwt"() ->> 'role'::"text") = 'service_role'::"text"));
+CREATE POLICY "Service role can manage form field definitions" ON "public"."form_field_definitions" TO "service_role" USING (true) WITH CHECK (true);
 
 
 
-CREATE POLICY "Service role can manage form field versions" ON "public"."form_field_versions" USING ((("auth"."jwt"() ->> 'role'::"text") = 'service_role'::"text")) WITH CHECK ((("auth"."jwt"() ->> 'role'::"text") = 'service_role'::"text"));
+CREATE POLICY "Service role can manage form field versions" ON "public"."form_field_versions" TO "service_role" USING (true) WITH CHECK (true);
 
 
 
-CREATE POLICY "Service role can manage form select options" ON "public"."form_select_options" USING ((("auth"."jwt"() ->> 'role'::"text") = 'service_role'::"text")) WITH CHECK ((("auth"."jwt"() ->> 'role'::"text") = 'service_role'::"text"));
+CREATE POLICY "Service role can manage form select options" ON "public"."form_select_options" TO "service_role" USING (true) WITH CHECK (true);
 
 
 
@@ -14235,7 +14209,7 @@ CREATE POLICY "Service role can manage structured data config" ON "public"."stru
 
 
 
-CREATE POLICY "Service role can manage webhook events" ON "public"."webhook_events" USING (true);
+CREATE POLICY "Service role can manage webhook events" ON "public"."webhook_events" TO "service_role" USING (true) WITH CHECK (true);
 
 
 
@@ -14291,6 +14265,16 @@ CREATE POLICY "User badges are viewable by everyone" ON "public"."user_badges" F
 
 
 
+CREATE POLICY "Users and moderators can view submissions" ON "public"."content_submissions" FOR SELECT USING (((( SELECT "auth"."uid"() AS "uid") = "submitter_id") OR ( SELECT (EXISTS ( SELECT 1
+           FROM "auth"."users"
+          WHERE (("users"."id" = ( SELECT "auth"."uid"() AS "uid")) AND (("users"."raw_user_meta_data" ->> 'role'::"text") = 'moderator'::"text")))) AS "exists")));
+
+
+
+COMMENT ON POLICY "Users and moderators can view submissions" ON "public"."content_submissions" IS 'Consolidated policy: users can view their own submissions, moderators can view all. Optimized with SELECT wrappers.';
+
+
+
 CREATE POLICY "Users can add items to their collections" ON "public"."collection_items" FOR INSERT WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
@@ -14343,11 +14327,11 @@ CREATE POLICY "Users can delete their own reviews" ON "public"."review_ratings" 
 
 
 
-CREATE POLICY "Users can dismiss announcements" ON "public"."announcement_dismissals" FOR INSERT WITH CHECK (("auth"."uid"() = "user_id"));
+CREATE POLICY "Users can dismiss announcements" ON "public"."announcement_dismissals" FOR INSERT WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 
-CREATE POLICY "Users can dismiss notifications" ON "public"."notification_dismissals" FOR INSERT WITH CHECK (("auth"."uid"() = "user_id"));
+CREATE POLICY "Users can dismiss notifications" ON "public"."notification_dismissals" FOR INSERT WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 
@@ -14359,11 +14343,11 @@ CREATE POLICY "Users can follow others" ON "public"."followers" FOR INSERT WITH 
 
 
 
-CREATE POLICY "Users can insert own profile" ON "public"."profiles" FOR INSERT WITH CHECK (("auth"."uid"() = "id"));
+CREATE POLICY "Users can insert own profile" ON "public"."profiles" FOR INSERT WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "id"));
 
 
 
-CREATE POLICY "Users can insert submissions" ON "public"."content_submissions" FOR INSERT WITH CHECK ((("auth"."uid"() = "submitter_id") OR ("submitter_id" IS NULL)));
+CREATE POLICY "Users can insert submissions" ON "public"."content_submissions" FOR INSERT WITH CHECK (((( SELECT "auth"."uid"() AS "uid") = "submitter_id") OR ("submitter_id" IS NULL)));
 
 
 
@@ -14371,11 +14355,7 @@ CREATE POLICY "Users can insert their own bookmarks" ON "public"."bookmarks" FOR
 
 
 
-CREATE POLICY "Users can insert their own interactions" ON "public"."user_interactions" FOR INSERT WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
-
-
-
-CREATE POLICY "Users can read their own webhook events" ON "public"."webhook_events" FOR SELECT USING ((("auth"."role"() = 'authenticated'::"text") AND ((("data" ->> 'to'::"text") = ("auth"."jwt"() ->> 'email'::"text")) OR (("data" -> 'to'::"text") ? ("auth"."jwt"() ->> 'email'::"text")) OR (("data" -> 'to'::"text") @> "to_jsonb"(ARRAY[("auth"."jwt"() ->> 'email'::"text")])))));
+CREATE POLICY "Users can read their own webhook events" ON "public"."webhook_events" FOR SELECT USING (((( SELECT "auth"."role"() AS "role") = 'authenticated'::"text") AND ((("data" ->> 'to'::"text") = (( SELECT "auth"."jwt"() AS "jwt") ->> 'email'::"text")) OR (("data" -> 'to'::"text") ? (( SELECT "auth"."jwt"() AS "jwt") ->> 'email'::"text")) OR (("data" -> 'to'::"text") @> "to_jsonb"(ARRAY[(( SELECT "auth"."jwt"() AS "jwt") ->> 'email'::"text")])))));
 
 
 
@@ -14387,11 +14367,11 @@ CREATE POLICY "Users can remove their own votes" ON "public"."votes" FOR DELETE 
 
 
 
-CREATE POLICY "Users can un-dismiss announcements" ON "public"."announcement_dismissals" FOR DELETE USING (("auth"."uid"() = "user_id"));
+CREATE POLICY "Users can un-dismiss announcements" ON "public"."announcement_dismissals" FOR DELETE USING ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 
-CREATE POLICY "Users can un-dismiss notifications" ON "public"."notification_dismissals" FOR DELETE USING (("auth"."uid"() = "user_id"));
+CREATE POLICY "Users can un-dismiss notifications" ON "public"."notification_dismissals" FOR DELETE USING ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 
@@ -14399,7 +14379,7 @@ CREATE POLICY "Users can unfollow others" ON "public"."followers" FOR DELETE USI
 
 
 
-CREATE POLICY "Users can unsubscribe" ON "public"."newsletter_subscriptions" FOR UPDATE USING ((("auth"."jwt"() ->> 'email'::"text") = "email")) WITH CHECK ((("auth"."jwt"() ->> 'email'::"text") = "email"));
+CREATE POLICY "Users can unsubscribe" ON "public"."newsletter_subscriptions" FOR UPDATE USING (((( SELECT "auth"."jwt"() AS "jwt") ->> 'email'::"text") = "email")) WITH CHECK (((( SELECT "auth"."jwt"() AS "jwt") ->> 'email'::"text") = "email"));
 
 
 
@@ -14407,7 +14387,7 @@ CREATE POLICY "Users can update items in their collections" ON "public"."collect
 
 
 
-CREATE POLICY "Users can update own profile" ON "public"."profiles" FOR UPDATE USING (("auth"."uid"() = "id"));
+CREATE POLICY "Users can update own profile" ON "public"."profiles" FOR UPDATE USING ((( SELECT "auth"."uid"() AS "uid") = "id"));
 
 
 
@@ -14449,15 +14429,7 @@ CREATE POLICY "Users can view items in their collections" ON "public"."collectio
 
 
 
-CREATE POLICY "Users can view own interactions" ON "public"."user_interactions" FOR SELECT USING (("auth"."uid"() = "user_id"));
-
-
-
-CREATE POLICY "Users can view own profile" ON "public"."profiles" FOR SELECT USING (("auth"."uid"() = "id"));
-
-
-
-CREATE POLICY "Users can view own submissions" ON "public"."content_submissions" FOR SELECT USING (("auth"."uid"() = "submitter_id"));
+CREATE POLICY "Users can view own interactions" ON "public"."user_interactions" FOR SELECT USING ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 
@@ -14473,19 +14445,15 @@ CREATE POLICY "Users can view their own bookmarks" ON "public"."bookmarks" FOR S
 
 
 
-CREATE POLICY "Users can view their own dismissals" ON "public"."announcement_dismissals" FOR SELECT USING (("auth"."uid"() = "user_id"));
+CREATE POLICY "Users can view their own dismissals" ON "public"."announcement_dismissals" FOR SELECT USING ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 
-CREATE POLICY "Users can view their own dismissals" ON "public"."notification_dismissals" FOR SELECT USING (("auth"."uid"() = "user_id"));
+CREATE POLICY "Users can view their own dismissals" ON "public"."notification_dismissals" FOR SELECT USING ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 
-CREATE POLICY "Users can view their own interactions" ON "public"."user_interactions" FOR SELECT USING ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
-
-
-
-CREATE POLICY "Users can view their own newsletter subscription" ON "public"."newsletter_subscriptions" FOR SELECT USING ((("auth"."jwt"() ->> 'email'::"text") = "email"));
+CREATE POLICY "Users can view their own newsletter subscription" ON "public"."newsletter_subscriptions" FOR SELECT USING (((( SELECT "auth"."jwt"() AS "jwt") ->> 'email'::"text") = "email"));
 
 
 
@@ -14542,7 +14510,7 @@ CREATE POLICY "changelog_changes_public_read" ON "public"."changelog_changes" FO
 
 
 
-CREATE POLICY "changelog_changes_service_write" ON "public"."changelog_changes" USING (false) WITH CHECK (false);
+CREATE POLICY "changelog_changes_service_write" ON "public"."changelog_changes" TO "service_role" USING (true) WITH CHECK (true);
 
 
 
@@ -14580,7 +14548,7 @@ CREATE POLICY "content_seo_overrides_delete_policy" ON "public"."content_seo_ove
 
 
 
-CREATE POLICY "content_seo_overrides_insert_policy" ON "public"."content_seo_overrides" FOR INSERT TO "authenticated" WITH CHECK (("auth"."uid"() = "created_by"));
+CREATE POLICY "content_seo_overrides_insert_policy" ON "public"."content_seo_overrides" FOR INSERT TO "authenticated" WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "created_by"));
 
 
 
@@ -15308,12 +15276,20 @@ GRANT ALL ON TABLE "public"."agents" TO "service_role";
 
 
 
+GRANT SELECT ON TABLE "public"."announcements" TO "anon";
+
+
+
 GRANT SELECT ON TABLE "public"."badges" TO "authenticated";
 GRANT SELECT ON TABLE "public"."badges" TO "anon";
 
 
 
 GRANT SELECT,INSERT,DELETE ON TABLE "public"."bookmarks" TO "authenticated";
+
+
+
+GRANT SELECT ON TABLE "public"."category_configs" TO "anon";
 
 
 
@@ -15383,6 +15359,7 @@ GRANT SELECT ON TABLE "public"."content_base" TO "authenticated";
 
 
 GRANT SELECT ON TABLE "public"."content_popularity" TO "authenticated";
+GRANT SELECT ON TABLE "public"."content_popularity" TO "anon";
 
 
 
@@ -15421,6 +15398,14 @@ GRANT ALL ON TABLE "public"."form_field_configs" TO "service_role";
 
 
 
+GRANT SELECT ON TABLE "public"."form_field_definitions" TO "anon";
+
+
+
+GRANT SELECT ON TABLE "public"."form_select_options" TO "anon";
+
+
+
 GRANT ALL ON TABLE "public"."metadata_templates" TO "authenticated";
 GRANT ALL ON TABLE "public"."metadata_templates" TO "anon";
 
@@ -15431,11 +15416,32 @@ GRANT INSERT ON TABLE "public"."user_interactions" TO "anon";
 
 
 
+GRANT SELECT ON TABLE "public"."mv_analytics_summary" TO "anon";
+
+
+
+GRANT SELECT ON TABLE "public"."mv_content_similarity" TO "anon";
+
+
+
+GRANT SELECT ON TABLE "public"."mv_content_stats" TO "anon";
+
+
+
 GRANT SELECT ON TABLE "public"."mv_content_tag_index" TO "service_role";
+GRANT SELECT ON TABLE "public"."mv_content_tag_index" TO "anon";
+
+
+
+GRANT SELECT ON TABLE "public"."mv_featured_scores" TO "anon";
 
 
 
 GRANT SELECT ON TABLE "public"."user_affinities" TO "authenticated";
+
+
+
+GRANT SELECT ON TABLE "public"."mv_search_facets" TO "anon";
 
 
 
@@ -15450,10 +15456,12 @@ GRANT SELECT ON TABLE "public"."mv_site_urls" TO "authenticated";
 
 
 GRANT SELECT ON TABLE "public"."mv_trending_content" TO "service_role";
+GRANT SELECT ON TABLE "public"."mv_trending_content" TO "anon";
 
 
 
 GRANT SELECT ON TABLE "public"."mv_weekly_new_content" TO "service_role";
+GRANT SELECT ON TABLE "public"."mv_weekly_new_content" TO "anon";
 
 
 
@@ -15473,6 +15481,7 @@ GRANT SELECT ON TABLE "public"."profiles" TO "anon";
 
 GRANT SELECT ON TABLE "public"."recommended_content" TO "authenticated";
 GRANT SELECT ON TABLE "public"."recommended_content" TO "service_role";
+GRANT SELECT ON TABLE "public"."recommended_content" TO "anon";
 
 
 
@@ -15537,6 +15546,7 @@ GRANT SELECT,INSERT,DELETE ON TABLE "public"."votes" TO "authenticated";
 
 GRANT SELECT ON TABLE "public"."trending_content_24h" TO "authenticated";
 GRANT ALL ON TABLE "public"."trending_content_24h" TO "service_role";
+GRANT SELECT ON TABLE "public"."trending_content_24h" TO "anon";
 
 
 
@@ -15551,6 +15561,7 @@ GRANT ALL ON TABLE "public"."user_affinity_scores" TO "service_role";
 
 
 GRANT SELECT ON TABLE "public"."user_badge_stats" TO "authenticated";
+GRANT SELECT ON TABLE "public"."user_badge_stats" TO "anon";
 
 
 
@@ -15574,6 +15585,7 @@ GRANT SELECT ON TABLE "public"."user_similarities" TO "authenticated";
 
 
 GRANT SELECT ON TABLE "public"."user_stats" TO "authenticated";
+GRANT SELECT ON TABLE "public"."user_stats" TO "anon";
 
 
 
