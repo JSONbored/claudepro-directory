@@ -101,8 +101,8 @@ class Logger {
       return;
     }
 
-    // In production, only output errors and fatal logs
-    if (this.isProduction && entry.level !== 'error' && entry.level !== 'fatal') {
+    // In production, output info, warn, error, and fatal logs (skip debug only)
+    if (this.isProduction && entry.level === 'debug') {
       return;
     }
 
@@ -431,7 +431,7 @@ class Logger {
     // Always output in dev, verbose mode, or CI/build environments
     if (!isProduction || isVerbose || isCI) {
       // biome-ignore lint/suspicious/noConsole: CLI output for scripts
-      console.log(`✅ ${message}`);
+      console.log(`? ${message}`);
     }
   }
 
@@ -441,7 +441,7 @@ class Logger {
   failure(message: string): void {
     // Always log failures
     // biome-ignore lint/suspicious/noConsole: CLI output for scripts
-    console.error(`❌ ${message}`);
+    console.error(`? ${message}`);
   }
 
   /**
@@ -464,7 +464,7 @@ class Logger {
     }
   ): void {
     if (success) {
-      this.debug(`✅ Metadata validated: ${route}`, {
+      this.debug(`? Metadata validated: ${route}`, {
         route,
         titleLength: details?.titleLength?.toString() || 'unknown',
         descLength: details?.descLength?.toString() || 'unknown',
@@ -472,7 +472,7 @@ class Logger {
       });
     } else {
       this.error(
-        `❌ Metadata validation failed: ${route}`,
+        `? Metadata validation failed: ${route}`,
         details?.errors?.join(', ') || 'Unknown validation error',
         { route }
       );
@@ -490,9 +490,9 @@ class Logger {
     };
 
     if (durationMs > 100) {
-      this.warn(`⚠️ Slow metadata generation: ${route} (${durationMs}ms)`, {}, metadata);
+      this.warn(`?? Slow metadata generation: ${route} (${durationMs}ms)`, {}, metadata);
     } else if (this.isDevelopment) {
-      this.debug(`⚡ Metadata generated: ${route} (${durationMs}ms)`, {}, metadata);
+      this.debug(`? Metadata generated: ${route} (${durationMs}ms)`, {}, metadata);
     }
   }
 
@@ -509,7 +509,7 @@ class Logger {
   }): void {
     const complianceRate = ((metrics.validatedRoutes / metrics.totalRoutes) * 100).toFixed(1);
 
-    this.info(`📊 SEO Compliance: ${complianceRate}%`, {
+    this.info(`?? SEO Compliance: ${complianceRate}%`, {
       totalRoutes: metrics.totalRoutes.toString(),
       validated: metrics.validatedRoutes.toString(),
       failed: metrics.failedRoutes.toString(),
