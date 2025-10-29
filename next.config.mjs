@@ -345,10 +345,40 @@ const nextConfig = {
     return config;
   },
 
-  // Headers for caching only - security headers handled by Nosecone in middleware.ts
+  // Headers for caching and security (Cloudflare handles primary security)
   async headers() {
     return [
-      // Cache-Control headers only (no security headers to avoid conflicts with Nosecone)
+      // Security headers for all routes
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'no-referrer',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+      // Cache-Control headers
       {
         source: '/api/:path*',
         headers: [

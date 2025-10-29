@@ -429,6 +429,7 @@ COMMENT ON TYPE "public"."use_case_type" IS 'Primary use cases for content recom
 
 CREATE OR REPLACE FUNCTION "public"."add_bookmark"("p_user_id" "uuid", "p_content_type" "text", "p_content_slug" "text", "p_notes" "text" DEFAULT NULL::"text") RETURNS "jsonb"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_bookmark JSONB;
@@ -468,6 +469,7 @@ COMMENT ON FUNCTION "public"."add_bookmark"("p_user_id" "uuid", "p_content_type"
 
 CREATE OR REPLACE FUNCTION "public"."auto_award_badges"("p_user_id" "uuid") RETURNS TABLE("badge_slug" "text", "badge_name" "text", "awarded" boolean, "reason" "text")
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_stats JSONB;
@@ -567,6 +569,7 @@ COMMENT ON FUNCTION "public"."auto_award_badges"("p_user_id" "uuid") IS 'Automat
 
 CREATE OR REPLACE FUNCTION "public"."auto_populate_generated_fields"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 declare
   v_category text;
@@ -633,6 +636,7 @@ COMMENT ON FUNCTION "public"."auto_populate_generated_fields"() IS 'Trigger func
 
 CREATE OR REPLACE FUNCTION "public"."batch_add_bookmarks"("p_user_id" "uuid", "p_items" "jsonb") RETURNS "jsonb"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_bookmarks JSONB;
@@ -683,6 +687,7 @@ COMMENT ON FUNCTION "public"."batch_add_bookmarks"("p_user_id" "uuid", "p_items"
 
 CREATE OR REPLACE FUNCTION "public"."batch_recalculate_all_reputation"() RETURNS TABLE("user_id" "uuid", "old_score" integer, "new_score" integer, "updated" boolean)
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN QUERY
@@ -783,6 +788,7 @@ COMMENT ON FUNCTION "public"."batch_update_user_affinity_scores"("p_user_ids" "u
 
 CREATE OR REPLACE FUNCTION "public"."build_enriched_content_base"("p_id" "text", "p_slug" "text", "p_title" "text", "p_description" "text", "p_author" "text", "p_author_profile_url" "text", "p_category" "text", "p_tags" "text"[], "p_source_table" "text", "p_created_at" timestamp without time zone, "p_updated_at" timestamp without time zone, "p_date_added" timestamp without time zone, "p_discovery_metadata" "jsonb", "p_examples" "jsonb", "p_features" "text"[], "p_troubleshooting" "jsonb"[], "p_use_cases" "text"[], "p_source" "text", "p_documentation_url" "text", "p_popularity_score" numeric, "p_content" "text", "p_seo_title" "text", "p_display_title" "text", "p_view_count" integer, "p_copy_count" integer, "p_bookmark_count" integer, "p_sponsored_id" "text", "p_sponsor_tier" "text", "p_sponsored_active" boolean) RETURNS "jsonb"
     LANGUAGE "plpgsql" IMMUTABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN jsonb_build_object(
@@ -995,6 +1001,7 @@ COMMENT ON FUNCTION "public"."calculate_all_user_affinities"("p_user_id" "uuid")
 
 CREATE OR REPLACE FUNCTION "public"."calculate_and_store_weekly_featured"() RETURNS TABLE("category" "text", "featured_count" integer, "duration_ms" integer)
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_week_start DATE := date_trunc('week', CURRENT_DATE)::DATE;
@@ -1096,6 +1103,7 @@ COMMENT ON FUNCTION "public"."calculate_and_store_weekly_featured"() IS 'Calcula
 
 CREATE OR REPLACE FUNCTION "public"."calculate_tag_similarity"("p_tags_a" "text"[], "p_tags_b" "text"[]) RETURNS numeric
     LANGUAGE "plpgsql" IMMUTABLE
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_intersection INT;
@@ -1133,6 +1141,7 @@ COMMENT ON FUNCTION "public"."calculate_tag_similarity"("p_tags_a" "text"[], "p_
 
 CREATE OR REPLACE FUNCTION "public"."calculate_user_reputation"("target_user_id" "uuid") RETURNS integer
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_new_score INTEGER;
@@ -1161,6 +1170,7 @@ COMMENT ON FUNCTION "public"."calculate_user_reputation"("target_user_id" "uuid"
 
 CREATE OR REPLACE FUNCTION "public"."calculate_user_reputation_score"("p_user_id" "uuid") RETURNS integer
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_posts_count INTEGER;
@@ -1238,6 +1248,7 @@ COMMENT ON FUNCTION "public"."calculate_user_reputation_score"("p_user_id" "uuid
 
 CREATE OR REPLACE FUNCTION "public"."cancel_email_sequence"("p_email" "text") RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_sequence_id TEXT := 'onboarding';
@@ -1345,6 +1356,7 @@ ALTER FUNCTION "public"."check_and_award_badge"("target_user_id" "uuid", "badge_
 
 CREATE OR REPLACE FUNCTION "public"."check_and_award_badges_manual"("p_user_id" "uuid") RETURNS TABLE("success" boolean, "badges_awarded" integer, "badge_slugs" "text"[])
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_results RECORD;
@@ -1407,6 +1419,7 @@ ALTER FUNCTION "public"."cleanup_old_interactions"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."create_form_field_version"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   max_version INTEGER;
@@ -1439,6 +1452,7 @@ ALTER FUNCTION "public"."create_form_field_version"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."enroll_in_email_sequence"("p_email" "text") RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_sequence_id TEXT := 'onboarding';
@@ -1496,6 +1510,7 @@ COMMENT ON FUNCTION "public"."enroll_in_email_sequence"("p_email" "text") IS 'En
 
 CREATE OR REPLACE FUNCTION "public"."evaluate_badge_criteria"("p_criteria" "jsonb", "p_stats" "jsonb") RETURNS boolean
     LANGUAGE "plpgsql" IMMUTABLE
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_criteria_type TEXT;
@@ -1563,6 +1578,7 @@ COMMENT ON FUNCTION "public"."evaluate_badge_criteria"("p_criteria" "jsonb", "p_
 
 CREATE OR REPLACE FUNCTION "public"."extract_tags_for_search"("tags" "jsonb") RETURNS "text"
     LANGUAGE "sql" IMMUTABLE PARALLEL SAFE
+    SET "search_path" TO 'public'
     AS $$
   SELECT COALESCE(string_agg(value::text, ' '), '')
   FROM jsonb_array_elements_text(COALESCE(tags, '[]'::jsonb))
@@ -1800,6 +1816,7 @@ ALTER FUNCTION "public"."generate_collection_slug"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."generate_content_field"("p_category" "text", "p_slug" "text", "p_field_type" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $_$
 declare
   v_config record;
@@ -1909,6 +1926,7 @@ COMMENT ON FUNCTION "public"."generate_content_field"("p_category" "text", "p_sl
 
 CREATE OR REPLACE FUNCTION "public"."generate_metadata_for_route"("p_route_pattern" "text", "p_context" "jsonb", "p_route" "text" DEFAULT NULL::"text") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_template RECORD;
@@ -2147,6 +2165,7 @@ COMMENT ON FUNCTION "public"."generate_metadata_for_route"("p_route_pattern" "te
 
 CREATE OR REPLACE FUNCTION "public"."generate_slug"("p_name" "text") RETURNS "text"
     LANGUAGE "plpgsql" IMMUTABLE
+    SET "search_path" TO 'public'
     AS $_$
 DECLARE
   v_slug TEXT;
@@ -2233,6 +2252,7 @@ ALTER FUNCTION "public"."generate_user_slug"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."get_aggregate_rating"("p_content_type" "text", "p_content_slug" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_result JSONB;
@@ -2287,6 +2307,7 @@ COMMENT ON FUNCTION "public"."get_aggregate_rating"("p_content_type" "text", "p_
 
 CREATE OR REPLACE FUNCTION "public"."get_all_content_categories"() RETURNS TABLE("category" "text")
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN QUERY
@@ -2308,6 +2329,7 @@ COMMENT ON FUNCTION "public"."get_all_content_categories"() IS 'Returns all publ
 
 CREATE OR REPLACE FUNCTION "public"."get_all_seo_config"() RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN (
@@ -2327,6 +2349,7 @@ COMMENT ON FUNCTION "public"."get_all_seo_config"() IS 'Fetch all SEO configurat
 
 CREATE OR REPLACE FUNCTION "public"."get_all_structured_data_configs"() RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN (
@@ -2519,6 +2542,7 @@ COMMENT ON FUNCTION "public"."get_bulk_user_stats_realtime"("user_ids" "uuid"[])
 
 CREATE OR REPLACE FUNCTION "public"."get_category_config"("p_category" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 declare
   v_config jsonb;
@@ -2541,6 +2565,7 @@ COMMENT ON FUNCTION "public"."get_category_config"("p_category" "text") IS 'Fetc
 
 CREATE OR REPLACE FUNCTION "public"."get_changelog_entries"("p_category" "text" DEFAULT NULL::"text", "p_published_only" boolean DEFAULT true, "p_featured_only" boolean DEFAULT false, "p_limit" integer DEFAULT 50, "p_offset" integer DEFAULT 0) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   result JSONB;
@@ -2630,6 +2655,7 @@ ALTER FUNCTION "public"."get_changelog_entries"("p_category" "text", "p_publishe
 
 CREATE OR REPLACE FUNCTION "public"."get_changelog_entry_by_slug"("p_slug" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   result JSONB;
@@ -2677,6 +2703,7 @@ ALTER FUNCTION "public"."get_changelog_entry_by_slug"("p_slug" "text") OWNER TO 
 
 CREATE OR REPLACE FUNCTION "public"."get_changelog_metadata"() RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   result JSONB;
@@ -2730,6 +2757,7 @@ ALTER FUNCTION "public"."get_changelog_metadata"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."get_changelog_with_category_stats"("p_category" "text" DEFAULT NULL::"text", "p_limit" integer DEFAULT 1000, "p_offset" integer DEFAULT 0) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_entries JSONB;
@@ -2818,6 +2846,7 @@ COMMENT ON FUNCTION "public"."get_changelog_with_category_stats"("p_category" "t
 
 CREATE OR REPLACE FUNCTION "public"."get_content_affinity"("p_user_id" "uuid", "p_content_type" "text", "p_content_slug" "text") RETURNS numeric
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN (
@@ -2841,6 +2870,7 @@ COMMENT ON FUNCTION "public"."get_content_affinity"("p_user_id" "uuid", "p_conte
 
 CREATE OR REPLACE FUNCTION "public"."get_content_with_analytics"("p_category" "text" DEFAULT NULL::"text", "p_limit" integer DEFAULT 100) RETURNS TABLE("category" "text", "slug" "text", "title" "text", "description" "text", "date_added" timestamp with time zone, "view_count" bigint, "copy_count" bigint, "bookmark_count" bigint)
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN QUERY
@@ -2872,6 +2902,7 @@ COMMENT ON FUNCTION "public"."get_content_with_analytics"("p_category" "text", "
 
 CREATE OR REPLACE FUNCTION "public"."get_due_sequence_emails"() RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_sequence_id TEXT := 'onboarding';
@@ -2911,6 +2942,7 @@ COMMENT ON FUNCTION "public"."get_due_sequence_emails"() IS 'Get all due sequenc
 
 CREATE OR REPLACE FUNCTION "public"."get_enriched_content"("p_category" "text" DEFAULT NULL::"text", "p_slug" "text" DEFAULT NULL::"text", "p_slugs" "text"[] DEFAULT NULL::"text"[], "p_limit" integer DEFAULT 50, "p_offset" integer DEFAULT 0) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_result JSONB;
@@ -3378,6 +3410,7 @@ COMMENT ON FUNCTION "public"."get_enriched_content"("p_category" "text", "p_slug
 
 CREATE OR REPLACE FUNCTION "public"."get_featured_content"("p_category" "text" DEFAULT NULL::"text", "p_limit" integer DEFAULT 10) RETURNS TABLE("content_type" "text", "content_slug" "text", "rank" bigint, "final_score" numeric, "trending_score" numeric, "rating_score" numeric, "engagement_score" numeric, "freshness_score" numeric, "views_24h" bigint, "growth_rate_pct" numeric, "bookmark_count" bigint, "copy_count" bigint, "comment_count" bigint, "total_views" bigint, "days_old" numeric, "calculated_at" timestamp with time zone)
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN QUERY
@@ -3416,6 +3449,7 @@ COMMENT ON FUNCTION "public"."get_featured_content"("p_category" "text", "p_limi
 
 CREATE OR REPLACE FUNCTION "public"."get_form_field_config"("p_form_type" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_result jsonb;
@@ -3466,6 +3500,7 @@ COMMENT ON FUNCTION "public"."get_form_field_config"("p_form_type" "text") IS 'F
 
 CREATE OR REPLACE FUNCTION "public"."get_form_fields_for_content_type"("p_content_type" "public"."content_category") RETURNS TABLE("id" "uuid", "field_scope" "public"."field_scope", "field_name" "text", "field_type" "public"."field_type", "label" "text", "placeholder" "text", "help_text" "text", "required" boolean, "grid_column" "public"."grid_column", "field_order" integer, "icon" "text", "icon_position" "public"."icon_position", "field_properties" "jsonb", "select_options" "jsonb")
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN QUERY
@@ -3523,6 +3558,7 @@ COMMENT ON FUNCTION "public"."get_form_fields_for_content_type"("p_content_type"
 
 CREATE OR REPLACE FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_result jsonb;
@@ -3571,6 +3607,7 @@ COMMENT ON FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") IS 
 
 CREATE OR REPLACE FUNCTION "public"."get_metadata_template"("p_route_pattern" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_template JSONB;
@@ -3600,6 +3637,7 @@ COMMENT ON FUNCTION "public"."get_metadata_template"("p_route_pattern" "text") I
 
 CREATE OR REPLACE FUNCTION "public"."get_new_content_for_week"("p_week_start" "date", "p_limit" integer DEFAULT 5) RETURNS TABLE("category" "text", "slug" "text", "title" "text", "description" "text", "date_added" timestamp with time zone, "url" "text")
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN QUERY
@@ -3628,6 +3666,7 @@ COMMENT ON FUNCTION "public"."get_new_content_for_week"("p_week_start" "date", "
 
 CREATE OR REPLACE FUNCTION "public"."get_personalized_feed"("p_user_id" "uuid", "p_category" "text" DEFAULT NULL::"text", "p_limit" integer DEFAULT 20) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_recommendations JSONB;
@@ -3921,6 +3960,7 @@ ALTER FUNCTION "public"."get_popular_posts"("limit_count" integer) OWNER TO "pos
 
 CREATE OR REPLACE FUNCTION "public"."get_quiz_configuration"() RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN (
@@ -3960,6 +4000,7 @@ COMMENT ON FUNCTION "public"."get_quiz_configuration"() IS 'Returns complete qui
 
 CREATE OR REPLACE FUNCTION "public"."get_recent_merged"("p_limit" integer DEFAULT 5) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN COALESCE(
@@ -4003,6 +4044,7 @@ COMMENT ON FUNCTION "public"."get_recent_merged"("p_limit" integer) IS 'Get rece
 
 CREATE OR REPLACE FUNCTION "public"."get_recommendations"("p_use_case" "text", "p_experience_level" "text", "p_tool_preferences" "text"[], "p_integrations" "text"[] DEFAULT ARRAY[]::"text"[], "p_focus_areas" "text"[] DEFAULT ARRAY[]::"text"[], "p_limit" integer DEFAULT 10) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_results JSONB;
@@ -4121,6 +4163,7 @@ COMMENT ON FUNCTION "public"."get_recommendations"("p_use_case" "text", "p_exper
 
 CREATE OR REPLACE FUNCTION "public"."get_related_content"("p_category" "text", "p_slug" "text", "p_tags" "text"[] DEFAULT '{}'::"text"[], "p_limit" integer DEFAULT 3, "p_exclude_slugs" "text"[] DEFAULT '{}'::"text"[]) RETURNS TABLE("category" "text", "slug" "text", "title" "text", "description" "text", "author" "text", "date_added" timestamp with time zone, "tags" "text"[], "score" numeric, "match_type" "text", "views" bigint, "matched_tags" "text"[])
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_current_tags TEXT[];
@@ -4233,6 +4276,7 @@ COMMENT ON FUNCTION "public"."get_related_content"("p_category" "text", "p_slug"
 
 CREATE OR REPLACE FUNCTION "public"."get_reviews_with_stats"("p_content_type" "text", "p_content_slug" "text", "p_sort_by" "text" DEFAULT 'recent'::"text", "p_offset" integer DEFAULT 0, "p_limit" integer DEFAULT 10, "p_user_id" "uuid" DEFAULT NULL::"uuid") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_reviews JSONB;
@@ -4341,6 +4385,7 @@ COMMENT ON FUNCTION "public"."get_reviews_with_stats"("p_content_type" "text", "
 
 CREATE OR REPLACE FUNCTION "public"."get_search_count"("p_query" "text" DEFAULT NULL::"text", "p_categories" "text"[] DEFAULT NULL::"text"[], "p_tags" "text"[] DEFAULT NULL::"text"[], "p_authors" "text"[] DEFAULT NULL::"text"[]) RETURNS integer
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_count INTEGER;
@@ -4367,6 +4412,7 @@ COMMENT ON FUNCTION "public"."get_search_count"("p_query" "text", "p_categories"
 
 CREATE OR REPLACE FUNCTION "public"."get_search_suggestions"("p_query" "text", "p_limit" integer DEFAULT 10) RETURNS TABLE("suggestion" "text")
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   IF p_query IS NULL OR length(trim(p_query)) < 2 THEN
@@ -4392,6 +4438,7 @@ COMMENT ON FUNCTION "public"."get_search_suggestions"("p_query" "text", "p_limit
 
 CREATE OR REPLACE FUNCTION "public"."get_seo_config"("p_key" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_value JSONB;
@@ -4414,6 +4461,7 @@ COMMENT ON FUNCTION "public"."get_seo_config"("p_key" "text") IS 'Fetch SEO conf
 
 CREATE OR REPLACE FUNCTION "public"."get_site_urls"() RETURNS TABLE("path" "text", "lastmod" timestamp with time zone, "changefreq" "text", "priority" numeric)
     LANGUAGE "sql" STABLE
+    SET "search_path" TO 'public'
     AS $$
   select path, lastmod, changefreq, priority
   from public.mv_site_urls
@@ -4430,6 +4478,7 @@ COMMENT ON FUNCTION "public"."get_site_urls"() IS 'Returns sitemap-ready URL met
 
 CREATE OR REPLACE FUNCTION "public"."get_structured_data_config"("p_category" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_config JSONB;
@@ -4474,6 +4523,7 @@ COMMENT ON FUNCTION "public"."get_structured_data_config"("p_category" "text") I
 
 CREATE OR REPLACE FUNCTION "public"."get_tier_name_from_score"("p_score" integer) RETURNS "text"
     LANGUAGE "plpgsql" IMMUTABLE
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_legend_min INTEGER;
@@ -4513,6 +4563,7 @@ COMMENT ON FUNCTION "public"."get_tier_name_from_score"("p_score" integer) IS 'G
 
 CREATE OR REPLACE FUNCTION "public"."get_tier_progress_from_score"("p_score" integer) RETURNS integer
     LANGUAGE "plpgsql" IMMUTABLE
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_tier_name TEXT;
@@ -4563,6 +4614,7 @@ COMMENT ON FUNCTION "public"."get_tier_progress_from_score"("p_score" integer) I
 
 CREATE OR REPLACE FUNCTION "public"."get_top_contributors"("p_limit" integer DEFAULT 5) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN COALESCE(
@@ -4606,6 +4658,7 @@ COMMENT ON FUNCTION "public"."get_top_contributors"("p_limit" integer) IS 'Get t
 
 CREATE OR REPLACE FUNCTION "public"."get_trending_content"("p_limit" integer DEFAULT 3) RETURNS TABLE("category" "text", "slug" "text", "title" "text", "description" "text", "view_count" bigint, "url" "text")
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN QUERY
@@ -4632,6 +4685,7 @@ COMMENT ON FUNCTION "public"."get_trending_content"("p_limit" integer) IS 'Get t
 
 CREATE OR REPLACE FUNCTION "public"."get_trending_page"("p_period" "public"."trending_period" DEFAULT 'week'::"public"."trending_period", "p_metric" "public"."trending_metric" DEFAULT 'views'::"public"."trending_metric", "p_category" "text" DEFAULT NULL::"text", "p_page" integer DEFAULT 1, "p_limit" integer DEFAULT 20) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_offset INTEGER;
@@ -4785,6 +4839,7 @@ COMMENT ON FUNCTION "public"."get_trending_page"("p_period" "public"."trending_p
 
 CREATE OR REPLACE FUNCTION "public"."get_usage_recommendations"("p_user_id" "uuid", "p_trigger" "text", "p_content_type" "text" DEFAULT NULL::"text", "p_content_slug" "text" DEFAULT NULL::"text", "p_category" "text" DEFAULT NULL::"text", "p_limit" integer DEFAULT 3) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_recommendations JSONB;
@@ -5031,6 +5086,7 @@ COMMENT ON FUNCTION "public"."get_usage_recommendations"("p_user_id" "uuid", "p_
 
 CREATE OR REPLACE FUNCTION "public"."get_user_activity_timeline"("p_user_id" "uuid", "p_type" "text" DEFAULT NULL::"text", "p_limit" integer DEFAULT 20, "p_offset" integer DEFAULT 0) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_result JSONB;
@@ -5191,6 +5247,7 @@ Performance: Optimized with composite indexes on (user_id, created_at DESC) for 
 
 CREATE OR REPLACE FUNCTION "public"."get_user_badges_with_details"("p_user_id" "uuid", "p_featured_only" boolean DEFAULT false, "p_limit" integer DEFAULT NULL::integer, "p_offset" integer DEFAULT 0) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_result JSONB;
@@ -5245,6 +5302,7 @@ COMMENT ON FUNCTION "public"."get_user_badges_with_details"("p_user_id" "uuid", 
 
 CREATE OR REPLACE FUNCTION "public"."get_user_favorite_categories"("p_user_id" "uuid", "p_limit" integer DEFAULT 3) RETURNS "text"[]
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN ARRAY(
@@ -5269,6 +5327,7 @@ COMMENT ON FUNCTION "public"."get_user_favorite_categories"("p_user_id" "uuid", 
 
 CREATE OR REPLACE FUNCTION "public"."get_user_interaction_summary"("p_user_id" "uuid") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN (
@@ -5295,6 +5354,7 @@ COMMENT ON FUNCTION "public"."get_user_interaction_summary"("p_user_id" "uuid") 
 
 CREATE OR REPLACE FUNCTION "public"."get_user_recent_interactions"("p_user_id" "uuid", "p_limit" integer DEFAULT 20) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN COALESCE(
@@ -5332,6 +5392,7 @@ COMMENT ON FUNCTION "public"."get_user_recent_interactions"("p_user_id" "uuid", 
 
 CREATE OR REPLACE FUNCTION "public"."get_user_reputation_breakdown"("p_user_id" "uuid") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_user_score INTEGER;
@@ -5480,6 +5541,7 @@ COMMENT ON FUNCTION "public"."get_user_reputation_breakdown"("p_user_id" "uuid")
 
 CREATE OR REPLACE FUNCTION "public"."get_weekly_digest"("p_week_start" "date" DEFAULT NULL::"date") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_week_start DATE;
@@ -5567,6 +5629,7 @@ ALTER FUNCTION "public"."handle_new_user"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."handle_webhook_bounce"("p_webhook_id" "uuid", "p_event_data" "jsonb") RETURNS "void"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_email TEXT;
@@ -5642,6 +5705,7 @@ COMMENT ON FUNCTION "public"."handle_webhook_bounce"("p_webhook_id" "uuid", "p_e
 
 CREATE OR REPLACE FUNCTION "public"."handle_webhook_complaint"("p_webhook_id" "uuid", "p_event_data" "jsonb") RETURNS "void"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_email TEXT;
@@ -5721,6 +5785,7 @@ ALTER FUNCTION "public"."increment"("table_name" "text", "row_id" "uuid", "colum
 
 CREATE OR REPLACE FUNCTION "public"."is_bookmarked"("p_user_id" "uuid", "p_content_type" "text", "p_content_slug" "text") RETURNS boolean
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN EXISTS (
@@ -5759,6 +5824,7 @@ ALTER FUNCTION "public"."is_following"("follower_id" "uuid", "following_id" "uui
 
 CREATE OR REPLACE FUNCTION "public"."mark_sequence_email_processed"("p_schedule_id" "uuid", "p_email" "text", "p_step" integer, "p_success" boolean DEFAULT true) RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_sequence_id TEXT := 'onboarding';
@@ -5794,6 +5860,7 @@ COMMENT ON FUNCTION "public"."mark_sequence_email_processed"("p_schedule_id" "uu
 
 CREATE OR REPLACE FUNCTION "public"."process_webhook_event"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   -- Process based on event type
@@ -5855,6 +5922,7 @@ ALTER FUNCTION "public"."refresh_content_popularity"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."refresh_mv_site_urls"() RETURNS "void"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 begin
   refresh materialized view concurrently public.mv_site_urls;
@@ -6029,6 +6097,7 @@ ALTER FUNCTION "public"."refresh_user_stats"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."remove_bookmark"("p_user_id" "uuid", "p_content_type" "text", "p_content_slug" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   DELETE FROM bookmarks
@@ -6054,6 +6123,7 @@ COMMENT ON FUNCTION "public"."remove_bookmark"("p_user_id" "uuid", "p_content_ty
 
 CREATE OR REPLACE FUNCTION "public"."replace_title_placeholder"("p_text" "text", "p_title" "text", "p_slug" "text") RETURNS "text"
     LANGUAGE "plpgsql" IMMUTABLE
+    SET "search_path" TO 'public'
     AS $$
 begin
   -- Use title if available, otherwise use slug
@@ -6071,6 +6141,7 @@ COMMENT ON FUNCTION "public"."replace_title_placeholder"("p_text" "text", "p_tit
 
 CREATE OR REPLACE FUNCTION "public"."schedule_next_sequence_step"("p_email" "text", "p_current_step" integer) RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_sequence_id TEXT := 'onboarding';
@@ -6127,6 +6198,7 @@ COMMENT ON FUNCTION "public"."schedule_next_sequence_step"("p_email" "text", "p_
 
 CREATE OR REPLACE FUNCTION "public"."search_by_popularity"("p_query" "text" DEFAULT NULL::"text", "p_categories" "text"[] DEFAULT NULL::"text"[], "p_tags" "text"[] DEFAULT NULL::"text"[], "p_authors" "text"[] DEFAULT NULL::"text"[], "p_limit" integer DEFAULT 50, "p_offset" integer DEFAULT 0) RETURNS TABLE("id" "text", "slug" "text", "title" "text", "description" "text", "category" "text", "author" "text", "author_profile_url" "text", "date_added" "text", "tags" "text"[], "created_at" "text", "updated_at" "text", "features" "jsonb", "use_cases" "jsonb", "examples" "jsonb", "troubleshooting" "jsonb", "discovery_metadata" "jsonb", "fts_vector" "tsvector", "source_table" "text", "view_count" bigint, "copy_count" bigint, "bookmark_count" bigint, "popularity_score" real)
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN QUERY
@@ -6264,6 +6336,7 @@ ALTER FUNCTION "public"."search_companies"("search_query" "text", "result_limit"
 
 CREATE OR REPLACE FUNCTION "public"."search_content_optimized"("p_query" "text" DEFAULT NULL::"text", "p_categories" "text"[] DEFAULT NULL::"text"[], "p_tags" "text"[] DEFAULT NULL::"text"[], "p_authors" "text"[] DEFAULT NULL::"text"[], "p_sort" "text" DEFAULT 'relevance'::"text", "p_limit" integer DEFAULT 50, "p_offset" integer DEFAULT 0) RETURNS TABLE("id" "text", "slug" "text", "title" "text", "description" "text", "category" "text", "author" "text", "author_profile_url" "text", "date_added" "text", "tags" "text"[], "created_at" "text", "updated_at" "text", "features" "jsonb", "use_cases" "jsonb", "examples" "jsonb", "troubleshooting" "jsonb", "discovery_metadata" "jsonb", "fts_vector" "tsvector", "source_table" "text", "relevance_score" real, "view_count" bigint, "copy_count" bigint, "bookmark_count" bigint, "combined_score" real)
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN QUERY
@@ -6486,6 +6559,7 @@ ALTER FUNCTION "public"."search_users"("search_query" "text", "result_limit" int
 
 CREATE OR REPLACE FUNCTION "public"."sync_changelog_changes_from_jsonb"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   category_name TEXT;
@@ -6539,6 +6613,7 @@ ALTER FUNCTION "public"."sync_changelog_changes_from_jsonb"() OWNER TO "postgres
 
 CREATE OR REPLACE FUNCTION "public"."toggle_follow"("p_follower_id" "uuid", "p_following_id" "uuid", "p_action" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_result JSONB;
@@ -6590,6 +6665,7 @@ COMMENT ON FUNCTION "public"."toggle_follow"("p_follower_id" "uuid", "p_followin
 
 CREATE OR REPLACE FUNCTION "public"."toggle_post_vote"("p_post_id" "uuid", "p_user_id" "uuid", "p_action" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   IF p_action = 'vote' THEN
@@ -6625,6 +6701,7 @@ COMMENT ON FUNCTION "public"."toggle_post_vote"("p_post_id" "uuid", "p_user_id" 
 
 CREATE OR REPLACE FUNCTION "public"."toggle_review_helpful"("p_review_id" "uuid", "p_user_id" "uuid", "p_helpful" boolean) RETURNS "jsonb"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_review RECORD;
@@ -6671,6 +6748,7 @@ COMMENT ON FUNCTION "public"."toggle_review_helpful"("p_review_id" "uuid", "p_us
 
 CREATE OR REPLACE FUNCTION "public"."trigger_auto_award_badges"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_target_user_id UUID;
@@ -6719,6 +6797,7 @@ COMMENT ON FUNCTION "public"."trigger_auto_award_badges"() IS 'Trigger function 
 
 CREATE OR REPLACE FUNCTION "public"."trigger_update_user_reputation"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_user_id UUID;
@@ -6756,6 +6835,7 @@ COMMENT ON FUNCTION "public"."trigger_update_user_reputation"() IS 'Trigger func
 
 CREATE OR REPLACE FUNCTION "public"."update_announcements_updated_at"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   NEW.updated_at = NOW();
@@ -6795,6 +6875,7 @@ ALTER FUNCTION "public"."update_collection_item_count"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."update_content_fts"() RETURNS "trigger"
     LANGUAGE "plpgsql" IMMUTABLE
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   -- Build tsvector with weighted fields:
@@ -6838,6 +6919,7 @@ ALTER FUNCTION "public"."update_content_items_updated_at"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."update_email_sequences_updated_at"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   NEW.updated_at = NOW();
@@ -6851,6 +6933,7 @@ ALTER FUNCTION "public"."update_email_sequences_updated_at"() OWNER TO "postgres
 
 CREATE OR REPLACE FUNCTION "public"."update_newsletter_updated_at"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   NEW.updated_at = NOW();
@@ -6864,6 +6947,7 @@ ALTER FUNCTION "public"."update_newsletter_updated_at"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."update_notifications_updated_at"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   NEW.updated_at = NOW();
@@ -7009,6 +7093,7 @@ ALTER FUNCTION "public"."update_review_helpful_count"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."update_seo_config_updated_at"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   NEW.updated_at = NOW();
@@ -7022,6 +7107,7 @@ ALTER FUNCTION "public"."update_seo_config_updated_at"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."update_structured_data_config_updated_at"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   NEW.updated_at = NOW();
@@ -7035,6 +7121,7 @@ ALTER FUNCTION "public"."update_structured_data_config_updated_at"() OWNER TO "p
 
 CREATE OR REPLACE FUNCTION "public"."update_updated_at_column"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   NEW.updated_at = NOW();
@@ -7111,6 +7198,7 @@ COMMENT ON FUNCTION "public"."update_user_affinity_scores"("p_user_id" "uuid") I
 
 CREATE OR REPLACE FUNCTION "public"."update_user_profile"("p_user_id" "uuid", "p_display_name" "text" DEFAULT NULL::"text", "p_bio" "text" DEFAULT NULL::"text", "p_work" "text" DEFAULT NULL::"text", "p_website" "text" DEFAULT NULL::"text", "p_social_x_link" "text" DEFAULT NULL::"text", "p_interests" "text"[] DEFAULT NULL::"text"[], "p_profile_public" boolean DEFAULT NULL::boolean, "p_follow_email" boolean DEFAULT NULL::boolean) RETURNS "jsonb"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_updated_user JSONB;
@@ -7163,6 +7251,7 @@ COMMENT ON FUNCTION "public"."update_user_profile"("p_user_id" "uuid", "p_displa
 
 CREATE OR REPLACE FUNCTION "public"."validate_interests_array"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
     AS $$
 BEGIN
   IF NEW.interests IS NOT NULL THEN
@@ -7920,6 +8009,10 @@ CREATE MATERIALIZED VIEW "public"."company_job_stats" AS
 ALTER MATERIALIZED VIEW "public"."company_job_stats" OWNER TO "postgres";
 
 
+COMMENT ON MATERIALIZED VIEW "public"."company_job_stats" IS 'Company job statistics materialized view. Publicly accessible via API for performance. Refreshed periodically via pg_cron.';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."guides" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "slug" "text" NOT NULL,
@@ -8513,7 +8606,7 @@ UNION ALL
 ALTER VIEW "public"."content_base" OWNER TO "postgres";
 
 
-COMMENT ON VIEW "public"."content_base" IS 'Unified view of common fields across all content tables (excludes jobs table). Used for type generation and cross-content queries.';
+COMMENT ON VIEW "public"."content_base" IS 'Unified view of base content fields across all content types. Uses SECURITY DEFINER to provide consistent access control across multiple tables.';
 
 
 
@@ -8644,6 +8737,10 @@ CREATE MATERIALIZED VIEW "public"."content_popularity" AS
 
 
 ALTER MATERIALIZED VIEW "public"."content_popularity" OWNER TO "postgres";
+
+
+COMMENT ON MATERIALIZED VIEW "public"."content_popularity" IS 'Content popularity materialized view. Publicly accessible via API for performance. Refreshed periodically via pg_cron.';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."content_seo_overrides" (
@@ -8955,9 +9052,7 @@ UNION ALL
 ALTER VIEW "public"."content_unified" OWNER TO "postgres";
 
 
-COMMENT ON VIEW "public"."content_unified" IS 'Unified view of all content types with PostgreSQL full-text search (fts_vector).
-Enables server-side fuzzy search, eliminates client-side fuzzysort package.
-Used for type generation via supabase gen types.';
+COMMENT ON VIEW "public"."content_unified" IS 'Unified view of complete content with enriched metadata. Uses SECURITY DEFINER to provide consistent access control and efficient joins.';
 
 
 
@@ -9896,7 +9991,7 @@ CREATE MATERIALIZED VIEW "public"."mv_site_urls" AS
 ALTER MATERIALIZED VIEW "public"."mv_site_urls" OWNER TO "postgres";
 
 
-COMMENT ON MATERIALIZED VIEW "public"."mv_site_urls" IS 'Aggregated sitemap/llms URL registry sourced from PostgreSQL tables for database-first publishing.';
+COMMENT ON MATERIALIZED VIEW "public"."mv_site_urls" IS 'Site URLs materialized view for sitemap generation. Publicly accessible via API for performance. Refreshed periodically via pg_cron.';
 
 
 
@@ -10286,7 +10381,7 @@ CREATE MATERIALIZED VIEW "public"."recommended_content" AS
 ALTER MATERIALIZED VIEW "public"."recommended_content" OWNER TO "postgres";
 
 
-COMMENT ON MATERIALIZED VIEW "public"."recommended_content" IS 'Personalized content recommendations per user. Refreshed every 2 hours. Formula: (affinity × 0.7) + (popularity × 0.3).';
+COMMENT ON MATERIALIZED VIEW "public"."recommended_content" IS 'Recommended content materialized view. Publicly accessible via API for performance. Refreshed periodically via pg_cron.';
 
 
 
@@ -10612,7 +10707,7 @@ CREATE MATERIALIZED VIEW "public"."submission_stats_summary" AS
 ALTER MATERIALIZED VIEW "public"."submission_stats_summary" OWNER TO "postgres";
 
 
-COMMENT ON MATERIALIZED VIEW "public"."submission_stats_summary" IS 'Aggregated submission statistics for dashboard - refreshed hourly via pg_cron';
+COMMENT ON MATERIALIZED VIEW "public"."submission_stats_summary" IS 'Submission statistics summary materialized view. Publicly accessible via API for performance. Refreshed periodically via pg_cron.';
 
 
 
@@ -10721,7 +10816,7 @@ CREATE MATERIALIZED VIEW "public"."trending_content_24h" AS
 ALTER MATERIALIZED VIEW "public"."trending_content_24h" OWNER TO "postgres";
 
 
-COMMENT ON MATERIALIZED VIEW "public"."trending_content_24h" IS 'Trending content in last 24 hours. Refreshed every 30 minutes. Sorted by trending score (bookmarks, posts, votes, recency).';
+COMMENT ON MATERIALIZED VIEW "public"."trending_content_24h" IS '24-hour trending content materialized view. Publicly accessible via API for performance. Refreshed periodically via pg_cron.';
 
 
 
@@ -10766,7 +10861,7 @@ CREATE MATERIALIZED VIEW "public"."user_activity_summary" AS
 ALTER MATERIALIZED VIEW "public"."user_activity_summary" OWNER TO "postgres";
 
 
-COMMENT ON MATERIALIZED VIEW "public"."user_activity_summary" IS 'Aggregated user activity statistics - refreshed daily via pg_cron. Replaces 5 parallel queries with 1 indexed query.';
+COMMENT ON MATERIALIZED VIEW "public"."user_activity_summary" IS 'User activity summary materialized view. Publicly accessible via API for performance. Refreshed periodically via pg_cron.';
 
 
 
@@ -10835,7 +10930,7 @@ CREATE MATERIALIZED VIEW "public"."user_affinity_scores" AS
 ALTER MATERIALIZED VIEW "public"."user_affinity_scores" OWNER TO "postgres";
 
 
-COMMENT ON MATERIALIZED VIEW "public"."user_affinity_scores" IS 'Aggregated user affinity data. Refreshed every 6 hours. Used for personalization and recommendations.';
+COMMENT ON MATERIALIZED VIEW "public"."user_affinity_scores" IS 'User affinity scores materialized view. Publicly accessible via API for performance. Refreshed periodically via pg_cron.';
 
 
 
@@ -10881,7 +10976,7 @@ CREATE MATERIALIZED VIEW "public"."user_badge_stats" AS
 ALTER MATERIALIZED VIEW "public"."user_badge_stats" OWNER TO "postgres";
 
 
-COMMENT ON MATERIALIZED VIEW "public"."user_badge_stats" IS 'Pre-computed user statistics for badge evaluation. Refreshed hourly via pg_cron. NO AUTH.USERS DEPENDENCY (security hardened).';
+COMMENT ON MATERIALIZED VIEW "public"."user_badge_stats" IS 'User badge statistics materialized view. Publicly accessible via API for performance. Refreshed periodically via pg_cron.';
 
 
 
@@ -11043,6 +11138,10 @@ CREATE MATERIALIZED VIEW "public"."user_stats" AS
 
 
 ALTER MATERIALIZED VIEW "public"."user_stats" OWNER TO "postgres";
+
+
+COMMENT ON MATERIALIZED VIEW "public"."user_stats" IS 'User statistics materialized view. Publicly accessible via API for performance. Refreshed periodically via pg_cron.';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."webhook_events" (
@@ -13868,6 +13967,10 @@ CREATE POLICY "Active user content is viewable by everyone" ON "public"."user_co
 
 
 
+CREATE POLICY "Affinity config is publicly readable" ON "public"."affinity_config" FOR SELECT USING (true);
+
+
+
 CREATE POLICY "Allow webhook inserts from external services" ON "public"."webhook_events" FOR INSERT WITH CHECK (true);
 
 
@@ -14036,6 +14139,10 @@ CREATE POLICY "Helpful votes are viewable by everyone" ON "public"."review_helpf
 
 
 
+CREATE POLICY "Metadata templates are publicly readable" ON "public"."metadata_templates" FOR SELECT USING (true);
+
+
+
 CREATE POLICY "Moderators can update submissions" ON "public"."content_submissions" FOR UPDATE USING ((EXISTS ( SELECT 1
    FROM "auth"."users"
   WHERE (("users"."id" = "auth"."uid"()) AND (("users"."raw_user_meta_data" ->> 'role'::"text") = 'moderator'::"text")))));
@@ -14092,7 +14199,19 @@ CREATE POLICY "Reviews are viewable by everyone" ON "public"."review_ratings" FO
 
 
 
+CREATE POLICY "SEO config is publicly readable" ON "public"."seo_config" FOR SELECT USING (true);
+
+
+
 CREATE POLICY "SEO enrichment rules are viewable by everyone" ON "public"."seo_enrichment_rules" FOR SELECT USING (("enabled" = true));
+
+
+
+CREATE POLICY "Service role can manage SEO config" ON "public"."seo_config" TO "service_role" USING (true) WITH CHECK (true);
+
+
+
+CREATE POLICY "Service role can manage affinity config" ON "public"."affinity_config" TO "service_role" USING (true) WITH CHECK (true);
 
 
 
@@ -14105,6 +14224,14 @@ CREATE POLICY "Service role can manage form field versions" ON "public"."form_fi
 
 
 CREATE POLICY "Service role can manage form select options" ON "public"."form_select_options" USING ((("auth"."jwt"() ->> 'role'::"text") = 'service_role'::"text")) WITH CHECK ((("auth"."jwt"() ->> 'role'::"text") = 'service_role'::"text"));
+
+
+
+CREATE POLICY "Service role can manage metadata templates" ON "public"."metadata_templates" TO "service_role" USING (true) WITH CHECK (true);
+
+
+
+CREATE POLICY "Service role can manage structured data config" ON "public"."structured_data_config" TO "service_role" USING (true) WITH CHECK (true);
 
 
 
@@ -14149,6 +14276,10 @@ CREATE POLICY "Service role has full access to submissions" ON "public"."submiss
 
 
 CREATE POLICY "Service role has full access to user similarities" ON "public"."user_similarities" TO "service_role" USING (true) WITH CHECK (true);
+
+
+
+CREATE POLICY "Structured data config is publicly readable" ON "public"."structured_data_config" FOR SELECT USING (true);
 
 
 
@@ -14374,6 +14505,9 @@ CREATE POLICY "Votes are viewable by everyone" ON "public"."votes" FOR SELECT US
 
 
 
+ALTER TABLE "public"."affinity_config" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."agents" ENABLE ROW LEVEL SECURITY;
 
 
@@ -14410,6 +14544,9 @@ CREATE POLICY "changelog_changes_public_read" ON "public"."changelog_changes" FO
 
 CREATE POLICY "changelog_changes_service_write" ON "public"."changelog_changes" USING (false) WITH CHECK (false);
 
+
+
+ALTER TABLE "public"."changelog_entries" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."collection_items" ENABLE ROW LEVEL SECURITY;
@@ -14497,6 +14634,9 @@ ALTER TABLE "public"."jobs" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."mcp" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "public"."metadata_templates" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."newsletter_subscriptions" ENABLE ROW LEVEL SECURITY;
 
 
@@ -14536,6 +14676,9 @@ ALTER TABLE "public"."review_ratings" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."rules" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "public"."seo_config" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."seo_enrichment_rules" ENABLE ROW LEVEL SECURITY;
 
 
@@ -14556,6 +14699,9 @@ ALTER TABLE "public"."sponsored_impressions" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."statuslines" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."structured_data_config" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."submissions" ENABLE ROW LEVEL SECURITY;
