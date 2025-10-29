@@ -121,7 +121,7 @@ export async function getContentByCategory(category: CategoryId): Promise<Conten
         return [];
       }
     },
-    [`enriched-content-${category}`],
+    [`enriched-content-${category}-v2`], // v2: cache bust after migration
     {
       revalidate: 3600, // 1 hour ISR cache
       tags: [`content-${category}`],

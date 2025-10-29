@@ -3,21 +3,21 @@
  * All content from Supabase with ISR caching, dynamic category loading from UNIFIED_CATEGORY_REGISTRY.
  */
 
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
 import { TopContributors } from '@/src/components/features/community/top-contributors';
 import { HomePageClient } from '@/src/components/features/home';
 import { LazySection } from '@/src/components/infra/lazy-section';
 import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
 
-const RollingText = dynamic(
+const RollingText = dynamicImport(
   () => import('@/src/components/magic/rolling-text').then((mod) => ({ default: mod.RollingText })),
   {
     loading: () => <span className="text-accent">enthusiasts</span>,
   }
 );
 
-const NumberTicker = dynamic(
+const NumberTicker = dynamicImport(
   () =>
     import('@/src/components/magic/number-ticker').then((mod) => ({ default: mod.NumberTicker })),
   {
@@ -25,7 +25,7 @@ const NumberTicker = dynamic(
   }
 );
 
-const UnifiedNewsletterCapture = dynamic(
+const UnifiedNewsletterCapture = dynamicImport(
   () =>
     import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
       default: mod.UnifiedNewsletterCapture,
@@ -44,7 +44,7 @@ import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
 import { getCurrentWeekStartISO } from '@/src/lib/utils/data.utils';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 type CategoryMetadata = ContentItem & { category: CategoryId };
 type EnrichedMetadata = CategoryMetadata & { viewCount: number; copyCount: number };
