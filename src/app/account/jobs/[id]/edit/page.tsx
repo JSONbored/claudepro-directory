@@ -9,6 +9,9 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import type { Database } from '@/src/types/database.types';
 
+// Force dynamic rendering - requires authentication
+export const dynamic = 'force-dynamic';
+
 export const metadata = generatePageMetadata('/account/jobs/:id/edit');
 
 interface EditJobPageProps {

@@ -5,7 +5,7 @@
 
 import type { MetadataContext } from '@/src/lib/seo/metadata-registry';
 import type { RoutePattern } from '@/src/lib/seo/route-classifier';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 
 export interface MetadataConfig {
   title: string;
@@ -29,7 +29,7 @@ export async function generateMetadataFromDB(
   context: MetadataContext,
   route?: string
 ): Promise<MetadataConfig> {
-  const supabase = await createClient();
+  const supabase = createAnonClient();
 
   const contextPayload = {
     plural_title: context.categoryConfig?.pluralTitle,

@@ -1,6 +1,10 @@
 'use server';
 
 import { unstable_cache } from 'next/cache';
+import {
+  FORM_FIELDS_CACHE_SECONDS,
+  FORM_FIELDS_CACHE_TAG,
+} from '@/src/lib/forms/submission-form-config.constants';
 import type {
   FieldDefinition,
   GridColumn,
@@ -29,11 +33,8 @@ import {
   Tags,
   Terminal,
 } from '@/src/lib/icons';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Database } from '@/src/types/database.types';
-
-const FORM_FIELDS_CACHE_TAG = 'submission-form-fields';
-const FORM_FIELDS_CACHE_SECONDS = 60 * 60 * 6; // 6 hours
 
 type RpcRow =
   Database['public']['Functions']['get_form_fields_for_content_type']['Returns'][number];
@@ -204,7 +205,7 @@ function emptySection(): SubmissionFormSection {
 }
 
 async function fetchFieldsForContentType(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: ReturnType<typeof createAnonClient>,
   contentType: SubmissionContentType
 ): Promise<SubmissionFormSection> {
   if (!supabase || typeof supabase.rpc !== 'function') {
@@ -252,7 +253,7 @@ async function fetchFieldsForContentType(
 }
 
 async function loadSubmissionFormConfig(): Promise<SubmissionFormConfig> {
-  const supabase = await createClient();
+  const supabase = createAnonClient();
   const entries = await Promise.all(
     SUBMISSION_CONTENT_TYPES.map(async (contentType) => {
       const section = await fetchFieldsForContentType(supabase, contentType);
@@ -276,5 +277,3 @@ export const getSubmissionFormConfig = unstable_cache(
     tags: [FORM_FIELDS_CACHE_TAG],
   }
 );
-
-export { FORM_FIELDS_CACHE_TAG, FORM_FIELDS_CACHE_SECONDS };

@@ -14,6 +14,9 @@ import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from 
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { BADGE_COLORS, type SubmissionStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 
+// Force dynamic rendering - requires authentication
+export const dynamic = 'force-dynamic';
+
 export const metadata = generatePageMetadata('/account/submissions');
 
 export default async function SubmissionsPage() {

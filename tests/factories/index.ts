@@ -2,11 +2,15 @@
  * Test Data Factories - Central Registry
  *
  * Type-safe test data generation using Fishery and Faker.
- * Provides realistic, production-like test data for all entity types.
+ * Provides realistic, production-like test data for user entities.
+ *
+ * **MODERNIZATION NOTE (Oct 2025):**
+ * Content factories (agent, mcp, command, etc.) have been removed.
+ * Use database-generated types (Tables<'category'>) and seed data instead.
  *
  * **Architecture:**
  * - Factory pattern for consistent data generation
- * - Type-safe using Zod schemas and TypeScript inference
+ * - Type-safe using database types and TypeScript inference
  * - Faker.js for realistic fake data (dates, names, URLs, etc.)
  * - Fishery for factory management (sequences, traits, associations)
  *
@@ -19,19 +23,16 @@
  *
  * **Usage:**
  * ```ts
- * import { agentFactory, userFactory } from '@/tests/factories';
+ * import { userFactory, bookmarkFactory } from '@/tests/factories';
  *
  * // Generate single entity
- * const agent = agentFactory.build();
+ * const user = userFactory.build();
  *
  * // Generate multiple entities
- * const agents = agentFactory.buildList(5);
+ * const users = userFactory.buildList(5);
  *
  * // Override specific fields
- * const featuredAgent = agentFactory.build({ featured: true });
- *
- * // Use transient params for complex logic
- * const agentWithTags = agentFactory.build({}, { transient: { tagCount: 5 } });
+ * const admin = userFactory.build({ role: 'admin' });
  * ```
  *
  * @see https://github.com/thoughtbot/fishery
@@ -39,22 +40,6 @@
  */
 
 // biome-ignore lint/performance/noBarrelFile: Test factories barrel - intentional convenience exports
-// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
-export * from './content/agent.factory';
-// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
-export * from './content/collection.factory';
-// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
-export * from './content/command.factory';
-// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
-export * from './content/hook.factory';
-// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
-export * from './content/mcp.factory';
-// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
-export * from './content/rule.factory';
-// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
-export * from './content/statusline.factory';
-// biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
-export * from './shared/usage-example.factory';
 // biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports
 export * from './user/bookmark.factory';
 // biome-ignore lint/performance/noReExportAll: Test factories barrel - intentional convenience exports

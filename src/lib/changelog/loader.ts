@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Json, Tables } from '@/src/types/database.types';
 
 // Zod schema for changelog entry changes structure (JSONB validation)
@@ -51,7 +51,7 @@ export function parseChangelogChanges(changes: unknown): ChangelogChanges {
 
 export async function getChangelog() {
   try {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
     const { data, error } = await supabase.rpc('get_changelog_entries', {
       p_published_only: true,
       p_limit: 1000,
@@ -78,7 +78,7 @@ export async function getChangelog() {
 
 export async function getAllChangelogEntries(): Promise<ChangelogEntry[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
     const { data, error } = await supabase.rpc('get_changelog_entries', {
       p_published_only: false,
       p_limit: 10000,
@@ -99,7 +99,7 @@ export async function getAllChangelogEntries(): Promise<ChangelogEntry[]> {
 
 export async function getChangelogEntryBySlug(slug: string): Promise<ChangelogEntry | null> {
   try {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
     const { data, error } = await supabase.rpc('get_changelog_entry_by_slug', {
       p_slug: slug,
     });
@@ -117,7 +117,7 @@ export async function getChangelogEntryBySlug(slug: string): Promise<ChangelogEn
 
 export async function getRecentChangelogEntries(limit = 5): Promise<ChangelogEntry[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
     const { data, error } = await supabase.rpc('get_changelog_entries', {
       p_published_only: true,
       p_limit: limit,
@@ -138,7 +138,7 @@ export async function getRecentChangelogEntries(limit = 5): Promise<ChangelogEnt
 
 export async function getChangelogEntriesByCategory(category: string): Promise<ChangelogEntry[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
     const { data, error } = await supabase.rpc('get_changelog_entries', {
       p_category: category,
       p_published_only: true,
@@ -160,7 +160,7 @@ export async function getChangelogEntriesByCategory(category: string): Promise<C
 
 export async function getFeaturedChangelogEntries(limit = 3): Promise<ChangelogEntry[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
     const { data, error } = await supabase.rpc('get_changelog_entries', {
       p_published_only: true,
       p_featured_only: true,
@@ -182,7 +182,7 @@ export async function getFeaturedChangelogEntries(limit = 3): Promise<ChangelogE
 
 export async function getChangelogMetadata() {
   try {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
     const { data, error } = await supabase.rpc('get_changelog_metadata');
 
     if (error) throw error;

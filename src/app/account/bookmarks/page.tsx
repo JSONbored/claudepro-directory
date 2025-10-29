@@ -1,6 +1,9 @@
 import { redirect } from 'next/navigation';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
+// Force dynamic rendering - requires authentication
+export const dynamic = 'force-dynamic';
+
 export const metadata = generatePageMetadata('/account/bookmarks');
 
 /**

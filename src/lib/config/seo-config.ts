@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 
 const SITE_NAME = 'Claude Pro Directory';
 const SEPARATOR = ' - ';
@@ -50,7 +50,7 @@ export const MAX_BASE_TITLE_LENGTH = {
 } as const satisfies Record<CategoryId, number>;
 
 export async function getMetadataQualityRules() {
-  const supabase = await createClient();
+  const supabase = createAnonClient();
   const { data } = await supabase.rpc('get_seo_config', { p_key: 'metadata_quality_rules' });
   return data as {
     title: { minLength: number; maxLength: number; extendedMaxLength: number };
@@ -69,7 +69,7 @@ export const METADATA_QUALITY_RULES = {
   openGraph: { imageWidth: 1200, imageHeight: 630, aspectRatio: 1.91 },
 } as const;
 export async function getSeoConfig() {
-  const supabase = await createClient();
+  const supabase = createAnonClient();
   const { data } = await supabase.rpc('get_all_seo_config');
   const config = data as Record<string, unknown>;
 

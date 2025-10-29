@@ -9,11 +9,11 @@
  * - Analytics tracking
  */
 
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import { redirect } from 'next/navigation';
 import { ForYouFeedClient } from '@/src/components/features/personalization/for-you-feed-client';
 
-const UnifiedNewsletterCapture = dynamic(
+const UnifiedNewsletterCapture = dynamicImport(
   () =>
     import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
       default: mod.UnifiedNewsletterCapture,
@@ -28,6 +28,9 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 
 export const metadata = generatePageMetadata('/for-you');
+
+// Force dynamic rendering - personalized content requires auth
+export const dynamic = 'force-dynamic';
 
 export default async function ForYouPage() {
   // Check authentication

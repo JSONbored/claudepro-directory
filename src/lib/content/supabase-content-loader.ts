@@ -19,7 +19,7 @@
 import { unstable_cache } from 'next/cache';
 import type { CategoryId } from '@/src/lib/config/category-types';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Database, Tables } from '@/src/types/database.types';
 import type { Views } from '@/src/types/database-overrides';
 
@@ -97,7 +97,7 @@ export async function getContentByCategory(category: CategoryId): Promise<Conten
   return unstable_cache(
     async () => {
       try {
-        const supabase = await createClient();
+        const supabase = createAnonClient();
 
         // Use enriched content RPC - single query with all data
         const { data, error } = await supabase.rpc('get_enriched_content', {
@@ -145,7 +145,7 @@ export async function getContentBySlug(
   const result = await unstable_cache(
     async (): Promise<ContentItem | null> => {
       try {
-        const supabase = await createClient();
+        const supabase = createAnonClient();
 
         // Use enriched content RPC
         const { data, error } = await supabase.rpc('get_enriched_content', {
@@ -204,7 +204,7 @@ export async function getFullContentBySlug(
   return unstable_cache(
     async () => {
       try {
-        const supabase = await createClient();
+        const supabase = createAnonClient();
 
         // Map category to table name (category IS the table name in our architecture)
         // Type-safe: category is CategoryId which matches table names
@@ -276,7 +276,7 @@ export async function getAllContent(filters?: ContentFilters): Promise<ContentIt
   return unstable_cache(
     async () => {
       try {
-        const supabase = await createClient();
+        const supabase = createAnonClient();
 
         // Start query builder
         let query = supabase.from('content_unified').select('*');
@@ -377,7 +377,7 @@ export async function getContentCount(category?: CategoryId): Promise<number> {
   return unstable_cache(
     async () => {
       try {
-        const supabase = await createClient();
+        const supabase = createAnonClient();
 
         // Start query builder for count
         let query = supabase.from('content_unified').select('*', { count: 'exact', head: true });
@@ -436,7 +436,7 @@ export async function getContentWithAnalytics(
   return unstable_cache(
     async () => {
       try {
-        const supabase = await createClient();
+        const supabase = createAnonClient();
 
         let query = supabase
           .from('mv_content_stats')
@@ -489,7 +489,7 @@ export async function getTrendingContent(category?: CategoryId, limit = 20) {
   return unstable_cache(
     async () => {
       try {
-        const supabase = await createClient();
+        const supabase = createAnonClient();
 
         let query = supabase.from('mv_trending_content').select('*').limit(limit);
 

@@ -26,7 +26,7 @@ import {
   Terminal,
   Webhook,
 } from '@/src/lib/icons';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type {
   ActionButtonConfig,
   ContentTypeConfig,
@@ -108,7 +108,7 @@ const CATEGORY_CONFIG_TAG = 'category-configs';
 async function fetchContentTypeConfig(
   category: Tables<'category_configs'>['category']
 ): Promise<ContentTypeConfig | null> {
-  const supabase = await createClient();
+  const supabase = createAnonClient();
 
   const { data: dbConfig, error } = await supabase
     .from('category_configs')

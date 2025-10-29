@@ -15,6 +15,9 @@ import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-const
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import type { Database } from '@/src/types/database.types';
 
+// Force dynamic rendering - requires authentication
+export const dynamic = 'force-dynamic';
+
 export const metadata = generatePageMetadata('/account/jobs/:id/analytics');
 
 interface JobAnalyticsPageProps {

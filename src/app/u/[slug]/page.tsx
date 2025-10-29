@@ -26,6 +26,9 @@ import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 
+// User profiles may show personalized content if authenticated
+export const dynamic = 'force-dynamic';
+
 interface UserProfilePageProps {
   params: Promise<{ slug: string }>;
 }

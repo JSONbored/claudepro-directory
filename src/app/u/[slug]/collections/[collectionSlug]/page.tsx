@@ -18,6 +18,9 @@ import { createClient as createAdminClient } from '@/src/lib/supabase/admin-clie
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
+// Collection pages may have private content
+export const dynamic = 'force-dynamic';
+
 interface PublicCollectionPageProps {
   params: Promise<{ slug: string; collectionSlug: string }>;
 }

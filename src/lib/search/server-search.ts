@@ -4,7 +4,7 @@
 
 import { unstable_cache } from 'next/cache';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Database } from '@/src/types/database.types';
 
 type SearchContentArgs = Database['public']['Functions']['search_content_optimized']['Args'];
@@ -36,7 +36,7 @@ export async function searchContent(
 
   return unstable_cache(
     async () => {
-      const supabase = await createClient();
+      const supabase = createAnonClient();
 
       const rpcParams: SearchContentArgs = {};
 
@@ -73,7 +73,7 @@ export async function getSearchSuggestions(query: string, limit = 10): Promise<s
 
   return unstable_cache(
     async () => {
-      const supabase = await createClient();
+      const supabase = createAnonClient();
 
       const { data, error } = await supabase.rpc('get_search_suggestions', {
         p_query: query.trim(),
@@ -98,7 +98,7 @@ export async function getSearchSuggestions(query: string, limit = 10): Promise<s
 export async function getSearchCount(query: string, filters?: SearchFilters): Promise<number> {
   return unstable_cache(
     async () => {
-      const supabase = await createClient();
+      const supabase = createAnonClient();
 
       const rpcParams: Database['public']['Functions']['get_search_count']['Args'] = {};
 
@@ -128,7 +128,7 @@ export async function getSearchCount(query: string, filters?: SearchFilters): Pr
 export async function getSearchFacets() {
   return unstable_cache(
     async () => {
-      const supabase = await createClient();
+      const supabase = createAnonClient();
 
       const { data, error } = await supabase
         .from('mv_search_facets')
@@ -156,7 +156,7 @@ export async function searchByPopularity(
 ): Promise<SearchByPopularityReturn> {
   return unstable_cache(
     async () => {
-      const supabase = await createClient();
+      const supabase = createAnonClient();
 
       const rpcParams: Database['public']['Functions']['search_by_popularity']['Args'] = {};
 

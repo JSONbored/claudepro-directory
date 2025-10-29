@@ -3,6 +3,9 @@ import { JobForm } from '@/src/components/forms/job-form';
 import { createJob } from '@/src/lib/actions/business.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
+// Force dynamic rendering - requires authentication
+export const dynamic = 'force-dynamic';
+
 export const metadata = generatePageMetadata('/account/jobs/new');
 
 export default function NewJobPage() {

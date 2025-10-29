@@ -18,6 +18,9 @@ export async function generateMetadata({ params }: EditCollectionPageProps): Pro
   return generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
 }
 
+// Force dynamic rendering - requires authentication
+export const dynamic = 'force-dynamic';
+
 export default async function EditCollectionPage({ params }: EditCollectionPageProps) {
   const { slug } = await params;
   const supabase = await createClient();
