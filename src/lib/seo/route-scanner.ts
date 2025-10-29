@@ -31,11 +31,21 @@
 import { readdir } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { logger } from '@/src/lib/logger';
-import { METADATA_TEMPLATES } from '@/src/lib/seo/metadata-templates';
 import type { RouteClassification, RoutePattern } from '@/src/lib/seo/route-classifier';
 import { classifyRoute } from '@/src/lib/seo/route-classifier';
 import { validateClassification } from '@/src/lib/seo/validation-schemas';
 import { cliReporter } from '@/src/lib/utils/cli-reporter';
+
+const ROUTE_PATTERNS: RoutePattern[] = [
+  'HOMEPAGE',
+  'CATEGORY',
+  'CONTENT_DETAIL',
+  'USER_PROFILE',
+  'ACCOUNT',
+  'TOOL',
+  'STATIC',
+  'AUTH',
+];
 
 /**
  * Route Discovery Result
@@ -267,8 +277,8 @@ export async function scanRoutes(appDir?: string): Promise<RouteScanReport> {
 
   // Check for patterns without templates (should never happen)
   const missingTemplates: RoutePattern[] = [];
-  for (const pattern of Object.keys(METADATA_TEMPLATES) as RoutePattern[]) {
-    if (!METADATA_TEMPLATES[pattern]) {
+  for (const pattern of ROUTE_PATTERNS) {
+    if (!pattern) {
       missingTemplates.push(pattern);
     }
   }

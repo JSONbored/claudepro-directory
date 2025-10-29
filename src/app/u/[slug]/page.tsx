@@ -318,7 +318,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Account Tier</span>
                   {(() => {
                     const tier = profile.tier || 'free';
-                    const tierConfig = tierConfigs[tier] || { label: 'Free', className: 'border-muted-foreground/20 text-muted-foreground' };
+                    const tierConfig = tierConfigs[tier] || {
+                      label: 'Free',
+                      className: 'border-muted-foreground/20 text-muted-foreground',
+                    };
                     return (
                       <UnifiedBadge variant="base" style="outline" className={tierConfig.className}>
                         {tierConfig.label}

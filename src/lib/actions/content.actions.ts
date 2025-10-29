@@ -1,25 +1,8 @@
 'use server';
 
 /**
- * Content Actions
- * Consolidated server actions for all content-related functionality
- *
- * This file consolidates the following domains into a single, tree-shakeable module:
- * - Collections (create, update, delete, add/remove items, reorder)
- * - Reviews (create, update, delete, mark helpful, get aggregate ratings)
- * - Posts (create, update, delete, vote, comments)
- *
- * Architecture:
- * - All authenticated actions use authedAction middleware
- * - Repository pattern for database operations
- * - Fully tree-shakeable with named exports
- * - Type-safe with Zod schemas
- *
- * Benefits:
- * - Single source of truth for content domain
- * - Reduced import overhead
- * - Consistent error handling and logging
- * - Easier maintenance and testing
+ * Content Actions - Database-First Architecture
+ * Collections, reviews, posts with PostgreSQL RPC functions for business logic.
  */
 
 import { revalidatePath, revalidateTag } from 'next/cache';
@@ -717,95 +700,28 @@ export const deleteReview = authedAction
     };
   });
 
-/**
- * Mark a review as helpful (or remove helpful vote)
- *
- * Rate limit: 50 requests per hour per IP
- * Higher limit to allow engagement
- */
 export const markReviewHelpful = authedAction
-  .metadata({
-    actionName: 'markReviewHelpful',
-    category: 'user',
-  })
+  .metadata({ actionName: 'markReviewHelpful', category: 'user' })
   .schema(helpfulVoteSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const { review_id, helpful } = parsedInput;
-    const { userId } = ctx;
-
     const supabase = await createClient();
+    const { data, error } = await supabase.rpc('toggle_review_helpful', {
+      p_review_id: parsedInput.review_id,
+      p_user_id: ctx.userId,
+      p_helpful: parsedInput.helpful,
+    });
+    if (error) throw new Error(error.message);
 
-    // Get review to verify it exists and get author
-    const { data: review, error: fetchError } = await supabase
-      .from('review_ratings')
-      .select('user_id, content_type, content_slug')
-      .eq('id', review_id)
-      .single();
-
-    if (fetchError || !review) {
-      throw new Error('Review not found');
-    }
-
-    // Prevent users from voting on their own reviews
-    if (review.user_id === userId) {
-      throw new Error('You cannot vote on your own review');
-    }
-
-    if (helpful) {
-      // Add helpful vote
-      const { error } = await supabase.from('review_helpful_votes').insert({
-        review_id,
-        user_id: userId,
-      });
-
-      if (error) {
-        // Ignore duplicate key errors (user already voted)
-        if (error.code !== '23505') {
-          logger.error('Failed to add helpful vote', new Error(error.message), {
-            userId,
-            reviewId: review_id,
-            error: error.message,
-          });
-          throw new Error(`Failed to mark review as helpful: ${error.message}`);
-        }
-      } else {
-        logger.info('Review marked helpful', {
-          userId,
-          reviewId: review_id,
-          reviewAuthor: review.user_id,
-        });
-      }
-    } else {
-      // Remove helpful vote
-      const { error } = await supabase
-        .from('review_helpful_votes')
-        .delete()
-        .eq('review_id', review_id)
-        .eq('user_id', userId);
-
-      if (error) {
-        logger.error('Failed to remove helpful vote', new Error(error.message), {
-          userId,
-          reviewId: review_id,
-          error: error.message,
-        });
-        throw new Error(`Failed to remove helpful vote: ${error.message}`);
-      }
-
-      logger.info('Helpful vote removed', {
-        userId,
-        reviewId: review_id,
-      });
-    }
-
-    // Revalidate detail page (helpful count changed)
-    revalidatePath(`/${review.content_type}/${review.content_slug}`);
-    revalidateTag(`reviews:${review.content_type}:${review.content_slug}`, 'max');
-
-    return {
-      success: true,
-      helpful,
+    const result = data as {
+      success: boolean;
+      helpful: boolean;
+      content_type: string;
+      content_slug: string;
     };
+    revalidatePath(`/${result.content_type}/${result.content_slug}`);
+    revalidateTag(`reviews:${result.content_type}:${result.content_slug}`, 'max');
+
+    return { success: result.success, helpful: result.helpful };
   });
 
 /**
@@ -916,68 +832,21 @@ export const getReviews = rateLimitedAction
     };
   });
 
-/**
- * Get aggregate rating stats for a content item
- *
- * Returns average rating, total count, and rating distribution
- * Used for displaying star ratings on ConfigCard and detail pages
- */
 export const getAggregateRating = rateLimitedAction
-  .metadata({
-    actionName: 'getAggregateRating',
-    category: 'content',
-  })
-  .schema(
-    z.object({
-      content_type: categoryIdSchema,
-      content_slug: nonEmptyString.max(200),
-    })
-  )
+  .metadata({ actionName: 'getAggregateRating', category: 'content' })
+  .schema(z.object({ content_type: categoryIdSchema, content_slug: nonEmptyString.max(200) }))
   .action(async ({ parsedInput }) => {
-    const { content_type, content_slug } = parsedInput;
-    const { createClient } = await import('@/src/lib/supabase/server');
     const supabase = await createClient();
-
-    // Fetch all ratings for this content
-    const { data: ratings, error } = await supabase
-      .from('review_ratings')
-      .select('rating')
-      .eq('content_type', content_type)
-      .eq('content_slug', content_slug);
-
-    if (error) {
-      logger.error('Failed to fetch aggregate rating', new Error(error.message), {
-        content_type,
-        content_slug,
-        error: error.message,
-      });
-      throw new Error('Failed to fetch rating statistics. Please try again.');
-    }
-
-    if (!ratings || ratings.length === 0) {
-      return {
-        success: true,
-        average: 0,
-        count: 0,
-        distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
-      };
-    }
-
-    // Calculate average
-    const sum = ratings.reduce((acc, r) => acc + r.rating, 0);
-    const average = sum / ratings.length;
-
-    // Calculate distribution
-    const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    for (const r of ratings) {
-      distribution[r.rating as keyof typeof distribution] += 1;
-    }
-
-    return {
-      success: true,
-      average: Number(average.toFixed(1)), // Round to 1 decimal
-      count: ratings.length,
-      distribution,
+    const { data, error } = await supabase.rpc('get_aggregate_rating', {
+      p_content_type: parsedInput.content_type,
+      p_content_slug: parsedInput.content_slug,
+    });
+    if (error) throw new Error('Failed to fetch rating statistics. Please try again.');
+    return data as {
+      success: boolean;
+      average: number;
+      count: number;
+      distribution: Record<string, number>;
     };
   });
 
@@ -1110,58 +979,19 @@ export const deletePost = authedAction
     };
   });
 
-/**
- * Vote on a post (upvote/unvote toggle)
- */
 export const votePost = authedAction
-  .metadata({
-    actionName: 'votePost',
-    category: 'user',
-  })
-  .schema(
-    z.object({
-      post_id: z.string().uuid(),
-      action: z.enum(['vote', 'unvote']),
-    })
-  )
+  .metadata({ actionName: 'votePost', category: 'user' })
+  .schema(z.object({ post_id: z.string().uuid(), action: z.enum(['vote', 'unvote']) }))
   .action(async ({ parsedInput, ctx }) => {
-    const { post_id, action } = parsedInput;
-    const { userId } = ctx;
-
     const supabase = await createClient();
-
-    if (action === 'vote') {
-      // Add vote - PostgREST handles duplicate detection via unique constraint
-      const { error } = await supabase.from('votes').insert({
-        user_id: userId,
-        post_id,
-      });
-
-      if (error) {
-        if (error.code === '23505') {
-          throw new Error('You have already voted on this post');
-        }
-        throw new Error(`Failed to vote: ${error.message}`);
-      }
-    } else {
-      // Remove vote
-      const { error } = await supabase
-        .from('votes')
-        .delete()
-        .eq('user_id', userId)
-        .eq('post_id', post_id);
-
-      if (error) {
-        throw new Error(`Failed to remove vote: ${error.message}`);
-      }
-    }
-
+    const { data, error } = await supabase.rpc('toggle_post_vote', {
+      p_post_id: parsedInput.post_id,
+      p_user_id: ctx.userId,
+      p_action: parsedInput.action,
+    });
+    if (error) throw new Error(error.message);
     revalidatePath('/board');
-
-    return {
-      success: true,
-      action,
-    };
+    return data as { success: boolean; action: string };
   });
 
 /**

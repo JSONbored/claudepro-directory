@@ -6,15 +6,11 @@ import {
 import { serializeJsonLd } from '@/src/lib/utils/jsonld.utils';
 
 /**
- * Unified Structured Data Component
- * Handles schema.org JSON-LD generation for all content types (agents, commands, hooks, mcp, rules, statuslines)
- *
- * Consolidates 6 previously separate schema components into one with type discrimination
- * Configuration-driven approach using STRUCTURED_DATA_RULES from schema-types.ts
+ * Unified Structured Data - Database-First Architecture
+ * All configuration from PostgreSQL structured_data_config table
  */
 export async function UnifiedStructuredData({ item }: UnifiedStructuredDataProps) {
-  // Generate all schemas using configuration-driven approach
-  const schemas = generateAllSchemasForContent(item);
+  const schemas = await generateAllSchemasForContent(item);
 
   // Render all schemas as Script tags
   return (

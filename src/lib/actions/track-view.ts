@@ -1,3 +1,8 @@
+/**
+ * Analytics Tracking - Database-First Architecture
+ * Fire-and-forget event tracking via user_interactions table.
+ */
+
 'use server';
 
 import { z } from 'zod';
@@ -7,9 +12,6 @@ import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
 
-/**
- * Tracking parameters schema for view and copy events
- */
 const trackingParamsSchema = z.object({
   category: categoryIdSchema,
   slug: nonEmptyString
@@ -21,23 +23,6 @@ const trackingParamsSchema = z.object({
     .transform((val: string) => val.toLowerCase().trim()),
 });
 
-/**
- * Track a view event for content
- *
- * Features:
- * - Rate limited: 100 requests per 60 seconds per IP
- * - Automatic validation via Zod schema
- * - Centralized logging via middleware
- * - Type-safe with full inference
- *
- * Usage:
- * ```ts
- * const result = await trackView({ category: 'agents', slug: 'my-agent' });
- * if (result?.data) {
- *   console.log('View count:', result.data.viewCount);
- * }
- * ```
- */
 export const trackView = rateLimitedAction
   .metadata({
     actionName: 'trackView',
@@ -79,23 +64,6 @@ export const trackView = rateLimitedAction
     };
   });
 
-/**
- * Track a copy event for content (e.g., code snippets)
- *
- * Features:
- * - Rate limited: 100 requests per 60 seconds per IP
- * - Automatic validation via Zod schema
- * - Centralized logging via middleware
- * - Type-safe with full inference
- *
- * Usage:
- * ```ts
- * const result = await trackCopy({ category: 'commands', slug: 'my-command' });
- * if (result?.data?.success) {
- *   console.log('Copy tracked successfully');
- * }
- * ```
- */
 export const trackCopy = rateLimitedAction
   .metadata({
     actionName: 'trackCopy',

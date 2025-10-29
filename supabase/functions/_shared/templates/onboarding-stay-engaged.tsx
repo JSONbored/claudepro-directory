@@ -6,11 +6,11 @@
  * Content: Recap of journey, new features, feedback request, continued engagement
  */
 
-import { Button, Hr, Section, Text } from '@react-email/components';
+import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
 import type * as React from 'react';
-import { addUTMToURL } from '@/src/lib/utils/email-utm';
-import { EMAIL_UTM_TEMPLATES } from '@/src/lib/utils/utm-templates';
-import { BaseLayout } from '../layouts/base-layout';
+import { addUTMToURL } from '../utils/email-utm.ts';
+import { EMAIL_UTM_TEMPLATES } from '../utils/utm-templates.ts';
+import { BaseLayout } from '../layouts/base-layout.tsx';
 import {
   cardStyle,
   contentSection,
@@ -29,8 +29,8 @@ import {
   sectionTitleStyle,
   strongStyle,
   subheadingStyle,
-} from '../utils/common-styles';
-import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme';
+} from '../utils/common-styles.ts';
+import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme.ts';
 
 export interface OnboardingStayEngagedProps {
   /**

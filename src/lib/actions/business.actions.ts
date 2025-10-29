@@ -1,7 +1,8 @@
 'use server';
 
 /**
- * Business Actions - Server actions for submissions, companies, jobs, and sponsored content.
+ * Business Actions - Database-First Architecture
+ * All aggregations in PostgreSQL. TypeScript handles GitHub operations + auth validation only.
  */
 
 import { revalidatePath } from 'next/cache';
@@ -33,10 +34,6 @@ import {
 } from '@/src/lib/schemas/generated/db-schemas';
 import { nonNegativeInt } from '@/src/lib/schemas/primitives';
 import type { Tables } from '@/src/types/database.types';
-
-// ============================================
-// SUBMISSION STATS TYPES (Database-First)
-// ============================================
 
 // Leaderboard types (derived from database tables, not materialized views)
 type RecentMerged = {
@@ -100,25 +97,6 @@ type CompanyInsert = Database['public']['Tables']['companies']['Insert'];
 type CompanyUpdate = Database['public']['Tables']['companies']['Update'];
 type SubmissionInsert = Database['public']['Tables']['submissions']['Insert'];
 
-// ============================================
-// SUBMISSION ACTIONS
-// ============================================
-
-/**
- * Submit new content configuration
- * Creates GitHub PR automatically
- *
- * Flow:
- * 1. Validate user is authenticated
- * 2. Check for duplicates
- * 3. Generate slug
- * 4. Format content file
- * 5. Create GitHub branch
- * 6. Commit file
- * 7. Create PR
- * 8. Track in database
- * 9. Return PR URL
- */
 export const submitConfiguration = rateLimitedAction
   .metadata({
     actionName: 'submitConfiguration',
@@ -299,10 +277,6 @@ export const submitConfiguration = rateLimitedAction
     };
   });
 
-/**
- * Get user's submissions
- * Helper function for submissions page
- */
 export async function getUserSubmissions() {
   const supabase = await createClient();
 
@@ -329,226 +303,49 @@ export async function getUserSubmissions() {
   return submissions || [];
 }
 
-// ============================================
-// SUBMISSION STATS ACTIONS
-// ============================================
-
-/**
- * Get submission statistics
- * Cached via repository (5-minute TTL)
- */
 export const getSubmissionStats = rateLimitedAction
-  .metadata({
-    actionName: 'getSubmissionStats',
-    category: 'analytics',
-  })
-  .schema(z.object({})) // No input needed
+  .metadata({ actionName: 'getSubmissionStats', category: 'analytics' })
+  .schema(z.object({}))
   .outputSchema(submissionStatsSchema)
   .action(async () => {
-    try {
-      const supabase = await createClient();
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('submission_stats_summary')
+      .select('total, pending, merged_this_week')
+      .single();
 
-      // Parallel queries for performance
-      // Query materialized view (replaces 3 parallel queries with 1)
-      // View is refreshed hourly via pg_cron
-      const { data, error } = await supabase
-        .from('submission_stats_summary')
-        .select('total, pending, merged_this_week')
-        .single();
+    if (error) throw new Error(`Failed to fetch submission stats: ${error.message}`);
 
-      if (error) {
-        throw new Error(`Failed to fetch submission stats: ${error.message}`);
-      }
-
-      return {
-        total: data?.total ?? 0,
-        pending: data?.pending ?? 0,
-        mergedThisWeek: data?.merged_this_week ?? 0,
-      };
-    } catch (error) {
-      logger.error(
-        'Failed to fetch submission stats',
-        error instanceof Error ? error : new Error(String(error))
-      );
-      return { total: 0, pending: 0, mergedThisWeek: 0 };
-    }
+    return {
+      total: data?.total ?? 0,
+      pending: data?.pending ?? 0,
+      mergedThisWeek: data?.merged_this_week ?? 0,
+    };
   });
 
-/**
- * Get recently merged submissions
- * Shows social proof
- */
 export const getRecentMerged = rateLimitedAction
-  .metadata({
-    actionName: 'getRecentMerged',
-    category: 'analytics',
-  })
-  .schema(
-    z.object({
-      limit: nonNegativeInt.min(1).max(10).default(5),
-    })
-  )
+  .metadata({ actionName: 'getRecentMerged', category: 'analytics' })
+  .schema(z.object({ limit: nonNegativeInt.min(1).max(10).default(5) }))
   .outputSchema(z.array(recentMergedSchema))
-  .action(async ({ parsedInput }: { parsedInput: { limit: number } }) => {
-    try {
-      const supabase = await createClient();
-
-      // Fetch recent merged with user joins
-      const { data, error } = await supabase
-        .from('submissions')
-        .select(
-          `
-          id,
-          content_name,
-          content_type,
-          merged_at,
-          user_id,
-          users!inner (
-            name,
-            slug
-          )
-        `
-        )
-        .eq('status', 'merged')
-        .not('merged_at', 'is', null)
-        .order('merged_at', { ascending: false })
-        .limit(parsedInput.limit);
-
-      if (error) {
-        throw new Error(`Failed to fetch recent merged: ${error.message}`);
-      }
-
-      // Define type for Supabase query result with joined users table
-      type SubmissionWithMergedAt = {
-        id: string;
-        content_name: string;
-        content_type: string;
-        merged_at: string;
-        users: { name: string | null; slug: string | null };
-      };
-
-      // Transform to match schema with content type validation
-      const transformed: RecentMerged[] = ((data || []) as SubmissionWithMergedAt[]).map((item) => {
-        const validContentType = [
-          'agents',
-          'mcp',
-          'rules',
-          'commands',
-          'hooks',
-          'statuslines',
-          'collections',
-        ].includes(item.content_type)
-          ? (item.content_type as
-              | 'agents'
-              | 'mcp'
-              | 'rules'
-              | 'commands'
-              | 'hooks'
-              | 'statuslines'
-              | 'collections')
-          : 'agents';
-
-        return {
-          id: item.id,
-          content_name: item.content_name,
-          content_type: validContentType,
-          merged_at: item.merged_at,
-          user:
-            item.users?.name && item.users?.slug
-              ? {
-                  name: item.users.name,
-                  slug: item.users.slug,
-                }
-              : null,
-        };
-      });
-
-      return transformed;
-    } catch (error) {
-      logger.error(
-        'Failed to fetch recent merged',
-        error instanceof Error ? error : new Error(String(error))
-      );
-      return [];
-    }
+  .action(async ({ parsedInput }) => {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc('get_recent_merged', { p_limit: parsedInput.limit });
+    if (error) throw new Error(`Failed to fetch recent merged: ${error.message}`);
+    return (data as RecentMerged[]) ?? [];
   });
 
-/**
- * Get top contributors
- * Gamification element
- */
 export const getTopContributors = rateLimitedAction
-  .metadata({
-    actionName: 'getTopContributors',
-    category: 'analytics',
-  })
-  .schema(
-    z.object({
-      limit: nonNegativeInt.min(1).max(10).default(5),
-    })
-  )
+  .metadata({ actionName: 'getTopContributors', category: 'analytics' })
+  .schema(z.object({ limit: nonNegativeInt.min(1).max(10).default(5) }))
   .outputSchema(z.array(topContributorSchema))
-  .action(async ({ parsedInput }: { parsedInput: { limit: number } }) => {
-    try {
-      const supabase = await createClient();
-
-      // Count merged submissions per user
-      const { data, error } = await supabase
-        .from('submissions')
-        .select('user_id, users!inner(name, slug)')
-        .eq('status', 'merged');
-
-      if (error) {
-        throw new Error(`Failed to fetch contributors: ${error.message}`);
-      }
-
-      // Group by user and count
-      const userCounts = new Map<string, { name: string; slug: string; count: number }>();
-
-      // Define type for Supabase query result with joined users table
-      type TopContributorSubmission = {
-        users: { name: string | null; slug: string | null };
-      };
-
-      for (const submission of data || []) {
-        const user = (submission as TopContributorSubmission).users;
-        if (!(user?.name && user?.slug)) continue;
-
-        const existing = userCounts.get(user.slug) || {
-          name: user.name,
-          slug: user.slug,
-          count: 0,
-        };
-        existing.count++;
-        userCounts.set(user.slug, existing);
-      }
-
-      // Sort by count and get top N
-      const sorted = Array.from(userCounts.values())
-        .sort((a, b) => b.count - a.count)
-        .slice(0, parsedInput.limit);
-
-      // Transform to schema format with ranks
-      const contributors: TopContributor[] = sorted.map((user, index) => ({
-        rank: index + 1,
-        name: user.name,
-        slug: user.slug,
-        mergedCount: user.count,
-      }));
-
-      return contributors;
-    } catch (error) {
-      logger.error(
-        'Failed to fetch top contributors',
-        error instanceof Error ? error : new Error(String(error))
-      );
-      return [];
-    }
+  .action(async ({ parsedInput }) => {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc('get_top_contributors', {
+      p_limit: parsedInput.limit,
+    });
+    if (error) throw new Error(`Failed to fetch contributors: ${error.message}`);
+    return (data as TopContributor[]) ?? [];
   });
-
-// ============================================
-// COMPANY ACTIONS
-// ============================================
 
 // Company schemas - Generated base + business rules
 const createCompanySchema = publicCompaniesInsertSchema.extend({
@@ -576,9 +373,6 @@ const updateCompanySchema = publicCompaniesUpdateSchema.extend({
     .optional(),
 });
 
-/**
- * Create a new company profile
- */
 export const createCompany = rateLimitedAction
   .metadata({
     actionName: 'createCompany',
@@ -637,9 +431,6 @@ export const createCompany = rateLimitedAction
     };
   });
 
-/**
- * Update a company profile (owner only)
- */
 export const updateCompany = rateLimitedAction
   .metadata({
     actionName: 'updateCompany',
@@ -699,9 +490,6 @@ export const updateCompany = rateLimitedAction
     };
   });
 
-/**
- * Get user's companies
- */
 export async function getUserCompanies() {
   const supabase = await createClient();
 
@@ -727,19 +515,6 @@ export async function getUserCompanies() {
   return companies || [];
 }
 
-// ============================================
-// JOB ACTIONS
-// ============================================
-
-/**
- * Create a new job listing
- *
- * Flow:
- * 1. Validate input
- * 2. Check user auth
- * 3. Create job in database (status: draft, active: false initially)
- * 4. Redirect to job management page
- */
 export const createJob = rateLimitedAction
   .metadata({
     actionName: 'createJob',
@@ -822,10 +597,6 @@ export const createJob = rateLimitedAction
     };
   });
 
-/**
- * Update an existing job listing
- * Only owner can update
- */
 export const updateJob = rateLimitedAction
   .metadata({
     actionName: 'updateJob',
@@ -899,9 +670,6 @@ export const updateJob = rateLimitedAction
     };
   });
 
-/**
- * Toggle job status (activate, pause, etc.)
- */
 export const toggleJobStatus = rateLimitedAction
   .metadata({
     actionName: 'toggleJobStatus',
@@ -945,9 +713,6 @@ export const toggleJobStatus = rateLimitedAction
     };
   });
 
-/**
- * Delete a job (soft delete by setting status)
- */
 export const deleteJob = rateLimitedAction
   .metadata({
     actionName: 'deleteJob',
@@ -1009,10 +774,6 @@ export async function getUserJobs(): Promise<Array<Tables<'jobs'>>> {
   return data || [];
 }
 
-// ============================================
-// SPONSORED CONTENT ACTIONS
-// ============================================
-
 // Sponsored content tracking schemas - Generated base + validation
 const trackImpressionSchema = publicSponsoredImpressionsInsertSchema.extend({
   position: z.number().int().min(0).max(100).optional(),
@@ -1023,10 +784,6 @@ const trackClickSchema = publicSponsoredClicksInsertSchema.extend({
   target_url: z.string().max(500),
 });
 
-/**
- * Track a sponsored impression
- * Called when sponsored content becomes visible (Intersection Observer)
- */
 export const trackSponsoredImpression = rateLimitedAction
   .metadata({
     actionName: 'trackSponsoredImpression',
@@ -1068,10 +825,6 @@ export const trackSponsoredImpression = rateLimitedAction
     return { success: true };
   });
 
-/**
- * Track a sponsored click
- * Called when user clicks on sponsored content
- */
 export const trackSponsoredClick = rateLimitedAction
   .metadata({
     actionName: 'trackSponsoredClick',
@@ -1111,9 +864,6 @@ export const trackSponsoredClick = rateLimitedAction
     return { success: true };
   });
 
-/**
- * Get active sponsored content for injection
- */
 export async function getActiveSponsoredContent(limit = 5) {
   const supabase = await createClient();
   const now = new Date().toISOString();

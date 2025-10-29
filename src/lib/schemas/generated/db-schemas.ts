@@ -4,176 +4,170 @@
  * ==========================================
  */
 
-import { z } from "zod";
-import { type Json } from "./../../../types/database.types";
+import { z } from 'zod';
+import type { Json } from './../../../types/database.types';
 
 export const publicAnnouncementPrioritySchema = z.union([
-  z.literal("high"),
-  z.literal("medium"),
-  z.literal("low"),
+  z.literal('high'),
+  z.literal('medium'),
+  z.literal('low'),
 ]);
 
 export const publicAnnouncementVariantSchema = z.union([
-  z.literal("default"),
-  z.literal("outline"),
-  z.literal("secondary"),
-  z.literal("destructive"),
+  z.literal('default'),
+  z.literal('outline'),
+  z.literal('secondary'),
+  z.literal('destructive'),
 ]);
 
 export const publicChangelogCategorySchema = z.union([
-  z.literal("Added"),
-  z.literal("Changed"),
-  z.literal("Deprecated"),
-  z.literal("Removed"),
-  z.literal("Fixed"),
-  z.literal("Security"),
+  z.literal('Added'),
+  z.literal('Changed'),
+  z.literal('Deprecated'),
+  z.literal('Removed'),
+  z.literal('Fixed'),
+  z.literal('Security'),
 ]);
 
 export const publicContentCategorySchema = z.union([
-  z.literal("agents"),
-  z.literal("mcp"),
-  z.literal("rules"),
-  z.literal("commands"),
-  z.literal("hooks"),
-  z.literal("statuslines"),
-  z.literal("skills"),
-  z.literal("collections"),
-  z.literal("guides"),
-  z.literal("jobs"),
-  z.literal("changelog"),
+  z.literal('agents'),
+  z.literal('mcp'),
+  z.literal('rules'),
+  z.literal('commands'),
+  z.literal('hooks'),
+  z.literal('statuslines'),
+  z.literal('skills'),
+  z.literal('collections'),
+  z.literal('guides'),
+  z.literal('jobs'),
+  z.literal('changelog'),
 ]);
 
 export const publicExperienceLevelSchema = z.union([
-  z.literal("beginner"),
-  z.literal("intermediate"),
-  z.literal("advanced"),
+  z.literal('beginner'),
+  z.literal('intermediate'),
+  z.literal('advanced'),
 ]);
 
 export const publicFieldScopeSchema = z.union([
-  z.literal("common"),
-  z.literal("type_specific"),
-  z.literal("tags"),
+  z.literal('common'),
+  z.literal('type_specific'),
+  z.literal('tags'),
 ]);
 
 export const publicFieldTypeSchema = z.union([
-  z.literal("text"),
-  z.literal("textarea"),
-  z.literal("number"),
-  z.literal("select"),
+  z.literal('text'),
+  z.literal('textarea'),
+  z.literal('number'),
+  z.literal('select'),
 ]);
 
 export const publicFocusAreaTypeSchema = z.union([
-  z.literal("security"),
-  z.literal("performance"),
-  z.literal("documentation"),
-  z.literal("testing"),
-  z.literal("code-quality"),
-  z.literal("automation"),
+  z.literal('security'),
+  z.literal('performance'),
+  z.literal('documentation'),
+  z.literal('testing'),
+  z.literal('code-quality'),
+  z.literal('automation'),
 ]);
 
 export const publicGridColumnSchema = z.union([
-  z.literal("full"),
-  z.literal("half"),
-  z.literal("third"),
-  z.literal("two-thirds"),
+  z.literal('full'),
+  z.literal('half'),
+  z.literal('third'),
+  z.literal('two-thirds'),
 ]);
 
-export const publicIconPositionSchema = z.union([
-  z.literal("left"),
-  z.literal("right"),
-]);
+export const publicIconPositionSchema = z.union([z.literal('left'), z.literal('right')]);
 
 export const publicIntegrationTypeSchema = z.union([
-  z.literal("github"),
-  z.literal("database"),
-  z.literal("cloud-aws"),
-  z.literal("cloud-gcp"),
-  z.literal("cloud-azure"),
-  z.literal("communication"),
-  z.literal("none"),
+  z.literal('github'),
+  z.literal('database'),
+  z.literal('cloud-aws'),
+  z.literal('cloud-gcp'),
+  z.literal('cloud-azure'),
+  z.literal('communication'),
+  z.literal('none'),
 ]);
 
 export const publicInteractionTypeSchema = z.union([
-  z.literal("view"),
-  z.literal("copy"),
-  z.literal("bookmark"),
-  z.literal("click"),
-  z.literal("time_spent"),
-  z.literal("search"),
-  z.literal("filter"),
+  z.literal('view'),
+  z.literal('copy'),
+  z.literal('bookmark'),
+  z.literal('click'),
+  z.literal('time_spent'),
+  z.literal('search'),
+  z.literal('filter'),
 ]);
 
 export const publicNotificationPrioritySchema = z.union([
-  z.literal("high"),
-  z.literal("medium"),
-  z.literal("low"),
+  z.literal('high'),
+  z.literal('medium'),
+  z.literal('low'),
 ]);
 
 export const publicNotificationTypeSchema = z.union([
-  z.literal("announcement"),
-  z.literal("feedback"),
+  z.literal('announcement'),
+  z.literal('feedback'),
 ]);
 
-export const publicSortDirectionSchema = z.union([
-  z.literal("asc"),
-  z.literal("desc"),
-]);
+export const publicSortDirectionSchema = z.union([z.literal('asc'), z.literal('desc')]);
 
 export const publicSortOptionSchema = z.union([
-  z.literal("relevance"),
-  z.literal("date"),
-  z.literal("popularity"),
-  z.literal("name"),
-  z.literal("updated"),
-  z.literal("created"),
-  z.literal("views"),
-  z.literal("trending"),
+  z.literal('relevance'),
+  z.literal('date'),
+  z.literal('popularity'),
+  z.literal('name'),
+  z.literal('updated'),
+  z.literal('created'),
+  z.literal('views'),
+  z.literal('trending'),
 ]);
 
 export const publicSubmissionStatusSchema = z.union([
-  z.literal("pending"),
-  z.literal("approved"),
-  z.literal("rejected"),
-  z.literal("spam"),
-  z.literal("merged"),
+  z.literal('pending'),
+  z.literal('approved'),
+  z.literal('rejected'),
+  z.literal('spam'),
+  z.literal('merged'),
 ]);
 
 export const publicSubmissionTypeSchema = z.union([
-  z.literal("agents"),
-  z.literal("mcp"),
-  z.literal("rules"),
-  z.literal("commands"),
-  z.literal("hooks"),
-  z.literal("statuslines"),
-  z.literal("skills"),
+  z.literal('agents'),
+  z.literal('mcp'),
+  z.literal('rules'),
+  z.literal('commands'),
+  z.literal('hooks'),
+  z.literal('statuslines'),
+  z.literal('skills'),
 ]);
 
 export const publicTrendingMetricSchema = z.union([
-  z.literal("views"),
-  z.literal("likes"),
-  z.literal("shares"),
-  z.literal("downloads"),
-  z.literal("all"),
+  z.literal('views'),
+  z.literal('likes'),
+  z.literal('shares'),
+  z.literal('downloads'),
+  z.literal('all'),
 ]);
 
 export const publicTrendingPeriodSchema = z.union([
-  z.literal("today"),
-  z.literal("week"),
-  z.literal("month"),
-  z.literal("year"),
-  z.literal("all"),
+  z.literal('today'),
+  z.literal('week'),
+  z.literal('month'),
+  z.literal('year'),
+  z.literal('all'),
 ]);
 
 export const publicUseCaseTypeSchema = z.union([
-  z.literal("code-review"),
-  z.literal("api-development"),
-  z.literal("frontend-development"),
-  z.literal("data-science"),
-  z.literal("content-creation"),
-  z.literal("devops-infrastructure"),
-  z.literal("general-development"),
-  z.literal("testing-qa"),
-  z.literal("security-audit"),
+  z.literal('code-review'),
+  z.literal('api-development'),
+  z.literal('frontend-development'),
+  z.literal('data-science'),
+  z.literal('content-creation'),
+  z.literal('devops-infrastructure'),
+  z.literal('general-development'),
+  z.literal('testing-qa'),
+  z.literal('security-audit'),
 ]);
 
 export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
@@ -185,7 +179,7 @@ export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
       z.record(z.string(), z.union([jsonSchema, z.undefined()])),
       z.array(jsonSchema),
     ])
-    .nullable(),
+    .nullable()
 );
 
 export const publicAffinityConfigRowSchema = z.object({
@@ -397,11 +391,11 @@ export const publicAnalyticsEventsUpdateSchema = z.object({
 
 export const publicAnalyticsEventsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("analytics_events_category_fkey"),
-    columns: z.tuple([z.literal("category")]),
+    foreignKeyName: z.literal('analytics_events_category_fkey'),
+    columns: z.tuple([z.literal('category')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("analytics_event_categories"),
-    referencedColumns: z.tuple([z.literal("name")]),
+    referencedRelation: z.literal('analytics_event_categories'),
+    referencedColumns: z.tuple([z.literal('name')]),
   }),
 ]);
 
@@ -425,11 +419,11 @@ export const publicAnnouncementDismissalsUpdateSchema = z.object({
 
 export const publicAnnouncementDismissalsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("announcement_dismissals_announcement_id_fkey"),
-    columns: z.tuple([z.literal("announcement_id")]),
+    foreignKeyName: z.literal('announcement_dismissals_announcement_id_fkey'),
+    columns: z.tuple([z.literal('announcement_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("announcements"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('announcements'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -552,32 +546,32 @@ export const publicBookmarksUpdateSchema = z.object({
 
 export const publicBookmarksRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("bookmarks_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('bookmarks_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("bookmarks_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('bookmarks_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("bookmarks_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('bookmarks_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("bookmarks_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('bookmarks_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -736,39 +730,39 @@ export const publicCollectionItemsUpdateSchema = z.object({
 
 export const publicCollectionItemsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("collection_items_collection_id_fkey"),
-    columns: z.tuple([z.literal("collection_id")]),
+    foreignKeyName: z.literal('collection_items_collection_id_fkey'),
+    columns: z.tuple([z.literal('collection_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_collections"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('user_collections'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("collection_items_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('collection_items_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("collection_items_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('collection_items_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("collection_items_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('collection_items_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("collection_items_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('collection_items_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -1011,39 +1005,39 @@ export const publicCommentsUpdateSchema = z.object({
 
 export const publicCommentsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("comments_post_id_fkey"),
-    columns: z.tuple([z.literal("post_id")]),
+    foreignKeyName: z.literal('comments_post_id_fkey'),
+    columns: z.tuple([z.literal('post_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("posts"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('posts'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("comments_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('comments_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("comments_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('comments_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("comments_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('comments_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("comments_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('comments_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -1100,32 +1094,32 @@ export const publicCompaniesUpdateSchema = z.object({
 
 export const publicCompaniesRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("companies_owner_id_fkey"),
-    columns: z.tuple([z.literal("owner_id")]),
+    foreignKeyName: z.literal('companies_owner_id_fkey'),
+    columns: z.tuple([z.literal('owner_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("companies_owner_id_fkey"),
-    columns: z.tuple([z.literal("owner_id")]),
+    foreignKeyName: z.literal('companies_owner_id_fkey'),
+    columns: z.tuple([z.literal('owner_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("companies_owner_id_fkey"),
-    columns: z.tuple([z.literal("owner_id")]),
+    foreignKeyName: z.literal('companies_owner_id_fkey'),
+    columns: z.tuple([z.literal('owner_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("companies_owner_id_fkey"),
-    columns: z.tuple([z.literal("owner_id")]),
+    foreignKeyName: z.literal('companies_owner_id_fkey'),
+    columns: z.tuple([z.literal('owner_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -1210,6 +1204,57 @@ export const publicContentItemsUpdateSchema = z.object({
   search_vector: z.unknown().optional(),
   slug: z.string().optional(),
   synced_at: z.string().optional(),
+  updated_at: z.string().optional(),
+});
+
+export const publicContentSeoOverridesRowSchema = z.object({
+  category: z.string(),
+  content_id: z.string(),
+  created_at: z.string(),
+  created_by: z.string().nullable(),
+  description: z.string().nullable(),
+  id: z.string(),
+  keywords: z.array(z.string()).nullable(),
+  notes: z.string().nullable(),
+  og_type: z.string().nullable(),
+  robots_follow: z.boolean().nullable(),
+  robots_index: z.boolean().nullable(),
+  title: z.string().nullable(),
+  twitter_card: z.string().nullable(),
+  updated_at: z.string(),
+});
+
+export const publicContentSeoOverridesInsertSchema = z.object({
+  category: z.string(),
+  content_id: z.string(),
+  created_at: z.string().optional(),
+  created_by: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  id: z.string().optional(),
+  keywords: z.array(z.string()).optional().nullable(),
+  notes: z.string().optional().nullable(),
+  og_type: z.string().optional().nullable(),
+  robots_follow: z.boolean().optional().nullable(),
+  robots_index: z.boolean().optional().nullable(),
+  title: z.string().optional().nullable(),
+  twitter_card: z.string().optional().nullable(),
+  updated_at: z.string().optional(),
+});
+
+export const publicContentSeoOverridesUpdateSchema = z.object({
+  category: z.string().optional(),
+  content_id: z.string().optional(),
+  created_at: z.string().optional(),
+  created_by: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  id: z.string().optional(),
+  keywords: z.array(z.string()).optional().nullable(),
+  notes: z.string().optional().nullable(),
+  og_type: z.string().optional().nullable(),
+  robots_follow: z.boolean().optional().nullable(),
+  robots_index: z.boolean().optional().nullable(),
+  title: z.string().optional().nullable(),
+  twitter_card: z.string().optional().nullable(),
   updated_at: z.string().optional(),
 });
 
@@ -1322,6 +1367,27 @@ export const publicContentSubmissionsUpdateSchema = z.object({
   submitter_ip: z.unknown().optional(),
   tags: z.array(z.string()).optional().nullable(),
   updated_at: z.string().optional(),
+});
+
+export const publicEmailBlocklistRowSchema = z.object({
+  created_at: z.string(),
+  email: z.string(),
+  notes: z.string().nullable(),
+  reason: z.string(),
+});
+
+export const publicEmailBlocklistInsertSchema = z.object({
+  created_at: z.string().optional(),
+  email: z.string(),
+  notes: z.string().optional().nullable(),
+  reason: z.string(),
+});
+
+export const publicEmailBlocklistUpdateSchema = z.object({
+  created_at: z.string().optional(),
+  email: z.string().optional(),
+  notes: z.string().optional().nullable(),
+  reason: z.string().optional(),
 });
 
 export const publicEmailSequenceScheduleRowSchema = z.object({
@@ -1467,60 +1533,60 @@ export const publicFollowersUpdateSchema = z.object({
 
 export const publicFollowersRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("followers_follower_id_fkey"),
-    columns: z.tuple([z.literal("follower_id")]),
+    foreignKeyName: z.literal('followers_follower_id_fkey'),
+    columns: z.tuple([z.literal('follower_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("followers_follower_id_fkey"),
-    columns: z.tuple([z.literal("follower_id")]),
+    foreignKeyName: z.literal('followers_follower_id_fkey'),
+    columns: z.tuple([z.literal('follower_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("followers_follower_id_fkey"),
-    columns: z.tuple([z.literal("follower_id")]),
+    foreignKeyName: z.literal('followers_follower_id_fkey'),
+    columns: z.tuple([z.literal('follower_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("followers_follower_id_fkey"),
-    columns: z.tuple([z.literal("follower_id")]),
+    foreignKeyName: z.literal('followers_follower_id_fkey'),
+    columns: z.tuple([z.literal('follower_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("followers_following_id_fkey"),
-    columns: z.tuple([z.literal("following_id")]),
+    foreignKeyName: z.literal('followers_following_id_fkey'),
+    columns: z.tuple([z.literal('following_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("followers_following_id_fkey"),
-    columns: z.tuple([z.literal("following_id")]),
+    foreignKeyName: z.literal('followers_following_id_fkey'),
+    columns: z.tuple([z.literal('following_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("followers_following_id_fkey"),
-    columns: z.tuple([z.literal("following_id")]),
+    foreignKeyName: z.literal('followers_following_id_fkey'),
+    columns: z.tuple([z.literal('following_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("followers_following_id_fkey"),
-    columns: z.tuple([z.literal("following_id")]),
+    foreignKeyName: z.literal('followers_following_id_fkey'),
+    columns: z.tuple([z.literal('following_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -1619,11 +1685,11 @@ export const publicFormFieldVersionsUpdateSchema = z.object({
 
 export const publicFormFieldVersionsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("form_field_versions_field_id_fkey"),
-    columns: z.tuple([z.literal("field_id")]),
+    foreignKeyName: z.literal('form_field_versions_field_id_fkey'),
+    columns: z.tuple([z.literal('field_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("form_field_definitions"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('form_field_definitions'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -1659,11 +1725,11 @@ export const publicFormSelectOptionsUpdateSchema = z.object({
 
 export const publicFormSelectOptionsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("form_select_options_field_id_fkey"),
-    columns: z.tuple([z.literal("field_id")]),
+    foreignKeyName: z.literal('form_select_options_field_id_fkey'),
+    columns: z.tuple([z.literal('field_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("form_field_definitions"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('form_field_definitions'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -1999,46 +2065,46 @@ export const publicJobsUpdateSchema = z.object({
 
 export const publicJobsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("jobs_company_id_fkey"),
-    columns: z.tuple([z.literal("company_id")]),
+    foreignKeyName: z.literal('jobs_company_id_fkey'),
+    columns: z.tuple([z.literal('company_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("companies"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('companies'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("jobs_company_id_fkey"),
-    columns: z.tuple([z.literal("company_id")]),
+    foreignKeyName: z.literal('jobs_company_id_fkey'),
+    columns: z.tuple([z.literal('company_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("company_job_stats"),
-    referencedColumns: z.tuple([z.literal("company_id")]),
+    referencedRelation: z.literal('company_job_stats'),
+    referencedColumns: z.tuple([z.literal('company_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("jobs_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('jobs_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("jobs_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('jobs_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("jobs_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('jobs_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("jobs_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('jobs_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -2174,6 +2240,42 @@ export const publicMcpUpdateSchema = z.object({
   use_cases: z.array(z.string()).optional().nullable(),
 });
 
+export const publicMetadataTemplatesRowSchema = z.object({
+  active: z.boolean().nullable(),
+  created_at: z.string(),
+  default_keywords: z.array(z.string()),
+  description_template: z.string(),
+  route_pattern: z.string(),
+  title_formulas: z.array(z.string()),
+  updated_at: z.string(),
+  use_current_month_year: z.boolean().nullable(),
+  use_current_year: z.boolean().nullable(),
+});
+
+export const publicMetadataTemplatesInsertSchema = z.object({
+  active: z.boolean().optional().nullable(),
+  created_at: z.string().optional(),
+  default_keywords: z.array(z.string()),
+  description_template: z.string(),
+  route_pattern: z.string(),
+  title_formulas: z.array(z.string()),
+  updated_at: z.string().optional(),
+  use_current_month_year: z.boolean().optional().nullable(),
+  use_current_year: z.boolean().optional().nullable(),
+});
+
+export const publicMetadataTemplatesUpdateSchema = z.object({
+  active: z.boolean().optional().nullable(),
+  created_at: z.string().optional(),
+  default_keywords: z.array(z.string()).optional(),
+  description_template: z.string().optional(),
+  route_pattern: z.string().optional(),
+  title_formulas: z.array(z.string()).optional(),
+  updated_at: z.string().optional(),
+  use_current_month_year: z.boolean().optional().nullable(),
+  use_current_year: z.boolean().optional().nullable(),
+});
+
 export const publicNewsletterSubscriptionsRowSchema = z.object({
   confirmation_token: z.string().nullable(),
   confirmed: z.boolean().nullable(),
@@ -2260,11 +2362,11 @@ export const publicNotificationDismissalsUpdateSchema = z.object({
 
 export const publicNotificationDismissalsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("notification_dismissals_notification_id_fkey"),
-    columns: z.tuple([z.literal("notification_id")]),
+    foreignKeyName: z.literal('notification_dismissals_notification_id_fkey'),
+    columns: z.tuple([z.literal('notification_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("notifications"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('notifications'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -2369,32 +2471,32 @@ export const publicPaymentsUpdateSchema = z.object({
 
 export const publicPaymentsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("payments_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('payments_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("payments_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('payments_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("payments_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('payments_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("payments_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('payments_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -2436,32 +2538,32 @@ export const publicPostsUpdateSchema = z.object({
 
 export const publicPostsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("posts_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('posts_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("posts_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('posts_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("posts_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('posts_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("posts_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('posts_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -2617,39 +2719,39 @@ export const publicReviewHelpfulVotesUpdateSchema = z.object({
 
 export const publicReviewHelpfulVotesRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("review_helpful_votes_review_id_fkey"),
-    columns: z.tuple([z.literal("review_id")]),
+    foreignKeyName: z.literal('review_helpful_votes_review_id_fkey'),
+    columns: z.tuple([z.literal('review_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("review_ratings"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('review_ratings'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("review_helpful_votes_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('review_helpful_votes_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("review_helpful_votes_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('review_helpful_votes_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("review_helpful_votes_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('review_helpful_votes_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("review_helpful_votes_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('review_helpful_votes_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -2691,32 +2793,32 @@ export const publicReviewRatingsUpdateSchema = z.object({
 
 export const publicReviewRatingsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("review_ratings_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('review_ratings_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("review_ratings_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('review_ratings_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("review_ratings_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('review_ratings_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("review_ratings_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('review_ratings_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -2814,6 +2916,27 @@ export const publicRulesUpdateSchema = z.object({
   troubleshooting: z.array(jsonSchema).optional().nullable(),
   updated_at: z.string().optional(),
   use_cases: z.array(z.string()).optional().nullable(),
+});
+
+export const publicSeoConfigRowSchema = z.object({
+  description: z.string().nullable(),
+  key: z.string(),
+  updated_at: z.string(),
+  value: jsonSchema,
+});
+
+export const publicSeoConfigInsertSchema = z.object({
+  description: z.string().optional().nullable(),
+  key: z.string(),
+  updated_at: z.string().optional(),
+  value: jsonSchema,
+});
+
+export const publicSeoConfigUpdateSchema = z.object({
+  description: z.string().optional().nullable(),
+  key: z.string().optional(),
+  updated_at: z.string().optional(),
+  value: jsonSchema.optional(),
 });
 
 export const publicSkillsRowSchema = z.object({
@@ -2935,39 +3058,39 @@ export const publicSponsoredClicksUpdateSchema = z.object({
 
 export const publicSponsoredClicksRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("sponsored_clicks_sponsored_id_fkey"),
-    columns: z.tuple([z.literal("sponsored_id")]),
+    foreignKeyName: z.literal('sponsored_clicks_sponsored_id_fkey'),
+    columns: z.tuple([z.literal('sponsored_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("sponsored_content"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('sponsored_content'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("sponsored_clicks_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('sponsored_clicks_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("sponsored_clicks_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('sponsored_clicks_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("sponsored_clicks_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('sponsored_clicks_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("sponsored_clicks_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('sponsored_clicks_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -3021,32 +3144,32 @@ export const publicSponsoredContentUpdateSchema = z.object({
 
 export const publicSponsoredContentRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("sponsored_content_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('sponsored_content_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("sponsored_content_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('sponsored_content_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("sponsored_content_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('sponsored_content_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("sponsored_content_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('sponsored_content_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -3079,39 +3202,39 @@ export const publicSponsoredImpressionsUpdateSchema = z.object({
 
 export const publicSponsoredImpressionsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("sponsored_impressions_sponsored_id_fkey"),
-    columns: z.tuple([z.literal("sponsored_id")]),
+    foreignKeyName: z.literal('sponsored_impressions_sponsored_id_fkey'),
+    columns: z.tuple([z.literal('sponsored_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("sponsored_content"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('sponsored_content'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("sponsored_impressions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('sponsored_impressions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("sponsored_impressions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('sponsored_impressions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("sponsored_impressions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('sponsored_impressions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("sponsored_impressions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('sponsored_impressions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -3217,6 +3340,81 @@ export const publicStatuslinesUpdateSchema = z.object({
   use_cases: z.array(z.string()).optional().nullable(),
 });
 
+export const publicStructuredDataConfigRowSchema = z.object({
+  active: z.boolean().nullable(),
+  application_sub_category: z.string().nullable(),
+  category: z.string(),
+  category_display_name: z.string(),
+  created_at: z.string(),
+  creative_work_description: z.string().nullable(),
+  default_keywords: z.array(z.string()).nullable(),
+  default_requirements: z.array(z.string()).nullable(),
+  generate_aggregate_rating: z.boolean().nullable(),
+  generate_application: z.boolean().nullable(),
+  generate_breadcrumb: z.boolean().nullable(),
+  generate_collection_page: z.boolean().nullable(),
+  generate_course: z.boolean().nullable(),
+  generate_creative_work: z.boolean().nullable(),
+  generate_faq: z.boolean().nullable(),
+  generate_how_to: z.boolean().nullable(),
+  generate_job_posting: z.boolean().nullable(),
+  generate_review: z.boolean().nullable(),
+  generate_source_code: z.boolean().nullable(),
+  generate_speakable: z.boolean().nullable(),
+  generate_video_object: z.boolean().nullable(),
+  updated_at: z.string(),
+});
+
+export const publicStructuredDataConfigInsertSchema = z.object({
+  active: z.boolean().optional().nullable(),
+  application_sub_category: z.string().optional().nullable(),
+  category: z.string(),
+  category_display_name: z.string(),
+  created_at: z.string().optional(),
+  creative_work_description: z.string().optional().nullable(),
+  default_keywords: z.array(z.string()).optional().nullable(),
+  default_requirements: z.array(z.string()).optional().nullable(),
+  generate_aggregate_rating: z.boolean().optional().nullable(),
+  generate_application: z.boolean().optional().nullable(),
+  generate_breadcrumb: z.boolean().optional().nullable(),
+  generate_collection_page: z.boolean().optional().nullable(),
+  generate_course: z.boolean().optional().nullable(),
+  generate_creative_work: z.boolean().optional().nullable(),
+  generate_faq: z.boolean().optional().nullable(),
+  generate_how_to: z.boolean().optional().nullable(),
+  generate_job_posting: z.boolean().optional().nullable(),
+  generate_review: z.boolean().optional().nullable(),
+  generate_source_code: z.boolean().optional().nullable(),
+  generate_speakable: z.boolean().optional().nullable(),
+  generate_video_object: z.boolean().optional().nullable(),
+  updated_at: z.string().optional(),
+});
+
+export const publicStructuredDataConfigUpdateSchema = z.object({
+  active: z.boolean().optional().nullable(),
+  application_sub_category: z.string().optional().nullable(),
+  category: z.string().optional(),
+  category_display_name: z.string().optional(),
+  created_at: z.string().optional(),
+  creative_work_description: z.string().optional().nullable(),
+  default_keywords: z.array(z.string()).optional().nullable(),
+  default_requirements: z.array(z.string()).optional().nullable(),
+  generate_aggregate_rating: z.boolean().optional().nullable(),
+  generate_application: z.boolean().optional().nullable(),
+  generate_breadcrumb: z.boolean().optional().nullable(),
+  generate_collection_page: z.boolean().optional().nullable(),
+  generate_course: z.boolean().optional().nullable(),
+  generate_creative_work: z.boolean().optional().nullable(),
+  generate_faq: z.boolean().optional().nullable(),
+  generate_how_to: z.boolean().optional().nullable(),
+  generate_job_posting: z.boolean().optional().nullable(),
+  generate_review: z.boolean().optional().nullable(),
+  generate_source_code: z.boolean().optional().nullable(),
+  generate_speakable: z.boolean().optional().nullable(),
+  generate_video_object: z.boolean().optional().nullable(),
+  updated_at: z.string().optional(),
+});
+
 export const publicSubmissionsRowSchema = z.object({
   branch_name: z.string().nullable(),
   content_name: z.string(),
@@ -3270,32 +3468,32 @@ export const publicSubmissionsUpdateSchema = z.object({
 
 export const publicSubmissionsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("submissions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('submissions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("submissions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('submissions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("submissions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('submissions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("submissions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('submissions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -3355,32 +3553,32 @@ export const publicSubscriptionsUpdateSchema = z.object({
 
 export const publicSubscriptionsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("subscriptions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('subscriptions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("subscriptions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('subscriptions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("subscriptions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('subscriptions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("subscriptions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('subscriptions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -3446,32 +3644,32 @@ export const publicUserAffinitiesUpdateSchema = z.object({
 
 export const publicUserAffinitiesRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -3504,39 +3702,39 @@ export const publicUserBadgesUpdateSchema = z.object({
 
 export const publicUserBadgesRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("user_badges_badge_id_fkey"),
-    columns: z.tuple([z.literal("badge_id")]),
+    foreignKeyName: z.literal('user_badges_badge_id_fkey'),
+    columns: z.tuple([z.literal('badge_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("badges"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('badges'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_badges_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_badges_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_badges_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_badges_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_badges_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_badges_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_badges_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_badges_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -3584,32 +3782,32 @@ export const publicUserCollectionsUpdateSchema = z.object({
 
 export const publicUserCollectionsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("user_collections_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_collections_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_collections_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_collections_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_collections_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_collections_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_collections_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_collections_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -3669,32 +3867,32 @@ export const publicUserContentUpdateSchema = z.object({
 
 export const publicUserContentRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("user_content_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_content_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_content_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_content_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_content_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_content_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_content_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_content_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -3733,32 +3931,32 @@ export const publicUserInteractionsUpdateSchema = z.object({
 
 export const publicUserInteractionsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("user_interactions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_interactions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_interactions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_interactions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_interactions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_interactions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_interactions_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_interactions_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -3821,46 +4019,46 @@ export const publicUserMcpsUpdateSchema = z.object({
 
 export const publicUserMcpsRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("user_mcps_company_id_fkey"),
-    columns: z.tuple([z.literal("company_id")]),
+    foreignKeyName: z.literal('user_mcps_company_id_fkey'),
+    columns: z.tuple([z.literal('company_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("companies"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('companies'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_mcps_company_id_fkey"),
-    columns: z.tuple([z.literal("company_id")]),
+    foreignKeyName: z.literal('user_mcps_company_id_fkey'),
+    columns: z.tuple([z.literal('company_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("company_job_stats"),
-    referencedColumns: z.tuple([z.literal("company_id")]),
+    referencedRelation: z.literal('company_job_stats'),
+    referencedColumns: z.tuple([z.literal('company_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_mcps_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_mcps_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_mcps_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_mcps_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_mcps_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_mcps_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_mcps_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_mcps_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -3893,60 +4091,60 @@ export const publicUserSimilaritiesUpdateSchema = z.object({
 
 export const publicUserSimilaritiesRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("user_similarities_user_a_id_fkey"),
-    columns: z.tuple([z.literal("user_a_id")]),
+    foreignKeyName: z.literal('user_similarities_user_a_id_fkey'),
+    columns: z.tuple([z.literal('user_a_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_similarities_user_a_id_fkey"),
-    columns: z.tuple([z.literal("user_a_id")]),
+    foreignKeyName: z.literal('user_similarities_user_a_id_fkey'),
+    columns: z.tuple([z.literal('user_a_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_similarities_user_a_id_fkey"),
-    columns: z.tuple([z.literal("user_a_id")]),
+    foreignKeyName: z.literal('user_similarities_user_a_id_fkey'),
+    columns: z.tuple([z.literal('user_a_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_similarities_user_a_id_fkey"),
-    columns: z.tuple([z.literal("user_a_id")]),
+    foreignKeyName: z.literal('user_similarities_user_a_id_fkey'),
+    columns: z.tuple([z.literal('user_a_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_similarities_user_b_id_fkey"),
-    columns: z.tuple([z.literal("user_b_id")]),
+    foreignKeyName: z.literal('user_similarities_user_b_id_fkey'),
+    columns: z.tuple([z.literal('user_b_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_similarities_user_b_id_fkey"),
-    columns: z.tuple([z.literal("user_b_id")]),
+    foreignKeyName: z.literal('user_similarities_user_b_id_fkey'),
+    columns: z.tuple([z.literal('user_b_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_similarities_user_b_id_fkey"),
-    columns: z.tuple([z.literal("user_b_id")]),
+    foreignKeyName: z.literal('user_similarities_user_b_id_fkey'),
+    columns: z.tuple([z.literal('user_b_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_similarities_user_b_id_fkey"),
-    columns: z.tuple([z.literal("user_b_id")]),
+    foreignKeyName: z.literal('user_similarities_user_b_id_fkey'),
+    columns: z.tuple([z.literal('user_b_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -4045,39 +4243,39 @@ export const publicVotesUpdateSchema = z.object({
 
 export const publicVotesRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("votes_post_id_fkey"),
-    columns: z.tuple([z.literal("post_id")]),
+    foreignKeyName: z.literal('votes_post_id_fkey'),
+    columns: z.tuple([z.literal('post_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("posts"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('posts'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("votes_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('votes_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("votes_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('votes_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("votes_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('votes_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("votes_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('votes_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -4278,32 +4476,32 @@ export const publicMvForYouFeedRowSchema = z.object({
 
 export const publicMvForYouFeedRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -4370,32 +4568,32 @@ export const publicRecommendedContentRowSchema = z.object({
 
 export const publicRecommendedContentRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -4442,32 +4640,32 @@ export const publicUserAffinityScoresRowSchema = z.object({
 
 export const publicUserAffinityScoresRelationshipsSchema = z.tuple([
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_activity_summary"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_activity_summary'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_badge_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_badge_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_stats"),
-    referencedColumns: z.tuple([z.literal("user_id")]),
+    referencedRelation: z.literal('user_stats'),
+    referencedColumns: z.tuple([z.literal('user_id')]),
   }),
   z.object({
-    foreignKeyName: z.literal("user_affinities_user_id_fkey"),
-    columns: z.tuple([z.literal("user_id")]),
+    foreignKeyName: z.literal('user_affinities_user_id_fkey'),
+    columns: z.tuple([z.literal('user_id')]),
     isOneToOne: z.literal(false),
-    referencedRelation: z.literal("users"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    referencedRelation: z.literal('users'),
+    referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
 
@@ -4505,6 +4703,15 @@ export const publicUserStatsRowSchema = z.object({
   user_id: z.string().nullable(),
 });
 
+export const publicAddBookmarkArgsSchema = z.object({
+  p_content_slug: z.string(),
+  p_content_type: z.string(),
+  p_notes: z.string().optional(),
+  p_user_id: z.string(),
+});
+
+export const publicAddBookmarkReturnsSchema = jsonSchema;
+
 export const publicAutoAwardBadgesArgsSchema = z.object({
   p_user_id: z.string(),
 });
@@ -4515,8 +4722,15 @@ export const publicAutoAwardBadgesReturnsSchema = z.array(
     badge_name: z.string(),
     badge_slug: z.string(),
     reason: z.string(),
-  }),
+  })
 );
+
+export const publicBatchAddBookmarksArgsSchema = z.object({
+  p_items: jsonSchema,
+  p_user_id: z.string(),
+});
+
+export const publicBatchAddBookmarksReturnsSchema = jsonSchema;
 
 export const publicBatchRecalculateAllReputationArgsSchema = z.never();
 
@@ -4526,7 +4740,7 @@ export const publicBatchRecalculateAllReputationReturnsSchema = z.array(
     old_score: z.number(),
     updated: z.boolean(),
     user_id: z.string(),
-  }),
+  })
 );
 
 export const publicBatchRecalculateReputationArgsSchema = z.object({
@@ -4537,7 +4751,7 @@ export const publicBatchRecalculateReputationReturnsSchema = z.array(
   z.object({
     new_reputation_score: z.number(),
     user_id: z.string(),
-  }),
+  })
 );
 
 export const publicBatchUpdateUserAffinityScoresArgsSchema = z.object({
@@ -4552,7 +4766,7 @@ export const publicBatchUpdateUserAffinityScoresReturnsSchema = z.array(
     total_affinity_count: z.number(),
     updated_count: z.number(),
     user_id: z.string(),
-  }),
+  })
 );
 
 export const publicCalculateAffinityScoreForContentArgsSchema = z.object({
@@ -4570,7 +4784,7 @@ export const publicCalculateAffinityScoreForContentReturnsSchema = z.array(
     content_type: z.string(),
     interaction_summary: jsonSchema,
     user_id: z.string(),
-  }),
+  })
 );
 
 export const publicCalculateAllUserAffinitiesArgsSchema = z.object({
@@ -4584,7 +4798,17 @@ export const publicCalculateAllUserAffinitiesReturnsSchema = z.array(
     content_slug: z.string(),
     content_type: z.string(),
     interaction_summary: jsonSchema,
-  }),
+  })
+);
+
+export const publicCalculateAndStoreWeeklyFeaturedArgsSchema = z.never();
+
+export const publicCalculateAndStoreWeeklyFeaturedReturnsSchema = z.array(
+  z.object({
+    category: z.string(),
+    duration_ms: z.number(),
+    featured_count: z.number(),
+  })
 );
 
 export const publicCalculateTagSimilarityArgsSchema = z.object({
@@ -4605,6 +4829,12 @@ export const publicCalculateUserReputationScoreArgsSchema = z.object({
 });
 
 export const publicCalculateUserReputationScoreReturnsSchema = z.number();
+
+export const publicCancelEmailSequenceArgsSchema = z.object({
+  p_email: z.string(),
+});
+
+export const publicCancelEmailSequenceReturnsSchema = z.undefined();
 
 export const publicCheckAllBadgesArgsSchema = z.object({
   target_user_id: z.string(),
@@ -4628,12 +4858,18 @@ export const publicCheckAndAwardBadgesManualReturnsSchema = z.array(
     badge_slugs: z.array(z.string()),
     badges_awarded: z.number(),
     success: z.boolean(),
-  }),
+  })
 );
 
 export const publicCleanupOldInteractionsArgsSchema = z.never();
 
 export const publicCleanupOldInteractionsReturnsSchema = z.number();
+
+export const publicEnrollInEmailSequenceArgsSchema = z.object({
+  p_email: z.string(),
+});
+
+export const publicEnrollInEmailSequenceReturnsSchema = z.undefined();
 
 export const publicEvaluateBadgeCriteriaArgsSchema = z.object({
   p_criteria: jsonSchema,
@@ -4698,8 +4934,45 @@ export const publicFilterJobsReturnsSchema = z.array(
     user_id: z.string().nullable(),
     view_count: z.number().nullable(),
     workplace: z.string().nullable(),
-  }),
+  })
 );
+
+export const publicGenerateMetadataForRouteArgsSchema = z.object({
+  p_context: jsonSchema,
+  p_route: z.string().optional(),
+  p_route_pattern: z.string(),
+});
+
+export const publicGenerateMetadataForRouteReturnsSchema = jsonSchema;
+
+export const publicGenerateSlugArgsSchema = z.object({
+  p_name: z.string(),
+});
+
+export const publicGenerateSlugReturnsSchema = z.string();
+
+export const publicGetAggregateRatingArgsSchema = z.object({
+  p_content_slug: z.string(),
+  p_content_type: z.string(),
+});
+
+export const publicGetAggregateRatingReturnsSchema = jsonSchema;
+
+export const publicGetAllContentCategoriesArgsSchema = z.never();
+
+export const publicGetAllContentCategoriesReturnsSchema = z.array(
+  z.object({
+    category: z.string(),
+  })
+);
+
+export const publicGetAllSeoConfigArgsSchema = z.never();
+
+export const publicGetAllSeoConfigReturnsSchema = jsonSchema;
+
+export const publicGetAllStructuredDataConfigsArgsSchema = z.never();
+
+export const publicGetAllStructuredDataConfigsReturnsSchema = jsonSchema;
 
 export const publicGetBookmarkCountsByCategoryArgsSchema = z.object({
   category_filter: z.string(),
@@ -4709,7 +4982,7 @@ export const publicGetBookmarkCountsByCategoryReturnsSchema = z.array(
   z.object({
     bookmark_count: z.number(),
     content_slug: z.string(),
-  }),
+  })
 );
 
 export const publicGetBulkUserStatsArgsSchema = z.object({
@@ -4727,7 +5000,7 @@ export const publicGetBulkUserStatsReturnsSchema = z.array(
     submissions: z.number(),
     user_id: z.string(),
     votes_received: z.number(),
-  }),
+  })
 );
 
 export const publicGetBulkUserStatsRealtimeArgsSchema = z.object({
@@ -4745,8 +5018,16 @@ export const publicGetBulkUserStatsRealtimeReturnsSchema = z.array(
     submissions: z.number(),
     user_id: z.string(),
     votes_received: z.number(),
-  }),
+  })
 );
+
+export const publicGetContentAffinityArgsSchema = z.object({
+  p_content_slug: z.string(),
+  p_content_type: z.string(),
+  p_user_id: z.string(),
+});
+
+export const publicGetContentAffinityReturnsSchema = z.number();
 
 export const publicGetContentWithAnalyticsArgsSchema = z.object({
   p_category: z.string().optional(),
@@ -4763,8 +5044,12 @@ export const publicGetContentWithAnalyticsReturnsSchema = z.array(
     slug: z.string(),
     title: z.string(),
     view_count: z.number(),
-  }),
+  })
 );
+
+export const publicGetDueSequenceEmailsArgsSchema = z.never();
+
+export const publicGetDueSequenceEmailsReturnsSchema = jsonSchema;
 
 export const publicGetFeaturedContentArgsSchema = z.object({
   p_category: z.string().optional(),
@@ -4789,7 +5074,7 @@ export const publicGetFeaturedContentReturnsSchema = z.array(
     total_views: z.number(),
     trending_score: z.number(),
     views_24h: z.number(),
-  }),
+  })
 );
 
 export const publicGetFormFieldsForContentTypeArgsSchema = z.object({
@@ -4812,8 +5097,14 @@ export const publicGetFormFieldsForContentTypeReturnsSchema = z.array(
     placeholder: z.string(),
     required: z.boolean(),
     select_options: jsonSchema,
-  }),
+  })
 );
+
+export const publicGetMetadataTemplateArgsSchema = z.object({
+  p_route_pattern: z.string(),
+});
+
+export const publicGetMetadataTemplateReturnsSchema = jsonSchema;
 
 export const publicGetNewContentForWeekArgsSchema = z.object({
   p_limit: z.number().optional(),
@@ -4828,8 +5119,16 @@ export const publicGetNewContentForWeekReturnsSchema = z.array(
     slug: z.string(),
     title: z.string(),
     url: z.string(),
-  }),
+  })
 );
+
+export const publicGetPersonalizedFeedArgsSchema = z.object({
+  p_category: z.string().optional(),
+  p_limit: z.number().optional(),
+  p_user_id: z.string(),
+});
+
+export const publicGetPersonalizedFeedReturnsSchema = jsonSchema;
 
 export const publicGetPopularPostsArgsSchema = z.object({
   limit_count: z.number().optional(),
@@ -4847,8 +5146,14 @@ export const publicGetPopularPostsReturnsSchema = z.array(
     updated_at: z.string(),
     user_id: z.string(),
     vote_count: z.number(),
-  }),
+  })
 );
+
+export const publicGetRecentMergedArgsSchema = z.object({
+  p_limit: z.number().optional(),
+});
+
+export const publicGetRecentMergedReturnsSchema = jsonSchema;
 
 export const publicGetRecommendationsArgsSchema = z.object({
   p_experience_level: z.string(),
@@ -4870,7 +5175,7 @@ export const publicGetRecommendationsReturnsSchema = z.array(
     slug: z.string(),
     tags: z.array(z.string()),
     title: z.string(),
-  }),
+  })
 );
 
 export const publicGetRelatedContentArgsSchema = z.object({
@@ -4894,7 +5199,7 @@ export const publicGetRelatedContentReturnsSchema = z.array(
     tags: z.array(z.string()),
     title: z.string(),
     views: z.number(),
-  }),
+  })
 );
 
 export const publicGetSearchCountArgsSchema = z.object({
@@ -4914,8 +5219,20 @@ export const publicGetSearchSuggestionsArgsSchema = z.object({
 export const publicGetSearchSuggestionsReturnsSchema = z.array(
   z.object({
     suggestion: z.string(),
-  }),
+  })
 );
+
+export const publicGetSeoConfigArgsSchema = z.object({
+  p_key: z.string(),
+});
+
+export const publicGetSeoConfigReturnsSchema = jsonSchema;
+
+export const publicGetStructuredDataConfigArgsSchema = z.object({
+  p_category: z.string(),
+});
+
+export const publicGetStructuredDataConfigReturnsSchema = jsonSchema;
 
 export const publicGetTierNameFromScoreArgsSchema = z.object({
   p_score: z.number(),
@@ -4929,6 +5246,12 @@ export const publicGetTierProgressFromScoreArgsSchema = z.object({
 
 export const publicGetTierProgressFromScoreReturnsSchema = z.number();
 
+export const publicGetTopContributorsArgsSchema = z.object({
+  p_limit: z.number().optional(),
+});
+
+export const publicGetTopContributorsReturnsSchema = jsonSchema;
+
 export const publicGetTrendingContentArgsSchema = z.object({
   p_limit: z.number().optional(),
 });
@@ -4941,7 +5264,7 @@ export const publicGetTrendingContentReturnsSchema = z.array(
     title: z.string(),
     url: z.string(),
     view_count: z.number(),
-  }),
+  })
 );
 
 export const publicGetTrendingPageArgsSchema = z.object({
@@ -4953,6 +5276,46 @@ export const publicGetTrendingPageArgsSchema = z.object({
 });
 
 export const publicGetTrendingPageReturnsSchema = jsonSchema;
+
+export const publicGetUsageRecommendationsArgsSchema = z.object({
+  p_category: z.string().optional(),
+  p_content_slug: z.string().optional(),
+  p_content_type: z.string().optional(),
+  p_limit: z.number().optional(),
+  p_trigger: z.string(),
+  p_user_id: z.string(),
+});
+
+export const publicGetUsageRecommendationsReturnsSchema = jsonSchema;
+
+export const publicGetUserActivityTimelineArgsSchema = z.object({
+  p_limit: z.number().optional(),
+  p_offset: z.number().optional(),
+  p_type: z.string().optional(),
+  p_user_id: z.string(),
+});
+
+export const publicGetUserActivityTimelineReturnsSchema = jsonSchema;
+
+export const publicGetUserFavoriteCategoriesArgsSchema = z.object({
+  p_limit: z.number().optional(),
+  p_user_id: z.string(),
+});
+
+export const publicGetUserFavoriteCategoriesReturnsSchema = z.array(z.string());
+
+export const publicGetUserInteractionSummaryArgsSchema = z.object({
+  p_user_id: z.string(),
+});
+
+export const publicGetUserInteractionSummaryReturnsSchema = jsonSchema;
+
+export const publicGetUserRecentInteractionsArgsSchema = z.object({
+  p_limit: z.number().optional(),
+  p_user_id: z.string(),
+});
+
+export const publicGetUserRecentInteractionsReturnsSchema = jsonSchema;
 
 export const publicGetUserReputationBreakdownArgsSchema = z.object({
   p_user_id: z.string(),
@@ -4966,6 +5329,20 @@ export const publicGetWeeklyDigestArgsSchema = z.object({
 
 export const publicGetWeeklyDigestReturnsSchema = jsonSchema;
 
+export const publicHandleWebhookBounceArgsSchema = z.object({
+  p_event_data: jsonSchema,
+  p_webhook_id: z.string(),
+});
+
+export const publicHandleWebhookBounceReturnsSchema = z.undefined();
+
+export const publicHandleWebhookComplaintArgsSchema = z.object({
+  p_event_data: jsonSchema,
+  p_webhook_id: z.string(),
+});
+
+export const publicHandleWebhookComplaintReturnsSchema = z.undefined();
+
 export const publicIncrementArgsSchema = z.object({
   column_name: z.string(),
   increment_by: z.number().optional(),
@@ -4975,12 +5352,29 @@ export const publicIncrementArgsSchema = z.object({
 
 export const publicIncrementReturnsSchema = z.undefined();
 
+export const publicIsBookmarkedArgsSchema = z.object({
+  p_content_slug: z.string(),
+  p_content_type: z.string(),
+  p_user_id: z.string(),
+});
+
+export const publicIsBookmarkedReturnsSchema = z.boolean();
+
 export const publicIsFollowingArgsSchema = z.object({
   follower_id: z.string(),
   following_id: z.string(),
 });
 
 export const publicIsFollowingReturnsSchema = z.boolean();
+
+export const publicMarkSequenceEmailProcessedArgsSchema = z.object({
+  p_email: z.string(),
+  p_schedule_id: z.string(),
+  p_step: z.number(),
+  p_success: z.boolean().optional(),
+});
+
+export const publicMarkSequenceEmailProcessedReturnsSchema = z.undefined();
 
 export const publicRefreshContentPopularityArgsSchema = z.never();
 
@@ -4990,7 +5384,7 @@ export const publicRefreshContentPopularityReturnsSchema = z.array(
     message: z.string(),
     rows_refreshed: z.number(),
     success: z.boolean(),
-  }),
+  })
 );
 
 export const publicRefreshProfileFromOauthArgsSchema = z.object({
@@ -5008,7 +5402,7 @@ export const publicRefreshUserStatReturnsSchema = z.array(
     message: z.string(),
     success: z.boolean(),
     user_id: z.string(),
-  }),
+  })
 );
 
 export const publicRefreshUserStatsArgsSchema = z.never();
@@ -5019,8 +5413,23 @@ export const publicRefreshUserStatsReturnsSchema = z.array(
     message: z.string(),
     rows_refreshed: z.number(),
     success: z.boolean(),
-  }),
+  })
 );
+
+export const publicRemoveBookmarkArgsSchema = z.object({
+  p_content_slug: z.string(),
+  p_content_type: z.string(),
+  p_user_id: z.string(),
+});
+
+export const publicRemoveBookmarkReturnsSchema = jsonSchema;
+
+export const publicScheduleNextSequenceStepArgsSchema = z.object({
+  p_current_step: z.number(),
+  p_email: z.string(),
+});
+
+export const publicScheduleNextSequenceStepReturnsSchema = z.undefined();
 
 export const publicSearchByPopularityArgsSchema = z.object({
   p_authors: z.array(z.string()).optional(),
@@ -5055,7 +5464,7 @@ export const publicSearchByPopularityReturnsSchema = z.array(
     updated_at: z.string(),
     use_cases: jsonSchema,
     view_count: z.number(),
-  }),
+  })
 );
 
 export const publicSearchCompaniesArgsSchema = z.object({
@@ -5079,7 +5488,7 @@ export const publicSearchCompaniesReturnsSchema = z.array(
     updated_at: z.string(),
     using_cursor_since: z.string().nullable(),
     website: z.string().nullable(),
-  }),
+  })
 );
 
 export const publicSearchContentOptimizedArgsSchema = z.object({
@@ -5117,7 +5526,7 @@ export const publicSearchContentOptimizedReturnsSchema = z.array(
     updated_at: z.string(),
     use_cases: jsonSchema,
     view_count: z.number(),
-  }),
+  })
 );
 
 export const publicSearchJobsArgsSchema = z.object({
@@ -5165,7 +5574,7 @@ export const publicSearchJobsReturnsSchema = z.array(
     user_id: z.string().nullable(),
     view_count: z.number().nullable(),
     workplace: z.string().nullable(),
-  }),
+  })
 );
 
 export const publicSearchUsersArgsSchema = z.object({
@@ -5196,7 +5605,7 @@ export const publicSearchUsersReturnsSchema = z.array(
     updated_at: z.string(),
     website: z.string().nullable(),
     work: z.string().nullable(),
-  }),
+  })
 );
 
 export const publicShowLimitArgsSchema = z.never();
@@ -5204,13 +5613,37 @@ export const publicShowLimitArgsSchema = z.never();
 export const publicShowLimitReturnsSchema = z.number();
 
 export const publicShowTrgmArgsSchema = z.object({
-  "": z.string(),
+  '': z.string(),
 });
 
 export const publicShowTrgmReturnsSchema = z.array(z.string());
 
+export const publicToggleFollowArgsSchema = z.object({
+  p_action: z.string(),
+  p_follower_id: z.string(),
+  p_following_id: z.string(),
+});
+
+export const publicToggleFollowReturnsSchema = jsonSchema;
+
+export const publicTogglePostVoteArgsSchema = z.object({
+  p_action: z.string(),
+  p_post_id: z.string(),
+  p_user_id: z.string(),
+});
+
+export const publicTogglePostVoteReturnsSchema = jsonSchema;
+
+export const publicToggleReviewHelpfulArgsSchema = z.object({
+  p_helpful: z.boolean(),
+  p_review_id: z.string(),
+  p_user_id: z.string(),
+});
+
+export const publicToggleReviewHelpfulReturnsSchema = jsonSchema;
+
 export const publicUnaccentArgsSchema = z.object({
-  "": z.string(),
+  '': z.string(),
 });
 
 export const publicUnaccentReturnsSchema = z.string();
@@ -5224,5 +5657,19 @@ export const publicUpdateUserAffinityScoresReturnsSchema = z.array(
     inserted_count: z.number(),
     total_affinity_count: z.number(),
     updated_count: z.number(),
-  }),
+  })
 );
+
+export const publicUpdateUserProfileArgsSchema = z.object({
+  p_bio: z.string().optional(),
+  p_display_name: z.string().optional(),
+  p_follow_email: z.boolean().optional(),
+  p_interests: z.array(z.string()).optional(),
+  p_profile_public: z.boolean().optional(),
+  p_social_x_link: z.string().optional(),
+  p_user_id: z.string(),
+  p_website: z.string().optional(),
+  p_work: z.string().optional(),
+});
+
+export const publicUpdateUserProfileReturnsSchema = jsonSchema;

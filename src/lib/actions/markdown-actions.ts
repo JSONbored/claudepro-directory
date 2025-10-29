@@ -1,17 +1,6 @@
 /**
- * Markdown Export Server Actions
- *
- * Type-safe server actions for markdown content export functionality.
- * Provides copy and download capabilities for content items.
- *
- * October 2025 Production Standards:
- * - next-safe-action for type safety and validation
- * - Rate limiting: 50 requests per 60 seconds per IP
- * - Database caching for performance
- * - Comprehensive logging and error handling
- * - Analytics-ready action tracking
- *
- * @module lib/actions/markdown-actions
+ * Markdown Export Actions - Database-First Architecture
+ * Generates markdown from database content for copy/download. Rate limited.
  */
 
 'use server';
@@ -22,9 +11,6 @@ import { getContentBySlug } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { rateLimitedAction } from './safe-action';
 
-/**
- * Schema for markdown export request
- */
 const markdownExportSchema = z.object({
   category: z
     .string()
@@ -36,9 +22,6 @@ const markdownExportSchema = z.object({
   includeFooter: z.boolean().default(true).describe('Include attribution footer'),
 });
 
-/**
- * Schema for markdown export response
- */
 const markdownExportResponseSchema = z.object({
   success: z.boolean(),
   markdown: z.string().optional(),
@@ -50,10 +33,6 @@ const markdownExportResponseSchema = z.object({
 export type MarkdownExportInput = z.infer<typeof markdownExportSchema>;
 export type MarkdownExportResponse = z.infer<typeof markdownExportResponseSchema>;
 
-/**
- * Generate markdown content from content item
- * Internal utility function used by both copy and download actions
- */
 function generateMarkdownContent(
   item: {
     slug: string;
@@ -178,24 +157,6 @@ function generateMarkdownContent(
   return sections.join('\n');
 }
 
-/**
- * Copy Markdown Action
- *
- * Returns markdown content for clipboard copy functionality.
- * Rate limited to 50 requests per 60 seconds per IP.
- *
- * @example
- * ```tsx
- * const { execute, status } = useAction(copyMarkdownAction);
- *
- * const handleCopy = async () => {
- *   const result = await execute({ category: 'agents', slug: 'api-builder' });
- *   if (result?.data?.success) {
- *     await navigator.clipboard.writeText(result.data.markdown);
- *   }
- * };
- * ```
- */
 export const copyMarkdownAction = rateLimitedAction
   .metadata({
     actionName: 'copyMarkdown',
@@ -241,30 +202,6 @@ export const copyMarkdownAction = rateLimitedAction
     }
   );
 
-/**
- * Download Markdown Action
- *
- * Returns markdown content optimized for file download.
- * Includes full metadata and attribution.
- * Rate limited to 30 requests per 60 seconds per IP.
- *
- * @example
- * ```tsx
- * const { execute, status } = useAction(downloadMarkdownAction);
- *
- * const handleDownload = async () => {
- *   const result = await execute({ category: 'agents', slug: 'api-builder' });
- *   if (result?.data?.success) {
- *     const blob = new Blob([result.data.markdown], { type: 'text/markdown' });
- *     const url = URL.createObjectURL(blob);
- *     const a = document.createElement('a');
- *     a.href = url;
- *     a.download = result.data.filename;
- *     a.click();
- *   }
- * };
- * ```
- */
 export const downloadMarkdownAction = rateLimitedAction
   .metadata({
     actionName: 'downloadMarkdown',

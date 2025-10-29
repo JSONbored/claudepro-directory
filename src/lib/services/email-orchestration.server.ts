@@ -1,36 +1,13 @@
 /**
- * Email Orchestration Service
- * SHA-3151: Unified email subscription orchestration (374 LOC reduction)
- *
- * Consolidates duplicated email subscription logic from:
- * - newsletter-signup.ts (145 LOC)
- * - email-capture.ts (178 LOC)
- *
- * Central orchestration for:
- * 1. Email subscription via Resend
- * 2. Welcome email sending
- * 3. Email sequence enrollment
- * 4. Error handling & logging
- * 5. Analytics event generation
- *
- * Production Standards:
- * - Type-safe with Zod validation
- * - Non-blocking async operations
- * - Comprehensive error boundaries
- * - Idempotent operations
- * - Fire-and-forget for non-critical tasks
- *
- * @module lib/services/email-orchestration.service
+ * Email Orchestration Service - Database-First Architecture
+ * Handles subscription via Resend, welcome email, sequence enrollment. Non-blocking async.
  */
 
 import { NewsletterWelcome } from '@/src/emails/templates/newsletter-welcome';
 import { logger } from '@/src/lib/logger';
-import { emailSequenceService } from '@/src/lib/services/email-sequence.server';
+import { enrollInSequence } from '@/src/lib/services/email-sequence.server';
 import { resendService } from '@/src/lib/services/resend.server';
 
-/**
- * Email subscription metadata
- */
 export interface EmailSubscriptionMetadata {
   source?: string;
   referrer?: string;
@@ -39,52 +16,25 @@ export interface EmailSubscriptionMetadata {
   copySlug?: string;
 }
 
-/**
- * Email subscription result
- */
 export interface EmailSubscriptionResult {
   success: boolean;
   message: string;
   contactId?: string;
   error?: string;
   analytics?: {
-    event: EventName;
+    event: string;
     [key: string]: string | undefined;
   };
 }
 
-/**
- * Email orchestration configuration
- */
 interface EmailOrchestrationConfig {
-  /** Email address to subscribe */
   email: string;
-  /** Subscription metadata */
   metadata: EmailSubscriptionMetadata;
-  /** Whether to include copy-specific analytics */
   includeCopyAnalytics?: boolean;
-  /** Log message suffix for debugging */
   logContext?: string;
 }
 
-/**
- * EmailOrchestrationService class
- *
- * Singleton service for orchestrating email subscription workflows.
- */
 class EmailOrchestrationService {
-  /**
-   * Subscribe user to newsletter with full orchestration
-   *
-   * Handles:
-   * 1. Subscription via Resend
-   * 2. Welcome email sending (async, non-blocking)
-   * 3. Email sequence enrollment (async, non-blocking)
-   * 4. Analytics event generation
-   *
-   * @param config - Orchestration configuration
-   * @returns Promise resolving to subscription result
-   */
   async subscribeWithOrchestration(
     config: EmailOrchestrationConfig
   ): Promise<EmailSubscriptionResult> {
@@ -153,19 +103,6 @@ class EmailOrchestrationService {
     };
   }
 
-  /**
-   * Orchestrate post-subscription tasks (async, non-blocking)
-   *
-   * Handles:
-   * 1. Welcome email sending
-   * 2. Email sequence enrollment
-   *
-   * Uses async IIFE with comprehensive error handling to ensure
-   * no unhandled promise rejections.
-   *
-   * @param params - Orchestration parameters
-   * @private
-   */
   private orchestratePostSubscription(params: {
     email: string;
     source?: string;
@@ -200,7 +137,7 @@ class EmailOrchestrationService {
 
           // Enroll in onboarding sequence
           try {
-            await emailSequenceService.enrollInSequence(email);
+            await enrollInSequence(email);
           } catch (seqError) {
             logger.error(
               `Failed to enroll in sequence${logContext}`,
@@ -238,13 +175,6 @@ class EmailOrchestrationService {
     });
   }
 
-  /**
-   * Build analytics event based on subscription context
-   *
-   * @param params - Analytics event parameters
-   * @returns Analytics event object or undefined if no event
-   * @private
-   */
   private buildAnalyticsEvent(params: {
     includeCopyAnalytics: boolean;
     contactId?: string;
@@ -285,7 +215,4 @@ class EmailOrchestrationService {
   }
 }
 
-/**
- * Singleton instance
- */
 export const emailOrchestrationService = new EmailOrchestrationService();

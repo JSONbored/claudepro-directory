@@ -17,7 +17,6 @@
 import { z } from 'zod';
 import {
   publicContentSimilaritiesRowSchema,
-  publicUserAffinitiesInsertSchema,
   publicUserAffinitiesRowSchema,
   publicUserInteractionsInsertSchema,
   publicUserInteractionsRowSchema,
