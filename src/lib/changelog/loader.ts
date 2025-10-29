@@ -1,12 +1,32 @@
 /**
- * Changelog Loader - Database-First (zero caching ceremony)
+ * Changelog Loader - Database-First Architecture
+ * Calls get_changelog_entries() RPC - all enrichment in PostgreSQL.
  */
 
+import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
-import type { Tables } from '@/src/types/database.types';
+import type { Json, Tables } from '@/src/types/database.types';
 
-type ChangelogEntryRow = Tables<'changelog_entries'>;
+// Zod schema for changelog entry changes structure (JSONB validation)
+const changeItemSchema = z.object({
+  content: z.string(),
+});
+
+const changesSchema = z.object({
+  Added: z.array(changeItemSchema).optional(),
+  Changed: z.array(changeItemSchema).optional(),
+  Fixed: z.array(changeItemSchema).optional(),
+  Removed: z.array(changeItemSchema).optional(),
+  Deprecated: z.array(changeItemSchema).optional(),
+  Security: z.array(changeItemSchema).optional(),
+});
+
+// Use database type directly - no custom extensions
+export type ChangelogEntry = Tables<'changelog_entries'>;
+
+// Validated changes type (for runtime use after parsing)
+export type ChangelogChanges = z.infer<typeof changesSchema>;
 
 export type ChangelogCategory =
   | 'Added'
@@ -16,182 +36,58 @@ export type ChangelogCategory =
   | 'Fixed'
   | 'Security';
 
-export interface ChangelogEntry {
-  date: string;
-  title: string;
-  slug: string;
-  tldr?: string;
-  categories: {
-    Added: Array<{ content: string }>;
-    Changed: Array<{ content: string }>;
-    Deprecated: Array<{ content: string }>;
-    Removed: Array<{ content: string }>;
-    Fixed: Array<{ content: string }>;
-    Security: Array<{ content: string }>;
-  };
-  content: string;
-  rawContent: string;
-  description?: string;
-  keywords?: string[];
-  published: boolean;
-  featured: boolean;
-  [key: string]: unknown;
-}
-
-export interface ChangelogMetadata {
-  totalEntries: number;
-  latestEntry?: ChangelogEntry;
-  dateRange?: {
-    earliest: string;
-    latest: string;
-  };
-  categoryCounts: {
-    Added: number;
-    Changed: number;
-    Deprecated: number;
-    Removed: number;
-    Fixed: number;
-    Security: number;
-  };
-}
-
-export interface ParsedChangelog {
-  entries: ChangelogEntry[];
-  metadata: ChangelogMetadata;
-}
-
-function transformRow(row: ChangelogEntryRow): ChangelogEntry {
-  const changes = row.changes as {
-    Added?: Array<{ content: string }>;
-    Changed?: Array<{ content: string }>;
-    Deprecated?: Array<{ content: string }>;
-    Removed?: Array<{ content: string }>;
-    Fixed?: Array<{ content: string }>;
-    Security?: Array<{ content: string }>;
-  };
-
-  return {
-    date: row.release_date,
-    title: row.title,
-    slug: row.slug,
-    tldr: row.tldr || undefined,
-    categories: {
-      Added: changes.Added || [],
-      Changed: changes.Changed || [],
-      Deprecated: changes.Deprecated || [],
-      Removed: changes.Removed || [],
-      Fixed: changes.Fixed || [],
-      Security: changes.Security || [],
-    },
-    content: row.content,
-    rawContent: row.raw_content,
-    description: row.description || undefined,
-    keywords: row.keywords || undefined,
-    published: row.published,
-    featured: row.featured,
-  };
-}
-
-export async function getChangelog(): Promise<ParsedChangelog> {
+// Helper to safely parse changes JSONB field
+export function parseChangelogChanges(changes: unknown): ChangelogChanges {
   try {
-    const supabase = await createClient();
-
-    const { data: rows, error } = await supabase
-      .from('changelog_entries')
-      .select('*')
-      .eq('published', true)
-      .order('release_date', { ascending: false });
-
-    if (error) throw error;
-    if (!rows || rows.length === 0) {
-      return {
-        entries: [],
-        metadata: {
-          totalEntries: 0,
-          latestEntry: undefined,
-          dateRange: undefined,
-          categoryCounts: {
-            Added: 0,
-            Changed: 0,
-            Deprecated: 0,
-            Removed: 0,
-            Fixed: 0,
-            Security: 0,
-          },
-        },
-      };
-    }
-
-    const entries = rows.map(transformRow);
-
-    const categoryCounts = {
-      Added: 0,
-      Changed: 0,
-      Deprecated: 0,
-      Removed: 0,
-      Fixed: 0,
-      Security: 0,
-    };
-
-    for (const entry of entries) {
-      if (entry.categories.Added.length > 0) categoryCounts.Added++;
-      if (entry.categories.Changed.length > 0) categoryCounts.Changed++;
-      if (entry.categories.Deprecated.length > 0) categoryCounts.Deprecated++;
-      if (entry.categories.Removed.length > 0) categoryCounts.Removed++;
-      if (entry.categories.Fixed.length > 0) categoryCounts.Fixed++;
-      if (entry.categories.Security.length > 0) categoryCounts.Security++;
-    }
-
-    const metadata: ChangelogMetadata = {
-      totalEntries: entries.length,
-      latestEntry: entries[0],
-      dateRange: {
-        earliest: entries[entries.length - 1].date,
-        latest: entries[0].date,
-      },
-      categoryCounts,
-    };
-
-    return { entries, metadata };
+    return changesSchema.parse(changes);
   } catch (error) {
     logger.error(
-      'Failed to load full changelog',
+      'Failed to parse changelog changes',
       error instanceof Error ? error : new Error(String(error))
     );
+    return {}; // Return empty object if parsing fails
+  }
+}
 
-    // Return empty changelog as fallback
-    return {
-      entries: [],
-      metadata: {
-        totalEntries: 0,
-        latestEntry: undefined,
-        dateRange: undefined,
-        categoryCounts: {
-          Added: 0,
-          Changed: 0,
-          Deprecated: 0,
-          Removed: 0,
-          Fixed: 0,
-          Security: 0,
-        },
-      },
+export async function getChangelog() {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc('get_changelog_entries', {
+      p_published_only: true,
+      p_limit: 1000,
+    });
+
+    if (error) throw error;
+
+    const result = data as {
+      entries: ChangelogEntry[];
+      total: number;
+      limit: number;
+      offset: number;
+      hasMore: boolean;
     };
+    return result;
+  } catch (error) {
+    logger.error(
+      'Failed to load changelog',
+      error instanceof Error ? error : new Error(String(error))
+    );
+    return { entries: [], total: 0, limit: 1000, offset: 0, hasMore: false };
   }
 }
 
 export async function getAllChangelogEntries(): Promise<ChangelogEntry[]> {
   try {
     const supabase = await createClient();
-
-    const { data: rows, error } = await supabase
-      .from('changelog_entries')
-      .select('*')
-      .eq('published', true)
-      .order('release_date', { ascending: false });
+    const { data, error } = await supabase.rpc('get_changelog_entries', {
+      p_published_only: false,
+      p_limit: 10000,
+    });
 
     if (error) throw error;
 
-    return rows ? rows.map(transformRow) : [];
+    const result = data as { entries: ChangelogEntry[] };
+    return result.entries || [];
   } catch (error) {
     logger.error(
       'Failed to load changelog entries',
@@ -201,48 +97,36 @@ export async function getAllChangelogEntries(): Promise<ChangelogEntry[]> {
   }
 }
 
-export async function getChangelogEntryBySlug(slug: string): Promise<ChangelogEntry | undefined> {
+export async function getChangelogEntryBySlug(slug: string): Promise<ChangelogEntry | null> {
   try {
     const supabase = await createClient();
+    const { data, error } = await supabase.rpc('get_changelog_entry_by_slug', {
+      p_slug: slug,
+    });
 
-    const { data: row, error } = await supabase
-      .from('changelog_entries')
-      .select('*')
-      .eq('slug', slug)
-      .eq('published', true)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return undefined;
-      }
-      throw error;
-    }
-
-    return row ? transformRow(row) : undefined;
+    if (error) throw error;
+    return (data as ChangelogEntry) || null;
   } catch (error) {
     logger.error(
       `Failed to load changelog entry: ${slug}`,
       error instanceof Error ? error : new Error(String(error))
     );
-    return undefined;
+    return null;
   }
 }
 
 export async function getRecentChangelogEntries(limit = 5): Promise<ChangelogEntry[]> {
   try {
     const supabase = await createClient();
-
-    const { data: rows, error } = await supabase
-      .from('changelog_entries')
-      .select('*')
-      .eq('published', true)
-      .order('release_date', { ascending: false })
-      .limit(limit);
+    const { data, error } = await supabase.rpc('get_changelog_entries', {
+      p_published_only: true,
+      p_limit: limit,
+    });
 
     if (error) throw error;
 
-    return rows ? rows.map(transformRow) : [];
+    const result = data as { entries: ChangelogEntry[] };
+    return result.entries || [];
   } catch (error) {
     logger.error(
       `Failed to load recent changelog entries (limit: ${limit})`,
@@ -252,23 +136,19 @@ export async function getRecentChangelogEntries(limit = 5): Promise<ChangelogEnt
   }
 }
 
-export async function getChangelogEntriesByCategory(
-  category: 'Added' | 'Changed' | 'Deprecated' | 'Removed' | 'Fixed' | 'Security'
-): Promise<ChangelogEntry[]> {
+export async function getChangelogEntriesByCategory(category: string): Promise<ChangelogEntry[]> {
   try {
     const supabase = await createClient();
-
-    const { data: rows, error } = await supabase
-      .from('changelog_entries')
-      .select('*')
-      .eq('published', true)
-      .filter('changes', 'cs', `{"${category}": []}`)
-      .order('release_date', { ascending: false });
+    const { data, error } = await supabase.rpc('get_changelog_entries', {
+      p_category: category,
+      p_published_only: true,
+      p_limit: 1000,
+    });
 
     if (error) throw error;
 
-    const entries = rows ? rows.map(transformRow) : [];
-    return entries.filter((entry) => entry.categories[category].length > 0);
+    const result = data as { entries: ChangelogEntry[] };
+    return result.entries || [];
   } catch (error) {
     logger.error(
       `Failed to filter changelog entries by category: ${category}`,
@@ -281,23 +161,37 @@ export async function getChangelogEntriesByCategory(
 export async function getFeaturedChangelogEntries(limit = 3): Promise<ChangelogEntry[]> {
   try {
     const supabase = await createClient();
-
-    const { data: rows, error } = await supabase
-      .from('changelog_entries')
-      .select('*')
-      .eq('published', true)
-      .eq('featured', true)
-      .order('release_date', { ascending: false })
-      .limit(limit);
+    const { data, error } = await supabase.rpc('get_changelog_entries', {
+      p_published_only: true,
+      p_featured_only: true,
+      p_limit: limit,
+    });
 
     if (error) throw error;
 
-    return rows ? rows.map(transformRow) : [];
+    const result = data as { entries: ChangelogEntry[] };
+    return result.entries || [];
   } catch (error) {
     logger.error(
       `Failed to load featured changelog entries (limit: ${limit})`,
       error instanceof Error ? error : new Error(String(error))
     );
     return [];
+  }
+}
+
+export async function getChangelogMetadata() {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc('get_changelog_metadata');
+
+    if (error) throw error;
+    return data as Json;
+  } catch (error) {
+    logger.error(
+      'Failed to load changelog metadata',
+      error instanceof Error ? error : new Error(String(error))
+    );
+    return null;
   }
 }

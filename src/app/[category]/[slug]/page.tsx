@@ -110,7 +110,7 @@ export async function generateMetadata({
 
   return generatePageMetadata('/:category/:slug', {
     params: { category, slug },
-    item: itemMeta || undefined,
+    item: itemMeta as any,
     categoryConfig: config || undefined,
     category,
     slug,
@@ -238,7 +238,7 @@ export default async function DetailPage({
             },
           ]}
         />
-        <CollectionDetailView collection={fullItem} />
+        <CollectionDetailView collection={fullItem as any} />
       </>
     );
   }

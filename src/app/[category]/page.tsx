@@ -44,7 +44,6 @@ import { isValidCategory, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/cat
 import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 
 /**
  * ISR revalidation interval for category listing pages
@@ -159,48 +158,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     notFound();
   }
 
-  // Load content for this category
-  const itemsData = await getContentByCategory(category);
-
-  const supabase = await createClient();
-  const { data: analyticsData } = await supabase
-    .from('mv_analytics_summary')
-    .select('category, slug, view_count, copy_count')
-    .eq('category', category)
-    .returns<
-      Array<{
-        category: string | null;
-        slug: string | null;
-        view_count: number | null;
-        copy_count: number | null;
-      }>
-    >();
-
-  const analyticsMap = new Map<string, { viewCount: number; copyCount: number }>();
-  if (analyticsData) {
-    for (const row of analyticsData) {
-      if (row.category && row.slug) {
-        analyticsMap.set(`${row.category}:${row.slug}`, {
-          viewCount: row.view_count ?? 0,
-          copyCount: row.copy_count ?? 0,
-        });
-      }
-    }
-  }
-
-  // Merge analytics with items
-  const items = itemsData.map((item) => {
-    const analytics = analyticsMap.get(`${category}:${item.slug}`) ?? {
-      viewCount: 0,
-      copyCount: 0,
-    };
-    return {
-      ...item,
-      category,
-      viewCount: analytics.viewCount,
-      copyCount: analytics.copyCount,
-    };
-  });
+  // Load content for this category (enriched with analytics, sponsorship, etc.)
+  const items = await getContentByCategory(category);
 
   // Process badges (handle dynamic count badges)
   const badges = config.listPage.badges.map((badge) => {
@@ -226,7 +185,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
       description={config.description}
       icon={config.icon.displayName?.toLowerCase() || 'sparkles'}
       items={items}
-      type={category} // MODERNIZATION: No cast needed - category already CategoryId from route params
+      type={category}
       searchPlaceholder={config.listPage.searchPlaceholder}
       badges={badges}
     />

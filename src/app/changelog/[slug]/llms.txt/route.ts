@@ -27,7 +27,11 @@
  */
 
 import { NextResponse } from 'next/server';
-import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
+import {
+  getAllChangelogEntries,
+  getChangelogEntryBySlug,
+  parseChangelogChanges,
+} from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
@@ -91,13 +95,16 @@ export async function GET(
 > ${APP_CONFIG.name} Changelog Entry
 
 URL: ${entryUrl}
-Date: ${formatChangelogDate(entry.date)}
+Date: ${formatChangelogDate(entry.release_date)}
 Slug: ${entry.slug}
 ${entry.tldr ? `\nSummary: ${entry.tldr}` : ''}
 
 ---
 
 `;
+
+    // Parse changes JSONB field with type safety
+    const changes = parseChangelogChanges(entry.changes);
 
     // Add category sections with items
     const categoryOrder = [
@@ -110,8 +117,8 @@ ${entry.tldr ? `\nSummary: ${entry.tldr}` : ''}
     ] as const;
 
     for (const categoryName of categoryOrder) {
-      const items = entry.categories[categoryName];
-      if (items.length > 0) {
+      const items = changes[categoryName];
+      if (items && items.length > 0) {
         llmsTxt += `## ${categoryName}\n\n`;
         for (const item of items) {
           llmsTxt += `- ${item.content}\n`;
@@ -130,7 +137,7 @@ ${entry.content}
 ## Metadata
 
 - **Platform:** ${APP_CONFIG.name}
-- **Date:** ${entry.date}
+- **Date:** ${entry.release_date}
 - **Permanent URL:** ${entryUrl}
 - **Format:** Keep a Changelog 1.0.0
 - **License:** ${APP_CONFIG.license}

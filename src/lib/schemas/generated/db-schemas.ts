@@ -20,6 +20,14 @@ export const publicAnnouncementVariantSchema = z.union([
   z.literal('destructive'),
 ]);
 
+export const publicBadgeRaritySchema = z.union([
+  z.literal('common'),
+  z.literal('uncommon'),
+  z.literal('rare'),
+  z.literal('epic'),
+  z.literal('legendary'),
+]);
+
 export const publicChangelogCategorySchema = z.union([
   z.literal('Added'),
   z.literal('Changed'),
@@ -70,6 +78,22 @@ export const publicFocusAreaTypeSchema = z.union([
   z.literal('code-quality'),
   z.literal('automation'),
 ]);
+
+export const publicFormFieldTypeSchema = z.union([
+  z.literal('text'),
+  z.literal('textarea'),
+  z.literal('number'),
+  z.literal('select'),
+]);
+
+export const publicFormGridColumnSchema = z.union([
+  z.literal('full'),
+  z.literal('half'),
+  z.literal('third'),
+  z.literal('two-thirds'),
+]);
+
+export const publicFormIconPositionSchema = z.union([z.literal('left'), z.literal('right')]);
 
 export const publicGridColumnSchema = z.union([
   z.literal('full'),
@@ -485,6 +509,7 @@ export const publicBadgesRowSchema = z.object({
   id: z.string(),
   name: z.string(),
   order: z.number().nullable(),
+  rarity: publicBadgeRaritySchema,
   slug: z.string(),
   tier_required: z.string().nullable(),
 });
@@ -499,6 +524,7 @@ export const publicBadgesInsertSchema = z.object({
   id: z.string().optional(),
   name: z.string(),
   order: z.number().optional().nullable(),
+  rarity: publicBadgeRaritySchema.optional(),
   slug: z.string(),
   tier_required: z.string().optional().nullable(),
 });
@@ -513,6 +539,7 @@ export const publicBadgesUpdateSchema = z.object({
   id: z.string().optional(),
   name: z.string().optional(),
   order: z.number().optional().nullable(),
+  rarity: publicBadgeRaritySchema.optional(),
   slug: z.string().optional(),
   tier_required: z.string().optional().nullable(),
 });
@@ -574,6 +601,78 @@ export const publicBookmarksRelationshipsSchema = z.tuple([
     referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
+
+export const publicCategoryConfigsRowSchema = z.object({
+  category: publicContentCategorySchema,
+  color_scheme: z.string(),
+  config_format: z.string().nullable(),
+  content_loader: z.string(),
+  created_at: z.string(),
+  description: z.string(),
+  display_config: z.boolean(),
+  empty_state_message: z.string().nullable(),
+  icon_name: z.string(),
+  keywords: z.string(),
+  meta_description: z.string(),
+  plural_title: z.string(),
+  primary_action_config: jsonSchema.nullable(),
+  primary_action_label: z.string(),
+  primary_action_type: z.string(),
+  search_placeholder: z.string(),
+  sections: jsonSchema,
+  show_on_homepage: z.boolean(),
+  title: z.string(),
+  updated_at: z.string(),
+  url_slug: z.string(),
+});
+
+export const publicCategoryConfigsInsertSchema = z.object({
+  category: publicContentCategorySchema,
+  color_scheme: z.string(),
+  config_format: z.string().optional().nullable(),
+  content_loader: z.string(),
+  created_at: z.string().optional(),
+  description: z.string(),
+  display_config: z.boolean().optional(),
+  empty_state_message: z.string().optional().nullable(),
+  icon_name: z.string(),
+  keywords: z.string(),
+  meta_description: z.string(),
+  plural_title: z.string(),
+  primary_action_config: jsonSchema.optional().nullable(),
+  primary_action_label: z.string(),
+  primary_action_type: z.string(),
+  search_placeholder: z.string(),
+  sections: jsonSchema.optional(),
+  show_on_homepage: z.boolean().optional(),
+  title: z.string(),
+  updated_at: z.string().optional(),
+  url_slug: z.string(),
+});
+
+export const publicCategoryConfigsUpdateSchema = z.object({
+  category: publicContentCategorySchema.optional(),
+  color_scheme: z.string().optional(),
+  config_format: z.string().optional().nullable(),
+  content_loader: z.string().optional(),
+  created_at: z.string().optional(),
+  description: z.string().optional(),
+  display_config: z.boolean().optional(),
+  empty_state_message: z.string().optional().nullable(),
+  icon_name: z.string().optional(),
+  keywords: z.string().optional(),
+  meta_description: z.string().optional(),
+  plural_title: z.string().optional(),
+  primary_action_config: jsonSchema.optional().nullable(),
+  primary_action_label: z.string().optional(),
+  primary_action_type: z.string().optional(),
+  search_placeholder: z.string().optional(),
+  sections: jsonSchema.optional(),
+  show_on_homepage: z.boolean().optional(),
+  title: z.string().optional(),
+  updated_at: z.string().optional(),
+  url_slug: z.string().optional(),
+});
 
 export const publicChangelogRowSchema = z.object({
   category: z.string(),
@@ -643,6 +742,46 @@ export const publicChangelogUpdateSchema = z.object({
   updated_at: z.string().optional(),
   version: z.string().optional().nullable(),
 });
+
+export const publicChangelogChangesRowSchema = z.object({
+  category: z.string(),
+  change_text: z.string(),
+  changelog_entry_id: z.string(),
+  created_at: z.string().nullable(),
+  display_order: z.number(),
+  id: z.string(),
+  updated_at: z.string().nullable(),
+});
+
+export const publicChangelogChangesInsertSchema = z.object({
+  category: z.string(),
+  change_text: z.string(),
+  changelog_entry_id: z.string(),
+  created_at: z.string().optional().nullable(),
+  display_order: z.number().optional(),
+  id: z.string().optional(),
+  updated_at: z.string().optional().nullable(),
+});
+
+export const publicChangelogChangesUpdateSchema = z.object({
+  category: z.string().optional(),
+  change_text: z.string().optional(),
+  changelog_entry_id: z.string().optional(),
+  created_at: z.string().optional().nullable(),
+  display_order: z.number().optional(),
+  id: z.string().optional(),
+  updated_at: z.string().optional().nullable(),
+});
+
+export const publicChangelogChangesRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal('changelog_changes_changelog_entry_id_fkey'),
+    columns: z.tuple([z.literal('changelog_entry_id')]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal('changelog_entries'),
+    referencedColumns: z.tuple([z.literal('id')]),
+  }),
+]);
 
 export const publicChangelogEntriesRowSchema = z.object({
   changes: jsonSchema,
@@ -1171,6 +1310,45 @@ export const publicContentGenerationTrackingUpdateSchema = z.object({
   validation_passed: z.boolean().optional(),
 });
 
+export const publicContentGeneratorConfigsRowSchema = z.object({
+  category: z.string(),
+  conditional_rules: jsonSchema.nullable(),
+  created_at: z.string().nullable(),
+  defaults: jsonSchema,
+  field_type: z.string(),
+  id: z.string(),
+  strategy: z.array(z.string()).nullable(),
+  tag_mapping: jsonSchema.nullable(),
+  template: jsonSchema.nullable(),
+  updated_at: z.string().nullable(),
+});
+
+export const publicContentGeneratorConfigsInsertSchema = z.object({
+  category: z.string(),
+  conditional_rules: jsonSchema.optional().nullable(),
+  created_at: z.string().optional().nullable(),
+  defaults: jsonSchema,
+  field_type: z.string(),
+  id: z.string().optional(),
+  strategy: z.array(z.string()).optional().nullable(),
+  tag_mapping: jsonSchema.optional().nullable(),
+  template: jsonSchema.optional().nullable(),
+  updated_at: z.string().optional().nullable(),
+});
+
+export const publicContentGeneratorConfigsUpdateSchema = z.object({
+  category: z.string().optional(),
+  conditional_rules: jsonSchema.optional().nullable(),
+  created_at: z.string().optional().nullable(),
+  defaults: jsonSchema.optional(),
+  field_type: z.string().optional(),
+  id: z.string().optional(),
+  strategy: z.array(z.string()).optional().nullable(),
+  tag_mapping: jsonSchema.optional().nullable(),
+  template: jsonSchema.optional().nullable(),
+  updated_at: z.string().optional().nullable(),
+});
+
 export const publicContentItemsRowSchema = z.object({
   category: z.string(),
   created_at: z.string(),
@@ -1589,6 +1767,69 @@ export const publicFollowersRelationshipsSchema = z.tuple([
     referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
+
+export const publicFormFieldConfigsRowSchema = z.object({
+  config: jsonSchema.nullable(),
+  created_at: z.string(),
+  default_value: z.string().nullable(),
+  display_order: z.number(),
+  enabled: z.boolean(),
+  field_group: z.string(),
+  field_label: z.string(),
+  field_name: z.string(),
+  field_type: publicFormFieldTypeSchema,
+  form_type: z.string(),
+  grid_column: publicFormGridColumnSchema,
+  help_text: z.string().nullable(),
+  icon_name: z.string().nullable(),
+  icon_position: publicFormIconPositionSchema.nullable(),
+  id: z.string(),
+  placeholder: z.string().nullable(),
+  required: z.boolean(),
+  updated_at: z.string(),
+});
+
+export const publicFormFieldConfigsInsertSchema = z.object({
+  config: jsonSchema.optional().nullable(),
+  created_at: z.string().optional(),
+  default_value: z.string().optional().nullable(),
+  display_order: z.number().optional(),
+  enabled: z.boolean().optional(),
+  field_group: z.string().optional(),
+  field_label: z.string(),
+  field_name: z.string(),
+  field_type: publicFormFieldTypeSchema,
+  form_type: z.string(),
+  grid_column: publicFormGridColumnSchema.optional(),
+  help_text: z.string().optional().nullable(),
+  icon_name: z.string().optional().nullable(),
+  icon_position: publicFormIconPositionSchema.optional().nullable(),
+  id: z.string().optional(),
+  placeholder: z.string().optional().nullable(),
+  required: z.boolean().optional(),
+  updated_at: z.string().optional(),
+});
+
+export const publicFormFieldConfigsUpdateSchema = z.object({
+  config: jsonSchema.optional().nullable(),
+  created_at: z.string().optional(),
+  default_value: z.string().optional().nullable(),
+  display_order: z.number().optional(),
+  enabled: z.boolean().optional(),
+  field_group: z.string().optional(),
+  field_label: z.string().optional(),
+  field_name: z.string().optional(),
+  field_type: publicFormFieldTypeSchema.optional(),
+  form_type: z.string().optional(),
+  grid_column: publicFormGridColumnSchema.optional(),
+  help_text: z.string().optional().nullable(),
+  icon_name: z.string().optional().nullable(),
+  icon_position: publicFormIconPositionSchema.optional().nullable(),
+  id: z.string().optional(),
+  placeholder: z.string().optional().nullable(),
+  required: z.boolean().optional(),
+  updated_at: z.string().optional(),
+});
 
 export const publicFormFieldDefinitionsRowSchema = z.object({
   active: z.boolean().nullable(),
@@ -2011,7 +2252,7 @@ export const publicJobsInsertSchema = z.object({
   requirements: jsonSchema.optional(),
   salary: z.string().optional().nullable(),
   search_vector: z.unknown().optional(),
-  slug: z.string(),
+  slug: z.string().optional(),
   status: z.string().optional().nullable(),
   tags: jsonSchema.optional(),
   title: z.string(),
@@ -2624,6 +2865,82 @@ export const publicProfilesUpdateSchema = z.object({
   work: z.string().optional().nullable(),
 });
 
+export const publicQuizOptionsRowSchema = z.object({
+  created_at: z.string().nullable(),
+  description: z.string().nullable(),
+  display_order: z.number(),
+  icon_name: z.string().nullable(),
+  id: z.string(),
+  label: z.string(),
+  question_id: z.string(),
+  value: z.string(),
+});
+
+export const publicQuizOptionsInsertSchema = z.object({
+  created_at: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  display_order: z.number(),
+  icon_name: z.string().optional().nullable(),
+  id: z.string().optional(),
+  label: z.string(),
+  question_id: z.string(),
+  value: z.string(),
+});
+
+export const publicQuizOptionsUpdateSchema = z.object({
+  created_at: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  display_order: z.number().optional(),
+  icon_name: z.string().optional().nullable(),
+  id: z.string().optional(),
+  label: z.string().optional(),
+  question_id: z.string().optional(),
+  value: z.string().optional(),
+});
+
+export const publicQuizOptionsRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal('quiz_options_question_id_fkey'),
+    columns: z.tuple([z.literal('question_id')]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal('quiz_questions'),
+    referencedColumns: z.tuple([z.literal('question_id')]),
+  }),
+]);
+
+export const publicQuizQuestionsRowSchema = z.object({
+  created_at: z.string().nullable(),
+  description: z.string().nullable(),
+  display_order: z.number(),
+  id: z.string(),
+  question_id: z.string(),
+  question_text: z.string(),
+  required: z.boolean().nullable(),
+  updated_at: z.string().nullable(),
+});
+
+export const publicQuizQuestionsInsertSchema = z.object({
+  created_at: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  display_order: z.number(),
+  id: z.string().optional(),
+  question_id: z.string(),
+  question_text: z.string(),
+  required: z.boolean().optional().nullable(),
+  updated_at: z.string().optional().nullable(),
+});
+
+export const publicQuizQuestionsUpdateSchema = z.object({
+  created_at: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  display_order: z.number().optional(),
+  id: z.string().optional(),
+  question_id: z.string().optional(),
+  question_text: z.string().optional(),
+  required: z.boolean().optional().nullable(),
+  updated_at: z.string().optional().nullable(),
+});
+
 export const publicReputationActionsRowSchema = z.object({
   action_type: z.string(),
   active: z.boolean(),
@@ -2937,6 +3254,51 @@ export const publicSeoConfigUpdateSchema = z.object({
   key: z.string().optional(),
   updated_at: z.string().optional(),
   value: jsonSchema.optional(),
+});
+
+export const publicSeoEnrichmentRulesRowSchema = z.object({
+  category: z.string(),
+  created_at: z.string(),
+  enabled: z.boolean(),
+  example_questions: jsonSchema,
+  focus_areas: jsonSchema,
+  id: z.string(),
+  max_questions: z.number(),
+  min_questions: z.number(),
+  performance_config: jsonSchema,
+  quality_standards: jsonSchema.nullable(),
+  seo_config: jsonSchema,
+  updated_at: z.string(),
+});
+
+export const publicSeoEnrichmentRulesInsertSchema = z.object({
+  category: z.string(),
+  created_at: z.string().optional(),
+  enabled: z.boolean().optional(),
+  example_questions: jsonSchema.optional(),
+  focus_areas: jsonSchema.optional(),
+  id: z.string().optional(),
+  max_questions: z.number().optional(),
+  min_questions: z.number().optional(),
+  performance_config: jsonSchema.optional(),
+  quality_standards: jsonSchema.optional().nullable(),
+  seo_config: jsonSchema.optional(),
+  updated_at: z.string().optional(),
+});
+
+export const publicSeoEnrichmentRulesUpdateSchema = z.object({
+  category: z.string().optional(),
+  created_at: z.string().optional(),
+  enabled: z.boolean().optional(),
+  example_questions: jsonSchema.optional(),
+  focus_areas: jsonSchema.optional(),
+  id: z.string().optional(),
+  max_questions: z.number().optional(),
+  min_questions: z.number().optional(),
+  performance_config: jsonSchema.optional(),
+  quality_standards: jsonSchema.optional().nullable(),
+  seo_config: jsonSchema.optional(),
+  updated_at: z.string().optional(),
 });
 
 export const publicSkillsRowSchema = z.object({
@@ -4530,6 +4892,13 @@ export const publicMvSearchFacetsRowSchema = z.object({
   tag_count: z.number().nullable(),
 });
 
+export const publicMvSiteUrlsRowSchema = z.object({
+  changefreq: z.string().nullable(),
+  lastmod: z.string().nullable(),
+  path: z.string().nullable(),
+  priority: z.number().nullable(),
+});
+
 export const publicMvTrendingContentRowSchema = z.object({
   author: z.string().nullable(),
   bookmark_count: z.number().nullable(),
@@ -4769,6 +5138,40 @@ export const publicBatchUpdateUserAffinityScoresReturnsSchema = z.array(
   })
 );
 
+export const publicBuildEnrichedContentBaseArgsSchema = z.object({
+  p_author: z.string(),
+  p_author_profile_url: z.string(),
+  p_bookmark_count: z.number(),
+  p_category: z.string(),
+  p_content: z.string(),
+  p_copy_count: z.number(),
+  p_created_at: z.string(),
+  p_date_added: z.string(),
+  p_description: z.string(),
+  p_discovery_metadata: jsonSchema,
+  p_display_title: z.string(),
+  p_documentation_url: z.string(),
+  p_examples: jsonSchema,
+  p_features: z.array(z.string()),
+  p_id: z.string(),
+  p_popularity_score: z.number(),
+  p_seo_title: z.string(),
+  p_slug: z.string(),
+  p_source: z.string(),
+  p_source_table: z.string(),
+  p_sponsor_tier: z.string(),
+  p_sponsored_active: z.boolean(),
+  p_sponsored_id: z.string(),
+  p_tags: z.array(z.string()),
+  p_title: z.string(),
+  p_troubleshooting: z.array(jsonSchema),
+  p_updated_at: z.string(),
+  p_use_cases: z.array(z.string()),
+  p_view_count: z.number(),
+});
+
+export const publicBuildEnrichedContentBaseReturnsSchema = jsonSchema;
+
 export const publicCalculateAffinityScoreForContentArgsSchema = z.object({
   p_content_slug: z.string(),
   p_content_type: z.string(),
@@ -4937,6 +5340,14 @@ export const publicFilterJobsReturnsSchema = z.array(
   })
 );
 
+export const publicGenerateContentFieldArgsSchema = z.object({
+  p_category: z.string(),
+  p_field_type: z.string(),
+  p_slug: z.string(),
+});
+
+export const publicGenerateContentFieldReturnsSchema = jsonSchema;
+
 export const publicGenerateMetadataForRouteArgsSchema = z.object({
   p_context: jsonSchema,
   p_route: z.string().optional(),
@@ -5021,6 +5432,40 @@ export const publicGetBulkUserStatsRealtimeReturnsSchema = z.array(
   })
 );
 
+export const publicGetCategoryConfigArgsSchema = z.object({
+  p_category: z.string(),
+});
+
+export const publicGetCategoryConfigReturnsSchema = jsonSchema;
+
+export const publicGetChangelogEntriesArgsSchema = z.object({
+  p_category: z.string().optional(),
+  p_featured_only: z.boolean().optional(),
+  p_limit: z.number().optional(),
+  p_offset: z.number().optional(),
+  p_published_only: z.boolean().optional(),
+});
+
+export const publicGetChangelogEntriesReturnsSchema = jsonSchema;
+
+export const publicGetChangelogEntryBySlugArgsSchema = z.object({
+  p_slug: z.string(),
+});
+
+export const publicGetChangelogEntryBySlugReturnsSchema = jsonSchema;
+
+export const publicGetChangelogMetadataArgsSchema = z.never();
+
+export const publicGetChangelogMetadataReturnsSchema = jsonSchema;
+
+export const publicGetChangelogWithCategoryStatsArgsSchema = z.object({
+  p_category: z.string().optional(),
+  p_limit: z.number().optional(),
+  p_offset: z.number().optional(),
+});
+
+export const publicGetChangelogWithCategoryStatsReturnsSchema = jsonSchema;
+
 export const publicGetContentAffinityArgsSchema = z.object({
   p_content_slug: z.string(),
   p_content_type: z.string(),
@@ -5051,6 +5496,16 @@ export const publicGetDueSequenceEmailsArgsSchema = z.never();
 
 export const publicGetDueSequenceEmailsReturnsSchema = jsonSchema;
 
+export const publicGetEnrichedContentArgsSchema = z.object({
+  p_category: z.string().optional(),
+  p_limit: z.number().optional(),
+  p_offset: z.number().optional(),
+  p_slug: z.string().optional(),
+  p_slugs: z.array(z.string()).optional(),
+});
+
+export const publicGetEnrichedContentReturnsSchema = jsonSchema;
+
 export const publicGetFeaturedContentArgsSchema = z.object({
   p_category: z.string().optional(),
   p_limit: z.number().optional(),
@@ -5077,6 +5532,12 @@ export const publicGetFeaturedContentReturnsSchema = z.array(
   })
 );
 
+export const publicGetFormFieldConfigArgsSchema = z.object({
+  p_form_type: z.string(),
+});
+
+export const publicGetFormFieldConfigReturnsSchema = jsonSchema;
+
 export const publicGetFormFieldsForContentTypeArgsSchema = z.object({
   p_content_type: publicContentCategorySchema,
 });
@@ -5099,6 +5560,12 @@ export const publicGetFormFieldsForContentTypeReturnsSchema = z.array(
     select_options: jsonSchema,
   })
 );
+
+export const publicGetFormFieldsGroupedArgsSchema = z.object({
+  p_form_type: z.string(),
+});
+
+export const publicGetFormFieldsGroupedReturnsSchema = jsonSchema;
 
 export const publicGetMetadataTemplateArgsSchema = z.object({
   p_route_pattern: z.string(),
@@ -5149,6 +5616,10 @@ export const publicGetPopularPostsReturnsSchema = z.array(
   })
 );
 
+export const publicGetQuizConfigurationArgsSchema = z.never();
+
+export const publicGetQuizConfigurationReturnsSchema = jsonSchema;
+
 export const publicGetRecentMergedArgsSchema = z.object({
   p_limit: z.number().optional(),
 });
@@ -5164,19 +5635,7 @@ export const publicGetRecommendationsArgsSchema = z.object({
   p_use_case: z.string(),
 });
 
-export const publicGetRecommendationsReturnsSchema = z.array(
-  z.object({
-    author: z.string(),
-    category: z.string(),
-    description: z.string(),
-    match_percentage: z.number(),
-    match_score: z.number(),
-    primary_reason: z.string(),
-    slug: z.string(),
-    tags: z.array(z.string()),
-    title: z.string(),
-  })
-);
+export const publicGetRecommendationsReturnsSchema = jsonSchema;
 
 export const publicGetRelatedContentArgsSchema = z.object({
   p_category: z.string(),
@@ -5201,6 +5660,17 @@ export const publicGetRelatedContentReturnsSchema = z.array(
     views: z.number(),
   })
 );
+
+export const publicGetReviewsWithStatsArgsSchema = z.object({
+  p_content_slug: z.string(),
+  p_content_type: z.string(),
+  p_limit: z.number().optional(),
+  p_offset: z.number().optional(),
+  p_sort_by: z.string().optional(),
+  p_user_id: z.string().optional(),
+});
+
+export const publicGetReviewsWithStatsReturnsSchema = jsonSchema;
 
 export const publicGetSearchCountArgsSchema = z.object({
   p_authors: z.array(z.string()).optional(),
@@ -5227,6 +5697,17 @@ export const publicGetSeoConfigArgsSchema = z.object({
 });
 
 export const publicGetSeoConfigReturnsSchema = jsonSchema;
+
+export const publicGetSiteUrlsArgsSchema = z.never();
+
+export const publicGetSiteUrlsReturnsSchema = z.array(
+  z.object({
+    changefreq: z.string(),
+    lastmod: z.string(),
+    path: z.string(),
+    priority: z.number(),
+  })
+);
 
 export const publicGetStructuredDataConfigArgsSchema = z.object({
   p_category: z.string(),
@@ -5296,6 +5777,15 @@ export const publicGetUserActivityTimelineArgsSchema = z.object({
 });
 
 export const publicGetUserActivityTimelineReturnsSchema = jsonSchema;
+
+export const publicGetUserBadgesWithDetailsArgsSchema = z.object({
+  p_featured_only: z.boolean().optional(),
+  p_limit: z.number().optional(),
+  p_offset: z.number().optional(),
+  p_user_id: z.string(),
+});
+
+export const publicGetUserBadgesWithDetailsReturnsSchema = jsonSchema;
 
 export const publicGetUserFavoriteCategoriesArgsSchema = z.object({
   p_limit: z.number().optional(),
@@ -5367,6 +5857,12 @@ export const publicIsFollowingArgsSchema = z.object({
 
 export const publicIsFollowingReturnsSchema = z.boolean();
 
+export const publicJobSlugArgsSchema = z.object({
+  p_title: z.string(),
+});
+
+export const publicJobSlugReturnsSchema = z.string();
+
 export const publicMarkSequenceEmailProcessedArgsSchema = z.object({
   p_email: z.string(),
   p_schedule_id: z.string(),
@@ -5386,6 +5882,10 @@ export const publicRefreshContentPopularityReturnsSchema = z.array(
     success: z.boolean(),
   })
 );
+
+export const publicRefreshMvSiteUrlsArgsSchema = z.never();
+
+export const publicRefreshMvSiteUrlsReturnsSchema = z.undefined();
 
 export const publicRefreshProfileFromOauthArgsSchema = z.object({
   user_id: z.string(),
@@ -5423,6 +5923,14 @@ export const publicRemoveBookmarkArgsSchema = z.object({
 });
 
 export const publicRemoveBookmarkReturnsSchema = jsonSchema;
+
+export const publicReplaceTitlePlaceholderArgsSchema = z.object({
+  p_slug: z.string(),
+  p_text: z.string(),
+  p_title: z.string(),
+});
+
+export const publicReplaceTitlePlaceholderReturnsSchema = z.string();
 
 export const publicScheduleNextSequenceStepArgsSchema = z.object({
   p_current_step: z.number(),

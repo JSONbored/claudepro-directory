@@ -120,37 +120,20 @@ function formatTitle(title: string): string {
   return capitalizeAcronyms(title);
 }
 
-/**
- * Universal function to get display title from any content item
- * This ensures consistent title display across the entire application
- */
-export function getDisplayTitle(
-  item:
-    | {
-        readonly title?: string | undefined;
-        readonly name?: string | undefined;
-        readonly slug: string;
-        readonly category: string | undefined;
-      }
-    | {
-        readonly title?: string | undefined;
-        readonly name?: string | undefined;
-        readonly slug: string;
-        readonly category?: string | undefined;
-      }
-): string {
-  // For hooks (no title/name), use enhanced slugToTitle directly
-  // For other content (has title/name), use formatTitle for consistency
-  const titleOrName = item.title || item.name;
-  if (titleOrName) {
-    return formatTitle(titleOrName);
+export function getDisplayTitle(item: {
+  readonly title?: string | null;
+  readonly slug?: string | null;
+  readonly category?: string | null;
+}): string {
+  if (item.title) {
+    return formatTitle(item.title);
   }
 
-  const baseTitle = slugToTitle(item.slug);
+  const slug = item.slug || '';
+  const baseTitle = slugToTitle(slug);
 
-  // Commands should display with "/" prefix using the original slug
   if (item.category === 'commands') {
-    return `/${item.slug}`;
+    return `/${slug}`;
   }
 
   return baseTitle;

@@ -4,15 +4,22 @@
  * Generates realistic code examples for content types.
  * Used across agents, MCPs, commands, rules, etc.
  *
- * @see src/lib/schemas/content/base-content.schema.ts
+ * Uses database-first types from generated schema.
  */
 
 import { faker } from '@faker-js/faker';
 import { Factory } from 'fishery';
-import type { z } from 'zod';
-import type { baseUsageExampleSchema } from '@/src/lib/schemas/content/base-content.schema';
 
-type UsageExample = z.infer<typeof baseUsageExampleSchema>;
+/**
+ * Usage example type based on database schema
+ * The examples field in database is Json type containing array of these objects
+ */
+type UsageExample = {
+  title: string;
+  language: 'typescript' | 'javascript' | 'json' | 'bash' | 'python';
+  code: string;
+  description?: string;
+};
 
 export const usageExampleFactory = Factory.define<UsageExample>(() => {
   const language = faker.helpers.arrayElement([

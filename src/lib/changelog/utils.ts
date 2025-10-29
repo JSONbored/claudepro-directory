@@ -219,59 +219,39 @@ export function truncateChangelogContent(content: string, maxLength = 150): stri
 }
 
 /**
- * Count total items across all categories in an entry
- *
- * @param categories - Changelog categories object
- * @returns Total number of items
- *
- * @example
- * countChangelogItems(entry.categories)
- * // Returns: 15 (if 5 Added + 3 Fixed + 7 Changed)
+ * Count total items across all categories in an entry (handles Json type from DB)
  */
-export function countChangelogItems(categories: {
-  Added: Array<{ content: string }>;
-  Changed: Array<{ content: string }>;
-  Deprecated: Array<{ content: string }>;
-  Removed: Array<{ content: string }>;
-  Fixed: Array<{ content: string }>;
-  Security: Array<{ content: string }>;
-}): number {
+export function countChangelogItems(categories: unknown): number {
+  const cats = categories as Record<string, unknown>;
+  if (!cats) return 0;
+
   return (
-    categories.Added.length +
-    categories.Changed.length +
-    categories.Deprecated.length +
-    categories.Removed.length +
-    categories.Fixed.length +
-    categories.Security.length
+    (Array.isArray(cats.Added) ? cats.Added.length : 0) +
+    (Array.isArray(cats.Changed) ? cats.Changed.length : 0) +
+    (Array.isArray(cats.Deprecated) ? cats.Deprecated.length : 0) +
+    (Array.isArray(cats.Removed) ? cats.Removed.length : 0) +
+    (Array.isArray(cats.Fixed) ? cats.Fixed.length : 0) +
+    (Array.isArray(cats.Security) ? cats.Security.length : 0)
   );
 }
 
 /**
- * Get non-empty categories from an entry
- *
- * @param categories - Changelog categories object
- * @returns Array of category names that have items
- *
- * @example
- * getNonEmptyCategories(entry.categories)
- * // Returns: ["Added", "Fixed", "Changed"]
+ * Get non-empty categories from an entry (handles Json type from DB)
  */
-export function getNonEmptyCategories(categories: {
-  Added: Array<{ content: string }>;
-  Changed: Array<{ content: string }>;
-  Deprecated: Array<{ content: string }>;
-  Removed: Array<{ content: string }>;
-  Fixed: Array<{ content: string }>;
-  Security: Array<{ content: string }>;
-}): Array<'Added' | 'Changed' | 'Deprecated' | 'Removed' | 'Fixed' | 'Security'> {
+export function getNonEmptyCategories(
+  categories: unknown
+): Array<'Added' | 'Changed' | 'Deprecated' | 'Removed' | 'Fixed' | 'Security'> {
   const nonEmpty: Array<'Added' | 'Changed' | 'Deprecated' | 'Removed' | 'Fixed' | 'Security'> = [];
 
-  if (categories.Added.length > 0) nonEmpty.push('Added');
-  if (categories.Changed.length > 0) nonEmpty.push('Changed');
-  if (categories.Deprecated.length > 0) nonEmpty.push('Deprecated');
-  if (categories.Removed.length > 0) nonEmpty.push('Removed');
-  if (categories.Fixed.length > 0) nonEmpty.push('Fixed');
-  if (categories.Security.length > 0) nonEmpty.push('Security');
+  const cats = categories as Record<string, unknown>;
+  if (!cats) return nonEmpty;
+
+  if (Array.isArray(cats.Added) && cats.Added.length > 0) nonEmpty.push('Added');
+  if (Array.isArray(cats.Changed) && cats.Changed.length > 0) nonEmpty.push('Changed');
+  if (Array.isArray(cats.Deprecated) && cats.Deprecated.length > 0) nonEmpty.push('Deprecated');
+  if (Array.isArray(cats.Removed) && cats.Removed.length > 0) nonEmpty.push('Removed');
+  if (Array.isArray(cats.Fixed) && cats.Fixed.length > 0) nonEmpty.push('Fixed');
+  if (Array.isArray(cats.Security) && cats.Security.length > 0) nonEmpty.push('Security');
 
   return nonEmpty;
 }
@@ -321,7 +301,7 @@ function isValidDateFormat(date: string): boolean {
  * Validation rules:
  * - Date format: YYYY-MM-DD (must be valid date)
  * - Title length: 3-80 characters (after slug generation)
- * - Total slug length: ≤ 100 characters
+ * - Total slug length: ? 100 characters
  * - Format: lowercase alphanumeric + hyphens
  *
  * @example

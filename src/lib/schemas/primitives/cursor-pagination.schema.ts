@@ -20,8 +20,8 @@
 
 import { z } from 'zod';
 import { UI_CONFIG } from '@/src/lib/constants';
+import { nonNegativeInt, positiveInt } from '@/src/lib/schemas/primitives';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
-import { nonNegativeInt, positiveInt } from './base-numbers';
 
 // ============================================================================
 // CONFIGURATION CONSTANTS

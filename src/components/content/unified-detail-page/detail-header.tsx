@@ -1,17 +1,8 @@
 /**
  * DetailHeader - Server Component for header section
- *
- * REFACTORED: Split client/server logic for optimal performance
- * Server renders: Title, description, badges (static content)
- * Client renders: Action buttons (interactive elements via DetailHeaderActions)
- *
- * Extracts header rendering logic from unified-detail-page.tsx (lines 512-614)
- * Performance: 80% of header is server-rendered, only buttons are client-side
- *
- * @see components/unified-detail-page.tsx - Original implementation
  */
 
-import type { ContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import type { ContentTypeConfig } from '@/src/lib/types/content-type-config';
 import { DetailHeaderActions } from './detail-header-actions';
 
@@ -53,7 +44,7 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
         <DetailHeaderActions
           item={item}
           typeName={config.typeName}
-          category={item.category}
+          category={item.category as any}
           hasContent={hasContent}
           onCopyContent={onCopyContent}
           displayTitle={displayTitle}

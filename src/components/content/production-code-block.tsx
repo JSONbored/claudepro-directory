@@ -74,13 +74,10 @@ export function ProductionCodeBlock({
       const category = pathParts[0] || 'unknown';
       const slug = pathParts[1] || 'unknown';
 
-      Promise.all([
-        import('@/src/lib/analytics/events.constants'),
-        import('#lib/analytics/tracker'),
-      ])
-        .then(([events, tracker]) => {
+      import('#lib/analytics/tracker')
+        .then((tracker) => {
           // NEW: Use consolidated CODE_COPIED event with category as payload
-          tracker.trackEvent(events.EVENTS.CODE_COPIED, {
+          tracker.trackEvent('code_copied', {
             category,
             slug,
             contentLength: code.length, // NUMBER (camelCase for consistency)

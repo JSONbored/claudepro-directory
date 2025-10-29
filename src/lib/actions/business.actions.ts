@@ -33,64 +33,8 @@ import {
   publicSponsoredImpressionsInsertSchema,
 } from '@/src/lib/schemas/generated/db-schemas';
 import { nonNegativeInt } from '@/src/lib/schemas/primitives';
-import type { Tables } from '@/src/types/database.types';
-
-// Leaderboard types (derived from database tables, not materialized views)
-type RecentMerged = {
-  id: string;
-  content_name: string;
-  content_type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'collections';
-  merged_at: string;
-  user: {
-    name: string;
-    slug: string;
-  } | null;
-};
-
-type TopContributor = {
-  rank: number;
-  name: string;
-  slug: string;
-  mergedCount: number;
-};
-
-// Zod schemas for validation
-const submissionStatsSchema = z.object({
-  total: z.number(),
-  pending: z.number(),
-  mergedThisWeek: z.number(),
-});
-
-const recentMergedSchema = z.object({
-  id: z.string(),
-  content_name: z.string(),
-  content_type: z.enum([
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
-    'collections',
-  ]),
-  merged_at: z.string(),
-  user: z
-    .object({
-      name: z.string(),
-      slug: z.string(),
-    })
-    .nullable(),
-});
-
-const topContributorSchema = z.object({
-  rank: z.number(),
-  name: z.string(),
-  slug: z.string(),
-  mergedCount: z.number(),
-});
-
 import { createClient } from '@/src/lib/supabase/server';
-import type { Database } from '@/src/types/database.types';
+import type { Database, Tables } from '@/src/types/database.types';
 
 // Database-first types (from generated database schema)
 type CompanyInsert = Database['public']['Tables']['companies']['Insert'];
@@ -306,7 +250,6 @@ export async function getUserSubmissions() {
 export const getSubmissionStats = rateLimitedAction
   .metadata({ actionName: 'getSubmissionStats', category: 'analytics' })
   .schema(z.object({}))
-  .outputSchema(submissionStatsSchema)
   .action(async () => {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -326,59 +269,31 @@ export const getSubmissionStats = rateLimitedAction
 export const getRecentMerged = rateLimitedAction
   .metadata({ actionName: 'getRecentMerged', category: 'analytics' })
   .schema(z.object({ limit: nonNegativeInt.min(1).max(10).default(5) }))
-  .outputSchema(z.array(recentMergedSchema))
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
     const { data, error } = await supabase.rpc('get_recent_merged', { p_limit: parsedInput.limit });
     if (error) throw new Error(`Failed to fetch recent merged: ${error.message}`);
-    return (data as RecentMerged[]) ?? [];
+    return data ?? [];
   });
 
 export const getTopContributors = rateLimitedAction
   .metadata({ actionName: 'getTopContributors', category: 'analytics' })
   .schema(z.object({ limit: nonNegativeInt.min(1).max(10).default(5) }))
-  .outputSchema(z.array(topContributorSchema))
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
     const { data, error } = await supabase.rpc('get_top_contributors', {
       p_limit: parsedInput.limit,
     });
     if (error) throw new Error(`Failed to fetch contributors: ${error.message}`);
-    return (data as TopContributor[]) ?? [];
+    return data ?? [];
   });
-
-// Company schemas - Generated base + business rules
-const createCompanySchema = publicCompaniesInsertSchema.extend({
-  name: z.string().min(2).max(200),
-  logo: z.string().url().nullable().optional(),
-  website: z.string().url().nullable().optional(),
-  description: z.string().max(1000).nullable().optional(),
-  using_cursor_since: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .nullable()
-    .optional(),
-});
-
-const updateCompanySchema = publicCompaniesUpdateSchema.extend({
-  id: z.string().uuid(),
-  name: z.string().min(2).max(200).optional(),
-  logo: z.string().url().nullable().optional(),
-  website: z.string().url().nullable().optional(),
-  description: z.string().max(1000).nullable().optional(),
-  using_cursor_since: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .nullable()
-    .optional(),
-});
 
 export const createCompany = rateLimitedAction
   .metadata({
     actionName: 'createCompany',
     category: 'user',
   })
-  .schema(createCompanySchema)
+  .schema(publicCompaniesInsertSchema)
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
 
@@ -436,7 +351,7 @@ export const updateCompany = rateLimitedAction
     actionName: 'updateCompany',
     category: 'user',
   })
-  .schema(updateCompanySchema)
+  .schema(publicCompaniesUpdateSchema.required({ id: true }))
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
 
@@ -520,11 +435,22 @@ export const createJob = rateLimitedAction
     actionName: 'createJob',
     category: 'form',
   })
-  .schema(publicJobsInsertSchema)
+  .schema(
+    publicJobsInsertSchema
+      .omit({
+        tags: true,
+        requirements: true,
+        benefits: true,
+      })
+      .extend({
+        tags: z.any().optional(),
+        requirements: z.any().optional(),
+        benefits: z.any().optional(),
+      })
+  )
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
 
-    // Get current user
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -533,49 +459,29 @@ export const createJob = rateLimitedAction
       throw new Error('You must be signed in to create a job listing');
     }
 
-    // Generate slug from title
-    const generatedSlug = parsedInput.title
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '')
-      .substring(0, 100);
-
-    // Create job - all jobs go to pending_review with unpaid status (payment required workflow)
     const { data, error } = await supabase
       .from('jobs')
       .insert({
         user_id: user.id,
         title: parsedInput.title,
-        slug: generatedSlug,
         company: parsedInput.company,
-        location: parsedInput.location ?? null,
         description: parsedInput.description,
-        salary: parsedInput.salary ?? null,
-        remote: parsedInput.remote,
         type: parsedInput.type,
+        category: parsedInput.category,
+        link: parsedInput.link,
+        location: parsedInput.location ?? null,
+        salary: parsedInput.salary ?? null,
+        remote: parsedInput.remote ?? null,
         workplace: parsedInput.workplace ?? null,
         experience: parsedInput.experience ?? null,
-        category: parsedInput.category,
-        tags: parsedInput.tags as unknown as Database['public']['Tables']['jobs']['Row']['tags'],
-        requirements:
-          parsedInput.requirements as unknown as Database['public']['Tables']['jobs']['Row']['requirements'],
-        benefits:
-          parsedInput.benefits as unknown as Database['public']['Tables']['jobs']['Row']['benefits'],
-        link: parsedInput.link,
+        tags: parsedInput.tags,
+        requirements: parsedInput.requirements,
+        benefits: parsedInput.benefits,
         contact_email: parsedInput.contact_email ?? null,
         company_logo: parsedInput.company_logo ?? null,
         company_id: parsedInput.company_id ?? null,
-        plan: 'standard', // Single pricing tier: $299/30-day
-        active: false, // Activated after payment + admin approval
-        status: 'pending_review', // All jobs enter review queue
-        payment_status: 'unpaid', // Default payment status
-        payment_amount: 299.0, // Fixed price: $299/30-day listing
-        payment_method: null, // Set when payment received (polar/mercury_invoice/manual)
-        payment_date: null, // Set when payment confirmed
-        payment_reference: null, // Set to invoice/order ID when paid
-        admin_notes: null, // Internal notes for admin review
-        posted_at: null, // Set after approval + payment
-        expires_at: null, // Set after approval (30 days from posted_at)
+        status: 'pending_review',
+        payment_amount: 299.0,
       })
       .select()
       .single();
@@ -584,14 +490,13 @@ export const createJob = rateLimitedAction
       throw new Error(`Failed to create job: ${error.message}`);
     }
 
-    // Revalidate jobs pages
     revalidatePath('/jobs');
     revalidatePath('/account/jobs');
 
     return {
       success: true,
       job: data,
-      requiresPayment: true, // All jobs require payment ($299/30-day)
+      requiresPayment: true,
       message:
         'Job submitted for review! You will receive payment instructions via email after admin approval.',
     };
@@ -602,11 +507,23 @@ export const updateJob = rateLimitedAction
     actionName: 'updateJob',
     category: 'form',
   })
-  .schema(publicJobsUpdateSchema)
+  .schema(
+    publicJobsUpdateSchema
+      .omit({
+        tags: true,
+        requirements: true,
+        benefits: true,
+      })
+      .extend({
+        tags: z.any().optional(),
+        requirements: z.any().optional(),
+        benefits: z.any().optional(),
+      })
+      .required({ id: true })
+  )
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
 
-    // Get current user
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -675,7 +592,12 @@ export const toggleJobStatus = rateLimitedAction
     actionName: 'toggleJobStatus',
     category: 'form',
   })
-  .schema(publicJobsUpdateSchema.pick({ id: true, active: true }))
+  .schema(
+    z.object({
+      id: z.string().uuid(),
+      status: z.enum(['draft', 'pending_review', 'active', 'expired', 'rejected']),
+    })
+  )
   .action(async ({ parsedInput: { id, status } }) => {
     const supabase = await createClient();
 
@@ -687,14 +609,14 @@ export const toggleJobStatus = rateLimitedAction
       throw new Error('You must be signed in to manage jobs');
     }
 
-    // Update with ownership verification
+    const updateData: { status: string; posted_at?: string } = { status };
+    if (status === 'active') {
+      updateData.posted_at = new Date().toISOString();
+    }
+
     const { data: job, error } = await supabase
       .from('jobs')
-      .update({
-        status,
-        // If activating, set posted_at if not already set
-        ...(status === 'active' ? { posted_at: new Date().toISOString() } : {}),
-      })
+      .update(updateData)
       .eq('id', id)
       .eq('user_id', user.id)
       .select()

@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { SubmitFormClient } from '@/src/components/forms/submit-form-client';
+import { getSubmissionFormConfig } from '@/src/lib/forms/submission-form-config';
 
 const UnifiedNewsletterCapture = dynamic(
   () =>
@@ -46,6 +47,25 @@ const TYPE_LABELS: Record<string, string> = {
   statuslines: 'Statusline',
 };
 
+// Types for RPC returns
+type RecentMergedItem = {
+  id: string | number;
+  content_name: string;
+  content_type: string;
+  merged_at: string;
+  user?: {
+    slug: string;
+    name: string;
+  } | null;
+};
+
+type TopContributor = {
+  slug: string;
+  name: string;
+  rank: number;
+  mergedCount: number;
+};
+
 function formatTimeAgo(dateString: string): string {
   const now = new Date();
   const date = new Date(dateString);
@@ -68,8 +88,14 @@ export default async function SubmitPage() {
   ]);
 
   const stats = statsResult?.data || { total: 0, pending: 0, mergedThisWeek: 0 };
-  const recentMerged = recentResult?.data || [];
-  const topContributors = contributorsResult?.data || [];
+
+  // Type guard for recent merged submissions
+  const recentMerged = Array.isArray(recentResult?.data) ? recentResult.data : [];
+
+  // Type guard for top contributors
+  const topContributors = Array.isArray(contributorsResult?.data) ? contributorsResult.data : [];
+
+  const formConfig = await getSubmissionFormConfig();
 
   return (
     <div className="container mx-auto px-4 py-8 sm:py-12 max-w-7xl">
@@ -85,7 +111,7 @@ export default async function SubmitPage() {
 
       <div className="grid lg:grid-cols-[1fr_380px] gap-6 lg:gap-8 items-start">
         <div className="w-full min-w-0">
-          <SubmitFormClient />
+          <SubmitFormClient formConfig={formConfig} />
         </div>
 
         <aside className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit">
@@ -128,7 +154,7 @@ export default async function SubmitPage() {
                 <CardTitle className={'text-sm font-medium'}>🔥 Recently Merged</CardTitle>
               </CardHeader>
               <CardContent className={'space-y-3'}>
-                {recentMerged.map((submission) => (
+                {(recentMerged as RecentMergedItem[]).map((submission) => (
                   <div
                     key={submission.id}
                     className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} pb-3 border-b border-border/50 last:border-0 last:pb-0`}
@@ -169,7 +195,7 @@ export default async function SubmitPage() {
                 <CardTitle className={'text-sm font-medium'}>🌟 Top Contributors</CardTitle>
               </CardHeader>
               <CardContent className={'space-y-2'}>
-                {topContributors.map((contributor) => {
+                {(topContributors as TopContributor[]).map((contributor) => {
                   const getMedalIcon = (rank: number) => {
                     if (rank === 1) return <Trophy className="h-4 w-4 text-yellow-400" />;
                     if (rank === 2) return <Medal className="h-4 w-4 text-gray-400" />;

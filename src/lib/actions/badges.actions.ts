@@ -11,20 +11,10 @@ import { authedAction } from '@/src/lib/actions/safe-action';
 import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import { createClient } from '@/src/lib/supabase/server';
 
-const BADGE_SELECT = `
-  id,
-  badge_id,
-  earned_at,
-  featured,
-  badges!inner (
-    slug,
-    name,
-    description,
-    icon,
-    category
-  )
-`;
-
+/**
+ * Get user badges with full badge details
+ * Uses optimized RPC that returns badges + details in single query
+ */
 export const getUserBadges = authedAction
   .metadata({ actionName: 'getUserBadges', category: 'user' })
   .schema(
@@ -36,19 +26,20 @@ export const getUserBadges = authedAction
   )
   .action(async ({ parsedInput: { limit, offset, featuredOnly }, ctx }) => {
     const supabase = await createClient();
-    let query = supabase
-      .from('user_badges')
-      .select(BADGE_SELECT)
-      .eq('user_id', ctx.userId)
-      .order('earned_at', { ascending: false });
 
-    if (featuredOnly) query = query.eq('featured', true);
-    if (limit) query = query.range(offset ?? 0, (offset ?? 0) + limit - 1);
+    // Use optimized RPC - single query with JOIN
+    const { data, error } = await supabase.rpc('get_user_badges_with_details', {
+      p_user_id: ctx.userId,
+      p_featured_only: featuredOnly ?? false,
+      ...(limit !== undefined && { p_limit: limit }),
+      ...(offset !== undefined && { p_offset: offset }),
+    });
 
-    const { data, error } = await query;
     if (error) throw new Error(`Failed to fetch badges: ${error.message}`);
 
-    return { badges: data || [], total: data?.length || 0 };
+    // RPC returns JSONB array - cast to expected type
+    const badges = (data || []) as any;
+    return { badges, total: Array.isArray(badges) ? badges.length : 0 };
   });
 
 export const toggleBadgeFeatured = authedAction
@@ -104,6 +95,8 @@ export const checkAndAwardBadges = authedAction
     if (!data || data.length === 0) return { success: false, badgesAwarded: 0, badgeSlugs: [] };
 
     const result = data[0];
+    if (!result) return { success: false, badgesAwarded: 0, badgeSlugs: [] };
+
     if (result.badges_awarded > 0) {
       revalidatePath('/account');
       revalidatePath('/u/*');
@@ -125,7 +118,7 @@ export const getRecentlyEarnedBadges = authedAction
 
     const { data, error } = await supabase
       .from('user_badges')
-      .select('id, earned_at, badge:badges (slug, name, description, icon)')
+      .select('id, earned_at, badge:badges (slug, name, description, icon, rarity)')
       .eq('user_id', ctx.userId)
       .gte('earned_at', sinceTime)
       .order('earned_at', { ascending: false });
@@ -134,6 +127,10 @@ export const getRecentlyEarnedBadges = authedAction
     return { badges: data || [] };
   });
 
+/**
+ * Public function to fetch user badges (used in public profile pages)
+ * Now uses the optimized RPC
+ */
 export async function getPublicUserBadges(
   targetUserId: string,
   options?: { limit?: number; featuredOnly?: boolean }
@@ -141,19 +138,16 @@ export async function getPublicUserBadges(
   const validatedUserId = nonEmptyString.uuid().parse(targetUserId);
   const supabase = await createClient();
 
-  let query = supabase
-    .from('user_badges')
-    .select(BADGE_SELECT)
-    .eq('user_id', validatedUserId)
-    .order('earned_at', { ascending: false });
+  // Use optimized RPC
+  const { data, error } = await supabase.rpc('get_user_badges_with_details', {
+    p_user_id: validatedUserId,
+    p_featured_only: options?.featuredOnly ?? false,
+    ...(options?.limit !== undefined && { p_limit: options.limit }),
+  });
 
-  if (options?.featuredOnly) query = query.eq('featured', true);
-  if (options?.limit) query = query.limit(options.limit);
-
-  const { data, error } = await query;
   if (error) throw new Error(`Failed to fetch badges: ${error.message}`);
 
-  return data || [];
+  return (data || []) as any;
 }
 
 export async function userHasBadge(userId: string, badgeId: string): Promise<boolean> {

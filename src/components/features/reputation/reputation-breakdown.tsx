@@ -33,7 +33,6 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import type { Tables } from '@/src/types/database.types';
 
-type ReputationAction = Tables<'reputation_actions'>;
 type ReputationTier = Tables<'reputation_tiers'>;
 
 type ReputationBreakdownType = {

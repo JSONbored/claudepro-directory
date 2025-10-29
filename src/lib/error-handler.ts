@@ -32,6 +32,18 @@ import {
 import { ValidationError, validation } from '@/src/lib/security/validators';
 
 /**
+ * Request ID type for correlation tracking
+ */
+type RequestId = string;
+
+/**
+ * Generate unique request ID for correlation
+ */
+function createRequestId(): RequestId {
+  return randomUUID();
+}
+
+/**
  * HTTP status code mapping for different error types
  */
 const ERROR_STATUS_MAP: Record<ErrorType, number> = {

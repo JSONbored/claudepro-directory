@@ -1,21 +1,12 @@
 'use client';
 
 /**
- * Results Display Component
- * Displays personalized configuration recommendations
- *
- * Features:
- * - Ranked recommendation cards
- * - Match score visualization
- * - Filter/sort capabilities
- * - Share results functionality
- * - Bulk bookmark functionality
- * - Responsive grid layout
+ * Results Display - Database-First Architecture
+ * Uses RPC function returns + minimal UI enrichment only.
  */
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
-import { z } from 'zod';
 import { BaseCard } from '@/src/components/domain/base-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedButton } from '@/src/components/domain/unified-button';
@@ -49,7 +40,6 @@ import {
   BarChart,
   Bookmark,
   ChevronDown,
-  Eye,
   Info,
   RefreshCw,
   Settings,
@@ -57,27 +47,33 @@ import {
   Sparkles,
   TrendingUp,
 } from '@/src/lib/icons';
-import { publicGetRecommendationsReturnsSchema } from '@/src/lib/schemas/generated/db-schemas';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
+import type { Database } from '@/src/types/database.types';
 
-// Type based on database function return + UI enrichment
 type RecommendationResponse = {
   results: Array<{
     slug: string;
     title: string;
     description: string;
     category: string;
-    matchScore: number;
-    matchPercentage: number;
+    tags: string[];
+    author: string;
+    match_score: number;
+    match_percentage: number;
+    primary_reason: string;
     rank: number;
     reasons: Array<{ type: string; message: string }>;
-    primaryReason: string;
-    author: string;
-    tags: string[];
   }>;
   totalMatches: number;
-  answers: Record<string, unknown>;
+  answers: {
+    useCase: string;
+    experienceLevel: string;
+    toolPreferences: string[];
+    integrations?: string[];
+    focusAreas?: string[];
+    teamSize?: string;
+  };
   id: string;
   generatedAt: string;
   algorithm: string;
@@ -100,20 +96,17 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isPending, startTransition] = useTransition();
-
-  // Refine results state
   const [minScore, setMinScore] = useState(60);
   const [maxResults, setMaxResults] = useState(10);
   const [showRefinePanel, setShowRefinePanel] = useState(false);
 
   const { results, summary, totalMatches, answers } = recommendations;
 
-  // Handle bulk bookmark
   const handleSaveAll = () => {
     startTransition(async () => {
       try {
         const items = results.map((result) => ({
-          content_type: result.category,
+          content_type: result.category as Database['public']['Enums']['content_category'],
           content_slug: result.slug,
         }));
 
@@ -141,18 +134,15 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
     });
   };
 
-  // Apply filters and refinements
   const filteredResults = results
     .filter((r) => selectedCategory === 'all' || r.category === selectedCategory)
-    .filter((r) => r.matchScore >= minScore)
+    .filter((r) => r.match_score >= minScore)
     .slice(0, maxResults);
 
-  // Get unique categories from results
   const categories = ['all', ...new Set(results.map((r) => r.category))];
 
   return (
     <div className="space-y-8">
-      {/* Header Section */}
       <div className="text-center space-y-4">
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
           <Sparkles className="h-6 w-6 text-primary" />
@@ -165,7 +155,6 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           best fits for your needs.
         </p>
 
-        {/* Summary Stats */}
         <div className={'flex-wrap items-center justify-center gap-3'}>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
             <TrendingUp className="h-3 w-3 mr-1" />
@@ -180,7 +169,6 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           </UnifiedBadge>
         </div>
 
-        {/* Actions */}
         <div className={'flex-wrap items-center justify-center gap-3'}>
           <Button
             variant="default"
@@ -210,7 +198,6 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </div>
       </div>
 
-      {/* Refine Results Panel */}
       <Collapsible open={showRefinePanel} onOpenChange={setShowRefinePanel}>
         <CollapsibleTrigger asChild>
           <Button variant="ghost" size="sm" className="w-full gap-2">
@@ -230,7 +217,6 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Minimum Score Slider */}
               <div className="space-y-2">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className="text-sm font-medium">Minimum Match Score</span>
@@ -250,7 +236,6 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 </p>
               </div>
 
-              {/* Max Results Slider */}
               <div className="space-y-2">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className="text-sm font-medium">Maximum Results</span>
@@ -270,7 +255,6 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 </p>
               </div>
 
-              {/* Stats */}
               <div className="pt-4">
                 <Separator className="mb-4" />
                 <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-sm`}>
@@ -285,7 +269,6 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </CollapsibleContent>
       </Collapsible>
 
-      {/* Your Selections Summary */}
       <Card className="bg-accent/5">
         <CardHeader>
           <CardTitle className="text-lg">Your Selections</CardTitle>
@@ -296,48 +279,53 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             <div>
               <span className="text-sm font-medium">Use Case</span>
               <p className="text-sm text-muted-foreground mt-1 capitalize">
-                {answers.useCase.replace('-', ' ')}
+                {String(answers.useCase).replace('-', ' ')}
               </p>
             </div>
             <div>
               <span className="text-sm font-medium">Experience Level</span>
               <p className="text-sm text-muted-foreground mt-1 capitalize">
-                {answers.experienceLevel}
+                {String(answers.experienceLevel)}
               </p>
             </div>
             <div>
               <span className="text-sm font-medium">Tool Preferences</span>
               <p className="text-sm text-muted-foreground mt-1">
-                {answers.toolPreferences.join(', ')}
+                {Array.isArray(answers.toolPreferences) ? answers.toolPreferences.join(', ') : ''}
               </p>
             </div>
-            {answers.integrations && answers.integrations.length > 0 && (
-              <div>
-                <span className="text-sm font-medium">Integrations</span>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {answers.integrations.join(', ')}
-                </p>
-              </div>
-            )}
-            {answers.focusAreas && answers.focusAreas.length > 0 && (
-              <div>
-                <span className="text-sm font-medium">Focus Areas</span>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {answers.focusAreas.join(', ')}
-                </p>
-              </div>
-            )}
+            {answers.integrations &&
+              Array.isArray(answers.integrations) &&
+              answers.integrations.length > 0 && (
+                <div>
+                  <span className="text-sm font-medium">Integrations</span>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {answers.integrations.join(', ')}
+                  </p>
+                </div>
+              )}
+            {answers.focusAreas &&
+              Array.isArray(answers.focusAreas) &&
+              answers.focusAreas.length > 0 && (
+                <div>
+                  <span className="text-sm font-medium">Focus Areas</span>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {answers.focusAreas.join(', ')}
+                  </p>
+                </div>
+              )}
             {answers.teamSize && (
               <div>
                 <span className="text-sm font-medium">Team Size</span>
-                <p className="text-sm text-muted-foreground mt-1 capitalize">{answers.teamSize}</p>
+                <p className="text-sm text-muted-foreground mt-1 capitalize">
+                  {String(answers.teamSize)}
+                </p>
               </div>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Category Filter Tabs */}
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
         <TabsList className={'flex-wrap h-auto'}>
           {categories.map((category) => {
@@ -354,10 +342,13 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </TabsList>
 
         <TabsContent value={selectedCategory} className="mt-6">
-          {/* Results Grid */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredResults.map((result) => {
-              const targetPath = getContentItemUrl(result);
+              const targetPath = getContentItemUrl({
+                category: result.category as Database['public']['Enums']['content_category'],
+                slug: result.slug,
+              });
+              const matchScore = result.match_score;
               const getMatchScoreColor = (score: number) => {
                 if (score >= 90) return 'text-green-600 dark:text-green-400';
                 if (score >= 75) return 'text-blue-600 dark:text-blue-400';
@@ -373,7 +364,6 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
               return (
                 <div key={result.slug} className="relative">
-                  {/* Match score badge (top right) */}
                   <div className="absolute top-4 right-4 z-10">
                     <TooltipProvider>
                       <Tooltip>
@@ -381,10 +371,10 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                           <UnifiedBadge
                             variant="base"
                             style="secondary"
-                            className={`${getMatchScoreColor(result.matchScore)} font-bold text-base px-3 py-1`}
+                            className={`${getMatchScoreColor(matchScore)} font-bold text-base px-3 py-1`}
                           >
                             <Sparkles className="h-3 w-3 mr-1" />
-                            {result.matchScore}%
+                            {matchScore}%
                           </UnifiedBadge>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -394,7 +384,6 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     </TooltipProvider>
                   </div>
 
-                  {/* Rank badge (top left) */}
                   {result.rank <= 3 && (
                     <div className="absolute top-4 left-4 z-10">
                       <UnifiedBadge
@@ -407,7 +396,6 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     </div>
                   )}
 
-                  {/* Bookmark button (bottom right) */}
                   <div className="absolute bottom-4 right-4 z-10">
                     <UnifiedButton
                       variant="bookmark"
@@ -417,9 +405,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     />
                   </div>
 
-                  {/* Gradient overlay */}
                   <div
-                    className={`absolute inset-0 bg-gradient-to-br ${getMatchGradient(result.matchScore)} opacity-50 pointer-events-none`}
+                    className={`absolute inset-0 bg-gradient-to-br ${getMatchGradient(matchScore)} opacity-50 pointer-events-none`}
                   />
 
                   <Link href={targetPath}>
@@ -427,7 +414,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                       targetPath={targetPath}
                       displayTitle={result.title}
                       description={result.description}
-                      ariaLabel={`${result.title} - ${result.matchScore}% match`}
+                      ariaLabel={`${result.title} - ${matchScore}% match`}
                       tags={result.tags}
                       maxVisibleTags={4}
                       author={result.author}
@@ -439,7 +426,6 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                       )}
                       renderContent={() => (
                         <>
-                          {/* Primary reason for recommendation */}
                           <div
                             className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} p-3 bg-accent/50 rounded-lg mb-3`}
                           >
@@ -449,38 +435,29 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                             <div>
                               <p className="text-sm font-medium">Why recommended:</p>
                               <p className="text-sm text-muted-foreground">
-                                {result.primaryReason}
+                                {result.primary_reason}
                               </p>
                             </div>
                           </div>
 
-                          {/* Additional reasons */}
-                          {result.reasons.length > 1 && (
+                          {result.reasons && result.reasons.length > 1 && (
                             <div className="flex flex-wrap gap-1">
-                              {result.reasons.slice(1, 4).map((reason) => (
-                                <UnifiedBadge
-                                  key={reason.message}
-                                  variant="base"
-                                  style="secondary"
-                                  className="text-xs"
-                                >
-                                  {reason.message}
-                                </UnifiedBadge>
-                              ))}
+                              {result.reasons
+                                .slice(1, 4)
+                                .map((reason: { type: string; message: string }) => (
+                                  <UnifiedBadge
+                                    key={reason.message}
+                                    variant="base"
+                                    style="secondary"
+                                    className="text-xs"
+                                  >
+                                    {reason.message}
+                                  </UnifiedBadge>
+                                ))}
                             </div>
                           )}
                         </>
                       )}
-                      renderMetadataBadges={() =>
-                        result.viewCount !== undefined ? (
-                          <span
-                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} text-sm text-muted-foreground`}
-                          >
-                            <Eye className="h-3 w-3" />
-                            {result.viewCount}
-                          </span>
-                        ) : null
-                      }
                       customMetadataText={
                         <Button
                           variant="ghost"
@@ -512,7 +489,6 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </TabsContent>
       </Tabs>
 
-      {/* Next Steps CTA */}
       <Card className="bg-primary/5 border-primary/20">
         <CardHeader>
           <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -539,7 +515,6 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </CardContent>
       </Card>
 
-      {/* Share Modal */}
       {showShareModal && (
         <ShareResults
           shareUrl={shareUrl}

@@ -1,40 +1,19 @@
 'use client';
 
 /**
- * For You Feed Client Component
- * Displays personalized recommendations with filtering and infinite scroll
- *
- * **MODERNIZATION (2025):**
- * - Uses UnifiedCardGrid for consistency
- * - FIXED: Removed accessibility anti-patterns (biome-ignore suppression)
- * - FIXED: Uses ConfigCard's onBeforeNavigate instead of wrapper div onClick
- * - FIXED: Memoized data transformation outside render
+ * For You Feed Client - Database-First Architecture
+ * Uses RPC results with minimal UI transformation only.
  */
 
 import { useEffect, useMemo, useState } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { trackEvent } from '@/src/lib/analytics/tracker';
-import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ForYouFeedResponse } from '@/src/lib/schemas/personalization.schema';
+import type { Database } from '@/src/types/database.types';
 
 interface ForYouFeedClientProps {
   initialData: ForYouFeedResponse;
-}
-
-/** Transformed recommendation item with tracking data */
-interface TransformedRecommendation {
-  slug: string;
-  title: string;
-  name: string;
-  description: string;
-  category: CategoryId;
-  tags: string[];
-  author: string;
-  popularity: number | undefined;
-  viewCount: number | undefined;
-  _recommendationSource: string;
-  _recommendationReason: string | undefined;
 }
 
 export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
@@ -56,40 +35,39 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
     [recommendations]
   );
 
-  // MODERNIZATION: Memoize data transformation outside render
-  const transformedRecommendations = useMemo<TransformedRecommendation[]>(
+  const transformedRecommendations = useMemo(
     () =>
-      recommendations.map(
-        (rec): TransformedRecommendation => ({
-          slug: rec.slug,
-          title: rec.title,
-          name: rec.title,
-          description: rec.description,
-          category: rec.category,
-          tags: rec.tags || [],
-          author: rec.author || 'Unknown',
-          popularity: rec.popularity,
-          viewCount: rec.view_count,
-          // Store recommendation-specific data for tracking
-          _recommendationSource: rec.source,
-          _recommendationReason: rec.reason,
-        })
-      ),
+      recommendations.map((rec) => ({
+        id: rec.slug,
+        slug: rec.slug,
+        title: rec.title,
+        description: rec.description,
+        category: rec.category,
+        tags: rec.tags || [],
+        author: rec.author || 'Unknown',
+        date_added: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        source_table: rec.category,
+        author_profile_url: null,
+        seo_title: null,
+        content: null,
+        popularity_score: rec.popularity ?? null,
+        discovery_metadata:
+          {} as Database['public']['Tables']['agents']['Row']['discovery_metadata'],
+        _recommendationSource: rec.source,
+        _recommendationReason: rec.reason,
+      })) as any,
     [recommendations]
   );
 
-  // Filter recommendations by category
   const filteredItems = useMemo(
     () =>
       selectedCategory
-        ? transformedRecommendations.filter((item) => item.category === selectedCategory)
+        ? transformedRecommendations.filter((item: any) => item.category === selectedCategory)
         : transformedRecommendations,
     [transformedRecommendations, selectedCategory]
   );
-
-  // NOTE: Click tracking removed during modernization (no wrappers principle)
-  // TODO: Add click tracking support to ConfigCard component itself
-  // Previous implementation used wrapper div with onClick (accessibility anti-pattern)
 
   return (
     <div>
@@ -133,10 +111,9 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
         ariaLabel="Personalized recommendations"
       />
 
-      {/* Show recommendation reasons below grid if needed */}
-      {filteredItems.some((item) => item._recommendationReason) && (
+      {filteredItems.some((item: any) => item._recommendationReason) && (
         <div className="mt-6 space-y-2">
-          {filteredItems.map((item) =>
+          {filteredItems.map((item: any) =>
             item._recommendationReason ? (
               <p key={item.slug} className="text-xs text-muted-foreground italic">
                 <strong>{item.title}:</strong> {item._recommendationReason}

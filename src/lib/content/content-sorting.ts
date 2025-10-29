@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { ContentItem } from '@/src/lib/schemas/content/content-item-union.schema';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 
 // Production-grade sort option validation schema
 const sortOptionSchema = z.enum(['trending', 'newest', 'alphabetical', 'popularity']);

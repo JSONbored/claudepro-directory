@@ -1,10 +1,8 @@
 'use client';
 
 /**
- * Job Form Component
- * Reusable form for creating/editing job listings
- *
- * Follows patterns from existing forms and react-hook-form integration
+ * Job Form Component - Database-First Architecture
+ * All slug generation in PostgreSQL via job_slug() function.
  */
 
 import { useState, useTransition } from 'react';
@@ -43,40 +41,45 @@ interface JobFormProps {
 
 export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: JobFormProps) {
   const [isPending, startTransition] = useTransition();
-  const [tags, setTags] = useState<string[]>(initialData?.tags || []);
-  const [requirements, setRequirements] = useState<string[]>(initialData?.requirements || []);
-  const [benefits, setBenefits] = useState<string[]>(initialData?.benefits || []);
+  const [tags, setTags] = useState<string[]>(
+    Array.isArray(initialData?.tags) ? (initialData.tags as string[]) : []
+  );
+  const [requirements, setRequirements] = useState<string[]>(
+    Array.isArray(initialData?.requirements) ? (initialData.requirements as string[]) : []
+  );
+  const [benefits, setBenefits] = useState<string[]>(
+    Array.isArray(initialData?.benefits) ? (initialData.benefits as string[]) : []
+  );
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
 
+    const location = formData.get('location') as string;
+    const salary = formData.get('salary') as string;
+    const workplace = formData.get('workplace') as string;
+    const experience = formData.get('experience') as string;
+    const contactEmail = formData.get('contact_email') as string;
+    const companyLogo = formData.get('company_logo') as string;
+
     const jobData: CreateJobInput = {
       title: formData.get('title') as string,
       company: formData.get('company') as string,
-      location: (formData.get('location') as string) || undefined,
+      ...(location && { location }),
       description: formData.get('description') as string,
-      salary: (formData.get('salary') as string) || undefined,
+      ...(salary && { salary }),
       remote: formData.get('remote') === 'on',
-      type: formData.get('type') as
-        | 'full-time'
-        | 'part-time'
-        | 'contract'
-        | 'internship'
-        | 'freelance',
-      workplace: (formData.get('workplace') as 'On site' | 'Remote' | 'Hybrid') || undefined,
-      experience:
-        (formData.get('experience') as 'Entry' | 'Mid' | 'Senior' | 'Lead' | 'Executive') ||
-        undefined,
+      type: formData.get('type') as string,
+      ...(workplace && { workplace }),
+      ...(experience && { experience }),
       category: formData.get('category') as string,
       tags,
       requirements,
       benefits,
       link: formData.get('link') as string,
-      contact_email: (formData.get('contact_email') as string) || undefined,
-      company_logo: (formData.get('company_logo') as string) || undefined,
-      plan: (formData.get('plan') as 'standard' | 'featured' | 'premium') || 'standard',
+      ...(contactEmail && { contact_email: contactEmail }),
+      ...(companyLogo && { company_logo: companyLogo }),
     };
 
     startTransition(async () => {
@@ -98,7 +101,6 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Basic Info */}
       <Card>
         <CardHeader>
           <CardTitle>Job Details</CardTitle>
@@ -213,7 +215,6 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         </CardContent>
       </Card>
 
-      {/* Requirements */}
       <Card>
         <CardHeader>
           <CardTitle>Requirements</CardTitle>
@@ -231,7 +232,6 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         </CardContent>
       </Card>
 
-      {/* Benefits */}
       <Card>
         <CardHeader>
           <CardTitle>Benefits (Optional)</CardTitle>
@@ -250,7 +250,6 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         </CardContent>
       </Card>
 
-      {/* Tags */}
       <Card>
         <CardHeader>
           <CardTitle>Tags *</CardTitle>
@@ -272,7 +271,6 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         </CardContent>
       </Card>
 
-      {/* Application Details */}
       <Card>
         <CardHeader>
           <CardTitle>Application Details</CardTitle>
@@ -309,7 +307,6 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         </CardContent>
       </Card>
 
-      {/* Plan Selection */}
       <Card>
         <CardHeader>
           <CardTitle>Listing Plan</CardTitle>
@@ -344,12 +341,10 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         </CardContent>
       </Card>
 
-      {/* Hidden inputs for arrays (handled by state) */}
       <input type="hidden" name="tags" value={JSON.stringify(tags)} />
       <input type="hidden" name="requirements" value={JSON.stringify(requirements)} />
       <input type="hidden" name="benefits" value={JSON.stringify(benefits)} />
 
-      {/* Submit */}
       <div className="flex gap-4">
         <Button
           type="submit"

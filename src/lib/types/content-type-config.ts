@@ -10,16 +10,7 @@
 import type { ReactNode } from 'react';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import type { LucideIcon } from '@/src/lib/icons';
-
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
-
-/**
- * Troubleshooting item structure
- */
-export interface TroubleshootingItem {
-  issue: string;
-  solution: string;
-}
 
 /**
  * Installation steps structure
@@ -63,15 +54,16 @@ export interface SectionConfig {
 }
 
 /**
- * Generator functions for auto-generating content
+ * Generator functions - DEPRECATED
+ *
+ * Generators have been migrated to PostgreSQL database (content_generator_configs table).
+ * All generation logic now happens in the database via triggers using generate_content_field() RPC.
+ *
+ * This interface is kept for backwards compatibility but should not be used.
+ * All content fields (installation, use_cases, troubleshooting, etc.) are now pre-populated
+ * in the database before TypeScript ever sees them.
  */
-export interface GeneratorConfig {
-  installation?: (item: ContentItem) => InstallationSteps;
-  use_cases?: (item: ContentItem) => string[];
-  features?: (item: ContentItem) => string[];
-  troubleshooting?: (item: ContentItem) => TroubleshootingItem[];
-  requirements?: (item: ContentItem) => string[];
-}
+export type GeneratorConfig = {};
 
 /**
  * Custom renderer functions for specialized content
@@ -99,6 +91,7 @@ export interface ContentTypeConfig {
   typeName: string; // "Agent", "Command", "MCP Server", etc.
   icon: LucideIcon; // Lucide icon component
   colorScheme: string; // Tailwind color class for badges (e.g., "purple-500")
+  description?: string; // Category description
 
   // Primary action button
   primaryAction: ActionButtonConfig;

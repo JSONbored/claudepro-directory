@@ -25,12 +25,45 @@ import { relatedContentService } from '#lib/related-content/service';
 import { BaseCard } from '@/src/components/domain/base-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { Sparkles } from '@/src/lib/icons';
-import type {
-  RelatedContentItem,
-  SmartRelatedContentProps,
-} from '@/src/lib/schemas/related-content.schema';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
+
+/**
+ * Extended ContentItem for related content with matching metadata
+ */
+type RelatedContentItem = ContentItem & {
+  score?: number;
+  matchType?: string;
+  matchDetails?: {
+    matchedTags: string[];
+    matchedKeywords: string[];
+  };
+};
+
+/**
+ * Props for SmartRelatedContentProps
+ */
+export interface SmartRelatedContentProps {
+  /** Current pathname for context */
+  pathname?: string;
+  /** Current tags for matching */
+  currentTags?: string[];
+  /** Current keywords for matching */
+  currentKeywords?: string[];
+  /** Show featured content */
+  featured?: boolean;
+  /** Slugs to exclude from results */
+  exclude?: string[];
+  /** Maximum number of items to show */
+  limit?: number;
+  /** Enable analytics tracking */
+  trackingEnabled?: boolean;
+  /** Section title */
+  title?: string;
+  /** Show section title */
+  showTitle?: boolean;
+}
 
 /**
  * Get category color styles for badges
@@ -97,7 +130,7 @@ function getCategoryFromPath(pathname: string | undefined): string {
  * ```
  */
 export function RelatedContentClient({
-  featured = [],
+  featured = false,
   exclude = [],
   limit = 3,
   trackingEnabled = true,
@@ -107,6 +140,7 @@ export function RelatedContentClient({
   title = 'Related Content',
   showTitle = true,
 }: SmartRelatedContentProps) {
+  // Extended ContentItem with related content properties already exists in schema
   const [items, setItems] = useState<RelatedContentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [cacheHit, setCacheHit] = useState(false);
@@ -129,8 +163,29 @@ export function RelatedContentClient({
           limit,
         });
 
+        // Convert service response to RelatedContentItem format
+        const convertedItems = response.items.map(
+          (item: any): RelatedContentItem =>
+            ({
+              category: item.category,
+              slug: item.slug,
+              title: item.title,
+              description: item.description,
+              author: item.author,
+              date_added: item.date_added,
+              tags: item.tags,
+              // Add related content specific properties
+              score: item.score,
+              matchType: item.match_type,
+              matchDetails: {
+                matchedTags: item.matched_tags || [],
+                matchedKeywords: [],
+              },
+            }) as unknown as RelatedContentItem
+        );
+
         // Service now returns properly typed RelatedContentItem[] with all required fields
-        setItems(response.items);
+        setItems(convertedItems);
         setCacheHit(response.performance.cacheHit);
       } catch (_error) {
         // Error handling - silently fail with empty results
@@ -194,34 +249,36 @@ export function RelatedContentClient({
       )}
 
       <UnifiedCardGrid
-        items={items}
+        items={items as readonly ContentItem[]}
         variant="tight"
         loading={loading}
         emptyMessage="No related content available"
         loadingMessage="Finding related content..."
         renderCard={(item, index) => {
-          const matchBadge = getMatchTypeBadge(item.matchType ?? 'unknown');
-          const categoryBadge = getCategoryBadgeClass(item.category);
+          // Cast back to RelatedContentItem to access extended properties
+          const relatedItem = item as RelatedContentItem;
+          const matchBadge = getMatchTypeBadge(relatedItem.matchType ?? 'unknown');
+          const categoryBadge = getCategoryBadgeClass(relatedItem.category);
 
           return (
             <BaseCard
-              key={`${item.category}-${item.slug}`}
+              key={`${relatedItem.category}-${relatedItem.slug}`}
               targetPath={getContentItemUrl({
-                category: item.category,
-                slug: item.slug,
+                category: relatedItem.category as any,
+                slug: relatedItem.slug,
               })}
-              displayTitle={item.title ?? item.name ?? item.slug}
-              description={item.description}
-              tags={item.matchDetails?.matchedTags?.slice(0, 2) ?? []}
+              displayTitle={relatedItem.title ?? relatedItem.slug}
+              description={relatedItem.description}
+              tags={relatedItem.matchDetails?.matchedTags?.slice(0, 2) ?? []}
               topAccent
               compactMode
-              ariaLabel={`Related: ${item.title || item.name}`}
+              ariaLabel={`Related: ${relatedItem.title}`}
               onBeforeNavigate={() => {
                 // Track click with dynamic import (Storybook compatible)
                 if (trackingEnabled) {
                   const itemUrl = getContentItemUrl({
-                    category: item.category,
-                    slug: item.slug,
+                    category: relatedItem.category as any,
+                    slug: relatedItem.slug,
                   });
 
                   import('#lib/analytics/events/related-content')
@@ -230,7 +287,7 @@ export function RelatedContentClient({
                         pathname,
                         itemUrl,
                         index + 1,
-                        item.score ?? 0
+                        relatedItem.score ?? 0
                       );
                     })
                     .catch(() => {
@@ -245,7 +302,7 @@ export function RelatedContentClient({
                     variant="base"
                     style="secondary"
                   >
-                    {item.category}
+                    {relatedItem.category}
                   </UnifiedBadge>
                   <div title={matchBadge.label === 'Keyword' ? 'Keyword Match' : matchBadge.label}>
                     <UnifiedBadge

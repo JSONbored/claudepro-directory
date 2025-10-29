@@ -27,9 +27,8 @@ import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unifi
 import { isValidCategory } from '@/src/lib/config/category-config';
 import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
 import { detectLanguage } from '@/src/lib/content/language-detection';
-import type { FullContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting-starry';
-import type { ContentItem } from '@/src/lib/schemas/component.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { getDisplayTitle } from '@/src/lib/utils';
@@ -46,7 +45,7 @@ import { DetailMetadata } from './detail-metadata';
 import { DetailSidebar } from './sidebar/detail-sidebar';
 
 export interface UnifiedDetailPageProps {
-  item: ContentItem | FullContentItem; // Accept view data or full table row
+  item: ContentItem;
   relatedItems?: ContentItem[];
   viewCount?: number;
   relatedItemsPromise?: Promise<ContentItem[]>;
@@ -60,7 +59,7 @@ async function ViewCountMetadata({
   item,
   viewCountPromise,
 }: {
-  item: ContentItem | FullContentItem;
+  item: ContentItem;
   viewCountPromise: Promise<number>;
 }) {
   const viewCount = await viewCountPromise;
@@ -75,7 +74,7 @@ async function SidebarWithRelated({
   relatedItemsPromise,
   config,
 }: {
-  item: ContentItem | FullContentItem;
+  item: ContentItem;
   relatedItemsPromise: Promise<ContentItem[]>;
   config: {
     typeName: string;
@@ -99,8 +98,8 @@ export async function UnifiedDetailPage({
   relatedItemsPromise,
   viewCountPromise,
 }: UnifiedDetailPageProps) {
-  // Get configuration for this content type (Server Component - no hooks)
-  const config = getContentTypeConfig(item.category);
+  // Get configuration for this content type from database
+  const config = await getContentTypeConfig(item.category);
 
   // Generate display title (Server Component - direct computation)
   const displayTitle = getDisplayTitle(item);
@@ -112,44 +111,42 @@ export async function UnifiedDetailPage({
   } = await supabase.auth.getUser();
   const currentUserId = user?.id;
 
-  // Generate content using generators (Server Component - direct computation)
+  // Generate content using data from database (generators moved to PostgreSQL)
   const installation = (() => {
-    if (!config) return undefined;
     if ('installation' in item && item.installation) {
       if (typeof item.installation === 'object' && !Array.isArray(item.installation)) {
         return item.installation as InstallationSteps;
       }
     }
-    return config.generators.installation?.(item);
+    return undefined;
   })();
 
   const useCases = (() => {
-    if (!config) return [];
-    return 'use_cases' in item && item.use_cases && item.use_cases.length > 0
+    return 'use_cases' in item && Array.isArray(item.use_cases) && item.use_cases.length > 0
       ? item.use_cases
-      : // biome-ignore lint/correctness/useHookAtTopLevel: config.generators.use_cases is a generator function, not a React hook - false positive due to "use" in property name
-        config.generators.use_cases?.(item) || [];
+      : [];
   })();
 
   const features = (() => {
-    if (!config) return [];
-    return 'features' in item && item.features && item.features.length > 0
+    return 'features' in item && Array.isArray(item.features) && item.features.length > 0
       ? item.features
-      : config.generators.features?.(item) || [];
+      : [];
   })();
 
   const troubleshooting = (() => {
-    if (!config) return [];
-    return 'troubleshooting' in item && item.troubleshooting && item.troubleshooting.length > 0
+    return 'troubleshooting' in item &&
+      Array.isArray(item.troubleshooting) &&
+      item.troubleshooting.length > 0
       ? item.troubleshooting
-      : config.generators.troubleshooting?.(item) || [];
+      : [];
   })();
 
   const requirements = (() => {
-    if (!config) return [];
-    return 'requirements' in item && item.requirements && item.requirements.length > 0
+    return 'requirements' in item &&
+      Array.isArray(item.requirements) &&
+      item.requirements.length > 0
       ? item.requirements
-      : config.generators.requirements?.(item) || [];
+      : [];
   })();
 
   // ============================================================================
@@ -285,9 +282,9 @@ export async function UnifiedDetailPage({
   // Pre-process usage examples highlighting (UsageExamplesSection data)
   const examplesData = await (async () => {
     if (
-      !('examples' in item) ||
+      !('examples' in item && item.examples && Array.isArray(item.examples)) ||
       item.examples.length === 0 ||
-      !item.examples.every((ex) => typeof ex === 'object' && 'code' in ex)
+      !item.examples.every((ex: unknown) => typeof ex === 'object' && ex !== null && 'code' in ex)
     ) {
       return null;
     }
@@ -377,7 +374,7 @@ export async function UnifiedDetailPage({
           {/* Primary content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Content/Code section */}
-            {contentData && (
+            {contentData && config && (
               <UnifiedContentSection
                 variant="content"
                 title={`${config.typeName} Content`}
@@ -390,13 +387,13 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Features Section */}
-            {config.sections.features && features.length > 0 && (
+            {config && config.sections.features && features.length > 0 && (
               <UnifiedContentSection
                 variant="bullets"
                 title="Features"
                 description="Key capabilities and functionality"
-                items={features}
-                category={item.category}
+                items={features as string[]}
+                category={item.category as any}
                 bulletColor="primary"
               />
             )}
@@ -407,14 +404,14 @@ export async function UnifiedDetailPage({
                 variant="bullets"
                 title="Requirements"
                 description="Prerequisites and dependencies"
-                items={requirements}
-                category={item.category}
+                items={requirements as string[]}
+                category={item.category as any}
                 bulletColor="orange"
               />
             )}
 
             {/* Installation Section */}
-            {config.sections.installation && installation && (
+            {config && config.sections.installation && installation && (
               <UnifiedContentSection
                 variant="installation"
                 installation={installation}
@@ -423,7 +420,7 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Configuration Section */}
-            {config.sections.configuration && configData && (
+            {config && config.sections.configuration && configData && (
               <UnifiedContentSection
                 variant="configuration"
                 {...(configData.format === 'multi'
@@ -444,40 +441,40 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Use Cases Section */}
-            {config.sections.use_cases && useCases.length > 0 && (
+            {config && config.sections.use_cases && useCases.length > 0 && (
               <UnifiedContentSection
                 variant="bullets"
                 title="Use Cases"
                 description="Common scenarios and applications"
-                items={useCases}
-                category={item.category}
+                items={useCases as string[]}
+                category={item.category as any}
                 bulletColor="accent"
               />
             )}
 
             {/* Security Section (MCP-specific) */}
-            {config.sections.security && 'security' in item && (
+            {config && config.sections.security && 'security' in item && (
               <UnifiedContentSection
                 variant="bullets"
                 title="Security Best Practices"
                 description="Important security considerations"
                 items={item.security as string[]}
-                category={item.category}
+                category={item.category as any}
                 bulletColor="orange"
               />
             )}
 
             {/* Troubleshooting Section */}
-            {config.sections.troubleshooting && troubleshooting.length > 0 && (
+            {config && config.sections.troubleshooting && troubleshooting.length > 0 && (
               <UnifiedContentSection
                 variant="troubleshooting"
-                items={troubleshooting}
+                items={troubleshooting as any}
                 description="Common issues and solutions"
               />
             )}
 
             {/* Usage Examples Section - GitHub-style code snippets with syntax highlighting */}
-            {config.sections.examples && examplesData && examplesData.length > 0 && (
+            {config && config.sections.examples && examplesData && examplesData.length > 0 && (
               <UnifiedContentSection variant="examples" examples={examplesData} />
             )}
 
@@ -504,7 +501,7 @@ export async function UnifiedDetailPage({
 
           {/* Sidebar - Stream related items if promise provided */}
           <aside className="lg:sticky lg:top-24 lg:self-start space-y-6">
-            {relatedItemsPromise ? (
+            {relatedItemsPromise && config ? (
               <Suspense
                 fallback={
                   <DetailSidebar
@@ -526,7 +523,7 @@ export async function UnifiedDetailPage({
                   }}
                 />
               </Suspense>
-            ) : (
+            ) : config ? (
               <DetailSidebar
                 item={item}
                 relatedItems={relatedItems}
@@ -535,7 +532,7 @@ export async function UnifiedDetailPage({
                   metadata: config.metadata,
                 }}
               />
-            )}
+            ) : null}
           </aside>
         </div>
       </div>

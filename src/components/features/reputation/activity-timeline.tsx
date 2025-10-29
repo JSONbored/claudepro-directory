@@ -9,18 +9,11 @@ import { useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent } from '@/src/components/primitives/card';
+import type { Activity } from '@/src/lib/actions/user.actions';
 import { ExternalLink, FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Database } from '@/src/types/database.types';
 
-// Activity types from database tables (database-first)
-type PostActivity = Database['public']['Tables']['posts']['Row'] & { type: 'post' };
-type CommentActivity = Database['public']['Tables']['comments']['Row'] & { type: 'comment' };
-type VoteActivity = Database['public']['Tables']['votes']['Row'] & { type: 'vote' };
-type SubmissionActivity = Database['public']['Tables']['submissions']['Row'] & {
-  type: 'submission';
-};
-type Activity = PostActivity | CommentActivity | VoteActivity | SubmissionActivity;
+// Activity type imported from user.actions (database-validated with Zod)
 type ActivityType = 'post' | 'comment' | 'vote' | 'submission';
 
 interface ActivityTimelineProps {
@@ -161,28 +154,15 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                     {activity.type === 'post' && (
                       <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2}>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-base mb-1">
-                            {activity.url ? (
-                              <a
-                                href={activity.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={'hover:text-primary inline-flex items-center gap-1'}
-                              >
-                                {activity.title}
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                            ) : (
-                              activity.title
-                            )}
-                          </h3>
-                          <div
-                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-sm text-muted-foreground`}
-                          >
-                            <span>{activity.vote_count} votes</span>
-                            <span>•</span>
-                            <span>{activity.comment_count} comments</span>
-                          </div>
+                          <h3 className="font-medium text-base mb-1">{activity.title}</h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {activity.body}
+                          </p>
+                          {activity.content_type && activity.content_slug && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Posted in {activity.content_type}/{activity.content_slug}
+                            </p>
+                          )}
                         </div>
                         <UnifiedBadge
                           variant="base"
@@ -198,7 +178,10 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                       <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2}>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-muted-foreground mb-1">Commented on a post</p>
-                          <p className="text-sm line-clamp-2">{activity.content}</p>
+                          <p className="text-sm line-clamp-2">{activity.body}</p>
+                          {activity.parent_id && (
+                            <p className="text-xs text-muted-foreground mt-1">Reply to comment</p>
+                          )}
                         </div>
                         <UnifiedBadge
                           variant="base"
@@ -226,22 +209,27 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                     {activity.type === 'submission' && (
                       <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2}>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-base mb-1">{activity.content_name}</h3>
+                          <h3 className="font-medium text-base mb-1">{activity.title}</h3>
+                          {activity.description && (
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {activity.description}
+                            </p>
+                          )}
                           <div
-                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm text-muted-foreground`}
+                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm text-muted-foreground mt-2`}
                           >
                             <UnifiedBadge variant="base" style="secondary" className="text-xs">
                               {activity.content_type}
                             </UnifiedBadge>
                             {getStatusBadge(activity.status)}
-                            {activity.pr_url && (
+                            {activity.submission_url && (
                               <a
-                                href={activity.pr_url}
+                                href={activity.submission_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className={'inline-flex items-center gap-1 hover:text-primary'}
                               >
-                                View PR
+                                View submission
                                 <ExternalLink className="h-3 w-3" />
                               </a>
                             )}

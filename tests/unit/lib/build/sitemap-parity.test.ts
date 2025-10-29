@@ -27,13 +27,7 @@ import { getContentByCategory } from '@/src/lib/content/supabase-content-loader'
 describe('Sitemap Parity Test', () => {
   describe('Dynamic Sitemap Generation', () => {
     it('generates URLs using centralized URL generator', async () => {
-      const urls = await generateAllSiteUrls({
-        baseUrl: APP_CONFIG.url,
-        includeGuides: true,
-        includeChangelog: true,
-        includeLlmsTxt: true,
-        includeTools: true,
-      });
+      const urls = await generateAllSiteUrls({ baseUrl: APP_CONFIG.url });
 
       expect(urls).toBeDefined();
       expect(Array.isArray(urls)).toBe(true);
@@ -117,10 +111,7 @@ describe('Sitemap Parity Test', () => {
     });
 
     it('includes llms.txt routes when enabled', async () => {
-      const urls = await generateAllSiteUrls({
-        baseUrl: APP_CONFIG.url,
-        includeLlmsTxt: true,
-      });
+      const urls = await generateAllSiteUrls({ baseUrl: APP_CONFIG.url });
       const agentsMetadata = await getContentByCategory('agents');
 
       // Site-wide llms.txt
@@ -162,13 +153,7 @@ describe('Sitemap Parity Test', () => {
 
   describe('URL Count Validation', () => {
     it('generates expected number of URLs (±10 tolerance for growth)', async () => {
-      const dynamicUrls = await generateAllSiteUrls({
-        baseUrl: APP_CONFIG.url,
-        includeGuides: true,
-        includeChangelog: true,
-        includeLlmsTxt: true,
-        includeTools: true,
-      });
+      const dynamicUrls = await generateAllSiteUrls({ baseUrl: APP_CONFIG.url });
 
       // Baseline: 427 URLs (2025-10-11 - verified from last static generation)
       // NOTE: Update this baseline when you add significant new content sections
@@ -184,13 +169,7 @@ describe('Sitemap Parity Test', () => {
     });
 
     it('includes all critical routes', async () => {
-      const urls = await generateAllSiteUrls({
-        baseUrl: APP_CONFIG.url,
-        includeGuides: true,
-        includeChangelog: true,
-        includeLlmsTxt: true,
-        includeTools: true,
-      });
+      const urls = await generateAllSiteUrls({ baseUrl: APP_CONFIG.url });
 
       const urlSet = new Set(urls.map((u) => u.loc));
 

@@ -10,7 +10,6 @@
  * This ensures llms.txt content matches UnifiedDetailPage rendering EXACTLY for optimal LLM citation accuracy
  */
 
-import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
 import type { Database } from '@/src/types/database.types';
 
 /**
@@ -103,15 +102,9 @@ interface AIConfiguration {
   systemPrompt?: string;
 }
 
-/**
- * Type-safe troubleshooting item types
- */
-interface TroubleshootingItem {
-  issue: string;
-  solution: string;
-}
+import type { Json } from '@/src/types/database.types';
 
-type TroubleshootingEntry = TroubleshootingItem | string;
+type TroubleshootingEntry = Json | string;
 
 /**
  * Type-safe example types
@@ -148,59 +141,34 @@ type Example = CodeExample | RuleExample | string;
  * Build complete rich content string from any content item
  * Extracts ALL available fields based on content type
  *
- * CRITICAL: Section order MUST match UnifiedDetailPage rendering exactly for consistency
- * @see src/components/unified-detail-page/index.tsx lines 146-235
+ * All content fields are now pre-populated in PostgreSQL via database triggers.
+ * No runtime generation needed - fields like installation, use_cases, and troubleshooting
+ * are populated when content is inserted/updated in the database.
  *
  * @param item - Content item (mcp, agent, hook, command, rule, statusline)
  * @returns Complete formatted content string for llms.txt
- *
- * @remarks
- * Each content type has different fields - this function handles all types safely
- * Section order mirrors the page rendering for optimal LLM citation accuracy
- * Uses generators from content-type-configs to fill missing fields (matches UnifiedDetailPage exactly)
  */
 import type { FullContentItem } from '@/src/lib/content/supabase-content-loader';
 
 export function buildRichContent(item: ContentItem | FullContentItem): string {
   const sections: string[] = [];
 
-  // Get content type config for generators (matches UnifiedDetailPage line 49)
-  const config = getContentTypeConfig(item.category);
-
-  // Generate dynamic fields using config generators (matches UnifiedDetailPage lines 54-96)
-  // Extract generator functions first to avoid conditional calls
-  const genFeatures = config?.generators.features;
-  const genRequirements = config?.generators.requirements;
-  const genUseCases = config?.generators.use_cases;
-  const genTroubleshooting = config?.generators.troubleshooting;
-
-  const features =
-    'features' in item && item.features && item.features.length > 0
-      ? item.features
-      : genFeatures?.(item) || [];
+  // Extract fields from database (now pre-populated by triggers)
+  // No generators needed - all fields are populated in PostgreSQL
+  const features = 'features' in item && Array.isArray(item.features) ? item.features : [];
 
   const requirements =
-    'requirements' in item && item.requirements && item.requirements.length > 0
-      ? item.requirements
-      : genRequirements?.(item) || [];
+    'requirements' in item && Array.isArray(item.requirements)
+      ? (item.requirements as string[])
+      : [];
 
   const useCases =
-    'use_cases' in item && item.use_cases && item.use_cases.length > 0
-      ? item.use_cases
-      : genUseCases?.(item) || [];
+    'use_cases' in item && Array.isArray(item.use_cases) ? (item.use_cases as string[]) : [];
 
   const troubleshooting =
-    'troubleshooting' in item && item.troubleshooting && item.troubleshooting.length > 0
-      ? item.troubleshooting
-      : genTroubleshooting?.(item) || [];
+    'troubleshooting' in item && Array.isArray(item.troubleshooting) ? item.troubleshooting : [];
 
-  // Handle installation: prefer schema field, fallback to generator
-  const installation = (() => {
-    if ('installation' in item && item.installation) {
-      return item.installation;
-    }
-    return config?.generators.installation?.(item);
-  })();
+  const installation = 'installation' in item && item.installation ? item.installation : null;
 
   // 1. MAIN CONTENT SECTION (matches UnifiedDetailPage lines 148-155)
   // The primary content field - agents, commands, rules have markdown content
@@ -211,58 +179,45 @@ export function buildRichContent(item: ContentItem | FullContentItem): string {
     sections.push(item.content.trim());
   }
 
-  // 2. FEATURES SECTION (matches UnifiedDetailPage lines 157-166)
-  // Uses generated features if not in schema
-  if (config?.sections.features && features.length > 0) {
+  // 2. FEATURES SECTION
+  if (features.length > 0) {
     sections.push(formatBulletList('KEY FEATURES', features));
   }
 
-  // 3. REQUIREMENTS SECTION (matches UnifiedDetailPage lines 168-177)
-  // Uses generated requirements if not in schema
+  // 3. REQUIREMENTS SECTION
   if (requirements.length > 0) {
     sections.push(formatBulletList('REQUIREMENTS', requirements));
   }
 
-  // 4. INSTALLATION SECTION (matches UnifiedDetailPage lines 179-182)
-  // Uses generated installation if not in schema
-  if (config?.sections.installation && installation) {
+  // 4. INSTALLATION SECTION
+  if (installation) {
     sections.push(formatInstallation(installation));
   }
 
-  // 5. CONFIGURATION SECTION (matches UnifiedDetailPage lines 184-193)
-  if (config?.sections.configuration && 'configuration' in item && item.configuration) {
-    sections.push(formatConfiguration(item.configuration, item.category));
+  // 5. CONFIGURATION SECTION
+  if ('configuration' in item && item.configuration) {
+    sections.push(
+      formatConfiguration(item.configuration as Record<string, unknown>, item.category || '')
+    );
   }
 
-  // 6. USE CASES SECTION (matches UnifiedDetailPage lines 195-204)
-  // Uses generated useCases if not in schema
-  if (config?.sections.use_cases && useCases.length > 0) {
+  // 6. USE CASES SECTION
+  if (useCases.length > 0) {
     sections.push(formatBulletList('USE CASES', useCases));
   }
 
-  // 7. SECURITY SECTION (MCP-specific, matches UnifiedDetailPage lines 206-215)
-  if (
-    config?.sections.security &&
-    'security' in item &&
-    Array.isArray(item.security) &&
-    item.security.length > 0
-  ) {
-    sections.push(formatBulletList('SECURITY BEST PRACTICES', item.security));
+  // 7. SECURITY SECTION (MCP-specific)
+  if ('security' in item && Array.isArray(item.security) && item.security.length > 0) {
+    sections.push(formatBulletList('SECURITY BEST PRACTICES', item.security as string[]));
   }
 
-  // 8. TROUBLESHOOTING SECTION (matches UnifiedDetailPage lines 217-223)
-  // Uses generated troubleshooting if not in schema
-  if (config?.sections.troubleshooting && troubleshooting.length > 0) {
+  // 8. TROUBLESHOOTING SECTION
+  if (troubleshooting.length > 0) {
     sections.push(formatTroubleshooting(troubleshooting));
   }
 
-  // 9. EXAMPLES SECTION (MCP-specific, matches UnifiedDetailPage lines 225-235)
-  if (
-    config?.sections.examples &&
-    'examples' in item &&
-    Array.isArray(item.examples) &&
-    item.examples.length > 0
-  ) {
+  // 9. EXAMPLES SECTION
+  if ('examples' in item && Array.isArray(item.examples) && item.examples.length > 0) {
     // Type assertion: item.examples from baseUsageExampleSchema matches our Example type
     // Safe because Example = CodeExample | RuleExample | string, and baseUsageExampleSchema = CodeExample
     sections.push(formatExamples(item.examples as Example[], item.category));
@@ -286,7 +241,7 @@ export function buildRichContent(item: ContentItem | FullContentItem): string {
 function formatBulletList(title: string, items: string[]): string {
   const lines = [title, '-'.repeat(title.length), ''];
   for (const item of items) {
-    lines.push(`• ${item}`);
+    lines.push(`? ${item}`);
   }
   return lines.join('\n');
 }
@@ -358,7 +313,7 @@ function formatInstallation(installation: unknown): string {
   if (inst.requirements) {
     lines.push('Requirements:');
     for (const req of inst.requirements) {
-      lines.push(`• ${req}`);
+      lines.push(`? ${req}`);
     }
     lines.push('');
   }
@@ -584,17 +539,14 @@ function formatAiConfiguration(config: AIConfiguration): string {
   return lines.join('\n');
 }
 
-/**
- * Type guard for TroubleshootingItem
- */
-function isTroubleshootingItem(value: unknown): value is TroubleshootingItem {
+function isTroubleshootingItem(value: unknown): value is { issue: string; solution: string } {
   return (
     typeof value === 'object' &&
     value !== null &&
     'issue' in value &&
     'solution' in value &&
-    typeof (value as TroubleshootingItem).issue === 'string' &&
-    typeof (value as TroubleshootingItem).solution === 'string'
+    typeof (value as { issue: unknown; solution: unknown }).issue === 'string' &&
+    typeof (value as { issue: unknown; solution: unknown }).solution === 'string'
   );
 }
 
@@ -610,7 +562,7 @@ function formatTroubleshooting(items: TroubleshootingEntry[]): string {
       lines.push(`   Solution: ${item.solution}`);
       lines.push('');
     } else if (typeof item === 'string') {
-      lines.push(`• ${item}`);
+      lines.push(`? ${item}`);
     }
   }
 
@@ -672,7 +624,7 @@ function formatExamples(examples: Example[], category: string): string {
     }
     // Simple string examples (fallback)
     else if (typeof example === 'string') {
-      lines.push(`• ${example}`);
+      lines.push(`? ${example}`);
     }
   }
 
@@ -682,7 +634,7 @@ function formatExamples(examples: Example[], category: string): string {
 /**
  * Build technical details section
  */
-function buildTechnicalDetails(item: ContentItem): string {
+function buildTechnicalDetails(item: ContentItem | FullContentItem): string {
   const lines = ['TECHNICAL DETAILS', '-----------------', ''];
 
   // Package info (MCP servers)
@@ -710,23 +662,27 @@ function buildTechnicalDetails(item: ContentItem): string {
     }
 
     // Permissions
-    if ('permissions' in item && item.permissions && item.permissions.length > 0) {
-      lines.push(`Permissions: ${item.permissions.join(', ')}`);
+    if ('permissions' in item && Array.isArray(item.permissions) && item.permissions.length > 0) {
+      lines.push(`Permissions: ${(item.permissions as string[]).join(', ')}`);
     }
 
     // Tools/Resources provided
-    if ('toolsProvided' in item && item.toolsProvided && item.toolsProvided.length > 0) {
-      lines.push(`Tools Provided: ${item.toolsProvided.join(', ')}`);
+    if (
+      'toolsProvided' in item &&
+      Array.isArray(item.toolsProvided) &&
+      item.toolsProvided.length > 0
+    ) {
+      lines.push(`Tools Provided: ${(item.toolsProvided as string[]).join(', ')}`);
     }
     if (
       'resourcesProvided' in item &&
-      item.resourcesProvided &&
+      Array.isArray(item.resourcesProvided) &&
       item.resourcesProvided.length > 0
     ) {
-      lines.push(`Resources Provided: ${item.resourcesProvided.join(', ')}`);
+      lines.push(`Resources Provided: ${(item.resourcesProvided as string[]).join(', ')}`);
     }
-    if ('dataTypes' in item && item.dataTypes && item.dataTypes.length > 0) {
-      lines.push(`Data Types: ${item.dataTypes.join(', ')}`);
+    if ('dataTypes' in item && Array.isArray(item.dataTypes) && item.dataTypes.length > 0) {
+      lines.push(`Data Types: ${(item.dataTypes as string[]).join(', ')}`);
     }
 
     // MCP protocol version
@@ -747,24 +703,24 @@ function buildTechnicalDetails(item: ContentItem): string {
   if (
     item.category === 'rules' &&
     'relatedRules' in item &&
-    item.relatedRules &&
+    Array.isArray(item.relatedRules) &&
     item.relatedRules.length > 0
   ) {
-    lines.push(`Related Rules: ${item.relatedRules.join(', ')}`);
+    lines.push(`Related Rules: ${(item.relatedRules as string[]).join(', ')}`);
   }
 
   // Expertise areas (rules only)
   if (
     item.category === 'rules' &&
     'expertiseAreas' in item &&
-    item.expertiseAreas &&
+    Array.isArray(item.expertiseAreas) &&
     item.expertiseAreas.length > 0
   ) {
-    lines.push(`Expertise Areas: ${item.expertiseAreas.join(', ')}`);
+    lines.push(`Expertise Areas: ${(item.expertiseAreas as string[]).join(', ')}`);
   }
 
   // Documentation URL
-  if ('documentationUrl' in item && item.documentation_url) {
+  if ('documentation_url' in item && item.documentation_url) {
     lines.push(`Documentation: ${item.documentation_url}`);
   }
 

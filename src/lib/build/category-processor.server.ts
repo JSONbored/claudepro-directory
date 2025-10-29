@@ -324,11 +324,11 @@ async function processContentFile<T extends ContentType>(
     // Validate with category-specific schema
     const validatedContent = config.schema.parse(parsedData) as T;
 
-    // SEO Title Length Validation: Warn if seoTitle missing and title will be truncated
+    // SEO Title Length Validation: Warn if seo_title missing and title will be truncated
     if (validatedContent && typeof validatedContent === 'object' && 'title' in validatedContent) {
       const contentItem = validatedContent as {
         title?: string;
-        seoTitle?: string;
+        seo_title?: string;
         category?: string;
       };
       const title = contentItem.title;

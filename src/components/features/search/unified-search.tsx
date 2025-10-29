@@ -1,14 +1,8 @@
 'use client';
 
 /**
- * Unified Search Component (SHA-2087 Refactored)
- *
- * CONSOLIDATION: Now uses shared hook and filter panel component
- * - useUnifiedSearch hook for state management (~80 lines removed)
- * - SearchFilterPanel for filter UI (~200 lines removed)
- *
- * Previous: 420 lines of duplicated logic
- * Current: 180 lines (57% reduction)
+ * Unified Search Component - Database-First Architecture
+ * Search UI with filters. Analytics tracked via server action.
  */
 
 import { usePathname } from 'next/navigation';
@@ -30,13 +24,10 @@ import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/schemas/component.schema';
 import { sanitizers } from '@/src/lib/security/validators-sync';
-
 import { cn } from '@/src/lib/utils';
 
-// Re-export FilterState for backward compatibility
 export type { FilterState };
 
-// SearchErrorFallback component moved outside to avoid recreation on every render
 const SearchErrorFallback = () => (
   <div className="p-4 text-center text-muted-foreground">Error loading search</div>
 );
@@ -57,7 +48,6 @@ function UnifiedSearchComponent({
   const [announcement, setAnnouncement] = useState('');
   const pathname = usePathname();
 
-  // Use consolidated search hook
   const {
     filters,
     isFilterOpen,
@@ -72,29 +62,21 @@ function UnifiedSearchComponent({
     onFiltersChange,
   });
 
-  // Generate unique IDs
   const searchInputId = useId();
   const searchResultsId = useId();
   const filterPanelId = useId();
   const sortSelectId = useId();
 
-  // OPTIMIZATION (2025-10-22): Reduced debounce from 300ms to 150ms for faster search response
-  // Separated analytics tracking to run independently without delaying search
-  // Debounced search with sanitization
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Use sync version for client-side sanitization
       const sanitized = sanitizers.sanitizeSearchQuerySync(localSearchQuery);
       onSearch(sanitized);
-    }, 150); // Reduced from 300ms to 150ms for better responsiveness
+    }, 150);
 
     return () => clearTimeout(timer);
   }, [localSearchQuery, onSearch]);
 
-  // Separate effect for analytics tracking (runs independently of search debounce)
-  // This prevents analytics from delaying search results
   useEffect(() => {
-    // Only track non-empty queries
     if (!localSearchQuery || localSearchQuery.length === 0) {
       return;
     }
@@ -104,53 +86,39 @@ function UnifiedSearchComponent({
       if (sanitized && sanitized.length > 0) {
         const category = pathname?.split('/')[1] || 'global';
 
-        // Dynamic imports to avoid server-only module issues in Storybook
-        Promise.all([
-          import('@/src/lib/analytics/events.constants'),
-          import('#lib/analytics/tracker'),
-        ])
-          .then(([events, tracker]) => {
-            // NEW: Use consolidated SEARCH event with category as payload
-            tracker.trackEvent(events.EVENTS.SEARCH, {
+        import('@/src/lib/actions/track-search')
+          .then((module) =>
+            module.trackSearch({
+              query: sanitized.substring(0, 100),
               category,
-              query: sanitized.substring(0, 100), // Truncate for privacy
-              resultsCount: resultCount, // NUMBER (camelCase for consistency)
-              filtersApplied: activeFilterCount > 0, // BOOLEAN
-            });
-          })
-          .catch(() => {
-            // Silent fail in Storybook - analytics not critical for component rendering
-          });
+              resultsCount: resultCount,
+              filtersApplied: activeFilterCount > 0,
+            })
+          )
+          .catch(() => {});
       }
-    }, 500); // Longer debounce for analytics (500ms) - doesn't block search
+    }, 500);
 
     return () => clearTimeout(analyticsTimer);
   }, [localSearchQuery, resultCount, pathname, activeFilterCount]);
 
-  // Update ARIA live announcement for all search result scenarios
   useEffect(() => {
     if (!localSearchQuery) {
-      // Search cleared
       setAnnouncement('Search cleared. Showing all results.');
     } else if (resultCount === 0) {
-      // No results found
       setAnnouncement(`No results found for "${localSearchQuery}".`);
     } else if (resultCount === 1) {
-      // Single result
       setAnnouncement(`1 result found for "${localSearchQuery}".`);
     } else {
-      // Multiple results
       setAnnouncement(`${resultCount} results found for "${localSearchQuery}".`);
     }
   }, [localSearchQuery, resultCount]);
 
-  // Apply filters and close panel
   const applyFilters = useCallback(() => {
     handleFiltersChange(filters);
     setIsFilterOpen(false);
   }, [filters, handleFiltersChange, setIsFilterOpen]);
 
-  // Handle sort change directly (no need to apply)
   const handleSortChange = useCallback(
     (value: FilterState['sort']) => {
       const newFilters = { ...filters, sort: value || 'trending' };
@@ -162,7 +130,6 @@ function UnifiedSearchComponent({
   return (
     <ErrorBoundary fallback={SearchErrorFallback}>
       <search className={cn('w-full space-y-4', className)}>
-        {/* Search Bar */}
         <div className="space-y-3">
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
@@ -184,10 +151,8 @@ function UnifiedSearchComponent({
             />
           </div>
 
-          {/* Sort and Filter Controls */}
           {showFilters && (
             <div className={'flex gap-2 justify-end'}>
-              {/* Sort Dropdown styled as button */}
               <Select
                 value={filters.sort || 'trending'}
                 onValueChange={(value) => handleSortChange(value as FilterState['sort'])}
@@ -210,7 +175,6 @@ function UnifiedSearchComponent({
                 </SelectContent>
               </Select>
 
-              {/* Filter Button */}
               <Button
                 variant="outline"
                 size="default"
@@ -245,7 +209,6 @@ function UnifiedSearchComponent({
           )}
         </div>
 
-        {/* Comprehensive ARIA live announcements for all search scenarios */}
         <div
           className={'text-sm text-muted-foreground'}
           id={searchResultsId}
@@ -253,7 +216,6 @@ function UnifiedSearchComponent({
           aria-atomic="true"
         >
           {announcement && <span className="sr-only">{announcement}</span>}
-          {/* Visual display (different from screen reader announcement) */}
           {localSearchQuery && resultCount > 0 && (
             <span aria-hidden="true">
               {resultCount} {resultCount === 1 ? 'result' : 'results'} found
@@ -264,7 +226,6 @@ function UnifiedSearchComponent({
           )}
         </div>
 
-        {/* Collapsible Filter Panel */}
         <Collapsible open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <CollapsibleContent>
             <section id={filterPanelId} aria-label="Filter options">
@@ -289,26 +250,16 @@ function UnifiedSearchComponent({
   );
 }
 
-/**
- * Memoized export with custom comparison function
- * Prevents re-renders when parent state changes but props remain equal
- *
- * Custom comparison skips function references (onSearch, onFiltersChange)
- * since they're callbacks that change identity but not behavior
- */
 export const UnifiedSearch = memo(UnifiedSearchComponent, (prevProps, nextProps) => {
-  // Compare all props except function callbacks
   return (
     prevProps.placeholder === nextProps.placeholder &&
     prevProps.resultCount === nextProps.resultCount &&
     prevProps.className === nextProps.className &&
     prevProps.showFilters === nextProps.showFilters &&
-    // Deep compare arrays
     JSON.stringify(prevProps.availableTags) === JSON.stringify(nextProps.availableTags) &&
     JSON.stringify(prevProps.availableAuthors) === JSON.stringify(nextProps.availableAuthors) &&
     JSON.stringify(prevProps.availableCategories) ===
       JSON.stringify(nextProps.availableCategories) &&
-    // Deep compare filters object
     JSON.stringify(prevProps.filters) === JSON.stringify(nextProps.filters)
   );
 });

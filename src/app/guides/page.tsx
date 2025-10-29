@@ -10,7 +10,9 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import type { Tables } from '@/src/types/database.types';
 
-export const metadata: Metadata = generatePageMetadata('/guides');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/guides');
+}
 
 type GuideRow = Tables<'guides'>;
 

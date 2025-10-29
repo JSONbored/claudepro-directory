@@ -303,6 +303,7 @@ export type Database = {
           id: string;
           name: string;
           order: number | null;
+          rarity: Database['public']['Enums']['badge_rarity'];
           slug: string;
           tier_required: string | null;
         };
@@ -316,6 +317,7 @@ export type Database = {
           id?: string;
           name: string;
           order?: number | null;
+          rarity?: Database['public']['Enums']['badge_rarity'];
           slug: string;
           tier_required?: string | null;
         };
@@ -329,6 +331,7 @@ export type Database = {
           id?: string;
           name?: string;
           order?: number | null;
+          rarity?: Database['public']['Enums']['badge_rarity'];
           slug?: string;
           tier_required?: string | null;
         };
@@ -389,6 +392,78 @@ export type Database = {
             referencedColumns: ['id'];
           },
         ];
+      };
+      category_configs: {
+        Row: {
+          category: Database['public']['Enums']['content_category'];
+          color_scheme: string;
+          config_format: string | null;
+          content_loader: string;
+          created_at: string;
+          description: string;
+          display_config: boolean;
+          empty_state_message: string | null;
+          icon_name: string;
+          keywords: string;
+          meta_description: string;
+          plural_title: string;
+          primary_action_config: Json | null;
+          primary_action_label: string;
+          primary_action_type: string;
+          search_placeholder: string;
+          sections: Json;
+          show_on_homepage: boolean;
+          title: string;
+          updated_at: string;
+          url_slug: string;
+        };
+        Insert: {
+          category: Database['public']['Enums']['content_category'];
+          color_scheme: string;
+          config_format?: string | null;
+          content_loader: string;
+          created_at?: string;
+          description: string;
+          display_config?: boolean;
+          empty_state_message?: string | null;
+          icon_name: string;
+          keywords: string;
+          meta_description: string;
+          plural_title: string;
+          primary_action_config?: Json | null;
+          primary_action_label: string;
+          primary_action_type: string;
+          search_placeholder: string;
+          sections?: Json;
+          show_on_homepage?: boolean;
+          title: string;
+          updated_at?: string;
+          url_slug: string;
+        };
+        Update: {
+          category?: Database['public']['Enums']['content_category'];
+          color_scheme?: string;
+          config_format?: string | null;
+          content_loader?: string;
+          created_at?: string;
+          description?: string;
+          display_config?: boolean;
+          empty_state_message?: string | null;
+          icon_name?: string;
+          keywords?: string;
+          meta_description?: string;
+          plural_title?: string;
+          primary_action_config?: Json | null;
+          primary_action_label?: string;
+          primary_action_type?: string;
+          search_placeholder?: string;
+          sections?: Json;
+          show_on_homepage?: boolean;
+          title?: string;
+          updated_at?: string;
+          url_slug?: string;
+        };
+        Relationships: [];
       };
       changelog: {
         Row: {
@@ -458,6 +533,44 @@ export type Database = {
           version?: string | null;
         };
         Relationships: [];
+      };
+      changelog_changes: {
+        Row: {
+          category: string;
+          change_text: string;
+          changelog_entry_id: string;
+          created_at: string | null;
+          display_order: number;
+          id: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          category: string;
+          change_text: string;
+          changelog_entry_id: string;
+          created_at?: string | null;
+          display_order?: number;
+          id?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          category?: string;
+          change_text?: string;
+          changelog_entry_id?: string;
+          created_at?: string | null;
+          display_order?: number;
+          id?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'changelog_changes_changelog_entry_id_fkey';
+            columns: ['changelog_entry_id'];
+            isOneToOne: false;
+            referencedRelation: 'changelog_entries';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       changelog_entries: {
         Row: {
@@ -980,6 +1093,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      content_generator_configs: {
+        Row: {
+          category: string;
+          conditional_rules: Json | null;
+          created_at: string | null;
+          defaults: Json;
+          field_type: string;
+          id: string;
+          strategy: string[] | null;
+          tag_mapping: Json | null;
+          template: Json | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          category: string;
+          conditional_rules?: Json | null;
+          created_at?: string | null;
+          defaults: Json;
+          field_type: string;
+          id?: string;
+          strategy?: string[] | null;
+          tag_mapping?: Json | null;
+          template?: Json | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          category?: string;
+          conditional_rules?: Json | null;
+          created_at?: string | null;
+          defaults?: Json;
+          field_type?: string;
+          id?: string;
+          strategy?: string[] | null;
+          tag_mapping?: Json | null;
+          template?: Json | null;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
       content_items: {
         Row: {
           category: string;
@@ -1396,6 +1548,69 @@ export type Database = {
             referencedColumns: ['id'];
           },
         ];
+      };
+      form_field_configs: {
+        Row: {
+          config: Json | null;
+          created_at: string;
+          default_value: string | null;
+          display_order: number;
+          enabled: boolean;
+          field_group: string;
+          field_label: string;
+          field_name: string;
+          field_type: Database['public']['Enums']['form_field_type'];
+          form_type: string;
+          grid_column: Database['public']['Enums']['form_grid_column'];
+          help_text: string | null;
+          icon_name: string | null;
+          icon_position: Database['public']['Enums']['form_icon_position'] | null;
+          id: string;
+          placeholder: string | null;
+          required: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          config?: Json | null;
+          created_at?: string;
+          default_value?: string | null;
+          display_order?: number;
+          enabled?: boolean;
+          field_group?: string;
+          field_label: string;
+          field_name: string;
+          field_type: Database['public']['Enums']['form_field_type'];
+          form_type: string;
+          grid_column?: Database['public']['Enums']['form_grid_column'];
+          help_text?: string | null;
+          icon_name?: string | null;
+          icon_position?: Database['public']['Enums']['form_icon_position'] | null;
+          id?: string;
+          placeholder?: string | null;
+          required?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          config?: Json | null;
+          created_at?: string;
+          default_value?: string | null;
+          display_order?: number;
+          enabled?: boolean;
+          field_group?: string;
+          field_label?: string;
+          field_name?: string;
+          field_type?: Database['public']['Enums']['form_field_type'];
+          form_type?: string;
+          grid_column?: Database['public']['Enums']['form_grid_column'];
+          help_text?: string | null;
+          icon_name?: string | null;
+          icon_position?: Database['public']['Enums']['form_icon_position'] | null;
+          id?: string;
+          placeholder?: string | null;
+          required?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
       form_field_definitions: {
         Row: {
@@ -1814,7 +2029,7 @@ export type Database = {
           requirements?: Json;
           salary?: string | null;
           search_vector?: unknown;
-          slug: string;
+          slug?: string;
           status?: string | null;
           tags?: Json;
           title: string;
@@ -2419,6 +2634,80 @@ export type Database = {
         };
         Relationships: [];
       };
+      quiz_options: {
+        Row: {
+          created_at: string | null;
+          description: string | null;
+          display_order: number;
+          icon_name: string | null;
+          id: string;
+          label: string;
+          question_id: string;
+          value: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          description?: string | null;
+          display_order: number;
+          icon_name?: string | null;
+          id?: string;
+          label: string;
+          question_id: string;
+          value: string;
+        };
+        Update: {
+          created_at?: string | null;
+          description?: string | null;
+          display_order?: number;
+          icon_name?: string | null;
+          id?: string;
+          label?: string;
+          question_id?: string;
+          value?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'quiz_options_question_id_fkey';
+            columns: ['question_id'];
+            isOneToOne: false;
+            referencedRelation: 'quiz_questions';
+            referencedColumns: ['question_id'];
+          },
+        ];
+      };
+      quiz_questions: {
+        Row: {
+          created_at: string | null;
+          description: string | null;
+          display_order: number;
+          id: string;
+          question_id: string;
+          question_text: string;
+          required: boolean | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          description?: string | null;
+          display_order: number;
+          id?: string;
+          question_id: string;
+          question_text: string;
+          required?: boolean | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          description?: string | null;
+          display_order?: number;
+          id?: string;
+          question_id?: string;
+          question_text?: string;
+          required?: boolean | null;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
       reputation_actions: {
         Row: {
           action_type: string;
@@ -2727,6 +3016,51 @@ export type Database = {
           key?: string;
           updated_at?: string;
           value?: Json;
+        };
+        Relationships: [];
+      };
+      seo_enrichment_rules: {
+        Row: {
+          category: string;
+          created_at: string;
+          enabled: boolean;
+          example_questions: Json;
+          focus_areas: Json;
+          id: string;
+          max_questions: number;
+          min_questions: number;
+          performance_config: Json;
+          quality_standards: Json | null;
+          seo_config: Json;
+          updated_at: string;
+        };
+        Insert: {
+          category: string;
+          created_at?: string;
+          enabled?: boolean;
+          example_questions?: Json;
+          focus_areas?: Json;
+          id?: string;
+          max_questions?: number;
+          min_questions?: number;
+          performance_config?: Json;
+          quality_standards?: Json | null;
+          seo_config?: Json;
+          updated_at?: string;
+        };
+        Update: {
+          category?: string;
+          created_at?: string;
+          enabled?: boolean;
+          example_questions?: Json;
+          focus_areas?: Json;
+          id?: string;
+          max_questions?: number;
+          min_questions?: number;
+          performance_config?: Json;
+          quality_standards?: Json | null;
+          seo_config?: Json;
+          updated_at?: string;
         };
         Relationships: [];
       };
@@ -4319,6 +4653,15 @@ export type Database = {
         };
         Relationships: [];
       };
+      mv_site_urls: {
+        Row: {
+          changefreq: string | null;
+          lastmod: string | null;
+          path: string | null;
+          priority: number | null;
+        };
+        Relationships: [];
+      };
       mv_trending_content: {
         Row: {
           author: string | null;
@@ -4556,6 +4899,40 @@ export type Database = {
           user_id: string;
         }[];
       };
+      build_enriched_content_base: {
+        Args: {
+          p_author: string;
+          p_author_profile_url: string;
+          p_bookmark_count: number;
+          p_category: string;
+          p_content: string;
+          p_copy_count: number;
+          p_created_at: string;
+          p_date_added: string;
+          p_description: string;
+          p_discovery_metadata: Json;
+          p_display_title: string;
+          p_documentation_url: string;
+          p_examples: Json;
+          p_features: string[];
+          p_id: string;
+          p_popularity_score: number;
+          p_seo_title: string;
+          p_slug: string;
+          p_source: string;
+          p_source_table: string;
+          p_sponsor_tier: string;
+          p_sponsored_active: boolean;
+          p_sponsored_id: string;
+          p_tags: string[];
+          p_title: string;
+          p_troubleshooting: Json[];
+          p_updated_at: string;
+          p_use_cases: string[];
+          p_view_count: number;
+        };
+        Returns: Json;
+      };
       calculate_affinity_score_for_content: {
         Args: {
           p_content_slug: string;
@@ -4683,6 +5060,10 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      generate_content_field: {
+        Args: { p_category: string; p_field_type: string; p_slug: string };
+        Returns: Json;
+      };
       generate_metadata_for_route: {
         Args: { p_context: Json; p_route?: string; p_route_pattern: string };
         Returns: Json;
@@ -4735,6 +5116,23 @@ export type Database = {
           votes_received: number;
         }[];
       };
+      get_category_config: { Args: { p_category: string }; Returns: Json };
+      get_changelog_entries: {
+        Args: {
+          p_category?: string;
+          p_featured_only?: boolean;
+          p_limit?: number;
+          p_offset?: number;
+          p_published_only?: boolean;
+        };
+        Returns: Json;
+      };
+      get_changelog_entry_by_slug: { Args: { p_slug: string }; Returns: Json };
+      get_changelog_metadata: { Args: never; Returns: Json };
+      get_changelog_with_category_stats: {
+        Args: { p_category?: string; p_limit?: number; p_offset?: number };
+        Returns: Json;
+      };
       get_content_affinity: {
         Args: {
           p_content_slug: string;
@@ -4757,6 +5155,16 @@ export type Database = {
         }[];
       };
       get_due_sequence_emails: { Args: never; Returns: Json };
+      get_enriched_content: {
+        Args: {
+          p_category?: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_slug?: string;
+          p_slugs?: string[];
+        };
+        Returns: Json;
+      };
       get_featured_content: {
         Args: { p_category?: string; p_limit?: number };
         Returns: {
@@ -4778,6 +5186,7 @@ export type Database = {
           views_24h: number;
         }[];
       };
+      get_form_field_config: { Args: { p_form_type: string }; Returns: Json };
       get_form_fields_for_content_type: {
         Args: {
           p_content_type: Database['public']['Enums']['content_category'];
@@ -4799,6 +5208,7 @@ export type Database = {
           select_options: Json;
         }[];
       };
+      get_form_fields_grouped: { Args: { p_form_type: string }; Returns: Json };
       get_metadata_template: {
         Args: { p_route_pattern: string };
         Returns: Json;
@@ -4833,6 +5243,7 @@ export type Database = {
           vote_count: number;
         }[];
       };
+      get_quiz_configuration: { Args: never; Returns: Json };
       get_recent_merged: { Args: { p_limit?: number }; Returns: Json };
       get_recommendations: {
         Args: {
@@ -4843,17 +5254,7 @@ export type Database = {
           p_tool_preferences: string[];
           p_use_case: string;
         };
-        Returns: {
-          author: string;
-          category: string;
-          description: string;
-          match_percentage: number;
-          match_score: number;
-          primary_reason: string;
-          slug: string;
-          tags: string[];
-          title: string;
-        }[];
+        Returns: Json;
       };
       get_related_content: {
         Args: {
@@ -4877,6 +5278,17 @@ export type Database = {
           views: number;
         }[];
       };
+      get_reviews_with_stats: {
+        Args: {
+          p_content_slug: string;
+          p_content_type: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_sort_by?: string;
+          p_user_id?: string;
+        };
+        Returns: Json;
+      };
       get_search_count: {
         Args: {
           p_authors?: string[];
@@ -4893,6 +5305,15 @@ export type Database = {
         }[];
       };
       get_seo_config: { Args: { p_key: string }; Returns: Json };
+      get_site_urls: {
+        Args: never;
+        Returns: {
+          changefreq: string;
+          lastmod: string;
+          path: string;
+          priority: number;
+        }[];
+      };
       get_structured_data_config: {
         Args: { p_category: string };
         Returns: Json;
@@ -4944,6 +5365,15 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_user_badges_with_details: {
+        Args: {
+          p_featured_only?: boolean;
+          p_limit?: number;
+          p_offset?: number;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
       get_user_favorite_categories: {
         Args: { p_limit?: number; p_user_id: string };
         Returns: string[];
@@ -4990,6 +5420,7 @@ export type Database = {
         Args: { follower_id: string; following_id: string };
         Returns: boolean;
       };
+      job_slug: { Args: { p_title: string }; Returns: string };
       mark_sequence_email_processed: {
         Args: {
           p_email: string;
@@ -5008,6 +5439,7 @@ export type Database = {
           success: boolean;
         }[];
       };
+      refresh_mv_site_urls: { Args: never; Returns: undefined };
       refresh_profile_from_oauth: {
         Args: { user_id: string };
         Returns: undefined;
@@ -5036,6 +5468,10 @@ export type Database = {
           p_user_id: string;
         };
         Returns: Json;
+      };
+      replace_title_placeholder: {
+        Args: { p_slug: string; p_text: string; p_title: string };
+        Returns: string;
       };
       schedule_next_sequence_step: {
         Args: { p_current_step: number; p_email: string };
@@ -5262,6 +5698,7 @@ export type Database = {
     Enums: {
       announcement_priority: 'high' | 'medium' | 'low';
       announcement_variant: 'default' | 'outline' | 'secondary' | 'destructive';
+      badge_rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
       changelog_category: 'Added' | 'Changed' | 'Deprecated' | 'Removed' | 'Fixed' | 'Security';
       content_category:
         | 'agents'
@@ -5285,6 +5722,9 @@ export type Database = {
         | 'testing'
         | 'code-quality'
         | 'automation';
+      form_field_type: 'text' | 'textarea' | 'number' | 'select';
+      form_grid_column: 'full' | 'half' | 'third' | 'two-thirds';
+      form_icon_position: 'left' | 'right';
       grid_column: 'full' | 'half' | 'third' | 'two-thirds';
       icon_position: 'left' | 'right';
       integration_type:
@@ -5449,6 +5889,7 @@ export const Constants = {
     Enums: {
       announcement_priority: ['high', 'medium', 'low'],
       announcement_variant: ['default', 'outline', 'secondary', 'destructive'],
+      badge_rarity: ['common', 'uncommon', 'rare', 'epic', 'legendary'],
       changelog_category: ['Added', 'Changed', 'Deprecated', 'Removed', 'Fixed', 'Security'],
       content_category: [
         'agents',
@@ -5474,6 +5915,9 @@ export const Constants = {
         'code-quality',
         'automation',
       ],
+      form_field_type: ['text', 'textarea', 'number', 'select'],
+      form_grid_column: ['full', 'half', 'third', 'two-thirds'],
+      form_icon_position: ['left', 'right'],
       grid_column: ['full', 'half', 'third', 'two-thirds'],
       icon_position: ['left', 'right'],
       integration_type: [

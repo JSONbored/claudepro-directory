@@ -26,8 +26,14 @@ import {
 import { Input } from '@/src/components/primitives/input';
 import { Label } from '@/src/components/primitives/label';
 import { submitConfiguration } from '@/src/lib/actions/business.actions';
-import { COMMON_FIELDS, FORM_CONFIGS, TAGS_FIELD } from '@/src/lib/config/form-field-config';
 import { ROUTES } from '@/src/lib/constants/routes';
+import {
+  SUBMISSION_CONTENT_TYPES,
+  type SubmissionContentType,
+  type SubmissionFormConfig,
+  type SubmissionFormSection,
+  type TextFieldDefinition,
+} from '@/src/lib/forms/types';
 import { CheckCircle, ExternalLink, Github, Send } from '@/src/lib/icons';
 import type { configSubmissionSchema } from '@/src/lib/schemas/form.schema';
 // Note: Server action already validates with configSubmissionSchema
@@ -46,7 +52,38 @@ import { type Template, TemplateSelector } from './template-selector';
  */
 const examplesArraySchema = z.array(z.string());
 
-type ContentType = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills';
+const DEFAULT_CONTENT_TYPE: SubmissionContentType = 'agents';
+
+const EMPTY_SECTION: SubmissionFormSection = {
+  nameField: null,
+  common: [],
+  typeSpecific: [],
+  tags: [],
+};
+
+const FALLBACK_NAME_FIELD: TextFieldDefinition = {
+  type: 'text',
+  name: 'name',
+  label: 'Name *',
+  placeholder: 'e.g., "React Query Expert" or "Supabase MCP Server"',
+  required: true,
+  helpText: 'A clear, descriptive name for your configuration',
+  gridColumn: 'full',
+};
+
+const FORM_TYPE_LABELS: Record<SubmissionContentType, string> = {
+  agents: 'Claude Agent (System Prompt)',
+  mcp: 'MCP Server',
+  rules: 'Claude Rule (Expertise)',
+  commands: 'Command',
+  hooks: 'Hook',
+  statuslines: 'Statusline',
+  skills: 'Skill',
+};
+
+interface SubmitFormClientProps {
+  formConfig: SubmissionFormConfig;
+}
 
 /**
  * Submit Form - Uncontrolled Form Pattern with Minimal State
@@ -82,13 +119,13 @@ type ContentType = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statusli
  * @see https://react.dev/reference/react-dom/components/input#controlling-an-input-with-a-state-variable
  * @see https://developer.mozilla.org/en-US/docs/Web/API/FormData
  */
-export function SubmitFormClient() {
+export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
   /**
    * Minimal React State (only what requires reactivity)
    */
 
   /** Content type for dynamic field rendering */
-  const [contentType, setContentType] = useState<ContentType>('agents');
+  const [contentType, setContentType] = useState<SubmissionContentType>(DEFAULT_CONTENT_TYPE);
 
   /** Name for real-time duplicate checking */
   const [name, setName] = useState('');
@@ -272,6 +309,20 @@ export function SubmitFormClient() {
     });
   };
 
+  const getSection = (type: SubmissionContentType): SubmissionFormSection => {
+    return formConfig[type] ?? EMPTY_SECTION;
+  };
+
+  const activeSection = getSection(contentType);
+  const sharedSection = formConfig[DEFAULT_CONTENT_TYPE] ?? EMPTY_SECTION;
+
+  const nameFieldConfig = activeSection.nameField ?? sharedSection.nameField ?? FALLBACK_NAME_FIELD;
+
+  const commonFields =
+    activeSection.common.length > 0 ? activeSection.common : sharedSection.common;
+  const tagFields = activeSection.tags.length > 0 ? activeSection.tags : sharedSection.tags;
+  const typeSpecificFields = activeSection.typeSpecific;
+
   return (
     <>
       {/* Success Message */}
@@ -322,7 +373,7 @@ export function SubmitFormClient() {
                   id={`${formId}-type`}
                   value={contentType}
                   onChange={(e) => {
-                    setContentType(e.target.value as ContentType);
+                    setContentType(e.target.value as SubmissionContentType);
                     setName(''); // Reset name when type changes
                   }}
                   required
@@ -330,13 +381,11 @@ export function SubmitFormClient() {
                     'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm'
                   }
                 >
-                  <option value="agents">Claude Agent (System Prompt)</option>
-                  <option value="mcp">MCP Server</option>
-                  <option value="rules">Claude Rule (Expertise)</option>
-                  <option value="commands">Command</option>
-                  <option value="hooks">Hook</option>
-                  <option value="statuslines">Statusline</option>
-                  <option value="skills">Skill</option>
+                  {SUBMISSION_CONTENT_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {FORM_TYPE_LABELS[type]}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -348,29 +397,35 @@ export function SubmitFormClient() {
 
             {/* Name Field + Duplicate Warning (Special case - has interactive validation) */}
             <div className="space-y-2">
-              <Label htmlFor={`${formId}-name`}>Name *</Label>
+              <Label htmlFor={`${formId}-name`}>{nameFieldConfig.label}</Label>
               <Input
                 id={`${formId}-name`}
                 name="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., React Query Expert or Supabase MCP Server"
-                required
+                placeholder={nameFieldConfig.placeholder}
+                required={nameFieldConfig.required ?? true}
               />
               <p className="text-xs text-muted-foreground">
-                A clear, descriptive name for your configuration
+                {nameFieldConfig.helpText ?? 'A clear, descriptive name for your configuration'}
               </p>
               <DuplicateWarning contentType={contentType} name={name} />
             </div>
 
             {/* Common Fields - Config-Driven Rendering (description, category, author, github) */}
-            <ContentTypeFieldRenderer config={{ fields: COMMON_FIELDS.slice(1) }} formId={formId} />
+            {commonFields.length > 0 && (
+              <ContentTypeFieldRenderer config={{ fields: commonFields }} formId={formId} />
+            )}
 
             {/* Type-Specific Fields - Config-Driven Rendering */}
-            <ContentTypeFieldRenderer config={FORM_CONFIGS[contentType]} formId={formId} />
+            {typeSpecificFields.length > 0 && (
+              <ContentTypeFieldRenderer config={{ fields: typeSpecificFields }} formId={formId} />
+            )}
 
             {/* Tags Field - Config-Driven Rendering */}
-            <ContentTypeFieldRenderer config={{ fields: [TAGS_FIELD] }} formId={formId} />
+            {tagFields.length > 0 && (
+              <ContentTypeFieldRenderer config={{ fields: tagFields }} formId={formId} />
+            )}
 
             {/* Usage Examples (All Types - Optional) */}
             <ExamplesArrayInput name="examples" maxExamples={10} />

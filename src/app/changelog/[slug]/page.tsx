@@ -74,7 +74,13 @@ export async function generateMetadata({
 
   return generatePageMetadata('/changelog/:slug', {
     params: { slug },
-    item: entry || undefined,
+    item: entry
+      ? {
+          title: entry.title ?? undefined,
+          description: entry.description ?? undefined,
+          date_added: entry.release_date ?? undefined,
+        }
+      : undefined,
     slug,
   });
 }
@@ -139,7 +145,9 @@ export default async function ChangelogEntryPage({
           <header className="space-y-4 pb-6">
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-sm text-muted-foreground`}>
               <Calendar className="h-4 w-4" />
-              <time dateTime={entry.date}>{formatChangelogDate(entry.date)}</time>
+              <time dateTime={entry.release_date ?? undefined}>
+                {formatChangelogDate(entry.release_date)}
+              </time>
             </div>
 
             <h1 className="text-4xl font-bold tracking-tight">{entry.title}</h1>

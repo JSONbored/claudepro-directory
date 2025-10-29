@@ -44,7 +44,9 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Generate metadata from centralized registry
-export const metadata: Metadata = generatePageMetadata('/tools/config-recommender');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/tools/config-recommender');
+}
 
 export default async function ConfigRecommenderPage() {
   return (

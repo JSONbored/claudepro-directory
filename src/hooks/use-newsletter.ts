@@ -1,163 +1,47 @@
 /**
- * Newsletter Subscription Hook
- *
- * Production-grade hook for newsletter subscription with consistent state management.
- * Centralizes form logic that was duplicated across newsletter-form, footer-newsletter-bar,
- * and inline-email-cta components.
- *
- * Features:
- * - Type-safe source tracking for analytics
- * - Server Action integration with useTransition
- * - Consistent error handling and toast notifications
- * - Automatic form reset on success
- * - Referrer tracking for attribution
- *
- * Architecture:
- * - Follows existing useCopyToClipboard hook pattern
- * - Leverages subscribeToNewsletter server action
- * - Respects production standards for error handling
- *
- * @module hooks/use-newsletter
+ * Newsletter Subscription Hook - Client-side state management for newsletter forms
+ * Thin wrapper over subscribeToNewsletter server action with analytics tracking
  */
 
 'use client';
 
 import { useCallback, useState, useTransition } from 'react';
-import { subscribeToNewsletter } from '#lib/actions/newsletter-signup';
-import type { EventName } from '#lib/analytics/events.constants';
-import { trackEvent } from '#lib/analytics/tracker';
+import { subscribeToNewsletter } from '@/src/lib/actions/newsletter-signup';
+import { trackEvent } from '@/src/lib/analytics/tracker';
 import { logger } from '@/src/lib/logger';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
-/**
- * Newsletter source types for analytics tracking
- */
 export type NewsletterSource = 'footer' | 'homepage' | 'modal' | 'content_page' | 'inline';
 
-/**
- * Get location-specific email subscription event based on source
- * Uses dynamic import for Storybook compatibility
- */
-async function getEmailSubscriptionEvent(source: NewsletterSource): Promise<EventName> {
-  const { EVENTS } = await import('#lib/analytics/events.constants');
-
-  const eventMap: Record<NewsletterSource, EventName> = {
-    footer: EVENTS.EMAIL_SUBSCRIBED_FOOTER,
-    homepage: EVENTS.EMAIL_SUBSCRIBED_HOMEPAGE,
-    modal: EVENTS.EMAIL_SUBSCRIBED_MODAL,
-    content_page: EVENTS.EMAIL_SUBSCRIBED_CONTENT_PAGE,
-    inline: EVENTS.EMAIL_SUBSCRIBED_INLINE,
+function getEmailSubscriptionEvent(source: NewsletterSource): string {
+  const eventMap: Record<NewsletterSource, string> = {
+    footer: 'email_subscribed_footer',
+    homepage: 'email_subscribed_homepage',
+    modal: 'email_subscribed_modal',
+    content_page: 'email_subscribed_content_page',
+    inline: 'email_subscribed_inline',
   };
-
   return eventMap[source];
 }
 
-/**
- * Options for newsletter subscription hook
- */
 export interface UseNewsletterOptions {
-  /**
-   * Source location for analytics tracking
-   */
   source: NewsletterSource;
-
-  /**
-   * Callback to execute on successful subscription
-   */
   onSuccess?: () => void;
-
-  /**
-   * Callback to execute on subscription error
-   */
   onError?: (error: string) => void;
-
-  /**
-   * Custom success toast message
-   * @default "Welcome! You're now subscribed to our newsletter."
-   */
   successMessage?: string;
-
-  /**
-   * Custom error toast title
-   * @default "Subscription failed"
-   */
   errorTitle?: string;
-
-  /**
-   * Whether to show toast notifications
-   * @default true
-   */
   showToasts?: boolean;
 }
 
-/**
- * Return type for newsletter subscription hook
- */
 export interface UseNewsletterReturn {
-  /**
-   * Current email input value
-   */
   email: string;
-
-  /**
-   * Update email input value
-   */
   setEmail: (email: string) => void;
-
-  /**
-   * Whether subscription is in progress
-   */
   isSubmitting: boolean;
-
-  /**
-   * Subscribe function to trigger submission
-   */
   subscribe: () => Promise<void>;
-
-  /**
-   * Reset form state (clears email and errors)
-   */
   reset: () => void;
-
-  /**
-   * Last error message (if any)
-   */
   error: string | null;
 }
 
-/**
- * Hook for newsletter subscription with state management
- *
- * Centralizes newsletter subscription logic that was duplicated across
- * multiple components. Provides consistent UX and error handling.
- *
- * @param options - Configuration options
- * @returns Object with subscription state and handlers
- *
- * @example
- * ```tsx
- * function NewsletterForm() {
- *   const { email, setEmail, isSubmitting, subscribe } = useNewsletter({
- *     source: 'footer',
- *     onSuccess: () => console.log('Subscribed!'),
- *   });
- *
- *   return (
- *     <form onSubmit={(e) => { e.preventDefault(); subscribe(); }}>
- *       <input
- *         type="email"
- *         value={email}
- *         onChange={(e) => setEmail(e.target.value)}
- *         disabled={isSubmitting}
- *       />
- *       <button type="submit" disabled={isSubmitting}>
- *         {isSubmitting ? 'Subscribing...' : 'Subscribe'}
- *       </button>
- *     </form>
- *   );
- * }
- * ```
- */
 export function useNewsletter(options: UseNewsletterOptions): UseNewsletterReturn {
   const {
     source,
@@ -172,64 +56,32 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  /**
-   * Reset form to initial state
-   */
   const reset = useCallback(() => {
     setEmail('');
     setError(null);
   }, []);
 
-  /**
-   * Subscribe to newsletter
-   */
   const subscribe = useCallback(async () => {
-    // Client-side validation: Check if email is provided
     if (!email) {
       const errorMsg = 'Please enter your email address';
       setError(errorMsg);
-
-      if (showToasts) {
-        toasts.error.validation(errorMsg);
-      }
-
+      if (showToasts) toasts.error.validation(errorMsg);
       onError?.(errorMsg);
       return;
     }
 
-    // Client-side validation: Check email format
-    // RFC 5322 compliant email regex (simplified for common use cases)
-    const emailRegex =
-      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-
-    if (!emailRegex.test(email.trim())) {
-      const errorMsg = 'Please enter a valid email address';
-      setError(errorMsg);
-
-      if (showToasts) {
-        toasts.error.invalidInput('email');
-      }
-
-      onError?.(errorMsg);
-      return;
-    }
-
-    // Clear previous errors
     setError(null);
 
     startTransition(async () => {
       try {
-        // Get referrer for attribution
         const referrer = typeof window !== 'undefined' ? window.location.href : undefined;
 
-        // Call server action
         const result = await subscribeToNewsletter({
           email,
           source,
           ...(referrer && { referrer }),
         });
 
-        // Handle success
         if (result?.data?.success) {
           if (showToasts) {
             toasts.raw.success('Welcome!', {
@@ -237,20 +89,15 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
             });
           }
 
-          // Track successful subscription with location-specific event
-          const eventName = await getEmailSubscriptionEvent(source);
+          const eventName = getEmailSubscriptionEvent(source);
           trackEvent(eventName, {
             ...(result.data.contactId && { contact_id: result.data.contactId }),
             ...(referrer && { referrer }),
           });
 
-          // Reset form
           reset();
-
-          // Call success callback
           onSuccess?.();
         } else {
-          // Handle error response from server
           const errorMessage =
             result?.data?.message ||
             result?.serverError ||
@@ -267,15 +114,13 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
 
           onError?.(errorMessage);
 
-          // Log error for monitoring
           logger.error('Newsletter subscription failed', new Error(errorMessage), {
             component: 'useNewsletter',
             source,
-            email: `${email.substring(0, 3)}***`, // Partial email for privacy
+            email: `${email.substring(0, 3)}***`,
           });
         }
       } catch (err) {
-        // Handle unexpected errors
         const errorMessage =
           err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
 

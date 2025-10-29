@@ -74,7 +74,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
                   </UnifiedBadge>
                 )}
                 <ConfigCard
-                  item={{ ...item, position: index } as ContentItem}
+                  item={{ ...item, position: index } as unknown as ContentItem}
                   variant="default"
                   showCategory={true}
                   showActions={false}
@@ -104,7 +104,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
             renderCard={(item, index) => (
               <ConfigCard
                 key={item.slug}
-                item={{ ...item, position: index } as ContentItem}
+                item={{ ...item, position: index } as unknown as ContentItem}
                 variant="default"
                 showCategory={true}
                 showActions={false}
@@ -133,7 +133,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
             renderCard={(item, index) => (
               <ConfigCard
                 key={item.slug}
-                item={{ ...item, position: index } as ContentItem}
+                item={{ ...item, position: index } as unknown as ContentItem}
                 variant="default"
                 showCategory={true}
                 showActions={false}

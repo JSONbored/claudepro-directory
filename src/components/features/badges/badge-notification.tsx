@@ -95,7 +95,9 @@ interface BadgeToastProps {
  * - Earned timestamp
  */
 const BadgeToastContent = memo(function BadgeToastContent({ badge, earnedAt }: BadgeToastProps) {
-  const rarityColors = BADGE_RARITY_COLORS[badge.rarity || 'common'];
+  // Use rarity from database (defaults to 'common' in schema)
+  const rarity = badge.rarity || 'common';
+  const rarityColors = BADGE_RARITY_COLORS[rarity];
 
   return (
     <div className="flex items-start gap-3 p-2">
@@ -111,8 +113,8 @@ const BadgeToastContent = memo(function BadgeToastContent({ badge, earnedAt }: B
         }}
         className={cn(
           'relative flex items-center justify-center rounded-full p-3',
-          rarityColors.bg,
-          rarityColors.border,
+          rarityColors?.bg,
+          rarityColors?.border,
           'border-2'
         )}
       >
@@ -132,7 +134,7 @@ const BadgeToastContent = memo(function BadgeToastContent({ badge, earnedAt }: B
           }}
           className="absolute inset-0 flex items-center justify-center"
         >
-          <Sparkles className={cn('h-8 w-8', rarityColors.text)} />
+          <Sparkles className={cn('h-8 w-8', rarityColors?.text)} />
         </motion.div>
       </motion.div>
 
@@ -142,11 +144,11 @@ const BadgeToastContent = memo(function BadgeToastContent({ badge, earnedAt }: B
           <Award className="h-4 w-4 text-primary" />
           <span className="font-semibold text-sm">Badge Earned!</span>
         </div>
-        <h4 className={cn('font-bold', rarityColors.text)}>{badge.name}</h4>
+        <h4 className={cn('font-bold', rarityColors?.text)}>{badge.name}</h4>
         <p className="text-xs text-muted-foreground">{badge.description}</p>
         <div className="flex items-center gap-2 mt-2">
-          <span className={cn('text-xs px-2 py-0.5 rounded-full capitalize', rarityColors.bg)}>
-            {badge.rarity}
+          <span className={cn('text-xs px-2 py-0.5 rounded-full capitalize', rarityColors?.bg)}>
+            {rarity}
           </span>
           <span className="text-xs text-muted-foreground">
             {earnedAt.toLocaleTimeString('en-US', {

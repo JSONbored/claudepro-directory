@@ -103,13 +103,13 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
             tempFeaturedByCategory[record.content_type] = [];
           }
 
-          const enrichedItem = {
+          const enrichedItem: ContentItem = {
             ...item,
             _featured: {
               rank: record.rank,
               score: record.final_score,
             },
-          } as ContentItem;
+          } as unknown as ContentItem;
 
           tempFeaturedByCategory[record.content_type]?.push(enrichedItem);
         }

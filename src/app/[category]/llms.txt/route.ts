@@ -78,16 +78,25 @@ export async function GET(
     const items = await getContentByCategory(category);
 
     // Transform items to LLMsTxtItem format
-    const llmsItems: LLMsTxtItem[] = items.map((item) => ({
-      slug: item.slug,
-      title: item.title || item.slug,
-      description: item.description,
-      category: item.category,
-      tags: item.tags,
-      author: item.author,
-      date_added: item.date_added,
-      url: `${APP_CONFIG.url}/${category}/${item.slug}`,
-    }));
+    const llmsItems: LLMsTxtItem[] = items.map((item) => {
+      // Type guard for tags - ensure it's a string array
+      let tags: string[] = [];
+      const itemTags = item.tags as unknown;
+      if (Array.isArray(itemTags)) {
+        tags = itemTags.filter((tag): tag is string => typeof tag === 'string');
+      }
+
+      return {
+        slug: item.slug,
+        title: item.title || item.slug,
+        description: item.description,
+        category: item.category,
+        tags,
+        author: 'author' in item ? (item.author as string | undefined) : undefined,
+        date_added: 'date_added' in item ? (item.date_added as string | undefined) : undefined,
+        url: `${APP_CONFIG.url}/${category}/${item.slug}`,
+      };
+    });
 
     // Generate llms.txt content (config is now guaranteed non-null)
     const llmsTxt = await generateCategoryLLMsTxt(

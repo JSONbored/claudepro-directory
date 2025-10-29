@@ -19,7 +19,7 @@
 'use client';
 
 import { Info, Lock, Star } from 'lucide-react';
-import { memo, useEffect, useState, useTransition } from 'react';
+import { memo, useTransition } from 'react';
 import { toast } from 'sonner';
 import { toggleBadgeFeatured } from '#lib/actions/badges';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -36,7 +36,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/primitives/tooltip';
-import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import type { Tables } from '@/src/types/database.types';
@@ -76,13 +75,16 @@ const BADGE_RARITY_COLORS: Record<string, { bg: string; text: string; border: st
 // TYPES
 // =============================================================================
 
-/** UserBadge with badge details joined */
+/** UserBadge with badge details joined - returned by get_user_badges_with_details RPC */
 type UserBadgeWithBadge = {
   id: string;
   badge_id: string;
   earned_at: string;
   featured: boolean | null;
-  badges: {
+  metadata?: any;
+  badge?: Badge; // Full badge details from RPC
+  badges?: {
+    // Legacy format for backward compatibility
     slug: string;
     name: string;
     description: string;
@@ -105,14 +107,10 @@ export interface BadgeGridProps {
 }
 
 interface BadgeCardProps {
-  /** User badge with details */
   userBadge: UserBadgeWithBadge;
-  /** Badge from database */
-  badgeDetail?: Badge;
-  /** Can edit featured status */
+  badgeDetail?: Badge | undefined;
   canEdit: boolean;
-  /** Callback when featured status changes */
-  onFeaturedChange?: () => void;
+  onFeaturedChange?: () => void | undefined;
 }
 
 // =============================================================================
@@ -126,7 +124,7 @@ const BadgeCard = memo(function BadgeCard({
   onFeaturedChange,
 }: BadgeCardProps) {
   const [isPending, startTransition] = useTransition();
-  const [isFeatured, setIsFeatured] = useState(userBadge.featured);
+  const isFeatured = userBadge.featured;
 
   const handleToggleFeatured = () => {
     if (!canEdit || isPending) return;
@@ -139,10 +137,10 @@ const BadgeCard = memo(function BadgeCard({
         });
 
         if (result?.data?.success) {
-          setIsFeatured(!isFeatured);
           toast.success(
             isFeatured ? 'Badge removed from featured' : 'Badge featured on your profile'
           );
+          // Trigger parent refresh (optimistic update done via router.refresh in parent)
           onFeaturedChange?.();
         } else {
           throw new Error(result?.serverError || 'Failed to update badge');
@@ -158,7 +156,7 @@ const BadgeCard = memo(function BadgeCard({
   };
 
   const rarity = badgeDetail?.rarity || 'common';
-  const rarityColors = BADGE_RARITY_COLORS[rarity];
+  const rarityColors = BADGE_RARITY_COLORS[rarity] || BADGE_RARITY_COLORS.common;
 
   const Container = canEdit ? 'button' : 'div';
 
@@ -167,8 +165,8 @@ const BadgeCard = memo(function BadgeCard({
       type={canEdit ? 'button' : undefined}
       className={cn(
         'relative group rounded-lg border p-4 transition-all duration-200',
-        rarityColors.bg,
-        rarityColors.border,
+        rarityColors?.bg,
+        rarityColors?.border,
         'hover:shadow-md hover:scale-[1.02]',
         canEdit && 'cursor-pointer w-full text-left'
       )}
@@ -195,7 +193,7 @@ const BadgeCard = memo(function BadgeCard({
 
         {/* Badge Name */}
         <div className="space-y-1">
-          <h3 className={cn('font-semibold text-sm', rarityColors.text)}>
+          <h3 className={cn('font-semibold text-sm', rarityColors?.text)}>
             {badgeDetail?.name || 'Unknown Badge'}
           </h3>
           <p className="text-xs text-muted-foreground line-clamp-2">
@@ -207,7 +205,7 @@ const BadgeCard = memo(function BadgeCard({
         <UnifiedBadge
           variant="base"
           style="outline"
-          className={cn('text-xs capitalize', rarityColors.text)}
+          className={cn('text-xs capitalize', rarityColors?.text)}
         >
           {rarity}
         </UnifiedBadge>
@@ -278,35 +276,8 @@ export const BadgeGrid = memo(function BadgeGrid({
   className,
   emptyMessage = 'No badges earned yet',
 }: BadgeGridProps) {
-  // Filter badges
+  // Filter badges (if needed - but parent should pass pre-filtered data)
   const displayedBadges = featuredOnly ? badges.filter((b) => b.featured) : badges;
-  const [badgeDetails, setBadgeDetails] = useState<Map<string, Badge>>(new Map());
-
-  // Fetch badge details on mount
-  useEffect(() => {
-    const fetchBadgeDetails = async () => {
-      const supabase = createClient();
-      const slugs = displayedBadges
-        .map((b) => b.badges?.slug)
-        .filter((s): s is string => Boolean(s));
-
-      if (slugs.length > 0) {
-        const { data } = await supabase.from('badges').select('*').in('slug', slugs);
-
-        if (data) {
-          const detailsMap = new Map<string, Badge>();
-          for (const badge of data) {
-            detailsMap.set(badge.slug, badge);
-          }
-          setBadgeDetails(detailsMap);
-        }
-      }
-    };
-
-    fetchBadgeDetails().catch(() => {
-      // Silently fail - badges will show with default icon/name
-    });
-  }, [displayedBadges]);
 
   const handleFeaturedChange = () => {
     // Refresh badge list (optimistic update already handled in BadgeCard)
@@ -375,8 +346,8 @@ export const BadgeGrid = memo(function BadgeGrid({
           /* Badge Grid */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {displayedBadges.map((userBadge) => {
-              // Look up badge detail from fetched data
-              const badgeDetail = badgeDetails.get(userBadge.badges?.slug || '');
+              // Badge detail is now included in the RPC response
+              const badgeDetail = userBadge.badge as Badge | undefined;
 
               return (
                 <BadgeCard

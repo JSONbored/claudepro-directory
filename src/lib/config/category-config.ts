@@ -757,7 +757,7 @@ export const UNIFIED_CATEGORY_REGISTRY = {
     keywords: 'changelog, updates, new features, improvements, release notes',
     metaDescription:
       'Claude Pro Directory changelog for October 2025: Latest features, improvements, bug fixes, platform updates, new integrations, and performance enhancements.',
-    schema: publicChangelogRowSchema,
+    schema: publicChangelogRowSchema as any,
     typeName: 'Database["public"]["Tables"]["changelog"]["Row"]',
     generateFullContent: true,
     metadataFields: ['slug', 'title', 'description', 'date_added'] as const,

@@ -3,13 +3,13 @@
 /**
  * Supabase Content Sync Script - Category-Specific Tables
  *
- * Syncs content from /content/*.json files to category-specific Supabase tables.
+ * Syncs content from /content/*.json files AND CHANGELOG.md to category-specific Supabase tables.
  * Works locally and in GitHub Actions (no psql dependency).
  *
  * Features:
- * - Direct insert into typed tables (agents, mcp, rules, commands, etc.)
+ * - Direct insert into typed tables (agents, mcp, rules, commands, changelog_entries, etc.)
  * - Incremental sync via git diff (CHANGED_FILES env var)
- * - Full sync mode (scans all files)
+ * - Full sync mode (scans all files + CHANGELOG.md)
  * - File deletion handling (DELETED_FILES env var)
  * - Service role bypasses RLS automatically
  * - Cross-platform (works on Windows, macOS, Linux)
@@ -17,7 +17,7 @@
  *
  * Usage:
  *   pnpm sync:content              # Incremental sync (default)
- *   pnpm sync:content --full       # Full sync (all files)
+ *   pnpm sync:content:full         # Full sync (all files + changelog)
  *
  * Environment Variables:
  *   SUPABASE_URL              - Supabase project URL
@@ -35,7 +35,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
-import { getAllChangelogEntries as parseAllEntries } from '../../src/lib/changelog/parser.js';
+import { parseChangelog } from '../../src/lib/changelog/parser.js';
 
 // ============================================
 // CONFIGURATION
@@ -58,7 +58,7 @@ const VALID_CATEGORIES = [
   'collections',
   'guides',
   'jobs',
-  'changelog',
+  'changelog', // Parsed from CHANGELOG.md
 ] as const;
 
 type CategoryId = (typeof VALID_CATEGORIES)[number];
@@ -170,6 +170,22 @@ function hashContent(data: Record<string, unknown>): string {
  * Map JSON content to category-specific table row
  * Handles camelCase → snake_case conversion and category-specific fields
  */
+// ============================================
+// TABLE MAPPING
+// ============================================
+
+/**
+ * Map category to table name
+ * Most categories match their table name, but some differ
+ */
+function getTableName(category: CategoryId): string {
+  return category === 'changelog' ? 'changelog_entries' : category;
+}
+
+// ============================================
+// ROW MAPPING
+// ============================================
+
 function mapToTableRow(file: FileInfo): Record<string, unknown> {
   const { data, hash, slug, category } = file;
   const now = new Date().toISOString();
@@ -314,26 +330,34 @@ function mapToTableRow(file: FileInfo): Record<string, unknown> {
         synced_at: now,
       };
 
-    case 'changelog':
+    case 'changelog': {
+      // Changelog entries already parsed to correct format
+      // Don't add git_hash/synced_at as table doesn't have these columns
+      // Remove id field (let DB auto-generate) and any empty/undefined fields
+      const { id, created_at, updated_at, description, ...cleanData } = data as any;
+
+      // Generate description from tldr/content if needed (must be 50-160 chars or NULL)
+      let validDescription: string | null = null;
+      if (description && description.length >= 50) {
+        validDescription = description.slice(0, 160);
+      } else if (cleanData.tldr && cleanData.tldr.length >= 50) {
+        validDescription = cleanData.tldr.slice(0, 160);
+      } else if (cleanData.content) {
+        // Extract first substantial paragraph
+        const firstPara = cleanData.content.split('\n').find((line: string) => {
+          const trimmed = line.trim();
+          return trimmed.length > 50 && !trimmed.startsWith('#') && !trimmed.startsWith('**');
+        });
+        if (firstPara && firstPara.length >= 50) {
+          validDescription = firstPara.slice(0, 160);
+        }
+      }
+
       return {
-        slug,
-        title: data.title,
-        description: data.description || `Release notes for ${data.version || data.title}`,
-        category: 'changelog',
-        version: data.version || null,
-        date_added: data.date || data.dateAdded, // Changelog parser returns 'date' field
-        date_published: data.date || null,
-        date_updated: data.lastUpdated || null,
-        tags: data.tags || ['release'],
-        sections: data.sections || [],
-        commit_count: data.commitCount || null,
-        contributors: data.contributors || null,
-        git_tag: data.gitTag || null,
-        featured: data.featured,
-        source: data.source || 'git-cliff',
-        git_hash: hash,
-        synced_at: now,
+        ...cleanData,
+        description: validDescription,
       };
+    }
 
     default:
       throw new Error(`Unknown category: ${category}`);
@@ -449,25 +473,28 @@ async function scanAllFiles(): Promise<FileInfo[]> {
     }
   }
 
-  // Changelog from CHANGELOG.md
+  // Parse CHANGELOG.md
   try {
-    console.log('📋 Parsing changelog from CHANGELOG.md...');
-    const changelogEntries = await parseAllEntries();
+    const changelogPath = join(ROOT_DIR, 'CHANGELOG.md');
+    if (existsSync(changelogPath)) {
+      console.log('📄 Parsing CHANGELOG.md...');
+      const parsed = await parseChangelog(changelogPath);
 
-    for (const entry of changelogEntries) {
-      const hash = hashContent(entry as unknown as Record<string, unknown>);
-      files.push({
-        category: 'changelog',
-        slug: entry.slug,
-        path: join(ROOT_DIR, 'CHANGELOG.md'),
-        hash,
-        data: entry as unknown as Record<string, unknown>,
-      });
+      for (const entry of parsed.entries) {
+        const hash = hashContent(entry);
+        files.push({
+          category: 'changelog',
+          slug: entry.slug,
+          path: changelogPath,
+          hash,
+          data: entry as unknown as Record<string, unknown>,
+        });
+      }
+
+      console.log(`📂 changelog: ${parsed.entries.length} entries`);
     }
-
-    console.log(`📂 changelog: ${changelogEntries.length} entries`);
   } catch (error) {
-    console.error('Failed to parse CHANGELOG.md:', error);
+    console.warn('⚠️  Failed to parse CHANGELOG.md:', error);
   }
 
   return files;
@@ -578,7 +605,8 @@ async function upsertContent(
       for (const file of batch) {
         try {
           const row = mapToTableRow(file);
-          const { error } = await supabase.from(file.category).upsert(row, { onConflict: 'slug' });
+          const tableName = getTableName(file.category);
+          const { error } = await supabase.from(tableName).upsert(row, { onConflict: 'slug' });
 
           if (error) {
             console.error(`❌ Failed to sync ${file.category}:${file.slug}:`, error.message);
@@ -625,10 +653,11 @@ async function deleteRemovedContent(
         continue;
       }
 
-      const category = match[1];
+      const category = match[1] as CategoryId;
       const slug = match[3].replace(/\.json$/, '');
+      const tableName = getTableName(category);
 
-      const { error } = await supabase.from(category).delete().match({ slug });
+      const { error } = await supabase.from(tableName).delete().match({ slug });
 
       if (error) {
         console.error(`❌ Failed to delete ${category}:${slug}:`, error.message);

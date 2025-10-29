@@ -7,8 +7,9 @@ import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 
 /**
  * Content item with personalization metadata
+ * Uses intersection type with ContentItem
  */
-export interface PersonalizedContentItem extends ContentItem {
+export type PersonalizedContentItem = ContentItem & {
   affinity_score?: number;
   similarity_score?: number;
   recommendation_source?:
@@ -19,7 +20,7 @@ export interface PersonalizedContentItem extends ContentItem {
     | 'similar'
     | 'usage';
   recommendation_reason?: string;
-}
+};
 
 /**
  * User interaction summary for affinity calculation

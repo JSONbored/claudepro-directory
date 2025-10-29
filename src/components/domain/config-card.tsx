@@ -53,7 +53,7 @@ export const ConfigCard = memo(
     showBorderBeam = false, // Position-based BorderBeam animation (top 3 featured items)
   }: ConfigCardProps) => {
     const displayTitle = getDisplayTitle(item);
-    const targetPath = getContentItemUrl(item);
+    const targetPath = getContentItemUrl(item as any);
     const router = useRouter();
     const { copy } = useCopyToClipboard({
       context: {
@@ -109,8 +109,15 @@ export const ConfigCard = memo(
       }
     }, [item.category, item.slug, router]);
 
-    // Extract sponsored metadata - ContentItem already includes these properties
-    const { isSponsored, sponsoredId, sponsorTier, position, viewCount } = item;
+    // Extract sponsored metadata - ContentItem already includes these properties (when from enriched RPC)
+    const isSponsored: boolean | undefined =
+      'isSponsored' in item && typeof item.isSponsored === 'boolean' ? item.isSponsored : undefined;
+    const sponsoredId: string | undefined =
+      'sponsoredId' in item && typeof item.sponsoredId === 'string' ? item.sponsoredId : undefined;
+    const sponsorTier = 'sponsorTier' in item ? item.sponsorTier : undefined;
+    const position: number | undefined =
+      'position' in item && typeof item.position === 'number' ? item.position : undefined;
+    const viewCount = 'viewCount' in item ? item.viewCount : undefined;
 
     // copyCount is a runtime property added by analytics (not in schema)
     const copyCount = (item as { copyCount?: number }).copyCount;
@@ -128,7 +135,9 @@ export const ConfigCard = memo(
 
     // Extract collection-specific metadata (tree-shakeable - only loaded for collections)
     const isCollection = item.category === 'collections';
-    const { collectionType, difficulty: collectionDifficulty, itemCount } = item;
+    const collectionType = 'collectionType' in item ? item.collectionType : undefined;
+    const collectionDifficulty = 'difficulty' in item ? item.difficulty : undefined;
+    const itemCount = 'itemCount' in item ? item.itemCount : undefined;
 
     // Collection type label mapping (tree-shakeable)
     const COLLECTION_TYPE_LABELS = isCollection
@@ -153,28 +162,32 @@ export const ConfigCard = memo(
         )}
 
         <BaseCard
-          targetPath={targetPath}
-          displayTitle={displayTitle}
-          description={item.description}
-          author={item.author}
-          {...(item.author_profile_url && { authorProfileUrl: item.author_profile_url })}
-          {...(item.source && { source: item.source })}
-          {...(item.tags && { tags: item.tags })}
-          variant={variant}
-          showActions={showActions}
-          ariaLabel={`${displayTitle} - ${item.category} by ${item.author}`}
-          {...(isSponsored && { isSponsored })}
-          {...(sponsoredId && { sponsoredId })}
-          {...(position !== undefined && { position })}
-          {...(renderSponsoredWrapper && { renderSponsoredWrapper })}
-          // Mobile swipe gestures
-          enableSwipeGestures={enableSwipeGestures}
-          onSwipeRight={handleSwipeRightCopy}
-          onSwipeLeft={handleSwipeLeftBookmark}
-          // View transitions for smooth page morphing
-          useViewTransitions={useViewTransitions}
-          viewTransitionSlug={item.slug}
-          // Custom render slots
+          {...({
+            targetPath,
+            displayTitle,
+            description: item.description,
+            author: 'author' in item && item.author ? item.author : undefined,
+            authorProfileUrl:
+              'author_profile_url' in item && item.author_profile_url
+                ? item.author_profile_url
+                : undefined,
+            source: 'source' in item && item.source ? (item.source as string) : undefined,
+            tags:
+              'tags' in item && item.tags && Array.isArray(item.tags)
+                ? (item.tags as string[])
+                : undefined,
+            variant,
+            showActions,
+            ariaLabel: `${displayTitle} - ${item.category} by ${('author' in item && item.author) || 'Community'}`,
+            isSponsored,
+            sponsoredId,
+            position,
+            enableSwipeGestures,
+            onSwipeRight: handleSwipeRightCopy,
+            onSwipeLeft: handleSwipeLeftBookmark,
+            useViewTransitions,
+            viewTransitionSlug: item.slug,
+          } as any)}
           renderTopBadges={() => (
             <>
               {showCategory && (
@@ -220,10 +233,10 @@ export const ConfigCard = memo(
                 <UnifiedBadge
                   variant="base"
                   style="outline"
-                  className={`text-xs ${BADGE_COLORS.collectionType[collectionType]}`}
+                  className={`text-xs ${BADGE_COLORS.collectionType[collectionType as keyof typeof BADGE_COLORS.collectionType] || ''}`}
                 >
                   <Layers className="h-3 w-3 mr-1" aria-hidden="true" />
-                  {COLLECTION_TYPE_LABELS[collectionType]}
+                  {COLLECTION_TYPE_LABELS[collectionType as keyof typeof COLLECTION_TYPE_LABELS]}
                 </UnifiedBadge>
               )}
 
@@ -235,13 +248,13 @@ export const ConfigCard = memo(
                   <UnifiedBadge
                     variant="base"
                     style="outline"
-                    className={`text-xs ${BADGE_COLORS.difficulty[collectionDifficulty]}`}
+                    className={`text-xs ${BADGE_COLORS.difficulty[collectionDifficulty as 'beginner' | 'intermediate' | 'advanced']}`}
                   >
                     {collectionDifficulty}
                   </UnifiedBadge>
                 )}
 
-              {isCollection && itemCount !== undefined && (
+              {isCollection && itemCount !== undefined && typeof itemCount === 'number' && (
                 <UnifiedBadge
                   variant="base"
                   style="outline"
@@ -276,7 +289,7 @@ export const ConfigCard = memo(
               )}
 
               {/* New indicator - 0-7 days old content (server-computed) */}
-              {item.isNew && (
+              {'isNew' in item && item.isNew && (
                 <UnifiedBadge variant="new-indicator" label="New content" className="ml-0.5" />
               )}
             </>
@@ -284,28 +297,30 @@ export const ConfigCard = memo(
           renderMetadataBadges={() => (
             <>
               {/* View count badge */}
-              {behavior.showViewCount && viewCount !== undefined && (
-                <button
-                  type="button"
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.stopPropagation();
-                    }
-                  }}
-                  className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
-                  aria-label={`${formatViewCount(viewCount)} views`}
-                >
-                  <UnifiedBadge
-                    variant="base"
-                    style="secondary"
-                    className="h-7 px-2.5 gap-1.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
+              {behavior.showViewCount &&
+                viewCount !== undefined &&
+                typeof viewCount === 'number' && (
+                  <button
+                    type="button"
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.stopPropagation();
+                      }
+                    }}
+                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                    aria-label={`${formatViewCount(viewCount)} views`}
                   >
-                    <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span className="text-xs">{formatViewCount(viewCount)}</span>
-                  </UnifiedBadge>
-                </button>
-              )}
+                    <UnifiedBadge
+                      variant="base"
+                      style="secondary"
+                      className="h-7 px-2.5 gap-1.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
+                    >
+                      <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span className="text-xs">{formatViewCount(viewCount)}</span>
+                    </UnifiedBadge>
+                  </button>
+                )}
 
               {/* Copy count badge - social proof for engagement */}
               {behavior.showCopyCount && copyCount !== undefined && copyCount > 0 && (
@@ -355,14 +370,14 @@ export const ConfigCard = memo(
           )}
           renderActions={() => (
             <>
-              {item.repository && (
+              {'repository' in item && item.repository && (
                 <Button
                   variant="ghost"
                   size="sm"
                   className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.open(item.repository, '_blank');
+                    window.open(item.repository as string, '_blank');
                   }}
                   aria-label={`View ${displayTitle} repository on GitHub`}
                 >
@@ -370,14 +385,14 @@ export const ConfigCard = memo(
                 </Button>
               )}
 
-              {item.documentation_url && (
+              {'documentation_url' in item && item.documentation_url && (
                 <Button
                   variant="ghost"
                   size="sm"
                   className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.open(item.documentation_url, '_blank');
+                    window.open(item.documentation_url as string, '_blank');
                   }}
                   aria-label={`View ${displayTitle} documentation`}
                 >
@@ -396,7 +411,7 @@ export const ConfigCard = memo(
                 <UnifiedButton
                   variant="card-copy"
                   url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
-                  category={item.category || ''}
+                  category={(item.category || 'agents') as any}
                   slug={item.slug}
                   title={displayTitle}
                 />
@@ -417,15 +432,14 @@ export const ConfigCard = memo(
             </>
           )}
           customMetadataText={
-            <>
-              {/* Show static popularity if no view count */}
-              {viewCount === undefined && item.popularity !== undefined && (
-                <>
-                  <span>•</span>
-                  <span>{item.popularity}% popular</span>
-                </>
-              )}
-            </>
+            viewCount === undefined &&
+            'popularity' in item &&
+            typeof item.popularity === 'number' ? (
+              <>
+                <span>?</span>
+                <span>{item.popularity}% popular</span>
+              </>
+            ) : undefined
           }
         />
       </div>

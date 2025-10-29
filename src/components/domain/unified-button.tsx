@@ -105,7 +105,7 @@ type AuthSignOutVariant = {
  */
 type CopyMarkdownVariant = {
   variant: 'copy-markdown';
-  category: string;
+  category: CategoryId;
   slug: string;
   label?: string;
   showIcon?: boolean;
@@ -115,7 +115,7 @@ type CopyMarkdownVariant = {
 
 type DownloadMarkdownVariant = {
   variant: 'download-markdown';
-  category: string;
+  category: CategoryId;
   slug: string;
   label?: string;
   showIcon?: boolean;
@@ -426,21 +426,17 @@ function CopyMarkdownButton({
 
         // Track analytics (dynamic import for Storybook compatibility)
         const contentLength = result.data.markdown.length;
-        Promise.all([
-          import('@/src/lib/analytics/events.constants'),
-          import('#lib/analytics/tracker'),
-        ])
-          .then(([events, tracker]) => {
-            // NEW: Use consolidated event with category as payload (Umami best practices)
-            tracker.trackEvent(events.EVENTS.MARKDOWN_COPIED, {
+        import('#lib/analytics/tracker')
+          .then((tracker) => {
+            tracker.trackEvent('markdown_copied', {
               category,
               slug,
-              contentLength, // NUMBER (not string)
-              copyCount: 1, // Track copy frequency
+              contentLength,
+              copyCount: 1,
             });
           })
           .catch(() => {
-            // Silent fail in Storybook
+            // Silent fail
           });
       } else {
         throw new Error(result?.data?.error || 'Failed to generate markdown');
@@ -535,13 +531,9 @@ function DownloadMarkdownButton({
 
         // Track analytics (dynamic import for Storybook compatibility)
         const fileSize = blob.size;
-        Promise.all([
-          import('@/src/lib/analytics/events.constants'),
-          import('#lib/analytics/tracker'),
-        ])
-          .then(([events, tracker]) => {
-            // NEW: Use consolidated event with category as payload (Umami best practices)
-            tracker.trackEvent(events.EVENTS.MARKDOWN_DOWNLOADED, {
+        import('#lib/analytics/tracker')
+          .then((tracker) => {
+            tracker.trackEvent('markdown_downloaded', {
               category,
               slug,
               fileSize, // NUMBER (not string)
@@ -846,13 +838,13 @@ function JobToggleButton({
   const [isPending, startTransition] = useTransition();
 
   const handleToggle = () => {
-    const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+    const newStatus = currentStatus === 'active' ? 'draft' : 'active';
 
     startTransition(async () => {
       try {
         const result = await toggleJobStatus({
           id: jobId,
-          status: newStatus as 'active' | 'paused' | 'draft' | 'expired' | 'deleted',
+          status: newStatus as 'draft' | 'pending_review' | 'active' | 'expired' | 'rejected',
         });
 
         if (result?.data?.success) {

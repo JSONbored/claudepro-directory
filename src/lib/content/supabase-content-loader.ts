@@ -19,53 +19,43 @@
 import { unstable_cache } from 'next/cache';
 import type { CategoryId } from '@/src/lib/config/category-types';
 import { logger } from '@/src/lib/logger';
-import { publicContentUnifiedRowSchema } from '@/src/lib/schemas/generated/db-schemas';
 import { createClient } from '@/src/lib/supabase/server';
-import type { Tables } from '@/src/types/database.types';
+import type { Database, Tables } from '@/src/types/database.types';
 import type { Views } from '@/src/types/database-overrides';
 
 /**
- * Content item type from content_unified view
- * Database-first: Type inferred from generated database view schema
+ * Content item type - DATABASE-FIRST
  *
- * Jobs table is EXCLUDED - it has a completely different schema.
- * Jobs should use Tables<'jobs'> type separately.
+ * For LIST views: Use content_unified view (common fields only)
+ * For DETAIL views: Use individual table types (all fields)
+ *
+ * This type uses a union of all Tables for maximum compatibility.
+ * All content tables share the same base structure.
  */
-export type ContentItem = Views<'content_unified'>;
+export type ContentItem =
+  | Tables<'agents'>
+  | Tables<'mcp'>
+  | Tables<'commands'>
+  | Tables<'rules'>
+  | Tables<'hooks'>
+  | Tables<'statuslines'>
+  | Tables<'skills'>
+  | Tables<'collections'>
+  | Tables<'guides'>
+  | Tables<'jobs'>
+  | Tables<'changelog'>;
 
 /**
- * Full content item type - discriminated union based on category field
- * TypeScript can narrow the type based on the category value
+ * Content list item - Uses content_unified view
+ * For list/grid views where you only need common fields
  */
-export type FullContentItem =
-  | (Tables<'agents'> & { category: 'agents' })
-  | (Tables<'mcp'> & { category: 'mcp' })
-  | (Tables<'commands'> & { category: 'commands' })
-  | (Tables<'rules'> & { category: 'rules' })
-  | (Tables<'hooks'> & { category: 'hooks' })
-  | (Tables<'statuslines'> & { category: 'statuslines' })
-  | (Tables<'skills'> & { category: 'skills' })
-  | (Tables<'collections'> & { category: 'collections' })
-  | (Tables<'guides'> & { category: 'guides' })
-  | (Tables<'jobs'> & { category: 'jobs' })
-  | (Tables<'changelog'> & { category: 'changelog' });
+export type ContentListItem = Views<'content_unified'>;
 
 /**
- * Base fields guaranteed to exist on ALL content items (NOT NULL in database)
+ * Full content item type - DEPRECATED
+ * @deprecated Use ContentItem directly
  */
-export interface ContentItemBase {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  category: string;
-  author: string;
-  date_added: string;
-  tags: string[];
-  created_at: string;
-  updated_at: string;
-  source_table: string;
-}
+export type FullContentItem = ContentItem;
 
 /**
  * Filter options for server-side content queries
@@ -91,17 +81,17 @@ export interface ContentFilters {
 }
 
 /**
- * Get all content items for a specific category
+ * Get all content items for a specific category - ENRICHED
  *
- * SERVER-SIDE FILTERING: Uses PostgREST .eq() query, no client-side filtering.
- * Database → content_unified view → Zod validation → Typed result
+ * Uses get_enriched_content RPC that returns complete data in single query:
+ * - Base content fields
+ * - Analytics (viewCount, copyCount, bookmarkCount)
+ * - Sponsorship (isSponsored, sponsorTier, etc.)
+ * - Computed fields (isNew, popularity)
+ * - Category-specific fields (collectionType, difficulty, etc.)
  *
  * @param category - Category ID (agents, mcp, rules, etc)
- * @returns Array of validated content items
- *
- * @example
- * const agents = await getContentByCategory('agents');
- * // Returns: Array<Views<'content_unified'>> filtered by category
+ * @returns Array of enriched content items
  */
 export async function getContentByCategory(category: CategoryId): Promise<ContentItem[]> {
   return unstable_cache(
@@ -109,26 +99,20 @@ export async function getContentByCategory(category: CategoryId): Promise<Conten
       try {
         const supabase = await createClient();
 
-        // SERVER-SIDE FILTER: Query content_unified view with category filter
-        const { data, error } = await supabase
-          .from('content_unified')
-          .select('*')
-          .eq('category', category) // PostgreSQL filter, not JavaScript
-          .order('slug', { ascending: true });
+        // Use enriched content RPC - single query with all data
+        const { data, error } = await supabase.rpc('get_enriched_content', {
+          p_category: category,
+          p_limit: 1000, // Large limit for category pages
+          p_offset: 0,
+        });
 
         if (error) {
-          logger.error(`Failed to fetch content for category: ${category}`, error);
+          logger.error(`Failed to fetch enriched content for category: ${category}`, error);
           return [];
         }
 
-        if (!data || data.length === 0) {
-          return [];
-        }
-
-        // Validate with Zod schema - runtime safety
-        const validated = publicContentUnifiedRowSchema.array().parse(data);
-
-        return validated as ContentItem[];
+        // RPC returns JSONB array - already enriched with analytics, sponsorship, etc.
+        return (data || []) as ContentItem[];
       } catch (error) {
         logger.error(
           `Error in getContentByCategory(${category})`,
@@ -137,7 +121,7 @@ export async function getContentByCategory(category: CategoryId): Promise<Conten
         return [];
       }
     },
-    [`content-category-${category}`],
+    [`enriched-content-${category}`],
     {
       revalidate: 3600, // 1 hour ISR cache
       tags: [`content-${category}`],
@@ -146,55 +130,38 @@ export async function getContentByCategory(category: CategoryId): Promise<Conten
 }
 
 /**
- * Get a single content item by category and slug (UNIFIED VIEW - common fields only)
+ * Get a single content item by category and slug - ENRICHED
  *
- * USE FOR: Listings, search results, cards where you only need common fields
- * DON'T USE FOR: Detail pages - use getFullContentBySlug() instead
- *
- * SERVER-SIDE FILTERING: Uses PostgREST .eq() query on both category and slug.
+ * Uses get_enriched_content RPC that returns complete data.
  *
  * @param category - Category ID
  * @param slug - Content item slug
- * @returns Content item or null if not found
- *
- * @example
- * const agent = await getContentBySlug('agents', 'biome-expert');
- * // Returns: { slug: 'biome-expert', title: 'Biome Linter', ... } (common fields only)
+ * @returns Enriched content item or null if not found
  */
 export async function getContentBySlug(
   category: CategoryId,
   slug: string
 ): Promise<ContentItem | null> {
-  return unstable_cache(
-    async () => {
+  const result = await unstable_cache(
+    async (): Promise<ContentItem | null> => {
       try {
         const supabase = await createClient();
 
-        // SERVER-SIDE FILTER: Query content_unified view with category + slug filter
-        const { data, error } = await supabase
-          .from('content_unified')
-          .select('*')
-          .eq('category', category) // PostgreSQL filter
-          .eq('slug', slug) // PostgreSQL filter
-          .single();
+        // Use enriched content RPC
+        const { data, error } = await supabase.rpc('get_enriched_content', {
+          p_category: category,
+          p_slug: slug,
+          p_limit: 1,
+          p_offset: 0,
+        });
 
         if (error) {
-          // Not found is expected for invalid slugs
-          if (error.code === 'PGRST116') {
-            return null;
-          }
-          logger.error(`Failed to fetch content: ${category}/${slug}`, error);
+          logger.error(`Failed to fetch enriched content: ${category}/${slug}`, error);
           return null;
         }
 
-        if (!data) {
-          return null;
-        }
-
-        // Validate with Zod schema
-        const validated = publicContentUnifiedRowSchema.parse(data);
-
-        return validated as ContentItem;
+        const results = (data || []) as ContentItem[];
+        return results.length > 0 ? (results[0] ?? null) : null;
       } catch (error) {
         logger.error(
           `Error in getContentBySlug(${category}, ${slug})`,
@@ -203,12 +170,14 @@ export async function getContentBySlug(
         return null;
       }
     },
-    [`content-item-${category}-${slug}`],
+    [`enriched-content-${category}-${slug}`],
     {
       revalidate: 3600, // 1 hour ISR cache
       tags: [`content-${category}`, `content-${category}-${slug}`],
     }
   )();
+
+  return result;
 }
 
 /**
@@ -237,8 +206,9 @@ export async function getFullContentBySlug(
       try {
         const supabase = await createClient();
 
-        // Map category to table name (jobs already uses 'jobs' table)
-        const tableName = category as string;
+        // Map category to table name (category IS the table name in our architecture)
+        // Type-safe: category is CategoryId which matches table names
+        const tableName = category as keyof Database['public']['Tables'];
 
         // Query individual table for ALL fields
         const { data, error } = await supabase
@@ -364,10 +334,8 @@ export async function getAllContent(filters?: ContentFilters): Promise<ContentIt
 
         if (!data) return [];
 
-        // Validate with Zod schema
-        const validated = publicContentUnifiedRowSchema.array().parse(data);
-
-        return validated as ContentItem[];
+        // Return data as ContentItem array (RPC returns proper type)
+        return data as unknown as ContentItem[];
       } catch (error) {
         logger.error(
           'Error in getAllContent()',

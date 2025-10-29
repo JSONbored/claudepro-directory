@@ -2,14 +2,6 @@
 
 /**
  * DetailSidebar - Sidebar orchestrator for detail pages
- *
- * Consolidates sidebar rendering logic from unified-detail-page.tsx (lines 434-507)
- * and custom-sidebars.tsx (renderAgentSidebar, renderMCPSidebar)
- *
- * Uses SidebarCard directly with inline configuration for optimal tree-shaking
- *
- * @see components/unified-detail-page.tsx - Original implementation
- * @see lib/config/custom-sidebars.tsx - Custom sidebar renderers
  */
 
 import Link from 'next/link';
@@ -19,8 +11,8 @@ import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
-import type { ContentItem } from '@/src/lib/schemas/component.schema';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
@@ -77,15 +69,17 @@ export const DetailSidebar = memo(function DetailSidebar({
       : null;
 
   const showGitHubLink = config.metadata?.showGitHubLink ?? true;
+  const hasDocumentationUrl = 'documentation_url' in item && item.documentation_url;
   const hasConfiguration = 'configuration' in item && typeof item.configuration === 'object';
   const hasPackage = 'package' in item && item.package;
   const hasAuth = 'requiresAuth' in item;
   const hasPermissions = 'permissions' in item;
+  const hasSource = 'source' in item && item.source;
 
   return (
     <div className="space-y-6">
       {/* Resources Card */}
-      {!!(showGitHubLink || item.documentation_url) && (
+      {!!(showGitHubLink || hasDocumentationUrl) && (
         <Card>
           <CardHeader>
             <CardTitle>Resources</CardTitle>
@@ -99,7 +93,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 </a>
               </Button>
             )}
-            {item.documentation_url && (
+            {hasDocumentationUrl && 'documentation_url' in item && item.documentation_url && (
               <Button variant="outline" className="w-full justify-start" asChild>
                 <a href={item.documentation_url} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-4 w-4 mr-2" />
@@ -112,7 +106,7 @@ export const DetailSidebar = memo(function DetailSidebar({
       )}
 
       {/* Type-specific Details Card */}
-      {!!(hasConfiguration || hasPackage || hasAuth || hasPermissions || item.source) && (
+      {!!(hasConfiguration || hasPackage || hasAuth || hasPermissions || hasSource) && (
         <Card>
           <CardHeader>
             <CardTitle>{`${config.typeName} Details`}</CardTitle>
@@ -187,7 +181,7 @@ export const DetailSidebar = memo(function DetailSidebar({
               </div>
             )}
 
-            {item.source && (
+            {hasSource && 'source' in item && item.source && (
               <div>
                 <h4 className={'font-medium mb-1'}>Source</h4>
                 <UnifiedBadge variant="base" style="outline">
@@ -206,21 +200,33 @@ export const DetailSidebar = memo(function DetailSidebar({
             <CardTitle>{`Related ${config.typeName}s`}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {relatedItems.slice(0, 5).map((relatedItem) => (
-              <Link
-                key={relatedItem.slug}
-                href={getContentItemUrl(relatedItem)}
-                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer w-full text-left block`}
-              >
-                <div className={'flex-1 min-w-0'}>
-                  <h4 className="font-medium text-sm truncate">{getDisplayTitle(relatedItem)}</h4>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {relatedItem.description}
-                  </p>
-                </div>
-                <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0 ml-2" />
-              </Link>
-            ))}
+            {relatedItems.slice(0, 5).map((relatedItem) => {
+              const relatedCategory =
+                'category' in relatedItem && typeof relatedItem.category === 'string'
+                  ? relatedItem.category
+                  : '';
+              const relatedSlug =
+                'slug' in relatedItem && typeof relatedItem.slug === 'string'
+                  ? relatedItem.slug
+                  : '';
+              return (
+                <Link
+                  key={relatedSlug}
+                  href={getContentItemUrl({ category: relatedCategory, slug: relatedSlug } as any)}
+                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer w-full text-left block`}
+                >
+                  <div className={'flex-1 min-w-0'}>
+                    <h4 className="font-medium text-sm truncate">{getDisplayTitle(relatedItem)}</h4>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {'description' in relatedItem && typeof relatedItem.description === 'string'
+                        ? relatedItem.description
+                        : ''}
+                    </p>
+                  </div>
+                  <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0 ml-2" />
+                </Link>
+              );
+            })}
           </CardContent>
         </Card>
       )}

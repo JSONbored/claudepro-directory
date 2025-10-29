@@ -9,8 +9,8 @@ import { ResultsDisplay } from '@/src/components/tools/recommender/results-displ
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { logger } from '@/src/lib/logger';
-import { getRecommendations } from '@/src/lib/recommender/database-recommender';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { createClient } from '@/src/lib/supabase/server';
 
 function decodeQuizAnswers(encoded: string) {
   try {
@@ -62,40 +62,47 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
   }
 
   try {
-    const dbResults = await getRecommendations({
-      useCase: answers.useCase,
-      experienceLevel: answers.experienceLevel,
-      toolPreferences: answers.toolPreferences,
-      integrations: answers.integrations || [],
-      focusAreas: answers.focusAreas || [],
-      limit: 20,
+    const supabase = await createClient();
+
+    const { data: dbResult, error } = await supabase.rpc('get_recommendations', {
+      p_use_case: answers.useCase,
+      p_experience_level: answers.experienceLevel,
+      p_tool_preferences: answers.toolPreferences,
+      p_integrations: answers.integrations || [],
+      p_focus_areas: answers.focusAreas || [],
+      p_limit: 20,
     });
 
+    if (error) throw new Error(error.message);
+
+    const enrichedResult = dbResult as {
+      results: Array<{
+        slug: string;
+        title: string;
+        description: string;
+        category: string;
+        tags: string[];
+        author: string;
+        match_score: number;
+        match_percentage: number;
+        primary_reason: string;
+        rank: number;
+        reasons: Array<{ type: string; message: string }>;
+      }>;
+      totalMatches: number;
+      algorithm: string;
+      summary: {
+        topCategory: string;
+        avgMatchScore: number;
+        diversityScore: number;
+      };
+    };
+
     const recommendations = {
-      results: dbResults.map((item, index) => ({
-        slug: item.slug,
-        title: item.title,
-        description: item.description,
-        category: item.category,
-        matchScore: item.match_score,
-        matchPercentage: item.match_percentage,
-        rank: index + 1,
-        reasons: [{ type: 'use-case-match' as const, message: item.primary_reason }],
-        primaryReason: item.primary_reason,
-        author: item.author,
-        tags: item.tags,
-      })),
-      totalMatches: dbResults.length,
+      ...enrichedResult,
       answers,
       id: resolvedParams.id,
       generatedAt: new Date().toISOString(),
-      algorithm: 'rule-based' as const,
-      summary: {
-        topCategory: dbResults[0]?.category || 'agents',
-        avgMatchScore:
-          Math.round(dbResults.reduce((sum, r) => sum + r.match_score, 0) / dbResults.length) || 0,
-        diversityScore: Math.round((new Set(dbResults.map((r) => r.category)).size / 8) * 100),
-      },
     };
 
     const shareUrl = `${APP_CONFIG.url}/tools/config-recommender/results/${resolvedParams.id}?answers=${resolvedSearchParams.answers}`;

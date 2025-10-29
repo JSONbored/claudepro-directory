@@ -70,6 +70,31 @@ export default async function ChangelogPage() {
     // Load all changelog entries (database-cached)
     const entries = await getAllChangelogEntries();
 
+    // Calculate category counts for filtering based on change types
+    const categoryCounts: Record<string, number> = {
+      Added: 0,
+      Changed: 0,
+      Fixed: 0,
+      Removed: 0,
+      Deprecated: 0,
+      Security: 0,
+    };
+
+    // Count entries that have changes in each category
+    for (const entry of entries) {
+      if (entry.changes && typeof entry.changes === 'object') {
+        const changes = entry.changes as Record<string, unknown>;
+        for (const category of Object.keys(categoryCounts)) {
+          const categoryChanges = changes[category];
+          if (Array.isArray(categoryChanges) && categoryChanges.length > 0) {
+            if (typeof categoryCounts[category] === 'number') {
+              categoryCounts[category]++;
+            }
+          }
+        }
+      }
+    }
+
     return (
       <>
         {/* Structured Data - Blog Schema */}
@@ -105,8 +130,8 @@ export default async function ChangelogPage() {
               {entries.length > 0 && entries[0] && (
                 <div>
                   Latest:{' '}
-                  <time dateTime={entries[0].date} className="font-medium text-foreground">
-                    {new Date(entries[0].date).toLocaleDateString('en-US', {
+                  <time dateTime={entries[0].release_date} className="font-medium text-foreground">
+                    {new Date(entries[0].release_date).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
@@ -118,7 +143,7 @@ export default async function ChangelogPage() {
           </div>
 
           {/* Client-side filtered list */}
-          <ChangelogListClient entries={entries} />
+          <ChangelogListClient entries={entries} categoryCounts={categoryCounts} />
         </div>
 
         {/* Email CTA - Footer section (matching homepage pattern) */}

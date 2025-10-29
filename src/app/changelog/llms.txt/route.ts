@@ -26,7 +26,7 @@
  * - AI-optimized structure
  */
 
-import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
+import { getAllChangelogEntries, parseChangelogChanges } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { apiResponse } from '@/src/lib/error-handler';
@@ -52,7 +52,7 @@ export async function GET(): Promise<Response> {
 
 URL: ${APP_CONFIG.url}/changelog
 Total Updates: ${entries.length}
-Latest Update: ${entries[0]?.date ? formatChangelogDate(entries[0].date) : 'N/A'}
+Latest Update: ${entries[0]?.release_date ? formatChangelogDate(entries[0].release_date) : 'N/A'}
 
 ---
 
@@ -64,28 +64,31 @@ Latest Update: ${entries[0]?.date ? formatChangelogDate(entries[0].date) : 'N/A'
     for (const entry of entries) {
       const entryUrl = getChangelogUrl(entry.slug);
 
+      // Parse changes JSONB field with type safety
+      const changes = parseChangelogChanges(entry.changes);
+
       // Count items per category
       const categoryStats = [];
-      if (entry.categories.Added.length > 0) {
-        categoryStats.push(`${entry.categories.Added.length} Added`);
+      if (changes.Added && changes.Added.length > 0) {
+        categoryStats.push(`${changes.Added.length} Added`);
       }
-      if (entry.categories.Changed.length > 0) {
-        categoryStats.push(`${entry.categories.Changed.length} Changed`);
+      if (changes.Changed && changes.Changed.length > 0) {
+        categoryStats.push(`${changes.Changed.length} Changed`);
       }
-      if (entry.categories.Fixed.length > 0) {
-        categoryStats.push(`${entry.categories.Fixed.length} Fixed`);
+      if (changes.Fixed && changes.Fixed.length > 0) {
+        categoryStats.push(`${changes.Fixed.length} Fixed`);
       }
-      if (entry.categories.Removed.length > 0) {
-        categoryStats.push(`${entry.categories.Removed.length} Removed`);
+      if (changes.Removed && changes.Removed.length > 0) {
+        categoryStats.push(`${changes.Removed.length} Removed`);
       }
-      if (entry.categories.Deprecated.length > 0) {
-        categoryStats.push(`${entry.categories.Deprecated.length} Deprecated`);
+      if (changes.Deprecated && changes.Deprecated.length > 0) {
+        categoryStats.push(`${changes.Deprecated.length} Deprecated`);
       }
-      if (entry.categories.Security.length > 0) {
-        categoryStats.push(`${entry.categories.Security.length} Security`);
+      if (changes.Security && changes.Security.length > 0) {
+        categoryStats.push(`${changes.Security.length} Security`);
       }
 
-      llmsTxt += `### ${formatChangelogDate(entry.date)} - ${entry.title}
+      llmsTxt += `### ${formatChangelogDate(entry.release_date)} - ${entry.title}
 
 URL: ${entryUrl}
 Categories: ${categoryStats.join(', ') || 'None'}

@@ -22,11 +22,7 @@
 import { Input } from '@/src/components/primitives/input';
 import { Label } from '@/src/components/primitives/label';
 import { Textarea } from '@/src/components/primitives/textarea';
-import type {
-  ContentTypeConfig,
-  FieldDefinition,
-  GridColumn,
-} from '@/src/lib/config/form-field-config';
+import type { ContentTypeConfig, FieldDefinition, GridColumn } from '@/src/lib/forms/types';
 import { getResponsiveGridClass } from '@/src/lib/ui-constants';
 
 // ============================================================================

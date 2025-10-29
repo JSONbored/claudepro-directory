@@ -1,77 +1,35 @@
 /**
- * Changelog Parser
- *
- * Parses CHANGELOG.md into structured, type-safe entries following
- * Keep a Changelog 1.0.0 specification.
- *
- * Architecture:
- * - Reads CHANGELOG.md from filesystem (build-time only)
- * - Extracts entries using regex pattern matching
- * - Generates URL-safe slugs from dates and titles
- * - Parses categorized changes (Added, Fixed, Changed, etc.)
- * - Returns fully validated Zod schemas
- *
- * Performance:
- * - File read: ~2-5ms for 1MB file
- * - Parse time: ~10-20ms for 50 entries
- * - Zero runtime cost (build-time only)
- *
- * Production Standards:
- * - Async/await for file operations
- * - Comprehensive error handling
- * - Type-safe with Zod validation
- * - Proper logging for debugging
+ * Changelog Parser - Database-First Architecture
+ * Parses CHANGELOG.md following Keep a Changelog 1.0.0 specification.
  */
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import type {
-  ChangelogEntry,
-  ChangelogMetadata,
-  ParsedChangelog,
-} from '@/src/lib/changelog/loader';
 import { logger } from '@/src/lib/logger';
+import type { Json, Tables } from '@/src/types/database.types';
 
-/**
- * Changelog categories type (for parser)
- */
-type ChangelogCategories = ChangelogEntry['categories'];
+type ChangelogChanges = {
+  Added: string[];
+  Changed: string[];
+  Deprecated: string[];
+  Removed: string[];
+  Fixed: string[];
+  Security: string[];
+};
 
-/**
- * Generate URL-safe slug from date and title
- *
- * @param date - ISO date string (YYYY-MM-DD)
- * @param title - Entry title
- * @returns URL-safe slug (e.g., "2025-10-06-automated-submission-tracking")
- *
- * @example
- * generateSlug("2025-10-06", "Automated Submission Tracking and Analytics")
- * // Returns: "2025-10-06-automated-submission-tracking"
- */
 export function generateSlug(date: string, title: string): string {
   const titleSlug = title
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .replace(/-+/g, '-') // Replace multiple hyphens with single
-    .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
-    .slice(0, 100); // Truncate to 100 chars for reasonable URLs (increased from 50)
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 100);
 
   return `${date}-${titleSlug}`;
 }
 
-/**
- * Extract TL;DR summary from entry content
- *
- * @param content - Full markdown content
- * @returns TL;DR text or undefined if not found
- *
- * @example
- * extractTLDR("**TL;DR:** Brief summary\n\n### Added\n...")
- * // Returns: "Brief summary"
- */
 function extractTLDR(content: string): string | undefined {
-  // Match "**TL;DR:**" followed by text until double newline or section header
   const tldrMatch = content.match(/\*\*TL;DR:\*\*\s*(.+?)(?:\n\n|###|$)/s);
   if (tldrMatch?.[1]) {
     return tldrMatch[1].trim();
@@ -79,64 +37,33 @@ function extractTLDR(content: string): string | undefined {
   return undefined;
 }
 
-/**
- * Parse category section into structured items
- *
- * @param sectionContent - Markdown content under a category header (e.g., "### Added")
- * @returns Array of parsed items
- *
- * @example
- * parseCategorySection("- **Feature 1** - Description\n- **Feature 2** - Description")
- * // Returns: [{ content: "**Feature 1** - Description" }, { content: "**Feature 2** - Description" }]
- */
-function parseCategorySection(sectionContent: string): Array<{ content: string }> {
-  const items: Array<{ content: string }> = [];
-
-  // Split by lines starting with "-" (list items)
+function parseCategorySection(sectionContent: string): string[] {
+  const items: string[] = [];
   const lines = sectionContent.split('\n');
   let currentItem = '';
 
   for (const line of lines) {
     const trimmedLine = line.trim();
 
-    // New list item starts with "-"
     if (trimmedLine.startsWith('-')) {
-      // Save previous item if exists
       if (currentItem.trim()) {
-        items.push({ content: currentItem.trim() });
+        items.push(currentItem.trim());
       }
-      // Start new item (remove leading "- ")
       currentItem = trimmedLine.slice(1).trim();
     } else if (trimmedLine && currentItem) {
-      // Continuation of current item (indented content)
       currentItem += `\n${trimmedLine}`;
     }
   }
 
-  // Add last item
   if (currentItem.trim()) {
-    items.push({ content: currentItem.trim() });
+    items.push(currentItem.trim());
   }
 
   return items;
 }
 
-/**
- * Extract categorized changes from entry content
- *
- * Parses sections like:
- * ### Added
- * - Item 1
- * - Item 2
- *
- * ### Fixed
- * - Bug fix 1
- *
- * @param content - Full entry content
- * @returns Categorized changes object
- */
-function extractCategories(content: string): ChangelogCategories {
-  const categories: ChangelogCategories = {
+function extractCategories(content: string): ChangelogChanges {
+  const sections: ChangelogChanges = {
     Added: [],
     Changed: [],
     Deprecated: [],
@@ -145,93 +72,67 @@ function extractCategories(content: string): ChangelogCategories {
     Security: [],
   };
 
-  // Match category sections: ### CategoryName ... (until next ### or end)
   const categoryRegex =
     /###\s+(Added|Changed|Deprecated|Removed|Fixed|Security)\s*\n([\s\S]*?)(?=\n###|\n---|\n##|$)/gi;
 
   let match: RegExpExecArray | null;
-
-  // Use exec in loop to get all matches (reset lastIndex for global regex)
   categoryRegex.lastIndex = 0;
   match = categoryRegex.exec(content);
   while (match !== null) {
-    const categoryName = match[1] as keyof ChangelogCategories;
+    const categoryName = match[1] as keyof ChangelogChanges;
     const sectionContent = match[2]?.trim() || '';
 
     if (sectionContent) {
       const items = parseCategorySection(sectionContent);
-      categories[categoryName] = items;
+      sections[categoryName] = items;
     }
 
     match = categoryRegex.exec(content);
   }
 
-  return categories;
+  return sections;
 }
 
-/**
- * Parse a single changelog entry from markdown content
- *
- * @param entryContent - Full markdown content of the entry
- * @param date - Entry date (YYYY-MM-DD)
- * @param title - Entry title
- * @returns Parsed and validated changelog entry
- */
-function parseEntry(entryContent: string, date: string, title: string): ChangelogEntry {
+function parseEntry(
+  entryContent: string,
+  date: string,
+  title: string
+): Tables<'changelog_entries'> {
   const slug = generateSlug(date, title);
   const tldr = extractTLDR(entryContent);
-  const categories = extractCategories(entryContent);
+  const changes = extractCategories(entryContent);
 
-  // Remove the entry header line from content (## YYYY-MM-DD - Title)
-  const contentWithoutHeader = entryContent.replace(/^##\s+\d{4}-\d{2}-\d{2}\s+-\s+.+?\n/, '');
-
-  const entry: ChangelogEntry = {
-    date,
+  const entry: Tables<'changelog_entries'> = {
+    id: '',
     title,
     slug,
-    tldr,
-    categories,
-    content: contentWithoutHeader.trim(),
-    rawContent: entryContent.trim(),
+    release_date: date,
+    tldr: tldr || null,
+    content: entryContent,
+    raw_content: entryContent,
+    description: tldr || null,
+    keywords: null,
+    changes: changes as unknown as Json,
+    published: true,
+    featured: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   };
 
-  // Database will validate on insert
   return entry;
 }
 
-/**
- * Parse CHANGELOG.md file into structured entries
- *
- * @param changelogPath - Path to CHANGELOG.md file (defaults to project root)
- * @returns Parsed changelog with all entries and metadata
- *
- * @throws {Error} If CHANGELOG.md doesn't exist or is malformed
- *
- * @example
- * const changelog = await parseChangelog();
- * console.log(`Found ${changelog.entries.length} entries`);
- * console.log(`Latest: ${changelog.metadata.latestEntry?.title}`);
- */
 export async function parseChangelog(
   changelogPath: string = path.join(process.cwd(), 'CHANGELOG.md')
-): Promise<ParsedChangelog> {
+) {
   try {
-    // Read CHANGELOG.md file
     const fileContent = await fs.readFile(changelogPath, 'utf-8');
 
-    // Extract all entries matching pattern: ## YYYY-MM-DD - Title
-    // Pattern explanation:
-    // - ^## : Line starts with "## "
-    // - (\d{4}-\d{2}-\d{2}) : Capture date (YYYY-MM-DD)
-    // - \s+-\s+ : " - " separator
-    // - (.+?) : Capture title (non-greedy)
-    // - $ : End of line
     const entryHeaderRegex = /^##\s+(\d{4}-\d{2}-\d{2})\s+-\s+(.+?)$/gm;
 
-    const entries: ChangelogEntry[] = [];
+    const entries: Tables<'changelog_entries'>[] = [];
     const headerMatches: Array<{ index: number; date: string; title: string }> = [];
 
-    // Find all entry headers and their positions
     let match: RegExpExecArray | null;
     entryHeaderRegex.lastIndex = 0;
     match = entryHeaderRegex.exec(fileContent);
@@ -244,14 +145,12 @@ export async function parseChangelog(
       match = entryHeaderRegex.exec(fileContent);
     }
 
-    // Parse each entry by extracting content between headers
     for (let i = 0; i < headerMatches.length; i++) {
       const currentHeader = headerMatches[i];
       if (!currentHeader) continue;
 
       const nextHeader = headerMatches[i + 1];
 
-      // Extract content from current header to next header (or end of file)
       const entryStart = currentHeader.index;
       const entryEnd = nextHeader ? nextHeader.index : fileContent.length;
       const entryContent = fileContent.slice(entryStart, entryEnd).trim();
@@ -265,14 +164,11 @@ export async function parseChangelog(
           title: currentHeader.title,
           error: error instanceof Error ? error.message : String(error),
         });
-        // Continue parsing other entries even if one fails
       }
     }
 
-    // Sort entries by date (newest first)
-    entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    entries.sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime());
 
-    // Generate metadata
     const totalEntries = entries.length;
     const latestEntry = entries[0];
     const earliestEntry = entries[entries.length - 1];
@@ -280,12 +176,11 @@ export async function parseChangelog(
     const dateRange =
       earliestEntry && latestEntry
         ? {
-            earliest: earliestEntry.date,
-            latest: latestEntry.date,
+            earliest: earliestEntry.release_date,
+            latest: latestEntry.release_date,
           }
         : undefined;
 
-    // Count categories across all entries
     const categoryCounts = {
       Added: 0,
       Changed: 0,
@@ -296,26 +191,25 @@ export async function parseChangelog(
     };
 
     for (const entry of entries) {
-      if (entry.categories.Added.length > 0) categoryCounts.Added++;
-      if (entry.categories.Changed.length > 0) categoryCounts.Changed++;
-      if (entry.categories.Deprecated.length > 0) categoryCounts.Deprecated++;
-      if (entry.categories.Removed.length > 0) categoryCounts.Removed++;
-      if (entry.categories.Fixed.length > 0) categoryCounts.Fixed++;
-      if (entry.categories.Security.length > 0) categoryCounts.Security++;
+      const changes = entry.changes as unknown as ChangelogChanges;
+      if (Array.isArray(changes?.Added) && changes.Added.length > 0) categoryCounts.Added++;
+      if (Array.isArray(changes?.Changed) && changes.Changed.length > 0) categoryCounts.Changed++;
+      if (Array.isArray(changes?.Deprecated) && changes.Deprecated.length > 0)
+        categoryCounts.Deprecated++;
+      if (Array.isArray(changes?.Removed) && changes.Removed.length > 0) categoryCounts.Removed++;
+      if (Array.isArray(changes?.Fixed) && changes.Fixed.length > 0) categoryCounts.Fixed++;
+      if (Array.isArray(changes?.Security) && changes.Security.length > 0)
+        categoryCounts.Security++;
     }
 
-    const parsedChangelog: ParsedChangelog = {
-      entries,
-      metadata: {
-        totalEntries,
-        latestEntry,
-        dateRange,
-        categoryCounts,
-      },
+    const metadata = {
+      totalEntries,
+      ...(latestEntry && { latestEntry }),
+      ...(dateRange && { dateRange }),
+      categoryCounts,
     };
 
-    // Return parsed data (database will validate on sync)
-    return parsedChangelog;
+    return { entries, metadata };
   } catch (error) {
     logger.error(
       'Failed to parse CHANGELOG.md',
@@ -327,33 +221,14 @@ export async function parseChangelog(
   }
 }
 
-/**
- * Get a specific changelog entry by slug
- *
- * @param slug - Entry slug (e.g., "2025-10-06-automated-submission-tracking")
- * @returns Changelog entry or undefined if not found
- *
- * @example
- * const entry = await getChangelogEntryBySlug("2025-10-06-automated-submission-tracking");
- * if (entry) {
- *   console.log(entry.title);
- * }
- */
-export async function getChangelogEntryBySlug(slug: string): Promise<ChangelogEntry | undefined> {
+export async function getChangelogEntryBySlug(
+  slug: string
+): Promise<Tables<'changelog_entries'> | undefined> {
   const changelog = await parseChangelog();
   return changelog.entries.find((entry) => entry.slug === slug);
 }
 
-/**
- * Get all changelog entries sorted by date (newest first)
- *
- * @returns Array of all changelog entries
- *
- * @example
- * const entries = await getAllChangelogEntries();
- * console.log(`Total entries: ${entries.length}`);
- */
-export async function getAllChangelogEntries(): Promise<ChangelogEntry[]> {
+export async function getAllChangelogEntries(): Promise<Tables<'changelog_entries'>[]> {
   const changelog = await parseChangelog();
   return changelog.entries;
 }

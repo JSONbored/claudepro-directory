@@ -631,17 +631,11 @@ function ModalVariant({
       const now = Date.now();
       setShowTime(now);
 
-      import('#lib/analytics/events.constants')
-        .then(({ EVENTS }) => {
-          trackEvent(EVENTS.EMAIL_MODAL_SHOWN, {
-            trigger_source: 'post_copy',
-            copy_type: copyType,
-            session_copy_count: 1,
-          });
-        })
-        .catch(() => {
-          // Analytics tracking failure is non-critical - silently fail
-        });
+      trackEvent('email_modal_shown', {
+        trigger_source: 'post_copy',
+        copy_type: copyType,
+        session_copy_count: 1,
+      });
     }
   }, [open, copyType]);
 
@@ -716,17 +710,11 @@ function ModalVariant({
     if (showTime) {
       const timeShown = Date.now() - showTime;
 
-      import('#lib/analytics/events.constants')
-        .then(({ EVENTS }) => {
-          trackEvent(EVENTS.EMAIL_MODAL_DISMISSED, {
-            trigger_source: 'post_copy',
-            dismissal_method: 'maybe_later',
-            time_shown_ms: timeShown,
-          });
-        })
-        .catch(() => {
-          // Analytics tracking failure is non-critical - silently fail
-        });
+      trackEvent('email_modal_dismissed', {
+        trigger_source: 'post_copy',
+        dismissal_method: 'maybe_later',
+        time_shown_ms: timeShown,
+      });
     }
 
     onOpenChange(false);
@@ -737,17 +725,11 @@ function ModalVariant({
     if (!open && showTime) {
       const timeShown = Date.now() - showTime;
 
-      import('#lib/analytics/events.constants')
-        .then(({ EVENTS }) => {
-          trackEvent(EVENTS.EMAIL_MODAL_DISMISSED, {
-            trigger_source: 'post_copy',
-            dismissal_method: 'close_button',
-            time_shown_ms: timeShown,
-          });
-        })
-        .catch(() => {
-          // Analytics tracking failure is non-critical - silently fail
-        });
+      trackEvent('email_modal_dismissed', {
+        trigger_source: 'post_copy',
+        dismissal_method: 'close_button',
+        time_shown_ms: timeShown,
+      });
     }
 
     onOpenChange(open);

@@ -27,7 +27,7 @@
  */
 
 import type { NextRequest } from 'next/server';
-import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
+import { getAllChangelogEntries, parseChangelogChanges } from '@/src/lib/changelog/loader';
 import { formatChangelogDateISO8601, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { apiResponse } from '@/src/lib/error-handler';
@@ -70,7 +70,7 @@ export async function GET(_request: NextRequest): Promise<Response> {
     const entries = allEntries.slice(0, MAX_FEED_ENTRIES);
 
     // Get latest update date for feed-level <updated> tag
-    const latestDate = entries[0]?.date || new Date().toISOString().split('T')[0] || '';
+    const latestDate = entries[0]?.release_date || new Date().toISOString().split('T')[0] || '';
 
     // Build Atom 1.0 XML
     const atom = `<?xml version="1.0" encoding="UTF-8"?>
@@ -91,23 +91,26 @@ export async function GET(_request: NextRequest): Promise<Response> {
 ${entries
   .map((entry) => {
     const entryUrl = getChangelogUrl(entry.slug);
-    const summary = entry.tldr || entry.content.slice(0, 300);
+    const summary = entry.tldr || entry.content?.slice(0, 300) || '';
+
+    // Parse changes JSONB field with type safety
+    const changes = parseChangelogChanges(entry.changes);
 
     // Build category list
     const categories = [];
-    if (entry.categories.Added.length > 0) categories.push('Added');
-    if (entry.categories.Changed.length > 0) categories.push('Changed');
-    if (entry.categories.Fixed.length > 0) categories.push('Fixed');
-    if (entry.categories.Removed.length > 0) categories.push('Removed');
-    if (entry.categories.Deprecated.length > 0) categories.push('Deprecated');
-    if (entry.categories.Security.length > 0) categories.push('Security');
+    if (changes.Added && changes.Added.length > 0) categories.push('Added');
+    if (changes.Changed && changes.Changed.length > 0) categories.push('Changed');
+    if (changes.Fixed && changes.Fixed.length > 0) categories.push('Fixed');
+    if (changes.Removed && changes.Removed.length > 0) categories.push('Removed');
+    if (changes.Deprecated && changes.Deprecated.length > 0) categories.push('Deprecated');
+    if (changes.Security && changes.Security.length > 0) categories.push('Security');
 
     return `  <entry>
     <title>${escapeXml(entry.title)}</title>
     <link href="${escapeXml(entryUrl)}" rel="alternate" type="text/html" />
     <id>${escapeXml(entryUrl)}</id>
-    <published>${formatChangelogDateISO8601(entry.date)}</published>
-    <updated>${formatChangelogDateISO8601(entry.date)}</updated>
+    <published>${formatChangelogDateISO8601(entry.release_date)}</published>
+    <updated>${formatChangelogDateISO8601(entry.release_date)}</updated>
     <author>
       <name>${escapeXml(APP_CONFIG.author)}</name>
       <email>contact@claudepro.directory</email>

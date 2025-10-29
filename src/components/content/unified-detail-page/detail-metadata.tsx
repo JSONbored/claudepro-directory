@@ -5,28 +5,20 @@
  * Pure rendering of author, date, and tags
  *
  * Performance: Eliminated from client bundle, server-rendered for instant display
- *
- * @see components/unified-detail-page.tsx - Original implementation
  */
 
-import { z } from 'zod';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { Calendar, Eye, Tag, User } from '@/src/lib/icons';
-import type { ContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatViewCount } from '@/src/lib/utils/content.utils';
 import { formatDate } from '@/src/lib/utils/data.utils';
 
-/**
- * Schema for DetailMetadata props
- */
-const detailMetadataPropsSchema = z.object({
-  item: z.custom<ContentItem>(),
-  viewCount: z.number().optional(),
-});
-
-export type DetailMetadataProps = z.infer<typeof detailMetadataPropsSchema>;
+export interface DetailMetadataProps {
+  item: ContentItem;
+  viewCount?: number | undefined;
+}
 
 /**
  * DetailMetadata Component (Server Component)
@@ -35,8 +27,11 @@ export type DetailMetadataProps = z.infer<typeof detailMetadataPropsSchema>;
  * No React.memo needed - server components don't re-render
  */
 export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
-  const hasMetadata = item.author || item.date_added || viewCount !== undefined;
-  const hasTags = item.tags && item.tags.length > 0;
+  const hasMetadata =
+    ('author' in item && item.author) ||
+    ('date_added' in item && item.date_added) ||
+    viewCount !== undefined;
+  const hasTags = 'tags' in item && Array.isArray(item.tags) && item.tags.length > 0;
 
   if (!(hasMetadata || hasTags)) return null;
 
@@ -45,11 +40,14 @@ export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
       {/* Author, Date & View Count Metadata */}
       {hasMetadata && (
         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
-          {item.author && (
+          {'author' in item && item.author && (
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <User className="h-4 w-4" />
               <a
-                href={item.author_profile_url || SOCIAL_LINKS.authorProfile}
+                href={
+                  ('author_profile_url' in item && item.author_profile_url) ||
+                  SOCIAL_LINKS.authorProfile
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:underline hover:text-foreground transition-colors"
@@ -58,7 +56,7 @@ export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
               </a>
             </div>
           )}
-          {item.date_added && (
+          {'date_added' in item && item.date_added && (
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Calendar className="h-4 w-4" />
               <span>{formatDate(item.date_added)}</span>
@@ -74,10 +72,10 @@ export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
       )}
 
       {/* Tags */}
-      {hasTags && item.tags && (
+      {hasTags && 'tags' in item && Array.isArray(item.tags) && (
         <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
           <Tag className="h-4 w-4 text-muted-foreground" />
-          {item.tags.map((tag) => (
+          {(item.tags as string[]).map((tag: string) => (
             <UnifiedBadge key={tag} variant="base" style="outline" className="text-xs">
               {tag}
             </UnifiedBadge>

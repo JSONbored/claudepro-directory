@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/src/components/primitives/dropdown-menu';
 import { TEMPLATES, type Template } from '@/src/lib/config/templates';
+import type { SubmissionContentType } from '@/src/lib/forms/types';
 import { ChevronDown, FileText } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -34,10 +35,8 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 // Re-export Template type for consumer components
 export type { Template };
 
-type ContentType = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills';
-
 interface TemplateSelectorProps {
-  contentType: ContentType;
+  contentType: SubmissionContentType;
   onSelect: (template: Template) => void;
 }
 

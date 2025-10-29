@@ -1,22 +1,36 @@
 'use client';
 
 /**
- * Profile Edit Form
- * Form for editing user profile information
+ * Profile Edit Form - Database-First Architecture
+ * Uses React Hook Form + generated Zod schema for validation.
  */
 
-import { useState, useTransition } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useTransition } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { refreshProfileFromOAuth, updateProfile } from '#lib/actions/user';
 import { FormField } from '@/src/components/forms/utilities/form-field';
 import { ListItemManager } from '@/src/components/forms/utilities/list-item-manager';
 import { ToggleField } from '@/src/components/forms/utilities/toggle-field';
 import { Button } from '@/src/components/primitives/button';
+import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Tables } from '@/src/types/database.types';
 
-// Database-first: ProfileData is just the profiles table row type
 type ProfileData = Tables<'profiles'>;
 
-import { toasts } from '@/src/lib/utils/toast.utils';
+const profileFormSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100),
+  bio: z.string().max(500).optional(),
+  work: z.string().max(100).optional(),
+  website: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  social_x_link: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  interests: z.array(z.string()).max(10).optional(),
+  public: z.boolean(),
+  follow_email: z.boolean(),
+});
+
+type ProfileFormData = z.infer<typeof profileFormSchema>;
 
 interface ProfileEditFormProps {
   profile: ProfileData;
@@ -24,131 +38,119 @@ interface ProfileEditFormProps {
 
 export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const [isPending, startTransition] = useTransition();
-  const [hasChanges, setHasChanges] = useState(false);
 
-  // Form state
-  const [name, setName] = useState(profile.name || '');
-  const [bio, setBio] = useState(profile.bio || '');
-  const [work, setWork] = useState(profile.work || '');
-  const [website, setWebsite] = useState(profile.website || '');
-  const [socialXLink, setSocialXLink] = useState(profile.social_x_link || '');
-  const [isPublic, setIsPublic] = useState<boolean>(profile.public ?? true);
-  const [followEmail, setFollowEmail] = useState<boolean>(profile.follow_email ?? true);
-  const [interests, setInterests] = useState<string[]>(() => {
-    if (
-      Array.isArray(profile.interests) &&
-      profile.interests.every((item): item is string => typeof item === 'string')
-    ) {
-      return profile.interests;
-    }
-    return [];
+  const {
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    formState: { errors, isDirty },
+  } = useForm<ProfileFormData>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      name: profile.display_name || '',
+      bio: profile.bio || '',
+      work: profile.work || '',
+      website: profile.website || '',
+      social_x_link: profile.social_x_link || '',
+      interests: Array.isArray(profile.interests) ? profile.interests : [],
+      public: profile.profile_public ?? true,
+      follow_email: profile.follow_email ?? true,
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const interests = watch('interests') || [];
+  const isPublic = watch('public');
+  const followEmail = watch('follow_email');
 
+  const onSubmit = (data: ProfileFormData) => {
     startTransition(async () => {
       const result = await updateProfile({
-        name: name || undefined,
-        bio: bio || '',
-        work: work || '',
-        website: website || '',
-        social_x_link: socialXLink || '',
-        interests,
-        public: isPublic,
-        follow_email: followEmail,
+        display_name: data.name || undefined,
+        bio: data.bio || '',
+        work: data.work || '',
+        website: data.website || '',
+        social_x_link: data.social_x_link || '',
+        interests: data.interests,
+        profile_public: data.public,
+        follow_email: data.follow_email,
       });
 
       if (result?.data?.success) {
         toasts.success.profileUpdated();
-        setHasChanges(false);
+        reset(data);
       } else if (result?.serverError) {
         toasts.error.serverError(result.serverError);
       }
     });
   };
 
-  const handleFieldChange = () => {
-    setHasChanges(true);
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Name */}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <FormField
         variant="input"
         label="Name"
-        value={name}
-        onChange={(e) => {
-          setName(e.target.value);
-          handleFieldChange();
-        }}
+        value={watch('name')}
+        onChange={(e) => setValue('name', e.target.value, { shouldDirty: true })}
         placeholder="Your name"
         maxLength={100}
         required
+        error={!!errors.name}
+        {...(errors.name?.message && { errorMessage: errors.name.message })}
       />
 
-      {/* Bio */}
       <FormField
         variant="textarea"
         label="Bio"
-        value={bio}
-        onChange={(e) => {
-          setBio(e.target.value);
-          handleFieldChange();
-        }}
+        value={watch('bio') || ''}
+        onChange={(e) => setValue('bio', e.target.value, { shouldDirty: true })}
         placeholder="Tell us about yourself..."
         maxLength={500}
         showCharCount
         rows={4}
+        error={!!errors.bio}
+        {...(errors.bio?.message && { errorMessage: errors.bio.message })}
       />
 
-      {/* Work */}
       <FormField
         variant="input"
         label="Work"
-        value={work}
-        onChange={(e) => {
-          setWork(e.target.value);
-          handleFieldChange();
-        }}
+        value={watch('work') || ''}
+        onChange={(e) => setValue('work', e.target.value, { shouldDirty: true })}
         placeholder="e.g., Software Engineer at Company"
         maxLength={100}
+        error={!!errors.work}
+        {...(errors.work?.message && { errorMessage: errors.work.message })}
       />
 
-      {/* Website */}
       <FormField
         variant="input"
         label="Website"
         type="url"
-        value={website}
-        onChange={(e) => {
-          setWebsite(e.target.value);
-          handleFieldChange();
-        }}
+        value={watch('website') || ''}
+        onChange={(e) => setValue('website', e.target.value, { shouldDirty: true })}
         placeholder="https://yourwebsite.com"
+        error={!!errors.website}
+        {...(errors.website?.message && { errorMessage: errors.website.message })}
       />
 
-      {/* X/Twitter Link */}
       <FormField
         variant="input"
         label="X / Twitter"
         type="url"
-        value={socialXLink}
-        onChange={(e) => {
-          setSocialXLink(e.target.value);
-          handleFieldChange();
-        }}
+        value={watch('social_x_link') || ''}
+        onChange={(e) => setValue('social_x_link', e.target.value, { shouldDirty: true })}
         placeholder="https://x.com/yourhandle"
+        error={!!errors.social_x_link}
+        {...(errors.social_x_link?.message && { errorMessage: errors.social_x_link.message })}
       />
 
-      {/* Interests/Tags */}
       <ListItemManager
         variant="badge"
         label="Interests & Skills"
         items={interests}
-        onChange={setInterests}
-        onFieldChange={handleFieldChange}
+        onChange={(newInterests) => setValue('interests', newInterests, { shouldDirty: true })}
+        onFieldChange={() => {}}
         placeholder="Add an interest..."
         maxItems={10}
         maxLength={30}
@@ -158,16 +160,12 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         description="Press Enter or click Add"
       />
 
-      {/* Privacy & Notifications */}
       <div className="space-y-4 pt-2">
         <ToggleField
           label="Public profile"
           description="Allow others to view your profile"
           checked={isPublic}
-          onCheckedChange={(checked) => {
-            setIsPublic(!!checked);
-            setHasChanges(true);
-          }}
+          onCheckedChange={(checked) => setValue('public', !!checked, { shouldDirty: true })}
           ariaLabel="Toggle public profile visibility"
         />
 
@@ -175,41 +173,17 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
           label="Email on new followers"
           description="Send me an email when someone follows me"
           checked={followEmail}
-          onCheckedChange={(checked) => {
-            setFollowEmail(!!checked);
-            setHasChanges(true);
-          }}
+          onCheckedChange={(checked) => setValue('follow_email', !!checked, { shouldDirty: true })}
           ariaLabel="Toggle follower email notifications"
         />
       </div>
 
-      {/* Form Actions */}
       <div className="flex gap-3 pt-4">
-        <Button type="submit" disabled={isPending || !hasChanges}>
+        <Button type="submit" disabled={isPending || !isDirty}>
           {isPending ? 'Saving...' : 'Save Changes'}
         </Button>
-        {hasChanges && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              // Reset to original values
-              setName(profile.name || '');
-              setBio(profile.bio || '');
-              setWork(profile.work || '');
-              setWebsite(profile.website || '');
-              setSocialXLink(profile.social_x_link || '');
-              setIsPublic(profile.public ?? true);
-              setFollowEmail(profile.follow_email ?? true);
-              setInterests(
-                Array.isArray(profile.interests) &&
-                  profile.interests.every((item): item is string => typeof item === 'string')
-                  ? profile.interests
-                  : []
-              );
-              setHasChanges(false);
-            }}
-          >
+        {isDirty && (
+          <Button type="button" variant="outline" onClick={() => reset()}>
             Cancel
           </Button>
         )}
@@ -218,7 +192,6 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   );
 }
 
-// Small client button to refresh profile data from OAuth provider.
 export function RefreshProfileButton({ providerLabel }: { providerLabel: string }) {
   const [isPending, startTransition] = useTransition();
 

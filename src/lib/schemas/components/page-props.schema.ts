@@ -8,7 +8,6 @@
  * - Auto-updates when database schema changes
  */
 
-import { z } from 'zod';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 
 /**

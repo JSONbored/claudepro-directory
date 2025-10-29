@@ -1,21 +1,6 @@
 /**
- * Changelog Structured Data Generators
- *
- * Builds Schema.org JSON-LD structured data for changelog pages.
- * Optimized for SEO and AI crawler discovery (Google, Bing, Perplexity, ChatGPT).
- *
- * @module lib/changelog/structured-data
- *
- * Schemas Generated:
- * - Blog: Main changelog list page
- * - TechArticle: Individual changelog entries
- * - BreadcrumbList: Navigation breadcrumbs
- *
- * Production Standards:
- * - Full Schema.org compliance
- * - AI citation optimized
- * - Type-safe with TypeScript
- * - Follows existing structured-data patterns
+ * Changelog Structured Data - Database-First Architecture
+ * Schema.org JSON-LD generators for changelog pages using database types.
  */
 
 import type { ChangelogEntry } from '@/src/lib/changelog/loader';
@@ -71,8 +56,8 @@ export function buildChangelogBlogSchema(entries: ChangelogEntry[]): SchemaObjec
       headline: entry.title,
       description: entry.tldr || entry.content.slice(0, 200),
       url: getChangelogUrl(entry.slug),
-      datePublished: formatChangelogDateISO8601(entry.date),
-      dateModified: formatChangelogDateISO8601(entry.date),
+      datePublished: formatChangelogDateISO8601(entry.release_date),
+      dateModified: formatChangelogDateISO8601(entry.release_date),
       author: {
         '@type': 'Organization',
         name: APP_CONFIG.author,
@@ -117,16 +102,20 @@ export function buildChangelogBlogSchema(entries: ChangelogEntry[]): SchemaObjec
 export function buildChangelogArticleSchema(entry: ChangelogEntry): SchemaObject {
   const entryUrl = getChangelogUrl(entry.slug);
 
-  // Build category tags
+  const changes =
+    typeof entry.changes === 'object' && entry.changes !== null
+      ? (entry.changes as Record<string, unknown>)
+      : {};
   const categories = [];
-  if (entry.categories.Added.length > 0) categories.push('New Features');
-  if (entry.categories.Changed.length > 0) categories.push('Improvements');
-  if (entry.categories.Fixed.length > 0) categories.push('Bug Fixes');
-  if (entry.categories.Security.length > 0) categories.push('Security Updates');
-  if (entry.categories.Deprecated.length > 0) categories.push('Deprecations');
-  if (entry.categories.Removed.length > 0) categories.push('Removals');
+  if (Array.isArray(changes.Added) && changes.Added.length > 0) categories.push('New Features');
+  if (Array.isArray(changes.Changed) && changes.Changed.length > 0) categories.push('Improvements');
+  if (Array.isArray(changes.Fixed) && changes.Fixed.length > 0) categories.push('Bug Fixes');
+  if (Array.isArray(changes.Security) && changes.Security.length > 0)
+    categories.push('Security Updates');
+  if (Array.isArray(changes.Deprecated) && changes.Deprecated.length > 0)
+    categories.push('Deprecations');
+  if (Array.isArray(changes.Removed) && changes.Removed.length > 0) categories.push('Removals');
 
-  // Build description from TL;DR or content
   const description = entry.tldr || entry.content.slice(0, 300);
 
   return {
@@ -136,8 +125,8 @@ export function buildChangelogArticleSchema(entry: ChangelogEntry): SchemaObject
     headline: entry.title,
     description,
     url: entryUrl,
-    datePublished: formatChangelogDateISO8601(entry.date),
-    dateModified: formatChangelogDateISO8601(entry.date),
+    datePublished: formatChangelogDateISO8601(entry.release_date),
+    dateModified: formatChangelogDateISO8601(entry.release_date),
     author: {
       '@type': 'Organization',
       name: APP_CONFIG.author,

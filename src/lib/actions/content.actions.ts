@@ -10,7 +10,7 @@ import { z } from 'zod';
 import { authedAction, rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
 import { nonEmptyString } from '@/src/lib/schemas/primitives';
-import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
+// categoryIdSchema removed - using generated types only
 import {
   collectionInsertTransformSchema,
   collectionItemInsertTransformSchema,
@@ -329,7 +329,7 @@ export const reorderCollectionItems = authedAction
       throw new Error('You do not have permission to reorder items in this collection');
     }
 
-    // OPTIMIZATION: Batch operation (N queries → parallel batch)
+    // OPTIMIZATION: Batch operation (N queries ? parallel batch)
     // Performance gain: Significant for collections with 10-50 items
     const updates = items.map((item) =>
       supabase
@@ -725,14 +725,13 @@ export const markReviewHelpful = authedAction
   });
 
 /**
- * Get reviews for a content item
- *
- * This is a server action (not rate limited) for fetching reviews
- * Used by ReviewSection component for initial load and pagination
+ * Get reviews with aggregate stats - OPTIMIZED
+ * Uses single RPC call instead of separate getReviews + getAggregateRating
+ * Replaces 2 queries with 1
  */
-export const getReviews = rateLimitedAction
+export const getReviewsWithStats = rateLimitedAction
   .metadata({
-    actionName: 'getReviews',
+    actionName: 'getReviewsWithStats',
     category: 'content',
   })
   .schema(getReviewsSchema)
@@ -746,55 +745,18 @@ export const getReviews = rateLimitedAction
       data: { user },
     } = await supabase.auth.getUser();
 
-    // Build query
-    let query = supabase
-      .from('review_ratings')
-      .select(
-        `
-        *,
-        users:user_id (
-          slug,
-          name,
-          image,
-          reputation_score,
-          tier
-        )
-      `,
-        { count: 'exact' }
-      )
-      .eq('content_type', content_type)
-      .eq('content_slug', content_slug);
-
-    // Apply sorting
-    switch (sort_by) {
-      case 'helpful':
-        query = query
-          .order('helpful_count', { ascending: false })
-          .order('created_at', { ascending: false });
-        break;
-      case 'rating_high':
-        query = query
-          .order('rating', { ascending: false })
-          .order('created_at', { ascending: false });
-        break;
-      case 'rating_low':
-        query = query
-          .order('rating', { ascending: true })
-          .order('created_at', { ascending: false });
-        break;
-      default:
-        // 'recent' and any other value: sort by most recent first
-        query = query.order('created_at', { ascending: false });
-        break;
-    }
-
-    // Apply pagination
-    query = query.range(offset, offset + limit - 1);
-
-    const { data: reviews, error, count } = await query;
+    // Use optimized RPC - single query for reviews + aggregate stats
+    const { data, error } = await supabase.rpc('get_reviews_with_stats', {
+      p_content_type: content_type,
+      p_content_slug: content_slug,
+      ...(sort_by && { p_sort_by: sort_by }),
+      ...(offset !== undefined && { p_offset: offset }),
+      ...(limit !== undefined && { p_limit: limit }),
+      ...(user?.id && { p_user_id: user.id }),
+    });
 
     if (error) {
-      logger.error('Failed to fetch reviews', new Error(error.message), {
+      logger.error('Failed to fetch reviews with stats', new Error(error.message), {
         content_type,
         content_slug,
         sort_by,
@@ -803,52 +765,12 @@ export const getReviews = rateLimitedAction
       throw new Error('Failed to fetch reviews. Please try again.');
     }
 
-    // If user is authenticated, fetch their helpful votes for these reviews
-    let userHelpfulVotes: Set<string> = new Set();
-    if (user && reviews && reviews.length > 0) {
-      const reviewIds = reviews.map((r) => r.id);
-      const { data: votes } = await supabase
-        .from('review_helpful_votes')
-        .select('review_id')
-        .eq('user_id', user.id)
-        .in('review_id', reviewIds);
-
-      if (votes) {
-        userHelpfulVotes = new Set(votes.map((v) => v.review_id));
-      }
-    }
-
-    // Attach user helpful vote status to each review
-    const reviewsWithVoteStatus = (reviews || []).map((review) => ({
-      ...review,
-      user_has_voted_helpful: userHelpfulVotes.has(review.id),
-    }));
-
-    return {
-      success: true,
-      reviews: reviewsWithVoteStatus,
-      total: count || 0,
-      hasMore: (count || 0) > offset + limit,
-    };
+    // RPC returns JSONB with reviews, hasMore, totalCount, aggregateRating
+    return data as any;
   });
 
-export const getAggregateRating = rateLimitedAction
-  .metadata({ actionName: 'getAggregateRating', category: 'content' })
-  .schema(z.object({ content_type: categoryIdSchema, content_slug: nonEmptyString.max(200) }))
-  .action(async ({ parsedInput }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('get_aggregate_rating', {
-      p_content_type: parsedInput.content_type,
-      p_content_slug: parsedInput.content_slug,
-    });
-    if (error) throw new Error('Failed to fetch rating statistics. Please try again.');
-    return data as {
-      success: boolean;
-      average: number;
-      count: number;
-      distribution: Record<string, number>;
-    };
-  });
+// DELETED: getReviews() - Use getReviewsWithStats() instead (optimized single RPC)
+// DELETED: getAggregateRating() - Use getReviewsWithStats() instead (optimized single RPC)
 
 // ============================================
 // POST ACTIONS

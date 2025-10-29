@@ -44,8 +44,7 @@ import { useCallback, useEffect, useId, useMemo, useState, useTransition } from 
 import {
   createReview,
   deleteReview,
-  getAggregateRating,
-  getReviews,
+  getReviewsWithStats,
   markReviewHelpful,
   updateReview,
 } from '#lib/actions/content';
@@ -127,16 +126,7 @@ export interface ReviewItem {
   } | null;
 }
 
-/**
- * Rating Distribution Data
- */
-export interface RatingDistribution {
-  1: number;
-  2: number;
-  3: number;
-  4: number;
-  5: number;
-}
+// NO manual types - will use whatever the RPC returns
 
 /**
  * Discriminated Union for Unified Review Component
@@ -162,7 +152,7 @@ export type UnifiedReviewProps =
     }
   | {
       variant: 'histogram';
-      distribution: RatingDistribution;
+      distribution: Record<string, number>;
       totalReviews: number;
       averageRating: number;
     }
@@ -390,22 +380,18 @@ function SectionVariant({
   );
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const [aggregateRating, setAggregateRating] = useState<{
-    average: number;
-    count: number;
-    distribution: RatingDistribution;
-  } | null>(null);
+  const [aggregateRating, setAggregateRating] = useState<any>(null);
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   const router = useRouter();
 
   const REVIEWS_PER_PAGE = 10;
 
-  // Load reviews - wrapped in useCallback for stable reference
-  const loadReviews = useCallback(
+  // Load reviews with stats - OPTIMIZED: Single RPC call
+  const loadReviewsWithStats = useCallback(
     async (pageNum: number, sort: typeof sortBy) => {
       setIsLoading(true);
       try {
-        const result = await getReviews({
+        const result = await getReviewsWithStats({
           content_type: contentType,
           content_slug: contentSlug,
           sort_by: sort,
@@ -414,9 +400,14 @@ function SectionVariant({
         });
 
         if (result?.data) {
-          const { reviews, hasMore } = result.data;
+          const { reviews, hasMore, aggregateRating } = result.data as any;
           setReviews((prev) => (pageNum === 1 ? reviews : [...prev, ...reviews]));
           setHasMore(hasMore);
+
+          // Also update aggregate rating (no separate call needed!)
+          if (aggregateRating) {
+            setAggregateRating(aggregateRating);
+          }
         }
       } catch (_error) {
         toasts.error.reviewActionFailed('load');
@@ -427,36 +418,18 @@ function SectionVariant({
     [contentType, contentSlug]
   );
 
-  // Load aggregate rating - wrapped in useCallback for stable reference
-  const loadAggregateRating = useCallback(async () => {
-    try {
-      const result = await getAggregateRating({
-        content_type: contentType,
-        content_slug: contentSlug,
-      });
-
-      if (result?.data) {
-        setAggregateRating(result.data);
-      }
-    } catch (_error) {
-      // Silent fail - optional feature
-    }
-  }, [contentType, contentSlug]);
-
   // Initial load - useEffect for async operations (fire-and-forget pattern)
   useEffect(() => {
     // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
-    void loadReviews(1, sortBy);
-    // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
-    void loadAggregateRating();
-  }, [loadReviews, loadAggregateRating, sortBy]);
+    void loadReviewsWithStats(1, sortBy);
+  }, [loadReviewsWithStats, sortBy]);
 
   // Handle sort change (fire-and-forget pattern)
   const handleSortChange = (newSort: typeof sortBy) => {
     setSortBy(newSort);
     setPage(1);
     // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
-    void loadReviews(1, newSort);
+    void loadReviewsWithStats(1, newSort);
   };
 
   // Handle load more (fire-and-forget pattern)
@@ -464,7 +437,7 @@ function SectionVariant({
     const nextPage = page + 1;
     setPage(nextPage);
     // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
-    void loadReviews(nextPage, sortBy);
+    void loadReviewsWithStats(nextPage, sortBy);
   };
 
   // Handle delete
@@ -474,8 +447,9 @@ function SectionVariant({
       if (result?.data?.success) {
         toasts.success.itemDeleted('Review');
         setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+        // Refresh stats after deletion
         // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
-        void loadAggregateRating();
+        void loadReviewsWithStats(1, sortBy);
         router.refresh();
       }
     } catch (_error) {
@@ -708,7 +682,7 @@ function HistogramVariant({
   // ARCHITECTURAL FIX: Memoize chart data to prevent unnecessary recalculation
   const chartData = useMemo(() => {
     return [5, 4, 3, 2, 1].map((stars) => {
-      const count = distribution[stars as keyof typeof distribution];
+      const count = distribution[String(stars)] || 0;
       const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
 
       return {

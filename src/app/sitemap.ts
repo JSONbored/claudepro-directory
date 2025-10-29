@@ -36,13 +36,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = APP_CONFIG.url;
 
   // Generate all site URLs using centralized URL generator
-  // Content is fetched directly from Supabase via getAllContent()
-  const sitemapUrls = await generateAllSiteUrls({
-    baseUrl,
-    includeGuides: true,
-    includeChangelog: true,
-    includeLlmsTxt: true,
-  });
+  // Data comes from mv_site_urls materialized view (cached via get_site_urls RPC)
+  const sitemapUrls = await generateAllSiteUrls({ baseUrl });
 
   // Convert to Next.js MetadataRoute.Sitemap format
   return sitemapUrls.map((url) => ({

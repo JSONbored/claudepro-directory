@@ -19,8 +19,9 @@ import { UnifiedButton } from '@/src/components/domain/unified-button';
 import type { CopyType } from '@/src/components/features/growth/unified-newsletter-capture';
 import { Button } from '@/src/components/primitives/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
+import type { CategoryId } from '@/src/lib/config/category-types';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { ArrowLeft, Check, Copy } from '@/src/lib/icons';
-import type { ContentItem } from '@/src/lib/schemas/component.schema';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 /**
@@ -45,7 +46,7 @@ export interface SerializableAction {
 export interface DetailHeaderActionsProps {
   item: ContentItem;
   typeName: string;
-  category: string;
+  category: CategoryId;
   hasContent: boolean;
   displayTitle: string;
   primaryAction: SerializableAction;

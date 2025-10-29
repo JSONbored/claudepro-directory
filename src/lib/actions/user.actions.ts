@@ -25,8 +25,59 @@ const activityFilterSchema = z.object({
   offset: z.number().int().nonnegative().default(0),
 });
 
+// Activity item schema - discriminated union based on type field
+const baseActivitySchema = z.object({
+  id: z.string().uuid(),
+  type: z.enum(['post', 'comment', 'vote', 'submission']),
+  created_at: z.string(),
+  user_id: z.string().uuid(),
+});
+
+const postActivitySchema = baseActivitySchema.extend({
+  type: z.literal('post'),
+  title: z.string(),
+  body: z.string(),
+  content_type: z.string(),
+  content_slug: z.string(),
+  updated_at: z.string(),
+});
+
+const commentActivitySchema = baseActivitySchema.extend({
+  type: z.literal('comment'),
+  body: z.string(),
+  post_id: z.string().uuid(),
+  parent_id: z.string().uuid().nullable(),
+  updated_at: z.string(),
+});
+
+const voteActivitySchema = baseActivitySchema.extend({
+  type: z.literal('vote'),
+  vote_type: z.enum(['upvote', 'downvote']),
+  post_id: z.string().uuid(),
+});
+
+const submissionActivitySchema = baseActivitySchema.extend({
+  type: z.literal('submission'),
+  title: z.string(),
+  description: z.string().nullable(),
+  content_type: z.string(),
+  submission_url: z.string().nullable(),
+  status: z.enum(['pending', 'approved', 'rejected']),
+  updated_at: z.string(),
+});
+
+const activitySchema = z.discriminatedUnion('type', [
+  postActivitySchema,
+  commentActivitySchema,
+  voteActivitySchema,
+  submissionActivitySchema,
+]);
+
+// Export Activity type for use in components
+export type Activity = z.infer<typeof activitySchema>;
+
 const activityTimelineResponseSchema = z.object({
-  activities: z.array(z.any()),
+  activities: z.array(activitySchema),
   hasMore: z.boolean(),
   total: z.number(),
 });
@@ -316,5 +367,7 @@ export const getActivityTimeline = authedAction
       p_offset: offset,
     });
     if (error) throw new Error(`Failed to fetch activity timeline: ${error.message}`);
-    return data as { activities: unknown[]; hasMore: boolean; total: number };
+
+    // Validate RPC response with Zod schema (runtime type safety)
+    return activityTimelineResponseSchema.parse(data);
   });
