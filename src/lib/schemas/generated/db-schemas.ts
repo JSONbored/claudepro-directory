@@ -2861,6 +2861,45 @@ export const publicSponsoredImpressionsRelationshipsSchema = z.tuple([
   }),
 ]);
 
+export const publicStaticRoutesRowSchema = z.object({
+  created_at: z.string(),
+  description: z.string(),
+  group_name: z.string(),
+  icon_name: z.string(),
+  id: z.string(),
+  is_active: z.boolean(),
+  path: z.string(),
+  sort_order: z.number(),
+  title: z.string(),
+  updated_at: z.string(),
+});
+
+export const publicStaticRoutesInsertSchema = z.object({
+  created_at: z.string().optional(),
+  description: z.string(),
+  group_name: z.string(),
+  icon_name: z.string(),
+  id: z.string().optional(),
+  is_active: z.boolean().optional(),
+  path: z.string(),
+  sort_order: z.number().optional(),
+  title: z.string(),
+  updated_at: z.string().optional(),
+});
+
+export const publicStaticRoutesUpdateSchema = z.object({
+  created_at: z.string().optional(),
+  description: z.string().optional(),
+  group_name: z.string().optional(),
+  icon_name: z.string().optional(),
+  id: z.string().optional(),
+  is_active: z.boolean().optional(),
+  path: z.string().optional(),
+  sort_order: z.number().optional(),
+  title: z.string().optional(),
+  updated_at: z.string().optional(),
+});
+
 export const publicStructuredDataConfigRowSchema = z.object({
   active: z.boolean().nullable(),
   application_sub_category: z.string().nullable(),
@@ -3959,6 +3998,18 @@ export const publicMvSearchFacetsRowSchema = z.object({
   tag_count: z.number().nullable(),
 });
 
+export const publicMvTrendingContentRowSchema = z.object({
+  bookmark_count: z.number().nullable(),
+  category: z.string().nullable(),
+  copy_count: z.number().nullable(),
+  description: z.string().nullable(),
+  last_refreshed: z.string().nullable(),
+  latest_activity: z.string().nullable(),
+  slug: z.string().nullable(),
+  title: z.string().nullable(),
+  view_count: z.number().nullable(),
+});
+
 export const publicMvWeeklyNewContentRowSchema = z.object({
   category: z.string().nullable(),
   date_added: z.string().nullable(),
@@ -4739,6 +4790,10 @@ export const publicGetMySubmissionsArgsSchema = z.object({
 
 export const publicGetMySubmissionsReturnsSchema = jsonSchema;
 
+export const publicGetNavigationMenuArgsSchema = z.never();
+
+export const publicGetNavigationMenuReturnsSchema = jsonSchema;
+
 export const publicGetNewContentForWeekArgsSchema = z.object({
   p_limit: z.number().optional(),
   p_week_start: z.string(),
@@ -4871,6 +4926,12 @@ export const publicGetSeoConfigArgsSchema = z.object({
 });
 
 export const publicGetSeoConfigReturnsSchema = jsonSchema;
+
+export const publicGetSidebarGuidesDataArgsSchema = z.object({
+  p_limit: z.number().optional(),
+});
+
+export const publicGetSidebarGuidesDataReturnsSchema = jsonSchema;
 
 export const publicGetSimilarContentArgsSchema = z.object({
   p_content_slug: z.string(),

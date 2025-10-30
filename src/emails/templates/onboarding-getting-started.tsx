@@ -149,10 +149,10 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
           configurations effectively.
         </Text>
         <Button
-          href={addUTMToURL(`${baseUrl}/guides/tutorials`, { ...utm, content: 'tutorials_cta' })}
+          href={addUTMToURL(`${baseUrl}/guides`, { ...utm, content: 'guides_cta' })}
           style={secondaryButtonStyle}
         >
-          View Tutorials
+          View Guides
         </Button>
       </Section>
 

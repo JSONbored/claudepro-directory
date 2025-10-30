@@ -343,6 +343,27 @@ const nextConfig = {
     return config;
   },
 
+  // 301 Redirects for guides URL migration
+  // /guides/<subcategory>/<slug> → /guides/<slug>
+  async redirects() {
+    return [
+      // Guides migration: Remove subcategory from URLs
+      {
+        source:
+          '/guides/:subcategory(comparisons|troubleshooting|tutorials|use-cases|workflows)/:slug',
+        destination: '/guides/:slug',
+        permanent: true, // 301 redirect
+      },
+      // llms.txt routes for guides
+      {
+        source:
+          '/guides/:subcategory(comparisons|troubleshooting|tutorials|use-cases|workflows)/:slug/llms.txt',
+        destination: '/guides/:slug/llms.txt',
+        permanent: true, // 301 redirect
+      },
+    ];
+  },
+
   // Headers for caching and security (Cloudflare handles primary security)
   async headers() {
     return [

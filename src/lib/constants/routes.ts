@@ -86,14 +86,6 @@ export const CATEGORY_SLUG = (params: { category: string; slug: string }) => {
 };
 
 /**
- * /guides/[category]/[slug]
- */
-export const GUIDES_CATEGORY_SLUG = (params: { category: string; slug: string }) => {
-  const { category, slug } = params;
-  return `/guides/${category}/${slug}`;
-};
-
-/**
  * /changelog/[slug]
  */
 export const CHANGELOG_SLUG = (params: { slug: string }) => {
@@ -225,7 +217,6 @@ export const ALL_STATIC_ROUTES = [
 export const ALL_DYNAMIC_ROUTE_PATTERNS = [
   '/[category]',
   '/[category]/[slug]',
-  '/guides/[category]/[slug]',
   '/changelog/[slug]',
   '/jobs/[slug]',
   '/u/[slug]',

@@ -32,23 +32,28 @@ type Notification = Tables<'notifications'>;
  * Fetch active notifications from database (client-side)
  */
 async function fetchActiveNotifications(): Promise<Notification[]> {
-  const supabase = createClient();
-  const now = new Date().toISOString();
+  try {
+    const supabase = createClient();
+    const now = new Date().toISOString();
 
-  const { data, error } = await supabase
-    .from('notifications')
-    .select('*')
-    .eq('active', true)
-    .or(`expires_at.is.null,expires_at.gte.${now}`)
-    .order('priority', { ascending: false }) // high > medium > low
-    .order('created_at', { ascending: true }); // oldest first
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('active', true)
+      .or(`expires_at.is.null,expires_at.gte.${now}`)
+      .order('priority', { ascending: false }) // high > medium > low
+      .order('created_at', { ascending: true }); // oldest first
 
-  if (error) {
-    console.error('Failed to load notifications:', error);
+    if (error) {
+      console.error('Failed to load notifications:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    // Mock client or connection error - silently fail
     return [];
   }
-
-  return data || [];
 }
 
 /**

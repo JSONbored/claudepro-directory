@@ -3207,20 +3207,17 @@ BEGIN
       'content', c.content,
       'metadata', c.metadata,
       -- Analytics enrichment from materialized views
-      'viewCount', COALESCE(mv.view_count, 0),
-      'copyCount', COALESCE(mv.copy_count, 0),
-      'bookmarkCount', COALESCE(mv.bookmark_count, 0),
-      -- FIX: Use mv_content_stats for popularity/trending scores (not content.popularity_score)
+      'viewCount', COALESCE(mcs.view_count, 0),
+      'copyCount', COALESCE(mcs.copy_count, 0),
+      'bookmarkCount', COALESCE(mcs.bookmark_count, 0),
       'popularityScore', COALESCE(mcs.popularity_score, 0),
-      'trendingScore', COALESCE(mcs.trending_score, 0),
+      'trendingScore', 0, -- mv_content_stats doesn't have trending_score
       -- Sponsorship enrichment
       'sponsoredContentId', sc.id,
       'sponsorshipTier', sc.tier,
       'isSponsored', COALESCE(sc.active, false)
     ) as row_to_json
     FROM public.content c
-    LEFT JOIN public.mv_analytics_summary mv 
-      ON mv.slug = c.slug AND mv.category = c.category
     LEFT JOIN public.mv_content_stats mcs
       ON mcs.slug = c.slug AND mcs.category = c.category
     LEFT JOIN public.sponsored_content sc 
@@ -3244,7 +3241,8 @@ $$;
 ALTER FUNCTION "public"."get_enriched_content"("p_category" "text", "p_slug" "text", "p_slugs" "text"[], "p_limit" integer, "p_offset" integer) OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_enriched_content"("p_category" "text", "p_slug" "text", "p_slugs" "text"[], "p_limit" integer, "p_offset" integer) IS 'Fetches content from unified content table with analytics and sponsorship enrichment';
+COMMENT ON FUNCTION "public"."get_enriched_content"("p_category" "text", "p_slug" "text", "p_slugs" "text"[], "p_limit" integer, "p_offset" integer) IS 'Fetches content from unified content table with analytics and sponsorship enrichment. 
+Uses mv_content_stats for analytics data (view_count, copy_count, bookmark_count, popularity_score).';
 
 
 
@@ -3784,6 +3782,66 @@ ALTER FUNCTION "public"."get_my_submissions"("p_limit" integer, "p_offset" integ
 
 COMMENT ON FUNCTION "public"."get_my_submissions"("p_limit" integer, "p_offset" integer) IS 'Get current user''s submissions with status.';
 
+
+
+CREATE OR REPLACE FUNCTION "public"."get_navigation_menu"() RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  result JSONB;
+BEGIN
+  SELECT jsonb_build_object(
+    'primary', (
+      -- Category-based routes (agents, commands, hooks, mcp, rules, statuslines, collections, guides)
+      SELECT COALESCE(jsonb_agg(
+        jsonb_build_object(
+          'path', '/' || url_slug,
+          'title', plural_title,
+          'description', description,
+          'iconName', icon_name,
+          'group', 'primary'
+        ) ORDER BY title
+      ), '[]'::jsonb)
+      FROM category_configs
+      WHERE show_on_homepage = true
+    ),
+    'secondary', (
+      -- Static secondary routes
+      SELECT COALESCE(jsonb_agg(
+        jsonb_build_object(
+          'path', path,
+          'title', title,
+          'description', description,
+          'iconName', icon_name,
+          'group', 'secondary'
+        ) ORDER BY sort_order
+      ), '[]'::jsonb)
+      FROM static_routes
+      WHERE group_name = 'secondary' AND is_active = true
+    ),
+    'actions', (
+      -- Static action routes
+      SELECT COALESCE(jsonb_agg(
+        jsonb_build_object(
+          'path', path,
+          'title', title,
+          'description', description,
+          'iconName', icon_name,
+          'group', 'actions'
+        ) ORDER BY sort_order
+      ), '[]'::jsonb)
+      FROM static_routes
+      WHERE group_name = 'actions' AND is_active = true
+    )
+  ) INTO result;
+  
+  RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_navigation_menu"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."get_new_content_for_week"("p_week_start" "date", "p_limit" integer DEFAULT 5) RETURNS TABLE("category" "text", "slug" "text", "title" "text", "description" "text", "date_added" timestamp with time zone, "url" "text")
@@ -4661,6 +4719,53 @@ ALTER FUNCTION "public"."get_seo_config"("p_key" "text") OWNER TO "postgres";
 
 COMMENT ON FUNCTION "public"."get_seo_config"("p_key" "text") IS 'Fetch SEO configuration value by key. Returns JSONB.';
 
+
+
+CREATE OR REPLACE FUNCTION "public"."get_sidebar_guides_data"("p_limit" integer DEFAULT 5) RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  result JSONB;
+BEGIN
+  SELECT jsonb_build_object(
+    'trending', (
+      SELECT COALESCE(jsonb_agg(
+        jsonb_build_object(
+          'slug', slug,
+          'title', title,
+          'view_count', view_count
+        )
+      ), '[]'::jsonb)
+      FROM mv_trending_content
+      WHERE category = 'guides'
+      ORDER BY view_count DESC
+      LIMIT p_limit
+    ),
+    'recent', (
+      SELECT COALESCE(jsonb_agg(
+        jsonb_build_object(
+          'slug', slug,
+          'title', title,
+          'created_at', created_at
+        )
+      ), '[]'::jsonb)
+      FROM (
+        SELECT slug, title, created_at
+        FROM content
+        WHERE category = 'guides'
+        ORDER BY created_at DESC
+        LIMIT p_limit
+      ) recent_guides
+    )
+  ) INTO result;
+  
+  RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_sidebar_guides_data"("p_limit" integer) OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."get_similar_content"("p_content_type" "text", "p_content_slug" "text", "p_limit" integer DEFAULT 10) RETURNS "jsonb"
@@ -9177,7 +9282,6 @@ ALTER FUNCTION "public"."update_structured_data_config_updated_at"() OWNER TO "p
 
 CREATE OR REPLACE FUNCTION "public"."update_updated_at_column"() RETURNS "trigger"
     LANGUAGE "plpgsql"
-    SET "search_path" TO 'public'
     AS $$
 BEGIN
   NEW.updated_at = NOW();
@@ -10553,6 +10657,26 @@ COMMENT ON MATERIALIZED VIEW "public"."mv_search_facets" IS 'Pre-computed search
 
 
 
+CREATE MATERIALIZED VIEW "public"."mv_trending_content" AS
+ SELECT "c"."category",
+    "c"."slug",
+    "c"."title",
+    "c"."description",
+    COALESCE("count"(DISTINCT "ui"."id") FILTER (WHERE ("ui"."interaction_type" = 'view'::"text")), (0)::bigint) AS "view_count",
+    COALESCE("count"(DISTINCT "ui"."id") FILTER (WHERE ("ui"."interaction_type" = 'copy'::"text")), (0)::bigint) AS "copy_count",
+    COALESCE("count"(DISTINCT "ui"."id") FILTER (WHERE ("ui"."interaction_type" = 'bookmark'::"text")), (0)::bigint) AS "bookmark_count",
+    "max"("ui"."created_at") AS "latest_activity",
+    "now"() AS "last_refreshed"
+   FROM ("public"."content" "c"
+     LEFT JOIN "public"."user_interactions" "ui" ON ((("ui"."content_slug" = "c"."slug") AND ("ui"."content_type" = "c"."category") AND ("ui"."created_at" >= ("now"() - '90 days'::interval)))))
+  GROUP BY "c"."category", "c"."slug", "c"."title", "c"."description"
+ HAVING ("count"(DISTINCT "ui"."id") FILTER (WHERE ("ui"."interaction_type" = 'view'::"text")) > 0)
+  WITH NO DATA;
+
+
+ALTER MATERIALIZED VIEW "public"."mv_trending_content" OWNER TO "postgres";
+
+
 CREATE MATERIALIZED VIEW "public"."mv_weekly_new_content" AS
  WITH "recent_content" AS (
          SELECT "get_content_with_analytics"."category",
@@ -11192,6 +11316,24 @@ COMMENT ON CONSTRAINT "sponsored_impressions_page_url_length" ON "public"."spons
 
 COMMENT ON CONSTRAINT "sponsored_impressions_position_range" ON "public"."sponsored_impressions" IS 'Enforces position between 0-100 if provided';
 
+
+
+CREATE TABLE IF NOT EXISTS "public"."static_routes" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "path" "text" NOT NULL,
+    "title" "text" NOT NULL,
+    "description" "text" NOT NULL,
+    "icon_name" "text" NOT NULL,
+    "group_name" "text" NOT NULL,
+    "sort_order" integer DEFAULT 0 NOT NULL,
+    "is_active" boolean DEFAULT true NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "static_routes_group_name_check" CHECK (("group_name" = ANY (ARRAY['primary'::"text", 'secondary'::"text", 'actions'::"text"])))
+);
+
+
+ALTER TABLE "public"."static_routes" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."structured_data_config" (
@@ -12201,6 +12343,16 @@ ALTER TABLE ONLY "public"."sponsored_impressions"
 
 
 
+ALTER TABLE ONLY "public"."static_routes"
+    ADD CONSTRAINT "static_routes_path_key" UNIQUE ("path");
+
+
+
+ALTER TABLE ONLY "public"."static_routes"
+    ADD CONSTRAINT "static_routes_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."structured_data_config"
     ADD CONSTRAINT "structured_data_config_pkey" PRIMARY KEY ("category");
 
@@ -12859,6 +13011,18 @@ CREATE UNIQUE INDEX "idx_mv_content_tag_index_unique" ON "public"."mv_content_ta
 
 
 
+CREATE INDEX "idx_mv_trending_content_category_views" ON "public"."mv_trending_content" USING "btree" ("category", "view_count" DESC);
+
+
+
+CREATE UNIQUE INDEX "idx_mv_trending_content_unique" ON "public"."mv_trending_content" USING "btree" ("category", "slug");
+
+
+
+CREATE INDEX "idx_mv_trending_content_views" ON "public"."mv_trending_content" USING "btree" ("view_count" DESC, "latest_activity" DESC);
+
+
+
 CREATE INDEX "idx_mv_weekly_new_content_rank" ON "public"."mv_weekly_new_content" USING "btree" ("week_start", "week_rank");
 
 
@@ -13088,6 +13252,10 @@ CREATE INDEX "idx_sponsored_impressions_sponsored_id" ON "public"."sponsored_imp
 
 
 CREATE INDEX "idx_sponsored_impressions_user_id" ON "public"."sponsored_impressions" USING "btree" ("user_id");
+
+
+
+CREATE INDEX "idx_static_routes_group_active" ON "public"."static_routes" USING "btree" ("group_name", "is_active", "sort_order");
 
 
 
@@ -13700,6 +13868,10 @@ CREATE OR REPLACE TRIGGER "update_seo_config_updated_at" BEFORE UPDATE ON "publi
 
 
 CREATE OR REPLACE TRIGGER "update_sponsored_content_updated_at" BEFORE UPDATE ON "public"."sponsored_content" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
+
+
+
+CREATE OR REPLACE TRIGGER "update_static_routes_updated_at" BEFORE UPDATE ON "public"."static_routes" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
 
 
 

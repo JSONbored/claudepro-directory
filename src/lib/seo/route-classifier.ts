@@ -16,7 +16,7 @@
  * **8 Route Patterns:**
  * 1. HOMEPAGE - Root route (/)
  * 2. CATEGORY - Category list pages (/:category)
- * 3. CONTENT_DETAIL - Content detail pages (/:category/:slug, /guides/:category/:slug)
+ * 3. CONTENT_DETAIL - Content detail pages (/:category/:slug)
  * 4. USER_PROFILE - User profile pages (/u/:slug)
  * 5. ACCOUNT - Account management pages (/account/*)
  * 6. TOOL - Tool pages (/tools/*)
@@ -98,7 +98,6 @@ export interface RouteClassification {
  * - USER_PROFILE (/u/:slug) → 1.0 confidence
  * - CATEGORY (/:category) → 1.0 confidence (if valid category)
  * - CONTENT_DETAIL (/:category/:slug) → 1.0 confidence (if valid category)
- * - CONTENT_DETAIL (/guides/:category/:slug) → 1.0 confidence
  * - STATIC (fallback) → 0.5 confidence
  *
  * @param route - Next.js route string (e.g., '/agents/code-reviewer', '/:category/:slug')
@@ -243,30 +242,6 @@ export function classifyRoute(route: string): RouteClassification {
         route: normalizedRoute,
       };
     }
-  }
-
-  // PRIORITY 10: Guide subcategory pattern - Three segments
-  // Handles: /guides/:category/:slug, /guides/tutorials/build-mcp-server
-  if (segments.length === 3 && segments[0] === 'guides') {
-    return {
-      pattern: 'CONTENT_DETAIL',
-      confidence: 1.0,
-      segments,
-      isDynamic: true, // Guide detail pages have dynamic slugs
-      route: normalizedRoute,
-    };
-  }
-
-  // PRIORITY 11: Changelog pattern - Two segments
-  // Handles: /changelog/:slug
-  if (segments.length === 2 && segments[0] === 'changelog') {
-    return {
-      pattern: 'CONTENT_DETAIL',
-      confidence: 1.0,
-      segments,
-      isDynamic: true,
-      route: normalizedRoute,
-    };
   }
 
   // FALLBACK: Static pages (lower confidence)

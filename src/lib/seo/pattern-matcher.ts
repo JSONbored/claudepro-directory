@@ -141,42 +141,7 @@ export function extractContext(
     }
 
     case 'CONTENT_DETAIL': {
-      // Special handling for guide routes: /guides/:category/:slug
-      // For guides, we use a pseudo-category config with "Guides" as the display name
-      if (route.startsWith('/guides/')) {
-        const segments = route.split('/').filter(Boolean);
-        // segments = ['guides', 'tutorials', 'desktop-mcp-setup']
-        const guideSubcategory = segments[1]; // 'tutorials'
-        const guideSlug = segments[2]; // 'desktop-mcp-setup'
-
-        // Create pseudo-category config for guides
-        rawContext.categoryConfig = {
-          title: 'Guide', // Singular for title template
-          pluralTitle: 'Guides', // Plural for SEO
-          keywords: 'guides, tutorials, documentation, how-to',
-          metaDescription: 'Learn how to use Claude AI with step-by-step guides and tutorials.',
-        };
-
-        rawContext.category = 'guides';
-        // Conditionally spread params only if they exist
-        rawContext.params = {
-          ...params,
-          ...(guideSubcategory && { category: guideSubcategory }),
-          ...(guideSlug && { slug: guideSlug }),
-        };
-
-        if (guideSlug) {
-          rawContext.slug = guideSlug;
-        }
-
-        // Add item data if provided (from schema adapter or page data)
-        if (item && typeof item === 'object') {
-          rawContext.item = item as MetadataContext['item'];
-        }
-        break;
-      }
-
-      // Normal category handling for non-guide routes
+      // Unified category handling for all content detail pages
       // Extract category and slug
       const categoryId =
         (typeof params.category === 'string' ? params.category : params.category?.[0]) ||

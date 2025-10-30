@@ -2610,6 +2610,45 @@ export type Database = {
           },
         ];
       };
+      static_routes: {
+        Row: {
+          created_at: string;
+          description: string;
+          group_name: string;
+          icon_name: string;
+          id: string;
+          is_active: boolean;
+          path: string;
+          sort_order: number;
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          description: string;
+          group_name: string;
+          icon_name: string;
+          id?: string;
+          is_active?: boolean;
+          path: string;
+          sort_order?: number;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          description?: string;
+          group_name?: string;
+          icon_name?: string;
+          id?: string;
+          is_active?: boolean;
+          path?: string;
+          sort_order?: number;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       structured_data_config: {
         Row: {
           active: boolean | null;
@@ -3702,6 +3741,20 @@ export type Database = {
         };
         Relationships: [];
       };
+      mv_trending_content: {
+        Row: {
+          bookmark_count: number | null;
+          category: string | null;
+          copy_count: number | null;
+          description: string | null;
+          last_refreshed: string | null;
+          latest_activity: string | null;
+          slug: string | null;
+          title: string | null;
+          view_count: number | null;
+        };
+        Relationships: [];
+      };
       mv_weekly_new_content: {
         Row: {
           category: string | null;
@@ -4405,6 +4458,7 @@ export type Database = {
         Args: { p_limit?: number; p_offset?: number };
         Returns: Json;
       };
+      get_navigation_menu: { Args: never; Returns: Json };
       get_new_content_for_week: {
         Args: { p_limit?: number; p_week_start: string };
         Returns: {
@@ -4501,6 +4555,7 @@ export type Database = {
         }[];
       };
       get_seo_config: { Args: { p_key: string }; Returns: Json };
+      get_sidebar_guides_data: { Args: { p_limit?: number }; Returns: Json };
       get_similar_content: {
         Args: {
           p_content_slug: string;

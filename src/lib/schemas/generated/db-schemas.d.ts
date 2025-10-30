@@ -380,6 +380,9 @@ export type PublicSponsoredImpressionsUpdate = z.infer<
 export type PublicSponsoredImpressionsRelationships = z.infer<
   typeof generated.publicSponsoredImpressionsRelationshipsSchema
 >;
+export type PublicStaticRoutesRow = z.infer<typeof generated.publicStaticRoutesRowSchema>;
+export type PublicStaticRoutesInsert = z.infer<typeof generated.publicStaticRoutesInsertSchema>;
+export type PublicStaticRoutesUpdate = z.infer<typeof generated.publicStaticRoutesUpdateSchema>;
 export type PublicStructuredDataConfigRow = z.infer<
   typeof generated.publicStructuredDataConfigRowSchema
 >;
@@ -483,6 +486,7 @@ export type PublicMvAnalyticsSummaryRow = z.infer<
 export type PublicMvContentStatsRow = z.infer<typeof generated.publicMvContentStatsRowSchema>;
 export type PublicMvContentTagIndexRow = z.infer<typeof generated.publicMvContentTagIndexRowSchema>;
 export type PublicMvSearchFacetsRow = z.infer<typeof generated.publicMvSearchFacetsRowSchema>;
+export type PublicMvTrendingContentRow = z.infer<typeof generated.publicMvTrendingContentRowSchema>;
 export type PublicMvWeeklyNewContentRow = z.infer<
   typeof generated.publicMvWeeklyNewContentRowSchema
 >;
@@ -803,6 +807,12 @@ export type PublicGetMySubmissionsArgs = z.infer<typeof generated.publicGetMySub
 export type PublicGetMySubmissionsReturns = z.infer<
   typeof generated.publicGetMySubmissionsReturnsSchema
 >;
+export type PublicGetNavigationMenuArgs = z.infer<
+  typeof generated.publicGetNavigationMenuArgsSchema
+>;
+export type PublicGetNavigationMenuReturns = z.infer<
+  typeof generated.publicGetNavigationMenuReturnsSchema
+>;
 export type PublicGetNewContentForWeekArgs = z.infer<
   typeof generated.publicGetNewContentForWeekArgsSchema
 >;
@@ -865,6 +875,12 @@ export type PublicGetSearchSuggestionsReturns = z.infer<
 >;
 export type PublicGetSeoConfigArgs = z.infer<typeof generated.publicGetSeoConfigArgsSchema>;
 export type PublicGetSeoConfigReturns = z.infer<typeof generated.publicGetSeoConfigReturnsSchema>;
+export type PublicGetSidebarGuidesDataArgs = z.infer<
+  typeof generated.publicGetSidebarGuidesDataArgsSchema
+>;
+export type PublicGetSidebarGuidesDataReturns = z.infer<
+  typeof generated.publicGetSidebarGuidesDataReturnsSchema
+>;
 export type PublicGetSimilarContentArgs = z.infer<
   typeof generated.publicGetSimilarContentArgsSchema
 >;

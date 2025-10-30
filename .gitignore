@@ -85,6 +85,8 @@ config/reports/lighthouse/
 # Backup files
 *.orig
 *.bak
+backups/
+.backup-db-hash
 
 # Build analysis
 stats.html

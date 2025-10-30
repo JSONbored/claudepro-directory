@@ -21,6 +21,7 @@
  */
 
 import { Suspense } from 'react';
+import { JSONSectionRenderer } from '@/src/components/content/json-section-renderer';
 import { UnifiedContentSection } from '@/src/components/content/unified-content-section';
 import { UnifiedReview } from '@/src/components/domain/unified-review';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
@@ -150,6 +151,11 @@ export async function UnifiedDetailPage({
 
   // Pre-process content highlighting (ContentSection data)
   const contentData = await (async () => {
+    // GUIDES: Skip content processing - structured sections rendered separately
+    if (item.category === 'guides') {
+      return null;
+    }
+
     // Extract content from item
     let content = '';
     if ('content' in item && typeof (item as { content?: string }).content === 'string') {
@@ -327,6 +333,17 @@ export async function UnifiedDetailPage({
     }
   })();
 
+  // GUIDES: Extract sections array from metadata for JSONSectionRenderer
+  const guideSections = (() => {
+    if (item.category !== 'guides') return null;
+
+    const metadata = 'metadata' in item ? (item.metadata as Record<string, unknown>) : null;
+    if (!(metadata && metadata.sections && Array.isArray(metadata.sections))) return null;
+
+    // JSONSectionRenderer expects sections array, not full metadata
+    return metadata.sections;
+  })();
+
   // Handle case where config is not found - AFTER ALL HOOKS
   if (!config) {
     return (
@@ -365,7 +382,12 @@ export async function UnifiedDetailPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Primary content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Content/Code section */}
+            {/* GUIDES: Render structured sections from metadata using JSONSectionRenderer */}
+            {guideSections && guideSections.length > 0 && (
+              <JSONSectionRenderer sections={guideSections} />
+            )}
+
+            {/* Content/Code section (non-guides) */}
             {contentData && config && (
               <UnifiedContentSection
                 variant="content"

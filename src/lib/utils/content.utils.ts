@@ -743,37 +743,27 @@ export function isGuideSubcategory(value: unknown): value is GuideSubcategory {
 
 /**
  * Generates URL for a content item
- * Handles special cases for guide subcategories
+ * All categories use unified /[category]/[slug] pattern
  *
  * @param item - Content item with category and slug
  * @returns URL path for the content item
  *
  * @example
- * // Regular content
  * getContentItemUrl({ category: 'agents', slug: 'code-reviewer' })
  * // Returns: "/agents/code-reviewer"
  *
- * // Guide with subcategory
- * getContentItemUrl({
- *   category: 'guides',
- *   slug: 'setup',
- *   subcategory: 'tutorials'
- * })
- * // Returns: "/guides/tutorials/setup"
+ * getContentItemUrl({ category: 'guides', slug: 'build-mcp-server' })
+ * // Returns: "/guides/build-mcp-server"
  */
 export function getContentItemUrl(item: {
   category: CategoryId;
   slug: string;
   subcategory?: string | null | undefined;
 }): string {
-  const { category, slug, subcategory } = item;
+  const { category, slug } = item;
 
-  // Special handling for guide subcategories
-  if (category === 'guides' && subcategory && isGuideSubcategory(subcategory)) {
-    return `/guides/${subcategory}/${slug}`;
-  }
-
-  // Standard pattern: /[category]/[slug]
+  // Unified pattern for all categories: /[category]/[slug]
+  // Subcategory stored in metadata for filtering, not URL routing
   return `/${category}/${slug}`;
 }
 

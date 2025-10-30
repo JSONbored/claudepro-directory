@@ -17,26 +17,31 @@ import { AnnouncementBannerClient } from './announcement-banner-client';
  * Cached per request with React cache
  */
 const getActiveAnnouncement = cache(async (): Promise<Tables<'announcements'> | null> => {
-  const supabase = await createClient();
-  const now = new Date().toISOString();
+  try {
+    const supabase = await createClient();
+    const now = new Date().toISOString();
 
-  const { data, error } = await supabase
-    .from('announcements')
-    .select('*')
-    .eq('active', true)
-    .or(`start_date.is.null,start_date.lte.${now}`)
-    .or(`end_date.is.null,end_date.gte.${now}`)
-    .order('priority', { ascending: false })
-    .order('start_date', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    const { data, error } = await supabase
+      .from('announcements')
+      .select('*')
+      .eq('active', true)
+      .or(`start_date.is.null,start_date.lte.${now}`)
+      .or(`end_date.is.null,end_date.gte.${now}`)
+      .order('priority', { ascending: false })
+      .order('start_date', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-  if (error) {
-    console.error('Failed to load announcement:', error);
+    if (error) {
+      console.error('Failed to load announcement:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    // Mock client or connection error - silently fail
     return null;
   }
-
-  return data;
 });
 
 /**
