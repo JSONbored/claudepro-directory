@@ -19,7 +19,7 @@
     "directory"
   ],
   "type": "module",
-  "packageManager": "pnpm@10.19.0",
+  "packageManager": "pnpm@10.20.0",
   "engines": {
     "node": ">=22.0.0",
     "pnpm": ">=10.0.0"
