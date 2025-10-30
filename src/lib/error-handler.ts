@@ -1,22 +1,10 @@
 /**
- * Centralized Error & Response Handling System
- *
- * Production-grade error handling + standardized API responses.
- * Consolidates error formatting, success responses, and caching logic.
- * Designed with security-first approach for open-source production codebase.
- *
- * **Consolidation Benefits:**
- * - Single source of truth for ALL API responses (errors + success)
- * - Consistent cache headers across all endpoints
- * - Tree-shakeable named exports
- * - Type-safe response construction
- * - Eliminates response duplication across 8+ API routes
+ * Error & Response Handling - Centralized error formatting, success responses, cache headers
  */
 
 import { randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { APP_CONFIG } from '@/src/lib/constants';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
 import {
@@ -29,23 +17,9 @@ import {
   validateErrorContext,
   validateErrorInput,
 } from '@/src/lib/schemas/error.schema';
-import { ValidationError, validation } from '@/src/lib/security/validators';
+import { ValidationError } from '@/src/lib/security/validators';
 
-/**
- * Request ID type for correlation tracking
- */
-type RequestId = string;
-
-/**
- * Generate unique request ID for correlation
- */
-function createRequestId(): RequestId {
-  return randomUUID();
-}
-
-/**
- * HTTP status code mapping for different error types
- */
+/** HTTP status code mapping for different error types */
 const ERROR_STATUS_MAP: Record<ErrorType, number> = {
   ValidationError: 400,
   DatabaseError: 500,
@@ -61,9 +35,7 @@ const ERROR_STATUS_MAP: Record<ErrorType, number> = {
   InternalServerError: 500,
 } as const;
 
-/**
- * User-friendly error messages
- */
+/** User-friendly error messages */
 const USER_FRIENDLY_MESSAGES: Record<ErrorType, string> = {
   ValidationError: 'The provided data is invalid. Please check your input and try again.',
   DatabaseError: 'A database error occurred. Please try again later.',
@@ -79,9 +51,7 @@ const USER_FRIENDLY_MESSAGES: Record<ErrorType, string> = {
   InternalServerError: 'An internal server error occurred. Please try again later.',
 } as const;
 
-/**
- * Central error handler class
- */
+/** Central error handler class */
 export class ErrorHandler {
   private static instance: ErrorHandler;
 
@@ -94,9 +64,7 @@ export class ErrorHandler {
     return ErrorHandler.instance;
   }
 
-  /**
-   * Handle any error and return standardized response
-   */
+  /** Handle any error and return standardized response */
   public handleError(
     error: z.infer<typeof errorInputSchema>,
     config: ErrorHandlerConfig = {}
@@ -440,4 +408,3 @@ export const handleValidationError = (
 // React component error boundary helper moved to @/src/lib/error-handler/client
 // to avoid bundling server-only code in client components
 // Import from '@/src/lib/error-handler/client' instead
-

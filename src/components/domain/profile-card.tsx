@@ -19,27 +19,17 @@ import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Award, Briefcase, ExternalLink, Medal, Users } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database.types';
 
 /**
- * User profile data structure (matches Supabase users table)
+ * User profile data with runtime-added stats from materialized views
  */
-export interface UserProfile {
-  slug: string | null;
-  name: string | null;
-  bio: string | null;
-  image: string | null;
-  hero: string | null;
-  work: string | null;
-  website: string | null;
-  social_x_link: string | null;
-  interests: unknown; // Json type from database
-  reputation_score: number | null;
-  tier: string | null; // Database type is string, validated to 'free' | 'pro' | 'enterprise' at runtime
+export type UserProfile = Tables<'users'> & {
   // Runtime-added stats (from materialized view)
   total_contributions?: number;
   followers_count?: number;
   following_count?: number;
-}
+};
 
 export interface ProfileCardProps {
   user: UserProfile;

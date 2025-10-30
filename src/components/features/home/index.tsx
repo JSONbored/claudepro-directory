@@ -81,8 +81,8 @@ function HomePageClientComponent({
       setIsSearching(true);
       try {
         // Direct database RPC call - no API route middleman
-        const { createBrowserClient } = await import('@/src/lib/supabase/client');
-        const supabase = createBrowserClient();
+        const { createClient } = await import('@/src/lib/supabase/client');
+        const supabase = createClient();
 
         const { data, error } = await supabase.rpc('search_content_optimized', {
           p_query: query.trim(),
@@ -90,7 +90,8 @@ function HomePageClientComponent({
         });
 
         if (error) throw error;
-        setSearchResults(data || []);
+        // RPC returns search results - cast to ContentItem[]
+        setSearchResults((data || []) as unknown as ContentItem[]);
       } catch (error) {
         console.error('Search failed:', error);
         setSearchResults(allConfigs);

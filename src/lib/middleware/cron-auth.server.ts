@@ -32,8 +32,7 @@
  */
 
 import { timingSafeEqual } from 'node:crypto';
-import type { NextResponse } from 'next/server';
-import { apiResponse } from '@/src/lib/error-handler';
+import { NextResponse } from 'next/server';
 import { logger } from '@/src/lib/logger';
 
 /**
@@ -140,14 +139,17 @@ export async function withCronAuth(
 ): Promise<NextResponse> {
   // Verify cron authentication
   if (!verifyCronSecret(request)) {
-    return apiResponse.okRaw(
+    return NextResponse.json(
       {
         success: false,
         error: 'Unauthorized',
         message: 'Invalid or missing cron secret',
         timestamp: new Date().toISOString(),
       },
-      { status: 401, sMaxAge: 0, staleWhileRevalidate: 0 }
+      {
+        status: 401,
+        headers: { 'Cache-Control': 'no-store, must-revalidate' },
+      }
     );
   }
 
@@ -166,14 +168,17 @@ export async function withCronAuth(
       }
     );
 
-    return apiResponse.okRaw(
+    return NextResponse.json(
       {
         success: false,
         error: 'Internal Server Error',
         message: 'An unexpected error occurred',
         timestamp: new Date().toISOString(),
       },
-      { status: 500, sMaxAge: 0, staleWhileRevalidate: 0 }
+      {
+        status: 500,
+        headers: { 'Cache-Control': 'no-store, must-revalidate' },
+      }
     );
   }
 }
@@ -200,14 +205,17 @@ export async function withCronAuth(
  */
 export function verifyCronAuth(request: Request): NextResponse | null {
   if (!verifyCronSecret(request)) {
-    return apiResponse.okRaw(
+    return NextResponse.json(
       {
         success: false,
         error: 'Unauthorized',
         message: 'Invalid or missing cron secret',
         timestamp: new Date().toISOString(),
       },
-      { status: 401, sMaxAge: 0, staleWhileRevalidate: 0 }
+      {
+        status: 401,
+        headers: { 'Cache-Control': 'no-store, must-revalidate' },
+      }
     );
   }
 

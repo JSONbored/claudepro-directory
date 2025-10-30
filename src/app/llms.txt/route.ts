@@ -6,8 +6,9 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
+import { NextResponse } from 'next/server';
 import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
-import { apiResponse, handleApiError } from '@/src/lib/error-handler';
+import { handleApiError } from '@/src/lib/error-handler';
 import { generateSiteLLMsTxt } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
@@ -116,11 +117,13 @@ export async function GET(): Promise<Response> {
       contentLength: llmsTxt.length,
     });
 
-    // Return plain text response via unified builder
-    return apiResponse.raw(llmsTxt, {
-      contentType: 'text/plain; charset=utf-8',
-      headers: { 'X-Robots-Tag': 'index, follow' },
-      cache: { sMaxAge: 3600, staleWhileRevalidate: 86400 },
+    // Return plain text response with cache headers
+    return new NextResponse(llmsTxt, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Robots-Tag': 'index, follow',
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+      },
     });
   } catch (error: unknown) {
     logger.error(

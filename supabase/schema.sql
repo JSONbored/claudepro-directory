@@ -3287,6 +3287,26 @@ COMMENT ON FUNCTION "public"."get_featured_content"("p_category" "text", "p_limi
 
 
 
+CREATE OR REPLACE FUNCTION "public"."get_featured_jobs"() RETURNS SETOF "public"."jobs"
+    LANGUAGE "sql" STABLE SECURITY DEFINER
+    AS $$
+  SELECT *
+  FROM public.jobs
+  WHERE status = 'active'
+    AND active = true
+    AND plan IN ('featured', 'premium')
+  ORDER BY "order" DESC NULLS LAST, posted_at DESC
+  LIMIT 10;
+$$;
+
+
+ALTER FUNCTION "public"."get_featured_jobs"() OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_featured_jobs"() IS 'Get featured/premium jobs for homepage display. Replaces TypeScript filtering logic.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."get_form_field_config"("p_form_type" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -3597,6 +3617,42 @@ ALTER FUNCTION "public"."get_job_detail"("p_slug" "text") OWNER TO "postgres";
 
 
 COMMENT ON FUNCTION "public"."get_job_detail"("p_slug" "text") IS 'Returns single job by slug for detail page';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."get_jobs_by_category"("p_category" "text") RETURNS SETOF "public"."jobs"
+    LANGUAGE "sql" STABLE SECURITY DEFINER
+    AS $$
+  SELECT *
+  FROM public.jobs
+  WHERE status = 'active'
+    AND active = true
+    AND category = p_category
+  ORDER BY posted_at DESC;
+$$;
+
+
+ALTER FUNCTION "public"."get_jobs_by_category"("p_category" "text") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_jobs_by_category"("p_category" "text") IS 'Get jobs filtered by category. Replaces TypeScript filtering logic.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."get_jobs_count"() RETURNS integer
+    LANGUAGE "sql" STABLE SECURITY DEFINER
+    AS $$
+  SELECT COUNT(*)::INTEGER
+  FROM public.jobs
+  WHERE status = 'active'
+    AND active = true;
+$$;
+
+
+ALTER FUNCTION "public"."get_jobs_count"() OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_jobs_count"() IS 'Get total count of active jobs for stats display. Replaces TypeScript counting logic.';
 
 
 
@@ -15102,6 +15158,11 @@ GRANT ALL ON FUNCTION "public"."get_featured_content"("p_category" "text", "p_li
 
 
 
+GRANT ALL ON FUNCTION "public"."get_featured_jobs"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_featured_jobs"() TO "authenticated";
+
+
+
 GRANT ALL ON FUNCTION "public"."get_form_field_config"("p_form_type" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_form_field_config"("p_form_type" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_form_field_config"("p_form_type" "text") TO "service_role";
@@ -15121,6 +15182,16 @@ GRANT ALL ON FUNCTION "public"."get_homepage_content_enriched"("p_category_ids" 
 
 GRANT ALL ON FUNCTION "public"."get_job_detail"("p_slug" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_job_detail"("p_slug" "text") TO "authenticated";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_jobs_by_category"("p_category" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_jobs_by_category"("p_category" "text") TO "authenticated";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_jobs_count"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_jobs_count"() TO "authenticated";
 
 
 

@@ -18,22 +18,10 @@ import { Label } from '@/src/components/primitives/label';
 import { createCollection, updateCollection } from '@/src/lib/actions/content.actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { Tables } from '@/src/types/database.types';
 
-interface Bookmark {
-  id: string;
-  content_type: string;
-  content_slug: string;
-  notes?: string;
-  created_at: string;
-}
-
-interface CollectionData {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  is_public: boolean;
-}
+type Bookmark = Tables<'bookmarks'>;
+type CollectionData = Tables<'user_collections'>;
 
 interface CollectionFormProps {
   bookmarks: Bookmark[];

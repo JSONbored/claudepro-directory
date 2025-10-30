@@ -2,6 +2,7 @@
  * LLMs.txt Route - Generates AI-optimized plain text for individual content items.
  */
 
+import { NextResponse } from 'next/server';
 import {
   type CategoryId,
   isValidCategory,
@@ -13,7 +14,7 @@ import {
   getContentBySlug,
   getFullContentBySlug,
 } from '@/src/lib/content/supabase-content-loader';
-import { apiResponse, handleApiError } from '@/src/lib/error-handler';
+import { handleApiError } from '@/src/lib/error-handler';
 import { buildRichContent } from '@/src/lib/llms-txt/content-builder';
 import { generateLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
@@ -52,10 +53,12 @@ export async function GET(
         slug,
       });
 
-      return apiResponse.raw('Category not found', {
-        contentType: 'text/plain; charset=utf-8',
+      return new NextResponse('Category not found', {
         status: 404,
-        cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-store, must-revalidate',
+        },
       });
     }
 
@@ -64,10 +67,12 @@ export async function GET(
     if (!item) {
       logger.warn('Item not found for llms.txt', { category, slug });
 
-      return apiResponse.raw('Content not found', {
-        contentType: 'text/plain; charset=utf-8',
+      return new NextResponse('Content not found', {
         status: 404,
-        cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-store, must-revalidate',
+        },
       });
     }
 
@@ -79,10 +84,12 @@ export async function GET(
         slug,
       });
 
-      return apiResponse.raw('Content not found', {
-        contentType: 'text/plain; charset=utf-8',
+      return new NextResponse('Content not found', {
         status: 404,
-        cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-store, must-revalidate',
+        },
       });
     }
 
@@ -195,10 +202,12 @@ export async function GET(
       });
 
       // Return plain text response
-      return apiResponse.raw(llmsTxt, {
-        contentType: 'text/plain; charset=utf-8',
-        headers: { 'X-Robots-Tag': 'index, follow' },
-        cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
+      return new NextResponse(llmsTxt, {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'X-Robots-Tag': 'index, follow',
+          'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
+        },
       });
     }
 
@@ -235,10 +244,12 @@ export async function GET(
     });
 
     // Return plain text response
-    return apiResponse.raw(llmsTxt, {
-      contentType: 'text/plain; charset=utf-8',
-      headers: { 'X-Robots-Tag': 'index, follow' },
-      cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
+    return new NextResponse(llmsTxt, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Robots-Tag': 'index, follow',
+        'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
+      },
     });
   } catch (error: unknown) {
     const { category, slug } = await context.params.catch(() => ({

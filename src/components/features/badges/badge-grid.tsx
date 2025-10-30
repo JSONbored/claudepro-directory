@@ -135,8 +135,9 @@ const BadgeCard = memo(function BadgeCard({
           badgeId: userBadge.id,
           featured: !isFeatured,
         });
+        const data = result?.data as { success: boolean; featured: boolean } | undefined;
 
-        if (result?.data?.success) {
+        if (data?.success) {
           toast.success(
             isFeatured ? 'Badge removed from featured' : 'Badge featured on your profile'
           );

@@ -27,10 +27,10 @@
  */
 
 import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getAllChangelogEntries, parseChangelogChanges } from '@/src/lib/changelog/loader';
 import { formatChangelogDateRFC822, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { apiResponse } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
 /**
@@ -120,10 +120,12 @@ ${categories.map((cat) => `      <category>${escapeXml(cat)}</category>`).join('
       entriesCount: entries.length,
     });
 
-    // Return RSS XML via unified builder
-    return apiResponse.raw(rss, {
-      contentType: 'application/rss+xml; charset=utf-8',
-      cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
+    // Return RSS XML with cache headers
+    return new NextResponse(rss, {
+      headers: {
+        'Content-Type': 'application/rss+xml; charset=utf-8',
+        'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
+      },
     });
   } catch (error) {
     logger.error(
@@ -141,10 +143,12 @@ ${categories.map((cat) => `      <category>${escapeXml(cat)}</category>`).join('
   </channel>
 </rss>`;
 
-    return apiResponse.raw(errorRss, {
-      contentType: 'application/rss+xml; charset=utf-8',
+    return new NextResponse(errorRss, {
       status: 500,
-      cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
+      headers: {
+        'Content-Type': 'application/rss+xml; charset=utf-8',
+        'Cache-Control': 'no-store, must-revalidate',
+      },
     });
   }
 }

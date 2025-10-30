@@ -3,10 +3,11 @@
  */
 
 import fs from 'fs/promises';
+import { NextResponse } from 'next/server';
 import path from 'path';
 import { z } from 'zod';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { apiResponse, handleApiError } from '@/src/lib/error-handler';
+import { handleApiError } from '@/src/lib/error-handler';
 import { generateLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
@@ -58,10 +59,12 @@ export async function GET(
     if (!(category in PATH_MAP)) {
       logger.warn('Invalid guide category for llms.txt', { category });
 
-      return apiResponse.raw('Guide category not found', {
-        contentType: 'text/plain; charset=utf-8',
+      return new NextResponse('Guide category not found', {
         status: 404,
-        cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-store, must-revalidate',
+        },
       });
     }
 
@@ -73,10 +76,12 @@ export async function GET(
       logger.error('Invalid category path mapping', new Error('Category not found in PATH_MAP'), {
         category,
       });
-      return apiResponse.raw('Internal server error', {
-        contentType: 'text/plain; charset=utf-8',
+      return new NextResponse('Internal server error', {
         status: 500,
-        cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-store, must-revalidate',
+        },
       });
     }
     const filePath = path.join(process.cwd(), 'content', 'guides', mappedPath, filename);
@@ -90,10 +95,12 @@ export async function GET(
         filename,
       });
 
-      return apiResponse.raw('Guide not found', {
-        contentType: 'text/plain; charset=utf-8',
+      return new NextResponse('Guide not found', {
         status: 404,
-        cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-store, must-revalidate',
+        },
       });
     }
 
@@ -146,10 +153,12 @@ export async function GET(
       sanitize: true,
     });
 
-    return apiResponse.raw(llmsTxt, {
-      contentType: 'text/plain; charset=utf-8',
-      headers: { 'X-Robots-Tag': 'index, follow' },
-      cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
+    return new NextResponse(llmsTxt, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Robots-Tag': 'index, follow',
+        'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
+      },
     });
   } catch (error: unknown) {
     const rawParams = await context.params.catch(() => ({

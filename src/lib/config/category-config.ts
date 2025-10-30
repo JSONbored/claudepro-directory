@@ -1,45 +1,6 @@
 /**
- * Category Configuration System - SINGLE SOURCE OF TRUTH
- *
- * Unified category registry that consolidates ALL category-related configuration.
- * This is the ONLY place where categories are defined - all other systems derive from this.
- *
- * Modern 2025 Architecture:
- * - Configuration-driven: Add category here → everything auto-updates
- * - Type-safe: Full TypeScript inference with satisfies pattern
- * - Zero duplication: Build, UI, SEO all derive from single registry
- * - Tree-shakeable: Only imported categories included in bundle
- * - Validated: Zod schemas ensure correctness
- *
- * Registry Modernization (October 2025):
- * ✅ ALL hardcoded category arrays eliminated across codebase
- * ✅ Scripts now use getAllCategoryIds() for dynamic category discovery
- * ✅ Service worker updated with all 11 categories (was missing jobs, changelog)
- * ✅ Event generation fully registry-driven (removed ADDITIONAL_CONTENT_TYPES)
- * ✅ Validation scripts modernized with dynamic metadata loading
- * ✅ Build systems completely registry-driven (zero hardcoded paths)
- *
- * Current Categories (11):
- * - agents, mcp, commands, rules, hooks, statuslines
- * - collections, skills, guides, jobs, changelog
- *
- * Used by 50+ files:
- * - app/[category]/page.tsx (list pages)
- * - app/[category]/[slug]/page.tsx (detail pages)
- * - scripts/build/*.ts (build-time code generation)
- * - scripts/validation/*.ts (content validation)
- * - lib/content-loaders.ts (dynamic content loading)
- * - lib/seo/* (metadata generation)
- * - lib/analytics/* (event mapping & tracking)
- * - public/service-worker.js (offline caching)
- * - And 40+ more locations (all auto-derived)
- *
- * TO ADD A NEW CATEGORY:
- * 1. Add entry to UNIFIED_CATEGORY_REGISTRY below
- * 2. Create schema file: src/lib/schemas/content/{category}.schema.ts
- * 3. Add content: content/{category}/*.json
- * 4. Run: npm run build:content
- * That's it! Everything else auto-updates (scripts, routes, analytics, caching).
+ * Category Configuration - Single source of truth for all 11 content categories
+ * Configuration-driven system where adding a category auto-updates build/UI/SEO/analytics
  */
 
 import type { z } from 'zod';
@@ -160,17 +121,7 @@ export interface UnifiedCategoryConfig<
   [key: string]: unknown;
 }
 
-/**
- * ============================================
- * UNIFIED CATEGORY REGISTRY - SINGLE SOURCE OF TRUTH
- * ============================================
- *
- * This is the ONLY place where categories are defined.
- * All build scripts, UI components, SEO configs, analytics, and APIs derive from this.
- *
- * Performance: const assertion enables zero-cost type inference
- * Validation: satisfies ensures compile-time completeness
- */
+/** Unified category registry - all 11 content types with configuration */
 export const UNIFIED_CATEGORY_REGISTRY = {
   agents: {
     id: 'agents',

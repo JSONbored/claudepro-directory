@@ -29,21 +29,10 @@ import type { CategoryId } from '@/src/lib/config/category-config';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { Tables } from '@/src/types/database.types';
 
-interface CollectionItem {
-  id: string;
-  collection_id: string;
-  content_type: string;
-  content_slug: string;
-  notes?: string;
-  order: number;
-}
-
-interface Bookmark {
-  id: string;
-  content_type: string;
-  content_slug: string;
-}
+type CollectionItem = Tables<'collection_items'>;
+type Bookmark = Tables<'bookmarks'>;
 
 interface CollectionItemManagerProps {
   collectionId: string;

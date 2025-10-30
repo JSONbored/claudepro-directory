@@ -146,11 +146,12 @@ export const refreshProfileFromOAuth = authedAction
   .schema(z.void())
   .action(async ({ ctx }) => {
     const supabase = await createClient();
-    const { data: profile, error } = await supabase.rpc('refresh_profile_from_oauth', {
+    const { data, error } = await supabase.rpc('refresh_profile_from_oauth', {
       user_id: ctx.userId,
     });
     if (error) throw new Error(`Failed to refresh profile from OAuth: ${error.message}`);
 
+    const profile = data as { slug: string } | null;
     if (profile?.slug) revalidatePath(`/u/${profile.slug}`);
     revalidatePath('/account');
     revalidatePath('/account/settings');
@@ -333,7 +334,8 @@ export const getActivitySummary = authedAction
 
     if (error) throw new Error(`Failed to fetch user activity summary: ${error.message}`);
 
-    return data;
+    // RPC returns Json - validate with output schema
+    return activitySummarySchema.parse(data);
   });
 
 export const getActivityTimeline = authedAction

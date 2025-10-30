@@ -56,29 +56,18 @@ export async function getJobBySlug(slug: string): Promise<Job | undefined> {
   }
 }
 
-/**
- * Get featured jobs (premium/featured plans)
- */
+/** Get featured jobs via RPC */
 export async function getFeaturedJobs(): Promise<Job[]> {
   try {
     const supabase = createAnonClient();
-
-    const { data, error } = await supabase
-      .from('jobs')
-      .select('*')
-      .eq('status', 'active')
-      .eq('active', true)
-      .in('plan', ['featured', 'premium'])
-      .order('order', { ascending: false })
-      .order('posted_at', { ascending: false })
-      .limit(10);
+    const { data, error } = await supabase.rpc('get_featured_jobs');
 
     if (error) {
-      logger.error('Failed to fetch featured jobs', error);
+      logger.error('Failed to fetch featured jobs via RPC', error);
       return [];
     }
 
-    return data || [];
+    return (data || []) as Job[];
   } catch (error) {
     logger.error(
       'Error in getFeaturedJobs',
@@ -88,27 +77,18 @@ export async function getFeaturedJobs(): Promise<Job[]> {
   }
 }
 
-/**
- * Get jobs by category
- */
+/** Get jobs by category via RPC */
 export async function getJobsByCategory(category: string): Promise<Job[]> {
   try {
     const supabase = createAnonClient();
-
-    const { data, error } = await supabase
-      .from('jobs')
-      .select('*')
-      .eq('status', 'active')
-      .eq('active', true)
-      .eq('category', category)
-      .order('posted_at', { ascending: false });
+    const { data, error } = await supabase.rpc('get_jobs_by_category', { p_category: category });
 
     if (error) {
-      logger.error('Failed to fetch jobs by category', error);
+      logger.error('Failed to fetch jobs by category via RPC', error, { category });
       return [];
     }
 
-    return data || [];
+    return (data || []) as Job[];
   } catch (error) {
     logger.error(
       'Error in getJobsByCategory',
@@ -118,25 +98,18 @@ export async function getJobsByCategory(category: string): Promise<Job[]> {
   }
 }
 
-/**
- * Get jobs count (for stats)
- */
+/** Get jobs count via RPC */
 export async function getJobsCount(): Promise<number> {
   try {
     const supabase = createAnonClient();
-
-    const { count, error } = await supabase
-      .from('jobs')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'active')
-      .eq('active', true);
+    const { data, error } = await supabase.rpc('get_jobs_count');
 
     if (error) {
-      logger.error('Failed to fetch jobs count', error);
+      logger.error('Failed to fetch jobs count via RPC', error);
       return 0;
     }
 
-    return count || 0;
+    return data || 0;
   } catch (error) {
     logger.error(
       'Error in getJobsCount',

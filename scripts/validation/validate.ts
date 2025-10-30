@@ -99,11 +99,7 @@ Examples:
 // ============================================================================
 
 const runner = new ValidationRunner({
-  validators: [
-    new ContentValidator(),
-    new MetadataValidator(),
-    new LLMSTxtValidator(),
-  ],
+  validators: [new ContentValidator(), new MetadataValidator(), new LLMSTxtValidator()],
   parallel: values.parallel ?? true,
   stopOnError: false,
   quiet: values.ci ?? false,
