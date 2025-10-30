@@ -786,13 +786,13 @@ COMMENT ON FUNCTION "public"."batch_update_user_affinity_scores"("p_user_ids" "u
 
 
 
-CREATE OR REPLACE FUNCTION "public"."build_enriched_content_base"("p_id" "text", "p_slug" "text", "p_title" "text", "p_description" "text", "p_author" "text", "p_author_profile_url" "text", "p_category" "text", "p_tags" "text"[], "p_source_table" "text", "p_created_at" timestamp without time zone, "p_updated_at" timestamp without time zone, "p_date_added" timestamp without time zone, "p_discovery_metadata" "jsonb", "p_examples" "jsonb", "p_features" "text"[], "p_troubleshooting" "jsonb"[], "p_use_cases" "text"[], "p_source" "text", "p_documentation_url" "text", "p_popularity_score" numeric, "p_content" "text", "p_seo_title" "text", "p_display_title" "text", "p_view_count" integer, "p_copy_count" integer, "p_bookmark_count" integer, "p_sponsored_id" "text", "p_sponsor_tier" "text", "p_sponsored_active" boolean) RETURNS "jsonb"
+CREATE OR REPLACE FUNCTION "public"."build_enriched_content_base"("p_id" "uuid", "p_slug" "text", "p_title" "text", "p_description" "text", "p_author" "text", "p_author_profile_url" "text", "p_category" "text", "p_tags" "text"[], "p_source_table" "text", "p_created_at" timestamp with time zone, "p_updated_at" timestamp with time zone, "p_date_added" "date", "p_discovery_metadata" "jsonb", "p_examples" "jsonb", "p_features" "text"[], "p_troubleshooting" "jsonb"[], "p_use_cases" "text"[], "p_source" "text", "p_documentation_url" "text", "p_popularity_score" integer, "p_content" "text", "p_seo_title" "text", "p_display_title" "text", "p_view_count" bigint, "p_copy_count" bigint, "p_bookmark_count" bigint, "p_sponsored_id" "uuid", "p_sponsor_tier" "text", "p_sponsored_active" boolean) RETURNS "jsonb"
     LANGUAGE "plpgsql" IMMUTABLE
     SET "search_path" TO 'public'
     AS $$
 BEGIN
   RETURN jsonb_build_object(
-    'id', p_id,
+    'id', p_id::TEXT,                           -- Cast UUID to TEXT for JSON output
     'slug', p_slug,
     'title', p_title,
     'description', p_description,
@@ -821,25 +821,79 @@ BEGIN
     'copyCount', COALESCE(p_copy_count, 0),
     'bookmarkCount', COALESCE(p_bookmark_count, 0),
     -- Computed
-    'isNew', (p_date_added::date >= (CURRENT_DATE - INTERVAL '7 days')::date),
+    'isNew', (p_date_added >= (CURRENT_DATE - INTERVAL '7 days')::date),
     'popularity', CASE
       WHEN p_popularity_score IS NOT NULL THEN ROUND((p_popularity_score * 100)::numeric, 0)::int
       ELSE NULL
     END,
     -- Sponsorship
     'isSponsored', (p_sponsored_id IS NOT NULL AND p_sponsored_active = true),
-    'sponsoredId', p_sponsored_id,
+    'sponsoredId', CASE                          -- Cast UUID to TEXT for JSON output
+      WHEN p_sponsored_id IS NOT NULL THEN p_sponsored_id::TEXT
+      ELSE NULL
+    END,
     'sponsorTier', p_sponsor_tier
   );
 END;
 $$;
 
 
-ALTER FUNCTION "public"."build_enriched_content_base"("p_id" "text", "p_slug" "text", "p_title" "text", "p_description" "text", "p_author" "text", "p_author_profile_url" "text", "p_category" "text", "p_tags" "text"[], "p_source_table" "text", "p_created_at" timestamp without time zone, "p_updated_at" timestamp without time zone, "p_date_added" timestamp without time zone, "p_discovery_metadata" "jsonb", "p_examples" "jsonb", "p_features" "text"[], "p_troubleshooting" "jsonb"[], "p_use_cases" "text"[], "p_source" "text", "p_documentation_url" "text", "p_popularity_score" numeric, "p_content" "text", "p_seo_title" "text", "p_display_title" "text", "p_view_count" integer, "p_copy_count" integer, "p_bookmark_count" integer, "p_sponsored_id" "text", "p_sponsor_tier" "text", "p_sponsored_active" boolean) OWNER TO "postgres";
+ALTER FUNCTION "public"."build_enriched_content_base"("p_id" "uuid", "p_slug" "text", "p_title" "text", "p_description" "text", "p_author" "text", "p_author_profile_url" "text", "p_category" "text", "p_tags" "text"[], "p_source_table" "text", "p_created_at" timestamp with time zone, "p_updated_at" timestamp with time zone, "p_date_added" "date", "p_discovery_metadata" "jsonb", "p_examples" "jsonb", "p_features" "text"[], "p_troubleshooting" "jsonb"[], "p_use_cases" "text"[], "p_source" "text", "p_documentation_url" "text", "p_popularity_score" integer, "p_content" "text", "p_seo_title" "text", "p_display_title" "text", "p_view_count" bigint, "p_copy_count" bigint, "p_bookmark_count" bigint, "p_sponsored_id" "uuid", "p_sponsor_tier" "text", "p_sponsored_active" boolean) OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."build_enriched_content_base"("p_id" "text", "p_slug" "text", "p_title" "text", "p_description" "text", "p_author" "text", "p_author_profile_url" "text", "p_category" "text", "p_tags" "text"[], "p_source_table" "text", "p_created_at" timestamp without time zone, "p_updated_at" timestamp without time zone, "p_date_added" timestamp without time zone, "p_discovery_metadata" "jsonb", "p_examples" "jsonb", "p_features" "text"[], "p_troubleshooting" "jsonb"[], "p_use_cases" "text"[], "p_source" "text", "p_documentation_url" "text", "p_popularity_score" numeric, "p_content" "text", "p_seo_title" "text", "p_display_title" "text", "p_view_count" integer, "p_copy_count" integer, "p_bookmark_count" integer, "p_sponsored_id" "text", "p_sponsor_tier" "text", "p_sponsored_active" boolean) IS 'Helper function to build base JSONB object with common fields. Reduces code duplication across category-specific queries.';
+CREATE OR REPLACE FUNCTION "public"."build_enriched_content_base"("p_id" "uuid", "p_slug" "text", "p_title" "text", "p_description" "text", "p_author" "text", "p_author_profile_url" "text", "p_category" "text", "p_tags" "text"[], "p_source_table" "text", "p_created_at" timestamp with time zone, "p_updated_at" timestamp with time zone, "p_date_added" "date", "p_discovery_metadata" "jsonb", "p_examples" "jsonb", "p_features" "text"[], "p_troubleshooting" "jsonb"[], "p_use_cases" "text"[], "p_source" "text", "p_documentation_url" "text", "p_popularity_score" numeric, "p_content" "text", "p_seo_title" "text", "p_display_title" "text", "p_view_count" integer, "p_copy_count" integer, "p_bookmark_count" integer, "p_sponsored_id" "uuid", "p_sponsor_tier" "text", "p_sponsored_active" boolean) RETURNS "jsonb"
+    LANGUAGE "plpgsql" IMMUTABLE
+    SET "search_path" TO 'public'
+    AS $$
+BEGIN
+  RETURN jsonb_build_object(
+    'id', p_id::TEXT,                           -- Cast UUID to TEXT for JSON output
+    'slug', p_slug,
+    'title', p_title,
+    'description', p_description,
+    'author', p_author,
+    'author_profile_url', p_author_profile_url,
+    'category', p_category,
+    'tags', to_jsonb(p_tags),
+    'source_table', p_source_table,
+    'created_at', p_created_at,
+    'updated_at', p_updated_at,
+    'date_added', p_date_added,
+    'discovery_metadata', p_discovery_metadata,
+    'examples', p_examples,
+    'features', to_jsonb(p_features),
+    'troubleshooting', to_jsonb(p_troubleshooting),
+    'use_cases', to_jsonb(p_use_cases),
+    -- Common optional fields
+    'source', p_source,
+    'documentation_url', p_documentation_url,
+    'popularity_score', p_popularity_score,
+    'content', p_content,
+    'seo_title', p_seo_title,
+    'display_title', p_display_title,
+    -- Analytics
+    'viewCount', COALESCE(p_view_count, 0),
+    'copyCount', COALESCE(p_copy_count, 0),
+    'bookmarkCount', COALESCE(p_bookmark_count, 0),
+    -- Computed
+    'isNew', (p_date_added >= (CURRENT_DATE - INTERVAL '7 days')::date),
+    'popularity', CASE
+      WHEN p_popularity_score IS NOT NULL THEN ROUND((p_popularity_score * 100)::numeric, 0)::int
+      ELSE NULL
+    END,
+    -- Sponsorship
+    'isSponsored', (p_sponsored_id IS NOT NULL AND p_sponsored_active = true),
+    'sponsoredId', CASE                          -- Cast UUID to TEXT for JSON output
+      WHEN p_sponsored_id IS NOT NULL THEN p_sponsored_id::TEXT
+      ELSE NULL
+    END,
+    'sponsorTier', p_sponsor_tier
+  );
+END;
+$$;
 
+
+ALTER FUNCTION "public"."build_enriched_content_base"("p_id" "uuid", "p_slug" "text", "p_title" "text", "p_description" "text", "p_author" "text", "p_author_profile_url" "text", "p_category" "text", "p_tags" "text"[], "p_source_table" "text", "p_created_at" timestamp with time zone, "p_updated_at" timestamp with time zone, "p_date_added" "date", "p_discovery_metadata" "jsonb", "p_examples" "jsonb", "p_features" "text"[], "p_troubleshooting" "jsonb"[], "p_use_cases" "text"[], "p_source" "text", "p_documentation_url" "text", "p_popularity_score" numeric, "p_content" "text", "p_seo_title" "text", "p_display_title" "text", "p_view_count" integer, "p_copy_count" integer, "p_bookmark_count" integer, "p_sponsored_id" "uuid", "p_sponsor_tier" "text", "p_sponsored_active" boolean) OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."calculate_affinity_score_for_content"("p_user_id" "uuid", "p_content_type" "text", "p_content_slug" "text") RETURNS TABLE("user_id" "uuid", "content_type" "text", "content_slug" "text", "affinity_score" integer, "breakdown" "jsonb", "component_scores" "jsonb", "interaction_summary" "jsonb")
@@ -2251,6 +2305,45 @@ $$;
 ALTER FUNCTION "public"."generate_user_slug"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."get_active_sponsored_content"("p_content_type" "text" DEFAULT NULL::"text", "p_limit" integer DEFAULT 5) RETURNS TABLE("id" "uuid", "user_id" "uuid", "content_type" "text", "content_id" "uuid", "tier" "text", "active" boolean, "start_date" timestamp with time zone, "end_date" timestamp with time zone, "impression_limit" integer, "impression_count" integer, "click_count" integer, "created_at" timestamp with time zone, "updated_at" timestamp with time zone)
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    sc.id,
+    sc.user_id,
+    sc.content_type,
+    sc.content_id,
+    sc.tier,
+    sc.active,
+    sc.start_date,
+    sc.end_date,
+    sc.impression_limit,
+    sc.impression_count,
+    sc.click_count,
+    sc.created_at,
+    sc.updated_at
+  FROM sponsored_content sc
+  WHERE sc.active = true
+    AND sc.start_date <= NOW()
+    AND sc.end_date >= NOW()
+    AND (sc.impression_limit IS NULL OR sc.impression_count < sc.impression_limit)
+    AND (p_content_type IS NULL OR sc.content_type = p_content_type)
+  ORDER BY sc.tier DESC, sc.created_at DESC
+  LIMIT p_limit;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_active_sponsored_content"("p_content_type" "text", "p_limit" integer) OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_active_sponsored_content"("p_content_type" "text", "p_limit" integer) IS 'Replaces client-side filtering logic. Returns only active, under-limit sponsored content.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."get_aggregate_rating"("p_content_type" "text", "p_content_slug" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
     SET "search_path" TO 'public'
@@ -2312,11 +2405,9 @@ CREATE OR REPLACE FUNCTION "public"."get_all_content_categories"() RETURNS TABLE
     AS $$
 BEGIN
   RETURN QUERY
-  SELECT DISTINCT content_type::TEXT
-  FROM unified_content_view
-  WHERE deleted_at IS NULL
-    AND status = 'published'
-  ORDER BY content_type;
+  SELECT DISTINCT cu.category::TEXT
+  FROM content_unified cu
+  ORDER BY cu.category;
 END;
 $$;
 
@@ -2324,7 +2415,7 @@ $$;
 ALTER FUNCTION "public"."get_all_content_categories"() OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_all_content_categories"() IS 'Returns all published content categories for weekly featured calculation.';
+COMMENT ON FUNCTION "public"."get_all_content_categories"() IS 'Returns all published content categories for weekly featured calculation. Uses content_unified view.';
 
 
 
@@ -3603,6 +3694,109 @@ ALTER FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") OWNER TO
 
 
 COMMENT ON FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") IS 'Fetch form fields grouped by field_group (common, type_specific, tags). Useful for rendering forms in sections.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."get_homepage_content_enriched"("p_category_ids" "text"[], "p_week_start" "date" DEFAULT NULL::"date") RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $_$
+DECLARE
+  v_week_start DATE;
+  v_category TEXT;
+  v_category_data JSONB;
+  v_result JSONB := '{}'::JSONB;
+  v_stats JSONB := '{}'::JSONB;
+BEGIN
+  -- Calculate week start if not provided (Monday-based weeks)
+  v_week_start := COALESCE(
+    p_week_start,
+    (DATE_TRUNC('week', CURRENT_DATE) +
+     CASE WHEN EXTRACT(DOW FROM CURRENT_DATE) = 0
+          THEN INTERVAL '-6 days'
+          ELSE INTERVAL '1 day' * (1 - EXTRACT(DOW FROM CURRENT_DATE)::int)
+     END)::DATE
+  );
+
+  -- Build enriched category data (analytics + featured flags)
+  FOR v_category IN SELECT unnest(p_category_ids)
+  LOOP
+    -- Get content for this category with analytics and featured data
+    EXECUTE format($query$
+      SELECT COALESCE(jsonb_agg(item_data), '[]'::jsonb)
+      FROM (
+        SELECT jsonb_build_object(
+          'id', c.id,
+          'slug', c.slug,
+          'title', c.title,
+          'description', c.description,
+          'author', c.author,
+          'tags', c.tags,
+          'created_at', c.created_at,
+          'date_added', c.date_added,
+          'category', %L,
+          'viewCount', COALESCE(a.view_count, 0),
+          'copyCount', COALESCE(a.copy_count, 0),
+          '_featured', CASE
+            WHEN f.rank IS NOT NULL
+            THEN jsonb_build_object('rank', f.rank, 'score', f.final_score)
+            ELSE NULL
+          END
+        ) as item_data
+        FROM %I c
+        LEFT JOIN mv_analytics_summary a
+          ON a.category = %L AND a.slug = c.slug
+        LEFT JOIN featured_configs f
+          ON f.content_type = %L
+          AND f.content_slug = c.slug
+          AND f.week_start = %L
+        ORDER BY c.created_at DESC
+        LIMIT 100
+      ) items
+    $query$, v_category, v_category, v_category, v_category, v_week_start)
+    INTO v_category_data;
+
+    -- Add to result
+    v_result := v_result || jsonb_build_object(v_category, v_category_data);
+
+    -- Build stats count
+    EXECUTE format('SELECT COUNT(*)::integer FROM %I', v_category) INTO v_stats;
+    v_stats := jsonb_build_object(v_category, v_stats);
+  END LOOP;
+
+  -- Add allConfigs (deduplicated across categories)
+  v_result := v_result || jsonb_build_object(
+    'allConfigs',
+    (
+      SELECT COALESCE(jsonb_agg(DISTINCT item), '[]'::jsonb)
+      FROM (
+        SELECT jsonb_array_elements(value) as item
+        FROM jsonb_each(v_result)
+        WHERE key = ANY(p_category_ids)
+      ) all_items
+    )
+  );
+
+  -- Add stats (including guides and changelog)
+  v_stats := v_stats || jsonb_build_object(
+    'guides', (SELECT COUNT(*)::integer FROM guides),
+    'changelog', (SELECT COUNT(*)::integer FROM changelog)
+  );
+
+  -- Return complete enriched data
+  RETURN jsonb_build_object(
+    'categoryData', v_result,
+    'stats', v_stats,
+    'weekStart', v_week_start
+  );
+END;
+$_$;
+
+
+ALTER FUNCTION "public"."get_homepage_content_enriched"("p_category_ids" "text"[], "p_week_start" "date") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_homepage_content_enriched"("p_category_ids" "text"[], "p_week_start" "date") IS 'Replaces 135 lines of TypeScript enrichment logic. Single call returns all homepage data with analytics and featured flags.';
 
 
 
@@ -6122,6 +6316,64 @@ COMMENT ON FUNCTION "public"."remove_bookmark"("p_user_id" "uuid", "p_content_ty
 
 
 
+CREATE OR REPLACE FUNCTION "public"."reorder_collection_items"("p_collection_id" "uuid", "p_user_id" "uuid", "p_items" "jsonb") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_item JSONB;
+  v_updated_count INTEGER := 0;
+  v_errors JSONB := '[]'::JSONB;
+BEGIN
+  -- Verify collection exists and user owns it
+  IF NOT EXISTS (
+    SELECT 1 FROM user_collections
+    WHERE id = p_collection_id AND user_id = p_user_id
+  ) THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error', 'Collection not found or unauthorized',
+      'updated', 0
+    );
+  END IF;
+
+  -- Batch update all items in single transaction
+  FOR v_item IN SELECT * FROM jsonb_array_elements(p_items)
+  LOOP
+    BEGIN
+      UPDATE collection_items
+      SET "order" = (v_item->>'order')::INTEGER,
+          updated_at = NOW()
+      WHERE id = (v_item->>'id')::UUID
+        AND collection_id = p_collection_id;
+
+      IF FOUND THEN
+        v_updated_count := v_updated_count + 1;
+      END IF;
+    EXCEPTION WHEN OTHERS THEN
+      v_errors := v_errors || jsonb_build_object(
+        'itemId', v_item->>'id',
+        'error', SQLERRM
+      );
+    END;
+  END LOOP;
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'updated', v_updated_count,
+    'errors', v_errors
+  );
+END;
+$$;
+
+
+ALTER FUNCTION "public"."reorder_collection_items"("p_collection_id" "uuid", "p_user_id" "uuid", "p_items" "jsonb") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."reorder_collection_items"("p_collection_id" "uuid", "p_user_id" "uuid", "p_items" "jsonb") IS 'Batch reorders collection items in single transaction. Replaces N parallel UPDATE queries (10-50X faster for large collections).';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."replace_title_placeholder"("p_text" "text", "p_title" "text", "p_slug" "text") RETURNS "text"
     LANGUAGE "plpgsql" IMMUTABLE
     SET "search_path" TO 'public'
@@ -7347,6 +7599,10 @@ ALTER TABLE "public"."agents" OWNER TO "postgres";
 
 
 COMMENT ON TABLE "public"."agents" IS 'AI agent configurations - specialized AI assistants for development tasks';
+
+
+
+COMMENT ON COLUMN "public"."agents"."category" IS 'Category discriminator (always agents). No index needed - constant value.';
 
 
 
@@ -9155,7 +9411,7 @@ CREATE TABLE IF NOT EXISTS "public"."featured_configs" (
     "final_score" numeric(5,2) NOT NULL,
     "calculation_metadata" "jsonb" DEFAULT '{}'::"jsonb",
     "calculated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    CONSTRAINT "featured_configs_content_type_check" CHECK (("content_type" = ANY (ARRAY['agents'::"text", 'mcp'::"text", 'rules'::"text", 'commands'::"text", 'hooks'::"text", 'statuslines'::"text", 'collections'::"text"]))),
+    CONSTRAINT "featured_configs_content_type_check" CHECK (("content_type" = ANY (ARRAY['agents'::"text", 'mcp'::"text", 'rules'::"text", 'commands'::"text", 'hooks'::"text", 'statuslines'::"text", 'skills'::"text", 'collections'::"text", 'guides'::"text"]))),
     CONSTRAINT "featured_configs_engagement_score_check" CHECK ((("engagement_score" >= (0)::numeric) AND ("engagement_score" <= (100)::numeric))),
     CONSTRAINT "featured_configs_final_score_check" CHECK ((("final_score" >= (0)::numeric) AND ("final_score" <= (100)::numeric))),
     CONSTRAINT "featured_configs_freshness_score_check" CHECK ((("freshness_score" >= (0)::numeric) AND ("freshness_score" <= (100)::numeric))),
@@ -9505,7 +9761,7 @@ CREATE MATERIALIZED VIEW "public"."mv_featured_scores" AS
             COALESCE(( SELECT "count"(*) AS "count"
                    FROM "public"."user_interactions" "ui"
                   WHERE (("ui"."content_type" = "cu"."category") AND ("ui"."content_slug" = "cu"."slug") AND ("ui"."interaction_type" = 'copy'::"text"))), (0)::bigint) AS "copy_count",
-            0 AS "comment_count",
+            (0)::bigint AS "comment_count",
             COALESCE(( SELECT "count"(*) AS "count"
                    FROM "public"."user_interactions" "ui"
                   WHERE (("ui"."content_type" = "cu"."category") AND ("ui"."content_slug" = "cu"."slug") AND ("ui"."interaction_type" = 'view'::"text"))), (0)::bigint) AS "total_views"
@@ -9521,14 +9777,14 @@ CREATE MATERIALIZED VIEW "public"."mv_featured_scores" AS
             "content_stats"."comment_count",
             "content_stats"."total_views",
                 CASE
-                    WHEN ("content_stats"."views_previous_24h" > 0) THEN (((("content_stats"."views_24h")::double precision - ("content_stats"."views_previous_24h")::double precision) / ("content_stats"."views_previous_24h")::double precision) * (100)::double precision)
-                    ELSE (0)::double precision
+                    WHEN ("content_stats"."views_previous_24h" > 0) THEN (((("content_stats"."views_24h")::double precision - ("content_stats"."views_previous_24h")::double precision) / ("content_stats"."views_previous_24h")::double precision) * (100.0)::double precision)
+                    ELSE (0.0)::double precision
                 END AS "growth_rate_pct",
-            LEAST((100)::double precision, GREATEST((0)::double precision, ((100.0)::double precision / ((1)::double precision + "exp"(((- (
+            LEAST((100.0)::double precision, GREATEST((0.0)::double precision, ((100.0)::double precision / ((1.0)::double precision + "exp"((- ((
                 CASE
-                    WHEN ("content_stats"."views_previous_24h" > 0) THEN (((("content_stats"."views_24h")::double precision - ("content_stats"."views_previous_24h")::double precision) / ("content_stats"."views_previous_24h")::double precision) * (100)::double precision)
-                    ELSE (0)::double precision
-                END - (100)::double precision)) / (100.0)::double precision)))))) AS "trending_score"
+                    WHEN ("content_stats"."views_previous_24h" > 0) THEN (((("content_stats"."views_24h")::double precision - ("content_stats"."views_previous_24h")::double precision) / ("content_stats"."views_previous_24h")::double precision) * (100.0)::double precision)
+                    ELSE (0.0)::double precision
+                END - (100.0)::double precision) / (100.0)::double precision))))))) AS "trending_score"
            FROM "content_stats"
         ), "engagement_scores" AS (
          SELECT "trending_scores"."category",
@@ -9543,7 +9799,7 @@ CREATE MATERIALIZED VIEW "public"."mv_featured_scores" AS
             "trending_scores"."growth_rate_pct",
             "trending_scores"."trending_score",
             (((("trending_scores"."bookmark_count" * 5) + ("trending_scores"."copy_count" * 3)))::numeric + (("trending_scores"."total_views")::numeric / 10.0)) AS "raw_engagement",
-            ("percent_rank"() OVER (PARTITION BY "trending_scores"."category" ORDER BY (((("trending_scores"."bookmark_count" * 5) + ("trending_scores"."copy_count" * 3)))::numeric + (("trending_scores"."total_views")::numeric / 10.0))) * (100)::double precision) AS "engagement_score"
+            ("percent_rank"() OVER (PARTITION BY "trending_scores"."category" ORDER BY (((("trending_scores"."bookmark_count" * 5) + ("trending_scores"."copy_count" * 3)))::numeric + (("trending_scores"."total_views")::numeric / 10.0))) * (100.0)::double precision) AS "engagement_score"
            FROM "trending_scores"
         ), "freshness_scores" AS (
          SELECT "engagement_scores"."category",
@@ -9559,8 +9815,8 @@ CREATE MATERIALIZED VIEW "public"."mv_featured_scores" AS
             "engagement_scores"."trending_score",
             "engagement_scores"."raw_engagement",
             "engagement_scores"."engagement_score",
-            (EXTRACT(epoch FROM ("now"() - (("engagement_scores"."date_added")::timestamp without time zone)::timestamp with time zone)) / 86400.0) AS "days_old",
-            GREATEST((0)::numeric, ((100)::numeric - ((EXTRACT(epoch FROM ("now"() - (("engagement_scores"."date_added")::timestamp without time zone)::timestamp with time zone)) / 86400.0) * (2)::numeric))) AS "freshness_score"
+            (EXTRACT(epoch FROM ("now"() - ("engagement_scores"."date_added")::timestamp with time zone)) / 86400.0) AS "days_old",
+            GREATEST((0)::numeric, ((100)::numeric - ((EXTRACT(epoch FROM ("now"() - ("engagement_scores"."date_added")::timestamp with time zone)) / 86400.0) * (2)::numeric))) AS "freshness_score"
            FROM "engagement_scores"
         ), "final_scores" AS (
          SELECT "freshness_scores"."category",
@@ -9579,7 +9835,7 @@ CREATE MATERIALIZED VIEW "public"."mv_featured_scores" AS
             "freshness_scores"."days_old",
             "freshness_scores"."freshness_score",
             (0)::numeric AS "rating_score",
-            (((("freshness_scores"."trending_score" * (0.4)::double precision) + (((0)::numeric * 0.3))::double precision) + ("freshness_scores"."engagement_score" * (0.2)::double precision)) + (("freshness_scores"."freshness_score" * 0.1))::double precision) AS "final_score"
+            (((("freshness_scores"."trending_score" * (0.4)::double precision) + (((0)::numeric * 0.3))::double precision) + ("freshness_scores"."engagement_score" * (0.2)::double precision)) + (("freshness_scores"."freshness_score")::double precision * (0.1)::double precision)) AS "final_score"
            FROM "freshness_scores"
         ), "ranked_content" AS (
          SELECT "final_scores"."category",
@@ -9593,12 +9849,12 @@ CREATE MATERIALIZED VIEW "public"."mv_featured_scores" AS
             "final_scores"."total_views",
             "final_scores"."growth_rate_pct",
             "final_scores"."trending_score",
-            "final_scores"."rating_score",
-            "final_scores"."engagement_score",
-            "final_scores"."freshness_score",
-            "final_scores"."final_score",
-            "final_scores"."days_old",
             "final_scores"."raw_engagement",
+            "final_scores"."engagement_score",
+            "final_scores"."days_old",
+            "final_scores"."freshness_score",
+            "final_scores"."rating_score",
+            "final_scores"."final_score",
             "row_number"() OVER (PARTITION BY "final_scores"."category" ORDER BY "final_scores"."final_score" DESC) AS "rank"
            FROM "final_scores"
         )
@@ -9629,7 +9885,7 @@ CREATE MATERIALIZED VIEW "public"."mv_featured_scores" AS
 ALTER MATERIALIZED VIEW "public"."mv_featured_scores" OWNER TO "postgres";
 
 
-COMMENT ON MATERIALIZED VIEW "public"."mv_featured_scores" IS 'Featured content scores calculated via multi-factor algorithm. Refreshed hourly via pg_cron.';
+COMMENT ON MATERIALIZED VIEW "public"."mv_featured_scores" IS 'Featured content scores calculated via multi-factor algorithm. Refreshed hourly via pg_cron. Fixed comment_count type to bigint.';
 
 
 
@@ -11825,10 +12081,6 @@ CREATE INDEX "idx_agents_author" ON "public"."agents" USING "btree" ("author");
 
 
 
-CREATE INDEX "idx_agents_category" ON "public"."agents" USING "btree" ("category");
-
-
-
 CREATE INDEX "idx_agents_content_fts" ON "public"."agents" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
 
 
@@ -11842,6 +12094,10 @@ CREATE INDEX "idx_agents_date_added" ON "public"."agents" USING "btree" ("date_a
 
 
 CREATE INDEX "idx_agents_fts" ON "public"."agents" USING "gin" ("fts_vector");
+
+
+
+CREATE INDEX "idx_agents_homepage" ON "public"."agents" USING "btree" ("created_at" DESC, "date_added" DESC);
 
 
 
@@ -12009,10 +12265,6 @@ CREATE INDEX "idx_collections_author" ON "public"."collections" USING "btree" ("
 
 
 
-CREATE INDEX "idx_collections_category" ON "public"."collections" USING "btree" ("category");
-
-
-
 CREATE INDEX "idx_collections_content_fts" ON "public"."collections" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
 
 
@@ -12026,6 +12278,10 @@ CREATE INDEX "idx_collections_date_added" ON "public"."collections" USING "btree
 
 
 CREATE INDEX "idx_collections_fts" ON "public"."collections" USING "gin" ("fts_vector");
+
+
+
+CREATE INDEX "idx_collections_homepage" ON "public"."collections" USING "btree" ("created_at" DESC, "date_added" DESC);
 
 
 
@@ -12049,10 +12305,6 @@ CREATE INDEX "idx_commands_author" ON "public"."commands" USING "btree" ("author
 
 
 
-CREATE INDEX "idx_commands_category" ON "public"."commands" USING "btree" ("category");
-
-
-
 CREATE INDEX "idx_commands_content_fts" ON "public"."commands" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
 
 
@@ -12066,6 +12318,10 @@ CREATE INDEX "idx_commands_date_added" ON "public"."commands" USING "btree" ("da
 
 
 CREATE INDEX "idx_commands_fts" ON "public"."commands" USING "gin" ("fts_vector");
+
+
+
+CREATE INDEX "idx_commands_homepage" ON "public"."commands" USING "btree" ("created_at" DESC, "date_added" DESC);
 
 
 
@@ -12377,6 +12633,10 @@ CREATE INDEX "idx_guides_fts" ON "public"."guides" USING "gin" ("fts_vector");
 
 
 
+CREATE INDEX "idx_guides_homepage" ON "public"."guides" USING "btree" ("created_at" DESC, "date_added" DESC);
+
+
+
 CREATE INDEX "idx_guides_keywords" ON "public"."guides" USING "gin" ("keywords");
 
 
@@ -12397,10 +12657,6 @@ CREATE INDEX "idx_hooks_author" ON "public"."hooks" USING "btree" ("author");
 
 
 
-CREATE INDEX "idx_hooks_category" ON "public"."hooks" USING "btree" ("category");
-
-
-
 CREATE INDEX "idx_hooks_content_fts" ON "public"."hooks" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
 
 
@@ -12418,6 +12674,10 @@ CREATE INDEX "idx_hooks_event_types" ON "public"."hooks" USING "gin" ("event_typ
 
 
 CREATE INDEX "idx_hooks_fts" ON "public"."hooks" USING "gin" ("fts_vector");
+
+
+
+CREATE INDEX "idx_hooks_homepage" ON "public"."hooks" USING "btree" ("created_at" DESC, "date_added" DESC);
 
 
 
@@ -12481,10 +12741,6 @@ CREATE INDEX "idx_mcp_author" ON "public"."mcp" USING "btree" ("author");
 
 
 
-CREATE INDEX "idx_mcp_category" ON "public"."mcp" USING "btree" ("category");
-
-
-
 CREATE INDEX "idx_mcp_content_fts" ON "public"."mcp" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
 
 
@@ -12498,6 +12754,10 @@ CREATE INDEX "idx_mcp_date_added" ON "public"."mcp" USING "btree" ("date_added" 
 
 
 CREATE INDEX "idx_mcp_fts" ON "public"."mcp" USING "gin" ("fts_vector");
+
+
+
+CREATE INDEX "idx_mcp_homepage" ON "public"."mcp" USING "btree" ("created_at" DESC, "date_added" DESC);
 
 
 
@@ -12558,26 +12818,6 @@ CREATE INDEX "idx_mv_content_tag_index_category" ON "public"."mv_content_tag_ind
 
 
 CREATE INDEX "idx_mv_content_tag_index_tags_gin" ON "public"."mv_content_tag_index" USING "gin" ("tags");
-
-
-
-CREATE INDEX "idx_mv_featured_scores_category" ON "public"."mv_featured_scores" USING "btree" ("content_type");
-
-
-
-CREATE UNIQUE INDEX "idx_mv_featured_scores_content_rank" ON "public"."mv_featured_scores" USING "btree" ("content_type", "content_slug", "rank");
-
-
-
-CREATE INDEX "idx_mv_featured_scores_final_score" ON "public"."mv_featured_scores" USING "btree" ("final_score" DESC);
-
-
-
-CREATE INDEX "idx_mv_featured_scores_rank" ON "public"."mv_featured_scores" USING "btree" ("content_type", "rank");
-
-
-
-CREATE UNIQUE INDEX "idx_mv_featured_scores_unique" ON "public"."mv_featured_scores" USING "btree" ("content_type", "content_slug");
 
 
 
@@ -12793,10 +13033,6 @@ CREATE INDEX "idx_rules_author" ON "public"."rules" USING "btree" ("author");
 
 
 
-CREATE INDEX "idx_rules_category" ON "public"."rules" USING "btree" ("category");
-
-
-
 CREATE INDEX "idx_rules_content_fts" ON "public"."rules" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
 
 
@@ -12810,6 +13046,10 @@ CREATE INDEX "idx_rules_date_added" ON "public"."rules" USING "btree" ("date_add
 
 
 CREATE INDEX "idx_rules_fts" ON "public"."rules" USING "gin" ("fts_vector");
+
+
+
+CREATE INDEX "idx_rules_homepage" ON "public"."rules" USING "btree" ("created_at" DESC, "date_added" DESC);
 
 
 
@@ -12849,10 +13089,6 @@ CREATE INDEX "idx_skills_author" ON "public"."skills" USING "btree" ("author");
 
 
 
-CREATE INDEX "idx_skills_category" ON "public"."skills" USING "btree" ("category");
-
-
-
 CREATE INDEX "idx_skills_content_fts" ON "public"."skills" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
 
 
@@ -12874,6 +13110,10 @@ CREATE INDEX "idx_skills_difficulty" ON "public"."skills" USING "btree" ("diffic
 
 
 CREATE INDEX "idx_skills_fts" ON "public"."skills" USING "gin" ("fts_vector");
+
+
+
+CREATE INDEX "idx_skills_homepage" ON "public"."skills" USING "btree" ("created_at" DESC, "date_added" DESC);
 
 
 
@@ -12925,10 +13165,6 @@ CREATE INDEX "idx_statuslines_author" ON "public"."statuslines" USING "btree" ("
 
 
 
-CREATE INDEX "idx_statuslines_category" ON "public"."statuslines" USING "btree" ("category");
-
-
-
 CREATE INDEX "idx_statuslines_content_fts" ON "public"."statuslines" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
 
 
@@ -12942,6 +13178,10 @@ CREATE INDEX "idx_statuslines_date_added" ON "public"."statuslines" USING "btree
 
 
 CREATE INDEX "idx_statuslines_fts" ON "public"."statuslines" USING "gin" ("fts_vector");
+
+
+
+CREATE INDEX "idx_statuslines_homepage" ON "public"."statuslines" USING "btree" ("created_at" DESC, "date_added" DESC);
 
 
 
@@ -14952,8 +15192,13 @@ GRANT ALL ON FUNCTION "public"."batch_update_user_affinity_scores"("p_user_ids" 
 
 
 
-GRANT ALL ON FUNCTION "public"."build_enriched_content_base"("p_id" "text", "p_slug" "text", "p_title" "text", "p_description" "text", "p_author" "text", "p_author_profile_url" "text", "p_category" "text", "p_tags" "text"[], "p_source_table" "text", "p_created_at" timestamp without time zone, "p_updated_at" timestamp without time zone, "p_date_added" timestamp without time zone, "p_discovery_metadata" "jsonb", "p_examples" "jsonb", "p_features" "text"[], "p_troubleshooting" "jsonb"[], "p_use_cases" "text"[], "p_source" "text", "p_documentation_url" "text", "p_popularity_score" numeric, "p_content" "text", "p_seo_title" "text", "p_display_title" "text", "p_view_count" integer, "p_copy_count" integer, "p_bookmark_count" integer, "p_sponsored_id" "text", "p_sponsor_tier" "text", "p_sponsored_active" boolean) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."build_enriched_content_base"("p_id" "text", "p_slug" "text", "p_title" "text", "p_description" "text", "p_author" "text", "p_author_profile_url" "text", "p_category" "text", "p_tags" "text"[], "p_source_table" "text", "p_created_at" timestamp without time zone, "p_updated_at" timestamp without time zone, "p_date_added" timestamp without time zone, "p_discovery_metadata" "jsonb", "p_examples" "jsonb", "p_features" "text"[], "p_troubleshooting" "jsonb"[], "p_use_cases" "text"[], "p_source" "text", "p_documentation_url" "text", "p_popularity_score" numeric, "p_content" "text", "p_seo_title" "text", "p_display_title" "text", "p_view_count" integer, "p_copy_count" integer, "p_bookmark_count" integer, "p_sponsored_id" "text", "p_sponsor_tier" "text", "p_sponsored_active" boolean) TO "anon";
+GRANT ALL ON FUNCTION "public"."build_enriched_content_base"("p_id" "uuid", "p_slug" "text", "p_title" "text", "p_description" "text", "p_author" "text", "p_author_profile_url" "text", "p_category" "text", "p_tags" "text"[], "p_source_table" "text", "p_created_at" timestamp with time zone, "p_updated_at" timestamp with time zone, "p_date_added" "date", "p_discovery_metadata" "jsonb", "p_examples" "jsonb", "p_features" "text"[], "p_troubleshooting" "jsonb"[], "p_use_cases" "text"[], "p_source" "text", "p_documentation_url" "text", "p_popularity_score" integer, "p_content" "text", "p_seo_title" "text", "p_display_title" "text", "p_view_count" bigint, "p_copy_count" bigint, "p_bookmark_count" bigint, "p_sponsored_id" "uuid", "p_sponsor_tier" "text", "p_sponsored_active" boolean) TO "anon";
+GRANT ALL ON FUNCTION "public"."build_enriched_content_base"("p_id" "uuid", "p_slug" "text", "p_title" "text", "p_description" "text", "p_author" "text", "p_author_profile_url" "text", "p_category" "text", "p_tags" "text"[], "p_source_table" "text", "p_created_at" timestamp with time zone, "p_updated_at" timestamp with time zone, "p_date_added" "date", "p_discovery_metadata" "jsonb", "p_examples" "jsonb", "p_features" "text"[], "p_troubleshooting" "jsonb"[], "p_use_cases" "text"[], "p_source" "text", "p_documentation_url" "text", "p_popularity_score" integer, "p_content" "text", "p_seo_title" "text", "p_display_title" "text", "p_view_count" bigint, "p_copy_count" bigint, "p_bookmark_count" bigint, "p_sponsored_id" "uuid", "p_sponsor_tier" "text", "p_sponsored_active" boolean) TO "authenticated";
+
+
+
+GRANT ALL ON FUNCTION "public"."build_enriched_content_base"("p_id" "uuid", "p_slug" "text", "p_title" "text", "p_description" "text", "p_author" "text", "p_author_profile_url" "text", "p_category" "text", "p_tags" "text"[], "p_source_table" "text", "p_created_at" timestamp with time zone, "p_updated_at" timestamp with time zone, "p_date_added" "date", "p_discovery_metadata" "jsonb", "p_examples" "jsonb", "p_features" "text"[], "p_troubleshooting" "jsonb"[], "p_use_cases" "text"[], "p_source" "text", "p_documentation_url" "text", "p_popularity_score" numeric, "p_content" "text", "p_seo_title" "text", "p_display_title" "text", "p_view_count" integer, "p_copy_count" integer, "p_bookmark_count" integer, "p_sponsored_id" "uuid", "p_sponsor_tier" "text", "p_sponsored_active" boolean) TO "anon";
+GRANT ALL ON FUNCTION "public"."build_enriched_content_base"("p_id" "uuid", "p_slug" "text", "p_title" "text", "p_description" "text", "p_author" "text", "p_author_profile_url" "text", "p_category" "text", "p_tags" "text"[], "p_source_table" "text", "p_created_at" timestamp with time zone, "p_updated_at" timestamp with time zone, "p_date_added" "date", "p_discovery_metadata" "jsonb", "p_examples" "jsonb", "p_features" "text"[], "p_troubleshooting" "jsonb"[], "p_use_cases" "text"[], "p_source" "text", "p_documentation_url" "text", "p_popularity_score" numeric, "p_content" "text", "p_seo_title" "text", "p_display_title" "text", "p_view_count" integer, "p_copy_count" integer, "p_bookmark_count" integer, "p_sponsored_id" "uuid", "p_sponsor_tier" "text", "p_sponsored_active" boolean) TO "authenticated";
 
 
 
@@ -14964,6 +15209,11 @@ GRANT ALL ON FUNCTION "public"."calculate_affinity_score_for_content"("p_user_id
 
 GRANT ALL ON FUNCTION "public"."calculate_all_user_affinities"("p_user_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."calculate_all_user_affinities"("p_user_id" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."calculate_and_store_weekly_featured"() TO "anon";
+GRANT ALL ON FUNCTION "public"."calculate_and_store_weekly_featured"() TO "authenticated";
 
 
 
@@ -15022,6 +15272,16 @@ GRANT ALL ON FUNCTION "public"."generate_metadata_for_route"("p_route_pattern" "
 
 
 
+GRANT ALL ON FUNCTION "public"."get_active_sponsored_content"("p_content_type" "text", "p_limit" integer) TO "anon";
+GRANT ALL ON FUNCTION "public"."get_active_sponsored_content"("p_content_type" "text", "p_limit" integer) TO "authenticated";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_all_content_categories"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_all_content_categories"() TO "authenticated";
+
+
+
 GRANT ALL ON FUNCTION "public"."get_all_seo_config"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_all_seo_config"() TO "anon";
 
@@ -15068,6 +15328,11 @@ GRANT ALL ON FUNCTION "public"."get_enriched_content"("p_category" "text", "p_sl
 
 
 
+GRANT ALL ON FUNCTION "public"."get_featured_content"("p_category" "text", "p_limit" integer) TO "anon";
+GRANT ALL ON FUNCTION "public"."get_featured_content"("p_category" "text", "p_limit" integer) TO "authenticated";
+
+
+
 GRANT ALL ON FUNCTION "public"."get_form_field_config"("p_form_type" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_form_field_config"("p_form_type" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_form_field_config"("p_form_type" "text") TO "service_role";
@@ -15077,6 +15342,11 @@ GRANT ALL ON FUNCTION "public"."get_form_field_config"("p_form_type" "text") TO 
 GRANT ALL ON FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_homepage_content_enriched"("p_category_ids" "text"[], "p_week_start" "date") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_homepage_content_enriched"("p_category_ids" "text"[], "p_week_start" "date") TO "authenticated";
 
 
 
@@ -15195,6 +15465,10 @@ GRANT ALL ON FUNCTION "public"."refresh_user_stats"() TO "authenticated";
 
 
 
+GRANT ALL ON FUNCTION "public"."reorder_collection_items"("p_collection_id" "uuid", "p_user_id" "uuid", "p_items" "jsonb") TO "authenticated";
+
+
+
 GRANT ALL ON FUNCTION "public"."schedule_next_sequence_step"("p_email" "text", "p_current_step" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."schedule_next_sequence_step"("p_email" "text", "p_current_step" integer) TO "anon";
 
@@ -15273,10 +15547,13 @@ GRANT ALL ON TABLE "public"."affinity_config" TO "service_role";
 
 
 GRANT ALL ON TABLE "public"."agents" TO "service_role";
+GRANT SELECT ON TABLE "public"."agents" TO "anon";
+GRANT SELECT ON TABLE "public"."agents" TO "authenticated";
 
 
 
 GRANT SELECT ON TABLE "public"."announcements" TO "anon";
+GRANT SELECT ON TABLE "public"."announcements" TO "authenticated";
 
 
 
@@ -15294,6 +15571,8 @@ GRANT SELECT ON TABLE "public"."category_configs" TO "anon";
 
 
 GRANT ALL ON TABLE "public"."changelog" TO "service_role";
+GRANT SELECT ON TABLE "public"."changelog" TO "anon";
+GRANT SELECT ON TABLE "public"."changelog" TO "authenticated";
 
 
 
@@ -15313,10 +15592,14 @@ GRANT SELECT ON TABLE "public"."collection_items" TO "anon";
 
 
 GRANT ALL ON TABLE "public"."collections" TO "service_role";
+GRANT SELECT ON TABLE "public"."collections" TO "anon";
+GRANT SELECT ON TABLE "public"."collections" TO "authenticated";
 
 
 
 GRANT ALL ON TABLE "public"."commands" TO "service_role";
+GRANT SELECT ON TABLE "public"."commands" TO "anon";
+GRANT SELECT ON TABLE "public"."commands" TO "authenticated";
 
 
 
@@ -15330,26 +15613,38 @@ GRANT SELECT ON TABLE "public"."company_job_stats" TO "authenticated";
 
 
 GRANT ALL ON TABLE "public"."guides" TO "service_role";
+GRANT SELECT ON TABLE "public"."guides" TO "anon";
+GRANT SELECT ON TABLE "public"."guides" TO "authenticated";
 
 
 
 GRANT ALL ON TABLE "public"."hooks" TO "service_role";
+GRANT SELECT ON TABLE "public"."hooks" TO "anon";
+GRANT SELECT ON TABLE "public"."hooks" TO "authenticated";
 
 
 
 GRANT ALL ON TABLE "public"."mcp" TO "service_role";
+GRANT SELECT ON TABLE "public"."mcp" TO "anon";
+GRANT SELECT ON TABLE "public"."mcp" TO "authenticated";
 
 
 
 GRANT ALL ON TABLE "public"."rules" TO "service_role";
+GRANT SELECT ON TABLE "public"."rules" TO "anon";
+GRANT SELECT ON TABLE "public"."rules" TO "authenticated";
 
 
 
 GRANT ALL ON TABLE "public"."skills" TO "service_role";
+GRANT SELECT ON TABLE "public"."skills" TO "anon";
+GRANT SELECT ON TABLE "public"."skills" TO "authenticated";
 
 
 
 GRANT ALL ON TABLE "public"."statuslines" TO "service_role";
+GRANT SELECT ON TABLE "public"."statuslines" TO "anon";
+GRANT SELECT ON TABLE "public"."statuslines" TO "authenticated";
 
 
 
@@ -15417,6 +15712,7 @@ GRANT INSERT ON TABLE "public"."user_interactions" TO "anon";
 
 
 GRANT SELECT ON TABLE "public"."mv_analytics_summary" TO "anon";
+GRANT SELECT ON TABLE "public"."mv_analytics_summary" TO "authenticated";
 
 
 
@@ -15434,6 +15730,7 @@ GRANT SELECT ON TABLE "public"."mv_content_tag_index" TO "anon";
 
 
 GRANT SELECT ON TABLE "public"."mv_featured_scores" TO "anon";
+GRANT SELECT ON TABLE "public"."mv_featured_scores" TO "authenticated";
 
 
 

@@ -788,31 +788,16 @@ export const trackSponsoredClick = rateLimitedAction
 
 export async function getActiveSponsoredContent(limit = 5) {
   const supabase = await createClient();
-  const now = new Date().toISOString();
 
-  // Fetch active sponsored content within date range
-  const { data, error } = await supabase
-    .from('sponsored_content')
-    .select('*')
-    .eq('active', true)
-    .lte('start_date', now)
-    .gte('end_date', now)
-    .order('tier', { ascending: true }) // Premium first
-    .limit(limit);
+  // RPC handles all filtering (active, date range, impression limits)
+  const { data, error } = await supabase.rpc('get_active_sponsored_content', {
+    p_limit: limit,
+  });
 
   if (error) {
     logger.warn('Failed to fetch active sponsored content', undefined, { error: error.message });
     return [];
   }
 
-  // Filter out items that hit impression limit
-  const filtered = (data || []).filter((item) => {
-    const impressionCount = item.impression_count ?? 0;
-    if (item.impression_limit && impressionCount >= item.impression_limit) {
-      return false;
-    }
-    return true;
-  });
-
-  return filtered;
+  return data || [];
 }

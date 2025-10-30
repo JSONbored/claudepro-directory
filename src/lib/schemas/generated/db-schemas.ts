@@ -5138,40 +5138,6 @@ export const publicBatchUpdateUserAffinityScoresReturnsSchema = z.array(
   })
 );
 
-export const publicBuildEnrichedContentBaseArgsSchema = z.object({
-  p_author: z.string(),
-  p_author_profile_url: z.string(),
-  p_bookmark_count: z.number(),
-  p_category: z.string(),
-  p_content: z.string(),
-  p_copy_count: z.number(),
-  p_created_at: z.string(),
-  p_date_added: z.string(),
-  p_description: z.string(),
-  p_discovery_metadata: jsonSchema,
-  p_display_title: z.string(),
-  p_documentation_url: z.string(),
-  p_examples: jsonSchema,
-  p_features: z.array(z.string()),
-  p_id: z.string(),
-  p_popularity_score: z.number(),
-  p_seo_title: z.string(),
-  p_slug: z.string(),
-  p_source: z.string(),
-  p_source_table: z.string(),
-  p_sponsor_tier: z.string(),
-  p_sponsored_active: z.boolean(),
-  p_sponsored_id: z.string(),
-  p_tags: z.array(z.string()),
-  p_title: z.string(),
-  p_troubleshooting: z.array(jsonSchema),
-  p_updated_at: z.string(),
-  p_use_cases: z.array(z.string()),
-  p_view_count: z.number(),
-});
-
-export const publicBuildEnrichedContentBaseReturnsSchema = jsonSchema;
-
 export const publicCalculateAffinityScoreForContentArgsSchema = z.object({
   p_content_slug: z.string(),
   p_content_type: z.string(),
@@ -5361,6 +5327,29 @@ export const publicGenerateSlugArgsSchema = z.object({
 });
 
 export const publicGenerateSlugReturnsSchema = z.string();
+
+export const publicGetActiveSponsoredContentArgsSchema = z.object({
+  p_content_type: z.string().optional(),
+  p_limit: z.number().optional(),
+});
+
+export const publicGetActiveSponsoredContentReturnsSchema = z.array(
+  z.object({
+    active: z.boolean(),
+    click_count: z.number(),
+    content_id: z.string(),
+    content_type: z.string(),
+    created_at: z.string(),
+    end_date: z.string(),
+    id: z.string(),
+    impression_count: z.number(),
+    impression_limit: z.number(),
+    start_date: z.string(),
+    tier: z.string(),
+    updated_at: z.string(),
+    user_id: z.string(),
+  })
+);
 
 export const publicGetAggregateRatingArgsSchema = z.object({
   p_content_slug: z.string(),
@@ -5566,6 +5555,13 @@ export const publicGetFormFieldsGroupedArgsSchema = z.object({
 });
 
 export const publicGetFormFieldsGroupedReturnsSchema = jsonSchema;
+
+export const publicGetHomepageContentEnrichedArgsSchema = z.object({
+  p_category_ids: z.array(z.string()),
+  p_week_start: z.string().optional(),
+});
+
+export const publicGetHomepageContentEnrichedReturnsSchema = jsonSchema;
 
 export const publicGetMetadataTemplateArgsSchema = z.object({
   p_route_pattern: z.string(),
@@ -5923,6 +5919,14 @@ export const publicRemoveBookmarkArgsSchema = z.object({
 });
 
 export const publicRemoveBookmarkReturnsSchema = jsonSchema;
+
+export const publicReorderCollectionItemsArgsSchema = z.object({
+  p_collection_id: z.string(),
+  p_items: jsonSchema,
+  p_user_id: z.string(),
+});
+
+export const publicReorderCollectionItemsReturnsSchema = jsonSchema;
 
 export const publicReplaceTitlePlaceholderArgsSchema = z.object({
   p_slug: z.string(),

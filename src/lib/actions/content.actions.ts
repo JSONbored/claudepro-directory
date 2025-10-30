@@ -314,37 +314,27 @@ export const reorderCollectionItems = authedAction
 
     const supabase = await createClient();
 
-    // Verify collection belongs to user
-    const { data: collection, error: checkError } = await supabase
-      .from('user_collections')
-      .select('user_id')
-      .eq('id', collection_id)
-      .single();
+    // RPC handles ownership verification and atomic batch update
+    const { data, error } = await supabase.rpc('reorder_collection_items', {
+      p_collection_id: collection_id,
+      p_user_id: userId,
+      p_items: items,
+    });
 
-    if (checkError || !collection) {
-      throw new Error('Collection not found or you do not have permission');
+    if (error) {
+      throw new Error(`Failed to reorder items: ${error.message}`);
     }
 
-    if (collection.user_id !== userId) {
-      throw new Error('You do not have permission to reorder items in this collection');
+    const result = data as { success: boolean; updated: number; errors: any[] };
+
+    if (!result.success) {
+      throw new Error('Failed to reorder collection items');
     }
 
-    // OPTIMIZATION: Batch operation (N queries ? parallel batch)
-    // Performance gain: Significant for collections with 10-50 items
-    const updates = items.map((item) =>
-      supabase
-        .from('collection_items')
-        .update({ order: item.order })
-        .eq('id', item.id)
-        .eq('collection_id', collection_id)
-    );
-
-    const results = await Promise.all(updates);
-
-    // Check for errors
-    const errors = results.filter((r) => r.error);
-    if (errors.length > 0) {
-      throw new Error(`Failed to reorder items: ${errors[0]?.error?.message}`);
+    if (result.errors && Array.isArray(result.errors) && result.errors.length > 0) {
+      logger.warn('Some items failed to reorder', undefined, {
+        errorCount: result.errors.length,
+      });
     }
 
     // Revalidate collection pages
@@ -354,6 +344,7 @@ export const reorderCollectionItems = authedAction
 
     return {
       success: true,
+      updated: result.updated,
     };
   });
 

@@ -4899,40 +4899,75 @@ export type Database = {
           user_id: string;
         }[];
       };
-      build_enriched_content_base: {
-        Args: {
-          p_author: string;
-          p_author_profile_url: string;
-          p_bookmark_count: number;
-          p_category: string;
-          p_content: string;
-          p_copy_count: number;
-          p_created_at: string;
-          p_date_added: string;
-          p_description: string;
-          p_discovery_metadata: Json;
-          p_display_title: string;
-          p_documentation_url: string;
-          p_examples: Json;
-          p_features: string[];
-          p_id: string;
-          p_popularity_score: number;
-          p_seo_title: string;
-          p_slug: string;
-          p_source: string;
-          p_source_table: string;
-          p_sponsor_tier: string;
-          p_sponsored_active: boolean;
-          p_sponsored_id: string;
-          p_tags: string[];
-          p_title: string;
-          p_troubleshooting: Json[];
-          p_updated_at: string;
-          p_use_cases: string[];
-          p_view_count: number;
-        };
-        Returns: Json;
-      };
+      build_enriched_content_base:
+        | {
+            Args: {
+              p_author: string;
+              p_author_profile_url: string;
+              p_bookmark_count: number;
+              p_category: string;
+              p_content: string;
+              p_copy_count: number;
+              p_created_at: string;
+              p_date_added: string;
+              p_description: string;
+              p_discovery_metadata: Json;
+              p_display_title: string;
+              p_documentation_url: string;
+              p_examples: Json;
+              p_features: string[];
+              p_id: string;
+              p_popularity_score: number;
+              p_seo_title: string;
+              p_slug: string;
+              p_source: string;
+              p_source_table: string;
+              p_sponsor_tier: string;
+              p_sponsored_active: boolean;
+              p_sponsored_id: string;
+              p_tags: string[];
+              p_title: string;
+              p_troubleshooting: Json[];
+              p_updated_at: string;
+              p_use_cases: string[];
+              p_view_count: number;
+            };
+            Returns: Json;
+          }
+        | {
+            Args: {
+              p_author: string;
+              p_author_profile_url: string;
+              p_bookmark_count: number;
+              p_category: string;
+              p_content: string;
+              p_copy_count: number;
+              p_created_at: string;
+              p_date_added: string;
+              p_description: string;
+              p_discovery_metadata: Json;
+              p_display_title: string;
+              p_documentation_url: string;
+              p_examples: Json;
+              p_features: string[];
+              p_id: string;
+              p_popularity_score: number;
+              p_seo_title: string;
+              p_slug: string;
+              p_source: string;
+              p_source_table: string;
+              p_sponsor_tier: string;
+              p_sponsored_active: boolean;
+              p_sponsored_id: string;
+              p_tags: string[];
+              p_title: string;
+              p_troubleshooting: Json[];
+              p_updated_at: string;
+              p_use_cases: string[];
+              p_view_count: number;
+            };
+            Returns: Json;
+          };
       calculate_affinity_score_for_content: {
         Args: {
           p_content_slug: string;
@@ -5069,6 +5104,24 @@ export type Database = {
         Returns: Json;
       };
       generate_slug: { Args: { p_name: string }; Returns: string };
+      get_active_sponsored_content: {
+        Args: { p_content_type?: string; p_limit?: number };
+        Returns: {
+          active: boolean;
+          click_count: number;
+          content_id: string;
+          content_type: string;
+          created_at: string;
+          end_date: string;
+          id: string;
+          impression_count: number;
+          impression_limit: number;
+          start_date: string;
+          tier: string;
+          updated_at: string;
+          user_id: string;
+        }[];
+      };
       get_aggregate_rating: {
         Args: { p_content_slug: string; p_content_type: string };
         Returns: Json;
@@ -5209,6 +5262,10 @@ export type Database = {
         }[];
       };
       get_form_fields_grouped: { Args: { p_form_type: string }; Returns: Json };
+      get_homepage_content_enriched: {
+        Args: { p_category_ids: string[]; p_week_start?: string };
+        Returns: Json;
+      };
       get_metadata_template: {
         Args: { p_route_pattern: string };
         Returns: Json;
@@ -5467,6 +5524,10 @@ export type Database = {
           p_content_type: string;
           p_user_id: string;
         };
+        Returns: Json;
+      };
+      reorder_collection_items: {
+        Args: { p_collection_id: string; p_items: Json; p_user_id: string };
         Returns: Json;
       };
       replace_title_placeholder: {

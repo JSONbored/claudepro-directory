@@ -35,14 +35,10 @@ const UnifiedNewsletterCapture = dynamicImport(
   }
 );
 
-import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { type CategoryId, getHomepageCategoryIds } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
-import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
-import { getCurrentWeekStartISO } from '@/src/lib/utils/data.utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,174 +54,82 @@ interface HomePageProps {
 async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
   const categoryIds = getHomepageCategoryIds();
 
-  // Initialize category data storage
-  const categoryData: Record<CategoryId, ContentItem[]> = {} as Record<CategoryId, ContentItem[]>;
-  const featuredByCategory: Record<string, ContentItem[]> = {};
-
   try {
-    const loaders = categoryIds.map((id) => getContentByCategory(id));
-    const results = await batchFetch(loaders);
-
-    categoryIds.forEach((id, index) => {
-      categoryData[id] = (results[index] as ContentItem[]) || [];
-    });
-
     const supabase = createAnonClient();
-    const weekStart = getCurrentWeekStartISO();
 
-    const { data: featuredRecords, error: featuredError } = await supabase
-      .from('featured_configs')
-      .select('content_type, content_slug, rank, final_score')
-      .eq('week_start', weekStart)
-      .order('rank', { ascending: true });
-
-    if (!featuredError && featuredRecords && featuredRecords.length > 0) {
-      const contentByCategory = await batchMap(categoryIds, async (category) => ({
-        category,
-        items: categoryData[category] || [],
-      }));
-
-      const contentMap = new Map<string, ContentItem>();
-      for (const { category, items } of contentByCategory) {
-        for (const item of items) {
-          contentMap.set(`${category}:${item.slug}`, item);
-        }
-      }
-
-      const tempFeaturedByCategory: Record<string, ContentItem[]> = {};
-
-      for (const record of featuredRecords) {
-        const key = `${record.content_type}:${record.content_slug}`;
-        const item = contentMap.get(key);
-
-        if (item) {
-          if (!tempFeaturedByCategory[record.content_type]) {
-            tempFeaturedByCategory[record.content_type] = [];
-          }
-
-          const enrichedItem: ContentItem = {
-            ...item,
-            _featured: {
-              rank: record.rank,
-              score: record.final_score,
-            },
-          } as unknown as ContentItem;
-
-          tempFeaturedByCategory[record.content_type]?.push(enrichedItem);
-        }
-      }
-
-      for (const [category, items] of Object.entries(tempFeaturedByCategory)) {
-        featuredByCategory[category] = items
-          .sort((a, b) => {
-            const aRank =
-              (a as ContentItem & { _featured?: { rank: number } })._featured?.rank ?? 999;
-            const bRank =
-              (b as ContentItem & { _featured?: { rank: number } })._featured?.rank ?? 999;
-            return aRank - bRank;
-          })
-          .slice(0, 6);
-      }
-    }
-  } catch (error) {
-    logger.error(
-      'Failed to load homepage content',
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        source: 'HomePage',
-        operation: 'loadContentMetadata',
-      }
-    );
-
-    categoryIds.forEach((id) => {
-      categoryData[id] = [];
+    // Single RPC call replaces 135 lines of TypeScript enrichment logic
+    const { data, error } = await supabase.rpc('get_homepage_content_enriched', {
+      p_category_ids: categoryIds,
     });
-  }
 
-  const supabase = createAnonClient();
-  const { data: analyticsData } = await supabase
-    .from('mv_analytics_summary')
-    .select('category, slug, view_count, copy_count');
-
-  const analyticsMap = new Map<string, { viewCount: number; copyCount: number }>();
-  if (analyticsData) {
-    for (const row of analyticsData) {
-      analyticsMap.set(`${row.category}:${row.slug}`, {
-        viewCount: row.view_count ?? 0,
-        copyCount: row.copy_count ?? 0,
+    if (error) {
+      logger.error('Failed to load homepage content', error, {
+        source: 'HomePage',
+        operation: 'get_homepage_content_enriched',
       });
+      throw error;
     }
-  }
 
-  const enrichedCategoryData: Record<CategoryId, EnrichedMetadata[]> = {} as Record<
-    CategoryId,
-    EnrichedMetadata[]
-  >;
-  for (const id of categoryIds) {
-    enrichedCategoryData[id] = categoryData[id].map((item) => {
-      const analytics = analyticsMap.get(`${id}:${item.slug}`) ?? { viewCount: 0, copyCount: 0 };
-      return {
-        ...item,
-        category: id,
-        viewCount: analytics.viewCount,
-        copyCount: analytics.copyCount,
-      };
-    });
-  }
+    const enrichedData = data as {
+      categoryData: Record<string, EnrichedMetadata[]>;
+      stats: Record<string, number>;
+      weekStart: string;
+    };
 
-  const enrichedFeaturedByCategory: Record<string, ContentItem[]> = {};
-  for (const [category, items] of Object.entries(featuredByCategory)) {
-    enrichedFeaturedByCategory[category] = items.map((item) => {
-      const analytics = analyticsMap.get(`${item.category}:${item.slug}`) ?? {
-        viewCount: 0,
-        copyCount: 0,
-      };
-      return { ...item, viewCount: analytics.viewCount, copyCount: analytics.copyCount };
-    });
-  }
+    // Extract featured content (items with _featured flag)
+    const featuredByCategory: Record<string, ContentItem[]> = {};
+    for (const [category, items] of Object.entries(enrichedData.categoryData)) {
+      if (category === 'allConfigs') continue; // Skip allConfigs for featured
 
-  const allConfigsWithDuplicates = categoryIds.flatMap((id) => enrichedCategoryData[id] || []);
-  const allConfigsMap = new Map(allConfigsWithDuplicates.map((item) => [item.slug, item]));
-  const allConfigs = Array.from(allConfigsMap.values()) as ContentItem[];
+      const featured = items
+        .filter((item: any) => item._featured)
+        .sort((a: any, b: any) => a._featured.rank - b._featured.rank)
+        .slice(0, 6);
 
-  const initialData: Record<string, ContentItem[]> = {
-    ...enrichedCategoryData,
-    allConfigs,
-  };
+      if (featured.length > 0) {
+        featuredByCategory[category] = featured as ContentItem[];
+      }
+    }
 
-  let guidesCount = 0;
-  let changelogCount = 0;
+    const initialData: Record<string, ContentItem[]> = enrichedData.categoryData as Record<
+      string,
+      ContentItem[]
+    >;
 
-  try {
-    const [guidesData, changelogData] = await batchFetch([
-      getContentByCategory('guides'),
-      getAllChangelogEntries(),
-    ]);
-    guidesCount = guidesData.length;
-    changelogCount = changelogData.length;
+    return (
+      <HomePageClient
+        initialData={initialData}
+        initialSearchQuery={searchQuery}
+        featuredByCategory={featuredByCategory}
+        stats={enrichedData.stats}
+      />
+    );
   } catch (error) {
     logger.error(
-      'Failed to load guides/changelog counts',
+      'Homepage content error',
       error instanceof Error ? error : new Error(String(error)),
       {
         source: 'HomePage',
-        operation: 'loadGuidesChangelogCounts',
+        operation: 'HomeContentSection',
       }
     );
-  }
 
-  return (
-    <HomePageClient
-      initialData={initialData}
-      initialSearchQuery={searchQuery}
-      featuredByCategory={enrichedFeaturedByCategory}
-      stats={{
-        ...Object.fromEntries(categoryIds.map((id) => [id, enrichedCategoryData[id]?.length || 0])),
-        guides: guidesCount,
-        changelog: changelogCount,
-      }}
-    />
-  );
+    // Return empty state on error
+    const emptyData: Record<string, ContentItem[]> = {};
+    categoryIds.forEach((id) => {
+      emptyData[id] = [];
+    });
+    emptyData.allConfigs = [];
+
+    return (
+      <HomePageClient
+        initialData={emptyData}
+        initialSearchQuery={searchQuery}
+        featuredByCategory={{}}
+        stats={Object.fromEntries(categoryIds.map((id) => [id, 0]))}
+      />
+    );
+  }
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
