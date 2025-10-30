@@ -53,33 +53,18 @@ export const toggleBadgeFeatured = authedAction
   .action(async ({ parsedInput: { badgeId, featured }, ctx }) => {
     const supabase = await createClient();
 
-    const { data: badge } = await supabase
-      .from('user_badges')
-      .select('user_id')
-      .eq('id', badgeId)
-      .single();
+    const { data, error } = await supabase.rpc('toggle_badge_featured', {
+      p_badge_id: badgeId,
+      p_user_id: ctx.userId,
+      p_featured: featured,
+    });
 
-    if (!badge || badge.user_id !== ctx.userId) {
-      throw new Error('Badge not found or unauthorized');
-    }
-
-    if (featured) {
-      const { count } = await supabase
-        .from('user_badges')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', ctx.userId)
-        .eq('featured', true);
-
-      if ((count || 0) >= 5) throw new Error('Maximum 5 featured badges');
-    }
-
-    const { error } = await supabase.from('user_badges').update({ featured }).eq('id', badgeId);
-    if (error) throw new Error(`Failed to update: ${error.message}`);
+    if (error) throw new Error(error.message);
 
     revalidatePath('/account');
     revalidatePath('/u/*');
 
-    return { success: true, featured };
+    return data;
   });
 
 export const checkAndAwardBadges = authedAction

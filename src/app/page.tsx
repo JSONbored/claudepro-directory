@@ -41,7 +41,7 @@ import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 900; // 15 minutes ISR
 
 type CategoryMetadata = ContentItem & { category: CategoryId };
 type EnrichedMetadata = CategoryMetadata & { viewCount: number; copyCount: number };
@@ -143,10 +143,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     async () => {
       const supabase = createAnonClient();
       const [memberCountResult, topContributorsResult] = await Promise.all([
-        supabase
-          .from('users')
-          .select('*', { count: 'exact', head: true })
-          .eq('public', true),
+        supabase.from('users').select('*', { count: 'exact', head: true }).eq('public', true),
         supabase
           .from('users')
           .select('*')

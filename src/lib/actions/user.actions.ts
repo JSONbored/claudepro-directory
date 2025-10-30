@@ -146,17 +146,10 @@ export const refreshProfileFromOAuth = authedAction
   .schema(z.void())
   .action(async ({ ctx }) => {
     const supabase = await createClient();
-    const { error: rpcError } = await supabase.rpc('refresh_profile_from_oauth', {
+    const { data: profile, error } = await supabase.rpc('refresh_profile_from_oauth', {
       user_id: ctx.userId,
     });
-    if (rpcError) throw new Error(`Failed to refresh profile from OAuth: ${rpcError.message}`);
-
-    const { data: profile, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', ctx.userId)
-      .single();
-    if (error) throw new Error(`Failed to fetch refreshed user: ${error.message}`);
+    if (error) throw new Error(`Failed to refresh profile from OAuth: ${error.message}`);
 
     if (profile?.slug) revalidatePath(`/u/${profile.slug}`);
     revalidatePath('/account');
@@ -334,24 +327,13 @@ export const getActivitySummary = authedAction
   .outputSchema(activitySummarySchema)
   .action(async ({ ctx }) => {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('user_activity_summary')
-      .select(
-        'total_posts, total_comments, total_votes, total_submissions, merged_submissions, total_activity'
-      )
-      .eq('user_id', ctx.userId)
-      .single();
+    const { data, error } = await supabase.rpc('get_user_activity_summary', {
+      p_user_id: ctx.userId,
+    });
 
     if (error) throw new Error(`Failed to fetch user activity summary: ${error.message}`);
 
-    return {
-      total_posts: data?.total_posts ?? 0,
-      total_comments: data?.total_comments ?? 0,
-      total_votes: data?.total_votes ?? 0,
-      total_submissions: data?.total_submissions ?? 0,
-      merged_submissions: data?.merged_submissions ?? 0,
-      total_activity: data?.total_activity ?? 0,
-    };
+    return data;
   });
 
 export const getActivityTimeline = authedAction

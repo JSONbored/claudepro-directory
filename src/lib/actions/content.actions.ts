@@ -235,7 +235,7 @@ export async function getCollectionWithItems(collectionId: string) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Get collection with items (optimized JOIN query)
+  // Get collection with items (optimized JOIN query with LIMIT for scalability)
   const { data, error } = await supabase
     .from('user_collections')
     .select(
@@ -246,6 +246,7 @@ export async function getCollectionWithItems(collectionId: string) {
     )
     .eq('id', collectionId)
     .order('order', { referencedTable: 'collection_items', ascending: true })
+    .limit(100)
     .single();
 
   if (error) {
@@ -282,6 +283,7 @@ export async function getPublicCollectionBySlug(userSlug: string, collectionSlug
     .eq('is_public', true)
     .eq('users.slug', userSlug)
     .order('order', { referencedTable: 'collection_items', ascending: true })
+    .limit(100)
     .single();
 
   if (error) {

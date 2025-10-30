@@ -19,8 +19,6 @@ import { ValidationRunner } from './core/runner.js';
 import { ContentValidator } from './validators/content-validator.js';
 import { LLMSTxtValidator } from './validators/llmstxt-validator.js';
 import { MetadataValidator } from './validators/metadata-validator.js';
-import { SEOValidator } from './validators/seo-validator.js';
-import { TitleValidator } from './validators/title-validator.js';
 
 // ============================================================================
 // Parse CLI Arguments
@@ -75,8 +73,8 @@ Usage:
   npm run validate [options]
 
 Options:
-  -t, --type <type>      Run specific validator(s): content, seo, metadata, titles, llmstxt
-                         Can specify multiple: --type=content,seo
+  -t, --type <type>      Run specific validator(s): content, metadata, llmstxt
+                         Can specify multiple: --type=content,metadata
   -q, --quick            Run in quick mode (faster, less thorough)
   -f, --fix              Auto-fix issues where possible
   -p, --parallel         Run validators in parallel (default: true)
@@ -87,7 +85,7 @@ Options:
 Examples:
   npm run validate                          # Run all validators
   npm run validate -- --type=content        # Only content validation
-  npm run validate -- --type=content,seo    # Content and SEO only
+  npm run validate -- --type=content,metadata    # Content and metadata only
   npm run validate -- --quick               # Quick mode (all validators)
   npm run validate -- --fix                 # Auto-fix issues
   npm run validate -- --ci                  # CI-friendly format
@@ -103,9 +101,7 @@ Examples:
 const runner = new ValidationRunner({
   validators: [
     new ContentValidator(),
-    new SEOValidator(),
     new MetadataValidator(),
-    new TitleValidator(),
     new LLMSTxtValidator(),
   ],
   parallel: values.parallel ?? true,

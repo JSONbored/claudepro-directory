@@ -7,9 +7,9 @@
  * PERFORMANCE CRITICAL: This is the first page users see
  * Data fetched server-side, search redirects to /search page
  *
- * Architecture Changes (2025-10-27):
+ * Architecture Changes (2025-10-30):
  * 1. ✅ Data fetched from content_unified view (server-side in page.tsx)
- * 2. ✅ Search redirects to /search page (uses PostgreSQL FTS)
+ * 2. ✅ Search uses direct Supabase RPC (database-first, no API route)
  * 3. ✅ No client-side filtering - just display and navigation
  * 4. ✅ Client-only for animations and interactions
  *
@@ -69,7 +69,7 @@ function HomePageClientComponent({
   const [isSearching, setIsSearching] = useState(false);
   const [filters, setFilters] = useState({});
 
-  // Handle search using server action
+  // Handle search using direct Supabase RPC call (database-first)
   const handleSearch = useCallback(
     async (query: string) => {
       if (!query.trim()) {
@@ -80,14 +80,22 @@ function HomePageClientComponent({
 
       setIsSearching(true);
       try {
-        // Call server-side search
-        const results = await fetch(`/api/search?q=${encodeURIComponent(query)}`).then((r) =>
-          r.json()
-        );
-        setSearchResults(results);
+        // Direct database RPC call - no API route middleman
+        const { createBrowserClient } = await import('@/src/lib/supabase/client');
+        const supabase = createBrowserClient();
+
+        const { data, error } = await supabase.rpc('search_content_optimized', {
+          p_query: query.trim(),
+          p_limit: 50,
+        });
+
+        if (error) throw error;
+        setSearchResults(data || []);
       } catch (error) {
         console.error('Search failed:', error);
         setSearchResults(allConfigs);
+      } finally {
+        setIsSearching(false);
       }
     },
     [allConfigs]

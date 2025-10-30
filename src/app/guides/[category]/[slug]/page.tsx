@@ -34,10 +34,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { category, slug } = await params;
 
-  // Construct guides slug format: "category/slug"
-  const guideSlug = `${category}/${slug}`;
-
-  const itemMeta = await getContentBySlug('guides', guideSlug);
+  // Database stores just the slug, not subcategory prefix
+  const itemMeta = await getContentBySlug('guides', slug);
 
   return generatePageMetadata('/guides/:category/:slug', {
     params: { category, slug },
@@ -54,25 +52,21 @@ export default async function GuideDetailPage({
 }) {
   const { category, slug } = await params;
 
-  // Construct guides slug format: "category/slug" (e.g., "tutorials/desktop-mcp-setup")
-  const guideSlug = `${category}/${slug}`;
-
   logger.info('Guide detail page accessed', {
     category,
     slug,
-    guideSlug,
   });
 
-  // Load item metadata for validation
-  const itemMeta = await getContentBySlug('guides', guideSlug);
+  // Database stores just the slug, not subcategory prefix
+  const itemMeta = await getContentBySlug('guides', slug);
 
   if (!itemMeta) {
-    logger.warn('Guide not found', { category, slug, guideSlug });
+    logger.warn('Guide not found', { category, slug });
     notFound();
   }
 
   // Load full content from database
-  const fullItem = await getFullContentBySlug('guides', guideSlug);
+  const fullItem = await getFullContentBySlug('guides', slug);
   const itemData = (fullItem || itemMeta) as ContentItem;
 
   // Analytics data already included in itemMeta from get_enriched_content() RPC
@@ -88,8 +82,8 @@ export default async function GuideDetailPage({
     <>
       <ReadProgress />
 
-      <UnifiedTracker variant="view" category="guides" slug={guideSlug} />
-      <UnifiedTracker variant="page-view" category="guides" slug={guideSlug} />
+      <UnifiedTracker variant="view" category="guides" slug={slug} />
+      <UnifiedTracker variant="page-view" category="guides" slug={slug} />
       <UnifiedStructuredData item={fullItem || itemData} />
       <BreadcrumbSchema
         items={[

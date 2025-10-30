@@ -143,25 +143,6 @@ export const cronHandlers = [
       duration: 980,
     });
   }),
-
-  /**
-   * GET /api/cron/send-weekly-digest
-   */
-  http.get('http://localhost:3000/api/cron/send-weekly-digest', async ({ request }) => {
-    const authHeader = request.headers.get('authorization');
-    if (authHeader !== 'Bearer test-cron-secret') {
-      return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    await delay(300);
-
-    return HttpResponse.json({
-      success: true,
-      sent: 245,
-      failed: 3,
-      timestamp: new Date().toISOString(),
-    });
-  }),
 ];
 
 /**
