@@ -29,7 +29,6 @@ import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
 import { detectLanguage } from '@/src/lib/content/language-detection';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting-starry';
-import { createClient } from '@/src/lib/supabase/server';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
@@ -103,13 +102,6 @@ export async function UnifiedDetailPage({
 
   // Generate display title (Server Component - direct computation)
   const displayTitle = getDisplayTitle(item);
-
-  // Get current user for review functionality (Server Component - async)
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const currentUserId = user?.id;
 
   // Generate content using data from database (generators moved to PostgreSQL)
   const installation = (() => {
@@ -485,7 +477,6 @@ export async function UnifiedDetailPage({
                   variant="section"
                   contentType={item.category}
                   contentSlug={item.slug}
-                  {...(currentUserId && { currentUserId })}
                 />
               </div>
             )}
