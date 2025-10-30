@@ -45,9 +45,8 @@ type DatabaseWithViewOverrides = {
           author_profile_url: string | null;
           features: string[] | null;
           use_cases: string[] | null;
-          examples: DatabaseGenerated['public']['Tables']['agents']['Row']['examples'];
-          troubleshooting: DatabaseGenerated['public']['Tables']['agents']['Row']['troubleshooting'];
-          discovery_metadata: DatabaseGenerated['public']['Tables']['agents']['Row']['discovery_metadata'];
+          examples: DatabaseGenerated['public']['Tables']['content']['Row']['examples'];
+          discovery_metadata: DatabaseGenerated['public']['Tables']['content']['Row']['discovery_metadata'];
         };
       };
 
@@ -121,7 +120,7 @@ type DatabaseWithViewOverrides = {
           author_profile_url: string | null;
           features: string[] | null;
           use_cases: string[] | null;
-          examples: DatabaseGenerated['public']['Tables']['agents']['Row']['examples'];
+          examples: DatabaseGenerated['public']['Tables']['content']['Row']['examples'];
         };
       };
 
@@ -157,7 +156,7 @@ type DatabaseWithViewOverrides = {
           author_profile_url: string | null;
           features: string[] | null;
           use_cases: string[] | null;
-          examples: DatabaseGenerated['public']['Tables']['agents']['Row']['examples'];
+          examples: DatabaseGenerated['public']['Tables']['content']['Row']['examples'];
         };
       };
     };

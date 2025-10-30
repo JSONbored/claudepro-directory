@@ -16,6 +16,7 @@
       "generated/**/*",
       "src/generated/**/*",
       "src/lib/schemas/generated/**/*",
+      "src/lib/schemas/generated/db-schemas.d.ts",
       "src/types/database.types.ts",
       "node_modules/**/*",
       "test-results/**/*",

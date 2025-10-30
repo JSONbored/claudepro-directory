@@ -54,7 +54,7 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
         content: null,
         popularity_score: rec.popularity ?? null,
         discovery_metadata:
-          {} as Database['public']['Tables']['agents']['Row']['discovery_metadata'],
+          {} as Database['public']['Tables']['content']['Row']['discovery_metadata'],
         _recommendationSource: rec.source,
         _recommendationReason: rec.reason,
       })) as any,

@@ -6,7 +6,6 @@
 import { marked } from 'marked';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
-import { nonNegativeInt } from '@/src/lib/schemas/primitives';
 import { DOMPurify } from '@/src/lib/security/html-sanitizer';
 
 /**
@@ -115,8 +114,6 @@ const markdownSanitizedHtmlSchema = z.string().refine(
  */
 const markdownToHtmlResponseSchema = z.object({
   html: markdownSanitizedHtmlSchema,
-  wordCount: nonNegativeInt,
-  readingTime: nonNegativeInt, // in minutes
   hasCodeBlocks: z.boolean(),
   hasLinks: z.boolean(),
   hasImages: z.boolean(),
@@ -142,25 +139,6 @@ marked.setOptions({
   pedantic: false,
   silent: false,
 });
-
-/**
- * Calculate reading time based on word count
- * Average reading speed: 200-250 words per minute
- */
-function calculateReadingTime(wordCount: number): number {
-  const wordsPerMinute = 225;
-  return Math.ceil(wordCount / wordsPerMinute);
-}
-
-/**
- * Count words in text content
- */
-function countWords(text: string): number {
-  return text
-    .trim()
-    .split(/\s+/)
-    .filter((word) => word.length > 0).length;
-}
 
 /**
  * Check if HTML contains specific elements
@@ -246,16 +224,11 @@ export async function markdownToSafeHtml(
     // Validate final output
     const validatedHtml: SanitizedHtml = markdownSanitizedHtmlSchema.parse(sanitizedHtml);
 
-    // Calculate metadata
-    const plainText = validatedHtml.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
-    const wordCount = countWords(plainText);
-    const readingTime = calculateReadingTime(wordCount);
+    // Analyze content
     const contentAnalysis = analyzeHtmlContent(validatedHtml);
 
     return {
       html: validatedHtml,
-      wordCount,
-      readingTime,
       ...contentAnalysis,
     };
   } catch (error) {

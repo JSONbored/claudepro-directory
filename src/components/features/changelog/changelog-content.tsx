@@ -25,8 +25,8 @@ import type { ChangelogEntry } from '@/src/lib/changelog/loader';
 import { parseChangelogChanges } from '@/src/lib/changelog/loader';
 import type { Database } from '@/src/types/database.types';
 
-type GuideRow = Database['public']['Tables']['guides']['Row'];
-type GuideSection = GuideRow['sections'];
+type ContentRow = Database['public']['Tables']['content']['Row'];
+type GuideSection = ContentRow['metadata'];
 
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 

@@ -139,6 +139,14 @@ function createSupabaseClient() {
       persistSession: false,
       autoRefreshToken: false,
     },
+    db: {
+      schema: 'public',
+    },
+    global: {
+      headers: {
+        'x-my-custom-header': 'sync-script',
+      },
+    },
   });
 }
 
@@ -176,10 +184,15 @@ function hashContent(data: Record<string, unknown>): string {
 
 /**
  * Map category to table name
- * Most categories match their table name, but some differ
+ * After unified content migration:
+ * - agents, mcp, commands, rules, hooks, statuslines, skills, collections, guides → content
+ * - jobs → jobs
+ * - changelog → changelog_entries
  */
 function getTableName(category: CategoryId): string {
-  return category === 'changelog' ? 'changelog_entries' : category;
+  if (category === 'changelog') return 'changelog_entries';
+  if (category === 'jobs') return 'jobs';
+  return 'content'; // All other categories use unified content table
 }
 
 // ============================================
@@ -189,179 +202,121 @@ function getTableName(category: CategoryId): string {
 function mapToTableRow(file: FileInfo): Record<string, unknown> {
   const { data, hash, slug, category } = file;
   const now = new Date().toISOString();
+  const tableName = getTableName(category);
 
-  // Base fields (shared across most tables)
-  const base = {
-    slug,
-    description: data.description || `Content for ${slug}`,
-    category: data.category || category,
-    author: data.author,
-    author_profile_url: data.authorProfileUrl || null,
-    date_added: data.dateAdded,
-    tags: data.tags || [],
-    git_hash: hash,
-    synced_at: now,
-  };
+  // For unified content table, use metadata pattern
+  if (tableName === 'content') {
+    // Base fields that exist as columns in content table
+    const row: Record<string, unknown> = {
+      category,
+      slug,
+      title: data.title || null,
+      display_title: data.displayTitle || null,
+      seo_title: data.seoTitle || null,
+      description: data.description || `Content for ${slug}`,
+      author: data.author,
+      author_profile_url: data.authorProfileUrl || null,
+      date_added: data.dateAdded,
+      tags: data.tags || [],
+      content: data.content || null,
+      source: data.source || null,
+      documentation_url: data.documentationUrl || null,
+      features: data.features || [],
+      use_cases: data.useCases || [],
+      examples: data.examples || [],
+      discovery_metadata: data.discoveryMetadata || null,
+      git_hash: hash,
+      synced_at: now,
+    };
 
-  // Category-specific mappings
-  switch (category) {
-    case 'agents':
-    case 'mcp':
-    case 'rules':
-    case 'commands':
-      return {
-        ...base,
-        content: data.content,
-        title: data.title || null,
-        display_title: data.displayTitle || null,
-        seo_title: data.seoTitle || null,
-        source: data.source || null,
-        documentation_url: data.documentationUrl || null,
-        features: data.features || [],
-        use_cases: data.useCases || [],
-        examples: data.examples || [],
-        discovery_metadata: data.discoveryMetadata || null,
-        troubleshooting: data.troubleshooting || [],
-        configuration: data.configuration || null,
-        ...(category === 'mcp' || category === 'commands'
-          ? { installation: data.installation || null }
-          : {}),
-      };
+    // Category-specific fields go into metadata JSONB column
+    const metadata: Record<string, unknown> = {};
 
-    case 'hooks':
-      return {
-        ...base,
-        content: data.content,
-        title: data.title || null,
-        display_title: data.displayTitle || null,
-        seo_title: data.seoTitle || null,
-        source: data.source || null,
-        documentation_url: data.documentationUrl || null,
-        features: data.features || [],
-        use_cases: data.useCases || [],
-        examples: data.examples || [],
-        discovery_metadata: data.discoveryMetadata || null,
-        troubleshooting: data.troubleshooting || [],
-        installation: data.installation || null,
-        event_types: data.eventTypes || null,
-      };
+    // Add category-specific fields to metadata
+    if (category === 'mcp' || category === 'commands') {
+      if (data.installation) metadata.installation = data.installation;
+      if (data.configuration) metadata.configuration = data.configuration;
+    }
 
-    case 'statuslines':
-      return {
-        ...base,
-        content: data.content,
-        title: data.title || null,
-        display_title: data.displayTitle || null,
-        seo_title: data.seoTitle || null,
-        source: data.source || null,
-        documentation_url: data.documentationUrl || null,
-        features: data.features || [],
-        use_cases: data.useCases || [],
-        examples: data.examples || [],
-        discovery_metadata: data.discoveryMetadata || null,
-        troubleshooting: data.troubleshooting || [],
-        preview: data.preview || null,
-        refresh_rate_ms: data.refreshRateMs || null,
-        installation: data.installation || null,
-      };
+    if (category === 'hooks') {
+      if (data.installation) metadata.installation = data.installation;
+      if (data.eventTypes) metadata.event_types = data.eventTypes;
+    }
 
-    case 'skills':
-      return {
-        ...base,
-        content: data.content,
-        title: data.title || null,
-        display_title: data.displayTitle || null,
-        seo_title: data.seoTitle || null,
-        source: data.source || null,
-        documentation_url: data.documentationUrl || null,
-        features: data.features || [],
-        use_cases: data.useCases || [],
-        examples: data.examples || [],
-        discovery_metadata: data.discoveryMetadata || null,
-        troubleshooting: data.troubleshooting || [],
-        dependencies: data.dependencies || null,
-        difficulty: data.difficulty || null,
-        estimated_time: data.estimatedTime || null,
-      };
+    if (category === 'statuslines') {
+      if (data.installation) metadata.installation = data.installation;
+      if (data.preview) metadata.preview = data.preview;
+      if (data.refreshRateMs) metadata.refresh_rate_ms = data.refreshRateMs;
+    }
 
-    case 'collections': {
-      // Extract only slugs from items array of objects
+    if (category === 'skills') {
+      if (data.dependencies) metadata.dependencies = data.dependencies;
+      if (data.difficulty) metadata.difficulty = data.difficulty;
+      if (data.estimatedTime) metadata.estimated_time = data.estimatedTime;
+    }
+
+    if (category === 'collections') {
       const items = data.items as Array<{ slug: string }> | null;
-      const itemSlugs = items ? items.map((item) => item.slug) : null;
-
-      return {
-        ...base,
-        content: data.content,
-        title: data.title || null,
-        display_title: data.displayTitle || null,
-        seo_title: data.seoTitle || null,
-        source: data.source || null,
-        documentation_url: data.documentationUrl || null,
-        features: data.features || [],
-        use_cases: data.useCases || [],
-        examples: data.examples || [],
-        discovery_metadata: data.discoveryMetadata || null,
-        troubleshooting: data.troubleshooting || [],
-        items: itemSlugs,
-        collection_type: data.collectionType || null,
-      };
+      if (items) metadata.items = items.map((item) => item.slug);
+      if (data.collectionType) metadata.collection_type = data.collectionType;
     }
 
-    case 'guides':
-      return {
-        slug,
-        title: data.title,
-        description: data.description,
-        category: 'guides',
-        subcategory: data.subcategory,
-        author: data.author,
-        author_profile_url: data.authorProfileUrl || null,
-        date_added: data.dateAdded,
-        tags: data.tags || [],
-        keywords: data.keywords || null,
-        sections: data.sections || [],
-        seo_title: data.seoTitle || null,
-        source: data.source || null,
-        related_guides: data.relatedContent || null,
-        reading_time: data.estimatedReadTime || null,
-        difficulty: data.difficulty || null,
-        date_updated: data.lastUpdated || null,
-        git_hash: hash,
-        synced_at: now,
-      };
-
-    case 'changelog': {
-      // Changelog entries already parsed to correct format
-      // Don't add git_hash/synced_at as table doesn't have these columns
-      // Remove id field (let DB auto-generate) and any empty/undefined fields
-      const { id, created_at, updated_at, description, ...cleanData } = data as any;
-
-      // Generate description from tldr/content if needed (must be 50-160 chars or NULL)
-      let validDescription: string | null = null;
-      if (description && description.length >= 50) {
-        validDescription = description.slice(0, 160);
-      } else if (cleanData.tldr && cleanData.tldr.length >= 50) {
-        validDescription = cleanData.tldr.slice(0, 160);
-      } else if (cleanData.content) {
-        // Extract first substantial paragraph
-        const firstPara = cleanData.content.split('\n').find((line: string) => {
-          const trimmed = line.trim();
-          return trimmed.length > 50 && !trimmed.startsWith('#') && !trimmed.startsWith('**');
-        });
-        if (firstPara && firstPara.length >= 50) {
-          validDescription = firstPara.slice(0, 160);
-        }
-      }
-
-      return {
-        ...cleanData,
-        description: validDescription,
-      };
+    if (category === 'guides') {
+      if (data.subcategory) metadata.subcategory = data.subcategory;
+      if (data.keywords) metadata.keywords = data.keywords;
+      if (data.sections) metadata.sections = data.sections;
+      if (data.relatedContent) metadata.related_guides = data.relatedContent;
+      if (data.estimatedReadTime) metadata.reading_time = data.estimatedReadTime;
+      if (data.difficulty) metadata.difficulty = data.difficulty;
+      if (data.lastUpdated) metadata.date_updated = data.lastUpdated;
     }
 
-    default:
-      throw new Error(`Unknown category: ${category}`);
+    if (
+      category === 'agents' ||
+      category === 'rules' ||
+      category === 'mcp' ||
+      category === 'commands'
+    ) {
+      if (data.configuration) metadata.configuration = data.configuration;
+      if (data.troubleshooting) metadata.troubleshooting = data.troubleshooting;
+    }
+
+    row.metadata = metadata;
+    return row;
   }
+
+  // For changelog table only (jobs currently not synced)
+  if (category === 'changelog') {
+    // Changelog entries already parsed to correct format
+    // Don't add git_hash/synced_at as table doesn't have these columns
+    // Remove id field (let DB auto-generate) and any empty/undefined fields
+    const { id, created_at, updated_at, description, ...cleanData } = data as any;
+
+    // Generate description from tldr/content if needed (must be 50-160 chars or NULL)
+    let validDescription: string | null = null;
+    if (description && description.length >= 50) {
+      validDescription = description.slice(0, 160);
+    } else if (cleanData.tldr && cleanData.tldr.length >= 50) {
+      validDescription = cleanData.tldr.slice(0, 160);
+    } else if (cleanData.content) {
+      // Extract first substantial paragraph
+      const firstPara = cleanData.content.split('\n').find((line: string) => {
+        const trimmed = line.trim();
+        return trimmed.length > 50 && !trimmed.startsWith('#') && !trimmed.startsWith('**');
+      });
+      if (firstPara && firstPara.length >= 50) {
+        validDescription = firstPara.slice(0, 160);
+      }
+    }
+
+    return {
+      ...cleanData,
+      description: validDescription,
+    };
+  }
+
+  // This should never be reached (all categories handled above)
+  throw new Error(`Unknown category: ${category}`);
 }
 
 // ============================================
@@ -531,10 +486,21 @@ async function upsertContent(
   // Fetch all existing hashes per category in parallel (1 query per category instead of 315 queries)
   const hashMapPromises = Object.entries(filesByCategory).map(async ([category, categoryFiles]) => {
     const slugs = categoryFiles.map((f) => f.slug);
-    const { data, error } = await supabase
-      .from(category as CategoryId)
-      .select('slug, git_hash')
-      .in('slug', slugs);
+    const tableName = getTableName(category as CategoryId);
+
+    // For unified content table, filter by category; for jobs/changelog, just query by slug
+    // changelog_entries doesn't have git_hash column, so skip it
+    if (tableName === 'changelog_entries') {
+      return { category: category as CategoryId, hashMap: new Map<string, string>() };
+    }
+
+    const query = supabase.from(tableName).select('slug, git_hash').in('slug', slugs);
+
+    if (tableName === 'content') {
+      query.eq('category', category);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error(`❌ Failed to fetch hashes for ${category}:`, error.message);
@@ -606,7 +572,11 @@ async function upsertContent(
         try {
           const row = mapToTableRow(file);
           const tableName = getTableName(file.category);
-          const { error } = await supabase.from(tableName).upsert(row, { onConflict: 'slug' });
+
+          // Unified content table uses (category, slug) unique constraint
+          // Jobs and changelog use just 'slug'
+          const onConflict = tableName === 'content' ? 'category,slug' : 'slug';
+          const { error } = await supabase.from(tableName).upsert(row, { onConflict });
 
           if (error) {
             console.error(`❌ Failed to sync ${file.category}:${file.slug}:`, error.message);
@@ -657,7 +627,10 @@ async function deleteRemovedContent(
       const slug = match[3].replace(/\.json$/, '');
       const tableName = getTableName(category);
 
-      const { error } = await supabase.from(tableName).delete().match({ slug });
+      // Unified content table needs both category and slug for deletion
+      // Jobs and changelog use just slug
+      const matchCriteria = tableName === 'content' ? { category, slug } : { slug };
+      const { error } = await supabase.from(tableName).delete().match(matchCriteria);
 
       if (error) {
         console.error(`❌ Failed to delete ${category}:${slug}:`, error.message);

@@ -5,7 +5,7 @@
 
 import type { Database } from '@/src/types/database.types';
 
-type SkillRow = Database['public']['Tables']['skills']['Row'];
+type SkillRow = Database['public']['Tables']['content']['Row'] & { category: 'skills' };
 
 export function transformSkillToMarkdown(skill: SkillRow): string {
   const frontmatter = generateYamlFrontmatter(skill);
@@ -23,10 +23,12 @@ description: ${escapedDescription}
 
 export function generateMarkdownBody(skill: SkillRow): string {
   const sections: string[] = [];
+  const metadata = (skill.metadata as Record<string, unknown>) || {};
 
   if (skill.content) sections.push(skill.content);
 
-  const prerequisites = generatePrerequisitesSection(skill.dependencies);
+  const dependencies = metadata.dependencies as string[] | null;
+  const prerequisites = generatePrerequisitesSection(dependencies);
   if (prerequisites) sections.push(prerequisites);
 
   const features = generateFeaturesSection(skill.features);
@@ -38,8 +40,9 @@ export function generateMarkdownBody(skill: SkillRow): string {
   const examples = generateExamplesSection(skill.examples as any);
   if (examples) sections.push(examples);
 
-  const troubleshooting = generateTroubleshootingSection(skill.troubleshooting as any);
-  if (troubleshooting) sections.push(troubleshooting);
+  const troubleshooting = metadata.troubleshooting as any;
+  const troubleshootingSection = generateTroubleshootingSection(troubleshooting);
+  if (troubleshootingSection) sections.push(troubleshootingSection);
 
   const learnMore = generateLearnMoreSection(skill.documentation_url);
   if (learnMore) sections.push(learnMore);

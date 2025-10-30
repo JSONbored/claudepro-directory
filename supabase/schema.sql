@@ -3039,456 +3039,60 @@ CREATE OR REPLACE FUNCTION "public"."get_enriched_content"("p_category" "text" D
 DECLARE
   v_result JSONB;
 BEGIN
-  
-  -- Route to specific table based on category for full schema access
-  CASE p_category
-    
-    -- ========================================================================
-    -- AGENTS
-    -- ========================================================================
-    WHEN 'agents' THEN
-      SELECT jsonb_agg(row_to_json) INTO v_result FROM (
-        SELECT (
-          build_enriched_content_base(
-            a.id, a.slug, a.title, a.description, a.author, a.author_profile_url,
-            a.category, a.tags, 'agents', a.created_at, a.updated_at, a.date_added,
-            a.discovery_metadata, a.examples, a.features, a.troubleshooting, a.use_cases,
-            a.source, a.documentation_url, a.popularity_score, a.content, a.seo_title, a.display_title,
-            mv.view_count, mv.copy_count, mv.bookmark_count,
-            sc.id, sc.tier, sc.active
-          ) || jsonb_build_object(
-            'configuration', a.configuration,
-            'installation', a.installation
-          )
-        ) as row_to_json
-        FROM public.agents a
-        LEFT JOIN public.mv_analytics_summary mv ON mv.slug = a.slug AND mv.category = a.category
-        LEFT JOIN public.sponsored_content sc ON sc.content_id = a.id AND sc.content_type = 'agents'
-          AND sc.active = true AND CURRENT_TIMESTAMP BETWEEN sc.start_date AND sc.end_date
-        WHERE (p_slug IS NULL OR a.slug = p_slug)
-          AND (p_slugs IS NULL OR a.slug = ANY(p_slugs))
-        ORDER BY a.slug
-        LIMIT p_limit OFFSET p_offset
-      ) subquery;
+  -- Query unified content table with analytics and sponsorship enrichment
+  SELECT COALESCE(jsonb_agg(row_to_json), '[]'::jsonb) INTO v_result
+  FROM (
+    SELECT jsonb_build_object(
+      'id', c.id,
+      'slug', c.slug,
+      'title', c.title,
+      'display_title', c.display_title,
+      'seo_title', c.seo_title,
+      'description', c.description,
+      'author', c.author,
+      'author_profile_url', c.author_profile_url,
+      'category', c.category,
+      'tags', c.tags,
+      'source_table', c.category,
+      'created_at', c.created_at,
+      'updated_at', c.updated_at,
+      'date_added', c.date_added,
+      'discovery_metadata', c.discovery_metadata,
+      'examples', c.examples,
+      'features', c.features,
+      'use_cases', c.use_cases,
+      'source', c.source,
+      'documentation_url', c.documentation_url,
+      'content', c.content,
+      'metadata', c.metadata,
+      -- Analytics enrichment
+      'viewCount', COALESCE(mv.view_count, 0),
+      'copyCount', COALESCE(mv.copy_count, 0),
+      'bookmarkCount', COALESCE(mv.bookmark_count, 0),
+      'popularityScore', COALESCE(mv.popularity_score, 0),
+      'trendingScore', COALESCE(mv.trending_score, 0),
+      -- Sponsorship enrichment (use content_id for join)
+      'sponsoredContentId', sc.id,
+      'sponsorshipTier', sc.tier,
+      'isSponsored', COALESCE(sc.active, false)
+    ) as row_to_json
+    FROM public.content c
+    LEFT JOIN public.mv_analytics_summary mv 
+      ON mv.slug = c.slug AND mv.category = c.category
+    LEFT JOIN public.sponsored_content sc 
+      ON sc.content_id = c.id
+      AND sc.content_type = c.category
+      AND sc.active = true 
+      AND CURRENT_TIMESTAMP BETWEEN sc.start_date AND sc.end_date
+    WHERE 
+      (p_category IS NULL OR c.category = p_category)
+      AND (p_slug IS NULL OR c.slug = p_slug)
+      AND (p_slugs IS NULL OR c.slug = ANY(p_slugs))
+    ORDER BY c.slug
+    LIMIT p_limit OFFSET p_offset
+  ) subquery;
 
-    -- ========================================================================
-    -- MCP
-    -- ========================================================================
-    WHEN 'mcp' THEN
-      SELECT jsonb_agg(row_to_json) INTO v_result FROM (
-        SELECT (
-          build_enriched_content_base(
-            m.id, m.slug, m.title, m.description, m.author, m.author_profile_url,
-            m.category, m.tags, 'mcp', m.created_at, m.updated_at, m.date_added,
-            m.discovery_metadata, m.examples, m.features, m.troubleshooting, m.use_cases,
-            m.source, m.documentation_url, m.popularity_score, m.content, m.seo_title, m.display_title,
-            mv.view_count, mv.copy_count, mv.bookmark_count,
-            sc.id, sc.tier, sc.active
-          ) || jsonb_build_object(
-            'server_type', m.server_type,
-            'mcp_version', m.mcp_version,
-            'requires_auth', m.requires_auth,
-            'auth_type', m.auth_type,
-            'configuration', m.configuration,
-            'installation', m.installation,
-            'capabilities', m.capabilities,
-            'tools_provided', m.tools_provided,
-            'resources_provided', m.resources_provided,
-            'data_types', m.data_types,
-            'transport', m.transport,
-            'server_info', m.server_info,
-            'security', m.security,
-            'permissions', m.permissions,
-            'config_location', m.config_location,
-            'package', m.package
-          )
-        ) as row_to_json
-        FROM public.mcp m
-        LEFT JOIN public.mv_analytics_summary mv ON mv.slug = m.slug AND mv.category = m.category
-        LEFT JOIN public.sponsored_content sc ON sc.content_id = m.id AND sc.content_type = 'mcp'
-          AND sc.active = true AND CURRENT_TIMESTAMP BETWEEN sc.start_date AND sc.end_date
-        WHERE (p_slug IS NULL OR m.slug = p_slug)
-          AND (p_slugs IS NULL OR m.slug = ANY(p_slugs))
-        ORDER BY m.slug
-        LIMIT p_limit OFFSET p_offset
-      ) subquery;
-
-    -- ========================================================================
-    -- COMMANDS
-    -- ========================================================================
-    WHEN 'commands' THEN
-      SELECT jsonb_agg(row_to_json) INTO v_result FROM (
-        SELECT (
-          build_enriched_content_base(
-            c.id, c.slug, c.title, c.description, c.author, c.author_profile_url,
-            c.category, c.tags, 'commands', c.created_at, c.updated_at, c.date_added,
-            c.discovery_metadata, c.examples, c.features, c.troubleshooting, c.use_cases,
-            c.source, c.documentation_url, c.popularity_score, c.content, c.seo_title, c.display_title,
-            mv.view_count, mv.copy_count, mv.bookmark_count,
-            sc.id, sc.tier, sc.active
-          ) || jsonb_build_object(
-            'configuration', c.configuration,
-            'installation', c.installation
-          )
-        ) as row_to_json
-        FROM public.commands c
-        LEFT JOIN public.mv_analytics_summary mv ON mv.slug = c.slug AND mv.category = c.category
-        LEFT JOIN public.sponsored_content sc ON sc.content_id = c.id AND sc.content_type = 'commands'
-          AND sc.active = true AND CURRENT_TIMESTAMP BETWEEN sc.start_date AND sc.end_date
-        WHERE (p_slug IS NULL OR c.slug = p_slug)
-          AND (p_slugs IS NULL OR c.slug = ANY(p_slugs))
-        ORDER BY c.slug
-        LIMIT p_limit OFFSET p_offset
-      ) subquery;
-
-    -- ========================================================================
-    -- RULES
-    -- ========================================================================
-    WHEN 'rules' THEN
-      SELECT jsonb_agg(row_to_json) INTO v_result FROM (
-        SELECT (
-          build_enriched_content_base(
-            r.id, r.slug, r.title, r.description, r.author, r.author_profile_url,
-            r.category, r.tags, 'rules', r.created_at, r.updated_at, r.date_added,
-            r.discovery_metadata, r.examples, r.features, r.troubleshooting, r.use_cases,
-            r.source, r.documentation_url, r.popularity_score, r.content, r.seo_title, r.display_title,
-            mv.view_count, mv.copy_count, mv.bookmark_count,
-            sc.id, sc.tier, sc.active
-          ) || jsonb_build_object(
-            'configuration', r.configuration,
-            'expertise_areas', r.expertise_areas,
-            'requirements', r.requirements,
-            'related_rules', r.related_rules
-          )
-        ) as row_to_json
-        FROM public.rules r
-        LEFT JOIN public.mv_analytics_summary mv ON mv.slug = r.slug AND mv.category = r.category
-        LEFT JOIN public.sponsored_content sc ON sc.content_id = r.id AND sc.content_type = 'rules'
-          AND sc.active = true AND CURRENT_TIMESTAMP BETWEEN sc.start_date AND sc.end_date
-        WHERE (p_slug IS NULL OR r.slug = p_slug)
-          AND (p_slugs IS NULL OR r.slug = ANY(p_slugs))
-        ORDER BY r.slug
-        LIMIT p_limit OFFSET p_offset
-      ) subquery;
-
-    -- ========================================================================
-    -- HOOKS
-    -- ========================================================================
-    WHEN 'hooks' THEN
-      SELECT jsonb_agg(row_to_json) INTO v_result FROM (
-        SELECT (
-          build_enriched_content_base(
-            h.id, h.slug, h.title, h.description, h.author, h.author_profile_url,
-            h.category, h.tags, 'hooks', h.created_at, h.updated_at, h.date_added,
-            h.discovery_metadata, h.examples, h.features, h.troubleshooting, h.use_cases,
-            h.source, h.documentation_url, h.popularity_score, h.content, h.seo_title, h.display_title,
-            mv.view_count, mv.copy_count, mv.bookmark_count,
-            sc.id, sc.tier, sc.active
-          ) || jsonb_build_object(
-            'hook_type', h.hook_type,
-            'event_types', h.event_types,
-            'configuration', h.configuration,
-            'installation', h.installation,
-            'requirements', h.requirements
-          )
-        ) as row_to_json
-        FROM public.hooks h
-        LEFT JOIN public.mv_analytics_summary mv ON mv.slug = h.slug AND mv.category = h.category
-        LEFT JOIN public.sponsored_content sc ON sc.content_id = h.id AND sc.content_type = 'hooks'
-          AND sc.active = true AND CURRENT_TIMESTAMP BETWEEN sc.start_date AND sc.end_date
-        WHERE (p_slug IS NULL OR h.slug = p_slug)
-          AND (p_slugs IS NULL OR h.slug = ANY(p_slugs))
-        ORDER BY h.slug
-        LIMIT p_limit OFFSET p_offset
-      ) subquery;
-
-    -- ========================================================================
-    -- STATUSLINES
-    -- ========================================================================
-    WHEN 'statuslines' THEN
-      SELECT jsonb_agg(row_to_json) INTO v_result FROM (
-        SELECT (
-          build_enriched_content_base(
-            s.id, s.slug, s.title, s.description, s.author, s.author_profile_url,
-            s.category, s.tags, 'statuslines', s.created_at, s.updated_at, s.date_added,
-            s.discovery_metadata, s.examples, s.features, s.troubleshooting, s.use_cases,
-            s.source, s.documentation_url, s.popularity_score, s.content, s.seo_title, s.display_title,
-            mv.view_count, mv.copy_count, mv.bookmark_count,
-            sc.id, sc.tier, sc.active
-          ) || jsonb_build_object(
-            'statusline_type', s.statusline_type,
-            'preview', s.preview,
-            'refresh_rate_ms', s.refresh_rate_ms,
-            'configuration', s.configuration,
-            'installation', s.installation,
-            'requirements', s.requirements
-          )
-        ) as row_to_json
-        FROM public.statuslines s
-        LEFT JOIN public.mv_analytics_summary mv ON mv.slug = s.slug AND mv.category = s.category
-        LEFT JOIN public.sponsored_content sc ON sc.content_id = s.id AND sc.content_type = 'statuslines'
-          AND sc.active = true AND CURRENT_TIMESTAMP BETWEEN sc.start_date AND sc.end_date
-        WHERE (p_slug IS NULL OR s.slug = p_slug)
-          AND (p_slugs IS NULL OR s.slug = ANY(p_slugs))
-        ORDER BY s.slug
-        LIMIT p_limit OFFSET p_offset
-      ) subquery;
-
-    -- ========================================================================
-    -- SKILLS
-    -- ========================================================================
-    WHEN 'skills' THEN
-      SELECT jsonb_agg(row_to_json) INTO v_result FROM (
-        SELECT (
-          build_enriched_content_base(
-            sk.id, sk.slug, sk.title, sk.description, sk.author, sk.author_profile_url,
-            sk.category, sk.tags, 'skills', sk.created_at, sk.updated_at, sk.date_added,
-            sk.discovery_metadata, sk.examples, sk.features, sk.troubleshooting, sk.use_cases,
-            sk.source, sk.documentation_url, sk.popularity_score, sk.content, sk.seo_title, sk.display_title,
-            mv.view_count, mv.copy_count, mv.bookmark_count,
-            sc.id, sc.tier, sc.active
-          ) || jsonb_build_object(
-            'difficulty', sk.difficulty,
-            'estimated_time', sk.estimated_time,
-            'dependencies', sk.dependencies
-          )
-        ) as row_to_json
-        FROM public.skills sk
-        LEFT JOIN public.mv_analytics_summary mv ON mv.slug = sk.slug AND mv.category = sk.category
-        LEFT JOIN public.sponsored_content sc ON sc.content_id = sk.id AND sc.content_type = 'skills'
-          AND sc.active = true AND CURRENT_TIMESTAMP BETWEEN sc.start_date AND sc.end_date
-        WHERE (p_slug IS NULL OR sk.slug = p_slug)
-          AND (p_slugs IS NULL OR sk.slug = ANY(p_slugs))
-        ORDER BY sk.slug
-        LIMIT p_limit OFFSET p_offset
-      ) subquery;
-
-    -- ========================================================================
-    -- GUIDES
-    -- ========================================================================
-    WHEN 'guides' THEN
-      SELECT jsonb_agg(row_to_json) INTO v_result FROM (
-        SELECT (
-          build_enriched_content_base(
-            g.id, g.slug, g.title, g.description, g.author, g.author_profile_url,
-            g.category, g.tags, 'guides', g.created_at, g.updated_at, g.date_added,
-            NULL, NULL, NULL, NULL, NULL, -- guides don't have discovery_metadata, examples, features, troubleshooting, use_cases
-            g.source, g.documentation_url, NULL, NULL, g.seo_title, NULL,
-            mv.view_count, mv.copy_count, mv.bookmark_count,
-            sc.id, sc.tier, sc.active
-          ) || jsonb_build_object(
-            'difficulty', g.difficulty,
-            'subcategory', g.subcategory,
-            'sections', g.sections,
-            'keywords', g.keywords,
-            'reading_time', g.reading_time,
-            'related_guides', g.related_guides,
-            'github_url', g.github_url,
-            'date_published', g.date_published,
-            'date_modified', g.date_modified,
-            'date_updated', g.date_updated,
-            'last_reviewed', g.last_reviewed,
-            'featured', g.featured,
-            'ai_optimized', g.ai_optimized,
-            'citation_ready', g.citation_ready,
-            'community_driven', g.community_driven,
-            'community_engagement', g.community_engagement
-          )
-        ) as row_to_json
-        FROM public.guides g
-        LEFT JOIN public.mv_analytics_summary mv ON mv.slug = g.slug AND mv.category = g.category
-        LEFT JOIN public.sponsored_content sc ON sc.content_id = g.id AND sc.content_type = 'guides'
-          AND sc.active = true AND CURRENT_TIMESTAMP BETWEEN sc.start_date AND sc.end_date
-        WHERE (p_slug IS NULL OR g.slug = p_slug)
-          AND (p_slugs IS NULL OR g.slug = ANY(p_slugs))
-        ORDER BY g.slug
-        LIMIT p_limit OFFSET p_offset
-      ) subquery;
-
-    -- ========================================================================
-    -- COLLECTIONS
-    -- ========================================================================
-    WHEN 'collections' THEN
-      SELECT jsonb_agg(row_to_json) INTO v_result FROM (
-        SELECT (
-          build_enriched_content_base(
-            co.id, co.slug, co.title, co.description, co.author, co.author_profile_url,
-            co.category, co.tags, 'collections', co.created_at, co.updated_at, co.date_added,
-            co.discovery_metadata, co.examples, co.features, co.troubleshooting, co.use_cases,
-            co.source, co.documentation_url, co.popularity_score, co.content, co.seo_title, co.display_title,
-            mv.view_count, mv.copy_count, mv.bookmark_count,
-            sc.id, sc.tier, sc.active
-          ) || jsonb_build_object(
-            'collectionType', co.collection_type,
-            'difficulty', co.difficulty,
-            'itemCount', COALESCE(jsonb_array_length(co.items), 0),
-            'configuration', co.configuration,
-            'installation', co.installation,
-            'compatibility', co.compatibility,
-            'prerequisites', co.prerequisites,
-            'related_collections', co.related_collections,
-            'installation_order', co.installation_order,
-            'estimated_setup_time', co.estimated_setup_time,
-            'usage', co.usage,
-            'further_reading', co.further_reading,
-            'items', co.items
-          )
-        ) as row_to_json
-        FROM public.collections co
-        LEFT JOIN public.mv_analytics_summary mv ON mv.slug = co.slug AND mv.category = co.category
-        LEFT JOIN public.sponsored_content sc ON sc.content_id = co.id AND sc.content_type = 'collections'
-          AND sc.active = true AND CURRENT_TIMESTAMP BETWEEN sc.start_date AND sc.end_date
-        WHERE (p_slug IS NULL OR co.slug = p_slug)
-          AND (p_slugs IS NULL OR co.slug = ANY(p_slugs))
-        ORDER BY co.slug
-        LIMIT p_limit OFFSET p_offset
-      ) subquery;
-
-    -- ========================================================================
-    -- JOBS
-    -- ========================================================================
-    WHEN 'jobs' THEN
-      SELECT jsonb_agg(row_to_json) INTO v_result FROM (
-        SELECT (
-          jsonb_build_object(
-            'id', j.id,
-            'slug', j.slug,
-            'title', j.title,
-            'description', j.description,
-            'author', j.company,
-            'author_profile_url', NULL,
-            'category', j.category,
-            'tags', j.tags,
-            'source_table', 'jobs',
-            'created_at', j.created_at,
-            'updated_at', j.updated_at,
-            'date_added', j.created_at,
-            -- Jobs-specific fields (from actual schema)
-            'company', j.company,
-            'company_id', j.company_id,
-            'company_logo', j.company_logo,
-            'contact_email', j.contact_email,
-            'location', j.location,
-            'remote', j.remote,
-            'salary', j.salary,
-            'experience', j.experience,
-            'link', j.link,
-            'requirements', j.requirements,
-            'benefits', j.benefits,
-            'status', j.status,
-            'expires_at', j.expires_at,
-            'posted_at', j.posted_at,
-            'featured', j.featured,
-            'plan', j.plan,
-            'payment_status', j.payment_status,
-            'payment_method', j.payment_method,
-            'payment_amount', j.payment_amount,
-            'payment_date', j.payment_date,
-            'payment_reference', j.payment_reference,
-            'admin_notes', j.admin_notes,
-            'click_count', j.click_count,
-            'view_count', COALESCE(j.view_count, 0),
-            'workplace', j.workplace,
-            'type', j.type,
-            'active', j.active,
-            'order', j.order,
-            -- Analytics (jobs don't use mv_analytics_summary)
-            'viewCount', COALESCE(j.view_count, 0),
-            'copyCount', 0,
-            'bookmarkCount', 0,
-            -- Computed
-            'isNew', (j.created_at::date >= (CURRENT_DATE - INTERVAL '7 days')::date),
-            -- Sponsorship
-            'isSponsored', (sc.id IS NOT NULL AND sc.active = true),
-            'sponsoredId', sc.id,
-            'sponsorTier', sc.tier
-          )
-        ) as row_to_json
-        FROM public.jobs j
-        LEFT JOIN public.sponsored_content sc ON sc.content_id = j.id AND sc.content_type = 'jobs'
-          AND sc.active = true AND CURRENT_TIMESTAMP BETWEEN sc.start_date AND sc.end_date
-        WHERE (p_slug IS NULL OR j.slug = p_slug)
-          AND (p_slugs IS NULL OR j.slug = ANY(p_slugs))
-        ORDER BY j.slug
-        LIMIT p_limit OFFSET p_offset
-      ) subquery;
-
-    -- ========================================================================
-    -- CHANGELOG
-    -- ========================================================================
-    WHEN 'changelog' THEN
-      SELECT jsonb_agg(row_to_json) INTO v_result FROM (
-        SELECT (
-          jsonb_build_object(
-            'id', ch.id,
-            'slug', ch.slug,
-            'title', ch.title,
-            'description', ch.description,
-            'author', 'Claude Pro Directory',
-            'author_profile_url', NULL,
-            'category', 'changelog',
-            'tags', '[]'::jsonb,
-            'source_table', 'changelog_entries',
-            'created_at', ch.created_at,
-            'updated_at', ch.updated_at,
-            'date_added', ch.release_date,
-            -- Changelog-specific fields
-            'release_date', ch.release_date,
-            'tldr', ch.tldr,
-            'content', ch.content,
-            'raw_content', ch.raw_content,
-            'changes', ch.changes,
-            'published', ch.published,
-            'featured', ch.featured,
-            'keywords', ch.keywords,
-            -- Analytics
-            'viewCount', COALESCE(mv.view_count, 0),
-            'copyCount', COALESCE(mv.copy_count, 0),
-            'bookmarkCount', COALESCE(mv.bookmark_count, 0),
-            -- Computed
-            'isNew', (ch.release_date::date >= (CURRENT_DATE - INTERVAL '7 days')::date),
-            -- Sponsorship (changelog typically not sponsored)
-            'isSponsored', false,
-            'sponsoredId', NULL,
-            'sponsorTier', NULL
-          )
-        ) as row_to_json
-        FROM public.changelog_entries ch
-        LEFT JOIN public.mv_analytics_summary mv ON mv.slug = ch.slug AND mv.category = 'changelog'
-        WHERE (p_slug IS NULL OR ch.slug = p_slug)
-          AND (p_slugs IS NULL OR ch.slug = ANY(p_slugs))
-        ORDER BY ch.release_date DESC
-        LIMIT p_limit OFFSET p_offset
-      ) subquery;
-
-    -- ========================================================================
-    -- NO CATEGORY (all from content_unified)
-    -- ========================================================================
-    ELSE
-      SELECT jsonb_agg(row_to_json) INTO v_result FROM (
-        SELECT (
-          build_enriched_content_base(
-            cu.id, cu.slug, cu.title, cu.description, cu.author, cu.author_profile_url,
-            cu.category, cu.tags, cu.source_table, cu.created_at, cu.updated_at, cu.date_added,
-            cu.discovery_metadata, cu.examples, cu.features, cu.troubleshooting, cu.use_cases,
-            NULL, NULL, NULL, NULL, NULL, NULL,
-            mv.view_count, mv.copy_count, mv.bookmark_count,
-            sc.id, sc.tier, sc.active
-          )
-        ) as row_to_json
-        FROM public.content_unified cu
-        LEFT JOIN public.mv_analytics_summary mv ON mv.slug = cu.slug AND mv.category = cu.category
-        LEFT JOIN public.sponsored_content sc ON sc.content_id = cu.id AND sc.content_type = cu.category
-          AND sc.active = true AND CURRENT_TIMESTAMP BETWEEN sc.start_date AND sc.end_date
-        WHERE (p_category IS NULL OR cu.category = p_category)
-          AND (p_slug IS NULL OR cu.slug = p_slug)
-          AND (p_slugs IS NULL OR cu.slug = ANY(p_slugs))
-        ORDER BY cu.slug
-        LIMIT p_limit OFFSET p_offset
-      ) subquery;
-  END CASE;
-
-  RETURN COALESCE(v_result, '[]'::jsonb);
+  RETURN v_result;
 END;
 $$;
 
@@ -3496,7 +3100,7 @@ $$;
 ALTER FUNCTION "public"."get_enriched_content"("p_category" "text", "p_slug" "text", "p_slugs" "text"[], "p_limit" integer, "p_offset" integer) OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_enriched_content"("p_category" "text", "p_slug" "text", "p_slugs" "text"[], "p_limit" integer, "p_offset" integer) IS 'Returns fully enriched content with analytics, sponsorship, and computed fields for ALL 11 categories: agents, mcp, commands, rules, hooks, statuslines, skills, guides, collections, jobs, changelog. Single unified database-driven system.';
+COMMENT ON FUNCTION "public"."get_enriched_content"("p_category" "text", "p_slug" "text", "p_slugs" "text"[], "p_limit" integer, "p_offset" integer) IS 'Fetches content from unified content table with analytics and sponsorship enrichment';
 
 
 
@@ -3700,7 +3304,7 @@ COMMENT ON FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") IS 
 CREATE OR REPLACE FUNCTION "public"."get_homepage_content_enriched"("p_category_ids" "text"[], "p_week_start" "date" DEFAULT NULL::"date") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public'
-    AS $_$
+    AS $$
 DECLARE
   v_week_start DATE;
   v_category TEXT;
@@ -3708,60 +3312,58 @@ DECLARE
   v_result JSONB := '{}'::JSONB;
   v_stats JSONB := '{}'::JSONB;
 BEGIN
-  -- Calculate week start if not provided (Monday-based weeks)
+  -- Calculate week start correctly (Monday of current week)
+  -- Fix: Use DATE_TRUNC('week', CURRENT_DATE) which returns Monday by default in PostgreSQL
   v_week_start := COALESCE(
     p_week_start,
-    (DATE_TRUNC('week', CURRENT_DATE) +
-     CASE WHEN EXTRACT(DOW FROM CURRENT_DATE) = 0
-          THEN INTERVAL '-6 days'
-          ELSE INTERVAL '1 day' * (1 - EXTRACT(DOW FROM CURRENT_DATE)::int)
-     END)::DATE
+    DATE_TRUNC('week', CURRENT_DATE)::DATE
   );
 
   -- Build enriched category data (analytics + featured flags)
   FOR v_category IN SELECT unnest(p_category_ids)
   LOOP
     -- Get content for this category with analytics and featured data
-    EXECUTE format($query$
-      SELECT COALESCE(jsonb_agg(item_data), '[]'::jsonb)
-      FROM (
-        SELECT jsonb_build_object(
-          'id', c.id,
-          'slug', c.slug,
-          'title', c.title,
-          'description', c.description,
-          'author', c.author,
-          'tags', c.tags,
-          'created_at', c.created_at,
-          'date_added', c.date_added,
-          'category', %L,
-          'viewCount', COALESCE(a.view_count, 0),
-          'copyCount', COALESCE(a.copy_count, 0),
-          '_featured', CASE
-            WHEN f.rank IS NOT NULL
-            THEN jsonb_build_object('rank', f.rank, 'score', f.final_score)
-            ELSE NULL
-          END
-        ) as item_data
-        FROM %I c
-        LEFT JOIN mv_analytics_summary a
-          ON a.category = %L AND a.slug = c.slug
-        LEFT JOIN featured_configs f
-          ON f.content_type = %L
-          AND f.content_slug = c.slug
-          AND f.week_start = %L
-        ORDER BY c.created_at DESC
-        LIMIT 100
-      ) items
-    $query$, v_category, v_category, v_category, v_category, v_week_start)
-    INTO v_category_data;
+    SELECT COALESCE(jsonb_agg(item_data), '[]'::jsonb)
+    INTO v_category_data
+    FROM (
+      SELECT jsonb_build_object(
+        'id', c.id,
+        'slug', c.slug,
+        'title', c.title,
+        'description', c.description,
+        'author', c.author,
+        'tags', c.tags,
+        'created_at', c.created_at,
+        'date_added', c.date_added,
+        'category', c.category,
+        'viewCount', COALESCE(a.view_count, 0),
+        'copyCount', COALESCE(a.copy_count, 0),
+        '_featured', CASE
+          WHEN f.rank IS NOT NULL
+          THEN jsonb_build_object('rank', f.rank, 'score', f.final_score)
+          ELSE NULL
+        END
+      ) as item_data
+      FROM content c
+      LEFT JOIN mv_analytics_summary a
+        ON a.category = c.category AND a.slug = c.slug
+      LEFT JOIN featured_configs f
+        ON f.content_type = c.category
+        AND f.content_slug = c.slug
+        AND f.week_start = v_week_start
+      WHERE c.category = v_category
+      ORDER BY c.created_at DESC
+      LIMIT 100
+    ) items;
 
     -- Add to result
     v_result := v_result || jsonb_build_object(v_category, v_category_data);
 
-    -- Build stats count
-    EXECUTE format('SELECT COUNT(*)::integer FROM %I', v_category) INTO v_stats;
-    v_stats := jsonb_build_object(v_category, v_stats);
+    -- Accumulate stats count
+    v_stats := v_stats || jsonb_build_object(
+      v_category,
+      (SELECT COUNT(*)::integer FROM content WHERE category = v_category)
+    );
   END LOOP;
 
   -- Add allConfigs (deduplicated across categories)
@@ -3779,8 +3381,8 @@ BEGIN
 
   -- Add stats (including guides and changelog)
   v_stats := v_stats || jsonb_build_object(
-    'guides', (SELECT COUNT(*)::integer FROM guides),
-    'changelog', (SELECT COUNT(*)::integer FROM changelog)
+    'guides', (SELECT COUNT(*)::integer FROM content WHERE category = 'guides'),
+    'changelog', (SELECT COUNT(*)::integer FROM changelog_entries)
   );
 
   -- Return complete enriched data
@@ -3790,13 +3392,13 @@ BEGIN
     'weekStart', v_week_start
   );
 END;
-$_$;
+$$;
 
 
 ALTER FUNCTION "public"."get_homepage_content_enriched"("p_category_ids" "text"[], "p_week_start" "date") OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_homepage_content_enriched"("p_category_ids" "text"[], "p_week_start" "date") IS 'Replaces 135 lines of TypeScript enrichment logic. Single call returns all homepage data with analytics and featured flags.';
+COMMENT ON FUNCTION "public"."get_homepage_content_enriched"("p_category_ids" "text"[], "p_week_start" "date") IS 'FIXED week calculation: Uses DATE_TRUNC for correct Monday. Single table scan replaces 9 separate queries.';
 
 
 
@@ -4883,128 +4485,94 @@ CREATE OR REPLACE FUNCTION "public"."get_trending_page"("p_period" "public"."tre
     SET "search_path" TO 'public'
     AS $$
 DECLARE
-  v_offset INTEGER;
   v_trending JSONB;
   v_popular JSONB;
   v_recent JSONB;
   v_total_count INTEGER;
+  v_display_limit INTEGER := 12; -- Fixed limit for curated display
 BEGIN
-  -- Validate and sanitize inputs
-  IF p_page < 1 THEN
-    p_page := 1;
-  END IF;
+  -- Get total count from unified content table
+  SELECT COUNT(*)::INTEGER
+  INTO v_total_count
+  FROM content
+  WHERE p_category IS NULL OR category = p_category;
 
-  IF p_limit < 1 OR p_limit > 100 THEN
-    p_limit := 20;
-  END IF;
-
-  v_offset := (p_page - 1) * p_limit;
-
-  -- Get total count across all content types
-  SELECT COALESCE(
-    (SELECT COUNT(*) FROM agents WHERE active = true) +
-    (SELECT COUNT(*) FROM mcp WHERE active = true) +
-    (SELECT COUNT(*) FROM rules WHERE active = true) +
-    (SELECT COUNT(*) FROM commands WHERE active = true) +
-    (SELECT COUNT(*) FROM hooks WHERE active = true) +
-    (SELECT COUNT(*) FROM statuslines WHERE active = true) +
-    (SELECT COUNT(*) FROM collections WHERE active = true) +
-    (SELECT COUNT(*) FROM skills WHERE active = true),
-    0
-  ) INTO v_total_count;
-
-  -- Get trending content from materialized view
-  -- Uses trending_content_24h for real-time trending scores
+  -- Get top 12 trending items (LIMIT in subquery BEFORE agg)
   SELECT COALESCE(jsonb_agg(
     jsonb_build_object(
-      'category', content.category,
-      'slug', content.slug,
-      'title', content.title,
-      'description', content.description,
-      'author', content.author,
-      'tags', content.tags,
-      'trendingScore', t.trending_score,
-      'viewCount', COALESCE(a.view_count, 0),
-      'copyCount', COALESCE(a.copy_count, 0)
-    ) ORDER BY t.trending_score DESC
+      'category', category,
+      'slug', slug,
+      'title', title,
+      'description', description,
+      'author', author,
+      'tags', tags,
+      'trendingScore', trending_score,
+      'viewCount', view_count,
+      'copyCount', copy_count,
+      'rankOverall', rank_overall,
+      'rankInCategory', rank_in_category
+    ) ORDER BY trending_score DESC
   ), '[]'::JSONB)
   INTO v_trending
-  FROM trending_content_24h t
-  -- Union query to get full content metadata from respective tables
-  LEFT JOIN LATERAL (
-    SELECT category, slug, title, description, author, tags FROM agents WHERE category = t.content_type AND slug = t.content_slug
-    UNION ALL
-    SELECT category, slug, title, description, author, tags FROM mcp WHERE category = t.content_type AND slug = t.content_slug
-    UNION ALL
-    SELECT category, slug, title, description, author, tags FROM rules WHERE category = t.content_type AND slug = t.content_slug
-    UNION ALL
-    SELECT category, slug, title, description, author, tags FROM commands WHERE category = t.content_type AND slug = t.content_slug
-    UNION ALL
-    SELECT category, slug, title, description, author, tags FROM hooks WHERE category = t.content_type AND slug = t.content_slug
-    UNION ALL
-    SELECT category, slug, title, description, author, tags FROM statuslines WHERE category = t.content_type AND slug = t.content_slug
-    UNION ALL
-    SELECT category, slug, title, description, author, tags FROM collections WHERE category = t.content_type AND slug = t.content_slug
-    UNION ALL
-    SELECT category, slug, title, description, author, tags FROM skills WHERE category = t.content_type AND slug = t.content_slug
-  ) content ON true
-  LEFT JOIN mv_analytics_summary a ON a.category = t.content_type AND a.slug = t.content_slug
-  WHERE (p_category IS NULL OR t.content_type = p_category)
-  LIMIT p_limit;
+  FROM (
+    SELECT * FROM mv_trending_content
+    WHERE (p_category IS NULL OR category = p_category)
+    ORDER BY trending_score DESC
+    LIMIT v_display_limit
+  ) t;
 
-  -- Get popular content from all-time popularity materialized view
+  -- Get top 12 popular items (LIMIT in subquery)
   SELECT COALESCE(jsonb_agg(
     jsonb_build_object(
-      'category', p.category,
-      'slug', p.slug,
-      'title', p.title,
-      'description', p.description,
-      'author', p.author,
-      'viewCount', p.view_count,
-      'popularityScore', p.trending_score
-    ) ORDER BY p.view_count DESC
+      'category', category,
+      'slug', slug,
+      'title', title,
+      'description', description,
+      'author', author,
+      'tags', tags,
+      'viewCount', view_count,
+      'popularityScore', popularity_score
+    ) ORDER BY view_count DESC
   ), '[]'::JSONB)
   INTO v_popular
-  FROM mv_trending_content p
-  WHERE (p_category IS NULL OR p.category = p_category)
-  LIMIT p_limit;
+  FROM (
+    SELECT * FROM mv_content_stats
+    WHERE (p_category IS NULL OR category = p_category)
+    ORDER BY view_count DESC
+    LIMIT v_display_limit
+  ) cs;
 
-  -- Get recent content (last 30 days)
-  -- Union across all content tables
-  WITH recent_content AS (
-    SELECT category, slug, title, description, author, date_added, tags FROM agents WHERE active = true AND date_added >= CURRENT_DATE - INTERVAL '30 days'
-    UNION ALL
-    SELECT category, slug, title, description, author, date_added, tags FROM mcp WHERE active = true AND date_added >= CURRENT_DATE - INTERVAL '30 days'
-    UNION ALL
-    SELECT category, slug, title, description, author, date_added, tags FROM rules WHERE active = true AND date_added >= CURRENT_DATE - INTERVAL '30 days'
-    UNION ALL
-    SELECT category, slug, title, description, author, date_added, tags FROM commands WHERE active = true AND date_added >= CURRENT_DATE - INTERVAL '30 days'
-    UNION ALL
-    SELECT category, slug, title, description, author, date_added, tags FROM hooks WHERE active = true AND date_added >= CURRENT_DATE - INTERVAL '30 days'
-    UNION ALL
-    SELECT category, slug, title, description, author, date_added, tags FROM statuslines WHERE active = true AND date_added >= CURRENT_DATE - INTERVAL '30 days'
-    UNION ALL
-    SELECT category, slug, title, description, author, date_added, tags FROM collections WHERE active = true AND date_added >= CURRENT_DATE - INTERVAL '30 days'
-    UNION ALL
-    SELECT category, slug, title, description, author, date_added, tags FROM skills WHERE active = true AND date_added >= CURRENT_DATE - INTERVAL '30 days'
-  )
+  -- Get top 12 recent items (LIMIT in subquery)
   SELECT COALESCE(jsonb_agg(
     jsonb_build_object(
-      'category', r.category,
-      'slug', r.slug,
-      'title', r.title,
-      'description', r.description,
-      'author', r.author,
-      'tags', r.tags,
-      'dateAdded', r.date_added,
-      'viewCount', COALESCE(a.view_count, 0)
-    ) ORDER BY r.date_added DESC
+      'category', category,
+      'slug', slug,
+      'title', title,
+      'description', description,
+      'author', author,
+      'tags', tags,
+      'dateAdded', date_added,
+      'viewCount', view_count
+    ) ORDER BY date_added DESC
   ), '[]'::JSONB)
   INTO v_recent
-  FROM recent_content r
-  LEFT JOIN mv_analytics_summary a ON a.category = r.category AND a.slug = r.slug
-  WHERE (p_category IS NULL OR r.category = p_category)
-  LIMIT p_limit;
+  FROM (
+    SELECT 
+      c.category,
+      c.slug,
+      c.title,
+      c.description,
+      c.author,
+      c.tags,
+      c.date_added,
+      COALESCE(a.view_count, 0) as view_count
+    FROM content c
+    LEFT JOIN mv_analytics_summary a ON (a.category = c.category AND a.slug = c.slug)
+    WHERE (p_category IS NULL OR c.category = p_category)
+      AND c.date_added >= CURRENT_DATE - INTERVAL '30 days'
+    ORDER BY c.date_added DESC
+    LIMIT v_display_limit
+  ) r;
 
   -- Return complete trending page data
   RETURN jsonb_build_object(
@@ -5016,9 +4584,8 @@ BEGIN
       'period', p_period,
       'metric', p_metric,
       'category', p_category,
-      'page', p_page,
-      'limit', p_limit,
-      'algorithm', 'materialized_views'
+      'displayLimit', v_display_limit,
+      'algorithm', 'curated_top_12'
     )
   );
 END;
@@ -5028,7 +4595,7 @@ $$;
 ALTER FUNCTION "public"."get_trending_page"("p_period" "public"."trending_period", "p_metric" "public"."trending_metric", "p_category" "text", "p_page" integer, "p_limit" integer) OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_trending_page"("p_period" "public"."trending_period", "p_metric" "public"."trending_metric", "p_category" "text", "p_page" integer, "p_limit" integer) IS 'Database-first trending page data. Returns trending, popular, and recent content with analytics enrichment. Uses materialized views for 100-400x performance improvement.';
+COMMENT ON FUNCTION "public"."get_trending_page"("p_period" "public"."trending_period", "p_metric" "public"."trending_metric", "p_category" "text", "p_page" integer, "p_limit" integer) IS 'Trending page with EXACTLY top 12 items per tab. Fixed with subquery LIMIT before aggregation.';
 
 
 
@@ -7156,6 +6723,22 @@ $$;
 ALTER FUNCTION "public"."update_content_fts"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."update_content_fts_vector"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+BEGIN
+  NEW.fts_vector :=
+    setweight(to_tsvector('english', COALESCE(NEW.title, '')), 'A') ||
+    setweight(to_tsvector('english', COALESCE(NEW.description, '')), 'B') ||
+    setweight(to_tsvector('english', COALESCE(array_to_string(NEW.tags, ' '), '')), 'C');
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."update_content_fts_vector"() OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."update_content_items_updated_at"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -7168,6 +6751,19 @@ $$;
 
 
 ALTER FUNCTION "public"."update_content_items_updated_at"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."update_content_updated_at"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."update_content_updated_at"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."update_email_sequences_updated_at"() RETURNS "trigger"
@@ -7546,87 +7142,6 @@ ALTER TABLE "public"."affinity_config" OWNER TO "postgres";
 
 
 COMMENT ON TABLE "public"."affinity_config" IS 'Configuration for affinity scoring algorithm. Single-row table with default weights and thresholds matching affinity-scorer.ts';
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."agents" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "slug" "text" NOT NULL,
-    "description" "text" NOT NULL,
-    "category" "text" DEFAULT 'agents'::"text" NOT NULL,
-    "author" "text" NOT NULL,
-    "author_profile_url" "text",
-    "date_added" "date" NOT NULL,
-    "tags" "text"[] NOT NULL,
-    "content" "text",
-    "title" "text",
-    "display_title" "text",
-    "seo_title" "text",
-    "source" "text",
-    "documentation_url" "text",
-    "features" "text"[],
-    "use_cases" "text"[],
-    "examples" "jsonb" DEFAULT '[]'::"jsonb",
-    "discovery_metadata" "jsonb",
-    "configuration" "jsonb",
-    "troubleshooting" "jsonb"[] DEFAULT ARRAY[]::"jsonb"[],
-    "git_hash" "text",
-    "synced_at" timestamp with time zone,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "installation" "jsonb",
-    "fts_vector" "tsvector",
-    "popularity_score" integer GENERATED ALWAYS AS (0) STORED,
-    CONSTRAINT "agents_author_check" CHECK (("length"("author") >= 2)),
-    CONSTRAINT "agents_author_profile_url_check" CHECK ((("author_profile_url" IS NULL) OR ("author_profile_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "agents_category_check" CHECK (("category" = 'agents'::"text")),
-    CONSTRAINT "agents_description_check" CHECK ((("length"("description") >= 10) AND ("length"("description") <= 500))),
-    CONSTRAINT "agents_documentation_url_check" CHECK ((("documentation_url" IS NULL) OR ("documentation_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "agents_features_check" CHECK ((("features" IS NULL) OR ("array_length"("features", 1) <= 20))),
-    CONSTRAINT "agents_seo_title_check" CHECK ((("seo_title" IS NULL) OR ("length"("seo_title") <= 60))),
-    CONSTRAINT "agents_slug_check" CHECK ((("slug" ~ '^[a-z0-9-]+$'::"text") AND (("length"("slug") >= 3) AND ("length"("slug") <= 100)))),
-    CONSTRAINT "agents_source_check" CHECK ((("source" IS NULL) OR ("length"("source") >= 3))),
-    CONSTRAINT "agents_tags_check" CHECK ((("array_length"("tags", 1) >= 1) AND ("array_length"("tags", 1) <= 20))),
-    CONSTRAINT "agents_use_cases_check" CHECK ((("use_cases" IS NULL) OR ("array_length"("use_cases", 1) <= 20))),
-    CONSTRAINT "chk_agents_author_url" CHECK ((("author_profile_url" IS NULL) OR ("author_profile_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "chk_agents_description_length" CHECK ((("description" IS NULL) OR (("length"("description") >= 10) AND ("length"("description") <= 500)))),
-    CONSTRAINT "chk_agents_name_pattern" CHECK ((("slug" ~ '^[a-zA-Z0-9\s\-_.]+$'::"text") OR ("slug" IS NULL))),
-    CONSTRAINT "chk_agents_tags_count" CHECK ((("tags" IS NULL) OR ("array_length"("tags", 1) <= 10)))
-);
-
-
-ALTER TABLE "public"."agents" OWNER TO "postgres";
-
-
-COMMENT ON TABLE "public"."agents" IS 'AI agent configurations - specialized AI assistants for development tasks';
-
-
-
-COMMENT ON COLUMN "public"."agents"."category" IS 'Category discriminator (always agents). No index needed - constant value.';
-
-
-
-COMMENT ON COLUMN "public"."agents"."installation" IS 'Installation instructions for different platforms: {claudeCode: object, claudeDesktop: object, sdk: object, requirements: string[]}';
-
-
-
-COMMENT ON COLUMN "public"."agents"."fts_vector" IS 'Full-text search vector (title=A, description=B, tags=C). Auto-updated on row change.';
-
-
-
-COMMENT ON COLUMN "public"."agents"."popularity_score" IS 'Computed popularity score (will be updated by mv_content_stats)';
-
-
-
-COMMENT ON CONSTRAINT "chk_agents_description_length" ON "public"."agents" IS 'Enforces description length 10-500 chars (replaces Zod validation)';
-
-
-
-COMMENT ON CONSTRAINT "chk_agents_name_pattern" ON "public"."agents" IS 'Enforces slug pattern validation (replaces Zod regex in form.schema.ts)';
-
-
-
-COMMENT ON CONSTRAINT "chk_agents_tags_count" ON "public"."agents" IS 'Enforces max 10 tags per content (replaces Zod validation)';
 
 
 
@@ -8046,171 +7561,6 @@ COMMENT ON CONSTRAINT "collection_items_order_min" ON "public"."collection_items
 
 
 
-CREATE TABLE IF NOT EXISTS "public"."collections" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "slug" "text" NOT NULL,
-    "description" "text" NOT NULL,
-    "category" "text" DEFAULT 'collections'::"text" NOT NULL,
-    "author" "text" NOT NULL,
-    "author_profile_url" "text",
-    "date_added" "date" NOT NULL,
-    "tags" "text"[] NOT NULL,
-    "content" "text",
-    "title" "text",
-    "display_title" "text",
-    "seo_title" "text",
-    "source" "text",
-    "documentation_url" "text",
-    "features" "text"[],
-    "use_cases" "text"[],
-    "examples" "jsonb" DEFAULT '[]'::"jsonb",
-    "discovery_metadata" "jsonb",
-    "collection_type" "text",
-    "troubleshooting" "jsonb"[] DEFAULT ARRAY[]::"jsonb"[],
-    "git_hash" "text",
-    "synced_at" timestamp with time zone,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "difficulty" "text",
-    "estimated_setup_time" "text",
-    "installation_order" "text"[],
-    "prerequisites" "text"[],
-    "compatibility" "jsonb",
-    "installation" "jsonb",
-    "configuration" "jsonb",
-    "usage" "jsonb",
-    "related_collections" "text"[],
-    "further_reading" "jsonb"[],
-    "items" "jsonb"[],
-    "fts_vector" "tsvector",
-    "popularity_score" integer GENERATED ALWAYS AS (0) STORED,
-    CONSTRAINT "chk_collections_name_pattern" CHECK ((("slug" ~ '^[a-zA-Z0-9\s\-_.]+$'::"text") OR ("slug" IS NULL))),
-    CONSTRAINT "collections_author_check" CHECK (("length"("author") >= 2)),
-    CONSTRAINT "collections_author_profile_url_check" CHECK ((("author_profile_url" IS NULL) OR ("author_profile_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "collections_category_check" CHECK (("category" = 'collections'::"text")),
-    CONSTRAINT "collections_collection_type_check" CHECK ((("collection_type" IS NULL) OR ("length"("collection_type") >= 3))),
-    CONSTRAINT "collections_description_check" CHECK ((("length"("description") >= 10) AND ("length"("description") <= 500))),
-    CONSTRAINT "collections_difficulty_check" CHECK ((("difficulty" IS NULL) OR ("difficulty" = ANY (ARRAY['beginner'::"text", 'intermediate'::"text", 'advanced'::"text"])))),
-    CONSTRAINT "collections_documentation_url_check" CHECK ((("documentation_url" IS NULL) OR ("documentation_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "collections_estimated_setup_time_check" CHECK ((("estimated_setup_time" IS NULL) OR (("length"("estimated_setup_time") >= 5) AND ("length"("estimated_setup_time") <= 50)))),
-    CONSTRAINT "collections_features_check" CHECK ((("features" IS NULL) OR ("array_length"("features", 1) <= 20))),
-    CONSTRAINT "collections_further_reading_check" CHECK ((("further_reading" IS NULL) OR ("array_length"("further_reading", 1) <= 10))),
-    CONSTRAINT "collections_installation_order_check" CHECK ((("installation_order" IS NULL) OR ("array_length"("installation_order", 1) <= 20))),
-    CONSTRAINT "collections_items_check" CHECK ((("items" IS NULL) OR (("array_length"("items", 1) >= 2) AND ("array_length"("items", 1) <= 100)))),
-    CONSTRAINT "collections_prerequisites_check" CHECK ((("prerequisites" IS NULL) OR ("array_length"("prerequisites", 1) <= 10))),
-    CONSTRAINT "collections_related_collections_check" CHECK ((("related_collections" IS NULL) OR ("array_length"("related_collections", 1) <= 10))),
-    CONSTRAINT "collections_seo_title_check" CHECK ((("seo_title" IS NULL) OR ("length"("seo_title") <= 60))),
-    CONSTRAINT "collections_slug_check" CHECK ((("slug" ~ '^[a-z0-9-]+$'::"text") AND (("length"("slug") >= 3) AND ("length"("slug") <= 100)))),
-    CONSTRAINT "collections_source_check" CHECK ((("source" IS NULL) OR ("length"("source") >= 3))),
-    CONSTRAINT "collections_tags_check" CHECK ((("array_length"("tags", 1) >= 1) AND ("array_length"("tags", 1) <= 20))),
-    CONSTRAINT "collections_use_cases_check" CHECK ((("use_cases" IS NULL) OR ("array_length"("use_cases", 1) <= 20)))
-);
-
-
-ALTER TABLE "public"."collections" OWNER TO "postgres";
-
-
-COMMENT ON TABLE "public"."collections" IS 'Collections - curated sets of related content items';
-
-
-
-COMMENT ON COLUMN "public"."collections"."difficulty" IS 'Difficulty level for using this collection. Values: beginner, intermediate, advanced.';
-
-
-
-COMMENT ON COLUMN "public"."collections"."estimated_setup_time" IS 'Human-readable time estimate for complete collection setup. Examples: "15 minutes", "1 hour", "2-3 hours".';
-
-
-
-COMMENT ON COLUMN "public"."collections"."installation_order" IS 'Optional ordered array of item slugs defining recommended installation sequence. If null, items can be installed in any order.';
-
-
-
-COMMENT ON COLUMN "public"."collections"."prerequisites" IS 'Prerequisites required before installing collection. Examples: "Node.js 18+", "API key from service X".';
-
-
-
-COMMENT ON COLUMN "public"."collections"."compatibility" IS 'Platform compatibility flags: {claudeDesktop: boolean, claudeCode: boolean}. Indicates which Claude platforms support this collection.';
-
-
-
-COMMENT ON COLUMN "public"."collections"."installation" IS 'Installation instructions: {overview: string, steps: string[], notes: string[]}. Detailed setup guidance.';
-
-
-
-COMMENT ON COLUMN "public"."collections"."configuration" IS 'Configuration settings: {required: object, optional: object}. Settings needed to use the collection.';
-
-
-
-COMMENT ON COLUMN "public"."collections"."usage" IS 'Usage guidance: {quickStart: string, examples: array}. How to use the collection effectively.';
-
-
-
-COMMENT ON COLUMN "public"."collections"."related_collections" IS 'Array of related collection slugs. Maximum 10 related collections.';
-
-
-
-COMMENT ON COLUMN "public"."collections"."further_reading" IS 'Array of JSONB objects with external resources: [{title: string, url: string}]. Maximum 10 links.';
-
-
-
-COMMENT ON COLUMN "public"."collections"."items" IS 'Array of JSONB objects representing collection items. Each object contains: {category: string, slug: string, reason?: string}. Minimum 2 items, maximum 100 items.';
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."commands" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "slug" "text" NOT NULL,
-    "description" "text" NOT NULL,
-    "category" "text" DEFAULT 'commands'::"text" NOT NULL,
-    "author" "text" NOT NULL,
-    "author_profile_url" "text",
-    "date_added" "date" NOT NULL,
-    "tags" "text"[] NOT NULL,
-    "content" "text",
-    "title" "text",
-    "display_title" "text",
-    "seo_title" "text",
-    "source" "text",
-    "documentation_url" "text",
-    "features" "text"[],
-    "use_cases" "text"[],
-    "examples" "jsonb" DEFAULT '[]'::"jsonb",
-    "discovery_metadata" "jsonb",
-    "configuration" "jsonb",
-    "installation" "jsonb",
-    "troubleshooting" "jsonb"[] DEFAULT ARRAY[]::"jsonb"[],
-    "git_hash" "text",
-    "synced_at" timestamp with time zone,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "fts_vector" "tsvector",
-    "popularity_score" integer GENERATED ALWAYS AS (0) STORED,
-    CONSTRAINT "chk_commands_author_url" CHECK ((("author_profile_url" IS NULL) OR ("author_profile_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "chk_commands_description_length" CHECK ((("description" IS NULL) OR (("length"("description") >= 10) AND ("length"("description") <= 500)))),
-    CONSTRAINT "chk_commands_name_pattern" CHECK ((("slug" ~ '^[a-zA-Z0-9\s\-_.]+$'::"text") OR ("slug" IS NULL))),
-    CONSTRAINT "chk_commands_tags_count" CHECK ((("tags" IS NULL) OR ("array_length"("tags", 1) <= 10))),
-    CONSTRAINT "commands_author_check" CHECK (("length"("author") >= 2)),
-    CONSTRAINT "commands_author_profile_url_check" CHECK ((("author_profile_url" IS NULL) OR ("author_profile_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "commands_category_check" CHECK (("category" = 'commands'::"text")),
-    CONSTRAINT "commands_description_check" CHECK ((("length"("description") >= 10) AND ("length"("description") <= 500))),
-    CONSTRAINT "commands_documentation_url_check" CHECK ((("documentation_url" IS NULL) OR ("documentation_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "commands_features_check" CHECK ((("features" IS NULL) OR ("array_length"("features", 1) <= 20))),
-    CONSTRAINT "commands_seo_title_check" CHECK ((("seo_title" IS NULL) OR ("length"("seo_title") <= 60))),
-    CONSTRAINT "commands_slug_check" CHECK ((("slug" ~ '^[a-z0-9-]+$'::"text") AND (("length"("slug") >= 3) AND ("length"("slug") <= 100)))),
-    CONSTRAINT "commands_source_check" CHECK ((("source" IS NULL) OR ("length"("source") >= 3))),
-    CONSTRAINT "commands_tags_check" CHECK ((("array_length"("tags", 1) >= 1) AND ("array_length"("tags", 1) <= 20))),
-    CONSTRAINT "commands_use_cases_check" CHECK ((("use_cases" IS NULL) OR ("array_length"("use_cases", 1) <= 20)))
-);
-
-
-ALTER TABLE "public"."commands" OWNER TO "postgres";
-
-
-COMMENT ON TABLE "public"."commands" IS 'Slash commands - custom command implementations';
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."comments" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "user_id" "uuid" NOT NULL,
@@ -8270,600 +7620,79 @@ COMMENT ON MATERIALIZED VIEW "public"."company_job_stats" IS 'Company job statis
 
 
 
-CREATE TABLE IF NOT EXISTS "public"."guides" (
+CREATE TABLE IF NOT EXISTS "public"."content" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+    "category" "text" NOT NULL,
     "slug" "text" NOT NULL,
-    "title" "text" NOT NULL,
-    "description" "text" NOT NULL,
-    "category" "text" DEFAULT 'guides'::"text" NOT NULL,
-    "subcategory" "text" NOT NULL,
-    "author" "text" NOT NULL,
-    "author_profile_url" "text",
-    "date_added" "date",
-    "date_published" "date",
-    "date_modified" "date",
-    "date_updated" "date",
-    "last_reviewed" "date",
-    "tags" "text"[] NOT NULL,
-    "keywords" "text"[] NOT NULL,
+    "title" "text",
+    "display_title" "text",
     "seo_title" "text",
-    "reading_time" "text",
-    "difficulty" "text",
-    "featured" boolean DEFAULT false,
-    "ai_optimized" boolean DEFAULT false,
-    "citation_ready" boolean DEFAULT false,
-    "community_engagement" boolean DEFAULT false,
-    "community_driven" boolean DEFAULT false,
-    "source" "text" DEFAULT 'claudepro'::"text",
-    "documentation_url" "text",
-    "github_url" "text",
-    "related_guides" "text"[],
-    "sections" "jsonb" NOT NULL,
-    "git_hash" "text",
-    "synced_at" timestamp with time zone,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "fts_vector" "tsvector",
-    CONSTRAINT "guides_author_check" CHECK (("length"("author") >= 2)),
-    CONSTRAINT "guides_author_profile_url_check" CHECK ((("author_profile_url" IS NULL) OR ("author_profile_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "guides_category_check" CHECK (("category" = 'guides'::"text")),
-    CONSTRAINT "guides_description_check" CHECK ((("length"("description") >= 10) AND ("length"("description") <= 500))),
-    CONSTRAINT "guides_difficulty_check" CHECK ((("difficulty" IS NULL) OR ("length"("difficulty") >= 3))),
-    CONSTRAINT "guides_documentation_url_check" CHECK ((("documentation_url" IS NULL) OR ("documentation_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "guides_github_url_check" CHECK ((("github_url" IS NULL) OR ("github_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "guides_keywords_check" CHECK ((("array_length"("keywords", 1) >= 1) AND ("array_length"("keywords", 1) <= 20))),
-    CONSTRAINT "guides_related_guides_check" CHECK ((("related_guides" IS NULL) OR ("array_length"("related_guides", 1) <= 20))),
-    CONSTRAINT "guides_sections_check" CHECK (("jsonb_typeof"("sections") = 'array'::"text")),
-    CONSTRAINT "guides_seo_title_check" CHECK ((("seo_title" IS NULL) OR ("length"("seo_title") <= 60))),
-    CONSTRAINT "guides_slug_check" CHECK ((("slug" ~ '^[a-z0-9-]+$'::"text") AND (("length"("slug") >= 3) AND ("length"("slug") <= 100)))),
-    CONSTRAINT "guides_source_check" CHECK ((("source" IS NULL) OR ("length"("source") >= 3))),
-    CONSTRAINT "guides_subcategory_check" CHECK (("length"("subcategory") >= 3)),
-    CONSTRAINT "guides_tags_check" CHECK ((("array_length"("tags", 1) >= 1) AND ("array_length"("tags", 1) <= 20))),
-    CONSTRAINT "guides_title_check" CHECK (("length"("title") >= 3))
-);
-
-
-ALTER TABLE "public"."guides" OWNER TO "postgres";
-
-
-COMMENT ON TABLE "public"."guides" IS 'Guides - JSON-based educational content with 18+ section types (tutorials, comparisons, troubleshooting, workflows)';
-
-
-
-COMMENT ON COLUMN "public"."guides"."subcategory" IS 'Guide subcategory for routing: tutorials, comparisons, troubleshooting, use-cases, workflows';
-
-
-
-COMMENT ON COLUMN "public"."guides"."sections" IS 'JSONB array of typed sections: tldr, text, code, callout, tabs, accordion, faq, steps, checklist, etc. See guide.schema.ts';
-
-
-
-COMMENT ON CONSTRAINT "guides_sections_check" ON "public"."guides" IS 'Ensures sections column is JSONB array type (same pattern as changelog_sections_check)';
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."hooks" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "slug" "text" NOT NULL,
     "description" "text" NOT NULL,
-    "category" "text" DEFAULT 'hooks'::"text" NOT NULL,
     "author" "text" NOT NULL,
     "author_profile_url" "text",
     "date_added" "date" NOT NULL,
     "tags" "text"[] NOT NULL,
     "content" "text",
-    "title" "text",
-    "display_title" "text",
-    "seo_title" "text",
     "source" "text",
     "documentation_url" "text",
     "features" "text"[],
     "use_cases" "text"[],
     "examples" "jsonb" DEFAULT '[]'::"jsonb",
     "discovery_metadata" "jsonb",
-    "installation" "jsonb",
-    "troubleshooting" "jsonb"[] DEFAULT ARRAY[]::"jsonb"[],
-    "event_types" "text"[],
-    "git_hash" "text",
-    "synced_at" timestamp with time zone,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "configuration" "jsonb",
-    "requirements" "text"[],
-    "hook_type" "text",
-    "fts_vector" "tsvector",
-    "popularity_score" integer GENERATED ALWAYS AS (0) STORED,
-    CONSTRAINT "chk_hooks_name_pattern" CHECK ((("slug" ~ '^[a-zA-Z0-9\s\-_.]+$'::"text") OR ("slug" IS NULL))),
-    CONSTRAINT "hooks_author_check" CHECK (("length"("author") >= 2)),
-    CONSTRAINT "hooks_author_profile_url_check" CHECK ((("author_profile_url" IS NULL) OR ("author_profile_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "hooks_category_check" CHECK (("category" = 'hooks'::"text")),
-    CONSTRAINT "hooks_description_check" CHECK ((("length"("description") >= 10) AND ("length"("description") <= 500))),
-    CONSTRAINT "hooks_documentation_url_check" CHECK ((("documentation_url" IS NULL) OR ("documentation_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "hooks_event_types_check" CHECK ((("event_types" IS NULL) OR ("array_length"("event_types", 1) <= 20))),
-    CONSTRAINT "hooks_features_check" CHECK ((("features" IS NULL) OR ("array_length"("features", 1) <= 20))),
-    CONSTRAINT "hooks_hook_type_check" CHECK ((("hook_type" IS NULL) OR ("hook_type" = ANY (ARRAY['SessionStart'::"text", 'ToolUse'::"text", 'ToolResult'::"text", 'UserPromptSubmit'::"text", 'Error'::"text"])))),
-    CONSTRAINT "hooks_requirements_check" CHECK ((("requirements" IS NULL) OR ("array_length"("requirements", 1) <= 10))),
-    CONSTRAINT "hooks_seo_title_check" CHECK ((("seo_title" IS NULL) OR ("length"("seo_title") <= 60))),
-    CONSTRAINT "hooks_slug_check" CHECK ((("slug" ~ '^[a-z0-9-]+$'::"text") AND (("length"("slug") >= 3) AND ("length"("slug") <= 100)))),
-    CONSTRAINT "hooks_source_check" CHECK ((("source" IS NULL) OR ("length"("source") >= 3))),
-    CONSTRAINT "hooks_tags_check" CHECK ((("array_length"("tags", 1) >= 1) AND ("array_length"("tags", 1) <= 20))),
-    CONSTRAINT "hooks_use_cases_check" CHECK ((("use_cases" IS NULL) OR ("array_length"("use_cases", 1) <= 20)))
-);
-
-
-ALTER TABLE "public"."hooks" OWNER TO "postgres";
-
-
-COMMENT ON TABLE "public"."hooks" IS 'Event hooks - automation triggers for development workflows';
-
-
-
-COMMENT ON COLUMN "public"."hooks"."configuration" IS 'Hook configuration settings and parameters';
-
-
-
-COMMENT ON COLUMN "public"."hooks"."requirements" IS 'Prerequisites or requirements for using this hook';
-
-
-
-COMMENT ON COLUMN "public"."hooks"."hook_type" IS 'Type of hook event: SessionStart, ToolUse, ToolResult, UserPromptSubmit, Error';
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."mcp" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "slug" "text" NOT NULL,
-    "description" "text" NOT NULL,
-    "category" "text" DEFAULT 'mcp'::"text" NOT NULL,
-    "author" "text" NOT NULL,
-    "author_profile_url" "text",
-    "date_added" "date" NOT NULL,
-    "tags" "text"[] NOT NULL,
-    "content" "text",
-    "title" "text",
-    "display_title" "text",
-    "seo_title" "text",
-    "source" "text",
-    "documentation_url" "text",
-    "features" "text"[],
-    "use_cases" "text"[],
-    "examples" "jsonb" DEFAULT '[]'::"jsonb",
-    "discovery_metadata" "jsonb",
-    "configuration" "jsonb" NOT NULL,
-    "installation" "jsonb",
-    "troubleshooting" "jsonb"[] DEFAULT ARRAY[]::"jsonb"[],
-    "git_hash" "text",
-    "synced_at" timestamp with time zone,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "package" "jsonb",
-    "auth_type" "text",
-    "capabilities" "jsonb",
-    "data_types" "text"[],
-    "mcp_version" "text",
-    "permissions" "jsonb",
-    "requires_auth" boolean DEFAULT false,
-    "resources_provided" "text"[],
-    "security" "jsonb",
-    "server_info" "jsonb",
-    "server_type" "text",
-    "tools_provided" "text"[],
-    "transport" "jsonb",
-    "config_location" "text",
-    "fts_vector" "tsvector",
-    "popularity_score" integer GENERATED ALWAYS AS (0) STORED,
-    CONSTRAINT "chk_mcp_author_url" CHECK ((("author_profile_url" IS NULL) OR ("author_profile_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "chk_mcp_description_length" CHECK ((("description" IS NULL) OR (("length"("description") >= 10) AND ("length"("description") <= 500)))),
-    CONSTRAINT "chk_mcp_name_pattern" CHECK ((("slug" ~ '^[a-zA-Z0-9\s\-_.]+$'::"text") OR ("slug" IS NULL))),
-    CONSTRAINT "chk_mcp_tags_count" CHECK ((("tags" IS NULL) OR ("array_length"("tags", 1) <= 10))),
-    CONSTRAINT "mcp_auth_type_check" CHECK ((("auth_type" IS NULL) OR ("auth_type" = ANY (ARRAY['none'::"text", 'api_key'::"text", 'oauth'::"text", 'basic'::"text", 'bearer'::"text", 'custom'::"text"])))),
-    CONSTRAINT "mcp_author_check" CHECK (("length"("author") >= 2)),
-    CONSTRAINT "mcp_author_profile_url_check" CHECK ((("author_profile_url" IS NULL) OR ("author_profile_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "mcp_category_check" CHECK (("category" = 'mcp'::"text")),
-    CONSTRAINT "mcp_description_check" CHECK ((("length"("description") >= 10) AND ("length"("description") <= 500))),
-    CONSTRAINT "mcp_documentation_url_check" CHECK ((("documentation_url" IS NULL) OR ("documentation_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "mcp_features_check" CHECK ((("features" IS NULL) OR ("array_length"("features", 1) <= 20))),
-    CONSTRAINT "mcp_mcp_version_check" CHECK ((("mcp_version" IS NULL) OR ("mcp_version" ~ '^[0-9]+\.[0-9]+(\.[0-9]+)?$'::"text"))),
-    CONSTRAINT "mcp_seo_title_check" CHECK ((("seo_title" IS NULL) OR ("length"("seo_title") <= 60))),
-    CONSTRAINT "mcp_server_type_check" CHECK ((("server_type" IS NULL) OR ("server_type" = ANY (ARRAY['stdio'::"text", 'sse'::"text", 'http'::"text", 'websocket'::"text"])))),
-    CONSTRAINT "mcp_slug_check" CHECK ((("slug" ~ '^[a-z0-9-]+$'::"text") AND (("length"("slug") >= 3) AND ("length"("slug") <= 100)))),
-    CONSTRAINT "mcp_source_check" CHECK ((("source" IS NULL) OR ("length"("source") >= 3))),
-    CONSTRAINT "mcp_tags_check" CHECK ((("array_length"("tags", 1) >= 1) AND ("array_length"("tags", 1) <= 20))),
-    CONSTRAINT "mcp_use_cases_check" CHECK ((("use_cases" IS NULL) OR ("array_length"("use_cases", 1) <= 20)))
-);
-
-
-ALTER TABLE "public"."mcp" OWNER TO "postgres";
-
-
-COMMENT ON TABLE "public"."mcp" IS 'Model Context Protocol servers - external integrations for Claude Code';
-
-
-
-COMMENT ON COLUMN "public"."mcp"."package" IS 'NPM package information: {name: string, version: string, registry?: string}';
-
-
-
-COMMENT ON COLUMN "public"."mcp"."auth_type" IS 'Authentication type required: none, api_key, oauth, basic, bearer, custom';
-
-
-
-COMMENT ON COLUMN "public"."mcp"."capabilities" IS 'MCP server capabilities: {tools: boolean, resources: boolean, prompts: boolean}';
-
-
-
-COMMENT ON COLUMN "public"."mcp"."data_types" IS 'Types of data this MCP server works with (e.g., ["files", "databases", "apis"])';
-
-
-
-COMMENT ON COLUMN "public"."mcp"."mcp_version" IS 'MCP protocol version supported (e.g., "1.0", "1.1")';
-
-
-
-COMMENT ON COLUMN "public"."mcp"."permissions" IS 'Required permissions: {filesystem: string[], network: string[], environment: string[]}';
-
-
-
-COMMENT ON COLUMN "public"."mcp"."requires_auth" IS 'Whether this MCP server requires authentication';
-
-
-
-COMMENT ON COLUMN "public"."mcp"."resources_provided" IS 'List of resource types provided by this server';
-
-
-
-COMMENT ON COLUMN "public"."mcp"."security" IS 'Security considerations and best practices: {warnings: string[], recommendations: string[]}';
-
-
-
-COMMENT ON COLUMN "public"."mcp"."server_info" IS 'Server metadata: {vendor: string, homepage: string, version: string}';
-
-
-
-COMMENT ON COLUMN "public"."mcp"."server_type" IS 'Server transport type: stdio, sse, http, websocket';
-
-
-
-COMMENT ON COLUMN "public"."mcp"."tools_provided" IS 'List of tool names provided by this MCP server';
-
-
-
-COMMENT ON COLUMN "public"."mcp"."transport" IS 'Transport configuration details for different connection types';
-
-
-
-COMMENT ON COLUMN "public"."mcp"."config_location" IS 'Where configuration should be placed (e.g., "claude_desktop_config.json", "mcp_config.json")';
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."rules" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "slug" "text" NOT NULL,
-    "description" "text" NOT NULL,
-    "category" "text" DEFAULT 'rules'::"text" NOT NULL,
-    "author" "text" NOT NULL,
-    "author_profile_url" "text",
-    "date_added" "date" NOT NULL,
-    "tags" "text"[] NOT NULL,
-    "content" "text",
-    "title" "text",
-    "display_title" "text",
-    "seo_title" "text",
-    "source" "text",
-    "documentation_url" "text",
-    "features" "text"[],
-    "use_cases" "text"[],
-    "examples" "jsonb" DEFAULT '[]'::"jsonb",
-    "discovery_metadata" "jsonb",
-    "configuration" "jsonb",
-    "troubleshooting" "jsonb"[] DEFAULT ARRAY[]::"jsonb"[],
-    "git_hash" "text",
-    "synced_at" timestamp with time zone,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "expertise_areas" "text"[],
-    "related_rules" "text"[],
-    "requirements" "text"[],
-    "fts_vector" "tsvector",
-    "popularity_score" integer GENERATED ALWAYS AS (0) STORED,
-    CONSTRAINT "chk_rules_author_url" CHECK ((("author_profile_url" IS NULL) OR ("author_profile_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "chk_rules_description_length" CHECK ((("description" IS NULL) OR (("length"("description") >= 10) AND ("length"("description") <= 500)))),
-    CONSTRAINT "chk_rules_name_pattern" CHECK ((("slug" ~ '^[a-zA-Z0-9\s\-_.]+$'::"text") OR ("slug" IS NULL))),
-    CONSTRAINT "chk_rules_tags_count" CHECK ((("tags" IS NULL) OR ("array_length"("tags", 1) <= 10))),
-    CONSTRAINT "rules_author_check" CHECK (("length"("author") >= 2)),
-    CONSTRAINT "rules_author_profile_url_check" CHECK ((("author_profile_url" IS NULL) OR ("author_profile_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "rules_category_check" CHECK (("category" = 'rules'::"text")),
-    CONSTRAINT "rules_description_check" CHECK ((("length"("description") >= 10) AND ("length"("description") <= 500))),
-    CONSTRAINT "rules_documentation_url_check" CHECK ((("documentation_url" IS NULL) OR ("documentation_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "rules_expertise_areas_check" CHECK ((("expertise_areas" IS NULL) OR ("array_length"("expertise_areas", 1) <= 20))),
-    CONSTRAINT "rules_features_check" CHECK ((("features" IS NULL) OR ("array_length"("features", 1) <= 20))),
-    CONSTRAINT "rules_related_rules_check" CHECK ((("related_rules" IS NULL) OR ("array_length"("related_rules", 1) <= 10))),
-    CONSTRAINT "rules_requirements_check" CHECK ((("requirements" IS NULL) OR ("array_length"("requirements", 1) <= 10))),
-    CONSTRAINT "rules_seo_title_check" CHECK ((("seo_title" IS NULL) OR ("length"("seo_title") <= 60))),
-    CONSTRAINT "rules_slug_check" CHECK ((("slug" ~ '^[a-z0-9-]+$'::"text") AND (("length"("slug") >= 3) AND ("length"("slug") <= 100)))),
-    CONSTRAINT "rules_source_check" CHECK ((("source" IS NULL) OR ("length"("source") >= 3))),
-    CONSTRAINT "rules_tags_check" CHECK ((("array_length"("tags", 1) >= 1) AND ("array_length"("tags", 1) <= 20))),
-    CONSTRAINT "rules_use_cases_check" CHECK ((("use_cases" IS NULL) OR ("array_length"("use_cases", 1) <= 20)))
-);
-
-
-ALTER TABLE "public"."rules" OWNER TO "postgres";
-
-
-COMMENT ON TABLE "public"."rules" IS 'Configuration rules - project-specific guidelines and conventions';
-
-
-
-COMMENT ON COLUMN "public"."rules"."expertise_areas" IS 'Areas of expertise or domains this rule applies to (max 20)';
-
-
-
-COMMENT ON COLUMN "public"."rules"."related_rules" IS 'Slugs of related rules that work well together (max 10)';
-
-
-
-COMMENT ON COLUMN "public"."rules"."requirements" IS 'Prerequisites or requirements for using this rule (max 10)';
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."skills" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "slug" "text" NOT NULL,
-    "description" "text" NOT NULL,
-    "category" "text" DEFAULT 'skills'::"text" NOT NULL,
-    "author" "text" NOT NULL,
-    "author_profile_url" "text",
-    "date_added" "date" NOT NULL,
-    "tags" "text"[] NOT NULL,
-    "content" "text",
-    "title" "text",
-    "display_title" "text",
-    "seo_title" "text",
-    "source" "text",
-    "documentation_url" "text",
-    "features" "text"[],
-    "use_cases" "text"[],
-    "examples" "jsonb" DEFAULT '[]'::"jsonb",
-    "discovery_metadata" "jsonb",
-    "dependencies" "text"[],
-    "difficulty" "text",
-    "estimated_time" "text",
-    "troubleshooting" "jsonb"[] DEFAULT ARRAY[]::"jsonb"[],
+    "metadata" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
     "git_hash" "text",
     "synced_at" timestamp with time zone,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "fts_vector" "tsvector",
     "popularity_score" integer GENERATED ALWAYS AS (0) STORED,
-    CONSTRAINT "chk_skills_name_pattern" CHECK ((("slug" ~ '^[a-zA-Z0-9\s\-_.]+$'::"text") OR ("slug" IS NULL))),
-    CONSTRAINT "skills_author_check" CHECK (("length"("author") >= 2)),
-    CONSTRAINT "skills_author_profile_url_check" CHECK ((("author_profile_url" IS NULL) OR ("author_profile_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "skills_category_check" CHECK (("category" = 'skills'::"text")),
-    CONSTRAINT "skills_dependencies_check" CHECK ((("dependencies" IS NULL) OR ("array_length"("dependencies", 1) <= 20))),
-    CONSTRAINT "skills_description_check" CHECK ((("length"("description") >= 10) AND ("length"("description") <= 500))),
-    CONSTRAINT "skills_difficulty_check" CHECK ((("difficulty" IS NULL) OR ("length"("difficulty") >= 3))),
-    CONSTRAINT "skills_documentation_url_check" CHECK ((("documentation_url" IS NULL) OR ("documentation_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "skills_features_check" CHECK ((("features" IS NULL) OR ("array_length"("features", 1) <= 20))),
-    CONSTRAINT "skills_seo_title_check" CHECK ((("seo_title" IS NULL) OR ("length"("seo_title") <= 60))),
-    CONSTRAINT "skills_slug_check" CHECK ((("slug" ~ '^[a-z0-9-]+$'::"text") AND (("length"("slug") >= 3) AND ("length"("slug") <= 100)))),
-    CONSTRAINT "skills_source_check" CHECK ((("source" IS NULL) OR ("length"("source") >= 3))),
-    CONSTRAINT "skills_tags_check" CHECK ((("array_length"("tags", 1) >= 1) AND ("array_length"("tags", 1) <= 20))),
-    CONSTRAINT "skills_use_cases_check" CHECK ((("use_cases" IS NULL) OR ("array_length"("use_cases", 1) <= 20)))
+    "reading_time" integer GENERATED ALWAYS AS (
+CASE
+    WHEN ("content" IS NULL) THEN 0
+    ELSE ("ceil"((("array_length"("regexp_split_to_array"(TRIM(BOTH FROM "content"), '\s+'::"text"), 1))::numeric / (225)::numeric)))::integer
+END) STORED,
+    "difficulty_score" integer GENERATED ALWAYS AS (
+CASE
+    WHEN ("content" IS NULL) THEN 0
+    ELSE LEAST(100, GREATEST(0, (((((("array_length"("regexp_split_to_array"(TRIM(BOTH FROM "content"), '\s+'::"text"), 1) / 50) + ((("length"("content") - "length"("replace"("lower"("content"), 'api'::"text", ''::"text"))) / 3) * 5)) + ((("length"("content") - "length"("replace"("lower"("content"), 'configuration'::"text", ''::"text"))) / 13) * 5)) + ((("length"("content") - "length"("replace"("lower"("content"), 'environment'::"text", ''::"text"))) / 11) * 5)) + ((("length"("content") - "length"("replace"("content", '```'::"text", ''::"text"))) / 3) * 10)) +
+    CASE
+        WHEN ("metadata" ? 'prerequisites'::"text") THEN 15
+        ELSE 0
+    END)))
+END) STORED,
+    "has_troubleshooting" boolean GENERATED ALWAYS AS ((("metadata" ? 'troubleshooting'::"text") AND ("jsonb_typeof"(("metadata" -> 'troubleshooting'::"text")) = 'array'::"text") AND ("jsonb_array_length"(("metadata" -> 'troubleshooting'::"text")) > 0))) STORED,
+    "has_prerequisites" boolean GENERATED ALWAYS AS ((("metadata" ? 'prerequisites'::"text") AND ("jsonb_typeof"(("metadata" -> 'prerequisites'::"text")) = 'array'::"text") AND ("jsonb_array_length"(("metadata" -> 'prerequisites'::"text")) > 0))) STORED,
+    "has_breaking_changes" boolean GENERATED ALWAYS AS (COALESCE((("metadata" ->> 'has_breaking_changes'::"text"))::boolean, false)) STORED,
+    CONSTRAINT "content_author_length" CHECK (("length"("author") >= 2)),
+    CONSTRAINT "content_category_check" CHECK (("category" = ANY (ARRAY['agents'::"text", 'mcp'::"text", 'commands'::"text", 'rules'::"text", 'hooks'::"text", 'statuslines'::"text", 'skills'::"text", 'collections'::"text", 'guides'::"text"]))),
+    CONSTRAINT "content_description_length" CHECK ((("length"("description") >= 10) AND ("length"("description") <= 500))),
+    CONSTRAINT "content_features_count" CHECK ((("features" IS NULL) OR ("array_length"("features", 1) <= 20))),
+    CONSTRAINT "content_slug_pattern" CHECK ((("slug" ~ '^[a-z0-9-]+$'::"text") AND (("length"("slug") >= 3) AND ("length"("slug") <= 100)))),
+    CONSTRAINT "content_tags_count" CHECK ((("array_length"("tags", 1) >= 1) AND ("array_length"("tags", 1) <= 20))),
+    CONSTRAINT "content_use_cases_count" CHECK ((("use_cases" IS NULL) OR ("array_length"("use_cases", 1) <= 20)))
 );
 
 
-ALTER TABLE "public"."skills" OWNER TO "postgres";
+ALTER TABLE "public"."content" OWNER TO "postgres";
 
 
-COMMENT ON TABLE "public"."skills" IS 'Skills - reusable capabilities and knowledge modules';
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."statuslines" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "slug" "text" NOT NULL,
-    "description" "text" NOT NULL,
-    "category" "text" DEFAULT 'statuslines'::"text" NOT NULL,
-    "author" "text" NOT NULL,
-    "author_profile_url" "text",
-    "date_added" "date" NOT NULL,
-    "tags" "text"[] NOT NULL,
-    "content" "text",
-    "title" "text",
-    "display_title" "text",
-    "seo_title" "text",
-    "source" "text",
-    "documentation_url" "text",
-    "features" "text"[],
-    "use_cases" "text"[],
-    "examples" "jsonb" DEFAULT '[]'::"jsonb",
-    "discovery_metadata" "jsonb",
-    "preview" "text",
-    "refresh_rate_ms" integer,
-    "installation" "jsonb",
-    "troubleshooting" "jsonb"[] DEFAULT ARRAY[]::"jsonb"[],
-    "git_hash" "text",
-    "synced_at" timestamp with time zone,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "configuration" "jsonb",
-    "statusline_type" "text",
-    "requirements" "text"[],
-    "fts_vector" "tsvector",
-    "popularity_score" integer GENERATED ALWAYS AS (0) STORED,
-    CONSTRAINT "chk_statuslines_name_pattern" CHECK ((("slug" ~ '^[a-zA-Z0-9\s\-_.]+$'::"text") OR ("slug" IS NULL))),
-    CONSTRAINT "statuslines_author_check" CHECK (("length"("author") >= 2)),
-    CONSTRAINT "statuslines_author_profile_url_check" CHECK ((("author_profile_url" IS NULL) OR ("author_profile_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "statuslines_category_check" CHECK (("category" = 'statuslines'::"text")),
-    CONSTRAINT "statuslines_description_check" CHECK ((("length"("description") >= 10) AND ("length"("description") <= 500))),
-    CONSTRAINT "statuslines_documentation_url_check" CHECK ((("documentation_url" IS NULL) OR ("documentation_url" ~ '^https?://'::"text"))),
-    CONSTRAINT "statuslines_features_check" CHECK ((("features" IS NULL) OR ("array_length"("features", 1) <= 20))),
-    CONSTRAINT "statuslines_refresh_rate_ms_check" CHECK ((("refresh_rate_ms" IS NULL) OR ("refresh_rate_ms" >= 100))),
-    CONSTRAINT "statuslines_requirements_check" CHECK ((("requirements" IS NULL) OR ("array_length"("requirements", 1) <= 10))),
-    CONSTRAINT "statuslines_seo_title_check" CHECK ((("seo_title" IS NULL) OR ("length"("seo_title") <= 60))),
-    CONSTRAINT "statuslines_slug_check" CHECK ((("slug" ~ '^[a-z0-9-]+$'::"text") AND (("length"("slug") >= 3) AND ("length"("slug") <= 100)))),
-    CONSTRAINT "statuslines_source_check" CHECK ((("source" IS NULL) OR ("length"("source") >= 3))),
-    CONSTRAINT "statuslines_statusline_type_check" CHECK ((("statusline_type" IS NULL) OR ("statusline_type" = ANY (ARRAY['static'::"text", 'dynamic'::"text", 'interactive'::"text", 'data-driven'::"text"])))),
-    CONSTRAINT "statuslines_tags_check" CHECK ((("array_length"("tags", 1) >= 1) AND ("array_length"("tags", 1) <= 20))),
-    CONSTRAINT "statuslines_use_cases_check" CHECK ((("use_cases" IS NULL) OR ("array_length"("use_cases", 1) <= 20)))
-);
-
-
-ALTER TABLE "public"."statuslines" OWNER TO "postgres";
-
-
-COMMENT ON TABLE "public"."statuslines" IS 'Status line configurations - customizable status bar displays';
+COMMENT ON COLUMN "public"."content"."reading_time" IS 'Estimated reading time in minutes (225 words/min)';
 
 
 
-COMMENT ON COLUMN "public"."statuslines"."configuration" IS 'Statusline configuration settings and parameters';
+COMMENT ON COLUMN "public"."content"."difficulty_score" IS 'Content difficulty score (0-100 scale)';
 
 
 
-COMMENT ON COLUMN "public"."statuslines"."statusline_type" IS 'Type of statusline: static, dynamic, interactive, data-driven';
+COMMENT ON COLUMN "public"."content"."has_troubleshooting" IS 'True if content has troubleshooting section';
 
 
 
-COMMENT ON COLUMN "public"."statuslines"."requirements" IS 'Prerequisites or requirements for using this statusline (max 10)';
+COMMENT ON COLUMN "public"."content"."has_prerequisites" IS 'True if content has prerequisites';
 
 
 
-CREATE OR REPLACE VIEW "public"."content_base" AS
- SELECT "agents"."id",
-    "agents"."slug",
-    "agents"."description",
-    "agents"."category",
-    "agents"."author",
-    "agents"."author_profile_url",
-    "agents"."date_added",
-    "agents"."tags",
-    "agents"."created_at",
-    "agents"."updated_at",
-    'agents'::"text" AS "table_name"
-   FROM "public"."agents"
-UNION ALL
- SELECT "mcp"."id",
-    "mcp"."slug",
-    "mcp"."description",
-    "mcp"."category",
-    "mcp"."author",
-    "mcp"."author_profile_url",
-    "mcp"."date_added",
-    "mcp"."tags",
-    "mcp"."created_at",
-    "mcp"."updated_at",
-    'mcp'::"text" AS "table_name"
-   FROM "public"."mcp"
-UNION ALL
- SELECT "rules"."id",
-    "rules"."slug",
-    "rules"."description",
-    "rules"."category",
-    "rules"."author",
-    "rules"."author_profile_url",
-    "rules"."date_added",
-    "rules"."tags",
-    "rules"."created_at",
-    "rules"."updated_at",
-    'rules'::"text" AS "table_name"
-   FROM "public"."rules"
-UNION ALL
- SELECT "commands"."id",
-    "commands"."slug",
-    "commands"."description",
-    "commands"."category",
-    "commands"."author",
-    "commands"."author_profile_url",
-    "commands"."date_added",
-    "commands"."tags",
-    "commands"."created_at",
-    "commands"."updated_at",
-    'commands'::"text" AS "table_name"
-   FROM "public"."commands"
-UNION ALL
- SELECT "hooks"."id",
-    "hooks"."slug",
-    "hooks"."description",
-    "hooks"."category",
-    "hooks"."author",
-    "hooks"."author_profile_url",
-    "hooks"."date_added",
-    "hooks"."tags",
-    "hooks"."created_at",
-    "hooks"."updated_at",
-    'hooks'::"text" AS "table_name"
-   FROM "public"."hooks"
-UNION ALL
- SELECT "statuslines"."id",
-    "statuslines"."slug",
-    "statuslines"."description",
-    "statuslines"."category",
-    "statuslines"."author",
-    "statuslines"."author_profile_url",
-    "statuslines"."date_added",
-    "statuslines"."tags",
-    "statuslines"."created_at",
-    "statuslines"."updated_at",
-    'statuslines'::"text" AS "table_name"
-   FROM "public"."statuslines"
-UNION ALL
- SELECT "skills"."id",
-    "skills"."slug",
-    "skills"."description",
-    "skills"."category",
-    "skills"."author",
-    "skills"."author_profile_url",
-    "skills"."date_added",
-    "skills"."tags",
-    "skills"."created_at",
-    "skills"."updated_at",
-    'skills'::"text" AS "table_name"
-   FROM "public"."skills"
-UNION ALL
- SELECT "collections"."id",
-    "collections"."slug",
-    "collections"."description",
-    "collections"."category",
-    "collections"."author",
-    "collections"."author_profile_url",
-    "collections"."date_added",
-    "collections"."tags",
-    "collections"."created_at",
-    "collections"."updated_at",
-    'collections'::"text" AS "table_name"
-   FROM "public"."collections"
-UNION ALL
- SELECT "guides"."id",
-    "guides"."slug",
-    "guides"."description",
-    "guides"."category",
-    "guides"."author",
-    "guides"."author_profile_url",
-    "guides"."date_added",
-    "guides"."tags",
-    "guides"."created_at",
-    "guides"."updated_at",
-    'guides'::"text" AS "table_name"
-   FROM "public"."guides"
-UNION ALL
- SELECT "changelog"."id",
-    "changelog"."slug",
-    "changelog"."description",
-    "changelog"."category",
-    NULL::"text" AS "author",
-    NULL::"text" AS "author_profile_url",
-    "changelog"."date_added",
-    "changelog"."tags",
-    "changelog"."created_at",
-    "changelog"."updated_at",
-    'changelog'::"text" AS "table_name"
-   FROM "public"."changelog";
-
-
-ALTER VIEW "public"."content_base" OWNER TO "postgres";
-
-
-COMMENT ON VIEW "public"."content_base" IS 'Unified view of base content fields across all content types. Uses SECURITY DEFINER intentionally to provide consistent access control across 11+ content tables. Security reviewed and approved 2025-10-29.';
+COMMENT ON COLUMN "public"."content"."has_breaking_changes" IS 'True if content has breaking changes';
 
 
 
@@ -8934,49 +7763,6 @@ COMMENT ON COLUMN "public"."content_generator_configs"."tag_mapping" IS 'Maps it
 
 
 COMMENT ON COLUMN "public"."content_generator_configs"."template" IS 'Template with {title} placeholder for personalization. Used when strategy includes ''title''.';
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."content_items" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "category" "text" NOT NULL,
-    "slug" "text" NOT NULL,
-    "data" "jsonb" NOT NULL,
-    "git_hash" "text" NOT NULL,
-    "synced_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "search_vector" "tsvector" GENERATED ALWAYS AS ((("setweight"("to_tsvector"('"english"'::"regconfig", COALESCE(("data" ->> 'name'::"text"), ("data" ->> 'title'::"text"), ''::"text")), 'A'::"char") || "setweight"("to_tsvector"('"english"'::"regconfig", COALESCE(("data" ->> 'description'::"text"), ''::"text")), 'B'::"char")) || "setweight"("to_tsvector"('"english"'::"regconfig", "public"."extract_tags_for_search"(("data" -> 'tags'::"text"))), 'C'::"char"))) STORED,
-    CONSTRAINT "content_items_category_check" CHECK (("category" = ANY (ARRAY['agents'::"text", 'mcp'::"text", 'commands'::"text", 'rules'::"text", 'hooks'::"text", 'statuslines'::"text", 'skills'::"text", 'collections'::"text", 'guides'::"text", 'jobs'::"text", 'changelog'::"text"]))),
-    CONSTRAINT "content_items_git_hash_check" CHECK (("length"("git_hash") = 64)),
-    CONSTRAINT "content_items_slug_check" CHECK ((("length"("slug") > 0) AND ("length"("slug") <= 255)))
-);
-
-
-ALTER TABLE "public"."content_items" OWNER TO "postgres";
-
-
-COMMENT ON TABLE "public"."content_items" IS 'Content directory items synced from Git /content/*.json files. RLS enabled with public read access. Service role key automatically bypasses RLS for sync operations.';
-
-
-
-COMMENT ON COLUMN "public"."content_items"."category" IS 'Content category (agents, mcp, commands, etc). Maps to /content/{category}/ directory.';
-
-
-
-COMMENT ON COLUMN "public"."content_items"."slug" IS 'URL-safe slug identifier. Maps to /content/{category}/{slug}.json filename.';
-
-
-
-COMMENT ON COLUMN "public"."content_items"."data" IS 'Full JSON content object. Stored as JSONB for query flexibility and schema evolution.';
-
-
-
-COMMENT ON COLUMN "public"."content_items"."git_hash" IS 'SHA256 hash of source JSON file. Used for incremental sync (only update if hash changed).';
-
-
-
-COMMENT ON COLUMN "public"."content_items"."search_vector" IS 'Auto-generated full-text search vector. Combines name, description, and tags with weighted ranking.';
 
 
 
@@ -9125,191 +7911,21 @@ COMMENT ON COLUMN "public"."content_submissions"."spam_score" IS 'AI-calculated 
 
 
 CREATE OR REPLACE VIEW "public"."content_unified" AS
- SELECT ("agents"."id")::"text" AS "id",
-    "agents"."slug",
-    "agents"."title",
-    "agents"."description",
-    "agents"."category",
-    "agents"."author",
-    "agents"."author_profile_url",
-    ("agents"."date_added")::"text" AS "date_added",
-    "agents"."tags",
-    ("agents"."created_at")::"text" AS "created_at",
-    ("agents"."updated_at")::"text" AS "updated_at",
-    "agents"."features",
-    "agents"."use_cases",
-    "agents"."examples",
-    "agents"."troubleshooting",
-    "agents"."discovery_metadata",
-    "agents"."fts_vector",
-    'agents'::"text" AS "source_table"
-   FROM "public"."agents"
-UNION ALL
- SELECT ("mcp"."id")::"text" AS "id",
-    "mcp"."slug",
-    "mcp"."title",
-    "mcp"."description",
-    "mcp"."category",
-    "mcp"."author",
-    "mcp"."author_profile_url",
-    ("mcp"."date_added")::"text" AS "date_added",
-    "mcp"."tags",
-    ("mcp"."created_at")::"text" AS "created_at",
-    ("mcp"."updated_at")::"text" AS "updated_at",
-    "mcp"."features",
-    "mcp"."use_cases",
-    "mcp"."examples",
-    "mcp"."troubleshooting",
-    "mcp"."discovery_metadata",
-    "mcp"."fts_vector",
-    'mcp'::"text" AS "source_table"
-   FROM "public"."mcp"
-UNION ALL
- SELECT ("rules"."id")::"text" AS "id",
-    "rules"."slug",
-    "rules"."title",
-    "rules"."description",
-    "rules"."category",
-    "rules"."author",
-    "rules"."author_profile_url",
-    ("rules"."date_added")::"text" AS "date_added",
-    "rules"."tags",
-    ("rules"."created_at")::"text" AS "created_at",
-    ("rules"."updated_at")::"text" AS "updated_at",
-    "rules"."features",
-    "rules"."use_cases",
-    "rules"."examples",
-    "rules"."troubleshooting",
-    "rules"."discovery_metadata",
-    "rules"."fts_vector",
-    'rules'::"text" AS "source_table"
-   FROM "public"."rules"
-UNION ALL
- SELECT ("commands"."id")::"text" AS "id",
-    "commands"."slug",
-    "commands"."title",
-    "commands"."description",
-    "commands"."category",
-    "commands"."author",
-    "commands"."author_profile_url",
-    ("commands"."date_added")::"text" AS "date_added",
-    "commands"."tags",
-    ("commands"."created_at")::"text" AS "created_at",
-    ("commands"."updated_at")::"text" AS "updated_at",
-    "commands"."features",
-    "commands"."use_cases",
-    "commands"."examples",
-    "commands"."troubleshooting",
-    "commands"."discovery_metadata",
-    "commands"."fts_vector",
-    'commands'::"text" AS "source_table"
-   FROM "public"."commands"
-UNION ALL
- SELECT ("hooks"."id")::"text" AS "id",
-    "hooks"."slug",
-    "hooks"."title",
-    "hooks"."description",
-    "hooks"."category",
-    "hooks"."author",
-    "hooks"."author_profile_url",
-    ("hooks"."date_added")::"text" AS "date_added",
-    "hooks"."tags",
-    ("hooks"."created_at")::"text" AS "created_at",
-    ("hooks"."updated_at")::"text" AS "updated_at",
-    "hooks"."features",
-    "hooks"."use_cases",
-    "hooks"."examples",
-    "hooks"."troubleshooting",
-    "hooks"."discovery_metadata",
-    "hooks"."fts_vector",
-    'hooks'::"text" AS "source_table"
-   FROM "public"."hooks"
-UNION ALL
- SELECT ("statuslines"."id")::"text" AS "id",
-    "statuslines"."slug",
-    "statuslines"."title",
-    "statuslines"."description",
-    "statuslines"."category",
-    "statuslines"."author",
-    "statuslines"."author_profile_url",
-    ("statuslines"."date_added")::"text" AS "date_added",
-    "statuslines"."tags",
-    ("statuslines"."created_at")::"text" AS "created_at",
-    ("statuslines"."updated_at")::"text" AS "updated_at",
-    "statuslines"."features",
-    "statuslines"."use_cases",
-    "statuslines"."examples",
-    "statuslines"."troubleshooting",
-    "statuslines"."discovery_metadata",
-    "statuslines"."fts_vector",
-    'statuslines'::"text" AS "source_table"
-   FROM "public"."statuslines"
-UNION ALL
- SELECT ("skills"."id")::"text" AS "id",
-    "skills"."slug",
-    "skills"."title",
-    "skills"."description",
-    "skills"."category",
-    "skills"."author",
-    "skills"."author_profile_url",
-    ("skills"."date_added")::"text" AS "date_added",
-    "skills"."tags",
-    ("skills"."created_at")::"text" AS "created_at",
-    ("skills"."updated_at")::"text" AS "updated_at",
-    "skills"."features",
-    "skills"."use_cases",
-    "skills"."examples",
-    "skills"."troubleshooting",
-    "skills"."discovery_metadata",
-    "skills"."fts_vector",
-    'skills'::"text" AS "source_table"
-   FROM "public"."skills"
-UNION ALL
- SELECT ("collections"."id")::"text" AS "id",
-    "collections"."slug",
-    "collections"."title",
-    "collections"."description",
-    "collections"."category",
-    "collections"."author",
-    "collections"."author_profile_url",
-    ("collections"."date_added")::"text" AS "date_added",
-    "collections"."tags",
-    ("collections"."created_at")::"text" AS "created_at",
-    ("collections"."updated_at")::"text" AS "updated_at",
-    "collections"."features",
-    "collections"."use_cases",
-    "collections"."examples",
-    "collections"."troubleshooting",
-    "collections"."discovery_metadata",
-    "collections"."fts_vector",
-    'collections'::"text" AS "source_table"
-   FROM "public"."collections"
-UNION ALL
- SELECT ("guides"."id")::"text" AS "id",
-    "guides"."slug",
-    "guides"."title",
-    "guides"."description",
-    "guides"."category",
-    "guides"."author",
-    "guides"."author_profile_url",
-    ("guides"."date_added")::"text" AS "date_added",
-    "guides"."tags",
-    ("guides"."created_at")::"text" AS "created_at",
-    ("guides"."updated_at")::"text" AS "updated_at",
-    NULL::"text"[] AS "features",
-    NULL::"text"[] AS "use_cases",
-    NULL::"jsonb" AS "examples",
-    NULL::"jsonb"[] AS "troubleshooting",
-    NULL::"jsonb" AS "discovery_metadata",
-    "guides"."fts_vector",
-    'guides'::"text" AS "source_table"
-   FROM "public"."guides";
+ SELECT "category",
+    "slug",
+    "title",
+    "description",
+    "author",
+    "tags",
+    "created_at",
+    "updated_at"
+   FROM "public"."content";
 
 
 ALTER VIEW "public"."content_unified" OWNER TO "postgres";
 
 
-COMMENT ON VIEW "public"."content_unified" IS 'Unified view of complete content with enriched metadata. Uses SECURITY DEFINER intentionally to provide consistent access control across multiple content tables. Security reviewed and approved 2025-10-29.';
+COMMENT ON VIEW "public"."content_unified" IS 'Compatibility view wrapping the unified content table for materialized views.';
 
 
 
@@ -9325,7 +7941,7 @@ CREATE TABLE IF NOT EXISTS "public"."email_blocklist" (
 ALTER TABLE "public"."email_blocklist" OWNER TO "postgres";
 
 
-COMMENT ON TABLE "public"."email_blocklist" IS 'Emails blocked from future subscriptions due to bounces/complaints';
+COMMENT ON TABLE "public"."email_blocklist" IS 'Email blocklist - Service role only (contains PII)';
 
 
 
@@ -9644,54 +8260,6 @@ COMMENT ON MATERIALIZED VIEW "public"."mv_analytics_summary" IS 'Public analytic
 
 
 
-CREATE MATERIALIZED VIEW "public"."mv_content_similarity" AS
- WITH "content_pairs" AS (
-         SELECT "c1"."category" AS "source_category",
-            "c1"."slug" AS "source_slug",
-            "c1"."title" AS "source_title",
-            "c1"."tags" AS "source_tags",
-            "c1"."description" AS "source_description",
-            "c2"."category" AS "target_category",
-            "c2"."slug" AS "target_slug",
-            "c2"."title" AS "target_title",
-            "c2"."tags" AS "target_tags",
-            "c2"."description" AS "target_description"
-           FROM ("public"."content_unified" "c1"
-             CROSS JOIN "public"."content_unified" "c2")
-          WHERE ("c1"."slug" <> "c2"."slug")
-        )
- SELECT "source_category",
-    "source_slug",
-    "target_category",
-    "target_slug",
-    ((("public"."similarity"("source_title", "target_title") * (0.4)::double precision) + ("public"."similarity"("source_description", "target_description") * (0.3)::double precision)) +
-        CASE
-            WHEN (("source_tags" IS NULL) OR ("target_tags" IS NULL)) THEN (0)::double precision
-            WHEN (("array_length"("source_tags", 1) = 0) OR ("array_length"("target_tags", 1) = 0)) THEN (0)::double precision
-            ELSE ((( SELECT ("count"(*))::double precision AS "count"
-               FROM "unnest"("content_pairs"."source_tags") "tag"("tag")
-              WHERE ("tag"."tag" = ANY ("content_pairs"."target_tags"))) / (NULLIF("array_length"(ARRAY( SELECT DISTINCT "unnest"(("content_pairs"."source_tags" || "content_pairs"."target_tags")) AS "unnest"), 1), 0))::double precision) * (0.3)::double precision)
-        END) AS "similarity_score"
-   FROM "content_pairs"
-  WHERE ((("public"."similarity"("source_title", "target_title") * (0.4)::double precision) + ("public"."similarity"("source_description", "target_description") * (0.3)::double precision)) >= (0.20)::double precision)
-  ORDER BY "source_category", "source_slug", ((("public"."similarity"("source_title", "target_title") * (0.4)::double precision) + ("public"."similarity"("source_description", "target_description") * (0.3)::double precision)) +
-        CASE
-            WHEN (("source_tags" IS NULL) OR ("target_tags" IS NULL)) THEN (0)::double precision
-            WHEN (("array_length"("source_tags", 1) = 0) OR ("array_length"("target_tags", 1) = 0)) THEN (0)::double precision
-            ELSE ((( SELECT ("count"(*))::double precision AS "count"
-               FROM "unnest"("content_pairs"."source_tags") "tag"("tag")
-              WHERE ("tag"."tag" = ANY ("content_pairs"."target_tags"))) / (NULLIF("array_length"(ARRAY( SELECT DISTINCT "unnest"(("content_pairs"."source_tags" || "content_pairs"."target_tags")) AS "unnest"), 1), 0))::double precision) * (0.3)::double precision)
-        END) DESC
-  WITH NO DATA;
-
-
-ALTER MATERIALIZED VIEW "public"."mv_content_similarity" OWNER TO "postgres";
-
-
-COMMENT ON MATERIALIZED VIEW "public"."mv_content_similarity" IS 'Pre-computed content similarity matrix using pg_trgm. Refresh: daily via pg_cron. Replaces related-content/service.ts';
-
-
-
 CREATE MATERIALIZED VIEW "public"."mv_content_stats" AS
  SELECT "cu"."category",
     "cu"."slug",
@@ -9728,164 +8296,19 @@ COMMENT ON MATERIALIZED VIEW "public"."mv_content_stats" IS 'Comprehensive conte
 CREATE MATERIALIZED VIEW "public"."mv_content_tag_index" AS
  SELECT "category",
     "slug",
-    COALESCE(ARRAY( SELECT "jsonb_array_elements_text"(("content_items"."data" -> 'tags'::"text")) AS "jsonb_array_elements_text"), '{}'::"text"[]) AS "tags",
-    COALESCE((("data" ->> 'featured'::"text"))::boolean, false) AS "featured",
-    COALESCE((("data" ->> 'priority'::"text"))::integer, 0) AS "priority",
-    COALESCE(("data" ->> 'title'::"text"), ("data" ->> 'name'::"text"), ''::"text") AS "title"
-   FROM "public"."content_items"
-  WHERE ("category" = ANY (ARRAY['agents'::"text", 'mcp'::"text", 'commands'::"text", 'rules'::"text", 'hooks'::"text", 'statuslines'::"text", 'skills'::"text", 'collections'::"text"]))
+    COALESCE("tags", '{}'::"text"[]) AS "tags",
+    COALESCE((("metadata" ->> 'featured'::"text"))::boolean, false) AS "featured",
+    COALESCE((("metadata" ->> 'priority'::"text"))::integer, 0) AS "priority",
+    COALESCE("title", "display_title", ''::"text") AS "title"
+   FROM "public"."content"
+  WHERE ("category" = ANY (ARRAY['agents'::"text", 'mcp'::"text", 'commands'::"text", 'rules'::"text", 'hooks'::"text", 'statuslines'::"text", 'skills'::"text", 'collections'::"text", 'guides'::"text"]))
   WITH NO DATA;
 
 
 ALTER MATERIALIZED VIEW "public"."mv_content_tag_index" OWNER TO "postgres";
 
 
-COMMENT ON MATERIALIZED VIEW "public"."mv_content_tag_index" IS 'Pre-computed tag index for faster related content queries. Refreshed daily via pg_cron.';
-
-
-
-CREATE MATERIALIZED VIEW "public"."mv_featured_scores" AS
- WITH "content_stats" AS (
-         SELECT "cu"."category",
-            "cu"."slug",
-            "cu"."date_added",
-            COALESCE(( SELECT "count"(*) AS "count"
-                   FROM "public"."user_interactions" "ui"
-                  WHERE (("ui"."content_type" = "cu"."category") AND ("ui"."content_slug" = "cu"."slug") AND ("ui"."interaction_type" = 'view'::"text") AND ("ui"."created_at" > ("now"() - '24:00:00'::interval)))), (0)::bigint) AS "views_24h",
-            COALESCE(( SELECT "count"(*) AS "count"
-                   FROM "public"."user_interactions" "ui"
-                  WHERE (("ui"."content_type" = "cu"."category") AND ("ui"."content_slug" = "cu"."slug") AND ("ui"."interaction_type" = 'view'::"text") AND ("ui"."created_at" > ("now"() - '48:00:00'::interval)) AND ("ui"."created_at" <= ("now"() - '24:00:00'::interval)))), (0)::bigint) AS "views_previous_24h",
-            COALESCE(( SELECT "count"(*) AS "count"
-                   FROM "public"."bookmarks" "b"
-                  WHERE (("b"."content_type" = "cu"."category") AND ("b"."content_slug" = "cu"."slug"))), (0)::bigint) AS "bookmark_count",
-            COALESCE(( SELECT "count"(*) AS "count"
-                   FROM "public"."user_interactions" "ui"
-                  WHERE (("ui"."content_type" = "cu"."category") AND ("ui"."content_slug" = "cu"."slug") AND ("ui"."interaction_type" = 'copy'::"text"))), (0)::bigint) AS "copy_count",
-            (0)::bigint AS "comment_count",
-            COALESCE(( SELECT "count"(*) AS "count"
-                   FROM "public"."user_interactions" "ui"
-                  WHERE (("ui"."content_type" = "cu"."category") AND ("ui"."content_slug" = "cu"."slug") AND ("ui"."interaction_type" = 'view'::"text"))), (0)::bigint) AS "total_views"
-           FROM "public"."content_unified" "cu"
-        ), "trending_scores" AS (
-         SELECT "content_stats"."category",
-            "content_stats"."slug",
-            "content_stats"."date_added",
-            "content_stats"."views_24h",
-            "content_stats"."views_previous_24h",
-            "content_stats"."bookmark_count",
-            "content_stats"."copy_count",
-            "content_stats"."comment_count",
-            "content_stats"."total_views",
-                CASE
-                    WHEN ("content_stats"."views_previous_24h" > 0) THEN (((("content_stats"."views_24h")::double precision - ("content_stats"."views_previous_24h")::double precision) / ("content_stats"."views_previous_24h")::double precision) * (100.0)::double precision)
-                    ELSE (0.0)::double precision
-                END AS "growth_rate_pct",
-            LEAST((100.0)::double precision, GREATEST((0.0)::double precision, ((100.0)::double precision / ((1.0)::double precision + "exp"((- ((
-                CASE
-                    WHEN ("content_stats"."views_previous_24h" > 0) THEN (((("content_stats"."views_24h")::double precision - ("content_stats"."views_previous_24h")::double precision) / ("content_stats"."views_previous_24h")::double precision) * (100.0)::double precision)
-                    ELSE (0.0)::double precision
-                END - (100.0)::double precision) / (100.0)::double precision))))))) AS "trending_score"
-           FROM "content_stats"
-        ), "engagement_scores" AS (
-         SELECT "trending_scores"."category",
-            "trending_scores"."slug",
-            "trending_scores"."date_added",
-            "trending_scores"."views_24h",
-            "trending_scores"."views_previous_24h",
-            "trending_scores"."bookmark_count",
-            "trending_scores"."copy_count",
-            "trending_scores"."comment_count",
-            "trending_scores"."total_views",
-            "trending_scores"."growth_rate_pct",
-            "trending_scores"."trending_score",
-            (((("trending_scores"."bookmark_count" * 5) + ("trending_scores"."copy_count" * 3)))::numeric + (("trending_scores"."total_views")::numeric / 10.0)) AS "raw_engagement",
-            ("percent_rank"() OVER (PARTITION BY "trending_scores"."category" ORDER BY (((("trending_scores"."bookmark_count" * 5) + ("trending_scores"."copy_count" * 3)))::numeric + (("trending_scores"."total_views")::numeric / 10.0))) * (100.0)::double precision) AS "engagement_score"
-           FROM "trending_scores"
-        ), "freshness_scores" AS (
-         SELECT "engagement_scores"."category",
-            "engagement_scores"."slug",
-            "engagement_scores"."date_added",
-            "engagement_scores"."views_24h",
-            "engagement_scores"."views_previous_24h",
-            "engagement_scores"."bookmark_count",
-            "engagement_scores"."copy_count",
-            "engagement_scores"."comment_count",
-            "engagement_scores"."total_views",
-            "engagement_scores"."growth_rate_pct",
-            "engagement_scores"."trending_score",
-            "engagement_scores"."raw_engagement",
-            "engagement_scores"."engagement_score",
-            (EXTRACT(epoch FROM ("now"() - ("engagement_scores"."date_added")::timestamp with time zone)) / 86400.0) AS "days_old",
-            GREATEST((0)::numeric, ((100)::numeric - ((EXTRACT(epoch FROM ("now"() - ("engagement_scores"."date_added")::timestamp with time zone)) / 86400.0) * (2)::numeric))) AS "freshness_score"
-           FROM "engagement_scores"
-        ), "final_scores" AS (
-         SELECT "freshness_scores"."category",
-            "freshness_scores"."slug",
-            "freshness_scores"."date_added",
-            "freshness_scores"."views_24h",
-            "freshness_scores"."views_previous_24h",
-            "freshness_scores"."bookmark_count",
-            "freshness_scores"."copy_count",
-            "freshness_scores"."comment_count",
-            "freshness_scores"."total_views",
-            "freshness_scores"."growth_rate_pct",
-            "freshness_scores"."trending_score",
-            "freshness_scores"."raw_engagement",
-            "freshness_scores"."engagement_score",
-            "freshness_scores"."days_old",
-            "freshness_scores"."freshness_score",
-            (0)::numeric AS "rating_score",
-            (((("freshness_scores"."trending_score" * (0.4)::double precision) + (((0)::numeric * 0.3))::double precision) + ("freshness_scores"."engagement_score" * (0.2)::double precision)) + (("freshness_scores"."freshness_score")::double precision * (0.1)::double precision)) AS "final_score"
-           FROM "freshness_scores"
-        ), "ranked_content" AS (
-         SELECT "final_scores"."category",
-            "final_scores"."slug",
-            "final_scores"."date_added",
-            "final_scores"."views_24h",
-            "final_scores"."views_previous_24h",
-            "final_scores"."bookmark_count",
-            "final_scores"."copy_count",
-            "final_scores"."comment_count",
-            "final_scores"."total_views",
-            "final_scores"."growth_rate_pct",
-            "final_scores"."trending_score",
-            "final_scores"."raw_engagement",
-            "final_scores"."engagement_score",
-            "final_scores"."days_old",
-            "final_scores"."freshness_score",
-            "final_scores"."rating_score",
-            "final_scores"."final_score",
-            "row_number"() OVER (PARTITION BY "final_scores"."category" ORDER BY "final_scores"."final_score" DESC) AS "rank"
-           FROM "final_scores"
-        )
- SELECT "category" AS "content_type",
-    "slug" AS "content_slug",
-    "rank",
-    "round"(("final_score")::numeric, 2) AS "final_score",
-    "round"(("trending_score")::numeric, 2) AS "trending_score",
-    "round"("rating_score", 2) AS "rating_score",
-    "round"(("engagement_score")::numeric, 2) AS "engagement_score",
-    "round"("freshness_score", 2) AS "freshness_score",
-    "views_24h",
-    "views_previous_24h",
-    "round"(("growth_rate_pct")::numeric, 2) AS "growth_rate_pct",
-    "bookmark_count",
-    "copy_count",
-    "comment_count",
-    "total_views",
-    "round"("days_old", 1) AS "days_old",
-    "date_added",
-    "now"() AS "calculated_at"
-   FROM "ranked_content"
-  WHERE ("rank" <= 10)
-  ORDER BY "category", "rank"
-  WITH NO DATA;
-
-
-ALTER MATERIALIZED VIEW "public"."mv_featured_scores" OWNER TO "postgres";
-
-
-COMMENT ON MATERIALIZED VIEW "public"."mv_featured_scores" IS 'Featured content scores calculated via multi-factor algorithm. Refreshed hourly via pg_cron. Fixed comment_count type to bigint.';
+COMMENT ON MATERIALIZED VIEW "public"."mv_content_tag_index" IS 'Pre-computed tag index for faster related content queries. Now queries unified content table.';
 
 
 
@@ -9933,54 +8356,6 @@ COMMENT ON MATERIALIZED VIEW "public"."mv_for_you_feed" IS 'Personalized content
 
 
 
-CREATE MATERIALIZED VIEW "public"."mv_recommendation_scores" AS
- WITH "content_metadata" AS (
-         SELECT "content_unified"."category",
-            "content_unified"."slug",
-            "content_unified"."title",
-            "content_unified"."description",
-            "content_unified"."author",
-            "content_unified"."tags",
-            ARRAY( SELECT "tag"."tag"
-                   FROM "unnest"("content_unified"."tags") "tag"("tag")
-                  WHERE ("tag"."tag" = ANY (ARRAY['code-review'::"text", 'api-development'::"text", 'frontend-development'::"text", 'data-science'::"text", 'content-creation'::"text", 'devops-infrastructure'::"text", 'testing-qa'::"text", 'security-audit'::"text"]))) AS "use_case_tags",
-            ARRAY( SELECT "tag"."tag"
-                   FROM "unnest"("content_unified"."tags") "tag"("tag")
-                  WHERE ("tag"."tag" = ANY (ARRAY['github'::"text", 'database'::"text", 'aws'::"text", 'gcp'::"text", 'azure'::"text", 'communication'::"text"]))) AS "integration_tags",
-            ARRAY( SELECT "tag"."tag"
-                   FROM "unnest"("content_unified"."tags") "tag"("tag")
-                  WHERE ("tag"."tag" = ANY (ARRAY['security'::"text", 'performance'::"text", 'documentation'::"text", 'testing'::"text", 'code-quality'::"text", 'automation'::"text"]))) AS "focus_area_tags",
-                CASE
-                    WHEN (('beginner'::"text" = ANY ("content_unified"."tags")) OR ("content_unified"."description" ~~* '%beginner%'::"text")) THEN 'beginner'::"text"
-                    WHEN (('advanced'::"text" = ANY ("content_unified"."tags")) OR ("content_unified"."description" ~~* '%advanced%'::"text")) THEN 'advanced'::"text"
-                    ELSE 'intermediate'::"text"
-                END AS "suggested_experience_level"
-           FROM "public"."content_unified"
-        )
- SELECT "category",
-    "slug",
-    "title",
-    "description",
-    "author",
-    "tags",
-    "use_case_tags",
-    "integration_tags",
-    "focus_area_tags",
-    "suggested_experience_level",
-    "array_length"("use_case_tags", 1) AS "use_case_match_count",
-    "array_length"("integration_tags", 1) AS "integration_match_count",
-    "array_length"("focus_area_tags", 1) AS "focus_area_match_count"
-   FROM "content_metadata"
-  WITH NO DATA;
-
-
-ALTER MATERIALIZED VIEW "public"."mv_recommendation_scores" OWNER TO "postgres";
-
-
-COMMENT ON MATERIALIZED VIEW "public"."mv_recommendation_scores" IS 'Pre-computed recommendation metadata for fast filtering. Refresh: every 6 hours via pg_cron. Replaces recommender/algorithm.ts';
-
-
-
 CREATE MATERIALIZED VIEW "public"."mv_search_facets" AS
  WITH "tag_expansion" AS (
          SELECT "content_unified"."category",
@@ -10003,252 +8378,6 @@ ALTER MATERIALIZED VIEW "public"."mv_search_facets" OWNER TO "postgres";
 
 
 COMMENT ON MATERIALIZED VIEW "public"."mv_search_facets" IS 'Pre-computed search facets (categories, authors, tags with counts). Refresh: hourly via pg_cron.';
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."user_collections" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "user_id" "uuid" NOT NULL,
-    "name" "text" NOT NULL,
-    "slug" "text" NOT NULL,
-    "description" "text",
-    "is_public" boolean DEFAULT false NOT NULL,
-    "view_count" integer DEFAULT 0 NOT NULL,
-    "bookmark_count" integer DEFAULT 0 NOT NULL,
-    "item_count" integer DEFAULT 0 NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    CONSTRAINT "user_collections_description_check" CHECK (("char_length"("description") <= 500)),
-    CONSTRAINT "user_collections_description_length" CHECK ((("description" IS NULL) OR ("length"("description") <= 500))),
-    CONSTRAINT "user_collections_name_check" CHECK ((("char_length"("name") >= 2) AND ("char_length"("name") <= 100))),
-    CONSTRAINT "user_collections_name_length" CHECK ((("length"("name") >= 2) AND ("length"("name") <= 100))),
-    CONSTRAINT "user_collections_slug_check" CHECK ((("char_length"("slug") >= 2) AND ("char_length"("slug") <= 100))),
-    CONSTRAINT "user_collections_slug_pattern" CHECK ((("length"("slug") >= 2) AND ("length"("slug") <= 100) AND ("slug" ~ '^[a-z0-9\-]+$'::"text")))
-);
-
-
-ALTER TABLE "public"."user_collections" OWNER TO "postgres";
-
-
-COMMENT ON COLUMN "public"."user_collections"."is_public" IS 'Whether collection is publicly visible (default: false, NOT NULL)';
-
-
-
-COMMENT ON CONSTRAINT "user_collections_description_length" ON "public"."user_collections" IS 'Enforces description max 500 characters';
-
-
-
-COMMENT ON CONSTRAINT "user_collections_name_length" ON "public"."user_collections" IS 'Enforces collection name between 2-100 characters';
-
-
-
-COMMENT ON CONSTRAINT "user_collections_slug_pattern" ON "public"."user_collections" IS 'Enforces slug format: 2-100 chars, lowercase letters, numbers, hyphens only';
-
-
-
-CREATE MATERIALIZED VIEW "public"."mv_site_urls" AS
- WITH "content_items" AS (
-         SELECT "concat"('/', "cu"."category", '/', "cu"."slug") AS "path",
-            COALESCE((NULLIF("cu"."updated_at", ''::"text"))::timestamp with time zone, (NULLIF("cu"."date_added", ''::"text"))::timestamp with time zone, "now"()) AS "lastmod",
-            'weekly'::"text" AS "changefreq",
-            0.70 AS "priority"
-           FROM "public"."content_unified" "cu"
-        ), "content_item_llms" AS (
-         SELECT "concat"('/', "cu"."category", '/', "cu"."slug", '/llms.txt') AS "path",
-            COALESCE((NULLIF("cu"."updated_at", ''::"text"))::timestamp with time zone, (NULLIF("cu"."date_added", ''::"text"))::timestamp with time zone, "now"()) AS "lastmod",
-            'daily'::"text" AS "changefreq",
-            0.75 AS "priority"
-           FROM "public"."content_unified" "cu"
-        ), "category_pages" AS (
-         SELECT "concat"('/', "cu"."category") AS "path",
-            COALESCE("max"(COALESCE((NULLIF("cu"."updated_at", ''::"text"))::timestamp with time zone, (NULLIF("cu"."date_added", ''::"text"))::timestamp with time zone)), "now"()) AS "lastmod",
-            'daily'::"text" AS "changefreq",
-            0.80 AS "priority"
-           FROM "public"."content_unified" "cu"
-          GROUP BY "cu"."category"
-        ), "category_llms" AS (
-         SELECT "concat"('/', SUBSTRING("category_pages"."path" FROM 2), '/llms.txt') AS "path",
-            "category_pages"."lastmod",
-            'daily'::"text" AS "changefreq",
-            0.85 AS "priority"
-           FROM "category_pages"
-        ), "guides_pages" AS (
-         SELECT "concat"('/guides/', "g"."subcategory", '/', "g"."slug") AS "path",
-            COALESCE(("g"."date_updated")::timestamp with time zone, ("g"."date_modified")::timestamp with time zone, ("g"."date_added")::timestamp with time zone, "g"."created_at") AS "lastmod",
-            'monthly'::"text" AS "changefreq",
-            0.65 AS "priority"
-           FROM "public"."guides" "g"
-          WHERE ("g"."slug" IS NOT NULL)
-        ), "guides_llms" AS (
-         SELECT "concat"('/guides/', "g"."subcategory", '/', "g"."slug", '/llms.txt') AS "path",
-            COALESCE(("g"."date_updated")::timestamp with time zone, ("g"."date_modified")::timestamp with time zone, ("g"."date_added")::timestamp with time zone, "g"."created_at") AS "lastmod",
-            'weekly'::"text" AS "changefreq",
-            0.70 AS "priority"
-           FROM "public"."guides" "g"
-          WHERE ("g"."slug" IS NOT NULL)
-        ), "changelog_entries" AS (
-         SELECT "concat"('/changelog/', "ce"."slug") AS "path",
-            COALESCE(("ce"."release_date")::timestamp with time zone, "ce"."updated_at", "ce"."created_at", "now"()) AS "lastmod",
-            'monthly'::"text" AS "changefreq",
-            0.70 AS "priority"
-           FROM "public"."changelog_entries" "ce"
-        ), "changelog_entries_llms" AS (
-         SELECT "concat"('/changelog/', "ce"."slug", '/llms.txt') AS "path",
-            COALESCE(("ce"."release_date")::timestamp with time zone, "ce"."updated_at", "ce"."created_at", "now"()) AS "lastmod",
-            'weekly'::"text" AS "changefreq",
-            0.75 AS "priority"
-           FROM "public"."changelog_entries" "ce"
-        ), "changelog_meta" AS (
-         SELECT "t"."path",
-            "t"."lastmod",
-            "t"."changefreq",
-            "t"."priority"
-           FROM ( VALUES ('/changelog'::"text",( SELECT COALESCE(("max"("ce"."release_date"))::timestamp with time zone, "now"()) AS "coalesce"
-                           FROM "public"."changelog_entries" "ce"),'daily'::"text",0.80), ('/changelog/rss.xml'::"text",( SELECT COALESCE(("max"("ce"."release_date"))::timestamp with time zone, "now"()) AS "coalesce"
-                           FROM "public"."changelog_entries" "ce"),'daily'::"text",0.80), ('/changelog/atom.xml'::"text",( SELECT COALESCE(("max"("ce"."release_date"))::timestamp with time zone, "now"()) AS "coalesce"
-                           FROM "public"."changelog_entries" "ce"),'daily'::"text",0.80), ('/changelog/llms.txt'::"text",( SELECT COALESCE(("max"("ce"."release_date"))::timestamp with time zone, "now"()) AS "coalesce"
-                           FROM "public"."changelog_entries" "ce"),'daily'::"text",0.85)) "t"("path", "lastmod", "changefreq", "priority")
-        ), "jobs_pages" AS (
-         SELECT "concat"('/jobs/', "j"."slug") AS "path",
-            COALESCE("j"."posted_at", "j"."updated_at", "j"."created_at", "now"()) AS "lastmod",
-            'weekly'::"text" AS "changefreq",
-            0.65 AS "priority"
-           FROM "public"."jobs" "j"
-          WHERE (("j"."slug" IS NOT NULL) AND ("j"."active" = true))
-        ), "user_profiles" AS (
-         SELECT "concat"('/u/', "u"."slug") AS "path",
-            COALESCE("u"."updated_at", "u"."created_at", "now"()) AS "lastmod",
-            'weekly'::"text" AS "changefreq",
-            0.50 AS "priority"
-           FROM "public"."users" "u"
-          WHERE (("u"."public" = true) AND ("u"."slug" IS NOT NULL))
-        ), "collection_pages" AS (
-         SELECT "concat"('/u/', "u"."slug", '/collections/', "uc"."slug") AS "path",
-            COALESCE("uc"."updated_at", "uc"."created_at", "now"()) AS "lastmod",
-            'weekly'::"text" AS "changefreq",
-            0.50 AS "priority"
-           FROM ("public"."user_collections" "uc"
-             JOIN "public"."users" "u" ON (("u"."id" = "uc"."user_id")))
-          WHERE (("uc"."is_public" = true) AND ("u"."slug" IS NOT NULL) AND ("u"."public" = true))
-        ), "category_indexes" AS (
-         SELECT "category_pages"."path",
-            "category_pages"."lastmod",
-            'daily'::"text" AS "changefreq",
-            0.75 AS "priority"
-           FROM "category_pages"
-        ), "global_llms" AS (
-         SELECT '/llms.txt'::"text" AS "path",
-            "now"() AS "lastmod",
-            'daily'::"text" AS "changefreq",
-            0.90 AS "priority"
-        ), "static_pages" AS (
-         SELECT "t"."path",
-            "t"."lastmod",
-            "t"."changefreq",
-            "t"."priority"
-           FROM ( VALUES ('/'::"text","now"(),'daily'::"text",1.00), ('/guides'::"text","now"(),'daily'::"text",0.70), ('/trending'::"text","now"(),'daily'::"text",0.80), ('/jobs'::"text","now"(),'daily'::"text",0.60), ('/compare'::"text","now"(),'monthly'::"text",0.60), ('/submit'::"text","now"(),'weekly'::"text",0.50), ('/tools/config-recommender'::"text","now"(),'weekly'::"text",0.60)) "t"("path", "lastmod", "changefreq", "priority")
-        )
- SELECT DISTINCT ON ("path") "path",
-    COALESCE("lastmod", "now"()) AS "lastmod",
-    "changefreq",
-    "priority"
-   FROM ( SELECT "content_items"."path",
-            "content_items"."lastmod",
-            "content_items"."changefreq",
-            "content_items"."priority"
-           FROM "content_items"
-        UNION ALL
-         SELECT "content_item_llms"."path",
-            "content_item_llms"."lastmod",
-            "content_item_llms"."changefreq",
-            "content_item_llms"."priority"
-           FROM "content_item_llms"
-        UNION ALL
-         SELECT "category_pages"."path",
-            "category_pages"."lastmod",
-            "category_pages"."changefreq",
-            "category_pages"."priority"
-           FROM "category_pages"
-        UNION ALL
-         SELECT "category_indexes"."path",
-            "category_indexes"."lastmod",
-            "category_indexes"."changefreq",
-            "category_indexes"."priority"
-           FROM "category_indexes"
-        UNION ALL
-         SELECT "category_llms"."path",
-            "category_llms"."lastmod",
-            "category_llms"."changefreq",
-            "category_llms"."priority"
-           FROM "category_llms"
-        UNION ALL
-         SELECT "guides_pages"."path",
-            "guides_pages"."lastmod",
-            "guides_pages"."changefreq",
-            "guides_pages"."priority"
-           FROM "guides_pages"
-        UNION ALL
-         SELECT "guides_llms"."path",
-            "guides_llms"."lastmod",
-            "guides_llms"."changefreq",
-            "guides_llms"."priority"
-           FROM "guides_llms"
-        UNION ALL
-         SELECT "changelog_entries"."path",
-            "changelog_entries"."lastmod",
-            "changelog_entries"."changefreq",
-            "changelog_entries"."priority"
-           FROM "changelog_entries"
-        UNION ALL
-         SELECT "changelog_entries_llms"."path",
-            "changelog_entries_llms"."lastmod",
-            "changelog_entries_llms"."changefreq",
-            "changelog_entries_llms"."priority"
-           FROM "changelog_entries_llms"
-        UNION ALL
-         SELECT "changelog_meta"."path",
-            "changelog_meta"."lastmod",
-            "changelog_meta"."changefreq",
-            "changelog_meta"."priority"
-           FROM "changelog_meta"
-        UNION ALL
-         SELECT "jobs_pages"."path",
-            "jobs_pages"."lastmod",
-            "jobs_pages"."changefreq",
-            "jobs_pages"."priority"
-           FROM "jobs_pages"
-        UNION ALL
-         SELECT "user_profiles"."path",
-            "user_profiles"."lastmod",
-            "user_profiles"."changefreq",
-            "user_profiles"."priority"
-           FROM "user_profiles"
-        UNION ALL
-         SELECT "collection_pages"."path",
-            "collection_pages"."lastmod",
-            "collection_pages"."changefreq",
-            "collection_pages"."priority"
-           FROM "collection_pages"
-        UNION ALL
-         SELECT "static_pages"."path",
-            "static_pages"."lastmod",
-            "static_pages"."changefreq",
-            "static_pages"."priority"
-           FROM "static_pages"
-        UNION ALL
-         SELECT "global_llms"."path",
-            "global_llms"."lastmod",
-            "global_llms"."changefreq",
-            "global_llms"."priority"
-           FROM "global_llms") "aggregated"
-  ORDER BY "path", COALESCE("lastmod", "now"()) DESC
-  WITH NO DATA;
-
-
-ALTER MATERIALIZED VIEW "public"."mv_site_urls" OWNER TO "postgres";
-
-
-COMMENT ON MATERIALIZED VIEW "public"."mv_site_urls" IS 'Site URLs materialized view for sitemap generation. Publicly accessible via API for performance. Refreshed periodically via pg_cron.';
 
 
 
@@ -11274,6 +9403,46 @@ CREATE TABLE IF NOT EXISTS "public"."user_badges" (
 ALTER TABLE "public"."user_badges" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."user_collections" (
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "name" "text" NOT NULL,
+    "slug" "text" NOT NULL,
+    "description" "text",
+    "is_public" boolean DEFAULT false NOT NULL,
+    "view_count" integer DEFAULT 0 NOT NULL,
+    "bookmark_count" integer DEFAULT 0 NOT NULL,
+    "item_count" integer DEFAULT 0 NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "user_collections_description_check" CHECK (("char_length"("description") <= 500)),
+    CONSTRAINT "user_collections_description_length" CHECK ((("description" IS NULL) OR ("length"("description") <= 500))),
+    CONSTRAINT "user_collections_name_check" CHECK ((("char_length"("name") >= 2) AND ("char_length"("name") <= 100))),
+    CONSTRAINT "user_collections_name_length" CHECK ((("length"("name") >= 2) AND ("length"("name") <= 100))),
+    CONSTRAINT "user_collections_slug_check" CHECK ((("char_length"("slug") >= 2) AND ("char_length"("slug") <= 100))),
+    CONSTRAINT "user_collections_slug_pattern" CHECK ((("length"("slug") >= 2) AND ("length"("slug") <= 100) AND ("slug" ~ '^[a-z0-9\-]+$'::"text")))
+);
+
+
+ALTER TABLE "public"."user_collections" OWNER TO "postgres";
+
+
+COMMENT ON COLUMN "public"."user_collections"."is_public" IS 'Whether collection is publicly visible (default: false, NOT NULL)';
+
+
+
+COMMENT ON CONSTRAINT "user_collections_description_length" ON "public"."user_collections" IS 'Enforces description max 500 characters';
+
+
+
+COMMENT ON CONSTRAINT "user_collections_name_length" ON "public"."user_collections" IS 'Enforces collection name between 2-100 characters';
+
+
+
+COMMENT ON CONSTRAINT "user_collections_slug_pattern" ON "public"."user_collections" IS 'Enforces slug format: 2-100 chars, lowercase letters, numbers, hyphens only';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."user_content" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "user_id" "uuid" NOT NULL,
@@ -11448,16 +9617,6 @@ ALTER TABLE ONLY "public"."affinity_config"
 
 
 
-ALTER TABLE ONLY "public"."agents"
-    ADD CONSTRAINT "agents_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."agents"
-    ADD CONSTRAINT "agents_slug_key" UNIQUE ("slug");
-
-
-
 ALTER TABLE ONLY "public"."analytics_event_categories"
     ADD CONSTRAINT "analytics_event_categories_name_key" UNIQUE ("name");
 
@@ -11558,26 +9717,6 @@ ALTER TABLE ONLY "public"."collection_items"
 
 
 
-ALTER TABLE ONLY "public"."collections"
-    ADD CONSTRAINT "collections_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."collections"
-    ADD CONSTRAINT "collections_slug_key" UNIQUE ("slug");
-
-
-
-ALTER TABLE ONLY "public"."commands"
-    ADD CONSTRAINT "commands_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."commands"
-    ADD CONSTRAINT "commands_slug_key" UNIQUE ("slug");
-
-
-
 ALTER TABLE ONLY "public"."comments"
     ADD CONSTRAINT "comments_pkey" PRIMARY KEY ("id");
 
@@ -11590,6 +9729,11 @@ ALTER TABLE ONLY "public"."companies"
 
 ALTER TABLE ONLY "public"."companies"
     ADD CONSTRAINT "companies_slug_key" UNIQUE ("slug");
+
+
+
+ALTER TABLE ONLY "public"."content"
+    ADD CONSTRAINT "content_category_slug_unique" UNIQUE ("category", "slug");
 
 
 
@@ -11613,13 +9757,8 @@ ALTER TABLE ONLY "public"."content_generator_configs"
 
 
 
-ALTER TABLE ONLY "public"."content_items"
-    ADD CONSTRAINT "content_items_category_slug_unique" UNIQUE ("category", "slug");
-
-
-
-ALTER TABLE ONLY "public"."content_items"
-    ADD CONSTRAINT "content_items_pkey" PRIMARY KEY ("id");
+ALTER TABLE ONLY "public"."content"
+    ADD CONSTRAINT "content_pkey" PRIMARY KEY ("id");
 
 
 
@@ -11737,26 +9876,6 @@ ALTER TABLE ONLY "public"."form_select_options"
 
 
 
-ALTER TABLE ONLY "public"."guides"
-    ADD CONSTRAINT "guides_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."guides"
-    ADD CONSTRAINT "guides_slug_key" UNIQUE ("slug");
-
-
-
-ALTER TABLE ONLY "public"."hooks"
-    ADD CONSTRAINT "hooks_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."hooks"
-    ADD CONSTRAINT "hooks_slug_key" UNIQUE ("slug");
-
-
-
 ALTER TABLE ONLY "public"."jobs"
     ADD CONSTRAINT "jobs_pkey" PRIMARY KEY ("id");
 
@@ -11764,16 +9883,6 @@ ALTER TABLE ONLY "public"."jobs"
 
 ALTER TABLE ONLY "public"."jobs"
     ADD CONSTRAINT "jobs_slug_key" UNIQUE ("slug");
-
-
-
-ALTER TABLE ONLY "public"."mcp"
-    ADD CONSTRAINT "mcp_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."mcp"
-    ADD CONSTRAINT "mcp_slug_key" UNIQUE ("slug");
 
 
 
@@ -11887,16 +9996,6 @@ ALTER TABLE ONLY "public"."review_ratings"
 
 
 
-ALTER TABLE ONLY "public"."rules"
-    ADD CONSTRAINT "rules_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."rules"
-    ADD CONSTRAINT "rules_slug_key" UNIQUE ("slug");
-
-
-
 ALTER TABLE ONLY "public"."seo_config"
     ADD CONSTRAINT "seo_config_pkey" PRIMARY KEY ("key");
 
@@ -11912,16 +10011,6 @@ ALTER TABLE ONLY "public"."seo_enrichment_rules"
 
 
 
-ALTER TABLE ONLY "public"."skills"
-    ADD CONSTRAINT "skills_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."skills"
-    ADD CONSTRAINT "skills_slug_key" UNIQUE ("slug");
-
-
-
 ALTER TABLE ONLY "public"."sponsored_clicks"
     ADD CONSTRAINT "sponsored_clicks_pkey" PRIMARY KEY ("id");
 
@@ -11934,16 +10023,6 @@ ALTER TABLE ONLY "public"."sponsored_content"
 
 ALTER TABLE ONLY "public"."sponsored_impressions"
     ADD CONSTRAINT "sponsored_impressions_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."statuslines"
-    ADD CONSTRAINT "statuslines_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."statuslines"
-    ADD CONSTRAINT "statuslines_slug_key" UNIQUE ("slug");
 
 
 
@@ -12077,38 +10156,6 @@ ALTER TABLE ONLY "public"."webhook_events"
 
 
 
-CREATE INDEX "idx_agents_author" ON "public"."agents" USING "btree" ("author");
-
-
-
-CREATE INDEX "idx_agents_content_fts" ON "public"."agents" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
-
-
-
-CREATE INDEX "idx_agents_created_at" ON "public"."agents" USING "btree" ("created_at" DESC);
-
-
-
-CREATE INDEX "idx_agents_date_added" ON "public"."agents" USING "btree" ("date_added" DESC);
-
-
-
-CREATE INDEX "idx_agents_fts" ON "public"."agents" USING "gin" ("fts_vector");
-
-
-
-CREATE INDEX "idx_agents_homepage" ON "public"."agents" USING "btree" ("created_at" DESC, "date_added" DESC);
-
-
-
-CREATE INDEX "idx_agents_slug" ON "public"."agents" USING "btree" ("slug");
-
-
-
-CREATE INDEX "idx_agents_tags" ON "public"."agents" USING "gin" ("tags");
-
-
-
 CREATE INDEX "idx_analytics_event_categories_order" ON "public"."analytics_event_categories" USING "btree" ("display_order") WHERE ("active" = true);
 
 
@@ -12145,15 +10192,7 @@ CREATE INDEX "idx_badges_rarity" ON "public"."badges" USING "btree" ("rarity");
 
 
 
-CREATE INDEX "idx_bookmarks_content" ON "public"."bookmarks" USING "btree" ("content_type", "content_slug");
-
-
-
 CREATE INDEX "idx_bookmarks_content_slug" ON "public"."bookmarks" USING "btree" ("content_slug");
-
-
-
-CREATE UNIQUE INDEX "idx_bookmarks_lookup" ON "public"."bookmarks" USING "btree" ("user_id", "content_type", "content_slug") INCLUDE ("id", "created_at");
 
 
 
@@ -12166,10 +10205,6 @@ CREATE INDEX "idx_bookmarks_user_recent" ON "public"."bookmarks" USING "btree" (
 
 
 CREATE INDEX "idx_category_configs_show_on_homepage" ON "public"."category_configs" USING "btree" ("show_on_homepage") WHERE ("show_on_homepage" = true);
-
-
-
-CREATE INDEX "idx_category_configs_url_slug" ON "public"."category_configs" USING "btree" ("url_slug");
 
 
 
@@ -12217,10 +10252,6 @@ CREATE INDEX "idx_changelog_entries_search" ON "public"."changelog_entries" USIN
 
 
 
-CREATE INDEX "idx_changelog_entries_slug" ON "public"."changelog_entries" USING "btree" ("slug");
-
-
-
 CREATE INDEX "idx_changelog_featured" ON "public"."changelog" USING "btree" ("featured") WHERE ("featured" = true);
 
 
@@ -12229,23 +10260,11 @@ CREATE INDEX "idx_changelog_git_tag" ON "public"."changelog" USING "btree" ("git
 
 
 
-CREATE INDEX "idx_changelog_slug" ON "public"."changelog" USING "btree" ("slug");
-
-
-
 CREATE INDEX "idx_changelog_tags" ON "public"."changelog" USING "gin" ("tags");
 
 
 
 CREATE INDEX "idx_changelog_version" ON "public"."changelog" USING "btree" ("version") WHERE ("version" IS NOT NULL);
-
-
-
-CREATE INDEX "idx_collection_items_collection_id" ON "public"."collection_items" USING "btree" ("collection_id");
-
-
-
-CREATE INDEX "idx_collection_items_content" ON "public"."collection_items" USING "btree" ("content_type", "content_slug");
 
 
 
@@ -12258,78 +10277,6 @@ CREATE INDEX "idx_collection_items_order" ON "public"."collection_items" USING "
 
 
 CREATE INDEX "idx_collection_items_user_id" ON "public"."collection_items" USING "btree" ("user_id");
-
-
-
-CREATE INDEX "idx_collections_author" ON "public"."collections" USING "btree" ("author");
-
-
-
-CREATE INDEX "idx_collections_content_fts" ON "public"."collections" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
-
-
-
-CREATE INDEX "idx_collections_created_at" ON "public"."collections" USING "btree" ("created_at" DESC);
-
-
-
-CREATE INDEX "idx_collections_date_added" ON "public"."collections" USING "btree" ("date_added" DESC);
-
-
-
-CREATE INDEX "idx_collections_fts" ON "public"."collections" USING "gin" ("fts_vector");
-
-
-
-CREATE INDEX "idx_collections_homepage" ON "public"."collections" USING "btree" ("created_at" DESC, "date_added" DESC);
-
-
-
-CREATE INDEX "idx_collections_items" ON "public"."collections" USING "gin" ("items");
-
-
-
-CREATE INDEX "idx_collections_slug" ON "public"."collections" USING "btree" ("slug");
-
-
-
-CREATE INDEX "idx_collections_tags" ON "public"."collections" USING "gin" ("tags");
-
-
-
-CREATE INDEX "idx_collections_type" ON "public"."collections" USING "btree" ("collection_type") WHERE ("collection_type" IS NOT NULL);
-
-
-
-CREATE INDEX "idx_commands_author" ON "public"."commands" USING "btree" ("author");
-
-
-
-CREATE INDEX "idx_commands_content_fts" ON "public"."commands" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
-
-
-
-CREATE INDEX "idx_commands_created_at" ON "public"."commands" USING "btree" ("created_at" DESC);
-
-
-
-CREATE INDEX "idx_commands_date_added" ON "public"."commands" USING "btree" ("date_added" DESC);
-
-
-
-CREATE INDEX "idx_commands_fts" ON "public"."commands" USING "gin" ("fts_vector");
-
-
-
-CREATE INDEX "idx_commands_homepage" ON "public"."commands" USING "btree" ("created_at" DESC, "date_added" DESC);
-
-
-
-CREATE INDEX "idx_commands_slug" ON "public"."commands" USING "btree" ("slug");
-
-
-
-CREATE INDEX "idx_commands_tags" ON "public"."commands" USING "gin" ("tags");
 
 
 
@@ -12377,10 +10324,6 @@ CREATE INDEX "idx_companies_search_vector" ON "public"."companies" USING "gin" (
 
 
 
-CREATE INDEX "idx_companies_slug" ON "public"."companies" USING "btree" ("slug");
-
-
-
 CREATE INDEX "idx_company_job_stats_active_jobs" ON "public"."company_job_stats" USING "btree" ("active_jobs" DESC) WHERE ("active_jobs" > 0);
 
 
@@ -12394,6 +10337,30 @@ CREATE UNIQUE INDEX "idx_company_job_stats_company_slug" ON "public"."company_jo
 
 
 CREATE INDEX "idx_company_job_stats_total_views" ON "public"."company_job_stats" USING "btree" ("total_views" DESC) WHERE ("total_views" > 0);
+
+
+
+CREATE INDEX "idx_content_created_at" ON "public"."content" USING "btree" ("created_at" DESC);
+
+
+
+CREATE INDEX "idx_content_difficulty_score" ON "public"."content" USING "btree" ("difficulty_score") WHERE ("difficulty_score" > 0);
+
+
+
+COMMENT ON INDEX "public"."idx_content_difficulty_score" IS 'Index for filtering/sorting by difficulty score';
+
+
+
+CREATE INDEX "idx_content_flags" ON "public"."content" USING "btree" ("has_troubleshooting", "has_prerequisites", "has_breaking_changes") WHERE (("has_troubleshooting" = true) OR ("has_prerequisites" = true) OR ("has_breaking_changes" = true));
+
+
+
+COMMENT ON INDEX "public"."idx_content_flags" IS 'Composite index for boolean flag filters';
+
+
+
+CREATE INDEX "idx_content_fts" ON "public"."content" USING "gin" ("fts_vector");
 
 
 
@@ -12417,39 +10384,39 @@ CREATE INDEX "idx_content_generation_validation" ON "public"."content_generation
 
 
 
-CREATE INDEX "idx_content_items_category" ON "public"."content_items" USING "btree" ("category");
+CREATE INDEX "idx_content_has_breaking_changes" ON "public"."content" USING "btree" ("has_breaking_changes") WHERE ("has_breaking_changes" = true);
 
 
 
-CREATE INDEX "idx_content_items_category_slug" ON "public"."content_items" USING "btree" ("category", "slug");
+COMMENT ON INDEX "public"."idx_content_has_breaking_changes" IS 'Index for breaking changes content filter';
 
 
 
-CREATE INDEX "idx_content_items_data_gin" ON "public"."content_items" USING "gin" ("data");
+CREATE INDEX "idx_content_has_prerequisites" ON "public"."content" USING "btree" ("has_prerequisites") WHERE ("has_prerequisites" = true);
 
 
 
-CREATE INDEX "idx_content_items_git_hash" ON "public"."content_items" USING "btree" ("git_hash");
+COMMENT ON INDEX "public"."idx_content_has_prerequisites" IS 'Index for prerequisites content filter';
 
 
 
-CREATE INDEX "idx_content_items_search_vector" ON "public"."content_items" USING "gin" ("search_vector");
+CREATE INDEX "idx_content_has_troubleshooting" ON "public"."content" USING "btree" ("has_troubleshooting") WHERE ("has_troubleshooting" = true);
 
 
 
-CREATE INDEX "idx_content_items_slug" ON "public"."content_items" USING "btree" ("slug");
+COMMENT ON INDEX "public"."idx_content_has_troubleshooting" IS 'Index for troubleshooting content filter';
 
 
 
-CREATE INDEX "idx_content_items_synced_at" ON "public"."content_items" USING "btree" ("synced_at" DESC);
+CREATE INDEX "idx_content_homepage" ON "public"."content" USING "btree" ("category", "popularity_score" DESC NULLS LAST, "created_at" DESC);
 
 
 
-CREATE INDEX "idx_content_items_tags_gin" ON "public"."content_items" USING "gin" ((("data" -> 'tags'::"text")));
+CREATE INDEX "idx_content_metadata" ON "public"."content" USING "gin" ("metadata");
 
 
 
-COMMENT ON INDEX "public"."idx_content_items_tags_gin" IS 'GIN index for fast tag array searches in related content queries.';
+CREATE INDEX "idx_content_popularity" ON "public"."content" USING "btree" ("popularity_score" DESC NULLS LAST);
 
 
 
@@ -12465,11 +10432,15 @@ CREATE INDEX "idx_content_popularity_type" ON "public"."content_popularity" USIN
 
 
 
+CREATE INDEX "idx_content_reading_time" ON "public"."content" USING "btree" ("reading_time") WHERE ("reading_time" > 0);
+
+
+
+COMMENT ON INDEX "public"."idx_content_reading_time" IS 'Index for filtering/sorting by reading time';
+
+
+
 CREATE INDEX "idx_content_seo_overrides_category" ON "public"."content_seo_overrides" USING "btree" ("category");
-
-
-
-CREATE INDEX "idx_content_seo_overrides_content_category" ON "public"."content_seo_overrides" USING "btree" ("content_id", "category");
 
 
 
@@ -12482,6 +10453,10 @@ CREATE INDEX "idx_content_similarities_content_b" ON "public"."content_similarit
 
 
 CREATE INDEX "idx_content_similarities_score" ON "public"."content_similarities" USING "btree" ("similarity_score" DESC) WHERE ("similarity_score" >= 0.3);
+
+
+
+CREATE INDEX "idx_content_slug" ON "public"."content" USING "btree" ("slug");
 
 
 
@@ -12506,6 +10481,10 @@ CREATE INDEX "idx_content_submissions_submitter" ON "public"."content_submission
 
 
 CREATE INDEX "idx_content_submissions_type" ON "public"."content_submissions" USING "btree" ("submission_type");
+
+
+
+CREATE INDEX "idx_content_tags" ON "public"."content" USING "gin" ("tags");
 
 
 
@@ -12557,14 +10536,6 @@ CREATE INDEX "idx_field_versions_field_id" ON "public"."form_field_versions" USI
 
 
 
-CREATE INDEX "idx_followers_follower_following" ON "public"."followers" USING "btree" ("follower_id", "following_id");
-
-
-
-CREATE INDEX "idx_followers_follower_id" ON "public"."followers" USING "btree" ("follower_id");
-
-
-
 CREATE INDEX "idx_followers_following_id" ON "public"."followers" USING "btree" ("following_id");
 
 
@@ -12594,98 +10565,6 @@ CREATE INDEX "idx_form_fields_order" ON "public"."form_field_definitions" USING 
 
 
 CREATE INDEX "idx_form_fields_scope" ON "public"."form_field_definitions" USING "btree" ("field_scope");
-
-
-
-CREATE INDEX "idx_guides_author" ON "public"."guides" USING "btree" ("author");
-
-
-
-CREATE INDEX "idx_guides_category" ON "public"."guides" USING "btree" ("category");
-
-
-
-CREATE INDEX "idx_guides_content_fts" ON "public"."guides" USING "gin" ("to_tsvector"('"english"'::"regconfig", (("title" || ' '::"text") || "description")));
-
-
-
-CREATE INDEX "idx_guides_created_at" ON "public"."guides" USING "btree" ("created_at" DESC);
-
-
-
-CREATE INDEX "idx_guides_date_published" ON "public"."guides" USING "btree" ("date_published" DESC NULLS LAST);
-
-
-
-CREATE INDEX "idx_guides_date_updated" ON "public"."guides" USING "btree" ("date_updated" DESC NULLS LAST);
-
-
-
-CREATE INDEX "idx_guides_difficulty" ON "public"."guides" USING "btree" ("difficulty") WHERE ("difficulty" IS NOT NULL);
-
-
-
-CREATE INDEX "idx_guides_featured" ON "public"."guides" USING "btree" ("featured") WHERE ("featured" = true);
-
-
-
-CREATE INDEX "idx_guides_fts" ON "public"."guides" USING "gin" ("fts_vector");
-
-
-
-CREATE INDEX "idx_guides_homepage" ON "public"."guides" USING "btree" ("created_at" DESC, "date_added" DESC);
-
-
-
-CREATE INDEX "idx_guides_keywords" ON "public"."guides" USING "gin" ("keywords");
-
-
-
-CREATE INDEX "idx_guides_slug" ON "public"."guides" USING "btree" ("slug");
-
-
-
-CREATE INDEX "idx_guides_subcategory" ON "public"."guides" USING "btree" ("subcategory");
-
-
-
-CREATE INDEX "idx_guides_tags" ON "public"."guides" USING "gin" ("tags");
-
-
-
-CREATE INDEX "idx_hooks_author" ON "public"."hooks" USING "btree" ("author");
-
-
-
-CREATE INDEX "idx_hooks_content_fts" ON "public"."hooks" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
-
-
-
-CREATE INDEX "idx_hooks_created_at" ON "public"."hooks" USING "btree" ("created_at" DESC);
-
-
-
-CREATE INDEX "idx_hooks_date_added" ON "public"."hooks" USING "btree" ("date_added" DESC);
-
-
-
-CREATE INDEX "idx_hooks_event_types" ON "public"."hooks" USING "gin" ("event_types");
-
-
-
-CREATE INDEX "idx_hooks_fts" ON "public"."hooks" USING "gin" ("fts_vector");
-
-
-
-CREATE INDEX "idx_hooks_homepage" ON "public"."hooks" USING "btree" ("created_at" DESC, "date_added" DESC);
-
-
-
-CREATE INDEX "idx_hooks_slug" ON "public"."hooks" USING "btree" ("slug");
-
-
-
-CREATE INDEX "idx_hooks_tags" ON "public"."hooks" USING "gin" ("tags");
 
 
 
@@ -12737,42 +10616,6 @@ CREATE INDEX "idx_jobs_user_id_status_created_at" ON "public"."jobs" USING "btre
 
 
 
-CREATE INDEX "idx_mcp_author" ON "public"."mcp" USING "btree" ("author");
-
-
-
-CREATE INDEX "idx_mcp_content_fts" ON "public"."mcp" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
-
-
-
-CREATE INDEX "idx_mcp_created_at" ON "public"."mcp" USING "btree" ("created_at" DESC);
-
-
-
-CREATE INDEX "idx_mcp_date_added" ON "public"."mcp" USING "btree" ("date_added" DESC);
-
-
-
-CREATE INDEX "idx_mcp_fts" ON "public"."mcp" USING "gin" ("fts_vector");
-
-
-
-CREATE INDEX "idx_mcp_homepage" ON "public"."mcp" USING "btree" ("created_at" DESC, "date_added" DESC);
-
-
-
-CREATE INDEX "idx_mcp_slug" ON "public"."mcp" USING "btree" ("slug");
-
-
-
-CREATE INDEX "idx_mcp_tags" ON "public"."mcp" USING "gin" ("tags");
-
-
-
-CREATE UNIQUE INDEX "idx_mv_analytics_summary_content" ON "public"."mv_analytics_summary" USING "btree" ("category", "slug");
-
-
-
 CREATE INDEX "idx_mv_analytics_summary_copies" ON "public"."mv_analytics_summary" USING "btree" ("copy_count" DESC);
 
 
@@ -12781,91 +10624,7 @@ CREATE INDEX "idx_mv_analytics_summary_views" ON "public"."mv_analytics_summary"
 
 
 
-CREATE INDEX "idx_mv_content_similarity_score" ON "public"."mv_content_similarity" USING "btree" ("similarity_score" DESC);
-
-
-
-CREATE INDEX "idx_mv_content_similarity_source" ON "public"."mv_content_similarity" USING "btree" ("source_category", "source_slug", "similarity_score" DESC);
-
-
-
-CREATE INDEX "idx_mv_content_similarity_target" ON "public"."mv_content_similarity" USING "btree" ("target_category", "target_slug");
-
-
-
-CREATE INDEX "idx_mv_content_stats_category" ON "public"."mv_content_stats" USING "btree" ("category");
-
-
-
-CREATE INDEX "idx_mv_content_stats_popularity" ON "public"."mv_content_stats" USING "btree" ("popularity_score" DESC);
-
-
-
-CREATE INDEX "idx_mv_content_stats_slug" ON "public"."mv_content_stats" USING "btree" ("category", "slug");
-
-
-
-CREATE INDEX "idx_mv_content_stats_tags" ON "public"."mv_content_stats" USING "gin" ("tags");
-
-
-
-CREATE INDEX "idx_mv_content_stats_trending" ON "public"."mv_content_stats" USING "btree" ("trending_score" DESC);
-
-
-
-CREATE INDEX "idx_mv_content_tag_index_category" ON "public"."mv_content_tag_index" USING "btree" ("category");
-
-
-
-CREATE INDEX "idx_mv_content_tag_index_tags_gin" ON "public"."mv_content_tag_index" USING "gin" ("tags");
-
-
-
-CREATE INDEX "idx_mv_for_you_feed_score" ON "public"."mv_for_you_feed" USING "btree" ("recommendation_score" DESC);
-
-
-
-CREATE INDEX "idx_mv_for_you_feed_user" ON "public"."mv_for_you_feed" USING "btree" ("user_id", "rank_for_user");
-
-
-
-CREATE INDEX "idx_mv_for_you_feed_user_content" ON "public"."mv_for_you_feed" USING "btree" ("user_id", "content_type", "content_slug");
-
-
-
-CREATE INDEX "idx_mv_recommendation_scores_category" ON "public"."mv_recommendation_scores" USING "btree" ("category");
-
-
-
-CREATE INDEX "idx_mv_recommendation_scores_experience" ON "public"."mv_recommendation_scores" USING "btree" ("suggested_experience_level");
-
-
-
-CREATE INDEX "idx_mv_recommendation_scores_focus_areas" ON "public"."mv_recommendation_scores" USING "gin" ("focus_area_tags");
-
-
-
-CREATE INDEX "idx_mv_recommendation_scores_integrations" ON "public"."mv_recommendation_scores" USING "gin" ("integration_tags");
-
-
-
-CREATE INDEX "idx_mv_recommendation_scores_use_cases" ON "public"."mv_recommendation_scores" USING "gin" ("use_case_tags");
-
-
-
-CREATE UNIQUE INDEX "idx_mv_search_facets_category" ON "public"."mv_search_facets" USING "btree" ("category");
-
-
-
-CREATE INDEX "idx_mv_trending_content_category" ON "public"."mv_trending_content" USING "btree" ("category", "rank_in_category");
-
-
-
-CREATE INDEX "idx_mv_trending_content_rank" ON "public"."mv_trending_content" USING "btree" ("rank_overall");
-
-
-
-CREATE INDEX "idx_mv_trending_content_views" ON "public"."mv_trending_content" USING "btree" ("view_count" DESC);
+CREATE UNIQUE INDEX "idx_mv_content_tag_index_unique" ON "public"."mv_content_tag_index" USING "btree" ("category", "slug");
 
 
 
@@ -12993,14 +10752,6 @@ CREATE INDEX "idx_reputation_tiers_score_range" ON "public"."reputation_tiers" U
 
 
 
-CREATE INDEX "idx_review_helpful_votes_review" ON "public"."review_helpful_votes" USING "btree" ("review_id");
-
-
-
-CREATE INDEX "idx_review_helpful_votes_user" ON "public"."review_helpful_votes" USING "btree" ("user_id");
-
-
-
 CREATE INDEX "idx_review_ratings_content" ON "public"."review_ratings" USING "btree" ("content_type", "content_slug", "created_at" DESC);
 
 
@@ -13029,38 +10780,6 @@ CREATE INDEX "idx_review_ratings_user" ON "public"."review_ratings" USING "btree
 
 
 
-CREATE INDEX "idx_rules_author" ON "public"."rules" USING "btree" ("author");
-
-
-
-CREATE INDEX "idx_rules_content_fts" ON "public"."rules" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
-
-
-
-CREATE INDEX "idx_rules_created_at" ON "public"."rules" USING "btree" ("created_at" DESC);
-
-
-
-CREATE INDEX "idx_rules_date_added" ON "public"."rules" USING "btree" ("date_added" DESC);
-
-
-
-CREATE INDEX "idx_rules_fts" ON "public"."rules" USING "gin" ("fts_vector");
-
-
-
-CREATE INDEX "idx_rules_homepage" ON "public"."rules" USING "btree" ("created_at" DESC, "date_added" DESC);
-
-
-
-CREATE INDEX "idx_rules_slug" ON "public"."rules" USING "btree" ("slug");
-
-
-
-CREATE INDEX "idx_rules_tags" ON "public"."rules" USING "gin" ("tags");
-
-
-
 CREATE INDEX "idx_select_options_active" ON "public"."form_select_options" USING "btree" ("active") WHERE ("active" = true);
 
 
@@ -13082,46 +10801,6 @@ CREATE INDEX "idx_seo_enrichment_rules_enabled" ON "public"."seo_enrichment_rule
 
 
 CREATE INDEX "idx_seo_enrichment_rules_focus_areas" ON "public"."seo_enrichment_rules" USING "gin" ("focus_areas");
-
-
-
-CREATE INDEX "idx_skills_author" ON "public"."skills" USING "btree" ("author");
-
-
-
-CREATE INDEX "idx_skills_content_fts" ON "public"."skills" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
-
-
-
-CREATE INDEX "idx_skills_created_at" ON "public"."skills" USING "btree" ("created_at" DESC);
-
-
-
-CREATE INDEX "idx_skills_date_added" ON "public"."skills" USING "btree" ("date_added" DESC);
-
-
-
-CREATE INDEX "idx_skills_dependencies" ON "public"."skills" USING "gin" ("dependencies");
-
-
-
-CREATE INDEX "idx_skills_difficulty" ON "public"."skills" USING "btree" ("difficulty") WHERE ("difficulty" IS NOT NULL);
-
-
-
-CREATE INDEX "idx_skills_fts" ON "public"."skills" USING "gin" ("fts_vector");
-
-
-
-CREATE INDEX "idx_skills_homepage" ON "public"."skills" USING "btree" ("created_at" DESC, "date_added" DESC);
-
-
-
-CREATE INDEX "idx_skills_slug" ON "public"."skills" USING "btree" ("slug");
-
-
-
-CREATE INDEX "idx_skills_tags" ON "public"."skills" USING "gin" ("tags");
 
 
 
@@ -13158,38 +10837,6 @@ CREATE INDEX "idx_sponsored_impressions_sponsored_id" ON "public"."sponsored_imp
 
 
 CREATE INDEX "idx_sponsored_impressions_user_id" ON "public"."sponsored_impressions" USING "btree" ("user_id");
-
-
-
-CREATE INDEX "idx_statuslines_author" ON "public"."statuslines" USING "btree" ("author");
-
-
-
-CREATE INDEX "idx_statuslines_content_fts" ON "public"."statuslines" USING "gin" ("to_tsvector"('"english"'::"regconfig", "description"));
-
-
-
-CREATE INDEX "idx_statuslines_created_at" ON "public"."statuslines" USING "btree" ("created_at" DESC);
-
-
-
-CREATE INDEX "idx_statuslines_date_added" ON "public"."statuslines" USING "btree" ("date_added" DESC);
-
-
-
-CREATE INDEX "idx_statuslines_fts" ON "public"."statuslines" USING "gin" ("fts_vector");
-
-
-
-CREATE INDEX "idx_statuslines_homepage" ON "public"."statuslines" USING "btree" ("created_at" DESC, "date_added" DESC);
-
-
-
-CREATE INDEX "idx_statuslines_slug" ON "public"."statuslines" USING "btree" ("slug");
-
-
-
-CREATE INDEX "idx_statuslines_tags" ON "public"."statuslines" USING "gin" ("tags");
 
 
 
@@ -13285,10 +10932,6 @@ CREATE INDEX "idx_user_affinities_filtered_sort" ON "public"."user_affinities" U
 
 
 
-CREATE INDEX "idx_user_affinities_user_id" ON "public"."user_affinities" USING "btree" ("user_id", "affinity_score" DESC);
-
-
-
 CREATE INDEX "idx_user_affinity_scores_type" ON "public"."user_affinity_scores" USING "btree" ("content_type", "avg_affinity_score" DESC);
 
 
@@ -13334,10 +10977,6 @@ CREATE INDEX "idx_user_collections_created_at" ON "public"."user_collections" US
 
 
 CREATE INDEX "idx_user_collections_public" ON "public"."user_collections" USING "btree" ("is_public") WHERE ("is_public" = true);
-
-
-
-CREATE INDEX "idx_user_collections_slug" ON "public"."user_collections" USING "btree" ("user_id", "slug");
 
 
 
@@ -13390,10 +11029,6 @@ CREATE INDEX "idx_user_interactions_session" ON "public"."user_interactions" USI
 
 
 CREATE INDEX "idx_user_interactions_type" ON "public"."user_interactions" USING "btree" ("interaction_type");
-
-
-
-CREATE INDEX "idx_user_interactions_user" ON "public"."user_interactions" USING "btree" ("user_id");
 
 
 
@@ -13461,10 +11096,6 @@ CREATE INDEX "idx_users_name_trgm" ON "public"."users" USING "gin" ("name" "publ
 
 
 
-CREATE INDEX "idx_users_reputation" ON "public"."users" USING "btree" ("reputation_score" DESC);
-
-
-
 CREATE INDEX "idx_users_reputation_score" ON "public"."users" USING "btree" ("reputation_score" DESC) WHERE ("reputation_score" > 0);
 
 
@@ -13474,10 +11105,6 @@ COMMENT ON INDEX "public"."idx_users_reputation_score" IS 'Index for fast leader
 
 
 CREATE INDEX "idx_users_search_vector" ON "public"."users" USING "gin" ("search_vector");
-
-
-
-CREATE INDEX "idx_users_slug" ON "public"."users" USING "btree" ("slug");
 
 
 
@@ -13537,7 +11164,23 @@ CREATE INDEX "idx_webhook_events_type" ON "public"."webhook_events" USING "btree
 
 
 
-CREATE UNIQUE INDEX "mv_site_urls_path_idx" ON "public"."mv_site_urls" USING "btree" ("path");
+CREATE UNIQUE INDEX "mv_analytics_summary_category_slug_idx" ON "public"."mv_analytics_summary" USING "btree" ("category", "slug");
+
+
+
+CREATE UNIQUE INDEX "mv_content_stats_category_slug_idx" ON "public"."mv_content_stats" USING "btree" ("category", "slug");
+
+
+
+CREATE UNIQUE INDEX "mv_for_you_feed_user_content_idx" ON "public"."mv_for_you_feed" USING "btree" ("user_id", "content_type", "content_slug");
+
+
+
+CREATE UNIQUE INDEX "mv_search_facets_category_idx" ON "public"."mv_search_facets" USING "btree" ("category");
+
+
+
+CREATE UNIQUE INDEX "mv_trending_content_category_slug_idx" ON "public"."mv_trending_content" USING "btree" ("category", "slug");
 
 
 
@@ -13551,10 +11194,6 @@ CREATE STATISTICS "public"."stats_user_interactions_user_time_type" (dependencie
 
 
 ALTER STATISTICS "public"."stats_user_interactions_user_time_type" OWNER TO "postgres";
-
-
-CREATE OR REPLACE TRIGGER "agents_fts_update" BEFORE INSERT OR UPDATE OF "title", "description", "tags" ON "public"."agents" FOR EACH ROW EXECUTE FUNCTION "public"."update_content_fts"();
-
 
 
 CREATE OR REPLACE TRIGGER "auto_award_badges_after_comment" AFTER INSERT ON "public"."comments" FOR EACH ROW EXECUTE FUNCTION "public"."trigger_auto_award_badges"();
@@ -13589,43 +11228,11 @@ COMMENT ON TRIGGER "auto_award_badges_after_submission" ON "public"."submissions
 
 
 
-CREATE OR REPLACE TRIGGER "auto_populate_agents_fields" BEFORE INSERT OR UPDATE ON "public"."agents" FOR EACH ROW EXECUTE FUNCTION "public"."auto_populate_generated_fields"();
+CREATE OR REPLACE TRIGGER "content_fts_update" BEFORE INSERT OR UPDATE OF "title", "description", "tags" ON "public"."content" FOR EACH ROW EXECUTE FUNCTION "public"."update_content_fts_vector"();
 
 
 
-CREATE OR REPLACE TRIGGER "auto_populate_collections_fields" BEFORE INSERT OR UPDATE ON "public"."collections" FOR EACH ROW EXECUTE FUNCTION "public"."auto_populate_generated_fields"();
-
-
-
-CREATE OR REPLACE TRIGGER "auto_populate_commands_fields" BEFORE INSERT OR UPDATE ON "public"."commands" FOR EACH ROW EXECUTE FUNCTION "public"."auto_populate_generated_fields"();
-
-
-
-CREATE OR REPLACE TRIGGER "auto_populate_guides_fields" BEFORE INSERT OR UPDATE ON "public"."guides" FOR EACH ROW EXECUTE FUNCTION "public"."auto_populate_generated_fields"();
-
-
-
-CREATE OR REPLACE TRIGGER "auto_populate_hooks_fields" BEFORE INSERT OR UPDATE ON "public"."hooks" FOR EACH ROW EXECUTE FUNCTION "public"."auto_populate_generated_fields"();
-
-
-
-CREATE OR REPLACE TRIGGER "auto_populate_mcp_fields" BEFORE INSERT OR UPDATE ON "public"."mcp" FOR EACH ROW EXECUTE FUNCTION "public"."auto_populate_generated_fields"();
-
-
-
-CREATE OR REPLACE TRIGGER "auto_populate_rules_fields" BEFORE INSERT OR UPDATE ON "public"."rules" FOR EACH ROW EXECUTE FUNCTION "public"."auto_populate_generated_fields"();
-
-
-
-CREATE OR REPLACE TRIGGER "auto_populate_statuslines_fields" BEFORE INSERT OR UPDATE ON "public"."statuslines" FOR EACH ROW EXECUTE FUNCTION "public"."auto_populate_generated_fields"();
-
-
-
-CREATE OR REPLACE TRIGGER "collections_fts_update" BEFORE INSERT OR UPDATE OF "title", "description", "tags" ON "public"."collections" FOR EACH ROW EXECUTE FUNCTION "public"."update_content_fts"();
-
-
-
-CREATE OR REPLACE TRIGGER "commands_fts_update" BEFORE INSERT OR UPDATE OF "title", "description", "tags" ON "public"."commands" FOR EACH ROW EXECUTE FUNCTION "public"."update_content_fts"();
+CREATE OR REPLACE TRIGGER "content_updated_at" BEFORE UPDATE ON "public"."content" FOR EACH ROW EXECUTE FUNCTION "public"."update_content_updated_at"();
 
 
 
@@ -13657,31 +11264,7 @@ CREATE OR REPLACE TRIGGER "generate_users_slug" BEFORE INSERT OR UPDATE ON "publ
 
 
 
-CREATE OR REPLACE TRIGGER "guides_fts_update" BEFORE INSERT OR UPDATE OF "title", "description", "tags", "keywords" ON "public"."guides" FOR EACH ROW EXECUTE FUNCTION "public"."update_content_fts"();
-
-
-
-CREATE OR REPLACE TRIGGER "hooks_fts_update" BEFORE INSERT OR UPDATE OF "title", "description", "tags" ON "public"."hooks" FOR EACH ROW EXECUTE FUNCTION "public"."update_content_fts"();
-
-
-
-CREATE OR REPLACE TRIGGER "mcp_fts_update" BEFORE INSERT OR UPDATE OF "title", "description", "tags" ON "public"."mcp" FOR EACH ROW EXECUTE FUNCTION "public"."update_content_fts"();
-
-
-
 CREATE OR REPLACE TRIGGER "newsletter_updated_at_trigger" BEFORE UPDATE ON "public"."newsletter_subscriptions" FOR EACH ROW EXECUTE FUNCTION "public"."update_newsletter_updated_at"();
-
-
-
-CREATE OR REPLACE TRIGGER "rules_fts_update" BEFORE INSERT OR UPDATE OF "title", "description", "tags" ON "public"."rules" FOR EACH ROW EXECUTE FUNCTION "public"."update_content_fts"();
-
-
-
-CREATE OR REPLACE TRIGGER "skills_fts_update" BEFORE INSERT OR UPDATE OF "title", "description", "tags" ON "public"."skills" FOR EACH ROW EXECUTE FUNCTION "public"."update_content_fts"();
-
-
-
-CREATE OR REPLACE TRIGGER "statuslines_fts_update" BEFORE INSERT OR UPDATE OF "title", "description", "tags" ON "public"."statuslines" FOR EACH ROW EXECUTE FUNCTION "public"."update_content_fts"();
 
 
 
@@ -13737,10 +11320,6 @@ CREATE OR REPLACE TRIGGER "trigger_update_helpful_count_on_insert" AFTER INSERT 
 
 
 
-CREATE OR REPLACE TRIGGER "update_agents_updated_at" BEFORE UPDATE ON "public"."agents" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
-
-
-
 CREATE OR REPLACE TRIGGER "update_analytics_event_categories_updated_at" BEFORE UPDATE ON "public"."analytics_event_categories" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
 
 
@@ -13769,14 +11348,6 @@ CREATE OR REPLACE TRIGGER "update_collection_item_count_on_insert" AFTER INSERT 
 
 
 
-CREATE OR REPLACE TRIGGER "update_collections_updated_at" BEFORE UPDATE ON "public"."collections" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
-
-
-
-CREATE OR REPLACE TRIGGER "update_commands_updated_at" BEFORE UPDATE ON "public"."commands" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
-
-
-
 CREATE OR REPLACE TRIGGER "update_comments_updated_at" BEFORE UPDATE ON "public"."comments" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
 
 
@@ -13789,10 +11360,6 @@ CREATE OR REPLACE TRIGGER "update_content_generation_tracking_updated_at" BEFORE
 
 
 
-CREATE OR REPLACE TRIGGER "update_content_items_updated_at_trigger" BEFORE UPDATE ON "public"."content_items" FOR EACH ROW EXECUTE FUNCTION "public"."update_content_items_updated_at"();
-
-
-
 CREATE OR REPLACE TRIGGER "update_content_seo_overrides_updated_at" BEFORE UPDATE ON "public"."content_seo_overrides" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
 
 
@@ -13801,19 +11368,7 @@ CREATE OR REPLACE TRIGGER "update_content_submissions_updated_at" BEFORE UPDATE 
 
 
 
-CREATE OR REPLACE TRIGGER "update_guides_updated_at" BEFORE UPDATE ON "public"."guides" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
-
-
-
-CREATE OR REPLACE TRIGGER "update_hooks_updated_at" BEFORE UPDATE ON "public"."hooks" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
-
-
-
 CREATE OR REPLACE TRIGGER "update_jobs_updated_at" BEFORE UPDATE ON "public"."jobs" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
-
-
-
-CREATE OR REPLACE TRIGGER "update_mcp_updated_at" BEFORE UPDATE ON "public"."mcp" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
 
 
 
@@ -13861,23 +11416,11 @@ CREATE OR REPLACE TRIGGER "update_review_ratings_updated_at" BEFORE UPDATE ON "p
 
 
 
-CREATE OR REPLACE TRIGGER "update_rules_updated_at" BEFORE UPDATE ON "public"."rules" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
-
-
-
 CREATE OR REPLACE TRIGGER "update_seo_config_updated_at" BEFORE UPDATE ON "public"."seo_config" FOR EACH ROW EXECUTE FUNCTION "public"."update_seo_config_updated_at"();
 
 
 
-CREATE OR REPLACE TRIGGER "update_skills_updated_at" BEFORE UPDATE ON "public"."skills" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
-
-
-
 CREATE OR REPLACE TRIGGER "update_sponsored_content_updated_at" BEFORE UPDATE ON "public"."sponsored_content" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
-
-
-
-CREATE OR REPLACE TRIGGER "update_statuslines_updated_at" BEFORE UPDATE ON "public"."statuslines" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
 
 
 
@@ -14271,47 +11814,7 @@ CREATE POLICY "Company owners can update their companies" ON "public"."companies
 
 
 
-CREATE POLICY "Content is publicly readable" ON "public"."agents" FOR SELECT TO "authenticated", "anon" USING (true);
-
-
-
 CREATE POLICY "Content is publicly readable" ON "public"."changelog" FOR SELECT TO "authenticated", "anon" USING (true);
-
-
-
-CREATE POLICY "Content is publicly readable" ON "public"."collections" FOR SELECT TO "authenticated", "anon" USING (true);
-
-
-
-CREATE POLICY "Content is publicly readable" ON "public"."commands" FOR SELECT TO "authenticated", "anon" USING (true);
-
-
-
-CREATE POLICY "Content is publicly readable" ON "public"."content_items" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Content is publicly readable" ON "public"."guides" FOR SELECT TO "authenticated", "anon" USING (true);
-
-
-
-CREATE POLICY "Content is publicly readable" ON "public"."hooks" FOR SELECT TO "authenticated", "anon" USING (true);
-
-
-
-CREATE POLICY "Content is publicly readable" ON "public"."mcp" FOR SELECT TO "authenticated", "anon" USING (true);
-
-
-
-CREATE POLICY "Content is publicly readable" ON "public"."rules" FOR SELECT TO "authenticated", "anon" USING (true);
-
-
-
-CREATE POLICY "Content is publicly readable" ON "public"."skills" FOR SELECT TO "authenticated", "anon" USING (true);
-
-
-
-CREATE POLICY "Content is publicly readable" ON "public"."statuslines" FOR SELECT TO "authenticated", "anon" USING (true);
 
 
 
@@ -14716,9 +12219,6 @@ CREATE POLICY "Votes are viewable by everyone" ON "public"."votes" FOR SELECT US
 ALTER TABLE "public"."affinity_config" ENABLE ROW LEVEL SECURITY;
 
 
-ALTER TABLE "public"."agents" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."analytics_event_categories" ENABLE ROW LEVEL SECURITY;
 
 
@@ -14760,16 +12260,17 @@ ALTER TABLE "public"."changelog_entries" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."collection_items" ENABLE ROW LEVEL SECURITY;
 
 
-ALTER TABLE "public"."collections" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."commands" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."comments" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."companies" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."content" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "content_delete_service_role" ON "public"."content" FOR DELETE TO "service_role" USING (true);
+
 
 
 ALTER TABLE "public"."content_generation_tracking" ENABLE ROW LEVEL SECURITY;
@@ -14778,7 +12279,20 @@ ALTER TABLE "public"."content_generation_tracking" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."content_generator_configs" ENABLE ROW LEVEL SECURITY;
 
 
-ALTER TABLE "public"."content_items" ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "content_insert_service_role" ON "public"."content" FOR INSERT TO "service_role" WITH CHECK (true);
+
+
+
+CREATE POLICY "content_select_anon" ON "public"."content" FOR SELECT TO "anon" USING (true);
+
+
+
+CREATE POLICY "content_select_authenticated" ON "public"."content" FOR SELECT TO "authenticated" USING (true);
+
+
+
+CREATE POLICY "content_select_service_role" ON "public"."content" FOR SELECT TO "service_role" USING (true);
+
 
 
 ALTER TABLE "public"."content_seo_overrides" ENABLE ROW LEVEL SECURITY;
@@ -14806,6 +12320,25 @@ ALTER TABLE "public"."content_similarities" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."content_submissions" ENABLE ROW LEVEL SECURITY;
 
 
+CREATE POLICY "content_update_service_role" ON "public"."content" FOR UPDATE TO "service_role" USING (true) WITH CHECK (true);
+
+
+
+ALTER TABLE "public"."email_blocklist" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "email_blocklist_block_anon" ON "public"."email_blocklist" TO "anon" USING (false);
+
+
+
+CREATE POLICY "email_blocklist_block_authenticated" ON "public"."email_blocklist" TO "authenticated" USING (false);
+
+
+
+CREATE POLICY "email_blocklist_service_role_all" ON "public"."email_blocklist" TO "service_role" USING (true) WITH CHECK (true);
+
+
+
 ALTER TABLE "public"."email_sequence_schedule" ENABLE ROW LEVEL SECURITY;
 
 
@@ -14830,16 +12363,7 @@ ALTER TABLE "public"."form_field_versions" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."form_select_options" ENABLE ROW LEVEL SECURITY;
 
 
-ALTER TABLE "public"."guides" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."hooks" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."jobs" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."mcp" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."metadata_templates" ENABLE ROW LEVEL SECURITY;
@@ -14881,9 +12405,6 @@ ALTER TABLE "public"."review_helpful_votes" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."review_ratings" ENABLE ROW LEVEL SECURITY;
 
 
-ALTER TABLE "public"."rules" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."seo_config" ENABLE ROW LEVEL SECURITY;
 
 
@@ -14894,9 +12415,6 @@ CREATE POLICY "service_role_changelog_entries_all" ON "public"."changelog_entrie
 
 
 
-ALTER TABLE "public"."skills" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."sponsored_clicks" ENABLE ROW LEVEL SECURITY;
 
 
@@ -14904,9 +12422,6 @@ ALTER TABLE "public"."sponsored_content" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."sponsored_impressions" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."statuslines" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."structured_data_config" ENABLE ROW LEVEL SECURITY;
@@ -15323,8 +12838,9 @@ GRANT ALL ON FUNCTION "public"."get_due_sequence_emails"() TO "anon";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_enriched_content"("p_category" "text", "p_slug" "text", "p_slugs" "text"[], "p_limit" integer, "p_offset" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_enriched_content"("p_category" "text", "p_slug" "text", "p_slugs" "text"[], "p_limit" integer, "p_offset" integer) TO "anon";
+GRANT ALL ON FUNCTION "public"."get_enriched_content"("p_category" "text", "p_slug" "text", "p_slugs" "text"[], "p_limit" integer, "p_offset" integer) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_enriched_content"("p_category" "text", "p_slug" "text", "p_slugs" "text"[], "p_limit" integer, "p_offset" integer) TO "service_role";
 
 
 
@@ -15546,12 +13062,6 @@ GRANT ALL ON TABLE "public"."affinity_config" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."agents" TO "service_role";
-GRANT SELECT ON TABLE "public"."agents" TO "anon";
-GRANT SELECT ON TABLE "public"."agents" TO "authenticated";
-
-
-
 GRANT SELECT ON TABLE "public"."announcements" TO "anon";
 GRANT SELECT ON TABLE "public"."announcements" TO "authenticated";
 
@@ -15591,18 +13101,6 @@ GRANT SELECT ON TABLE "public"."collection_items" TO "anon";
 
 
 
-GRANT ALL ON TABLE "public"."collections" TO "service_role";
-GRANT SELECT ON TABLE "public"."collections" TO "anon";
-GRANT SELECT ON TABLE "public"."collections" TO "authenticated";
-
-
-
-GRANT ALL ON TABLE "public"."commands" TO "service_role";
-GRANT SELECT ON TABLE "public"."commands" TO "anon";
-GRANT SELECT ON TABLE "public"."commands" TO "authenticated";
-
-
-
 GRANT SELECT,INSERT ON TABLE "public"."comments" TO "authenticated";
 GRANT SELECT ON TABLE "public"."comments" TO "anon";
 
@@ -15612,44 +13110,9 @@ GRANT SELECT ON TABLE "public"."company_job_stats" TO "authenticated";
 
 
 
-GRANT ALL ON TABLE "public"."guides" TO "service_role";
-GRANT SELECT ON TABLE "public"."guides" TO "anon";
-GRANT SELECT ON TABLE "public"."guides" TO "authenticated";
-
-
-
-GRANT ALL ON TABLE "public"."hooks" TO "service_role";
-GRANT SELECT ON TABLE "public"."hooks" TO "anon";
-GRANT SELECT ON TABLE "public"."hooks" TO "authenticated";
-
-
-
-GRANT ALL ON TABLE "public"."mcp" TO "service_role";
-GRANT SELECT ON TABLE "public"."mcp" TO "anon";
-GRANT SELECT ON TABLE "public"."mcp" TO "authenticated";
-
-
-
-GRANT ALL ON TABLE "public"."rules" TO "service_role";
-GRANT SELECT ON TABLE "public"."rules" TO "anon";
-GRANT SELECT ON TABLE "public"."rules" TO "authenticated";
-
-
-
-GRANT ALL ON TABLE "public"."skills" TO "service_role";
-GRANT SELECT ON TABLE "public"."skills" TO "anon";
-GRANT SELECT ON TABLE "public"."skills" TO "authenticated";
-
-
-
-GRANT ALL ON TABLE "public"."statuslines" TO "service_role";
-GRANT SELECT ON TABLE "public"."statuslines" TO "anon";
-GRANT SELECT ON TABLE "public"."statuslines" TO "authenticated";
-
-
-
-GRANT SELECT ON TABLE "public"."content_base" TO "anon";
-GRANT SELECT ON TABLE "public"."content_base" TO "authenticated";
+GRANT ALL ON TABLE "public"."content" TO "service_role";
+GRANT ALL ON TABLE "public"."content" TO "authenticated";
+GRANT SELECT ON TABLE "public"."content" TO "anon";
 
 
 
@@ -15672,8 +13135,9 @@ GRANT SELECT,INSERT ON TABLE "public"."content_submissions" TO "authenticated";
 
 
 
-GRANT SELECT ON TABLE "public"."content_unified" TO "authenticated";
 GRANT SELECT ON TABLE "public"."content_unified" TO "anon";
+GRANT SELECT ON TABLE "public"."content_unified" TO "authenticated";
+GRANT SELECT ON TABLE "public"."content_unified" TO "service_role";
 
 
 
@@ -15716,21 +13180,15 @@ GRANT SELECT ON TABLE "public"."mv_analytics_summary" TO "authenticated";
 
 
 
-GRANT SELECT ON TABLE "public"."mv_content_similarity" TO "anon";
-
-
-
 GRANT SELECT ON TABLE "public"."mv_content_stats" TO "anon";
+GRANT SELECT ON TABLE "public"."mv_content_stats" TO "authenticated";
+GRANT SELECT ON TABLE "public"."mv_content_stats" TO "service_role";
 
 
 
-GRANT SELECT ON TABLE "public"."mv_content_tag_index" TO "service_role";
 GRANT SELECT ON TABLE "public"."mv_content_tag_index" TO "anon";
-
-
-
-GRANT SELECT ON TABLE "public"."mv_featured_scores" TO "anon";
-GRANT SELECT ON TABLE "public"."mv_featured_scores" TO "authenticated";
+GRANT SELECT ON TABLE "public"."mv_content_tag_index" TO "authenticated";
+GRANT SELECT ON TABLE "public"."mv_content_tag_index" TO "service_role";
 
 
 
@@ -15738,22 +13196,21 @@ GRANT SELECT ON TABLE "public"."user_affinities" TO "authenticated";
 
 
 
+GRANT SELECT ON TABLE "public"."mv_for_you_feed" TO "anon";
+GRANT SELECT ON TABLE "public"."mv_for_you_feed" TO "authenticated";
+GRANT SELECT ON TABLE "public"."mv_for_you_feed" TO "service_role";
+
+
+
 GRANT SELECT ON TABLE "public"."mv_search_facets" TO "anon";
+GRANT SELECT ON TABLE "public"."mv_search_facets" TO "authenticated";
+GRANT SELECT ON TABLE "public"."mv_search_facets" TO "service_role";
 
 
 
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE "public"."user_collections" TO "authenticated";
-GRANT SELECT ON TABLE "public"."user_collections" TO "anon";
-
-
-
-GRANT SELECT ON TABLE "public"."mv_site_urls" TO "anon";
-GRANT SELECT ON TABLE "public"."mv_site_urls" TO "authenticated";
-
-
-
-GRANT SELECT ON TABLE "public"."mv_trending_content" TO "service_role";
 GRANT SELECT ON TABLE "public"."mv_trending_content" TO "anon";
+GRANT SELECT ON TABLE "public"."mv_trending_content" TO "authenticated";
+GRANT SELECT ON TABLE "public"."mv_trending_content" TO "service_role";
 
 
 
@@ -15864,6 +13321,11 @@ GRANT SELECT ON TABLE "public"."user_badge_stats" TO "anon";
 
 GRANT SELECT ON TABLE "public"."user_badges" TO "authenticated";
 GRANT SELECT ON TABLE "public"."user_badges" TO "anon";
+
+
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE "public"."user_collections" TO "authenticated";
+GRANT SELECT ON TABLE "public"."user_collections" TO "anon";
 
 
 

@@ -10,18 +10,12 @@
  * This ensures llms.txt content matches UnifiedDetailPage rendering EXACTLY for optimal LLM citation accuracy
  */
 
-import type { Database } from '@/src/types/database.types';
+import type { Tables } from '@/src/types/database.types';
 
 /**
  * Union type for all content items
  */
-export type ContentItem =
-  | Database['public']['Tables']['mcp']['Row']
-  | Database['public']['Tables']['agents']['Row']
-  | Database['public']['Tables']['commands']['Row']
-  | Database['public']['Tables']['rules']['Row']
-  | Database['public']['Tables']['hooks']['Row']
-  | Database['public']['Tables']['statuslines']['Row'];
+export type ContentItem = Tables<'content'>;
 
 /**
  * Type-safe installation configuration types

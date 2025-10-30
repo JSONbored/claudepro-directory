@@ -11,8 +11,8 @@ import { UnifiedContentBox } from '@/src/components/domain/unified-content-box';
 import { ComparisonTable } from '@/src/components/template/comparison-table';
 import type { Database } from '@/src/types/database.types';
 
-type GuideRow = Database['public']['Tables']['guides']['Row'];
-type GuideSections = GuideRow['sections'];
+type ContentRow = Database['public']['Tables']['content']['Row'];
+type GuideSections = ContentRow['metadata'];
 
 interface JSONSectionRendererProps {
   sections: GuideSections;

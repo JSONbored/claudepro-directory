@@ -70,10 +70,12 @@ export const DetailSidebar = memo(function DetailSidebar({
 
   const showGitHubLink = config.metadata?.showGitHubLink ?? true;
   const hasDocumentationUrl = 'documentation_url' in item && item.documentation_url;
-  const hasConfiguration = 'configuration' in item && typeof item.configuration === 'object';
-  const hasPackage = 'package' in item && item.package;
-  const hasAuth = 'requiresAuth' in item;
-  const hasPermissions = 'permissions' in item;
+  const metadata = ('metadata' in item && (item.metadata as Record<string, unknown>)) || {};
+  const hasConfiguration = metadata.configuration && typeof metadata.configuration === 'object';
+  const packageName = metadata.package as string | undefined;
+  const hasPackage = !!packageName;
+  const hasAuth = 'requiresAuth' in metadata;
+  const hasPermissions = 'permissions' in metadata;
   const hasSource = 'source' in item && item.source;
 
   return (
@@ -130,9 +132,19 @@ export const DetailSidebar = memo(function DetailSidebar({
               </div>
             )}
 
-            {hasConfiguration &&
-              'temperature' in (item.configuration as object) &&
-              typeof (item.configuration as { temperature?: number }).temperature === 'number' && (
+            {(() => {
+              if (
+                !hasConfiguration ||
+                typeof metadata.configuration !== 'object' ||
+                metadata.configuration === null
+              ) {
+                return null;
+              }
+              const config = metadata.configuration as { temperature?: number };
+              if (typeof config.temperature !== 'number') {
+                return null;
+              }
+              return (
                 <div>
                   <h4 className={'font-medium mb-1'}>Temperature</h4>
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -144,17 +156,18 @@ export const DetailSidebar = memo(function DetailSidebar({
                         'text-xs font-medium bg-orange-500/10 text-orange-600 border-orange-500/30'
                       }
                     >
-                      {String((item.configuration as { temperature: number }).temperature)}
+                      {String(config.temperature)}
                     </UnifiedBadge>
                   </div>
                 </div>
-              )}
+              );
+            })()}
 
-            {hasPackage && (
+            {hasPackage && packageName && (
               <div>
                 <h4 className={'font-medium mb-1'}>Package</h4>
                 <UnifiedBadge variant="base" style="outline" className="font-mono text-xs">
-                  {String((item as { package: string }).package)}
+                  {packageName}
                 </UnifiedBadge>
               </div>
             )}
@@ -163,16 +176,16 @@ export const DetailSidebar = memo(function DetailSidebar({
               <div>
                 <h4 className={'font-medium mb-1'}>Authentication</h4>
                 <p className={UI_CLASSES.TEXT_SM_MUTED}>
-                  {(item as { requiresAuth: boolean }).requiresAuth ? 'Required' : 'Not required'}
+                  {(metadata.requiresAuth as boolean) ? 'Required' : 'Not required'}
                 </p>
               </div>
             )}
 
-            {hasPermissions && (item.permissions as string[]).length > 0 && (
+            {hasPermissions && (metadata.permissions as string[])?.length > 0 && (
               <div>
                 <h4 className={'font-medium mb-1'}>Permissions</h4>
                 <div className="flex flex-wrap gap-1">
-                  {(item.permissions as string[]).map((perm: string) => (
+                  {(metadata.permissions as string[]).map((perm: string) => (
                     <UnifiedBadge key={perm} variant="base" style="outline" className="text-xs">
                       {perm}
                     </UnifiedBadge>

@@ -27,54 +27,58 @@ export interface UnifiedStructuredDataProps {
 
 export function isAgentContent(
   item: UnifiedContent
-): item is Database['public']['Tables']['agents']['Row'] & { category: 'agents' } {
+): item is Database['public']['Tables']['content']['Row'] & { category: 'agents' } {
   return item.category === 'agents';
 }
 
 export function isCommandContent(
   item: UnifiedContent
-): item is Database['public']['Tables']['commands']['Row'] & { category: 'commands' } {
+): item is Database['public']['Tables']['content']['Row'] & { category: 'commands' } {
   return item.category === 'commands';
 }
 
 export function isCollectionContent(
   item: UnifiedContent
-): item is Database['public']['Tables']['collections']['Row'] & { category: 'collections' } {
+): item is Database['public']['Tables']['content']['Row'] & { category: 'collections' } {
   return item.category === 'collections';
 }
 
 export function isHookContent(
   item: UnifiedContent
-): item is Database['public']['Tables']['hooks']['Row'] & { category: 'hooks' } {
+): item is Database['public']['Tables']['content']['Row'] & { category: 'hooks' } {
   return item.category === 'hooks';
 }
 
 export function isMcpContent(
   item: UnifiedContent
-): item is Database['public']['Tables']['mcp']['Row'] & { category: 'mcp' } {
+): item is Database['public']['Tables']['content']['Row'] & { category: 'mcp' } {
   return item.category === 'mcp';
 }
 
 export function isRuleContent(
   item: UnifiedContent
-): item is Database['public']['Tables']['rules']['Row'] & { category: 'rules' } {
+): item is Database['public']['Tables']['content']['Row'] & { category: 'rules' } {
   return item.category === 'rules';
 }
 
 export function isStatuslineContent(
   item: UnifiedContent
-): item is Database['public']['Tables']['statuslines']['Row'] & { category: 'statuslines' } {
+): item is Database['public']['Tables']['content']['Row'] & { category: 'statuslines' } {
   return item.category === 'statuslines';
 }
 
 export function isSkillContent(
   item: UnifiedContent
-): item is Database['public']['Tables']['skills']['Row'] & { category: 'skills' } {
+): item is Database['public']['Tables']['content']['Row'] & { category: 'skills' } {
   return item.category === 'skills';
 }
 
 export function hasContentTroubleshooting(item: UnifiedContent): boolean {
-  return 'troubleshooting' in item && Array.isArray(item.troubleshooting);
+  if ('metadata' in item && item.metadata && typeof item.metadata === 'object') {
+    const meta = item.metadata as Record<string, unknown>;
+    return 'troubleshooting' in meta && Array.isArray(meta.troubleshooting);
+  }
+  return false;
 }
 
 export async function generateAllSchemasForContent(item: UnifiedContent): Promise<SchemaObject[]> {
@@ -121,37 +125,44 @@ export async function generateAllSchemasForContent(item: UnifiedContent): Promis
     ...itemTags,
   ];
 
+  // Extract category-specific fields from metadata JSONB
+  const metadata = ('metadata' in item && (item.metadata as Record<string, unknown>)) || {};
+
   let requirements = [
     ...(Array.isArray(dbConfig.defaultRequirements)
       ? (dbConfig.defaultRequirements as string[])
       : []),
   ];
-  if (isCollectionContent(item) && item.prerequisites && Array.isArray(item.prerequisites)) {
-    requirements = [...requirements, ...item.prerequisites];
-  } else if (isHookContent(item) && item.requirements && Array.isArray(item.requirements)) {
-    requirements = [...requirements, ...item.requirements];
+  if (
+    isCollectionContent(item) &&
+    metadata.prerequisites &&
+    Array.isArray(metadata.prerequisites)
+  ) {
+    requirements = [...requirements, ...(metadata.prerequisites as string[])];
+  } else if (isHookContent(item) && metadata.requirements && Array.isArray(metadata.requirements)) {
+    requirements = [...requirements, ...(metadata.requirements as string[])];
   } else if (isMcpContent(item)) {
-    const installation = item.installation as { requirements?: string[] } | null;
+    const installation = metadata.installation as { requirements?: string[] } | null;
     if (installation?.requirements && Array.isArray(installation.requirements)) {
       requirements = [...requirements, ...installation.requirements];
     }
   } else if (isStatuslineContent(item)) {
-    const skillReqs = 'requirements' in item ? item.requirements : undefined;
+    const skillReqs = metadata.requirements;
     if (Array.isArray(skillReqs)) {
-      requirements = [...requirements, ...skillReqs];
+      requirements = [...requirements, ...(skillReqs as string[])];
     }
   } else if (isSkillContent(item)) {
-    const skillReqs = 'requirements' in item ? item.requirements : undefined;
+    const skillReqs = metadata.requirements;
     if (Array.isArray(skillReqs)) {
-      requirements = skillReqs;
+      requirements = skillReqs as string[];
     }
   }
 
   let configuration: unknown;
   if (isAgentContent(item) || isCommandContent(item) || isRuleContent(item)) {
-    configuration = item.configuration;
+    configuration = metadata.configuration;
   } else if (isHookContent(item) || isMcpContent(item) || isStatuslineContent(item)) {
-    configuration = item.configuration;
+    configuration = metadata.configuration;
   }
 
   if (dbConfig.schemaTypes.application) {
@@ -238,8 +249,9 @@ async function generateSourceCodeSchemas(
   githubUrl?: string
 ): Promise<SchemaObject[]> {
   const schemas: SchemaObject[] = [];
+  const metadata = ('metadata' in item && (item.metadata as Record<string, unknown>)) || {};
 
-  if (isAgentContent(item) && item.configuration) {
+  if (isAgentContent(item) && metadata.configuration) {
     schemas.push(
       buildSoftwareSourceCode({
         slug: item.slug,
@@ -247,7 +259,7 @@ async function generateSourceCodeSchemas(
         name: `${displayName} - Configuration`,
         description: 'Agent configuration for Claude',
         programmingLanguage: 'JSON',
-        code: JSON.stringify(item.configuration, null, 2),
+        code: JSON.stringify(metadata.configuration, null, 2),
         encodingFormat: 'application/json',
         githubUrl,
         fragmentId: 'configuration',
@@ -271,15 +283,16 @@ async function generateSourceCodeSchemas(
     );
   }
 
-  if (isHookContent(item) && item.configuration) {
-    const config = item.configuration as { scriptContent?: string; hookConfig?: unknown };
+  if (isHookContent(item) && metadata.configuration) {
+    const config = metadata.configuration as { scriptContent?: string; hookConfig?: unknown };
+    const hookType = metadata.hook_type as string | undefined;
     if (config.scriptContent) {
       schemas.push(
         buildSoftwareSourceCode({
           slug: item.slug,
           category: item.category,
           name: `${displayName} - Script`,
-          description: `${item.hook_type || 'Hook'} script for Claude`,
+          description: `${hookType || 'Hook'} script for Claude`,
           programmingLanguage: 'Shell Script',
           code: config.scriptContent,
           encodingFormat: 'text/x-shellscript',
@@ -306,8 +319,8 @@ async function generateSourceCodeSchemas(
     }
   }
 
-  if (isMcpContent(item) && item.configuration) {
-    const config = item.configuration as {
+  if (isMcpContent(item) && metadata.configuration) {
+    const config = metadata.configuration as {
       claudeDesktop?: Record<string, unknown>;
       claudeCode?: Record<string, unknown>;
     };
@@ -350,7 +363,8 @@ async function generateSourceCodeSchemas(
   }
 
   if (isStatuslineContent(item) && item.content) {
-    const config = item.configuration as { format?: string } | null;
+    const config = metadata.configuration as { format?: string } | null;
+    const statuslineType = metadata.statusline_type as string | undefined;
     const isPython = config?.format === 'python';
 
     schemas.push(
@@ -358,7 +372,7 @@ async function generateSourceCodeSchemas(
         slug: item.slug,
         category: item.category,
         name: `${displayName} - Script`,
-        description: `${item.statusline_type || 'Statusline'} script for Claude Code`,
+        description: `${statuslineType || 'Statusline'} script for Claude Code`,
         programmingLanguage: isPython ? 'Python' : 'Shell Script',
         code: item.content,
         encodingFormat: isPython ? 'text/x-python' : 'text/x-shellscript',
@@ -376,6 +390,8 @@ function generateHowToSteps(
   displayName: string,
   categoryDisplayName: string
 ) {
+  const metadata = ('metadata' in item && (item.metadata as Record<string, unknown>)) || {};
+
   const baseSteps = [
     {
       position: 1,
@@ -390,8 +406,8 @@ function generateHowToSteps(
   ];
 
   if (isAgentContent(item) || isCommandContent(item) || isRuleContent(item)) {
-    const configCode = (item as { configuration?: unknown }).configuration
-      ? JSON.stringify((item as { configuration?: unknown }).configuration, null, 2)
+    const configCode = metadata.configuration
+      ? JSON.stringify(metadata.configuration, null, 2)
       : undefined;
     baseSteps.push({
       position: 3,
@@ -402,7 +418,7 @@ function generateHowToSteps(
   }
 
   if (isHookContent(item)) {
-    const config = item.configuration as { scriptContent?: string } | null;
+    const config = metadata.configuration as { scriptContent?: string } | null;
     const scriptContent = config?.scriptContent;
     baseSteps.push({
       position: 3,
@@ -416,12 +432,13 @@ function generateHowToSteps(
   }
 
   if (isMcpContent(item)) {
-    const installation = item.installation as { claudeCode?: string } | null;
+    const installation = metadata.installation as { claudeCode?: string } | null;
+    const packageName = metadata.package as string | undefined;
     const installText =
       typeof installation?.claudeCode === 'string'
         ? installation.claudeCode
-        : item.package
-          ? `npm install ${item.package}`
+        : packageName
+          ? `npm install ${packageName}`
           : 'Install the MCP server package';
     baseSteps.push({
       position: 3,

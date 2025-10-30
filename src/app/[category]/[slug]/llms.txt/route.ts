@@ -88,17 +88,23 @@ export async function GET(
 
     // Collections require special handling with embedded items
     if (category === 'collections') {
-      const collection = fullItem as Database['public']['Tables']['collections']['Row'];
+      const collection = fullItem as Database['public']['Tables']['content']['Row'] & {
+        category: 'collections';
+      };
+      const metadata = (collection.metadata as Record<string, unknown>) || {};
+      const items = metadata.items as
+        | Array<{ category: string; slug: string; reason?: string }>
+        | undefined;
 
       // Build detailed content including all embedded items (NO TRUNCATION)
       let detailedContent = '';
 
-      if (collection.items && collection.items.length > 0) {
+      if (items && items.length > 0) {
         detailedContent += 'INCLUDED ITEMS\n--------------\n\n';
 
         // Group items by category - items is Json[] from database
-        const itemsByCategory: Record<string, typeof collection.items> = {};
-        for (const item of collection.items) {
+        const itemsByCategory: Record<string, typeof items> = {};
+        for (const item of items) {
           const itemCategory = (item as { category?: string }).category || 'other';
           if (!itemsByCategory[itemCategory]) {
             itemsByCategory[itemCategory] = [];
@@ -152,9 +158,10 @@ export async function GET(
       }
 
       // Add metadata sections (safely handle optional properties)
-      if (collection.prerequisites && collection.prerequisites.length > 0) {
+      const prerequisites = metadata.prerequisites as string[] | undefined;
+      if (prerequisites && prerequisites.length > 0) {
         detailedContent += '\nPREREQUISITES\n-------------\n';
-        detailedContent += collection.prerequisites.map((p: string) => `• ${p}`).join('\n');
+        detailedContent += prerequisites.map((p: string) => `• ${p}`).join('\n');
         detailedContent += '\n\n';
       }
 
@@ -184,7 +191,7 @@ export async function GET(
       logger.info('Collection llms.txt generated successfully', {
         slug,
         contentLength: llmsTxt.length,
-        itemsCount: collection.items?.length || 0,
+        itemsCount: items?.length || 0,
       });
 
       // Return plain text response
