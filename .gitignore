@@ -112,3 +112,11 @@ config/tools/tech-debt/.history.json
 storybook-static
 
 MIGRATION_GUIDE.md
+
+redis-export.json
+
+.zod-schema-hash
+
+scripts/import-redis-seed-data.ts
+
+scripts/redis-export.ts

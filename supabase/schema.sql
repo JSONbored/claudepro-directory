@@ -3463,6 +3463,82 @@ COMMENT ON FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") IS 
 
 
 
+CREATE OR REPLACE FUNCTION "public"."get_github_stars"("p_repo_url" "text") RETURNS TABLE("stars" integer, "forks" integer, "watchers" integer, "open_issues" integer, "last_fetched_at" timestamp with time zone, "is_cached" boolean)
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  v_repo_owner TEXT;
+  v_repo_name TEXT;
+  v_cache_valid BOOLEAN := FALSE;
+BEGIN
+  -- Extract owner and repo from URL
+  -- Supports: https://github.com/owner/repo OR github.com/owner/repo
+  SELECT 
+    (regexp_matches(p_repo_url, 'github\.com/([^/]+)/([^/]+)'))[1],
+    (regexp_matches(p_repo_url, 'github\.com/([^/]+)/([^/]+)'))[2]
+  INTO v_repo_owner, v_repo_name;
+
+  IF v_repo_owner IS NULL OR v_repo_name IS NULL THEN
+    RAISE EXCEPTION 'Invalid GitHub URL format: %', p_repo_url;
+  END IF;
+
+  -- Check if cached data exists and is fresh (< 1 hour old)
+  SELECT 
+    (last_fetched_at > NOW() - INTERVAL '1 hour')
+  INTO v_cache_valid
+  FROM github_repo_stats
+  WHERE repo_url = p_repo_url;
+
+  -- Return cached data if valid
+  IF v_cache_valid THEN
+    RETURN QUERY
+    SELECT 
+      grs.stars,
+      grs.forks,
+      grs.watchers,
+      grs.open_issues,
+      grs.last_fetched_at,
+      TRUE as is_cached
+    FROM github_repo_stats grs
+    WHERE grs.repo_url = p_repo_url;
+  ELSE
+    -- Return indication that cache is stale/missing
+    -- Client should fetch from GitHub API and call upsert_github_stars()
+    RETURN QUERY
+    SELECT 
+      COALESCE(grs.stars, 0) as stars,
+      grs.forks,
+      grs.watchers,
+      grs.open_issues,
+      grs.last_fetched_at,
+      FALSE as is_cached
+    FROM github_repo_stats grs
+    WHERE grs.repo_url = p_repo_url
+    LIMIT 1;
+
+    -- If no record exists at all, return defaults
+    IF NOT FOUND THEN
+      RETURN QUERY
+      SELECT 
+        0::INTEGER as stars,
+        NULL::INTEGER as forks,
+        NULL::INTEGER as watchers,
+        NULL::INTEGER as open_issues,
+        NULL::TIMESTAMPTZ as last_fetched_at,
+        FALSE as is_cached;
+    END IF;
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_github_stars"("p_repo_url" "text") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_github_stars"("p_repo_url" "text") IS 'Retrieves GitHub repository stars with 1-hour cache. Returns is_cached=false if data needs refresh.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."get_homepage_content_enriched"("p_category_ids" "text"[], "p_week_start" "date" DEFAULT NULL::"date") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -6559,6 +6635,60 @@ COMMENT ON FUNCTION "public"."handle_webhook_complaint"("p_webhook_id" "uuid", "
 
 
 
+CREATE OR REPLACE FUNCTION "public"."import_redis_seed_data"("redis_data" "jsonb") RETURNS TABLE("total_processed" integer, "total_views_added" integer, "total_copies_added" integer, "items_processed" integer)
+    LANGUAGE "plpgsql"
+    AS $$
+DECLARE
+  item JSONB;
+  item_count INTEGER;
+  total_rows INTEGER := 0;
+  view_rows INTEGER := 0;
+  copy_rows INTEGER := 0;
+  items_count INTEGER := 0;
+  batch_rows user_interactions[];
+  batch_size CONSTANT INTEGER := 500;
+BEGIN
+  -- Process each item in the JSON array
+  FOR item IN SELECT * FROM jsonb_array_elements(redis_data)
+  LOOP
+    item_count := (item->>'count')::INTEGER;
+    items_count := items_count + 1;
+    
+    -- Track totals
+    IF item->>'interaction_type' = 'view' THEN
+      view_rows := view_rows + item_count;
+    ELSE
+      copy_rows := copy_rows + item_count;
+    END IF;
+    
+    -- Generate rows with random timestamps over last 90 days
+    INSERT INTO user_interactions (content_type, content_slug, interaction_type, user_id, created_at)
+    SELECT 
+      item->>'content_type',
+      item->>'content_slug',
+      (item->>'interaction_type')::text,
+      NULL,
+      NOW() - (random() * INTERVAL '90 days')
+    FROM generate_series(1, item_count);
+    
+    total_rows := total_rows + item_count;
+    
+    -- Log progress every 10 items
+    IF items_count % 10 = 0 THEN
+      RAISE NOTICE 'Processed % items, inserted % rows...', items_count, total_rows;
+    END IF;
+  END LOOP;
+  
+  RAISE NOTICE 'Import complete: % items processed, % total rows inserted', items_count, total_rows;
+  
+  RETURN QUERY SELECT total_rows, view_rows, copy_rows, items_count;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."import_redis_seed_data"("redis_data" "jsonb") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."increment"("table_name" "text", "row_id" "uuid", "column_name" "text", "increment_by" integer DEFAULT 1) RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -9409,6 +9539,64 @@ COMMENT ON FUNCTION "public"."update_user_profile"("p_user_id" "uuid", "p_displa
 
 
 
+CREATE OR REPLACE FUNCTION "public"."upsert_github_stars"("p_repo_url" "text", "p_stars" integer, "p_forks" integer DEFAULT NULL::integer, "p_watchers" integer DEFAULT NULL::integer, "p_open_issues" integer DEFAULT NULL::integer) RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  v_repo_owner TEXT;
+  v_repo_name TEXT;
+BEGIN
+  -- Extract owner and repo from URL
+  SELECT 
+    (regexp_matches(p_repo_url, 'github\.com/([^/]+)/([^/]+)'))[1],
+    (regexp_matches(p_repo_url, 'github\.com/([^/]+)/([^/]+)'))[2]
+  INTO v_repo_owner, v_repo_name;
+
+  IF v_repo_owner IS NULL OR v_repo_name IS NULL THEN
+    RAISE EXCEPTION 'Invalid GitHub URL format: %', p_repo_url;
+  END IF;
+
+  INSERT INTO github_repo_stats (
+    repo_owner,
+    repo_name,
+    repo_url,
+    stars,
+    forks,
+    watchers,
+    open_issues,
+    last_fetched_at,
+    updated_at
+  )
+  VALUES (
+    v_repo_owner,
+    v_repo_name,
+    p_repo_url,
+    p_stars,
+    p_forks,
+    p_watchers,
+    p_open_issues,
+    NOW(),
+    NOW()
+  )
+  ON CONFLICT (repo_url)
+  DO UPDATE SET
+    stars = EXCLUDED.stars,
+    forks = EXCLUDED.forks,
+    watchers = EXCLUDED.watchers,
+    open_issues = EXCLUDED.open_issues,
+    last_fetched_at = NOW(),
+    updated_at = NOW();
+END;
+$$;
+
+
+ALTER FUNCTION "public"."upsert_github_stars"("p_repo_url" "text", "p_stars" integer, "p_forks" integer, "p_watchers" integer, "p_open_issues" integer) OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."upsert_github_stars"("p_repo_url" "text", "p_stars" integer, "p_forks" integer, "p_watchers" integer, "p_open_issues" integer) IS 'Upserts GitHub repository statistics after fetching from GitHub API.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."validate_interests_array"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public'
@@ -9974,9 +10162,11 @@ END) STORED,
     "has_troubleshooting" boolean GENERATED ALWAYS AS ((("metadata" ? 'troubleshooting'::"text") AND ("jsonb_typeof"(("metadata" -> 'troubleshooting'::"text")) = 'array'::"text") AND ("jsonb_array_length"(("metadata" -> 'troubleshooting'::"text")) > 0))) STORED,
     "has_prerequisites" boolean GENERATED ALWAYS AS ((("metadata" ? 'prerequisites'::"text") AND ("jsonb_typeof"(("metadata" -> 'prerequisites'::"text")) = 'array'::"text") AND ("jsonb_array_length"(("metadata" -> 'prerequisites'::"text")) > 0))) STORED,
     "has_breaking_changes" boolean GENERATED ALWAYS AS (COALESCE((("metadata" ->> 'has_breaking_changes'::"text"))::boolean, false)) STORED,
+    "download_url" "text",
     CONSTRAINT "content_author_length" CHECK (("length"("author") >= 2)),
     CONSTRAINT "content_category_check" CHECK (("category" = ANY (ARRAY['agents'::"text", 'mcp'::"text", 'commands'::"text", 'rules'::"text", 'hooks'::"text", 'statuslines'::"text", 'skills'::"text", 'collections'::"text", 'guides'::"text"]))),
     CONSTRAINT "content_description_length" CHECK ((("length"("description") >= 10) AND ("length"("description") <= 500))),
+    CONSTRAINT "content_download_url_check" CHECK ((("download_url" IS NULL) OR ("download_url" ~ '^(/downloads/|https?://)'::"text"))),
     CONSTRAINT "content_features_count" CHECK ((("features" IS NULL) OR ("array_length"("features", 1) <= 20))),
     CONSTRAINT "content_guide_subcategory_check" CHECK ((("category" <> 'guides'::"text") OR (("metadata" ->> 'subcategory'::"text") IS NULL) OR (("metadata" ->> 'subcategory'::"text") = ANY (ARRAY['tutorials'::"text", 'comparisons'::"text", 'workflows'::"text", 'use-cases'::"text", 'troubleshooting'::"text"])))),
     CONSTRAINT "content_slug_pattern" CHECK ((("slug" ~ '^[a-z0-9-]+$'::"text") AND (("length"("slug") >= 3) AND ("length"("slug") <= 100)))),
@@ -10010,6 +10200,10 @@ COMMENT ON COLUMN "public"."content"."has_prerequisites" IS 'True if content has
 
 
 COMMENT ON COLUMN "public"."content"."has_breaking_changes" IS 'True if content has breaking changes';
+
+
+
+COMMENT ON COLUMN "public"."content"."download_url" IS 'Optional download URL for content (e.g., skills ZIP files, PDF exports)';
 
 
 
@@ -10486,6 +10680,30 @@ ALTER TABLE "public"."form_select_options" OWNER TO "postgres";
 
 
 COMMENT ON TABLE "public"."form_select_options" IS 'Options for select-type form fields. Linked to form_field_definitions via field_id.';
+
+
+
+CREATE TABLE IF NOT EXISTS "public"."github_repo_stats" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "repo_owner" "text" NOT NULL,
+    "repo_name" "text" NOT NULL,
+    "repo_url" "text" NOT NULL,
+    "stars" integer DEFAULT 0 NOT NULL,
+    "forks" integer,
+    "watchers" integer,
+    "open_issues" integer,
+    "last_fetched_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "valid_repo_format" CHECK ((("repo_owner" ~ '^[a-zA-Z0-9._-]+$'::"text") AND ("repo_name" ~ '^[a-zA-Z0-9._-]+$'::"text"))),
+    CONSTRAINT "valid_stars" CHECK (("stars" >= 0))
+);
+
+
+ALTER TABLE "public"."github_repo_stats" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."github_repo_stats" IS 'Cached GitHub repository statistics, refreshed via pg_cron every 6 hours';
 
 
 
@@ -12188,6 +12406,16 @@ ALTER TABLE ONLY "public"."form_select_options"
 
 
 
+ALTER TABLE ONLY "public"."github_repo_stats"
+    ADD CONSTRAINT "github_repo_stats_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."github_repo_stats"
+    ADD CONSTRAINT "github_repo_stats_repo_url_key" UNIQUE ("repo_url");
+
+
+
 ALTER TABLE ONLY "public"."jobs"
     ADD CONSTRAINT "jobs_pkey" PRIMARY KEY ("id");
 
@@ -12695,6 +12923,10 @@ COMMENT ON INDEX "public"."idx_content_difficulty_score" IS 'Index for filtering
 
 
 
+CREATE INDEX "idx_content_download_url" ON "public"."content" USING "btree" ("download_url") WHERE ("download_url" IS NOT NULL);
+
+
+
 CREATE INDEX "idx_content_flags" ON "public"."content" USING "btree" ("has_troubleshooting", "has_prerequisites", "has_breaking_changes") WHERE (("has_troubleshooting" = true) OR ("has_prerequisites" = true) OR ("has_breaking_changes" = true));
 
 
@@ -12932,6 +13164,14 @@ CREATE INDEX "idx_form_fields_order" ON "public"."form_field_definitions" USING 
 
 
 CREATE INDEX "idx_form_fields_scope" ON "public"."form_field_definitions" USING "btree" ("field_scope");
+
+
+
+CREATE INDEX "idx_github_repo_stats_last_fetched" ON "public"."github_repo_stats" USING "btree" ("last_fetched_at" DESC);
+
+
+
+CREATE INDEX "idx_github_repo_stats_repo_lookup" ON "public"."github_repo_stats" USING "btree" ("repo_owner", "repo_name");
 
 
 
@@ -14842,6 +15082,17 @@ ALTER TABLE "public"."form_field_versions" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."form_select_options" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."github_repo_stats" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "github_repo_stats_public_read" ON "public"."github_repo_stats" FOR SELECT USING (true);
+
+
+
+CREATE POLICY "github_repo_stats_service_write" ON "public"."github_repo_stats" USING (("auth"."role"() = 'service_role'::"text"));
+
 
 
 ALTER TABLE "public"."jobs" ENABLE ROW LEVEL SECURITY;

@@ -18,6 +18,7 @@
 import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { trackInteraction } from '@/src/lib/actions/analytics.actions';
 import { Check, ChevronDown, Copy } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -74,13 +75,20 @@ export function ProductionCodeBlock({
       const category = pathParts[0] || 'unknown';
       const slug = pathParts[1] || 'unknown';
 
+      // Track to user_interactions table (database-first)
+      trackInteraction({
+        interaction_type: 'copy',
+        content_type: category,
+        content_slug: slug,
+      }).catch(() => {});
+
+      // Track to analytics (fire-and-forget)
       import('#lib/analytics/tracker')
         .then((tracker) => {
-          // NEW: Use consolidated CODE_COPIED event with category as payload
           tracker.trackEvent('code_copied', {
             category,
             slug,
-            contentLength: code.length, // NUMBER (camelCase for consistency)
+            contentLength: code.length,
             ...(language && { language }),
           });
         })

@@ -190,6 +190,8 @@ export function DetailHeaderActions({
           <UnifiedButton
             variant="copy-llms"
             llmsTxtUrl={`/${category}/${item.slug}/llms.txt`}
+            category={category}
+            slug={item.slug}
             buttonVariant="outline"
             size="default"
             className="min-w-0"

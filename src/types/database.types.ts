@@ -758,6 +758,7 @@ export type Database = {
           discovery_metadata: Json | null;
           display_title: string | null;
           documentation_url: string | null;
+          download_url: string | null;
           examples: Json | null;
           features: string[] | null;
           fts_vector: unknown;
@@ -790,6 +791,7 @@ export type Database = {
           discovery_metadata?: Json | null;
           display_title?: string | null;
           documentation_url?: string | null;
+          download_url?: string | null;
           examples?: Json | null;
           features?: string[] | null;
           fts_vector?: unknown;
@@ -822,6 +824,7 @@ export type Database = {
           discovery_metadata?: Json | null;
           display_title?: string | null;
           documentation_url?: string | null;
+          download_url?: string | null;
           examples?: Json | null;
           features?: string[] | null;
           fts_vector?: unknown;
@@ -1513,6 +1516,48 @@ export type Database = {
             referencedColumns: ['id'];
           },
         ];
+      };
+      github_repo_stats: {
+        Row: {
+          created_at: string;
+          forks: number | null;
+          id: string;
+          last_fetched_at: string;
+          open_issues: number | null;
+          repo_name: string;
+          repo_owner: string;
+          repo_url: string;
+          stars: number;
+          updated_at: string;
+          watchers: number | null;
+        };
+        Insert: {
+          created_at?: string;
+          forks?: number | null;
+          id?: string;
+          last_fetched_at?: string;
+          open_issues?: number | null;
+          repo_name: string;
+          repo_owner: string;
+          repo_url: string;
+          stars?: number;
+          updated_at?: string;
+          watchers?: number | null;
+        };
+        Update: {
+          created_at?: string;
+          forks?: number | null;
+          id?: string;
+          last_fetched_at?: string;
+          open_issues?: number | null;
+          repo_name?: string;
+          repo_owner?: string;
+          repo_url?: string;
+          stars?: number;
+          updated_at?: string;
+          watchers?: number | null;
+        };
+        Relationships: [];
       };
       jobs: {
         Row: {
@@ -4394,6 +4439,17 @@ export type Database = {
         }[];
       };
       get_form_fields_grouped: { Args: { p_form_type: string }; Returns: Json };
+      get_github_stars: {
+        Args: { p_repo_url: string };
+        Returns: {
+          forks: number;
+          is_cached: boolean;
+          last_fetched_at: string;
+          open_issues: number;
+          stars: number;
+          watchers: number;
+        }[];
+      };
       get_homepage_content_enriched: {
         Args: { p_category_ids: string[]; p_week_start?: string };
         Returns: Json;
@@ -4676,6 +4732,15 @@ export type Database = {
       handle_webhook_complaint: {
         Args: { p_event_data: Json; p_webhook_id: string };
         Returns: undefined;
+      };
+      import_redis_seed_data: {
+        Args: { redis_data: Json };
+        Returns: {
+          items_processed: number;
+          total_copies_added: number;
+          total_processed: number;
+          total_views_added: number;
+        }[];
       };
       increment: {
         Args: {
@@ -5027,6 +5092,16 @@ export type Database = {
           p_work?: string;
         };
         Returns: Json;
+      };
+      upsert_github_stars: {
+        Args: {
+          p_forks?: number;
+          p_open_issues?: number;
+          p_repo_url: string;
+          p_stars: number;
+          p_watchers?: number;
+        };
+        Returns: undefined;
       };
     };
     Enums: {

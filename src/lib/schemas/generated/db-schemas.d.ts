@@ -240,6 +240,13 @@ export type PublicFormSelectOptionsUpdate = z.infer<
 export type PublicFormSelectOptionsRelationships = z.infer<
   typeof generated.publicFormSelectOptionsRelationshipsSchema
 >;
+export type PublicGithubRepoStatsRow = z.infer<typeof generated.publicGithubRepoStatsRowSchema>;
+export type PublicGithubRepoStatsInsert = z.infer<
+  typeof generated.publicGithubRepoStatsInsertSchema
+>;
+export type PublicGithubRepoStatsUpdate = z.infer<
+  typeof generated.publicGithubRepoStatsUpdateSchema
+>;
 export type PublicJobsRow = z.infer<typeof generated.publicJobsRowSchema>;
 export type PublicJobsInsert = z.infer<typeof generated.publicJobsInsertSchema>;
 export type PublicJobsUpdate = z.infer<typeof generated.publicJobsUpdateSchema>;
@@ -779,6 +786,10 @@ export type PublicGetFormFieldsGroupedArgs = z.infer<
 export type PublicGetFormFieldsGroupedReturns = z.infer<
   typeof generated.publicGetFormFieldsGroupedReturnsSchema
 >;
+export type PublicGetGithubStarsArgs = z.infer<typeof generated.publicGetGithubStarsArgsSchema>;
+export type PublicGetGithubStarsReturns = z.infer<
+  typeof generated.publicGetGithubStarsReturnsSchema
+>;
 export type PublicGetHomepageContentEnrichedArgs = z.infer<
   typeof generated.publicGetHomepageContentEnrichedArgsSchema
 >;
@@ -1011,6 +1022,12 @@ export type PublicHandleWebhookComplaintArgs = z.infer<
 export type PublicHandleWebhookComplaintReturns = z.infer<
   typeof generated.publicHandleWebhookComplaintReturnsSchema
 >;
+export type PublicImportRedisSeedDataArgs = z.infer<
+  typeof generated.publicImportRedisSeedDataArgsSchema
+>;
+export type PublicImportRedisSeedDataReturns = z.infer<
+  typeof generated.publicImportRedisSeedDataReturnsSchema
+>;
 export type PublicIncrementArgs = z.infer<typeof generated.publicIncrementArgsSchema>;
 export type PublicIncrementReturns = z.infer<typeof generated.publicIncrementReturnsSchema>;
 export type PublicIsAdminArgs = z.infer<typeof generated.publicIsAdminArgsSchema>;
@@ -1166,4 +1183,10 @@ export type PublicUpdateUserProfileArgs = z.infer<
 >;
 export type PublicUpdateUserProfileReturns = z.infer<
   typeof generated.publicUpdateUserProfileReturnsSchema
+>;
+export type PublicUpsertGithubStarsArgs = z.infer<
+  typeof generated.publicUpsertGithubStarsArgsSchema
+>;
+export type PublicUpsertGithubStarsReturns = z.infer<
+  typeof generated.publicUpsertGithubStarsReturnsSchema
 >;

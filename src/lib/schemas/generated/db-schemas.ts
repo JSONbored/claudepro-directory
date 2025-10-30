@@ -982,6 +982,7 @@ export const publicContentRowSchema = z.object({
   discovery_metadata: jsonSchema.nullable(),
   display_title: z.string().nullable(),
   documentation_url: z.string().nullable(),
+  download_url: z.string().nullable(),
   examples: jsonSchema.nullable(),
   features: z.array(z.string()).nullable(),
   fts_vector: z.unknown(),
@@ -1015,6 +1016,7 @@ export const publicContentInsertSchema = z.object({
   discovery_metadata: jsonSchema.optional().nullable(),
   display_title: z.string().optional().nullable(),
   documentation_url: z.string().optional().nullable(),
+  download_url: z.string().optional().nullable(),
   examples: jsonSchema.optional().nullable(),
   features: z.array(z.string()).optional().nullable(),
   fts_vector: z.unknown().optional(),
@@ -1048,6 +1050,7 @@ export const publicContentUpdateSchema = z.object({
   discovery_metadata: jsonSchema.optional().nullable(),
   display_title: z.string().optional().nullable(),
   documentation_url: z.string().optional().nullable(),
+  download_url: z.string().optional().nullable(),
   examples: jsonSchema.optional().nullable(),
   features: z.array(z.string()).optional().nullable(),
   fts_vector: z.unknown().optional(),
@@ -1744,6 +1747,48 @@ export const publicFormSelectOptionsRelationshipsSchema = z.tuple([
     referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
+
+export const publicGithubRepoStatsRowSchema = z.object({
+  created_at: z.string(),
+  forks: z.number().nullable(),
+  id: z.string(),
+  last_fetched_at: z.string(),
+  open_issues: z.number().nullable(),
+  repo_name: z.string(),
+  repo_owner: z.string(),
+  repo_url: z.string(),
+  stars: z.number(),
+  updated_at: z.string(),
+  watchers: z.number().nullable(),
+});
+
+export const publicGithubRepoStatsInsertSchema = z.object({
+  created_at: z.string().optional(),
+  forks: z.number().optional().nullable(),
+  id: z.string().optional(),
+  last_fetched_at: z.string().optional(),
+  open_issues: z.number().optional().nullable(),
+  repo_name: z.string(),
+  repo_owner: z.string(),
+  repo_url: z.string(),
+  stars: z.number().optional(),
+  updated_at: z.string().optional(),
+  watchers: z.number().optional().nullable(),
+});
+
+export const publicGithubRepoStatsUpdateSchema = z.object({
+  created_at: z.string().optional(),
+  forks: z.number().optional().nullable(),
+  id: z.string().optional(),
+  last_fetched_at: z.string().optional(),
+  open_issues: z.number().optional().nullable(),
+  repo_name: z.string().optional(),
+  repo_owner: z.string().optional(),
+  repo_url: z.string().optional(),
+  stars: z.number().optional(),
+  updated_at: z.string().optional(),
+  watchers: z.number().optional().nullable(),
+});
 
 export const publicJobsRowSchema = z.object({
   active: z.boolean().nullable(),
@@ -4709,6 +4754,21 @@ export const publicGetFormFieldsGroupedArgsSchema = z.object({
 
 export const publicGetFormFieldsGroupedReturnsSchema = jsonSchema;
 
+export const publicGetGithubStarsArgsSchema = z.object({
+  p_repo_url: z.string(),
+});
+
+export const publicGetGithubStarsReturnsSchema = z.array(
+  z.object({
+    forks: z.number(),
+    is_cached: z.boolean(),
+    last_fetched_at: z.string(),
+    open_issues: z.number(),
+    stars: z.number(),
+    watchers: z.number(),
+  })
+);
+
 export const publicGetHomepageContentEnrichedArgsSchema = z.object({
   p_category_ids: z.array(z.string()),
   p_week_start: z.string().optional(),
@@ -5116,6 +5176,19 @@ export const publicHandleWebhookComplaintArgsSchema = z.object({
 });
 
 export const publicHandleWebhookComplaintReturnsSchema = z.undefined();
+
+export const publicImportRedisSeedDataArgsSchema = z.object({
+  redis_data: jsonSchema,
+});
+
+export const publicImportRedisSeedDataReturnsSchema = z.array(
+  z.object({
+    items_processed: z.number(),
+    total_copies_added: z.number(),
+    total_processed: z.number(),
+    total_views_added: z.number(),
+  })
+);
 
 export const publicIncrementArgsSchema = z.object({
   column_name: z.string(),
@@ -5570,3 +5643,13 @@ export const publicUpdateUserProfileArgsSchema = z.object({
 });
 
 export const publicUpdateUserProfileReturnsSchema = jsonSchema;
+
+export const publicUpsertGithubStarsArgsSchema = z.object({
+  p_forks: z.number().optional(),
+  p_open_issues: z.number().optional(),
+  p_repo_url: z.string(),
+  p_stars: z.number(),
+  p_watchers: z.number().optional(),
+});
+
+export const publicUpsertGithubStarsReturnsSchema = z.undefined();
