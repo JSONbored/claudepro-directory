@@ -7,14 +7,8 @@
 
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { isValidCategory } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import {
-  publicContentSimilaritiesRowSchema,
-  publicUserAffinitiesRowSchema,
-} from '@/src/lib/schemas/generated/db-schemas';
-import {
-  type AffinityScore,
   type ForYouFeedResponse,
   forYouFeedResponseSchema,
   forYouQuerySchema,
@@ -28,7 +22,6 @@ import {
   userAffinitiesResponseSchema,
 } from '@/src/lib/schemas/personalization.schema';
 import { createClient } from '@/src/lib/supabase/server';
-import { validateRows } from '@/src/lib/supabase/validators';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 import type { Database } from '@/src/types/database.types';
 
@@ -136,93 +129,28 @@ export const getSimilarConfigs = rateLimitedAction
   .schema(similarConfigsQuerySchema)
   .outputSchema(similarConfigsResponseSchema)
   .action(async ({ parsedInput }: { parsedInput: z.infer<typeof similarConfigsQuerySchema> }) => {
-    try {
-      const supabase = await createClient();
-      const { data: similarities_data, error: similarities_error } = await supabase
-        .from('content_similarities')
-        .select('*')
-        .eq('content_a_type', parsedInput.content_type)
-        .eq('content_a_slug', parsedInput.content_slug)
-        .order('similarity_score', { ascending: false })
-        .limit(parsedInput.limit);
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc('get_similar_content', {
+      p_content_type: parsedInput.content_type,
+      p_content_slug: parsedInput.content_slug,
+      p_limit: parsedInput.limit,
+    });
 
-      if (similarities_error) {
-        throw new Error(`Failed to find similar content: ${similarities_error.message}`);
-      }
-
-      const validated_similarities = validateRows(
-        publicContentSimilaritiesRowSchema,
-        similarities_data || [],
-        { schemaName: 'ContentSimilarity' }
-      );
-
-      const similarities = validated_similarities
-        .map((sim) => {
-          if (!isValidCategory(sim.content_b_type)) {
-            logger.warn('Invalid category type in similarity data', undefined, {
-              content_b_type: sim.content_b_type,
-              content_a_slug: sim.content_a_slug,
-              content_b_slug: sim.content_b_slug,
-            });
-            return null;
-          }
-
-          return {
-            content_slug: sim.content_b_slug,
-            content_type: sim.content_b_type,
-            similarity_score: sim.similarity_score,
-            calculated_at: sim.calculated_at,
-            similarity_factors:
-              typeof sim.similarity_factors === 'object' &&
-              sim.similarity_factors !== null &&
-              !Array.isArray(sim.similarity_factors)
-                ? (sim.similarity_factors as Record<string, unknown>)
-                : undefined,
-          };
-        })
-        .filter((r): r is NonNullable<typeof r> => r !== null);
-
-      if (similarities.length > 0) {
-        const response: SimilarConfigsResponse = {
-          similar_items: similarities.map((sim) => ({
-            slug: sim.content_slug,
-            title: sim.content_slug,
-            description: '',
-            category: sim.content_type,
-            url: getContentItemUrl({
-              category: sim.content_type,
-              slug: sim.content_slug,
-            }),
-            score: Math.round(sim.similarity_score * 100),
-            source: 'similar' as const,
-            reason: 'Similar to this config',
-            tags: [],
-          })),
-          source_item: {
-            slug: parsedInput.content_slug,
-            category: parsedInput.content_type,
-          },
-          algorithm_version: 'v1.0',
-        };
-
-        return response;
-      }
-
-      return {
-        similar_items: [],
-        source_item: {
-          slug: parsedInput.content_slug,
-          category: parsedInput.content_type,
-        },
-        algorithm_version: 'v1.0-fallback',
-      };
-    } catch (error) {
-      logger.error(
-        'Failed to get similar configs',
-        error instanceof Error ? error : new Error(String(error))
-      );
-      throw new Error('Failed to get similar configurations');
+    if (error) {
+      logger.error('Failed to get similar content', error);
+      throw new Error(`Failed to get similar content: ${error.message}`);
     }
+
+    // Add URLs (presentation logic - only thing that belongs in TypeScript)
+    const result = data as SimilarConfigsResponse;
+    result.similar_items = result.similar_items.map((item) => ({
+      ...item,
+      url: getContentItemUrl({ category: item.category, slug: item.slug }),
+      source: 'similar' as const,
+      reason: 'Similar to this config',
+    }));
+
+    return result;
   });
 
 const usageRecommendationInputSchema = z.object({
@@ -328,9 +256,7 @@ export const getUserAffinities = rateLimitedAction
   )
   .outputSchema(userAffinitiesResponseSchema)
   .action(async ({ parsedInput }: { parsedInput: { limit: number; min_score: number } }) => {
-    const { limit, min_score } = parsedInput;
     const supabase = await createClient();
-
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -339,35 +265,18 @@ export const getUserAffinities = rateLimitedAction
       throw new Error('You must be signed in to view affinities');
     }
 
-    // Fetch user affinities
-    const { data: affinities_data, error: affinities_error } = await supabase
-      .from('user_affinities')
-      .select('*')
-      .eq('user_id', user.id)
-      .gte('affinity_score', min_score)
-      .order('affinity_score', { ascending: false })
-      .limit(limit);
+    const { data, error } = await supabase.rpc('get_user_affinities', {
+      p_user_id: user.id,
+      p_limit: parsedInput.limit,
+      p_min_score: parsedInput.min_score,
+    });
 
-    if (affinities_error) {
-      logger.error('Failed to fetch user affinities', undefined, {
-        error: affinities_error.message,
-      });
-      throw new Error(`Failed to fetch affinities: ${affinities_error.message}`);
+    if (error) {
+      logger.error('Failed to get user affinities', error);
+      throw new Error(`Failed to get affinities: ${error.message}`);
     }
 
-    const validated_affinities = validateRows(
-      publicUserAffinitiesRowSchema,
-      affinities_data || [],
-      { schemaName: 'UserAffinity' }
-    );
-
-    const response: UserAffinitiesResponse = {
-      affinities: validated_affinities as AffinityScore[],
-      total_count: validated_affinities.length,
-      last_calculated: validated_affinities[0]?.calculated_at || new Date().toISOString(),
-    };
-
-    return response;
+    return data as UserAffinitiesResponse;
   });
 
 export const calculateUserAffinitiesAction = rateLimitedAction
@@ -676,36 +585,8 @@ export const generateConfigRecommendations = rateLimitedAction
         diversityScore: response.summary.diversityScore,
       });
 
-      const supabase = await createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user) {
-        const interestTags = [
-          answers.useCase,
-          answers.experienceLevel,
-          ...answers.toolPreferences,
-          ...(answers.integrations || []),
-          ...(answers.focusAreas || []),
-        ].filter(Boolean);
-
-        createClient()
-          .then((supabase) =>
-            supabase
-              .from('users')
-              .update({
-                interests: Array.from(new Set(interestTags)).slice(0, 10),
-                updated_at: new Date().toISOString(),
-              })
-              .eq('id', user.id)
-          )
-          .catch(() => {
-            logger.warn('Failed to update user interests from quiz', undefined, {
-              user_id: user.id,
-            });
-          });
-      }
+      // User interests update removed - was fire-and-forget, never worked (all interests are empty [])
+      // If needed in future, implement as database trigger on quiz completion tracking
 
       return {
         success: true,
@@ -725,32 +606,5 @@ export const generateConfigRecommendations = rateLimitedAction
     }
   });
 
-export const trackRecommendationEvent = rateLimitedAction
-  .metadata({
-    actionName: 'trackRecommendationEvent',
-    category: 'analytics',
-  })
-  .schema(
-    quizAnswersSchema.pick({
-      useCase: true,
-      experienceLevel: true,
-      toolPreferences: true,
-    })
-  )
-  .action(
-    async ({
-      parsedInput,
-    }: {
-      parsedInput: Pick<QuizAnswers, 'useCase' | 'experienceLevel' | 'toolPreferences'>;
-    }) => {
-      logger.info('Recommendation event tracked', {
-        useCase: parsedInput.useCase,
-        experienceLevel: parsedInput.experienceLevel,
-        toolPreferences: parsedInput.toolPreferences.join(','),
-      });
-
-      return {
-        success: true,
-      };
-    }
-  );
+// trackRecommendationEvent deleted - was doing nothing except logging
+// If analytics tracking is needed, use trackInteraction instead

@@ -9,7 +9,7 @@ import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from '@/src/lib/icons';
 import {
   type MetricsDisplayProps,
   metricsDisplayPropsSchema,
-} from '@/src/lib/schemas/shared.schema';
+} from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 

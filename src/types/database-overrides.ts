@@ -16,7 +16,22 @@ type DatabaseWithViewOverrides = {
   public: {
     Tables: DatabaseGenerated['public']['Tables'];
     Enums: DatabaseGenerated['public']['Enums'];
-    Functions: DatabaseGenerated['public']['Functions'];
+    Functions: Omit<DatabaseGenerated['public']['Functions'], 'submit_content_for_review'> & {
+      submit_content_for_review: {
+        Args: {
+          p_author: string;
+          p_author_profile_url?: string | null;
+          p_category: string;
+          p_content_data: DatabaseGenerated['public']['Functions']['submit_content_for_review']['Args']['p_content_data'];
+          p_description: string;
+          p_github_url?: string | null;
+          p_name: string;
+          p_submission_type: string;
+          p_tags?: string[] | null;
+        };
+        Returns: DatabaseGenerated['public']['Functions']['submit_content_for_review']['Returns'];
+      };
+    };
     Views: {
       /**
        * content_unified view

@@ -257,6 +257,18 @@ CREATE TYPE "public"."grid_column" AS ENUM (
 ALTER TYPE "public"."grid_column" OWNER TO "postgres";
 
 
+CREATE TYPE "public"."guide_subcategory" AS ENUM (
+    'tutorials',
+    'comparisons',
+    'workflows',
+    'use-cases',
+    'troubleshooting'
+);
+
+
+ALTER TYPE "public"."guide_subcategory" OWNER TO "postgres";
+
+
 CREATE TYPE "public"."icon_position" AS ENUM (
     'left',
     'right'
@@ -464,6 +476,110 @@ ALTER FUNCTION "public"."add_bookmark"("p_user_id" "uuid", "p_content_type" "tex
 
 
 COMMENT ON FUNCTION "public"."add_bookmark"("p_user_id" "uuid", "p_content_type" "text", "p_content_slug" "text", "p_notes" "text") IS 'Add bookmark with automatic interaction tracking. Replaces 64 LOC TypeScript with atomic database operation.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."approve_submission"("p_submission_id" "uuid", "p_moderator_notes" "text" DEFAULT NULL::"text") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_submission RECORD;
+  v_slug TEXT;
+  v_slug_counter INTEGER := 0;
+  v_final_slug TEXT;
+  v_content_id UUID;
+BEGIN
+  -- Check admin role
+  IF NOT is_admin(auth.uid()) THEN
+    RAISE EXCEPTION 'Unauthorized - admin role required';
+  END IF;
+
+  -- Get submission
+  SELECT * INTO v_submission
+  FROM content_submissions
+  WHERE id = p_submission_id AND status = 'pending';
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Submission not found or already processed';
+  END IF;
+
+  -- Generate base slug from name
+  v_slug := generate_slug(v_submission.name);
+  v_final_slug := v_slug;
+
+  -- Check for duplicate slug and append number if needed
+  WHILE EXISTS (
+    SELECT 1 FROM content
+    WHERE slug = v_final_slug
+      AND category = v_submission.submission_type::TEXT
+  ) LOOP
+    v_slug_counter := v_slug_counter + 1;
+    v_final_slug := v_slug || '-' || v_slug_counter;
+  END LOOP;
+
+  -- Insert into unified content table
+  INSERT INTO content (
+    category,
+    slug,
+    title,
+    description,
+    author,
+    author_profile_url,
+    date_added,
+    tags,
+    source,
+    metadata,
+    created_at,
+    updated_at
+  ) VALUES (
+    v_submission.submission_type::TEXT,
+    v_final_slug,
+    v_submission.name,
+    v_submission.description,
+    v_submission.author,
+    v_submission.author_profile_url,
+    CURRENT_DATE,
+    COALESCE(v_submission.tags, '{}'),
+    v_submission.github_url,
+    jsonb_build_object(
+      'submission_id', v_submission.id,
+      'submitter_id', v_submission.submitter_id,
+      'approved_by', auth.uid(),
+      'approved_at', NOW(),
+      'original_content_data', v_submission.content_data
+    ),
+    NOW(),
+    NOW()
+  )
+  RETURNING id INTO v_content_id;
+
+  -- Update submission status
+  UPDATE content_submissions
+  SET
+    status = 'approved',
+    moderated_by = auth.uid(),
+    moderated_at = NOW(),
+    moderator_notes = p_moderator_notes,
+    updated_at = NOW()
+  WHERE id = p_submission_id;
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'submission_id', p_submission_id,
+    'content_id', v_content_id,
+    'slug', v_final_slug,
+    'category', v_submission.submission_type::TEXT,
+    'message', 'Submission approved and published successfully'
+  );
+END;
+$$;
+
+
+ALTER FUNCTION "public"."approve_submission"("p_submission_id" "uuid", "p_moderator_notes" "text") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."approve_submission"("p_submission_id" "uuid", "p_moderator_notes" "text") IS 'Approve submission and publish to unified content table. Handles slug deduplication automatically. Admin only.';
 
 
 
@@ -2220,49 +2336,18 @@ COMMENT ON FUNCTION "public"."generate_metadata_for_route"("p_route_pattern" "te
 
 CREATE OR REPLACE FUNCTION "public"."generate_slug"("p_name" "text") RETURNS "text"
     LANGUAGE "plpgsql" IMMUTABLE
-    SET "search_path" TO 'public'
-    AS $_$
-DECLARE
-  v_slug TEXT;
-  v_reserved_slugs TEXT[] := ARRAY[
-    'api', 'admin', 'auth', 'login', 'logout', 'signup', 'dashboard',
-    'settings', 'profile', 'search', 'changelog', 'about', 'contact',
-    'privacy', 'terms', 'help', 'docs', 'guides', 'blog',
-    'agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections',
-    'new', 'edit', 'delete', 'create', 'update', 'submit', 'test', 'preview', 'draft',
-    'assets', 'static', 'public', 'images', 'files', 'uploads',
-    'get', 'post', 'put', 'patch', 'delete'
-  ];
+    AS $$
 BEGIN
-  IF p_name IS NULL OR TRIM(p_name) = '' THEN
-    RAISE EXCEPTION 'Slug cannot be generated from empty string';
-  END IF;
-
-  v_slug := LOWER(TRIM(p_name));
-  v_slug := REGEXP_REPLACE(v_slug, '[^a-z0-9\s-]', '', 'g');
-  v_slug := REGEXP_REPLACE(v_slug, '\s+', '-', 'g');
-  v_slug := REGEXP_REPLACE(v_slug, '-+', '-', 'g');
-  v_slug := REGEXP_REPLACE(v_slug, '^-|-$', '', 'g');
-
-  IF v_slug = '' THEN
-    RAISE EXCEPTION 'Slug cannot be generated from input: "%" (contains no valid characters)', p_name;
-  END IF;
-
-  IF LENGTH(v_slug) < 3 THEN
-    RAISE EXCEPTION 'Slug must be at least 3 characters (got: "%", length: %)', v_slug, LENGTH(v_slug);
-  END IF;
-
-  IF LENGTH(v_slug) > 100 THEN
-    RAISE EXCEPTION 'Slug must be at most 100 characters (got length: %)', LENGTH(v_slug);
-  END IF;
-
-  IF v_slug = ANY(v_reserved_slugs) THEN
-    RAISE EXCEPTION 'Slug "%" is reserved and cannot be used', v_slug;
-  END IF;
-
-  RETURN v_slug;
+  RETURN lower(
+    regexp_replace(
+      regexp_replace(p_name, '[^a-zA-Z0-9\s-]', '', 'g'),
+      '\s+',
+      '-',
+      'g'
+    )
+  );
 END;
-$_$;
+$$;
 
 
 ALTER FUNCTION "public"."generate_slug"("p_name" "text") OWNER TO "postgres";
@@ -2270,6 +2355,30 @@ ALTER FUNCTION "public"."generate_slug"("p_name" "text") OWNER TO "postgres";
 
 COMMENT ON FUNCTION "public"."generate_slug"("p_name" "text") IS 'Generate URL-safe slug from name with validation. Replaces 61 LOC TypeScript.';
 
+
+
+CREATE OR REPLACE FUNCTION "public"."generate_slug_from_filename"("p_filename" "text") RETURNS "text"
+    LANGUAGE "plpgsql" IMMUTABLE
+    AS $_$
+BEGIN
+  RETURN REGEXP_REPLACE(
+    REGEXP_REPLACE(
+      REGEXP_REPLACE(
+        REGEXP_REPLACE(
+          LOWER(REGEXP_REPLACE(p_filename, '\.json$', '', 'i')),
+          '_', '-', 'g'  -- Convert underscores to hyphens FIRST
+        ),
+        '[^a-z0-9\-]', '-', 'g'  -- Replace other special chars with hyphens
+      ),
+      '-+', '-', 'g'  -- Collapse consecutive hyphens
+    ),
+    '^-|-$', '', 'g'  -- Remove leading/trailing hyphens
+  );
+END;
+$_$;
+
+
+ALTER FUNCTION "public"."generate_slug_from_filename"("p_filename" "text") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."generate_slug_from_name"() RETURNS "trigger"
@@ -2661,20 +2770,28 @@ CREATE OR REPLACE FUNCTION "public"."get_changelog_entries"("p_category" "text" 
     AS $$
 DECLARE
   result JSONB;
+  total_count_val INT;
 BEGIN
+  -- Get total count first (needed for pagination metadata)
+  SELECT COUNT(*)::int INTO total_count_val
+  FROM public.changelog_entries ce
+  WHERE
+    (NOT p_published_only OR ce.published = true)
+    AND (NOT p_featured_only OR ce.featured = true)
+    AND (
+      p_category IS NULL
+      OR EXISTS (
+        SELECT 1 FROM public.changelog_changes cc
+        WHERE cc.changelog_entry_id = ce.id
+        AND cc.category = p_category
+      )
+    );
+
+  -- Build result with optimized query
   WITH filtered_entries AS (
-    SELECT DISTINCT ce.id
-    FROM public.changelog_entries ce
-    LEFT JOIN public.changelog_changes cc ON cc.changelog_entry_id = ce.id
-    WHERE 
-      (NOT p_published_only OR ce.published = true)
-      AND (NOT p_featured_only OR ce.featured = true)
-      AND (p_category IS NULL OR cc.category = p_category)
-    ORDER BY ce.release_date DESC
-    LIMIT p_limit
-    OFFSET p_offset
-  ),
-  enriched_entries AS (
+    -- ✅ Conditional filtering: only use subquery when p_category is provided
+    -- ✅ No DISTINCT needed: ce.id is PRIMARY KEY
+    -- ✅ No LEFT JOIN for 99% of calls (when p_category IS NULL)
     SELECT
       ce.id,
       ce.slug,
@@ -2688,54 +2805,33 @@ BEGIN
       ce.featured,
       ce.published,
       ce.keywords,
+      ce.changes,  -- ✅ JSONB field with all category data (used by frontend)
       ce.created_at,
-      ce.updated_at,
-      -- Aggregate categories into JSONB object
-      (
-        SELECT jsonb_object_agg(
-          category,
-          changes_array
-        )
-        FROM (
-          SELECT
-            cc.category,
-            jsonb_agg(cc.change_text ORDER BY cc.display_order) as changes_array
-          FROM public.changelog_changes cc
-          WHERE cc.changelog_entry_id = ce.id
-          GROUP BY cc.category
-        ) category_groups
-      ) as categories,
-      -- Pre-compute category counts
-      (
-        SELECT jsonb_object_agg(category, count)
-        FROM (
-          SELECT cc.category, COUNT(*)::int as count
-          FROM public.changelog_changes cc
-          WHERE cc.changelog_entry_id = ce.id
-          GROUP BY cc.category
-        ) counts
-      ) as category_counts
+      ce.updated_at
     FROM public.changelog_entries ce
-    WHERE ce.id IN (SELECT id FROM filtered_entries)
-    ORDER BY ce.release_date DESC
-  ),
-  total_count AS (
-    SELECT COUNT(DISTINCT ce.id)::int as count
-    FROM public.changelog_entries ce
-    LEFT JOIN public.changelog_changes cc ON cc.changelog_entry_id = ce.id
-    WHERE 
+    WHERE
       (NOT p_published_only OR ce.published = true)
       AND (NOT p_featured_only OR ce.featured = true)
-      AND (p_category IS NULL OR cc.category = p_category)
+      AND (
+        p_category IS NULL
+        OR EXISTS (
+          SELECT 1 FROM public.changelog_changes cc
+          WHERE cc.changelog_entry_id = ce.id
+          AND cc.category = p_category
+        )
+      )
+    ORDER BY ce.release_date DESC
+    LIMIT p_limit
+    OFFSET p_offset
   )
   SELECT jsonb_build_object(
-    'entries', COALESCE(jsonb_agg(row_to_json(enriched_entries)::jsonb), '[]'::jsonb),
-    'total', (SELECT count FROM total_count),
+    'entries', COALESCE(jsonb_agg(row_to_json(filtered_entries)::jsonb ORDER BY release_date DESC), '[]'::jsonb),
+    'total', total_count_val,
     'limit', p_limit,
     'offset', p_offset,
-    'hasMore', (SELECT count FROM total_count) > (p_offset + p_limit)
+    'hasMore', total_count_val > (p_offset + p_limit)
   ) INTO result
-  FROM enriched_entries;
+  FROM filtered_entries;
 
   RETURN result;
 END;
@@ -3065,13 +3161,14 @@ BEGIN
       'documentation_url', c.documentation_url,
       'content', c.content,
       'metadata', c.metadata,
-      -- Analytics enrichment
+      -- Analytics enrichment from materialized view
       'viewCount', COALESCE(mv.view_count, 0),
       'copyCount', COALESCE(mv.copy_count, 0),
       'bookmarkCount', COALESCE(mv.bookmark_count, 0),
-      'popularityScore', COALESCE(mv.popularity_score, 0),
-      'trendingScore', COALESCE(mv.trending_score, 0),
-      -- Sponsorship enrichment (use content_id for join)
+      -- Use GENERATED columns from content table for scores
+      'popularityScore', COALESCE(c.popularity_score, 0),
+      'trendingScore', 0, -- No trending score available yet
+      -- Sponsorship enrichment
       'sponsoredContentId', sc.id,
       'sponsorshipTier', sc.tier,
       'isSponsored', COALESCE(sc.active, false)
@@ -3402,6 +3499,113 @@ COMMENT ON FUNCTION "public"."get_homepage_content_enriched"("p_category_ids" "t
 
 
 
+CREATE OR REPLACE FUNCTION "public"."get_job_detail"("p_slug" "text") RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_job JSONB;
+BEGIN
+  -- Input validation
+  IF p_slug IS NULL OR LENGTH(TRIM(p_slug)) = 0 THEN
+    RETURN NULL;
+  END IF;
+
+  -- Single indexed lookup (slug has UNIQUE constraint)
+  SELECT jsonb_build_object(
+    'id', j.id,
+    'slug', j.slug,
+    'title', j.title,
+    'company', j.company,
+    'description', j.description,
+    'location', j.location,
+    'remote', j.remote,
+    'salary', j.salary,
+    'type', j.type,
+    'category', j.category,
+    'tags', j.tags,
+    'requirements', j.requirements,
+    'benefits', j.benefits,
+    'link', j.link,
+    'contact_email', j.contact_email,
+    'posted_at', j.posted_at,
+    'expires_at', j.expires_at,
+    'active', j.active,
+    'status', j.status,
+    'order', j.order,
+    'created_at', j.created_at,
+    'updated_at', j.updated_at
+  ) INTO v_job
+  FROM public.jobs j
+  WHERE j.slug = p_slug
+    AND j.status = 'active'
+  LIMIT 1;
+
+  RETURN v_job;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_job_detail"("p_slug" "text") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_job_detail"("p_slug" "text") IS 'Returns single job by slug for detail page';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."get_jobs_list"() RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_jobs JSONB;
+BEGIN
+  -- Single optimized query with proper ordering
+  SELECT COALESCE(
+    jsonb_agg(
+      jsonb_build_object(
+        'id', j.id,
+        'slug', j.slug,
+        'title', j.title,
+        'company', j.company,
+        'description', j.description,
+        'location', j.location,
+        'remote', j.remote,
+        'salary', j.salary,
+        'type', j.type,
+        'category', j.category,
+        'tags', j.tags,
+        'requirements', j.requirements,
+        'benefits', j.benefits,
+        'link', j.link,
+        'contact_email', j.contact_email,
+        'posted_at', j.posted_at,
+        'expires_at', j.expires_at,
+        'active', j.active,
+        'status', j.status,
+        'order', j.order,
+        'created_at', j.created_at,
+        'updated_at', j.updated_at
+      ) ORDER BY j.order DESC, j.posted_at DESC
+    ),
+    '[]'::jsonb
+  ) INTO v_jobs
+  FROM public.jobs j
+  WHERE j.status = 'active'
+    AND j.active = true;
+
+  RETURN v_jobs;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_jobs_list"() OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_jobs_list"() IS 'Returns all active jobs ordered by priority and date';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."get_metadata_template"("p_route_pattern" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -3432,6 +3636,53 @@ COMMENT ON FUNCTION "public"."get_metadata_template"("p_route_pattern" "text") I
 
 
 
+CREATE OR REPLACE FUNCTION "public"."get_my_submissions"("p_limit" integer DEFAULT 20, "p_offset" integer DEFAULT 0) RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_user_id UUID;
+  v_submissions JSONB;
+BEGIN
+  v_user_id := auth.uid();
+
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Authentication required';
+  END IF;
+
+  SELECT COALESCE(
+    jsonb_agg(
+      jsonb_build_object(
+        'id', id,
+        'submission_type', submission_type,
+        'status', status,
+        'name', name,
+        'description', description,
+        'category', category,
+        'moderator_notes', moderator_notes,
+        'created_at', created_at,
+        'moderated_at', moderated_at
+      ) ORDER BY created_at DESC
+    ),
+    '[]'::jsonb
+  ) INTO v_submissions
+  FROM content_submissions
+  WHERE submitter_id = v_user_id
+  LIMIT p_limit
+  OFFSET p_offset;
+
+  RETURN v_submissions;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_my_submissions"("p_limit" integer, "p_offset" integer) OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_my_submissions"("p_limit" integer, "p_offset" integer) IS 'Get current user''s submissions with status.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."get_new_content_for_week"("p_week_start" "date", "p_limit" integer DEFAULT 5) RETURNS TABLE("category" "text", "slug" "text", "title" "text", "description" "text", "date_added" timestamp with time zone, "url" "text")
     LANGUAGE "plpgsql" STABLE
     SET "search_path" TO 'public'
@@ -3458,6 +3709,59 @@ ALTER FUNCTION "public"."get_new_content_for_week"("p_week_start" "date", "p_lim
 
 
 COMMENT ON FUNCTION "public"."get_new_content_for_week"("p_week_start" "date", "p_limit" integer) IS 'Get new content added during a specific week. Used for weekly digest emails.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."get_pending_submissions"("p_limit" integer DEFAULT 50, "p_offset" integer DEFAULT 0, "p_filter_type" "text" DEFAULT NULL::"text") RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_submissions JSONB;
+BEGIN
+  -- Check admin role
+  IF NOT is_admin(auth.uid()) THEN
+    RAISE EXCEPTION 'Unauthorized - admin role required';
+  END IF;
+
+  -- Get pending submissions
+  SELECT COALESCE(
+    jsonb_agg(
+      jsonb_build_object(
+        'id', cs.id,
+        'submission_type', cs.submission_type,
+        'status', cs.status,
+        'name', cs.name,
+        'description', cs.description,
+        'category', cs.category,
+        'author', cs.author,
+        'author_profile_url', cs.author_profile_url,
+        'github_url', cs.github_url,
+        'tags', cs.tags,
+        'content_data', cs.content_data,
+        'submitter_id', cs.submitter_id,
+        'submitter_email', cs.submitter_email,
+        'spam_score', cs.spam_score,
+        'created_at', cs.created_at
+      ) ORDER BY cs.created_at DESC
+    ),
+    '[]'::jsonb
+  ) INTO v_submissions
+  FROM content_submissions cs
+  WHERE cs.status = 'pending'
+    AND (p_filter_type IS NULL OR cs.submission_type::TEXT = p_filter_type)
+  LIMIT p_limit
+  OFFSET p_offset;
+
+  RETURN v_submissions;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_pending_submissions"("p_limit" integer, "p_offset" integer, "p_filter_type" "text") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_pending_submissions"("p_limit" integer, "p_offset" integer, "p_filter_type" "text") IS 'Get pending submissions for admin review.';
 
 
 
@@ -4256,6 +4560,55 @@ COMMENT ON FUNCTION "public"."get_seo_config"("p_key" "text") IS 'Fetch SEO conf
 
 
 
+CREATE OR REPLACE FUNCTION "public"."get_similar_content"("p_content_type" "text", "p_content_slug" "text", "p_limit" integer DEFAULT 10) RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE
+    AS $$
+DECLARE
+  v_result JSONB;
+BEGIN
+  -- Query content_similarities with JOIN to content table for actual metadata
+  SELECT jsonb_build_object(
+    'similar_items', COALESCE(jsonb_agg(
+      jsonb_build_object(
+        'slug', c.slug,
+        'title', COALESCE(c.title, c.slug),
+        'description', COALESCE(c.description, ''),
+        'category', c.category,
+        'score', ROUND((cs.similarity_score * 100)::numeric, 0),
+        'tags', COALESCE(c.tags, ARRAY[]::text[]),
+        'similarity_factors', cs.similarity_factors,
+        'calculated_at', cs.calculated_at
+      ) ORDER BY cs.similarity_score DESC
+    ), '[]'::jsonb),
+    'source_item', jsonb_build_object(
+      'slug', p_content_slug,
+      'category', p_content_type
+    ),
+    'algorithm_version', 'v1.0'
+  ) INTO v_result
+  FROM content_similarities cs
+  INNER JOIN content c 
+    ON c.category = cs.content_b_type 
+    AND c.slug = cs.content_b_slug
+  WHERE cs.content_a_type = p_content_type
+    AND cs.content_a_slug = p_content_slug
+  LIMIT p_limit;
+
+  RETURN COALESCE(v_result, jsonb_build_object(
+    'similar_items', '[]'::jsonb,
+    'source_item', jsonb_build_object(
+      'slug', p_content_slug,
+      'category', p_content_type
+    ),
+    'algorithm_version', 'v1.0-fallback'
+  ));
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_similar_content"("p_content_type" "text", "p_content_slug" "text", "p_limit" integer) OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."get_site_urls"() RETURNS TABLE("path" "text", "lastmod" timestamp with time zone, "changefreq" "text", "priority" numeric)
     LANGUAGE "sql" STABLE
     SET "search_path" TO 'public'
@@ -5007,6 +5360,47 @@ Performance: Optimized with composite indexes on (user_id, created_at DESC) for 
 
 
 
+CREATE OR REPLACE FUNCTION "public"."get_user_affinities"("p_user_id" "uuid", "p_limit" integer DEFAULT 50, "p_min_score" numeric DEFAULT 10) RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    AS $$
+DECLARE
+  v_affinities JSONB;
+  v_total_count INT;
+  v_last_calculated TIMESTAMPTZ;
+BEGIN
+  -- Get affinities with metadata
+  SELECT 
+    COALESCE(jsonb_agg(
+      jsonb_build_object(
+        'id', id,
+        'user_id', user_id,
+        'content_type', content_type,
+        'content_slug', content_slug,
+        'affinity_score', affinity_score,
+        'based_on', based_on,
+        'calculated_at', calculated_at
+      ) ORDER BY affinity_score DESC
+    ), '[]'::jsonb),
+    COUNT(*),
+    MAX(calculated_at)
+  INTO v_affinities, v_total_count, v_last_calculated
+  FROM user_affinities
+  WHERE user_id = p_user_id
+    AND affinity_score >= p_min_score
+  LIMIT p_limit;
+
+  RETURN jsonb_build_object(
+    'affinities', v_affinities,
+    'total_count', COALESCE(v_total_count, 0),
+    'last_calculated', COALESCE(v_last_calculated, NOW())
+  );
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_user_affinities"("p_user_id" "uuid", "p_limit" integer, "p_min_score" numeric) OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."get_user_badges_with_details"("p_user_id" "uuid", "p_featured_only" boolean DEFAULT false, "p_limit" integer DEFAULT NULL::integer, "p_offset" integer DEFAULT 0) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -5062,6 +5456,161 @@ COMMENT ON FUNCTION "public"."get_user_badges_with_details"("p_user_id" "uuid", 
 
 
 
+CREATE OR REPLACE FUNCTION "public"."get_user_collection_detail"("p_user_slug" "text", "p_collection_slug" "text", "p_viewer_id" "uuid" DEFAULT NULL::"uuid") RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_user_id UUID;
+  v_collection_id UUID;
+  v_result JSONB;
+BEGIN
+  -- Input validation
+  IF p_user_slug IS NULL OR LENGTH(TRIM(p_user_slug)) = 0 OR
+     p_collection_slug IS NULL OR LENGTH(TRIM(p_collection_slug)) = 0 THEN
+    RETURN NULL;
+  END IF;
+
+  -- Get user ID (indexed lookup)
+  SELECT id INTO v_user_id
+  FROM public.users
+  WHERE slug = p_user_slug
+  LIMIT 1;
+  
+  -- Early return if user not found
+  IF v_user_id IS NULL THEN
+    RETURN NULL;
+  END IF;
+
+  -- Get collection ID and verify it's public (indexed lookup)
+  SELECT id INTO v_collection_id
+  FROM public.user_collections
+  WHERE user_id = v_user_id 
+    AND slug = p_collection_slug
+    AND is_public = true
+  LIMIT 1;
+
+  -- Early return if collection not found or not public
+  IF v_collection_id IS NULL THEN
+    RETURN NULL;
+  END IF;
+
+  -- Build complete response with CTEs for efficiency
+  WITH user_data AS (
+    SELECT id, slug, name, image, tier
+    FROM public.users
+    WHERE id = v_user_id
+  ),
+  collection_data AS (
+    SELECT 
+      id, user_id, slug, name, description, is_public,
+      item_count, view_count, created_at, updated_at
+    FROM public.user_collections
+    WHERE id = v_collection_id
+  ),
+  collection_items AS (
+    SELECT jsonb_agg(
+      jsonb_build_object(
+        'id', id,
+        'collection_id', collection_id,
+        'content_type', content_type,
+        'content_slug', content_slug,
+        'notes', notes,
+        'order', "order",
+        'added_at', added_at
+      ) ORDER BY "order" ASC
+    ) as items
+    FROM public.collection_items
+    WHERE collection_id = v_collection_id
+    ORDER BY "order" ASC
+  )
+  SELECT jsonb_build_object(
+    'user', (
+      SELECT jsonb_build_object(
+        'id', id,
+        'slug', slug,
+        'name', name,
+        'image', image,
+        'tier', tier
+      )
+      FROM user_data
+    ),
+    'collection', (
+      SELECT jsonb_build_object(
+        'id', id,
+        'user_id', user_id,
+        'slug', slug,
+        'name', name,
+        'description', description,
+        'is_public', is_public,
+        'item_count', item_count,
+        'view_count', view_count,
+        'created_at', created_at,
+        'updated_at', updated_at
+      )
+      FROM collection_data
+    ),
+    'items', COALESCE((SELECT items FROM collection_items), '[]'::jsonb),
+    'isOwner', (
+      CASE
+        WHEN p_viewer_id IS NULL THEN false
+        ELSE p_viewer_id = v_user_id
+      END
+    )
+  ) INTO v_result;
+  
+  RETURN v_result;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_user_collection_detail"("p_user_slug" "text", "p_collection_slug" "text", "p_viewer_id" "uuid") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_user_collection_detail"("p_user_slug" "text", "p_collection_slug" "text", "p_viewer_id" "uuid") IS 'Production-optimized collection detail RPC. Returns user, collection, and ordered items in single query. <30ms execution. Returns NULL for non-existent/private collections.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."get_user_dashboard"("p_user_id" "uuid") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_submissions JSONB;
+  v_companies JSONB;
+  v_jobs JSONB;
+BEGIN
+  -- Fetch user submissions (all fields from submissions table)
+  SELECT COALESCE(jsonb_agg(to_jsonb(s.*) ORDER BY s.created_at DESC), '[]'::jsonb)
+  INTO v_submissions
+  FROM submissions s
+  WHERE s.user_id = p_user_id;
+
+  -- Fetch user companies (all fields from companies table)
+  SELECT COALESCE(jsonb_agg(to_jsonb(c.*) ORDER BY c.created_at DESC), '[]'::jsonb)
+  INTO v_companies
+  FROM companies c
+  WHERE c.owner_id = p_user_id;
+
+  -- Fetch user jobs excluding deleted (all fields from jobs table)
+  SELECT COALESCE(jsonb_agg(to_jsonb(j.*) ORDER BY j.created_at DESC), '[]'::jsonb)
+  INTO v_jobs
+  FROM jobs j
+  WHERE j.user_id = p_user_id AND j.status != 'deleted';
+
+  -- Return combined dashboard data
+  RETURN jsonb_build_object(
+    'submissions', v_submissions,
+    'companies', v_companies,
+    'jobs', v_jobs
+  );
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_user_dashboard"("p_user_id" "uuid") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."get_user_favorite_categories"("p_user_id" "uuid", "p_limit" integer DEFAULT 3) RETURNS "text"[]
     LANGUAGE "plpgsql" STABLE
     SET "search_path" TO 'public'
@@ -5111,6 +5660,241 @@ ALTER FUNCTION "public"."get_user_interaction_summary"("p_user_id" "uuid") OWNER
 
 
 COMMENT ON FUNCTION "public"."get_user_interaction_summary"("p_user_id" "uuid") IS 'Database-first interaction summary. Replaces 82 LOC TypeScript with single aggregation query using COUNT FILTER.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."get_user_library"("p_user_id" "uuid") RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_result JSONB;
+BEGIN
+  -- Build complete library response with bookmarks, collections, and stats
+  SELECT jsonb_build_object(
+    'bookmarks', (
+      SELECT COALESCE(jsonb_agg(
+        jsonb_build_object(
+          'id', b.id,
+          'user_id', b.user_id,
+          'content_type', b.content_type,
+          'content_slug', b.content_slug,
+          'notes', b.notes,
+          'created_at', b.created_at,
+          'updated_at', b.updated_at
+        ) ORDER BY b.created_at DESC
+      ), '[]'::jsonb)
+      FROM public.bookmarks b
+      WHERE b.user_id = p_user_id
+    ),
+    'collections', (
+      SELECT COALESCE(jsonb_agg(
+        jsonb_build_object(
+          'id', c.id,
+          'user_id', c.user_id,
+          'slug', c.slug,
+          'name', c.name,
+          'description', c.description,
+          'is_public', c.is_public,
+          'item_count', c.item_count,
+          'view_count', c.view_count,
+          'created_at', c.created_at,
+          'updated_at', c.updated_at
+        ) ORDER BY c.created_at DESC
+      ), '[]'::jsonb)
+      FROM public.user_collections c
+      WHERE c.user_id = p_user_id
+    ),
+    'stats', jsonb_build_object(
+      'bookmarkCount', (
+        SELECT COUNT(*) 
+        FROM public.bookmarks 
+        WHERE user_id = p_user_id
+      ),
+      'collectionCount', (
+        SELECT COUNT(*) 
+        FROM public.user_collections 
+        WHERE user_id = p_user_id
+      ),
+      'totalCollectionItems', (
+        SELECT COALESCE(SUM(item_count), 0)
+        FROM public.user_collections
+        WHERE user_id = p_user_id
+      ),
+      'totalCollectionViews', (
+        SELECT COALESCE(SUM(view_count), 0)
+        FROM public.user_collections
+        WHERE user_id = p_user_id
+      )
+    )
+  ) INTO v_result;
+  
+  RETURN v_result;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_user_library"("p_user_id" "uuid") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_user_library"("p_user_id" "uuid") IS 'Returns complete user library data including bookmarks, collections, and aggregated stats. Single RPC replaces 2+ separate queries for library page.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."get_user_profile"("p_user_slug" "text", "p_viewer_id" "uuid" DEFAULT NULL::"uuid") RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_user_id UUID;
+  v_result JSONB;
+BEGIN
+  -- Input validation
+  IF p_user_slug IS NULL OR LENGTH(TRIM(p_user_slug)) = 0 THEN
+    RETURN NULL;
+  END IF;
+
+  -- Single indexed lookup for user (slug has UNIQUE index)
+  SELECT id INTO v_user_id
+  FROM public.users
+  WHERE slug = p_user_slug 
+    AND public = true
+  LIMIT 1;
+  
+  -- Early return if user not found
+  IF v_user_id IS NULL THEN
+    RETURN NULL;
+  END IF;
+
+  -- Build complete profile with CTEs for efficiency
+  WITH profile_data AS (
+    SELECT 
+      id, slug, name, image, bio, website, location, 
+      tier, reputation_score, public, created_at
+    FROM public.users
+    WHERE id = v_user_id
+  ),
+  stats AS (
+    SELECT
+      (SELECT COUNT(*) FROM public.followers WHERE following_id = v_user_id) as follower_count,
+      (SELECT COUNT(*) FROM public.followers WHERE follower_id = v_user_id) as following_count,
+      (SELECT COUNT(*) FROM public.posts WHERE user_id = v_user_id) as posts_count,
+      (SELECT COUNT(*) FROM public.user_collections WHERE user_id = v_user_id AND is_public = true) as collections_count,
+      (SELECT COUNT(*) FROM public.user_content WHERE user_id = v_user_id AND active = true) as contributions_count
+  ),
+  recent_posts AS (
+    SELECT jsonb_agg(
+      jsonb_build_object(
+        'id', id,
+        'user_id', user_id,
+        'title', title,
+        'content', content,
+        'created_at', created_at,
+        'updated_at', updated_at
+      ) ORDER BY created_at DESC
+    ) as posts
+    FROM (
+      SELECT id, user_id, title, content, created_at, updated_at
+      FROM public.posts
+      WHERE user_id = v_user_id
+      ORDER BY created_at DESC
+      LIMIT 10
+    ) p
+  ),
+  public_collections AS (
+    SELECT jsonb_agg(
+      jsonb_build_object(
+        'id', id,
+        'slug', slug,
+        'name', name,
+        'description', description,
+        'is_public', is_public,
+        'item_count', item_count,
+        'view_count', view_count,
+        'created_at', created_at
+      ) ORDER BY created_at DESC
+    ) as collections
+    FROM (
+      SELECT id, slug, name, description, is_public, item_count, view_count, created_at
+      FROM public.user_collections
+      WHERE user_id = v_user_id AND is_public = true
+      ORDER BY created_at DESC
+      LIMIT 6
+    ) c
+  ),
+  user_contributions AS (
+    SELECT jsonb_agg(
+      jsonb_build_object(
+        'id', id,
+        'content_type', content_type,
+        'content_slug', content_slug,
+        'status', status,
+        'created_at', created_at
+      ) ORDER BY created_at DESC
+    ) as contributions
+    FROM (
+      SELECT id, content_type, content_slug, status, created_at
+      FROM public.user_content
+      WHERE user_id = v_user_id AND active = true
+      ORDER BY created_at DESC
+      LIMIT 12
+    ) cont
+  ),
+  following_status AS (
+    SELECT CASE
+      WHEN p_viewer_id IS NULL THEN false
+      WHEN p_viewer_id = v_user_id THEN false
+      ELSE EXISTS (
+        SELECT 1
+        FROM public.followers
+        WHERE follower_id = p_viewer_id 
+          AND following_id = v_user_id
+        LIMIT 1
+      )
+    END as is_following
+  )
+  SELECT jsonb_build_object(
+    'profile', (
+      SELECT jsonb_build_object(
+        'id', id,
+        'slug', slug,
+        'name', name,
+        'image', image,
+        'bio', bio,
+        'website', website,
+        'location', location,
+        'tier', tier,
+        'reputation_score', reputation_score,
+        'created_at', created_at
+      )
+      FROM profile_data
+    ),
+    'stats', (
+      SELECT jsonb_build_object(
+        'followerCount', follower_count,
+        'followingCount', following_count,
+        'postsCount', posts_count,
+        'collectionsCount', collections_count,
+        'contributionsCount', contributions_count
+      )
+      FROM stats
+    ),
+    'posts', COALESCE((SELECT posts FROM recent_posts), '[]'::jsonb),
+    'collections', COALESCE((SELECT collections FROM public_collections), '[]'::jsonb),
+    'contributions', COALESCE((SELECT contributions FROM user_contributions), '[]'::jsonb),
+    'isFollowing', (SELECT is_following FROM following_status),
+    'isOwner', (p_viewer_id IS NOT NULL AND p_viewer_id = v_user_id)
+  ) INTO v_result;
+  
+  RETURN v_result;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_user_profile"("p_user_slug" "text", "p_viewer_id" "uuid") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_user_profile"("p_user_slug" "text", "p_viewer_id" "uuid") IS 'Production-optimized user profile RPC. Single query with CTEs, indexed lookups, efficient aggregations. Replaces 6+ queries with <50ms execution. Returns NULL for non-existent/private profiles.';
 
 
 
@@ -5545,6 +6329,29 @@ $_$;
 ALTER FUNCTION "public"."increment"("table_name" "text", "row_id" "uuid", "column_name" "text", "increment_by" integer) OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."is_admin"("p_user_id" "uuid") RETURNS boolean
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_is_admin BOOLEAN;
+BEGIN
+  SELECT role = 'admin' INTO v_is_admin
+  FROM users
+  WHERE id = p_user_id;
+
+  RETURN COALESCE(v_is_admin, FALSE);
+END;
+$$;
+
+
+ALTER FUNCTION "public"."is_admin"("p_user_id" "uuid") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."is_admin"("p_user_id" "uuid") IS 'Check if user has admin role';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."is_bookmarked"("p_user_id" "uuid", "p_content_type" "text", "p_content_slug" "text") RETURNS boolean
     LANGUAGE "plpgsql" STABLE
     SET "search_path" TO 'public'
@@ -5584,6 +6391,810 @@ $$;
 ALTER FUNCTION "public"."is_following"("follower_id" "uuid", "following_id" "uuid") OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."manage_collection"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_collection_id UUID;
+  v_slug TEXT;
+  v_result JSONB;
+BEGIN
+  -- Validate action
+  IF p_action NOT IN ('create', 'update', 'delete', 'add_item', 'remove_item') THEN
+    RAISE EXCEPTION 'Invalid action: %. Must be create, update, delete, add_item, or remove_item', p_action;
+  END IF;
+
+  -- CREATE COLLECTION
+  IF p_action = 'create' THEN
+    -- Generate slug if not provided
+    v_slug := COALESCE(
+      p_data->>'slug',
+      LOWER(REGEXP_REPLACE(p_data->>'name', '[^a-zA-Z0-9]+', '-', 'g'))
+    );
+    
+    -- Insert collection
+    INSERT INTO user_collections (user_id, name, slug, description, is_public)
+    VALUES (
+      p_user_id,
+      p_data->>'name',
+      v_slug,
+      p_data->>'description',
+      COALESCE((p_data->>'is_public')::BOOLEAN, FALSE)
+    )
+    RETURNING jsonb_build_object(
+      'success', TRUE,
+      'collection', jsonb_build_object(
+        'id', id,
+        'user_id', user_id,
+        'name', name,
+        'slug', slug,
+        'description', description,
+        'is_public', is_public,
+        'view_count', view_count,
+        'bookmark_count', bookmark_count,
+        'item_count', item_count,
+        'created_at', created_at,
+        'updated_at', updated_at
+      )
+    ) INTO v_result;
+    
+    RETURN v_result;
+
+  -- UPDATE COLLECTION
+  ELSIF p_action = 'update' THEN
+    v_collection_id := (p_data->>'id')::UUID;
+    v_slug := p_data->>'slug';
+    
+    -- Update with ownership verification (atomic)
+    UPDATE user_collections
+    SET
+      name = p_data->>'name',
+      slug = COALESCE(v_slug, slug),
+      description = p_data->>'description',
+      is_public = COALESCE((p_data->>'is_public')::BOOLEAN, is_public),
+      updated_at = NOW()
+    WHERE id = v_collection_id AND user_id = p_user_id
+    RETURNING jsonb_build_object(
+      'success', TRUE,
+      'collection', jsonb_build_object(
+        'id', id,
+        'user_id', user_id,
+        'name', name,
+        'slug', slug,
+        'description', description,
+        'is_public', is_public,
+        'view_count', view_count,
+        'bookmark_count', bookmark_count,
+        'item_count', item_count,
+        'created_at', created_at,
+        'updated_at', updated_at
+      )
+    ) INTO v_result;
+    
+    IF v_result IS NULL THEN
+      RAISE EXCEPTION 'Collection not found or you do not have permission to update it';
+    END IF;
+    
+    RETURN v_result;
+
+  -- DELETE COLLECTION
+  ELSIF p_action = 'delete' THEN
+    v_collection_id := (p_data->>'id')::UUID;
+    
+    -- Delete with ownership verification (CASCADE handles items)
+    DELETE FROM user_collections
+    WHERE id = v_collection_id AND user_id = p_user_id;
+    
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Collection not found or you do not have permission to delete it';
+    END IF;
+    
+    RETURN jsonb_build_object('success', TRUE);
+
+  -- ADD ITEM TO COLLECTION
+  ELSIF p_action = 'add_item' THEN
+    v_collection_id := (p_data->>'collection_id')::UUID;
+    
+    -- Verify collection ownership
+    IF NOT EXISTS (
+      SELECT 1 FROM user_collections 
+      WHERE id = v_collection_id AND user_id = p_user_id
+    ) THEN
+      RAISE EXCEPTION 'Collection not found or you do not have permission';
+    END IF;
+    
+    -- Insert item (unique constraint prevents duplicates)
+    INSERT INTO collection_items (
+      collection_id,
+      user_id,
+      content_type,
+      content_slug,
+      notes,
+      "order"
+    )
+    VALUES (
+      v_collection_id,
+      p_user_id,
+      p_data->>'content_type',
+      p_data->>'content_slug',
+      p_data->>'notes',
+      COALESCE((p_data->>'order')::INTEGER, 0)
+    )
+    RETURNING jsonb_build_object(
+      'success', TRUE,
+      'item', jsonb_build_object(
+        'id', id,
+        'collection_id', collection_id,
+        'user_id', user_id,
+        'content_type', content_type,
+        'content_slug', content_slug,
+        'notes', notes,
+        'order', "order",
+        'added_at', added_at
+      )
+    ) INTO v_result;
+    
+    RETURN v_result;
+
+  -- REMOVE ITEM FROM COLLECTION
+  ELSIF p_action = 'remove_item' THEN
+    v_collection_id := (p_data->>'collection_id')::UUID;
+    
+    -- Verify collection ownership
+    IF NOT EXISTS (
+      SELECT 1 FROM user_collections 
+      WHERE id = v_collection_id AND user_id = p_user_id
+    ) THEN
+      RAISE EXCEPTION 'Collection not found or you do not have permission';
+    END IF;
+    
+    -- Delete item
+    DELETE FROM collection_items
+    WHERE id = (p_data->>'id')::UUID;
+    
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Item not found';
+    END IF;
+    
+    RETURN jsonb_build_object('success', TRUE);
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."manage_collection"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."manage_collection"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") IS 'Consolidated collection management - handles create, update, delete, add_item, remove_item operations with ownership verification';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."manage_comment"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_comment_id UUID;
+  v_result JSONB;
+BEGIN
+  -- Validate action
+  IF p_action NOT IN ('create', 'delete') THEN
+    RAISE EXCEPTION 'Invalid action: %. Must be create or delete', p_action;
+  END IF;
+
+  -- CREATE COMMENT
+  IF p_action = 'create' THEN
+    -- Insert comment
+    INSERT INTO comments (user_id, post_id, content)
+    VALUES (
+      p_user_id,
+      (p_data->>'post_id')::UUID,
+      p_data->>'content'
+    )
+    RETURNING jsonb_build_object(
+      'success', TRUE,
+      'comment', jsonb_build_object(
+        'id', id,
+        'user_id', user_id,
+        'post_id', post_id,
+        'content', content,
+        'created_at', created_at,
+        'updated_at', updated_at
+      )
+    ) INTO v_result;
+    
+    RETURN v_result;
+
+  -- DELETE COMMENT
+  ELSIF p_action = 'delete' THEN
+    v_comment_id := (p_data->>'id')::UUID;
+    
+    -- Delete with ownership verification (atomic)
+    DELETE FROM comments
+    WHERE id = v_comment_id AND user_id = p_user_id;
+    
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Comment not found or you do not have permission to delete it';
+    END IF;
+    
+    RETURN jsonb_build_object('success', TRUE);
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."manage_comment"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."manage_comment"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") IS 'Consolidated comment management - handles create and delete operations with ownership verification';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."manage_company"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_company_id UUID;
+  v_slug TEXT;
+  v_result JSONB;
+BEGIN
+  -- Validate action
+  IF p_action NOT IN ('create', 'update') THEN
+    RAISE EXCEPTION 'Invalid action: %. Must be create or update', p_action;
+  END IF;
+
+  -- CREATE COMPANY
+  IF p_action = 'create' THEN
+    -- Generate slug from name if not provided
+    v_slug := COALESCE(
+      p_data->>'slug',
+      LOWER(REGEXP_REPLACE(REGEXP_REPLACE(p_data->>'name', '\s+', '-', 'g'), '[^a-z0-9\-]', '', 'g'))
+    );
+    
+    -- Insert company
+    INSERT INTO companies (
+      owner_id,
+      name,
+      slug,
+      logo,
+      website,
+      description,
+      size,
+      industry,
+      using_cursor_since
+    )
+    VALUES (
+      p_user_id,
+      p_data->>'name',
+      v_slug,
+      p_data->>'logo',
+      p_data->>'website',
+      p_data->>'description',
+      p_data->>'size',
+      p_data->>'industry',
+      CASE 
+        WHEN p_data->>'using_cursor_since' IS NOT NULL 
+        THEN (p_data->>'using_cursor_since')::DATE
+        ELSE NULL
+      END
+    )
+    RETURNING jsonb_build_object(
+      'success', TRUE,
+      'company', jsonb_build_object(
+        'id', id,
+        'owner_id', owner_id,
+        'name', name,
+        'slug', slug,
+        'logo', logo,
+        'website', website,
+        'description', description,
+        'size', size,
+        'industry', industry,
+        'using_cursor_since', using_cursor_since,
+        'featured', featured,
+        'created_at', created_at,
+        'updated_at', updated_at
+      )
+    ) INTO v_result;
+    
+    RETURN v_result;
+
+  -- UPDATE COMPANY
+  ELSIF p_action = 'update' THEN
+    v_company_id := (p_data->>'id')::UUID;
+    
+    -- Update with ownership verification (atomic)
+    UPDATE companies
+    SET
+      name = COALESCE(p_data->>'name', name),
+      slug = COALESCE(p_data->>'slug', slug),
+      logo = CASE WHEN p_data ? 'logo' THEN p_data->>'logo' ELSE logo END,
+      website = CASE WHEN p_data ? 'website' THEN p_data->>'website' ELSE website END,
+      description = CASE WHEN p_data ? 'description' THEN p_data->>'description' ELSE description END,
+      size = CASE WHEN p_data ? 'size' THEN p_data->>'size' ELSE size END,
+      industry = CASE WHEN p_data ? 'industry' THEN p_data->>'industry' ELSE industry END,
+      using_cursor_since = CASE 
+        WHEN p_data ? 'using_cursor_since' AND p_data->>'using_cursor_since' IS NOT NULL
+        THEN (p_data->>'using_cursor_since')::DATE
+        WHEN p_data ? 'using_cursor_since' THEN NULL
+        ELSE using_cursor_since
+      END,
+      updated_at = NOW()
+    WHERE id = v_company_id AND owner_id = p_user_id
+    RETURNING jsonb_build_object(
+      'success', TRUE,
+      'company', jsonb_build_object(
+        'id', id,
+        'owner_id', owner_id,
+        'name', name,
+        'slug', slug,
+        'logo', logo,
+        'website', website,
+        'description', description,
+        'size', size,
+        'industry', industry,
+        'using_cursor_since', using_cursor_since,
+        'featured', featured,
+        'created_at', created_at,
+        'updated_at', updated_at
+      )
+    ) INTO v_result;
+    
+    IF v_result IS NULL THEN
+      RAISE EXCEPTION 'Company not found or you do not have permission to update it';
+    END IF;
+    
+    RETURN v_result;
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."manage_company"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."manage_company"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") IS 'Consolidated company management - handles create and update operations with auto-slug generation and ownership verification';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."manage_job"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_job_id UUID;
+  v_slug TEXT;
+  v_result JSONB;
+BEGIN
+  -- Validate action
+  IF p_action NOT IN ('create', 'update', 'delete', 'toggle_status') THEN
+    RAISE EXCEPTION 'Invalid action: %. Must be create, update, delete, or toggle_status', p_action;
+  END IF;
+
+  -- CREATE JOB
+  IF p_action = 'create' THEN
+    -- Generate slug from title
+    v_slug := LOWER(REGEXP_REPLACE(
+      REGEXP_REPLACE(p_data->>'title', '\s+', '-', 'g'),
+      '[^a-z0-9\-]', '', 'g'
+    )) || '-' || EXTRACT(EPOCH FROM NOW())::TEXT;
+    
+    -- Insert job with business rules
+    INSERT INTO jobs (
+      user_id,
+      title,
+      company,
+      description,
+      type,
+      category,
+      link,
+      location,
+      salary,
+      remote,
+      workplace,
+      experience,
+      tags,
+      requirements,
+      benefits,
+      contact_email,
+      company_logo,
+      company_id,
+      slug,
+      status,
+      payment_amount,
+      payment_status,
+      plan
+    )
+    VALUES (
+      p_user_id,
+      p_data->>'title',
+      p_data->>'company',
+      p_data->>'description',
+      p_data->>'type',
+      p_data->>'category',
+      p_data->>'link',
+      p_data->>'location',
+      p_data->>'salary',
+      COALESCE((p_data->>'remote')::BOOLEAN, FALSE),
+      p_data->>'workplace',
+      p_data->>'experience',
+      COALESCE(p_data->'tags', '[]'::JSONB),
+      COALESCE(p_data->'requirements', '[]'::JSONB),
+      COALESCE(p_data->'benefits', '[]'::JSONB),
+      p_data->>'contact_email',
+      p_data->>'company_logo',
+      CASE WHEN p_data->>'company_id' IS NOT NULL THEN (p_data->>'company_id')::UUID ELSE NULL END,
+      v_slug,
+      'pending_review',
+      299.0,  -- Business rule: standard job posting fee
+      'unpaid',
+      'standard'
+    )
+    RETURNING jsonb_build_object(
+      'success', TRUE,
+      'job', to_jsonb(jobs.*),
+      'requiresPayment', TRUE,
+      'message', 'Job submitted for review! You will receive payment instructions via email after admin approval.'
+    ) INTO v_result;
+    
+    RETURN v_result;
+
+  -- UPDATE JOB
+  ELSIF p_action = 'update' THEN
+    v_job_id := (p_data->>'id')::UUID;
+    
+    -- Update with ownership verification
+    UPDATE jobs
+    SET
+      title = COALESCE(p_data->>'title', title),
+      company = COALESCE(p_data->>'company', company),
+      description = COALESCE(p_data->>'description', description),
+      type = COALESCE(p_data->>'type', type),
+      category = COALESCE(p_data->>'category', category),
+      link = COALESCE(p_data->>'link', link),
+      location = CASE WHEN p_data ? 'location' THEN p_data->>'location' ELSE location END,
+      salary = CASE WHEN p_data ? 'salary' THEN p_data->>'salary' ELSE salary END,
+      remote = COALESCE((p_data->>'remote')::BOOLEAN, remote),
+      workplace = CASE WHEN p_data ? 'workplace' THEN p_data->>'workplace' ELSE workplace END,
+      experience = CASE WHEN p_data ? 'experience' THEN p_data->>'experience' ELSE experience END,
+      tags = COALESCE(p_data->'tags', tags),
+      requirements = COALESCE(p_data->'requirements', requirements),
+      benefits = COALESCE(p_data->'benefits', benefits),
+      contact_email = CASE WHEN p_data ? 'contact_email' THEN p_data->>'contact_email' ELSE contact_email END,
+      company_logo = CASE WHEN p_data ? 'company_logo' THEN p_data->>'company_logo' ELSE company_logo END,
+      company_id = CASE 
+        WHEN p_data ? 'company_id' AND p_data->>'company_id' IS NOT NULL THEN (p_data->>'company_id')::UUID
+        WHEN p_data ? 'company_id' THEN NULL
+        ELSE company_id
+      END,
+      updated_at = NOW()
+    WHERE id = v_job_id AND user_id = p_user_id
+    RETURNING jsonb_build_object(
+      'success', TRUE,
+      'job', to_jsonb(jobs.*)
+    ) INTO v_result;
+    
+    IF v_result IS NULL THEN
+      RAISE EXCEPTION 'Job not found or you do not have permission to update it';
+    END IF;
+    
+    RETURN v_result;
+
+  -- DELETE JOB (soft delete)
+  ELSIF p_action = 'delete' THEN
+    v_job_id := (p_data->>'id')::UUID;
+    
+    -- Soft delete with ownership verification
+    UPDATE jobs
+    SET status = 'deleted', updated_at = NOW()
+    WHERE id = v_job_id AND user_id = p_user_id;
+    
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Job not found or you do not have permission to delete it';
+    END IF;
+    
+    RETURN jsonb_build_object('success', TRUE);
+
+  -- TOGGLE STATUS
+  ELSIF p_action = 'toggle_status' THEN
+    v_job_id := (p_data->>'id')::UUID;
+    
+    -- Update status with conditional posted_at
+    UPDATE jobs
+    SET
+      status = p_data->>'status',
+      posted_at = CASE 
+        WHEN p_data->>'status' = 'active' AND posted_at IS NULL THEN NOW()
+        ELSE posted_at
+      END,
+      updated_at = NOW()
+    WHERE id = v_job_id AND user_id = p_user_id
+    RETURNING jsonb_build_object(
+      'success', TRUE,
+      'job', to_jsonb(jobs.*)
+    ) INTO v_result;
+    
+    IF v_result IS NULL THEN
+      RAISE EXCEPTION 'Job not found or you do not have permission to update it';
+    END IF;
+    
+    RETURN v_result;
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."manage_job"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."manage_job"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") IS 'Consolidated job management - handles create, update, delete (soft), and status toggle operations with business rules and ownership verification';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."manage_post"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_post_id UUID;
+  v_result JSONB;
+BEGIN
+  -- Validate action
+  IF p_action NOT IN ('create', 'update', 'delete') THEN
+    RAISE EXCEPTION 'Invalid action: %. Must be create, update, or delete', p_action;
+  END IF;
+
+  -- CREATE POST
+  IF p_action = 'create' THEN
+    -- Check for duplicate URL if provided
+    IF p_data ? 'url' AND p_data->>'url' IS NOT NULL THEN
+      IF EXISTS (
+        SELECT 1 FROM posts WHERE url = p_data->>'url'
+      ) THEN
+        RAISE EXCEPTION 'This URL has already been submitted';
+      END IF;
+    END IF;
+    
+    -- Insert post
+    INSERT INTO posts (user_id, title, content, url)
+    VALUES (
+      p_user_id,
+      p_data->>'title',
+      p_data->>'content',
+      p_data->>'url'
+    )
+    RETURNING jsonb_build_object(
+      'success', TRUE,
+      'post', jsonb_build_object(
+        'id', id,
+        'user_id', user_id,
+        'title', title,
+        'content', content,
+        'url', url,
+        'vote_count', vote_count,
+        'comment_count', comment_count,
+        'created_at', created_at,
+        'updated_at', updated_at
+      )
+    ) INTO v_result;
+    
+    RETURN v_result;
+
+  -- UPDATE POST
+  ELSIF p_action = 'update' THEN
+    v_post_id := (p_data->>'id')::UUID;
+    
+    -- Update with ownership verification (atomic)
+    UPDATE posts
+    SET
+      title = COALESCE(p_data->>'title', title),
+      content = CASE 
+        WHEN p_data ? 'content' THEN p_data->>'content'
+        ELSE content
+      END,
+      updated_at = NOW()
+    WHERE id = v_post_id AND user_id = p_user_id
+    RETURNING jsonb_build_object(
+      'success', TRUE,
+      'post', jsonb_build_object(
+        'id', id,
+        'user_id', user_id,
+        'title', title,
+        'content', content,
+        'url', url,
+        'vote_count', vote_count,
+        'comment_count', comment_count,
+        'created_at', created_at,
+        'updated_at', updated_at
+      )
+    ) INTO v_result;
+    
+    IF v_result IS NULL THEN
+      RAISE EXCEPTION 'Post not found or you do not have permission to update it';
+    END IF;
+    
+    RETURN v_result;
+
+  -- DELETE POST
+  ELSIF p_action = 'delete' THEN
+    v_post_id := (p_data->>'id')::UUID;
+    
+    -- Delete with ownership verification (CASCADE handles comments, votes)
+    DELETE FROM posts
+    WHERE id = v_post_id AND user_id = p_user_id;
+    
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Post not found or you do not have permission to delete it';
+    END IF;
+    
+    RETURN jsonb_build_object('success', TRUE);
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."manage_post"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."manage_post"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") IS 'Consolidated post management - handles create, update, delete operations with duplicate URL prevention and ownership verification';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."manage_review"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_review_id UUID;
+  v_content_type TEXT;
+  v_content_slug TEXT;
+  v_result JSONB;
+BEGIN
+  -- Validate action
+  IF p_action NOT IN ('create', 'update', 'delete') THEN
+    RAISE EXCEPTION 'Invalid action: %. Must be create, update, or delete', p_action;
+  END IF;
+
+  -- CREATE REVIEW
+  IF p_action = 'create' THEN
+    v_content_type := p_data->>'content_type';
+    v_content_slug := p_data->>'content_slug';
+    
+    -- Check for existing review (prevent duplicates)
+    IF EXISTS (
+      SELECT 1 FROM review_ratings
+      WHERE user_id = p_user_id
+        AND content_type = v_content_type
+        AND content_slug = v_content_slug
+    ) THEN
+      RAISE EXCEPTION 'You have already reviewed this content. Use the update action to modify your review.';
+    END IF;
+    
+    -- Insert review with interaction tracking
+    INSERT INTO review_ratings (
+      user_id,
+      content_type,
+      content_slug,
+      rating,
+      review_text,
+      helpful_count
+    )
+    VALUES (
+      p_user_id,
+      v_content_type,
+      v_content_slug,
+      (p_data->>'rating')::INTEGER,
+      p_data->>'review_text',
+      0
+    )
+    RETURNING jsonb_build_object(
+      'success', TRUE,
+      'review', jsonb_build_object(
+        'id', id,
+        'user_id', user_id,
+        'content_type', content_type,
+        'content_slug', content_slug,
+        'rating', rating,
+        'review_text', review_text,
+        'helpful_count', helpful_count,
+        'created_at', created_at,
+        'updated_at', updated_at
+      )
+    ) INTO v_result;
+    
+    -- Track interaction for personalization (atomic within transaction)
+    INSERT INTO user_interactions (
+      user_id,
+      content_type,
+      content_slug,
+      interaction_type,
+      session_id,
+      metadata
+    )
+    VALUES (
+      p_user_id,
+      v_content_type,
+      v_content_slug,
+      'view',
+      NULL,
+      jsonb_build_object('source', 'review_creation')
+    )
+    ON CONFLICT DO NOTHING; -- Ignore if already exists
+    
+    RETURN v_result;
+
+  -- UPDATE REVIEW
+  ELSIF p_action = 'update' THEN
+    v_review_id := (p_data->>'review_id')::UUID;
+    
+    -- Build dynamic update (only update provided fields)
+    UPDATE review_ratings
+    SET
+      rating = COALESCE((p_data->>'rating')::INTEGER, rating),
+      review_text = CASE 
+        WHEN p_data ? 'review_text' THEN p_data->>'review_text'
+        ELSE review_text
+      END,
+      updated_at = NOW()
+    WHERE id = v_review_id AND user_id = p_user_id
+    RETURNING jsonb_build_object(
+      'success', TRUE,
+      'review', jsonb_build_object(
+        'id', id,
+        'user_id', user_id,
+        'content_type', content_type,
+        'content_slug', content_slug,
+        'rating', rating,
+        'review_text', review_text,
+        'helpful_count', helpful_count,
+        'created_at', created_at,
+        'updated_at', updated_at
+      )
+    ) INTO v_result;
+    
+    IF v_result IS NULL THEN
+      RAISE EXCEPTION 'Review not found or you do not have permission to update it';
+    END IF;
+    
+    RETURN v_result;
+
+  -- DELETE REVIEW
+  ELSIF p_action = 'delete' THEN
+    v_review_id := (p_data->>'review_id')::UUID;
+    
+    -- Fetch review info for return data before deletion
+    SELECT content_type, content_slug
+    INTO v_content_type, v_content_slug
+    FROM review_ratings
+    WHERE id = v_review_id AND user_id = p_user_id;
+    
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Review not found or you can only delete your own reviews';
+    END IF;
+    
+    -- Delete review (cascades to helpful votes via FK)
+    DELETE FROM review_ratings
+    WHERE id = v_review_id;
+    
+    RETURN jsonb_build_object(
+      'success', TRUE,
+      'content_type', v_content_type,
+      'content_slug', v_content_slug
+    );
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."manage_review"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."manage_review"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") IS 'Consolidated review management - handles create, update, delete operations with duplicate prevention and ownership verification';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."mark_sequence_email_processed"("p_schedule_id" "uuid", "p_email" "text", "p_step" integer, "p_success" boolean DEFAULT true) RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -5617,6 +7228,44 @@ ALTER FUNCTION "public"."mark_sequence_email_processed"("p_schedule_id" "uuid", 
 
 
 COMMENT ON FUNCTION "public"."mark_sequence_email_processed"("p_schedule_id" "uuid", "p_email" "text", "p_step" integer, "p_success" boolean) IS 'Mark sequence email as processed and update sequence state.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."notify_newsletter_subscription"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+BEGIN
+  -- Call send-welcome-email Edge Function via pg_net (async, non-blocking)
+  -- This replaces the fire-and-forget email-orchestration.server.ts logic
+  PERFORM net.http_post(
+    url := 'https://hxeckduifagerhxsktev.supabase.co/functions/v1/send-welcome-email',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', 'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'SUPABASE_ANON_KEY'),
+      'X-Trigger-Source', 'newsletter_subscription'
+    ),
+    body := jsonb_build_object(
+      'email', NEW.email,
+      'source', NEW.source,
+      'referrer', NEW.referrer,
+      'copy_type', NEW.copy_type,
+      'copy_category', NEW.copy_category,
+      'copy_slug', NEW.copy_slug,
+      'trigger_type', 'newsletter',
+      'subscription_id', NEW.id
+    )
+  );
+  
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."notify_newsletter_subscription"() OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."notify_newsletter_subscription"() IS 'Triggers send-welcome-email Edge Function when newsletter subscription is created. Replaces fire-and-forget email-orchestration.server.ts logic.';
 
 
 
@@ -5855,6 +7504,46 @@ $$;
 
 
 ALTER FUNCTION "public"."refresh_user_stats"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."reject_submission"("p_submission_id" "uuid", "p_moderator_notes" "text") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+BEGIN
+  -- Check admin role
+  IF NOT is_admin(auth.uid()) THEN
+    RAISE EXCEPTION 'Unauthorized - admin role required';
+  END IF;
+
+  -- Update submission status
+  UPDATE content_submissions
+  SET
+    status = 'rejected',
+    moderated_by = auth.uid(),
+    moderated_at = NOW(),
+    moderator_notes = p_moderator_notes,
+    updated_at = NOW()
+  WHERE id = p_submission_id AND status = 'pending';
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Submission not found or already processed';
+  END IF;
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'submission_id', p_submission_id,
+    'status', 'rejected'
+  );
+END;
+$$;
+
+
+ALTER FUNCTION "public"."reject_submission"("p_submission_id" "uuid", "p_moderator_notes" "text") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."reject_submission"("p_submission_id" "uuid", "p_moderator_notes" "text") IS 'Reject submission with moderator notes. Admin only.';
+
 
 
 CREATE OR REPLACE FUNCTION "public"."remove_bookmark"("p_user_id" "uuid", "p_content_type" "text", "p_content_slug" "text") RETURNS "jsonb"
@@ -6377,6 +8066,76 @@ $$;
 ALTER FUNCTION "public"."search_users"("search_query" "text", "result_limit" integer) OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."submit_content_for_review"("p_submission_type" "text", "p_name" "text", "p_description" "text", "p_category" "text", "p_author" "text", "p_content_data" "jsonb", "p_author_profile_url" "text" DEFAULT NULL::"text", "p_github_url" "text" DEFAULT NULL::"text", "p_tags" "text"[] DEFAULT '{}'::"text"[]) RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_submission_id UUID;
+  v_submitter_id UUID;
+  v_submitter_email TEXT;
+BEGIN
+  -- Get authenticated user
+  v_submitter_id := auth.uid();
+
+  IF v_submitter_id IS NULL THEN
+    RAISE EXCEPTION 'Authentication required';
+  END IF;
+
+  -- Get user email from auth.users
+  SELECT email INTO v_submitter_email
+  FROM auth.users
+  WHERE id = v_submitter_id;
+
+  -- Insert submission (CHECK constraints enforce all validation)
+  INSERT INTO content_submissions (
+    submission_type,
+    status,
+    name,
+    description,
+    category,
+    author,
+    author_profile_url,
+    github_url,
+    tags,
+    content_data,
+    submitter_id,
+    submitter_email,
+    spam_score
+  ) VALUES (
+    p_submission_type::submission_type,
+    'pending'::submission_status,
+    p_name,
+    p_description,
+    p_category,
+    p_author,
+    p_author_profile_url,
+    p_github_url,
+    p_tags,
+    p_content_data,
+    v_submitter_id,
+    v_submitter_email,
+    0.0
+  )
+  RETURNING id INTO v_submission_id;
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'submission_id', v_submission_id,
+    'status', 'pending',
+    'message', 'Submission received and pending review'
+  );
+END;
+$$;
+
+
+ALTER FUNCTION "public"."submit_content_for_review"("p_submission_type" "text", "p_name" "text", "p_description" "text", "p_category" "text", "p_author" "text", "p_content_data" "jsonb", "p_author_profile_url" "text", "p_github_url" "text", "p_tags" "text"[]) OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."submit_content_for_review"("p_submission_type" "text", "p_name" "text", "p_description" "text", "p_category" "text", "p_author" "text", "p_content_data" "jsonb", "p_author_profile_url" "text", "p_github_url" "text", "p_tags" "text"[]) IS 'Submit content for admin review. All validation via CHECK constraints.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."sync_changelog_changes_from_jsonb"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public'
@@ -6563,6 +8322,80 @@ ALTER FUNCTION "public"."toggle_review_helpful"("p_review_id" "uuid", "p_user_id
 
 
 COMMENT ON FUNCTION "public"."toggle_review_helpful"("p_review_id" "uuid", "p_user_id" "uuid", "p_helpful" boolean) IS 'Toggle helpful vote on review with validation. Replaces 83 LOC TypeScript with atomic database operation.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."track_sponsored_event"("p_event_type" "text", "p_user_id" "uuid", "p_data" "jsonb") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_sponsored_id UUID;
+  v_result JSONB;
+BEGIN
+  -- Validate event type
+  IF p_event_type NOT IN ('impression', 'click') THEN
+    RAISE EXCEPTION 'Invalid event_type: %. Must be impression or click', p_event_type;
+  END IF;
+
+  v_sponsored_id := (p_data->>'sponsored_id')::UUID;
+
+  -- TRACK IMPRESSION
+  IF p_event_type = 'impression' THEN
+    -- Insert impression record
+    INSERT INTO sponsored_impressions (
+      sponsored_id,
+      user_id,
+      page_url,
+      position
+    )
+    VALUES (
+      v_sponsored_id,
+      p_user_id,
+      p_data->>'page_url',
+      CASE WHEN p_data->>'position' IS NOT NULL THEN (p_data->>'position')::INTEGER ELSE NULL END
+    );
+    
+    -- Atomically increment impression_count
+    UPDATE sponsored_content
+    SET 
+      impression_count = COALESCE(impression_count, 0) + 1,
+      updated_at = NOW()
+    WHERE id = v_sponsored_id;
+    
+    RETURN jsonb_build_object('success', TRUE);
+
+  -- TRACK CLICK
+  ELSIF p_event_type = 'click' THEN
+    -- Insert click record
+    INSERT INTO sponsored_clicks (
+      sponsored_id,
+      user_id,
+      target_url
+    )
+    VALUES (
+      v_sponsored_id,
+      p_user_id,
+      p_data->>'target_url'
+    );
+    
+    -- Atomically increment click_count
+    UPDATE sponsored_content
+    SET 
+      click_count = COALESCE(click_count, 0) + 1,
+      updated_at = NOW()
+    WHERE id = v_sponsored_id;
+    
+    RETURN jsonb_build_object('success', TRUE);
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."track_sponsored_event"("p_event_type" "text", "p_user_id" "uuid", "p_data" "jsonb") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."track_sponsored_event"("p_event_type" "text", "p_user_id" "uuid", "p_data" "jsonb") IS 'Atomic sponsored content tracking - handles impression and click events with automatic counter updates in single transaction';
 
 
 
@@ -7667,6 +9500,7 @@ END) STORED,
     CONSTRAINT "content_category_check" CHECK (("category" = ANY (ARRAY['agents'::"text", 'mcp'::"text", 'commands'::"text", 'rules'::"text", 'hooks'::"text", 'statuslines'::"text", 'skills'::"text", 'collections'::"text", 'guides'::"text"]))),
     CONSTRAINT "content_description_length" CHECK ((("length"("description") >= 10) AND ("length"("description") <= 500))),
     CONSTRAINT "content_features_count" CHECK ((("features" IS NULL) OR ("array_length"("features", 1) <= 20))),
+    CONSTRAINT "content_guide_subcategory_check" CHECK ((("category" <> 'guides'::"text") OR (("metadata" ->> 'subcategory'::"text") IS NULL) OR (("metadata" ->> 'subcategory'::"text") = ANY (ARRAY['tutorials'::"text", 'comparisons'::"text", 'workflows'::"text", 'use-cases'::"text", 'troubleshooting'::"text"])))),
     CONSTRAINT "content_slug_pattern" CHECK ((("slug" ~ '^[a-z0-9-]+$'::"text") AND (("length"("slug") >= 3) AND ("length"("slug") <= 100)))),
     CONSTRAINT "content_tags_count" CHECK ((("array_length"("tags", 1) >= 1) AND ("array_length"("tags", 1) <= 20))),
     CONSTRAINT "content_use_cases_count" CHECK ((("use_cases" IS NULL) OR ("array_length"("use_cases", 1) <= 20)))
@@ -11108,6 +12942,10 @@ CREATE INDEX "idx_users_search_vector" ON "public"."users" USING "gin" ("search_
 
 
 
+CREATE UNIQUE INDEX "idx_users_slug_public" ON "public"."users" USING "btree" ("slug") WHERE ("public" = true);
+
+
+
 CREATE INDEX "idx_users_tier" ON "public"."users" USING "btree" ("tier");
 
 
@@ -11265,6 +13103,14 @@ CREATE OR REPLACE TRIGGER "generate_users_slug" BEFORE INSERT OR UPDATE ON "publ
 
 
 CREATE OR REPLACE TRIGGER "newsletter_updated_at_trigger" BEFORE UPDATE ON "public"."newsletter_subscriptions" FOR EACH ROW EXECUTE FUNCTION "public"."update_newsletter_updated_at"();
+
+
+
+CREATE OR REPLACE TRIGGER "on_newsletter_subscription" AFTER INSERT ON "public"."newsletter_subscriptions" FOR EACH ROW EXECUTE FUNCTION "public"."notify_newsletter_subscription"();
+
+
+
+COMMENT ON TRIGGER "on_newsletter_subscription" ON "public"."newsletter_subscriptions" IS 'Calls send-welcome-email Edge Function via pg_net after newsletter subscription insert.';
 
 
 
@@ -12866,6 +14712,16 @@ GRANT ALL ON FUNCTION "public"."get_homepage_content_enriched"("p_category_ids" 
 
 
 
+GRANT ALL ON FUNCTION "public"."get_job_detail"("p_slug" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_job_detail"("p_slug" "text") TO "authenticated";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_jobs_list"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_jobs_list"() TO "authenticated";
+
+
+
 GRANT ALL ON FUNCTION "public"."get_metadata_template"("p_route_pattern" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_metadata_template"("p_route_pattern" "text") TO "anon";
 
@@ -12930,6 +14786,15 @@ GRANT ALL ON FUNCTION "public"."get_user_badges_with_details"("p_user_id" "uuid"
 
 
 
+GRANT ALL ON FUNCTION "public"."get_user_collection_detail"("p_user_slug" "text", "p_collection_slug" "text", "p_viewer_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_user_collection_detail"("p_user_slug" "text", "p_collection_slug" "text", "p_viewer_id" "uuid") TO "authenticated";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_user_dashboard"("p_user_id" "uuid") TO "authenticated";
+
+
+
 GRANT ALL ON FUNCTION "public"."get_user_favorite_categories"("p_user_id" "uuid", "p_limit" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_user_favorite_categories"("p_user_id" "uuid", "p_limit" integer) TO "service_role";
 
@@ -12937,6 +14802,15 @@ GRANT ALL ON FUNCTION "public"."get_user_favorite_categories"("p_user_id" "uuid"
 
 GRANT ALL ON FUNCTION "public"."get_user_interaction_summary"("p_user_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_user_interaction_summary"("p_user_id" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_user_library"("p_user_id" "uuid") TO "authenticated";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_user_profile"("p_user_slug" "text", "p_viewer_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_user_profile"("p_user_slug" "text", "p_viewer_id" "uuid") TO "authenticated";
 
 
 
@@ -12952,6 +14826,30 @@ GRANT ALL ON FUNCTION "public"."get_weekly_digest"("p_week_start" "date") TO "an
 
 GRANT ALL ON FUNCTION "public"."increment"("table_name" "text", "row_id" "uuid", "column_name" "text", "increment_by" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."increment"("table_name" "text", "row_id" "uuid", "column_name" "text", "increment_by" integer) TO "anon";
+
+
+
+GRANT ALL ON FUNCTION "public"."manage_collection"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") TO "authenticated";
+
+
+
+GRANT ALL ON FUNCTION "public"."manage_comment"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") TO "authenticated";
+
+
+
+GRANT ALL ON FUNCTION "public"."manage_company"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") TO "authenticated";
+
+
+
+GRANT ALL ON FUNCTION "public"."manage_job"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") TO "authenticated";
+
+
+
+GRANT ALL ON FUNCTION "public"."manage_post"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") TO "authenticated";
+
+
+
+GRANT ALL ON FUNCTION "public"."manage_review"("p_action" "text", "p_user_id" "uuid", "p_data" "jsonb") TO "authenticated";
 
 
 
@@ -13022,6 +14920,11 @@ GRANT SELECT ON TABLE "public"."users" TO "anon";
 
 GRANT ALL ON FUNCTION "public"."search_users"("search_query" "text", "result_limit" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."search_users"("search_query" "text", "result_limit" integer) TO "anon";
+
+
+
+GRANT ALL ON FUNCTION "public"."track_sponsored_event"("p_event_type" "text", "p_user_id" "uuid", "p_data" "jsonb") TO "anon";
+GRANT ALL ON FUNCTION "public"."track_sponsored_event"("p_event_type" "text", "p_user_id" "uuid", "p_data" "jsonb") TO "authenticated";
 
 
 

@@ -1,3 +1,8 @@
+/**
+ * User Collection Detail Page - Database-First RPC Architecture
+ * Single RPC call to get_user_collection_detail() replaces 3 separate queries
+ */
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -11,10 +16,10 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { Separator } from '@/src/components/primitives/separator';
-import { trackView } from '@/src/lib/actions/track-view';
+import { trackInteraction } from '@/src/lib/actions/analytics.actions';
 import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -25,52 +30,73 @@ interface PublicCollectionPageProps {
   params: Promise<{ slug: string; collectionSlug: string }>;
 }
 
+type CollectionDetailData = {
+  user: {
+    id: string;
+    slug: string;
+    name: string;
+    image: string | null;
+    tier: string;
+  };
+  collection: {
+    id: string;
+    user_id: string;
+    slug: string;
+    name: string;
+    description: string | null;
+    is_public: boolean;
+    item_count: number;
+    view_count: number;
+    created_at: string;
+    updated_at: string;
+  };
+  items: Array<{
+    id: string;
+    collection_id: string;
+    content_type: string;
+    content_slug: string;
+    notes: string | null;
+    order: number;
+    added_at: string;
+  }>;
+  isOwner: boolean;
+};
+
 /**
- * Fetch public user collection data
- *
- * Shared data loader for both metadata generation and page rendering.
- * Next.js 15 automatically deduplicates this during the same render cycle.
- *
- * @param slug - User profile slug
- * @param collectionSlug - Collection slug
- * @returns Collection data or null if not found
+ * Fetch collection detail using optimized RPC
  */
-async function getPublicCollection(slug: string, collectionSlug: string) {
-  const supabase = await createAdminClient();
+async function getCollectionDetail(
+  slug: string,
+  collectionSlug: string,
+  viewerId?: string
+): Promise<CollectionDetailData | null> {
+  const supabase = await createClient();
 
-  // Fetch profile user
-  const { data: profileUser } = await supabase.from('users').select('*').eq('slug', slug).single();
+  const { data, error } = await supabase.rpc('get_user_collection_detail', {
+    p_user_slug: slug,
+    p_collection_slug: collectionSlug,
+    ...(viewerId && { p_viewer_id: viewerId }),
+  });
 
-  if (!profileUser) {
+  if (error) {
+    logger.error('Failed to load collection detail', error, { slug, collectionSlug });
     return null;
   }
 
-  // Fetch public collection
-  const { data: collection } = await supabase
-    .from('user_collections')
-    .select('*')
-    .eq('user_id', profileUser.id)
-    .eq('slug', collectionSlug)
-    .eq('is_public', true)
-    .single();
-
-  return collection;
+  return data as CollectionDetailData | null;
 }
 
 export async function generateMetadata({ params }: PublicCollectionPageProps): Promise<Metadata> {
   const { slug, collectionSlug } = await params;
 
-  // Load collection data (automatically deduplicated by Next.js)
-  const collection = await getPublicCollection(slug, collectionSlug);
+  const collectionData = await getCollectionDetail(slug, collectionSlug);
 
-  // Transform to metadata context item
-  // Converts null to undefined for TypeScript compatibility
-  const collectionItem = collection
+  const collectionItem = collectionData
     ? {
-        name: collection.name,
-        description: collection.description ?? undefined,
-        date_added: collection.created_at,
-        lastModified: collection.updated_at,
+        name: collectionData.collection.name,
+        description: collectionData.collection.description ?? undefined,
+        date_added: collectionData.collection.created_at,
+        lastModified: collectionData.collection.updated_at,
       }
     : undefined;
 
@@ -86,43 +112,28 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   const { slug, collectionSlug } = await params;
 
   // Get current user (if logged in) for ownership check
-  const currentUserClient = await createClient();
+  const supabase = await createClient();
   const {
     data: { user: currentUser },
-  } = await currentUserClient.auth.getUser();
+  } = await supabase.auth.getUser();
 
-  // Load collection data (automatically deduplicated by Next.js with generateMetadata call)
-  const collection = await getPublicCollection(slug, collectionSlug);
+  // Single RPC call replaces 3 separate queries (user, collection, items)
+  const collectionData = await getCollectionDetail(slug, collectionSlug, currentUser?.id);
 
-  if (!collection) {
+  if (!collectionData) {
     notFound();
   }
 
-  // Get profile owner for display
-  const supabase = await createAdminClient();
-  const { data: profileUser } = await supabase.from('users').select('*').eq('slug', slug).single();
-
-  if (!profileUser) {
-    notFound();
-  }
-
-  // Get collection items
-  const { data: items } = await supabase
-    .from('collection_items')
-    .select('*')
-    .eq('collection_id', collection.id)
-    .order('order', { ascending: true });
+  const { user: profileUser, collection, items, isOwner } = collectionData;
 
   // Track view (async, non-blocking)
-  // Note: Using 'guides' category as a placeholder since trackView expects specific content types
-  trackView({
-    category: 'guides',
-    slug: `user-collection-${slug}-${collectionSlug}`,
+  trackInteraction({
+    interaction_type: 'view',
+    content_type: 'guides',
+    content_slug: `user-collection-${slug}-${collectionSlug}`,
   }).catch(() => {
     // Ignore tracking errors
   });
-
-  const isOwner = currentUser?.id === profileUser.id;
 
   return (
     <div className={'min-h-screen bg-background'}>

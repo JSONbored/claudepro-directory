@@ -41,6 +41,7 @@ import {
   Workflow,
   Zap,
 } from '@/src/lib/icons';
+import type { RelatedGuide } from '@/src/lib/schemas/app.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { shallowEqual, slugToTitle } from '@/src/lib/utils';
 
@@ -52,12 +53,6 @@ interface ContentData {
   dateUpdated?: string;
   category?: string;
   content?: string;
-}
-
-interface RelatedGuide {
-  title: string;
-  slug: string;
-  category: string;
 }
 
 interface TrendingGuide {

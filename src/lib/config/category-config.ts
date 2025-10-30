@@ -833,6 +833,14 @@ export function getHomepageCategoryIds(): CategoryId[] {
   return VALID_CATEGORIES.filter((id) => UNIFIED_CATEGORY_REGISTRY[id].showOnHomepage);
 }
 
+/**
+ * Get cacheable category IDs (categories with generateFullContent: true)
+ * Used for build-time content generation and caching
+ */
+export function getCacheableCategoryIds(): CategoryId[] {
+  return VALID_CATEGORIES.filter((id) => UNIFIED_CATEGORY_REGISTRY[id].generateFullContent);
+}
+
 // REMOVED: Registry validation check - no longer needed
 // Schema is now derived from registry, so they're always in sync by definition
 

@@ -29,7 +29,6 @@ export const ROUTES = {
   BOARD_NEW: '/board/new',
   COMMUNITY: '/community',
   COMPANIES: '/companies',
-  COMPARE: '/compare',
   FOR_YOU: '/for-you',
   LLMS_TXT: '/llms.txt',
   LOGIN: '/login',
@@ -100,14 +99,6 @@ export const GUIDES_CATEGORY_SLUG = (params: { category: string; slug: string })
 export const CHANGELOG_SLUG = (params: { slug: string }) => {
   const { slug } = params;
   return `/changelog/${slug}`;
-};
-
-/**
- * /compare/[slug]
- */
-export const COMPARE_SLUG = (params: { slug: string }) => {
-  const { slug } = params;
-  return `/compare/${slug}`;
 };
 
 /**
@@ -195,7 +186,6 @@ export const ALL_STATIC_ROUTES = [
   '/board/new',
   '/community',
   '/companies',
-  '/compare',
   '/for-you',
   '/llms.txt',
   '/login',
@@ -237,7 +227,6 @@ export const ALL_DYNAMIC_ROUTE_PATTERNS = [
   '/[category]/[slug]',
   '/guides/[category]/[slug]',
   '/changelog/[slug]',
-  '/compare/[slug]',
   '/jobs/[slug]',
   '/u/[slug]',
   '/u/[slug]/collections/[collectionSlug]',

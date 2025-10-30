@@ -1,3 +1,8 @@
+/**
+ * Library Page - Database-First RPC Architecture
+ * Single RPC call to get_user_library() replaces 2 separate queries
+ */
+
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
@@ -11,6 +16,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Bookmark, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -20,6 +26,40 @@ export const dynamic = 'force-dynamic';
 
 export const metadata = generatePageMetadata('/account/library');
 
+type Bookmark = {
+  id: string;
+  user_id: string;
+  content_type: string;
+  content_slug: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type UserCollection = {
+  id: string;
+  user_id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  is_public: boolean;
+  item_count: number;
+  view_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
+type LibraryData = {
+  bookmarks: Bookmark[];
+  collections: UserCollection[];
+  stats: {
+    bookmarkCount: number;
+    collectionCount: number;
+    totalCollectionItems: number;
+    totalCollectionViews: number;
+  };
+};
+
 export default async function LibraryPage() {
   const supabase = await createClient();
   const {
@@ -28,22 +68,24 @@ export default async function LibraryPage() {
 
   if (!user) return null;
 
-  // Get user's bookmarks
-  const { data: bookmarks } = await supabase
-    .from('bookmarks')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  // Single RPC call replaces 2 separate queries
+  const { data, error } = await supabase.rpc('get_user_library', {
+    p_user_id: user.id,
+  });
 
-  // Get user's collections
-  const { data: collections } = await supabase
-    .from('user_collections')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  if (error) {
+    logger.error('Failed to load user library', error, { userId: user.id });
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">My Library</h1>
+        <p className="text-muted-foreground">Unable to load library. Please try again later.</p>
+      </div>
+    );
+  }
 
-  const bookmarkCount = bookmarks?.length || 0;
-  const collectionCount = collections?.length || 0;
+  const libraryData = data as LibraryData;
+  const { bookmarks, collections, stats } = libraryData;
+  const { bookmarkCount, collectionCount } = stats;
 
   return (
     <div className="space-y-6">

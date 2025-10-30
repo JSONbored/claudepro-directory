@@ -102,6 +102,14 @@ export const publicGridColumnSchema = z.union([
   z.literal('two-thirds'),
 ]);
 
+export const publicGuideSubcategorySchema = z.union([
+  z.literal('tutorials'),
+  z.literal('comparisons'),
+  z.literal('workflows'),
+  z.literal('use-cases'),
+  z.literal('troubleshooting'),
+]);
+
 export const publicIconPositionSchema = z.union([z.literal('left'), z.literal('right')]);
 
 export const publicIntegrationTypeSchema = z.union([
@@ -4160,6 +4168,13 @@ export const publicAddBookmarkArgsSchema = z.object({
 
 export const publicAddBookmarkReturnsSchema = jsonSchema;
 
+export const publicApproveSubmissionArgsSchema = z.object({
+  p_moderator_notes: z.string().optional(),
+  p_submission_id: z.string(),
+});
+
+export const publicApproveSubmissionReturnsSchema = jsonSchema;
+
 export const publicAutoAwardBadgesArgsSchema = z.object({
   p_user_id: z.string(),
 });
@@ -4407,6 +4422,12 @@ export const publicGenerateSlugArgsSchema = z.object({
 
 export const publicGenerateSlugReturnsSchema = z.string();
 
+export const publicGenerateSlugFromFilenameArgsSchema = z.object({
+  p_filename: z.string(),
+});
+
+export const publicGenerateSlugFromFilenameReturnsSchema = z.string();
+
 export const publicGetActiveSponsoredContentArgsSchema = z.object({
   p_content_type: z.string().optional(),
   p_limit: z.number().optional(),
@@ -4642,11 +4663,28 @@ export const publicGetHomepageContentEnrichedArgsSchema = z.object({
 
 export const publicGetHomepageContentEnrichedReturnsSchema = jsonSchema;
 
+export const publicGetJobDetailArgsSchema = z.object({
+  p_slug: z.string(),
+});
+
+export const publicGetJobDetailReturnsSchema = jsonSchema;
+
+export const publicGetJobsListArgsSchema = z.never();
+
+export const publicGetJobsListReturnsSchema = jsonSchema;
+
 export const publicGetMetadataTemplateArgsSchema = z.object({
   p_route_pattern: z.string(),
 });
 
 export const publicGetMetadataTemplateReturnsSchema = jsonSchema;
+
+export const publicGetMySubmissionsArgsSchema = z.object({
+  p_limit: z.number().optional(),
+  p_offset: z.number().optional(),
+});
+
+export const publicGetMySubmissionsReturnsSchema = jsonSchema;
 
 export const publicGetNewContentForWeekArgsSchema = z.object({
   p_limit: z.number().optional(),
@@ -4663,6 +4701,14 @@ export const publicGetNewContentForWeekReturnsSchema = z.array(
     url: z.string(),
   })
 );
+
+export const publicGetPendingSubmissionsArgsSchema = z.object({
+  p_filter_type: z.string().optional(),
+  p_limit: z.number().optional(),
+  p_offset: z.number().optional(),
+});
+
+export const publicGetPendingSubmissionsReturnsSchema = jsonSchema;
 
 export const publicGetPersonalizedFeedArgsSchema = z.object({
   p_category: z.string().optional(),
@@ -4773,6 +4819,14 @@ export const publicGetSeoConfigArgsSchema = z.object({
 
 export const publicGetSeoConfigReturnsSchema = jsonSchema;
 
+export const publicGetSimilarContentArgsSchema = z.object({
+  p_content_slug: z.string(),
+  p_content_type: z.string(),
+  p_limit: z.number().optional(),
+});
+
+export const publicGetSimilarContentReturnsSchema = jsonSchema;
+
 export const publicGetSiteUrlsArgsSchema = z.never();
 
 export const publicGetSiteUrlsReturnsSchema = z.array(
@@ -4853,6 +4907,14 @@ export const publicGetUserActivityTimelineArgsSchema = z.object({
 
 export const publicGetUserActivityTimelineReturnsSchema = jsonSchema;
 
+export const publicGetUserAffinitiesArgsSchema = z.object({
+  p_limit: z.number().optional(),
+  p_min_score: z.number().optional(),
+  p_user_id: z.string(),
+});
+
+export const publicGetUserAffinitiesReturnsSchema = jsonSchema;
+
 export const publicGetUserBadgesWithDetailsArgsSchema = z.object({
   p_featured_only: z.boolean().optional(),
   p_limit: z.number().optional(),
@@ -4861,6 +4923,20 @@ export const publicGetUserBadgesWithDetailsArgsSchema = z.object({
 });
 
 export const publicGetUserBadgesWithDetailsReturnsSchema = jsonSchema;
+
+export const publicGetUserCollectionDetailArgsSchema = z.object({
+  p_collection_slug: z.string(),
+  p_user_slug: z.string(),
+  p_viewer_id: z.string().optional(),
+});
+
+export const publicGetUserCollectionDetailReturnsSchema = jsonSchema;
+
+export const publicGetUserDashboardArgsSchema = z.object({
+  p_user_id: z.string(),
+});
+
+export const publicGetUserDashboardReturnsSchema = jsonSchema;
 
 export const publicGetUserFavoriteCategoriesArgsSchema = z.object({
   p_limit: z.number().optional(),
@@ -4874,6 +4950,19 @@ export const publicGetUserInteractionSummaryArgsSchema = z.object({
 });
 
 export const publicGetUserInteractionSummaryReturnsSchema = jsonSchema;
+
+export const publicGetUserLibraryArgsSchema = z.object({
+  p_user_id: z.string(),
+});
+
+export const publicGetUserLibraryReturnsSchema = jsonSchema;
+
+export const publicGetUserProfileArgsSchema = z.object({
+  p_user_slug: z.string(),
+  p_viewer_id: z.string().optional(),
+});
+
+export const publicGetUserProfileReturnsSchema = jsonSchema;
 
 export const publicGetUserRecentInteractionsArgsSchema = z.object({
   p_limit: z.number().optional(),
@@ -4917,6 +5006,12 @@ export const publicIncrementArgsSchema = z.object({
 
 export const publicIncrementReturnsSchema = z.undefined();
 
+export const publicIsAdminArgsSchema = z.object({
+  p_user_id: z.string(),
+});
+
+export const publicIsAdminReturnsSchema = z.boolean();
+
 export const publicIsBookmarkedArgsSchema = z.object({
   p_content_slug: z.string(),
   p_content_type: z.string(),
@@ -4937,6 +5032,54 @@ export const publicJobSlugArgsSchema = z.object({
 });
 
 export const publicJobSlugReturnsSchema = z.string();
+
+export const publicManageCollectionArgsSchema = z.object({
+  p_action: z.string(),
+  p_data: jsonSchema,
+  p_user_id: z.string(),
+});
+
+export const publicManageCollectionReturnsSchema = jsonSchema;
+
+export const publicManageCommentArgsSchema = z.object({
+  p_action: z.string(),
+  p_data: jsonSchema,
+  p_user_id: z.string(),
+});
+
+export const publicManageCommentReturnsSchema = jsonSchema;
+
+export const publicManageCompanyArgsSchema = z.object({
+  p_action: z.string(),
+  p_data: jsonSchema,
+  p_user_id: z.string(),
+});
+
+export const publicManageCompanyReturnsSchema = jsonSchema;
+
+export const publicManageJobArgsSchema = z.object({
+  p_action: z.string(),
+  p_data: jsonSchema,
+  p_user_id: z.string(),
+});
+
+export const publicManageJobReturnsSchema = jsonSchema;
+
+export const publicManagePostArgsSchema = z.object({
+  p_action: z.string(),
+  p_data: jsonSchema,
+  p_user_id: z.string(),
+});
+
+export const publicManagePostReturnsSchema = jsonSchema;
+
+export const publicManageReviewArgsSchema = z.object({
+  p_action: z.string(),
+  p_data: jsonSchema,
+  p_user_id: z.string(),
+});
+
+export const publicManageReviewReturnsSchema = jsonSchema;
 
 export const publicMarkSequenceEmailProcessedArgsSchema = z.object({
   p_email: z.string(),
@@ -4990,6 +5133,13 @@ export const publicRefreshUserStatsReturnsSchema = z.array(
     success: z.boolean(),
   })
 );
+
+export const publicRejectSubmissionArgsSchema = z.object({
+  p_moderator_notes: z.string(),
+  p_submission_id: z.string(),
+});
+
+export const publicRejectSubmissionReturnsSchema = jsonSchema;
 
 export const publicRemoveBookmarkArgsSchema = z.object({
   p_content_slug: z.string(),
@@ -5209,6 +5359,20 @@ export const publicShowTrgmArgsSchema = z.object({
 
 export const publicShowTrgmReturnsSchema = z.array(z.string());
 
+export const publicSubmitContentForReviewArgsSchema = z.object({
+  p_author: z.string(),
+  p_author_profile_url: z.string().optional(),
+  p_category: z.string(),
+  p_content_data: jsonSchema,
+  p_description: z.string(),
+  p_github_url: z.string().optional(),
+  p_name: z.string(),
+  p_submission_type: z.string(),
+  p_tags: z.array(z.string()).optional(),
+});
+
+export const publicSubmitContentForReviewReturnsSchema = jsonSchema;
+
 export const publicToggleFollowArgsSchema = z.object({
   p_action: z.string(),
   p_follower_id: z.string(),
@@ -5232,6 +5396,14 @@ export const publicToggleReviewHelpfulArgsSchema = z.object({
 });
 
 export const publicToggleReviewHelpfulReturnsSchema = jsonSchema;
+
+export const publicTrackSponsoredEventArgsSchema = z.object({
+  p_data: jsonSchema,
+  p_event_type: z.string(),
+  p_user_id: z.string(),
+});
+
+export const publicTrackSponsoredEventReturnsSchema = jsonSchema;
 
 export const publicUnaccentArgsSchema = z.object({
   '': z.string(),

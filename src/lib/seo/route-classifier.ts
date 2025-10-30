@@ -257,19 +257,7 @@ export function classifyRoute(route: string): RouteClassification {
     };
   }
 
-  // PRIORITY 11: SEO compare pattern - Two segments starting with compare
-  // Handles: /compare/:slug, /(seo)/compare/:slug
-  if (segments.some((seg) => seg === 'compare' || seg === '(seo)')) {
-    return {
-      pattern: 'CONTENT_DETAIL',
-      confidence: 0.9,
-      segments,
-      isDynamic: true,
-      route: normalizedRoute,
-    };
-  }
-
-  // PRIORITY 12: Changelog pattern - Two segments
+  // PRIORITY 11: Changelog pattern - Two segments
   // Handles: /changelog/:slug
   if (segments.length === 2 && segments[0] === 'changelog') {
     return {

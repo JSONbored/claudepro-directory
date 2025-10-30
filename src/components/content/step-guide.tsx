@@ -21,7 +21,10 @@ import { UnifiedContentBox } from '@/src/components/domain/unified-content-box';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting-starry';
 import { Zap } from '@/src/lib/icons';
-import { type StepByStepGuideProps, stepGuidePropsSchema } from '@/src/lib/schemas/shared.schema';
+import {
+  type StepByStepGuideProps,
+  stepGuidePropsSchema,
+} from '@/src/lib/schemas/component.schema';
 import { batchMap } from '@/src/lib/utils/batch.utils';
 
 export async function StepByStepGuide(props: StepByStepGuideProps) {

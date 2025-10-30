@@ -3927,6 +3927,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      approve_submission: {
+        Args: { p_moderator_notes?: string; p_submission_id: string };
+        Returns: Json;
+      };
       auto_award_badges: {
         Args: { p_user_id: string };
         Returns: {
@@ -4171,6 +4175,10 @@ export type Database = {
         Returns: Json;
       };
       generate_slug: { Args: { p_name: string }; Returns: string };
+      generate_slug_from_filename: {
+        Args: { p_filename: string };
+        Returns: string;
+      };
       get_active_sponsored_content: {
         Args: { p_content_type?: string; p_limit?: number };
         Returns: {
@@ -4333,8 +4341,14 @@ export type Database = {
         Args: { p_category_ids: string[]; p_week_start?: string };
         Returns: Json;
       };
+      get_job_detail: { Args: { p_slug: string }; Returns: Json };
+      get_jobs_list: { Args: never; Returns: Json };
       get_metadata_template: {
         Args: { p_route_pattern: string };
+        Returns: Json;
+      };
+      get_my_submissions: {
+        Args: { p_limit?: number; p_offset?: number };
         Returns: Json;
       };
       get_new_content_for_week: {
@@ -4347,6 +4361,10 @@ export type Database = {
           title: string;
           url: string;
         }[];
+      };
+      get_pending_submissions: {
+        Args: { p_filter_type?: string; p_limit?: number; p_offset?: number };
+        Returns: Json;
       };
       get_personalized_feed: {
         Args: { p_category?: string; p_limit?: number; p_user_id: string };
@@ -4429,6 +4447,14 @@ export type Database = {
         }[];
       };
       get_seo_config: { Args: { p_key: string }; Returns: Json };
+      get_similar_content: {
+        Args: {
+          p_content_slug: string;
+          p_content_type: string;
+          p_limit?: number;
+        };
+        Returns: Json;
+      };
       get_site_urls: {
         Args: never;
         Returns: {
@@ -4489,6 +4515,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_user_affinities: {
+        Args: { p_limit?: number; p_min_score?: number; p_user_id: string };
+        Returns: Json;
+      };
       get_user_badges_with_details: {
         Args: {
           p_featured_only?: boolean;
@@ -4498,12 +4528,26 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_user_collection_detail: {
+        Args: {
+          p_collection_slug: string;
+          p_user_slug: string;
+          p_viewer_id?: string;
+        };
+        Returns: Json;
+      };
+      get_user_dashboard: { Args: { p_user_id: string }; Returns: Json };
       get_user_favorite_categories: {
         Args: { p_limit?: number; p_user_id: string };
         Returns: string[];
       };
       get_user_interaction_summary: {
         Args: { p_user_id: string };
+        Returns: Json;
+      };
+      get_user_library: { Args: { p_user_id: string }; Returns: Json };
+      get_user_profile: {
+        Args: { p_user_slug: string; p_viewer_id?: string };
         Returns: Json;
       };
       get_user_recent_interactions: {
@@ -4532,6 +4576,7 @@ export type Database = {
         };
         Returns: undefined;
       };
+      is_admin: { Args: { p_user_id: string }; Returns: boolean };
       is_bookmarked: {
         Args: {
           p_content_slug: string;
@@ -4545,6 +4590,30 @@ export type Database = {
         Returns: boolean;
       };
       job_slug: { Args: { p_title: string }; Returns: string };
+      manage_collection: {
+        Args: { p_action: string; p_data: Json; p_user_id: string };
+        Returns: Json;
+      };
+      manage_comment: {
+        Args: { p_action: string; p_data: Json; p_user_id: string };
+        Returns: Json;
+      };
+      manage_company: {
+        Args: { p_action: string; p_data: Json; p_user_id: string };
+        Returns: Json;
+      };
+      manage_job: {
+        Args: { p_action: string; p_data: Json; p_user_id: string };
+        Returns: Json;
+      };
+      manage_post: {
+        Args: { p_action: string; p_data: Json; p_user_id: string };
+        Returns: Json;
+      };
+      manage_review: {
+        Args: { p_action: string; p_data: Json; p_user_id: string };
+        Returns: Json;
+      };
       mark_sequence_email_processed: {
         Args: {
           p_email: string;
@@ -4584,6 +4653,10 @@ export type Database = {
           rows_refreshed: number;
           success: boolean;
         }[];
+      };
+      reject_submission: {
+        Args: { p_moderator_notes: string; p_submission_id: string };
+        Returns: Json;
       };
       remove_bookmark: {
         Args: {
@@ -4783,6 +4856,20 @@ export type Database = {
       };
       show_limit: { Args: never; Returns: number };
       show_trgm: { Args: { '': string }; Returns: string[] };
+      submit_content_for_review: {
+        Args: {
+          p_author: string;
+          p_author_profile_url?: string;
+          p_category: string;
+          p_content_data: Json;
+          p_description: string;
+          p_github_url?: string;
+          p_name: string;
+          p_submission_type: string;
+          p_tags?: string[];
+        };
+        Returns: Json;
+      };
       toggle_follow: {
         Args: {
           p_action: string;
@@ -4797,6 +4884,10 @@ export type Database = {
       };
       toggle_review_helpful: {
         Args: { p_helpful: boolean; p_review_id: string; p_user_id: string };
+        Returns: Json;
+      };
+      track_sponsored_event: {
+        Args: { p_data: Json; p_event_type: string; p_user_id: string };
         Returns: Json;
       };
       unaccent: { Args: { '': string }; Returns: string };
@@ -4854,6 +4945,12 @@ export type Database = {
       form_grid_column: 'full' | 'half' | 'third' | 'two-thirds';
       form_icon_position: 'left' | 'right';
       grid_column: 'full' | 'half' | 'third' | 'two-thirds';
+      guide_subcategory:
+        | 'tutorials'
+        | 'comparisons'
+        | 'workflows'
+        | 'use-cases'
+        | 'troubleshooting';
       icon_position: 'left' | 'right';
       integration_type:
         | 'github'
@@ -5047,6 +5144,7 @@ export const Constants = {
       form_grid_column: ['full', 'half', 'third', 'two-thirds'],
       form_icon_position: ['left', 'right'],
       grid_column: ['full', 'half', 'third', 'two-thirds'],
+      guide_subcategory: ['tutorials', 'comparisons', 'workflows', 'use-cases', 'troubleshooting'],
       icon_position: ['left', 'right'],
       integration_type: [
         'github',

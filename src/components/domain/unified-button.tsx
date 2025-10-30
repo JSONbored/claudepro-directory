@@ -40,14 +40,13 @@ import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useState, useTransition } from 'react';
-import { deleteJob, toggleJobStatus } from '#lib/actions/business';
-import { copyMarkdownAction, downloadMarkdownAction } from '#lib/actions/markdown';
-import { trackCopy } from '#lib/actions/track-view';
-import { addBookmark, removeBookmark } from '#lib/actions/user';
-import { usePostCopyEmail } from '#lib/providers/post-copy-email';
-import { createClient } from '#lib/supabase/client';
+import { usePostCopyEmail } from '@/src/components/infra/providers/post-copy-email-provider';
 import { Button } from '@/src/components/primitives/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
+import { trackInteraction } from '@/src/lib/actions/analytics.actions';
+import { deleteJob, toggleJobStatus } from '@/src/lib/actions/business.actions';
+import { copyMarkdownAction, downloadMarkdownAction } from '@/src/lib/actions/markdown-actions';
+import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
 import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import {
@@ -68,6 +67,7 @@ import {
   Trash,
 } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
+import { createClient } from '@/src/lib/supabase/client';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -426,7 +426,7 @@ function CopyMarkdownButton({
 
         // Track analytics (dynamic import for Storybook compatibility)
         const contentLength = result.data.markdown.length;
-        import('#lib/analytics/tracker')
+        import('@/src/lib/analytics/tracker')
           .then((tracker) => {
             tracker.trackEvent('markdown_copied', {
               category,
@@ -531,7 +531,7 @@ function DownloadMarkdownButton({
 
         // Track analytics (dynamic import for Storybook compatibility)
         const fileSize = blob.size;
-        import('#lib/analytics/tracker')
+        import('@/src/lib/analytics/tracker')
           .then((tracker) => {
             tracker.trackEvent('markdown_downloaded', {
               category,
@@ -778,7 +778,11 @@ function CardCopyButton({
       setTimeout(() => setCopied(false), 2000);
 
       // Track copy action (silent fail for analytics)
-      trackCopy({ category, slug }).catch((trackError) => {
+      trackInteraction({
+        interaction_type: 'click',
+        content_type: category,
+        content_slug: slug,
+      }).catch((trackError) => {
         logger.error(
           'Failed to track copy action',
           trackError instanceof Error ? trackError : new Error(String(trackError)),

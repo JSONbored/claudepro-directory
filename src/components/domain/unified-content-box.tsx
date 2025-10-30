@@ -1,33 +1,7 @@
 'use client';
 
 /**
- * Unified Content Box Component
- *
- * Production-grade, configuration-driven content box system consolidating ALL content box patterns.
- * Replaces 4 separate content box files with a single discriminated union architecture.
- *
- * Architecture Benefits:
- * - DRY: Single source for ALL content box logic (~276 LOC reduction)
- * - Type-safe: Discriminated unions enforce valid prop combinations
- * - Tree-shakeable: Unused variants compile out
- * - Zero wrappers: Complete consolidation, no backward compatibility
- * - Performance: Optimized re-renders with proper state management
- * - SEO: Proper Schema.org structured data (microdata + JSON-LD)
- *
- * Consolidates:
- * - Accordion (98 LOC) - Collapsible Q&A with microdata
- * - AIOptimizedFAQ (96 LOC) - FAQ with JSON-LD structured data
- * - InfoBox (52 LOC) - Information highlight boxes
- * - Callout (34 LOC) - Alert-style notifications
- *
- * Production Standards (October 2025):
- * - Schema.org compliance (FAQPage JSON-LD, Question/Answer microdata)
- * - Arcjet CSP integration (automatic nonce handling)
- * - Accessibility compliant (ARIA attributes, keyboard navigation)
- * - Zod validation for all props
- * - Error boundaries and logging
- *
- * @module components/ui/unified-content-box
+ * Unified content box component (accordion, FAQ, infobox, callout)
  */
 
 import Script from 'next/script';
@@ -48,75 +22,40 @@ import type {
   CalloutProps,
   FAQProps,
   InfoBoxProps,
-} from '@/src/lib/schemas/shared.schema';
+} from '@/src/lib/schemas/component.schema';
 import {
   accordionPropsSchema,
   calloutPropsSchema,
   faqPropsSchema,
   infoBoxPropsSchema,
-} from '@/src/lib/schemas/shared.schema';
+} from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { serializeJsonLd } from '@/src/lib/utils/jsonld.utils';
 
-/**
- * ==============================================================================
- * DISCRIMINATED UNION TYPE DEFINITIONS
- * ==============================================================================
- */
-
-/**
- * Accordion Variant - Collapsible content with Schema.org microdata
- */
 export type AccordionVariant = AccordionProps & {
   contentType: 'accordion';
 };
 
-/**
- * FAQ Variant - FAQ with JSON-LD structured data
- * Note: Client component with automatic CSP nonce handling via Arcjet/Next.js
- */
 export type FAQVariant = FAQProps & {
   contentType: 'faq';
 };
 
-/**
- * InfoBox Variant - Information highlight boxes
- * Note: Uses 'contentType' to avoid conflict with InfoBoxProps.variant (visual styling)
- */
 export type InfoBoxVariant = InfoBoxProps & {
   contentType: 'infobox';
 };
 
-/**
- * Callout Variant - Alert-style notifications
- */
 export type CalloutVariant = CalloutProps & {
   contentType: 'callout';
 };
 
-/**
- * Master Discriminated Union
- *
- * TypeScript will enforce that ONLY valid prop combinations are allowed.
- * No wrappers, no backward compatibility - pure configuration-driven architecture.
- *
- * Note: Uses 'contentType' as discriminant to avoid conflict with InfoBoxProps.variant
- */
 export type UnifiedContentBoxProps =
   | AccordionVariant
   | FAQVariant
   | InfoBoxVariant
   | CalloutVariant;
 
-/**
- * ==============================================================================
- * UNIFIED CONTENT BOX COMPONENT
- * ==============================================================================
- */
-
 export function UnifiedContentBox(props: UnifiedContentBoxProps) {
-  // Route to specific implementation based on discriminated union contentType
   switch (props.contentType) {
     case 'accordion':
       return <AccordionBox {...props} />;
@@ -134,18 +73,6 @@ export function UnifiedContentBox(props: UnifiedContentBoxProps) {
   }
 }
 
-/**
- * ==============================================================================
- * VARIANT IMPLEMENTATIONS
- * ==============================================================================
- */
-
-/**
- * Accordion - Collapsible content sections with Schema.org Question/Answer microdata
- *
- * Note: Provides Question/Answer microdata but does NOT declare FAQPage schema.
- * Use FAQBox for pages requiring FAQPage structured data.
- */
 function AccordionBox(props: AccordionVariant) {
   const validated = accordionPropsSchema.parse(props);
   const { items, title, description, allowMultiple } = validated;
@@ -228,12 +155,6 @@ function AccordionBox(props: AccordionVariant) {
   );
 }
 
-/**
- * FAQ - FAQ component with JSON-LD structured data
- *
- * Generates FAQPage JSON-LD for Google Search Console.
- * CSP nonce is automatically handled by Arcjet middleware and Next.js Script component.
- */
 function FAQBox(props: FAQVariant) {
   const validated = faqPropsSchema.parse(props);
   const { questions, title, description } = validated;
@@ -306,9 +227,6 @@ function FAQBox(props: FAQVariant) {
   );
 }
 
-/**
- * InfoBox - Information highlight box with Schema.org Note markup
- */
 function InfoBoxComponent(props: InfoBoxVariant) {
   const validated = infoBoxPropsSchema.parse(props);
   const { title, children, variant } = validated;
@@ -350,9 +268,6 @@ function InfoBoxComponent(props: InfoBoxVariant) {
   );
 }
 
-/**
- * Callout - Alert-style component using shadcn/ui Alert
- */
 function CalloutComponent(props: CalloutVariant) {
   const validated = calloutPropsSchema.parse(props);
   const { type, title, children } = validated;

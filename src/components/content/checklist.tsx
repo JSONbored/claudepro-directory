@@ -15,7 +15,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { AlertTriangle, BookOpen, CheckCircle } from '@/src/lib/icons';
-import { type ChecklistProps, checklistPropsSchema } from '@/src/lib/schemas/shared.schema';
+import { type ChecklistProps, checklistPropsSchema } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function Checklist(props: ChecklistProps) {

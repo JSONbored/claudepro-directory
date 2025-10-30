@@ -16,7 +16,7 @@ import { CheckCircle } from '@/src/lib/icons';
 import {
   type ComparisonTableProps,
   comparisonTablePropsSchema,
-} from '@/src/lib/schemas/shared.schema';
+} from '@/src/lib/schemas/component.schema';
 
 export function ComparisonTable(props: ComparisonTableProps) {
   const validated = comparisonTablePropsSchema.parse(props);

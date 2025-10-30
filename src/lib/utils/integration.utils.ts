@@ -38,7 +38,7 @@ const GITHUB_CONFIG = {
 /**
  * Content type display names for issue titles
  */
-const CONTENT_TYPE_LABELS: Record<ConfigSubmissionData['type'], string> = {
+const CONTENT_TYPE_LABELS: Record<ConfigSubmissionData['submission_type'], string> = {
   agents: 'Agent',
   mcp: 'MCP Server',
   rules: 'Rule',
@@ -55,7 +55,7 @@ function generateIssueBody(data: ConfigSubmissionData): string {
   const sections: string[] = [
     '## New Configuration Submission',
     '',
-    `**Submission Type:** ${CONTENT_TYPE_LABELS[data.type]}`,
+    `**Submission Type:** ${CONTENT_TYPE_LABELS[data.submission_type]}`,
     `**Name:** ${data.name}`,
     `**Author:** ${data.author}`,
     `**Category:** ${data.category}`,
@@ -68,9 +68,9 @@ function generateIssueBody(data: ConfigSubmissionData): string {
   sections.push('');
 
   // GitHub URL if provided
-  if (data.github?.trim()) {
+  if (data.github_url?.trim()) {
     sections.push('### Repository');
-    sections.push(`**GitHub URL:** ${data.github}`);
+    sections.push(`**GitHub URL:** ${data.github_url}`);
     sections.push('');
   }
 
@@ -103,7 +103,7 @@ function generateIssueBody(data: ConfigSubmissionData): string {
   // Metadata
   sections.push('### Submission Metadata');
   sections.push(`**Submitted:** ${new Date().toISOString()}`);
-  sections.push(`**Type:** ${data.type}`);
+  sections.push(`**Type:** ${data.submission_type}`);
   sections.push('**Status:** Pending Review');
   sections.push('');
 
@@ -136,9 +136,9 @@ function generateIssueBody(data: ConfigSubmissionData): string {
  * });
  */
 export function generateGitHubIssueUrl(data: ConfigSubmissionData): string {
-  const title = `New ${CONTENT_TYPE_LABELS[data.type]} Submission: ${data.name}`;
+  const title = `New ${CONTENT_TYPE_LABELS[data.submission_type]} Submission: ${data.name}`;
   const body = generateIssueBody(data);
-  const labels = ['submission', `type:${data.type}`, 'needs-review'].join(',');
+  const labels = ['submission', `type:${data.submission_type}`, 'needs-review'].join(',');
 
   const baseUrl = `${GITHUB_CONFIG.baseUrl}/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues/new`;
   const params = new URLSearchParams({

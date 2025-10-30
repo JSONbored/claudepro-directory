@@ -86,13 +86,16 @@ function UnifiedSearchComponent({
       if (sanitized && sanitized.length > 0) {
         const category = pathname?.split('/')[1] || 'global';
 
-        import('@/src/lib/actions/track-search')
+        import('@/src/lib/actions/analytics.actions')
           .then((module) =>
-            module.trackSearch({
-              query: sanitized.substring(0, 100),
-              category,
-              resultsCount: resultCount,
-              filtersApplied: activeFilterCount > 0,
+            module.trackInteraction({
+              interaction_type: 'click',
+              content_type: category,
+              content_slug: `search:${sanitized.substring(0, 100)}`,
+              metadata: {
+                resultsCount: resultCount,
+                filtersApplied: activeFilterCount > 0,
+              },
             })
           )
           .catch(() => {});

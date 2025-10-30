@@ -1,6 +1,6 @@
 /**
- * User Profile Page - Database-First User Profiles
- * All data from Supabase with parallel batch fetching, reputation from PostgreSQL RPC.
+ * User Profile Page - Database-First RPC Architecture
+ * Single RPC call to get_user_profile() replaces 6+ separate queries
  */
 
 import type { Metadata } from 'next';
@@ -24,7 +24,6 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { batchFetch } from '@/src/lib/utils/batch.utils';
 
 // User profiles may show personalized content if authenticated
 export const dynamic = 'force-dynamic';
@@ -35,20 +34,44 @@ interface UserProfilePageProps {
 
 /**
  * ISR revalidation interval for user profile pages
- *
- * @constant {number}
- * @description Pages revalidate every 30 minutes for fresher user data while maintaining edge caching benefits.
  */
 export const revalidate = 1800; // 30 minutes
 
 export async function generateMetadata({ params }: UserProfilePageProps): Promise<Metadata> {
   const { slug } = await params;
-
-  // Use generator with smart defaults for user profiles
   return generatePageMetadata('/u/:slug', {
     params: { slug },
   });
 }
+
+type UserProfile = {
+  id: string;
+  slug: string;
+  name: string;
+  image: string | null;
+  bio: string | null;
+  website: string | null;
+  location: string | null;
+  tier: string;
+  reputation_score: number;
+  created_at: string;
+};
+
+type ProfileData = {
+  profile: UserProfile;
+  stats: {
+    followerCount: number;
+    followingCount: number;
+    postsCount: number;
+    collectionsCount: number;
+    contributionsCount: number;
+  };
+  posts: any[];
+  collections: any[];
+  contributions: any[];
+  isFollowing: boolean;
+  isOwner: boolean;
+};
 
 export default async function UserProfilePage({ params }: UserProfilePageProps) {
   const { slug } = await params;
@@ -59,154 +82,51 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     data: { user: currentUser },
   } = await supabase.auth.getUser();
 
-  // Fetch profile by slug
-  const { data: profile, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('slug', slug)
-    .single();
+  // Single RPC call replaces 6+ separate queries
+  const { data: profileData, error } = await supabase.rpc('get_user_profile', {
+    p_user_slug: slug,
+    ...(currentUser?.id && { p_viewer_id: currentUser.id }),
+  });
 
-  if (error || !profile || !profile.public) {
+  if (error || !profileData) {
+    logger.error('Failed to load user profile', error instanceof Error ? error : undefined, {
+      slug,
+    });
     notFound();
   }
 
-  // Batch fetch all profile data in parallel
-  const [
-    followerCountResult,
-    followingCountResult,
-    postsResult,
-    collectionsResult,
-    contributionsResult,
-    isFollowingResult,
-    reputationResult,
-    badgesResult,
-    tierConfigsResult,
-  ] = await batchFetch([
-    // Follower count
-    (async () => {
-      const res = await supabase
-        .from('followers')
-        .select('*', { count: 'exact', head: true })
-        .eq('following_id', profile.id);
-      return res.count || 0;
-    })(),
+  const data = profileData as ProfileData;
+  const { profile, stats, posts, collections, contributions, isFollowing, isOwner } = data;
 
-    // Following count
-    (async () => {
-      const res = await supabase
-        .from('followers')
-        .select('*', { count: 'exact', head: true })
-        .eq('follower_id', profile.id);
-      return res.count || 0;
-    })(),
-
-    // User's posts
-    (async () => {
-      const res = await supabase
-        .from('posts')
-        .select('*')
-        .eq('user_id', profile.id)
-        .order('created_at', { ascending: false })
-        .limit(10);
-      return res.data || [];
-    })(),
-
-    // User's public collections
-    (async () => {
-      const res = await supabase
-        .from('user_collections')
-        .select('*')
-        .eq('user_id', profile.id)
-        .eq('is_public', true)
-        .order('created_at', { ascending: false })
-        .limit(6);
-      return res.data || [];
-    })(),
-
-    // User's content contributions
-    (async () => {
-      const res = await supabase
-        .from('user_content')
-        .select('*')
-        .eq('user_id', profile.id)
-        .eq('active', true)
-        .order('created_at', { ascending: false })
-        .limit(12);
-      return res.data || [];
-    })(),
-
-    // Is following check
-    currentUser
-      ? (async () => {
-          const res = await supabase
-            .from('followers')
-            .select('id')
-            .eq('follower_id', currentUser.id)
-            .eq('following_id', profile.id)
-            .single();
-          return !!res.data;
-        })()
-      : Promise.resolve(false),
-
-    // Reputation data
+  // Fetch reputation and badges in parallel (these use separate RPCs/actions)
+  const [reputationData, userBadges, tierConfigsResult] = await Promise.all([
     getUserReputation(profile.id).catch((error) => {
-      logger.error(
-        'Failed to fetch reputation for profile',
-        error instanceof Error ? error : new Error(String(error)),
-        { profileId: profile.id }
-      );
+      logger.error('Failed to fetch reputation', error as Error, { profileId: profile.id });
       return null;
     }),
-
-    // User badges
     getPublicUserBadges(profile.id, { featuredOnly: false }).catch((error) => {
-      logger.error(
-        'Failed to fetch badges for profile',
-        error instanceof Error ? error : new Error(String(error)),
-        { profileId: profile.id }
-      );
+      logger.error('Failed to fetch badges', error as Error, { profileId: profile.id });
       return [];
     }),
-
-    // Tier display configs
-    (async () => {
-      const res = await supabase.from('tier_display_config').select('*').eq('active', true);
-      return res.data || [];
-    })(),
+    supabase
+      .from('tier_display_config')
+      .select('*')
+      .eq('active', true)
+      .then((res) => res.data || []),
   ]);
 
-  const followerCount = followerCountResult;
-  const followingCount = followingCountResult;
-  const posts = postsResult;
-  const collections = collectionsResult;
-  const contributions = contributionsResult;
-  const isFollowing = isFollowingResult;
-  const reputationData = reputationResult;
-  const userBadges = badgesResult;
   const tierConfigs = Object.fromEntries(
     tierConfigsResult.map((t) => [t.tier, { label: t.label, className: t.css_classes }])
   );
 
-  // Check if current user is the profile owner
-  const isOwner = currentUser?.id === profile.id;
+  const { followerCount, followingCount } = stats;
 
   return (
     <div className={'min-h-screen bg-background'}>
       {/* Hero/Profile Header */}
       <section className="relative">
-        {profile.hero && (
-          <div className="w-full h-48 bg-gradient-to-r from-primary/20 to-accent/20 relative">
-            <Image
-              src={profile.hero}
-              alt={`${profile.name || slug}'s profile banner`}
-              fill
-              className="object-cover"
-            />
-          </div>
-        )}
-
         <div className={'container mx-auto px-4'}>
-          <div className={`flex items-start justify-between ${profile.hero ? '-mt-16' : 'pt-12'}`}>
+          <div className="flex items-start justify-between pt-12">
             <div className="flex items-start gap-4">
               {profile.image ? (
                 <Image
@@ -224,7 +144,6 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
               <div className="mt-4">
                 <h1 className="text-3xl font-bold">{profile.name || slug}</h1>
-                {profile.work && <p className="text-muted-foreground">{profile.work}</p>}
                 {profile.bio && <p className={'text-sm mt-2 max-w-2xl'}>{profile.bio}</p>}
 
                 <div className={'flex items-center gap-4 mt-3 text-sm'}>
@@ -250,20 +169,6 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                     </>
                   )}
                 </div>
-
-                {/* Interests/Skills Tags */}
-                {profile.interests &&
-                  Array.isArray(profile.interests) &&
-                  profile.interests.length > 0 &&
-                  profile.interests.every((item): item is string => typeof item === 'string') && (
-                    <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4`}>
-                      {profile.interests.map((interest) => (
-                        <UnifiedBadge key={interest} variant="base" style="secondary">
-                          {interest}
-                        </UnifiedBadge>
-                      ))}
-                    </div>
-                  )}
               </div>
             </div>
 

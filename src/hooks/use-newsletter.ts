@@ -82,7 +82,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
           ...(referrer && { referrer }),
         });
 
-        if (result?.data?.success) {
+        if (result?.data) {
           if (showToasts) {
             toasts.raw.success('Welcome!', {
               description: successMessage,
@@ -91,18 +91,14 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
 
           const eventName = getEmailSubscriptionEvent(source);
           trackEvent(eventName, {
-            ...(result.data.contactId && { contact_id: result.data.contactId }),
+            contact_id: result.data.id,
             ...(referrer && { referrer }),
           });
 
           reset();
           onSuccess?.();
         } else {
-          const errorMessage =
-            result?.data?.message ||
-            result?.serverError ||
-            (result?.data?.error ? `Error: ${result.data.error}` : null) ||
-            'Please try again later.';
+          const errorMessage = result?.serverError || 'Please try again later.';
 
           setError(errorMessage);
 

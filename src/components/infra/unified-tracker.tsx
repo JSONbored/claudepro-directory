@@ -6,8 +6,8 @@
  */
 
 import { useEffect } from 'react';
-import { trackView } from '#lib/actions/track-view';
-import { trackEvent } from '#lib/analytics/tracker';
+import { trackInteraction } from '@/src/lib/actions/analytics.actions';
+import { trackEvent } from '@/src/lib/analytics/tracker';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 
 export type UnifiedTrackerProps =
@@ -70,7 +70,11 @@ function ViewVariant({
 }: Extract<UnifiedTrackerProps, { variant: 'view' }>) {
   useTrackingEffect(
     () => {
-      return trackView({ category, slug }).catch(() => {});
+      return trackInteraction({
+        interaction_type: 'view',
+        content_type: category,
+        content_slug: slug,
+      }).catch(() => {});
     },
     delay,
     [category, slug]

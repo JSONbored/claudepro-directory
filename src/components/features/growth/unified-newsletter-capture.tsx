@@ -641,21 +641,23 @@ function ModalVariant({
 
   const { execute, status } = useAction(postCopyEmailCaptureAction, {
     onSuccess: (result) => {
-      if (result.data?.success) {
+      if (result.data) {
         toasts.raw.success('Welcome to the newsletter! 🎉', {
           description: 'Check your inbox for a welcome email',
           duration: 5000,
         });
 
-        if (result.data.analytics) {
-          const { event, ...eventData } = result.data.analytics;
-          trackEvent(event, eventData);
-        }
+        trackEvent('newsletter_subscription_post_copy', {
+          contact_id: result.data.id,
+          copy_type: result.data.copy_type,
+          copy_category: result.data.copy_category,
+          copy_slug: result.data.copy_slug,
+        });
 
         onOpenChange(false);
         setEmail('');
       } else {
-        throw new Error(result.data?.error || 'Subscription failed');
+        throw new Error('Subscription failed');
       }
     },
     onError: (error) => {

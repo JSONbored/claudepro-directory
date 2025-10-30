@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { AlertTriangle, Info } from '@/src/lib/icons';
-import { type ErrorTableProps, errorTablePropsSchema } from '@/src/lib/schemas/shared.schema';
+import { type ErrorTableProps, errorTablePropsSchema } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function ErrorTable(props: ErrorTableProps) {

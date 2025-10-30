@@ -58,7 +58,7 @@ import type {
   FeatureGridProps,
   QuickReferenceProps,
   TLDRSummaryProps,
-} from '@/src/lib/schemas/shared.schema';
+} from '@/src/lib/schemas/component.schema';
 import {
   caseStudyPropsSchema,
   contentTabsPropsSchema,
@@ -66,7 +66,7 @@ import {
   featureGridPropsSchema,
   quickReferencePropsSchema,
   tldrSummaryPropsSchema,
-} from '@/src/lib/schemas/shared.schema';
+} from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // ============================================================================

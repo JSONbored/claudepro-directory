@@ -15,7 +15,7 @@
  */
 
 import { highlightCode } from '@/src/lib/content/syntax-highlighting-starry';
-import type { CodeGroupProps } from '@/src/lib/schemas/shared.schema';
+import type { CodeGroupProps } from '@/src/lib/schemas/component.schema';
 import { batchMap } from '@/src/lib/utils/batch.utils';
 import { CodeGroup } from './code-group';
 

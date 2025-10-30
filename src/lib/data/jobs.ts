@@ -1,37 +1,29 @@
 /**
- * Jobs Data Layer
- * Fetches job listings from Supabase database
- *
- * Migration: Moved from static JSON to database for dynamic content management
+ * Jobs Data Layer - Database-First Architecture
+ * Uses get_jobs_list() and get_job_detail() RPCs
  */
 
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Database } from '@/src/types/database.types';
 
 export type Job = Database['public']['Tables']['jobs']['Row'];
 
 /**
- * Get all active jobs
+ * Get all active jobs via RPC
  */
 export async function getJobs(): Promise<Job[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
 
-    const { data, error } = await supabase
-      .from('jobs')
-      .select('*')
-      .eq('status', 'active')
-      .eq('active', true)
-      .order('order', { ascending: false })
-      .order('posted_at', { ascending: false });
+    const { data, error } = await supabase.rpc('get_jobs_list');
 
     if (error) {
-      logger.error('Failed to fetch jobs', error);
+      logger.error('Failed to fetch jobs via RPC', error);
       return [];
     }
 
-    return data || [];
+    return (data || []) as Job[];
   } catch (error) {
     logger.error('Error in getJobs', error instanceof Error ? error : new Error(String(error)));
     return [];
@@ -39,24 +31,22 @@ export async function getJobs(): Promise<Job[]> {
 }
 
 /**
- * Get a job by slug
+ * Get a job by slug via RPC
  */
 export async function getJobBySlug(slug: string): Promise<Job | undefined> {
   try {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
 
-    const { data, error } = await supabase
-      .from('jobs')
-      .select('*')
-      .eq('slug', slug)
-      .eq('status', 'active')
-      .single();
+    const { data, error } = await supabase.rpc('get_job_detail', {
+      p_slug: slug,
+    });
 
-    if (error || !data) {
+    if (error) {
+      logger.error('Failed to fetch job detail via RPC', error, { slug });
       return undefined;
     }
 
-    return data;
+    return data ? (data as Job) : undefined;
   } catch (error) {
     logger.error(
       'Error in getJobBySlug',
@@ -71,7 +61,7 @@ export async function getJobBySlug(slug: string): Promise<Job | undefined> {
  */
 export async function getFeaturedJobs(): Promise<Job[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
 
     const { data, error } = await supabase
       .from('jobs')
@@ -103,7 +93,7 @@ export async function getFeaturedJobs(): Promise<Job[]> {
  */
 export async function getJobsByCategory(category: string): Promise<Job[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
 
     const { data, error } = await supabase
       .from('jobs')
@@ -133,7 +123,7 @@ export async function getJobsByCategory(category: string): Promise<Job[]> {
  */
 export async function getJobsCount(): Promise<number> {
   try {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
 
     const { count, error } = await supabase
       .from('jobs')

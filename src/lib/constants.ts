@@ -453,7 +453,6 @@ export const SITEMAP_CONFIG = {
     '/trending': 0.8, // High-value discovery
     '/guides': 0.7, // Educational content
     '/u/*': 0.6, // User profiles
-    '/compare/*': 0.7, // Comparison pages
   } as Record<string, number>,
 
   /**
@@ -469,6 +468,5 @@ export const SITEMAP_CONFIG = {
     '/ph-waitlist': 'weekly',
     '/changelog': 'daily',
     '/u/*': 'weekly',
-    '/compare/*': 'monthly',
   } as Record<string, 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never'>,
 } as const;

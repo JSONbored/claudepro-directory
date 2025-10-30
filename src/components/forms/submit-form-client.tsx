@@ -12,7 +12,6 @@
  */
 
 import { motion } from 'motion/react';
-import Link from 'next/link';
 import { useId, useState, useTransition } from 'react';
 import { z } from 'zod';
 import { Button } from '@/src/components/primitives/button';
@@ -26,7 +25,6 @@ import {
 import { Input } from '@/src/components/primitives/input';
 import { Label } from '@/src/components/primitives/label';
 import { submitConfiguration } from '@/src/lib/actions/business.actions';
-import { ROUTES } from '@/src/lib/constants/routes';
 import {
   SUBMISSION_CONTENT_TYPES,
   type SubmissionContentType,
@@ -34,7 +32,7 @@ import {
   type SubmissionFormSection,
   type TextFieldDefinition,
 } from '@/src/lib/forms/types';
-import { CheckCircle, ExternalLink, Github, Send } from '@/src/lib/icons';
+import { CheckCircle, Github, Send } from '@/src/lib/icons';
 import type { configSubmissionSchema } from '@/src/lib/schemas/form.schema';
 // Note: Server action already validates with configSubmissionSchema
 // Client-side validation would be redundant and cause type mismatches
@@ -135,9 +133,9 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
 
   /** Submission result for success message display */
   const [submissionResult, setSubmissionResult] = useState<{
-    prUrl: string;
-    prNumber: number;
-    slug: string;
+    submission_id: string;
+    status: string;
+    message: string;
   } | null>(null);
 
   /**
@@ -294,9 +292,9 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
 
         if (result?.data?.success) {
           setSubmissionResult({
-            prUrl: result.data.prUrl,
-            prNumber: result.data.prNumber,
-            slug: result.data.slug,
+            submission_id: result.data.submission_id,
+            status: result.data.status,
+            message: result.data.message,
           });
 
           toasts.success.submissionCreated(contentType);
@@ -335,20 +333,11 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
               />
               <div className="flex-1 min-w-0">
                 <p className="font-medium">Submission Successful! 🎉</p>
-                <p className={'text-sm text-muted-foreground mt-1'}>
-                  Your configuration has been submitted for review. Pull Request #
-                  {submissionResult.prNumber} created on GitHub.
+                <p className={'text-sm text-muted-foreground mt-1'}>{submissionResult.message}</p>
+                <p className={'text-xs text-muted-foreground mt-1'}>
+                  Status: {submissionResult.status} • ID:{' '}
+                  {submissionResult.submission_id.slice(0, 8)}...
                 </p>
-                <div className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_2} mt-3`}>
-                  <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
-                    <a href={submissionResult.prUrl} target="_blank" rel="noopener noreferrer">
-                      View PR <ExternalLink className="h-3 w-3 ml-1" />
-                    </a>
-                  </Button>
-                  <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
-                    <Link href={ROUTES.ACCOUNT_SUBMISSIONS}>Track Status</Link>
-                  </Button>
-                </div>
               </div>
             </div>
           </CardContent>

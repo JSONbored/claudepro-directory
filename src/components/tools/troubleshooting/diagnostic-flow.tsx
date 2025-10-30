@@ -18,7 +18,7 @@ import { CheckCircle } from '@/src/lib/icons';
 import {
   type DiagnosticFlowProps,
   diagnosticFlowPropsSchema,
-} from '@/src/lib/schemas/shared.schema';
+} from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function DiagnosticFlow(props: DiagnosticFlowProps) {
