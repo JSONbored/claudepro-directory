@@ -138,15 +138,16 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const initialSearchQuery = resolvedParams.q || '';
 
   // Cache user stats queries (15min revalidation) - 70% faster
+  // MUST use createAnonClient() - createClient() uses cookies() which is forbidden in unstable_cache()
   const getCachedUserStats = unstable_cache(
     async () => {
-      const supabase = await import('@/src/lib/supabase/server').then((mod) => mod.createClient());
+      const supabase = createAnonClient();
       const [memberCountResult, topContributorsResult] = await Promise.all([
-        (await supabase)
+        supabase
           .from('users')
           .select('*', { count: 'exact', head: true })
           .eq('public', true),
-        (await supabase)
+        supabase
           .from('users')
           .select('*')
           .eq('public', true)
