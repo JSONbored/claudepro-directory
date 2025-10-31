@@ -305,6 +305,7 @@ export type Database = {
       };
       category_configs: {
         Row: {
+          api_schema: Json | null;
           category: Database['public']['Enums']['content_category'];
           color_scheme: string;
           config_format: string | null;
@@ -313,6 +314,7 @@ export type Database = {
           description: string;
           display_config: boolean;
           empty_state_message: string | null;
+          generation_config: Json | null;
           icon_name: string;
           keywords: string;
           meta_description: string;
@@ -320,14 +322,17 @@ export type Database = {
           primary_action_config: Json | null;
           primary_action_label: string;
           primary_action_type: string;
+          schema_name: string | null;
           search_placeholder: string;
           sections: Json;
           show_on_homepage: boolean;
           title: string;
           updated_at: string;
           url_slug: string;
+          validation_config: Json | null;
         };
         Insert: {
+          api_schema?: Json | null;
           category: Database['public']['Enums']['content_category'];
           color_scheme: string;
           config_format?: string | null;
@@ -336,6 +341,7 @@ export type Database = {
           description: string;
           display_config?: boolean;
           empty_state_message?: string | null;
+          generation_config?: Json | null;
           icon_name: string;
           keywords: string;
           meta_description: string;
@@ -343,14 +349,17 @@ export type Database = {
           primary_action_config?: Json | null;
           primary_action_label: string;
           primary_action_type: string;
+          schema_name?: string | null;
           search_placeholder: string;
           sections?: Json;
           show_on_homepage?: boolean;
           title: string;
           updated_at?: string;
           url_slug: string;
+          validation_config?: Json | null;
         };
         Update: {
+          api_schema?: Json | null;
           category?: Database['public']['Enums']['content_category'];
           color_scheme?: string;
           config_format?: string | null;
@@ -359,6 +368,7 @@ export type Database = {
           description?: string;
           display_config?: boolean;
           empty_state_message?: string | null;
+          generation_config?: Json | null;
           icon_name?: string;
           keywords?: string;
           meta_description?: string;
@@ -366,12 +376,14 @@ export type Database = {
           primary_action_config?: Json | null;
           primary_action_label?: string;
           primary_action_type?: string;
+          schema_name?: string | null;
           search_placeholder?: string;
           sections?: Json;
           show_on_homepage?: boolean;
           title?: string;
           updated_at?: string;
           url_slug?: string;
+          validation_config?: Json | null;
         };
         Relationships: [];
       };
@@ -892,45 +904,6 @@ export type Database = {
           updated_at?: string;
           validation_errors?: string[] | null;
           validation_passed?: boolean;
-        };
-        Relationships: [];
-      };
-      content_generator_configs: {
-        Row: {
-          category: string;
-          conditional_rules: Json | null;
-          created_at: string | null;
-          defaults: Json;
-          field_type: string;
-          id: string;
-          strategy: string[] | null;
-          tag_mapping: Json | null;
-          template: Json | null;
-          updated_at: string | null;
-        };
-        Insert: {
-          category: string;
-          conditional_rules?: Json | null;
-          created_at?: string | null;
-          defaults: Json;
-          field_type: string;
-          id?: string;
-          strategy?: string[] | null;
-          tag_mapping?: Json | null;
-          template?: Json | null;
-          updated_at?: string | null;
-        };
-        Update: {
-          category?: string;
-          conditional_rules?: Json | null;
-          created_at?: string | null;
-          defaults?: Json;
-          field_type?: string;
-          id?: string;
-          strategy?: string[] | null;
-          tag_mapping?: Json | null;
-          template?: Json | null;
-          updated_at?: string | null;
         };
         Relationships: [];
       };
@@ -4262,6 +4235,14 @@ export type Database = {
       };
       get_all_seo_config: { Args: never; Returns: Json };
       get_all_structured_data_configs: { Args: never; Returns: Json };
+      get_api_category_content: {
+        Args: { p_category: string; p_limit?: number; p_offset?: number };
+        Returns: Json;
+      };
+      get_api_content: {
+        Args: { p_category: string; p_slug: string };
+        Returns: Json;
+      };
       get_bookmark_counts_by_category: {
         Args: { category_filter: string };
         Returns: {
@@ -4297,7 +4278,7 @@ export type Database = {
           votes_received: number;
         }[];
       };
-      get_category_config: { Args: { p_category: string }; Returns: Json };
+      get_category_config: { Args: { p_category?: string }; Returns: Json };
       get_changelog_entries: {
         Args: {
           p_category?: string;
@@ -4439,6 +4420,7 @@ export type Database = {
         }[];
       };
       get_form_fields_grouped: { Args: { p_form_type: string }; Returns: Json };
+      get_generation_config: { Args: { p_category?: string }; Returns: Json };
       get_github_stars: {
         Args: { p_repo_url: string };
         Returns: {

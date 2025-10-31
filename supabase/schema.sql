@@ -2377,6 +2377,7 @@ COMMENT ON FUNCTION "public"."generate_metadata_for_route"("p_route_pattern" "te
 
 CREATE OR REPLACE FUNCTION "public"."generate_slug"("p_name" "text") RETURNS "text"
     LANGUAGE "plpgsql" IMMUTABLE
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 BEGIN
   RETURN lower(
@@ -2633,6 +2634,110 @@ COMMENT ON FUNCTION "public"."get_all_structured_data_configs"() IS 'Fetch all s
 
 
 
+CREATE OR REPLACE FUNCTION "public"."get_api_category_content"("p_category" "text", "p_limit" integer DEFAULT 100, "p_offset" integer DEFAULT 0) RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
+    AS $$
+DECLARE
+  v_api_fields jsonb;
+  v_result jsonb;
+BEGIN
+  -- Get API schema fields for this category
+  SELECT api_schema->'fields'
+  INTO v_api_fields
+  FROM category_configs
+  WHERE category::text = p_category;
+  
+  IF v_api_fields IS NULL THEN
+    RAISE EXCEPTION 'Category % not found or has no API schema', p_category;
+  END IF;
+  
+  -- Build array of filtered content items
+  SELECT jsonb_agg(filtered_content ORDER BY created_at DESC)
+  INTO v_result
+  FROM (
+    SELECT 
+      jsonb_object_agg(key, value) as filtered_content,
+      MAX(created_at) as created_at
+    FROM content c,
+    LATERAL (
+      SELECT key, value
+      FROM jsonb_each(to_jsonb(c.*) - 'id'::text)
+      WHERE key = ANY(
+        SELECT jsonb_array_elements_text(v_api_fields)
+      )
+    ) fields
+    WHERE c.category = p_category
+    GROUP BY c.slug
+    LIMIT p_limit
+    OFFSET p_offset
+  ) items;
+  
+  RETURN COALESCE(v_result, '[]'::jsonb);
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_api_category_content"("p_category" "text", "p_limit" integer, "p_offset" integer) OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_api_category_content"("p_category" "text", "p_limit" integer, "p_offset" integer) IS 'Returns all content in a category filtered by api_schema. Supports pagination. Used for /api/content/[category]/index.json endpoints.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."get_api_content"("p_category" "text", "p_slug" "text") RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
+    AS $$
+DECLARE
+  v_api_fields jsonb;
+  v_content jsonb;
+  v_result jsonb;
+  v_field text;
+BEGIN
+  -- Get API schema fields for this category
+  SELECT api_schema->'fields'
+  INTO v_api_fields
+  FROM category_configs
+  WHERE category::text = p_category;
+  
+  IF v_api_fields IS NULL THEN
+    RAISE EXCEPTION 'Category % not found or has no API schema', p_category;
+  END IF;
+  
+  -- Get full content record as JSONB
+  SELECT to_jsonb(c.*) - 'id'::text
+  INTO v_content
+  FROM content c
+  WHERE c.category = p_category
+    AND c.slug = p_slug;
+  
+  IF v_content IS NULL THEN
+    RETURN NULL;
+  END IF;
+  
+  -- Build result with only API-allowed fields
+  v_result := '{}'::jsonb;
+  
+  FOR v_field IN SELECT jsonb_array_elements_text(v_api_fields)
+  LOOP
+    IF v_content ? v_field THEN
+      v_result := v_result || jsonb_build_object(v_field, v_content->v_field);
+    END IF;
+  END LOOP;
+  
+  RETURN v_result;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_api_content"("p_category" "text", "p_slug" "text") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_api_content"("p_category" "text", "p_slug" "text") IS 'Returns content filtered by category api_schema. Used for public JSON API endpoints. Respects RLS policies and only exposes whitelisted fields.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."get_bookmark_counts_by_category"("category_filter" "text") RETURNS TABLE("content_slug" "text", "bookmark_count" bigint)
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -2781,26 +2886,86 @@ COMMENT ON FUNCTION "public"."get_bulk_user_stats_realtime"("user_ids" "uuid"[])
 
 
 
-CREATE OR REPLACE FUNCTION "public"."get_category_config"("p_category" "text") RETURNS "jsonb"
-    LANGUAGE "plpgsql" STABLE
-    SET "search_path" TO 'public'
+CREATE OR REPLACE FUNCTION "public"."get_category_config"("p_category" "text" DEFAULT NULL::"text") RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
-declare
-  v_config jsonb;
-begin
-  select to_jsonb(category_configs.*) into v_config
-  from public.category_configs
-  where category = p_category::public.content_category;
+DECLARE
+  v_result jsonb;
+BEGIN
+  -- If specific category requested, return that config
+  IF p_category IS NOT NULL THEN
+    SELECT jsonb_build_object(
+      'category', category,
+      'title', title,
+      'pluralTitle', plural_title,
+      'description', description,
+      'iconName', icon_name,
+      'colorScheme', color_scheme,
+      'showOnHomepage', show_on_homepage,
+      'keywords', keywords,
+      'metaDescription', meta_description,
+      'sections', sections,
+      'primaryActionType', primary_action_type,
+      'primaryActionLabel', primary_action_label,
+      'primaryActionConfig', primary_action_config,
+      'searchPlaceholder', search_placeholder,
+      'emptyStateMessage', empty_state_message,
+      'urlSlug', url_slug,
+      'contentLoader', content_loader,
+      'displayConfig', display_config,
+      'configFormat', config_format,
+      'validationConfig', validation_config,
+      'generationConfig', generation_config,
+      'schemaName', schema_name
+    )
+    INTO v_result
+    FROM category_configs
+    WHERE category = p_category::category_type;
+    
+    RETURN v_result;
+  END IF;
   
-  return v_config;
-end;
+  -- Otherwise return all configs as object keyed by category
+  SELECT jsonb_object_agg(
+    category,
+    jsonb_build_object(
+      'category', category,
+      'title', title,
+      'pluralTitle', plural_title,
+      'description', description,
+      'iconName', icon_name,
+      'colorScheme', color_scheme,
+      'showOnHomepage', show_on_homepage,
+      'keywords', keywords,
+      'metaDescription', meta_description,
+      'sections', sections,
+      'primaryActionType', primary_action_type,
+      'primaryActionLabel', primary_action_label,
+      'primaryActionConfig', primary_action_config,
+      'searchPlaceholder', search_placeholder,
+      'emptyStateMessage', empty_state_message,
+      'urlSlug', url_slug,
+      'contentLoader', content_loader,
+      'displayConfig', display_config,
+      'configFormat', config_format,
+      'validationConfig', validation_config,
+      'generationConfig', generation_config,
+      'schemaName', schema_name
+    )
+  )
+  INTO v_result
+  FROM category_configs;
+  
+  RETURN v_result;
+END;
 $$;
 
 
 ALTER FUNCTION "public"."get_category_config"("p_category" "text") OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_category_config"("p_category" "text") IS 'Fetch category configuration as JSONB for a given category. Returns null if category not found.';
+COMMENT ON FUNCTION "public"."get_category_config"("p_category" "text") IS 'Retrieves category configuration from database. Returns all configs if no category specified, or specific config if category provided.';
 
 
 
@@ -3176,63 +3341,36 @@ COMMENT ON FUNCTION "public"."get_due_sequence_emails"() IS 'Get all due sequenc
 
 CREATE OR REPLACE FUNCTION "public"."get_enriched_content"("p_category" "text" DEFAULT NULL::"text", "p_slug" "text" DEFAULT NULL::"text", "p_slugs" "text"[] DEFAULT NULL::"text"[], "p_limit" integer DEFAULT 100, "p_offset" integer DEFAULT 0) RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 DECLARE
   v_result JSONB;
 BEGIN
-  -- Query unified content table with analytics and sponsorship enrichment
   SELECT COALESCE(jsonb_agg(row_to_json), '[]'::jsonb) INTO v_result
   FROM (
     SELECT jsonb_build_object(
-      'id', c.id,
-      'slug', c.slug,
-      'title', c.title,
-      'display_title', c.display_title,
-      'seo_title', c.seo_title,
-      'description', c.description,
-      'author', c.author,
-      'author_profile_url', c.author_profile_url,
-      'category', c.category,
-      'tags', c.tags,
-      'source_table', c.category,
-      'created_at', c.created_at,
-      'updated_at', c.updated_at,
-      'date_added', c.date_added,
-      'discovery_metadata', c.discovery_metadata,
-      'examples', c.examples,
-      'features', c.features,
-      'use_cases', c.use_cases,
-      'source', c.source,
-      'documentation_url', c.documentation_url,
-      'content', c.content,
+      'id', c.id, 'slug', c.slug, 'title', c.title, 'display_title', c.display_title,
+      'seo_title', c.seo_title, 'description', c.description, 'author', c.author,
+      'author_profile_url', c.author_profile_url, 'category', c.category, 'tags', c.tags,
+      'source_table', c.category, 'created_at', c.created_at, 'updated_at', c.updated_at,
+      'date_added', c.date_added, 'discovery_metadata', c.discovery_metadata,
+      'examples', c.examples, 'features', c.features, 'use_cases', c.use_cases,
+      'source', c.source, 'documentation_url', c.documentation_url, 'content', c.content,
       'metadata', c.metadata,
-      -- Analytics enrichment from materialized views
-      'viewCount', COALESCE(mcs.view_count, 0),
-      'copyCount', COALESCE(mcs.copy_count, 0),
-      'bookmarkCount', COALESCE(mcs.bookmark_count, 0),
-      'popularityScore', COALESCE(mcs.popularity_score, 0),
-      'trendingScore', 0, -- mv_content_stats doesn't have trending_score
-      -- Sponsorship enrichment
-      'sponsoredContentId', sc.id,
-      'sponsorshipTier', sc.tier,
-      'isSponsored', COALESCE(sc.active, false)
+      'viewCount', COALESCE(mcs.view_count, 0), 'copyCount', COALESCE(mcs.copy_count, 0),
+      'bookmarkCount', COALESCE(mcs.bookmark_count, 0), 'popularityScore', COALESCE(mcs.popularity_score, 0),
+      'trendingScore', 0,
+      'sponsoredContentId', sc.id, 'sponsorshipTier', sc.tier, 'isSponsored', COALESCE(sc.active, false)
     ) as row_to_json
     FROM public.content c
-    LEFT JOIN public.mv_content_stats mcs
-      ON mcs.slug = c.slug AND mcs.category = c.category
-    LEFT JOIN public.sponsored_content sc 
-      ON sc.content_id = c.id
-      AND sc.content_type = c.category
-      AND sc.active = true 
-      AND CURRENT_TIMESTAMP BETWEEN sc.start_date AND sc.end_date
-    WHERE 
-      (p_category IS NULL OR c.category = p_category)
+    LEFT JOIN public.mv_content_stats mcs ON mcs.slug = c.slug AND mcs.category = c.category
+    LEFT JOIN public.sponsored_content sc ON sc.content_id = c.id AND sc.content_type = c.category 
+      AND sc.active = true AND CURRENT_TIMESTAMP BETWEEN sc.start_date AND sc.end_date
+    WHERE (p_category IS NULL OR c.category = p_category)
       AND (p_slug IS NULL OR c.slug = p_slug)
       AND (p_slugs IS NULL OR c.slug = ANY(p_slugs))
-    ORDER BY c.slug
-    LIMIT p_limit OFFSET p_offset
+    ORDER BY c.slug LIMIT p_limit OFFSET p_offset
   ) subquery;
-
   RETURN v_result;
 END;
 $$;
@@ -3241,8 +3379,7 @@ $$;
 ALTER FUNCTION "public"."get_enriched_content"("p_category" "text", "p_slug" "text", "p_slugs" "text"[], "p_limit" integer, "p_offset" integer) OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_enriched_content"("p_category" "text", "p_slug" "text", "p_slugs" "text"[], "p_limit" integer, "p_offset" integer) IS 'Fetches content from unified content table with analytics and sponsorship enrichment. 
-Uses mv_content_stats for analytics data (view_count, copy_count, bookmark_count, popularity_score).';
+COMMENT ON FUNCTION "public"."get_enriched_content"("p_category" "text", "p_slug" "text", "p_slugs" "text"[], "p_limit" integer, "p_offset" integer) IS 'Returns enriched content with analytics and sponsorship data. SECURITY DEFINER - Fixed search_path vulnerability (2025-01-30)';
 
 
 
@@ -3287,21 +3424,18 @@ COMMENT ON FUNCTION "public"."get_featured_content"("p_category" "text", "p_limi
 
 CREATE OR REPLACE FUNCTION "public"."get_featured_jobs"() RETURNS SETOF "public"."jobs"
     LANGUAGE "sql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
-  SELECT *
-  FROM public.jobs
-  WHERE status = 'active'
-    AND active = true
-    AND plan IN ('featured', 'premium')
-  ORDER BY "order" DESC NULLS LAST, posted_at DESC
-  LIMIT 10;
+  SELECT * FROM public.jobs
+  WHERE status = 'active' AND active = true AND plan IN ('featured', 'premium')
+  ORDER BY "order" DESC NULLS LAST, posted_at DESC LIMIT 10;
 $$;
 
 
 ALTER FUNCTION "public"."get_featured_jobs"() OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_featured_jobs"() IS 'Get featured/premium jobs for homepage display. Replaces TypeScript filtering logic.';
+COMMENT ON FUNCTION "public"."get_featured_jobs"() IS 'Returns featured and premium job listings. SECURITY DEFINER - Fixed search_path vulnerability (2025-01-30)';
 
 
 
@@ -3463,69 +3597,76 @@ COMMENT ON FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") IS 
 
 
 
+CREATE OR REPLACE FUNCTION "public"."get_generation_config"("p_category" "text" DEFAULT NULL::"text") RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
+    AS $$
+DECLARE
+  v_result jsonb;
+BEGIN
+  -- If specific category requested, return that config
+  IF p_category IS NOT NULL THEN
+    SELECT jsonb_build_object(
+      'category', category,
+      'validationConfig', validation_config,
+      'generationConfig', generation_config
+    )
+    INTO v_result
+    FROM category_configs
+    WHERE category = p_category::category_type;
+    
+    RETURN v_result;
+  END IF;
+  
+  -- Otherwise return all configs as object keyed by category
+  SELECT jsonb_object_agg(
+    category,
+    jsonb_build_object(
+      'validationConfig', validation_config,
+      'generationConfig', generation_config
+    )
+  )
+  INTO v_result
+  FROM category_configs;
+  
+  RETURN v_result;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_generation_config"("p_category" "text") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_generation_config"("p_category" "text") IS 'Retrieves generation and validation configuration from category_configs. Replaces generation-rules.ts (199 lines), trend-detection.ts (317 lines), and validation files (381 lines) - total 897 lines eliminated.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."get_github_stars"("p_repo_url" "text") RETURNS TABLE("stars" integer, "forks" integer, "watchers" integer, "open_issues" integer, "last_fetched_at" timestamp with time zone, "is_cached" boolean)
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 DECLARE
   v_repo_owner TEXT;
   v_repo_name TEXT;
   v_cache_valid BOOLEAN := FALSE;
 BEGIN
-  -- Extract owner and repo from URL
-  -- Supports: https://github.com/owner/repo OR github.com/owner/repo
-  SELECT 
-    (regexp_matches(p_repo_url, 'github\.com/([^/]+)/([^/]+)'))[1],
-    (regexp_matches(p_repo_url, 'github\.com/([^/]+)/([^/]+)'))[2]
+  SELECT (regexp_matches(p_repo_url, 'github\.com/([^/]+)/([^/]+)'))[1],
+         (regexp_matches(p_repo_url, 'github\.com/([^/]+)/([^/]+)'))[2]
   INTO v_repo_owner, v_repo_name;
-
   IF v_repo_owner IS NULL OR v_repo_name IS NULL THEN
     RAISE EXCEPTION 'Invalid GitHub URL format: %', p_repo_url;
   END IF;
-
-  -- Check if cached data exists and is fresh (< 1 hour old)
-  SELECT 
-    (last_fetched_at > NOW() - INTERVAL '1 hour')
-  INTO v_cache_valid
-  FROM github_repo_stats
-  WHERE repo_url = p_repo_url;
-
-  -- Return cached data if valid
+  SELECT (last_fetched_at > NOW() - INTERVAL '1 hour') INTO v_cache_valid
+  FROM github_repo_stats WHERE repo_url = p_repo_url;
   IF v_cache_valid THEN
-    RETURN QUERY
-    SELECT 
-      grs.stars,
-      grs.forks,
-      grs.watchers,
-      grs.open_issues,
-      grs.last_fetched_at,
-      TRUE as is_cached
-    FROM github_repo_stats grs
-    WHERE grs.repo_url = p_repo_url;
+    RETURN QUERY SELECT grs.stars, grs.forks, grs.watchers, grs.open_issues, grs.last_fetched_at, TRUE as is_cached
+    FROM github_repo_stats grs WHERE grs.repo_url = p_repo_url;
   ELSE
-    -- Return indication that cache is stale/missing
-    -- Client should fetch from GitHub API and call upsert_github_stars()
-    RETURN QUERY
-    SELECT 
-      COALESCE(grs.stars, 0) as stars,
-      grs.forks,
-      grs.watchers,
-      grs.open_issues,
-      grs.last_fetched_at,
-      FALSE as is_cached
-    FROM github_repo_stats grs
-    WHERE grs.repo_url = p_repo_url
-    LIMIT 1;
-
-    -- If no record exists at all, return defaults
+    RETURN QUERY SELECT COALESCE(grs.stars, 0) as stars, grs.forks, grs.watchers, grs.open_issues, grs.last_fetched_at, FALSE as is_cached
+    FROM github_repo_stats grs WHERE grs.repo_url = p_repo_url LIMIT 1;
     IF NOT FOUND THEN
-      RETURN QUERY
-      SELECT 
-        0::INTEGER as stars,
-        NULL::INTEGER as forks,
-        NULL::INTEGER as watchers,
-        NULL::INTEGER as open_issues,
-        NULL::TIMESTAMPTZ as last_fetched_at,
-        FALSE as is_cached;
+      RETURN QUERY SELECT 0::INTEGER as stars, NULL::INTEGER as forks, NULL::INTEGER as watchers,
+        NULL::INTEGER as open_issues, NULL::TIMESTAMPTZ as last_fetched_at, FALSE as is_cached;
     END IF;
   END IF;
 END;
@@ -3535,7 +3676,7 @@ $$;
 ALTER FUNCTION "public"."get_github_stars"("p_repo_url" "text") OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_github_stars"("p_repo_url" "text") IS 'Retrieves GitHub repository stars with 1-hour cache. Returns is_cached=false if data needs refresh.';
+COMMENT ON FUNCTION "public"."get_github_stars"("p_repo_url" "text") IS 'Returns GitHub repo stats with caching. SECURITY DEFINER - Fixed search_path vulnerability (2025-01-30)';
 
 
 
@@ -3696,12 +3837,10 @@ COMMENT ON FUNCTION "public"."get_job_detail"("p_slug" "text") IS 'Returns singl
 
 CREATE OR REPLACE FUNCTION "public"."get_jobs_by_category"("p_category" "text") RETURNS SETOF "public"."jobs"
     LANGUAGE "sql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
-  SELECT *
-  FROM public.jobs
-  WHERE status = 'active'
-    AND active = true
-    AND category = p_category
+  SELECT * FROM public.jobs
+  WHERE status = 'active' AND active = true AND category = p_category
   ORDER BY posted_at DESC;
 $$;
 
@@ -3709,24 +3848,22 @@ $$;
 ALTER FUNCTION "public"."get_jobs_by_category"("p_category" "text") OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_jobs_by_category"("p_category" "text") IS 'Get jobs filtered by category. Replaces TypeScript filtering logic.';
+COMMENT ON FUNCTION "public"."get_jobs_by_category"("p_category" "text") IS 'Returns active jobs by category. SECURITY DEFINER - Fixed search_path vulnerability (2025-01-30)';
 
 
 
 CREATE OR REPLACE FUNCTION "public"."get_jobs_count"() RETURNS integer
     LANGUAGE "sql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
-  SELECT COUNT(*)::INTEGER
-  FROM public.jobs
-  WHERE status = 'active'
-    AND active = true;
+  SELECT COUNT(*)::INTEGER FROM public.jobs WHERE status = 'active' AND active = true;
 $$;
 
 
 ALTER FUNCTION "public"."get_jobs_count"() OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_jobs_count"() IS 'Get total count of active jobs for stats display. Replaces TypeScript counting logic.';
+COMMENT ON FUNCTION "public"."get_jobs_count"() IS 'Returns count of active jobs. SECURITY DEFINER - Fixed search_path vulnerability (2025-01-30)';
 
 
 
@@ -4846,11 +4983,11 @@ ALTER FUNCTION "public"."get_sidebar_guides_data"("p_limit" integer) OWNER TO "p
 
 CREATE OR REPLACE FUNCTION "public"."get_similar_content"("p_content_type" "text", "p_content_slug" "text", "p_limit" integer DEFAULT 10) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 DECLARE
   v_result JSONB;
 BEGIN
-  -- Query content_similarities with JOIN to content table for actual metadata
   SELECT jsonb_build_object(
     'similar_items', COALESCE(jsonb_agg(
       jsonb_build_object(
@@ -4871,19 +5008,13 @@ BEGIN
     'algorithm_version', 'v1.0'
   ) INTO v_result
   FROM content_similarities cs
-  INNER JOIN content c 
-    ON c.category = cs.content_b_type 
-    AND c.slug = cs.content_b_slug
-  WHERE cs.content_a_type = p_content_type
-    AND cs.content_a_slug = p_content_slug
+  INNER JOIN content c ON c.category = cs.content_b_type AND c.slug = cs.content_b_slug
+  WHERE cs.content_a_type = p_content_type AND cs.content_a_slug = p_content_slug
   LIMIT p_limit;
 
   RETURN COALESCE(v_result, jsonb_build_object(
     'similar_items', '[]'::jsonb,
-    'source_item', jsonb_build_object(
-      'slug', p_content_slug,
-      'category', p_content_type
-    ),
+    'source_item', jsonb_build_object('slug', p_content_slug, 'category', p_content_type),
     'algorithm_version', 'v1.0-fallback'
   ));
 END;
@@ -5485,33 +5616,22 @@ COMMENT ON FUNCTION "public"."get_usage_recommendations"("p_user_id" "uuid", "p_
 
 CREATE OR REPLACE FUNCTION "public"."get_user_activity_summary"("p_user_id" "uuid") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 DECLARE
   v_summary RECORD;
 BEGIN
   SELECT
-    COALESCE(total_posts, 0) as total_posts,
-    COALESCE(total_comments, 0) as total_comments,
-    COALESCE(total_votes, 0) as total_votes,
-    COALESCE(total_submissions, 0) as total_submissions,
-    COALESCE(merged_submissions, 0) as merged_submissions,
-    COALESCE(total_activity, 0) as total_activity
-  INTO v_summary
-  FROM public.user_activity_summary
-  WHERE user_id = p_user_id;
-  
-  -- If user not found in MV, return zeros
+    COALESCE(total_posts, 0) as total_posts, COALESCE(total_comments, 0) as total_comments,
+    COALESCE(total_votes, 0) as total_votes, COALESCE(total_submissions, 0) as total_submissions,
+    COALESCE(merged_submissions, 0) as merged_submissions, COALESCE(total_activity, 0) as total_activity
+  INTO v_summary FROM public.user_activity_summary WHERE user_id = p_user_id;
   IF v_summary IS NULL THEN
     RETURN jsonb_build_object(
-      'total_posts', 0,
-      'total_comments', 0,
-      'total_votes', 0,
-      'total_submissions', 0,
-      'merged_submissions', 0,
-      'total_activity', 0
+      'total_posts', 0, 'total_comments', 0, 'total_votes', 0,
+      'total_submissions', 0, 'merged_submissions', 0, 'total_activity', 0
     );
   END IF;
-  
   RETURN row_to_json(v_summary)::JSONB;
 END;
 $$;
@@ -5520,7 +5640,7 @@ $$;
 ALTER FUNCTION "public"."get_user_activity_summary"("p_user_id" "uuid") OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_user_activity_summary"("p_user_id" "uuid") IS 'Returns user activity summary with null coalescing. Returns zeros if user not found.';
+COMMENT ON FUNCTION "public"."get_user_activity_summary"("p_user_id" "uuid") IS 'Returns user activity summary from materialized view. SECURITY DEFINER - Fixed search_path vulnerability (2025-01-30)';
 
 
 
@@ -5687,31 +5807,26 @@ Performance: Optimized with composite indexes on (user_id, created_at DESC) for 
 
 CREATE OR REPLACE FUNCTION "public"."get_user_affinities"("p_user_id" "uuid", "p_limit" integer DEFAULT 50, "p_min_score" numeric DEFAULT 10) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 DECLARE
   v_affinities JSONB;
   v_total_count INT;
   v_last_calculated TIMESTAMPTZ;
 BEGIN
-  -- Get affinities with metadata
-  SELECT 
+  SELECT
     COALESCE(jsonb_agg(
       jsonb_build_object(
-        'id', id,
-        'user_id', user_id,
-        'content_type', content_type,
-        'content_slug', content_slug,
-        'affinity_score', affinity_score,
-        'based_on', based_on,
-        'calculated_at', calculated_at
+        'id', id, 'user_id', user_id, 'content_type', content_type,
+        'content_slug', content_slug, 'affinity_score', affinity_score,
+        'based_on', based_on, 'calculated_at', calculated_at
       ) ORDER BY affinity_score DESC
     ), '[]'::jsonb),
     COUNT(*),
     MAX(calculated_at)
   INTO v_affinities, v_total_count, v_last_calculated
   FROM user_affinities
-  WHERE user_id = p_user_id
-    AND affinity_score >= p_min_score
+  WHERE user_id = p_user_id AND affinity_score >= p_min_score
   LIMIT p_limit;
 
   RETURN jsonb_build_object(
@@ -5724,6 +5839,10 @@ $$;
 
 
 ALTER FUNCTION "public"."get_user_affinities"("p_user_id" "uuid", "p_limit" integer, "p_min_score" numeric) OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_user_affinities"("p_user_id" "uuid", "p_limit" integer, "p_min_score" numeric) IS 'Returns user content affinities. SECURITY DEFINER - Fixed search_path vulnerability (2025-01-30)';
+
 
 
 CREATE OR REPLACE FUNCTION "public"."get_user_badges_with_details"("p_user_id" "uuid", "p_featured_only" boolean DEFAULT false, "p_limit" integer DEFAULT NULL::integer, "p_offset" integer DEFAULT 0) RETURNS "jsonb"
@@ -6637,6 +6756,7 @@ COMMENT ON FUNCTION "public"."handle_webhook_complaint"("p_webhook_id" "uuid", "
 
 CREATE OR REPLACE FUNCTION "public"."import_redis_seed_data"("redis_data" "jsonb") RETURNS TABLE("total_processed" integer, "total_views_added" integer, "total_copies_added" integer, "items_processed" integer)
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 DECLARE
   item JSONB;
@@ -6648,39 +6768,25 @@ DECLARE
   batch_rows user_interactions[];
   batch_size CONSTANT INTEGER := 500;
 BEGIN
-  -- Process each item in the JSON array
   FOR item IN SELECT * FROM jsonb_array_elements(redis_data)
   LOOP
     item_count := (item->>'count')::INTEGER;
     items_count := items_count + 1;
-    
-    -- Track totals
     IF item->>'interaction_type' = 'view' THEN
       view_rows := view_rows + item_count;
     ELSE
       copy_rows := copy_rows + item_count;
     END IF;
-    
-    -- Generate rows with random timestamps over last 90 days
     INSERT INTO user_interactions (content_type, content_slug, interaction_type, user_id, created_at)
-    SELECT 
-      item->>'content_type',
-      item->>'content_slug',
-      (item->>'interaction_type')::text,
-      NULL,
-      NOW() - (random() * INTERVAL '90 days')
+    SELECT item->>'content_type', item->>'content_slug', (item->>'interaction_type')::text,
+      NULL, NOW() - (random() * INTERVAL '90 days')
     FROM generate_series(1, item_count);
-    
     total_rows := total_rows + item_count;
-    
-    -- Log progress every 10 items
     IF items_count % 10 = 0 THEN
       RAISE NOTICE 'Processed % items, inserted % rows...', items_count, total_rows;
     END IF;
   END LOOP;
-  
   RAISE NOTICE 'Import complete: % items processed, % total rows inserted', items_count, total_rows;
-  
   RETURN QUERY SELECT total_rows, view_rows, copy_rows, items_count;
 END;
 $$;
@@ -7963,6 +8069,7 @@ COMMENT ON FUNCTION "public"."remove_bookmark"("p_user_id" "uuid", "p_content_ty
 
 CREATE OR REPLACE FUNCTION "public"."render_guide_sections_to_markdown"("sections" "jsonb") RETURNS "text"
     LANGUAGE "plpgsql" IMMUTABLE
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 DECLARE
   section JSONB;
@@ -7971,18 +8078,13 @@ DECLARE
   section_type TEXT;
   section_content TEXT;
 BEGIN
-  -- Loop through sections array
   FOR section IN SELECT jsonb_array_elements(sections)
   LOOP
     section_type := section->>'type';
     section_content := COALESCE(section->>'content', '');
-
-    -- Render based on section type
     CASE section_type
-      -- TLDR section
       WHEN 'tldr' THEN
-        result := result || E'## TL;DR\n\n';
-        result := result || section_content || E'\n\n';
+        result := result || E'## TL;DR\n\n' || section_content || E'\n\n';
         IF section ? 'keyPoints' THEN
           result := result || E'**Key Points:**\n\n';
           FOR section_text IN SELECT jsonb_array_elements_text(section->'keyPoints')
@@ -7991,8 +8093,6 @@ BEGIN
           END LOOP;
           result := result || E'\n';
         END IF;
-
-      -- Heading
       WHEN 'heading' THEN
         DECLARE
           level INT := COALESCE((section->>'level')::INT, 2);
@@ -8000,33 +8100,18 @@ BEGIN
         BEGIN
           result := result || heading_prefix || ' ' || section_content || E'\n\n';
         END;
-
-      -- Text/paragraph
-      WHEN 'text' THEN
-        result := result || section_content || E'\n\n';
-
-      -- Callout
+      WHEN 'text' THEN result := result || section_content || E'\n\n';
       WHEN 'callout' THEN
-        result := result || E'> **' || COALESCE(section->>'title', 'Note') || E'**\n';
-        result := result || E'> \n';
+        result := result || E'> **' || COALESCE(section->>'title', 'Note') || E'**\n> \n';
         result := result || '> ' || replace(section_content, E'\n', E'\n> ') || E'\n\n';
-
-      -- Code block
       WHEN 'code' THEN
-        DECLARE
-          lang TEXT := COALESCE(section->>'language', '');
+        DECLARE lang TEXT := COALESCE(section->>'language', '');
         BEGIN
-          result := result || '```' || lang || E'\n';
-          result := result || section_content || E'\n';
-          result := result || E'```\n\n';
+          result := result || '```' || lang || E'\n' || section_content || E'\n```\n\n';
         END;
-
-      -- Steps/ordered list
       WHEN 'steps' THEN
         IF section ? 'steps' THEN
-          DECLARE
-            step_item JSONB;
-            step_num INT := 1;
+          DECLARE step_item JSONB; step_num INT := 1;
           BEGIN
             FOR step_item IN SELECT jsonb_array_elements(section->'steps')
             LOOP
@@ -8036,8 +8121,6 @@ BEGIN
             END LOOP;
           END;
         END IF;
-
-      -- Checklist
       WHEN 'checklist' THEN
         IF section ? 'items' THEN
           FOR section_text IN SELECT jsonb_array_elements_text(section->'items')
@@ -8046,12 +8129,9 @@ BEGIN
           END LOOP;
           result := result || E'\n';
         END IF;
-
-      -- FAQ
       WHEN 'faq' THEN
         IF section ? 'items' THEN
-          DECLARE
-            faq_item JSONB;
+          DECLARE faq_item JSONB;
           BEGIN
             result := result || E'## FAQ\n\n';
             FOR faq_item IN SELECT jsonb_array_elements(section->'items')
@@ -8061,14 +8141,10 @@ BEGIN
             END LOOP;
           END;
         END IF;
-
-      -- Default: skip complex types (feature_grid, tabs, etc.) as they need React components
       ELSE
-        -- For unhandled types, just add a placeholder comment
         result := result || E'<!-- Section type: ' || COALESCE(section_type, 'unknown') || E' -->\n\n';
     END CASE;
   END LOOP;
-
   RETURN result;
 END;
 $$;
@@ -8704,45 +8780,21 @@ ALTER FUNCTION "public"."sync_changelog_changes_from_jsonb"() OWNER TO "postgres
 
 CREATE OR REPLACE FUNCTION "public"."toggle_badge_featured"("p_badge_id" "uuid", "p_user_id" "uuid", "p_featured" boolean) RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 DECLARE
   v_badge_user_id UUID;
   v_featured_count INTEGER;
 BEGIN
-  -- Step 1: Verify ownership (replaces first query)
-  SELECT user_id INTO v_badge_user_id
-  FROM public.user_badges
-  WHERE id = p_badge_id;
-  
-  IF v_badge_user_id IS NULL THEN
-    RAISE EXCEPTION 'Badge not found';
-  END IF;
-  
-  IF v_badge_user_id != p_user_id THEN
-    RAISE EXCEPTION 'Unauthorized - badge belongs to different user';
-  END IF;
-  
-  -- Step 2: Count featured badges if marking as featured (replaces second query)
+  SELECT user_id INTO v_badge_user_id FROM public.user_badges WHERE id = p_badge_id;
+  IF v_badge_user_id IS NULL THEN RAISE EXCEPTION 'Badge not found'; END IF;
+  IF v_badge_user_id != p_user_id THEN RAISE EXCEPTION 'Unauthorized - badge belongs to different user'; END IF;
   IF p_featured THEN
-    SELECT COUNT(*) INTO v_featured_count
-    FROM public.user_badges
-    WHERE user_id = p_user_id AND featured = true;
-    
-    IF v_featured_count >= 5 THEN
-      RAISE EXCEPTION 'Maximum 5 featured badges allowed';
-    END IF;
+    SELECT COUNT(*) INTO v_featured_count FROM public.user_badges WHERE user_id = p_user_id AND featured = true;
+    IF v_featured_count >= 5 THEN RAISE EXCEPTION 'Maximum 5 featured badges allowed'; END IF;
   END IF;
-  
-  -- Step 3: Update badge (replaces third query)
-  UPDATE public.user_badges
-  SET featured = p_featured, updated_at = NOW()
-  WHERE id = p_badge_id;
-  
-  -- Return success response
-  RETURN jsonb_build_object(
-    'success', true,
-    'featured', p_featured
-  );
+  UPDATE public.user_badges SET featured = p_featured, updated_at = NOW() WHERE id = p_badge_id;
+  RETURN jsonb_build_object('success', true, 'featured', p_featured);
 END;
 $$;
 
@@ -8750,7 +8802,7 @@ $$;
 ALTER FUNCTION "public"."toggle_badge_featured"("p_badge_id" "uuid", "p_user_id" "uuid", "p_featured" boolean) OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."toggle_badge_featured"("p_badge_id" "uuid", "p_user_id" "uuid", "p_featured" boolean) IS 'Atomically toggles badge featured status with ownership verification and max limit check. Returns {success: true, featured: boolean}.';
+COMMENT ON FUNCTION "public"."toggle_badge_featured"("p_badge_id" "uuid", "p_user_id" "uuid", "p_featured" boolean) IS 'Toggle featured status on user badge. SECURITY DEFINER - Fixed search_path vulnerability (2025-01-30)';
 
 
 
@@ -9412,6 +9464,7 @@ ALTER FUNCTION "public"."update_structured_data_config_updated_at"() OWNER TO "p
 
 CREATE OR REPLACE FUNCTION "public"."update_updated_at_column"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 BEGIN
   NEW.updated_at = NOW();
@@ -9423,7 +9476,7 @@ $$;
 ALTER FUNCTION "public"."update_updated_at_column"() OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."update_updated_at_column"() IS 'Trigger function to automatically update updated_at timestamp';
+COMMENT ON FUNCTION "public"."update_updated_at_column"() IS 'Trigger function to auto-update updated_at timestamp. SECURITY: Fixed search_path vulnerability (2025-01-30)';
 
 
 
@@ -9541,51 +9594,23 @@ COMMENT ON FUNCTION "public"."update_user_profile"("p_user_id" "uuid", "p_displa
 
 CREATE OR REPLACE FUNCTION "public"."upsert_github_stars"("p_repo_url" "text", "p_stars" integer, "p_forks" integer DEFAULT NULL::integer, "p_watchers" integer DEFAULT NULL::integer, "p_open_issues" integer DEFAULT NULL::integer) RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 DECLARE
   v_repo_owner TEXT;
   v_repo_name TEXT;
 BEGIN
-  -- Extract owner and repo from URL
-  SELECT 
-    (regexp_matches(p_repo_url, 'github\.com/([^/]+)/([^/]+)'))[1],
-    (regexp_matches(p_repo_url, 'github\.com/([^/]+)/([^/]+)'))[2]
+  SELECT (regexp_matches(p_repo_url, 'github\.com/([^/]+)/([^/]+)'))[1],
+         (regexp_matches(p_repo_url, 'github\.com/([^/]+)/([^/]+)'))[2]
   INTO v_repo_owner, v_repo_name;
-
   IF v_repo_owner IS NULL OR v_repo_name IS NULL THEN
     RAISE EXCEPTION 'Invalid GitHub URL format: %', p_repo_url;
   END IF;
-
-  INSERT INTO github_repo_stats (
-    repo_owner,
-    repo_name,
-    repo_url,
-    stars,
-    forks,
-    watchers,
-    open_issues,
-    last_fetched_at,
-    updated_at
-  )
-  VALUES (
-    v_repo_owner,
-    v_repo_name,
-    p_repo_url,
-    p_stars,
-    p_forks,
-    p_watchers,
-    p_open_issues,
-    NOW(),
-    NOW()
-  )
-  ON CONFLICT (repo_url)
-  DO UPDATE SET
-    stars = EXCLUDED.stars,
-    forks = EXCLUDED.forks,
-    watchers = EXCLUDED.watchers,
-    open_issues = EXCLUDED.open_issues,
-    last_fetched_at = NOW(),
-    updated_at = NOW();
+  INSERT INTO github_repo_stats (repo_owner, repo_name, repo_url, stars, forks, watchers, open_issues, last_fetched_at, updated_at)
+  VALUES (v_repo_owner, v_repo_name, p_repo_url, p_stars, p_forks, p_watchers, p_open_issues, NOW(), NOW())
+  ON CONFLICT (repo_url) DO UPDATE SET
+    stars = EXCLUDED.stars, forks = EXCLUDED.forks, watchers = EXCLUDED.watchers,
+    open_issues = EXCLUDED.open_issues, last_fetched_at = NOW(), updated_at = NOW();
 END;
 $$;
 
@@ -9593,7 +9618,7 @@ $$;
 ALTER FUNCTION "public"."upsert_github_stars"("p_repo_url" "text", "p_stars" integer, "p_forks" integer, "p_watchers" integer, "p_open_issues" integer) OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."upsert_github_stars"("p_repo_url" "text", "p_stars" integer, "p_forks" integer, "p_watchers" integer, "p_open_issues" integer) IS 'Upserts GitHub repository statistics after fetching from GitHub API.';
+COMMENT ON FUNCTION "public"."upsert_github_stars"("p_repo_url" "text", "p_stars" integer, "p_forks" integer, "p_watchers" integer, "p_open_issues" integer) IS 'Upserts GitHub repo stats cache. SECURITY DEFINER - Fixed search_path vulnerability (2025-01-30)';
 
 
 
@@ -9890,6 +9915,10 @@ CREATE TABLE IF NOT EXISTS "public"."category_configs" (
     "config_format" "text",
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "validation_config" "jsonb" DEFAULT '{}'::"jsonb",
+    "generation_config" "jsonb" DEFAULT '{}'::"jsonb",
+    "schema_name" "text",
+    "api_schema" "jsonb" DEFAULT "jsonb_build_object"('fields', "jsonb_build_array"('slug', 'title', 'description', 'author', 'tags', 'created_at', 'updated_at'), 'exclude', "jsonb_build_array"('seo_title', 'meta_description', 'color_scheme', 'icon_name', 'show_on_homepage', 'internal_notes', 'display_config', 'sections', 'primary_action_config', 'validation_config', 'generation_config')),
     CONSTRAINT "category_configs_config_format_check" CHECK (("config_format" = ANY (ARRAY['json'::"text", 'multi'::"text", 'hook'::"text"]))),
     CONSTRAINT "category_configs_primary_action_type_check" CHECK (("primary_action_type" = ANY (ARRAY['notification'::"text", 'copy_command'::"text", 'copy_script'::"text", 'scroll'::"text", 'download'::"text", 'github_link'::"text"])))
 );
@@ -9915,6 +9944,22 @@ COMMENT ON COLUMN "public"."category_configs"."primary_action_type" IS 'Type of 
 
 
 COMMENT ON COLUMN "public"."category_configs"."primary_action_config" IS 'Additional configuration for primary action. Structure varies by action_type: scroll needs sectionId, download needs pathTemplate.';
+
+
+
+COMMENT ON COLUMN "public"."category_configs"."validation_config" IS 'Complete validation configuration: requiredFields, optionalButRecommended, customValidators, categorySpecificRules';
+
+
+
+COMMENT ON COLUMN "public"."category_configs"."generation_config" IS 'Consolidated content generation configuration including fieldDefaults (migrated from content_generator_configs), discovery sources, research rules, and quality standards';
+
+
+
+COMMENT ON COLUMN "public"."category_configs"."schema_name" IS 'Name of the Zod schema to use for this category (e.g., "statuslineContentSchema")';
+
+
+
+COMMENT ON COLUMN "public"."category_configs"."api_schema" IS 'Defines which fields are exposed in public JSON API. Separates website display schema from API schema for optimal performance and security.';
 
 
 
@@ -10239,41 +10284,6 @@ COMMENT ON COLUMN "public"."content_generation_tracking"."quality_score" IS 'AI-
 
 
 COMMENT ON COLUMN "public"."content_generation_tracking"."discovery_metadata" IS 'Research metadata from content discovery workflow (trending sources, keyword analysis, etc.)';
-
-
-
-CREATE TABLE IF NOT EXISTS "public"."content_generator_configs" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "category" "text" NOT NULL,
-    "field_type" "text" NOT NULL,
-    "strategy" "text"[] DEFAULT ARRAY['item'::"text", 'defaults'::"text"],
-    "defaults" "jsonb" NOT NULL,
-    "tag_mapping" "jsonb",
-    "template" "jsonb",
-    "conditional_rules" "jsonb",
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "updated_at" timestamp with time zone DEFAULT "now"(),
-    CONSTRAINT "content_generator_configs_category_check" CHECK (("category" = ANY (ARRAY['agents'::"text", 'mcp'::"text", 'rules'::"text", 'commands'::"text", 'hooks'::"text", 'statuslines'::"text", 'skills'::"text", 'collections'::"text", 'guides'::"text"]))),
-    CONSTRAINT "content_generator_configs_field_type_check" CHECK (("field_type" = ANY (ARRAY['installation'::"text", 'use_cases'::"text", 'troubleshooting'::"text", 'requirements'::"text", 'features'::"text"])))
-);
-
-
-ALTER TABLE "public"."content_generator_configs" OWNER TO "postgres";
-
-
-COMMENT ON TABLE "public"."content_generator_configs" IS 'Generator configurations for auto-generating content fields. Replaces TypeScript generator-factories.ts logic.';
-
-
-
-COMMENT ON COLUMN "public"."content_generator_configs"."strategy" IS 'Fallback strategy priority: [''item'', ''tags'', ''title'', ''defaults'']. Evaluated in order.';
-
-
-
-COMMENT ON COLUMN "public"."content_generator_configs"."tag_mapping" IS 'Maps item tags to generated content. Used when strategy includes ''tags''.';
-
-
-
-COMMENT ON COLUMN "public"."content_generator_configs"."template" IS 'Template with {title} placeholder for personalization. Used when strategy includes ''title''.';
 
 
 
@@ -12277,16 +12287,6 @@ ALTER TABLE ONLY "public"."content_generation_tracking"
 
 
 
-ALTER TABLE ONLY "public"."content_generator_configs"
-    ADD CONSTRAINT "content_generator_configs_category_field_type_key" UNIQUE ("category", "field_type");
-
-
-
-ALTER TABLE ONLY "public"."content_generator_configs"
-    ADD CONSTRAINT "content_generator_configs_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."content"
     ADD CONSTRAINT "content_pkey" PRIMARY KEY ("id");
 
@@ -12767,7 +12767,31 @@ CREATE INDEX "idx_bookmarks_user_recent" ON "public"."bookmarks" USING "btree" (
 
 
 
+CREATE INDEX "idx_category_configs_api_schema" ON "public"."category_configs" USING "gin" ("api_schema");
+
+
+
+CREATE INDEX "idx_category_configs_generation_config" ON "public"."category_configs" USING "gin" ("generation_config");
+
+
+
+CREATE INDEX "idx_category_configs_generation_discovery" ON "public"."category_configs" USING "gin" ((("generation_config" -> 'discovery'::"text")));
+
+
+
+CREATE INDEX "idx_category_configs_generation_field_defaults" ON "public"."category_configs" USING "gin" ((("generation_config" -> 'fieldDefaults'::"text")));
+
+
+
 CREATE INDEX "idx_category_configs_show_on_homepage" ON "public"."category_configs" USING "btree" ("show_on_homepage") WHERE ("show_on_homepage" = true);
+
+
+
+CREATE INDEX "idx_category_configs_validation_config" ON "public"."category_configs" USING "gin" ("validation_config");
+
+
+
+CREATE INDEX "idx_category_configs_validation_required" ON "public"."category_configs" USING "gin" ((("validation_config" -> 'requiredFields'::"text")));
 
 
 
@@ -13144,6 +13168,14 @@ CREATE INDEX "idx_form_field_configs_enabled" ON "public"."form_field_configs" U
 
 
 CREATE INDEX "idx_form_field_configs_form_type" ON "public"."form_field_configs" USING "btree" ("form_type");
+
+
+
+CREATE INDEX "idx_form_field_definitions_created_by" ON "public"."form_field_definitions" USING "btree" ("created_by");
+
+
+
+COMMENT ON INDEX "public"."idx_form_field_definitions_created_by" IS 'Foreign key index for form_field_definitions.created_by to improve JOIN/filter performance';
 
 
 
@@ -14541,14 +14573,6 @@ CREATE POLICY "Form select options are publicly readable" ON "public"."form_sele
 
 
 
-CREATE POLICY "Generator configs are publicly readable" ON "public"."content_generator_configs" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Generator configs are service-writable" ON "public"."content_generator_configs" TO "service_role" USING (true) WITH CHECK (true);
-
-
-
 CREATE POLICY "Helpful votes are viewable by everyone" ON "public"."review_helpful_votes" FOR SELECT USING (true);
 
 
@@ -14995,9 +15019,6 @@ CREATE POLICY "content_delete_service_role" ON "public"."content" FOR DELETE TO 
 
 
 ALTER TABLE "public"."content_generation_tracking" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."content_generator_configs" ENABLE ROW LEVEL SECURITY;
 
 
 CREATE POLICY "content_insert_service_role" ON "public"."content" FOR INSERT TO "service_role" WITH CHECK (true);

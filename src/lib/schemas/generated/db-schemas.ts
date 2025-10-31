@@ -521,6 +521,7 @@ export const publicBookmarksRelationshipsSchema = z.tuple([
 ]);
 
 export const publicCategoryConfigsRowSchema = z.object({
+  api_schema: jsonSchema.nullable(),
   category: publicContentCategorySchema,
   color_scheme: z.string(),
   config_format: z.string().nullable(),
@@ -529,6 +530,7 @@ export const publicCategoryConfigsRowSchema = z.object({
   description: z.string(),
   display_config: z.boolean(),
   empty_state_message: z.string().nullable(),
+  generation_config: jsonSchema.nullable(),
   icon_name: z.string(),
   keywords: z.string(),
   meta_description: z.string(),
@@ -536,15 +538,18 @@ export const publicCategoryConfigsRowSchema = z.object({
   primary_action_config: jsonSchema.nullable(),
   primary_action_label: z.string(),
   primary_action_type: z.string(),
+  schema_name: z.string().nullable(),
   search_placeholder: z.string(),
   sections: jsonSchema,
   show_on_homepage: z.boolean(),
   title: z.string(),
   updated_at: z.string(),
   url_slug: z.string(),
+  validation_config: jsonSchema.nullable(),
 });
 
 export const publicCategoryConfigsInsertSchema = z.object({
+  api_schema: jsonSchema.optional().nullable(),
   category: publicContentCategorySchema,
   color_scheme: z.string(),
   config_format: z.string().optional().nullable(),
@@ -553,6 +558,7 @@ export const publicCategoryConfigsInsertSchema = z.object({
   description: z.string(),
   display_config: z.boolean().optional(),
   empty_state_message: z.string().optional().nullable(),
+  generation_config: jsonSchema.optional().nullable(),
   icon_name: z.string(),
   keywords: z.string(),
   meta_description: z.string(),
@@ -560,15 +566,18 @@ export const publicCategoryConfigsInsertSchema = z.object({
   primary_action_config: jsonSchema.optional().nullable(),
   primary_action_label: z.string(),
   primary_action_type: z.string(),
+  schema_name: z.string().optional().nullable(),
   search_placeholder: z.string(),
   sections: jsonSchema.optional(),
   show_on_homepage: z.boolean().optional(),
   title: z.string(),
   updated_at: z.string().optional(),
   url_slug: z.string(),
+  validation_config: jsonSchema.optional().nullable(),
 });
 
 export const publicCategoryConfigsUpdateSchema = z.object({
+  api_schema: jsonSchema.optional().nullable(),
   category: publicContentCategorySchema.optional(),
   color_scheme: z.string().optional(),
   config_format: z.string().optional().nullable(),
@@ -577,6 +586,7 @@ export const publicCategoryConfigsUpdateSchema = z.object({
   description: z.string().optional(),
   display_config: z.boolean().optional(),
   empty_state_message: z.string().optional().nullable(),
+  generation_config: jsonSchema.optional().nullable(),
   icon_name: z.string().optional(),
   keywords: z.string().optional(),
   meta_description: z.string().optional(),
@@ -584,12 +594,14 @@ export const publicCategoryConfigsUpdateSchema = z.object({
   primary_action_config: jsonSchema.optional().nullable(),
   primary_action_label: z.string().optional(),
   primary_action_type: z.string().optional(),
+  schema_name: z.string().optional().nullable(),
   search_placeholder: z.string().optional(),
   sections: jsonSchema.optional(),
   show_on_homepage: z.boolean().optional(),
   title: z.string().optional(),
   updated_at: z.string().optional(),
   url_slug: z.string().optional(),
+  validation_config: jsonSchema.optional().nullable(),
 });
 
 export const publicChangelogRowSchema = z.object({
@@ -1118,45 +1130,6 @@ export const publicContentGenerationTrackingUpdateSchema = z.object({
   updated_at: z.string().optional(),
   validation_errors: z.array(z.string()).optional().nullable(),
   validation_passed: z.boolean().optional(),
-});
-
-export const publicContentGeneratorConfigsRowSchema = z.object({
-  category: z.string(),
-  conditional_rules: jsonSchema.nullable(),
-  created_at: z.string().nullable(),
-  defaults: jsonSchema,
-  field_type: z.string(),
-  id: z.string(),
-  strategy: z.array(z.string()).nullable(),
-  tag_mapping: jsonSchema.nullable(),
-  template: jsonSchema.nullable(),
-  updated_at: z.string().nullable(),
-});
-
-export const publicContentGeneratorConfigsInsertSchema = z.object({
-  category: z.string(),
-  conditional_rules: jsonSchema.optional().nullable(),
-  created_at: z.string().optional().nullable(),
-  defaults: jsonSchema,
-  field_type: z.string(),
-  id: z.string().optional(),
-  strategy: z.array(z.string()).optional().nullable(),
-  tag_mapping: jsonSchema.optional().nullable(),
-  template: jsonSchema.optional().nullable(),
-  updated_at: z.string().optional().nullable(),
-});
-
-export const publicContentGeneratorConfigsUpdateSchema = z.object({
-  category: z.string().optional(),
-  conditional_rules: jsonSchema.optional().nullable(),
-  created_at: z.string().optional().nullable(),
-  defaults: jsonSchema.optional(),
-  field_type: z.string().optional(),
-  id: z.string().optional(),
-  strategy: z.array(z.string()).optional().nullable(),
-  tag_mapping: jsonSchema.optional().nullable(),
-  template: jsonSchema.optional().nullable(),
-  updated_at: z.string().optional().nullable(),
 });
 
 export const publicContentSeoOverridesRowSchema = z.object({
@@ -4527,6 +4500,21 @@ export const publicGetAllStructuredDataConfigsArgsSchema = z.never();
 
 export const publicGetAllStructuredDataConfigsReturnsSchema = jsonSchema;
 
+export const publicGetApiCategoryContentArgsSchema = z.object({
+  p_category: z.string(),
+  p_limit: z.number().optional(),
+  p_offset: z.number().optional(),
+});
+
+export const publicGetApiCategoryContentReturnsSchema = jsonSchema;
+
+export const publicGetApiContentArgsSchema = z.object({
+  p_category: z.string(),
+  p_slug: z.string(),
+});
+
+export const publicGetApiContentReturnsSchema = jsonSchema;
+
 export const publicGetBookmarkCountsByCategoryArgsSchema = z.object({
   category_filter: z.string(),
 });
@@ -4575,7 +4563,7 @@ export const publicGetBulkUserStatsRealtimeReturnsSchema = z.array(
 );
 
 export const publicGetCategoryConfigArgsSchema = z.object({
-  p_category: z.string(),
+  p_category: z.string().optional(),
 });
 
 export const publicGetCategoryConfigReturnsSchema = jsonSchema;
@@ -4753,6 +4741,12 @@ export const publicGetFormFieldsGroupedArgsSchema = z.object({
 });
 
 export const publicGetFormFieldsGroupedReturnsSchema = jsonSchema;
+
+export const publicGetGenerationConfigArgsSchema = z.object({
+  p_category: z.string().optional(),
+});
+
+export const publicGetGenerationConfigReturnsSchema = jsonSchema;
 
 export const publicGetGithubStarsArgsSchema = z.object({
   p_repo_url: z.string(),

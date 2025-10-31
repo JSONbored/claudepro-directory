@@ -140,15 +140,6 @@ export type PublicContentGenerationTrackingInsert = z.infer<
 export type PublicContentGenerationTrackingUpdate = z.infer<
   typeof generated.publicContentGenerationTrackingUpdateSchema
 >;
-export type PublicContentGeneratorConfigsRow = z.infer<
-  typeof generated.publicContentGeneratorConfigsRowSchema
->;
-export type PublicContentGeneratorConfigsInsert = z.infer<
-  typeof generated.publicContentGeneratorConfigsInsertSchema
->;
-export type PublicContentGeneratorConfigsUpdate = z.infer<
-  typeof generated.publicContentGeneratorConfigsUpdateSchema
->;
 export type PublicContentSeoOverridesRow = z.infer<
   typeof generated.publicContentSeoOverridesRowSchema
 >;
@@ -688,6 +679,14 @@ export type PublicGetAllStructuredDataConfigsArgs = z.infer<
 export type PublicGetAllStructuredDataConfigsReturns = z.infer<
   typeof generated.publicGetAllStructuredDataConfigsReturnsSchema
 >;
+export type PublicGetApiCategoryContentArgs = z.infer<
+  typeof generated.publicGetApiCategoryContentArgsSchema
+>;
+export type PublicGetApiCategoryContentReturns = z.infer<
+  typeof generated.publicGetApiCategoryContentReturnsSchema
+>;
+export type PublicGetApiContentArgs = z.infer<typeof generated.publicGetApiContentArgsSchema>;
+export type PublicGetApiContentReturns = z.infer<typeof generated.publicGetApiContentReturnsSchema>;
 export type PublicGetBookmarkCountsByCategoryArgs = z.infer<
   typeof generated.publicGetBookmarkCountsByCategoryArgsSchema
 >;
@@ -785,6 +784,12 @@ export type PublicGetFormFieldsGroupedArgs = z.infer<
 >;
 export type PublicGetFormFieldsGroupedReturns = z.infer<
   typeof generated.publicGetFormFieldsGroupedReturnsSchema
+>;
+export type PublicGetGenerationConfigArgs = z.infer<
+  typeof generated.publicGetGenerationConfigArgsSchema
+>;
+export type PublicGetGenerationConfigReturns = z.infer<
+  typeof generated.publicGetGenerationConfigReturnsSchema
 >;
 export type PublicGetGithubStarsArgs = z.infer<typeof generated.publicGetGithubStarsArgsSchema>;
 export type PublicGetGithubStarsReturns = z.infer<
