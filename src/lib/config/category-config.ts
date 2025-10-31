@@ -19,14 +19,13 @@ import {
 } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import {
-  publicChangelogRowSchema,
   publicContentRowSchema,
   publicJobsRowSchema,
 } from '@/src/lib/schemas/generated/db-schemas';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Tables } from '@/src/types/database.types';
 
-export type ContentType = Tables<'content'> | Tables<'jobs'> | Tables<'changelog_entries'>;
+export type ContentType = Tables<'content'> | Tables<'jobs'>;
 
 type DatabaseCategoryConfig = Tables<'category_configs'>;
 
@@ -107,7 +106,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Code,
 };
 
-const SCHEMA_MAP: Record<CategoryId, z.ZodType<ContentType>> = {
+const SCHEMA_MAP: Partial<Record<CategoryId, z.ZodType<ContentType>>> = {
   agents: publicContentRowSchema as unknown as z.ZodType<ContentType>,
   mcp: publicContentRowSchema as unknown as z.ZodType<ContentType>,
   commands: publicContentRowSchema as unknown as z.ZodType<ContentType>,
@@ -118,7 +117,6 @@ const SCHEMA_MAP: Record<CategoryId, z.ZodType<ContentType>> = {
   collections: publicContentRowSchema as unknown as z.ZodType<ContentType>,
   guides: publicContentRowSchema as unknown as z.ZodType<ContentType>,
   jobs: publicJobsRowSchema as unknown as z.ZodType<ContentType>,
-  changelog: publicChangelogRowSchema as unknown as z.ZodType<ContentType>,
 };
 
 function transformBadges(
@@ -186,7 +184,7 @@ function transformDatabaseConfig(
     showOnHomepage: features.show_on_homepage ?? true,
     keywords: dbConfig.keywords,
     metaDescription: dbConfig.meta_description,
-    schema: SCHEMA_MAP[categoryId],
+    schema: SCHEMA_MAP[categoryId] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Database["public"]["Tables"]["content"]["Row"]',
     generateFullContent: features.generate_full_content ?? true,
     metadataFields: dbConfig.metadata_fields,

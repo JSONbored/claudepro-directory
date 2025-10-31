@@ -101,7 +101,7 @@ export const updateProfile = authedAction
       display_name: z.string().optional(),
       bio: z.string().optional(),
       work: z.string().optional(),
-      website: z.string().url().optional().or(z.literal('')),
+      website: z.string().optional().or(z.literal('')),
       social_x_link: z.string().optional(),
       interests: z.array(z.string()).optional(),
       profile_public: z.boolean().optional(),

@@ -8,7 +8,7 @@ import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Tables } from '@/src/types/database.types';
 
-export type ContentItem = Tables<'content'> | Tables<'jobs'> | Tables<'changelog'>;
+export type ContentItem = Tables<'content'> | Tables<'jobs'>;
 export type ContentListItem = Tables<'content'>;
 export type FullContentItem = ContentItem;
 

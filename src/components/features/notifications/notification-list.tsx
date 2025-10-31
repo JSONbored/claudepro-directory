@@ -1,15 +1,5 @@
 /**
- * Notification List Component
- *
- * Simple list of notification cards.
- * Displays active, non-dismissed notifications.
- *
- * Features:
- * - AnimatePresence for smooth exit animations
- * - Empty state handling
- * - Dismiss all button
- *
- * @module components/features/notifications/notification-list
+ * Notification List - Displays notification cards with animations
  */
 
 'use client';
@@ -25,13 +15,10 @@ import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/n
 import { NotificationItem } from './notification-item';
 
 function NotificationListComponent() {
-  // ✅ Select stable state reference (not function call)
-  const activeNotifications = useNotificationStore(
-    (state: NotificationStore) => state.activeNotifications
-  );
+  const notifications = useNotificationStore((state: NotificationStore) => state.notifications);
   const dismissAll = useNotificationStore((state: NotificationStore) => state.dismissAll);
 
-  if (activeNotifications.length === 0) {
+  if (notifications.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center">
         <p className="text-sm text-muted-foreground">No new notifications</p>
@@ -41,8 +28,7 @@ function NotificationListComponent() {
 
   return (
     <div className="space-y-3">
-      {/* Dismiss All Button */}
-      {activeNotifications.length > 1 && (
+      {notifications.length > 1 && (
         <div className="flex justify-end px-1">
           <Button variant="ghost" size="sm" onClick={dismissAll} className="text-xs">
             Dismiss All
@@ -50,9 +36,8 @@ function NotificationListComponent() {
         </div>
       )}
 
-      {/* Notification Cards */}
       <AnimatePresence mode="popLayout">
-        {activeNotifications.map((notification: Notification) => (
+        {notifications.map((notification: Notification) => (
           <motion.div key={notification.id} layout>
             <NotificationItem notification={notification} />
           </motion.div>

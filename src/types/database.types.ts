@@ -485,75 +485,6 @@ export type Database = {
           },
         ];
       };
-      changelog: {
-        Row: {
-          category: string;
-          commit_count: number | null;
-          contributors: string[] | null;
-          created_at: string;
-          date_added: string;
-          date_published: string | null;
-          date_updated: string | null;
-          description: string;
-          featured: boolean | null;
-          git_hash: string | null;
-          git_tag: string | null;
-          id: string;
-          sections: Json;
-          slug: string;
-          source: string | null;
-          synced_at: string | null;
-          tags: string[];
-          title: string;
-          updated_at: string;
-          version: string | null;
-        };
-        Insert: {
-          category?: string;
-          commit_count?: number | null;
-          contributors?: string[] | null;
-          created_at?: string;
-          date_added: string;
-          date_published?: string | null;
-          date_updated?: string | null;
-          description: string;
-          featured?: boolean | null;
-          git_hash?: string | null;
-          git_tag?: string | null;
-          id?: string;
-          sections: Json;
-          slug: string;
-          source?: string | null;
-          synced_at?: string | null;
-          tags: string[];
-          title: string;
-          updated_at?: string;
-          version?: string | null;
-        };
-        Update: {
-          category?: string;
-          commit_count?: number | null;
-          contributors?: string[] | null;
-          created_at?: string;
-          date_added?: string;
-          date_published?: string | null;
-          date_updated?: string | null;
-          description?: string;
-          featured?: boolean | null;
-          git_hash?: string | null;
-          git_tag?: string | null;
-          id?: string;
-          sections?: Json;
-          slug?: string;
-          source?: string | null;
-          synced_at?: string | null;
-          tags?: string[];
-          title?: string;
-          updated_at?: string;
-          version?: string | null;
-        };
-        Relationships: [];
-      };
       changelog_changes: {
         Row: {
           category: string;
@@ -594,51 +525,72 @@ export type Database = {
       };
       changelog_entries: {
         Row: {
+          canonical_url: string | null;
           changes: Json;
           content: string;
           created_at: string;
           description: string | null;
           featured: boolean;
           id: string;
+          json_ld: Json | null;
           keywords: string[] | null;
+          og_image: string | null;
+          og_type: string | null;
           published: boolean;
           raw_content: string;
           release_date: string;
+          robots_follow: boolean | null;
+          robots_index: boolean | null;
           slug: string;
           title: string;
           tldr: string | null;
+          twitter_card: string | null;
           updated_at: string;
         };
         Insert: {
+          canonical_url?: string | null;
           changes?: Json;
           content: string;
           created_at?: string;
           description?: string | null;
           featured?: boolean;
           id?: string;
+          json_ld?: Json | null;
           keywords?: string[] | null;
+          og_image?: string | null;
+          og_type?: string | null;
           published?: boolean;
           raw_content: string;
           release_date: string;
+          robots_follow?: boolean | null;
+          robots_index?: boolean | null;
           slug: string;
           title: string;
           tldr?: string | null;
+          twitter_card?: string | null;
           updated_at?: string;
         };
         Update: {
+          canonical_url?: string | null;
           changes?: Json;
           content?: string;
           created_at?: string;
           description?: string | null;
           featured?: boolean;
           id?: string;
+          json_ld?: Json | null;
           keywords?: string[] | null;
+          og_image?: string | null;
+          og_type?: string | null;
           published?: boolean;
           raw_content?: string;
           release_date?: string;
+          robots_follow?: boolean | null;
+          robots_index?: boolean | null;
           slug?: string;
           title?: string;
           tldr?: string | null;
+          twitter_card?: string | null;
           updated_at?: string;
         };
         Relationships: [];
@@ -859,6 +811,7 @@ export type Database = {
         Row: {
           author: string;
           author_profile_url: string | null;
+          canonical_url: string | null;
           category: string;
           content: string | null;
           copy_count: number | null;
@@ -879,12 +832,17 @@ export type Database = {
           has_prerequisites: boolean | null;
           has_troubleshooting: boolean | null;
           id: string;
+          json_ld: Json | null;
           last_downloaded_at: string | null;
           llmstxt_copy_count: number | null;
           markdown_download_count: number | null;
           metadata: Json;
+          og_image: string | null;
+          og_type: string | null;
           popularity_score: number | null;
           reading_time: number | null;
+          robots_follow: boolean | null;
+          robots_index: boolean | null;
           seo_title: string | null;
           slug: string;
           source: string | null;
@@ -892,6 +850,7 @@ export type Database = {
           synced_at: string | null;
           tags: string[];
           title: string | null;
+          twitter_card: string | null;
           updated_at: string;
           use_cases: string[] | null;
           view_count: number | null;
@@ -899,6 +858,7 @@ export type Database = {
         Insert: {
           author: string;
           author_profile_url?: string | null;
+          canonical_url?: string | null;
           category: string;
           content?: string | null;
           copy_count?: number | null;
@@ -919,12 +879,17 @@ export type Database = {
           has_prerequisites?: boolean | null;
           has_troubleshooting?: boolean | null;
           id?: string;
+          json_ld?: Json | null;
           last_downloaded_at?: string | null;
           llmstxt_copy_count?: number | null;
           markdown_download_count?: number | null;
           metadata?: Json;
+          og_image?: string | null;
+          og_type?: string | null;
           popularity_score?: number | null;
           reading_time?: number | null;
+          robots_follow?: boolean | null;
+          robots_index?: boolean | null;
           seo_title?: string | null;
           slug: string;
           source?: string | null;
@@ -932,6 +897,7 @@ export type Database = {
           synced_at?: string | null;
           tags: string[];
           title?: string | null;
+          twitter_card?: string | null;
           updated_at?: string;
           use_cases?: string[] | null;
           view_count?: number | null;
@@ -939,6 +905,7 @@ export type Database = {
         Update: {
           author?: string;
           author_profile_url?: string | null;
+          canonical_url?: string | null;
           category?: string;
           content?: string | null;
           copy_count?: number | null;
@@ -959,12 +926,17 @@ export type Database = {
           has_prerequisites?: boolean | null;
           has_troubleshooting?: boolean | null;
           id?: string;
+          json_ld?: Json | null;
           last_downloaded_at?: string | null;
           llmstxt_copy_count?: number | null;
           markdown_download_count?: number | null;
           metadata?: Json;
+          og_image?: string | null;
+          og_type?: string | null;
           popularity_score?: number | null;
           reading_time?: number | null;
+          robots_follow?: boolean | null;
+          robots_index?: boolean | null;
           seo_title?: string | null;
           slug?: string;
           source?: string | null;
@@ -972,6 +944,7 @@ export type Database = {
           synced_at?: string | null;
           tags?: string[];
           title?: string | null;
+          twitter_card?: string | null;
           updated_at?: string;
           use_cases?: string[] | null;
           view_count?: number | null;
@@ -1407,69 +1380,6 @@ export type Database = {
           },
         ];
       };
-      form_field_configs: {
-        Row: {
-          config: Json | null;
-          created_at: string;
-          default_value: string | null;
-          display_order: number;
-          enabled: boolean;
-          field_group: string;
-          field_label: string;
-          field_name: string;
-          field_type: Database['public']['Enums']['form_field_type'];
-          form_type: string;
-          grid_column: Database['public']['Enums']['form_grid_column'];
-          help_text: string | null;
-          icon_name: string | null;
-          icon_position: Database['public']['Enums']['form_icon_position'] | null;
-          id: string;
-          placeholder: string | null;
-          required: boolean;
-          updated_at: string;
-        };
-        Insert: {
-          config?: Json | null;
-          created_at?: string;
-          default_value?: string | null;
-          display_order?: number;
-          enabled?: boolean;
-          field_group?: string;
-          field_label: string;
-          field_name: string;
-          field_type: Database['public']['Enums']['form_field_type'];
-          form_type: string;
-          grid_column?: Database['public']['Enums']['form_grid_column'];
-          help_text?: string | null;
-          icon_name?: string | null;
-          icon_position?: Database['public']['Enums']['form_icon_position'] | null;
-          id?: string;
-          placeholder?: string | null;
-          required?: boolean;
-          updated_at?: string;
-        };
-        Update: {
-          config?: Json | null;
-          created_at?: string;
-          default_value?: string | null;
-          display_order?: number;
-          enabled?: boolean;
-          field_group?: string;
-          field_label?: string;
-          field_name?: string;
-          field_type?: Database['public']['Enums']['form_field_type'];
-          form_type?: string;
-          grid_column?: Database['public']['Enums']['form_grid_column'];
-          help_text?: string | null;
-          icon_name?: string | null;
-          icon_position?: Database['public']['Enums']['form_icon_position'] | null;
-          id?: string;
-          placeholder?: string | null;
-          required?: boolean;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
       form_field_definitions: {
         Row: {
           active: boolean | null;
@@ -1656,6 +1566,7 @@ export type Database = {
           active: boolean | null;
           admin_notes: string | null;
           benefits: Json;
+          canonical_url: string | null;
           category: string;
           click_count: number | null;
           company: string;
@@ -1668,8 +1579,11 @@ export type Database = {
           expires_at: string | null;
           featured: boolean | null;
           id: string;
+          json_ld: Json | null;
           link: string;
           location: string | null;
+          og_image: string | null;
+          og_type: string | null;
           order: number | null;
           payment_amount: number | null;
           payment_date: string | null;
@@ -1680,12 +1594,15 @@ export type Database = {
           posted_at: string | null;
           remote: boolean | null;
           requirements: Json;
+          robots_follow: boolean | null;
+          robots_index: boolean | null;
           salary: string | null;
           search_vector: unknown;
           slug: string;
           status: string | null;
-          tags: Json;
+          tags: string[] | null;
           title: string;
+          twitter_card: string | null;
           type: string;
           updated_at: string;
           user_id: string | null;
@@ -1696,6 +1613,7 @@ export type Database = {
           active?: boolean | null;
           admin_notes?: string | null;
           benefits?: Json;
+          canonical_url?: string | null;
           category: string;
           click_count?: number | null;
           company: string;
@@ -1708,8 +1626,11 @@ export type Database = {
           expires_at?: string | null;
           featured?: boolean | null;
           id?: string;
+          json_ld?: Json | null;
           link: string;
           location?: string | null;
+          og_image?: string | null;
+          og_type?: string | null;
           order?: number | null;
           payment_amount?: number | null;
           payment_date?: string | null;
@@ -1720,12 +1641,15 @@ export type Database = {
           posted_at?: string | null;
           remote?: boolean | null;
           requirements?: Json;
+          robots_follow?: boolean | null;
+          robots_index?: boolean | null;
           salary?: string | null;
           search_vector?: unknown;
           slug?: string;
           status?: string | null;
-          tags?: Json;
+          tags?: string[] | null;
           title: string;
+          twitter_card?: string | null;
           type: string;
           updated_at?: string;
           user_id?: string | null;
@@ -1736,6 +1660,7 @@ export type Database = {
           active?: boolean | null;
           admin_notes?: string | null;
           benefits?: Json;
+          canonical_url?: string | null;
           category?: string;
           click_count?: number | null;
           company?: string;
@@ -1748,8 +1673,11 @@ export type Database = {
           expires_at?: string | null;
           featured?: boolean | null;
           id?: string;
+          json_ld?: Json | null;
           link?: string;
           location?: string | null;
+          og_image?: string | null;
+          og_type?: string | null;
           order?: number | null;
           payment_amount?: number | null;
           payment_date?: string | null;
@@ -1760,12 +1688,15 @@ export type Database = {
           posted_at?: string | null;
           remote?: boolean | null;
           requirements?: Json;
+          robots_follow?: boolean | null;
+          robots_index?: boolean | null;
           salary?: string | null;
           search_vector?: unknown;
           slug?: string;
           status?: string | null;
-          tags?: Json;
+          tags?: string[] | null;
           title?: string;
+          twitter_card?: string | null;
           type?: string;
           updated_at?: string;
           user_id?: string | null;
@@ -2749,39 +2680,60 @@ export type Database = {
       };
       static_routes: {
         Row: {
+          canonical_url: string | null;
           created_at: string;
           description: string;
           group_name: string;
           icon_name: string;
           id: string;
           is_active: boolean;
+          json_ld: Json | null;
+          og_image: string | null;
+          og_type: string | null;
           path: string;
+          robots_follow: boolean | null;
+          robots_index: boolean | null;
           sort_order: number;
           title: string;
+          twitter_card: string | null;
           updated_at: string;
         };
         Insert: {
+          canonical_url?: string | null;
           created_at?: string;
           description: string;
           group_name: string;
           icon_name: string;
           id?: string;
           is_active?: boolean;
+          json_ld?: Json | null;
+          og_image?: string | null;
+          og_type?: string | null;
           path: string;
+          robots_follow?: boolean | null;
+          robots_index?: boolean | null;
           sort_order?: number;
           title: string;
+          twitter_card?: string | null;
           updated_at?: string;
         };
         Update: {
+          canonical_url?: string | null;
           created_at?: string;
           description?: string;
           group_name?: string;
           icon_name?: string;
           id?: string;
           is_active?: boolean;
+          json_ld?: Json | null;
+          og_image?: string | null;
+          og_type?: string | null;
           path?: string;
+          robots_follow?: boolean | null;
+          robots_index?: boolean | null;
           sort_order?: number;
           title?: string;
+          twitter_card?: string | null;
           updated_at?: string;
         };
         Relationships: [];
@@ -3115,6 +3067,7 @@ export type Database = {
       };
       user_badges: {
         Row: {
+          badge_details: Json | null;
           badge_id: string;
           earned_at: string;
           featured: boolean | null;
@@ -3123,6 +3076,7 @@ export type Database = {
           user_id: string;
         };
         Insert: {
+          badge_details?: Json | null;
           badge_id: string;
           earned_at?: string;
           featured?: boolean | null;
@@ -3131,6 +3085,7 @@ export type Database = {
           user_id: string;
         };
         Update: {
+          badge_details?: Json | null;
           badge_id?: string;
           earned_at?: string;
           featured?: boolean | null;
@@ -3247,89 +3202,6 @@ export type Database = {
           },
         ];
       };
-      user_content: {
-        Row: {
-          active: boolean | null;
-          content: Json;
-          content_type: string;
-          created_at: string;
-          description: string;
-          download_count: number | null;
-          featured: boolean | null;
-          id: string;
-          name: string;
-          plan: string;
-          slug: string;
-          tags: Json | null;
-          updated_at: string;
-          user_id: string;
-          view_count: number | null;
-        };
-        Insert: {
-          active?: boolean | null;
-          content: Json;
-          content_type: string;
-          created_at?: string;
-          description: string;
-          download_count?: number | null;
-          featured?: boolean | null;
-          id?: string;
-          name: string;
-          plan?: string;
-          slug: string;
-          tags?: Json | null;
-          updated_at?: string;
-          user_id: string;
-          view_count?: number | null;
-        };
-        Update: {
-          active?: boolean | null;
-          content?: Json;
-          content_type?: string;
-          created_at?: string;
-          description?: string;
-          download_count?: number | null;
-          featured?: boolean | null;
-          id?: string;
-          name?: string;
-          plan?: string;
-          slug?: string;
-          tags?: Json | null;
-          updated_at?: string;
-          user_id?: string;
-          view_count?: number | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'user_content_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_activity_summary';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_content_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_content_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_content_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
       user_interactions: {
         Row: {
           content_slug: string;
@@ -3385,106 +3257,6 @@ export type Database = {
           },
           {
             foreignKeyName: 'user_interactions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      user_mcps: {
-        Row: {
-          active: boolean | null;
-          click_count: number | null;
-          company_id: string | null;
-          created_at: string;
-          description: string;
-          id: string;
-          link: string;
-          logo: string | null;
-          mcp_link: string | null;
-          name: string;
-          order: number | null;
-          plan: string;
-          slug: string;
-          updated_at: string;
-          user_id: string;
-          view_count: number | null;
-        };
-        Insert: {
-          active?: boolean | null;
-          click_count?: number | null;
-          company_id?: string | null;
-          created_at?: string;
-          description: string;
-          id?: string;
-          link: string;
-          logo?: string | null;
-          mcp_link?: string | null;
-          name: string;
-          order?: number | null;
-          plan?: string;
-          slug: string;
-          updated_at?: string;
-          user_id: string;
-          view_count?: number | null;
-        };
-        Update: {
-          active?: boolean | null;
-          click_count?: number | null;
-          company_id?: string | null;
-          created_at?: string;
-          description?: string;
-          id?: string;
-          link?: string;
-          logo?: string | null;
-          mcp_link?: string | null;
-          name?: string;
-          order?: number | null;
-          plan?: string;
-          slug?: string;
-          updated_at?: string;
-          user_id?: string;
-          view_count?: number | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'user_mcps_company_id_fkey';
-            columns: ['company_id'];
-            isOneToOne: false;
-            referencedRelation: 'companies';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'user_mcps_company_id_fkey';
-            columns: ['company_id'];
-            isOneToOne: false;
-            referencedRelation: 'company_job_stats';
-            referencedColumns: ['company_id'];
-          },
-          {
-            foreignKeyName: 'user_mcps_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_activity_summary';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_mcps_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_mcps_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_mcps_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'users';
@@ -4038,6 +3810,61 @@ export type Database = {
         };
         Relationships: [];
       };
+      user_badges_with_details: {
+        Row: {
+          badge_id: string | null;
+          badge_order: number | null;
+          category: string | null;
+          description: string | null;
+          earned_at: string | null;
+          featured: boolean | null;
+          icon: string | null;
+          id: string | null;
+          metadata: Json | null;
+          name: string | null;
+          rarity: Database['public']['Enums']['badge_rarity'] | null;
+          slug: string | null;
+          tier_required: string | null;
+          user_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_badges_badge_id_fkey';
+            columns: ['badge_id'];
+            isOneToOne: false;
+            referencedRelation: 'badges';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'user_badges_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_activity_summary';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'user_badges_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_badge_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'user_badges_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'user_stats';
+            referencedColumns: ['user_id'];
+          },
+          {
+            foreignKeyName: 'user_badges_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       user_stats: {
         Row: {
           account_age_days: number | null;
@@ -4268,6 +4095,7 @@ export type Database = {
           active: boolean | null;
           admin_notes: string | null;
           benefits: Json;
+          canonical_url: string | null;
           category: string;
           click_count: number | null;
           company: string;
@@ -4280,8 +4108,11 @@ export type Database = {
           expires_at: string | null;
           featured: boolean | null;
           id: string;
+          json_ld: Json | null;
           link: string;
           location: string | null;
+          og_image: string | null;
+          og_type: string | null;
           order: number | null;
           payment_amount: number | null;
           payment_date: string | null;
@@ -4292,12 +4123,15 @@ export type Database = {
           posted_at: string | null;
           remote: boolean | null;
           requirements: Json;
+          robots_follow: boolean | null;
+          robots_index: boolean | null;
           salary: string | null;
           search_vector: unknown;
           slug: string;
           status: string | null;
-          tags: Json;
+          tags: string[] | null;
           title: string;
+          twitter_card: string | null;
           type: string;
           updated_at: string;
           user_id: string | null;
@@ -4323,6 +4157,30 @@ export type Database = {
       generate_slug_from_filename: {
         Args: { p_filename: string };
         Returns: string;
+      };
+      get_active_notifications: {
+        Args: { p_dismissed_ids?: string[] };
+        Returns: {
+          action_href: string | null;
+          action_label: string | null;
+          action_onclick: string | null;
+          active: boolean;
+          created_at: string;
+          expires_at: string | null;
+          icon: string | null;
+          id: string;
+          message: string;
+          priority: Database['public']['Enums']['notification_priority'];
+          title: string;
+          type: Database['public']['Enums']['notification_type'];
+          updated_at: string;
+        }[];
+        SetofOptions: {
+          from: '*';
+          to: 'notifications';
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
       };
       get_active_sponsored_content: {
         Args: { p_content_type?: string; p_limit?: number };
@@ -4487,6 +4345,7 @@ export type Database = {
           active: boolean | null;
           admin_notes: string | null;
           benefits: Json;
+          canonical_url: string | null;
           category: string;
           click_count: number | null;
           company: string;
@@ -4499,8 +4358,11 @@ export type Database = {
           expires_at: string | null;
           featured: boolean | null;
           id: string;
+          json_ld: Json | null;
           link: string;
           location: string | null;
+          og_image: string | null;
+          og_type: string | null;
           order: number | null;
           payment_amount: number | null;
           payment_date: string | null;
@@ -4511,12 +4373,15 @@ export type Database = {
           posted_at: string | null;
           remote: boolean | null;
           requirements: Json;
+          robots_follow: boolean | null;
+          robots_index: boolean | null;
           salary: string | null;
           search_vector: unknown;
           slug: string;
           status: string | null;
-          tags: Json;
+          tags: string[] | null;
           title: string;
+          twitter_card: string | null;
           type: string;
           updated_at: string;
           user_id: string | null;
@@ -4530,7 +4395,6 @@ export type Database = {
           isSetofReturn: true;
         };
       };
-      get_form_field_config: { Args: { p_form_type: string }; Returns: Json };
       get_form_fields_for_content_type: {
         Args: {
           p_content_type: Database['public']['Enums']['content_category'];
@@ -4552,7 +4416,6 @@ export type Database = {
           select_options: Json;
         }[];
       };
-      get_form_fields_grouped: { Args: { p_form_type: string }; Returns: Json };
       get_generation_config: { Args: { p_category?: string }; Returns: Json };
       get_github_stars: {
         Args: { p_repo_url: string };
@@ -4576,6 +4439,7 @@ export type Database = {
           active: boolean | null;
           admin_notes: string | null;
           benefits: Json;
+          canonical_url: string | null;
           category: string;
           click_count: number | null;
           company: string;
@@ -4588,8 +4452,11 @@ export type Database = {
           expires_at: string | null;
           featured: boolean | null;
           id: string;
+          json_ld: Json | null;
           link: string;
           location: string | null;
+          og_image: string | null;
+          og_type: string | null;
           order: number | null;
           payment_amount: number | null;
           payment_date: string | null;
@@ -4600,12 +4467,15 @@ export type Database = {
           posted_at: string | null;
           remote: boolean | null;
           requirements: Json;
+          robots_follow: boolean | null;
+          robots_index: boolean | null;
           salary: string | null;
           search_vector: unknown;
           slug: string;
           status: string | null;
-          tags: Json;
+          tags: string[] | null;
           title: string;
+          twitter_card: string | null;
           type: string;
           updated_at: string;
           user_id: string | null;
@@ -4652,14 +4522,13 @@ export type Database = {
       get_popular_posts: {
         Args: { limit_count?: number };
         Returns: {
-          body: string;
           comment_count: number;
-          content_slug: string;
-          content_type: string;
+          content: string;
           created_at: string;
           id: string;
           title: string;
           updated_at: string;
+          url: string;
           user_id: string;
           vote_count: number;
         }[];
@@ -5054,7 +4923,7 @@ export type Database = {
           description: string;
           discovery_metadata: Json;
           examples: Json;
-          features: Json;
+          features: string[];
           fts_vector: unknown;
           id: string;
           relevance_score: number;
@@ -5062,9 +4931,9 @@ export type Database = {
           source_table: string;
           tags: string[];
           title: string;
-          troubleshooting: Json;
+          troubleshooting: string;
           updated_at: string;
-          use_cases: Json;
+          use_cases: string[];
           view_count: number;
         }[];
       };
@@ -5074,6 +4943,7 @@ export type Database = {
           active: boolean | null;
           admin_notes: string | null;
           benefits: Json;
+          canonical_url: string | null;
           category: string;
           click_count: number | null;
           company: string;
@@ -5086,8 +4956,11 @@ export type Database = {
           expires_at: string | null;
           featured: boolean | null;
           id: string;
+          json_ld: Json | null;
           link: string;
           location: string | null;
+          og_image: string | null;
+          og_type: string | null;
           order: number | null;
           payment_amount: number | null;
           payment_date: string | null;
@@ -5098,12 +4971,15 @@ export type Database = {
           posted_at: string | null;
           remote: boolean | null;
           requirements: Json;
+          robots_follow: boolean | null;
+          robots_index: boolean | null;
           salary: string | null;
           search_vector: unknown;
           slug: string;
           status: string | null;
-          tags: Json;
+          tags: string[] | null;
           title: string;
+          twitter_card: string | null;
           type: string;
           updated_at: string;
           user_id: string | null;

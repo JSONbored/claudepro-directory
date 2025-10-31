@@ -207,15 +207,27 @@ export async function getUserCompanies() {
   return result.companies || [];
 }
 
+const createJobInputSchema = publicJobsInsertSchema.pick({
+  title: true,
+  company: true,
+  description: true,
+  category: true,
+  type: true,
+  link: true,
+  location: true,
+  salary: true,
+  remote: true,
+  workplace: true,
+  tags: true,
+  requirements: true,
+  benefits: true,
+  experience: true,
+  contact_email: true,
+}) as z.ZodType<any>;
+
 export const createJob = rateLimitedAction
   .metadata({ actionName: 'createJob', category: 'form' })
-  .schema(
-    publicJobsInsertSchema.omit({ tags: true, requirements: true, benefits: true }).extend({
-      tags: z.any().optional(),
-      requirements: z.any().optional(),
-      benefits: z.any().optional(),
-    })
-  )
+  .schema(createJobInputSchema)
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
     const {
@@ -238,18 +250,18 @@ export const createJob = rateLimitedAction
     return data as { success: boolean; job: any; requiresPayment: boolean; message: string };
   });
 
+const updateJobInputSchema = publicJobsUpdateSchema
+  .omit({ tags: true, requirements: true, benefits: true })
+  .extend({
+    tags: z.any().optional(),
+    requirements: z.any().optional(),
+    benefits: z.any().optional(),
+  })
+  .required({ id: true }) as z.ZodType<any>;
+
 export const updateJob = rateLimitedAction
   .metadata({ actionName: 'updateJob', category: 'form' })
-  .schema(
-    publicJobsUpdateSchema
-      .omit({ tags: true, requirements: true, benefits: true })
-      .extend({
-        tags: z.any().optional(),
-        requirements: z.any().optional(),
-        benefits: z.any().optional(),
-      })
-      .required({ id: true })
-  )
+  .schema(updateJobInputSchema)
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
     const {

@@ -1852,7 +1852,6 @@ CREATE TABLE IF NOT EXISTS "public"."jobs" (
     "workplace" "text",
     "experience" "text",
     "category" "text" NOT NULL,
-    "tags" "jsonb" DEFAULT '[]'::"jsonb" NOT NULL,
     "requirements" "jsonb" DEFAULT '[]'::"jsonb" NOT NULL,
     "benefits" "jsonb" DEFAULT '[]'::"jsonb" NOT NULL,
     "link" "text" NOT NULL,
@@ -1875,14 +1874,23 @@ CREATE TABLE IF NOT EXISTS "public"."jobs" (
     "payment_amount" numeric(10,2),
     "payment_reference" "text",
     "admin_notes" "text",
-    "search_vector" "tsvector" GENERATED ALWAYS AS ((((("setweight"("to_tsvector"('"english"'::"regconfig", COALESCE("title", ''::"text")), 'A'::"char") || "setweight"("to_tsvector"('"english"'::"regconfig", COALESCE("company", ''::"text")), 'A'::"char")) || "setweight"("to_tsvector"('"english"'::"regconfig", COALESCE("description", ''::"text")), 'B'::"char")) || "setweight"("to_tsvector"('"english"'::"regconfig", COALESCE("category", ''::"text")), 'C'::"char")) || "setweight"("to_tsvector"('"english"'::"regconfig", COALESCE(("tags")::"text", ''::"text")), 'D'::"char"))) STORED,
     "slug" "text" GENERATED ALWAYS AS ("public"."job_slug"("title")) STORED NOT NULL,
+    "og_image" "text",
+    "canonical_url" "text",
+    "og_type" "text" DEFAULT 'article'::"text",
+    "twitter_card" "text" DEFAULT 'summary_large_image'::"text",
+    "robots_index" boolean DEFAULT true,
+    "robots_follow" boolean DEFAULT true,
+    "json_ld" "jsonb",
+    "tags" "text"[],
+    "search_vector" "tsvector",
     CONSTRAINT "jobs_benefits_check" CHECK (("jsonb_typeof"("benefits") = 'array'::"text")),
+    CONSTRAINT "jobs_company_logo_check" CHECK ((("company_logo" IS NULL) OR ("company_logo" ~ '^https?://[^\s]+$'::"text"))),
+    CONSTRAINT "jobs_contact_email_check" CHECK ((("contact_email" IS NULL) OR (("length"("contact_email") >= 5) AND ("length"("contact_email") <= 254) AND ("contact_email" ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'::"text")))),
     CONSTRAINT "jobs_payment_method_check" CHECK (("payment_method" = ANY (ARRAY['polar'::"text", 'mercury_invoice'::"text", 'manual'::"text"]))),
     CONSTRAINT "jobs_payment_status_check" CHECK (("payment_status" = ANY (ARRAY['unpaid'::"text", 'paid'::"text", 'refunded'::"text"]))),
     CONSTRAINT "jobs_requirements_check" CHECK (("jsonb_typeof"("requirements") = 'array'::"text")),
-    CONSTRAINT "jobs_status_check" CHECK (("status" = ANY (ARRAY['draft'::"text", 'pending_review'::"text", 'active'::"text", 'expired'::"text", 'rejected'::"text"]))),
-    CONSTRAINT "jobs_tags_check" CHECK (("jsonb_typeof"("tags") = 'array'::"text"))
+    CONSTRAINT "jobs_status_check" CHECK (("status" = ANY (ARRAY['draft'::"text", 'pending_review'::"text", 'active'::"text", 'expired'::"text", 'rejected'::"text"])))
 );
 
 
@@ -1913,19 +1921,15 @@ COMMENT ON COLUMN "public"."jobs"."admin_notes" IS 'Internal admin notes for rev
 
 
 
-COMMENT ON COLUMN "public"."jobs"."search_vector" IS 'Full-text search vector (auto-maintained): title(A) + company(A) + description(B) + category(C) + tags(D)';
-
-
-
 COMMENT ON CONSTRAINT "jobs_benefits_check" ON "public"."jobs" IS 'Enforce benefits field is a JSONB array (eliminates application-level Array.isArray checks)';
 
 
 
+COMMENT ON CONSTRAINT "jobs_contact_email_check" ON "public"."jobs" IS 'Contact email must be valid RFC 5322 format, 5-254 chars';
+
+
+
 COMMENT ON CONSTRAINT "jobs_requirements_check" ON "public"."jobs" IS 'Enforce requirements field is a JSONB array (eliminates application-level Array.isArray checks)';
-
-
-
-COMMENT ON CONSTRAINT "jobs_tags_check" ON "public"."jobs" IS 'Enforce tags field is a JSONB array (eliminates application-level Array.isArray checks)';
 
 
 
@@ -2465,6 +2469,109 @@ $$;
 
 
 ALTER FUNCTION "public"."generate_user_slug"() OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."notifications" (
+    "id" "text" NOT NULL,
+    "type" "public"."notification_type" NOT NULL,
+    "priority" "public"."notification_priority" DEFAULT 'medium'::"public"."notification_priority" NOT NULL,
+    "active" boolean DEFAULT true NOT NULL,
+    "expires_at" timestamp with time zone,
+    "title" "text" NOT NULL,
+    "message" "text" NOT NULL,
+    "action_label" "text",
+    "action_href" "text",
+    "action_onclick" "text",
+    "icon" "text",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "notifications_action_href_check" CHECK ((("action_href" IS NULL) OR ("action_href" ~ '^/'::"text"))),
+    CONSTRAINT "notifications_action_label_check" CHECK ((("action_label" IS NULL) OR ("length"("action_label") <= 50))),
+    CONSTRAINT "notifications_action_onclick_check" CHECK ((("action_onclick" IS NULL) OR ("length"("action_onclick") <= 100))),
+    CONSTRAINT "notifications_icon_check" CHECK ((("icon" IS NULL) OR ("length"("icon") <= 50))),
+    CONSTRAINT "notifications_id_check" CHECK (("id" ~ '^[a-z0-9-]+$'::"text")),
+    CONSTRAINT "notifications_message_check" CHECK ((("length"("message") >= 10) AND ("length"("message") <= 500))),
+    CONSTRAINT "notifications_title_check" CHECK ((("length"("title") >= 5) AND ("length"("title") <= 100)))
+);
+
+
+ALTER TABLE "public"."notifications" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."notifications" IS 'Site-wide notification definitions with scheduling and priority';
+
+
+
+COMMENT ON COLUMN "public"."notifications"."id" IS 'Unique identifier in kebab-case format (e.g., announcement-launch-2025-10)';
+
+
+
+COMMENT ON COLUMN "public"."notifications"."type" IS 'Notification category: announcement, feedback';
+
+
+
+COMMENT ON COLUMN "public"."notifications"."priority" IS 'Display priority when multiple active (high > medium > low)';
+
+
+
+COMMENT ON COLUMN "public"."notifications"."active" IS 'Admin toggle to enable/disable without deleting';
+
+
+
+COMMENT ON COLUMN "public"."notifications"."expires_at" IS 'Notification hidden after this date (null = no expiration)';
+
+
+
+COMMENT ON COLUMN "public"."notifications"."title" IS 'Notification title (5-100 characters, action-oriented)';
+
+
+
+COMMENT ON COLUMN "public"."notifications"."message" IS 'Notification message (10-500 characters, 1-2 sentences max)';
+
+
+
+COMMENT ON COLUMN "public"."notifications"."action_label" IS 'Optional CTA button label';
+
+
+
+COMMENT ON COLUMN "public"."notifications"."action_href" IS 'Optional CTA href (relative URLs only)';
+
+
+
+COMMENT ON COLUMN "public"."notifications"."action_onclick" IS 'Optional CTA onclick handler (function name)';
+
+
+
+COMMENT ON COLUMN "public"."notifications"."icon" IS 'Optional Lucide icon name (e.g., "Sparkles", "MessageSquare")';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."get_active_notifications"("p_dismissed_ids" "text"[] DEFAULT '{}'::"text"[]) RETURNS SETOF "public"."notifications"
+    LANGUAGE "plpgsql" STABLE
+    AS $$
+BEGIN
+  RETURN QUERY
+  SELECT *
+  FROM notifications
+  WHERE active = true
+    AND (expires_at IS NULL OR expires_at > NOW())
+    AND id != ALL(p_dismissed_ids)
+  ORDER BY 
+    CASE priority
+      WHEN 'high' THEN 1
+      WHEN 'medium' THEN 2
+      WHEN 'low' THEN 3
+    END,
+    created_at ASC;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_active_notifications"("p_dismissed_ids" "text"[]) OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_active_notifications"("p_dismissed_ids" "text"[]) IS 'Returns active, non-expired notifications excluding dismissed IDs. Zero client-side filtering - all logic in PostgreSQL.';
+
 
 
 CREATE OR REPLACE FUNCTION "public"."get_active_sponsored_content"("p_content_type" "text" DEFAULT NULL::"text", "p_limit" integer DEFAULT 5) RETURNS TABLE("id" "uuid", "user_id" "uuid", "content_type" "text", "content_id" "uuid", "tier" "text", "active" boolean, "start_date" timestamp with time zone, "end_date" timestamp with time zone, "impression_limit" integer, "impression_count" integer, "click_count" integer, "created_at" timestamp with time zone, "updated_at" timestamp with time zone)
@@ -3615,57 +3722,6 @@ COMMENT ON FUNCTION "public"."get_featured_jobs"() IS 'Returns featured and prem
 
 
 
-CREATE OR REPLACE FUNCTION "public"."get_form_field_config"("p_form_type" "text") RETURNS "jsonb"
-    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
-    SET "search_path" TO 'public', 'pg_catalog'
-    AS $$
-DECLARE
-  v_result jsonb;
-BEGIN
-  -- Fetch all fields for the form type, grouped by field_group
-  SELECT jsonb_build_object(
-    'formType', p_form_type,
-    'fields', (
-      SELECT jsonb_agg(
-        jsonb_build_object(
-          'name', field_name,
-          'label', field_label,
-          'type', field_type::text,
-          'required', required,
-          'placeholder', placeholder,
-          'helpText', help_text,
-          'defaultValue', default_value,
-          'gridColumn', grid_column::text,
-          'iconName', icon_name,
-          'iconPosition', COALESCE(icon_position::text, 'left'),
-          'config', config,
-          'fieldGroup', field_group,
-          'displayOrder', display_order
-        ) ORDER BY display_order ASC
-      )
-      FROM public.form_field_configs
-      WHERE form_type = p_form_type
-        AND enabled = true
-    )
-  ) INTO v_result;
-
-  -- Return NULL if no config found
-  IF v_result->>'fields' IS NULL THEN
-    RETURN NULL;
-  END IF;
-
-  RETURN v_result;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."get_form_field_config"("p_form_type" "text") OWNER TO "postgres";
-
-
-COMMENT ON FUNCTION "public"."get_form_field_config"("p_form_type" "text") IS 'Fetch form field configuration for a given form type. Returns JSONB with all field definitions ordered by display_order.';
-
-
-
 CREATE OR REPLACE FUNCTION "public"."get_form_fields_for_content_type"("p_content_type" "public"."content_category") RETURNS TABLE("id" "uuid", "field_scope" "public"."field_scope", "field_name" "text", "field_type" "public"."field_type", "label" "text", "placeholder" "text", "help_text" "text", "required" boolean, "grid_column" "public"."grid_column", "field_order" integer, "icon" "text", "icon_position" "public"."icon_position", "field_properties" "jsonb", "select_options" "jsonb")
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public'
@@ -3721,55 +3777,6 @@ ALTER FUNCTION "public"."get_form_fields_for_content_type"("p_content_type" "pub
 
 
 COMMENT ON FUNCTION "public"."get_form_fields_for_content_type"("p_content_type" "public"."content_category") IS 'Retrieves all form fields for a content type (common + type-specific + tags) with select options included.';
-
-
-
-CREATE OR REPLACE FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") RETURNS "jsonb"
-    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
-    SET "search_path" TO 'public', 'pg_catalog'
-    AS $$
-DECLARE
-  v_result jsonb;
-BEGIN
-  -- Group fields by field_group (common, type_specific, tags)
-  SELECT jsonb_object_agg(
-    field_group,
-    fields
-  )
-  FROM (
-    SELECT 
-      field_group,
-      jsonb_agg(
-        jsonb_build_object(
-          'name', field_name,
-          'label', field_label,
-          'type', field_type::text,
-          'required', required,
-          'placeholder', placeholder,
-          'helpText', help_text,
-          'defaultValue', default_value,
-          'gridColumn', grid_column::text,
-          'iconName', icon_name,
-          'iconPosition', COALESCE(icon_position::text, 'left'),
-          'config', config
-        ) ORDER BY display_order ASC
-      ) AS fields
-    FROM public.form_field_configs
-    WHERE form_type = p_form_type
-      AND enabled = true
-    GROUP BY field_group
-  ) grouped
-  INTO v_result;
-
-  RETURN v_result;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") OWNER TO "postgres";
-
-
-COMMENT ON FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") IS 'Fetch form fields grouped by field_group (common, type_specific, tags). Useful for rendering forms in sections.';
 
 
 
@@ -4591,14 +4598,22 @@ COMMENT ON FUNCTION "public"."get_personalized_feed"("p_user_id" "uuid", "p_cate
 
 
 
-CREATE OR REPLACE FUNCTION "public"."get_popular_posts"("limit_count" integer DEFAULT 50) RETURNS TABLE("id" "uuid", "user_id" "uuid", "content_type" "text", "content_slug" "text", "title" "text", "body" "text", "vote_count" integer, "comment_count" integer, "created_at" timestamp with time zone, "updated_at" timestamp with time zone)
+CREATE OR REPLACE FUNCTION "public"."get_popular_posts"("limit_count" integer DEFAULT 50) RETURNS TABLE("id" "uuid", "user_id" "uuid", "title" "text", "content" "text", "url" "text", "vote_count" integer, "comment_count" integer, "created_at" timestamp with time zone, "updated_at" timestamp with time zone)
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_catalog'
     AS $$
 BEGIN
   RETURN QUERY
-  SELECT p.id, p.user_id, p.content_type, p.content_slug, p.title, p.body,
-         p.vote_count, p.comment_count, p.created_at, p.updated_at
+  SELECT 
+    p.id,
+    p.user_id,
+    p.title,
+    p.content,
+    p.url,
+    p.vote_count,
+    p.comment_count,
+    p.created_at,
+    p.updated_at
   FROM public.posts p
   ORDER BY p.vote_count DESC, p.created_at DESC
   LIMIT limit_count;
@@ -7967,6 +7982,39 @@ COMMENT ON FUNCTION "public"."notify_newsletter_subscription"() IS 'Triggers sen
 
 
 
+CREATE OR REPLACE FUNCTION "public"."populate_badge_details"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+BEGIN
+  -- Fetch badge details and store as JSONB for Realtime payload
+  NEW.badge_details := (
+    SELECT jsonb_build_object(
+      'id', b.id,
+      'slug', b.slug,
+      'name', b.name,
+      'description', b.description,
+      'icon', b.icon,
+      'category', b.category,
+      'rarity', b.rarity,
+      'tier_required', b.tier_required,
+      'order', b.order
+    )
+    FROM badges b
+    WHERE b.id = NEW.badge_id
+  );
+  
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."populate_badge_details"() OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."populate_badge_details"() IS 'Auto-populates badge_details JSONB column on user_badges INSERT for zero-query Realtime notifications.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."process_webhook_event"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public'
@@ -8644,7 +8692,7 @@ $$;
 ALTER FUNCTION "public"."search_companies"("search_query" "text", "result_limit" integer) OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."search_content_optimized"("p_query" "text" DEFAULT NULL::"text", "p_categories" "text"[] DEFAULT NULL::"text"[], "p_tags" "text"[] DEFAULT NULL::"text"[], "p_authors" "text"[] DEFAULT NULL::"text"[], "p_sort" "text" DEFAULT 'relevance'::"text", "p_limit" integer DEFAULT 50, "p_offset" integer DEFAULT 0) RETURNS TABLE("id" "text", "slug" "text", "title" "text", "description" "text", "category" "text", "author" "text", "author_profile_url" "text", "date_added" "text", "tags" "text"[], "created_at" "text", "updated_at" "text", "features" "jsonb", "use_cases" "jsonb", "examples" "jsonb", "troubleshooting" "jsonb", "discovery_metadata" "jsonb", "fts_vector" "tsvector", "source_table" "text", "relevance_score" real, "view_count" bigint, "copy_count" bigint, "bookmark_count" bigint, "combined_score" real)
+CREATE OR REPLACE FUNCTION "public"."search_content_optimized"("p_query" "text" DEFAULT NULL::"text", "p_categories" "text"[] DEFAULT NULL::"text"[], "p_tags" "text"[] DEFAULT NULL::"text"[], "p_authors" "text"[] DEFAULT NULL::"text"[], "p_sort" "text" DEFAULT 'relevance'::"text", "p_limit" integer DEFAULT 50, "p_offset" integer DEFAULT 0) RETURNS TABLE("id" "text", "slug" "text", "title" "text", "description" "text", "category" "text", "author" "text", "author_profile_url" "text", "date_added" "text", "tags" "text"[], "created_at" "text", "updated_at" "text", "features" "text"[], "use_cases" "text"[], "examples" "jsonb", "troubleshooting" "text", "discovery_metadata" "jsonb", "fts_vector" "tsvector", "source_table" "text", "relevance_score" real, "view_count" bigint, "copy_count" bigint, "bookmark_count" bigint, "combined_score" real)
     LANGUAGE "plpgsql" STABLE
     SET "search_path" TO 'public'
     AS $$
@@ -8652,13 +8700,30 @@ BEGIN
   RETURN QUERY
   WITH search_results AS (
     SELECT
-      cu.*,
+      c.id::text,
+      c.slug,
+      c.title,
+      c.description,
+      c.category,
+      c.author,
+      c.author_profile_url,
+      c.date_added::text,
+      c.tags,
+      c.created_at::text,
+      c.updated_at::text,
+      c.features,
+      c.use_cases,
+      c.examples,
+      c.content as troubleshooting,
+      c.discovery_metadata,
+      c.fts_vector,
+      'content'::text as source_table,
+      
       -- Relevance score from ts_rank (0.0 to 1.0)
-      -- Higher weight for exact title matches
       CASE
         WHEN p_query IS NOT NULL AND p_query != '' THEN
           ts_rank(
-            cu.fts_vector,
+            c.fts_vector,
             websearch_to_tsquery('english', p_query),
             1  -- normalization: divide by document length
           )
@@ -8671,11 +8736,10 @@ BEGIN
       COALESCE(a.bookmark_count, 0) AS bookmarks,
 
       -- Combined score: relevance (70%) + popularity (30%)
-      -- Normalized popularity: log scale to prevent huge view counts from dominating
       CASE
         WHEN p_query IS NOT NULL AND p_query != '' THEN
           (ts_rank(
-            cu.fts_vector,
+            c.fts_vector,
             websearch_to_tsquery('english', p_query),
             1
           ) * 0.7) +
@@ -8685,23 +8749,23 @@ BEGIN
           LOG(1 + COALESCE(a.view_count, 0))
       END AS final_score
 
-    FROM public.content_unified cu
+    FROM public.content c
     LEFT JOIN public.mv_analytics_summary a
-      ON cu.category = a.category
-      AND cu.slug = a.slug
+      ON c.category = a.category
+      AND c.slug = a.slug
 
     WHERE
-      -- Full-text search filter (uses GIN index)
-      (p_query IS NULL OR p_query = '' OR cu.fts_vector @@ websearch_to_tsquery('english', p_query))
+      -- Full-text search filter (uses GIN index on fts_vector)
+      (p_query IS NULL OR p_query = '' OR c.fts_vector @@ websearch_to_tsquery('english', p_query))
 
       -- Category filter
-      AND (p_categories IS NULL OR cu.category = ANY(p_categories))
+      AND (p_categories IS NULL OR c.category = ANY(p_categories))
 
       -- Tag filter (array overlap)
-      AND (p_tags IS NULL OR cu.tags && p_tags)
+      AND (p_tags IS NULL OR c.tags && p_tags)
 
       -- Author filter
-      AND (p_authors IS NULL OR cu.author = ANY(p_authors))
+      AND (p_authors IS NULL OR c.author = ANY(p_authors))
   )
   SELECT
     sr.id,
@@ -8745,32 +8809,6 @@ $$;
 
 
 ALTER FUNCTION "public"."search_content_optimized"("p_query" "text", "p_categories" "text"[], "p_tags" "text"[], "p_authors" "text"[], "p_sort" "text", "p_limit" integer, "p_offset" integer) OWNER TO "postgres";
-
-
-COMMENT ON FUNCTION "public"."search_content_optimized"("p_query" "text", "p_categories" "text"[], "p_tags" "text"[], "p_authors" "text"[], "p_sort" "text", "p_limit" integer, "p_offset" integer) IS 'Optimized search with ts_rank relevance scoring and popularity boost.
-
-Performance: ~5-20ms per query using GIN indexes.
-
-Scoring Algorithm:
-- Relevance: ts_rank (PostgreSQL full-text search, 0.0-1.0)
-- Popularity: LOG(1 + view_count) normalized to 0.0-1.0
-- Combined: (relevance × 0.7) + (popularity × 0.3)
-
-Sort Options:
-- relevance: Combined score (default)
-- popularity: View count (logarithmic scale)
-- newest: Created date descending
-- alphabetical: Title ascending
-
-Example:
-SELECT * FROM search_content_optimized(
-  p_query := ''biome linter'',
-  p_categories := ARRAY[''agents'', ''rules''],
-  p_tags := ARRAY[''linting''],
-  p_sort := ''relevance'',
-  p_limit := 20
-);';
-
 
 
 CREATE OR REPLACE FUNCTION "public"."search_jobs"("search_query" "text", "result_limit" integer DEFAULT 20) RETURNS SETOF "public"."jobs"
@@ -8822,7 +8860,10 @@ CREATE TABLE IF NOT EXISTS "public"."users" (
     "search_vector" "tsvector" GENERATED ALWAYS AS (((("setweight"("to_tsvector"('"english"'::"regconfig", COALESCE("name", ''::"text")), 'A'::"char") || "setweight"("to_tsvector"('"english"'::"regconfig", COALESCE("bio", ''::"text")), 'B'::"char")) || "setweight"("to_tsvector"('"english"'::"regconfig", COALESCE("work", ''::"text")), 'C'::"char")) || "setweight"("to_tsvector"('"english"'::"regconfig", COALESCE(("interests")::"text", ''::"text")), 'D'::"char"))) STORED,
     "tier_name" "text" GENERATED ALWAYS AS ("public"."get_tier_name_from_score"("reputation_score")) STORED,
     "tier_progress" integer GENERATED ALWAYS AS ("public"."get_tier_progress_from_score"("reputation_score")) STORED,
-    CONSTRAINT "users_tier_check" CHECK (("tier" = ANY (ARRAY['free'::"text", 'pro'::"text", 'enterprise'::"text"])))
+    CONSTRAINT "users_email_check" CHECK ((("email" IS NULL) OR (("length"("email") >= 5) AND ("length"("email") <= 254) AND ("email" ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'::"text")))),
+    CONSTRAINT "users_image_check" CHECK ((("image" IS NULL) OR ("image" ~ '^https?://[^\s]+$'::"text"))),
+    CONSTRAINT "users_tier_check" CHECK (("tier" = ANY (ARRAY['free'::"text", 'pro'::"text", 'enterprise'::"text"]))),
+    CONSTRAINT "users_website_check" CHECK ((("website" IS NULL) OR ("website" ~ '^https?://'::"text")))
 );
 
 
@@ -8838,6 +8879,10 @@ COMMENT ON COLUMN "public"."users"."tier_name" IS 'Auto-computed reputation tier
 
 
 COMMENT ON COLUMN "public"."users"."tier_progress" IS 'Auto-computed progress through current reputation tier (0-100%). Updates automatically when score changes.';
+
+
+
+COMMENT ON CONSTRAINT "users_email_check" ON "public"."users" IS 'User email must be valid RFC 5322 format, 5-254 chars';
 
 
 
@@ -9598,6 +9643,24 @@ $$;
 ALTER FUNCTION "public"."update_email_sequences_updated_at"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."update_jobs_search_vector"() RETURNS "trigger"
+    LANGUAGE "plpgsql" IMMUTABLE
+    AS $$
+BEGIN
+  NEW.search_vector := 
+    setweight(to_tsvector('english', COALESCE(NEW.title, '')), 'A') ||
+    setweight(to_tsvector('english', COALESCE(NEW.company, '')), 'A') ||
+    setweight(to_tsvector('english', COALESCE(NEW.description, '')), 'B') ||
+    setweight(to_tsvector('english', COALESCE(NEW.category, '')), 'C') ||
+    setweight(to_tsvector('english', COALESCE(array_to_string(NEW.tags, ' '), '')), 'D');
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."update_jobs_search_vector"() OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."update_newsletter_updated_at"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public'
@@ -10233,11 +10296,16 @@ CREATE TABLE IF NOT EXISTS "public"."badges" (
     "active" boolean DEFAULT true,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "rarity" "public"."badge_rarity" DEFAULT 'common'::"public"."badge_rarity" NOT NULL,
+    CONSTRAINT "badges_icon_check" CHECK ((("icon" IS NULL) OR (("length"("icon") >= 1) AND ("length"("icon") <= 50)))),
     CONSTRAINT "badges_tier_required_check" CHECK (("tier_required" = ANY (ARRAY['free'::"text", 'pro'::"text", 'enterprise'::"text"])))
 );
 
 
 ALTER TABLE "public"."badges" OWNER TO "postgres";
+
+
+COMMENT ON CONSTRAINT "badges_icon_check" ON "public"."badges" IS 'Icon name must be 1-50 chars';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."bookmarks" (
@@ -10293,6 +10361,7 @@ CREATE TABLE IF NOT EXISTS "public"."category_configs" (
     "metadata_fields" "text"[] DEFAULT ARRAY['slug'::"text", 'title'::"text", 'description'::"text", 'author'::"text", 'tags'::"text", 'category'::"text", 'date_added'::"text", 'source'::"text"] NOT NULL,
     "badges" "jsonb",
     CONSTRAINT "category_configs_config_format_check" CHECK (("config_format" = ANY (ARRAY['json'::"text", 'multi'::"text", 'hook'::"text"]))),
+    CONSTRAINT "category_configs_icon_name_check" CHECK ((("length"("icon_name") >= 1) AND ("length"("icon_name") <= 50))),
     CONSTRAINT "category_configs_primary_action_type_check" CHECK (("primary_action_type" = ANY (ARRAY['notification'::"text", 'copy_command'::"text", 'copy_script'::"text", 'scroll'::"text", 'download'::"text", 'github_link'::"text"])))
 );
 
@@ -10369,58 +10438,6 @@ COMMENT ON TABLE "public"."category_features" IS 'Database-first feature flags f
 
 
 
-CREATE TABLE IF NOT EXISTS "public"."changelog" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "slug" "text" NOT NULL,
-    "title" "text" NOT NULL,
-    "description" "text" NOT NULL,
-    "category" "text" DEFAULT 'changelog'::"text" NOT NULL,
-    "version" "text",
-    "date_added" "date" NOT NULL,
-    "date_published" "date",
-    "date_updated" "date",
-    "tags" "text"[] NOT NULL,
-    "sections" "jsonb" NOT NULL,
-    "commit_count" integer,
-    "contributors" "text"[],
-    "git_tag" "text",
-    "git_hash" "text",
-    "featured" boolean DEFAULT false,
-    "source" "text" DEFAULT 'claudepro'::"text",
-    "synced_at" timestamp with time zone,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    CONSTRAINT "changelog_category_check" CHECK (("category" = 'changelog'::"text")),
-    CONSTRAINT "changelog_commit_count_check" CHECK ((("commit_count" IS NULL) OR ("commit_count" >= 0))),
-    CONSTRAINT "changelog_description_check" CHECK ((("length"("description") >= 10) AND ("length"("description") <= 500))),
-    CONSTRAINT "changelog_sections_check" CHECK (("jsonb_typeof"("sections") = 'array'::"text")),
-    CONSTRAINT "changelog_slug_check" CHECK ((("slug" ~ '^[a-z0-9-]+$'::"text") AND (("length"("slug") >= 3) AND ("length"("slug") <= 100)))),
-    CONSTRAINT "changelog_source_check" CHECK ((("source" IS NULL) OR ("length"("source") >= 3))),
-    CONSTRAINT "changelog_tags_check" CHECK ((("array_length"("tags", 1) >= 1) AND ("array_length"("tags", 1) <= 20))),
-    CONSTRAINT "changelog_title_check" CHECK (("length"("title") >= 3)),
-    CONSTRAINT "changelog_version_check" CHECK ((("version" IS NULL) OR ("version" ~ '^v?[0-9]+\\.[0-9]+\\.[0-9]+'::"text")))
-);
-
-
-ALTER TABLE "public"."changelog" OWNER TO "postgres";
-
-
-COMMENT ON TABLE "public"."changelog" IS 'Changelog entries - platform updates and release notes (auto-generated from git-cliff)';
-
-
-
-COMMENT ON COLUMN "public"."changelog"."version" IS 'Semantic version (e.g., v1.2.3) extracted from git tags';
-
-
-
-COMMENT ON COLUMN "public"."changelog"."sections" IS 'JSONB array of guide-style sections (reuses guide schema for consistency)';
-
-
-
-COMMENT ON COLUMN "public"."changelog"."commit_count" IS 'Number of commits in this release';
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."changelog_changes" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "changelog_entry_id" "uuid" NOT NULL,
@@ -10451,6 +10468,13 @@ CREATE TABLE IF NOT EXISTS "public"."changelog_entries" (
     "featured" boolean DEFAULT false NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "og_image" "text",
+    "canonical_url" "text",
+    "og_type" "text" DEFAULT 'article'::"text",
+    "twitter_card" "text" DEFAULT 'summary_large_image'::"text",
+    "robots_index" boolean DEFAULT true,
+    "robots_follow" boolean DEFAULT true,
+    "json_ld" "jsonb",
     CONSTRAINT "changelog_entries_content_check" CHECK (("length"("content") >= 10)),
     CONSTRAINT "changelog_entries_description_check" CHECK ((("description" IS NULL) OR (("length"("description") >= 50) AND ("length"("description") <= 160)))),
     CONSTRAINT "changelog_entries_raw_content_check" CHECK (("length"("raw_content") >= 10)),
@@ -10621,13 +10645,23 @@ END) STORED,
     "markdown_download_count" bigint DEFAULT 0,
     "copy_count" bigint DEFAULT 0,
     "view_count" bigint DEFAULT 0,
+    "og_image" "text",
+    "canonical_url" "text",
+    "og_type" "text" DEFAULT 'article'::"text",
+    "twitter_card" "text" DEFAULT 'summary_large_image'::"text",
+    "robots_index" boolean DEFAULT true,
+    "robots_follow" boolean DEFAULT true,
+    "json_ld" "jsonb",
     CONSTRAINT "content_author_length" CHECK (("length"("author") >= 2)),
+    CONSTRAINT "content_author_profile_url_check" CHECK ((("author_profile_url" IS NULL) OR ("author_profile_url" ~ '^https?://'::"text"))),
     CONSTRAINT "content_category_check" CHECK (("category" = ANY (ARRAY['agents'::"text", 'mcp'::"text", 'commands'::"text", 'rules'::"text", 'hooks'::"text", 'statuslines'::"text", 'skills'::"text", 'collections'::"text", 'guides'::"text"]))),
     CONSTRAINT "content_description_length" CHECK ((("length"("description") >= 10) AND ("length"("description") <= 500))),
+    CONSTRAINT "content_documentation_url_check" CHECK ((("documentation_url" IS NULL) OR ("documentation_url" ~ '^https?://'::"text"))),
     CONSTRAINT "content_download_url_check" CHECK ((("download_url" IS NULL) OR ("download_url" ~ '^(/downloads/|https?://)'::"text"))),
     CONSTRAINT "content_features_count" CHECK ((("features" IS NULL) OR ("array_length"("features", 1) <= 20))),
     CONSTRAINT "content_guide_subcategory_check" CHECK ((("category" <> 'guides'::"text") OR (("metadata" ->> 'subcategory'::"text") IS NULL) OR (("metadata" ->> 'subcategory'::"text") = ANY (ARRAY['tutorials'::"text", 'comparisons'::"text", 'workflows'::"text", 'use-cases'::"text", 'troubleshooting'::"text"])))),
     CONSTRAINT "content_slug_pattern" CHECK ((("slug" ~ '^[a-z0-9-]+$'::"text") AND (("length"("slug") >= 3) AND ("length"("slug") <= 100)))),
+    CONSTRAINT "content_storage_url_check" CHECK ((("storage_url" IS NULL) OR ("storage_url" ~ '^(/storage/|https?://)'::"text"))),
     CONSTRAINT "content_tags_count" CHECK ((("array_length"("tags", 1) >= 1) AND ("array_length"("tags", 1) <= 20))),
     CONSTRAINT "content_use_cases_count" CHECK ((("use_cases" IS NULL) OR ("array_length"("use_cases", 1) <= 20)))
 );
@@ -10662,6 +10696,14 @@ COMMENT ON COLUMN "public"."content"."has_breaking_changes" IS 'True if content 
 
 
 COMMENT ON COLUMN "public"."content"."download_url" IS 'Optional download URL for content (e.g., skills ZIP files, PDF exports)';
+
+
+
+COMMENT ON CONSTRAINT "content_author_profile_url_check" ON "public"."content" IS 'Author profile must be valid HTTP(S) URL';
+
+
+
+COMMENT ON CONSTRAINT "content_documentation_url_check" ON "public"."content" IS 'Documentation must be valid HTTP(S) URL';
 
 
 
@@ -10868,6 +10910,7 @@ CREATE TABLE IF NOT EXISTS "public"."email_blocklist" (
     "reason" "text" NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "notes" "text",
+    CONSTRAINT "email_blocklist_email_check" CHECK ((("length"("email") >= 5) AND ("length"("email") <= 254) AND ("email" ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'::"text"))),
     CONSTRAINT "email_blocklist_reason_check" CHECK (("reason" = ANY (ARRAY['spam_complaint'::"text", 'hard_bounce'::"text", 'repeated_soft_bounce'::"text", 'manual'::"text"])))
 );
 
@@ -10876,6 +10919,10 @@ ALTER TABLE "public"."email_blocklist" OWNER TO "postgres";
 
 
 COMMENT ON TABLE "public"."email_blocklist" IS 'Email blocklist - Service role only (contains PII)';
+
+
+
+COMMENT ON CONSTRAINT "email_blocklist_email_check" ON "public"."email_blocklist" IS 'Email must match RFC 5322 format, 5-254 chars';
 
 
 
@@ -10888,6 +10935,7 @@ CREATE TABLE IF NOT EXISTS "public"."email_sequence_schedule" (
     "processed" boolean DEFAULT false NOT NULL,
     "processed_at" timestamp with time zone,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "email_sequence_schedule_email_check" CHECK ((("length"("email") >= 5) AND ("length"("email") <= 254) AND ("email" ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'::"text"))),
     CONSTRAINT "email_sequence_schedule_sequence_id_check" CHECK (("sequence_id" = 'onboarding'::"text")),
     CONSTRAINT "email_sequence_schedule_step_check" CHECK ((("step" >= 1) AND ("step" <= 5))),
     CONSTRAINT "valid_processed" CHECK (((("processed" = true) AND ("processed_at" IS NOT NULL)) OR (("processed" = false) AND ("processed_at" IS NULL))))
@@ -10986,50 +11034,6 @@ CREATE TABLE IF NOT EXISTS "public"."followers" (
 ALTER TABLE "public"."followers" OWNER TO "postgres";
 
 
-CREATE TABLE IF NOT EXISTS "public"."form_field_configs" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "form_type" "text" NOT NULL,
-    "field_group" "text" DEFAULT 'type_specific'::"text" NOT NULL,
-    "display_order" integer DEFAULT 0 NOT NULL,
-    "field_name" "text" NOT NULL,
-    "field_label" "text" NOT NULL,
-    "field_type" "public"."form_field_type" NOT NULL,
-    "required" boolean DEFAULT false NOT NULL,
-    "placeholder" "text",
-    "help_text" "text",
-    "default_value" "text",
-    "grid_column" "public"."form_grid_column" DEFAULT 'full'::"public"."form_grid_column" NOT NULL,
-    "icon_name" "text",
-    "icon_position" "public"."form_icon_position" DEFAULT 'left'::"public"."form_icon_position",
-    "config" "jsonb" DEFAULT '{}'::"jsonb",
-    "enabled" boolean DEFAULT true NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    CONSTRAINT "form_field_configs_display_order_check" CHECK (("display_order" >= 0)),
-    CONSTRAINT "form_field_configs_field_label_check" CHECK ((("length"("field_label") >= 1) AND ("length"("field_label") <= 200))),
-    CONSTRAINT "form_field_configs_field_name_check" CHECK ((("length"("field_name") >= 1) AND ("length"("field_name") <= 100)))
-);
-
-
-ALTER TABLE "public"."form_field_configs" OWNER TO "postgres";
-
-
-COMMENT ON TABLE "public"."form_field_configs" IS 'Form field configuration for dynamic form rendering. Replaces form-field-config.ts.';
-
-
-
-COMMENT ON COLUMN "public"."form_field_configs"."form_type" IS 'Content type: agents, mcp, rules, commands, hooks, statuslines, skills';
-
-
-
-COMMENT ON COLUMN "public"."form_field_configs"."field_group" IS 'Field grouping: common (all forms), type_specific (per form), tags (after type-specific)';
-
-
-
-COMMENT ON COLUMN "public"."form_field_configs"."config" IS 'Type-specific configuration as JSONB (textarea rows, number min/max/step, select options)';
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."form_field_definitions" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "content_type" "public"."content_category",
@@ -11118,6 +11122,7 @@ CREATE TABLE IF NOT EXISTS "public"."github_repo_stats" (
     "last_fetched_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "github_repo_stats_repo_url_check" CHECK (("repo_url" ~ '^https://github\.com/[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$'::"text")),
     CONSTRAINT "valid_repo_format" CHECK ((("repo_owner" ~ '^[a-zA-Z0-9._-]+$'::"text") AND ("repo_name" ~ '^[a-zA-Z0-9._-]+$'::"text"))),
     CONSTRAINT "valid_stars" CHECK (("stars" >= 0))
 );
@@ -11435,81 +11440,6 @@ COMMENT ON COLUMN "public"."notification_dismissals"."dismissed_at" IS 'When the
 
 
 
-CREATE TABLE IF NOT EXISTS "public"."notifications" (
-    "id" "text" NOT NULL,
-    "type" "public"."notification_type" NOT NULL,
-    "priority" "public"."notification_priority" DEFAULT 'medium'::"public"."notification_priority" NOT NULL,
-    "active" boolean DEFAULT true NOT NULL,
-    "expires_at" timestamp with time zone,
-    "title" "text" NOT NULL,
-    "message" "text" NOT NULL,
-    "action_label" "text",
-    "action_href" "text",
-    "action_onclick" "text",
-    "icon" "text",
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    CONSTRAINT "notifications_action_href_check" CHECK ((("action_href" IS NULL) OR ("action_href" ~ '^/'::"text"))),
-    CONSTRAINT "notifications_action_label_check" CHECK ((("action_label" IS NULL) OR ("length"("action_label") <= 50))),
-    CONSTRAINT "notifications_action_onclick_check" CHECK ((("action_onclick" IS NULL) OR ("length"("action_onclick") <= 100))),
-    CONSTRAINT "notifications_icon_check" CHECK ((("icon" IS NULL) OR ("length"("icon") <= 50))),
-    CONSTRAINT "notifications_id_check" CHECK (("id" ~ '^[a-z0-9-]+$'::"text")),
-    CONSTRAINT "notifications_message_check" CHECK ((("length"("message") >= 10) AND ("length"("message") <= 500))),
-    CONSTRAINT "notifications_title_check" CHECK ((("length"("title") >= 5) AND ("length"("title") <= 100)))
-);
-
-
-ALTER TABLE "public"."notifications" OWNER TO "postgres";
-
-
-COMMENT ON TABLE "public"."notifications" IS 'Site-wide notification definitions with scheduling and priority';
-
-
-
-COMMENT ON COLUMN "public"."notifications"."id" IS 'Unique identifier in kebab-case format (e.g., announcement-launch-2025-10)';
-
-
-
-COMMENT ON COLUMN "public"."notifications"."type" IS 'Notification category: announcement, feedback';
-
-
-
-COMMENT ON COLUMN "public"."notifications"."priority" IS 'Display priority when multiple active (high > medium > low)';
-
-
-
-COMMENT ON COLUMN "public"."notifications"."active" IS 'Admin toggle to enable/disable without deleting';
-
-
-
-COMMENT ON COLUMN "public"."notifications"."expires_at" IS 'Notification hidden after this date (null = no expiration)';
-
-
-
-COMMENT ON COLUMN "public"."notifications"."title" IS 'Notification title (5-100 characters, action-oriented)';
-
-
-
-COMMENT ON COLUMN "public"."notifications"."message" IS 'Notification message (10-500 characters, 1-2 sentences max)';
-
-
-
-COMMENT ON COLUMN "public"."notifications"."action_label" IS 'Optional CTA button label';
-
-
-
-COMMENT ON COLUMN "public"."notifications"."action_href" IS 'Optional CTA href (relative URLs only)';
-
-
-
-COMMENT ON COLUMN "public"."notifications"."action_onclick" IS 'Optional CTA onclick handler (function name)';
-
-
-
-COMMENT ON COLUMN "public"."notifications"."icon" IS 'Optional Lucide icon name (e.g., "Sparkles", "MessageSquare")';
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."payments" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "user_id" "uuid",
@@ -11542,7 +11472,8 @@ CREATE TABLE IF NOT EXISTS "public"."posts" (
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     CONSTRAINT "posts_content_length" CHECK ((("content" IS NULL) OR ("length"("content") <= 5000))),
-    CONSTRAINT "posts_title_length" CHECK ((("length"("title") >= 3) AND ("length"("title") <= 300)))
+    CONSTRAINT "posts_title_length" CHECK ((("length"("title") >= 3) AND ("length"("title") <= 300))),
+    CONSTRAINT "posts_url_check" CHECK ((("url" IS NULL) OR ("url" ~ '^https?://[^\s]+$'::"text")))
 );
 
 
@@ -11610,7 +11541,8 @@ CREATE TABLE IF NOT EXISTS "public"."quiz_options" (
     "description" "text",
     "display_order" integer NOT NULL,
     "icon_name" "text",
-    "created_at" timestamp with time zone DEFAULT "now"()
+    "created_at" timestamp with time zone DEFAULT "now"(),
+    CONSTRAINT "quiz_options_icon_name_check" CHECK ((("icon_name" IS NULL) OR (("length"("icon_name") >= 1) AND ("length"("icon_name") <= 50))))
 );
 
 
@@ -11970,7 +11902,15 @@ CREATE TABLE IF NOT EXISTS "public"."static_routes" (
     "is_active" boolean DEFAULT true NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    CONSTRAINT "static_routes_group_name_check" CHECK (("group_name" = ANY (ARRAY['primary'::"text", 'secondary'::"text", 'actions'::"text"])))
+    "og_image" "text",
+    "canonical_url" "text",
+    "og_type" "text" DEFAULT 'website'::"text",
+    "twitter_card" "text" DEFAULT 'summary_large_image'::"text",
+    "robots_index" boolean DEFAULT true,
+    "robots_follow" boolean DEFAULT true,
+    "json_ld" "jsonb",
+    CONSTRAINT "static_routes_group_name_check" CHECK (("group_name" = ANY (ARRAY['primary'::"text", 'secondary'::"text", 'actions'::"text"]))),
+    CONSTRAINT "static_routes_icon_name_check" CHECK ((("length"("icon_name") >= 1) AND ("length"("icon_name") <= 50)))
 );
 
 
@@ -12027,6 +11967,7 @@ CREATE TABLE IF NOT EXISTS "public"."submissions" (
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "merged_at" timestamp with time zone,
     CONSTRAINT "submissions_content_type_check" CHECK (("content_type" = ANY (ARRAY['agents'::"text", 'mcp'::"text", 'rules'::"text", 'commands'::"text", 'hooks'::"text", 'statuslines'::"text"]))),
+    CONSTRAINT "submissions_pr_url_check" CHECK ((("pr_url" IS NULL) OR ("pr_url" ~ '^https://github\.com/.+/pull/[0-9]+$'::"text"))),
     CONSTRAINT "submissions_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'approved'::"text", 'rejected'::"text", 'merged'::"text"])))
 );
 
@@ -12349,11 +12290,42 @@ CREATE TABLE IF NOT EXISTS "public"."user_badges" (
     "badge_id" "uuid" NOT NULL,
     "earned_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "metadata" "jsonb",
-    "featured" boolean DEFAULT false
+    "featured" boolean DEFAULT false,
+    "badge_details" "jsonb"
 );
 
 
 ALTER TABLE "public"."user_badges" OWNER TO "postgres";
+
+
+COMMENT ON COLUMN "public"."user_badges"."badge_details" IS 'Denormalized badge data for zero-query Realtime notifications. Auto-populated by trigger on INSERT.';
+
+
+
+CREATE OR REPLACE VIEW "public"."user_badges_with_details" AS
+ SELECT "ub"."id",
+    "ub"."user_id",
+    "ub"."badge_id",
+    "ub"."earned_at",
+    "ub"."metadata",
+    "ub"."featured",
+    "b"."slug",
+    "b"."name",
+    "b"."description",
+    "b"."icon",
+    "b"."category",
+    "b"."rarity",
+    "b"."tier_required",
+    "b"."order" AS "badge_order"
+   FROM ("public"."user_badges" "ub"
+     JOIN "public"."badges" "b" ON (("ub"."badge_id" = "b"."id")));
+
+
+ALTER VIEW "public"."user_badges_with_details" OWNER TO "postgres";
+
+
+COMMENT ON VIEW "public"."user_badges_with_details" IS 'Enriched user badges with complete badge details for Realtime notifications. Eliminates N+1 queries by joining badge data at database level.';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."user_collections" (
@@ -12394,51 +12366,6 @@ COMMENT ON CONSTRAINT "user_collections_name_length" ON "public"."user_collectio
 
 COMMENT ON CONSTRAINT "user_collections_slug_pattern" ON "public"."user_collections" IS 'Enforces slug format: 2-100 chars, lowercase letters, numbers, hyphens only';
 
-
-
-CREATE TABLE IF NOT EXISTS "public"."user_content" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "user_id" "uuid" NOT NULL,
-    "content_type" "text" NOT NULL,
-    "slug" "text" NOT NULL,
-    "name" "text" NOT NULL,
-    "description" "text" NOT NULL,
-    "content" "jsonb" NOT NULL,
-    "tags" "jsonb" DEFAULT '[]'::"jsonb",
-    "plan" "text" DEFAULT 'standard'::"text" NOT NULL,
-    "active" boolean DEFAULT false,
-    "featured" boolean DEFAULT false,
-    "view_count" integer DEFAULT 0,
-    "download_count" integer DEFAULT 0,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
-);
-
-
-ALTER TABLE "public"."user_content" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."user_mcps" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "user_id" "uuid" NOT NULL,
-    "company_id" "uuid",
-    "slug" "text" NOT NULL,
-    "name" "text" NOT NULL,
-    "description" "text" NOT NULL,
-    "logo" "text",
-    "link" "text" NOT NULL,
-    "mcp_link" "text",
-    "plan" "text" DEFAULT 'standard'::"text" NOT NULL,
-    "active" boolean DEFAULT false,
-    "order" integer DEFAULT 0,
-    "view_count" integer DEFAULT 0,
-    "click_count" integer DEFAULT 0,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
-);
-
-
-ALTER TABLE "public"."user_mcps" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."user_similarities" (
@@ -12670,16 +12597,6 @@ ALTER TABLE ONLY "public"."changelog_entries"
 
 
 
-ALTER TABLE ONLY "public"."changelog"
-    ADD CONSTRAINT "changelog_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."changelog"
-    ADD CONSTRAINT "changelog_slug_key" UNIQUE ("slug");
-
-
-
 ALTER TABLE ONLY "public"."collection_items"
     ADD CONSTRAINT "collection_items_collection_id_content_type_content_slug_key" UNIQUE ("collection_id", "content_type", "content_slug");
 
@@ -12796,16 +12713,6 @@ ALTER TABLE ONLY "public"."followers"
 
 ALTER TABLE ONLY "public"."followers"
     ADD CONSTRAINT "followers_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."form_field_configs"
-    ADD CONSTRAINT "form_field_configs_form_type_field_name_key" UNIQUE ("form_type", "field_name");
-
-
-
-ALTER TABLE ONLY "public"."form_field_configs"
-    ADD CONSTRAINT "form_field_configs_pkey" PRIMARY KEY ("id");
 
 
 
@@ -13074,28 +12981,8 @@ ALTER TABLE ONLY "public"."user_collections"
 
 
 
-ALTER TABLE ONLY "public"."user_content"
-    ADD CONSTRAINT "user_content_content_type_slug_key" UNIQUE ("content_type", "slug");
-
-
-
-ALTER TABLE ONLY "public"."user_content"
-    ADD CONSTRAINT "user_content_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."user_interactions"
     ADD CONSTRAINT "user_interactions_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."user_mcps"
-    ADD CONSTRAINT "user_mcps_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."user_mcps"
-    ADD CONSTRAINT "user_mcps_slug_key" UNIQUE ("slug");
 
 
 
@@ -13200,6 +13087,10 @@ CREATE INDEX "idx_badges_category" ON "public"."badges" USING "btree" ("category
 
 
 
+CREATE INDEX "idx_badges_name_trgm" ON "public"."badges" USING "gin" ("name" "public"."gin_trgm_ops");
+
+
+
 CREATE INDEX "idx_badges_rarity" ON "public"."badges" USING "btree" ("rarity");
 
 
@@ -13276,18 +13167,6 @@ CREATE INDEX "idx_changelog_changes_entry_id" ON "public"."changelog_changes" US
 
 
 
-CREATE INDEX "idx_changelog_content_fts" ON "public"."changelog" USING "gin" ("to_tsvector"('"english"'::"regconfig", (("title" || ' '::"text") || "description")));
-
-
-
-CREATE INDEX "idx_changelog_date_added" ON "public"."changelog" USING "btree" ("date_added" DESC);
-
-
-
-CREATE INDEX "idx_changelog_date_published" ON "public"."changelog" USING "btree" ("date_published" DESC NULLS LAST);
-
-
-
 CREATE INDEX "idx_changelog_entries_changes" ON "public"."changelog_entries" USING "gin" ("changes");
 
 
@@ -13313,22 +13192,6 @@ COMMENT ON INDEX "public"."idx_changelog_entries_published_featured" IS 'Changel
 
 
 CREATE INDEX "idx_changelog_entries_search" ON "public"."changelog_entries" USING "gin" ("to_tsvector"('"english"'::"regconfig", (("title" || ' '::"text") || "content")));
-
-
-
-CREATE INDEX "idx_changelog_featured" ON "public"."changelog" USING "btree" ("featured") WHERE ("featured" = true);
-
-
-
-CREATE INDEX "idx_changelog_git_tag" ON "public"."changelog" USING "btree" ("git_tag") WHERE ("git_tag" IS NOT NULL);
-
-
-
-CREATE INDEX "idx_changelog_tags" ON "public"."changelog" USING "gin" ("tags");
-
-
-
-CREATE INDEX "idx_changelog_version" ON "public"."changelog" USING "btree" ("version") WHERE ("version" IS NOT NULL);
 
 
 
@@ -13412,6 +13275,10 @@ CREATE INDEX "idx_content_created_at" ON "public"."content" USING "btree" ("crea
 
 
 
+CREATE INDEX "idx_content_description_trgm" ON "public"."content" USING "gin" ("description" "public"."gin_trgm_ops");
+
+
+
 CREATE INDEX "idx_content_difficulty_score" ON "public"."content" USING "btree" ("difficulty_score") WHERE ("difficulty_score" > 0);
 
 
@@ -13420,11 +13287,27 @@ COMMENT ON INDEX "public"."idx_content_difficulty_score" IS 'Index for filtering
 
 
 
+CREATE INDEX "idx_content_discovery_metadata_gin" ON "public"."content" USING "gin" ("discovery_metadata");
+
+
+
+COMMENT ON INDEX "public"."idx_content_discovery_metadata_gin" IS 'GIN index for trending/discovery metadata filtering';
+
+
+
 CREATE INDEX "idx_content_download_url" ON "public"."content" USING "btree" ("download_url") WHERE ("download_url" IS NOT NULL);
 
 
 
 CREATE INDEX "idx_content_downloads" ON "public"."content" USING "btree" ("category", "download_count" DESC) WHERE ("category" = 'skills'::"text");
+
+
+
+CREATE INDEX "idx_content_examples_gin" ON "public"."content" USING "gin" ("examples");
+
+
+
+COMMENT ON INDEX "public"."idx_content_examples_gin" IS 'GIN index for fast code example searches using @> containment operator';
 
 
 
@@ -13489,6 +13372,14 @@ CREATE INDEX "idx_content_homepage" ON "public"."content" USING "btree" ("catego
 
 
 CREATE INDEX "idx_content_metadata" ON "public"."content" USING "gin" ("metadata");
+
+
+
+CREATE INDEX "idx_content_metadata_gin" ON "public"."content" USING "gin" ("metadata");
+
+
+
+COMMENT ON INDEX "public"."idx_content_metadata_gin" IS 'GIN index for general metadata key existence (?) and containment (@>) queries';
 
 
 
@@ -13580,6 +13471,10 @@ CREATE INDEX "idx_content_tags" ON "public"."content" USING "gin" ("tags");
 
 
 
+CREATE INDEX "idx_content_title_trgm" ON "public"."content" USING "gin" ("title" "public"."gin_trgm_ops");
+
+
+
 CREATE INDEX "idx_email_sequence_schedule_due" ON "public"."email_sequence_schedule" USING "btree" ("due_at") WHERE ("processed" = false);
 
 
@@ -13636,18 +13531,6 @@ CREATE INDEX "idx_followers_following_id" ON "public"."followers" USING "btree" 
 
 
 
-CREATE INDEX "idx_form_field_configs_display_order" ON "public"."form_field_configs" USING "btree" ("form_type", "display_order");
-
-
-
-CREATE INDEX "idx_form_field_configs_enabled" ON "public"."form_field_configs" USING "btree" ("enabled") WHERE ("enabled" = true);
-
-
-
-CREATE INDEX "idx_form_field_configs_form_type" ON "public"."form_field_configs" USING "btree" ("form_type");
-
-
-
 CREATE INDEX "idx_form_field_definitions_created_by" ON "public"."form_field_definitions" USING "btree" ("created_by");
 
 
@@ -13696,7 +13579,19 @@ CREATE INDEX "idx_jobs_active_posted_at" ON "public"."jobs" USING "btree" ("acti
 
 
 
+CREATE INDEX "idx_jobs_benefits_gin" ON "public"."jobs" USING "gin" ("benefits");
+
+
+
+COMMENT ON INDEX "public"."idx_jobs_benefits_gin" IS 'GIN index for searching jobs by benefits offered';
+
+
+
 CREATE INDEX "idx_jobs_company_id" ON "public"."jobs" USING "btree" ("company_id");
+
+
+
+CREATE INDEX "idx_jobs_description_trgm" ON "public"."jobs" USING "gin" ("description" "public"."gin_trgm_ops");
 
 
 
@@ -13716,7 +13611,11 @@ CREATE INDEX "idx_jobs_plan" ON "public"."jobs" USING "btree" ("plan");
 
 
 
-CREATE INDEX "idx_jobs_search_vector" ON "public"."jobs" USING "gin" ("search_vector");
+CREATE INDEX "idx_jobs_requirements_gin" ON "public"."jobs" USING "gin" ("requirements");
+
+
+
+COMMENT ON INDEX "public"."idx_jobs_requirements_gin" IS 'GIN index for filtering jobs by skill requirements';
 
 
 
@@ -14144,6 +14043,14 @@ CREATE INDEX "idx_user_badges_featured" ON "public"."user_badges" USING "btree" 
 
 
 
+CREATE INDEX "idx_user_badges_user_earned" ON "public"."user_badges" USING "btree" ("user_id", "earned_at" DESC);
+
+
+
+COMMENT ON INDEX "public"."idx_user_badges_user_earned" IS 'Optimizes Realtime queries filtering by user_id and sorting by earned_at DESC for recent badge notifications.';
+
+
+
 CREATE INDEX "idx_user_badges_user_featured_earned" ON "public"."user_badges" USING "btree" ("user_id", "featured", "earned_at" DESC) WHERE ("featured" = true);
 
 
@@ -14168,18 +14075,6 @@ CREATE INDEX "idx_user_collections_view_count" ON "public"."user_collections" US
 
 
 
-CREATE INDEX "idx_user_content_active" ON "public"."user_content" USING "btree" ("active") WHERE ("active" = true);
-
-
-
-CREATE INDEX "idx_user_content_type" ON "public"."user_content" USING "btree" ("content_type");
-
-
-
-CREATE INDEX "idx_user_content_user_id" ON "public"."user_content" USING "btree" ("user_id");
-
-
-
 CREATE INDEX "idx_user_interactions_affinity_lookup" ON "public"."user_interactions" USING "btree" ("user_id", "content_type", "content_slug", "interaction_type") WHERE ("interaction_type" = ANY (ARRAY['view'::"text", 'bookmark'::"text", 'copy'::"text", 'time_spent'::"text"]));
 
 
@@ -14193,6 +14088,14 @@ CREATE INDEX "idx_user_interactions_content" ON "public"."user_interactions" USI
 
 
 CREATE INDEX "idx_user_interactions_created" ON "public"."user_interactions" USING "btree" ("created_at" DESC);
+
+
+
+CREATE INDEX "idx_user_interactions_metadata_gin" ON "public"."user_interactions" USING "gin" ("metadata");
+
+
+
+COMMENT ON INDEX "public"."idx_user_interactions_metadata_gin" IS 'GIN index for analytics queries on interaction metadata';
 
 
 
@@ -14229,26 +14132,6 @@ CREATE INDEX "idx_user_interactions_user_timeline" ON "public"."user_interaction
 
 
 COMMENT ON INDEX "public"."idx_user_interactions_user_timeline" IS 'User activity timeline sorted by recency. Optimizes per-user interaction queries.';
-
-
-
-CREATE INDEX "idx_user_mcps_active" ON "public"."user_mcps" USING "btree" ("active") WHERE ("active" = true);
-
-
-
-CREATE INDEX "idx_user_mcps_company_id" ON "public"."user_mcps" USING "btree" ("company_id");
-
-
-
-CREATE INDEX "idx_user_mcps_plan" ON "public"."user_mcps" USING "btree" ("plan");
-
-
-
-CREATE INDEX "idx_user_mcps_slug" ON "public"."user_mcps" USING "btree" ("slug");
-
-
-
-CREATE INDEX "idx_user_mcps_user_id" ON "public"."user_mcps" USING "btree" ("user_id");
 
 
 
@@ -14360,6 +14243,14 @@ CREATE INDEX "idx_webhook_events_data" ON "public"."webhook_events" USING "gin" 
 
 
 
+CREATE INDEX "idx_webhook_events_data_gin" ON "public"."webhook_events" USING "gin" ("data");
+
+
+
+COMMENT ON INDEX "public"."idx_webhook_events_data_gin" IS 'GIN index for email routing in RLS policies (performance-critical)';
+
+
+
 CREATE INDEX "idx_webhook_events_next_retry" ON "public"."webhook_events" USING "btree" ("next_retry_at") WHERE ("next_retry_at" IS NOT NULL);
 
 
@@ -14369,6 +14260,10 @@ CREATE INDEX "idx_webhook_events_processed" ON "public"."webhook_events" USING "
 
 
 CREATE INDEX "idx_webhook_events_type" ON "public"."webhook_events" USING "btree" ("type");
+
+
+
+CREATE INDEX "jobs_search_vector_idx" ON "public"."jobs" USING "gin" ("search_vector");
 
 
 
@@ -14456,11 +14351,11 @@ CREATE OR REPLACE TRIGGER "generate_user_collections_slug" BEFORE INSERT OR UPDA
 
 
 
-CREATE OR REPLACE TRIGGER "generate_user_mcp_slug" BEFORE INSERT ON "public"."user_mcps" FOR EACH ROW EXECUTE FUNCTION "public"."generate_slug_from_name"();
-
-
-
 CREATE OR REPLACE TRIGGER "generate_users_slug" BEFORE INSERT OR UPDATE ON "public"."users" FOR EACH ROW EXECUTE FUNCTION "public"."generate_user_slug"();
+
+
+
+CREATE OR REPLACE TRIGGER "jobs_search_vector_update" BEFORE INSERT OR UPDATE ON "public"."jobs" FOR EACH ROW EXECUTE FUNCTION "public"."update_jobs_search_vector"();
 
 
 
@@ -14485,6 +14380,10 @@ CREATE OR REPLACE TRIGGER "tier_display_config_updated_at" BEFORE UPDATE ON "pub
 
 
 CREATE OR REPLACE TRIGGER "trigger_check_badges_on_reputation" AFTER UPDATE OF "reputation_score" ON "public"."users" FOR EACH ROW WHEN (("old"."reputation_score" IS DISTINCT FROM "new"."reputation_score")) EXECUTE FUNCTION "public"."check_badges_after_reputation"();
+
+
+
+CREATE OR REPLACE TRIGGER "trigger_populate_badge_details" BEFORE INSERT ON "public"."user_badges" FOR EACH ROW EXECUTE FUNCTION "public"."populate_badge_details"();
 
 
 
@@ -14549,10 +14448,6 @@ CREATE OR REPLACE TRIGGER "update_category_features_updated_at" BEFORE UPDATE ON
 
 
 CREATE OR REPLACE TRIGGER "update_changelog_entries_updated_at" BEFORE UPDATE ON "public"."changelog_entries" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
-
-
-
-CREATE OR REPLACE TRIGGER "update_changelog_updated_at" BEFORE UPDATE ON "public"."changelog" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
 
 
 
@@ -14653,14 +14548,6 @@ CREATE OR REPLACE TRIGGER "update_subscriptions_updated_at" BEFORE UPDATE ON "pu
 
 
 CREATE OR REPLACE TRIGGER "update_user_collections_updated_at" BEFORE UPDATE ON "public"."user_collections" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
-
-
-
-CREATE OR REPLACE TRIGGER "update_user_content_updated_at" BEFORE UPDATE ON "public"."user_content" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
-
-
-
-CREATE OR REPLACE TRIGGER "update_user_mcps_updated_at" BEFORE UPDATE ON "public"."user_mcps" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
 
 
 
@@ -14895,23 +14782,8 @@ ALTER TABLE ONLY "public"."user_collections"
 
 
 
-ALTER TABLE ONLY "public"."user_content"
-    ADD CONSTRAINT "user_content_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."user_interactions"
     ADD CONSTRAINT "user_interactions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."user_mcps"
-    ADD CONSTRAINT "user_mcps_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE SET NULL;
-
-
-
-ALTER TABLE ONLY "public"."user_mcps"
-    ADD CONSTRAINT "user_mcps_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
 
 
 
@@ -14940,19 +14812,11 @@ ALTER TABLE ONLY "public"."votes"
 
 
 
-CREATE POLICY "Active MCPs are viewable by everyone" ON "public"."user_mcps" FOR SELECT USING ((("active" = true) OR (( SELECT "auth"."uid"() AS "uid") = "user_id")));
-
-
-
 CREATE POLICY "Active jobs are viewable by everyone" ON "public"."jobs" FOR SELECT USING ((("status" = 'active'::"text") OR (( SELECT "auth"."uid"() AS "uid") = "user_id")));
 
 
 
 CREATE POLICY "Active sponsored content is viewable by everyone" ON "public"."sponsored_content" FOR SELECT USING ((("active" = true) OR (( SELECT "auth"."uid"() AS "uid") = "user_id")));
-
-
-
-CREATE POLICY "Active user content is viewable by everyone" ON "public"."user_content" FOR SELECT USING ((("active" = true) OR (( SELECT "auth"."uid"() AS "uid") = "user_id")));
 
 
 
@@ -15056,10 +14920,6 @@ CREATE POLICY "Company owners can update their companies" ON "public"."companies
 
 
 
-CREATE POLICY "Content is publicly readable" ON "public"."changelog" FOR SELECT TO "authenticated", "anon" USING (true);
-
-
-
 CREATE POLICY "Content similarities are viewable by everyone" ON "public"."content_similarities" FOR SELECT USING (true);
 
 
@@ -15069,10 +14929,6 @@ CREATE POLICY "Featured configs are viewable by everyone" ON "public"."featured_
 
 
 CREATE POLICY "Followers are viewable by everyone" ON "public"."followers" FOR SELECT USING (true);
-
-
-
-CREATE POLICY "Form field configs are viewable by everyone" ON "public"."form_field_configs" FOR SELECT USING (("enabled" = true));
 
 
 
@@ -15226,10 +15082,6 @@ CREATE POLICY "Service role has full access to featured configs" ON "public"."fe
 
 
 
-CREATE POLICY "Service role has full access to form configs" ON "public"."form_field_configs" TO "service_role" USING (true) WITH CHECK (true);
-
-
-
 CREATE POLICY "Service role has full access to helpful votes" ON "public"."review_helpful_votes" TO "service_role" USING (true) WITH CHECK (true);
 
 
@@ -15276,15 +15128,7 @@ CREATE POLICY "Users can add items to their collections" ON "public"."collection
 
 
 
-CREATE POLICY "Users can create MCPs" ON "public"."user_mcps" FOR INSERT WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
-
-
-
 CREATE POLICY "Users can create companies" ON "public"."companies" FOR INSERT WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "owner_id"));
-
-
-
-CREATE POLICY "Users can create content" ON "public"."user_content" FOR INSERT WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 
@@ -15388,19 +15232,11 @@ CREATE POLICY "Users can update own profile" ON "public"."profiles" FOR UPDATE U
 
 
 
-CREATE POLICY "Users can update their own MCPs" ON "public"."user_mcps" FOR UPDATE USING ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
-
-
-
 CREATE POLICY "Users can update their own collections" ON "public"."user_collections" FOR UPDATE USING ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 
 CREATE POLICY "Users can update their own comments" ON "public"."comments" FOR UPDATE USING ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
-
-
-
-CREATE POLICY "Users can update their own content" ON "public"."user_content" FOR UPDATE USING ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 
@@ -15514,9 +15350,6 @@ ALTER TABLE "public"."category_configs" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."category_features" ENABLE ROW LEVEL SECURITY;
 
 
-ALTER TABLE "public"."changelog" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."changelog_changes" ENABLE ROW LEVEL SECURITY;
 
 
@@ -15622,9 +15455,6 @@ ALTER TABLE "public"."featured_configs" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."followers" ENABLE ROW LEVEL SECURITY;
 
 
-ALTER TABLE "public"."form_field_configs" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."form_field_definitions" ENABLE ROW LEVEL SECURITY;
 
 
@@ -15727,13 +15557,7 @@ ALTER TABLE "public"."user_badges" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."user_collections" ENABLE ROW LEVEL SECURITY;
 
 
-ALTER TABLE "public"."user_content" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."user_interactions" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."user_mcps" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."user_similarities" ENABLE ROW LEVEL SECURITY;
@@ -15751,6 +15575,18 @@ ALTER TABLE "public"."webhook_events" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
+
+
+ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."notifications";
+
+
+
+ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."posts";
+
+
+
+ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."user_badges";
+
 
 
 
@@ -16141,18 +15977,6 @@ GRANT ALL ON FUNCTION "public"."get_featured_jobs"() TO "authenticated";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_form_field_config"("p_form_type" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_form_field_config"("p_form_type" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_form_field_config"("p_form_type" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_form_fields_grouped"("p_form_type" "text") TO "service_role";
-
-
-
 GRANT ALL ON FUNCTION "public"."get_homepage_content_enriched"("p_category_ids" "text"[], "p_week_start" "date") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_homepage_content_enriched"("p_category_ids" "text"[], "p_week_start" "date") TO "authenticated";
 
@@ -16368,11 +16192,6 @@ GRANT ALL ON FUNCTION "public"."search_companies"("search_query" "text", "result
 
 
 
-GRANT ALL ON FUNCTION "public"."search_content_optimized"("p_query" "text", "p_categories" "text"[], "p_tags" "text"[], "p_authors" "text"[], "p_sort" "text", "p_limit" integer, "p_offset" integer) TO "anon";
-GRANT ALL ON FUNCTION "public"."search_content_optimized"("p_query" "text", "p_categories" "text"[], "p_tags" "text"[], "p_authors" "text"[], "p_sort" "text", "p_limit" integer, "p_offset" integer) TO "authenticated";
-
-
-
 GRANT ALL ON FUNCTION "public"."search_jobs"("search_query" "text", "result_limit" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."search_jobs"("search_query" "text", "result_limit" integer) TO "anon";
 
@@ -16452,12 +16271,6 @@ GRANT SELECT ON TABLE "public"."category_configs" TO "anon";
 
 
 
-GRANT ALL ON TABLE "public"."changelog" TO "service_role";
-GRANT SELECT ON TABLE "public"."changelog" TO "anon";
-GRANT SELECT ON TABLE "public"."changelog" TO "authenticated";
-
-
-
 GRANT ALL ON TABLE "public"."changelog_changes" TO "service_role";
 
 
@@ -16519,12 +16332,6 @@ GRANT SELECT ON TABLE "public"."featured_configs" TO "anon";
 
 GRANT SELECT,INSERT,DELETE ON TABLE "public"."followers" TO "authenticated";
 GRANT SELECT ON TABLE "public"."followers" TO "anon";
-
-
-
-GRANT SELECT ON TABLE "public"."form_field_configs" TO "anon";
-GRANT SELECT ON TABLE "public"."form_field_configs" TO "authenticated";
-GRANT ALL ON TABLE "public"."form_field_configs" TO "service_role";
 
 
 
@@ -16683,16 +16490,6 @@ GRANT SELECT ON TABLE "public"."user_badges" TO "anon";
 
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE "public"."user_collections" TO "authenticated";
 GRANT SELECT ON TABLE "public"."user_collections" TO "anon";
-
-
-
-GRANT SELECT,INSERT,UPDATE ON TABLE "public"."user_content" TO "authenticated";
-GRANT SELECT ON TABLE "public"."user_content" TO "anon";
-
-
-
-GRANT SELECT,INSERT,UPDATE ON TABLE "public"."user_mcps" TO "authenticated";
-GRANT SELECT ON TABLE "public"."user_mcps" TO "anon";
 
 
 

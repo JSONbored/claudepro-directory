@@ -117,6 +117,15 @@ const serverEnvSchema = z
       .optional()
       .describe('Secret key for cron job authorization (minimum 32 characters)'),
 
+    // ISR revalidation security
+    REVALIDATE_SECRET: z
+      .string()
+      .min(32)
+      .optional()
+      .describe(
+        'Secret key for on-demand ISR revalidation from Supabase webhooks (minimum 32 characters)'
+      ),
+
     // BetterStack Heartbeat Monitoring (optional - for cron job health monitoring)
     BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE: urlString
       .optional()

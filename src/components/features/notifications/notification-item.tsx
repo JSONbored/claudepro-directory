@@ -1,17 +1,5 @@
 /**
- * Notification Item Component
- *
- * Individual notification card displayed in sheet/list.
- * Shows title, message, action button, and dismiss control.
- *
- * Features:
- * - Motion.dev hover animations
- * - Icon rendering (dynamic lucide icons)
- * - Action button (link or custom handler)
- * - Dismiss button with confirmation
- * - Responsive layout
- *
- * @module components/features/notifications/notification-item
+ * Notification Item - Individual notification card with actions
  */
 
 'use client';
@@ -33,10 +21,6 @@ interface NotificationItemProps {
 export function NotificationItem({ notification }: NotificationItemProps) {
   const dismiss = useNotificationStore((state: NotificationStore) => state.dismiss);
   const closeSheet = useNotificationStore((state: NotificationStore) => state.closeSheet);
-
-  // Icon rendering - notification.icon is string name, would need dynamic import
-  // For now, always use Bell - TODO: implement dynamic icon loading
-  const Icon = Bell;
 
   const handleDismiss = () => {
     dismiss(notification.id);
@@ -64,7 +48,6 @@ export function NotificationItem({ notification }: NotificationItemProps) {
         transition-shadow duration-200
       `}
     >
-      {/* Dismiss Button */}
       <button
         type="button"
         onClick={handleDismiss}
@@ -83,12 +66,9 @@ export function NotificationItem({ notification }: NotificationItemProps) {
         <X className="h-4 w-4" />
       </button>
 
-      {/* Content */}
       <div className="flex gap-3 pr-6">
-        {/* Icon */}
-        {Icon && (
-          <div
-            className={`
+        <div
+          className={`
             flex-shrink-0
             h-10 w-10
             rounded-full
@@ -99,17 +79,14 @@ export function NotificationItem({ notification }: NotificationItemProps) {
                 : 'bg-accent/10 text-accent'
             }
           `}
-          >
-            <Icon className="h-5 w-5" />
-          </div>
-        )}
+        >
+          <Bell className="h-5 w-5" />
+        </div>
 
-        {/* Text Content */}
         <div className="flex-1 space-y-1">
           <h4 className="font-medium text-sm text-foreground">{notification.title}</h4>
           <p className="text-xs text-muted-foreground leading-relaxed">{notification.message}</p>
 
-          {/* Action Button */}
           {notification.action_label && (
             <div className="pt-2">
               {notification.action_href ? (

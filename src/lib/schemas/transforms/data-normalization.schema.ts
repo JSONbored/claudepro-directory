@@ -23,7 +23,7 @@ import {
   publicReviewRatingsInsertSchema,
   publicUserCollectionsInsertSchema,
 } from '@/src/lib/schemas/generated/db-schemas';
-import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives';
+import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import {
   normalizeString,
   trimOptionalString,
@@ -176,6 +176,7 @@ export const getReviewsSchema = z.object({
 /**
  * Create post (client-side input)
  * Business rule: Must have either content or URL
+ * Database CHECK constraint validates URL format
  */
 export const createPostSchema = z
   .object({
@@ -185,7 +186,7 @@ export const createPostSchema = z
       .max(5000, 'Content must be less than 5000 characters')
       .nullable()
       .optional(),
-    url: urlString.nullable().optional(),
+    url: z.string().nullable().optional(),
   })
   .refine((data) => data.content || data.url, {
     message: 'Post must have either content or a URL',

@@ -6,6 +6,7 @@
 import type { MetadataContext } from '@/src/lib/seo/metadata-registry';
 import type { RoutePattern } from '@/src/lib/seo/route-classifier';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
+import type { Tables } from '@/src/types/database.types';
 
 export interface MetadataConfig {
   title: string;
@@ -31,6 +32,10 @@ export async function generateMetadataFromDB(
 ): Promise<MetadataConfig> {
   const supabase = createAnonClient();
 
+  // Step 1: Check for database-stored SEO fields
+  const dbSeoFields = await fetchDatabaseSEOFields(supabase, pattern, context, route);
+
+  // Step 2: Generate metadata from RPC (for fallback and baseline)
   const contextPayload = {
     plural_title: context.categoryConfig?.pluralTitle,
     kw1: context.categoryConfig?.keywords?.split(',')[0]?.trim(),
@@ -46,7 +51,7 @@ export async function generateMetadataFromDB(
     item: context.item,
   };
 
-  const { data, error } = await supabase.rpc(
+  const { data } = await supabase.rpc(
     'generate_metadata_for_route',
     route
       ? {
@@ -60,17 +65,91 @@ export async function generateMetadataFromDB(
         }
   );
 
-  if (error || !data) {
+  const fallbackData: MetadataConfig = {
+    title: 'Claude Pro Directory - Browse AI Resources',
+    description: 'Browse Claude AI configurations and resources.',
+    keywords: ['claude', 'ai', new Date().getFullYear().toString()],
+    openGraphType: 'website',
+    twitterCard: 'summary_large_image',
+    robots: { index: true, follow: true },
+    shouldAddLlmsTxt: false,
+  };
+
+  const rpcData = (data as unknown as MetadataConfig) || fallbackData;
+
+  // Step 3: Merge database SEO fields with RPC-generated metadata (database takes priority)
+  if (dbSeoFields) {
     return {
-      title: 'Claude Pro Directory - Browse AI Resources',
-      description: 'Browse Claude AI configurations and resources.',
-      keywords: ['claude', 'ai', new Date().getFullYear().toString()],
-      openGraphType: 'website',
-      twitterCard: 'summary_large_image',
-      robots: { index: true, follow: true },
-      shouldAddLlmsTxt: false,
+      ...rpcData,
+      ...(dbSeoFields.title && { title: dbSeoFields.title }),
+      ...(dbSeoFields.description && { description: dbSeoFields.description }),
+      ...(dbSeoFields.og_type && { openGraphType: dbSeoFields.og_type as 'website' | 'article' }),
+      ...(dbSeoFields.twitter_card && {
+        twitterCard: dbSeoFields.twitter_card as 'summary_large_image',
+      }),
+      ...(dbSeoFields.robots_index !== null &&
+        dbSeoFields.robots_follow !== null && {
+          robots: {
+            index: dbSeoFields.robots_index,
+            follow: dbSeoFields.robots_follow,
+          },
+        }),
     };
   }
 
-  return data as unknown as MetadataConfig;
+  return rpcData;
+}
+
+type SEOFields = Pick<
+  Tables<'content'> | Tables<'changelog_entries'> | Tables<'static_routes'>,
+  | 'title'
+  | 'description'
+  | 'og_type'
+  | 'twitter_card'
+  | 'robots_index'
+  | 'robots_follow'
+  | 'json_ld'
+>;
+
+async function fetchDatabaseSEOFields(
+  supabase: ReturnType<typeof createAnonClient>,
+  pattern: RoutePattern,
+  context: MetadataContext,
+  route?: string
+): Promise<SEOFields | null> {
+  const category = context.params?.category as string;
+  const slug = context.params?.slug as string;
+
+  // Match route pattern to table query
+  if (pattern === 'CONTENT_DETAIL' && category && slug) {
+    const { data } = await supabase
+      .from('content')
+      .select('title, description, og_type, twitter_card, robots_index, robots_follow, json_ld')
+      .eq('category', category)
+      .eq('slug', slug)
+      .maybeSingle();
+    return data;
+  }
+
+  // Changelog routes: check if route starts with /changelog/
+  if (route?.startsWith('/changelog/') && slug) {
+    const { data } = await supabase
+      .from('changelog_entries')
+      .select('title, description, og_type, twitter_card, robots_index, robots_follow, json_ld')
+      .eq('slug', slug)
+      .maybeSingle();
+    return data;
+  }
+
+  // Static routes: check static_routes table
+  if (route) {
+    const { data } = await supabase
+      .from('static_routes')
+      .select('title, description, og_type, twitter_card, robots_index, robots_follow, json_ld')
+      .eq('path', route)
+      .maybeSingle();
+    return data;
+  }
+
+  return null;
 }

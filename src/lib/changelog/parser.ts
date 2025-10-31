@@ -117,6 +117,13 @@ function parseEntry(
     featured: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
+    og_image: null,
+    canonical_url: null,
+    og_type: null,
+    twitter_card: null,
+    robots_index: null,
+    robots_follow: null,
+    json_ld: null,
   };
 
   return entry;
