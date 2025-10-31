@@ -120,3 +120,5 @@ redis-export.json
 scripts/import-redis-seed-data.ts
 
 scripts/redis-export.ts
+
+.skill-packages-hash-cache

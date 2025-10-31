@@ -46,10 +46,7 @@ async function getAllContentSlugs(): Promise<Map<string, string[]>> {
   return byCategory;
 }
 
-async function verifyEndpoint(
-  category: string,
-  slug: string
-): Promise<VerificationResult> {
+async function verifyEndpoint(category: string, slug: string): Promise<VerificationResult> {
   const result: VerificationResult = {
     category,
     slug,
@@ -71,14 +68,7 @@ async function verifyEndpoint(
     const data = await response.json();
 
     // Required fields for all categories
-    const requiredFields = [
-      'slug',
-      'title',
-      'description',
-      'author',
-      'date_added',
-      'tags',
-    ];
+    const requiredFields = ['slug', 'title', 'description', 'author', 'date_added', 'tags'];
 
     // Check for missing fields
     for (const field of requiredFields) {
@@ -111,7 +101,7 @@ async function verifyEndpoint(
     // Check metadata for configuration and troubleshooting
     // Configuration: commands, hooks, mcp, rules, statuslines have it (agents, skills, collections do NOT)
     if (['commands', 'hooks', 'mcp', 'rules', 'statuslines'].includes(category)) {
-      if (!data.metadata || !data.metadata.configuration) {
+      if (!(data.metadata && data.metadata.configuration)) {
         result.nullFields.push('metadata.configuration');
         result.status = 'fail';
       }
@@ -119,12 +109,11 @@ async function verifyEndpoint(
 
     // Troubleshooting: ALL categories except collections have it
     if (category !== 'collections') {
-      if (!data.metadata || !data.metadata.troubleshooting) {
+      if (!(data.metadata && data.metadata.troubleshooting)) {
         result.nullFields.push('metadata.troubleshooting');
         result.status = 'fail';
       }
     }
-
   } catch (error) {
     result.status = 'fail';
     result.errors.push(error instanceof Error ? error.message : String(error));

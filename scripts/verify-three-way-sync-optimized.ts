@@ -27,7 +27,10 @@ Object.assign(process.env, envVars);
 
 const API_BASE = 'http://localhost:3055';
 const CONCURRENCY = 10; // Parallel API requests
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 console.log('✅ Environment variables loaded\n');
 
@@ -140,7 +143,9 @@ async function fetchWithConcurrency<T>(
       await Promise.race(inProgress);
       const finishedIndex = inProgress.findIndex((p) => {
         let finished = false;
-        p.then(() => { finished = true; });
+        p.then(() => {
+          finished = true;
+        });
         return finished;
       });
       if (finishedIndex !== -1) {
@@ -215,15 +220,27 @@ function verifyItem(
 
   // Optional fields
   if (item.data.content) checkField('content', item.data.content, dbData.content, apiData.content);
-  if (item.data.features) checkField('features', item.data.features, dbData.features, apiData.features);
-  if (item.data.useCases) checkField('use_cases', item.data.useCases, dbData.use_cases, apiData.use_cases);
+  if (item.data.features)
+    checkField('features', item.data.features, dbData.features, apiData.features);
+  if (item.data.useCases)
+    checkField('use_cases', item.data.useCases, dbData.use_cases, apiData.use_cases);
 
   // Metadata
   if (item.data.configuration) {
-    checkField('configuration', item.data.configuration, dbData.metadata?.configuration, apiData.metadata?.configuration);
+    checkField(
+      'configuration',
+      item.data.configuration,
+      dbData.metadata?.configuration,
+      apiData.metadata?.configuration
+    );
   }
   if (item.data.troubleshooting) {
-    checkField('troubleshooting', item.data.troubleshooting, dbData.metadata?.troubleshooting, apiData.metadata?.troubleshooting);
+    checkField(
+      'troubleshooting',
+      item.data.troubleshooting,
+      dbData.metadata?.troubleshooting,
+      apiData.metadata?.troubleshooting
+    );
   }
 
   return { status: issues.length === 0 ? 'pass' : 'fail', issues };
@@ -239,7 +256,7 @@ async function main() {
   const [contentItems, dbMap, apiMap] = await Promise.all([
     loadAllContentFiles(),
     loadAllDatabaseContent(),
-    loadAllContentFiles().then(items => loadAllAPIContent(items))
+    loadAllContentFiles().then((items) => loadAllAPIContent(items)),
   ]);
 
   console.log('🔄 Comparing content files vs database vs API...\n');
@@ -280,7 +297,7 @@ async function main() {
         }
       }
     } else if (results.failed > 5) {
-      console.log(`   (Showing first 3 failures)`);
+      console.log('   (Showing first 3 failures)');
       for (const item of results.items.slice(0, 3)) {
         console.log(`\n   ${item.slug}:`);
         for (const issue of item.issues) {

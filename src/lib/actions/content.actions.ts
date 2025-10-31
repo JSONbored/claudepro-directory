@@ -613,3 +613,37 @@ export const deleteComment = authedAction
     revalidatePath('/board');
     return data as { success: boolean };
   });
+
+// ============================================
+// USAGE TRACKING ACTIONS
+// ============================================
+
+/**
+ * Track content usage (copy, download, etc.)
+ * Increments both copy_count (unified frontend metric) and specific action counters
+ */
+export const trackUsage = rateLimitedAction
+  .metadata({ actionName: 'trackUsage', category: 'content' })
+  .schema(
+    z.object({
+      content_id: z.string().uuid(),
+      action_type: z.enum(['copy', 'download_zip', 'download_markdown', 'llmstxt']),
+    })
+  )
+  .action(async ({ parsedInput }) => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc('increment_usage', {
+      p_content_id: parsedInput.content_id,
+      p_action_type: parsedInput.action_type,
+    });
+
+    if (error) {
+      logger.error('Failed to track usage', new Error(error.message), {
+        content_id: parsedInput.content_id,
+        action_type: parsedInput.action_type,
+      });
+      throw new Error(error.message);
+    }
+
+    return { success: true };
+  });

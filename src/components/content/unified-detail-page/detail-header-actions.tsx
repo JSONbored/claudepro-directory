@@ -192,6 +192,7 @@ export function DetailHeaderActions({
             llmsTxtUrl={`/${category}/${item.slug}/llms.txt`}
             category={category}
             slug={item.slug}
+            contentId={item.id}
             buttonVariant="outline"
             size="default"
             className="min-w-0"

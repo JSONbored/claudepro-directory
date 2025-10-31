@@ -987,6 +987,7 @@ export const publicContentRowSchema = z.object({
   author_profile_url: z.string().nullable(),
   category: z.string(),
   content: z.string().nullable(),
+  copy_count: z.number().nullable(),
   created_at: z.string(),
   date_added: z.string(),
   description: z.string(),
@@ -994,6 +995,7 @@ export const publicContentRowSchema = z.object({
   discovery_metadata: jsonSchema.nullable(),
   display_title: z.string().nullable(),
   documentation_url: z.string().nullable(),
+  download_count: z.number().nullable(),
   download_url: z.string().nullable(),
   examples: jsonSchema.nullable(),
   features: z.array(z.string()).nullable(),
@@ -1003,17 +1005,22 @@ export const publicContentRowSchema = z.object({
   has_prerequisites: z.boolean().nullable(),
   has_troubleshooting: z.boolean().nullable(),
   id: z.string(),
+  last_downloaded_at: z.string().nullable(),
+  llmstxt_copy_count: z.number().nullable(),
+  markdown_download_count: z.number().nullable(),
   metadata: jsonSchema,
   popularity_score: z.number().nullable(),
   reading_time: z.number().nullable(),
   seo_title: z.string().nullable(),
   slug: z.string(),
   source: z.string().nullable(),
+  storage_url: z.string().nullable(),
   synced_at: z.string().nullable(),
   tags: z.array(z.string()),
   title: z.string().nullable(),
   updated_at: z.string(),
   use_cases: z.array(z.string()).nullable(),
+  view_count: z.number().nullable(),
 });
 
 export const publicContentInsertSchema = z.object({
@@ -1021,6 +1028,7 @@ export const publicContentInsertSchema = z.object({
   author_profile_url: z.string().optional().nullable(),
   category: z.string(),
   content: z.string().optional().nullable(),
+  copy_count: z.number().optional().nullable(),
   created_at: z.string().optional(),
   date_added: z.string(),
   description: z.string(),
@@ -1028,6 +1036,7 @@ export const publicContentInsertSchema = z.object({
   discovery_metadata: jsonSchema.optional().nullable(),
   display_title: z.string().optional().nullable(),
   documentation_url: z.string().optional().nullable(),
+  download_count: z.number().optional().nullable(),
   download_url: z.string().optional().nullable(),
   examples: jsonSchema.optional().nullable(),
   features: z.array(z.string()).optional().nullable(),
@@ -1037,17 +1046,22 @@ export const publicContentInsertSchema = z.object({
   has_prerequisites: z.boolean().optional().nullable(),
   has_troubleshooting: z.boolean().optional().nullable(),
   id: z.string().optional(),
+  last_downloaded_at: z.string().optional().nullable(),
+  llmstxt_copy_count: z.number().optional().nullable(),
+  markdown_download_count: z.number().optional().nullable(),
   metadata: jsonSchema.optional(),
   popularity_score: z.number().optional().nullable(),
   reading_time: z.number().optional().nullable(),
   seo_title: z.string().optional().nullable(),
   slug: z.string(),
   source: z.string().optional().nullable(),
+  storage_url: z.string().optional().nullable(),
   synced_at: z.string().optional().nullable(),
   tags: z.array(z.string()),
   title: z.string().optional().nullable(),
   updated_at: z.string().optional(),
   use_cases: z.array(z.string()).optional().nullable(),
+  view_count: z.number().optional().nullable(),
 });
 
 export const publicContentUpdateSchema = z.object({
@@ -1055,6 +1069,7 @@ export const publicContentUpdateSchema = z.object({
   author_profile_url: z.string().optional().nullable(),
   category: z.string().optional(),
   content: z.string().optional().nullable(),
+  copy_count: z.number().optional().nullable(),
   created_at: z.string().optional(),
   date_added: z.string().optional(),
   description: z.string().optional(),
@@ -1062,6 +1077,7 @@ export const publicContentUpdateSchema = z.object({
   discovery_metadata: jsonSchema.optional().nullable(),
   display_title: z.string().optional().nullable(),
   documentation_url: z.string().optional().nullable(),
+  download_count: z.number().optional().nullable(),
   download_url: z.string().optional().nullable(),
   examples: jsonSchema.optional().nullable(),
   features: z.array(z.string()).optional().nullable(),
@@ -1071,17 +1087,22 @@ export const publicContentUpdateSchema = z.object({
   has_prerequisites: z.boolean().optional().nullable(),
   has_troubleshooting: z.boolean().optional().nullable(),
   id: z.string().optional(),
+  last_downloaded_at: z.string().optional().nullable(),
+  llmstxt_copy_count: z.number().optional().nullable(),
+  markdown_download_count: z.number().optional().nullable(),
   metadata: jsonSchema.optional(),
   popularity_score: z.number().optional().nullable(),
   reading_time: z.number().optional().nullable(),
   seo_title: z.string().optional().nullable(),
   slug: z.string().optional(),
   source: z.string().optional().nullable(),
+  storage_url: z.string().optional().nullable(),
   synced_at: z.string().optional().nullable(),
   tags: z.array(z.string()).optional(),
   title: z.string().optional().nullable(),
   updated_at: z.string().optional(),
   use_cases: z.array(z.string()).optional().nullable(),
+  view_count: z.number().optional().nullable(),
 });
 
 export const publicContentGenerationTrackingRowSchema = z.object({
@@ -4622,6 +4643,10 @@ export const publicGetContentWithAnalyticsReturnsSchema = z.array(
   })
 );
 
+export const publicGetDatabaseFingerprintArgsSchema = z.never();
+
+export const publicGetDatabaseFingerprintReturnsSchema = jsonSchema;
+
 export const publicGetDueSequenceEmailsArgsSchema = z.never();
 
 export const publicGetDueSequenceEmailsReturnsSchema = jsonSchema;
@@ -5193,6 +5218,13 @@ export const publicIncrementArgsSchema = z.object({
 
 export const publicIncrementReturnsSchema = z.undefined();
 
+export const publicIncrementUsageArgsSchema = z.object({
+  p_action_type: z.string(),
+  p_content_id: z.string(),
+});
+
+export const publicIncrementUsageReturnsSchema = z.undefined();
+
 export const publicIsAdminArgsSchema = z.object({
   p_user_id: z.string(),
 });
@@ -5551,6 +5583,12 @@ export const publicShowTrgmArgsSchema = z.object({
 });
 
 export const publicShowTrgmReturnsSchema = z.array(z.string());
+
+export const publicSlugToTitleArgsSchema = z.object({
+  p_slug: z.string(),
+});
+
+export const publicSlugToTitleReturnsSchema = z.string();
 
 export const publicSubmitContentForReviewArgsSchema = z.object({
   p_author: z.string(),

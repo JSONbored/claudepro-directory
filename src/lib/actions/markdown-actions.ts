@@ -136,6 +136,7 @@ export const copyMarkdownAction = rateLimitedAction
         markdown,
         filename: `${slug}.md`,
         length: markdown.length,
+        content_id: item.id,
       };
     } catch (error) {
       logger.error(
@@ -177,6 +178,7 @@ export const downloadMarkdownAction = rateLimitedAction
         markdown,
         filename: `${slug}.md`,
         length: markdown.length,
+        content_id: item.id,
       };
     } catch (error) {
       logger.error(

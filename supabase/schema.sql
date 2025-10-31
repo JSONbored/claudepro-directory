@@ -3299,6 +3299,32 @@ COMMENT ON FUNCTION "public"."get_content_with_analytics"("p_category" "text", "
 
 
 
+CREATE OR REPLACE FUNCTION "public"."get_database_fingerprint"() RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+DECLARE
+  fingerprint jsonb;
+BEGIN
+  -- Aggregate table statistics into compact fingerprint
+  SELECT jsonb_object_agg(
+    schemaname || '.' || tablename,
+    jsonb_build_object(
+      'rows', n_live_tup,
+      'modified', COALESCE(last_vacuum, last_autovacuum, last_analyze, last_autoanalyze, '1970-01-01'::timestamp)::text
+    )
+  ) INTO fingerprint
+  FROM pg_stat_user_tables
+  WHERE schemaname IN ('public', 'auth', 'storage', 'realtime', 'cron', 'supabase_migrations', 'vault', 'supabase_functions', 'net');
+  
+  RETURN fingerprint;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_database_fingerprint"() OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."get_due_sequence_emails"() RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -6814,6 +6840,43 @@ $_$;
 ALTER FUNCTION "public"."increment"("table_name" "text", "row_id" "uuid", "column_name" "text", "increment_by" integer) OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."increment_usage"("p_content_id" "uuid", "p_action_type" "text") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+BEGIN
+  -- Always increment copy_count (unified "use count" for frontend display)
+  UPDATE content
+  SET copy_count = copy_count + 1
+  WHERE id = p_content_id;
+  
+  -- Also increment specific tracker for backend analytics
+  IF p_action_type = 'download_zip' THEN
+    UPDATE content
+    SET 
+      download_count = download_count + 1,
+      last_downloaded_at = NOW()
+    WHERE id = p_content_id;
+    
+  ELSIF p_action_type = 'download_markdown' THEN
+    UPDATE content
+    SET markdown_download_count = markdown_download_count + 1
+    WHERE id = p_content_id;
+    
+  ELSIF p_action_type = 'llmstxt' THEN
+    UPDATE content
+    SET llmstxt_copy_count = llmstxt_copy_count + 1
+    WHERE id = p_content_id;
+  END IF;
+  
+  -- Note: 'copy' action type just increments copy_count (already done above)
+END;
+$$;
+
+
+ALTER FUNCTION "public"."increment_usage"("p_content_id" "uuid", "p_action_type" "text") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."is_admin"("p_user_id" "uuid") RETURNS boolean
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -8654,6 +8717,92 @@ $$;
 ALTER FUNCTION "public"."search_users"("search_query" "text", "result_limit" integer) OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."set_title_from_slug"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+BEGIN
+  IF NEW.title IS NULL THEN
+    NEW.title := slug_to_title(NEW.slug);
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."set_title_from_slug"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."slug_to_title"("p_slug" "text") RETURNS "text"
+    LANGUAGE "plpgsql" IMMUTABLE
+    AS $$
+DECLARE
+  v_words TEXT[];
+  v_word TEXT;
+  v_result TEXT := '';
+  v_acronyms TEXT[] := ARRAY['API', 'AWS', 'CSS', 'JSON', 'SCSS', 'HTML', 'XML', 'HTTP', 'HTTPS', 'URL', 'URI', 'SQL', 'NoSQL', 'REST', 'GraphQL', 'JWT', 'SSH', 'FTP', 'SMTP', 'DNS', 'CDN', 'SDK', 'CLI', 'IDE', 'UI', 'UX', 'AI', 'ML', 'NPM', 'CI', 'CD', 'CI/CD', 'PDF', 'CSV', 'SVG', 'PNG', 'JPG', 'JPEG', 'GIF', 'TCP', 'UDP', 'IP', 'VPN', 'SSL', 'TLS', 'OAuth', 'SAML', 'LDAP', 'DB', 'CRUD', 'ORM', 'MVC', 'MVP', 'MVVM', 'SPA', 'PWA', 'SEO', 'CMS', 'CRM', 'SaaS', 'PaaS', 'IaaS', 'E2E', 'QA', 'TDD', 'BDD', 'CORS', 'CSRF', 'XSS', 'MCP', 'LLM', 'GPT', 'SRE', 'DevOps'];
+  v_acronym TEXT;
+  v_base_word TEXT;
+BEGIN
+  -- Split slug by hyphens
+  v_words := string_to_array(p_slug, '-');
+  
+  -- Process each word
+  FOREACH v_word IN ARRAY v_words
+  LOOP
+    IF v_result != '' THEN
+      v_result := v_result || ' ';
+    END IF;
+    
+    -- Check if word matches an acronym (case-insensitive)
+    v_acronym := NULL;
+    FOREACH v_acronym IN ARRAY v_acronyms
+    LOOP
+      IF LOWER(v_word) = LOWER(v_acronym) THEN
+        v_result := v_result || v_acronym;
+        EXIT;
+      END IF;
+    END LOOP;
+    
+    -- If acronym found, continue to next word
+    IF v_acronym IS NOT NULL AND LOWER(v_word) = LOWER(v_acronym) THEN
+      CONTINUE;
+    END IF;
+    
+    -- Handle special .js suffix case (nextjs, vuejs, etc)
+    IF LOWER(v_word) LIKE '%js' AND LENGTH(v_word) > 2 THEN
+      v_base_word := substring(v_word from 1 for LENGTH(v_word) - 2);
+      v_acronym := NULL;
+      FOREACH v_acronym IN ARRAY v_acronyms
+      LOOP
+        IF LOWER(v_base_word) = LOWER(v_acronym) THEN
+          v_result := v_result || v_acronym || '.js';
+          EXIT;
+        END IF;
+      END LOOP;
+      
+      IF v_acronym IS NOT NULL AND LOWER(v_base_word) = LOWER(v_acronym) THEN
+        CONTINUE;
+      END IF;
+    END IF;
+    
+    -- Handle CloudFormation special case
+    IF LOWER(v_word) = 'cloudformation' THEN
+      v_result := v_result || 'CloudFormation';
+      CONTINUE;
+    END IF;
+    
+    -- Default: Title Case
+    v_result := v_result || UPPER(substring(v_word from 1 for 1)) || substring(v_word from 2);
+  END LOOP;
+  
+  RETURN v_result;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."slug_to_title"("p_slug" "text") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."submit_content_for_review"("p_submission_type" "text", "p_name" "text", "p_description" "text", "p_category" "text", "p_author" "text", "p_content_data" "jsonb", "p_author_profile_url" "text" DEFAULT NULL::"text", "p_github_url" "text" DEFAULT NULL::"text", "p_tags" "text"[] DEFAULT '{}'::"text"[]) RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -10208,6 +10357,13 @@ END) STORED,
     "has_prerequisites" boolean GENERATED ALWAYS AS ((("metadata" ? 'prerequisites'::"text") AND ("jsonb_typeof"(("metadata" -> 'prerequisites'::"text")) = 'array'::"text") AND ("jsonb_array_length"(("metadata" -> 'prerequisites'::"text")) > 0))) STORED,
     "has_breaking_changes" boolean GENERATED ALWAYS AS (COALESCE((("metadata" ->> 'has_breaking_changes'::"text"))::boolean, false)) STORED,
     "download_url" "text",
+    "storage_url" "text",
+    "download_count" bigint DEFAULT 0,
+    "last_downloaded_at" timestamp with time zone,
+    "llmstxt_copy_count" bigint DEFAULT 0,
+    "markdown_download_count" bigint DEFAULT 0,
+    "copy_count" bigint DEFAULT 0,
+    "view_count" bigint DEFAULT 0,
     CONSTRAINT "content_author_length" CHECK (("length"("author") >= 2)),
     CONSTRAINT "content_category_check" CHECK (("category" = ANY (ARRAY['agents'::"text", 'mcp'::"text", 'commands'::"text", 'rules'::"text", 'hooks'::"text", 'statuslines'::"text", 'skills'::"text", 'collections'::"text", 'guides'::"text"]))),
     CONSTRAINT "content_description_length" CHECK ((("length"("description") >= 10) AND ("length"("description") <= 500))),
@@ -12935,6 +13091,10 @@ COMMENT ON INDEX "public"."idx_content_category_created" IS 'Category-specific c
 
 
 
+CREATE INDEX "idx_content_copy_count" ON "public"."content" USING "btree" ("category", "copy_count" DESC);
+
+
+
 CREATE INDEX "idx_content_created_at" ON "public"."content" USING "btree" ("created_at" DESC);
 
 
@@ -12948,6 +13108,10 @@ COMMENT ON INDEX "public"."idx_content_difficulty_score" IS 'Index for filtering
 
 
 CREATE INDEX "idx_content_download_url" ON "public"."content" USING "btree" ("download_url") WHERE ("download_url" IS NOT NULL);
+
+
+
+CREATE INDEX "idx_content_downloads" ON "public"."content" USING "btree" ("category", "download_count" DESC) WHERE ("category" = 'skills'::"text");
 
 
 
@@ -13936,6 +14100,10 @@ COMMENT ON TRIGGER "auto_award_badges_after_submission" ON "public"."submissions
 
 
 CREATE OR REPLACE TRIGGER "content_fts_update" BEFORE INSERT OR UPDATE OF "title", "description", "tags" ON "public"."content" FOR EACH ROW EXECUTE FUNCTION "public"."update_content_fts_vector"();
+
+
+
+CREATE OR REPLACE TRIGGER "content_title_trigger" BEFORE INSERT OR UPDATE ON "public"."content" FOR EACH ROW EXECUTE FUNCTION "public"."set_title_from_slug"();
 
 
 
@@ -15752,6 +15920,11 @@ GRANT ALL ON FUNCTION "public"."get_weekly_digest"("p_week_start" "date") TO "an
 
 GRANT ALL ON FUNCTION "public"."increment"("table_name" "text", "row_id" "uuid", "column_name" "text", "increment_by" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."increment"("table_name" "text", "row_id" "uuid", "column_name" "text", "increment_by" integer) TO "anon";
+
+
+
+GRANT ALL ON FUNCTION "public"."increment_usage"("p_content_id" "uuid", "p_action_type" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."increment_usage"("p_content_id" "uuid", "p_action_type" "text") TO "anon";
 
 
 

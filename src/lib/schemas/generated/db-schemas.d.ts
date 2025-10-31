@@ -745,6 +745,12 @@ export type PublicGetContentWithAnalyticsArgs = z.infer<
 export type PublicGetContentWithAnalyticsReturns = z.infer<
   typeof generated.publicGetContentWithAnalyticsReturnsSchema
 >;
+export type PublicGetDatabaseFingerprintArgs = z.infer<
+  typeof generated.publicGetDatabaseFingerprintArgsSchema
+>;
+export type PublicGetDatabaseFingerprintReturns = z.infer<
+  typeof generated.publicGetDatabaseFingerprintReturnsSchema
+>;
 export type PublicGetDueSequenceEmailsArgs = z.infer<
   typeof generated.publicGetDueSequenceEmailsArgsSchema
 >;
@@ -1035,6 +1041,10 @@ export type PublicImportRedisSeedDataReturns = z.infer<
 >;
 export type PublicIncrementArgs = z.infer<typeof generated.publicIncrementArgsSchema>;
 export type PublicIncrementReturns = z.infer<typeof generated.publicIncrementReturnsSchema>;
+export type PublicIncrementUsageArgs = z.infer<typeof generated.publicIncrementUsageArgsSchema>;
+export type PublicIncrementUsageReturns = z.infer<
+  typeof generated.publicIncrementUsageReturnsSchema
+>;
 export type PublicIsAdminArgs = z.infer<typeof generated.publicIsAdminArgsSchema>;
 export type PublicIsAdminReturns = z.infer<typeof generated.publicIsAdminReturnsSchema>;
 export type PublicIsBookmarkedArgs = z.infer<typeof generated.publicIsBookmarkedArgsSchema>;
@@ -1145,6 +1155,8 @@ export type PublicShowLimitArgs = z.infer<typeof generated.publicShowLimitArgsSc
 export type PublicShowLimitReturns = z.infer<typeof generated.publicShowLimitReturnsSchema>;
 export type PublicShowTrgmArgs = z.infer<typeof generated.publicShowTrgmArgsSchema>;
 export type PublicShowTrgmReturns = z.infer<typeof generated.publicShowTrgmReturnsSchema>;
+export type PublicSlugToTitleArgs = z.infer<typeof generated.publicSlugToTitleArgsSchema>;
+export type PublicSlugToTitleReturns = z.infer<typeof generated.publicSlugToTitleReturnsSchema>;
 export type PublicSubmitContentForReviewArgs = z.infer<
   typeof generated.publicSubmitContentForReviewArgsSchema
 >;

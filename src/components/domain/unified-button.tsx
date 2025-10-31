@@ -14,6 +14,7 @@ import { useButtonSuccess } from '@/src/hooks/use-button-success';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { trackInteraction } from '@/src/lib/actions/analytics.actions';
 import { deleteJob, toggleJobStatus } from '@/src/lib/actions/business.actions';
+import { trackUsage } from '@/src/lib/actions/content.actions';
 import { getGitHubStars } from '@/src/lib/actions/github.actions';
 import { copyMarkdownAction, downloadMarkdownAction } from '@/src/lib/actions/markdown-actions';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
@@ -89,6 +90,7 @@ type CopyLLMsVariant = {
   showIcon?: boolean;
   category?: CategoryId;
   slug?: string;
+  contentId?: string;
 } & ButtonStyleProps;
 
 type BookmarkVariant = {
@@ -363,12 +365,13 @@ function CopyMarkdownButton({
           description: 'Markdown content ready to paste',
         });
 
-        // Track to database (fire-and-forget)
-        trackInteraction({
-          interaction_type: 'copy',
-          content_type: category,
-          content_slug: slug,
-        }).catch(() => {});
+        // Track usage with database-first trackUsage()
+        if (result.data.content_id) {
+          trackUsage({
+            content_id: result.data.content_id,
+            action_type: 'copy',
+          }).catch(() => {});
+        }
 
         // Trigger email modal
         showModal({
@@ -435,16 +438,42 @@ function DownloadMarkdownButton({
 }: DownloadMarkdownVariant) {
   const { isSuccess, triggerSuccess } = useButtonSuccess();
   const { executeAsync, status } = useAction(downloadMarkdownAction);
+  const [zipUrl, setZipUrl] = useState<string | null>(null);
+  const [isLoadingUrl, setIsLoadingUrl] = useState(category === 'skills');
+  const [contentId, setContentId] = useState<string | null>(null);
+  const supabase = createClient();
 
-  // Skills category: Direct link to ZIP file with tracking
+  // Skills category: Fetch storage_url from database
+  useEffect(() => {
+    if (category !== 'skills') return;
+
+    const fetchStorageData = async () => {
+      const { data, error } = await supabase
+        .from('content')
+        .select('id, storage_url')
+        .eq('category', 'skills')
+        .eq('slug', slug)
+        .single();
+
+      if (!error && data) {
+        setZipUrl(data.storage_url);
+        setContentId(data.id);
+      }
+      setIsLoadingUrl(false);
+    };
+
+    fetchStorageData().catch(() => setIsLoadingUrl(false));
+  }, [category, slug, supabase]);
+
+  // Skills category: Download ZIP from Supabase Storage with trackUsage()
   if (category === 'skills') {
-    const zipUrl = `/downloads/skills/${slug}.zip`;
-    const handleZipClick = () => {
-      trackInteraction({
-        interaction_type: 'copy',
-        content_type: category,
-        content_slug: slug,
-      }).catch(() => {});
+    const handleZipClick = async () => {
+      if (contentId) {
+        trackUsage({
+          content_id: contentId,
+          action_type: 'download_zip',
+        }).catch(() => {});
+      }
     };
 
     return (
@@ -452,12 +481,12 @@ function DownloadMarkdownButton({
         variant={buttonVariant}
         size={size}
         asChild
-        disabled={disabled}
+        disabled={disabled || isLoadingUrl || !zipUrl}
         className={cn('gap-2 transition-all', className)}
       >
-        <a href={zipUrl} download onClick={handleZipClick}>
+        <a href={zipUrl || '#'} download onClick={handleZipClick}>
           {showIcon && <Download className="h-4 w-4" />}
-          <span>Download ZIP</span>
+          <span>{isLoadingUrl ? 'Loading...' : 'Download ZIP'}</span>
         </a>
       </Button>
     );
@@ -488,12 +517,13 @@ function DownloadMarkdownButton({
           description: `Saved as ${result.data.filename}`,
         });
 
-        // Track to database (fire-and-forget)
-        trackInteraction({
-          interaction_type: 'copy',
-          content_type: category,
-          content_slug: slug,
-        }).catch(() => {});
+        // Track usage with database-first trackUsage()
+        if (result.data.content_id) {
+          trackUsage({
+            content_id: result.data.content_id,
+            action_type: 'download_markdown',
+          }).catch(() => {});
+        }
 
         // Track analytics (fire-and-forget)
         const fileSize = blob.size;
@@ -550,6 +580,7 @@ function CopyLLMsButton({
   disabled = false,
   category,
   slug,
+  contentId,
 }: CopyLLMsVariant) {
   const [isLoading, setIsLoading] = useState(false);
   const { isSuccess, triggerSuccess } = useButtonSuccess();
@@ -578,15 +609,16 @@ function CopyLLMsButton({
         description: 'AI-optimized content ready to paste',
       });
 
-      // Track to database if category/slug provided (fire-and-forget)
-      if (category && slug) {
-        trackInteraction({
-          interaction_type: 'copy',
-          content_type: category,
-          content_slug: slug,
+      // Track usage with database-first trackUsage() (uses prop from server component)
+      if (contentId) {
+        trackUsage({
+          content_id: contentId,
+          action_type: 'llmstxt',
         }).catch(() => {});
+      }
 
-        // Track analytics (fire-and-forget)
+      // Track analytics (fire-and-forget)
+      if (category && slug) {
         import('@/src/lib/analytics/tracker')
           .then((tracker) => {
             tracker.trackEvent('llmstxt_copied', {

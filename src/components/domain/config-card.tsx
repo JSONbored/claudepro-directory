@@ -333,7 +333,7 @@ export const ConfigCard = memo(
                     }
                   }}
                   className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
-                  aria-label={`${formatCopyCount(copyCount)} copies`}
+                  aria-label={`${formatCopyCount(copyCount)} uses`}
                 >
                   <UnifiedBadge
                     variant="base"

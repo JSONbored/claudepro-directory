@@ -763,6 +763,7 @@ export type Database = {
           author_profile_url: string | null;
           category: string;
           content: string | null;
+          copy_count: number | null;
           created_at: string;
           date_added: string;
           description: string;
@@ -770,6 +771,7 @@ export type Database = {
           discovery_metadata: Json | null;
           display_title: string | null;
           documentation_url: string | null;
+          download_count: number | null;
           download_url: string | null;
           examples: Json | null;
           features: string[] | null;
@@ -779,23 +781,29 @@ export type Database = {
           has_prerequisites: boolean | null;
           has_troubleshooting: boolean | null;
           id: string;
+          last_downloaded_at: string | null;
+          llmstxt_copy_count: number | null;
+          markdown_download_count: number | null;
           metadata: Json;
           popularity_score: number | null;
           reading_time: number | null;
           seo_title: string | null;
           slug: string;
           source: string | null;
+          storage_url: string | null;
           synced_at: string | null;
           tags: string[];
           title: string | null;
           updated_at: string;
           use_cases: string[] | null;
+          view_count: number | null;
         };
         Insert: {
           author: string;
           author_profile_url?: string | null;
           category: string;
           content?: string | null;
+          copy_count?: number | null;
           created_at?: string;
           date_added: string;
           description: string;
@@ -803,6 +811,7 @@ export type Database = {
           discovery_metadata?: Json | null;
           display_title?: string | null;
           documentation_url?: string | null;
+          download_count?: number | null;
           download_url?: string | null;
           examples?: Json | null;
           features?: string[] | null;
@@ -812,23 +821,29 @@ export type Database = {
           has_prerequisites?: boolean | null;
           has_troubleshooting?: boolean | null;
           id?: string;
+          last_downloaded_at?: string | null;
+          llmstxt_copy_count?: number | null;
+          markdown_download_count?: number | null;
           metadata?: Json;
           popularity_score?: number | null;
           reading_time?: number | null;
           seo_title?: string | null;
           slug: string;
           source?: string | null;
+          storage_url?: string | null;
           synced_at?: string | null;
           tags: string[];
           title?: string | null;
           updated_at?: string;
           use_cases?: string[] | null;
+          view_count?: number | null;
         };
         Update: {
           author?: string;
           author_profile_url?: string | null;
           category?: string;
           content?: string | null;
+          copy_count?: number | null;
           created_at?: string;
           date_added?: string;
           description?: string;
@@ -836,6 +851,7 @@ export type Database = {
           discovery_metadata?: Json | null;
           display_title?: string | null;
           documentation_url?: string | null;
+          download_count?: number | null;
           download_url?: string | null;
           examples?: Json | null;
           features?: string[] | null;
@@ -845,17 +861,22 @@ export type Database = {
           has_prerequisites?: boolean | null;
           has_troubleshooting?: boolean | null;
           id?: string;
+          last_downloaded_at?: string | null;
+          llmstxt_copy_count?: number | null;
+          markdown_download_count?: number | null;
           metadata?: Json;
           popularity_score?: number | null;
           reading_time?: number | null;
           seo_title?: string | null;
           slug?: string;
           source?: string | null;
+          storage_url?: string | null;
           synced_at?: string | null;
           tags?: string[];
           title?: string | null;
           updated_at?: string;
           use_cases?: string[] | null;
+          view_count?: number | null;
         };
         Relationships: [];
       };
@@ -4316,6 +4337,7 @@ export type Database = {
           view_count: number;
         }[];
       };
+      get_database_fingerprint: { Args: never; Returns: Json };
       get_due_sequence_emails: { Args: never; Returns: Json };
       get_enriched_content: {
         Args: {
@@ -4733,6 +4755,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      increment_usage: {
+        Args: { p_action_type: string; p_content_id: string };
+        Returns: undefined;
+      };
       is_admin: { Args: { p_user_id: string }; Returns: boolean };
       is_bookmarked: {
         Args: {
@@ -5014,6 +5040,7 @@ export type Database = {
       };
       show_limit: { Args: never; Returns: number };
       show_trgm: { Args: { '': string }; Returns: string[] };
+      slug_to_title: { Args: { p_slug: string }; Returns: string };
       submit_content_for_review: {
         Args: {
           p_author: string;
