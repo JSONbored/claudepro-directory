@@ -40,7 +40,11 @@
 
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content-list-server';
-import { isValidCategory, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+import {
+  type CategoryId,
+  getCategoryConfig,
+  isValidCategory,
+} from '@/src/lib/config/category-config';
 import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -113,11 +117,11 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     });
   }
 
-  const categoryConfig = UNIFIED_CATEGORY_REGISTRY[category];
+  const categoryConfig = await getCategoryConfig(category as CategoryId);
 
   return generatePageMetadata('/:category', {
     params: { category },
-    categoryConfig,
+    categoryConfig: categoryConfig || undefined,
     category,
   });
 }
@@ -146,14 +150,12 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;
 
-  // Validate category
   if (!isValidCategory(category)) {
     logger.warn('Invalid category requested', { category });
     notFound();
   }
 
-  // Get category configuration
-  const config = UNIFIED_CATEGORY_REGISTRY[category];
+  const config = await getCategoryConfig(category as CategoryId);
   if (!config) {
     notFound();
   }

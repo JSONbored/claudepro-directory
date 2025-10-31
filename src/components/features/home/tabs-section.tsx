@@ -23,7 +23,7 @@ import { Button } from '@/src/components/primitives/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import {
   HOMEPAGE_TAB_CATEGORIES,
-  UNIFIED_CATEGORY_REGISTRY,
+  type UnifiedCategoryConfig,
 } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
 import type { ContentItem } from '@/src/lib/schemas/component.schema';
@@ -32,12 +32,14 @@ interface TabsSectionProps {
   activeTab: string;
   filteredResults: readonly ContentItem[];
   onTabChange: (value: string) => void;
+  categoryConfigs: Record<string, UnifiedCategoryConfig>;
 }
 
 const TabsSectionComponent: FC<TabsSectionProps> = ({
   activeTab,
   filteredResults,
   onTabChange,
+  categoryConfigs,
 }) => {
   // Get content tabs (exclude 'community' which has custom content)
   const contentTabs = useMemo(
@@ -51,11 +53,10 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
       <TabsList className="w-full overflow-x-auto lg:w-auto lg:grid lg:grid-flow-col lg:auto-cols-fr gap-1 scrollbar-hide">
         <div className="flex lg:contents min-w-max lg:min-w-0">
           {HOMEPAGE_TAB_CATEGORIES.map((tab) => {
-            // Get display name from category config, or use tab name
             let displayName = tab.charAt(0).toUpperCase() + tab.slice(1);
 
             if (tab !== 'all' && tab !== 'community') {
-              const config = UNIFIED_CATEGORY_REGISTRY[tab];
+              const config = categoryConfigs[tab];
               if (config) {
                 displayName = config.pluralTitle;
               }
@@ -84,7 +85,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
         const categoryName =
           tab === 'all'
             ? 'configurations'
-            : UNIFIED_CATEGORY_REGISTRY[tab]?.pluralTitle?.toLowerCase() || tab;
+            : categoryConfigs[tab]?.pluralTitle?.toLowerCase() || tab;
 
         return (
           <TabsContent key={tab} value={tab} className="space-y-6">

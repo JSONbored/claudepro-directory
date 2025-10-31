@@ -2,14 +2,14 @@
  * DetailHeader - Server Component for header section
  */
 
+import type { UnifiedCategoryConfig } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import type { ContentTypeConfig } from '@/src/lib/types/content-type-config';
 import { DetailHeaderActions } from './detail-header-actions';
 
 export interface DetailHeaderProps {
   displayTitle: string;
   item: ContentItem;
-  config: ContentTypeConfig;
+  config: UnifiedCategoryConfig;
   onCopyContent?: (() => Promise<void>) | undefined;
 }
 
@@ -26,16 +26,9 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
       ('configuration' in item && (item as { configuration?: object }).configuration)
   );
 
-  // Extract serializable action data from config
-  const primaryAction = {
-    label: config.primaryAction.label,
-    type: 'deploy', // Generic type for all actions
-  };
-
-  const secondaryActions = config.secondaryActions?.map((action) => ({
-    label: action.label,
-    type: 'secondary',
-  }));
+  // Extract serializable action data - database stores { label, type } only
+  const primaryAction = config.primaryAction || { label: 'Deploy', type: 'deploy' };
+  const secondaryActions = config.secondaryActions;
 
   return (
     <div className={'border-b border-border bg-code/50 backdrop-blur-sm'}>

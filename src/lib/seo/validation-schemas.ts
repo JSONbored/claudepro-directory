@@ -1,33 +1,6 @@
 /**
- * SEO Validation Schemas
- *
- * **Production-Grade Validation Infrastructure (October 2025)**
- *
- * Comprehensive Zod schemas for type-safe validation across the SEO metadata system.
- * Implements layered validation architecture to catch errors at system boundaries.
- *
- * **Validation Layers:**
- * 1. **Input Validation** - MetadataContext, route params, classification results
- * 2. **Template Validation** - Template output (title, description, keywords)
- * 3. **Output Validation** - Final metadata before Next.js (validatedMetadataSchema)
- *
- * **Architecture Principles:**
- * - Fail Fast: Invalid data throws descriptive errors in dev/test
- * - Type Safety: Full TypeScript inference from Zod schemas
- * - Zero Casting: No type assertions or `as` casts needed
- * - Performance: Schemas are JIT-compiled once, reused across requests
- * - Standards Compliance: SEO rules enforced at type level
- *
- * **October 2025 SEO Standards (Research-Driven):**
- * - Title: 53-60 characters optimal, 61-65 acceptable (semantic preservation)
- * - Description: 150-160 characters (AI citation optimization)
- * - Keywords: 3-10 keywords, max 30 chars each
- * - Canonical URLs: No trailing slashes (except homepage)
- *
- * **SEO 2025 Research:** Too short (< 53) is worse than slightly long (61-65).
- * Short titles rewritten 96% of time vs 40% for 53-60 char titles.
- *
- * @module lib/seo/validation-schemas
+ * SEO Validation Schemas - Database-First
+ * Zod schemas for type-safe validation of SEO metadata from category_configs table.
  */
 
 import { z } from 'zod';
@@ -82,7 +55,7 @@ export const metadataContextSchema = z
       .catchall(z.unknown())
       .optional(),
 
-    /** Category configuration from UNIFIED_CATEGORY_REGISTRY */
+    /** Category configuration from category_configs table */
     categoryConfig: z
       .object({
         title: z.string().optional(),
@@ -245,26 +218,7 @@ export const templateOutputSchema = z
 
 /**
  * Category Configuration Validation Schema
- *
- * Validates individual category entries in UNIFIED_CATEGORY_REGISTRY.
- * Ensures all categories have required SEO metadata and proper configuration.
- *
- * **Design Philosophy:**
- * - Strict validation for production data
- * - All SEO-critical fields are required
- * - Keywords enforced at category level (not per-page)
- * - passthrough() allows custom category properties
- *
- * @example
- * ```typescript
- * const categoryConfig = categoryConfigSchema.parse({
- *   id: 'agents',
- *   title: 'Agent',
- *   pluralTitle: 'Agents',
- *   metaDescription: 'Discover specialized AI agents...',
- *   keywords: 'ai agents, claude agents, automation',
- * });
- * ```
+ * Validates individual category entries from category_configs table.
  */
 export const categoryConfigSchema = z
   .object({
@@ -322,17 +276,7 @@ export const categoryConfigSchema = z
 
 /**
  * Full Category Registry Validation Schema
- *
- * Validates the entire UNIFIED_CATEGORY_REGISTRY at build time.
- * Ensures all categories are properly configured with SEO metadata.
- *
- * **Note:** Uses z.record() with string keys (category IDs) and categoryConfigSchema values.
- * This allows any string as a key (category ID) but validates the configuration object.
- *
- * @example
- * ```typescript
- * const registry = categoryRegistrySchema.parse(UNIFIED_CATEGORY_REGISTRY);
- * ```
+ * Validates entire category registry from category_configs table at build time.
  */
 export const categoryRegistrySchema = z
   .record(z.string(), categoryConfigSchema)
@@ -505,20 +449,7 @@ export function validateClassification(
 
 /**
  * Validate Category Registry (Build-Time)
- *
- * Validates entire UNIFIED_CATEGORY_REGISTRY at build time.
- * Ensures all categories have proper SEO metadata configuration.
- *
- * **Usage:** Call this in a build-time validation script or test suite.
- *
- * @param registry - Category registry to validate
- * @throws Always throws on validation failure (build-time only)
- *
- * @example
- * ```typescript
- * // In tests or build script
- * validateCategoryRegistry(UNIFIED_CATEGORY_REGISTRY);
- * ```
+ * Validates entire category registry from category_configs table at build time.
  */
 export function validateCategoryRegistry(registry: unknown): void {
   const result = categoryRegistrySchema.safeParse(registry);
@@ -527,7 +458,7 @@ export function validateCategoryRegistry(registry: unknown): void {
     const errors = result.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`);
 
     throw new Error(
-      `UNIFIED_CATEGORY_REGISTRY validation failed:\n${errors.map((e) => `- ${e}`).join('\n')}\n\nFix category configurations in src/lib/config/category-config.ts`
+      `Category registry validation failed:\n${errors.map((e) => `- ${e}`).join('\n')}\n\nFix category configurations in PostgreSQL category_configs table`
     );
   }
 }

@@ -26,7 +26,7 @@ import { Suspense } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
-import { isValidCategory } from '@/src/lib/config/category-config';
+import { getCategoryConfigs, isValidCategory } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { getContentBySlug } from '@/src/lib/content/supabase-content-loader';
 import { AlertTriangle, CheckCircle } from '@/src/lib/icons';
@@ -37,17 +37,12 @@ import { batchMap } from '@/src/lib/utils/batch.utils';
 import { getViewTransitionStyle } from '@/src/lib/utils/view-transitions.utils';
 import type { Database } from '@/src/types/database.types';
 
-/**
- * Item with loaded content data
- */
 interface ItemWithData {
   category: string;
   slug: string;
   reason?: string;
   data: ContentItem;
 }
-
-import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 
 /**
  * Collection Detail View Props
@@ -67,8 +62,9 @@ export interface CollectionDetailViewProps {
  * @returns Collection detail view JSX
  */
 export async function CollectionDetailView({ collection }: CollectionDetailViewProps) {
-  // Load all referenced items with full content (parallel batch operation)
-  // collection.metadata.items is Json[] from database, each item has {category, slug, reason?}
+  // Load category configs once (single RPC call)
+  const categoryConfigs = await getCategoryConfigs();
+
   const metadata = (collection.metadata as Record<string, unknown>) || {};
   const items =
     (metadata.items as Array<{ category: string; slug: string; reason?: string }>) || [];
@@ -179,8 +175,8 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
               ([category, items]) => (
                 <div key={category}>
                   <h3 className="text-lg font-semibold text-foreground mb-4">
-                    {UNIFIED_CATEGORY_REGISTRY[category as keyof typeof UNIFIED_CATEGORY_REGISTRY]
-                      ?.pluralTitle || category}{' '}
+                    {categoryConfigs[category as keyof typeof categoryConfigs]?.pluralTitle ||
+                      category}{' '}
                     ({items.length})
                   </h3>
                   <div className="grid gap-4 sm:grid-cols-1">

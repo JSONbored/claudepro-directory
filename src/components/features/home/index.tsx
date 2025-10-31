@@ -31,10 +31,7 @@ import {
 } from '@/src/components/features/home/lazy-homepage-sections';
 import { NumberTicker } from '@/src/components/magic/number-ticker';
 import { HomepageStatsSkeleton, Skeleton } from '@/src/components/primitives/loading-skeleton';
-import {
-  getCategoryStatsConfig,
-  HOMEPAGE_FEATURED_CATEGORIES,
-} from '@/src/lib/config/category-config';
+import { HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import type { HomePageClientProps } from '@/src/lib/schemas/components/page-props.schema';
@@ -62,6 +59,8 @@ function HomePageClientComponent({
   initialSearchQuery,
   featuredByCategory,
   stats,
+  categoryStatsConfig,
+  categoryConfigs,
 }: HomePageClientProps) {
   const allConfigs = (initialData.allConfigs || []) as ContentItem[];
   const [activeTab, setActiveTab] = useState('all');
@@ -179,29 +178,24 @@ function HomePageClientComponent({
                 transition={{ delay: 0.3 }}
               >
                 <div className="flex gap-3 px-4 pb-2">
-                  {getCategoryStatsConfig()
-                    .slice(0, 5)
-                    .map(({ categoryId, icon: Icon, delay }) => {
-                      const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
+                  {categoryStatsConfig.slice(0, 5).map(({ categoryId, icon: Icon, delay }) => {
+                    const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
 
-                      return (
-                        <Link key={categoryId} href={categoryRoute}>
-                          <motion.div
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border/40 bg-card/50 backdrop-blur-sm whitespace-nowrap min-w-fit"
-                            whileTap={{ scale: 0.95 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                          >
-                            <Icon
-                              className="h-4 w-4 text-accent flex-shrink-0"
-                              aria-hidden="true"
-                            />
-                            <span className="text-sm font-medium">
-                              <NumberTicker value={stats[categoryId] || 0} delay={delay} />
-                            </span>
-                          </motion.div>
-                        </Link>
-                      );
-                    })}
+                    return (
+                      <Link key={categoryId} href={categoryRoute}>
+                        <motion.div
+                          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border/40 bg-card/50 backdrop-blur-sm whitespace-nowrap min-w-fit"
+                          whileTap={{ scale: 0.95 }}
+                          transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                        >
+                          <Icon className="h-4 w-4 text-accent flex-shrink-0" aria-hidden="true" />
+                          <span className="text-sm font-medium">
+                            <NumberTicker value={stats[categoryId] || 0} delay={delay} />
+                          </span>
+                        </motion.div>
+                      </Link>
+                    );
+                  })}
                 </div>
               </motion.div>
 
@@ -211,7 +205,7 @@ function HomePageClientComponent({
                   'hidden md:flex flex-wrap justify-center gap-2 lg:gap-3 text-xs lg:text-sm text-muted-foreground mt-6'
                 }
               >
-                {getCategoryStatsConfig().map(({ categoryId, icon: Icon, displayText, delay }) => {
+                {categoryStatsConfig.map(({ categoryId, icon: Icon, displayText, delay }) => {
                   // Get category route from ROUTES constant
                   const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
 
@@ -265,7 +259,12 @@ function HomePageClientComponent({
         />
 
         {/* Featured Content Sections - Render immediately (above the fold) */}
-        {!isSearching && <LazyFeaturedSections categories={featuredByCategory || initialData} />}
+        {!isSearching && (
+          <LazyFeaturedSections
+            categories={featuredByCategory || initialData}
+            categoryConfigs={categoryConfigs}
+          />
+        )}
 
         {/* Tabs Section - Render immediately (above the fold) */}
         {!isSearching && (
@@ -273,6 +272,7 @@ function HomePageClientComponent({
             activeTab={activeTab}
             filteredResults={filteredResults}
             onTabChange={handleTabChange}
+            categoryConfigs={categoryConfigs}
           />
         )}
       </section>

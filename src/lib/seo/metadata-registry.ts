@@ -58,7 +58,7 @@ export interface MetadataContext {
       }
     | undefined;
 
-  /** Category configuration from UNIFIED_CATEGORY_REGISTRY */
+  /** Category configuration from category_configs table */
   categoryConfig?:
     | {
         title?: string | undefined;

@@ -12,6 +12,7 @@ export type PublicBadgeRarity = z.infer<typeof generated.publicBadgeRaritySchema
 export type PublicChangelogCategory = z.infer<typeof generated.publicChangelogCategorySchema>;
 export type PublicContentCategory = z.infer<typeof generated.publicContentCategorySchema>;
 export type PublicExperienceLevel = z.infer<typeof generated.publicExperienceLevelSchema>;
+export type PublicFeatureScope = z.infer<typeof generated.publicFeatureScopeSchema>;
 export type PublicFieldScope = z.infer<typeof generated.publicFieldScopeSchema>;
 export type PublicFieldType = z.infer<typeof generated.publicFieldTypeSchema>;
 export type PublicFocusAreaType = z.infer<typeof generated.publicFocusAreaTypeSchema>;
@@ -70,6 +71,9 @@ export type PublicAnnouncementDismissalsRelationships = z.infer<
 export type PublicAnnouncementsRow = z.infer<typeof generated.publicAnnouncementsRowSchema>;
 export type PublicAnnouncementsInsert = z.infer<typeof generated.publicAnnouncementsInsertSchema>;
 export type PublicAnnouncementsUpdate = z.infer<typeof generated.publicAnnouncementsUpdateSchema>;
+export type PublicAppSettingsRow = z.infer<typeof generated.publicAppSettingsRowSchema>;
+export type PublicAppSettingsInsert = z.infer<typeof generated.publicAppSettingsInsertSchema>;
+export type PublicAppSettingsUpdate = z.infer<typeof generated.publicAppSettingsUpdateSchema>;
 export type PublicBadgesRow = z.infer<typeof generated.publicBadgesRowSchema>;
 export type PublicBadgesInsert = z.infer<typeof generated.publicBadgesInsertSchema>;
 export type PublicBadgesUpdate = z.infer<typeof generated.publicBadgesUpdateSchema>;
@@ -85,6 +89,16 @@ export type PublicCategoryConfigsInsert = z.infer<
 >;
 export type PublicCategoryConfigsUpdate = z.infer<
   typeof generated.publicCategoryConfigsUpdateSchema
+>;
+export type PublicCategoryFeaturesRow = z.infer<typeof generated.publicCategoryFeaturesRowSchema>;
+export type PublicCategoryFeaturesInsert = z.infer<
+  typeof generated.publicCategoryFeaturesInsertSchema
+>;
+export type PublicCategoryFeaturesUpdate = z.infer<
+  typeof generated.publicCategoryFeaturesUpdateSchema
+>;
+export type PublicCategoryFeaturesRelationships = z.infer<
+  typeof generated.publicCategoryFeaturesRelationshipsSchema
 >;
 export type PublicChangelogRow = z.infer<typeof generated.publicChangelogRowSchema>;
 export type PublicChangelogInsert = z.infer<typeof generated.publicChangelogInsertSchema>;
@@ -687,6 +701,10 @@ export type PublicGetApiCategoryContentReturns = z.infer<
 >;
 export type PublicGetApiContentArgs = z.infer<typeof generated.publicGetApiContentArgsSchema>;
 export type PublicGetApiContentReturns = z.infer<typeof generated.publicGetApiContentReturnsSchema>;
+export type PublicGetAppSettingsArgs = z.infer<typeof generated.publicGetAppSettingsArgsSchema>;
+export type PublicGetAppSettingsReturns = z.infer<
+  typeof generated.publicGetAppSettingsReturnsSchema
+>;
 export type PublicGetBookmarkCountsByCategoryArgs = z.infer<
   typeof generated.publicGetBookmarkCountsByCategoryArgsSchema
 >;
@@ -708,6 +726,18 @@ export type PublicGetCategoryConfigArgs = z.infer<
 >;
 export type PublicGetCategoryConfigReturns = z.infer<
   typeof generated.publicGetCategoryConfigReturnsSchema
+>;
+export type PublicGetCategoryConfigsWithFeaturesArgs = z.infer<
+  typeof generated.publicGetCategoryConfigsWithFeaturesArgsSchema
+>;
+export type PublicGetCategoryConfigsWithFeaturesReturns = z.infer<
+  typeof generated.publicGetCategoryConfigsWithFeaturesReturnsSchema
+>;
+export type PublicGetCategoryFeaturesArgs = z.infer<
+  typeof generated.publicGetCategoryFeaturesArgsSchema
+>;
+export type PublicGetCategoryFeaturesReturns = z.infer<
+  typeof generated.publicGetCategoryFeaturesReturnsSchema
 >;
 export type PublicGetChangelogEntriesArgs = z.infer<
   typeof generated.publicGetChangelogEntriesArgsSchema

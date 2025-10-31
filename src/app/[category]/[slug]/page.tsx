@@ -10,8 +10,9 @@ import { BreadcrumbSchema } from '@/src/components/infra/structured-data/breadcr
 import { UnifiedStructuredData } from '@/src/components/infra/structured-data/unified-structured-data';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 import {
+  type CategoryId,
+  getCategoryConfig,
   isValidCategory,
-  UNIFIED_CATEGORY_REGISTRY,
   VALID_CATEGORIES,
 } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -57,9 +58,8 @@ export async function generateMetadata({
     });
   }
 
-  // Load item and category config for metadata generation
   const itemMeta = await getContentBySlug(category, slug);
-  const config = UNIFIED_CATEGORY_REGISTRY[category];
+  const config = await getCategoryConfig(category as CategoryId);
 
   return generatePageMetadata('/:category/:slug', {
     params: { category, slug },
@@ -77,13 +77,12 @@ export default async function DetailPage({
 }) {
   const { category, slug } = await params;
 
-  // Validate category
   if (!isValidCategory(category)) {
     logger.warn('Invalid category in detail page', { category, slug });
     notFound();
   }
 
-  const config = UNIFIED_CATEGORY_REGISTRY[category];
+  const config = await getCategoryConfig(category as CategoryId);
   if (!config) {
     notFound();
   }

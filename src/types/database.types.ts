@@ -202,6 +202,51 @@ export type Database = {
         };
         Relationships: [];
       };
+      app_settings: {
+        Row: {
+          category: string;
+          created_at: string;
+          description: string;
+          enabled: boolean;
+          environment: string | null;
+          previous_value: Json | null;
+          setting_key: string;
+          setting_type: string;
+          setting_value: Json;
+          updated_at: string;
+          updated_by: string | null;
+          version: number;
+        };
+        Insert: {
+          category: string;
+          created_at?: string;
+          description: string;
+          enabled?: boolean;
+          environment?: string | null;
+          previous_value?: Json | null;
+          setting_key: string;
+          setting_type: string;
+          setting_value?: Json;
+          updated_at?: string;
+          updated_by?: string | null;
+          version?: number;
+        };
+        Update: {
+          category?: string;
+          created_at?: string;
+          description?: string;
+          enabled?: boolean;
+          environment?: string | null;
+          previous_value?: Json | null;
+          setting_key?: string;
+          setting_type?: string;
+          setting_value?: Json;
+          updated_at?: string;
+          updated_by?: string | null;
+          version?: number;
+        };
+        Relationships: [];
+      };
       badges: {
         Row: {
           active: boolean | null;
@@ -306,6 +351,7 @@ export type Database = {
       category_configs: {
         Row: {
           api_schema: Json | null;
+          badges: Json | null;
           category: Database['public']['Enums']['content_category'];
           color_scheme: string;
           config_format: string | null;
@@ -314,10 +360,12 @@ export type Database = {
           description: string;
           display_config: boolean;
           empty_state_message: string | null;
+          generate_full_content: boolean;
           generation_config: Json | null;
           icon_name: string;
           keywords: string;
           meta_description: string;
+          metadata_fields: string[];
           plural_title: string;
           primary_action_config: Json | null;
           primary_action_label: string;
@@ -333,6 +381,7 @@ export type Database = {
         };
         Insert: {
           api_schema?: Json | null;
+          badges?: Json | null;
           category: Database['public']['Enums']['content_category'];
           color_scheme: string;
           config_format?: string | null;
@@ -341,10 +390,12 @@ export type Database = {
           description: string;
           display_config?: boolean;
           empty_state_message?: string | null;
+          generate_full_content?: boolean;
           generation_config?: Json | null;
           icon_name: string;
           keywords: string;
           meta_description: string;
+          metadata_fields?: string[];
           plural_title: string;
           primary_action_config?: Json | null;
           primary_action_label: string;
@@ -360,6 +411,7 @@ export type Database = {
         };
         Update: {
           api_schema?: Json | null;
+          badges?: Json | null;
           category?: Database['public']['Enums']['content_category'];
           color_scheme?: string;
           config_format?: string | null;
@@ -368,10 +420,12 @@ export type Database = {
           description?: string;
           display_config?: boolean;
           empty_state_message?: string | null;
+          generate_full_content?: boolean;
           generation_config?: Json | null;
           icon_name?: string;
           keywords?: string;
           meta_description?: string;
+          metadata_fields?: string[];
           plural_title?: string;
           primary_action_config?: Json | null;
           primary_action_label?: string;
@@ -386,6 +440,50 @@ export type Database = {
           validation_config?: Json | null;
         };
         Relationships: [];
+      };
+      category_features: {
+        Row: {
+          category: Database['public']['Enums']['content_category'];
+          config: Json | null;
+          created_at: string;
+          description: string | null;
+          enabled: boolean;
+          feature_key: string;
+          id: string;
+          scope: Database['public']['Enums']['feature_scope'];
+          updated_at: string;
+        };
+        Insert: {
+          category: Database['public']['Enums']['content_category'];
+          config?: Json | null;
+          created_at?: string;
+          description?: string | null;
+          enabled?: boolean;
+          feature_key: string;
+          id?: string;
+          scope: Database['public']['Enums']['feature_scope'];
+          updated_at?: string;
+        };
+        Update: {
+          category?: Database['public']['Enums']['content_category'];
+          config?: Json | null;
+          created_at?: string;
+          description?: string | null;
+          enabled?: boolean;
+          feature_key?: string;
+          id?: string;
+          scope?: Database['public']['Enums']['feature_scope'];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'category_features_category_fkey';
+            columns: ['category'];
+            isOneToOne: false;
+            referencedRelation: 'category_configs';
+            referencedColumns: ['category'];
+          },
+        ];
       };
       changelog: {
         Row: {
@@ -4264,6 +4362,10 @@ export type Database = {
         Args: { p_category: string; p_slug: string };
         Returns: Json;
       };
+      get_app_settings: {
+        Args: { p_category?: string; p_environment?: string };
+        Returns: Json;
+      };
       get_bookmark_counts_by_category: {
         Args: { category_filter: string };
         Returns: {
@@ -4300,6 +4402,15 @@ export type Database = {
         }[];
       };
       get_category_config: { Args: { p_category?: string }; Returns: Json };
+      get_category_configs_with_features: { Args: never; Returns: Json };
+      get_category_features: {
+        Args: {
+          p_category?: string;
+          p_enabled_only?: boolean;
+          p_scope?: Database['public']['Enums']['feature_scope'];
+        };
+        Returns: Json;
+      };
       get_changelog_entries: {
         Args: {
           p_category?: string;
@@ -5131,6 +5242,7 @@ export type Database = {
         | 'jobs'
         | 'changelog';
       experience_level: 'beginner' | 'intermediate' | 'advanced';
+      feature_scope: 'ui' | 'content' | 'api' | 'build' | 'seo';
       field_scope: 'common' | 'type_specific' | 'tags';
       field_type: 'text' | 'textarea' | 'number' | 'select';
       focus_area_type:
@@ -5329,6 +5441,7 @@ export const Constants = {
         'changelog',
       ],
       experience_level: ['beginner', 'intermediate', 'advanced'],
+      feature_scope: ['ui', 'content', 'api', 'build', 'seo'],
       field_scope: ['common', 'type_specific', 'tags'],
       field_type: ['text', 'textarea', 'number', 'select'],
       focus_area_type: [

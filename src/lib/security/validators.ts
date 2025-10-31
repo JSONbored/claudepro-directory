@@ -74,7 +74,7 @@ export const baseSchemas = {
     .string()
     .regex(VALIDATION_PATTERNS.CONTENT_TYPE, 'Invalid content type')
     .describe(
-      'Content category identifier with .json extension. Auto-validated against UNIFIED_CATEGORY_REGISTRY categories.'
+      'Content category identifier with .json extension. Auto-validated against category_configs table categories.'
     ),
 
   // Search query with sanitization
@@ -402,9 +402,8 @@ export const sanitizers = {
   },
 
   /**
-   * Validate and sanitize category input
-   * Ensures only valid categories are accepted
-   * Auto-validated against UNIFIED_CATEGORY_REGISTRY
+   * Validate and sanitize category input - Database-First
+   * Auto-validated against category_configs table
    */
   sanitizeCategory: async (category: string): Promise<string | null> => {
     const sanitized = (await sanitizers.sanitizeFormInput(category, 50)).toLowerCase();

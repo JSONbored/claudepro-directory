@@ -1,8 +1,9 @@
 /**
- * Category Configuration - Single source of truth for all 11 content categories
- * Configuration-driven system where adding a category auto-updates build/UI/SEO/analytics
+ * Category Configuration - Database-First Architecture
+ * Single source of truth: category_configs table in PostgreSQL
  */
 
+import { unstable_cache } from 'next/cache';
 import type { z } from 'zod';
 import {
   BookOpen,
@@ -11,890 +12,362 @@ import {
   FileText,
   Layers,
   type LucideIcon,
+  Server,
   Sparkles,
   Terminal,
   Webhook,
 } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import {
   publicChangelogRowSchema,
   publicContentRowSchema,
   publicJobsRowSchema,
 } from '@/src/lib/schemas/generated/db-schemas';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Tables } from '@/src/types/database.types';
 
-/**
- * Content type - unified content table
- * All categories (agents, mcp, commands, rules, hooks, statuslines, collections, skills, guides) use the unified content table
- */
 export type ContentType = Tables<'content'> | Tables<'jobs'> | Tables<'changelog_entries'>;
 
-/**
- * Unified Category Configuration Interface
- *
- * Consolidates UI, build, and API configuration into single registry.
- * This eliminates duplication between category-config and build-category-config.
- *
- * Production Standards:
- * - Index signature allows type compatibility with MetadataContext
- * - All properties remain strongly typed
- * - Used by build scripts, UI components, SEO, analytics, and more
- */
+type DatabaseCategoryConfig = Tables<'category_configs'>;
+
+export type CategoryId = DatabaseCategoryConfig['category'];
+
 export interface UnifiedCategoryConfig<
   T extends ContentType = ContentType,
   TId extends string = string,
 > {
-  // ===== IDENTITY =====
-  /** Category identifier - type-safe literal from UNIFIED_CATEGORY_REGISTRY keys */
   readonly id: TId;
-
-  // ===== DISPLAY PROPERTIES =====
-  title: string; // Singular display name
-  pluralTitle: string; // Plural display name
-  description: string; // User-facing description
-  icon: LucideIcon; // Lucide icon component
-  colorScheme: string; // Tailwind color class (e.g., 'purple-500') for UI theming
-  showOnHomepage: boolean; // Whether category appears in homepage "All" section
-
-  // ===== SEO =====
-  keywords: string; // Comma-separated keywords
-  metaDescription: string; // Meta description (150-160 chars)
-
-  // ===== SCHEMA & BUILD =====
-  /** Validation schema for this content type */
+  title: string;
+  pluralTitle: string;
+  description: string;
+  icon: LucideIcon;
+  colorScheme: string;
+  showOnHomepage: boolean;
+  keywords: string;
+  metaDescription: string;
   readonly schema: z.ZodType<T>;
-  /** Type discriminator for metadata exports */
   readonly typeName: string;
-  /** Whether this category generates full content exports (vs metadata only) */
   readonly generateFullContent: boolean;
-  /** Metadata field mapping for optimized exports */
   readonly metadataFields: ReadonlyArray<string>;
-
-  // ===== BUILD PERFORMANCE =====
   readonly buildConfig: {
-    /** Batch size for parallel processing */
     readonly batchSize: number;
-    /** Enable incremental caching */
     readonly enableCache: boolean;
-    /** Cache TTL in milliseconds */
     readonly cacheTTL: number;
   };
-
-  // ===== API GENERATION =====
   readonly apiConfig: {
-    /** Generate static API endpoint */
     readonly generateStaticAPI: boolean;
-    /** Include in trending calculations */
     readonly includeTrending: boolean;
-    /** Maximum items per API response */
     readonly maxItemsPerResponse: number;
   };
-
-  // ===== LIST PAGE CONFIGURATION =====
   listPage: {
     searchPlaceholder: string;
-    badges: Array<{
-      icon?: string;
-      text: string | ((count: number) => string);
-    }>;
+    badges: Array<{ icon?: string; text: string | ((count: number) => string) }>;
     emptyStateMessage?: string;
   };
-
-  // ===== DETAIL PAGE CONFIGURATION =====
   detailPage: {
     displayConfig: boolean;
     configFormat: 'json' | 'multi' | 'hook';
-    sections?: Array<{
-      id: string;
-      title: string;
-      order: number;
-      customRenderer?: string;
-    }>;
   };
-
-  // ===== ROUTING =====
+  sections: {
+    features: boolean;
+    installation: boolean;
+    use_cases: boolean;
+    configuration: boolean;
+    security: boolean;
+    troubleshooting: boolean;
+    examples: boolean;
+  };
+  metadata?: {
+    categoryLabel?: string;
+    showGitHubLink?: boolean;
+    githubPathPrefix?: string;
+  };
+  primaryAction: {
+    label: string;
+    type: string;
+  };
+  secondaryActions?: Array<{
+    label: string;
+    type: string;
+  }>;
   urlSlug: string;
-
-  // ===== DATA LOADING =====
   contentLoader: string;
-
-  // Index signature for compatibility with MetadataContext
   [key: string]: unknown;
 }
 
-/** Unified category registry - all 11 content types with configuration */
-export const UNIFIED_CATEGORY_REGISTRY = {
-  agents: {
-    id: 'agents',
-    title: 'AI Agent',
-    pluralTitle: 'AI Agents',
-    description:
-      "Browse specialized AI agents designed for specific tasks and workflows using Claude's capabilities.",
-    icon: Sparkles,
-    colorScheme: 'purple-500',
-    showOnHomepage: true,
-    keywords: 'Claude agents, AI agents, specialized assistants, workflow automation, Claude AI',
-    metaDescription:
-      'Specialized Claude AI agents for October 2025. Community-contributed coding, writing, research, and automation configurations ready for Claude Desktop and Code.',
-    schema: publicContentRowSchema,
+const ICON_MAP: Record<string, LucideIcon> = {
+  Sparkles,
+  Terminal,
+  Webhook,
+  BookOpen,
+  Server,
+  Layers,
+  Briefcase,
+  FileText,
+  Code,
+};
+
+const SCHEMA_MAP: Record<CategoryId, z.ZodType<ContentType>> = {
+  agents: publicContentRowSchema as unknown as z.ZodType<ContentType>,
+  mcp: publicContentRowSchema as unknown as z.ZodType<ContentType>,
+  commands: publicContentRowSchema as unknown as z.ZodType<ContentType>,
+  rules: publicContentRowSchema as unknown as z.ZodType<ContentType>,
+  hooks: publicContentRowSchema as unknown as z.ZodType<ContentType>,
+  statuslines: publicContentRowSchema as unknown as z.ZodType<ContentType>,
+  skills: publicContentRowSchema as unknown as z.ZodType<ContentType>,
+  collections: publicContentRowSchema as unknown as z.ZodType<ContentType>,
+  guides: publicContentRowSchema as unknown as z.ZodType<ContentType>,
+  jobs: publicJobsRowSchema as unknown as z.ZodType<ContentType>,
+  changelog: publicChangelogRowSchema as unknown as z.ZodType<ContentType>,
+};
+
+function transformBadges(
+  dbBadges: unknown
+): Array<{ icon?: string; text: string | ((count: number) => string) }> {
+  if (!(dbBadges && Array.isArray(dbBadges))) return [];
+  return dbBadges.map((badge) => {
+    if (typeof badge !== 'object' || !badge) return { text: '' };
+    const b = badge as { icon?: string; text?: string; hasDynamicCount?: boolean };
+    if (b.hasDynamicCount && b.text) {
+      const template = b.text;
+      return b.icon
+        ? { icon: b.icon, text: (count: number) => template.replace('{count}', String(count)) }
+        : { text: (count: number) => template.replace('{count}', String(count)) };
+    }
+    return b.icon ? { icon: b.icon, text: b.text || '' } : { text: b.text || '' };
+  });
+}
+
+interface DatabaseConfigWithFeatures {
+  category: string;
+  title: string;
+  plural_title: string;
+  description: string;
+  icon_name: string;
+  color_scheme: string;
+  keywords: string;
+  meta_description: string;
+  search_placeholder: string;
+  empty_state_message: string | null;
+  url_slug: string;
+  content_loader: string;
+  config_format: string | null;
+  primary_action_type: string;
+  primary_action_label: string;
+  primary_action_config: unknown;
+  validation_config: unknown;
+  generation_config: unknown;
+  schema_name: string | null;
+  api_schema: unknown;
+  metadata_fields: string[];
+  badges: unknown;
+  features: Record<string, boolean>;
+}
+
+function transformDatabaseConfig(
+  dbConfig: DatabaseConfigWithFeatures
+): UnifiedCategoryConfig<ContentType, CategoryId> {
+  const categoryId = dbConfig.category as CategoryId;
+  const features = dbConfig.features || {};
+  const generationConfig = (dbConfig.generation_config || {}) as {
+    buildConfig?: { batchSize?: number; cacheTTL?: number };
+  };
+  const apiSchema = (dbConfig.api_schema || {}) as {
+    apiConfig?: { maxItemsPerResponse?: number };
+  };
+
+  return {
+    id: categoryId,
+    title: dbConfig.title,
+    pluralTitle: dbConfig.plural_title,
+    description: dbConfig.description,
+    icon: ICON_MAP[dbConfig.icon_name] || FileText,
+    colorScheme: dbConfig.color_scheme,
+    showOnHomepage: features.show_on_homepage ?? true,
+    keywords: dbConfig.keywords,
+    metaDescription: dbConfig.meta_description,
+    schema: SCHEMA_MAP[categoryId],
     typeName: 'Database["public"]["Tables"]["content"]["Row"]',
-    generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'seoTitle',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ] as const,
+    generateFullContent: features.generate_full_content ?? true,
+    metadataFields: dbConfig.metadata_fields,
     buildConfig: {
-      batchSize: 10,
-      enableCache: true,
-      cacheTTL: 5 * 60 * 1000,
+      batchSize: generationConfig.buildConfig?.batchSize || 10,
+      enableCache: features.build_enable_cache ?? true,
+      cacheTTL: generationConfig.buildConfig?.cacheTTL || 300000,
     },
     apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: true,
-      maxItemsPerResponse: 1000,
+      generateStaticAPI: features.api_generate_static ?? true,
+      includeTrending: features.api_include_trending ?? true,
+      maxItemsPerResponse: apiSchema.apiConfig?.maxItemsPerResponse || 1000,
     },
-    listPage: {
-      searchPlaceholder: 'Search AI agents...',
-      badges: [
-        { icon: 'sparkles', text: (count: number) => `${count} Agents Available` },
-        { text: 'Task Optimized' },
-        { text: 'Ready to Deploy' },
-      ],
-    },
+    listPage: (() => {
+      const listPage: {
+        searchPlaceholder: string;
+        badges: Array<{ icon?: string; text: string | ((count: number) => string) }>;
+        emptyStateMessage?: string;
+      } = {
+        searchPlaceholder: dbConfig.search_placeholder,
+        badges: transformBadges(dbConfig.badges),
+      };
+      if (dbConfig.empty_state_message) {
+        listPage.emptyStateMessage = dbConfig.empty_state_message;
+      }
+      return listPage;
+    })(),
     detailPage: {
-      displayConfig: true,
-      configFormat: 'json' as const,
-      sections: [
-        { id: 'content', title: 'Agent Prompt', order: 1 },
-        { id: 'configuration', title: 'Configuration', order: 2 },
-      ],
+      displayConfig: features.display_config ?? true,
+      configFormat: (dbConfig.config_format as 'json' | 'multi' | 'hook') || 'json',
     },
-    urlSlug: 'agents',
-    contentLoader: 'agents',
-  },
+    sections: {
+      features: features.section_features ?? false,
+      installation: features.section_installation ?? false,
+      use_cases: features.section_use_cases ?? false,
+      configuration: features.section_configuration ?? false,
+      security: features.section_security ?? false,
+      troubleshooting: features.section_troubleshooting ?? false,
+      examples: features.section_examples ?? false,
+    },
+    metadata: {
+      showGitHubLink: features.metadata_show_github_link ?? true,
+    },
+    primaryAction: {
+      label: dbConfig.primary_action_label,
+      type: dbConfig.primary_action_type,
+    },
+    urlSlug: dbConfig.url_slug,
+    contentLoader: dbConfig.content_loader,
+  };
+}
 
-  mcp: {
-    id: 'mcp',
-    title: 'MCP Server',
-    pluralTitle: 'MCP Servers',
-    description:
-      "Model Context Protocol servers that extend Claude's capabilities with external tools and data sources.",
-    icon: Code,
-    colorScheme: 'green-500',
-    showOnHomepage: true,
-    keywords: 'MCP servers, Model Context Protocol, Claude tools, API integration',
-    metaDescription:
-      'Model Context Protocol servers for October 2025. Extend Claude with GitHub, databases, APIs, and file systems. Official MCP integrations with setup guides.',
-    schema: publicContentRowSchema,
-    typeName: 'Database["public"]["Tables"]["content"]["Row"]',
-    generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'seoTitle',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ] as const,
-    buildConfig: {
-      batchSize: 10,
-      enableCache: true,
-      cacheTTL: 5 * 60 * 1000,
-    },
-    apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: true,
-      maxItemsPerResponse: 1000,
-    },
-    listPage: {
-      searchPlaceholder: 'Search MCP servers...',
-      badges: [
-        { icon: 'code', text: (count: number) => `${count} Servers Available` },
-        { text: 'Official Protocol' },
-        { text: 'Production Ready' },
-      ],
-    },
-    detailPage: {
-      displayConfig: true,
-      configFormat: 'multi' as const,
-    },
-    urlSlug: 'mcp',
-    contentLoader: 'mcp',
-  },
+async function fetchAllCategoryConfigs(): Promise<
+  Record<CategoryId, UnifiedCategoryConfig<ContentType, CategoryId>>
+> {
+  try {
+    const supabase = createAnonClient();
+    const { data, error } = await supabase.rpc('get_category_configs_with_features');
+    if (error) throw error;
+    if (!data) throw new Error('No category configs found');
 
-  commands: {
-    id: 'commands',
-    title: 'Command',
-    pluralTitle: 'Commands',
-    description:
-      'Custom slash commands to enhance your Claude Code workflow with reusable prompts and actions.',
-    icon: Terminal,
-    colorScheme: 'orange-500',
-    showOnHomepage: true,
-    keywords: 'Claude commands, slash commands, CLI tools, workflow automation',
-    metaDescription:
-      'Claude Code slash commands for October 2025. Workflow automation, code review, testing, and documentation. Community-built reusable prompts for development.',
-    schema: publicContentRowSchema,
-    typeName: 'Database["public"]["Tables"]["content"]["Row"]',
-    generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'seoTitle',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ] as const,
-    buildConfig: {
-      batchSize: 10,
-      enableCache: true,
-      cacheTTL: 5 * 60 * 1000,
-    },
-    apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: true,
-      maxItemsPerResponse: 1000,
-    },
-    listPage: {
-      searchPlaceholder: 'Search commands...',
-      badges: [
-        { icon: 'terminal', text: (count: number) => `${count} Commands Available` },
-        { text: 'Workflow Boosters' },
-        { text: 'Copy & Use' },
-      ],
-    },
-    detailPage: {
-      displayConfig: true,
-      configFormat: 'json' as const,
-    },
-    urlSlug: 'commands',
-    contentLoader: 'commands',
-  },
+    const rawConfigs = data as unknown as Record<string, DatabaseConfigWithFeatures>;
+    const configs: Record<string, UnifiedCategoryConfig<ContentType, CategoryId>> = {};
 
-  rules: {
-    id: 'rules',
-    title: 'Rule',
-    pluralTitle: 'Rules',
-    description: "Custom rules to guide Claude's behavior and responses in your projects.",
-    icon: BookOpen,
-    colorScheme: 'blue-500',
-    showOnHomepage: true,
-    keywords: 'Claude rules, AI guidelines, project rules, behavior customization',
-    metaDescription:
-      'Claude AI rules for October 2025. Control behavior for coding standards, security, testing, and documentation. Community-curated guidelines for AI assistance.',
-    schema: publicContentRowSchema,
-    typeName: 'Database["public"]["Tables"]["content"]["Row"]',
-    generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'seoTitle',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ] as const,
-    buildConfig: {
-      batchSize: 10,
-      enableCache: true,
-      cacheTTL: 5 * 60 * 1000,
-    },
-    apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: true,
-      maxItemsPerResponse: 1000,
-    },
-    listPage: {
-      searchPlaceholder: 'Search rules...',
-      badges: [
-        { icon: 'book-open', text: (count: number) => `${count} Rules Available` },
-        { text: 'Behavior Control' },
-        { text: 'Project Specific' },
-      ],
-    },
-    detailPage: {
-      displayConfig: true,
-      configFormat: 'json' as const,
-    },
-    urlSlug: 'rules',
-    contentLoader: 'rules',
-  },
+    for (const [categoryId, dbConfig] of Object.entries(rawConfigs)) {
+      configs[categoryId] = transformDatabaseConfig(dbConfig);
+    }
 
-  hooks: {
-    id: 'hooks',
-    title: 'Hook',
-    pluralTitle: 'Hooks',
-    description: 'Event-driven automation hooks that trigger during Claude Code operations.',
-    icon: Webhook,
-    colorScheme: 'blue-500',
-    showOnHomepage: true,
-    keywords: 'Claude hooks, automation, webhooks, event triggers, CI/CD',
-    metaDescription:
-      'Claude Code automation hooks for October 2025. Event-driven scripts for git commits, testing, linting, and CI/CD integration. Shell scripts for dev workflows.',
-    schema: publicContentRowSchema,
-    typeName: 'Database["public"]["Tables"]["content"]["Row"]',
-    generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'seoTitle',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ] as const,
-    buildConfig: {
-      batchSize: 10,
-      enableCache: true,
-      cacheTTL: 5 * 60 * 1000,
-    },
-    apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: true,
-      maxItemsPerResponse: 1000,
-    },
-    listPage: {
-      searchPlaceholder: 'Search hooks...',
-      badges: [
-        { icon: 'webhook', text: (count: number) => `${count} Hooks Available` },
-        { text: 'Event Driven' },
-        { text: 'Automation Ready' },
-      ],
-    },
-    detailPage: {
-      displayConfig: true,
-      configFormat: 'hook' as const,
-    },
-    urlSlug: 'hooks',
-    contentLoader: 'hooks',
-  },
-
-  statuslines: {
-    id: 'statuslines',
-    title: 'Statusline',
-    pluralTitle: 'Statuslines',
-    description:
-      'Customizable status line configurations for Claude Code CLI with real-time session information.',
-    icon: Terminal,
-    colorScheme: 'cyan-500',
-    showOnHomepage: true,
-    keywords: 'Claude statuslines, CLI customization, terminal themes, status bar',
-    metaDescription:
-      'Claude Code CLI statuslines for October 2025. Beautiful terminal themes showing git info, project details, and session stats. Community-designed status bars.',
-    schema: publicContentRowSchema,
-    typeName: 'Database["public"]["Tables"]["content"]["Row"]',
-    generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'seoTitle',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ] as const,
-    buildConfig: {
-      batchSize: 10,
-      enableCache: true,
-      cacheTTL: 5 * 60 * 1000,
-    },
-    apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: true,
-      maxItemsPerResponse: 1000,
-    },
-    listPage: {
-      searchPlaceholder: 'Search statuslines...',
-      badges: [
-        { icon: 'terminal', text: (count: number) => `${count} Statuslines Available` },
-        { text: 'CLI Enhancement' },
-        { text: 'Customizable' },
-      ],
-    },
-    detailPage: {
-      displayConfig: true,
-      configFormat: 'json' as const,
-      sections: [
-        {
-          id: 'preview',
-          title: 'Preview',
-          order: 1,
-          customRenderer: 'StatuslinePreview',
-        },
-        { id: 'script', title: 'Script Content', order: 2 },
-        { id: 'configuration', title: 'Installation', order: 3 },
-      ],
-    },
-    urlSlug: 'statuslines',
-    contentLoader: 'statuslines',
-  },
-
-  collections: {
-    id: 'collections',
-    title: 'Collection',
-    pluralTitle: 'Collections',
-    description:
-      'Curated bundles of related content items organized by theme, use case, or workflow for easy discovery.',
-    icon: Layers,
-    colorScheme: 'indigo-500',
-    showOnHomepage: true,
-    keywords: 'Claude collections, starter kits, workflows, bundles, curated content',
-    metaDescription:
-      'Curated Claude AI starter kits bundling agents, MCP servers, commands, and rules by use case. Complete workflow collections for web development and automation.',
-    schema: publicContentRowSchema,
-    typeName: 'Database["public"]["Tables"]["content"]["Row"]',
-    generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'seoTitle',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-      'collectionType',
-      'difficulty',
-      'estimatedSetupTime',
-    ] as const,
-    buildConfig: {
-      batchSize: 10,
-      enableCache: true,
-      cacheTTL: 5 * 60 * 1000,
-    },
-    apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: true,
-      maxItemsPerResponse: 1000,
-    },
-    listPage: {
-      searchPlaceholder: 'Search collections...',
-      badges: [
-        { icon: 'layers', text: (count: number) => `${count} Collections Available` },
-        { text: 'Curated Bundles' },
-        { text: 'Ready to Use' },
-      ],
-    },
-    detailPage: {
-      displayConfig: false,
-      configFormat: 'json' as const,
-      sections: [
-        { id: 'items', title: "What's Included", order: 1 },
-        { id: 'prerequisites', title: 'Prerequisites', order: 2 },
-        { id: 'installation', title: 'Installation Order', order: 3 },
-        { id: 'compatibility', title: 'Compatibility', order: 4 },
-      ],
-    },
-    urlSlug: 'collections',
-    contentLoader: 'collections',
-  },
-
-  skills: {
-    id: 'skills',
-    title: 'Skill',
-    pluralTitle: 'Skills',
-    description:
-      'Task-focused capability guides for Claude (PDF, DOCX, PPTX, XLSX, and more) with requirements and runnable examples.',
-    icon: BookOpen,
-    colorScheme: 'emerald-500',
-    showOnHomepage: true,
-    keywords: 'Claude skills, document processing, pdf, docx, pptx, xlsx, how-to, examples',
-    metaDescription:
-      'Practical Claude Skills for October 2025: PDF/DOCX/PPTX/XLSX workflows with exact dependencies, copy-pasteable code examples, and troubleshooting guides.',
-    schema: publicContentRowSchema,
-    typeName: 'Database["public"]["Tables"]["content"]["Row"]',
-    generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'seoTitle',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ] as const,
-    buildConfig: {
-      batchSize: 10,
-      enableCache: true,
-      cacheTTL: 5 * 60 * 1000,
-    },
-    apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: true,
-      maxItemsPerResponse: 1000,
-    },
-    listPage: {
-      searchPlaceholder: 'Search skills...',
-      badges: [
-        { icon: 'book-open', text: (count: number) => `${count} Skills Available` },
-        { text: 'Environment Ready' },
-        { text: 'Copy & Run' },
-      ],
-    },
-    detailPage: {
-      displayConfig: false,
-      configFormat: 'json' as const,
-      sections: [
-        { id: 'content', title: 'Guide', order: 1 },
-        { id: 'installation', title: 'Installation', order: 2 },
-        { id: 'examples', title: 'Examples', order: 3 },
-        { id: 'troubleshooting', title: 'Troubleshooting', order: 4 },
-      ],
-    },
-    urlSlug: 'skills',
-    contentLoader: 'skills',
-  },
-
-  guides: {
-    id: 'guides',
-    title: 'Guide',
-    pluralTitle: 'Guides',
-    description:
-      'Comprehensive guides, tutorials, comparisons, and workflows for Claude. SEO-optimized content covering best practices, use cases, and troubleshooting.',
-    icon: FileText,
-    colorScheme: 'blue-500',
-    showOnHomepage: false,
-    keywords:
-      'Claude guides, tutorials, comparisons, workflows, use cases, troubleshooting, best practices',
-    metaDescription:
-      'Expert Claude guides for October 2025: In-depth tutorials, feature comparisons, workflow automation, use case examples, troubleshooting, and best practices.',
-    schema: publicContentRowSchema,
-    typeName: 'Database["public"]["Tables"]["content"]["Row"]',
-    generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'seoTitle',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'subcategory',
-      'date_added',
-      'source',
-      'keywords',
-      'difficulty',
-      'readingTime',
-    ] as const,
-    buildConfig: {
-      batchSize: 10,
-      enableCache: true,
-      cacheTTL: 5 * 60 * 1000,
-    },
-    apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: true,
-      maxItemsPerResponse: 1000,
-    },
-    listPage: {
-      searchPlaceholder: 'Search guides...',
-      badges: [
-        { icon: 'file-text', text: (count: number) => `${count} Guides Available` },
-        { text: 'SEO Optimized' },
-        { text: 'Expert Content' },
-      ],
-    },
-    detailPage: {
-      displayConfig: false,
-      configFormat: 'json' as const,
-      sections: [
-        { id: 'content', title: 'Guide Content', order: 1 },
-        { id: 'related', title: 'Related Guides', order: 2 },
-      ],
-    },
-    urlSlug: 'guides',
-    contentLoader: 'guides',
-  },
-
-  jobs: {
-    id: 'jobs',
-    title: 'Job',
-    pluralTitle: 'Jobs',
-    description:
-      'AI and Claude-related job listings. Find opportunities in AI development, prompt engineering, and Claude integration.',
-    icon: Briefcase,
-    colorScheme: 'indigo-500',
-    showOnHomepage: false,
-    keywords: 'AI jobs, Claude jobs, prompt engineering, AI development, remote AI jobs',
-    metaDescription:
-      'AI job board for October 2025: Claude-related positions, prompt engineering roles, AI development opportunities. Remote and on-site positions available.',
-    schema: publicJobsRowSchema,
-    typeName: 'Database["public"]["Tables"]["jobs"]["Row"]',
-    generateFullContent: false,
-    metadataFields: [
-      'id',
-      'slug',
-      'title',
-      'company',
-      'location',
-      'type',
-      'remote',
-      'salary',
-      'posted_at',
-    ] as const,
-    buildConfig: {
-      batchSize: 20,
-      enableCache: true,
-      cacheTTL: 2 * 60 * 1000,
-    },
-    apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: false,
-      maxItemsPerResponse: 100,
-    },
-    listPage: {
-      searchPlaceholder: 'Search jobs...',
-      badges: [
-        { icon: 'briefcase', text: (count: number) => `${count} Open Positions` },
-        { text: 'Remote Available' },
-        { text: 'Updated Daily' },
-      ],
-    },
-    detailPage: {
-      displayConfig: false,
-      configFormat: 'json' as const,
-    },
-    urlSlug: 'jobs',
-    contentLoader: 'jobs',
-  },
-
-  changelog: {
-    id: 'changelog',
-    title: 'Changelog',
-    pluralTitle: 'Changelog',
-    description:
-      'Product updates, new features, and improvements to the Claude Pro Directory platform.',
-    icon: FileText,
-    colorScheme: 'slate-500',
-    showOnHomepage: false,
-    keywords: 'changelog, updates, new features, improvements, release notes',
-    metaDescription:
-      'Claude Pro Directory changelog for October 2025: Latest features, improvements, bug fixes, platform updates, new integrations, and performance enhancements.',
-    schema: publicChangelogRowSchema as any,
-    typeName: 'Database["public"]["Tables"]["changelog"]["Row"]',
-    generateFullContent: true,
-    metadataFields: ['slug', 'title', 'description', 'date_added'] as const,
-    buildConfig: {
-      batchSize: 5,
-      enableCache: true,
-      cacheTTL: 10 * 60 * 1000,
-    },
-    apiConfig: {
-      generateStaticAPI: false,
-      includeTrending: false,
-      maxItemsPerResponse: 50,
-    },
-    listPage: {
-      searchPlaceholder: 'Search changelog...',
-      badges: [{ icon: 'file-text', text: 'Release History' }, { text: 'Product Updates' }],
-    },
-    detailPage: {
-      displayConfig: false,
-      configFormat: 'json' as const,
-    },
-    urlSlug: 'changelog',
-    contentLoader: 'changelog',
-  },
-} as const satisfies Record<string, UnifiedCategoryConfig>;
-
-/**
- * Type inference from unified registry
- * Modern TypeScript pattern for zero-cost type safety
- */
-export type CategoryId = keyof typeof UNIFIED_CATEGORY_REGISTRY;
-export type UnifiedCategoryConfigValue = (typeof UNIFIED_CATEGORY_REGISTRY)[CategoryId];
-
-/**
- * ============================================
- * HELPER FUNCTIONS
- * ============================================
- */
-
-/**
- * Get valid category slugs for routing validation
- *
- * @architecture DERIVED FROM REGISTRY
- * Uses Object.keys() to dynamically extract category IDs from UNIFIED_CATEGORY_REGISTRY.
- * TypeScript types this as string[] by default, but we know these are CategoryId values.
- *
- * This is the ONE acceptable cast in the entire system because:
- * 1. Object.keys() ALWAYS returns the registry keys
- * 2. CategoryId is derived from registry keys via `keyof typeof UNIFIED_CATEGORY_REGISTRY`
- * 3. Therefore the cast is safe by construction - the runtime value matches the type
- *
- * All other code should use isValidCategory() type guard or iterate this array - NO OTHER CASTS.
- */
-export const VALID_CATEGORIES = Object.keys(UNIFIED_CATEGORY_REGISTRY) as CategoryId[];
-
-/**
- * Get category config by URL slug
- * Returns unified category configuration from UNIFIED_CATEGORY_REGISTRY
- */
-export function getCategoryConfig(slug: string): UnifiedCategoryConfigValue | null {
-  if (!isValidCategory(slug)) {
-    return null;
+    logger.info('Loaded category configs with features from database', {
+      count: Object.keys(configs).length,
+    });
+    return configs as Record<CategoryId, UnifiedCategoryConfig<ContentType, CategoryId>>;
+  } catch (error) {
+    logger.error('Failed to fetch category configs', error as Error);
+    throw error;
   }
-  return UNIFIED_CATEGORY_REGISTRY[slug];
 }
 
-/**
- * Type guard for valid categories
- */
-export function isValidCategory(category: string): category is CategoryId {
-  return category in UNIFIED_CATEGORY_REGISTRY;
+const getCategoryConfigsFromDB = unstable_cache(fetchAllCategoryConfigs, ['category-configs-v2'], {
+  revalidate: 86400,
+  tags: ['category-configs'],
+});
+
+export async function getCategoryConfigs(): Promise<
+  Record<CategoryId, UnifiedCategoryConfig<ContentType, CategoryId>>
+> {
+  return getCategoryConfigsFromDB();
 }
 
-/**
- * Get all category IDs as array
- *
- * @returns Array of all category IDs from UNIFIED_CATEGORY_REGISTRY
- *
- * @architecture Just returns VALID_CATEGORIES (which is Object.keys(registry))
- */
-export function getAllCategoryIds(): CategoryId[] {
-  return VALID_CATEGORIES;
-}
+export type UnifiedCategoryConfigValue = UnifiedCategoryConfig;
 
-/**
- * Get category IDs that should appear on homepage "All" section
- * Filters based on showOnHomepage flag in registry
- */
-export function getHomepageCategoryIds(): CategoryId[] {
-  return VALID_CATEGORIES.filter((id) => UNIFIED_CATEGORY_REGISTRY[id].showOnHomepage);
-}
-
-/**
- * Get cacheable category IDs (categories with generateFullContent: true)
- * Used for build-time content generation and caching
- */
-export function getCacheableCategoryIds(): CategoryId[] {
-  return VALID_CATEGORIES.filter((id) => UNIFIED_CATEGORY_REGISTRY[id].generateFullContent);
-}
-
-// REMOVED: Registry validation check - no longer needed
-// Schema is now derived from registry, so they're always in sync by definition
-
-/**
- * Homepage-specific category configurations
- * Now derived from registry (ensures stays in sync)
- */
-export const HOMEPAGE_FEATURED_CATEGORIES = [
-  'rules',
-  'mcp',
+export const VALID_CATEGORIES: readonly CategoryId[] = [
   'agents',
+  'mcp',
   'commands',
+  'rules',
   'hooks',
   'statuslines',
-  'collections',
   'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
 ] as const;
 
+export async function getCategoryConfig(
+  slug: CategoryId
+): Promise<UnifiedCategoryConfigValue | null> {
+  const configs = await getCategoryConfigs();
+  return configs[slug] || null;
+}
+
+export function isValidCategory(category: string): category is CategoryId {
+  return VALID_CATEGORIES.includes(category as CategoryId);
+}
+
+export async function getAllCategoryIds(): Promise<CategoryId[]> {
+  return Object.keys(await getCategoryConfigs()) as CategoryId[];
+}
+
+export async function getHomepageCategoryIds(): Promise<CategoryId[]> {
+  const configs = await getCategoryConfigs();
+  return Object.entries(configs)
+    .filter(([_, config]) => config.showOnHomepage)
+    .map(([id, _]) => id as CategoryId);
+}
+
+export async function getCacheableCategoryIds(): Promise<CategoryId[]> {
+  return Object.keys(await getCategoryConfigs()).filter(
+    (id) => id !== 'jobs' && id !== 'changelog'
+  ) as CategoryId[];
+}
+
+export const HOMEPAGE_FEATURED_CATEGORIES = [
+  'agents',
+  'mcp',
+  'commands',
+  'rules',
+] as const satisfies readonly CategoryId[];
 export const HOMEPAGE_TAB_CATEGORIES = [
   'all',
-  'rules',
-  'mcp',
   'agents',
+  'mcp',
   'commands',
+  'rules',
   'hooks',
   'statuslines',
   'collections',
-  'skills',
+  'guides',
   'community',
 ] as const;
 
 export type HomepageFeaturedCategory = (typeof HOMEPAGE_FEATURED_CATEGORIES)[number];
 export type HomepageTabCategory = (typeof HOMEPAGE_TAB_CATEGORIES)[number];
 
-/**
- * ============================================
- * HOMEPAGE STATS DISPLAY CONFIGURATION
- * ============================================
- *
- * Configuration for dynamic stats display on homepage.
- * Associates each category with its icon and display text.
- *
- * Modern 2025 Architecture:
- * - Configuration-driven stats rendering
- * - Zero hardcoded stat displays
- * - Icons pulled from category config
- * - Display text auto-generated from pluralTitle
- */
-
 export interface CategoryStatsConfig {
-  readonly categoryId: CategoryId;
-  readonly icon: LucideIcon;
-  readonly displayText: string;
-  readonly delay: number; // Animation delay in ms
+  categoryId: CategoryId;
+  icon: LucideIcon;
+  displayText: string;
+  delay: number;
 }
 
-/**
- * Get stats configuration for homepage display
- * Dynamically generates from registry with animation stagger
- *
- * @returns Array of category stats configurations
- */
-export function getCategoryStatsConfig(): readonly CategoryStatsConfig[] {
-  return getAllCategoryIds().map((id, index) => {
-    const config = UNIFIED_CATEGORY_REGISTRY[id];
-    return {
-      categoryId: id,
-      icon: config.icon,
-      displayText: config.pluralTitle,
-      delay: index * 100, // Stagger animations by 100ms
-    };
-  });
+export async function getCategoryStatsConfig(): Promise<readonly CategoryStatsConfig[]> {
+  const configs = await getCategoryConfigs();
+  return Object.keys(configs).map((id, index) => ({
+    categoryId: id as CategoryId,
+    icon: configs[id as CategoryId].icon,
+    displayText: configs[id as CategoryId].pluralTitle,
+    delay: index * 100,
+  }));
 }
 
-/**
- * Calculate total resource count from stats object
- * Used for dynamic newsletter CTA copy
- *
- * @param stats - Stats object with category counts (from homepage)
- * @returns Total number of resources across all categories
- */
 export function getTotalResourceCount(stats: Record<string, number>): number {
   return Object.values(stats).reduce((sum, count) => sum + count, 0);
 }
 
-/**
- * Newsletter CTA Copy Configuration
- * Honest, conversion-optimized messaging based on 2025 best practices
- */
 export const NEWSLETTER_CTA_CONFIG = {
-  /** Headline for main CTA (3-5 words, benefit-driven) */
-  headline: 'Discover New Claude Tools',
-
-  /** Subheadline explaining value (single line) */
-  description:
-    'Weekly picks, exclusive guides, and early access to new features. Join our growing community.',
-
-  /** Button text (2-4 words, first-person for 371% higher conversion) */
-  buttonText: 'Count Me In',
-
-  /** Footer text (social proof without lying) */
-  footerText: 'No spam • Unsubscribe anytime',
-
-  /** Early adopter appeal for smaller sites */
-  earlyAdopterBadge: 'Founding Member Access',
+  title: 'Get the latest Claude resources',
+  headline: 'Get the latest Claude resources',
+  description: 'Weekly roundup of the best Claude agents, tools, and guides.',
+  ctaText: 'Subscribe',
+  buttonText: 'Subscribe',
+  footerText: 'No spam. Unsubscribe anytime.',
 } as const;

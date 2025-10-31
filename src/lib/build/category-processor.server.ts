@@ -20,7 +20,8 @@ import { z } from 'zod';
 import {
   type CategoryId,
   type ContentType,
-  UNIFIED_CATEGORY_REGISTRY,
+  getCategoryConfig,
+  type UnifiedCategoryConfig,
 } from '@/src/lib/config/category-config';
 // MDX support removed - 100% JSON content now
 import { logger } from '@/src/lib/logger';
@@ -159,7 +160,7 @@ function computeContentHash(content: string): string {
  */
 function extractMetadata(
   content: ContentType,
-  config: (typeof UNIFIED_CATEGORY_REGISTRY)[CategoryId]
+  config: UnifiedCategoryConfig
 ): Record<string, unknown> {
   const metadata: Record<string, unknown> = {};
 
@@ -339,9 +340,7 @@ async function processContentFile<T extends ContentType>(
       const SITE_NAME = 'Claude Pro Directory'; // 20 chars
       const SEPARATOR = ' - '; // 3 chars
 
-      const categoryDisplay =
-        UNIFIED_CATEGORY_REGISTRY[category as keyof typeof UNIFIED_CATEGORY_REGISTRY]
-          ?.pluralTitle || category;
+      const categoryDisplay = config.pluralTitle || category;
       const overhead =
         SEPARATOR.length + categoryDisplay.length + SEPARATOR.length + SITE_NAME.length;
       const maxContentLength = 60 - overhead;
@@ -498,11 +497,25 @@ export async function buildCategory(
   const startTime = performance.now();
   const startMemory = process.memoryUsage().heapUsed;
 
-  const config = UNIFIED_CATEGORY_REGISTRY[categoryId];
+  const config = await getCategoryConfig(categoryId);
+  if (!config) throw new Error(`Category config not found for ${categoryId}`);
+
+  // Extract only BuildCategoryConfig fields from UnifiedCategoryConfig
+  // config.id is CategoryId because we fetched with getCategoryConfig(categoryId: CategoryId)
+  const buildConfig: BuildCategoryConfig = {
+    id: categoryId, // Use the input parameter which is properly typed as CategoryId
+    pluralTitle: config.pluralTitle,
+    schema: config.schema,
+    typeName: config.typeName,
+    generateFullContent: config.generateFullContent,
+    metadataFields: config.metadataFields,
+    buildConfig: config.buildConfig,
+    apiConfig: config.apiConfig,
+  };
 
   try {
     // Process all files with type-safe generic
-    const results = await processCategoryFiles<ContentType>(contentDir, config, cache);
+    const results = await processCategoryFiles<ContentType>(contentDir, buildConfig, cache);
 
     // Separate successful and failed results
     const successful = results.filter((r) => r.success && r.content !== null);

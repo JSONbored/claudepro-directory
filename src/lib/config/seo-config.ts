@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+import { getCategoryConfigs } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
@@ -12,42 +12,36 @@ import { createAnonClient } from '@/src/lib/supabase/server-anon';
 const SITE_NAME = 'Claude Pro Directory';
 const SEPARATOR = ' - ';
 
-function calculateSuffixLength(categoryDisplayName: string): number {
-  return SEPARATOR.length + categoryDisplayName.length + SEPARATOR.length + SITE_NAME.length;
-}
-
-export const SUFFIX_LENGTHS = {
-  agents: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.agents.pluralTitle),
-  mcp: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.mcp.pluralTitle),
-  rules: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.rules.pluralTitle),
-  commands: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.commands.pluralTitle),
-  hooks: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.hooks.pluralTitle),
-  statuslines: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.statuslines.pluralTitle),
-  collections: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.collections.pluralTitle),
-  skills: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.skills.pluralTitle),
-  guides: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.guides.pluralTitle),
-  jobs: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.jobs.pluralTitle),
-  changelog: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.changelog.pluralTitle),
-} as const satisfies Record<CategoryId, number>;
-
 export const MAX_TITLE_LENGTH = 60;
 export const OPTIMAL_MIN = 53;
 export const OPTIMAL_MAX = 60;
 export const MIN_ENHANCEMENT_GAIN = 3;
 
-export const MAX_BASE_TITLE_LENGTH = {
-  agents: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.agents,
-  mcp: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.mcp,
-  rules: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.rules,
-  commands: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.commands,
-  hooks: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.hooks,
-  statuslines: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.statuslines,
-  collections: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.collections,
-  skills: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.skills,
-  guides: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.guides,
-  jobs: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.jobs,
-  changelog: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.changelog,
-} as const satisfies Record<CategoryId, number>;
+function calculateSuffixLength(categoryDisplayName: string): number {
+  return SEPARATOR.length + categoryDisplayName.length + SEPARATOR.length + SITE_NAME.length;
+}
+
+export async function getSuffixLengths(): Promise<Record<CategoryId, number>> {
+  const configs = await getCategoryConfigs();
+  const lengths: Record<string, number> = {};
+
+  for (const [categoryId, config] of Object.entries(configs)) {
+    lengths[categoryId] = calculateSuffixLength(config.pluralTitle);
+  }
+
+  return lengths as Record<CategoryId, number>;
+}
+
+export async function getMaxBaseTitleLengths(): Promise<Record<CategoryId, number>> {
+  const suffixLengths = await getSuffixLengths();
+  const maxLengths: Record<string, number> = {};
+
+  for (const [categoryId, suffixLength] of Object.entries(suffixLengths)) {
+    maxLengths[categoryId] = MAX_TITLE_LENGTH - suffixLength;
+  }
+
+  return maxLengths as Record<CategoryId, number>;
+}
 
 export async function getMetadataQualityRules() {
   const supabase = createAnonClient();

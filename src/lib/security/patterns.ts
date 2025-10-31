@@ -16,7 +16,7 @@ export const VALIDATION_PATTERNS = {
   // Strict slug format (URL-safe)
   SLUG: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
 
-  // Content type validation (exact match) - Auto-generated from UNIFIED_CATEGORY_REGISTRY
+  // Content type validation - Auto-generated from category_configs table
   CONTENT_TYPE: new RegExp(`^(${VALID_CATEGORIES.join('|')})\\.json$`),
 
   // File extensions (security-focused)

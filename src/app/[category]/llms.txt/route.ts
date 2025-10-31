@@ -7,7 +7,11 @@
  */
 
 import { NextResponse } from 'next/server';
-import { isValidCategory, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+import {
+  type CategoryId,
+  getCategoryConfig,
+  isValidCategory,
+} from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { handleApiError } from '@/src/lib/error-handler';
@@ -60,10 +64,8 @@ export async function GET(
       });
     }
 
-    // Get category configuration and content
-    const config = UNIFIED_CATEGORY_REGISTRY[category];
+    const config = await getCategoryConfig(category as CategoryId);
 
-    // Handle case where config is not found (should never happen with validation above)
     if (!config) {
       logger.error(
         'Category config not found despite validation',

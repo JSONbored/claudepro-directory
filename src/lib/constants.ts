@@ -7,7 +7,7 @@
  */
 
 import { z } from 'zod';
-import { getAllCategoryIds } from '@/src/lib/config/category-config';
+import { VALID_CATEGORIES } from '@/src/lib/config/category-config';
 
 /**
  * Application Information Schema
@@ -83,15 +83,14 @@ export const CLAUDE_CONFIG = claudeConfigSchema.parse({
 });
 
 /**
- * Content Categories
- * **ARCHITECTURAL FIX**: Removed CONTENT_CATEGORIES and SEO_CATEGORIES constants (outdated)
- * Use UNIFIED_CATEGORY_REGISTRY from category-config.ts as single source of truth instead
+ * Content Categories - Database-First
+ * Use category_configs table as single source of truth (category-config.ts)
  */
 
 // CONSOLIDATION: Export unified main content categories for splitting logic
-// **ARCHITECTURAL FIX**: Now dynamically generated from UNIFIED_CATEGORY_REGISTRY
-// Auto-generated from UNIFIED_CATEGORY_REGISTRY - single source of truth
-export const MAIN_CONTENT_CATEGORIES = getAllCategoryIds() as readonly string[];
+// **ARCHITECTURAL FIX**: Now using VALID_CATEGORIES from category-config
+// Auto-generated from VALID_CATEGORIES - single source of truth
+export const MAIN_CONTENT_CATEGORIES = VALID_CATEGORIES;
 
 // **ARCHITECTURAL FIX**: Removed unused SEO_CATEGORIES (guide subcategories, not top-level categories)
 

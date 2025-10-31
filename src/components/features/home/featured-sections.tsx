@@ -16,7 +16,7 @@ import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { Button } from '@/src/components/primitives/button';
 import {
   HOMEPAGE_FEATURED_CATEGORIES,
-  UNIFIED_CATEGORY_REGISTRY,
+  type UnifiedCategoryConfig,
 } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Briefcase, ExternalLink } from '@/src/lib/icons';
@@ -73,15 +73,16 @@ FeaturedSection.displayName = 'FeaturedSection';
  */
 interface FeaturedSectionsProps {
   categories: Record<string, readonly ContentItem[]>;
+  categoryConfigs: Record<string, UnifiedCategoryConfig>;
 }
 
-const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories }) => {
+const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories, categoryConfigs }) => {
   return (
     <div className={'space-y-16 mb-16'}>
       {/* Dynamically render featured sections based on HOMEPAGE_FEATURED_CATEGORIES */}
       {HOMEPAGE_FEATURED_CATEGORIES.map((categorySlug) => {
         const items = categories[categorySlug];
-        const config = UNIFIED_CATEGORY_REGISTRY[categorySlug];
+        const config = categoryConfigs[categorySlug];
 
         // Skip if no config or no items for this category
         if (!(config && items)) {

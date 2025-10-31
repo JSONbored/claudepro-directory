@@ -25,8 +25,7 @@ import { JSONSectionRenderer } from '@/src/components/content/json-section-rende
 import { UnifiedContentSection } from '@/src/components/content/unified-content-section';
 import { UnifiedReview } from '@/src/components/domain/unified-review';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
-import { isValidCategory } from '@/src/lib/config/category-config';
-import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
+import { getCategoryConfig, isValidCategory } from '@/src/lib/config/category-config';
 import { detectLanguage } from '@/src/lib/content/language-detection';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting-starry';
@@ -99,7 +98,7 @@ export async function UnifiedDetailPage({
   viewCountPromise,
 }: UnifiedDetailPageProps) {
   // Get configuration for this content type from database
-  const config = await getContentTypeConfig(item.category);
+  const config = await getCategoryConfig(item.category as any);
 
   // Generate display title (Server Component - direct computation)
   const displayTitle = getDisplayTitle(item);

@@ -1,18 +1,7 @@
 /**
- * Loading Component Factory - Configuration-Driven Skeleton System
- *
- * Unified skeleton loading system that matches actual content structure.
- * All skeletons are configuration-driven and auto-scale with content.
- *
- * Architecture:
- * - Single source of truth for all loading states
- * - Configuration-driven (extends UNIFIED_CATEGORY_REGISTRY)
- * - Matches actual content card structure (zero CLS)
- * - Responsive breakpoints match production
- * - GPU-accelerated shimmer animations (motion.dev)
- *
- * Performance:
- * - Zero CLS (layout reserved exactly)
+ * Loading Component Factory - Database-First Configuration
+ * Configuration-driven skeleton system from category_configs table.
+ * Matches actual content structure for zero CLS.
  * - Progressive enhancement (static first, shimmer second)
  * - Tree-shakeable exports
  * - Reusable patterns
