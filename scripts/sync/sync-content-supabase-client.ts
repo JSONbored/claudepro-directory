@@ -151,15 +151,14 @@ function createSupabaseClient() {
 }
 
 function cleanup(): void {
-  if (existsSync(ENV_LOCAL)) {
-    try {
-      unlinkSync(ENV_LOCAL);
-      console.log('🧹 Cleaned up .env.local');
-    } catch {
-      console.warn('⚠️  Failed to cleanup .env.local');
-    }
-  }
+  // Don't cleanup .env.local - Next.js build needs it
+  // The file is gitignored and will be overwritten on next pull
+  return;
 }
+
+// ============================================
+// CONTENT TRANSFORMATION UTILITIES
+// ============================================
 
 // ============================================
 // HASH UTILITIES
@@ -232,33 +231,45 @@ function mapToTableRow(file: FileInfo): Record<string, unknown> {
     // Category-specific fields go into metadata JSONB column
     const metadata: Record<string, unknown> = {};
 
+    // Common fields for ALL categories - configuration and troubleshooting
+    if (data.configuration) metadata.configuration = data.configuration;
+    if (data.troubleshooting) metadata.troubleshooting = data.troubleshooting;
+
     // Add category-specific fields to metadata
     if (category === 'mcp' || category === 'commands') {
       if (data.installation) metadata.installation = data.installation;
-      if (data.configuration) metadata.configuration = data.configuration;
     }
 
     if (category === 'hooks') {
       if (data.installation) metadata.installation = data.installation;
       if (data.eventTypes) metadata.event_types = data.eventTypes;
+      if (data.hookType) metadata.hook_type = data.hookType;
     }
 
     if (category === 'statuslines') {
       if (data.installation) metadata.installation = data.installation;
       if (data.preview) metadata.preview = data.preview;
       if (data.refreshRateMs) metadata.refresh_rate_ms = data.refreshRateMs;
+      if (data.statuslineType) metadata.statusline_type = data.statuslineType;
     }
 
     if (category === 'skills') {
       if (data.dependencies) metadata.dependencies = data.dependencies;
       if (data.difficulty) metadata.difficulty = data.difficulty;
       if (data.estimatedTime) metadata.estimated_time = data.estimatedTime;
+      if (data.installation) metadata.installation = data.installation;
+      if (data.requirements) metadata.requirements = data.requirements;
     }
 
     if (category === 'collections') {
       const items = data.items as Array<{ slug: string }> | null;
       if (items) metadata.items = items.map((item) => item.slug);
       if (data.collectionType) metadata.collection_type = data.collectionType;
+      if (data.compatibility) metadata.compatibility = data.compatibility;
+      if (data.difficulty) metadata.difficulty = data.difficulty;
+      if (data.estimatedSetupTime) metadata.estimated_setup_time = data.estimatedSetupTime;
+      if (data.installationOrder) metadata.installation_order = data.installationOrder;
+      if (data.prerequisites) metadata.prerequisites = data.prerequisites;
     }
 
     if (category === 'guides') {
@@ -271,14 +282,14 @@ function mapToTableRow(file: FileInfo): Record<string, unknown> {
       if (data.lastUpdated) metadata.date_updated = data.lastUpdated;
     }
 
-    if (
-      category === 'agents' ||
-      category === 'rules' ||
-      category === 'mcp' ||
-      category === 'commands'
-    ) {
-      if (data.configuration) metadata.configuration = data.configuration;
-      if (data.troubleshooting) metadata.troubleshooting = data.troubleshooting;
+    if (category === 'mcp') {
+      if (data.configLocation) metadata.config_location = data.configLocation;
+      if (data.permissions) metadata.permissions = data.permissions;
+      if (data.requiresAuth) metadata.requires_auth = data.requiresAuth;
+      if (data.authType) metadata.auth_type = data.authType;
+      if (data.readOnly) metadata.read_only = data.readOnly;
+      if (data.security) metadata.security = data.security;
+      if (data.package) metadata.package = data.package;
     }
 
     row.metadata = metadata;
@@ -338,6 +349,7 @@ async function parseContentFile(filePath: string): Promise<FileInfo | null> {
     // Read and parse file
     const content = await readFile(filePath, 'utf-8');
     const data = JSON.parse(content) as Record<string, unknown>;
+
     const hash = hashContent(data);
 
     return { category, slug, path: filePath, hash, data };
@@ -489,9 +501,23 @@ async function upsertContent(
     const tableName = getTableName(category as CategoryId);
 
     // For unified content table, filter by category; for jobs/changelog, just query by slug
-    // changelog_entries doesn't have git_hash column, so skip it
+    // changelog_entries doesn't have git_hash column, use slug existence check
     if (tableName === 'changelog_entries') {
-      return { category: category as CategoryId, hashMap: new Map<string, string>() };
+      const { data, error } = await supabase.from(tableName).select('slug').in('slug', slugs);
+
+      if (error) {
+        console.error('❌ Failed to fetch changelog slugs:', error.message);
+        return { category: category as CategoryId, hashMap: new Map<string, string>() };
+      }
+
+      // Use empty string as hash to indicate "exists but no hash tracking"
+      const hashMap = new Map<string, string>();
+      for (const row of data || []) {
+        if (row.slug) {
+          hashMap.set(row.slug, 'exists');
+        }
+      }
+      return { category: category as CategoryId, hashMap };
     }
 
     const query = supabase.from(tableName).select('slug, git_hash').in('slug', slugs);
@@ -532,6 +558,11 @@ async function upsertContent(
   for (const file of files) {
     const categoryHashMap = hashMapByCategory.get(file.category);
     const existingHash = categoryHashMap?.get(file.slug);
+
+    // For changelog entries, "exists" means already synced (no hash tracking)
+    if (file.category === 'changelog' && existingHash === 'exists') {
+      continue; // Skip existing changelog entries
+    }
 
     if (existingHash === file.hash) {
       // Content unchanged, skip

@@ -21,16 +21,15 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ category: string; slug: string }> }
 ) {
-  const { category, slug } = await params;
+  const { category, slug: slugWithExt } = await params;
+  const slug = slugWithExt.replace(/\.json$/, '');
 
-  // Validate category
   if (!VALID_CATEGORIES.includes(category as any)) {
     return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
   }
 
   const supabase = await createClient();
 
-  // Call database RPC function for field filtering
   const { data, error } = await supabase.rpc('get_api_content', {
     p_category: category,
     p_slug: slug,
@@ -45,7 +44,9 @@ export async function GET(
     return NextResponse.json({ error: 'Content not found' }, { status: 404 });
   }
 
-  return NextResponse.json(data, {
+  // Return prettified JSON with proper indentation
+  return new NextResponse(JSON.stringify(data, null, 2), {
+    status: 200,
     headers: {
       'Content-Type': 'application/json',
       'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
