@@ -198,17 +198,27 @@ function calculateSchemaHash(dbUrl: string): string | null {
   }
 }
 
+// Cache schema hash to avoid redundant queries (saves 3 queries per run)
+let cachedSchemaHash: string | null | undefined;
+
 function getSchemaHash(): string | null {
+  if (cachedSchemaHash !== undefined) {
+    return cachedSchemaHash;
+  }
+
   if (!pullVercelEnv()) {
+    cachedSchemaHash = null;
     return null;
   }
 
   const dbUrl = getDatabaseUrl();
   if (!dbUrl) {
+    cachedSchemaHash = null;
     return null;
   }
 
-  return calculateSchemaHash(dbUrl);
+  cachedSchemaHash = calculateSchemaHash(dbUrl);
+  return cachedSchemaHash;
 }
 
 function cleanup(): void {

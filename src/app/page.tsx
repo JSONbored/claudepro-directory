@@ -12,15 +12,14 @@ import { LazySection } from '@/src/components/infra/lazy-section';
 import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
 
 const RollingText = dynamicImport(
-  () => import('@/src/components/magic/rolling-text').then((mod) => ({ default: mod.RollingText })),
+  () => import('@/src/components/magic/rolling-text').then((mod) => mod.RollingText),
   {
     loading: () => <span className="text-accent">enthusiasts</span>,
   }
 );
 
 const NumberTicker = dynamicImport(
-  () =>
-    import('@/src/components/magic/number-ticker').then((mod) => ({ default: mod.NumberTicker })),
+  () => import('@/src/components/magic/number-ticker').then((mod) => mod.NumberTicker),
   {
     loading: () => <span className="font-semibold text-accent">0</span>,
   }
@@ -28,9 +27,9 @@ const NumberTicker = dynamicImport(
 
 const UnifiedNewsletterCapture = dynamicImport(
   () =>
-    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
-      default: mod.UnifiedNewsletterCapture,
-    })),
+    import('@/src/components/features/growth/unified-newsletter-capture').then(
+      (mod) => mod.UnifiedNewsletterCapture
+    ),
   {
     loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
   }

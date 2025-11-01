@@ -2,11 +2,14 @@
 
 /**
  * Service Worker Generation Script - Database-First
- * Generates service-worker.js dynamically from category_configs table and SECURITY_CONFIG.
+ * Generates service-worker.js dynamically from VALID_CATEGORIES and SECURITY_CONFIG.
+ *
+ * OPTIMIZATIONS:
+ * - Static categories (no database call at build time)
+ * - Input-based hashing (skips template rendering when inputs unchanged)
  */
 
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,12 +18,11 @@ import { VALID_CATEGORIES } from '../../src/lib/config/category-config.js';
 import { SECURITY_CONFIG } from '../../src/lib/constants/security.js';
 import { logger } from '../../src/lib/logger.js';
 import { ParseStrategy, safeParse } from '../../src/lib/utils/data.utils.js';
+import { hasHashChanged, setHash } from '../utils/hash-cache.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT_DIR = join(__dirname, '../..');
-const CACHE_DIR = join(ROOT_DIR, '.next', 'cache');
-const HASH_FILE = join(CACHE_DIR, 'sw-hash.txt');
 const TEMPLATE_PATH = join(ROOT_DIR, 'templates', 'service-worker.template.js');
 
 async function generateServiceWorker() {
@@ -59,6 +61,19 @@ async function generateServiceWorker() {
     // Generate allowed origins array from SECURITY_CONFIG
     const allowedOrigins = SECURITY_CONFIG.allowedOrigins.map((origin) => `"${origin}"`);
 
+    // OPTIMIZATION: Hash inputs instead of output (faster - skips template rendering)
+    const inputHash = createHash('sha256')
+      .update(JSON.stringify(categoryIds))
+      .update(JSON.stringify(SECURITY_CONFIG.allowedOrigins))
+      .update(version)
+      .digest('hex');
+
+    if (!hasHashChanged('service-worker', inputHash)) {
+      logger.info('✓ Service worker unchanged (inputs identical), skipping generation');
+      logger.success(`✅ Service worker up-to-date (${Date.now() - startTime}ms)`);
+      return true;
+    }
+
     // Replace placeholders in template
     const serviceWorkerCode = serviceWorkerTemplate
       .replace(/{{VERSION}}/g, version)
@@ -67,25 +82,12 @@ async function generateServiceWorker() {
       .replace('{{CONTENT_ROUTES}}', `[\n  ${contentRoutes.join(',\n  ')},\n]`)
       .replace('{{CATEGORY_PATTERN}}', categoryPattern);
 
-    // Incremental caching: Check if service worker content changed
-    const currentHash = createHash('sha256').update(serviceWorkerCode).digest('hex');
-    const previousHash = existsSync(HASH_FILE) ? await readFile(HASH_FILE, 'utf-8') : '';
-
-    if (currentHash === previousHash) {
-      logger.info('✓ Service worker unchanged, skipping generation');
-      logger.success(`✅ Service worker up-to-date (${Date.now() - startTime}ms)`);
-      return true;
-    }
-
     // Write to public/service-worker.js
     const outputPath = join(ROOT_DIR, 'public', 'service-worker.js');
     await writeFile(outputPath, serviceWorkerCode, 'utf-8');
 
-    // Save hash for next build
-    if (!existsSync(CACHE_DIR)) {
-      mkdirSync(CACHE_DIR, { recursive: true });
-    }
-    await writeFile(HASH_FILE, currentHash, 'utf-8');
+    // Save input hash for next build
+    setHash('service-worker', inputHash);
 
     const duration = Date.now() - startTime;
     logger.success(`✅ Service worker generated in ${duration}ms`);

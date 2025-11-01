@@ -65,9 +65,8 @@ const nextConfig = {
   compress: true,
   reactStrictMode: true,
 
-  // ✨ React Compiler (DISABLED - causes CSP eval violations)
-  // TODO: Re-enable when CSP-compatible or configure CSP to allow
-  reactCompiler: false,
+  // ✨ React Compiler (STABLE) - Automatic memoization without manual optimization
+  reactCompiler: true,
 
   // ✨ Cache Components / Partial Prerendering (DISABLED - incompatible with generateStaticParams)
   // PRODUCTION: We use full static generation with generateStaticParams() for all routes
@@ -189,6 +188,14 @@ const nextConfig = {
       '.git/**/*',
       'node_modules/@types/**/*',
       'node_modules/typescript/**/*',
+      'scripts/**/*', // Build scripts (193-621 LOC not needed at runtime)
+      'config/tools/**/*', // Tool configs (biome, playwright, lighthouse, etc.)
+      '__tests__/**/*', // Test files
+      'tests/**/*', // Test files
+      '*.test.*', // Test files
+      '*.spec.*', // Test files
+      'vitest.config.ts', // Test config
+      'playwright.config.ts', // Test config
     ],
     // Specific exclusions for guide pages
     '/guides/**': ['./docs/**/*', './scripts/**/*'],

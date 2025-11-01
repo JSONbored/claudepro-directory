@@ -5,8 +5,6 @@
  * Interactive discovery workflow → RPC submission → Discord announcement
  */
 
-import { execSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as readline from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
@@ -18,38 +16,13 @@ import {
   validateDiscoveryQuality,
 } from '@/config/content/discovery/run-discovery';
 import type { Database } from '@/src/types/database.types';
+import { ensureEnvVars } from '../utils/env.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT_DIR = join(__dirname, '../..');
-const ENV_LOCAL = join(ROOT_DIR, '.env.local');
 
 // Environment setup
-function ensureEnvVars(): void {
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return;
-  }
-
-  console.log('📥 Pulling environment variables from Vercel...');
-  try {
-    execSync('vercel env pull .env.local --yes', {
-      cwd: ROOT_DIR,
-      stdio: 'inherit',
-    });
-
-    const envContent = readFileSync(ENV_LOCAL, 'utf-8');
-    for (const line of envContent.split('\n')) {
-      const [key, ...valueParts] = line.split('=');
-      if (key && valueParts.length > 0) {
-        process.env[key] = valueParts.join('=').replace(/^["']|["']$/g, '');
-      }
-    }
-  } catch (error) {
-    console.error('❌ Failed to pull environment variables');
-    process.exit(1);
-  }
-}
-
-ensureEnvVars();
+await ensureEnvVars(['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY']);
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;

@@ -1,16 +1,19 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "remoteCache": {
+    "signature": true
+  },
   "tasks": {
     "generate:categories:exec": {
       "outputs": [
-        "src/lib/config/category-types.ts",
-        "src/lib/ui-constants-categories.ts"
+        "src/lib/config/category-config.generated.ts"
       ],
-      "inputs": ["src/lib/config/category-config.ts"],
+      "inputs": ["scripts/build/generate-category-config.ts"],
       "cache": true,
-      "passThroughEnv": ["VERCEL_DEPLOYMENT_ID"]
+      "passThroughEnv": ["VERCEL_DEPLOYMENT_ID", "NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]
     },
     "build:content:exec": {
+      "dependsOn": ["generate:categories:exec"],
       "outputs": [
         "generated/**",
         "src/generated/**",
@@ -22,6 +25,7 @@
         "CHANGELOG.md",
         "src/lib/schemas/**/*.ts",
         "src/lib/config/category-config.ts",
+        "src/lib/config/category-config.generated.ts",
         "scripts/build/build-content.ts",
         "src/lib/build/category-processor.server.ts"
       ],
@@ -46,15 +50,21 @@
       "passThroughEnv": ["VERCEL_DEPLOYMENT_ID"]
     },
     "generate:service-worker:exec": {
+      "dependsOn": ["generate:categories:exec"],
       "outputs": ["public/service-worker.js", ".next/cache/sw-hash.txt"],
       "inputs": [
         "scripts/build/generate-service-worker.ts",
         "src/lib/config/category-config.ts",
+        "src/lib/config/category-config.generated.ts",
         "src/lib/constants/security.ts",
         "package.json"
       ],
       "cache": true,
-      "passThroughEnv": ["VERCEL_DEPLOYMENT_ID"]
+      "passThroughEnv": [
+        "VERCEL_DEPLOYMENT_ID",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+      ]
     },
     "type-check": {
       "outputs": ["**/*.tsbuildinfo"],
@@ -96,6 +106,8 @@
     "SUPABASE_ANON_KEY",
     "SUPABASE_SERVICE_ROLE_KEY",
     "SUPABASE_JWT_SECRET",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
     "BETTERSTACK_HEARTBEAT_WEEKLY_TASKS",
     "BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE"
   ],
