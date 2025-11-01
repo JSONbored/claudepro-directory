@@ -149,6 +149,10 @@ export const HOMEPAGE_FEATURED_CATEGORIES = [
   'mcp',
   'commands',
   'rules',
+  'skills',
+  'collections',
+  'hooks',
+  'statuslines',
 ] as const satisfies readonly CategoryId[];
 export const HOMEPAGE_TAB_CATEGORIES = [
   'all',

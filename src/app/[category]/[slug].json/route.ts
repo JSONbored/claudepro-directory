@@ -22,6 +22,12 @@ export async function GET(
   { params }: { params: Promise<{ category: string; slug: string }> }
 ) {
   const { category, slug: slugWithExt } = await params;
+
+  // Only handle requests that explicitly end with .json
+  if (!slugWithExt.endsWith('.json')) {
+    return new NextResponse(null, { status: 404 });
+  }
+
   const slug = slugWithExt.replace(/\.json$/, '');
 
   if (!VALID_CATEGORIES.includes(category as any)) {
