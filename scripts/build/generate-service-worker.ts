@@ -11,7 +11,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
-import { getAllCategoryIds } from '../../src/lib/config/category-config.js';
+import { VALID_CATEGORIES } from '../../src/lib/config/category-config.js';
 import { SECURITY_CONFIG } from '../../src/lib/constants/security.js';
 import { logger } from '../../src/lib/logger.js';
 import { ParseStrategy, safeParse } from '../../src/lib/utils/data.utils.js';
@@ -45,8 +45,8 @@ async function generateServiceWorker() {
     const version = packageJson.version || '1.0.0';
     const cacheVersion = version.replace(/\./g, '-');
 
-    // Get all category IDs dynamically from registry
-    const categoryIds = await getAllCategoryIds();
+    // Get all category IDs from static array (build-time safe, no database call)
+    const categoryIds = Array.from(VALID_CATEGORIES);
     logger.info(`📦 Found ${categoryIds.length} categories: ${categoryIds.join(', ')}`);
 
     // Generate content routes array
