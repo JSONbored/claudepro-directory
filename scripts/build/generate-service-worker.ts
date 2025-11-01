@@ -46,7 +46,7 @@ async function generateServiceWorker() {
     const cacheVersion = version.replace(/\./g, '-');
 
     // Get all category IDs dynamically from registry
-    const categoryIds = getAllCategoryIds();
+    const categoryIds = await getAllCategoryIds();
     logger.info(`📦 Found ${categoryIds.length} categories: ${categoryIds.join(', ')}`);
 
     // Generate content routes array
