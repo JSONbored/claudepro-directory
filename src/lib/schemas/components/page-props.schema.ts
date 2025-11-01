@@ -8,7 +8,6 @@
  * - Auto-updates when database schema changes
  */
 
-import type { UnifiedCategoryConfig } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 
 /**
@@ -19,6 +18,7 @@ import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 /**
  * Client component props for home page - Database-First
  * Uses ContentItem from content_unified view, stats from PostgreSQL RPC.
+ * Category configs are imported statically on client (no serialization needed).
  */
 export interface HomePageClientProps {
   /** Initial server-side data for client hydration (from content_unified view) */
@@ -29,13 +29,4 @@ export interface HomePageClientProps {
   featuredByCategory?: Record<string, ContentItem[]>;
   /** Content category statistics */
   stats?: Record<string, number>;
-  /** Category stats configuration for rendering stats section */
-  categoryStatsConfig: ReadonlyArray<{
-    categoryId: string;
-    icon: any;
-    displayText: string;
-    delay: number;
-  }>;
-  /** Category configurations from database (single RPC call) */
-  categoryConfigs: Record<string, UnifiedCategoryConfig>;
 }

@@ -31,7 +31,11 @@ import {
 } from '@/src/components/features/home/lazy-homepage-sections';
 import { NumberTicker } from '@/src/components/magic/number-ticker';
 import { HomepageStatsSkeleton, Skeleton } from '@/src/components/primitives/loading-skeleton';
-import { HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
+import {
+  getCategoryConfigs,
+  getCategoryStatsConfig,
+  HOMEPAGE_FEATURED_CATEGORIES,
+} from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import type { HomePageClientProps } from '@/src/lib/schemas/components/page-props.schema';
@@ -59,14 +63,16 @@ function HomePageClientComponent({
   initialSearchQuery,
   featuredByCategory,
   stats,
-  categoryStatsConfig,
-  categoryConfigs,
 }: HomePageClientProps) {
   const allConfigs = (initialData.allConfigs || []) as ContentItem[];
   const [activeTab, setActiveTab] = useState('all');
   const [searchResults, setSearchResults] = useState<ContentItem[]>(allConfigs);
   const [isSearching, setIsSearching] = useState(false);
   const [filters, setFilters] = useState({});
+
+  // Get category configs from static imports (client-side)
+  const categoryStatsConfig = useMemo(() => getCategoryStatsConfig(), []);
+  const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
 
   // Handle search using direct Supabase RPC call (database-first)
   const handleSearch = useCallback(

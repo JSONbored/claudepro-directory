@@ -35,12 +35,7 @@ const UnifiedNewsletterCapture = dynamicImport(
   }
 );
 
-import {
-  type CategoryId,
-  getCategoryConfigs,
-  getCategoryStatsConfig,
-  getHomepageCategoryIds,
-} from '@/src/lib/config/category-config';
+import { type CategoryId, getHomepageCategoryIds } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
@@ -57,11 +52,7 @@ interface HomePageProps {
 }
 
 async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
-  const [categoryIds, categoryStatsConfig, categoryConfigs] = await Promise.all([
-    getHomepageCategoryIds(),
-    getCategoryStatsConfig(),
-    getCategoryConfigs(),
-  ]);
+  const categoryIds = getHomepageCategoryIds();
 
   try {
     const supabase = createAnonClient();
@@ -111,8 +102,6 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
         initialSearchQuery={searchQuery}
         featuredByCategory={featuredByCategory}
         stats={enrichedData.stats}
-        categoryStatsConfig={categoryStatsConfig}
-        categoryConfigs={categoryConfigs}
       />
     );
   } catch (error) {
@@ -138,8 +127,6 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
         initialSearchQuery={searchQuery}
         featuredByCategory={{}}
         stats={Object.fromEntries(categoryIds.map((id) => [id, 0]))}
-        categoryStatsConfig={categoryStatsConfig}
-        categoryConfigs={categoryConfigs}
       />
     );
   }
