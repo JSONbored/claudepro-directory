@@ -3,7 +3,7 @@
  */
 
 import { z } from 'zod';
-import { getCacheableCategoryIds } from '@/src/lib/config/category-config';
+import type { CategoryId } from '@/src/lib/config/category-config';
 import type { Enums } from '@/src/types/database.types';
 
 export type { CategoryId } from '@/src/lib/config/category-config';
@@ -22,7 +22,19 @@ export const categoryIdSchema = z.enum([
   'changelog',
 ] as const satisfies readonly Enums<'content_category'>[]);
 
-export const CACHEABLE_CATEGORIES = getCacheableCategoryIds();
+// Static array - MUST NOT call async getCacheableCategoryIds() at module load time
+// This would trigger database queries during middleware initialization → 504 timeout
+export const CACHEABLE_CATEGORIES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+] as const satisfies readonly CategoryId[];
 
 export const cacheableCategorySchema = z.enum(CACHEABLE_CATEGORIES as any);
 
