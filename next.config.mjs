@@ -551,6 +551,16 @@ const nextConfig = {
       },
     ];
   },
+
+  // Rewrites for .json API routes
+  async rewrites() {
+    return [
+      {
+        source: '/:category/:slug.json',
+        destination: '/api/json/:category/:slug',
+      },
+    ];
+  },
 };
 
 // Export the configuration with bundle analyzer wrapper
