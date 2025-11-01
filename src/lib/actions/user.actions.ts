@@ -8,16 +8,10 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
-import { publicUserActivitySummaryRowSchema } from '@/src/lib/schemas/generated/db-schemas';
+import { publicUserActivitySummaryResultSchema } from '@/src/lib/schemas/generated/db-schemas';
 
-const activitySummarySchema = publicUserActivitySummaryRowSchema.pick({
-  total_posts: true,
-  total_comments: true,
-  total_votes: true,
-  total_submissions: true,
-  merged_submissions: true,
-  total_activity: true,
-});
+// Use generated schema from database composite type
+const activitySummarySchema = publicUserActivitySummaryResultSchema;
 
 const activityFilterSchema = z.object({
   type: z.enum(['post', 'comment', 'vote', 'submission']).optional(),

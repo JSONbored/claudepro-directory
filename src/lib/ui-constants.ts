@@ -176,11 +176,52 @@ export const UI_CLASSES = {
 /** Type-safe UI class constant keys */
 export type UIClassKey = keyof typeof UI_CLASSES;
 
-/** Content Card Behavior Configuration - see ui-constants-categories.ts */
-export type { CardBehaviorKey } from './ui-constants-categories';
+/** Card behavior configuration keys */
+export type CardBehaviorKey = 'default' | 'code' | 'link';
 
-/** Badge color constants for job types, difficulty levels, categories, status */
-import { CATEGORY_BADGE_COLORS } from './ui-constants-categories';
+/** Badge color constants for categories */
+const CATEGORY_BADGE_COLORS = {
+  agents: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  mcp: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+  commands: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  rules: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  hooks: 'bg-green-500/10 text-green-400 border-green-500/20',
+  statuslines: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
+  collections: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+  skills: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
+  guides: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
+  jobs: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+  changelog: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
+  default: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+} as const;
+
+/** Card behavior configuration (copy vs link actions) */
+export const CARD_BEHAVIORS = {
+  default: {
+    primaryAction: 'copy' as const,
+    showCopyButton: true,
+    showBookmark: true,
+    showViewCount: true,
+    showCopyCount: true,
+    showRating: false,
+  },
+  code: {
+    primaryAction: 'copy' as const,
+    showCopyButton: true,
+    showBookmark: true,
+    showViewCount: true,
+    showCopyCount: true,
+    showRating: false,
+  },
+  link: {
+    primaryAction: 'link' as const,
+    showCopyButton: false,
+    showBookmark: true,
+    showViewCount: true,
+    showCopyCount: false,
+    showRating: true,
+  },
+} as const;
 
 export const BADGE_COLORS = {
   jobType: {

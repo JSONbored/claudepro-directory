@@ -451,6 +451,19 @@ COMMENT ON TYPE "public"."use_case_type" IS 'Primary use cases for content recom
 
 
 
+CREATE TYPE "public"."user_activity_summary_result" AS (
+	"total_posts" bigint,
+	"total_comments" bigint,
+	"total_votes" bigint,
+	"total_submissions" bigint,
+	"merged_submissions" bigint,
+	"total_activity" bigint
+);
+
+
+ALTER TYPE "public"."user_activity_summary_result" OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."add_bookmark"("p_user_id" "uuid", "p_content_type" "text", "p_content_slug" "text", "p_notes" "text" DEFAULT NULL::"text") RETURNS "jsonb"
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public'
@@ -3833,22 +3846,37 @@ DECLARE
   v_repo_name TEXT;
   v_cache_valid BOOLEAN := FALSE;
 BEGIN
+  -- Extract owner and repo name from URL
   SELECT (regexp_matches(p_repo_url, 'github\.com/([^/]+)/([^/]+)'))[1],
          (regexp_matches(p_repo_url, 'github\.com/([^/]+)/([^/]+)'))[2]
   INTO v_repo_owner, v_repo_name;
+
   IF v_repo_owner IS NULL OR v_repo_name IS NULL THEN
     RAISE EXCEPTION 'Invalid GitHub URL format: %', p_repo_url;
   END IF;
-  SELECT (last_fetched_at > NOW() - INTERVAL '1 hour') INTO v_cache_valid
-  FROM github_repo_stats WHERE repo_url = p_repo_url;
+
+  -- Check if cache is valid (less than 1 hour old) - FIX: Qualify column with table alias
+  SELECT (grs.last_fetched_at > NOW() - INTERVAL '1 hour') INTO v_cache_valid
+  FROM github_repo_stats grs WHERE grs.repo_url = p_repo_url;
+
+  -- Return cached data if fresh
   IF v_cache_valid THEN
-    RETURN QUERY SELECT grs.stars, grs.forks, grs.watchers, grs.open_issues, grs.last_fetched_at, TRUE as is_cached
-    FROM github_repo_stats grs WHERE grs.repo_url = p_repo_url;
+    RETURN QUERY 
+    SELECT grs.stars, grs.forks, grs.watchers, grs.open_issues, grs.last_fetched_at, TRUE as is_cached
+    FROM github_repo_stats grs 
+    WHERE grs.repo_url = p_repo_url;
   ELSE
-    RETURN QUERY SELECT COALESCE(grs.stars, 0) as stars, grs.forks, grs.watchers, grs.open_issues, grs.last_fetched_at, FALSE as is_cached
-    FROM github_repo_stats grs WHERE grs.repo_url = p_repo_url LIMIT 1;
+    -- Return stale cache or empty result
+    RETURN QUERY 
+    SELECT COALESCE(grs.stars, 0) as stars, grs.forks, grs.watchers, grs.open_issues, grs.last_fetched_at, FALSE as is_cached
+    FROM github_repo_stats grs 
+    WHERE grs.repo_url = p_repo_url 
+    LIMIT 1;
+
+    -- If no data exists, return zeros
     IF NOT FOUND THEN
-      RETURN QUERY SELECT 0::INTEGER as stars, NULL::INTEGER as forks, NULL::INTEGER as watchers,
+      RETURN QUERY 
+      SELECT 0::INTEGER as stars, NULL::INTEGER as forks, NULL::INTEGER as watchers,
         NULL::INTEGER as open_issues, NULL::TIMESTAMPTZ as last_fetched_at, FALSE as is_cached;
     END IF;
   END IF;
@@ -4664,7 +4692,7 @@ COMMENT ON FUNCTION "public"."get_quiz_configuration"() IS 'Returns complete qui
 
 
 
-CREATE OR REPLACE FUNCTION "public"."get_recent_merged"("p_limit" integer DEFAULT 5) RETURNS "jsonb"
+CREATE OR REPLACE FUNCTION "public"."get_recent_merged"("p_limit" integer DEFAULT 10) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
     SET "search_path" TO 'public'
     AS $$
@@ -4686,11 +4714,16 @@ BEGIN
         )
       )
       FROM (
-        SELECT id, content_name, content_type, merged_at, user_id
-        FROM submissions
-        WHERE status = 'merged'
-          AND merged_at IS NOT NULL
-        ORDER BY merged_at DESC
+        SELECT 
+          cs.id,
+          cs.name as content_name,
+          cs.category as content_type,
+          cs.merged_at,
+          cs.submitter_id as user_id
+        FROM content_submissions cs
+        WHERE cs.status = 'merged'
+          AND cs.merged_at IS NOT NULL
+        ORDER BY cs.merged_at DESC
         LIMIT p_limit
       ) s
       LEFT JOIN users u ON s.user_id = u.id
@@ -4704,7 +4737,7 @@ $$;
 ALTER FUNCTION "public"."get_recent_merged"("p_limit" integer) OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_recent_merged"("p_limit" integer) IS 'Get recent merged submissions with user data. Replaces 94 LOC TypeScript with type transformations.';
+COMMENT ON FUNCTION "public"."get_recent_merged"("p_limit" integer) IS 'Get recent merged submissions with user data. Updated to use content_submissions table (Phase 5).';
 
 
 
@@ -5277,6 +5310,35 @@ COMMENT ON FUNCTION "public"."get_structured_data_config"("p_category" "text") I
 
 
 
+CREATE OR REPLACE FUNCTION "public"."get_submission_stats"() RETURNS "jsonb"
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    AS $$
+DECLARE
+  result jsonb;
+BEGIN
+  SELECT jsonb_build_object(
+    'total', COUNT(*),
+    'pending', COUNT(*) FILTER (WHERE status = 'pending'),
+    'merged_this_week', COUNT(*) FILTER (
+      WHERE status = 'merged' 
+      AND moderated_at >= NOW() - INTERVAL '7 days'
+    )
+  )
+  INTO result
+  FROM content_submissions;
+  
+  RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_submission_stats"() OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_submission_stats"() IS 'Database-first aggregation for submission statistics. Returns total, pending, and merged_this_week counts.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."get_tier_name_from_score"("p_score" integer) RETURNS "text"
     LANGUAGE "plpgsql" IMMUTABLE
     SET "search_path" TO 'public'
@@ -5368,7 +5430,7 @@ COMMENT ON FUNCTION "public"."get_tier_progress_from_score"("p_score" integer) I
 
 
 
-CREATE OR REPLACE FUNCTION "public"."get_top_contributors"("p_limit" integer DEFAULT 5) RETURNS "jsonb"
+CREATE OR REPLACE FUNCTION "public"."get_top_contributors"("p_limit" integer DEFAULT 10) RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
     SET "search_path" TO 'public'
     AS $$
@@ -5389,9 +5451,9 @@ BEGIN
           u.name,
           u.slug,
           COUNT(*) as merged_count
-        FROM submissions s
-        INNER JOIN users u ON s.user_id = u.id
-        WHERE s.status = 'merged'
+        FROM content_submissions cs
+        INNER JOIN users u ON cs.submitter_id = u.id
+        WHERE cs.status = 'merged'
           AND u.name IS NOT NULL
           AND u.slug IS NOT NULL
         GROUP BY u.id, u.name, u.slug
@@ -5408,7 +5470,7 @@ $$;
 ALTER FUNCTION "public"."get_top_contributors"("p_limit" integer) OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_top_contributors"("p_limit" integer) IS 'Get top contributors by merged submission count. Replaces 70 LOC TypeScript with GROUP BY + ROW_NUMBER().';
+COMMENT ON FUNCTION "public"."get_top_contributors"("p_limit" integer) IS 'Get top contributors by merged submission count. Updated to use content_submissions table (Phase 5).';
 
 
 
@@ -5805,25 +5867,36 @@ COMMENT ON FUNCTION "public"."get_usage_recommendations"("p_user_id" "uuid", "p_
 
 
 
-CREATE OR REPLACE FUNCTION "public"."get_user_activity_summary"("p_user_id" "uuid") RETURNS "jsonb"
+CREATE OR REPLACE FUNCTION "public"."get_user_activity_summary"("p_user_id" "uuid") RETURNS "public"."user_activity_summary_result"
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_catalog'
     AS $$
 DECLARE
-  v_summary RECORD;
+  v_result user_activity_summary_result;
 BEGIN
+  -- Aggregate user activity from various tables
   SELECT
-    COALESCE(total_posts, 0) as total_posts, COALESCE(total_comments, 0) as total_comments,
-    COALESCE(total_votes, 0) as total_votes, COALESCE(total_submissions, 0) as total_submissions,
-    COALESCE(merged_submissions, 0) as merged_submissions, COALESCE(total_activity, 0) as total_activity
-  INTO v_summary FROM public.user_activity_summary WHERE user_id = p_user_id;
-  IF v_summary IS NULL THEN
-    RETURN jsonb_build_object(
-      'total_posts', 0, 'total_comments', 0, 'total_votes', 0,
-      'total_submissions', 0, 'merged_submissions', 0, 'total_activity', 0
-    );
-  END IF;
-  RETURN row_to_json(v_summary)::JSONB;
+    COALESCE(COUNT(DISTINCT p.id), 0)::bigint,
+    COALESCE(COUNT(DISTINCT c.id), 0)::bigint,
+    COALESCE(COUNT(DISTINCT v.id), 0)::bigint,
+    COALESCE(COUNT(DISTINCT cs.id), 0)::bigint,
+    COALESCE(COUNT(DISTINCT cs.id) FILTER (WHERE cs.status = 'merged'), 0)::bigint,
+    COALESCE(
+      COUNT(DISTINCT p.id) + 
+      COUNT(DISTINCT c.id) + 
+      COUNT(DISTINCT v.id) + 
+      COUNT(DISTINCT cs.id), 
+      0
+    )::bigint
+  INTO v_result
+  FROM users u
+  LEFT JOIN posts p ON p.user_id = u.id
+  LEFT JOIN comments c ON c.user_id = u.id
+  LEFT JOIN votes v ON v.user_id = u.id
+  LEFT JOIN content_submissions cs ON cs.submitter_email = u.email
+  WHERE u.id = p_user_id;
+
+  RETURN v_result;
 END;
 $$;
 
@@ -5831,7 +5904,7 @@ $$;
 ALTER FUNCTION "public"."get_user_activity_summary"("p_user_id" "uuid") OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_user_activity_summary"("p_user_id" "uuid") IS 'Returns user activity summary from materialized view. SECURITY DEFINER - Fixed search_path vulnerability (2025-01-30)';
+COMMENT ON FUNCTION "public"."get_user_activity_summary"("p_user_id" "uuid") IS 'Database-first: Returns typed composite with user activity counts. TypeScript types auto-generated via supazod.';
 
 
 
@@ -5844,83 +5917,21 @@ DECLARE
   v_total INTEGER;
 BEGIN
   WITH combined_activities AS (
-    SELECT
-      'post' AS activity_type,
-      id,
-      created_at,
-      jsonb_build_object(
-        'id', id,
-        'type', 'post',
-        'title', title,
-        'body', body,
-        'content_type', content_type,
-        'content_slug', content_slug,
-        'user_id', user_id,
-        'created_at', created_at,
-        'updated_at', updated_at
-      ) AS activity_data
-    FROM posts
-    WHERE user_id = p_user_id
-      AND (p_type IS NULL OR p_type = 'post')
-
-    UNION ALL
-
-    SELECT
-      'comment' AS activity_type,
-      id,
-      created_at,
-      jsonb_build_object(
-        'id', id,
-        'type', 'comment',
-        'body', body,
-        'post_id', post_id,
-        'parent_id', parent_id,
-        'user_id', user_id,
-        'created_at', created_at,
-        'updated_at', updated_at
-      ) AS activity_data
-    FROM comments
-    WHERE user_id = p_user_id
-      AND (p_type IS NULL OR p_type = 'comment')
-
-    UNION ALL
-
-    SELECT
-      'vote' AS activity_type,
-      id,
-      created_at,
-      jsonb_build_object(
-        'id', id,
-        'type', 'vote',
-        'vote_type', vote_type,
-        'post_id', post_id,
-        'user_id', user_id,
-        'created_at', created_at
-      ) AS activity_data
-    FROM votes
-    WHERE user_id = p_user_id
-      AND (p_type IS NULL OR p_type = 'vote')
-
-    UNION ALL
-
-    SELECT
-      'submission' AS activity_type,
-      id,
-      created_at,
-      jsonb_build_object(
-        'id', id,
+    -- Content submissions
+    SELECT jsonb_build_object(
         'type', 'submission',
-        'title', title,
+        'title', name,
         'description', description,
-        'content_type', content_type,
-        'submission_url', submission_url,
-        'status', status,
-        'user_id', user_id,
+        'content_type', category,
+        'submission_url', '/' || category || '/' || regexp_replace(lower(name), '[^a-z0-9]+', '-', 'g'),
+        'status', status::text,
+        'user_id', submitter_id,
         'created_at', created_at,
         'updated_at', updated_at
-      ) AS activity_data
-    FROM submissions
-    WHERE user_id = p_user_id
+      ) AS activity_data,
+      created_at
+    FROM content_submissions
+    WHERE submitter_id = p_user_id
       AND (p_type IS NULL OR p_type = 'submission')
   ),
   sorted_activities AS (
@@ -5952,47 +5963,7 @@ $$;
 ALTER FUNCTION "public"."get_user_activity_timeline"("p_user_id" "uuid", "p_type" "text", "p_limit" integer, "p_offset" integer) OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_user_activity_timeline"("p_user_id" "uuid", "p_type" "text", "p_limit" integer, "p_offset" integer) IS 'Unified activity timeline combining posts, comments, votes, and submissions.
-
-Returns JSONB with structure:
-{
-  "activities": [
-    {
-      "id": "uuid",
-      "type": "post" | "comment" | "vote" | "submission",
-      "created_at": "timestamp",
-      
-      -- Post fields (when type = ''post''):
-      "title": "string",
-      "body": "string",
-      "content_type": "string",
-      "content_slug": "string",
-      "user_id": "uuid",
-      "updated_at": "timestamp",
-      
-      -- Comment fields (when type = ''comment''):
-      "body": "string",
-      "post_id": "uuid",
-      "parent_id": "uuid | null",
-      
-      -- Vote fields (when type = ''vote''):
-      "vote_type": "upvote" | "downvote",
-      "post_id": "uuid",
-      
-      -- Submission fields (when type = ''submission''):
-      "title": "string",
-      "description": "string | null",
-      "content_type": "string",
-      "submission_url": "string | null",
-      "status": "pending" | "approved" | "rejected",
-      "updated_at": "timestamp"
-    }
-  ],
-  "hasMore": boolean,
-  "total": integer
-}
-
-Performance: Optimized with composite indexes on (user_id, created_at DESC) for all activity tables.';
+COMMENT ON FUNCTION "public"."get_user_activity_timeline"("p_user_id" "uuid", "p_type" "text", "p_limit" integer, "p_offset" integer) IS 'User activity timeline with pagination. Updated to use content_submissions table (Phase 5).';
 
 
 
@@ -6207,7 +6178,7 @@ COMMENT ON FUNCTION "public"."get_user_collection_detail"("p_user_slug" "text", 
 
 
 CREATE OR REPLACE FUNCTION "public"."get_user_dashboard"("p_user_id" "uuid") RETURNS "jsonb"
-    LANGUAGE "plpgsql" SECURITY DEFINER
+    LANGUAGE "plpgsql" STABLE
     SET "search_path" TO 'public', 'pg_catalog'
     AS $$
 DECLARE
@@ -6215,11 +6186,27 @@ DECLARE
   v_companies JSONB;
   v_jobs JSONB;
 BEGIN
-  -- Fetch user submissions (all fields from submissions table)
-  SELECT COALESCE(jsonb_agg(to_jsonb(s.*) ORDER BY s.created_at DESC), '[]'::jsonb)
+  -- Fetch user content submissions (all fields from content_submissions table)
+  SELECT COALESCE(jsonb_agg(
+    jsonb_build_object(
+      'id', cs.id,
+      'content_name', cs.name,
+      'content_type', cs.category,
+      'content_slug', regexp_replace(lower(cs.name), '[^a-z0-9]+', '-', 'g'),
+      'status', cs.status::text,
+      'created_at', cs.created_at,
+      'updated_at', cs.updated_at,
+      'merged_at', cs.merged_at,
+      'pr_url', cs.github_pr_url,
+      'pr_number', NULL::integer, -- Not tracked in content_submissions
+      'branch_name', NULL::text,  -- Not tracked in content_submissions
+      'submission_data', cs.content_data,
+      'rejection_reason', cs.moderator_notes
+    ) ORDER BY cs.created_at DESC
+  ), '[]'::jsonb)
   INTO v_submissions
-  FROM submissions s
-  WHERE s.user_id = p_user_id;
+  FROM content_submissions cs
+  WHERE cs.submitter_id = p_user_id;
 
   -- Fetch user companies (all fields from companies table)
   SELECT COALESCE(jsonb_agg(to_jsonb(c.*) ORDER BY c.created_at DESC), '[]'::jsonb)
@@ -6244,6 +6231,10 @@ $$;
 
 
 ALTER FUNCTION "public"."get_user_dashboard"("p_user_id" "uuid") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."get_user_dashboard"("p_user_id" "uuid") IS 'User dashboard data aggregator. Updated to use content_submissions table (Phase 5 modernization).';
+
 
 
 CREATE OR REPLACE FUNCTION "public"."get_user_favorite_categories"("p_user_id" "uuid", "p_limit" integer DEFAULT 3) RETURNS "text"[]
@@ -7944,6 +7935,105 @@ COMMENT ON FUNCTION "public"."mark_sequence_email_processed"("p_schedule_id" "uu
 
 
 
+CREATE OR REPLACE FUNCTION "public"."merge_submission_to_content"("p_submission_id" "uuid") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_submission content_submissions%ROWTYPE;
+  v_content_id UUID;
+  v_slug TEXT;
+  v_url TEXT;
+BEGIN
+  -- Fetch approved submission with row lock
+  SELECT * INTO v_submission
+  FROM content_submissions
+  WHERE id = p_submission_id 
+    AND status = 'approved'
+  FOR UPDATE;
+  
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Submission not found or not approved (ID: %)', p_submission_id;
+  END IF;
+  
+  -- Use auto-generated slug
+  v_slug := v_submission.auto_slug;
+  v_url := '/' || v_submission.category || '/' || v_slug;
+  
+  -- Check for slug collision in content table
+  IF EXISTS (
+    SELECT 1 FROM content 
+    WHERE category = v_submission.category 
+      AND slug = v_slug
+  ) THEN
+    -- Append UUID suffix to prevent collision
+    v_slug := v_slug || '-' || substring(v_submission.id::text from 1 for 8);
+    v_url := '/' || v_submission.category || '/' || v_slug;
+  END IF;
+  
+  -- Insert to content table (all validation in CHECK constraints)
+  INSERT INTO content (
+    category, 
+    slug, 
+    name, 
+    description, 
+    author, 
+    author_profile_url,
+    github_url, 
+    tags, 
+    content, 
+    date_added, 
+    status, 
+    is_featured, 
+    is_official
+  ) VALUES (
+    v_submission.category,
+    v_slug,
+    v_submission.name,
+    v_submission.description,
+    v_submission.author,
+    v_submission.author_profile_url,
+    v_submission.github_url,
+    COALESCE(v_submission.tags, '{}'),
+    v_submission.content_data,
+    CURRENT_DATE,
+    'published',
+    false,
+    false
+  )
+  RETURNING id INTO v_content_id;
+  
+  -- Update submission status to merged
+  UPDATE content_submissions
+  SET 
+    status = 'merged',
+    merged_at = NOW()
+  WHERE id = p_submission_id;
+  
+  -- Return success with metadata
+  RETURN jsonb_build_object(
+    'success', true,
+    'content_id', v_content_id,
+    'slug', v_slug,
+    'url', v_url,
+    'category', v_submission.category,
+    'name', v_submission.name
+  );
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Rollback handled automatically by PostgreSQL
+    RAISE EXCEPTION 'Merge failed: %', SQLERRM;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."merge_submission_to_content"("p_submission_id" "uuid") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."merge_submission_to_content"("p_submission_id" "uuid") IS 'Merge approved submission to content table. Database-first with slug collision handling. Replaces 93 LOC TypeScript.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."notify_newsletter_subscription"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_catalog'
@@ -9010,12 +9100,16 @@ COMMENT ON FUNCTION "public"."slug_to_title"("p_slug" "text") IS 'Converts slug 
 
 CREATE OR REPLACE FUNCTION "public"."submit_content_for_review"("p_submission_type" "text", "p_name" "text", "p_description" "text", "p_category" "text", "p_author" "text", "p_content_data" "jsonb", "p_author_profile_url" "text" DEFAULT NULL::"text", "p_github_url" "text" DEFAULT NULL::"text", "p_tags" "text"[] DEFAULT '{}'::"text"[]) RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
-    SET "search_path" TO 'public', 'pg_catalog'
+    SET "search_path" TO 'public'
     AS $$
 DECLARE
   v_submission_id UUID;
   v_submitter_id UUID;
   v_submitter_email TEXT;
+  v_recent_count INTEGER;
+  v_user_tier TEXT;
+  v_auto_approve BOOLEAN := false;
+  v_final_status submission_status;
 BEGIN
   -- Get authenticated user
   v_submitter_id := auth.uid();
@@ -9028,6 +9122,36 @@ BEGIN
   SELECT email INTO v_submitter_email
   FROM auth.users
   WHERE id = v_submitter_id;
+
+  -- Get user reputation tier (if users table exists and has tier)
+  BEGIN
+    SELECT COALESCE(
+      (reputation_data->>'tier')::text, 
+      'beginner'
+    ) INTO v_user_tier
+    FROM users
+    WHERE id = v_submitter_id;
+  EXCEPTION WHEN OTHERS THEN
+    v_user_tier := 'beginner';
+  END;
+
+  -- Rate limiting: 5 submissions per hour
+  SELECT COUNT(*) INTO v_recent_count
+  FROM content_submissions
+  WHERE submitter_id = v_submitter_id
+    AND created_at > NOW() - INTERVAL '1 hour';
+
+  IF v_recent_count >= 5 THEN
+    RAISE EXCEPTION 'Rate limit exceeded: maximum 5 submissions per hour';
+  END IF;
+
+  -- Auto-approve for expert+ tier users (trusted contributors)
+  IF v_user_tier IN ('expert', 'master', 'legend') THEN
+    v_auto_approve := true;
+    v_final_status := 'approved'::submission_status;
+  ELSE
+    v_final_status := 'pending'::submission_status;
+  END IF;
 
   -- Insert submission (CHECK constraints enforce all validation)
   INSERT INTO content_submissions (
@@ -9046,7 +9170,7 @@ BEGIN
     spam_score
   ) VALUES (
     p_submission_type::submission_type,
-    'pending'::submission_status,
+    v_final_status,
     p_name,
     p_description,
     p_category,
@@ -9064,8 +9188,11 @@ BEGIN
   RETURN jsonb_build_object(
     'success', true,
     'submission_id', v_submission_id,
-    'status', 'pending',
-    'message', 'Submission received and pending review'
+    'status', v_final_status::text,
+    'message', CASE 
+      WHEN v_auto_approve THEN 'Submission auto-approved (trusted contributor)'
+      ELSE 'Submission received and pending review'
+    END
   );
 END;
 $$;
@@ -9074,7 +9201,7 @@ $$;
 ALTER FUNCTION "public"."submit_content_for_review"("p_submission_type" "text", "p_name" "text", "p_description" "text", "p_category" "text", "p_author" "text", "p_content_data" "jsonb", "p_author_profile_url" "text", "p_github_url" "text", "p_tags" "text"[]) OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."submit_content_for_review"("p_submission_type" "text", "p_name" "text", "p_description" "text", "p_category" "text", "p_author" "text", "p_content_data" "jsonb", "p_author_profile_url" "text", "p_github_url" "text", "p_tags" "text"[]) IS 'Submit content for admin review. All validation via CHECK constraints.';
+COMMENT ON FUNCTION "public"."submit_content_for_review"("p_submission_type" "text", "p_name" "text", "p_description" "text", "p_category" "text", "p_author" "text", "p_content_data" "jsonb", "p_author_profile_url" "text", "p_github_url" "text", "p_tags" "text"[]) IS 'Submit content for review. Features: rate limiting (5/hour), auto-approve for expert+ tier, spam scoring.';
 
 
 
@@ -9292,6 +9419,44 @@ ALTER FUNCTION "public"."toggle_review_helpful"("p_review_id" "uuid", "p_user_id
 
 
 COMMENT ON FUNCTION "public"."toggle_review_helpful"("p_review_id" "uuid", "p_user_id" "uuid", "p_helpful" boolean) IS 'Toggle helpful vote on review with validation. Replaces 83 LOC TypeScript with atomic database operation.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."track_metadata_change"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+DECLARE
+  v_route TEXT;
+BEGIN
+  -- Determine route based on source table
+  CASE TG_TABLE_NAME
+    WHEN 'content' THEN
+      v_route := '/' || NEW.category || '/' || NEW.slug;
+    WHEN 'changelog_entries' THEN
+      v_route := '/changelog/' || NEW.slug;
+    WHEN 'jobs' THEN
+      v_route := '/jobs/' || NEW.slug;
+    WHEN 'static_routes' THEN
+      v_route := NEW.path;
+  END CASE;
+
+  -- Upsert cache entry
+  INSERT INTO page_metadata_cache (route, source_table, source_id, last_updated)
+  VALUES (v_route, TG_TABLE_NAME, NEW.id::TEXT, NOW())
+  ON CONFLICT (route) 
+  DO UPDATE SET 
+    last_updated = NOW(),
+    source_id = NEW.id::TEXT;
+
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."track_metadata_change"() OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."track_metadata_change"() IS 'Tracks SEO metadata changes in page_metadata_cache for webhook-based cache invalidation';
 
 
 
@@ -10847,6 +11012,7 @@ CREATE TABLE IF NOT EXISTS "public"."content_submissions" (
     "submitter_ip" "inet",
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "auto_slug" "text" GENERATED ALWAYS AS ("regexp_replace"("regexp_replace"("lower"("name"), '[^a-z0-9]+'::"text", '-'::"text", 'g'::"text"), '(^-|-$)'::"text", ''::"text", 'g'::"text")) STORED,
     CONSTRAINT "content_data_validation" CHECK (
 CASE "submission_type"
     WHEN 'agents'::"public"."submission_type" THEN (("content_data" ? 'systemPrompt'::"text") AND ("jsonb_typeof"(("content_data" -> 'systemPrompt'::"text")) = 'string'::"text") AND ("length"(("content_data" ->> 'systemPrompt'::"text")) >= 50))
@@ -10883,6 +11049,10 @@ COMMENT ON COLUMN "public"."content_submissions"."content_data" IS 'Type-specifi
 
 
 COMMENT ON COLUMN "public"."content_submissions"."spam_score" IS 'AI-calculated spam probability (0.0 = legitimate, 1.0 = spam)';
+
+
+
+COMMENT ON COLUMN "public"."content_submissions"."auto_slug" IS 'Auto-generated URL-safe slug from name. Database-driven, always consistent.';
 
 
 
@@ -11440,6 +11610,44 @@ COMMENT ON COLUMN "public"."notification_dismissals"."dismissed_at" IS 'When the
 
 
 
+CREATE TABLE IF NOT EXISTS "public"."page_metadata_cache" (
+    "route" "text" NOT NULL,
+    "source_table" "text" NOT NULL,
+    "source_id" "text" NOT NULL,
+    "metadata" "jsonb",
+    "last_updated" timestamp with time zone DEFAULT "now"(),
+    "created_at" timestamp with time zone DEFAULT "now"(),
+    CONSTRAINT "page_metadata_cache_source_table_check" CHECK (("source_table" = ANY (ARRAY['content'::"text", 'changelog_entries'::"text", 'jobs'::"text", 'static_routes'::"text"])))
+);
+
+
+ALTER TABLE "public"."page_metadata_cache" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."page_metadata_cache" IS 'Tracks page routes for hot-reload cache invalidation';
+
+
+
+COMMENT ON COLUMN "public"."page_metadata_cache"."route" IS 'Full route path (e.g., /agents/code-reviewer)';
+
+
+
+COMMENT ON COLUMN "public"."page_metadata_cache"."source_table" IS 'Origin table: content, changelog_entries, jobs, or static_routes';
+
+
+
+COMMENT ON COLUMN "public"."page_metadata_cache"."source_id" IS 'Primary key from source table (usually slug or id)';
+
+
+
+COMMENT ON COLUMN "public"."page_metadata_cache"."metadata" IS 'Cached metadata JSON (optional, for debugging)';
+
+
+
+COMMENT ON COLUMN "public"."page_metadata_cache"."last_updated" IS 'Last time this route metadata changed';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."payments" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "user_id" "uuid",
@@ -11951,62 +12159,6 @@ COMMENT ON TABLE "public"."structured_data_config" IS 'Database-first structured
 
 
 
-CREATE TABLE IF NOT EXISTS "public"."submissions" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "user_id" "uuid" NOT NULL,
-    "content_type" "text" NOT NULL,
-    "content_slug" "text" NOT NULL,
-    "content_name" "text" NOT NULL,
-    "pr_number" integer,
-    "pr_url" "text",
-    "branch_name" "text",
-    "status" "text" DEFAULT 'pending'::"text" NOT NULL,
-    "submission_data" "jsonb" NOT NULL,
-    "rejection_reason" "text",
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "merged_at" timestamp with time zone,
-    CONSTRAINT "submissions_content_type_check" CHECK (("content_type" = ANY (ARRAY['agents'::"text", 'mcp'::"text", 'rules'::"text", 'commands'::"text", 'hooks'::"text", 'statuslines'::"text"]))),
-    CONSTRAINT "submissions_pr_url_check" CHECK ((("pr_url" IS NULL) OR ("pr_url" ~ '^https://github\.com/.+/pull/[0-9]+$'::"text"))),
-    CONSTRAINT "submissions_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'approved'::"text", 'rejected'::"text", 'merged'::"text"])))
-);
-
-
-ALTER TABLE "public"."submissions" OWNER TO "postgres";
-
-
-CREATE MATERIALIZED VIEW "public"."submission_stats_summary" AS
- SELECT "count"(*) AS "total",
-    "count"(*) FILTER (WHERE ("status" = 'pending'::"text")) AS "pending",
-    "count"(*) FILTER (WHERE (("status" = 'merged'::"text") AND ("merged_at" >= ("now"() - '7 days'::interval)))) AS "merged_this_week",
-    "now"() AS "last_refreshed_at"
-   FROM "public"."submissions"
-  WITH NO DATA;
-
-
-ALTER MATERIALIZED VIEW "public"."submission_stats_summary" OWNER TO "postgres";
-
-
-COMMENT ON MATERIALIZED VIEW "public"."submission_stats_summary" IS 'Submission statistics summary materialized view. Publicly accessible via API for performance. Refreshed periodically via pg_cron.';
-
-
-
-COMMENT ON COLUMN "public"."submission_stats_summary"."total" IS 'Total number of submissions across all statuses';
-
-
-
-COMMENT ON COLUMN "public"."submission_stats_summary"."pending" IS 'Number of submissions with status=pending awaiting review';
-
-
-
-COMMENT ON COLUMN "public"."submission_stats_summary"."merged_this_week" IS 'Number of submissions merged in the last 7 days';
-
-
-
-COMMENT ON COLUMN "public"."submission_stats_summary"."last_refreshed_at" IS 'Timestamp of last materialized view refresh (updated hourly)';
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."subscriptions" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "user_id" "uuid" NOT NULL,
@@ -12105,75 +12257,6 @@ COMMENT ON COLUMN "public"."trending_content_24h"."trending_score" IS 'Weighted 
 
 
 COMMENT ON COLUMN "public"."trending_content_24h"."latest_activity_at" IS 'Most recent activity timestamp (bookmark, post, or vote). Used for recency bonus calculation.';
-
-
-
-CREATE MATERIALIZED VIEW "public"."user_activity_summary" AS
- SELECT "u"."id" AS "user_id",
-    COALESCE("p"."total_posts", (0)::bigint) AS "total_posts",
-    COALESCE("c"."total_comments", (0)::bigint) AS "total_comments",
-    COALESCE("v"."total_votes", (0)::bigint) AS "total_votes",
-    COALESCE("s"."total_submissions", (0)::bigint) AS "total_submissions",
-    COALESCE("s"."merged_submissions", (0)::bigint) AS "merged_submissions",
-    (((COALESCE("p"."total_posts", (0)::bigint) + COALESCE("c"."total_comments", (0)::bigint)) + COALESCE("v"."total_votes", (0)::bigint)) + COALESCE("s"."total_submissions", (0)::bigint)) AS "total_activity",
-    "now"() AS "last_refreshed_at"
-   FROM (((("public"."users" "u"
-     LEFT JOIN ( SELECT "posts"."user_id",
-            "count"(*) AS "total_posts"
-           FROM "public"."posts"
-          GROUP BY "posts"."user_id") "p" ON (("u"."id" = "p"."user_id")))
-     LEFT JOIN ( SELECT "comments"."user_id",
-            "count"(*) AS "total_comments"
-           FROM "public"."comments"
-          GROUP BY "comments"."user_id") "c" ON (("u"."id" = "c"."user_id")))
-     LEFT JOIN ( SELECT "votes"."user_id",
-            "count"(*) AS "total_votes"
-           FROM "public"."votes"
-          GROUP BY "votes"."user_id") "v" ON (("u"."id" = "v"."user_id")))
-     LEFT JOIN ( SELECT "submissions"."user_id",
-            "count"(*) AS "total_submissions",
-            "count"(*) FILTER (WHERE ("submissions"."status" = 'merged'::"text")) AS "merged_submissions"
-           FROM "public"."submissions"
-          GROUP BY "submissions"."user_id") "s" ON (("u"."id" = "s"."user_id")))
-  WITH NO DATA;
-
-
-ALTER MATERIALIZED VIEW "public"."user_activity_summary" OWNER TO "postgres";
-
-
-COMMENT ON MATERIALIZED VIEW "public"."user_activity_summary" IS 'User activity summary materialized view. Publicly accessible via API for performance. Refreshed periodically via pg_cron.';
-
-
-
-COMMENT ON COLUMN "public"."user_activity_summary"."user_id" IS 'User ID (foreign key to users.id)';
-
-
-
-COMMENT ON COLUMN "public"."user_activity_summary"."total_posts" IS 'Total number of posts created by user';
-
-
-
-COMMENT ON COLUMN "public"."user_activity_summary"."total_comments" IS 'Total number of comments created by user';
-
-
-
-COMMENT ON COLUMN "public"."user_activity_summary"."total_votes" IS 'Total number of votes cast by user (upvotes + downvotes)';
-
-
-
-COMMENT ON COLUMN "public"."user_activity_summary"."total_submissions" IS 'Total number of content submissions by user (all statuses)';
-
-
-
-COMMENT ON COLUMN "public"."user_activity_summary"."merged_submissions" IS 'Number of submissions approved and merged into production';
-
-
-
-COMMENT ON COLUMN "public"."user_activity_summary"."total_activity" IS 'Sum of all activity types (posts + comments + votes + submissions)';
-
-
-
-COMMENT ON COLUMN "public"."user_activity_summary"."last_refreshed_at" IS 'Timestamp of last materialized view refresh (updated daily at 2 AM UTC)';
 
 
 
@@ -12383,73 +12466,6 @@ CREATE TABLE IF NOT EXISTS "public"."user_similarities" (
 ALTER TABLE "public"."user_similarities" OWNER TO "postgres";
 
 
-CREATE MATERIALIZED VIEW "public"."user_stats" AS
- SELECT "u"."id" AS "user_id",
-    "u"."reputation_score",
-    COALESCE("p"."total_posts", (0)::bigint) AS "total_posts",
-    COALESCE("p"."total_upvotes_received", (0)::bigint) AS "total_upvotes_received",
-    COALESCE("b"."total_bookmarks", (0)::bigint) AS "total_bookmarks",
-    COALESCE("c"."total_collections", (0)::bigint) AS "total_collections",
-    COALESCE("c"."public_collections", (0)::bigint) AS "public_collections",
-    COALESCE("r"."total_reviews", (0)::bigint) AS "total_reviews",
-    COALESCE("r"."avg_rating_given", 0.0) AS "avg_rating_given",
-    COALESCE("s"."total_submissions", (0)::bigint) AS "total_submissions",
-    COALESCE("s"."approved_submissions", (0)::bigint) AS "approved_submissions",
-    COALESCE("bd"."total_badges", (0)::bigint) AS "total_badges",
-    COALESCE("bd"."featured_badges", (0)::bigint) AS "featured_badges",
-    COALESCE("v"."total_votes_given", (0)::bigint) AS "total_votes_given",
-    COALESCE("cm"."total_comments", (0)::bigint) AS "total_comments",
-    "u"."created_at",
-    (EXTRACT(epoch FROM ("now"() - "u"."created_at")) / (86400)::numeric) AS "account_age_days",
-    "now"() AS "refreshed_at"
-   FROM (((((((("public"."users" "u"
-     LEFT JOIN ( SELECT "posts"."user_id",
-            "count"(*) AS "total_posts",
-            COALESCE("sum"("posts"."vote_count"), (0)::bigint) AS "total_upvotes_received"
-           FROM "public"."posts"
-          GROUP BY "posts"."user_id") "p" ON (("u"."id" = "p"."user_id")))
-     LEFT JOIN ( SELECT "bookmarks"."user_id",
-            "count"(*) AS "total_bookmarks"
-           FROM "public"."bookmarks"
-          GROUP BY "bookmarks"."user_id") "b" ON (("u"."id" = "b"."user_id")))
-     LEFT JOIN ( SELECT "user_collections"."user_id",
-            "count"(*) AS "total_collections",
-            "count"(*) FILTER (WHERE ("user_collections"."is_public" = true)) AS "public_collections"
-           FROM "public"."user_collections"
-          GROUP BY "user_collections"."user_id") "c" ON (("u"."id" = "c"."user_id")))
-     LEFT JOIN ( SELECT "review_ratings"."user_id",
-            "count"(*) AS "total_reviews",
-            ("avg"("review_ratings"."rating"))::numeric(3,1) AS "avg_rating_given"
-           FROM "public"."review_ratings"
-          GROUP BY "review_ratings"."user_id") "r" ON (("u"."id" = "r"."user_id")))
-     LEFT JOIN ( SELECT "submissions"."user_id",
-            "count"(*) AS "total_submissions",
-            "count"(*) FILTER (WHERE ("submissions"."status" = 'approved'::"text")) AS "approved_submissions"
-           FROM "public"."submissions"
-          GROUP BY "submissions"."user_id") "s" ON (("u"."id" = "s"."user_id")))
-     LEFT JOIN ( SELECT "user_badges"."user_id",
-            "count"(*) AS "total_badges",
-            "count"(*) FILTER (WHERE ("user_badges"."featured" = true)) AS "featured_badges"
-           FROM "public"."user_badges"
-          GROUP BY "user_badges"."user_id") "bd" ON (("u"."id" = "bd"."user_id")))
-     LEFT JOIN ( SELECT "votes"."user_id",
-            "count"(*) AS "total_votes_given"
-           FROM "public"."votes"
-          GROUP BY "votes"."user_id") "v" ON (("u"."id" = "v"."user_id")))
-     LEFT JOIN ( SELECT "comments"."user_id",
-            "count"(*) AS "total_comments"
-           FROM "public"."comments"
-          GROUP BY "comments"."user_id") "cm" ON (("u"."id" = "cm"."user_id")))
-  WITH NO DATA;
-
-
-ALTER MATERIALIZED VIEW "public"."user_stats" OWNER TO "postgres";
-
-
-COMMENT ON MATERIALIZED VIEW "public"."user_stats" IS 'User statistics materialized view. Publicly accessible via API for performance. Refreshed periodically via pg_cron.';
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."webhook_events" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
     "type" "text" NOT NULL,
@@ -12489,6 +12505,31 @@ COMMENT ON COLUMN "public"."webhook_events"."data" IS 'Nested event data object 
 
 
 COMMENT ON COLUMN "public"."webhook_events"."svix_id" IS 'Svix webhook ID for idempotency checks (prevents duplicate processing)';
+
+
+
+CREATE TABLE IF NOT EXISTS "public"."webhook_logs" (
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+    "submission_id" "uuid" NOT NULL,
+    "webhook_type" "text" NOT NULL,
+    "status" "text" NOT NULL,
+    "http_status_code" integer,
+    "request_payload" "jsonb",
+    "response_payload" "jsonb",
+    "error_message" "text",
+    "retry_count" integer DEFAULT 0,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "completed_at" timestamp with time zone,
+    CONSTRAINT "webhook_logs_retry_count_check" CHECK ((("retry_count" >= 0) AND ("retry_count" <= 5))),
+    CONSTRAINT "webhook_logs_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'success'::"text", 'failed'::"text", 'retrying'::"text"]))),
+    CONSTRAINT "webhook_logs_webhook_type_check" CHECK (("webhook_type" = ANY (ARRAY['discord_notification'::"text", 'slack_notification'::"text"])))
+);
+
+
+ALTER TABLE "public"."webhook_logs" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."webhook_logs" IS 'Audit trail for webhook delivery attempts (Discord notifications, etc). Service role access only for debugging.';
 
 
 
@@ -12791,6 +12832,11 @@ ALTER TABLE ONLY "public"."notifications"
 
 
 
+ALTER TABLE ONLY "public"."page_metadata_cache"
+    ADD CONSTRAINT "page_metadata_cache_pkey" PRIMARY KEY ("route");
+
+
+
 ALTER TABLE ONLY "public"."payments"
     ADD CONSTRAINT "payments_pkey" PRIMARY KEY ("id");
 
@@ -12926,16 +12972,6 @@ ALTER TABLE ONLY "public"."structured_data_config"
 
 
 
-ALTER TABLE ONLY "public"."submissions"
-    ADD CONSTRAINT "submissions_content_type_content_slug_key" UNIQUE ("content_type", "content_slug");
-
-
-
-ALTER TABLE ONLY "public"."submissions"
-    ADD CONSTRAINT "submissions_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."subscriptions"
     ADD CONSTRAINT "subscriptions_pkey" PRIMARY KEY ("id");
 
@@ -13028,6 +13064,11 @@ ALTER TABLE ONLY "public"."webhook_events"
 
 ALTER TABLE ONLY "public"."webhook_events"
     ADD CONSTRAINT "webhook_events_svix_id_key" UNIQUE ("svix_id");
+
+
+
+ALTER TABLE ONLY "public"."webhook_logs"
+    ADD CONSTRAINT "webhook_logs_pkey" PRIMARY KEY ("id");
 
 
 
@@ -13439,6 +13480,10 @@ CREATE INDEX "idx_content_slug" ON "public"."content" USING "btree" ("slug");
 
 
 
+CREATE INDEX "idx_content_submissions_auto_slug" ON "public"."content_submissions" USING "btree" ("auto_slug");
+
+
+
 CREATE INDEX "idx_content_submissions_created" ON "public"."content_submissions" USING "btree" ("created_at" DESC);
 
 
@@ -13723,6 +13768,14 @@ CREATE INDEX "idx_notifications_type_priority" ON "public"."notifications" USING
 
 
 
+CREATE INDEX "idx_page_metadata_cache_source" ON "public"."page_metadata_cache" USING "btree" ("source_table", "source_id");
+
+
+
+CREATE INDEX "idx_page_metadata_cache_updated" ON "public"."page_metadata_cache" USING "btree" ("last_updated");
+
+
+
 CREATE INDEX "idx_payments_polar_transaction_id" ON "public"."payments" USING "btree" ("polar_transaction_id");
 
 
@@ -13923,46 +13976,6 @@ CREATE INDEX "idx_structured_data_config_active" ON "public"."structured_data_co
 
 
 
-CREATE UNIQUE INDEX "idx_submission_stats_summary_singleton" ON "public"."submission_stats_summary" USING "btree" ((1));
-
-
-
-CREATE INDEX "idx_submissions_content_type" ON "public"."submissions" USING "btree" ("content_type");
-
-
-
-CREATE INDEX "idx_submissions_created_at" ON "public"."submissions" USING "btree" ("created_at" DESC);
-
-
-
-CREATE INDEX "idx_submissions_pr_number" ON "public"."submissions" USING "btree" ("pr_number") WHERE ("pr_number" IS NOT NULL);
-
-
-
-CREATE INDEX "idx_submissions_status" ON "public"."submissions" USING "btree" ("status");
-
-
-
-CREATE INDEX "idx_submissions_status_merged_at" ON "public"."submissions" USING "btree" ("status", "merged_at" DESC) WHERE (("status" = 'merged'::"text") AND ("merged_at" IS NOT NULL));
-
-
-
-CREATE INDEX "idx_submissions_user_created" ON "public"."submissions" USING "btree" ("user_id", "created_at" DESC);
-
-
-
-COMMENT ON INDEX "public"."idx_submissions_user_created" IS 'Optimizes get_user_activity_timeline query for submissions';
-
-
-
-CREATE INDEX "idx_submissions_user_id" ON "public"."submissions" USING "btree" ("user_id");
-
-
-
-CREATE INDEX "idx_submissions_user_id_status" ON "public"."submissions" USING "btree" ("user_id", "status") WHERE ("status" = 'merged'::"text");
-
-
-
 CREATE INDEX "idx_subscriptions_polar_id" ON "public"."subscriptions" USING "btree" ("polar_subscription_id");
 
 
@@ -13988,14 +14001,6 @@ CREATE INDEX "idx_trending_content_24h_type" ON "public"."trending_content_24h" 
 
 
 CREATE UNIQUE INDEX "idx_trending_content_24h_unique" ON "public"."trending_content_24h" USING "btree" ("content_type", "content_slug");
-
-
-
-CREATE INDEX "idx_user_activity_summary_total_activity" ON "public"."user_activity_summary" USING "btree" ("total_activity" DESC);
-
-
-
-CREATE UNIQUE INDEX "idx_user_activity_summary_user_id" ON "public"."user_activity_summary" USING "btree" ("user_id");
 
 
 
@@ -14147,22 +14152,6 @@ CREATE INDEX "idx_user_similarities_user_b" ON "public"."user_similarities" USIN
 
 
 
-CREATE INDEX "idx_user_stats_badges" ON "public"."user_stats" USING "btree" ("total_badges" DESC, "user_id");
-
-
-
-CREATE INDEX "idx_user_stats_posts" ON "public"."user_stats" USING "btree" ("total_posts" DESC, "user_id");
-
-
-
-CREATE INDEX "idx_user_stats_reputation" ON "public"."user_stats" USING "btree" ("reputation_score" DESC, "user_id");
-
-
-
-CREATE UNIQUE INDEX "idx_user_stats_user_id" ON "public"."user_stats" USING "btree" ("user_id");
-
-
-
 CREATE INDEX "idx_users_bio_trgm" ON "public"."users" USING "gin" ("bio" "public"."gin_trgm_ops");
 
 
@@ -14263,6 +14252,18 @@ CREATE INDEX "idx_webhook_events_type" ON "public"."webhook_events" USING "btree
 
 
 
+CREATE INDEX "idx_webhook_logs_created_at" ON "public"."webhook_logs" USING "btree" ("created_at" DESC);
+
+
+
+CREATE INDEX "idx_webhook_logs_status" ON "public"."webhook_logs" USING "btree" ("status") WHERE ("status" = ANY (ARRAY['failed'::"text", 'retrying'::"text"]));
+
+
+
+CREATE INDEX "idx_webhook_logs_submission_id" ON "public"."webhook_logs" USING "btree" ("submission_id");
+
+
+
 CREATE INDEX "jobs_search_vector_idx" ON "public"."jobs" USING "gin" ("search_vector");
 
 
@@ -14281,6 +14282,18 @@ CREATE STATISTICS "public"."stats_user_interactions_user_time_type" (dependencie
 
 
 ALTER STATISTICS "public"."stats_user_interactions_user_time_type" OWNER TO "postgres";
+
+
+CREATE OR REPLACE TRIGGER "Discord - Content Published Announcements" AFTER UPDATE ON "public"."content_submissions" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://hxeckduifagerhxsktev.supabase.co/functions/v1/discord-content-announcement', 'POST', '{"Content-type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4ZWNrZHVpZmFnZXJoeHNrdGV2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTczMDQ3OSwiZXhwIjoyMDc1MzA2NDc5fQ.Cp070fkwYuraPZ9qhkH9pLhE4QwICg8HWHwUDD_jjgo"}', '{}', '5000');
+
+
+
+CREATE OR REPLACE TRIGGER "Discord - Content Submissions Notification" AFTER INSERT ON "public"."content_submissions" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://hxeckduifagerhxsktev.supabase.co/functions/v1/discord-submission-notification', 'POST', '{"Content-type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4ZWNrZHVpZmFnZXJoeHNrdGV2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTczMDQ3OSwiZXhwIjoyMDc1MzA2NDc5fQ.Cp070fkwYuraPZ9qhkH9pLhE4QwICg8HWHwUDD_jjgo"}', '{}', '5000');
+
+
+
+CREATE OR REPLACE TRIGGER "ISR Cache Revalidation" AFTER INSERT OR UPDATE ON "public"."page_metadata_cache" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://claudepro.directory/api/revalidate', 'POST', '{"Content-type":"application/json","x-webhook-secret":"ca01cfc645c0e8bb6faf0a020814ab519aee8bf0882ec5e07899d472e498bf32"}', '{}', '5000');
+
 
 
 CREATE OR REPLACE TRIGGER "app_settings_updated_at" BEFORE UPDATE ON "public"."app_settings" FOR EACH ROW EXECUTE FUNCTION "public"."update_app_settings_updated_at"();
@@ -14311,15 +14324,15 @@ COMMENT ON TRIGGER "auto_award_badges_after_post" ON "public"."posts" IS 'Auto-a
 
 
 
-CREATE OR REPLACE TRIGGER "auto_award_badges_after_submission" AFTER INSERT OR UPDATE ON "public"."submissions" FOR EACH ROW WHEN (("new"."status" = 'merged'::"text")) EXECUTE FUNCTION "public"."trigger_auto_award_badges"();
-
-
-
-COMMENT ON TRIGGER "auto_award_badges_after_submission" ON "public"."submissions" IS 'Auto-awards badges after user submission is merged';
+CREATE OR REPLACE TRIGGER "changelog_metadata_change" AFTER UPDATE OF "title", "description", "og_image", "og_type", "twitter_card", "robots_index", "robots_follow" ON "public"."changelog_entries" FOR EACH ROW EXECUTE FUNCTION "public"."track_metadata_change"();
 
 
 
 CREATE OR REPLACE TRIGGER "content_fts_update" BEFORE INSERT OR UPDATE OF "title", "description", "tags" ON "public"."content" FOR EACH ROW EXECUTE FUNCTION "public"."update_content_fts_vector"();
+
+
+
+CREATE OR REPLACE TRIGGER "content_metadata_change" AFTER UPDATE OF "title", "description", "og_image", "og_type", "twitter_card", "robots_index", "robots_follow" ON "public"."content" FOR EACH ROW EXECUTE FUNCTION "public"."track_metadata_change"();
 
 
 
@@ -14355,6 +14368,10 @@ CREATE OR REPLACE TRIGGER "generate_users_slug" BEFORE INSERT OR UPDATE ON "publ
 
 
 
+CREATE OR REPLACE TRIGGER "jobs_metadata_change" AFTER UPDATE OF "title", "description", "og_image", "og_type", "twitter_card", "robots_index", "robots_follow" ON "public"."jobs" FOR EACH ROW EXECUTE FUNCTION "public"."track_metadata_change"();
+
+
+
 CREATE OR REPLACE TRIGGER "jobs_search_vector_update" BEFORE INSERT OR UPDATE ON "public"."jobs" FOR EACH ROW EXECUTE FUNCTION "public"."update_jobs_search_vector"();
 
 
@@ -14372,6 +14389,10 @@ CREATE OR REPLACE TRIGGER "on_newsletter_subscription" AFTER INSERT ON "public".
 
 
 COMMENT ON TRIGGER "on_newsletter_subscription" ON "public"."newsletter_subscriptions" IS 'Calls send-welcome-email Edge Function via pg_net after newsletter subscription insert.';
+
+
+
+CREATE OR REPLACE TRIGGER "static_routes_metadata_change" AFTER UPDATE OF "title", "description", "og_image", "og_type", "twitter_card", "robots_index", "robots_follow" ON "public"."static_routes" FOR EACH ROW EXECUTE FUNCTION "public"."track_metadata_change"();
 
 
 
@@ -14404,10 +14425,6 @@ CREATE OR REPLACE TRIGGER "trigger_reputation_on_helpful_review" AFTER UPDATE OF
 
 
 CREATE OR REPLACE TRIGGER "trigger_reputation_on_post" AFTER INSERT ON "public"."posts" FOR EACH ROW EXECUTE FUNCTION "public"."update_reputation_on_post"();
-
-
-
-CREATE OR REPLACE TRIGGER "trigger_reputation_on_submission" AFTER INSERT OR UPDATE ON "public"."submissions" FOR EACH ROW EXECUTE FUNCTION "public"."update_reputation_on_submission"();
 
 
 
@@ -14508,14 +14525,6 @@ CREATE OR REPLACE TRIGGER "update_reputation_on_post" AFTER INSERT OR DELETE OR 
 
 
 COMMENT ON TRIGGER "update_reputation_on_post" ON "public"."posts" IS 'Auto-update user reputation when posts are created, updated, or deleted.';
-
-
-
-CREATE OR REPLACE TRIGGER "update_reputation_on_submission" AFTER INSERT OR DELETE OR UPDATE OF "status" ON "public"."submissions" FOR EACH ROW EXECUTE FUNCTION "public"."trigger_update_user_reputation"();
-
-
-
-COMMENT ON TRIGGER "update_reputation_on_submission" ON "public"."submissions" IS 'Auto-update user reputation when submission status changes (especially merged).';
 
 
 
@@ -14752,11 +14761,6 @@ ALTER TABLE ONLY "public"."sponsored_impressions"
 
 
 
-ALTER TABLE ONLY "public"."submissions"
-    ADD CONSTRAINT "submissions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."subscriptions"
     ADD CONSTRAINT "subscriptions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
 
@@ -14809,6 +14813,11 @@ ALTER TABLE ONLY "public"."votes"
 
 ALTER TABLE ONLY "public"."votes"
     ADD CONSTRAINT "votes_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."webhook_logs"
+    ADD CONSTRAINT "webhook_logs_submission_id_fkey" FOREIGN KEY ("submission_id") REFERENCES "public"."content_submissions"("id") ON DELETE CASCADE;
 
 
 
@@ -15066,6 +15075,10 @@ CREATE POLICY "Service role full access to app_settings" ON "public"."app_settin
 
 
 
+CREATE POLICY "Service role full access to webhook logs" ON "public"."webhook_logs" USING (true) WITH CHECK (true);
+
+
+
 CREATE POLICY "Service role has full access to SEO rules" ON "public"."seo_enrichment_rules" TO "service_role" USING (true) WITH CHECK (true);
 
 
@@ -15091,10 +15104,6 @@ CREATE POLICY "Service role has full access to interactions" ON "public"."user_i
 
 
 CREATE POLICY "Service role has full access to reviews" ON "public"."review_ratings" TO "service_role" USING (true) WITH CHECK (true);
-
-
-
-CREATE POLICY "Service role has full access to submissions" ON "public"."submissions" TO "service_role" USING (true) WITH CHECK (true);
 
 
 
@@ -15133,10 +15142,6 @@ CREATE POLICY "Users can create companies" ON "public"."companies" FOR INSERT WI
 
 
 CREATE POLICY "Users can create jobs" ON "public"."jobs" FOR INSERT WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
-
-
-
-CREATE POLICY "Users can create submissions" ON "public"."submissions" FOR INSERT TO "authenticated" WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 
@@ -15277,10 +15282,6 @@ CREATE POLICY "Users can view own interactions" ON "public"."user_interactions" 
 
 
 CREATE POLICY "Users can view own scheduled emails" ON "public"."email_sequence_schedule" FOR SELECT TO "authenticated", "anon" USING (("email" = (("current_setting"('request.jwt.claims'::"text", true))::json ->> 'email'::"text")));
-
-
-
-CREATE POLICY "Users can view own submissions" ON "public"."submissions" FOR SELECT TO "authenticated" USING ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 
@@ -15539,9 +15540,6 @@ ALTER TABLE "public"."sponsored_impressions" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."structured_data_config" ENABLE ROW LEVEL SECURITY;
 
 
-ALTER TABLE "public"."submissions" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."subscriptions" ENABLE ROW LEVEL SECURITY;
 
 
@@ -15570,6 +15568,9 @@ ALTER TABLE "public"."votes" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."webhook_events" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."webhook_logs" ENABLE ROW LEVEL SECURITY;
 
 
 
@@ -16052,6 +16053,11 @@ GRANT ALL ON FUNCTION "public"."get_structured_data_config"("p_category" "text")
 
 
 
+GRANT ALL ON FUNCTION "public"."get_submission_stats"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_submission_stats"() TO "authenticated";
+
+
+
 GRANT ALL ON FUNCTION "public"."get_trending_content"("p_limit" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_trending_content"("p_limit" integer) TO "anon";
 
@@ -16440,15 +16446,6 @@ GRANT SELECT ON TABLE "public"."structured_data_config" TO "anon";
 
 
 
-GRANT SELECT ON TABLE "public"."submissions" TO "authenticated";
-
-
-
-GRANT SELECT ON TABLE "public"."submission_stats_summary" TO "authenticated";
-GRANT SELECT ON TABLE "public"."submission_stats_summary" TO "anon";
-
-
-
 GRANT SELECT ON TABLE "public"."subscriptions" TO "authenticated";
 
 
@@ -16465,11 +16462,6 @@ GRANT SELECT,INSERT,DELETE ON TABLE "public"."votes" TO "authenticated";
 GRANT SELECT ON TABLE "public"."trending_content_24h" TO "authenticated";
 GRANT ALL ON TABLE "public"."trending_content_24h" TO "service_role";
 GRANT SELECT ON TABLE "public"."trending_content_24h" TO "anon";
-
-
-
-GRANT SELECT ON TABLE "public"."user_activity_summary" TO "authenticated";
-GRANT SELECT ON TABLE "public"."user_activity_summary" TO "anon";
 
 
 
@@ -16494,11 +16486,6 @@ GRANT SELECT ON TABLE "public"."user_collections" TO "anon";
 
 
 GRANT SELECT ON TABLE "public"."user_similarities" TO "authenticated";
-
-
-
-GRANT SELECT ON TABLE "public"."user_stats" TO "authenticated";
-GRANT SELECT ON TABLE "public"."user_stats" TO "anon";
 
 
 

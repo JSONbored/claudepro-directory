@@ -105,17 +105,18 @@ export const getSubmissionStats = rateLimitedAction
   .schema(z.object({}))
   .action(async () => {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('submission_stats_summary')
-      .select('total, pending, merged_this_week')
-      .single();
+
+    // Database-first: Call RPC function for aggregated stats
+    const { data, error } = await supabase.rpc('get_submission_stats');
 
     if (error) throw new Error(`Failed to fetch submission stats: ${error.message}`);
 
     return {
-      total: data?.total ?? 0,
-      pending: data?.pending ?? 0,
-      mergedThisWeek: data?.merged_this_week ?? 0,
+      total: (data as { total: number; pending: number; merged_this_week: number }).total ?? 0,
+      pending: (data as { total: number; pending: number; merged_this_week: number }).pending ?? 0,
+      mergedThisWeek:
+        (data as { total: number; pending: number; merged_this_week: number }).merged_this_week ??
+        0,
     };
   });
 

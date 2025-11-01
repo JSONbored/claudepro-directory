@@ -12,12 +12,9 @@ on:
       tests:
         description: 'Test changes present'
         value: ${{ jobs.filter.outputs.tests }}
-      content:
-        description: 'Content changes present'
-        value: ${{ jobs.filter.outputs.content }}
-      seo:
-        description: 'SEO-affecting changes present'
-        value: ${{ jobs.filter.outputs.seo }}
+      database:
+        description: 'Database schema changes present'
+        value: ${{ jobs.filter.outputs.database }}
       public:
         description: 'Public assets changed'
         value: ${{ jobs.filter.outputs.public }}
@@ -31,8 +28,7 @@ jobs:
       code: ${{ steps.filter.outputs.code }}
       deps: ${{ steps.filter.outputs.deps }}
       tests: ${{ steps.filter.outputs.tests }}
-      content: ${{ steps.filter.outputs.content }}
-      seo: ${{ steps.filter.outputs.seo }}
+      database: ${{ steps.filter.outputs.database }}
       public: ${{ steps.filter.outputs.public }}
 
     steps:
@@ -57,14 +53,9 @@ jobs:
               - 'src/**/*.test.{ts,tsx,js,jsx}'
               - 'jest.config.*'
               - 'config/tools/playwright.config.ts'
-            content:
-              - 'content/**/*.json'
-              - 'content/**/*.mdx'
-              - 'templates/**'
-            seo:
-              - 'content/**/*.mdx'
-              - 'content/**/*.json'
-              - 'src/app/**/page.tsx'
-              - 'src/lib/seo/**'
+            database:
+              - 'supabase/schema.sql'
+              - 'src/types/database.types.ts'
+              - 'src/lib/schemas/generated/**'
             public:
               - 'public/**'

@@ -22,6 +22,7 @@ import { UnifiedReview } from '@/src/components/domain/unified-review';
 import { BorderBeam } from '@/src/components/magic/border-beam';
 import { Button } from '@/src/components/primitives/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
+import { trackInteraction } from '@/src/lib/actions/analytics.actions';
 import { addBookmark } from '@/src/lib/actions/user.actions';
 import { isValidCategory } from '@/src/lib/config/category-config';
 import {
@@ -35,8 +36,7 @@ import {
 } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
-import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
-import { CARD_BEHAVIORS } from '@/src/lib/ui-constants-categories';
+import { BADGE_COLORS, CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { formatCopyCount, formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -70,8 +70,16 @@ export const ConfigCard = memo(
     const handleSwipeRightCopy = useCallback(async () => {
       const url = `${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`;
       await copy(url);
+
+      // Track user interaction for analytics and personalization
+      trackInteraction({
+        interaction_type: 'copy',
+        content_type: item.category,
+        content_slug: item.slug,
+      }).catch(() => {});
+
       toasts.success.copied();
-    }, [targetPath, copy]);
+    }, [targetPath, copy, item.category, item.slug]);
 
     const handleSwipeLeftBookmark = useCallback(async () => {
       // Type guard validation

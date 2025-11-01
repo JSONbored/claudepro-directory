@@ -59,11 +59,12 @@ jobs:
     name: Test Suite
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    continue-on-error: true  # Don't block CI on test failures (SEO tests can be fixed iteratively)
     if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
-    # Only run coverage on main branch (production)
-    # PRs run tests without coverage for faster feedback
     needs: [changes]
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_TEST_URL || secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_TEST_ANON_KEY || secrets.SUPABASE_ANON_KEY }}
+      NODE_ENV: test
 
     steps:
       - name: Checkout repository

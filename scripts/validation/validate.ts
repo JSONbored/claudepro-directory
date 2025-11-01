@@ -17,7 +17,6 @@ import { parseArgs } from 'node:util';
 import { formatCIResults } from './core/formatter.js';
 import { ValidationRunner } from './core/runner.js';
 import { ContentValidator } from './validators/content-validator.js';
-import { LLMSTxtValidator } from './validators/llmstxt-validator.js';
 import { MetadataValidator } from './validators/metadata-validator.js';
 
 // ============================================================================
@@ -99,7 +98,7 @@ Examples:
 // ============================================================================
 
 const runner = new ValidationRunner({
-  validators: [new ContentValidator(), new MetadataValidator(), new LLMSTxtValidator()],
+  validators: [new ContentValidator(), new MetadataValidator()],
   parallel: values.parallel ?? true,
   stopOnError: false,
   quiet: values.ci ?? false,

@@ -34,6 +34,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import ora from 'ora';
 
 // ============================================================================
 // Constants
@@ -118,47 +119,6 @@ interface StepResult {
 // ============================================================================
 // Progress Indicator Utilities
 // ============================================================================
-
-/**
- * Simple progress spinner with clean modern UI
- */
-class ProgressIndicator {
-  private frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-  private currentFrame = 0;
-  private interval: NodeJS.Timeout | null = null;
-  private message = '';
-
-  start(message: string): void {
-    this.message = message;
-    this.currentFrame = 0;
-
-    // Hide cursor for clean output
-    process.stdout.write('\x1B[?25l');
-
-    this.interval = setInterval(() => {
-      const frame = this.frames[this.currentFrame];
-      process.stdout.write(`\r${frame} ${this.message}`);
-      this.currentFrame = (this.currentFrame + 1) % this.frames.length;
-    }, 80);
-  }
-
-  stop(finalMessage: string, icon = '✓'): void {
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = null;
-    }
-
-    // Clear line and show final message
-    process.stdout.write(`\r\x1B[K${icon} ${finalMessage}\n`);
-
-    // Show cursor again
-    process.stdout.write('\x1B[?25h');
-  }
-
-  fail(errorMessage: string): void {
-    this.stop(errorMessage, '✗');
-  }
-}
 
 // ============================================================================
 // Shared Utilities
@@ -283,7 +243,7 @@ function writeHash(filePath: string, hash: string): void {
 
 function generateSchemaDump(isForce: boolean): StepResult {
   const startTime = performance.now();
-  const progress = new ProgressIndicator();
+  const spinner = ora();
 
   try {
     console.log(`\n${'='.repeat(80)}`);
@@ -292,12 +252,12 @@ function generateSchemaDump(isForce: boolean): StepResult {
 
     // Check if regeneration needed
     if (!isForce) {
-      progress.start('Checking for schema changes...');
+      spinner.start('Checking for schema changes...');
       const currentHash = getSchemaHash();
       const storedHash = readHash(SCHEMA_HASH_FILE);
 
       if (currentHash && storedHash === currentHash) {
-        progress.stop('Schema unchanged - skipping dump', '⊘');
+        spinner.info('Schema unchanged - skipping dump');
         return {
           step: 'Schema Dump',
           success: true,
@@ -306,10 +266,10 @@ function generateSchemaDump(isForce: boolean): StepResult {
           reason: 'No changes detected',
         };
       }
-      progress.stop('Schema changed - dumping...', '→');
+      spinner.succeed('Schema changed - dumping...');
     }
 
-    progress.start('Dumping database schema...');
+    spinner.start('Dumping database schema...');
 
     const output = execSync('npx supabase db dump --linked', {
       cwd: ROOT,
@@ -331,7 +291,7 @@ function generateSchemaDump(isForce: boolean): StepResult {
     }
 
     const duration = Math.round(performance.now() - startTime);
-    progress.stop(`Schema dump complete (${duration}ms)`, '✓');
+    spinner.succeed(`Schema dump complete (${duration}ms)`);
 
     return {
       step: 'Schema Dump',
@@ -340,7 +300,7 @@ function generateSchemaDump(isForce: boolean): StepResult {
       duration_ms: duration,
     };
   } catch (error) {
-    progress.fail('Schema dump failed');
+    spinner.fail('Schema dump failed');
     console.error(`   ${error instanceof Error ? error.message : String(error)}`);
     return {
       step: 'Schema Dump',
@@ -358,7 +318,7 @@ function generateSchemaDump(isForce: boolean): StepResult {
 
 function generateTypes(isForce: boolean): StepResult {
   const startTime = performance.now();
-  const progress = new ProgressIndicator();
+  const spinner = ora();
 
   try {
     console.log(`\n${'='.repeat(80)}`);
@@ -367,12 +327,12 @@ function generateTypes(isForce: boolean): StepResult {
 
     // Check if regeneration needed
     if (!isForce) {
-      progress.start('Checking for schema changes...');
+      spinner.start('Checking for schema changes...');
       const currentHash = getSchemaHash();
       const storedHash = readHash(TYPES_HASH_FILE);
 
       if (currentHash && storedHash === currentHash) {
-        progress.stop('Schema unchanged - skipping type generation', '⊘');
+        spinner.info('Schema unchanged - skipping type generation');
         return {
           step: 'TypeScript Types',
           success: true,
@@ -381,10 +341,10 @@ function generateTypes(isForce: boolean): StepResult {
           reason: 'No changes detected',
         };
       }
-      progress.stop('Schema changed - generating types...', '→');
+      spinner.succeed('Schema changed - generating types...');
     }
 
-    progress.start('Generating TypeScript types from Supabase...');
+    spinner.start('Generating TypeScript types from Supabase...');
 
     const dbUrl = getDatabaseUrl();
     if (!dbUrl) {
@@ -410,7 +370,7 @@ function generateTypes(isForce: boolean): StepResult {
     }
 
     const duration = Math.round(performance.now() - startTime);
-    progress.stop(`Type generation complete (${duration}ms)`, '✓');
+    spinner.succeed(`Type generation complete (${duration}ms)`);
 
     return {
       step: 'TypeScript Types',
@@ -419,7 +379,7 @@ function generateTypes(isForce: boolean): StepResult {
       duration_ms: duration,
     };
   } catch (error) {
-    progress.fail('Type generation failed');
+    spinner.fail('Type generation failed');
     console.error(`   ${error instanceof Error ? error.message : String(error)}`);
     return {
       step: 'TypeScript Types',
@@ -437,7 +397,7 @@ function generateTypes(isForce: boolean): StepResult {
 
 function generateZodSchemas(isForce: boolean): StepResult {
   const startTime = performance.now();
-  const progress = new ProgressIndicator();
+  const spinner = ora();
 
   try {
     console.log(`\n${'='.repeat(80)}`);
@@ -451,7 +411,7 @@ function generateZodSchemas(isForce: boolean): StepResult {
 
     // Check if regeneration needed
     if (!isForce) {
-      progress.start('Checking for type changes...');
+      spinner.start('Checking for type changes...');
 
       if (!existsSync(TYPES_FILE)) {
         throw new Error('TypeScript types file not found - run type generation first');
@@ -462,7 +422,7 @@ function generateZodSchemas(isForce: boolean): StepResult {
       const storedHash = readHash(ZOD_HASH_FILE);
 
       if (storedHash === currentHash) {
-        progress.stop('Types unchanged - skipping Zod generation', '⊘');
+        spinner.info('Types unchanged - skipping Zod generation');
         return {
           step: 'Zod Schemas',
           success: true,
@@ -471,10 +431,10 @@ function generateZodSchemas(isForce: boolean): StepResult {
           reason: 'No changes detected',
         };
       }
-      progress.stop('Types changed - generating Zod schemas...', '→');
+      spinner.succeed('Types changed - generating Zod schemas...');
     }
 
-    progress.start('Generating Zod schemas from TypeScript types...');
+    spinner.start('Generating Zod schemas from TypeScript types...');
 
     // Verify config exists
     if (!existsSync(ZOD_CONFIG_FILE)) {
@@ -511,7 +471,7 @@ function generateZodSchemas(isForce: boolean): StepResult {
     writeHash(ZOD_HASH_FILE, currentHash);
 
     const duration = Math.round(performance.now() - startTime);
-    progress.stop(`Zod schema generation complete (${duration}ms)`, '✓');
+    spinner.succeed(`Zod schema generation complete (${duration}ms)`);
 
     return {
       step: 'Zod Schemas',
@@ -520,7 +480,7 @@ function generateZodSchemas(isForce: boolean): StepResult {
       duration_ms: duration,
     };
   } catch (error) {
-    progress.fail('Zod generation failed');
+    spinner.fail('Zod generation failed');
     console.error(`   ${error instanceof Error ? error.message : String(error)}`);
     return {
       step: 'Zod Schemas',

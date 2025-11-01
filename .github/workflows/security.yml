@@ -54,8 +54,8 @@ jobs:
   build-for-codeql:
     name: Build for CodeQL
     uses: ./.github/workflows/build-reusable.yml
-    needs: [precheck]
-    if: needs.precheck.outputs.run-security == 'true'
+    needs: [changes]
+    if: github.event_name == 'schedule' || needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true'
     with:
       cache-key-suffix: ${{ github.event.pull_request.number || 'codeql' }}
       upload-artifact: true
@@ -64,8 +64,8 @@ jobs:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [precheck, build-for-codeql]
-    if: needs.precheck.outputs.run-security == 'true'
+    needs: [changes, build-for-codeql]
+    if: github.event_name == 'schedule' || needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true'
     permissions:
       actions: read
       contents: read

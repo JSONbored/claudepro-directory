@@ -98,7 +98,7 @@ jobs:
   analyze:
     name: Analyze & Compare
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     needs: [check-base-cache, build-pr, build-base]
     if: always() && needs.check-base-cache.result == 'success' && needs.build-pr.result == 'success' && (needs.build-base.result == 'success' || needs.check-base-cache.outputs.cache-hit == 'true')
 

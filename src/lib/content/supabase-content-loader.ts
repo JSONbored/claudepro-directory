@@ -3,7 +3,7 @@
  */
 
 import { unstable_cache } from 'next/cache';
-import type { CategoryId } from '@/src/lib/config/category-types';
+import type { CategoryId } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Tables } from '@/src/types/database.types';

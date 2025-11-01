@@ -277,6 +277,13 @@ export type PublicNotificationDismissalsRelationships = z.infer<
 export type PublicNotificationsRow = z.infer<typeof generated.publicNotificationsRowSchema>;
 export type PublicNotificationsInsert = z.infer<typeof generated.publicNotificationsInsertSchema>;
 export type PublicNotificationsUpdate = z.infer<typeof generated.publicNotificationsUpdateSchema>;
+export type PublicPageMetadataCacheRow = z.infer<typeof generated.publicPageMetadataCacheRowSchema>;
+export type PublicPageMetadataCacheInsert = z.infer<
+  typeof generated.publicPageMetadataCacheInsertSchema
+>;
+export type PublicPageMetadataCacheUpdate = z.infer<
+  typeof generated.publicPageMetadataCacheUpdateSchema
+>;
 export type PublicPaymentsRow = z.infer<typeof generated.publicPaymentsRowSchema>;
 export type PublicPaymentsInsert = z.infer<typeof generated.publicPaymentsInsertSchema>;
 export type PublicPaymentsUpdate = z.infer<typeof generated.publicPaymentsUpdateSchema>;
@@ -394,12 +401,6 @@ export type PublicStructuredDataConfigInsert = z.infer<
 export type PublicStructuredDataConfigUpdate = z.infer<
   typeof generated.publicStructuredDataConfigUpdateSchema
 >;
-export type PublicSubmissionsRow = z.infer<typeof generated.publicSubmissionsRowSchema>;
-export type PublicSubmissionsInsert = z.infer<typeof generated.publicSubmissionsInsertSchema>;
-export type PublicSubmissionsUpdate = z.infer<typeof generated.publicSubmissionsUpdateSchema>;
-export type PublicSubmissionsRelationships = z.infer<
-  typeof generated.publicSubmissionsRelationshipsSchema
->;
 export type PublicSubscriptionsRow = z.infer<typeof generated.publicSubscriptionsRowSchema>;
 export type PublicSubscriptionsInsert = z.infer<typeof generated.publicSubscriptionsInsertSchema>;
 export type PublicSubscriptionsUpdate = z.infer<typeof generated.publicSubscriptionsUpdateSchema>;
@@ -465,6 +466,12 @@ export type PublicVotesRelationships = z.infer<typeof generated.publicVotesRelat
 export type PublicWebhookEventsRow = z.infer<typeof generated.publicWebhookEventsRowSchema>;
 export type PublicWebhookEventsInsert = z.infer<typeof generated.publicWebhookEventsInsertSchema>;
 export type PublicWebhookEventsUpdate = z.infer<typeof generated.publicWebhookEventsUpdateSchema>;
+export type PublicWebhookLogsRow = z.infer<typeof generated.publicWebhookLogsRowSchema>;
+export type PublicWebhookLogsInsert = z.infer<typeof generated.publicWebhookLogsInsertSchema>;
+export type PublicWebhookLogsUpdate = z.infer<typeof generated.publicWebhookLogsUpdateSchema>;
+export type PublicWebhookLogsRelationships = z.infer<
+  typeof generated.publicWebhookLogsRelationshipsSchema
+>;
 export type PublicCompanyJobStatsRow = z.infer<typeof generated.publicCompanyJobStatsRowSchema>;
 export type PublicContentPopularityRow = z.infer<typeof generated.publicContentPopularityRowSchema>;
 export type PublicContentUnifiedRow = z.infer<typeof generated.publicContentUnifiedRowSchema>;
@@ -486,14 +493,8 @@ export type PublicRecommendedContentRow = z.infer<
 export type PublicRecommendedContentRelationships = z.infer<
   typeof generated.publicRecommendedContentRelationshipsSchema
 >;
-export type PublicSubmissionStatsSummaryRow = z.infer<
-  typeof generated.publicSubmissionStatsSummaryRowSchema
->;
 export type PublicTrendingContent24hRow = z.infer<
   typeof generated.publicTrendingContent24hRowSchema
->;
-export type PublicUserActivitySummaryRow = z.infer<
-  typeof generated.publicUserActivitySummaryRowSchema
 >;
 export type PublicUserAffinityScoresRow = z.infer<
   typeof generated.publicUserAffinityScoresRowSchema
@@ -508,7 +509,6 @@ export type PublicUserBadgesWithDetailsRow = z.infer<
 export type PublicUserBadgesWithDetailsRelationships = z.infer<
   typeof generated.publicUserBadgesWithDetailsRelationshipsSchema
 >;
-export type PublicUserStatsRow = z.infer<typeof generated.publicUserStatsRowSchema>;
 export type PublicAddBookmarkArgs = z.infer<typeof generated.publicAddBookmarkArgsSchema>;
 export type PublicAddBookmarkReturns = z.infer<typeof generated.publicAddBookmarkReturnsSchema>;
 export type PublicApproveSubmissionArgs = z.infer<
@@ -925,6 +925,12 @@ export type PublicGetStructuredDataConfigArgs = z.infer<
 export type PublicGetStructuredDataConfigReturns = z.infer<
   typeof generated.publicGetStructuredDataConfigReturnsSchema
 >;
+export type PublicGetSubmissionStatsArgs = z.infer<
+  typeof generated.publicGetSubmissionStatsArgsSchema
+>;
+export type PublicGetSubmissionStatsReturns = z.infer<
+  typeof generated.publicGetSubmissionStatsReturnsSchema
+>;
 export type PublicGetTierNameFromScoreArgs = z.infer<
   typeof generated.publicGetTierNameFromScoreArgsSchema
 >;
@@ -962,8 +968,8 @@ export type PublicGetUsageRecommendationsReturns = z.infer<
 export type PublicGetUserActivitySummaryArgs = z.infer<
   typeof generated.publicGetUserActivitySummaryArgsSchema
 >;
-export type PublicGetUserActivitySummaryReturns = z.infer<
-  typeof generated.publicGetUserActivitySummaryReturnsSchema
+export type PublicUserActivitySummaryResult = z.infer<
+  typeof generated.publicUserActivitySummaryResultSchema
 >;
 export type PublicGetUserActivityTimelineArgs = z.infer<
   typeof generated.publicGetUserActivityTimelineArgsSchema
@@ -1080,6 +1086,12 @@ export type PublicMarkSequenceEmailProcessedArgs = z.infer<
 >;
 export type PublicMarkSequenceEmailProcessedReturns = z.infer<
   typeof generated.publicMarkSequenceEmailProcessedReturnsSchema
+>;
+export type PublicMergeSubmissionToContentArgs = z.infer<
+  typeof generated.publicMergeSubmissionToContentArgsSchema
+>;
+export type PublicMergeSubmissionToContentReturns = z.infer<
+  typeof generated.publicMergeSubmissionToContentReturnsSchema
 >;
 export type PublicRefreshContentPopularityArgs = z.infer<
   typeof generated.publicRefreshContentPopularityArgsSchema
@@ -1214,4 +1226,7 @@ export type PublicUpsertGithubStarsArgs = z.infer<
 >;
 export type PublicUpsertGithubStarsReturns = z.infer<
   typeof generated.publicUpsertGithubStarsReturnsSchema
+>;
+export type PublicGetUserActivitySummaryReturns = z.infer<
+  typeof generated.publicGetUserActivitySummaryReturnsSchema
 >;

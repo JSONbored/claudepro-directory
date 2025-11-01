@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { getCacheableCategoryIds } from '@/src/lib/config/category-config';
 import type { Enums } from '@/src/types/database.types';
 
-export type { CategoryId } from '@/src/lib/config/category-types';
+export type { CategoryId } from '@/src/lib/config/category-config';
 
 export const categoryIdSchema = z.enum([
   'agents',

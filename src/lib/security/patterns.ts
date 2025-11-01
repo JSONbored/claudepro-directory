@@ -4,7 +4,7 @@
  * Extracted for DRY principle and easier maintenance
  */
 
-import { VALID_CATEGORIES } from '@/src/lib/config/category-types';
+import { VALID_CATEGORIES } from '@/src/lib/config/category-config';
 
 /**
  * Security-focused regex patterns for strict validation

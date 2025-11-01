@@ -1,18 +1,35 @@
 /**
- * Discovery Workflow - Mandatory Content Discovery Process
- *
- * Enforces trending topic research BEFORE content creation.
- * Prevents content creation based on assumptions.
- *
- * This module provides the discovery workflow that MUST be completed
- * before any content can be created. The discoveryMetadata field is
- * REQUIRED by the schema and will block validation without it.
- *
- * @module config/content/discovery/run-discovery
+ * Discovery Workflow - Database-First Content Discovery
+ * All logic in PostgreSQL via content_submissions RPC functions.
  */
 
 import type { CategoryId } from '@/src/lib/config/category-types';
-import type { DiscoveryMetadata } from '@/src/lib/schemas/content/base-content.schema';
+import type { Database } from '@/src/types/database.types';
+
+/**
+ * Discovery Metadata Type (matches database JSONB structure)
+ * Stored in content.discovery_metadata (JSONB column)
+ */
+export interface DiscoveryMetadata {
+  researchDate: string;
+  trendingSources: Array<{
+    source: string;
+    evidence: string;
+    url?: string;
+    relevanceScore?: 'high' | 'medium' | 'low';
+  }>;
+  keywordResearch: {
+    primaryKeywords: string[];
+    searchVolume: 'high' | 'medium' | 'low' | 'unknown';
+    competitionLevel: 'high' | 'medium' | 'low' | 'unknown';
+  };
+  gapAnalysis: {
+    existingContent: string[];
+    identifiedGap: string;
+    priority: 'high' | 'medium' | 'low';
+  };
+  approvalRationale: string;
+}
 
 /**
  * Discovery Workflow Instructions
@@ -301,4 +318,50 @@ export function formatDiscoveryReport(discovery: DiscoveryMetadata): string {
   }
 
   return lines.join('\n');
+}
+
+/**
+ * Build Database Payload for RPC Submission
+ *
+ * Converts discovery metadata and content data to submit_content_for_review parameters.
+ * Uses generated Database types for type safety.
+ *
+ * @param params - Content and discovery data
+ * @returns Parameters for submit_content_for_review RPC function
+ */
+export function buildDatabasePayload(params: {
+  category: CategoryId;
+  name: string;
+  description: string;
+  author: string;
+  contentData: Record<string, unknown>;
+  discoveryMetadata: DiscoveryMetadata;
+  authorProfileUrl?: string;
+  githubUrl?: string;
+  tags?: string[];
+}): {
+  p_submission_type: string;
+  p_name: string;
+  p_description: string;
+  p_category: string;
+  p_author: string;
+  p_content_data: Record<string, unknown>;
+  p_author_profile_url?: string;
+  p_github_url?: string;
+  p_tags?: string[];
+} {
+  return {
+    p_submission_type: params.category,
+    p_name: params.name,
+    p_description: params.description,
+    p_category: params.category,
+    p_author: params.author,
+    p_content_data: {
+      ...params.contentData,
+      discovery_metadata: params.discoveryMetadata,
+    },
+    p_author_profile_url: params.authorProfileUrl,
+    p_github_url: params.githubUrl,
+    p_tags: params.tags || [],
+  };
 }

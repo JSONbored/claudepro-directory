@@ -5,8 +5,7 @@
  */
 
 import { z } from 'zod';
-import { isValidCategory } from '@/src/lib/config/category-config';
-import { VALID_CATEGORIES } from '@/src/lib/config/category-types';
+import { isValidCategory, VALID_CATEGORIES } from '@/src/lib/config/category-config';
 import { DOMPurify } from './html-sanitizer';
 import { VALIDATION_PATTERNS } from './patterns';
 

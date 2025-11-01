@@ -1,188 +1,114 @@
 #!/usr/bin/env tsx
+
 /**
- * Generate README.md from content files
- *
- * This script automatically generates the project README.md with:
- * - OG image hero section
- * - Awesome-list style content catalog
- * - Auto-counted content items by category
- * - Contributors section and analytics
- *
- * Run: npm run generate:readme
- * Auto-runs: Pre-commit when content files change
+ * README Generator - Database-First Architecture
+ * Generates README.md by querying content and category_configs tables directly.
  */
 
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { createClient } from '@supabase/supabase-js';
 
 // ============================================================================
-// Types & Interfaces
+// Supabase Client
 // ============================================================================
 
-interface ContentItem {
-  title: string;
-  slug: string;
-  description: string;
-  category: string;
-  url?: string;
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!(supabaseUrl && supabaseKey)) {
+  console.error('❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables');
+  process.exit(1);
 }
 
-interface CategoryConfig {
-  name: string;
-  emoji: string;
-  description: string;
-  path: string;
-  sortOrder: number;
-}
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
-const CONTENT_DIR = join(process.cwd(), 'content');
 const README_PATH = join(process.cwd(), 'README.md');
 const SITE_URL = 'https://claudepro.directory';
 
-const CATEGORIES: CategoryConfig[] = [
-  {
-    name: 'Agents',
-    emoji: '🤖',
-    description: 'Specialized AI personas for specific development workflows and expert assistance',
-    path: 'agents',
-    sortOrder: 1,
-  },
-  {
-    name: 'MCP Servers',
-    emoji: '⚙️',
-    description: "Model Context Protocol servers for extending Claude's capabilities",
-    path: 'mcp',
-    sortOrder: 2,
-  },
-  {
-    name: 'Hooks',
-    emoji: '🪝',
-    description: 'Event-driven automation scripts that run on specific triggers',
-    path: 'hooks',
-    sortOrder: 3,
-  },
-  {
-    name: 'Commands',
-    emoji: '🔧',
-    description: 'Quick-action slash commands for common development tasks',
-    path: 'commands',
-    sortOrder: 4,
-  },
-  {
-    name: 'Rules',
-    emoji: '📜',
-    description: 'Custom instructions and guidelines for specialized AI behaviors',
-    path: 'rules',
-    sortOrder: 5,
-  },
-  {
-    name: 'Skills',
-    emoji: '📚',
-    description: 'Task-focused capability guides and specialized expertise',
-    path: 'skills',
-    sortOrder: 6,
-  },
-  {
-    name: 'Statuslines',
-    emoji: '💻',
-    description: 'Custom status bar displays for your Claude development environment',
-    path: 'statuslines',
-    sortOrder: 7,
-  },
-  {
-    name: 'Collections',
-    emoji: '📦',
-    description: 'Curated bundles of configurations for specific use cases',
-    path: 'collections',
-    sortOrder: 8,
-  },
+// Icon name to emoji mapping (Lucide icons → emoji)
+const ICON_EMOJI_MAP: Record<string, string> = {
+  Sparkles: '🤖',
+  Server: '⚙️',
+  Webhook: '🪝',
+  Terminal: '🔧',
+  BookOpen: '📜',
+  Layers: '📦',
+  FileText: '📄',
+  Briefcase: '💼',
+};
+
+// Categories to include in README (exclude guides, jobs, changelog)
+const README_CATEGORIES = [
+  'agents',
+  'mcp',
+  'hooks',
+  'commands',
+  'rules',
+  'skills',
+  'statuslines',
+  'collections',
 ];
 
 // ============================================================================
-// Content Loading
+// Database Queries
 // ============================================================================
 
-/**
- * Load all JSON content files from a category directory
- */
-function loadCategoryContent(categoryPath: string): ContentItem[] {
-  const categoryDir = join(CONTENT_DIR, categoryPath);
-  const items: ContentItem[] = [];
+async function getCategoryConfigs() {
+  const { data, error } = await supabase
+    .from('category_configs')
+    .select('category, title, description, icon_name, url_slug')
+    .in('category', README_CATEGORIES)
+    .order('category');
 
-  try {
-    const files = readdirSync(categoryDir).filter((f) => f.endsWith('.json'));
-
-    for (const file of files) {
-      try {
-        const content = readFileSync(join(categoryDir, file), 'utf-8');
-        const data = JSON.parse(content);
-
-        // Generate title from slug if not present
-        const slug = data.slug || file.replace('.json', '');
-        const title =
-          data.title ||
-          data.name ||
-          slug
-            .split('-')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-
-        // Extract metadata from JSON
-        items.push({
-          title,
-          slug,
-          description: data.description || data.seoDescription || '',
-          category: categoryPath,
-          url: data.url,
-        });
-      } catch (_error) {
-        console.warn(`⚠️  Failed to parse ${file}:`, _error);
-      }
-    }
-  } catch (_error) {
-    // Category directory doesn't exist or is empty
-    console.warn(`⚠️  Category ${categoryPath} not found or empty`);
-  }
-
-  // Sort alphabetically by title
-  return items.sort((a, b) => a.title.localeCompare(b.title));
+  if (error) throw new Error(`Failed to fetch categories: ${error.message}`);
+  return data || [];
 }
 
-/**
- * Get total count of all content items
- */
-function getTotalCount(): number {
-  return CATEGORIES.reduce((total, category) => {
-    const items = loadCategoryContent(category.path);
-    return total + items.length;
-  }, 0);
+async function getContentByCategory(category: string) {
+  const { data, error } = await supabase
+    .from('content')
+    .select('slug, title, description')
+    .eq('category', category)
+    .order('title');
+
+  if (error) throw new Error(`Failed to fetch content for ${category}: ${error.message}`);
+  return data || [];
+}
+
+async function getTotalContentCount() {
+  const { count, error } = await supabase
+    .from('content')
+    .select('*', { count: 'exact', head: true })
+    .in('category', README_CATEGORIES);
+
+  if (error) throw new Error(`Failed to count content: ${error.message}`);
+  return count || 0;
 }
 
 // ============================================================================
 // README Generation
 // ============================================================================
 
-/**
- * Generate a category section for the README
- */
-function generateCategorySection(category: CategoryConfig): string {
-  const items = loadCategoryContent(category.path);
-  const count = items.length;
+async function generateCategorySection(categoryConfig: any, contentItems: any[]) {
+  const count = contentItems.length;
+  if (count === 0) return '';
 
-  if (count === 0) {
-    return ''; // Skip empty categories
-  }
+  const emoji = ICON_EMOJI_MAP[categoryConfig.icon_name] || '📄';
+  const categoryName = categoryConfig.title.endsWith('y')
+    ? categoryConfig.title.slice(0, -1) + 'ies' // Rule → Rules
+    : categoryConfig.title + 's'; // Agent → Agents
 
-  let section = `## ${category.emoji} ${category.name} (${count})\n\n`;
-  section += `${category.description}\n\n`;
+  let section = `## ${emoji} ${categoryName} (${count})\n\n`;
+  section += `${categoryConfig.description}\n\n`;
 
-  // List items
-  for (const item of items) {
-    const url = `${SITE_URL}/${category.path}/${item.slug}`;
+  for (const item of contentItems) {
+    const url = `${SITE_URL}/${categoryConfig.url_slug}/${item.slug}`;
     const description = item.description || 'No description available';
     section += `- **[${item.title}](${url})** - ${description}\n`;
   }
@@ -191,11 +117,21 @@ function generateCategorySection(category: CategoryConfig): string {
   return section;
 }
 
-/**
- * Generate the complete README.md content
- */
-function generateReadme(): string {
-  const totalCount = getTotalCount();
+async function generateReadme() {
+  console.log('📝 Generating README.md from database...\n');
+
+  const [categories, totalCount] = await Promise.all([
+    getCategoryConfigs(),
+    getTotalContentCount(),
+  ]);
+
+  // Generate category sections
+  const categorySections = await Promise.all(
+    categories.map(async (cat) => {
+      const items = await getContentByCategory(cat.category);
+      return generateCategorySection(cat, items);
+    })
+  );
 
   return `![ClaudePro.directory](public/og-images/og-image.webp)
 
@@ -248,7 +184,7 @@ See our [Contributing Guide](.github/CONTRIBUTING.md) for detailed instructions.
 
 Browse all available Claude configurations by category:
 
-${CATEGORIES.map((cat) => generateCategorySection(cat)).join('')}
+${categorySections.join('')}
 
 ---
 
@@ -288,26 +224,31 @@ Thanks to everyone who has contributed to making Claude better for everyone!
 // Main Execution
 // ============================================================================
 
-function main() {
-  console.log('📝 Generating README.md from content files...\n');
-
+async function main() {
   try {
-    const readme = generateReadme();
+    const readme = await generateReadme();
     writeFileSync(README_PATH, readme, 'utf-8');
 
+    const totalCount = await getTotalContentCount();
+    const categories = await getCategoryConfigs();
+
     console.log('✅ README.md generated successfully!');
-    console.log(`   Total items: ${getTotalCount()}`);
-    console.log(`   Categories: ${CATEGORIES.length}\n`);
+    console.log(`   Total items: ${totalCount}`);
+    console.log(`   Categories: ${categories.length}\n`);
 
     // Show category breakdown
-    for (const category of CATEGORIES) {
-      const items = loadCategoryContent(category.path);
+    for (const cat of categories) {
+      const items = await getContentByCategory(cat.category);
       if (items.length > 0) {
-        console.log(`   ${category.emoji} ${category.name}: ${items.length}`);
+        const emoji = ICON_EMOJI_MAP[cat.icon_name] || '📄';
+        const categoryName = cat.title.endsWith('y')
+          ? cat.title.slice(0, -1) + 'ies'
+          : cat.title + 's';
+        console.log(`   ${emoji} ${categoryName}: ${items.length}`);
       }
     }
-  } catch (_error) {
-    console.error('❌ Failed to generate README:', _error);
+  } catch (error) {
+    console.error('❌ Failed to generate README:', error);
     process.exit(1);
   }
 }

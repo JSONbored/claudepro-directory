@@ -147,55 +147,24 @@ execSync(`ln -s "${timestamp}" "${LATEST_BACKUP_DIR}"`, { cwd: join(ROOT, 'backu
 // ============================================================================
 // README
 // ============================================================================
-const readme = `Supabase Database Complete Backup (OPTIMIZED)
-===============================================
+const readme = `Supabase Database Backup
+========================
 Date: ${new Date().toISOString()}
-Project: claudepro-directory
-Backup Hash: ${currentHash.slice(0, 16)}...
+Hash: ${currentHash.slice(0, 16)}...
 
 Files:
 ------
-full_backup.sql.gz : Compressed 1:1 database copy (ALL schemas + ALL data)
+full_backup.sql.gz - Complete database dump (all schemas + data, gzip -9)
 
-Optimizations:
---------------
-✓ Lightweight fingerprint check BEFORE dumping (50,000x less egress)
-✓ Streamed compression (zero intermediate buffers)
-✓ gzip level 9 (80-90% size reduction)
-✓ Incremental: only backs up if database changed
-
-Schemas Included:
------------------
-✓ public (77 tables, ~7,696 rows) - Application data
-✓ auth (19 tables, ~979 rows) - User authentication
-✓ storage (7 tables, ~44 rows) - File storage metadata
-✓ realtime (3 tables, ~64 rows) - Realtime subscriptions
-✓ cron (2 tables, ~29 rows) - Scheduled jobs
-✓ supabase_migrations (2 tables, ~58 rows) - Migration history
-✓ vault (1 table, ~1 row) - Secrets management
-✓ supabase_functions (2 tables, ~2 rows) - Edge functions
-✓ net (2 tables) - Network configuration
-✓ All RLS policies, triggers, functions, views, indexes
-
-Restore Instructions:
----------------------
-# Decompress and restore:
+Restore:
+--------
 gunzip -c full_backup.sql.gz | psql "$POSTGRES_URL"
-
-# Or decompress first:
-gunzip full_backup.sql.gz
-psql "$POSTGRES_URL" < full_backup.sql
-
-# Verify restore:
-psql "$POSTGRES_URL" -c "SELECT schemaname, COUNT(*) FROM pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema') GROUP BY schemaname;"
 
 Notes:
 ------
-- This is a COMPLETE backup (every schema, every table, every row)
-- Perfect 1:1 copy of entire database state
-- Hash-based incremental: only creates new backup if ANY data changed
-- Use pnpm backup:db --force to force new backup
-- Compressed with gzip level 9 (80-90% smaller)
+- Complete 1:1 database copy (public, auth, storage, realtime, cron, vault, net schemas)
+- Incremental: hash-based change detection (fingerprint RPC if available)
+- Use --force to bypass change detection
 `;
 
 writeFileSync(join(BACKUP_DIR, 'README.txt'), readme, 'utf-8');
