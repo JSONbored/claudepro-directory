@@ -43,7 +43,7 @@
   },
   "scripts": {
     "dev": "turbo run generate:service-worker:exec && next dev --turbopack",
-    "build": "turbo run build:skills:exec generate:service-worker:exec && next build --turbopack",
+    "build": "turbo run generate:service-worker:exec && next build --turbopack",
     "build:analyze": "TURBOPACK_STATS=1 next build --turbopack",
     "build:skills": "turbo run build:skills:exec",
     "build:skills:exec": "tsx scripts/build/generate-skill-packages.ts",
