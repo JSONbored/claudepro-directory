@@ -183,7 +183,7 @@ jobs:
             2. Once approved, your content will be merged to the main directory
             3. You'll be notified via GitHub when the PR is merged
 
-            **Review your submission:** [Supabase Dashboard](https://supabase.com/dashboard/project/hxeckduifagerhxsktev/editor/content_submissions)
+            **Review your submission:** [Supabase Dashboard](https://supabase.com/dashboard/project/${process.env.SUPABASE_PROJECT_ID || 'PROJECT_ID'}/editor/content_submissions)
 
             Thank you for contributing to Claude Pro Directory! 🎉`;
 

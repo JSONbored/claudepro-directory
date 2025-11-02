@@ -185,6 +185,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.922.0",
     "@axe-core/playwright": "^4.11.0",
     "@biomejs/biome": "2.2.7",
     "@faker-js/faker": "^10.1.0",

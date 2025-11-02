@@ -81,7 +81,9 @@ export async function generateMetadataFromDB(
   if (dbSeoFields) {
     return {
       ...rpcData,
-      ...(dbSeoFields.title && { title: dbSeoFields.title }),
+      // Use seo_title if present, fall back to title, then RPC-generated
+      ...(dbSeoFields.seo_title && { title: dbSeoFields.seo_title }),
+      ...(!dbSeoFields.seo_title && dbSeoFields.title && { title: dbSeoFields.title }),
       ...(dbSeoFields.description && { description: dbSeoFields.description }),
       ...(dbSeoFields.og_type && { openGraphType: dbSeoFields.og_type as 'website' | 'article' }),
       ...(dbSeoFields.twitter_card && {
@@ -109,7 +111,9 @@ type SEOFields = Pick<
   | 'robots_index'
   | 'robots_follow'
   | 'json_ld'
->;
+> & {
+  seo_title?: string | null;
+};
 
 async function fetchDatabaseSEOFields(
   supabase: ReturnType<typeof createAnonClient>,
@@ -124,7 +128,7 @@ async function fetchDatabaseSEOFields(
   if (pattern === 'CONTENT_DETAIL' && category && slug) {
     const { data } = await supabase
       .from('content')
-      .select('title, description, og_type, twitter_card, robots_index, robots_follow, json_ld')
+      .select('title, seo_title, description, og_type, twitter_card, robots_index, robots_follow, json_ld')
       .eq('category', category)
       .eq('slug', slug)
       .maybeSingle();

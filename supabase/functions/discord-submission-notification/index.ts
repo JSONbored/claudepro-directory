@@ -32,10 +32,12 @@ type WebhookLogUpdate = Database['public']['Tables']['webhook_logs']['Update'];
 
 // Environment variables
 const DISCORD_WEBHOOK_URL = Deno.env.get('DISCORD_WEBHOOK_URL');
-const SUPABASE_PROJECT_ID = Deno.env.get('SUPABASE_PROJECT_ID') || 'hxeckduifagerhxsktev';
-const SITE_URL = Deno.env.get('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
 const SUPABASE_URL = Deno.env.get('NEXT_PUBLIC_SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const SITE_URL = Deno.env.get('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
+
+// Extract project ID dynamically from Supabase URL (e.g., https://hgtjdifxfapoltfflowc.supabase.co)
+const SUPABASE_PROJECT_ID = SUPABASE_URL.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || 'unknown';
 
 // Configuration constants
 const SPAM_THRESHOLD = 0.7;

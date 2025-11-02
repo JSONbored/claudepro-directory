@@ -8,7 +8,7 @@
  * Data fetched server-side, search redirects to /search page
  *
  * Architecture Changes (2025-10-30):
- * 1. ✅ Data fetched from content_unified view (server-side in page.tsx)
+ * 1. ✅ Data fetched from content table (server-side in page.tsx)
  * 2. ✅ Search uses direct Supabase RPC (database-first, no API route)
  * 3. ✅ No client-side filtering - just display and navigation
  * 4. ✅ Client-only for animations and interactions

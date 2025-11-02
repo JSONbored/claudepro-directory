@@ -1,6 +1,6 @@
 /**
  * Dynamic JSON API for individual content items
- * Database-driven field filtering via category_configs.api_schema
+ * Database-driven field filtering, JSON-LD, and HTTP headers via PostgreSQL
  */
 
 import { NextResponse } from 'next/server';
@@ -16,6 +16,18 @@ const VALID_CATEGORIES = [
   'agents',
   'collections',
 ] as const;
+
+interface ApiResponse {
+  content: Record<string, unknown>;
+  jsonld: Record<string, unknown>;
+  httpHeaders: Record<string, string>;
+  meta: {
+    category: string;
+    slug: string;
+    generatedAt: string;
+    apiVersion: string;
+  };
+}
 
 export async function GET(
   request: Request,
@@ -44,15 +56,32 @@ export async function GET(
     return NextResponse.json({ error: 'Content not found' }, { status: 404 });
   }
 
-  // Return prettified JSON with proper indentation
-  return new NextResponse(JSON.stringify(data, null, 2), {
+  const apiResponse = data as ApiResponse;
+
+  // Merge JSON-LD into content for SEO-optimized response
+  const enrichedContent = {
+    ...apiResponse.content,
+    '@context': apiResponse.jsonld['@context'],
+    '@type': apiResponse.jsonld['@type'],
+    structuredData: apiResponse.jsonld,
+  };
+
+  // Extract database-driven HTTP headers
+  const dbHeaders = apiResponse.httpHeaders || {};
+
+  // Build response headers from database config
+  const responseHeaders: HeadersInit = {
+    'Content-Type': 'application/json; charset=utf-8',
+    ...dbHeaders,
+    // SEO headers
+    'Link': `<https://claudepro.directory/${category}/${slug}>; rel="canonical"`,
+    'X-Robots-Tag': 'index, follow',
+    'X-Content-Type-Options': 'nosniff',
+  };
+
+  return new NextResponse(JSON.stringify(enrichedContent, null, 2), {
     status: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    },
+    headers: responseHeaders,
   });
 }
 
@@ -63,6 +92,7 @@ export async function OPTIONS() {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '86400', // 24 hours CORS preflight cache
     },
   });
 }
