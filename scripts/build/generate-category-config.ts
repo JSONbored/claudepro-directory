@@ -209,7 +209,8 @@ import {
   publicContentRowSchema,
   publicJobsRowSchema,
 } from '@/src/lib/schemas/generated/db-schemas';
-import type { UnifiedCategoryConfig, ContentType, CategoryId } from './category-config';
+// biome-ignore lint: Import from .types file to break circular dependency
+import type { CategoryId, ContentType, UnifiedCategoryConfig } from './category-config.types';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Sparkles,

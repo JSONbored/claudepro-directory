@@ -24,6 +24,7 @@ import {
   updatePostSchema,
 } from '@/src/lib/schemas/transforms/data-normalization.schema';
 import { createClient } from '@/src/lib/supabase/server';
+import type { Tables } from '@/src/types/database.types';
 
 // =====================================================
 // COLLECTION ACTIONS
@@ -44,7 +45,7 @@ export const createCollection = authedAction
     });
 
     if (error) throw new Error(error.message);
-    const result = data as { success: boolean; collection: any };
+    const result = data as unknown as { success: boolean; collection: Tables<'user_collections'> };
 
     revalidatePath('/account');
     revalidatePath('/account/library');
@@ -68,7 +69,7 @@ export const updateCollection = authedAction
     });
 
     if (error) throw new Error(error.message);
-    const result = data as { success: boolean; collection: any };
+    const result = data as unknown as { success: boolean; collection: Tables<'user_collections'> };
 
     revalidatePath('/account');
     revalidatePath('/account/library');
@@ -121,7 +122,7 @@ export const addItemToCollection = authedAction
     revalidatePath('/account/library/[slug]', 'page');
     revalidatePath('/u/[slug]', 'page');
 
-    return data as { success: boolean; item: any };
+    return data as unknown as { success: boolean; item: Tables<'collection_items'> };
   });
 
 /**
@@ -323,7 +324,7 @@ export const createReview = authedAction
       throw new Error(error.message);
     }
 
-    const result = data as { success: boolean; review: any };
+    const result = data as unknown as { success: boolean; review: Tables<'review_ratings'> };
     const { content_type, content_slug } = result.review;
 
     revalidatePath(`/${content_type}/${content_slug}`);
@@ -363,7 +364,7 @@ export const updateReview = authedAction
       throw new Error(error.message);
     }
 
-    const result = data as { success: boolean; review: any };
+    const result = data as unknown as { success: boolean; review: Tables<'review_ratings'> };
     const { content_type, content_slug } = result.review;
 
     revalidatePath(`/${content_type}/${content_slug}`);
@@ -510,7 +511,7 @@ export const createPost = authedAction
     if (error) throw new Error(error.message);
 
     revalidatePath('/board');
-    return data as { success: boolean; post: any };
+    return data as unknown as { success: boolean; post: Tables<'posts'> };
   });
 
 /**
@@ -530,7 +531,7 @@ export const updatePost = authedAction
     if (error) throw new Error(error.message);
 
     revalidatePath('/board');
-    return data as { success: boolean; post: any };
+    return data as unknown as { success: boolean; post: Tables<'posts'> };
   });
 
 /**
@@ -590,7 +591,7 @@ export const createComment = authedAction
     if (error) throw new Error(error.message);
 
     revalidatePath('/board');
-    return data as { success: boolean; comment: any };
+    return data as unknown as { success: boolean; comment: Tables<'comments'> };
   });
 
 /**

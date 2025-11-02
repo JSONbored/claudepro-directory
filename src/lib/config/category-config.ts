@@ -4,84 +4,18 @@
  * Config generated at build time by scripts/build/generate-category-config.ts
  */
 
-import type { z } from 'zod';
-import type { LucideIcon } from '@/src/lib/icons';
-import type { Tables } from '@/src/types/database.types';
 import {
   ALL_CATEGORY_IDS,
   CACHEABLE_CATEGORY_IDS,
   CATEGORY_CONFIGS,
   HOMEPAGE_CATEGORY_IDS,
 } from './category-config.generated';
-
-export type ContentType = Tables<'content'> | Tables<'jobs'>;
-
-type DatabaseCategoryConfig = Tables<'category_configs'>;
-
-export type CategoryId = DatabaseCategoryConfig['category'];
-
-export interface UnifiedCategoryConfig<
-  T extends ContentType = ContentType,
-  TId extends string = string,
-> {
-  readonly id: TId;
-  title: string;
-  pluralTitle: string;
-  description: string;
-  icon: LucideIcon;
-  colorScheme: string;
-  showOnHomepage: boolean;
-  keywords: string;
-  metaDescription: string;
-  readonly schema: z.ZodType<T>;
-  readonly typeName: string;
-  readonly generateFullContent: boolean;
-  readonly metadataFields: ReadonlyArray<string>;
-  readonly buildConfig: {
-    readonly batchSize: number;
-    readonly enableCache: boolean;
-    readonly cacheTTL: number;
-  };
-  readonly apiConfig: {
-    readonly generateStaticAPI: boolean;
-    readonly includeTrending: boolean;
-    readonly maxItemsPerResponse: number;
-  };
-  listPage: {
-    searchPlaceholder: string;
-    badges: Array<{ icon?: string; text: string | ((count: number) => string) }>;
-    emptyStateMessage?: string;
-  };
-  detailPage: {
-    displayConfig: boolean;
-    configFormat: 'json' | 'multi' | 'hook';
-  };
-  sections: {
-    features: boolean;
-    installation: boolean;
-    use_cases: boolean;
-    configuration: boolean;
-    security: boolean;
-    troubleshooting: boolean;
-    examples: boolean;
-  };
-  metadata?: {
-    categoryLabel?: string;
-    showGitHubLink?: boolean;
-    githubPathPrefix?: string;
-  };
-  primaryAction: {
-    label: string;
-    type: string;
-  };
-  secondaryActions?: Array<{
-    label: string;
-    type: string;
-  }>;
-  urlSlug: string;
-  contentLoader: string;
-  [key: string]: unknown;
-}
+import type {
+  CategoryId,
+  CategoryStatsConfig,
+  ContentType,
+  UnifiedCategoryConfig,
+} from './category-config.types';
 
 /**
  * Get all category configs (static, no database query)
@@ -93,6 +27,7 @@ export function getCategoryConfigs(): Record<
   return CATEGORY_CONFIGS;
 }
 
+export type { CategoryId, CategoryStatsConfig, ContentType, UnifiedCategoryConfig };
 export type UnifiedCategoryConfigValue = UnifiedCategoryConfig;
 
 export const VALID_CATEGORIES: readonly CategoryId[] = [
@@ -169,13 +104,6 @@ export const HOMEPAGE_TAB_CATEGORIES = [
 
 export type HomepageFeaturedCategory = (typeof HOMEPAGE_FEATURED_CATEGORIES)[number];
 export type HomepageTabCategory = (typeof HOMEPAGE_TAB_CATEGORIES)[number];
-
-export interface CategoryStatsConfig {
-  categoryId: CategoryId;
-  icon: LucideIcon;
-  displayText: string;
-  delay: number;
-}
 
 /**
  * Get category stats config (static, no database query)
