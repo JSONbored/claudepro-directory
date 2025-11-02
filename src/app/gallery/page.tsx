@@ -11,6 +11,7 @@ import { Container } from '@/src/components/layout/container';
 import { Skeleton } from '@/src/components/primitives/skeleton';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
+import { getSkeletonKeys } from '@/src/lib/utils/skeleton-keys';
 
 export const metadata: Metadata = {
   title: 'Code Screenshot Gallery | ClaudePro Directory',
@@ -108,8 +109,8 @@ export default async function GalleryPage() {
         <Suspense
           fallback={
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {Array.from({ length: 12 }).map((_, i) => (
-                <Skeleton key={i} className="h-80 rounded-xl" />
+              {getSkeletonKeys(12).map((key) => (
+                <Skeleton key={key} className="h-80 rounded-xl" />
               ))}
             </div>
           }

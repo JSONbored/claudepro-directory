@@ -24,6 +24,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database.types';
 
 // User profiles may show personalized content if authenticated
 export const dynamic = 'force-dynamic';
@@ -57,6 +58,38 @@ type UserProfile = {
   created_at: string;
 };
 
+// RPC return types - exact structure from get_user_profile() JSONB
+type RPCPost = Pick<
+  Tables<'posts'>,
+  | 'id'
+  | 'user_id'
+  | 'title'
+  | 'content'
+  | 'url'
+  | 'vote_count'
+  | 'comment_count'
+  | 'created_at'
+  | 'updated_at'
+>;
+type RPCCollection = Pick<
+  Tables<'user_collections'>,
+  'id' | 'slug' | 'name' | 'description' | 'is_public' | 'item_count' | 'view_count' | 'created_at'
+>;
+type RPCContribution = Pick<
+  Tables<'user_content'>,
+  | 'id'
+  | 'content_type'
+  | 'name'
+  | 'description'
+  | 'featured'
+  | 'view_count'
+  | 'download_count'
+  | 'created_at'
+> & {
+  content_slug: string;
+  status: string;
+};
+
 type ProfileData = {
   profile: UserProfile;
   stats: {
@@ -66,9 +99,9 @@ type ProfileData = {
     collectionsCount: number;
     contributionsCount: number;
   };
-  posts: any[];
-  collections: any[];
-  contributions: any[];
+  posts: RPCPost[];
+  collections: RPCCollection[];
+  contributions: RPCContribution[];
   isFollowing: boolean;
   isOwner: boolean;
 };
@@ -190,9 +223,19 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
           <div className="space-y-4">
             {reputationData &&
               typeof reputationData === 'object' &&
-              'breakdown' in reputationData && (
+              'breakdown' in reputationData &&
+              typeof reputationData.breakdown === 'object' &&
+              reputationData.breakdown !== null && (
                 <ReputationBreakdown
-                  breakdown={reputationData.breakdown as any}
+                  breakdown={
+                    reputationData.breakdown as {
+                      from_posts: number;
+                      from_votes_received: number;
+                      from_comments: number;
+                      from_submissions: number;
+                      total: number;
+                    }
+                  }
                   showDetails={true}
                   showProgress={true}
                 />
@@ -356,7 +399,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {contributions.map((item) => (
                     <Card key={item.id} className={UI_CLASSES.CARD_INTERACTIVE}>
-                      <a href={`/${item.content_type}/${item.slug}`}>
+                      <a href={`/${item.content_type}/${item.content_slug}`}>
                         <CardHeader>
                           <div className={'mb-2 flex items-center justify-between'}>
                             <UnifiedBadge variant="base" style="secondary" className="text-xs">

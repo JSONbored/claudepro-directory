@@ -62,17 +62,21 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   const impressionsMap = new Map<string, number>();
   const clicksMap = new Map<string, number>();
 
-  impressionsByDay?.forEach((imp) => {
-    const isoDate = new Date(imp.created_at).toISOString();
-    const day = isoDate.substring(0, 10); // Extract YYYY-MM-DD
-    impressionsMap.set(day, (impressionsMap.get(day) || 0) + 1);
-  });
+  if (impressionsByDay) {
+    for (const imp of impressionsByDay) {
+      const isoDate = new Date(imp.created_at).toISOString();
+      const day = isoDate.substring(0, 10);
+      impressionsMap.set(day, (impressionsMap.get(day) || 0) + 1);
+    }
+  }
 
-  clicksByDay?.forEach((click) => {
-    const isoDate = new Date(click.created_at).toISOString();
-    const day = isoDate.substring(0, 10); // Extract YYYY-MM-DD
-    clicksMap.set(day, (clicksMap.get(day) || 0) + 1);
-  });
+  if (clicksByDay) {
+    for (const click of clicksByDay) {
+      const isoDate = new Date(click.created_at).toISOString();
+      const day = isoDate.substring(0, 10);
+      clicksMap.set(day, (clicksMap.get(day) || 0) + 1);
+    }
+  }
 
   const impressionCount = sponsorship.impression_count ?? 0;
   const clickCount = sponsorship.click_count ?? 0;

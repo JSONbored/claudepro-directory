@@ -1,19 +1,5 @@
 /**
- * Badge Grid Component
- *
- * Displays user badges in a responsive grid with rarity indicators.
- * Supports featuring badges (up to 5) and shows badge details on hover.
- *
- * Production Standards:
- * - Configuration-driven using badges.config.ts
- * - Type-safe with Zod schemas
- * - Performance-optimized with React.memo
- * - Accessible with ARIA labels and keyboard navigation
- * - Responsive grid layout
- * - Theme-aware with rarity colors
- * - Interactive with hover states
- *
- * @module components/features/badges/badge-grid
+ * Badge Grid - Displays user badges with rarity indicators and featuring support
  */
 
 'use client';
@@ -42,7 +28,6 @@ import type { Tables } from '@/src/types/database.types';
 
 type Badge = Tables<'badges'>;
 
-// Rarity color mapping (moved from config)
 const BADGE_RARITY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   common: {
     bg: 'bg-gray-50 dark:bg-gray-900/30',
@@ -71,38 +56,18 @@ const BADGE_RARITY_COLORS: Record<string, { bg: string; text: string; border: st
   },
 };
 
-// =============================================================================
-// TYPES
-// =============================================================================
-
-/** UserBadge with badge details joined - returned by get_user_badges_with_details RPC */
-type UserBadgeWithBadge = {
-  id: string;
-  badge_id: string;
-  earned_at: string;
-  featured: boolean | null;
-  metadata?: any;
-  badge?: Badge; // Full badge details from RPC
-  badges?: {
-    // Legacy format for backward compatibility
-    slug: string;
-    name: string;
-    description: string;
-    icon: string | null;
-    category: string;
-  };
+type UserBadgeWithBadge = Pick<
+  Tables<'user_badges'>,
+  'id' | 'badge_id' | 'earned_at' | 'featured' | 'metadata'
+> & {
+  badge?: Badge;
 };
 
 export interface BadgeGridProps {
-  /** User badges with badge details */
   badges: UserBadgeWithBadge[];
-  /** Show featured badges only */
   featuredOnly?: boolean;
-  /** Allow user to toggle featured status (owner only) */
   canEdit?: boolean;
-  /** Additional CSS classes */
   className?: string;
-  /** Empty state message */
   emptyMessage?: string;
 }
 
@@ -112,10 +77,6 @@ interface BadgeCardProps {
   canEdit: boolean;
   onFeaturedChange?: () => undefined | undefined;
 }
-
-// =============================================================================
-// BADGE CARD COMPONENT
-// =============================================================================
 
 const BadgeCard = memo(function BadgeCard({
   userBadge,
@@ -141,7 +102,6 @@ const BadgeCard = memo(function BadgeCard({
           toast.success(
             isFeatured ? 'Badge removed from featured' : 'Badge featured on your profile'
           );
-          // Trigger parent refresh (optimistic update done via router.refresh in parent)
           onFeaturedChange?.();
         } else {
           throw new Error(result?.serverError || 'Failed to update badge');
@@ -247,29 +207,6 @@ const BadgeCard = memo(function BadgeCard({
   );
 });
 
-// =============================================================================
-// BADGE GRID COMPONENT
-// =============================================================================
-
-/**
- * Badge Grid Component
- *
- * Displays user badges in responsive grid with:
- * - Rarity color coding
- * - Featured badge indicators
- * - Interactive featuring/unfeaturing (if canEdit)
- * - Empty state handling
- * - Responsive layout (1-col mobile, 2-col tablet, 3-col desktop)
- *
- * @example
- * ```tsx
- * <BadgeGrid
- *   badges={userBadges}
- *   canEdit={isOwner}
- *   featuredOnly={false}
- * />
- * ```
- */
 export const BadgeGrid = memo(function BadgeGrid({
   badges,
   featuredOnly = false,
@@ -277,13 +214,7 @@ export const BadgeGrid = memo(function BadgeGrid({
   className,
   emptyMessage = 'No badges earned yet',
 }: BadgeGridProps) {
-  // Filter badges (if needed - but parent should pass pre-filtered data)
   const displayedBadges = featuredOnly ? badges.filter((b) => b.featured) : badges;
-
-  const handleFeaturedChange = () => {
-    // Refresh badge list (optimistic update already handled in BadgeCard)
-    // In production, you might want to refetch from server
-  };
 
   return (
     <Card className={className}>
@@ -347,7 +278,6 @@ export const BadgeGrid = memo(function BadgeGrid({
           /* Badge Grid */
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {displayedBadges.map((userBadge) => {
-              // Badge detail is now included in the RPC response
               const badgeDetail = userBadge.badge as Badge | undefined;
 
               return (
@@ -356,7 +286,6 @@ export const BadgeGrid = memo(function BadgeGrid({
                   userBadge={userBadge}
                   badgeDetail={badgeDetail}
                   canEdit={canEdit}
-                  onFeaturedChange={handleFeaturedChange}
                 />
               );
             })}

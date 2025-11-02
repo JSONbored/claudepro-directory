@@ -13,6 +13,7 @@ import { Skeleton } from '@/src/components/primitives/skeleton';
 import { isValidCategory, VALID_CATEGORIES } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
+import { getSkeletonKeys } from '@/src/lib/utils/skeleton-keys';
 
 interface CategoryGalleryPageProps {
   params: Promise<{ category: string }>;
@@ -140,8 +141,8 @@ export default async function CategoryGalleryPage({ params }: CategoryGalleryPag
         <Suspense
           fallback={
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {Array.from({ length: 12 }).map((_, i) => (
-                <Skeleton key={i} className="h-80 rounded-xl" />
+              {getSkeletonKeys(12).map((key) => (
+                <Skeleton key={key} className="h-80 rounded-xl" />
               ))}
             </div>
           }
