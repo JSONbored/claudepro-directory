@@ -24,7 +24,7 @@ import {
   publicContentRowSchema,
   publicJobsRowSchema,
 } from '@/src/lib/schemas/generated/db-schemas';
-import type { CategoryId, ContentType, UnifiedCategoryConfig } from './category-config';
+import type { UnifiedCategoryConfig, ContentType, CategoryId } from './category-config';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Sparkles,
@@ -55,36 +55,21 @@ const SCHEMA_MAP: Partial<Record<CategoryId, z.ZodType<ContentType>>> = {
  * Static category configurations (generated at build time)
  * ZERO runtime database queries - 100% faster than unstable_cache
  */
-export const CATEGORY_CONFIGS: Record<
-  CategoryId,
-  UnifiedCategoryConfig<ContentType, CategoryId>
-> = {
-  mcp: {
+export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<ContentType, CategoryId>> = {
+  'mcp': {
     id: 'mcp' as const,
     title: 'MCP Server',
     pluralTitle: 'MCP Servers',
-    description:
-      "Model Context Protocol servers that extend Claude's capabilities with external tools and data sources.",
+    description: 'Model Context Protocol servers that extend Claude\'s capabilities with external tools and data sources.',
     icon: ICON_MAP['Server'] || FileText,
     colorScheme: 'orange-500',
     showOnHomepage: true,
-    keywords:
-      'MCP servers, Model Context Protocol, Claude Desktop, external tools, API integration',
-    metaDescription:
-      'MCP servers for Claude Desktop in October 2025. Extend Claude with file systems, databases, APIs, and custom tools via Model Context Protocol.',
+    keywords: 'MCP servers, Model Context Protocol, Claude Desktop, external tools, API integration',
+    metaDescription: 'MCP servers for Claude Desktop in October 2025. Extend Claude with file systems, databases, APIs, and custom tools via Model Context Protocol.',
     schema: SCHEMA_MAP['mcp'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Database["public"]["Tables"]["content"]["Row"]',
     generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ],
+    metadataFields: ["slug","title","description","author","author_profile_url","date_added","tags","features","content","use_cases","examples","source","documentation_url","seo_title","metadata","created_at","updated_at"],
     buildConfig: {
       batchSize: 10,
       enableCache: true,
@@ -97,15 +82,8 @@ export const CATEGORY_CONFIGS: Record<
     },
     listPage: {
       searchPlaceholder: 'Search MCP servers...',
-      badges: [
-        {
-          icon: 'code',
-          text: (count: number) =>
-            '{count} MCP Servers Available'.replace('{count}', String(count)),
-        },
-        { text: 'Verified Integrations' },
-        { text: 'Production Ready' },
-      ],
+      badges: [],
+      
     },
     detailPage: {
       displayConfig: true,
@@ -130,51 +108,34 @@ export const CATEGORY_CONFIGS: Record<
     urlSlug: 'mcp',
     contentLoader: 'mcp',
   },
-  jobs: {
+  'jobs': {
     id: 'jobs' as const,
     title: 'Job',
     pluralTitle: 'Jobs',
-    description:
-      'Job listings for Claude-related positions, AI engineering roles, and opportunities to work with AI technology.',
+    description: 'Job listings for Claude-related positions, AI engineering roles, and opportunities to work with AI technology.',
     icon: ICON_MAP['Briefcase'] || FileText,
     colorScheme: 'emerald-500',
     showOnHomepage: false,
     keywords: 'Claude jobs, AI jobs, engineering jobs, remote AI positions',
-    metaDescription:
-      'Job opportunities in Claude and AI in October 2025. Find roles working with Claude, AI engineering positions, and remote opportunities.',
+    metaDescription: 'Job opportunities in Claude and AI in October 2025. Find roles working with Claude, AI engineering positions, and remote opportunities.',
     schema: SCHEMA_MAP['jobs'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Database["public"]["Tables"]["content"]["Row"]',
     generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ],
+    metadataFields: ["slug","title","description","author","tags","created_at","updated_at"],
     buildConfig: {
-      batchSize: 50,
+      batchSize: 10,
       enableCache: true,
-      cacheTTL: 86400000,
+      cacheTTL: 300000,
     },
     apiConfig: {
       generateStaticAPI: true,
-      includeTrending: false,
-      maxItemsPerResponse: 500,
+      includeTrending: true,
+      maxItemsPerResponse: 1000,
     },
     listPage: {
       searchPlaceholder: 'Search jobs...',
-      badges: [
-        {
-          icon: 'briefcase',
-          text: (count: number) => '{count} Jobs Available'.replace('{count}', String(count)),
-        },
-        { text: 'Remote Work' },
-        { text: 'AI Opportunities' },
-      ],
+      badges: [],
+      
     },
     detailPage: {
       displayConfig: false,
@@ -199,7 +160,7 @@ export const CATEGORY_CONFIGS: Record<
     urlSlug: 'jobs',
     contentLoader: 'jobs',
   },
-  hooks: {
+  'hooks': {
     id: 'hooks' as const,
     title: 'Hook',
     pluralTitle: 'Hooks',
@@ -208,21 +169,11 @@ export const CATEGORY_CONFIGS: Record<
     colorScheme: 'green-500',
     showOnHomepage: true,
     keywords: 'Claude hooks, event hooks, automation, Claude Code hooks, git hooks',
-    metaDescription:
-      'Event-driven hooks for Claude Code in October 2025. Automate workflows with pre-commit, post-merge, and custom event triggers.',
+    metaDescription: 'Event-driven hooks for Claude Code in October 2025. Automate workflows with pre-commit, post-merge, and custom event triggers.',
     schema: SCHEMA_MAP['hooks'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Database["public"]["Tables"]["content"]["Row"]',
     generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ],
+    metadataFields: ["slug","title","description","author","author_profile_url","date_added","tags","features","use_cases","source","documentation_url","seo_title","metadata","created_at","updated_at"],
     buildConfig: {
       batchSize: 10,
       enableCache: true,
@@ -235,14 +186,8 @@ export const CATEGORY_CONFIGS: Record<
     },
     listPage: {
       searchPlaceholder: 'Search hooks...',
-      badges: [
-        {
-          icon: 'webhook',
-          text: (count: number) => '{count} Hooks Available'.replace('{count}', String(count)),
-        },
-        { text: 'Event-Driven' },
-        { text: 'Workflow Automation' },
-      ],
+      badges: [],
+      
     },
     detailPage: {
       displayConfig: true,
@@ -267,30 +212,20 @@ export const CATEGORY_CONFIGS: Record<
     urlSlug: 'hooks',
     contentLoader: 'hooks',
   },
-  rules: {
+  'rules': {
     id: 'rules' as const,
     title: 'Rule',
     pluralTitle: 'Rules',
-    description: "Custom rules to guide Claude's behavior and responses in your projects.",
+    description: 'Custom rules to guide Claude\'s behavior and responses in your projects.',
     icon: ICON_MAP['BookOpen'] || FileText,
     colorScheme: 'red-500',
     showOnHomepage: true,
     keywords: 'Claude rules, custom rules, behavior rules, project rules, .cursorrules',
-    metaDescription:
-      'Custom rules for Claude in October 2025. Define coding standards, architectural guidelines, and project-specific behavior for consistent AI assistance.',
+    metaDescription: 'Custom rules for Claude in October 2025. Define coding standards, architectural guidelines, and project-specific behavior for consistent AI assistance.',
     schema: SCHEMA_MAP['rules'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Database["public"]["Tables"]["content"]["Row"]',
     generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ],
+    metadataFields: ["slug","title","description","author","author_profile_url","date_added","tags","features","content","use_cases","examples","source","documentation_url","seo_title","metadata","created_at","updated_at"],
     buildConfig: {
       batchSize: 10,
       enableCache: true,
@@ -303,14 +238,8 @@ export const CATEGORY_CONFIGS: Record<
     },
     listPage: {
       searchPlaceholder: 'Search rules...',
-      badges: [
-        {
-          icon: 'book-open',
-          text: (count: number) => '{count} Rules Available'.replace('{count}', String(count)),
-        },
-        { text: 'Behavior Customization' },
-        { text: 'Context Control' },
-      ],
+      badges: [],
+      
     },
     detailPage: {
       displayConfig: true,
@@ -335,31 +264,20 @@ export const CATEGORY_CONFIGS: Record<
     urlSlug: 'rules',
     contentLoader: 'rules',
   },
-  agents: {
+  'agents': {
     id: 'agents' as const,
     title: 'AI Agent',
     pluralTitle: 'AI Agents',
-    description:
-      "Browse specialized AI agents designed for specific tasks and workflows using Claude's capabilities.",
+    description: 'Browse specialized AI agents designed for specific tasks and workflows using Claude\'s capabilities.',
     icon: ICON_MAP['Sparkles'] || FileText,
     colorScheme: 'purple-500',
     showOnHomepage: true,
     keywords: 'Claude agents, AI agents, specialized assistants, workflow automation, Claude AI',
-    metaDescription:
-      'Specialized Claude AI agents for October 2025. Community-contributed coding, writing, research, and automation configurations ready for Claude Desktop and Code.',
+    metaDescription: 'Specialized Claude AI agents for October 2025. Community-contributed coding, writing, research, and automation configurations ready for Claude Desktop and Code.',
     schema: SCHEMA_MAP['agents'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Database["public"]["Tables"]["content"]["Row"]',
     generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ],
+    metadataFields: ["slug","title","description","author","author_profile_url","date_added","tags","features","content","use_cases","source","documentation_url","seo_title","metadata","created_at","updated_at"],
     buildConfig: {
       batchSize: 10,
       enableCache: true,
@@ -372,14 +290,8 @@ export const CATEGORY_CONFIGS: Record<
     },
     listPage: {
       searchPlaceholder: 'Search AI agents...',
-      badges: [
-        {
-          icon: 'sparkles',
-          text: (count: number) => '{count} Agents Available'.replace('{count}', String(count)),
-        },
-        { text: 'Task Optimized' },
-        { text: 'Ready to Deploy' },
-      ],
+      badges: [],
+      
     },
     detailPage: {
       displayConfig: true,
@@ -404,31 +316,20 @@ export const CATEGORY_CONFIGS: Record<
     urlSlug: 'agents',
     contentLoader: 'agents',
   },
-  guides: {
+  'guides': {
     id: 'guides' as const,
     title: 'Guide',
     pluralTitle: 'Guides',
-    description:
-      'Comprehensive guides, tutorials, comparisons, and workflows for Claude. SEO-optimized content covering best practices, use cases, and troubleshooting.',
+    description: 'Comprehensive guides, tutorials, comparisons, and workflows for Claude. SEO-optimized content covering best practices, use cases, and troubleshooting.',
     icon: ICON_MAP['FileText'] || FileText,
     colorScheme: 'yellow-500',
     showOnHomepage: false,
     keywords: 'Claude guides, tutorials, how-to guides, best practices, workflows',
-    metaDescription:
-      'Comprehensive guides for Claude in October 2025. Tutorials, comparisons, workflows, and troubleshooting for Claude Desktop and Code.',
+    metaDescription: 'Comprehensive guides for Claude in October 2025. Tutorials, comparisons, workflows, and troubleshooting for Claude Desktop and Code.',
     schema: SCHEMA_MAP['guides'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Database["public"]["Tables"]["content"]["Row"]',
     generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ],
+    metadataFields: ["slug","title","description","author","tags","created_at","updated_at"],
     buildConfig: {
       batchSize: 10,
       enableCache: true,
@@ -441,14 +342,8 @@ export const CATEGORY_CONFIGS: Record<
     },
     listPage: {
       searchPlaceholder: 'Search guides...',
-      badges: [
-        {
-          icon: 'book-open',
-          text: (count: number) => '{count} Guides Available'.replace('{count}', String(count)),
-        },
-        { text: 'Step-by-Step' },
-        { text: 'Best Practices' },
-      ],
+      badges: [],
+      
     },
     detailPage: {
       displayConfig: false,
@@ -473,31 +368,20 @@ export const CATEGORY_CONFIGS: Record<
     urlSlug: 'guides',
     contentLoader: 'guides',
   },
-  skills: {
+  'skills': {
     id: 'skills' as const,
     title: 'Skill',
     pluralTitle: 'Skills',
-    description:
-      'Task-focused capability guides for Claude (PDF, DOCX, PPTX, XLSX, and more) with requirements and runnable examples.',
+    description: 'Task-focused capability guides for Claude (PDF, DOCX, PPTX, XLSX, and more) with requirements and runnable examples.',
     icon: ICON_MAP['Sparkles'] || FileText,
     colorScheme: 'pink-500',
     showOnHomepage: true,
     keywords: 'Claude skills, AI capabilities, task guides, skill packages, Claude Desktop skills',
-    metaDescription:
-      'Claude skills for October 2025. Downloadable capability packages with requirements, examples, and instructions for specific tasks.',
+    metaDescription: 'Claude skills for October 2025. Downloadable capability packages with requirements, examples, and instructions for specific tasks.',
     schema: SCHEMA_MAP['skills'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Database["public"]["Tables"]["content"]["Row"]',
     generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ],
+    metadataFields: ["slug","title","description","author","author_profile_url","date_added","tags","features","content","use_cases","examples","source","documentation_url","seo_title","metadata","created_at","updated_at"],
     buildConfig: {
       batchSize: 10,
       enableCache: true,
@@ -510,11 +394,8 @@ export const CATEGORY_CONFIGS: Record<
     },
     listPage: {
       searchPlaceholder: 'Search skills...',
-      badges: [
-        { text: (count: number) => '{count} Skills Available'.replace('{count}', String(count)) },
-        { text: 'Enhanced Capabilities' },
-        { text: 'Tool Extensions' },
-      ],
+      badges: [],
+      
     },
     detailPage: {
       displayConfig: false,
@@ -539,31 +420,20 @@ export const CATEGORY_CONFIGS: Record<
     urlSlug: 'skills',
     contentLoader: 'skills',
   },
-  commands: {
+  'commands': {
     id: 'commands' as const,
     title: 'Command',
     pluralTitle: 'Commands',
-    description:
-      'Custom slash commands to enhance your Claude Code workflow with reusable prompts and actions.',
+    description: 'Custom slash commands to enhance your Claude Code workflow with reusable prompts and actions.',
     icon: ICON_MAP['Terminal'] || FileText,
     colorScheme: 'blue-500',
     showOnHomepage: true,
     keywords: 'Claude commands, slash commands, custom commands, Claude Code, CLI',
-    metaDescription:
-      'Custom slash commands for Claude Code in October 2025. Community-created prompt templates, automation commands, and workflow shortcuts.',
+    metaDescription: 'Custom slash commands for Claude Code in October 2025. Community-created prompt templates, automation commands, and workflow shortcuts.',
     schema: SCHEMA_MAP['commands'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Database["public"]["Tables"]["content"]["Row"]',
     generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ],
+    metadataFields: ["slug","title","description","author","author_profile_url","date_added","tags","features","content","use_cases","source","documentation_url","seo_title","metadata","created_at","updated_at"],
     buildConfig: {
       batchSize: 10,
       enableCache: true,
@@ -576,14 +446,8 @@ export const CATEGORY_CONFIGS: Record<
     },
     listPage: {
       searchPlaceholder: 'Search commands...',
-      badges: [
-        {
-          icon: 'terminal',
-          text: (count: number) => '{count} Commands Available'.replace('{count}', String(count)),
-        },
-        { text: 'Quick Actions' },
-        { text: 'Instant Setup' },
-      ],
+      badges: [],
+      
     },
     detailPage: {
       displayConfig: false,
@@ -608,49 +472,34 @@ export const CATEGORY_CONFIGS: Record<
     urlSlug: 'commands',
     contentLoader: 'commands',
   },
-  changelog: {
+  'changelog': {
     id: 'changelog' as const,
     title: 'Changelog Entry',
     pluralTitle: 'Changelog',
-    description:
-      'Product updates, new features, bug fixes, and improvements to the ClaudePro Directory.',
+    description: 'Product updates, new features, bug fixes, and improvements to the ClaudePro Directory.',
     icon: ICON_MAP['FileText'] || FileText,
     colorScheme: 'gray-500',
     showOnHomepage: false,
     keywords: 'changelog, updates, release notes, new features, bug fixes',
-    metaDescription:
-      'ClaudePro Directory changelog for October 2025. Track new features, improvements, and bug fixes.',
-    schema:
-      SCHEMA_MAP['changelog'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
+    metaDescription: 'ClaudePro Directory changelog for October 2025. Track new features, improvements, and bug fixes.',
+    schema: SCHEMA_MAP['changelog'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Database["public"]["Tables"]["content"]["Row"]',
     generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ],
+    metadataFields: ["slug","title","description","author","tags","created_at","updated_at"],
     buildConfig: {
-      batchSize: 100,
+      batchSize: 10,
       enableCache: true,
-      cacheTTL: 3600000,
+      cacheTTL: 300000,
     },
     apiConfig: {
       generateStaticAPI: true,
-      includeTrending: false,
-      maxItemsPerResponse: 100,
+      includeTrending: true,
+      maxItemsPerResponse: 1000,
     },
     listPage: {
       searchPlaceholder: 'Search changelog...',
-      badges: [
-        { text: (count: number) => '{count} Updates'.replace('{count}', String(count)) },
-        { text: 'Latest Changes' },
-        { text: 'Version History' },
-      ],
+      badges: [],
+      
     },
     detailPage: {
       displayConfig: false,
@@ -675,32 +524,20 @@ export const CATEGORY_CONFIGS: Record<
     urlSlug: 'changelog',
     contentLoader: 'changelog_entries',
   },
-  collections: {
+  'collections': {
     id: 'collections' as const,
     title: 'Collection',
     pluralTitle: 'Collections',
-    description:
-      'Curated bundles of related content items organized by theme, use case, or workflow for easy discovery.',
+    description: 'Curated bundles of related content items organized by theme, use case, or workflow for easy discovery.',
     icon: ICON_MAP['Layers'] || FileText,
     colorScheme: 'indigo-500',
     showOnHomepage: true,
     keywords: 'Claude collections, curated content, workflow bundles, themed collections',
-    metaDescription:
-      'Curated Claude collections for October 2025. Pre-assembled bundles of agents, commands, and tools for specific use cases and workflows.',
-    schema:
-      SCHEMA_MAP['collections'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
+    metaDescription: 'Curated Claude collections for October 2025. Pre-assembled bundles of agents, commands, and tools for specific use cases and workflows.',
+    schema: SCHEMA_MAP['collections'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Database["public"]["Tables"]["content"]["Row"]',
     generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ],
+    metadataFields: ["slug","title","description","author","author_profile_url","date_added","tags","features","use_cases","source","seo_title","metadata","created_at","updated_at"],
     buildConfig: {
       batchSize: 10,
       enableCache: true,
@@ -713,15 +550,8 @@ export const CATEGORY_CONFIGS: Record<
     },
     listPage: {
       searchPlaceholder: 'Search collections...',
-      badges: [
-        {
-          icon: 'layers',
-          text: (count: number) =>
-            '{count} Collections Available'.replace('{count}', String(count)),
-        },
-        { text: 'Curated Workflows' },
-        { text: 'Multi-Component' },
-      ],
+      badges: [],
+      
     },
     detailPage: {
       displayConfig: false,
@@ -746,32 +576,20 @@ export const CATEGORY_CONFIGS: Record<
     urlSlug: 'collections',
     contentLoader: 'collections',
   },
-  statuslines: {
+  'statuslines': {
     id: 'statuslines' as const,
     title: 'Statusline',
     pluralTitle: 'Statuslines',
-    description:
-      'Customizable status line configurations for Claude Code CLI with real-time session information.',
+    description: 'Customizable status line configurations for Claude Code CLI with real-time session information.',
     icon: ICON_MAP['Terminal'] || FileText,
     colorScheme: 'cyan-500',
     showOnHomepage: true,
     keywords: 'Claude statusline, CLI statusline, terminal status, Claude Code customization',
-    metaDescription:
-      'Statusline scripts for Claude Code CLI in October 2025. Display git status, project info, and custom metrics in your terminal.',
-    schema:
-      SCHEMA_MAP['statuslines'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
+    metaDescription: 'Statusline scripts for Claude Code CLI in October 2025. Display git status, project info, and custom metrics in your terminal.',
+    schema: SCHEMA_MAP['statuslines'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Database["public"]["Tables"]["content"]["Row"]',
     generateFullContent: true,
-    metadataFields: [
-      'slug',
-      'title',
-      'description',
-      'author',
-      'tags',
-      'category',
-      'date_added',
-      'source',
-    ],
+    metadataFields: ["slug","title","description","author","author_profile_url","date_added","tags","features","content","use_cases","examples","source","documentation_url","seo_title","metadata","created_at","updated_at"],
     buildConfig: {
       batchSize: 10,
       enableCache: true,
@@ -784,14 +602,8 @@ export const CATEGORY_CONFIGS: Record<
     },
     listPage: {
       searchPlaceholder: 'Search statuslines...',
-      badges: [
-        {
-          text: (count: number) =>
-            '{count} Statuslines Available'.replace('{count}', String(count)),
-        },
-        { text: 'UI Customization' },
-        { text: 'Real-time Status' },
-      ],
+      badges: [],
+      
     },
     detailPage: {
       displayConfig: true,
@@ -815,51 +627,20 @@ export const CATEGORY_CONFIGS: Record<
     },
     urlSlug: 'statuslines',
     contentLoader: 'statuslines',
-  },
+  }
 };
 
 /**
  * All category IDs (static array)
  */
-export const ALL_CATEGORY_IDS = [
-  'mcp',
-  'jobs',
-  'hooks',
-  'rules',
-  'agents',
-  'guides',
-  'skills',
-  'commands',
-  'changelog',
-  'collections',
-  'statuslines',
-] as const;
+export const ALL_CATEGORY_IDS = ["mcp","jobs","hooks","rules","agents","guides","skills","commands","changelog","collections","statuslines"] as const;
 
 /**
  * Homepage category IDs (filtered at build time)
  */
-export const HOMEPAGE_CATEGORY_IDS = [
-  'mcp',
-  'hooks',
-  'rules',
-  'agents',
-  'skills',
-  'commands',
-  'collections',
-  'statuslines',
-] as const;
+export const HOMEPAGE_CATEGORY_IDS = ["mcp","hooks","rules","agents","skills","commands","collections","statuslines"] as const;
 
 /**
  * Cacheable category IDs (excludes jobs and changelog)
  */
-export const CACHEABLE_CATEGORY_IDS = [
-  'mcp',
-  'hooks',
-  'rules',
-  'agents',
-  'guides',
-  'skills',
-  'commands',
-  'collections',
-  'statuslines',
-] as const;
+export const CACHEABLE_CATEGORY_IDS = ["mcp","hooks","rules","agents","guides","skills","commands","collections","statuslines"] as const;

@@ -128,7 +128,9 @@ async function fetchDatabaseSEOFields(
   if (pattern === 'CONTENT_DETAIL' && category && slug) {
     const { data } = await supabase
       .from('content')
-      .select('title, seo_title, description, og_type, twitter_card, robots_index, robots_follow, json_ld')
+      .select(
+        'title, seo_title, description, og_type, twitter_card, robots_index, robots_follow, json_ld'
+      )
       .eq('category', category)
       .eq('slug', slug)
       .maybeSingle();

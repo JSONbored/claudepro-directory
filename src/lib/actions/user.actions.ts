@@ -8,10 +8,10 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
-import { publicUserActivitySummaryResultSchema } from '@/src/lib/schemas/generated/db-schemas';
+import { publicUserActivitySummaryRowSchema } from '@/src/lib/schemas/generated/db-schemas';
 
-// Use generated schema from database composite type
-const activitySummarySchema = publicUserActivitySummaryResultSchema;
+// Use generated schema from database materialized view
+const activitySummarySchema = publicUserActivitySummaryRowSchema;
 
 const activityFilterSchema = z.object({
   type: z.enum(['post', 'comment', 'vote', 'submission']).optional(),

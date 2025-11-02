@@ -33,7 +33,6 @@ interface HealthStatus {
 }
 
 export async function GET() {
-  const startTime = Date.now();
   const supabase = createAnonClient();
 
   const health: HealthStatus = {

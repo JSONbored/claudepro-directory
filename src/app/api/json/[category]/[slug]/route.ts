@@ -56,7 +56,7 @@ export async function GET(
     return NextResponse.json({ error: 'Content not found' }, { status: 404 });
   }
 
-  const apiResponse = data as ApiResponse;
+  const apiResponse = data as unknown as ApiResponse;
 
   // Merge JSON-LD into content for SEO-optimized response
   const enrichedContent = {
@@ -74,7 +74,7 @@ export async function GET(
     'Content-Type': 'application/json; charset=utf-8',
     ...dbHeaders,
     // SEO headers
-    'Link': `<https://claudepro.directory/${category}/${slug}>; rel="canonical"`,
+    Link: `<https://claudepro.directory/${category}/${slug}>; rel="canonical"`,
     'X-Robots-Tag': 'index, follow',
     'X-Content-Type-Options': 'nosniff',
   };

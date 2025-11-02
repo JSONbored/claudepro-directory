@@ -6,12 +6,19 @@
  * Uploads to Cloudflare R2 for offsite storage
  */
 
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { createReadStream, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import {
+  createReadStream,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { createClient } from '@supabase/supabase-js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -326,7 +333,10 @@ if (heartbeatUrl) {
       console.error('   ⚠️  Heartbeat response:', response.status);
     }
   } catch (error) {
-    console.error('   ⚠️  Failed to send heartbeat (non-critical):', error instanceof Error ? error.message : error);
+    console.error(
+      '   ⚠️  Failed to send heartbeat (non-critical):',
+      error instanceof Error ? error.message : error
+    );
   }
 } else {
   console.log('\n💡 BetterStack heartbeat not configured (set BETTERSTACK_HEARTBEAT_DB_BACKUP)');
