@@ -44,7 +44,7 @@ export default async function SponsorshipsPage() {
     <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
-          <h1 className="text-3xl font-bold mb-2">Sponsorships</h1>
+          <h1 className="mb-2 font-bold text-3xl">Sponsorships</h1>
           <p className="text-muted-foreground">
             {sponsorships?.length || 0} active{' '}
             {sponsorships?.length === 1 ? 'campaign' : 'campaigns'}
@@ -52,7 +52,7 @@ export default async function SponsorshipsPage() {
         </div>
         <Button variant="outline" asChild>
           <Link href={ROUTES.PARTNER}>
-            <TrendingUp className="h-4 w-4 mr-2" />
+            <TrendingUp className="mr-2 h-4 w-4" />
             Become a Sponsor
           </Link>
         </Button>
@@ -88,7 +88,7 @@ export default async function SponsorshipsPage() {
                       {isActive ? (
                         <UnifiedBadge
                           variant="base"
-                          className="bg-green-500/10 text-green-400 border-green-500/20"
+                          className="border-green-500/20 bg-green-500/10 text-green-400"
                         >
                           Active
                         </UnifiedBadge>
@@ -100,7 +100,7 @@ export default async function SponsorshipsPage() {
                       {hasHitLimit && (
                         <UnifiedBadge
                           variant="base"
-                          className="bg-orange-500/10 text-orange-400 border-orange-500/20"
+                          className="border-orange-500/20 bg-orange-500/10 text-orange-400"
                         >
                           Limit Reached
                         </UnifiedBadge>
@@ -116,7 +116,7 @@ export default async function SponsorshipsPage() {
                   </div>
                   <Button variant="outline" size="sm" asChild>
                     <Link href={`/account/sponsorships/${sponsorship.id}/analytics`}>
-                      <BarChart className="h-3 w-3 mr-1" />
+                      <BarChart className="mr-1 h-3 w-3" />
                       Analytics
                     </Link>
                   </Button>
@@ -125,15 +125,15 @@ export default async function SponsorshipsPage() {
 
               <CardContent>
                 {/* Quick stats */}
-                <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="mb-4 grid grid-cols-3 gap-4">
                   <div>
                     <div
-                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} text-xs text-muted-foreground mb-1`}
+                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} mb-1 text-muted-foreground text-xs`}
                     >
                       <Eye className="h-3 w-3" />
                       Impressions
                     </div>
-                    <div className="text-2xl font-bold">{impressionCount.toLocaleString()}</div>
+                    <div className="font-bold text-2xl">{impressionCount.toLocaleString()}</div>
                     {sponsorship.impression_limit && (
                       <div className={UI_CLASSES.TEXT_XS_MUTED}>
                         of {sponsorship.impression_limit.toLocaleString()}
@@ -143,30 +143,30 @@ export default async function SponsorshipsPage() {
 
                   <div>
                     <div
-                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} text-xs text-muted-foreground mb-1`}
+                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} mb-1 text-muted-foreground text-xs`}
                     >
                       <MousePointer className="h-3 w-3" />
                       Clicks
                     </div>
-                    <div className="text-2xl font-bold">{clickCount.toLocaleString()}</div>
+                    <div className="font-bold text-2xl">{clickCount.toLocaleString()}</div>
                   </div>
 
                   <div>
                     <div
-                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} text-xs text-muted-foreground mb-1`}
+                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} mb-1 text-muted-foreground text-xs`}
                     >
                       <BarChart className="h-3 w-3" />
                       CTR
                     </div>
-                    <div className="text-2xl font-bold">{ctr}%</div>
+                    <div className="font-bold text-2xl">{ctr}%</div>
                   </div>
                 </div>
 
                 {/* Progress bar if has limit */}
                 {sponsorship.impression_limit && (
-                  <div className="w-full bg-muted rounded-full h-2">
+                  <div className="h-2 w-full rounded-full bg-muted">
                     <div
-                      className="bg-primary h-2 rounded-full transition-all"
+                      className="h-2 rounded-full bg-primary transition-all"
                       style={{
                         width: `${Math.min(100, (impressionCount / sponsorship.impression_limit) * 100)}%`,
                       }}

@@ -81,7 +81,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
   return (
     <div className="space-y-6">
       {/* Filter Tabs */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex flex-wrap gap-2">
         <Button
           variant={filter === 'all' ? 'default' : 'outline'}
           size="sm"
@@ -99,7 +99,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
           size="sm"
           onClick={() => setFilter('post')}
         >
-          <FileText className="h-4 w-4 mr-1" />
+          <FileText className="mr-1 h-4 w-4" />
           Posts ({summary.total_posts})
         </Button>
         <Button
@@ -107,7 +107,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
           size="sm"
           onClick={() => setFilter('comment')}
         >
-          <MessageSquare className="h-4 w-4 mr-1" />
+          <MessageSquare className="mr-1 h-4 w-4" />
           Comments ({summary.total_comments})
         </Button>
         <Button
@@ -115,7 +115,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
           size="sm"
           onClick={() => setFilter('vote')}
         >
-          <ThumbsUp className="h-4 w-4 mr-1" />
+          <ThumbsUp className="mr-1 h-4 w-4" />
           Votes ({summary.total_votes})
         </Button>
         <Button
@@ -123,7 +123,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
           size="sm"
           onClick={() => setFilter('submission')}
         >
-          <GitPullRequest className="h-4 w-4 mr-1" />
+          <GitPullRequest className="mr-1 h-4 w-4" />
           Submissions ({summary.total_submissions})
         </Button>
       </div>
@@ -142,7 +142,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
           filteredActivities.map((activity) => (
             <Card
               key={`${activity.type}-${activity.id}`}
-              className="hover:shadow-md transition-shadow"
+              className="transition-shadow hover:shadow-md"
             >
               <CardContent className="pt-6">
                 <div className="flex gap-4">
@@ -150,16 +150,16 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                   <div className="mt-1">{getActivityIcon(activity.type)}</div>
 
                   {/* Content */}
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     {activity.type === 'post' && (
                       <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2}>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-base mb-1">{activity.title}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="mb-1 font-medium text-base">{activity.title}</h3>
+                          <p className="line-clamp-2 text-muted-foreground text-sm">
                             {activity.body}
                           </p>
                           {activity.content_type && activity.content_slug && (
-                            <p className="text-xs text-muted-foreground mt-1">
+                            <p className="mt-1 text-muted-foreground text-xs">
                               Posted in {activity.content_type}/{activity.content_slug}
                             </p>
                           )}
@@ -167,7 +167,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                         <UnifiedBadge
                           variant="base"
                           style="outline"
-                          className="text-xs whitespace-nowrap"
+                          className="whitespace-nowrap text-xs"
                         >
                           Posted
                         </UnifiedBadge>
@@ -176,17 +176,17 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
 
                     {activity.type === 'comment' && (
                       <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2}>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-muted-foreground mb-1">Commented on a post</p>
-                          <p className="text-sm line-clamp-2">{activity.body}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="mb-1 text-muted-foreground text-sm">Commented on a post</p>
+                          <p className="line-clamp-2 text-sm">{activity.body}</p>
                           {activity.parent_id && (
-                            <p className="text-xs text-muted-foreground mt-1">Reply to comment</p>
+                            <p className="mt-1 text-muted-foreground text-xs">Reply to comment</p>
                           )}
                         </div>
                         <UnifiedBadge
                           variant="base"
                           style="outline"
-                          className="text-xs whitespace-nowrap"
+                          className="whitespace-nowrap text-xs"
                         >
                           Comment
                         </UnifiedBadge>
@@ -199,7 +199,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                         <UnifiedBadge
                           variant="base"
                           style="outline"
-                          className="text-xs whitespace-nowrap"
+                          className="whitespace-nowrap text-xs"
                         >
                           Voted
                         </UnifiedBadge>
@@ -208,15 +208,15 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
 
                     {activity.type === 'submission' && (
                       <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2}>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-base mb-1">{activity.title}</h3>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="mb-1 font-medium text-base">{activity.title}</h3>
                           {activity.description && (
-                            <p className="text-sm text-muted-foreground line-clamp-2">
+                            <p className="line-clamp-2 text-muted-foreground text-sm">
                               {activity.description}
                             </p>
                           )}
                           <div
-                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm text-muted-foreground mt-2`}
+                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mt-2 text-muted-foreground text-sm`}
                           >
                             <UnifiedBadge variant="base" style="secondary" className="text-xs">
                               {activity.content_type}
@@ -239,7 +239,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                     )}
 
                     {/* Timestamp */}
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="mt-2 text-muted-foreground text-xs">
                       {formatDate(activity.created_at)}
                     </p>
                   </div>

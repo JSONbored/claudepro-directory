@@ -244,7 +244,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper>
         <div
           className={cn(
-            'text-xs font-medium border transition-colors hover:shadow-md hover:shadow-primary/20',
+            'border font-medium text-xs transition-colors hover:shadow-md hover:shadow-primary/20',
             categoryBadgeStyles[props.category],
             props.className
           )}
@@ -261,7 +261,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper>
         <div
           className={cn(
-            'text-xs font-medium border transition-colors hover:shadow-md hover:shadow-primary/20',
+            'border font-medium text-xs transition-colors hover:shadow-md hover:shadow-primary/20',
             sourceBadgeStyles[props.source],
             props.className
           )}
@@ -278,7 +278,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper>
         <div
           className={cn(
-            'text-xs font-medium border transition-colors hover:shadow-md hover:shadow-primary/20',
+            'border font-medium text-xs transition-colors hover:shadow-md hover:shadow-primary/20',
             statusBadgeStyles[props.status],
             props.className
           )}
@@ -296,11 +296,11 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
 
       switch (props.tier) {
         case 'featured':
-          return <Star className="h-3 w-3 mr-1 fill-current" aria-hidden="true" />;
+          return <Star className="mr-1 h-3 w-3 fill-current" aria-hidden="true" />;
         case 'promoted':
-          return <TrendingUp className="h-3 w-3 mr-1" aria-hidden="true" />;
+          return <TrendingUp className="mr-1 h-3 w-3" aria-hidden="true" />;
         case 'spotlight':
-          return <Zap className="h-3 w-3 mr-1" aria-hidden="true" />;
+          return <Zap className="mr-1 h-3 w-3" aria-hidden="true" />;
         default:
           return null;
       }
@@ -322,7 +322,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     return (
       <div
         className={cn(
-          'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors',
+          'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-colors',
           sponsoredBadgeStyles[props.tier],
           props.className
         )}
@@ -342,7 +342,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         <button
           type="button"
           className={cn(
-            'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-all duration-200',
+            'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-all duration-200',
             'cursor-pointer bg-accent text-accent-foreground shadow-lg shadow-primary/25',
             props.className
           )}
@@ -370,8 +370,8 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <button
         type="button"
         className={cn(
-          'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-all duration-200',
-          'cursor-pointer hover:bg-accent/10 hover:border-accent/30 border-muted-foreground/20 text-muted-foreground hover:text-accent',
+          'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-all duration-200',
+          'cursor-pointer border-muted-foreground/20 text-muted-foreground hover:border-accent/30 hover:bg-accent/10 hover:text-accent',
           props.className
         )}
         onClick={handleClick}
@@ -416,7 +416,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
               />
             </output>
           </TooltipTrigger>
-          <TooltipContent side={side} className="text-xs font-medium">
+          <TooltipContent side={side} className="font-medium text-xs">
             <p>{label}</p>
           </TooltipContent>
         </Tooltip>
@@ -439,7 +439,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         className={cn(
           'inline-flex items-center justify-center',
           'px-1.5 py-0.5',
-          'text-[10px] font-semibold uppercase tracking-wider',
+          'font-semibold text-[10px] uppercase tracking-wider',
           'rounded border',
           'transition-colors duration-200',
           variantStyles[badgeVariant],

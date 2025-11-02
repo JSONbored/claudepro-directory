@@ -22,7 +22,7 @@ const UnifiedNewsletterCapture = dynamic(
       default: mod.UnifiedNewsletterCapture,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
 
@@ -79,19 +79,19 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
 
   return (
     <div className={'min-h-screen bg-background'}>
-      <section className={'relative py-24 px-4 overflow-hidden'} aria-labelledby={pageTitleId}>
+      <section className={'relative overflow-hidden px-4 py-24'} aria-labelledby={pageTitleId}>
         <div className={'container mx-auto text-center'}>
-          <div className={'max-w-3xl mx-auto'}>
+          <div className={'mx-auto max-w-3xl'}>
             <UnifiedBadge
               variant="base"
               style="outline"
               className={'mb-6 border-accent/20 bg-accent/5 text-accent'}
             >
-              <TrendingUp className="h-3 w-3 mr-1 text-accent" aria-hidden="true" />
+              <TrendingUp className="mr-1 h-3 w-3 text-accent" aria-hidden="true" />
               Trending
             </UnifiedBadge>
 
-            <h1 id={pageTitleId} className="text-4xl md:text-6xl font-bold mb-6">
+            <h1 id={pageTitleId} className="mb-6 font-bold text-4xl md:text-6xl">
               Trending Configurations
             </h1>
 
@@ -100,22 +100,22 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
               to date with what developers are using and loving.
             </p>
 
-            <ul className={`${UI_CLASSES.FLEX_WRAP_GAP_2} justify-center list-none`}>
+            <ul className={`${UI_CLASSES.FLEX_WRAP_GAP_2} list-none justify-center`}>
               <li>
                 <UnifiedBadge variant="base" style="secondary">
-                  <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
+                  <Clock className="mr-1 h-3 w-3" aria-hidden="true" />
                   Real-time updates
                 </UnifiedBadge>
               </li>
               <li>
                 <UnifiedBadge variant="base" style="secondary">
-                  <Star className="h-3 w-3 mr-1" aria-hidden="true" />
+                  <Star className="mr-1 h-3 w-3" aria-hidden="true" />
                   Based on views
                 </UnifiedBadge>
               </li>
               <li>
                 <UnifiedBadge variant="base" style="secondary">
-                  <Users className="h-3 w-3 mr-1" aria-hidden="true" />
+                  <Users className="mr-1 h-3 w-3" aria-hidden="true" />
                   {pageData.totalCount} total configs
                 </UnifiedBadge>
               </li>

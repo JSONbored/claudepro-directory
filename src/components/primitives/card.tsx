@@ -8,7 +8,7 @@ const Card = memo(function Card({ className, ...props }: React.ComponentProps<'d
     <div
       data-slot="card"
       className={cn(
-        'bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm',
+        'flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm',
         className
       )}
       {...props}
@@ -46,7 +46,7 @@ const CardTitle = memo(function CardTitle({
   return (
     <Component
       data-slot="card-title"
-      className={cn('leading-none font-semibold', className)}
+      className={cn('font-semibold leading-none', className)}
       {...props}
     />
   );

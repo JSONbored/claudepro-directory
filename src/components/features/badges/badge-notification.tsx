@@ -100,12 +100,12 @@ const BadgeToastContent = memo(function BadgeToastContent({ badge, earnedAt }: B
           <span className="font-semibold text-sm">Badge Earned!</span>
         </div>
         <h4 className={cn('font-bold', rarityColors?.text)}>{badge.name}</h4>
-        <p className="text-xs text-muted-foreground">{badge.description}</p>
-        <div className="flex items-center gap-2 mt-2">
-          <span className={cn('text-xs px-2 py-0.5 rounded-full capitalize', rarityColors?.bg)}>
+        <p className="text-muted-foreground text-xs">{badge.description}</p>
+        <div className="mt-2 flex items-center gap-2">
+          <span className={cn('rounded-full px-2 py-0.5 text-xs capitalize', rarityColors?.bg)}>
             {rarity}
           </span>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-muted-foreground text-xs">
             {earnedAt.toLocaleTimeString('en-US', {
               hour: 'numeric',
               minute: '2-digit',

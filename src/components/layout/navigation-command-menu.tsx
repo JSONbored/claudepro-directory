@@ -105,20 +105,20 @@ export function NavigationCommandMenu({
   // Dynamic icon mapper
   const getIcon = (iconName: string) => {
     const Icon = (Icons as any)[iconName];
-    return Icon ? <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" /> : null;
+    return Icon ? <Icon className="h-4 w-4 flex-shrink-0 text-muted-foreground" /> : null;
   };
 
   const renderItem = (item: NavigationItem) => (
     <CommandItem
       key={item.path}
       onSelect={() => handleSelect(item.path)}
-      className="cursor-pointer group"
+      className="group cursor-pointer"
     >
       <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
         {getIcon(item.iconName)}
         <div className="flex flex-col items-start">
           <span>{item.title}</span>
-          <span className="text-xs text-muted-foreground group-hover:text-foreground/70 transition-colors">
+          <span className="text-muted-foreground text-xs transition-colors group-hover:text-foreground/70">
             {item.description}
           </span>
         </div>

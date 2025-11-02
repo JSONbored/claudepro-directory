@@ -116,7 +116,7 @@ export async function generateCodeScreenshot(
  * Uses Clipboard API with PNG blob
  */
 export async function copyScreenshotToClipboard(blob: Blob): Promise<void> {
-  if (!(navigator.clipboard && navigator.clipboard.write)) {
+  if (!navigator.clipboard?.write) {
     throw new Error('Clipboard API not supported in this browser');
   }
 

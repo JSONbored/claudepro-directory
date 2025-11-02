@@ -243,7 +243,7 @@ export const ConfigCard = memo(
                   style="outline"
                   className={`text-xs ${BADGE_COLORS.collectionType[collectionType as keyof typeof BADGE_COLORS.collectionType] || ''}`}
                 >
-                  <Layers className="h-3 w-3 mr-1" aria-hidden="true" />
+                  <Layers className="mr-1 h-3 w-3" aria-hidden="true" />
                   {COLLECTION_TYPE_LABELS[collectionType as keyof typeof COLLECTION_TYPE_LABELS]}
                 </UnifiedBadge>
               )}
@@ -266,7 +266,7 @@ export const ConfigCard = memo(
                 <UnifiedBadge
                   variant="base"
                   style="outline"
-                  className={'text-xs border-muted-foreground/20 text-muted-foreground'}
+                  className={'border-muted-foreground/20 text-muted-foreground text-xs'}
                 >
                   {itemCount} {itemCount === 1 ? 'item' : 'items'}
                 </UnifiedBadge>
@@ -277,7 +277,7 @@ export const ConfigCard = memo(
                 <UnifiedBadge
                   variant="base"
                   style="secondary"
-                  className="gap-1 border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 text-amber-600 dark:text-amber-400 hover:from-amber-500/15 hover:to-yellow-500/15 transition-all duration-300 shadow-sm hover:shadow-md font-semibold animate-in fade-in slide-in-from-top-2"
+                  className="fade-in slide-in-from-top-2 animate-in gap-1 border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 font-semibold text-amber-600 shadow-sm transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:shadow-md dark:text-amber-400"
                 >
                   {featuredRank && featuredRank <= 3 ? (
                     <Award className="h-3.5 w-3.5 text-amber-500" aria-hidden="true" />
@@ -316,13 +316,13 @@ export const ConfigCard = memo(
                         e.stopPropagation();
                       }
                     }}
-                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                    className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     aria-label={`${formatViewCount(viewCount)} views`}
                   >
                     <UnifiedBadge
                       variant="base"
                       style="secondary"
-                      className="h-7 px-2.5 gap-1.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
+                      className="h-7 gap-1.5 border-primary/20 bg-primary/10 px-2.5 font-medium text-primary transition-colors hover:bg-primary/15"
                     >
                       <Eye className="h-3.5 w-3.5" aria-hidden="true" />
                       <span className="text-xs">{formatViewCount(viewCount)}</span>
@@ -340,13 +340,13 @@ export const ConfigCard = memo(
                       e.stopPropagation();
                     }
                   }}
-                  className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                  className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   aria-label={`${formatCopyCount(copyCount)} uses`}
                 >
                   <UnifiedBadge
                     variant="base"
                     style="secondary"
-                    className="h-7 px-2.5 gap-1.5 bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 hover:bg-green-500/15 transition-colors font-medium"
+                    className="h-7 gap-1.5 border-green-500/20 bg-green-500/10 px-2.5 font-medium text-green-600 transition-colors hover:bg-green-500/15 dark:text-green-400"
                   >
                     <CopyIcon className="h-3.5 w-3.5" aria-hidden="true" />
                     <span className="text-xs">{formatCopyCount(copyCount)}</span>
@@ -364,7 +364,7 @@ export const ConfigCard = memo(
                       e.stopPropagation();
                     }
                   }}
-                  className="bg-transparent border-0 p-0 cursor-default"
+                  className="cursor-default border-0 bg-transparent p-0"
                 >
                   <UnifiedReview
                     variant="rating-compact"

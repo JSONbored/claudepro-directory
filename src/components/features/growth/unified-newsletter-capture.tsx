@@ -268,22 +268,22 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
         <div
           className={cn(
             'w-full bg-gradient-to-br from-primary/10 via-accent/5 to-background',
-            'border border-primary/20 rounded-lg p-8 md:p-12',
+            'rounded-lg border border-primary/20 p-8 md:p-12',
             'text-center',
             className
           )}
         >
-          <div className="flex justify-center mb-4">
-            <div className="p-4 bg-primary/10 rounded-full">
+          <div className="mb-4 flex justify-center">
+            <div className="rounded-full bg-primary/10 p-4">
               <Mail className="h-8 w-8 text-primary" aria-hidden="true" />
             </div>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{finalHeadline}</h2>
-          <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">{finalDescription}</p>
-          <div className="max-w-md mx-auto">
+          <h2 className="mb-4 font-bold text-3xl md:text-4xl">{finalHeadline}</h2>
+          <p className="mx-auto mb-6 max-w-2xl text-lg text-muted-foreground">{finalDescription}</p>
+          <div className="mx-auto max-w-md">
             <FormVariant source={source} className="w-full" />
           </div>
-          <p className="mt-4 text-xs text-muted-foreground">{NEWSLETTER_CTA_CONFIG.footerText}</p>
+          <p className="mt-4 text-muted-foreground text-xs">{NEWSLETTER_CTA_CONFIG.footerText}</p>
         </div>
       );
     }
@@ -294,16 +294,16 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
         <Card
           className={cn(
             'border-primary/20 bg-gradient-to-br from-primary/5 via-accent/5 to-background/95',
-            'backdrop-blur-sm shadow-lg',
+            'shadow-lg backdrop-blur-sm',
             className
           )}
         >
           <CardHeader className="pb-5">
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-3`}>
-              <div className="p-2.5 bg-primary/10 rounded-lg border border-primary/20">
+              <div className="rounded-lg border border-primary/20 bg-primary/10 p-2.5">
                 <Mail className="h-5 w-5 text-primary" aria-hidden="true" />
               </div>
-              <CardTitle className="text-xl font-bold">{finalHeadline}</CardTitle>
+              <CardTitle className="font-bold text-xl">{finalHeadline}</CardTitle>
             </div>
             <CardDescription className="text-base leading-relaxed">
               {finalDescription}
@@ -311,7 +311,7 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <FormVariant source={source} />
-            <div className="text-xs text-muted-foreground text-center">
+            <div className="text-center text-muted-foreground text-xs">
               <span>{NEWSLETTER_CTA_CONFIG.footerText}</span>
             </div>
           </CardContent>
@@ -324,16 +324,16 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
       return (
         <div
           className={cn(
-            'flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-between p-4 sm:p-5',
-            'bg-accent/5 border border-border/50 rounded-lg',
+            'flex flex-col items-stretch justify-between gap-4 p-4 sm:flex-row sm:items-center sm:p-5',
+            'rounded-lg border border-border/50 bg-accent/5',
             className
           )}
         >
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} flex-1 min-w-0`}>
-            <Mail className="h-5 w-5 text-primary flex-shrink-0" aria-hidden="true" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{finalHeadline}</p>
-              <p className="text-xs text-muted-foreground truncate">{finalDescription}</p>
+          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} min-w-0 flex-1`}>
+            <Mail className="h-5 w-5 flex-shrink-0 text-primary" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-medium text-sm">{finalHeadline}</p>
+              <p className="truncate text-muted-foreground text-xs">{finalDescription}</p>
             </div>
           </div>
           <FormVariant
@@ -349,18 +349,18 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
       return (
         <Card
           className={cn(
-            'h-full flex flex-col border-primary/20 bg-gradient-to-br from-primary/5 via-accent/5 to-background/95',
-            'backdrop-blur-sm shadow-lg',
+            'flex h-full flex-col border-primary/20 bg-gradient-to-br from-primary/5 via-accent/5 to-background/95',
+            'shadow-lg backdrop-blur-sm',
             className
           )}
         >
           <CardHeader className="flex-1">
             <div className="mb-4">
-              <div className="inline-flex p-3 bg-primary/10 rounded-lg border border-primary/20">
+              <div className="inline-flex rounded-lg border border-primary/20 bg-primary/10 p-3">
                 <Mail className="h-6 w-6 text-primary" aria-hidden="true" />
               </div>
             </div>
-            <CardTitle className="text-xl mb-3 font-bold">{finalHeadline}</CardTitle>
+            <CardTitle className="mb-3 font-bold text-xl">{finalHeadline}</CardTitle>
             <CardDescription className="text-sm leading-relaxed">
               {finalDescription}
             </CardDescription>
@@ -368,7 +368,7 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
           <CardContent className="space-y-4">
             <FormVariant source={source} />
             <div className="text-center">
-              <p className="text-xs text-muted-foreground">{NEWSLETTER_CTA_CONFIG.footerText}</p>
+              <p className="text-muted-foreground text-xs">{NEWSLETTER_CTA_CONFIG.footerText}</p>
             </div>
           </CardContent>
         </Card>
@@ -442,7 +442,7 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={isSubmitting}
-            className="flex-1 min-w-0"
+            className="min-w-0 flex-1"
             aria-label="Email address"
             error={!!error}
             {...(error ? { errorId } : {})}
@@ -450,7 +450,7 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] whitespace-nowrap flex-shrink-0"
+            className="flex-shrink-0 whitespace-nowrap bg-gradient-to-r from-accent to-primary font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:from-accent/90 hover:to-primary/90 hover:shadow-lg"
           >
             {isSubmitting ? (
               <>Joining...</>
@@ -463,7 +463,7 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
           </Button>
         </div>
         {error && (
-          <p id={errorId} className="text-sm text-destructive" role="alert">
+          <p id={errorId} className="text-destructive text-sm" role="alert">
             {error}
           </p>
         )}
@@ -570,25 +570,25 @@ function FooterBarVariant({
 
   return (
     <aside
-      className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-bg-overlay)] backdrop-blur-xl border-t-2 border-[var(--color-border-medium)] shadow-xl animate-in slide-in-from-bottom duration-300"
+      className="slide-in-from-bottom fixed right-0 bottom-0 left-0 z-50 animate-in border-[var(--color-border-medium)] border-t-2 bg-[var(--color-bg-overlay)] shadow-xl backdrop-blur-xl duration-300"
       aria-label="Newsletter signup"
     >
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--color-accent)]/30 to-transparent" />
+      <div className="absolute top-0 right-0 left-0 h-px bg-gradient-to-r from-transparent via-[var(--color-accent)]/30 to-transparent" />
       <div className="container mx-auto px-4 py-6 md:py-4">
         {/* Desktop layout */}
-        <div className="hidden md:flex items-center justify-between gap-6 max-w-5xl mx-auto">
-          <div className="flex-shrink-0 flex items-center gap-3">
-            <div className="p-2.5 bg-accent/10 rounded-lg border border-accent/20">
+        <div className="mx-auto hidden max-w-5xl items-center justify-between gap-6 md:flex">
+          <div className="flex flex-shrink-0 items-center gap-3">
+            <div className="rounded-lg border border-accent/20 bg-accent/10 p-2.5">
               <Mail className="h-5 w-5 text-accent" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-base font-semibold text-foreground">
+              <p className="font-semibold text-base text-foreground">
                 {NEWSLETTER_CTA_CONFIG.headline}
               </p>
-              <p className="text-sm text-muted-foreground">{NEWSLETTER_CTA_CONFIG.description}</p>
+              <p className="text-muted-foreground text-sm">{NEWSLETTER_CTA_CONFIG.description}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex flex-shrink-0 items-center gap-3">
             <FormVariant source={source} className="min-w-[360px]" />
             {dismissible && (
               <Button
@@ -605,11 +605,11 @@ function FooterBarVariant({
         </div>
 
         {/* Mobile layout */}
-        <div className="flex md:hidden flex-col gap-3">
+        <div className="flex flex-col gap-3 md:hidden">
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-accent flex-shrink-0" aria-hidden="true" />
-              <p className="text-sm font-medium text-foreground">
+              <Mail className="h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
+              <p className="font-medium text-foreground text-sm">
                 {NEWSLETTER_CTA_CONFIG.headline}
               </p>
             </div>
@@ -770,7 +770,7 @@ function ModalVariant({
 
   return (
     <Sheet open={open} onOpenChange={handleDismiss}>
-      <SheetContent side="bottom" className="sm:max-w-md sm:mx-auto">
+      <SheetContent side="bottom" className="sm:mx-auto sm:max-w-md">
         <SheetHeader>
           <SheetTitle>{NEWSLETTER_CTA_CONFIG.headline}</SheetTitle>
           <SheetDescription>{NEWSLETTER_CTA_CONFIG.description}</SheetDescription>
@@ -784,14 +784,14 @@ function ModalVariant({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
-              className="text-base h-12"
+              className="h-12 text-base"
               autoComplete="email"
               aria-label="Email address"
               required
             />
           </div>
 
-          <div className="flex gap-3 flex-col sm:flex-row">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <Button
               type="submit"
               disabled={isLoading || !email.trim()}
@@ -814,7 +814,7 @@ function ModalVariant({
           </div>
         </form>
 
-        <p className="mt-4 text-xs text-muted-foreground text-center">
+        <p className="mt-4 text-center text-muted-foreground text-xs">
           By subscribing, you agree to receive updates about Claude tools and resources.
         </p>
       </SheetContent>

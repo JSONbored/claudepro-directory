@@ -45,12 +45,12 @@ export default async function AccountDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+        <h1 className="mb-2 font-bold text-3xl">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back, {profile?.name || 'User'}!</p>
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Reputation</CardTitle>
@@ -58,9 +58,9 @@ export default async function AccountDashboard() {
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-2xl">🏆</span>
-              <span className="text-3xl font-bold">{profile?.reputation_score || 0}</span>
+              <span className="font-bold text-3xl">{profile?.reputation_score || 0}</span>
             </div>
-            <p className={'text-xs text-muted-foreground mt-2'}>Total points</p>
+            <p className={'mt-2 text-muted-foreground text-xs'}>Total points</p>
           </CardContent>
         </Card>
 
@@ -71,9 +71,9 @@ export default async function AccountDashboard() {
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Bookmark className="h-5 w-5 text-primary" />
-              <span className="text-3xl font-bold">{bookmarkCount || 0}</span>
+              <span className="font-bold text-3xl">{bookmarkCount || 0}</span>
             </div>
-            <p className={'text-xs text-muted-foreground mt-2'}>Saved items</p>
+            <p className={'mt-2 text-muted-foreground text-xs'}>Saved items</p>
           </CardContent>
         </Card>
 
@@ -91,7 +91,7 @@ export default async function AccountDashboard() {
                 ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
                 : 'Free'}
             </UnifiedBadge>
-            <p className={'text-xs text-muted-foreground mt-2'}>Membership level</p>
+            <p className={'mt-2 text-muted-foreground text-xs'}>Membership level</p>
           </CardContent>
         </Card>
 
@@ -102,9 +102,9 @@ export default async function AccountDashboard() {
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Calendar className="h-5 w-5 text-primary" />
-              <span className="text-3xl font-bold">{accountAge}</span>
+              <span className="font-bold text-3xl">{accountAge}</span>
             </div>
-            <p className={'text-xs text-muted-foreground mt-2'}>Days active</p>
+            <p className={'mt-2 text-muted-foreground text-xs'}>Days active</p>
           </CardContent>
         </Card>
       </div>

@@ -66,7 +66,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
       {Icon ? (
         <div className="relative">
           {iconPosition === 'left' && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <div className="-translate-y-1/2 absolute top-1/2 left-3 text-muted-foreground">
               <Icon className="h-4 w-4" />
             </div>
           )}
@@ -79,7 +79,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
             className={iconPosition === 'left' ? 'pl-10' : iconPosition === 'right' ? 'pr-10' : ''}
           />
           {iconPosition === 'right' && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <div className="-translate-y-1/2 absolute top-1/2 right-3 text-muted-foreground">
               <Icon className="h-4 w-4" />
             </div>
           )}
@@ -93,7 +93,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
           defaultValue={field.defaultValue}
         />
       )}
-      {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
+      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
     </div>
   );
 }
@@ -120,7 +120,7 @@ function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
         defaultValue={field.defaultValue}
         className={`${monoClass} resize-y`}
       />
-      {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
+      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
     </div>
   );
 }
@@ -148,7 +148,7 @@ function NumberFieldRenderer({ field, formId }: FieldRendererProps) {
         placeholder={field.placeholder}
         required={field.required}
       />
-      {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
+      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
     </div>
   );
 }
@@ -178,7 +178,7 @@ function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
           </option>
         ))}
       </select>
-      {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
+      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
     </div>
   );
 }

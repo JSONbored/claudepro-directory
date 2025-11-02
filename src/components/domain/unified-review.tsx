@@ -299,16 +299,16 @@ function FormVariant({
             ))}
           </Rating>
           {rating > 0 && (
-            <span className="text-sm text-muted-foreground ml-1 font-medium">
+            <span className="ml-1 font-medium text-muted-foreground text-sm">
               {rating.toFixed(1)}
             </span>
           )}
         </div>
         {rating === 0 && !showRatingError && (
-          <p className="text-xs text-muted-foreground mt-1">Click a star to rate</p>
+          <p className="mt-1 text-muted-foreground text-xs">Click a star to rate</p>
         )}
         {showRatingError && (
-          <p id={ratingErrorId} className="text-sm text-destructive mt-1" role="alert">
+          <p id={ratingErrorId} className="mt-1 text-destructive text-sm" role="alert">
             Please select a star rating before submitting
           </p>
         )}
@@ -317,7 +317,7 @@ function FormVariant({
       {/* Review Text */}
       <div>
         <Label htmlFor={textareaId} className="mb-2 block">
-          Your Review <span className="text-xs text-muted-foreground font-normal">(optional)</span>
+          Your Review <span className="font-normal text-muted-foreground text-xs">(optional)</span>
         </Label>
         <Textarea
           id={textareaId}
@@ -331,12 +331,12 @@ function FormVariant({
           {...(hasTextError ? { errorId: textareaErrorId } : {})}
         />
         {hasTextError && (
-          <p id={textareaErrorId} className="text-sm text-destructive mt-1" role="alert">
+          <p id={textareaErrorId} className="mt-1 text-destructive text-sm" role="alert">
             Review text cannot exceed {MAX_REVIEW_LENGTH} characters
           </p>
         )}
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mt-1`}>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Help others by sharing details about your experience
           </p>
           <p
@@ -472,16 +472,16 @@ function SectionVariant({
 
       {/* Sort Controls */}
       <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}`}>
-        <h3 className="text-lg font-semibold">Reviews ({aggregateRating?.count || 0})</h3>
+        <h3 className="font-semibold text-lg">Reviews ({aggregateRating?.count || 0})</h3>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <Label htmlFor={sortSelectId} className="text-sm text-muted-foreground">
+          <Label htmlFor={sortSelectId} className="text-muted-foreground text-sm">
             Sort by:
           </Label>
           <select
             id={sortSelectId}
             value={sortBy}
             onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
-            className="text-sm border rounded px-2 py-1"
+            className="rounded border px-2 py-1 text-sm"
           >
             <option value="recent">Most Recent</option>
             <option value="helpful">Most Helpful</option>
@@ -493,12 +493,12 @@ function SectionVariant({
 
       {/* Reviews List */}
       {isLoading && page === 1 ? (
-        <div className="text-center py-8">
+        <div className="py-8 text-center">
           <p className="text-muted-foreground">Loading reviews...</p>
         </div>
       ) : reviews.length === 0 ? (
-        <Card className="p-8 text-center bg-muted/50">
-          <Star className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" aria-hidden="true" />
+        <Card className="bg-muted/50 p-8 text-center">
+          <Star className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" aria-hidden="true" />
           <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
         </Card>
       ) : (
@@ -519,7 +519,7 @@ function SectionVariant({
 
       {/* Load More */}
       {hasMore && !isLoading && (
-        <div className="text-center pt-4">
+        <div className="pt-4 text-center">
           <Button variant="outline" onClick={handleLoadMore}>
             Load More Reviews
           </Button>
@@ -593,9 +593,9 @@ function ReviewCardItem({
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}`}>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
               <StarDisplay rating={review.rating} size="sm" />
-              <span className="text-xs text-muted-foreground ml-1">{review.rating.toFixed(1)}</span>
+              <span className="ml-1 text-muted-foreground text-xs">{review.rating.toFixed(1)}</span>
             </div>
-            <time className="text-xs text-muted-foreground" dateTime={review.created_at}>
+            <time className="text-muted-foreground text-xs" dateTime={review.created_at}>
               {formatDistanceToNow(new Date(review.created_at))} ago
             </time>
           </div>
@@ -603,12 +603,12 @@ function ReviewCardItem({
           {/* Review Text */}
           {reviewText && (
             <div>
-              <p className="text-sm text-foreground whitespace-pre-wrap">{displayText}</p>
+              <p className="whitespace-pre-wrap text-foreground text-sm">{displayText}</p>
               {needsTruncation && (
                 <button
                   type="button"
                   onClick={() => setShowFullText(!showFullText)}
-                  className="text-xs text-primary hover:underline mt-1"
+                  className="mt-1 text-primary text-xs hover:underline"
                 >
                   {showFullText ? 'Show less' : 'Read more'}
                 </button>
@@ -634,7 +634,7 @@ function ReviewCardItem({
                 }}
                 className={UI_CLASSES.BUTTON_GHOST_ICON}
               >
-                <ThumbsUp className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
+                <ThumbsUp className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
                 Helpful ({review.helpful_count})
               </Button>
             )}
@@ -648,7 +648,7 @@ function ReviewCardItem({
                   onClick={onEdit}
                   className={UI_CLASSES.BUTTON_GHOST_ICON}
                 >
-                  <Edit className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
+                  <Edit className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
                   Edit
                 </Button>
                 <Button
@@ -657,7 +657,7 @@ function ReviewCardItem({
                   onClick={onDelete}
                   className={`${UI_CLASSES.BUTTON_GHOST_ICON} text-destructive hover:text-destructive`}
                 >
-                  <Trash className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
+                  <Trash className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
                   Delete
                 </Button>
               </>
@@ -695,12 +695,12 @@ function HistogramVariant({
 
   if (totalReviews === 0) {
     return (
-      <Card className="p-6 bg-muted/50">
+      <Card className="bg-muted/50 p-6">
         <div className="text-center">
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} justify-center mb-2`}>
+          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2 justify-center`}>
             <Star className="h-8 w-8 text-muted-foreground/30" aria-hidden="true" />
           </div>
-          <p className="text-sm text-muted-foreground">No reviews yet. Be the first to review!</p>
+          <p className="text-muted-foreground text-sm">No reviews yet. Be the first to review!</p>
         </div>
       </Card>
     );
@@ -711,19 +711,19 @@ function HistogramVariant({
       {/* Header: Average Rating */}
       <div className="mb-6">
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-2`}>
-          <div className="text-4xl font-bold">{averageRating.toFixed(1)}</div>
+          <div className="font-bold text-4xl">{averageRating.toFixed(1)}</div>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
             <StarDisplay rating={averageRating} size="md" />
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Based on {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
         </p>
       </div>
 
       {/* Chart: Rating Distribution */}
       <div>
-        <h3 className="text-sm font-semibold mb-3">Rating Distribution</h3>
+        <h3 className="mb-3 font-semibold text-sm">Rating Distribution</h3>
         <ChartContainer height="200px" className="w-full">
           <HorizontalBarChart
             data={chartData}
@@ -777,7 +777,7 @@ function RatingInteractiveVariant({
         ))}
       </Rating>
       {showValue && (
-        <span className="text-sm text-muted-foreground ml-1 font-medium">{value.toFixed(1)}</span>
+        <span className="ml-1 font-medium text-muted-foreground text-sm">{value.toFixed(1)}</span>
       )}
     </div>
   );

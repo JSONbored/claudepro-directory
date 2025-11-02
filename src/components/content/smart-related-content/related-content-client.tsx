@@ -230,17 +230,17 @@ export function RelatedContentClient({
       aria-label="Related content"
     >
       {showTitle && (
-        <div className="mb-8 p-4 sm:p-6 bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="mb-8 rounded-xl border border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 p-4 sm:p-6">
+          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              <div className="flex-shrink-0 rounded-lg bg-primary/10 p-2">
+                <Sparkles className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
               </div>
               <div className="min-w-0">
-                <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1" itemProp="name">
+                <h2 className="mb-1 font-bold text-foreground text-xl sm:text-2xl" itemProp="name">
                   {title}
                 </h2>
-                <p className="text-xs sm:text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-xs sm:text-sm">
                   Intelligently curated based on your current content
                 </p>
               </div>
@@ -248,7 +248,7 @@ export function RelatedContentClient({
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="bg-primary/10 text-primary border-primary/30 font-medium px-2 sm:px-3 py-1 text-xs sm:text-sm flex-shrink-0"
+              className="flex-shrink-0 border-primary/30 bg-primary/10 px-2 py-1 font-medium text-primary text-xs sm:px-3 sm:text-sm"
             >
               AI Powered
             </UnifiedBadge>
@@ -304,9 +304,9 @@ export function RelatedContentClient({
                 }
               }}
               renderTopBadges={() => (
-                <div className="flex items-center justify-between gap-2 w-full">
+                <div className="flex w-full items-center justify-between gap-2">
                   <UnifiedBadge
-                    className={`${categoryBadge} font-medium px-2 sm:px-3 py-1 border text-xs sm:text-sm flex-shrink-0`}
+                    className={`${categoryBadge} flex-shrink-0 border px-2 py-1 font-medium text-xs sm:px-3 sm:text-sm`}
                     variant="base"
                     style="secondary"
                   >
@@ -316,7 +316,7 @@ export function RelatedContentClient({
                     <UnifiedBadge
                       variant="base"
                       style={matchBadge.variant}
-                      className="text-2xs sm:text-xs font-medium border px-1.5 sm:px-2 py-1 flex-shrink-0"
+                      className="flex-shrink-0 border px-1.5 py-1 font-medium text-2xs sm:px-2 sm:text-xs"
                     >
                       {matchBadge.label}
                     </UnifiedBadge>

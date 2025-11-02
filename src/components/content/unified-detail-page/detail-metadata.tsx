@@ -39,7 +39,7 @@ export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
     <div className="container mx-auto px-4">
       {/* Author, Date & View Count Metadata */}
       {hasMetadata && (
-        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
+        <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
           {'author' in item && item.author && (
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <User className="h-4 w-4" />
@@ -50,7 +50,7 @@ export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
                 }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:underline hover:text-foreground transition-colors"
+                className="transition-colors hover:text-foreground hover:underline"
               >
                 {item.author}
               </a>

@@ -132,15 +132,15 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
     );
 
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4 p-8">
-          <h1 className="text-2xl font-bold">Failed to Generate Recommendations</h1>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="space-y-4 p-8 text-center">
+          <h1 className="font-bold text-2xl">Failed to Generate Recommendations</h1>
           <p className="text-muted-foreground">
             We encountered an error while generating your recommendations. Please try again.
           </p>
           <a
             href={ROUTES.TOOLS_CONFIG_RECOMMENDER}
-            className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+            className="inline-block rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
           >
             Start Over
           </a>

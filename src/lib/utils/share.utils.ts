@@ -141,7 +141,10 @@ export async function copyShareLink(options: ShareOptions): Promise<boolean> {
  * Get share count from platform (placeholder - would need backend APIs)
  * Future enhancement: Track shares in database
  */
-export async function getShareCount(url: string, platform: SharePlatform): Promise<number | null> {
+export async function getShareCount(
+  _url: string,
+  _platform: SharePlatform
+): Promise<number | null> {
   // Placeholder for future share count tracking
   // Would integrate with platform APIs or database RPC
   return null;

@@ -41,9 +41,9 @@ export function ComparisonTable(props: ComparisonTableProps) {
           <table className="w-full">
             <thead className="border-b">
               <tr>
-                <th className={'text-left p-4 font-medium'}>Feature</th>
+                <th className={'p-4 text-left font-medium'}>Feature</th>
                 {validHeaders.map((header) => (
-                  <th key={header} className={'text-left p-4 font-medium'}>
+                  <th key={header} className={'p-4 text-left font-medium'}>
                     {header}
                   </th>
                 ))}

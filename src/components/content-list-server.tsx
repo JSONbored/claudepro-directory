@@ -31,9 +31,9 @@ function ContentHeroSection<T extends ContentItem>({
   return (
     <section className={UI_CLASSES.CONTAINER_OVERFLOW_BORDER} aria-labelledby={pageTitleId}>
       <div className={'container mx-auto px-4 py-20'}>
-        <div className={'text-center max-w-3xl mx-auto'}>
-          <div className={'flex justify-center mb-6'}>
-            <div className={'p-3 bg-accent/10 rounded-full'} aria-hidden="true">
+        <div className={'mx-auto max-w-3xl text-center'}>
+          <div className={'mb-6 flex justify-center'}>
+            <div className={'rounded-full bg-accent/10 p-3'} aria-hidden="true">
               {(() => {
                 const IconComponent =
                   ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
@@ -48,7 +48,7 @@ function ContentHeroSection<T extends ContentItem>({
 
           <p className={UI_CLASSES.TEXT_HEADING_MEDIUM}>{description}</p>
 
-          <ul className={'flex flex-wrap justify-center gap-2 mb-8 list-none'}>
+          <ul className={'mb-8 flex list-none flex-wrap justify-center gap-2'}>
             {displayBadges.map((badge, idx) => (
               <li key={badge.text || `badge-${idx}`}>
                 <UnifiedBadge variant="base" style={idx === 0 ? 'secondary' : 'outline'}>
@@ -57,10 +57,10 @@ function ContentHeroSection<T extends ContentItem>({
                       if (typeof badge.icon === 'string') {
                         const BadgeIconComponent =
                           ICON_NAME_MAP[badge.icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
-                        return <BadgeIconComponent className="h-3 w-3 mr-1" aria-hidden="true" />;
+                        return <BadgeIconComponent className="mr-1 h-3 w-3" aria-hidden="true" />;
                       }
                       const BadgeIcon = badge.icon;
-                      return <BadgeIcon className="h-3 w-3 mr-1" aria-hidden="true" />;
+                      return <BadgeIcon className="mr-1 h-3 w-3" aria-hidden="true" />;
                     })()}
                   {badge.text}
                 </UnifiedBadge>
@@ -88,7 +88,7 @@ function ContentSearchSkeleton() {
   return (
     <div className={'w-full space-y-4'}>
       <Skeleton size="xl" width="3xl" />
-      <div className={'flex gap-2 justify-end'}>
+      <div className={'flex justify-end gap-2'}>
         <Skeleton size="lg" width="sm" />
         <Skeleton size="lg" width="xs" />
       </div>

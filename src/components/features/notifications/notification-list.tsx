@@ -21,7 +21,7 @@ function NotificationListComponent() {
   if (notifications.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center">
-        <p className="text-sm text-muted-foreground">No new notifications</p>
+        <p className="text-muted-foreground text-sm">No new notifications</p>
       </div>
     );
   }

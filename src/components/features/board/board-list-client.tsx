@@ -103,14 +103,14 @@ export function BoardListClient({ initialPosts }: BoardListClientProps) {
     return (
       <Card>
         <CardContent className={'flex flex-col items-center py-12'}>
-          <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No posts yet</h3>
-          <p className={'text-muted-foreground text-center max-w-md mb-4'}>
+          <MessageSquare className="mb-4 h-12 w-12 text-muted-foreground" />
+          <h3 className="mb-2 font-semibold text-xl">No posts yet</h3>
+          <p className={'mb-4 max-w-md text-center text-muted-foreground'}>
             Be the first to share something with the community!
           </p>
           <Button asChild>
             <Link href={ROUTES.BOARD_NEW}>
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Create First Post
             </Link>
           </Button>
@@ -136,11 +136,11 @@ export function BoardListClient({ initialPosts }: BoardListClientProps) {
                   </CardDescription>
                 )}
 
-                <div className={'flex items-center gap-3 text-xs text-muted-foreground mt-3'}>
+                <div className={'mt-3 flex items-center gap-3 text-muted-foreground text-xs'}>
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                    <Avatar className="w-4 h-4">
+                    <Avatar className="h-4 w-4">
                       <AvatarFallback>
-                        <UserIcon className="w-3 h-3" />
+                        <UserIcon className="h-3 w-3" />
                       </AvatarFallback>
                     </Avatar>
                     <span>User</span>

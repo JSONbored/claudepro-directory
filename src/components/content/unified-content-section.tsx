@@ -284,7 +284,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
             <ul className="space-y-2">
               {items.map((item) => (
                 <li key={item.slice(0, 50)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-                  <div className={cn('h-1.5 w-1.5 rounded-full mt-2 flex-shrink-0', bulletClass)} />
+                  <div className={cn('mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full', bulletClass)} />
                   <span className={cn('leading-relaxed', textClass)}>{item}</span>
                 </li>
               ))}
@@ -464,12 +464,12 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                   itemType="https://schema.org/SoftwareSourceCode"
                 >
                   <div className="space-y-1">
-                    <h4 className="text-base font-semibold text-foreground" itemProp="name">
+                    <h4 className="font-semibold text-base text-foreground" itemProp="name">
                       {example.title}
                     </h4>
                     {example.description && (
                       <p
-                        className="text-sm text-muted-foreground leading-relaxed"
+                        className="text-muted-foreground text-sm leading-relaxed"
                         itemProp="description"
                       >
                         {example.description}
@@ -522,7 +522,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                 if (typeof trouble === 'string') {
                   return (
                     <li key={trouble.slice(0, 50)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-                      <div className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                      <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-500" />
                       <span className="text-sm leading-relaxed">{trouble}</span>
                     </li>
                   );
@@ -532,10 +532,10 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                 return (
                   <li key={trouble.issue.slice(0, 50)} className="space-y-2">
                     <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-                      <div className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                      <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-500" />
                       <div className="space-y-1">
-                        <p className="text-sm font-medium text-foreground">{trouble.issue}</p>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
+                        <p className="font-medium text-foreground text-sm">{trouble.issue}</p>
+                        <p className="text-muted-foreground text-sm leading-relaxed">
                           {trouble.solution}
                         </p>
                       </div>
@@ -576,7 +576,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                     if (step.type === 'command') {
                       return (
                         <div key={`cc-${index}`} className="space-y-2">
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-muted-foreground text-sm">
                             Step {index + 1}: Run command
                           </div>
                           <ProductionCodeBlock
@@ -591,7 +591,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                     }
                     return (
                       <div key={`cc-${index}`} className="flex items-start gap-3">
-                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                        <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
                         <span className="text-sm leading-relaxed">{step.text}</span>
                       </div>
                     );
@@ -599,7 +599,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                 </div>
                 {installationData.claudeCode.configPath && (
                   <div>
-                    <h5 className="font-medium mb-2 text-sm">Configuration Paths</h5>
+                    <h5 className="mb-2 font-medium text-sm">Configuration Paths</h5>
                     <div className="space-y-1 text-sm">
                       {Object.entries(installationData.claudeCode.configPath).map(
                         ([location, path]) => (
@@ -607,7 +607,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                             <UnifiedBadge variant="base" style="outline" className="capitalize">
                               {location}
                             </UnifiedBadge>
-                            <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                            <code className="rounded bg-muted px-1 py-0.5 text-xs">
                               {String(path)}
                             </code>
                           </div>
@@ -628,7 +628,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                     if (step.type === 'command') {
                       return (
                         <div key={`cd-${index}`} className="space-y-2">
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-muted-foreground text-sm">
                             Step {index + 1}: Run command
                           </div>
                           <ProductionCodeBlock
@@ -643,7 +643,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                     }
                     return (
                       <div key={`cd-${index}`} className="flex items-start gap-3">
-                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                        <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
                         <span className="text-sm leading-relaxed">{step.text}</span>
                       </div>
                     );
@@ -651,7 +651,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                 </div>
                 {installationData.claudeDesktop.configPath && (
                   <div>
-                    <h5 className="font-medium mb-2 text-sm">Configuration Paths</h5>
+                    <h5 className="mb-2 font-medium text-sm">Configuration Paths</h5>
                     <div className="space-y-1 text-sm">
                       {Object.entries(installationData.claudeDesktop.configPath).map(
                         ([platform, path]) => (
@@ -659,7 +659,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                             <UnifiedBadge variant="base" style="outline" className="capitalize">
                               {platform}
                             </UnifiedBadge>
-                            <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                            <code className="rounded bg-muted px-1 py-0.5 text-xs">
                               {String(path)}
                             </code>
                           </div>
@@ -680,7 +680,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                     if (step.type === 'command') {
                       return (
                         <div key={`sdk-${index}`} className="space-y-2">
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-muted-foreground text-sm">
                             Step {index + 1}: Run command
                           </div>
                           <ProductionCodeBlock
@@ -695,7 +695,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                     }
                     return (
                       <div key={`sdk-${index}`} className="flex items-start gap-3">
-                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                        <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
                         <span className="text-sm leading-relaxed">{step.text}</span>
                       </div>
                     );
@@ -707,14 +707,14 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
             {/* Requirements */}
             {installationData.requirements && installationData.requirements.length > 0 && (
               <div>
-                <h4 className="font-medium mb-2">Requirements</h4>
+                <h4 className="mb-2 font-medium">Requirements</h4>
                 <ul className="space-y-2">
                   {installationData.requirements.map((requirement: string) => (
                     <li
                       key={requirement.slice(0, 50)}
                       className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}
                     >
-                      <div className="h-1.5 w-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
+                      <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-orange-500" />
                       <span className="text-sm leading-relaxed">{requirement}</span>
                     </li>
                   ))}

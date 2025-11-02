@@ -48,8 +48,8 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
     return (
       <div>
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
-          <h2 className={'text-2xl font-bold'}>{title}</h2>
-          <Link href={href} className="text-accent hover:underline flex items-center gap-2">
+          <h2 className={'font-bold text-2xl'}>{title}</h2>
+          <Link href={href} className="flex items-center gap-2 text-accent hover:underline">
             View all <ExternalLink className="h-4 w-4" />
           </Link>
         </div>
@@ -78,7 +78,7 @@ interface FeaturedSectionsProps {
 
 const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories, categoryConfigs }) => {
   return (
-    <div className={'space-y-16 mb-16'}>
+    <div className={'mb-16 space-y-16'}>
       {/* Dynamically render featured sections based on HOMEPAGE_FEATURED_CATEGORIES */}
       {HOMEPAGE_FEATURED_CATEGORIES.map((categorySlug) => {
         const items = categories[categorySlug];
@@ -102,15 +102,15 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories, cate
       {/* Featured Jobs */}
       <div>
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
-          <h2 className={'text-2xl font-bold'}>Featured Jobs</h2>
-          <Link href={ROUTES.JOBS} className="text-accent hover:underline flex items-center gap-2">
+          <h2 className={'font-bold text-2xl'}>Featured Jobs</h2>
+          <Link href={ROUTES.JOBS} className="flex items-center gap-2 text-accent hover:underline">
             View all <ExternalLink className="h-4 w-4" />
           </Link>
         </div>
         <div className={UI_CLASSES.CONTAINER_CARD_MUTED}>
-          <Briefcase className={'h-12 w-12 mx-auto mb-4 text-muted-foreground/50'} />
-          <h3 className={'text-lg font-semibold mb-2'}>Find Your Next AI Role</h3>
-          <p className={'text-muted-foreground mb-6'}>
+          <Briefcase className={'mx-auto mb-4 h-12 w-12 text-muted-foreground/50'} />
+          <h3 className={'mb-2 font-semibold text-lg'}>Find Your Next AI Role</h3>
+          <p className={'mb-6 text-muted-foreground'}>
             Discover opportunities with companies building the future of AI
           </p>
           <Button asChild>

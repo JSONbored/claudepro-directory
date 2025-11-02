@@ -143,7 +143,7 @@ export function ToggleField({
     <div
       className={cn(
         'flex items-center justify-between',
-        disabled && 'opacity-50 cursor-not-allowed',
+        disabled && 'cursor-not-allowed opacity-50',
         className
       )}
     >
@@ -152,13 +152,13 @@ export function ToggleField({
         <Label
           htmlFor={id}
           className={cn(
-            'text-base font-medium',
+            'font-medium text-base',
             disabled ? 'cursor-not-allowed' : 'cursor-pointer'
           )}
         >
           {label}
         </Label>
-        {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
+        {description && <p className="mt-1 text-muted-foreground text-xs">{description}</p>}
       </div>
 
       {/* Switch */}

@@ -77,7 +77,7 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
           <button
             type="button"
             onClick={() => setSelectedCategory(null)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`rounded-lg px-4 py-2 font-medium text-sm transition-colors ${
               selectedCategory === null
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
@@ -90,7 +90,7 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
               key={cat}
               type="button"
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`rounded-lg px-4 py-2 font-medium text-sm transition-colors ${
                 selectedCategory === cat
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
@@ -115,7 +115,7 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
         <div className="mt-6 space-y-2">
           {filteredItems.map((item: any) =>
             item._recommendationReason ? (
-              <p key={item.slug} className="text-xs text-muted-foreground italic">
+              <p key={item.slug} className="text-muted-foreground text-xs italic">
                 <strong>{item.title}:</strong> {item._recommendationReason}
               </p>
             ) : null
@@ -125,7 +125,7 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
 
       {/* Sources info */}
       {initialData.sources_used.length > 0 && (
-        <div className="mt-8 text-center text-sm text-muted-foreground">
+        <div className="mt-8 text-center text-muted-foreground text-sm">
           <p>
             Recommendations from:{' '}
             {initialData.sources_used.map((s) => s.replace('_', ' ')).join(', ')}

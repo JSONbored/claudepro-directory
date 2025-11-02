@@ -19,7 +19,7 @@ const UnifiedNewsletterCapture = dynamic(
       default: mod.UnifiedNewsletterCapture,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
 
@@ -34,9 +34,9 @@ export default async function BoardPage() {
     <div className={'min-h-screen bg-background'}>
       <section className={`${UI_CLASSES.CONTAINER_OVERFLOW_BORDER}`}>
         <div className={'container mx-auto px-4 py-20'}>
-          <div className={'text-center max-w-3xl mx-auto'}>
-            <div className={'flex justify-center mb-6'}>
-              <div className={'p-3 bg-accent/10 rounded-full'}>
+          <div className={'mx-auto max-w-3xl text-center'}>
+            <div className={'mb-6 flex justify-center'}>
+              <div className={'rounded-full bg-accent/10 p-3'}>
                 <MessageSquare className="h-8 w-8 text-primary" />
               </div>
             </div>
@@ -47,9 +47,9 @@ export default async function BoardPage() {
               Share your Claude discoveries, ask questions, and connect with the community
             </p>
 
-            <div className={'flex justify-center gap-2 mb-8'}>
+            <div className={'mb-8 flex justify-center gap-2'}>
               <UnifiedBadge variant="base" style="secondary">
-                <TrendingUp className="h-3 w-3 mr-1" />
+                <TrendingUp className="mr-1 h-3 w-3" />
                 Trending Discussions
               </UnifiedBadge>
               <UnifiedBadge variant="base" style="outline">
@@ -59,7 +59,7 @@ export default async function BoardPage() {
 
             <Button asChild>
               <Link href={ROUTES.BOARD_NEW}>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="mr-2 h-4 w-4" />
                 New Post
               </Link>
             </Button>

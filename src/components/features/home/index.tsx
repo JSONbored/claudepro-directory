@@ -160,7 +160,7 @@ function HomePageClientComponent({
     <>
       {/* Search Section */}
       <section className={'container mx-auto px-4 pt-8 pb-12'}>
-        <div className={'max-w-4xl mx-auto'}>
+        <div className={'mx-auto max-w-4xl'}>
           <UnifiedSearch
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
             onSearch={handleSearch}
@@ -179,7 +179,7 @@ function HomePageClientComponent({
             <>
               {/* Mobile Stats - Compact horizontal scroll carousel */}
               <motion.div
-                className="md:hidden mt-6 overflow-x-auto scrollbar-hide"
+                className="scrollbar-hide mt-6 overflow-x-auto md:hidden"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
@@ -191,12 +191,12 @@ function HomePageClientComponent({
                     return (
                       <Link key={categoryId} href={categoryRoute}>
                         <motion.div
-                          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border/40 bg-card/50 backdrop-blur-sm whitespace-nowrap min-w-fit"
+                          className="flex min-w-fit items-center gap-2 whitespace-nowrap rounded-lg border border-border/40 bg-card/50 px-4 py-2.5 backdrop-blur-sm"
                           whileTap={{ scale: 0.95 }}
                           transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                         >
-                          <Icon className="h-4 w-4 text-accent flex-shrink-0" aria-hidden="true" />
-                          <span className="text-sm font-medium">
+                          <Icon className="h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
+                          <span className="font-medium text-sm">
                             <NumberTicker value={stats[categoryId] || 0} delay={delay} />
                           </span>
                         </motion.div>
@@ -209,7 +209,7 @@ function HomePageClientComponent({
               {/* Desktop Stats - Full layout (unchanged) */}
               <div
                 className={
-                  'hidden md:flex flex-wrap justify-center gap-2 lg:gap-3 text-xs lg:text-sm text-muted-foreground mt-6'
+                  'mt-6 hidden flex-wrap justify-center gap-2 text-muted-foreground text-xs md:flex lg:gap-3 lg:text-sm'
                 }
               >
                 {categoryStatsConfig.map(({ categoryId, icon: Icon, displayText, delay }) => {
@@ -224,7 +224,7 @@ function HomePageClientComponent({
                       aria-label={`View all ${displayText}`}
                     >
                       <motion.div
-                        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} px-2 py-1 rounded-md border border-transparent transition-colors cursor-pointer`}
+                        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} cursor-pointer rounded-md border border-transparent px-2 py-1 transition-colors`}
                         whileHover={{
                           scale: 1.05,
                           y: -2,

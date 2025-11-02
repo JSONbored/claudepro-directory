@@ -34,7 +34,7 @@ const UnifiedNewsletterCapture = dynamic(
       default: mod.UnifiedNewsletterCapture,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
 
@@ -119,13 +119,13 @@ export default async function ChangelogPage() {
         {/* Structured Data - Blog Schema */}
         <ChangelogBlogStructuredData entries={entries} />
 
-        <div className="container max-w-6xl py-8 space-y-8">
+        <div className="container max-w-6xl space-y-8 py-8">
           {/* Header */}
           <div className="space-y-4">
             <Link
               href="/"
               className={
-                'inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors'
+                'inline-flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground'
               }
             >
               <ArrowLeft className="h-4 w-4" />
@@ -133,7 +133,7 @@ export default async function ChangelogPage() {
             </Link>
 
             <div className="space-y-2">
-              <h1 className="text-4xl font-bold tracking-tight">Changelog</h1>
+              <h1 className="font-bold text-4xl tracking-tight">Changelog</h1>
               <p className="text-lg text-muted-foreground">
                 Track all updates, new features, bug fixes, and improvements to Claude Pro
                 Directory.
@@ -141,7 +141,7 @@ export default async function ChangelogPage() {
             </div>
 
             {/* Stats */}
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6} text-sm text-muted-foreground`}>
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6} text-muted-foreground text-sm`}>
               <div>
                 <span className="font-semibold text-foreground">{entries.length}</span> total
                 updates
@@ -181,7 +181,7 @@ export default async function ChangelogPage() {
     return (
       <div className="container max-w-6xl py-8">
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight">Changelog</h1>
+          <h1 className="font-bold text-4xl tracking-tight">Changelog</h1>
           <p className="text-muted-foreground">
             Unable to load changelog entries. Please try again later.
           </p>

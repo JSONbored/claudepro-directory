@@ -98,7 +98,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
       <div className={'border-b px-4 py-4'}>
         <div className={'container mx-auto flex items-center justify-between'}>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <Link href="/" className="group-hover:text-accent transition-colors-smooth">
+            <Link href="/" className="transition-colors-smooth group-hover:text-accent">
               ← Back to Directory
             </Link>
           </div>
@@ -114,19 +114,19 @@ export default async function AccountLayout({ children }: { children: React.Reac
       </div>
 
       <div className={'container mx-auto px-4 py-8'}>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="md:col-span-1 h-fit p-4">
-            <div className={'flex items-center gap-3 mb-6 pb-4 border-b'}>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+          <Card className="h-fit p-4 md:col-span-1">
+            <div className={'mb-6 flex items-center gap-3 border-b pb-4'}>
               {profile?.image ? (
                 <Image
                   src={profile.image}
                   alt={`${profile.name || 'User'}'s avatar`}
                   width={48}
                   height={48}
-                  className="w-12 h-12 rounded-full object-cover"
+                  className="h-12 w-12 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent">
                   <User className="h-6 w-6" />
                 </div>
               )}
@@ -140,7 +140,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
               {navigation.map((item) => (
                 <Link key={item.name} href={item.href}>
                   <Button variant="ghost" className={'w-full justify-start text-sm'}>
-                    <item.icon className="h-4 w-4 mr-2" />
+                    <item.icon className="mr-2 h-4 w-4" />
                     {item.name}
                   </Button>
                 </Link>

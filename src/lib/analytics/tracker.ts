@@ -127,7 +127,7 @@ function buildDefaultConfig(eventName: string): EventConfig {
  */
 function getEventConfig(eventName: string): EventConfig {
   // Return cached config if available
-  if (_eventConfigCache && _eventConfigCache[eventName]) {
+  if (_eventConfigCache?.[eventName]) {
     return _eventConfigCache[eventName];
   }
 

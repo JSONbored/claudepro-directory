@@ -149,31 +149,31 @@ function UnifiedSidebarComponent({
         {/* Trending Section */}
         {(sidebarData.trending.length > 0 || isLoading) && (
           <Card className="border-muted/40 shadow-sm">
-            <CardHeader className="pb-2 pt-3 px-3">
-              <CardTitle className="text-xs font-medium flex items-center gap-1.5">
+            <CardHeader className="px-3 pt-3 pb-2">
+              <CardTitle className="flex items-center gap-1.5 font-medium text-xs">
                 <TrendingUp className="h-3 w-3 text-primary" />
                 <span>Trending Now</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="pb-3 px-3">
+            <CardContent className="px-3 pb-3">
               <div className="space-y-1.5">
                 {isLoading ? (
-                  <div className="text-xs text-muted-foreground">Loading trending guides...</div>
+                  <div className="text-muted-foreground text-xs">Loading trending guides...</div>
                 ) : (
                   sidebarData.trending.map((guide, index) => (
                     <Link
                       key={guide.slug}
                       href={guide.slug}
-                      className="group flex items-center justify-between text-xs hover:bg-muted/50 rounded px-1.5 py-1 transition-colors"
+                      className="group flex items-center justify-between rounded px-1.5 py-1 text-xs transition-colors hover:bg-muted/50"
                     >
-                      <span className="text-muted-foreground group-hover:text-foreground truncate flex-1">
-                        <span className="text-muted-foreground/60 mr-1.5">{index + 1}.</span>
+                      <span className="flex-1 truncate text-muted-foreground group-hover:text-foreground">
+                        <span className="mr-1.5 text-muted-foreground/60">{index + 1}.</span>
                         {guide.title}
                       </span>
                       <UnifiedBadge
                         variant="base"
                         style="secondary"
-                        className="text-2xs h-4 px-1 bg-muted/50"
+                        className="h-4 bg-muted/50 px-1 text-2xs"
                       >
                         {guide.views}
                       </UnifiedBadge>
@@ -196,12 +196,12 @@ function UnifiedSidebarComponent({
 
                 return (
                   <Card className="border-muted/40 shadow-sm">
-                    <CardHeader className={'pb-2 pt-3 px-3'}>
-                      <CardTitle className={'text-xs font-medium text-muted-foreground'}>
+                    <CardHeader className={'px-3 pt-3 pb-2'}>
+                      <CardTitle className={'font-medium text-muted-foreground text-xs'}>
                         On this page
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className={'pb-3 px-3'}>
+                    <CardContent className={'px-3 pb-3'}>
                       <nav className="space-y-0.5">
                         {headings.slice(0, 5).map((heading) => {
                           const title = heading.replace('## ', '');
@@ -211,7 +211,7 @@ function UnifiedSidebarComponent({
                               key={id}
                               href={`#${id}`}
                               className={
-                                'block text-3xs text-muted-foreground hover:text-primary transition-colors py-0.5 pl-3 border-l-2 border-transparent hover:border-primary/50 truncate'
+                                'block truncate border-transparent border-l-2 py-0.5 pl-3 text-3xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary'
                               }
                             >
                               {title}
@@ -219,7 +219,7 @@ function UnifiedSidebarComponent({
                           );
                         })}
                         {headings.length > 5 && (
-                          <span className="text-2xs text-muted-foreground/60 pl-3 italic">
+                          <span className="pl-3 text-2xs text-muted-foreground/60 italic">
                             +{headings.length - 5} more sections
                           </span>
                         )}
@@ -232,17 +232,17 @@ function UnifiedSidebarComponent({
             {/* Related Guides - Only on content pages */}
             {relatedGuides.length > 0 && (
               <Card className="border-muted/40 shadow-sm">
-                <CardHeader className={'pb-2 pt-3 px-3'}>
-                  <CardTitle className={'text-xs font-medium flex items-center gap-1.5'}>
+                <CardHeader className={'px-3 pt-3 pb-2'}>
+                  <CardTitle className={'flex items-center gap-1.5 font-medium text-xs'}>
                     <Sparkles className="h-3 w-3 text-yellow-500" />
                     <span>Related Guides</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pb-3 px-3">
+                <CardContent className="px-3 pb-3">
                   <div className="space-y-1">
                     {relatedGuides.slice(0, 3).map((guide) => (
-                      <Link key={guide.slug} href={guide.slug} className="block group">
-                        <div className="text-3xs text-muted-foreground group-hover:text-primary transition-colors py-0.5 truncate">
+                      <Link key={guide.slug} href={guide.slug} className="group block">
+                        <div className="truncate py-0.5 text-3xs text-muted-foreground transition-colors group-hover:text-primary">
                           {guide.title}
                         </div>
                       </Link>
@@ -250,7 +250,7 @@ function UnifiedSidebarComponent({
                     {relatedGuides.length > 3 && (
                       <Link
                         href={ROUTES.GUIDES}
-                        className="text-2xs text-primary hover:underline inline-flex items-center gap-0.5 mt-1"
+                        className="mt-1 inline-flex items-center gap-0.5 text-2xs text-primary hover:underline"
                       >
                         View all ({relatedGuides.length})
                       </Link>
@@ -265,17 +265,17 @@ function UnifiedSidebarComponent({
         {/* Recent Section */}
         {sidebarData.recent.length > 0 && (
           <Card className="border-muted/40 shadow-sm">
-            <CardHeader className="pb-2 pt-3 px-3">
-              <CardTitle className="text-xs font-medium flex items-center gap-1.5">
+            <CardHeader className="px-3 pt-3 pb-2">
+              <CardTitle className="flex items-center gap-1.5 font-medium text-xs">
                 <Clock className="h-3 w-3 text-muted-foreground" />
                 <span>Recent Guides</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="pb-3 px-3">
+            <CardContent className="px-3 pb-3">
               <div className="space-y-1.5">
                 {sidebarData.recent.map((guide) => (
                   <Link key={guide.slug} href={guide.slug} className="group">
-                    <div className="text-3xs text-muted-foreground group-hover:text-primary transition-colors py-0.5">
+                    <div className="py-0.5 text-3xs text-muted-foreground transition-colors group-hover:text-primary">
                       <div className="truncate">{guide.title}</div>
                       <div className="text-2xs text-muted-foreground/60">{guide.date}</div>
                     </div>
@@ -289,14 +289,14 @@ function UnifiedSidebarComponent({
         {/* Getting Started - Show when no data */}
         {!isLoading && sidebarData.trending.length === 0 && sidebarData.recent.length === 0 && (
           <Card className="border-muted/40 shadow-sm">
-            <CardHeader className="pb-2 pt-3 px-3">
-              <CardTitle className="text-xs font-medium flex items-center gap-1.5">
+            <CardHeader className="px-3 pt-3 pb-2">
+              <CardTitle className="flex items-center gap-1.5 font-medium text-xs">
                 <Sparkles className="h-3 w-3 text-yellow-500" />
                 <span>Getting Started</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="pb-3 px-3">
-              <div className="text-3xs text-muted-foreground space-y-1.5">
+            <CardContent className="px-3 pb-3">
+              <div className="space-y-1.5 text-3xs text-muted-foreground">
                 <p>New guides are being added regularly.</p>
                 <p>Check back soon for trending content and recent updates!</p>
               </div>
@@ -305,9 +305,9 @@ function UnifiedSidebarComponent({
         )}
 
         {/* Community Resources (Future) */}
-        <Card className="border-dashed border-muted/30 bg-muted/5">
+        <Card className="border-muted/30 border-dashed bg-muted/5">
           <CardContent className="p-3">
-            <div className="text-2xs text-muted-foreground/50 text-center">
+            <div className="text-center text-2xs text-muted-foreground/50">
               <div className="flex items-center justify-center gap-1.5">
                 <Users className="h-3 w-3" />
                 <span>Community Resources</span>
@@ -321,13 +321,13 @@ function UnifiedSidebarComponent({
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-2xs`}>
             <Link
               href={ROUTES.GUIDES}
-              className="text-muted-foreground hover:text-primary transition-colors"
+              className="text-muted-foreground transition-colors hover:text-primary"
             >
               ← All Guides
             </Link>
             <Link
               href={ROUTES.HOME}
-              className="text-muted-foreground hover:text-primary transition-colors"
+              className="text-muted-foreground transition-colors hover:text-primary"
             >
               Browse Directory →
             </Link>

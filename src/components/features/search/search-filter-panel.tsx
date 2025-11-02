@@ -63,10 +63,10 @@ function SearchFilterPanelComponent({
 
   return (
     <section
-      className={'bg-card/30 border border-border/50 rounded-lg p-4 md:p-6 space-y-4 md:space-y-6'}
+      className={'space-y-4 rounded-lg border border-border/50 bg-card/30 p-4 md:space-y-6 md:p-6'}
     >
       {/* Main Filters */}
-      <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
         <legend className="sr-only">Filter by category, author, and date range</legend>
 
         {/* Category Filter */}
@@ -158,7 +158,7 @@ function SearchFilterPanelComponent({
 
       {/* Popularity Slider */}
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <legend className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           Popularity Range ({filters.popularity?.[0] || 0} - {filters.popularity?.[1] || 100})
         </legend>
         <div className="px-2 py-4">
@@ -179,10 +179,10 @@ function SearchFilterPanelComponent({
       {/* Tags - Organized in Scrollable Area */}
       {availableTags.length > 0 && (
         <fieldset className="space-y-3">
-          <div className={'border-t border-border/50 pt-3'} />
+          <div className={'border-border/50 border-t pt-3'} />
           <div>
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-3`}>
-              <legend className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              <legend className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Tags
               </legend>
               {filters.tags && filters.tags.length > 0 && (
@@ -197,7 +197,7 @@ function SearchFilterPanelComponent({
               )}
             </div>
             <ScrollArea
-              className={'h-40 md:h-48 w-full rounded-md border border-border/50 p-4'}
+              className={'h-40 w-full rounded-md border border-border/50 p-4 md:h-48'}
               aria-label="Select tags to filter by"
             >
               <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
@@ -233,7 +233,7 @@ function SearchFilterPanelComponent({
 
       {/* Action Buttons */}
       {showActions && (
-        <fieldset className={'flex justify-between items-center border-t border-border/50 pt-6'}>
+        <fieldset className={'flex items-center justify-between border-border/50 border-t pt-6'}>
           <legend className="sr-only">Filter actions</legend>
           <Button
             variant="ghost"

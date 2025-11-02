@@ -45,10 +45,10 @@ export function ErrorTable(props: ErrorTableProps) {
           <table className="w-full">
             <thead className="border-b bg-muted/30">
               <tr>
-                <th className={'text-left p-4 font-medium'}>Error Code</th>
-                <th className={'text-left p-4 font-medium'}>Severity</th>
-                <th className={'text-left p-4 font-medium'}>Message</th>
-                <th className={'text-left p-4 font-medium'}>Solution</th>
+                <th className={'p-4 text-left font-medium'}>Error Code</th>
+                <th className={'p-4 text-left font-medium'}>Severity</th>
+                <th className={'p-4 text-left font-medium'}>Message</th>
+                <th className={'p-4 text-left font-medium'}>Solution</th>
               </tr>
             </thead>
             <tbody>
@@ -71,7 +71,7 @@ export function ErrorTable(props: ErrorTableProps) {
                     </UnifiedBadge>
                   </td>
                   <td className={'p-4 text-sm'}>{error.message}</td>
-                  <td className={'p-4 text-sm text-muted-foreground'}>{error.solution}</td>
+                  <td className={'p-4 text-muted-foreground text-sm'}>{error.solution}</td>
                 </tr>
               ))}
             </tbody>

@@ -95,18 +95,18 @@ function ContentSearchClientComponent<T extends ContentItem>({
           />
         </ErrorBoundary>
       ) : (
-        <output className={'text-center py-12 block'}>
+        <output className={'block py-12 text-center'}>
           {(() => {
             const IconComponent = ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
             return (
               <IconComponent
-                className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50"
+                className="mx-auto mb-4 h-16 w-16 text-muted-foreground/50"
                 aria-hidden="true"
               />
             );
           })()}
-          <h2 className="text-lg font-semibold mb-2">No {title.toLowerCase()} found</h2>
-          <p className="text-muted-foreground mb-6">
+          <h2 className="mb-2 font-semibold text-lg">No {title.toLowerCase()} found</h2>
+          <p className="mb-6 text-muted-foreground">
             Try adjusting your search criteria or filters.
           </p>
         </output>

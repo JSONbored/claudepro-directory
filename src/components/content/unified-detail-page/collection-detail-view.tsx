@@ -134,7 +134,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
       {prerequisites && prerequisites.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-xl">
               <AlertTriangle className="h-5 w-5 text-yellow-500" aria-hidden="true" />
               Prerequisites
             </CardTitle>
@@ -147,7 +147,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                     className={`h-4 w-4 text-muted-foreground ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
                     aria-hidden="true"
                   />
-                  <span className="text-sm text-muted-foreground">{prereq}</span>
+                  <span className="text-muted-foreground text-sm">{prereq}</span>
                 </li>
               ))}
             </ul>
@@ -157,7 +157,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
 
       {/* What's Included Section - Embedded ConfigCards */}
       <div>
-        <h2 className="text-2xl font-bold text-foreground mb-6">
+        <h2 className="mb-6 font-bold text-2xl text-foreground">
           What's Included ({validItems.length} {validItems.length === 1 ? 'item' : 'items'})
         </h2>
 
@@ -174,7 +174,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
             {(Object.entries(itemsByCategory) as [string, ItemWithData[]][]).map(
               ([category, items]) => (
                 <div key={category}>
-                  <h3 className="text-lg font-semibold text-foreground mb-4">
+                  <h3 className="mb-4 font-semibold text-foreground text-lg">
                     {categoryConfigs[category as keyof typeof categoryConfigs]?.pluralTitle ||
                       category}{' '}
                     ({items.length})
@@ -212,13 +212,13 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                   <li key={slug} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                     <span
                       className={
-                        'flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-sm font-semibold'
+                        'flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary text-sm'
                       }
                       aria-hidden="true"
                     >
                       {index + 1}
                     </span>
-                    <span className="text-sm text-foreground mt-0.5">
+                    <span className="mt-0.5 text-foreground text-sm">
                       {item?.data?.title || slug}
                     </span>
                   </li>
@@ -243,7 +243,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                 ) : (
                   <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
                 )}
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   Claude Desktop {compatibility.claudeDesktop ? '(Supported)' : '(Not Supported)'}
                 </span>
               </div>
@@ -253,7 +253,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                 ) : (
                   <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
                 )}
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   Claude Code {compatibility.claudeCode ? '(Supported)' : '(Not Supported)'}
                 </span>
               </div>

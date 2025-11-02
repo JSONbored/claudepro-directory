@@ -32,7 +32,7 @@ const UnifiedNewsletterCapture = dynamicImport(
       (mod) => mod.UnifiedNewsletterCapture
     ),
   {
-    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
 
@@ -181,10 +181,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <div className={'min-h-screen bg-background'}>
       <div className="relative overflow-hidden">
-        <section className={'relative border-b border-border/50'} aria-label="Homepage hero">
-          <div className={'relative container mx-auto px-4 py-10 sm:py-16 lg:py-24'}>
-            <div className={'text-center max-w-4xl mx-auto'}>
-              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 text-foreground tracking-tight">
+        <section className={'relative border-border/50 border-b'} aria-label="Homepage hero">
+          <div className={'container relative mx-auto px-4 py-10 sm:py-16 lg:py-24'}>
+            <div className={'mx-auto max-w-4xl text-center'}>
+              <h1 className="mb-4 font-bold text-4xl text-foreground tracking-tight sm:mb-6 sm:text-5xl lg:text-7xl">
                 The home for Claude{' '}
                 <RollingText
                   words={['enthusiasts', 'developers', 'power users', 'beginners', 'builders']}
@@ -195,7 +195,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
               <p
                 className={
-                  'text-sm sm:text-base lg:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed'
+                  'mx-auto max-w-3xl text-muted-foreground text-sm leading-relaxed sm:text-base lg:text-lg'
                 }
               >
                 Join{' '}

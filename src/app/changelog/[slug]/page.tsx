@@ -123,12 +123,12 @@ export default async function ChangelogEntryPage({
           ]}
         />
 
-        <article className="container max-w-4xl py-8 space-y-8">
+        <article className="container max-w-4xl space-y-8 py-8">
           {/* Navigation */}
           <Link
             href={ROUTES.CHANGELOG}
             className={
-              'inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors'
+              'inline-flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground'
             }
           >
             <ArrowLeft className="h-4 w-4" />
@@ -137,21 +137,21 @@ export default async function ChangelogEntryPage({
 
           {/* Header */}
           <header className="space-y-4 pb-6">
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-sm text-muted-foreground`}>
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-muted-foreground text-sm`}>
               <Calendar className="h-4 w-4" />
               <time dateTime={entry.release_date ?? undefined}>
                 {formatChangelogDate(entry.release_date)}
               </time>
             </div>
 
-            <h1 className="text-4xl font-bold tracking-tight">{entry.title}</h1>
+            <h1 className="font-bold text-4xl tracking-tight">{entry.title}</h1>
 
             {/* Canonical URL */}
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
               <span className="text-muted-foreground">Permanent link:</span>
               <a
                 href={canonicalUrl}
-                className="text-primary hover:text-primary/80 transition-colors truncate"
+                className="truncate text-primary transition-colors hover:text-primary/80"
               >
                 {canonicalUrl}
               </a>
@@ -178,13 +178,13 @@ export default async function ChangelogEntryPage({
           <Link
             href={ROUTES.CHANGELOG}
             className={
-              'inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors'
+              'inline-flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground'
             }
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Changelog</span>
           </Link>
-          <h1 className="text-4xl font-bold tracking-tight">Error Loading Entry</h1>
+          <h1 className="font-bold text-4xl tracking-tight">Error Loading Entry</h1>
           <p className="text-muted-foreground">
             Unable to load this changelog entry. Please try again later.
           </p>

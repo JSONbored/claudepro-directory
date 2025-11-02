@@ -88,7 +88,7 @@ export function GalleryMasonryGrid({
   return (
     <div className="w-full">
       {/* Masonry Grid - CSS Grid with auto-flow dense */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-max">
+      <div className="grid auto-rows-max grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {items.map((item, index) => (
           <GalleryCard key={`${item.category}-${item.slug}-${index}`} {...item} />
         ))}
@@ -102,8 +102,8 @@ export function GalleryMasonryGrid({
           className="flex items-center justify-center py-12"
         >
           <div className="flex items-center gap-3 text-muted-foreground">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span className="text-sm font-medium">Loading more...</span>
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span className="font-medium text-sm">Loading more...</span>
           </div>
         </motion.div>
       )}
@@ -118,7 +118,7 @@ export function GalleryMasonryGrid({
           animate={{ opacity: 1 }}
           className="flex items-center justify-center py-12"
         >
-          <p className="text-sm text-muted-foreground">You've reached the end of the gallery</p>
+          <p className="text-muted-foreground text-sm">You've reached the end of the gallery</p>
         </motion.div>
       )}
 
@@ -129,11 +129,11 @@ export function GalleryMasonryGrid({
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col items-center justify-center py-24 text-center"
         >
-          <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center mb-4">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/5">
             <span className="text-3xl">📸</span>
           </div>
-          <h3 className="text-lg font-semibold mb-2">No screenshots yet</h3>
-          <p className="text-sm text-muted-foreground max-w-md">
+          <h3 className="mb-2 font-semibold text-lg">No screenshots yet</h3>
+          <p className="max-w-md text-muted-foreground text-sm">
             Be the first to create and share code screenshots from this category
           </p>
         </motion.div>

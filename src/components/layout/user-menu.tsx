@@ -159,7 +159,7 @@ export function UserMenu({ className }: UserMenuProps) {
             >
               <Avatar className="h-8 w-8">
                 {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName || 'User avatar'} />}
-                <AvatarFallback className="bg-accent/20 text-accent font-semibold text-sm">
+                <AvatarFallback className="bg-accent/20 font-semibold text-accent text-sm">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -171,8 +171,8 @@ export function UserMenu({ className }: UserMenuProps) {
           {/* User Info */}
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col">
-              <p className="text-sm font-medium leading-none">{displayName}</p>
-              <p className="text-xs leading-none text-muted-foreground mt-1">{user.email}</p>
+              <p className="font-medium text-sm leading-none">{displayName}</p>
+              <p className="mt-1 text-muted-foreground text-xs leading-none">{user.email}</p>
             </div>
           </DropdownMenuLabel>
 

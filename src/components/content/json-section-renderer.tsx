@@ -68,11 +68,11 @@ function render_section(section: any, index: number): React.ReactNode {
     case 'code_group':
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title && <h3 className="text-lg font-semibold mb-4">{section.title}</h3>}
-          <div className="border rounded-lg overflow-hidden">
+          {section.title && <h3 className="mb-4 font-semibold text-lg">{section.title}</h3>}
+          <div className="overflow-hidden rounded-lg border">
             {section.tabs.map((tab: any, idx: number) => (
               <details key={`${tab.label}-${idx}`} className="border-b last:border-0">
-                <summary className="px-4 py-3 cursor-pointer hover:bg-muted/50 font-medium">
+                <summary className="cursor-pointer px-4 py-3 font-medium hover:bg-muted/50">
                   {tab.label} {tab.filename && `• ${tab.filename}`}
                 </summary>
                 <div className="p-4">
@@ -204,14 +204,14 @@ function render_section(section: any, index: number): React.ReactNode {
     case 'tabs':
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title && <h3 className="text-lg font-semibold mb-4">{section.title}</h3>}
+          {section.title && <h3 className="mb-4 font-semibold text-lg">{section.title}</h3>}
           {section.description && (
-            <p className="text-muted-foreground mb-4">{section.description}</p>
+            <p className="mb-4 text-muted-foreground">{section.description}</p>
           )}
-          <div className="border rounded-lg overflow-hidden">
+          <div className="overflow-hidden rounded-lg border">
             {section.items.map((item: any, idx: number) => (
               <details key={`${item.value}-${idx}`} className="border-b last:border-0">
-                <summary className="px-4 py-3 cursor-pointer hover:bg-muted/50 font-medium">
+                <summary className="cursor-pointer px-4 py-3 font-medium hover:bg-muted/50">
                   {item.label}
                 </summary>
                 <TrustedHTML html={item.content} className="p-4" />
@@ -260,16 +260,16 @@ function render_section(section: any, index: number): React.ReactNode {
     case 'steps':
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title && <h3 className="text-lg font-semibold mb-4">{section.title}</h3>}
+          {section.title && <h3 className="mb-4 font-semibold text-lg">{section.title}</h3>}
           <div className="space-y-6">
             {section.steps.map((step: any) => (
-              <div key={step.number} className="border-l-4 border-primary pl-6">
-                <h4 className="text-lg font-semibold mb-2">
+              <div key={step.number} className="border-primary border-l-4 pl-6">
+                <h4 className="mb-2 font-semibold text-lg">
                   Step {step.number}: {step.title}
                 </h4>
-                <p className="text-muted-foreground mb-4">{step.description}</p>
+                <p className="mb-4 text-muted-foreground">{step.description}</p>
                 {step.timeEstimate && (
-                  <p className="text-sm text-muted-foreground mb-2">⏱️ {step.timeEstimate}</p>
+                  <p className="mb-2 text-muted-foreground text-sm">⏱️ {step.timeEstimate}</p>
                 )}
                 {step.code && (
                   <ProductionCodeBlock
@@ -279,7 +279,7 @@ function render_section(section: any, index: number): React.ReactNode {
                   />
                 )}
                 {step.notes && (
-                  <p className="text-sm text-muted-foreground mt-2 italic">{step.notes}</p>
+                  <p className="mt-2 text-muted-foreground text-sm italic">{step.notes}</p>
                 )}
               </div>
             ))}
@@ -309,9 +309,9 @@ function render_section(section: any, index: number): React.ReactNode {
     case 'related_content':
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title && <h3 className="text-lg font-semibold mb-4">{section.title}</h3>}
+          {section.title && <h3 className="mb-4 font-semibold text-lg">{section.title}</h3>}
           {section.description && (
-            <p className="text-muted-foreground mb-4">{section.description}</p>
+            <p className="mb-4 text-muted-foreground">{section.description}</p>
           )}
           {section.resources && section.resources.length > 0 && (
             <div className="grid gap-4">
@@ -321,11 +321,11 @@ function render_section(section: any, index: number): React.ReactNode {
                   href={r.url}
                   target={r.external ? '_blank' : undefined}
                   rel={r.external ? 'noopener noreferrer' : undefined}
-                  className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                  className="rounded-lg border p-4 transition-colors hover:bg-muted/50"
                 >
-                  <h4 className="font-semibold mb-1">{r.title}</h4>
-                  <p className="text-sm text-muted-foreground mb-2">{r.description}</p>
-                  <span className="text-xs text-primary uppercase">{r.type}</span>
+                  <h4 className="mb-1 font-semibold">{r.title}</h4>
+                  <p className="mb-2 text-muted-foreground text-sm">{r.description}</p>
+                  <span className="text-primary text-xs uppercase">{r.type}</span>
                 </a>
               ))}
             </div>

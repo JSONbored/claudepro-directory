@@ -11,7 +11,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export default function ChangelogEntryLoading() {
   return (
-    <article className="container max-w-4xl py-8 space-y-8">
+    <article className="container max-w-4xl space-y-8 py-8">
       {/* Back Navigation Skeleton */}
       <Skeleton size="sm" width="xs" />
 

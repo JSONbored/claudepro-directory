@@ -219,7 +219,7 @@ export function createDownloadAction(
 export function createGitHubLinkAction(
   pathTemplate: string,
   label = 'View on GitHub',
-  icon: ReactNode = <Webhook className={'h-4 w-4 mr-2'} />
+  icon: ReactNode = <Webhook className={'mr-2 h-4 w-4'} />
 ): ActionButtonConfig {
   return {
     label,
@@ -246,7 +246,7 @@ export const commonActions = {
   copyCommand: () =>
     createCopyAction(
       'Copy Command',
-      <Terminal className={'h-4 w-4 mr-2'} />,
+      <Terminal className={'mr-2 h-4 w-4'} />,
       (item) => ('content' in item && typeof item.content === 'string' ? item.content : ''),
       'Copied!',
       'Command content has been copied to your clipboard.'
@@ -258,7 +258,7 @@ export const commonActions = {
   copyScript: () =>
     createCopyAction(
       'Copy Script',
-      <Terminal className={'h-4 w-4 mr-2'} />,
+      <Terminal className={'mr-2 h-4 w-4'} />,
       (item) =>
         'configuration' in item &&
         typeof item.configuration === 'object' &&
@@ -277,7 +277,7 @@ export const commonActions = {
   viewConfiguration: () =>
     createScrollAction(
       'View Configuration',
-      <Server className={'h-4 w-4 mr-2'} />,
+      <Server className={'mr-2 h-4 w-4'} />,
       'configuration'
     ),
 
@@ -285,7 +285,7 @@ export const commonActions = {
    * View collection action (for collections category)
    */
   viewCollection: () =>
-    createScrollAction('View Collection', <Layers className={'h-4 w-4 mr-2'} />, 'items'),
+    createScrollAction('View Collection', <Layers className={'mr-2 h-4 w-4'} />, 'items'),
 
   /**
    * Download skill ZIP package (for skills category)
@@ -294,7 +294,7 @@ export const commonActions = {
   applySkill: () =>
     createDownloadAction(
       'Download Skill',
-      <Download className={'h-4 w-4 mr-2'} />,
+      <Download className={'mr-2 h-4 w-4'} />,
       '/downloads/skills/{slug}.zip'
     ),
 
@@ -305,6 +305,6 @@ export const commonActions = {
     createGitHubLinkAction(
       `${SOCIAL_LINKS.github}/blob/main/content/hooks/{slug}.json`,
       'View on GitHub',
-      <Webhook className={'h-4 w-4 mr-2'} />
+      <Webhook className={'mr-2 h-4 w-4'} />
     ),
 } as const;

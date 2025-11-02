@@ -94,18 +94,18 @@ const commonQuestions = [
 
 export default function HelpPage() {
   return (
-    <div className="container mx-auto px-4 py-8 sm:py-12 max-w-6xl">
-      <div className="text-center mb-12">
-        <h1 className="text-3xl sm:text-4xl font-bold mb-4">Help Center</h1>
-        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+    <div className="container mx-auto max-w-6xl px-4 py-8 sm:py-12">
+      <div className="mb-12 text-center">
+        <h1 className="mb-4 font-bold text-3xl sm:text-4xl">Help Center</h1>
+        <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
           Find answers, guides, and resources to get the most out of {APP_CONFIG.name}
         </p>
       </div>
 
       {/* Help Topics Grid */}
       <section className="mb-16">
-        <h2 className="text-2xl font-semibold mb-6">Browse by Topic</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <h2 className="mb-6 font-semibold text-2xl">Browse by Topic</h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {helpTopics.map((topic) => (
             <Card key={topic.title}>
               <CardHeader>
@@ -115,13 +115,13 @@ export default function HelpPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">{topic.description}</p>
+                <p className="mb-4 text-muted-foreground text-sm">{topic.description}</p>
                 <ul className="space-y-2">
                   {topic.links.map((link) => (
                     <li key={link.label}>
                       <Link
                         href={link.href}
-                        className="text-sm text-accent hover:underline flex items-center gap-1"
+                        className="flex items-center gap-1 text-accent text-sm hover:underline"
                       >
                         {link.label} →
                       </Link>
@@ -136,22 +136,22 @@ export default function HelpPage() {
 
       {/* Common Questions */}
       <section className="mb-16">
-        <h2 className="text-2xl font-semibold mb-6">Common Questions</h2>
+        <h2 className="mb-6 font-semibold text-2xl">Common Questions</h2>
         <div className="space-y-6">
           {commonQuestions.map((item) => (
             <Card key={item.question}>
               <CardHeader>
-                <CardTitle className="text-lg flex items-start gap-2">
-                  <HelpCircle className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
+                <CardTitle className="flex items-start gap-2 text-lg">
+                  <HelpCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent" />
                   {item.question}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-3">{item.answer}</p>
+                <p className="mb-3 text-muted-foreground">{item.answer}</p>
                 {item.link && (
                   <Link
                     href={item.link.href}
-                    className="text-accent hover:underline inline-flex items-center gap-1"
+                    className="inline-flex items-center gap-1 text-accent hover:underline"
                   >
                     {item.link.label} →
                   </Link>
@@ -164,40 +164,40 @@ export default function HelpPage() {
 
       {/* Quick Actions */}
       <section className="mb-8">
-        <h2 className="text-2xl font-semibold mb-6">Quick Actions</h2>
-        <div className="grid md:grid-cols-3 gap-4">
+        <h2 className="mb-6 font-semibold text-2xl">Quick Actions</h2>
+        <div className="grid gap-4 md:grid-cols-3">
           <Link href="/search" className="block">
-            <Card className="hover:bg-accent/5 transition-colors cursor-pointer h-full">
+            <Card className="h-full cursor-pointer transition-colors hover:bg-accent/5">
               <CardContent className="pt-6">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="mb-2 flex items-center gap-3">
                   <Search className="h-6 w-6 text-accent" />
                   <h3 className="font-semibold">Search</h3>
                 </div>
-                <p className="text-sm text-muted-foreground">Find configurations and resources</p>
+                <p className="text-muted-foreground text-sm">Find configurations and resources</p>
               </CardContent>
             </Card>
           </Link>
 
           <Link href="/guides" className="block">
-            <Card className="hover:bg-accent/5 transition-colors cursor-pointer h-full">
+            <Card className="h-full cursor-pointer transition-colors hover:bg-accent/5">
               <CardContent className="pt-6">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="mb-2 flex items-center gap-3">
                   <BookOpen className="h-6 w-6 text-accent" />
                   <h3 className="font-semibold">Guides</h3>
                 </div>
-                <p className="text-sm text-muted-foreground">Browse tutorials and how-tos</p>
+                <p className="text-muted-foreground text-sm">Browse tutorials and how-tos</p>
               </CardContent>
             </Card>
           </Link>
 
           <Link href="/contact" className="block">
-            <Card className="hover:bg-accent/5 transition-colors cursor-pointer h-full">
+            <Card className="h-full cursor-pointer transition-colors hover:bg-accent/5">
               <CardContent className="pt-6">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="mb-2 flex items-center gap-3">
                   <MessageSquare className="h-6 w-6 text-accent" />
                   <h3 className="font-semibold">Contact Support</h3>
                 </div>
-                <p className="text-sm text-muted-foreground">Get help from our team</p>
+                <p className="text-muted-foreground text-sm">Get help from our team</p>
               </CardContent>
             </Card>
           </Link>
@@ -205,22 +205,22 @@ export default function HelpPage() {
       </section>
 
       {/* Still Need Help */}
-      <Card className="bg-accent/5 border-accent/20">
+      <Card className="border-accent/20 bg-accent/5">
         <CardContent className="pt-6">
           <div className="text-center">
-            <h2 className="text-xl font-semibold mb-2">Still need help?</h2>
-            <p className="text-muted-foreground mb-4">Our community is here to assist you</p>
+            <h2 className="mb-2 font-semibold text-xl">Still need help?</h2>
+            <p className="mb-4 text-muted-foreground">Our community is here to assist you</p>
             <div className="flex justify-center gap-4">
               <Link
                 href="/contact"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-accent-foreground transition-colors hover:bg-accent/90"
               >
                 <MessageSquare className="h-4 w-4" />
                 Contact Us
               </Link>
               <Link
                 href="/community"
-                className="inline-flex items-center gap-2 px-4 py-2 border border-accent/20 rounded-lg hover:bg-accent/10 transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg border border-accent/20 px-4 py-2 transition-colors hover:bg-accent/10"
               >
                 Join Community
               </Link>

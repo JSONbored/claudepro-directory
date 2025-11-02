@@ -50,8 +50,8 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-8">
       {/* Tabs with horizontal scroll on mobile/tablet */}
-      <TabsList className="w-full overflow-x-auto lg:w-auto lg:grid lg:grid-flow-col lg:auto-cols-fr gap-1 scrollbar-hide">
-        <div className="flex lg:contents min-w-max lg:min-w-0">
+      <TabsList className="scrollbar-hide w-full gap-1 overflow-x-auto lg:grid lg:w-auto lg:auto-cols-fr lg:grid-flow-col">
+        <div className="flex min-w-max lg:contents lg:min-w-0">
           {HOMEPAGE_TAB_CATEGORIES.map((tab) => {
             let displayName = tab.charAt(0).toUpperCase() + tab.slice(1);
 
@@ -70,7 +70,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
               >
                 <TabsTrigger
                   value={tab}
-                  className="text-xs sm:text-sm px-3 sm:px-4 whitespace-nowrap"
+                  className="whitespace-nowrap px-3 text-xs sm:px-4 sm:text-sm"
                 >
                   {displayName}
                 </TabsTrigger>
@@ -107,20 +107,20 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
 
       {/* Community tab with custom content */}
       <TabsContent value="community" className="space-y-6">
-        <div className={'text-center mb-8'}>
-          <h3 className={'text-2xl font-bold mb-2'}>Featured Contributors</h3>
+        <div className={'mb-8 text-center'}>
+          <h3 className={'mb-2 font-bold text-2xl'}>Featured Contributors</h3>
           <p className="text-muted-foreground">
             Meet the experts creating amazing Claude configurations
           </p>
         </div>
 
         <div className="text-center">
-          <p className={'text-lg text-muted-foreground mb-6'}>
+          <p className={'mb-6 text-lg text-muted-foreground'}>
             Coming soon! Featured contributors who create amazing Claude configurations.
           </p>
         </div>
 
-        <div className={'text-center pt-8'}>
+        <div className={'pt-8 text-center'}>
           <Button variant="outline" asChild>
             <Link href={ROUTES.COMMUNITY}>View All Contributors</Link>
           </Button>

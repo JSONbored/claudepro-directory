@@ -58,19 +58,19 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
       <div>
         <Button variant="ghost" size="sm" asChild className="mb-4">
           <Link href={ROUTES.ACCOUNT_JOBS}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Jobs
           </Link>
         </Button>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
           <div>
-            <h1 className="text-3xl font-bold mb-2">Job Analytics</h1>
+            <h1 className="mb-2 font-bold text-3xl">Job Analytics</h1>
             <p className="text-muted-foreground">{job.title}</p>
           </div>
           {job.slug && (
             <Button variant="outline" asChild>
               <Link href={`/jobs/${job.slug}`}>
-                <ExternalLink className="h-4 w-4 mr-2" />
+                <ExternalLink className="mr-2 h-4 w-4" />
                 View Listing
               </Link>
             </Button>
@@ -128,12 +128,12 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Views</CardTitle>
+            <CardTitle className="font-medium text-sm">Total Views</CardTitle>
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{viewCount.toLocaleString()}</div>
-            <p className={'text-xs text-muted-foreground'}>
+            <div className="font-bold text-2xl">{viewCount.toLocaleString()}</div>
+            <p className={'text-muted-foreground text-xs'}>
               Since {job.posted_at ? formatRelativeDate(job.posted_at) : 'creation'}
             </p>
           </CardContent>
@@ -141,23 +141,23 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Clicks</CardTitle>
+            <CardTitle className="font-medium text-sm">Clicks</CardTitle>
             <ExternalLink className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{clickCount.toLocaleString()}</div>
-            <p className={'text-xs text-muted-foreground'}>Applications started</p>
+            <div className="font-bold text-2xl">{clickCount.toLocaleString()}</div>
+            <p className={'text-muted-foreground text-xs'}>Applications started</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Click-Through Rate</CardTitle>
+            <CardTitle className="font-medium text-sm">Click-Through Rate</CardTitle>
             <BarChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{ctr}%</div>
-            <p className={'text-xs text-muted-foreground'}>Of viewers clicked apply</p>
+            <div className="font-bold text-2xl">{ctr}%</div>
+            <p className={'text-muted-foreground text-xs'}>Of viewers clicked apply</p>
           </CardContent>
         </Card>
       </div>
@@ -169,7 +169,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
         <CardContent>
           <div className="space-y-4">
             {viewCount === 0 && (
-              <div className="p-4 bg-muted/50 rounded-lg">
+              <div className="rounded-lg bg-muted/50 p-4">
                 <p className="text-sm">
                   Your job listing hasn't received any views yet. Try sharing it on social media or
                   updating the description to make it more discoverable.
@@ -178,11 +178,11 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             )}
 
             {viewCount > 0 && clickCount === 0 && (
-              <div className="p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+              <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-4">
                 <p className="text-sm text-yellow-400">
                   Your listing is getting views but no clicks. Consider:
                 </p>
-                <ul className="text-sm text-yellow-400 mt-2 ml-4 list-disc">
+                <ul className="mt-2 ml-4 list-disc text-sm text-yellow-400">
                   <li>Making the job title more descriptive</li>
                   <li>Highlighting competitive benefits</li>
                   <li>Adding salary information</li>
@@ -191,16 +191,16 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             )}
 
             {Number.parseFloat(ctr) > 5 && (
-              <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
-                <p className="text-sm text-green-400">
+              <div className="rounded-lg border border-green-500/20 bg-green-500/10 p-4">
+                <p className="text-green-400 text-sm">
                   Great performance! Your CTR of {ctr}% is above average. Keep it up!
                 </p>
               </div>
             )}
 
-            <div className="text-sm text-muted-foreground">
-              <p className="font-medium mb-2">Tips to improve visibility:</p>
-              <ul className="ml-4 space-y-1 list-disc">
+            <div className="text-muted-foreground text-sm">
+              <p className="mb-2 font-medium">Tips to improve visibility:</p>
+              <ul className="ml-4 list-disc space-y-1">
                 <li>Use clear, descriptive job titles</li>
                 <li>Include relevant technologies in tags</li>
                 <li>Specify remote/hybrid work options</li>

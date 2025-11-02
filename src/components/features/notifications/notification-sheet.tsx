@@ -42,7 +42,7 @@ export function NotificationSheet() {
               : 'No new notifications'}
           </SheetDescription>
         </SheetHeader>
-        <div className="mt-6 overflow-y-auto max-h-[calc(80vh-8rem)]">
+        <div className="mt-6 max-h-[calc(80vh-8rem)] overflow-y-auto">
           <NotificationList />
         </div>
       </SheetContent>

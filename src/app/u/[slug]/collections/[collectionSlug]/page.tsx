@@ -143,7 +143,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           <div>
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-2`}>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <h1 className="text-3xl font-bold">{collection.name}</h1>
+                <h1 className="font-bold text-3xl">{collection.name}</h1>
                 <UnifiedBadge variant="base" style="outline">
                   Public
                 </UnifiedBadge>
@@ -158,10 +158,10 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
             </div>
 
             {collection.description && (
-              <p className={'text-muted-foreground max-w-3xl'}>{collection.description}</p>
+              <p className={'max-w-3xl text-muted-foreground'}>{collection.description}</p>
             )}
 
-            <div className={'text-sm text-muted-foreground mt-2'}>
+            <div className={'mt-2 text-muted-foreground text-sm'}>
               Created by{' '}
               <Link href={`/u/${slug}`} className="text-primary hover:underline">
                 {profileUser.name || slug}
@@ -173,7 +173,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
           {/* Collection Items */}
           <div>
-            <h2 className="text-xl font-semibold mb-4">Items in this Collection</h2>
+            <h2 className="mb-4 font-semibold text-xl">Items in this Collection</h2>
 
             {!items || items.length === 0 ? (
               <Card>
@@ -187,7 +187,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                   <Card key={item.id}>
                     <CardHeader>
                       <div className="flex items-start gap-4">
-                        <div className="text-2xl font-bold text-muted-foreground/50 w-8">
+                        <div className="w-8 font-bold text-2xl text-muted-foreground/50">
                           {index + 1}
                         </div>
                         <div className="flex-1">
@@ -228,26 +228,26 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           <div className="grid gap-4 sm:grid-cols-3">
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Total Items</CardTitle>
+                <CardTitle className="font-medium text-sm">Total Items</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{collection.item_count}</div>
+                <div className="font-bold text-2xl">{collection.item_count}</div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Views</CardTitle>
+                <CardTitle className="font-medium text-sm">Views</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{collection.view_count}</div>
+                <div className="font-bold text-2xl">{collection.view_count}</div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Created</CardTitle>
+                <CardTitle className="font-medium text-sm">Created</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-base font-medium">
+                <div className="font-medium text-base">
                   {new Date(collection.created_at).toLocaleDateString('en-US', {
                     month: 'long',
                     day: 'numeric',

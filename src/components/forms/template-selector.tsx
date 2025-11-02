@@ -63,10 +63,10 @@ export function TemplateSelector({ contentType, onSelect }: TemplateSelectorProp
           <DropdownMenuItem
             key={template.id}
             onClick={() => onSelect(template)}
-            className="flex-col items-start py-3 cursor-pointer"
+            className="cursor-pointer flex-col items-start py-3"
           >
             <div className="font-medium">{template.name}</div>
-            <div className={'text-xs text-muted-foreground mt-0.5'}>{template.description}</div>
+            <div className={'mt-0.5 text-muted-foreground text-xs'}>{template.description}</div>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

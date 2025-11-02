@@ -314,7 +314,7 @@ function AuthSignOutButton({
       variant={buttonVariant}
       className={className}
     >
-      <LogOut className="h-4 w-4 mr-2" />
+      <LogOut className="mr-2 h-4 w-4" />
       {loading ? 'Signing out...' : 'Sign out'}
     </Button>
   );
@@ -882,12 +882,12 @@ function JobToggleButton({
     >
       {currentStatus === 'active' ? (
         <>
-          <Pause className="h-3 w-3 mr-1" />
+          <Pause className="mr-1 h-3 w-3" />
           Pause
         </>
       ) : (
         <>
-          <Play className="h-3 w-3 mr-1" />
+          <Play className="mr-1 h-3 w-3" />
           Resume
         </>
       )}
@@ -943,7 +943,7 @@ function JobDeleteButton({
       disabled={disabled || isPending || isDeleting}
       className={cn('text-destructive', className)}
     >
-      <Trash className="h-3 w-3 mr-1" />
+      <Trash className="mr-1 h-3 w-3" />
       Delete
     </Button>
   );
@@ -1033,7 +1033,7 @@ function BackButton({
       disabled={disabled}
       className={cn('text-muted-foreground hover:text-foreground', className)}
     >
-      <ArrowLeft className="h-4 w-4 mr-2" />
+      <ArrowLeft className="mr-2 h-4 w-4" />
       {label}
     </Button>
   );

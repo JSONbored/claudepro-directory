@@ -77,7 +77,7 @@ export default async function LibraryPage() {
     logger.error('Failed to load user library', error, { userId: user.id });
     return (
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold">My Library</h1>
+        <h1 className="font-bold text-3xl">My Library</h1>
         <p className="text-muted-foreground">Unable to load library. Please try again later.</p>
       </div>
     );
@@ -91,7 +91,7 @@ export default async function LibraryPage() {
     <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
-          <h1 className="text-3xl font-bold mb-2">My Library</h1>
+          <h1 className="mb-2 font-bold text-3xl">My Library</h1>
           <p className="text-muted-foreground">
             {bookmarkCount} bookmarks • {collectionCount} collections
           </p>
@@ -120,9 +120,9 @@ export default async function LibraryPage() {
           {!bookmarks || bookmarks.length === 0 ? (
             <Card>
               <CardContent className={'flex flex-col items-center py-12'}>
-                <BookmarkIcon className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold mb-2">No bookmarks yet</h3>
-                <p className={'text-muted-foreground text-center max-w-md'}>
+                <BookmarkIcon className="mb-4 h-12 w-12 text-muted-foreground" />
+                <h3 className="mb-2 font-semibold text-xl">No bookmarks yet</h3>
+                <p className={'max-w-md text-center text-muted-foreground'}>
                   Start exploring the directory and bookmark your favorite agents, MCP servers,
                   rules, and more!
                 </p>
@@ -157,7 +157,7 @@ export default async function LibraryPage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className={'text-xs text-muted-foreground'}>
+                    <p className={'text-muted-foreground text-xs'}>
                       Saved {new Date(bookmark.created_at).toLocaleDateString()}
                     </p>
                   </CardContent>
@@ -171,9 +171,9 @@ export default async function LibraryPage() {
           {!collections || collections.length === 0 ? (
             <Card>
               <CardContent className={'flex flex-col items-center py-12'}>
-                <FolderOpen className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold mb-2">No collections yet</h3>
-                <p className={'text-muted-foreground text-center max-w-md mb-4'}>
+                <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
+                <h3 className="mb-2 font-semibold text-xl">No collections yet</h3>
+                <p className={'mb-4 max-w-md text-center text-muted-foreground'}>
                   Organize your bookmarks into custom collections! Group related configurations
                   together and share them with others.
                 </p>
@@ -212,10 +212,10 @@ export default async function LibraryPage() {
                     </CardHeader>
                     <CardContent>
                       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                        <p className={'text-xs text-muted-foreground'}>
+                        <p className={'text-muted-foreground text-xs'}>
                           {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'}
                         </p>
-                        <p className={'text-xs text-muted-foreground'}>
+                        <p className={'text-muted-foreground text-xs'}>
                           {collection.view_count} views
                         </p>
                       </div>

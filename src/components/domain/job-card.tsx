@@ -15,9 +15,9 @@ export const JobCard = memo(({ job }: JobCardProps) => {
   return (
     <Card className={`${UI_CLASSES.CARD_GRADIENT_HOVER} relative`}>
       {job.featured && (
-        <div className={'absolute -top-2 -right-2 z-10'}>
+        <div className={'-top-2 -right-2 absolute z-10'}>
           <UnifiedBadge variant="base" style="default" className="bg-accent text-accent-foreground">
-            <Star className="h-3 w-3 mr-1" />
+            <Star className="mr-1 h-3 w-3" />
             Featured
           </UnifiedBadge>
         </div>
@@ -38,7 +38,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
                 />
               )}
               <div>
-                <CardTitle className={'text-xl group-hover:text-accent transition-colors-smooth'}>
+                <CardTitle className={'text-xl transition-colors-smooth group-hover:text-accent'}>
                   <Link href={`/jobs/${job.slug}`}>{job.title}</Link>
                 </CardTitle>
                 <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-muted-foreground`}>
@@ -48,7 +48,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
               </div>
             </div>
 
-            <div className={`${UI_CLASSES.FLEX_WRAP_GAP_3} text-sm text-muted-foreground`}>
+            <div className={`${UI_CLASSES.FLEX_WRAP_GAP_3} text-muted-foreground text-sm`}>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 <MapPin className="h-4 w-4" />
                 {job.location}
@@ -88,7 +88,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
       </CardHeader>
 
       <CardContent className="pt-0">
-        <p className={'text-muted-foreground mb-4 line-clamp-2'}>{job.description}</p>
+        <p className={'mb-4 line-clamp-2 text-muted-foreground'}>{job.description}</p>
 
         <div className="mb-4">
           <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
@@ -110,7 +110,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
           <Button asChild className="flex-1">
             <a href={job.link} target="_blank" rel="noopener noreferrer">
               Apply Now
-              <ExternalLink className="h-4 w-4 ml-2" />
+              <ExternalLink className="ml-2 h-4 w-4" />
             </a>
           </Button>
           <Button variant="outline" asChild>

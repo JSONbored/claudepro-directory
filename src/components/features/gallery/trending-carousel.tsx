@@ -70,7 +70,7 @@ export function TrendingCarousel({ items, autoPlayInterval = 5000 }: TrendingCar
     >
       {/* Carousel Container */}
       <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex -ml-4">
+        <div className="-ml-4 flex">
           {items.map((item, index) => {
             const isCurrent = index === selectedIndex;
             const distance = Math.abs(index - selectedIndex);
@@ -78,7 +78,7 @@ export function TrendingCarousel({ items, autoPlayInterval = 5000 }: TrendingCar
             return (
               <motion.div
                 key={`${item.category}-${item.slug}`}
-                className="flex-[0_0_85%] min-w-0 pl-4 md:flex-[0_0_70%] lg:flex-[0_0_60%]"
+                className="min-w-0 flex-[0_0_85%] pl-4 md:flex-[0_0_70%] lg:flex-[0_0_60%]"
                 initial={false}
                 animate={{
                   opacity: isCurrent ? 1 : distance === 1 ? 0.5 : 0.3,
@@ -92,19 +92,19 @@ export function TrendingCarousel({ items, autoPlayInterval = 5000 }: TrendingCar
               >
                 <a
                   href={`/${item.category}/${item.slug}`}
-                  className="block group relative"
+                  className="group relative block"
                   aria-label={`View ${item.title}`}
                 >
                   {/* Card Container */}
-                  <div className="relative aspect-[16/10] rounded-xl border-2 border-primary/20 bg-gradient-to-br from-card via-card/80 to-transparent overflow-hidden shadow-2xl transition-all duration-300 group-hover:border-primary/40 group-hover:shadow-primary/20">
+                  <div className="relative aspect-[16/10] overflow-hidden rounded-xl border-2 border-primary/20 bg-gradient-to-br from-card via-card/80 to-transparent shadow-2xl transition-all duration-300 group-hover:border-primary/40 group-hover:shadow-primary/20">
                     {/* Preview Image Placeholder */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 flex items-center justify-center">
-                      <div className="text-center p-6">
-                        <h3 className="text-2xl font-bold mb-2 text-foreground">{item.title}</h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/5 via-transparent to-primary/10">
+                      <div className="p-6 text-center">
+                        <h3 className="mb-2 font-bold text-2xl text-foreground">{item.title}</h3>
+                        <p className="mb-4 line-clamp-2 text-muted-foreground text-sm">
                           {item.description}
                         </p>
-                        <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
+                        <div className="flex items-center justify-center gap-6 text-muted-foreground text-xs">
                           <div className="flex items-center gap-1">
                             <span>📸</span>
                             <span>{item.screenshot_count}</span>
@@ -119,7 +119,7 @@ export function TrendingCarousel({ items, autoPlayInterval = 5000 }: TrendingCar
 
                     {/* Category Badge */}
                     <div className="absolute top-4 right-4">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/30 backdrop-blur-sm">
+                      <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-medium text-primary text-xs backdrop-blur-sm">
                         {item.category}
                       </span>
                     </div>
@@ -135,23 +135,23 @@ export function TrendingCarousel({ items, autoPlayInterval = 5000 }: TrendingCar
       <button
         type="button"
         onClick={scrollPrev}
-        className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border shadow-lg flex items-center justify-center hover:bg-primary/10 hover:border-primary/30 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50"
+        className="-translate-y-1/2 absolute top-1/2 left-2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 shadow-lg backdrop-blur-sm transition-all duration-200 hover:border-primary/30 hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50"
         aria-label="Previous slide"
       >
-        <ChevronLeft className="w-5 h-5" />
+        <ChevronLeft className="h-5 w-5" />
       </button>
 
       <button
         type="button"
         onClick={scrollNext}
-        className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border shadow-lg flex items-center justify-center hover:bg-primary/10 hover:border-primary/30 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50"
+        className="-translate-y-1/2 absolute top-1/2 right-2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 shadow-lg backdrop-blur-sm transition-all duration-200 hover:border-primary/30 hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50"
         aria-label="Next slide"
       >
-        <ChevronRight className="w-5 h-5" />
+        <ChevronRight className="h-5 w-5" />
       </button>
 
       {/* Dots Indicator */}
-      <div className="flex items-center justify-center gap-2 mt-6">
+      <div className="mt-6 flex items-center justify-center gap-2">
         {items.map((_, index) => (
           <button
             key={index}

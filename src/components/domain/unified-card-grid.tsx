@@ -222,7 +222,7 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
       <output className="flex items-center justify-center py-12" aria-live="polite">
         <div className="flex items-center gap-2">
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">{loadingMessage}</p>
+          <p className="text-muted-foreground text-sm">{loadingMessage}</p>
         </div>
       </output>
     );
@@ -275,7 +275,7 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
             <div className="flex items-center gap-2">
               {/* Spinner - shadcn design pattern */}
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              <p className="text-sm text-muted-foreground">{loadingMessage}</p>
+              <p className="text-muted-foreground text-sm">{loadingMessage}</p>
             </div>
           )}
         </div>

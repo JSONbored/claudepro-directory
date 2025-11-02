@@ -31,7 +31,7 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
   const secondaryActions = config.secondaryActions;
 
   return (
-    <div className={'border-b border-border bg-code/50 backdrop-blur-sm'}>
+    <div className={'border-border border-b bg-code/50 backdrop-blur-sm'}>
       <div className="container mx-auto px-4 py-8">
         {/* Client component for back button and actions */}
         <DetailHeaderActions

@@ -15,7 +15,7 @@ const UnifiedNewsletterCapture = dynamic(
       default: mod.UnifiedNewsletterCapture,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
 
@@ -98,18 +98,18 @@ export default async function SubmitPage() {
   const formConfig = await getSubmissionFormConfig();
 
   return (
-    <div className="container mx-auto px-4 py-8 sm:py-12 max-w-7xl">
+    <div className="container mx-auto max-w-7xl px-4 py-8 sm:py-12">
       {/* Header - Responsive text sizes */}
-      <div className={'text-center mb-6 sm:mb-8 lg:mb-12'}>
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">
+      <div className={'mb-6 text-center sm:mb-8 lg:mb-12'}>
+        <h1 className="mb-3 font-bold text-3xl sm:mb-4 sm:text-4xl lg:text-5xl">
           Submit Your Configuration
         </h1>
-        <p className={'text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto px-2 sm:px-4'}>
+        <p className={'mx-auto max-w-3xl px-2 text-base text-muted-foreground sm:px-4 sm:text-lg'}>
           Share your Claude configurations with the community - no JSON formatting required!
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_380px] gap-6 lg:gap-8 items-start">
+      <div className="grid items-start gap-6 lg:grid-cols-[1fr_380px] lg:gap-8">
         <div className="w-full min-w-0">
           <SubmitFormClient formConfig={formConfig} />
         </div>
@@ -118,29 +118,29 @@ export default async function SubmitPage() {
           {/* Stats Card */}
           <Card>
             <CardHeader>
-              <CardTitle className={'text-sm font-medium'}>📊 Live Stats</CardTitle>
+              <CardTitle className={'font-medium text-sm'}>📊 Live Stats</CardTitle>
             </CardHeader>
             <CardContent className={'space-y-3'}>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                   <TrendingUp className="h-4 w-4 text-blue-400" />
-                  <span className={'text-sm text-muted-foreground'}>Total Configs</span>
+                  <span className={'text-muted-foreground text-sm'}>Total Configs</span>
                 </div>
-                <span className={'text-lg font-semibold'}>{stats.total}</span>
+                <span className={'font-semibold text-lg'}>{stats.total}</span>
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                   <Clock className="h-4 w-4 text-yellow-400" />
-                  <span className={'text-sm text-muted-foreground'}>Pending Review</span>
+                  <span className={'text-muted-foreground text-sm'}>Pending Review</span>
                 </div>
-                <span className={'text-lg font-semibold text-yellow-400'}>{stats.pending}</span>
+                <span className={'font-semibold text-lg text-yellow-400'}>{stats.pending}</span>
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                   <CheckCircle className="h-4 w-4 text-green-400" />
-                  <span className={'text-sm text-muted-foreground'}>Merged This Week</span>
+                  <span className={'text-muted-foreground text-sm'}>Merged This Week</span>
                 </div>
-                <span className={'text-lg font-semibold text-green-400'}>
+                <span className={'font-semibold text-green-400 text-lg'}>
                   {stats.mergedThisWeek}
                 </span>
               </div>
@@ -151,34 +151,34 @@ export default async function SubmitPage() {
           {recentMerged.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className={'text-sm font-medium'}>🔥 Recently Merged</CardTitle>
+                <CardTitle className={'font-medium text-sm'}>🔥 Recently Merged</CardTitle>
               </CardHeader>
               <CardContent className={'space-y-3'}>
                 {(recentMerged as RecentMergedItem[]).map((submission) => (
                   <div
                     key={submission.id}
-                    className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} pb-3 border-b border-border/50 last:border-0 last:pb-0`}
+                    className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} border-border/50 border-b pb-3 last:border-0 last:pb-0`}
                   >
-                    <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className={'text-sm font-medium truncate'}>{submission.content_name}</p>
+                    <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-400" />
+                    <div className="min-w-0 flex-1">
+                      <p className={'truncate font-medium text-sm'}>{submission.content_name}</p>
                       <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mt-1 flex-wrap`}>
                         <UnifiedBadge variant="base" style="outline" className="text-xs">
                           {TYPE_LABELS[submission.content_type]}
                         </UnifiedBadge>
                         {submission.user && (
-                          <span className={'text-xs text-muted-foreground'}>
+                          <span className={'text-muted-foreground text-xs'}>
                             by{' '}
                             <Link
                               href={`/u/${submission.user.slug}`}
-                              className="hover:text-foreground transition-colors"
+                              className="transition-colors hover:text-foreground"
                             >
                               @{submission.user.name}
                             </Link>
                           </span>
                         )}
                       </div>
-                      <p className={'text-xs text-muted-foreground mt-1'}>
+                      <p className={'mt-1 text-muted-foreground text-xs'}>
                         {formatTimeAgo(submission.merged_at)}
                       </p>
                     </div>
@@ -192,7 +192,7 @@ export default async function SubmitPage() {
           {topContributors.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className={'text-sm font-medium'}>🌟 Top Contributors</CardTitle>
+                <CardTitle className={'font-medium text-sm'}>🌟 Top Contributors</CardTitle>
               </CardHeader>
               <CardContent className={'space-y-2'}>
                 {(topContributors as TopContributor[]).map((contributor) => {
@@ -208,19 +208,19 @@ export default async function SubmitPage() {
                       key={contributor.slug}
                       href={`/u/${contributor.slug}`}
                       className={
-                        'flex items-center justify-between py-2 hover:bg-accent/5 px-2 -mx-2 rounded transition-colors'
+                        '-mx-2 flex items-center justify-between rounded px-2 py-2 transition-colors hover:bg-accent/5'
                       }
                     >
                       <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} min-w-0 flex-1`}>
                         <span
-                          className={'text-sm font-medium text-muted-foreground w-4 flex-shrink-0'}
+                          className={'w-4 flex-shrink-0 font-medium text-muted-foreground text-sm'}
                         >
                           {contributor.rank}.
                         </span>
                         {getMedalIcon(contributor.rank)}
-                        <span className={'text-sm truncate'}>@{contributor.name}</span>
+                        <span className={'truncate text-sm'}>@{contributor.name}</span>
                       </div>
-                      <span className={'text-sm font-semibold text-green-400 flex-shrink-0 ml-2'}>
+                      <span className={'ml-2 flex-shrink-0 font-semibold text-green-400 text-sm'}>
                         {contributor.mergedCount}
                       </span>
                     </Link>
@@ -231,18 +231,18 @@ export default async function SubmitPage() {
           )}
 
           {/* Tips Card */}
-          <Card className="bg-blue-500/5 border-blue-500/20">
+          <Card className="border-blue-500/20 bg-blue-500/5">
             <CardHeader>
-              <CardTitle className={'text-sm font-medium flex items-center gap-2'}>
+              <CardTitle className={'flex items-center gap-2 font-medium text-sm'}>
                 <Lightbulb className="h-4 w-4 text-blue-400" />💡 Tips for Success
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className={'space-y-2 list-none'}>
+              <ul className={'list-none space-y-2'}>
                 {SUBMISSION_TIPS.map((tip) => (
                   <li key={tip} className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
-                    <span className="text-blue-400 text-xs mt-0.5">•</span>
-                    <span className={'text-xs text-muted-foreground'}>{tip}</span>
+                    <span className="mt-0.5 text-blue-400 text-xs">•</span>
+                    <span className={'text-muted-foreground text-xs'}>{tip}</span>
                   </li>
                 ))}
               </ul>

@@ -219,7 +219,7 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
             variant="base"
             style="secondary"
             className={cn(
-              'text-base font-bold px-3 py-1',
+              'px-3 py-1 font-bold text-base',
               TIER_COLORS[currentTier?.name || 'Newcomer'] || TIER_COLORS.Newcomer
             )}
           >
@@ -245,7 +245,7 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
               {currentTier?.name || 'Newcomer'}
             </UnifiedBadge>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {currentTier?.description || 'Just getting started'}
           </p>
         </div>
@@ -255,11 +255,11 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
           <div className="space-y-2">
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
               <span className={UI_CLASSES.TEXT_SM_MUTED}>Progress to {nextTier.tier.name}</span>
-              <span className="text-sm font-medium">{progress}%</span>
+              <span className="font-medium text-sm">{progress}%</span>
             </div>
-            <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+            <div className="relative h-2 overflow-hidden rounded-full bg-muted">
               <div
-                className="absolute top-0 left-0 h-full bg-primary rounded-full transition-all duration-300"
+                className="absolute top-0 left-0 h-full rounded-full bg-primary transition-all duration-300"
                 style={{ width: `${progress}%` }}
                 role="progressbar"
                 aria-valuenow={progress}
@@ -270,7 +270,7 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
             </div>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
               <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 {nextTier.pointsNeeded} points needed for {nextTier.tier.icon} {nextTier.tier.name}
               </p>
             </div>
@@ -280,7 +280,7 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
         {/* Detailed Breakdown */}
         {showDetails && breakdown.total > 0 && (
           <div className="space-y-4">
-            <h4 className="text-sm font-medium">Reputation Breakdown</h4>
+            <h4 className="font-medium text-sm">Reputation Breakdown</h4>
 
             {/* Breakdown Chart */}
             <HorizontalBarChart
@@ -313,12 +313,12 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
               }).map(([key, { label, value, icon: Icon }]) => (
                 <div
                   key={key}
-                  className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 border border-border/40"
+                  className="flex items-center gap-2 rounded-lg border border-border/40 bg-muted/30 p-2"
                 >
-                  <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground truncate">{label}</p>
-                    <p className="text-sm font-semibold">{value} pts</p>
+                  <Icon className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-muted-foreground text-xs">{label}</p>
+                    <p className="font-semibold text-sm">{value} pts</p>
                   </div>
                 </div>
               ))}
@@ -326,12 +326,12 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
 
             {/* Point Values Reference */}
             <details className="group">
-              <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors">
+              <summary className="cursor-pointer text-muted-foreground text-xs transition-colors hover:text-foreground">
                 How reputation is calculated
               </summary>
-              <div className="mt-3 space-y-2 text-xs text-muted-foreground">
+              <div className="mt-3 space-y-2 text-muted-foreground text-xs">
                 <p>Points are earned for different activities:</p>
-                <ul className="space-y-1 ml-4">
+                <ul className="ml-4 space-y-1">
                   <li>• Create a post: +{points.post || 10} points</li>
                   <li>• Receive an upvote: +{points.vote_received || 5} points</li>
                   <li>• Write a comment: +{points.comment || 2} points</li>

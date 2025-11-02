@@ -32,7 +32,7 @@ const UnifiedNewsletterCapture = dynamic(
       default: mod.UnifiedNewsletterCapture,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
 
@@ -127,9 +127,9 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
     <div className={'min-h-screen bg-background'}>
       <section className={UI_CLASSES.CONTAINER_OVERFLOW_BORDER}>
         <div className={'container mx-auto px-4 py-20'}>
-          <div className={'text-center max-w-3xl mx-auto'}>
-            <div className={'flex justify-center mb-6'}>
-              <div className={'p-3 bg-accent/10 rounded-full'}>
+          <div className={'mx-auto max-w-3xl text-center'}>
+            <div className={'mb-6 flex justify-center'}>
+              <div className={'rounded-full bg-accent/10 p-3'}>
                 <Briefcase className="h-8 w-8 text-primary" />
               </div>
             </div>
@@ -141,9 +141,9 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
               From startups to industry giants, find your perfect role.
             </p>
 
-            <div className={'flex flex-wrap justify-center gap-2 mb-8'}>
+            <div className={'mb-8 flex flex-wrap justify-center gap-2'}>
               <UnifiedBadge variant="base" style="secondary">
-                <Briefcase className="h-3 w-3 mr-1" />
+                <Briefcase className="mr-1 h-3 w-3" />
                 {totalJobs || 0} Jobs Available
               </UnifiedBadge>
               <UnifiedBadge variant="base" style="outline">
@@ -171,7 +171,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
               <CardContent className="p-6">
                 <form method="GET" action="/jobs" className={UI_CLASSES.GRID_RESPONSIVE_4}>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
                     <Input
                       id={searchInputId}
                       name="search"
@@ -183,7 +183,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
 
                   <Select name="category" defaultValue={category || 'all'}>
                     <SelectTrigger id={categoryFilterId} aria-label="Filter jobs by category">
-                      <Filter className={'h-4 w-4 mr-2'} />
+                      <Filter className={'mr-2 h-4 w-4'} />
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -202,7 +202,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                       id={employmentFilterId}
                       aria-label="Filter jobs by employment type"
                     >
-                      <Clock className={'h-4 w-4 mr-2'} />
+                      <Clock className={'mr-2 h-4 w-4'} />
                       <SelectValue placeholder="Employment Type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -226,7 +226,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                           remote: remote ? undefined : 'true',
                         })}
                       >
-                        <MapPin className={'h-4 w-4 mr-2'} />
+                        <MapPin className={'mr-2 h-4 w-4'} />
                         Remote
                       </Link>
                     </Button>
@@ -240,7 +240,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   (category && category !== 'all') ||
                   (employment && employment !== 'any') ||
                   remote) && (
-                  <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4 pt-4 border-t border-border`}>
+                  <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4 border-border border-t pt-4`}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Active filters:</span>
                     {searchQuery && (
                       <UnifiedBadge variant="base" style="secondary">
@@ -309,11 +309,11 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
           {(totalJobs || 0) === 0 ? (
             <Card>
               <CardContent className={'flex flex-col items-center justify-center py-24'}>
-                <div className={'p-4 bg-accent/10 rounded-full mb-6'}>
+                <div className={'mb-6 rounded-full bg-accent/10 p-4'}>
                   <Briefcase className={'h-12 w-12 text-muted-foreground'} />
                 </div>
-                <h3 className="text-2xl font-bold mb-4">No Jobs Available Yet</h3>
-                <p className={'text-muted-foreground text-center mb-8 max-w-md leading-relaxed'}>
+                <h3 className="mb-4 font-bold text-2xl">No Jobs Available Yet</h3>
+                <p className={'mb-8 max-w-md text-center text-muted-foreground leading-relaxed'}>
                   We're building our jobs board! Soon you'll find amazing opportunities with
                   companies working on the future of AI. Be the first to know when new positions are
                   posted.
@@ -321,7 +321,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                 <div className="flex gap-4">
                   <Button asChild>
                     <Link href={ROUTES.PARTNER}>
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="mr-2 h-4 w-4" />
                       Post the First Job
                     </Link>
                   </Button>
@@ -334,9 +334,9 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
           ) : jobs.length === 0 ? (
             <Card>
               <CardContent className={'flex flex-col items-center justify-center py-16'}>
-                <Briefcase className={'h-16 w-16 text-muted-foreground mb-4'} />
-                <h3 className={'text-xl font-semibold mb-2'}>No Jobs Found</h3>
-                <p className={'text-muted-foreground text-center mb-6 max-w-md'}>
+                <Briefcase className={'mb-4 h-16 w-16 text-muted-foreground'} />
+                <h3 className={'mb-2 font-semibold text-xl'}>No Jobs Found</h3>
+                <p className={'mb-6 max-w-md text-center text-muted-foreground'}>
                   No jobs match your current filters. Try adjusting your search criteria.
                 </p>
                 <Button variant="outline" asChild>
@@ -348,7 +348,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             <>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                 <div>
-                  <h2 className="text-2xl font-bold">
+                  <h2 className="font-bold text-2xl">
                     {jobs.length} {jobs.length === 1 ? 'Job' : 'Jobs'} Found
                   </h2>
                   <p className="text-muted-foreground">Showing all available positions</p>

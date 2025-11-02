@@ -69,9 +69,9 @@ export function Checklist(props: ChecklistProps) {
       </CardHeader>
       <CardContent>
         <div className="mb-4">
-          <div className={'w-full bg-muted rounded-full h-2'}>
+          <div className={'h-2 w-full rounded-full bg-muted'}>
             <div
-              className={'bg-primary h-2 rounded-full transition-all duration-300'}
+              className={'h-2 rounded-full bg-primary transition-all duration-300'}
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -83,19 +83,19 @@ export function Checklist(props: ChecklistProps) {
               itemScope
               itemType="https://schema.org/ListItem"
               className={
-                'flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors'
+                'flex items-start gap-3 rounded-lg bg-muted/30 p-3 transition-colors hover:bg-muted/50'
               }
             >
               <button
                 type="button"
                 onClick={() => toggleItem(index)}
-                className="flex-shrink-0 mt-0.5"
+                className="mt-0.5 flex-shrink-0"
                 aria-label={`Mark ${item.task} as ${checkedItems.has(index) ? 'incomplete' : 'complete'}`}
               >
                 <div
-                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                  className={`flex h-5 w-5 items-center justify-center rounded border-2 transition-colors ${
                     checkedItems.has(index)
-                      ? 'bg-primary border-primary'
+                      ? 'border-primary bg-primary'
                       : 'border-border hover:border-primary'
                   }`}
                 >
@@ -108,18 +108,18 @@ export function Checklist(props: ChecklistProps) {
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                   <span
                     itemProp="name"
-                    className={`font-medium ${checkedItems.has(index) ? 'line-through text-muted-foreground' : ''}`}
+                    className={`font-medium ${checkedItems.has(index) ? 'text-muted-foreground line-through' : ''}`}
                   >
                     {item.task}
                   </span>
                   {item.priority && (
-                    <span className={`text-xs font-medium ${priorityColors[item.priority]}`}>
+                    <span className={`font-medium text-xs ${priorityColors[item.priority]}`}>
                       {item.priority.toUpperCase()}
                     </span>
                   )}
                 </div>
                 {item.description && (
-                  <p className="text-sm text-muted-foreground mt-1" itemProp="description">
+                  <p className="mt-1 text-muted-foreground text-sm" itemProp="description">
                     {item.description}
                   </p>
                 )}

@@ -415,7 +415,7 @@ export async function UnifiedDetailPage({
     if (item.category !== 'guides') return null;
 
     const metadata = 'metadata' in item ? (item.metadata as Record<string, unknown>) : null;
-    if (!(metadata && metadata.sections && Array.isArray(metadata.sections))) return null;
+    if (!(metadata?.sections && Array.isArray(metadata.sections))) return null;
 
     // JSONSectionRenderer expects sections array, not full metadata
     return metadata.sections;
@@ -427,8 +427,8 @@ export async function UnifiedDetailPage({
       <div className={'min-h-screen bg-background'}>
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Configuration Not Found</h1>
-            <p className="text-muted-foreground mb-6">
+            <h1 className="mb-4 font-bold text-2xl">Configuration Not Found</h1>
+            <p className="mb-6 text-muted-foreground">
               No configuration found for content type: {item.category}
             </p>
           </div>
@@ -456,9 +456,9 @@ export async function UnifiedDetailPage({
         className="container mx-auto px-4 py-8"
         style={getViewTransitionStyle('card', item.slug)}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Primary content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="space-y-8 lg:col-span-2">
             {/* GUIDES: Render structured sections from metadata using JSONSectionRenderer */}
             {guideSections && guideSections.length > 0 && (
               <JSONSectionRenderer sections={guideSections} />
@@ -478,7 +478,7 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Features Section */}
-            {config && config.sections.features && features.length > 0 && (
+            {config?.sections.features && features.length > 0 && (
               <UnifiedContentSection
                 variant="bullets"
                 title="Features"
@@ -502,7 +502,7 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Installation Section */}
-            {config && config.sections.installation && installationData && (
+            {config?.sections.installation && installationData && (
               <UnifiedContentSection
                 variant="installation"
                 installationData={installationData}
@@ -511,7 +511,7 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Configuration Section */}
-            {config && config.sections.configuration && configData && (
+            {config?.sections.configuration && configData && (
               <UnifiedContentSection
                 variant="configuration"
                 {...(configData.format === 'multi'
@@ -532,7 +532,7 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Use Cases Section */}
-            {config && config.sections.use_cases && useCases.length > 0 && (
+            {config?.sections.use_cases && useCases.length > 0 && (
               <UnifiedContentSection
                 variant="bullets"
                 title="Use Cases"
@@ -544,7 +544,7 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Security Section (MCP-specific) */}
-            {config && config.sections.security && 'security' in item && (
+            {config?.sections.security && 'security' in item && (
               <UnifiedContentSection
                 variant="bullets"
                 title="Security Best Practices"
@@ -556,7 +556,7 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Troubleshooting Section */}
-            {config && config.sections.troubleshooting && troubleshooting.length > 0 && (
+            {config?.sections.troubleshooting && troubleshooting.length > 0 && (
               <UnifiedContentSection
                 variant="troubleshooting"
                 items={troubleshooting as any}
@@ -565,13 +565,13 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Usage Examples Section - GitHub-style code snippets with syntax highlighting */}
-            {config && config.sections.examples && examplesData && examplesData.length > 0 && (
+            {config?.sections.examples && examplesData && examplesData.length > 0 && (
               <UnifiedContentSection variant="examples" examples={examplesData} />
             )}
 
             {/* Reviews & Ratings Section */}
             {isValidCategory(item.category) && (
-              <div className="mt-12 pt-12 border-t">
+              <div className="mt-12 border-t pt-12">
                 <UnifiedReview
                   variant="section"
                   contentType={item.category}
@@ -590,7 +590,7 @@ export async function UnifiedDetailPage({
           </div>
 
           {/* Sidebar - Stream related items if promise provided */}
-          <aside className="lg:sticky lg:top-24 lg:self-start space-y-6">
+          <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
             {relatedItemsPromise && config ? (
               <Suspense
                 fallback={

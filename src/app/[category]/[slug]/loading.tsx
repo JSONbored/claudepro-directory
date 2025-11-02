@@ -32,11 +32,11 @@ export default function Loading() {
 
       {/* Content with sidebar */}
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Main content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             {/* Content card */}
-            <div className="border rounded-lg p-6 space-y-4">
+            <div className="space-y-4 rounded-lg border p-6">
               <Skeleton size="md" width="3xl" />
               <Skeleton size="sm" width="3xl" />
               <Skeleton size="sm" width="3xl" />
@@ -44,7 +44,7 @@ export default function Loading() {
             </div>
 
             {/* Code block skeleton */}
-            <div className="border rounded-lg p-6 space-y-4">
+            <div className="space-y-4 rounded-lg border p-6">
               <Skeleton size="sm" width="sm" />
               <div className="space-y-2">
                 {Array.from({ length: 8 }, (_, i) => (
@@ -56,7 +56,7 @@ export default function Loading() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <div className="border rounded-lg p-6 space-y-4">
+            <div className="space-y-4 rounded-lg border p-6">
               <Skeleton size="md" width="sm" />
               <Skeleton size="sm" width="3xl" />
               <Skeleton size="sm" width="3xl" />

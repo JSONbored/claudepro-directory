@@ -141,16 +141,16 @@ export function DetailHeaderActions({
           onClick={() => router.back()}
           className="text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
+          <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
       </div>
 
       {/* Main content header */}
-      <div className={'flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6'}>
+      <div className={'flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between'}>
         <div className="flex-1">
-          <div className={'flex items-center gap-3 mb-4'}>
-            <UnifiedBadge variant="base" style="secondary" className={'text-xs font-medium'}>
+          <div className={'mb-4 flex items-center gap-3'}>
+            <UnifiedBadge variant="base" style="secondary" className={'font-medium text-xs'}>
               {typeName}
             </UnifiedBadge>
             <UnifiedBadge variant="base" style="outline" className="text-xs">
@@ -158,17 +158,17 @@ export function DetailHeaderActions({
             </UnifiedBadge>
           </div>
 
-          <h1 className={'text-4xl font-bold tracking-tight mb-4'}>{displayTitle}</h1>
+          <h1 className={'mb-4 font-bold text-4xl tracking-tight'}>{displayTitle}</h1>
 
           {item.description && (
-            <p className={'text-xl text-muted-foreground mb-6 leading-relaxed'}>
+            <p className={'mb-6 text-muted-foreground text-xl leading-relaxed'}>
               {item.description}
             </p>
           )}
         </div>
 
         {/* Action buttons */}
-        <div className={'flex flex-col sm:flex-row gap-3'}>
+        <div className={'flex flex-col gap-3 sm:flex-row'}>
           <Button onClick={() => handleActionClick(primaryAction)} className="min-w-0">
             {primaryAction.label}
           </Button>
@@ -181,12 +181,12 @@ export function DetailHeaderActions({
               <Button variant="outline" onClick={handleCopyContent} className="min-w-0">
                 {copied ? (
                   <>
-                    <Check className="h-4 w-4 mr-2 text-green-500" />
+                    <Check className="mr-2 h-4 w-4 text-green-500" />
                     Copied!
                   </>
                 ) : (
                   <>
-                    <Copy className="h-4 w-4 mr-2" />
+                    <Copy className="mr-2 h-4 w-4" />
                     Copy Content
                   </>
                 )}

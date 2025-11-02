@@ -57,7 +57,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Edit Job Listing</h1>
+        <h1 className="mb-2 font-bold text-3xl">Edit Job Listing</h1>
         <p className="text-muted-foreground">Update your job posting details</p>
       </div>
       <JobForm

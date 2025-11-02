@@ -95,7 +95,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'}
             showIcon
           />
-          <h1 className="text-3xl font-bold">Sponsorship Analytics</h1>
+          <h1 className="font-bold text-3xl">Sponsorship Analytics</h1>
         </div>
         <p className="text-muted-foreground">
           Detailed performance metrics for your sponsored content
@@ -103,7 +103,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
       </div>
 
       {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">Total Impressions</CardTitle>
@@ -111,10 +111,10 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Eye className="h-5 w-5 text-primary" />
-              <span className="text-3xl font-bold">{impressionCount.toLocaleString()}</span>
+              <span className="font-bold text-3xl">{impressionCount.toLocaleString()}</span>
             </div>
             {sponsorship.impression_limit && (
-              <p className={'text-xs text-muted-foreground mt-2'}>
+              <p className={'mt-2 text-muted-foreground text-xs'}>
                 of {sponsorship.impression_limit.toLocaleString()} limit
               </p>
             )}
@@ -128,9 +128,9 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <MousePointer className="h-5 w-5 text-primary" />
-              <span className="text-3xl font-bold">{clickCount.toLocaleString()}</span>
+              <span className="font-bold text-3xl">{clickCount.toLocaleString()}</span>
             </div>
-            <p className={'text-xs text-muted-foreground mt-2'}>User engagements</p>
+            <p className={'mt-2 text-muted-foreground text-xs'}>User engagements</p>
           </CardContent>
         </Card>
 
@@ -141,9 +141,9 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <BarChart className="h-5 w-5 text-primary" />
-              <span className="text-3xl font-bold">{ctr}%</span>
+              <span className="font-bold text-3xl">{ctr}%</span>
             </div>
-            <p className={'text-xs text-muted-foreground mt-2'}>Clicks / Impressions</p>
+            <p className={'mt-2 text-muted-foreground text-xs'}>Clicks / Impressions</p>
           </CardContent>
         </Card>
 
@@ -154,9 +154,9 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <TrendingUp className="h-5 w-5 text-primary" />
-              <span className="text-3xl font-bold">{avgImpressionsPerDay}</span>
+              <span className="font-bold text-3xl">{avgImpressionsPerDay}</span>
             </div>
-            <p className={'text-xs text-muted-foreground mt-2'}>Over {daysActive} days</p>
+            <p className={'mt-2 text-muted-foreground text-xs'}>Over {daysActive} days</p>
           </CardContent>
         </Card>
       </div>
@@ -170,31 +170,31 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className={'text-sm font-medium'}>Content Type</p>
+              <p className={'font-medium text-sm'}>Content Type</p>
               <p className="text-muted-foreground">{sponsorship.content_type}</p>
             </div>
 
             <div>
-              <p className={'text-sm font-medium'}>Content ID</p>
-              <p className={'text-muted-foreground font-mono text-xs'}>{sponsorship.content_id}</p>
+              <p className={'font-medium text-sm'}>Content ID</p>
+              <p className={'font-mono text-muted-foreground text-xs'}>{sponsorship.content_id}</p>
             </div>
 
             <div>
-              <p className={'text-sm font-medium'}>Start Date</p>
+              <p className={'font-medium text-sm'}>Start Date</p>
               <p className="text-muted-foreground">
                 {new Date(sponsorship.start_date).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <p className={'text-sm font-medium'}>End Date</p>
+              <p className={'font-medium text-sm'}>End Date</p>
               <p className="text-muted-foreground">
                 {new Date(sponsorship.end_date).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <p className={'text-sm font-medium'}>Status</p>
+              <p className={'font-medium text-sm'}>Status</p>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <UnifiedBadge variant="base" style={sponsorship.active ? 'default' : 'outline'}>
                   {sponsorship.active ? 'Active' : 'Inactive'}
@@ -203,7 +203,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             </div>
 
             <div>
-              <p className={'text-sm font-medium'}>Tier</p>
+              <p className={'font-medium text-sm'}>Tier</p>
               <div>
                 <UnifiedBadge
                   variant="sponsored"
@@ -233,13 +233,13 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
               const maxImpressions = Math.max(...Array.from(impressionsMap.values()), 1);
 
               return (
-                <div key={dayKey} className="grid grid-cols-12 gap-2 items-center">
-                  <div className="col-span-2 text-xs text-muted-foreground">
+                <div key={dayKey} className="grid grid-cols-12 items-center gap-2">
+                  <div className="col-span-2 text-muted-foreground text-xs">
                     {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
                   <div className="col-span-10 grid grid-cols-2 gap-1">
                     {/* Impressions bar */}
-                    <div className="relative h-8 bg-muted rounded overflow-hidden">
+                    <div className="relative h-8 overflow-hidden rounded bg-muted">
                       <div
                         className="absolute top-0 left-0 h-full bg-primary/30 transition-all"
                         style={{ width: `${(impressions / maxImpressions) * 100}%` }}
@@ -249,7 +249,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
                       </div>
                     </div>
                     {/* Clicks bar */}
-                    <div className="relative h-8 bg-muted rounded overflow-hidden">
+                    <div className="relative h-8 overflow-hidden rounded bg-muted">
                       <div
                         className="absolute top-0 left-0 h-full bg-accent/50 transition-all"
                         style={{ width: `${impressions > 0 ? (clicks / impressions) * 100 : 0}%` }}
@@ -273,7 +273,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardDescription>Improve your campaign performance</CardDescription>
         </CardHeader>
         <CardContent>
-          <ul className={'text-sm space-y-2'}>
+          <ul className={'space-y-2 text-sm'}>
             <li>• CTR above 2% is excellent for sponsored content</li>
             <li>• Featured tier gets 3x more impressions than promoted</li>
             <li>• Premium tier includes newsletter promotion for extra reach</li>

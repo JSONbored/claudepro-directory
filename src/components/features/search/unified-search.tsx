@@ -135,7 +135,7 @@ function UnifiedSearchComponent({
       <search className={cn('w-full space-y-4', className)}>
         <div className="space-y-3">
           <div className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+            <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-4 z-10">
               <Search className="h-5 w-5 text-accent" aria-hidden="true" />
             </div>
             <Input
@@ -146,7 +146,7 @@ function UnifiedSearchComponent({
               onChange={(e) => setLocalSearchQuery(e.target.value)}
               placeholder={placeholder}
               className={
-                'pl-12 pr-4 h-14 text-base bg-card/50 backdrop-blur-sm border-border/50 focus:border-accent/50 focus:bg-card transition-smooth w-full'
+                'h-14 w-full border-border/50 bg-card/50 pr-4 pl-12 text-base backdrop-blur-sm transition-smooth focus:border-accent/50 focus:bg-card'
               }
               aria-label="Search configurations"
               aria-describedby={resultCount > 0 && localSearchQuery ? searchResultsId : undefined}
@@ -155,7 +155,7 @@ function UnifiedSearchComponent({
           </div>
 
           {showFilters && (
-            <div className={'flex gap-2 justify-end'}>
+            <div className={'flex justify-end gap-2'}>
               <Select
                 value={filters.sort || 'trending'}
                 onValueChange={(value) => handleSortChange(value as FilterState['sort'])}
@@ -164,7 +164,7 @@ function UnifiedSearchComponent({
                 <SelectTrigger
                   id={sortSelectId}
                   className={
-                    'w-auto h-10 px-4 bg-background border-border hover:bg-accent/10 transition-smooth'
+                    'h-10 w-auto border-border bg-background px-4 transition-smooth hover:bg-accent/10'
                   }
                   aria-label="Sort configurations"
                 >
@@ -183,8 +183,8 @@ function UnifiedSearchComponent({
                 size="default"
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                 className={cn(
-                  'h-10 px-4 gap-2 transition-smooth',
-                  isFilterOpen && 'bg-accent/10 border-accent'
+                  'h-10 gap-2 px-4 transition-smooth',
+                  isFilterOpen && 'border-accent bg-accent/10'
                 )}
                 aria-expanded={isFilterOpen}
                 aria-controls={filterPanelId}
@@ -196,16 +196,16 @@ function UnifiedSearchComponent({
                   <UnifiedBadge
                     variant="base"
                     style="secondary"
-                    className="ml-1 px-1.5 py-0 h-5"
+                    className="ml-1 h-5 px-1.5 py-0"
                     aria-label={`${activeFilterCount} active filters`}
                   >
                     {activeFilterCount}
                   </UnifiedBadge>
                 )}
                 {isFilterOpen ? (
-                  <ChevronUp className="h-3 w-3 ml-1" aria-hidden="true" />
+                  <ChevronUp className="ml-1 h-3 w-3" aria-hidden="true" />
                 ) : (
-                  <ChevronDown className="h-3 w-3 ml-1" aria-hidden="true" />
+                  <ChevronDown className="ml-1 h-3 w-3" aria-hidden="true" />
                 )}
               </Button>
             </div>
@@ -213,7 +213,7 @@ function UnifiedSearchComponent({
         </div>
 
         <div
-          className={'text-sm text-muted-foreground'}
+          className={'text-muted-foreground text-sm'}
           id={searchResultsId}
           aria-live="polite"
           aria-atomic="true"

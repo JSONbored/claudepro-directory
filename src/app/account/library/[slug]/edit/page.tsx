@@ -60,7 +60,7 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
             Back to Collection
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold mb-2">Edit Collection</h1>
+        <h1 className="mb-2 font-bold text-3xl">Edit Collection</h1>
         <p className="text-muted-foreground">Update your collection details and settings</p>
       </div>
 

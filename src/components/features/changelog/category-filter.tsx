@@ -27,9 +27,9 @@ const FILTER_CATEGORIES = [
 
 export const CategoryFilter = memo(({ activeCategory, categoryCounts }: CategoryFilterProps) => {
   return (
-    <TabsList className="grid w-full lg:w-auto lg:grid-flow-col lg:auto-cols-fr gap-1">
+    <TabsList className="grid w-full gap-1 lg:w-auto lg:auto-cols-fr lg:grid-flow-col">
       {FILTER_CATEGORIES.map((category) => (
-        <TabsTrigger key={category} value={category} className={'text-sm flex items-center gap-2'}>
+        <TabsTrigger key={category} value={category} className={'flex items-center gap-2 text-sm'}>
           <span>{category}</span>
           <UnifiedBadge
             variant="base"

@@ -14,7 +14,7 @@ export const LazyFeaturedSections = dynamic(
     })),
   {
     loading: () => (
-      <div className="space-y-16 mb-16">
+      <div className="mb-16 space-y-16">
         {/* 5 featured categories + 1 jobs section */}
         {[...Array(6)].map((_, i) => (
           <FeaturedSectionSkeleton key={`featured-loading-${i + 1}`} />
@@ -40,7 +40,7 @@ export const LazyTabsSection = dynamic(
     loading: () => (
       <div className="space-y-8">
         {/* Tabs skeleton */}
-        <div className="flex gap-2 p-1 bg-muted rounded-lg">
+        <div className="flex gap-2 rounded-lg bg-muted p-1">
           {[...Array(7)].map((_, i) => (
             <Skeleton key={`tab-skeleton-${i + 1}`} size="lg" width="3xl" className="flex-1" />
           ))}

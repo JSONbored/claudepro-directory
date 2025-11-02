@@ -110,7 +110,7 @@ interface BadgeCardProps {
   userBadge: UserBadgeWithBadge;
   badgeDetail?: Badge | undefined;
   canEdit: boolean;
-  onFeaturedChange?: () => void | undefined;
+  onFeaturedChange?: () => undefined | undefined;
 }
 
 // =============================================================================
@@ -165,11 +165,11 @@ const BadgeCard = memo(function BadgeCard({
     <Container
       type={canEdit ? 'button' : undefined}
       className={cn(
-        'relative group rounded-lg border p-4 transition-all duration-200',
+        'group relative rounded-lg border p-4 transition-all duration-200',
         rarityColors?.bg,
         rarityColors?.border,
-        'hover:shadow-md hover:scale-[1.02]',
-        canEdit && 'cursor-pointer w-full text-left'
+        'hover:scale-[1.02] hover:shadow-md',
+        canEdit && 'w-full cursor-pointer text-left'
       )}
       onClick={canEdit ? handleToggleFeatured : undefined}
       aria-label={
@@ -186,7 +186,7 @@ const BadgeCard = memo(function BadgeCard({
       )}
 
       {/* Badge Content */}
-      <div className="flex flex-col items-center text-center space-y-2">
+      <div className="flex flex-col items-center space-y-2 text-center">
         {/* Badge Icon */}
         <div className="text-4xl" role="img" aria-label={`${badgeDetail?.name || 'Badge'} icon`}>
           {badgeDetail?.icon || '🏆'}
@@ -197,7 +197,7 @@ const BadgeCard = memo(function BadgeCard({
           <h3 className={cn('font-semibold text-sm', rarityColors?.text)}>
             {badgeDetail?.name || 'Unknown Badge'}
           </h3>
-          <p className="text-xs text-muted-foreground line-clamp-2">
+          <p className="line-clamp-2 text-muted-foreground text-xs">
             {badgeDetail?.description || 'Badge description'}
           </p>
         </div>
@@ -212,7 +212,7 @@ const BadgeCard = memo(function BadgeCard({
         </UnifiedBadge>
 
         {/* Earned Date */}
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           Earned{' '}
           {new Date(userBadge.earned_at).toLocaleDateString('en-US', {
             month: 'short',
@@ -227,11 +227,11 @@ const BadgeCard = memo(function BadgeCard({
         <div
           className={cn(
             'absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent',
-            'opacity-0 group-hover:opacity-100 transition-opacity',
+            'opacity-0 transition-opacity group-hover:opacity-100',
             'rounded-b-lg p-2 text-center'
           )}
         >
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {isFeatured ? 'Click to unfeature' : 'Click to feature'}
           </p>
         </div>
@@ -239,8 +239,8 @@ const BadgeCard = memo(function BadgeCard({
 
       {/* Loading Overlay */}
       {isPending && (
-        <div className="absolute inset-0 bg-background/50 rounded-lg flex items-center justify-center backdrop-blur-sm">
-          <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
+        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-background/50 backdrop-blur-sm">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
       )}
     </Container>
@@ -293,7 +293,7 @@ export const BadgeGrid = memo(function BadgeGrid({
             <CardTitle as="h3" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               {featuredOnly ? (
                 <>
-                  <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                  <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
                   Featured Badges
                 </>
               ) : (
@@ -314,7 +314,7 @@ export const BadgeGrid = memo(function BadgeGrid({
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    className="p-2 hover:bg-accent/10 rounded-md transition-colors"
+                    className="rounded-md p-2 transition-colors hover:bg-accent/10"
                     aria-label="Badge featuring help"
                   >
                     <Info className="h-4 w-4 text-muted-foreground" />
@@ -333,19 +333,19 @@ export const BadgeGrid = memo(function BadgeGrid({
         {displayedBadges.length === 0 ? (
           /* Empty State */
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="mb-4 p-4 rounded-full bg-muted/30">
+            <div className="mb-4 rounded-full bg-muted/30 p-4">
               <Lock className="h-8 w-8 text-muted-foreground" />
             </div>
             <p className="text-muted-foreground">{emptyMessage}</p>
             {!featuredOnly && canEdit && (
-              <p className="text-xs text-muted-foreground mt-2">
+              <p className="mt-2 text-muted-foreground text-xs">
                 Earn badges by contributing to the community
               </p>
             )}
           </div>
         ) : (
           /* Badge Grid */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {displayedBadges.map((userBadge) => {
               // Badge detail is now included in the RPC response
               const badgeDetail = userBadge.badge as Badge | undefined;
@@ -365,10 +365,10 @@ export const BadgeGrid = memo(function BadgeGrid({
 
         {/* Featured Count Indicator */}
         {canEdit && !featuredOnly && displayedBadges.length > 0 && (
-          <div className="mt-6 p-3 rounded-lg bg-muted/30 border border-border/40">
+          <div className="mt-6 rounded-lg border border-border/40 bg-muted/30 p-3">
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-              <p className="text-sm text-muted-foreground">
+              <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+              <p className="text-muted-foreground text-sm">
                 {displayedBadges.filter((b) => b.featured).length} of 5 featured badges selected
               </p>
             </div>

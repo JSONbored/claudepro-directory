@@ -19,7 +19,7 @@ const UnifiedNewsletterCapture = dynamicImport(
       default: mod.UnifiedNewsletterCapture,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
 
@@ -50,7 +50,7 @@ export default async function ForYouPage() {
   if (!result?.data) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold mb-4">For You</h1>
+        <h1 className="mb-4 font-bold text-3xl">For You</h1>
         <p className="text-muted-foreground">
           Unable to load recommendations. Please try again later.
         </p>
@@ -61,7 +61,7 @@ export default async function ForYouPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-3">For You</h1>
+        <h1 className="mb-3 font-bold text-4xl">For You</h1>
         <p className="text-lg text-muted-foreground">
           {result.data.user_has_history
             ? 'Personalized recommendations based on your activity'

@@ -21,7 +21,7 @@ import { highlight } from 'sugar-high';
  */
 export function highlightCode(
   code: string,
-  language = 'javascript',
+  _language = 'javascript',
   showLineNumbers = false
 ): string {
   if (!code || code.trim() === '') {
@@ -50,7 +50,7 @@ export function highlightCode(
 
     // No line numbers - simple wrap
     return `<pre class="overflow-x-auto text-sm leading-relaxed p-4 rounded-lg border border-border bg-code/50 backdrop-blur-sm"><code class="sugar-high" style="display: block; background: transparent;">${highlighted}</code></pre>`;
-  } catch (error) {
+  } catch (_error) {
     // Fallback to plain text if highlighting fails
     const escapedCode = code
       .replace(/&/g, '&amp;')

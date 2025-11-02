@@ -122,18 +122,18 @@ export function CategoryNavigationCard({
               <TooltipTrigger asChild>
                 <Link
                   href={`${validatedProps.basePath}/${key}`}
-                  className={`p-2 rounded-lg transition-all duration-200 ${
+                  className={`rounded-lg p-2 transition-all duration-200 ${
                     isActive
-                      ? info.activeColor || 'text-primary bg-primary/10'
-                      : `text-muted-foreground ${info.color || 'hover:text-primary hover:bg-muted/50'}`
+                      ? info.activeColor || 'bg-primary/10 text-primary'
+                      : `text-muted-foreground ${info.color || 'hover:bg-muted/50 hover:text-primary'}`
                   }`}
                 >
                   <Icon className="h-4 w-4" />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs max-w-[200px]">
+              <TooltipContent side="bottom" className="max-w-[200px] text-xs">
                 <div className="font-semibold">{info.label}</div>
-                <div className="text-muted-foreground mt-0.5">{info.description}</div>
+                <div className="mt-0.5 text-muted-foreground">{info.description}</div>
               </TooltipContent>
             </Tooltip>
           );

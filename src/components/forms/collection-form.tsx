@@ -163,10 +163,10 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           disabled={isPending}
         />
         <div className="flex-1">
-          <Label htmlFor={isPublicId} className="text-base font-medium cursor-pointer">
+          <Label htmlFor={isPublicId} className="cursor-pointer font-medium text-base">
             Public Collection
           </Label>
-          <p className={'text-sm text-muted-foreground'}>
+          <p className={'text-muted-foreground text-sm'}>
             Make this collection visible on your public profile
           </p>
         </div>
@@ -177,11 +177,11 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
         <div className="space-y-4">
           <div>
             <Label className="text-base">Add Bookmarks (Optional)</Label>
-            <p className={'text-sm text-muted-foreground mt-1'}>
+            <p className={'mt-1 text-muted-foreground text-sm'}>
               Select bookmarks to add to this collection. You can add more later.
             </p>
           </div>
-          <div className="max-h-64 overflow-y-auto space-y-2 rounded-lg border p-4">
+          <div className="max-h-64 space-y-2 overflow-y-auto rounded-lg border p-4">
             {bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
@@ -205,7 +205,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                 <div className="flex-1">
                   <Label
                     htmlFor={bookmark.id}
-                    className={`text-sm font-normal cursor-pointer ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}
+                    className={`cursor-pointer font-normal text-sm ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}
                   >
                     <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                       {bookmark.content_type}
@@ -217,7 +217,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             ))}
           </div>
           {selectedBookmarks.length > 0 && (
-            <p className={'text-sm text-muted-foreground'}>
+            <p className={'text-muted-foreground text-sm'}>
               {selectedBookmarks.length} bookmark{selectedBookmarks.length === 1 ? '' : 's'}{' '}
               selected
             </p>
@@ -228,7 +228,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       {/* Empty bookmarks message */}
       {mode === 'create' && bookmarks.length === 0 && (
         <div className="rounded-lg border border-dashed p-6 text-center">
-          <p className={'text-sm text-muted-foreground'}>
+          <p className={'text-muted-foreground text-sm'}>
             You don't have any bookmarks yet. Create the collection first and add bookmarks later.
           </p>
         </div>

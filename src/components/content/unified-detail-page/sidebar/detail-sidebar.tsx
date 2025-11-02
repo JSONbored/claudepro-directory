@@ -90,7 +90,7 @@ export const DetailSidebar = memo(function DetailSidebar({
             {showGitHubLink && githubUrl && (
               <Button variant="outline" className="w-full justify-start" asChild>
                 <a href={githubUrl} target="_blank" rel="noopener noreferrer">
-                  <Github className="h-4 w-4 mr-2" />
+                  <Github className="mr-2 h-4 w-4" />
                   View on GitHub
                 </a>
               </Button>
@@ -98,7 +98,7 @@ export const DetailSidebar = memo(function DetailSidebar({
             {hasDocumentationUrl && 'documentation_url' in item && item.documentation_url && (
               <Button variant="outline" className="w-full justify-start" asChild>
                 <a href={item.documentation_url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4 mr-2" />
+                  <ExternalLink className="mr-2 h-4 w-4" />
                   Documentation
                 </a>
               </Button>
@@ -116,11 +116,11 @@ export const DetailSidebar = memo(function DetailSidebar({
           <CardContent className="space-y-4">
             {item.category && (
               <div>
-                <h4 className={'font-medium mb-1'}>Category</h4>
+                <h4 className={'mb-1 font-medium'}>Category</h4>
                 <UnifiedBadge
                   variant="base"
                   style="default"
-                  className={`text-xs font-medium ${
+                  className={`font-medium text-xs ${
                     BADGE_COLORS.category[item.category as CategoryType] ||
                     BADGE_COLORS.category.default
                   }`}
@@ -146,14 +146,14 @@ export const DetailSidebar = memo(function DetailSidebar({
               }
               return (
                 <div>
-                  <h4 className={'font-medium mb-1'}>Temperature</h4>
+                  <h4 className={'mb-1 font-medium'}>Temperature</h4>
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                     <Thermometer className="h-3 w-3 text-orange-500" />
                     <UnifiedBadge
                       variant="base"
                       style="outline"
                       className={
-                        'text-xs font-medium bg-orange-500/10 text-orange-600 border-orange-500/30'
+                        'border-orange-500/30 bg-orange-500/10 font-medium text-orange-600 text-xs'
                       }
                     >
                       {String(config.temperature)}
@@ -165,7 +165,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasPackage && packageName && (
               <div>
-                <h4 className={'font-medium mb-1'}>Package</h4>
+                <h4 className={'mb-1 font-medium'}>Package</h4>
                 <UnifiedBadge variant="base" style="outline" className="font-mono text-xs">
                   {packageName}
                 </UnifiedBadge>
@@ -174,7 +174,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasAuth && (
               <div>
-                <h4 className={'font-medium mb-1'}>Authentication</h4>
+                <h4 className={'mb-1 font-medium'}>Authentication</h4>
                 <p className={UI_CLASSES.TEXT_SM_MUTED}>
                   {(metadata.requiresAuth as boolean) ? 'Required' : 'Not required'}
                 </p>
@@ -183,7 +183,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasPermissions && (metadata.permissions as string[])?.length > 0 && (
               <div>
-                <h4 className={'font-medium mb-1'}>Permissions</h4>
+                <h4 className={'mb-1 font-medium'}>Permissions</h4>
                 <div className="flex flex-wrap gap-1">
                   {(metadata.permissions as string[]).map((perm: string) => (
                     <UnifiedBadge key={perm} variant="base" style="outline" className="text-xs">
@@ -196,7 +196,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasSource && 'source' in item && item.source && (
               <div>
-                <h4 className={'font-medium mb-1'}>Source</h4>
+                <h4 className={'mb-1 font-medium'}>Source</h4>
                 <UnifiedBadge variant="base" style="outline">
                   {item.source}
                 </UnifiedBadge>
@@ -226,17 +226,17 @@ export const DetailSidebar = memo(function DetailSidebar({
                 <Link
                   key={relatedSlug}
                   href={getContentItemUrl({ category: relatedCategory, slug: relatedSlug } as any)}
-                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer w-full text-left block`}
+                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} block w-full cursor-pointer rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted/50`}
                 >
-                  <div className={'flex-1 min-w-0'}>
-                    <h4 className="font-medium text-sm truncate">{getDisplayTitle(relatedItem)}</h4>
-                    <p className="text-xs text-muted-foreground truncate">
+                  <div className={'min-w-0 flex-1'}>
+                    <h4 className="truncate font-medium text-sm">{getDisplayTitle(relatedItem)}</h4>
+                    <p className="truncate text-muted-foreground text-xs">
                       {'description' in relatedItem && typeof relatedItem.description === 'string'
                         ? relatedItem.description
                         : ''}
                     </p>
                   </div>
-                  <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0 ml-2" />
+                  <ExternalLink className="ml-2 h-4 w-4 flex-shrink-0 text-muted-foreground" />
                 </Link>
               );
             })}

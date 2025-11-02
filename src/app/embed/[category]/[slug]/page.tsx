@@ -79,9 +79,9 @@ export default async function EmbedPage({ params, searchParams }: EmbedPageProps
 
   if (!codeToDisplay) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <div className="text-center">
-          <p className="text-muted-foreground mb-4">No code example available</p>
+          <p className="mb-4 text-muted-foreground">No code example available</p>
           <EmbedBacklink category={category} slug={slug} utmSource={utm_source} author={null} />
         </div>
       </div>
@@ -92,20 +92,20 @@ export default async function EmbedPage({ params, searchParams }: EmbedPageProps
 
   return (
     <div
-      className="min-h-screen p-4 bg-background"
+      className="min-h-screen bg-background p-4"
       data-theme={theme}
       style={{
         colorScheme: theme === 'dark' ? 'dark' : theme === 'light' ? 'light' : 'light dark',
       }}
     >
       <div
-        className={`max-w-4xl mx-auto space-y-4 ${showBorder ? 'border border-border rounded-lg p-4' : ''}`}
+        className={`mx-auto max-w-4xl space-y-4 ${showBorder ? 'rounded-lg border border-border p-4' : ''}`}
       >
         {/* Title and description */}
         <div className="space-y-2">
-          <h1 className="text-xl font-bold">{content.title}</h1>
+          <h1 className="font-bold text-xl">{content.title}</h1>
           {content.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2">{content.description}</p>
+            <p className="line-clamp-2 text-muted-foreground text-sm">{content.description}</p>
           )}
         </div>
 
@@ -123,7 +123,7 @@ export default async function EmbedPage({ params, searchParams }: EmbedPageProps
             {content.tags.slice(0, 5).map((tag: string) => (
               <span
                 key={tag}
-                className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-primary/5 text-primary/80 border border-primary/10"
+                className="inline-flex items-center rounded-md border border-primary/10 bg-primary/5 px-2 py-1 text-primary/80 text-xs"
               >
                 {tag}
               </span>
@@ -157,17 +157,17 @@ function EmbedBacklink({
   const backlink = `${APP_CONFIG.url}/${category}/${slug}?utm_source=${utmSource}&utm_medium=embed&utm_campaign=widget_sharing`;
 
   return (
-    <div className="flex items-center justify-between pt-4 border-t border-border">
+    <div className="flex items-center justify-between border-border border-t pt-4">
       <a
         href={backlink}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors group"
+        className="group inline-flex items-center gap-2 text-muted-foreground text-xs transition-colors hover:text-primary"
       >
         <span className="font-medium">View on claudepro.directory</span>
-        <ExternalLink className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+        <ExternalLink className="group-hover:-translate-y-0.5 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
       </a>
-      <span className="text-xs text-muted-foreground">by {author || 'Community'}</span>
+      <span className="text-muted-foreground text-xs">by {author || 'Community'}</span>
     </div>
   );
 }

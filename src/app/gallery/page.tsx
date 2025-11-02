@@ -49,10 +49,10 @@ export default async function GalleryPage() {
   const gridItems = items.slice(10);
 
   return (
-    <Container className="py-12 space-y-16">
+    <Container className="space-y-16 py-12">
       {/* Header */}
-      <div className="text-center space-y-4 max-w-3xl mx-auto">
-        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+      <div className="mx-auto max-w-3xl space-y-4 text-center">
+        <h1 className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text font-bold text-4xl text-transparent md:text-5xl">
           Code Screenshot Gallery
         </h1>
         <p className="text-lg text-muted-foreground">
@@ -65,14 +65,14 @@ export default async function GalleryPage() {
       {trendingItems.length > 0 && (
         <section className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Trending Now</h2>
-            <span className="text-sm text-muted-foreground">
+            <h2 className="font-bold text-2xl">Trending Now</h2>
+            <span className="text-muted-foreground text-sm">
               {trendingItems.length} trending screenshots
             </span>
           </div>
           <Suspense
             fallback={
-              <div className="w-full aspect-[16/10] bg-card rounded-xl border-2 border-border animate-pulse" />
+              <div className="aspect-[16/10] w-full animate-pulse rounded-xl border-2 border-border bg-card" />
             }
           >
             <TrendingCarousel items={trendingItems} autoPlayInterval={5000} />
@@ -84,7 +84,7 @@ export default async function GalleryPage() {
       <section className="flex items-center gap-3 overflow-x-auto pb-2">
         <a
           href="/gallery"
-          className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors whitespace-nowrap"
+          className="inline-flex items-center whitespace-nowrap rounded-full bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90"
         >
           All
         </a>
@@ -92,7 +92,7 @@ export default async function GalleryPage() {
           <a
             key={category}
             href={`/gallery/${category}`}
-            className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-card border border-border hover:border-primary/30 hover:bg-primary/5 transition-colors whitespace-nowrap capitalize"
+            className="inline-flex items-center whitespace-nowrap rounded-full border border-border bg-card px-4 py-2 font-medium text-sm capitalize transition-colors hover:border-primary/30 hover:bg-primary/5"
           >
             {category}
           </a>
@@ -102,12 +102,12 @@ export default async function GalleryPage() {
       {/* Masonry Grid */}
       <section className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">All Screenshots</h2>
-          <span className="text-sm text-muted-foreground">{items.length} total</span>
+          <h2 className="font-bold text-2xl">All Screenshots</h2>
+          <span className="text-muted-foreground text-sm">{items.length} total</span>
         </div>
         <Suspense
           fallback={
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {Array.from({ length: 12 }).map((_, i) => (
                 <Skeleton key={i} className="h-80 rounded-xl" />
               ))}

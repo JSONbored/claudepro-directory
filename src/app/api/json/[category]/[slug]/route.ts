@@ -22,7 +22,7 @@ interface ApiResponse {
 }
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ category: string; slug: string }> }
 ) {
   const { category, slug: slugWithExt } = await params;

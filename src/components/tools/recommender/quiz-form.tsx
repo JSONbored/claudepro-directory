@@ -214,7 +214,7 @@ export function QuizForm() {
       <Card className="relative overflow-hidden">
         <CardHeader>
           <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-muted-foreground text-sm">
               Question {currentQuestion} of {totalQuestions}
             </span>
           </CardTitle>
@@ -229,7 +229,7 @@ export function QuizForm() {
               })}
             >
               <div className="space-y-4">
-                <div className="p-4 bg-muted rounded-lg space-y-2">
+                <div className="space-y-2 rounded-lg bg-muted p-4">
                   <div>
                     <span className="font-medium">Use Case:</span>{' '}
                     <span className="text-muted-foreground">
@@ -270,15 +270,15 @@ export function QuizForm() {
                   )}
                 </div>
 
-                <Card className="bg-primary/5 border-primary/20">
+                <Card className="border-primary/20 bg-primary/5">
                   <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-lg">
                       <Sparkles className="h-5 w-5 text-primary" />
                       What happens next?
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
+                    <ul className="space-y-2 text-muted-foreground text-sm">
                       <li>? We'll analyze 147+ configurations</li>
                       <li>? Match them to your specific needs</li>
                       <li>? Show you the top 8-10 best fits</li>
@@ -325,22 +325,22 @@ export function QuizForm() {
                         }
                       }}
                       disabled={!canSelect}
-                      className={`p-4 text-left rounded-lg border-2 transition-all ${
+                      className={`rounded-lg border-2 p-4 text-left transition-all ${
                         isSelected
                           ? 'border-primary bg-primary/5'
                           : canSelect
                             ? 'border-border hover:border-primary/50'
-                            : 'border-border opacity-50 cursor-not-allowed'
+                            : 'cursor-not-allowed border-border opacity-50'
                       }`}
                     >
                       <div className="font-medium">{option.label}</div>
-                      <div className="text-sm text-muted-foreground mt-1">{option.description}</div>
+                      <div className="mt-1 text-muted-foreground text-sm">{option.description}</div>
                     </button>
                   );
                 })}
               </div>
               {fieldKey && errors[fieldKey] && (
-                <p className="text-sm text-destructive mt-2">{errors[fieldKey]}</p>
+                <p className="mt-2 text-destructive text-sm">{errors[fieldKey]}</p>
               )}
             </QuestionCard>
           )}
@@ -353,14 +353,14 @@ export function QuizForm() {
               onClick={goToPrevious}
               disabled={currentQuestion === 1 || isPending}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="mr-2 h-4 w-4" />
               Previous
             </Button>
 
             {currentQuestion < totalQuestions ? (
               <Button type="button" onClick={goToNext} disabled={isPending}>
                 Next
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             ) : (
               <Button
@@ -371,12 +371,12 @@ export function QuizForm() {
               >
                 {isPending ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="h-4 w-4 mr-2" />
+                    <Sparkles className="mr-2 h-4 w-4" />
                     Get Results
                   </>
                 )}

@@ -69,7 +69,7 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Settings</h1>
+        <h1 className="mb-2 font-bold text-3xl">Settings</h1>
         <p className="text-muted-foreground">Manage your account settings and preferences</p>
       </div>
 
@@ -102,13 +102,13 @@ export default async function SettingsPage() {
           <CardDescription>Your account information</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <p className={'text-sm font-medium'}>Email</p>
+              <p className={'font-medium text-sm'}>Email</p>
               <p className="text-muted-foreground">{user.email}</p>
             </div>
             <div>
-              <p className={'text-sm font-medium'}>Member Since</p>
+              <p className={'font-medium text-sm'}>Member Since</p>
               <p className="text-muted-foreground">
                 {new Date(profile.created_at).toLocaleDateString('en-US', {
                   year: 'numeric',
@@ -118,7 +118,7 @@ export default async function SettingsPage() {
               </p>
             </div>
             <div>
-              <p className={'text-sm font-medium'}>Reputation</p>
+              <p className={'font-medium text-sm'}>Reputation</p>
               <p className="text-muted-foreground">{profile.reputation_score} points</p>
             </div>
           </div>
@@ -140,7 +140,7 @@ export default async function SettingsPage() {
                 alt={`${userData.name || 'User'}'s avatar`}
                 width={64}
                 height={64}
-                className="w-16 h-16 rounded-full object-cover"
+                className="h-16 w-16 rounded-full object-cover"
               />
               <div>
                 <p className="text-sm">

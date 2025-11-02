@@ -229,7 +229,7 @@ export function ProductionCodeBlock({
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             {/* Language badge pill */}
             {language && language !== 'text' && (
-              <span className="px-2 py-0.5 text-2xs font-medium uppercase tracking-wider rounded-full bg-accent/10 text-accent border border-accent/20">
+              <span className="rounded-full border border-accent/20 bg-accent/10 px-2 py-0.5 font-medium text-2xs text-accent uppercase tracking-wider">
                 {language}
               </span>
             )}
@@ -244,7 +244,7 @@ export function ProductionCodeBlock({
                 duration: 0.3,
                 repeat: isScreenshotting ? Number.POSITIVE_INFINITY : 0,
               }}
-              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-code/30 disabled:opacity-50`}
+              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} rounded-md px-3 py-1.5 font-medium text-muted-foreground text-xs transition-colors hover:bg-code/30 hover:text-foreground disabled:opacity-50`}
               style={{ minWidth: '48px', minHeight: '48px' }}
               title="Screenshot code"
             >
@@ -259,7 +259,7 @@ export function ProductionCodeBlock({
               <motion.button
                 type="button"
                 onClick={() => setIsShareOpen(!isShareOpen)}
-                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-code/30`}
+                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} rounded-md px-3 py-1.5 font-medium text-muted-foreground text-xs transition-colors hover:bg-code/30 hover:text-foreground`}
                 style={{ minWidth: '48px', minHeight: '48px' }}
                 title="Share code"
               >
@@ -274,7 +274,7 @@ export function ProductionCodeBlock({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute right-0 top-12 z-50 w-56 p-2 bg-popover border border-border rounded-lg shadow-lg backdrop-blur-sm"
+                  className="absolute top-12 right-0 z-50 w-56 rounded-lg border border-border bg-popover p-2 shadow-lg backdrop-blur-sm"
                   onMouseLeave={() => setIsShareOpen(false)}
                 >
                   {/* Twitter Share */}
@@ -291,7 +291,7 @@ export function ProductionCodeBlock({
                       title: `${category} - ${slug}`,
                       platform: 'twitter',
                     })}
-                    className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-accent/10 rounded-md transition-colors"
+                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-foreground text-sm transition-colors hover:bg-accent/10"
                     onClick={() => {
                       handleShare('twitter');
                     }}
@@ -314,7 +314,7 @@ export function ProductionCodeBlock({
                       title: `${category} - ${slug}`,
                       platform: 'linkedin',
                     })}
-                    className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-accent/10 rounded-md transition-colors"
+                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-foreground text-sm transition-colors hover:bg-accent/10"
                     onClick={() => {
                       handleShare('linkedin');
                     }}
@@ -327,9 +327,9 @@ export function ProductionCodeBlock({
                   <button
                     type="button"
                     onClick={() => handleShare('copy_link')}
-                    className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-accent/10 rounded-md transition-colors"
+                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-foreground text-sm transition-colors hover:bg-accent/10"
                   >
-                    <div className="h-5 w-5 rounded-full bg-accent/20 flex items-center justify-center">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
                       <Copy className="h-3 w-3" />
                     </div>
                     <span>Copy Link</span>
@@ -339,10 +339,10 @@ export function ProductionCodeBlock({
                   <button
                     type="button"
                     onClick={handleEmbedCopy}
-                    className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-accent/10 rounded-md transition-colors border-t border-border/50 mt-1 pt-2"
+                    className="mt-1 flex w-full items-center gap-3 rounded-md border-border/50 border-t px-3 py-2 pt-2 text-foreground text-sm transition-colors hover:bg-accent/10"
                   >
-                    <div className="h-5 w-5 rounded-full bg-accent/20 flex items-center justify-center">
-                      <span className="text-xs font-mono">&lt;/&gt;</span>
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
+                      <span className="font-mono text-xs">&lt;/&gt;</span>
                     </div>
                     <span>Copy Embed Code</span>
                   </button>
@@ -356,7 +356,7 @@ export function ProductionCodeBlock({
               onClick={handleCopy}
               animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: 0.3 }}
-              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-code/30`}
+              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} rounded-md px-3 py-1.5 font-medium text-muted-foreground text-xs transition-colors hover:bg-code/30 hover:text-foreground`}
               title="Copy code"
             >
               {isCopied ? (
@@ -385,7 +385,7 @@ export function ProductionCodeBlock({
       >
         {/* Language badge - top right corner */}
         {language && language !== 'text' && !filename && (
-          <div className="absolute top-3 right-3 z-20 px-2 py-1 text-2xs font-medium uppercase tracking-wide rounded-md bg-accent/10 text-accent border border-accent/20 backdrop-blur-sm">
+          <div className="absolute top-3 right-3 z-20 rounded-md border border-accent/20 bg-accent/10 px-2 py-1 font-medium text-2xs text-accent uppercase tracking-wide backdrop-blur-sm">
             {language}
           </div>
         )}
@@ -393,7 +393,7 @@ export function ProductionCodeBlock({
         {/* Gradient fade when collapsed - with smooth CSS transition */}
         {needsCollapse && !isExpanded && (
           <div
-            className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none z-10 transition-opacity duration-200"
+            className="pointer-events-none absolute right-0 bottom-0 left-0 z-10 h-24 transition-opacity duration-200"
             style={{
               background: 'linear-gradient(to bottom, transparent 0%, var(--color-bg-code) 90%)',
             }}
@@ -414,10 +414,10 @@ export function ProductionCodeBlock({
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className={`flex items-center justify-center gap-2 w-full py-2 text-sm font-medium transition-all hover:scale-105 bg-code/30 backdrop-blur-sm border-t border-border/50 ${
+          className={`flex w-full items-center justify-center gap-2 border-border/50 border-t bg-code/30 py-2 font-medium text-sm backdrop-blur-sm transition-all hover:scale-105 ${
             isExpanded
-              ? 'opacity-100 text-foreground'
-              : 'opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground'
+              ? 'text-foreground opacity-100'
+              : 'text-muted-foreground opacity-0 hover:text-foreground group-hover:opacity-100'
           }`}
         >
           <div

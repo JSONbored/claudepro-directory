@@ -72,8 +72,8 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
         <div className="space-y-4">
           {path.length > 0 && (
             <div className={UI_CLASSES.TEXT_SM_MUTED}>
-              <p className={'font-medium mb-2'}>Diagnostic Path:</p>
-              <ol className={'list-decimal list-inside space-y-1'}>
+              <p className={'mb-2 font-medium'}>Diagnostic Path:</p>
+              <ol className={'list-inside list-decimal space-y-1'}>
                 {path.map((step) => (
                   <li key={step}>{step}</li>
                 ))}
@@ -98,7 +98,7 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <p className={'text-lg font-medium'}>{currentStepData?.question}</p>
+                  <p className={'font-medium text-lg'}>{currentStepData?.question}</p>
                   <div className="flex gap-4">
                     <Button onClick={() => handleAnswer('yes')} variant="default">
                       Yes

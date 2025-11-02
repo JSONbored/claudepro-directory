@@ -9,10 +9,10 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="container mx-auto px-4 py-8 sm:py-12 max-w-4xl">
+    <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">
       <div className="prose prose-invert max-w-none">
-        <h1 className="text-3xl sm:text-4xl font-bold mb-6">Terms of Service</h1>
-        <p className="text-muted-foreground mb-8">
+        <h1 className="mb-6 font-bold text-3xl sm:text-4xl">Terms of Service</h1>
+        <p className="mb-8 text-muted-foreground">
           Last updated:{' '}
           {new Date().toLocaleDateString('en-US', {
             year: 'numeric',
@@ -22,7 +22,7 @@ export default function TermsPage() {
         </p>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
+          <h2 className="mb-4 font-semibold text-2xl">1. Acceptance of Terms</h2>
           <p className="mb-4">
             By accessing and using {APP_CONFIG.name}, you accept and agree to be bound by these
             Terms of Service and our{' '}
@@ -34,13 +34,13 @@ export default function TermsPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">2. Use of Service</h2>
+          <h2 className="mb-4 font-semibold text-2xl">2. Use of Service</h2>
           <p className="mb-4">
             You agree to use our service only for lawful purposes and in accordance with these
             terms.
           </p>
           <p className="mb-4">You agree NOT to:</p>
-          <ul className="list-disc pl-6 space-y-2">
+          <ul className="list-disc space-y-2 pl-6">
             <li>Violate any applicable laws or regulations</li>
             <li>Infringe upon the rights of others</li>
             <li>Upload malicious code or harmful content</li>
@@ -52,14 +52,14 @@ export default function TermsPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">3. User Content</h2>
+          <h2 className="mb-4 font-semibold text-2xl">3. User Content</h2>
           <p className="mb-4">
             You retain ownership of content you submit to {APP_CONFIG.name}. By submitting content,
             you grant us a worldwide, non-exclusive, royalty-free license to use, reproduce, modify,
             and display your content in connection with operating and promoting the service.
           </p>
           <p className="mb-4">You represent and warrant that:</p>
-          <ul className="list-disc pl-6 space-y-2">
+          <ul className="list-disc space-y-2 pl-6">
             <li>You own or have the necessary rights to the content you submit</li>
             <li>Your content does not violate any third-party rights</li>
             <li>Your content complies with these Terms of Service</li>
@@ -67,7 +67,7 @@ export default function TermsPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">4. Intellectual Property</h2>
+          <h2 className="mb-4 font-semibold text-2xl">4. Intellectual Property</h2>
           <p className="mb-4">
             The service and its original content (excluding user-generated content), features, and
             functionality are owned by {APP_CONFIG.author} and are protected by international
@@ -76,7 +76,7 @@ export default function TermsPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">5. Account Termination</h2>
+          <h2 className="mb-4 font-semibold text-2xl">5. Account Termination</h2>
           <p className="mb-4">
             We reserve the right to suspend or terminate your account and access to the service at
             our sole discretion, without notice, for conduct that we believe violates these Terms of
@@ -85,7 +85,7 @@ export default function TermsPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">6. Disclaimers</h2>
+          <h2 className="mb-4 font-semibold text-2xl">6. Disclaimers</h2>
           <p className="mb-4">
             The service is provided "AS IS" and "AS AVAILABLE" without warranties of any kind,
             either express or implied, including but not limited to implied warranties of
@@ -98,7 +98,7 @@ export default function TermsPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">7. Limitation of Liability</h2>
+          <h2 className="mb-4 font-semibold text-2xl">7. Limitation of Liability</h2>
           <p className="mb-4">
             In no event shall {APP_CONFIG.author}, its directors, employees, or agents be liable for
             any indirect, incidental, special, consequential, or punitive damages arising out of or
@@ -107,7 +107,7 @@ export default function TermsPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">8. Indemnification</h2>
+          <h2 className="mb-4 font-semibold text-2xl">8. Indemnification</h2>
           <p className="mb-4">
             You agree to indemnify and hold harmless {APP_CONFIG.author} from any claims, damages,
             losses, liabilities, and expenses (including legal fees) arising from your use of the
@@ -116,7 +116,7 @@ export default function TermsPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">9. Changes to Terms</h2>
+          <h2 className="mb-4 font-semibold text-2xl">9. Changes to Terms</h2>
           <p className="mb-4">
             We reserve the right to modify these Terms of Service at any time. We will notify users
             of any material changes by posting the new terms on this page and updating the "Last
@@ -126,7 +126,7 @@ export default function TermsPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">10. Governing Law</h2>
+          <h2 className="mb-4 font-semibold text-2xl">10. Governing Law</h2>
           <p className="mb-4">
             These Terms of Service shall be governed by and construed in accordance with applicable
             laws, without regard to conflict of law provisions.
@@ -134,7 +134,7 @@ export default function TermsPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">11. Contact Us</h2>
+          <h2 className="mb-4 font-semibold text-2xl">11. Contact Us</h2>
           <p className="mb-4">
             If you have questions about these Terms of Service, please{' '}
             <Link href="/contact" className="text-accent hover:underline">

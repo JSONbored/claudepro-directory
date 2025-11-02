@@ -55,7 +55,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-8">
+      <h1 className="mb-8 font-bold text-4xl">
         {sanitizedQuery ? `Search: "${sanitizedQuery}"` : 'Search Claude Code Directory'}
       </h1>
       <ContentSearchClient

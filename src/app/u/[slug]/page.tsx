@@ -134,19 +134,19 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   alt={`${profile.name || slug}'s profile picture`}
                   width={96}
                   height={96}
-                  className="w-24 h-24 rounded-full border-4 border-background object-cover"
+                  className="h-24 w-24 rounded-full border-4 border-background object-cover"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-full border-4 border-background bg-accent flex items-center justify-center text-2xl font-bold">
+                <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-background bg-accent font-bold text-2xl">
                   {(profile.name || slug).charAt(0).toUpperCase()}
                 </div>
               )}
 
               <div className="mt-4">
-                <h1 className="text-3xl font-bold">{profile.name || slug}</h1>
-                {profile.bio && <p className={'text-sm mt-2 max-w-2xl'}>{profile.bio}</p>}
+                <h1 className="font-bold text-3xl">{profile.name || slug}</h1>
+                {profile.bio && <p className={'mt-2 max-w-2xl text-sm'}>{profile.bio}</p>}
 
-                <div className={'flex items-center gap-4 mt-3 text-sm'}>
+                <div className={'mt-3 flex items-center gap-4 text-sm'}>
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                     <Users className="h-4 w-4" />
                     {followerCount || 0} followers
@@ -185,7 +185,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
       {/* Content */}
       <section className={'container mx-auto px-4 py-12'}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* Stats sidebar */}
           <div className="space-y-4">
             {reputationData &&
@@ -251,14 +251,14 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
           </div>
 
           {/* Main content */}
-          <div className="md:col-span-2 space-y-6">
+          <div className="space-y-6 md:col-span-2">
             <div>
-              <h2 className="text-2xl font-bold mb-4">Recent Posts</h2>
+              <h2 className="mb-4 font-bold text-2xl">Recent Posts</h2>
 
               {!posts || posts.length === 0 ? (
                 <Card>
                   <CardContent className={'flex flex-col items-center py-12'}>
-                    <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
+                    <MessageSquare className="mb-4 h-12 w-12 text-muted-foreground" />
                     <p className="text-muted-foreground">No posts yet</p>
                   </CardContent>
                 </Card>
@@ -273,7 +273,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                               href={post.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="group-hover:text-accent transition-colors-smooth"
+                              className="transition-colors-smooth group-hover:text-accent"
                             >
                               {post.title}
                             </a>
@@ -290,7 +290,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                         )}
                       </CardHeader>
                       <CardContent>
-                        <div className={'flex items-center gap-3 text-xs text-muted-foreground'}>
+                        <div className={'flex items-center gap-3 text-muted-foreground text-xs'}>
                           <UnifiedBadge variant="base" style="secondary">
                             {post.vote_count || 0} votes
                           </UnifiedBadge>
@@ -307,12 +307,12 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
             {/* Public Collections */}
             <div>
-              <h2 className="text-2xl font-bold mb-4">Public Collections</h2>
+              <h2 className="mb-4 font-bold text-2xl">Public Collections</h2>
 
               {!collections || collections.length === 0 ? (
                 <Card>
                   <CardContent className={'flex flex-col items-center py-12'}>
-                    <FolderOpen className="h-12 w-12 text-muted-foreground mb-4" />
+                    <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
                     <p className="text-muted-foreground">No public collections yet</p>
                   </CardContent>
                 </Card>
@@ -352,13 +352,13 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
             {/* Content Contributions */}
             {contributions && contributions.length > 0 && (
               <div>
-                <h2 className="text-2xl font-bold mb-4">Contributions</h2>
+                <h2 className="mb-4 font-bold text-2xl">Contributions</h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {contributions.map((item) => (
                     <Card key={item.id} className={UI_CLASSES.CARD_INTERACTIVE}>
                       <a href={`/${item.content_type}/${item.slug}`}>
                         <CardHeader>
-                          <div className={'flex items-center justify-between mb-2'}>
+                          <div className={'mb-2 flex items-center justify-between'}>
                             <UnifiedBadge variant="base" style="secondary" className="text-xs">
                               {item.content_type}
                             </UnifiedBadge>
@@ -374,7 +374,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <div className={'flex items-center gap-2 text-xs text-muted-foreground'}>
+                          <div className={'flex items-center gap-2 text-muted-foreground text-xs'}>
                             <span>{item.view_count || 0} views</span>
                             <span>•</span>
                             <span>{item.download_count || 0} downloads</span>
@@ -390,7 +390,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
             {/* Badges Section */}
             {userBadges.length > 0 && (
               <div>
-                <h2 className="text-2xl font-bold mb-4">Badges</h2>
+                <h2 className="mb-4 font-bold text-2xl">Badges</h2>
                 <BadgeGrid badges={userBadges} canEdit={isOwner} featuredOnly={false} />
               </div>
             )}

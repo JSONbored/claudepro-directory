@@ -331,10 +331,10 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
               <CheckCircle
                 className={`h-5 w-5 text-green-500 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
               />
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="font-medium">Submission Successful! 🎉</p>
-                <p className={'text-sm text-muted-foreground mt-1'}>{submissionResult.message}</p>
-                <p className={'text-xs text-muted-foreground mt-1'}>
+                <p className={'mt-1 text-muted-foreground text-sm'}>{submissionResult.message}</p>
+                <p className={'mt-1 text-muted-foreground text-xs'}>
                   Status: {submissionResult.status} • ID:{' '}
                   {submissionResult.submission_id.slice(0, 8)}...
                 </p>
@@ -355,7 +355,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Type Selection + Template Selector */}
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor={`${formId}-type`}>Content Type *</Label>
                 <select
@@ -395,7 +395,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
                 placeholder={nameFieldConfig.placeholder}
                 required={nameFieldConfig.required ?? true}
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 {nameFieldConfig.helpText ?? 'A clear, descriptive name for your configuration'}
               </p>
               <DuplicateWarning contentType={contentType} name={name} />
@@ -451,12 +451,12 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
             </div>
 
             {/* Info Box */}
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 sm:p-4">
+            <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-3 sm:p-4">
               <div className={`${UI_CLASSES.FLEX_GAP_2} sm:gap-3`}>
                 <Github className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
-                <div className="flex-1 min-w-0">
-                  <p className={'text-sm font-medium text-blue-400'}>How it works</p>
-                  <p className={'text-sm text-muted-foreground mt-1'}>
+                <div className="min-w-0 flex-1">
+                  <p className={'font-medium text-blue-400 text-sm'}>How it works</p>
+                  <p className={'mt-1 text-muted-foreground text-sm'}>
                     We'll automatically create a Pull Request with your submission. Our team reviews
                     for quality and accuracy, then merges it to make your contribution live!
                   </p>

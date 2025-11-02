@@ -23,39 +23,39 @@ export default function PHBundlePage() {
   return (
     <div className={'container mx-auto px-4 py-12'}>
       {/* Hero Section */}
-      <div className={'max-w-4xl mx-auto text-center mb-16'}>
+      <div className={'mx-auto mb-16 max-w-4xl text-center'}>
         <UnifiedBadge variant="base" style="outline" className="mb-6">
-          <Rocket className="h-3 w-3 mr-1" />
+          <Rocket className="mr-1 h-3 w-3" />
           Product Hunt Launch - November 4th
         </UnifiedBadge>
         <h1
           className={
-            'text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent'
+            'mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text font-bold text-4xl text-transparent md:text-6xl'
           }
         >
           Featured Claude Configurations
         </h1>
-        <p className={'text-xl md:text-2xl text-muted-foreground mb-8'}>
-          Discover <span className="text-primary font-semibold">500+ free configurations</span> to
+        <p className={'mb-8 text-muted-foreground text-xl md:text-2xl'}>
+          Discover <span className="font-semibold text-primary">500+ free configurations</span> to
           supercharge your Claude workflows
         </p>
-        <div className="flex items-center justify-center gap-4 flex-wrap">
+        <div className="flex flex-wrap items-center justify-center gap-4">
           <UnifiedBadge
             variant="base"
-            className="bg-green-500/10 text-green-500 border-green-500/20"
+            className="border-green-500/20 bg-green-500/10 text-green-500"
           >
-            <Sparkles className="h-3 w-3 mr-1" />
+            <Sparkles className="mr-1 h-3 w-3" />
             100% Free
           </UnifiedBadge>
-          <UnifiedBadge variant="base" className="bg-blue-500/10 text-blue-500 border-blue-500/20">
-            <Users className="h-3 w-3 mr-1" />
+          <UnifiedBadge variant="base" className="border-blue-500/20 bg-blue-500/10 text-blue-500">
+            <Users className="mr-1 h-3 w-3" />
             Community-Driven
           </UnifiedBadge>
           <UnifiedBadge
             variant="base"
-            className="bg-purple-500/10 text-purple-500 border-purple-500/20"
+            className="border-purple-500/20 bg-purple-500/10 text-purple-500"
           >
-            <Download className="h-3 w-3 mr-1" />
+            <Download className="mr-1 h-3 w-3" />
             Ready to Use
           </UnifiedBadge>
         </div>
@@ -64,16 +64,16 @@ export default function PHBundlePage() {
       {/* Product Hunt CTA */}
       <Card
         className={
-          'max-w-2xl mx-auto mb-12 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20'
+          'mx-auto mb-12 max-w-2xl border-primary/20 bg-gradient-to-r from-primary/10 to-primary/5'
         }
       >
         <CardContent className="pt-6">
           <div className="text-center">
-            <p className={'text-sm font-semibold text-muted-foreground mb-2'}>
+            <p className={'mb-2 font-semibold text-muted-foreground text-sm'}>
               Support Us on Product Hunt
             </p>
-            <p className={'text-4xl font-bold text-primary mb-2'}>November 4, 2025</p>
-            <p className="text-sm text-muted-foreground">
+            <p className={'mb-2 font-bold text-4xl text-primary'}>November 4, 2025</p>
+            <p className="text-muted-foreground text-sm">
               Help us reach #1 Product of the Day with your upvote
             </p>
           </div>
@@ -81,16 +81,16 @@ export default function PHBundlePage() {
       </Card>
 
       {/* Featured Collections */}
-      <div className={'max-w-5xl mx-auto mb-16'}>
-        <h2 className={'text-3xl font-bold text-center mb-12'}>
+      <div className={'mx-auto mb-16 max-w-5xl'}>
+        <h2 className={'mb-12 text-center font-bold text-3xl'}>
           What's Available in the Directory
         </h2>
         <div className="grid gap-6 md:grid-cols-2">
           {/* Claude Agents Collection */}
-          <Card className={'border-2 hover:border-primary/50 transition-colors'}>
+          <Card className={'border-2 transition-colors hover:border-primary/50'}>
             <CardHeader>
-              <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-blue-500/10 rounded-lg">
+              <div className="mb-4 flex items-start justify-between">
+                <div className="rounded-lg bg-blue-500/10 p-3">
                   <Bot className="h-6 w-6 text-blue-500" />
                 </div>
                 <UnifiedBadge variant="base" className="bg-green-500/10 text-green-500">
@@ -105,23 +105,23 @@ export default function PHBundlePage() {
             <CardContent>
               <ul className="space-y-2">
                 <li className="flex gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
                   <span className="text-sm">API Development Specialist</span>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
                   <span className="text-sm">Security Audit Expert</span>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
                   <span className="text-sm">Database Optimization Pro</span>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
                   <span className="text-sm">Code Review Automation</span>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
                   <span className="text-sm">+ 11 more specialized agents</span>
                 </li>
               </ul>
@@ -129,10 +129,10 @@ export default function PHBundlePage() {
           </Card>
 
           {/* MCP Servers Collection */}
-          <Card className={'border-2 hover:border-primary/50 transition-colors'}>
+          <Card className={'border-2 transition-colors hover:border-primary/50'}>
             <CardHeader>
-              <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-purple-500/10 rounded-lg">
+              <div className="mb-4 flex items-start justify-between">
+                <div className="rounded-lg bg-purple-500/10 p-3">
                   <Zap className="h-6 w-6 text-purple-500" />
                 </div>
                 <UnifiedBadge variant="base" className="bg-green-500/10 text-green-500">
@@ -147,23 +147,23 @@ export default function PHBundlePage() {
             <CardContent>
               <ul className="space-y-2">
                 <li className="flex gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
                   <span className="text-sm">GitHub Advanced Integration</span>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
                   <span className="text-sm">Database Query Assistant</span>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
                   <span className="text-sm">Cloud Services Connector</span>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
                   <span className="text-sm">API Testing Suite</span>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
                   <span className="text-sm">+ 6 more integrations</span>
                 </li>
               </ul>
@@ -171,10 +171,10 @@ export default function PHBundlePage() {
           </Card>
 
           {/* Rules & Commands Collection */}
-          <Card className={'border-2 hover:border-primary/50 transition-colors'}>
+          <Card className={'border-2 transition-colors hover:border-primary/50'}>
             <CardHeader>
-              <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-orange-500/10 rounded-lg">
+              <div className="mb-4 flex items-start justify-between">
+                <div className="rounded-lg bg-orange-500/10 p-3">
                   <Code className="h-6 w-6 text-orange-500" />
                 </div>
                 <UnifiedBadge variant="base" className="bg-green-500/10 text-green-500">
@@ -189,23 +189,23 @@ export default function PHBundlePage() {
             <CardContent>
               <ul className="space-y-2">
                 <li className="flex gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
                   <span className="text-sm">TypeScript Strict Mode Expert</span>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
                   <span className="text-sm">Security Best Practices</span>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
                   <span className="text-sm">Performance Optimization Rules</span>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
                   <span className="text-sm">API Design Standards</span>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
                   <span className="text-sm">+ 16 more rule sets</span>
                 </li>
               </ul>
@@ -215,8 +215,8 @@ export default function PHBundlePage() {
           {/* Community Features */}
           <Card className={'border-2 border-primary/50 bg-primary/5'}>
             <CardHeader>
-              <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
+              <div className="mb-4 flex items-start justify-between">
+                <div className="rounded-lg bg-primary/10 p-3">
                   <Users className="h-6 w-6 text-primary" />
                 </div>
                 <UnifiedBadge variant="base" className="bg-primary/10 text-primary">
@@ -229,23 +229,23 @@ export default function PHBundlePage() {
             <CardContent>
               <ul className="space-y-2">
                 <li className="flex gap-2">
-                  <Star className="h-4 w-4 text-primary mt-0.5" />
+                  <Star className="mt-0.5 h-4 w-4 text-primary" />
                   <span className="text-sm">Contribute your own configurations</span>
                 </li>
                 <li className="flex gap-2">
-                  <Star className="h-4 w-4 text-primary mt-0.5" />
+                  <Star className="mt-0.5 h-4 w-4 text-primary" />
                   <span className="text-sm">Bookmark and organize favorites</span>
                 </li>
                 <li className="flex gap-2">
-                  <Star className="h-4 w-4 text-primary mt-0.5" />
+                  <Star className="mt-0.5 h-4 w-4 text-primary" />
                   <span className="text-sm">Request new configurations</span>
                 </li>
                 <li className="flex gap-2">
-                  <Star className="h-4 w-4 text-primary mt-0.5" />
+                  <Star className="mt-0.5 h-4 w-4 text-primary" />
                   <span className="text-sm">Rate and review community content</span>
                 </li>
                 <li className="flex gap-2">
-                  <Star className="h-4 w-4 text-primary mt-0.5" />
+                  <Star className="mt-0.5 h-4 w-4 text-primary" />
                   <span className="text-sm">Early access to beta features</span>
                 </li>
               </ul>
@@ -255,31 +255,31 @@ export default function PHBundlePage() {
       </div>
 
       {/* Get Started - Free */}
-      <div className={'max-w-3xl mx-auto mb-16'}>
-        <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-2 border-primary/30">
+      <div className={'mx-auto mb-16 max-w-3xl'}>
+        <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
           <CardContent className="pt-8 pb-8">
             <div className="text-center">
-              <p className={'text-sm font-semibold text-muted-foreground mb-2'}>
+              <p className={'mb-2 font-semibold text-muted-foreground text-sm'}>
                 Everything is Free, Forever
               </p>
-              <div className={'flex items-center justify-center gap-4 mb-6'}>
-                <span className={'text-6xl font-bold text-primary'}>$0</span>
+              <div className={'mb-6 flex items-center justify-center gap-4'}>
+                <span className={'font-bold text-6xl text-primary'}>$0</span>
               </div>
               <UnifiedBadge
                 variant="base"
-                className="bg-green-500/10 text-green-500 border-green-500/20 mb-6"
+                className="mb-6 border-green-500/20 bg-green-500/10 text-green-500"
               >
                 100% Free • No Credit Card Required
               </UnifiedBadge>
-              <p className="text-sm text-muted-foreground mb-8">
+              <p className="mb-8 text-muted-foreground text-sm">
                 All configurations • Community-driven • Open access
               </p>
 
-              <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="mb-6 flex items-center justify-center gap-3">
                 <Check className="h-5 w-5 text-green-500" />
                 <span className="text-sm">Instant access to 500+ configurations</span>
               </div>
-              <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="mb-6 flex items-center justify-center gap-3">
                 <Check className="h-5 w-5 text-green-500" />
                 <span className="text-sm">Use in personal and commercial projects</span>
               </div>
@@ -293,45 +293,45 @@ export default function PHBundlePage() {
       </div>
 
       {/* How It Works */}
-      <div className={'max-w-4xl mx-auto mb-16'}>
-        <h2 className={'text-3xl font-bold text-center mb-12'}>How It Works</h2>
+      <div className={'mx-auto mb-16 max-w-4xl'}>
+        <h2 className={'mb-12 text-center font-bold text-3xl'}>How It Works</h2>
         <div className="grid gap-8 md:grid-cols-3">
           <div className="text-center">
             <div
               className={
-                'inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4'
+                'mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10'
               }
             >
-              <span className={'text-2xl font-bold text-primary'}>1</span>
+              <span className={'font-bold text-2xl text-primary'}>1</span>
             </div>
-            <h3 className={'text-lg font-semibold mb-2'}>Join the Waitlist</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className={'mb-2 font-semibold text-lg'}>Join the Waitlist</h3>
+            <p className="text-muted-foreground text-sm">
               Sign up below to get notified when we launch on Product Hunt on November 4th
             </p>
           </div>
           <div className="text-center">
             <div
               className={
-                'inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4'
+                'mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10'
               }
             >
-              <span className={'text-2xl font-bold text-primary'}>2</span>
+              <span className={'font-bold text-2xl text-primary'}>2</span>
             </div>
-            <h3 className={'text-lg font-semibold mb-2'}>Upvote on Product Hunt</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className={'mb-2 font-semibold text-lg'}>Upvote on Product Hunt</h3>
+            <p className="text-muted-foreground text-sm">
               Help us reach #1 Product of the Day with your upvote on November 4th
             </p>
           </div>
           <div className="text-center">
             <div
               className={
-                'inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4'
+                'mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10'
               }
             >
-              <span className={'text-2xl font-bold text-primary'}>3</span>
+              <span className={'font-bold text-2xl text-primary'}>3</span>
             </div>
-            <h3 className={'text-lg font-semibold mb-2'}>Explore & Contribute</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className={'mb-2 font-semibold text-lg'}>Explore & Contribute</h3>
+            <p className="text-muted-foreground text-sm">
               Browse 500+ free configurations, bookmark favorites, and contribute your own
             </p>
           </div>
@@ -339,25 +339,25 @@ export default function PHBundlePage() {
       </div>
 
       {/* Social Proof */}
-      <div className={'max-w-4xl mx-auto mb-16'}>
+      <div className={'mx-auto mb-16 max-w-4xl'}>
         <Card>
           <CardContent className="pt-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div className="grid grid-cols-2 gap-6 text-center md:grid-cols-4">
               <div>
-                <p className={'text-3xl font-bold text-primary mb-1'}>1,000+</p>
-                <p className="text-sm text-muted-foreground">Active Users</p>
+                <p className={'mb-1 font-bold text-3xl text-primary'}>1,000+</p>
+                <p className="text-muted-foreground text-sm">Active Users</p>
               </div>
               <div>
-                <p className={'text-3xl font-bold text-primary mb-1'}>500+</p>
-                <p className="text-sm text-muted-foreground">Configurations</p>
+                <p className={'mb-1 font-bold text-3xl text-primary'}>500+</p>
+                <p className="text-muted-foreground text-sm">Configurations</p>
               </div>
               <div>
-                <p className={'text-3xl font-bold text-primary mb-1'}>50+</p>
-                <p className="text-sm text-muted-foreground">MCP Servers</p>
+                <p className={'mb-1 font-bold text-3xl text-primary'}>50+</p>
+                <p className="text-muted-foreground text-sm">MCP Servers</p>
               </div>
               <div>
-                <p className={'text-3xl font-bold text-primary mb-1'}>4.9/5</p>
-                <p className="text-sm text-muted-foreground">User Rating</p>
+                <p className={'mb-1 font-bold text-3xl text-primary'}>4.9/5</p>
+                <p className="text-muted-foreground text-sm">User Rating</p>
               </div>
             </div>
           </CardContent>
@@ -365,12 +365,12 @@ export default function PHBundlePage() {
       </div>
 
       {/* CTA */}
-      <div className={'text-center max-w-2xl mx-auto mb-16'}>
-        <Card className="bg-primary/5 border-primary/20">
+      <div className={'mx-auto mb-16 max-w-2xl text-center'}>
+        <Card className="border-primary/20 bg-primary/5">
           <CardContent className="pt-8 pb-8">
-            <Rocket className={'h-12 w-12 text-primary mx-auto mb-4'} />
-            <h2 className={'text-2xl font-bold mb-4'}>Join Us on Product Hunt Launch Day</h2>
-            <p className={'text-muted-foreground mb-6'}>
+            <Rocket className={'mx-auto mb-4 h-12 w-12 text-primary'} />
+            <h2 className={'mb-4 font-bold text-2xl'}>Join Us on Product Hunt Launch Day</h2>
+            <p className={'mb-6 text-muted-foreground'}>
               Be part of our community launch on November 4th. Get notified when we go live and help
               us reach #1 Product of the Day with your upvote.
             </p>
@@ -378,17 +378,17 @@ export default function PHBundlePage() {
               <Button size="lg" asChild className="w-full">
                 <Link href={ROUTES.PH_WAITLIST}>
                   Join Launch Waitlist
-                  <Sparkles className={'h-4 w-4 ml-2'} />
+                  <Sparkles className={'ml-2 h-4 w-4'} />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="w-full">
                 <Link href={ROUTES.HOME}>
-                  <Sparkles className={'h-4 w-4 mr-2'} />
+                  <Sparkles className={'mr-2 h-4 w-4'} />
                   Explore Free Configurations
                 </Link>
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-4">
+            <p className="mt-4 text-muted-foreground text-xs">
               100% free • No credit card required • Community-driven
             </p>
           </CardContent>

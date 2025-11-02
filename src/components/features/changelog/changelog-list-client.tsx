@@ -68,7 +68,7 @@ export function ChangelogListClient({ entries, categoryCounts }: ChangelogListCl
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <time
                           dateTime={entry.release_date}
-                          className="text-sm font-medium text-muted-foreground"
+                          className="font-medium text-muted-foreground text-sm"
                           title={formatChangelogDateShort(entry.release_date)}
                         >
                           {displayDate}
@@ -103,7 +103,7 @@ export function ChangelogListClient({ entries, categoryCounts }: ChangelogListCl
                     customMetadataText={
                       <div
                         className={
-                          'flex items-center gap-2 text-sm text-primary group-hover:text-accent transition-colors-smooth font-medium transition-colors'
+                          'flex items-center gap-2 font-medium text-primary text-sm transition-colors transition-colors-smooth group-hover:text-accent'
                         }
                       >
                         <span>Read full changelog</span>

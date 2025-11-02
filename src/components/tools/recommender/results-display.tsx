@@ -143,13 +143,13 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
   return (
     <div className="space-y-8">
-      <div className="text-center space-y-4">
+      <div className="space-y-4 text-center">
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
           <Sparkles className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl md:text-4xl font-bold">Your Personalized Recommendations</h1>
+          <h1 className="font-bold text-3xl md:text-4xl">Your Personalized Recommendations</h1>
         </div>
 
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
           Based on your preferences, we found{' '}
           <strong>{totalMatches} matching configurations</strong>. Here are the top {results.length}{' '}
           best fits for your needs.
@@ -157,11 +157,11 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
         <div className={'flex-wrap items-center justify-center gap-3'}>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
-            <TrendingUp className="h-3 w-3 mr-1" />
+            <TrendingUp className="mr-1 h-3 w-3" />
             {summary.avgMatchScore}% Avg Match
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
-            <BarChart className="h-3 w-3 mr-1" />
+            <BarChart className="mr-1 h-3 w-3" />
             {summary.diversityScore}% Diversity
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="outline" className="text-sm">
@@ -219,8 +219,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className="text-sm font-medium">Minimum Match Score</span>
-                  <span className="text-sm text-muted-foreground">{minScore}%</span>
+                  <span className="font-medium text-sm">Minimum Match Score</span>
+                  <span className="text-muted-foreground text-sm">{minScore}%</span>
                 </div>
                 <Slider
                   value={[minScore]}
@@ -231,15 +231,15 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                   className="w-full"
                   aria-label="Minimum match score"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Only show configurations with at least {minScore}% match
                 </p>
               </div>
 
               <div className="space-y-2">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className="text-sm font-medium">Maximum Results</span>
-                  <span className="text-sm text-muted-foreground">{maxResults}</span>
+                  <span className="font-medium text-sm">Maximum Results</span>
+                  <span className="text-muted-foreground text-sm">{maxResults}</span>
                 </div>
                 <Slider
                   value={[maxResults]}
@@ -250,7 +250,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                   className="w-full"
                   aria-label="Maximum number of results"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Show up to {maxResults} recommendations
                 </p>
               </div>
@@ -277,20 +277,20 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
             <div>
-              <span className="text-sm font-medium">Use Case</span>
-              <p className="text-sm text-muted-foreground mt-1 capitalize">
+              <span className="font-medium text-sm">Use Case</span>
+              <p className="mt-1 text-muted-foreground text-sm capitalize">
                 {String(answers.useCase).replace('-', ' ')}
               </p>
             </div>
             <div>
-              <span className="text-sm font-medium">Experience Level</span>
-              <p className="text-sm text-muted-foreground mt-1 capitalize">
+              <span className="font-medium text-sm">Experience Level</span>
+              <p className="mt-1 text-muted-foreground text-sm capitalize">
                 {String(answers.experienceLevel)}
               </p>
             </div>
             <div>
-              <span className="text-sm font-medium">Tool Preferences</span>
-              <p className="text-sm text-muted-foreground mt-1">
+              <span className="font-medium text-sm">Tool Preferences</span>
+              <p className="mt-1 text-muted-foreground text-sm">
                 {Array.isArray(answers.toolPreferences) ? answers.toolPreferences.join(', ') : ''}
               </p>
             </div>
@@ -298,8 +298,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
               Array.isArray(answers.integrations) &&
               answers.integrations.length > 0 && (
                 <div>
-                  <span className="text-sm font-medium">Integrations</span>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <span className="font-medium text-sm">Integrations</span>
+                  <p className="mt-1 text-muted-foreground text-sm">
                     {answers.integrations.join(', ')}
                   </p>
                 </div>
@@ -308,16 +308,16 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
               Array.isArray(answers.focusAreas) &&
               answers.focusAreas.length > 0 && (
                 <div>
-                  <span className="text-sm font-medium">Focus Areas</span>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <span className="font-medium text-sm">Focus Areas</span>
+                  <p className="mt-1 text-muted-foreground text-sm">
                     {answers.focusAreas.join(', ')}
                   </p>
                 </div>
               )}
             {answers.teamSize && (
               <div>
-                <span className="text-sm font-medium">Team Size</span>
-                <p className="text-sm text-muted-foreground mt-1 capitalize">
+                <span className="font-medium text-sm">Team Size</span>
+                <p className="mt-1 text-muted-foreground text-sm capitalize">
                   {String(answers.teamSize)}
                 </p>
               </div>
@@ -327,7 +327,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
       </Card>
 
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-        <TabsList className={'flex-wrap h-auto'}>
+        <TabsList className={'h-auto flex-wrap'}>
           {categories.map((category) => {
             const count =
               category === 'all'
@@ -371,9 +371,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                           <UnifiedBadge
                             variant="base"
                             style="secondary"
-                            className={`${getMatchScoreColor(matchScore)} font-bold text-base px-3 py-1`}
+                            className={`${getMatchScoreColor(matchScore)} px-3 py-1 font-bold text-base`}
                           >
-                            <Sparkles className="h-3 w-3 mr-1" />
+                            <Sparkles className="mr-1 h-3 w-3" />
                             {matchScore}%
                           </UnifiedBadge>
                         </TooltipTrigger>
@@ -391,12 +391,12 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         style="outline"
                         className="bg-background/80 backdrop-blur-sm"
                       >
-                        <Award className="h-3 w-3 mr-1" />#{result.rank}
+                        <Award className="mr-1 h-3 w-3" />#{result.rank}
                       </UnifiedBadge>
                     </div>
                   )}
 
-                  <div className="absolute bottom-4 right-4 z-10">
+                  <div className="absolute right-4 bottom-4 z-10">
                     <UnifiedButton
                       variant="bookmark"
                       contentType={result.category}
@@ -406,7 +406,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                   </div>
 
                   <div
-                    className={`absolute inset-0 bg-gradient-to-br ${getMatchGradient(matchScore)} opacity-50 pointer-events-none`}
+                    className={`absolute inset-0 bg-gradient-to-br ${getMatchGradient(matchScore)} pointer-events-none opacity-50`}
                   />
 
                   <Link href={targetPath}>
@@ -418,7 +418,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                       tags={result.tags}
                       maxVisibleTags={4}
                       author={result.author}
-                      className="relative overflow-hidden hover:shadow-lg transition-all"
+                      className="relative overflow-hidden transition-all hover:shadow-lg"
                       renderTopBadges={() => (
                         <UnifiedBadge variant="base" style="outline" className="w-fit capitalize">
                           {result.category}
@@ -427,14 +427,14 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                       renderContent={() => (
                         <>
                           <div
-                            className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} p-3 bg-accent/50 rounded-lg mb-3`}
+                            className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} mb-3 rounded-lg bg-accent/50 p-3`}
                           >
                             <Info
                               className={`h-4 w-4 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
                             />
                             <div>
-                              <p className="text-sm font-medium">Why recommended:</p>
-                              <p className="text-sm text-muted-foreground">
+                              <p className="font-medium text-sm">Why recommended:</p>
+                              <p className="text-muted-foreground text-sm">
                                 {result.primary_reason}
                               </p>
                             </div>
@@ -462,12 +462,12 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="w-full group -mx-4 -mb-4 mt-2"
+                          className="group -mx-4 -mb-4 mt-2 w-full"
                           asChild
                         >
                           <span className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
                             View Details
-                            <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                           </span>
                         </Button>
                       }
@@ -489,7 +489,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </TabsContent>
       </Tabs>
 
-      <Card className="bg-primary/5 border-primary/20">
+      <Card className="border-primary/20 bg-primary/5">
         <CardHeader>
           <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Sparkles className="h-5 w-5 text-primary" />
@@ -497,7 +497,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Ready to start using these configurations? Click any card to view detailed setup
             instructions, examples, and documentation.
           </p>

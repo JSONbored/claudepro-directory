@@ -86,7 +86,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
         <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
           <div className="flex-1">
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
-              <h1 className="text-3xl font-bold">{collection.name}</h1>
+              <h1 className="font-bold text-3xl">{collection.name}</h1>
               {collection.is_public && (
                 <UnifiedBadge variant="base" style="outline" className="text-xs">
                   Public
@@ -96,7 +96,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
             {collection.description && (
               <p className="text-muted-foreground">{collection.description}</p>
             )}
-            <div className={'text-sm text-muted-foreground mt-2'}>
+            <div className={'mt-2 text-muted-foreground text-sm'}>
               {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'} •{' '}
               {collection.view_count} views
             </div>
@@ -147,26 +147,26 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Total Items</CardTitle>
+            <CardTitle className="font-medium text-sm">Total Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{collection.item_count}</div>
+            <div className="font-bold text-2xl">{collection.item_count}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Views</CardTitle>
+            <CardTitle className="font-medium text-sm">Views</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{collection.view_count}</div>
+            <div className="font-bold text-2xl">{collection.view_count}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Visibility</CardTitle>
+            <CardTitle className="font-medium text-sm">Visibility</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{collection.is_public ? 'Public' : 'Private'}</div>
+            <div className="font-bold text-2xl">{collection.is_public ? 'Public' : 'Private'}</div>
           </CardContent>
         </Card>
       </div>

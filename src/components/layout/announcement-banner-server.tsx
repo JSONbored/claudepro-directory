@@ -39,7 +39,7 @@ const getActiveAnnouncement = cache(async (): Promise<Tables<'announcements'> | 
     }
 
     return data;
-  } catch (error) {
+  } catch (_error) {
     // Mock client or connection error - silently fail
     return null;
   }

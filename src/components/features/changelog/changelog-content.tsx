@@ -71,7 +71,7 @@ export const ChangelogContent = memo(({ entry, sections }: ChangelogContentProps
   if (changes.Security && changes.Security.length > 0) nonEmptyCategories.push('Security');
 
   return (
-    <article className={'space-y-6 max-w-none'}>
+    <article className={'max-w-none space-y-6'}>
       {/* Category Badges */}
       {nonEmptyCategories.length > 0 && (
         <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} py-2`}>

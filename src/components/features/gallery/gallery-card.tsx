@@ -45,16 +45,16 @@ export function GalleryCard({
     >
       <a
         href={`/${category}/${slug}`}
-        className="block relative rounded-xl border-2 border-border bg-card overflow-hidden shadow-lg hover:shadow-2xl hover:border-primary/30 transition-all duration-300"
+        className="relative block overflow-hidden rounded-xl border-2 border-border bg-card shadow-lg transition-all duration-300 hover:border-primary/30 hover:shadow-2xl"
       >
         {/* Preview Image Placeholder */}
-        <div className="relative aspect-[4/3] bg-gradient-to-br from-primary/5 via-transparent to-primary/10 flex items-center justify-center overflow-hidden">
+        <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-primary/10">
           {/* Hover Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+          <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
           {/* Camera Icon Placeholder */}
-          <div className="relative z-0 flex items-center justify-center w-full h-full">
-            <Camera className="w-16 h-16 text-muted-foreground/30 group-hover:scale-110 transition-transform duration-300" />
+          <div className="relative z-0 flex h-full w-full items-center justify-center">
+            <Camera className="h-16 w-16 text-muted-foreground/30 transition-transform duration-300 group-hover:scale-110" />
           </div>
 
           {/* Category Badge */}
@@ -69,18 +69,18 @@ export function GalleryCard({
           </div>
 
           {/* Engagement Metrics on Hover */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="flex items-center gap-4 text-white text-sm">
+          <div className="absolute right-0 bottom-0 left-0 z-20 p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <div className="flex items-center gap-4 text-sm text-white">
               <div className="flex items-center gap-1.5">
-                <Camera className="w-4 h-4" />
+                <Camera className="h-4 w-4" />
                 <span className="font-medium">{screenshot_count}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Share2 className="w-4 h-4" />
+                <Share2 className="h-4 w-4" />
                 <span className="font-medium">{share_count}</span>
               </div>
-              <div className="flex items-center gap-1.5 ml-auto">
-                <TrendingUp className="w-4 h-4" />
+              <div className="ml-auto flex items-center gap-1.5">
+                <TrendingUp className="h-4 w-4" />
                 <span className="font-medium">{Math.round(trending_score)}</span>
               </div>
             </div>
@@ -88,12 +88,12 @@ export function GalleryCard({
         </div>
 
         {/* Card Content */}
-        <div className="p-4 space-y-3">
-          <h3 className="font-bold text-lg line-clamp-2 group-hover:text-primary transition-colors duration-200">
+        <div className="space-y-3 p-4">
+          <h3 className="line-clamp-2 font-bold text-lg transition-colors duration-200 group-hover:text-primary">
             {title}
           </h3>
 
-          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+          <p className="line-clamp-2 text-muted-foreground text-sm leading-relaxed">
             {description}
           </p>
 
@@ -103,13 +103,13 @@ export function GalleryCard({
               {tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center px-2 py-0.5 rounded-md text-xs bg-primary/5 text-primary/80 border border-primary/10"
+                  className="inline-flex items-center rounded-md border border-primary/10 bg-primary/5 px-2 py-0.5 text-primary/80 text-xs"
                 >
                   {tag}
                 </span>
               ))}
               {tags.length > 3 && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs text-muted-foreground">
+                <span className="inline-flex items-center rounded-md px-2 py-0.5 text-muted-foreground text-xs">
                   +{tags.length - 3}
                 </span>
               )}
@@ -117,13 +117,13 @@ export function GalleryCard({
           )}
 
           {/* Author */}
-          <div className="flex items-center gap-2 pt-2 border-t border-border/50">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-              <span className="text-xs font-medium text-primary">
+          <div className="flex items-center gap-2 border-border/50 border-t pt-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/5">
+              <span className="font-medium text-primary text-xs">
                 {author.charAt(0).toUpperCase()}
               </span>
             </div>
-            <span className="text-xs text-muted-foreground">{author}</span>
+            <span className="text-muted-foreground text-xs">{author}</span>
           </div>
         </div>
       </a>

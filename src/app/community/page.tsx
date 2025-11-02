@@ -9,7 +9,7 @@ const UnifiedNewsletterCapture = dynamic(
       default: mod.UnifiedNewsletterCapture,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
 
@@ -28,41 +28,41 @@ export default function CommunityPage() {
   return (
     <div className={'min-h-screen bg-background'}>
       {/* Hero Section */}
-      <section className={'relative py-24 px-4 overflow-hidden'}>
+      <section className={'relative overflow-hidden px-4 py-24'}>
         <div className={'container mx-auto text-center'}>
-          <div className={'max-w-3xl mx-auto'}>
+          <div className={'mx-auto max-w-3xl'}>
             <UnifiedBadge
               variant="base"
               style="outline"
               className={'mb-6 border-accent/20 bg-accent/5 text-accent'}
             >
-              <Users className="h-3 w-3 mr-1 text-accent" />
+              <Users className="mr-1 h-3 w-3 text-accent" />
               Community
             </UnifiedBadge>
 
-            <h1 className={'text-4xl md:text-6xl font-bold mb-6'}>Join the Claude Community</h1>
+            <h1 className={'mb-6 font-bold text-4xl md:text-6xl'}>Join the Claude Community</h1>
 
             <p className={UI_CLASSES.TEXT_HEADING_LARGE}>
               Connect with developers and AI enthusiasts building with Claude. Share your
               configurations, learn from the community, and contribute to our open-source directory.
             </p>
 
-            <div className={'flex flex-wrap gap-4 justify-center'}>
+            <div className={'flex flex-wrap justify-center gap-4'}>
               <Button size="lg" asChild>
                 <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer">
-                  <Github className={'h-5 w-5 mr-2'} />
+                  <Github className={'mr-2 h-5 w-5'} />
                   GitHub
                 </a>
               </Button>
               <Button size="lg" variant="outline" asChild>
                 <a href={SOCIAL_LINKS.discord} target="_blank" rel="noopener noreferrer">
-                  <MessageSquare className={'h-5 w-5 mr-2'} />
+                  <MessageSquare className={'mr-2 h-5 w-5'} />
                   Discord
                 </a>
               </Button>
               <Button size="lg" variant="outline" asChild>
                 <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noopener noreferrer">
-                  <Twitter className={'h-5 w-5 mr-2'} />X (Twitter)
+                  <Twitter className={'mr-2 h-5 w-5'} />X (Twitter)
                 </a>
               </Button>
             </div>
@@ -82,7 +82,7 @@ export default function CommunityPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={'text-3xl font-bold'}>100%</div>
+                <div className={'font-bold text-3xl'}>100%</div>
                 <p className="text-muted-foreground">Free and open source</p>
               </CardContent>
             </Card>
@@ -95,7 +95,7 @@ export default function CommunityPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={'text-3xl font-bold'}>50+</div>
+                <div className={'font-bold text-3xl'}>50+</div>
                 <p className="text-muted-foreground">Curated configurations</p>
               </CardContent>
             </Card>
@@ -108,7 +108,7 @@ export default function CommunityPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={'text-3xl font-bold'}>Growing</div>
+                <div className={'font-bold text-3xl'}>Growing</div>
                 <p className="text-muted-foreground">Join us on GitHub</p>
               </CardContent>
             </Card>
@@ -125,20 +125,20 @@ export default function CommunityPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className={'font-semibold mb-2'}>1. Fork the Repository</h3>
+                <h3 className={'mb-2 font-semibold'}>1. Fork the Repository</h3>
                 <p className="text-muted-foreground">
                   Start by forking our GitHub repository and cloning it to your local machine.
                 </p>
               </div>
               <div>
-                <h3 className={'font-semibold mb-2'}>2. Add Your Configuration</h3>
+                <h3 className={'mb-2 font-semibold'}>2. Add Your Configuration</h3>
                 <p className="text-muted-foreground">
                   Create a new JSON file with your Claude configuration in the appropriate content
                   directory.
                 </p>
               </div>
               <div>
-                <h3 className={'font-semibold mb-2'}>3. Submit a Pull Request</h3>
+                <h3 className={'mb-2 font-semibold'}>3. Submit a Pull Request</h3>
                 <p className="text-muted-foreground">
                   Submit a pull request with your contribution. Our team will review it promptly.
                 </p>

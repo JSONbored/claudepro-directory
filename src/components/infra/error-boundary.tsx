@@ -30,8 +30,8 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
   }, [resetErrorBoundary]);
 
   return (
-    <div className={'min-h-screen bg-background flex items-center justify-center p-4'}>
-      <Card className={'max-w-2xl w-full'}>
+    <div className={'flex min-h-screen items-center justify-center bg-background p-4'}>
+      <Card className={'w-full max-w-2xl'}>
         <CardHeader>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
             <AlertTriangle className="h-8 w-8 text-destructive" aria-hidden="true" />
@@ -45,9 +45,9 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {isDevelopment && error && (
-            <div className={'rounded-lg bg-muted p-4 space-y-2'}>
+            <div className={'space-y-2 rounded-lg bg-muted p-4'}>
               <p className={'font-semibold text-sm'}>Error Details:</p>
-              <pre className={'text-xs overflow-auto'}>{error.toString()}</pre>
+              <pre className={'overflow-auto text-xs'}>{error.toString()}</pre>
               {error.stack && (
                 <details className="text-xs">
                   <summary className="cursor-pointer font-semibold">Stack Trace</summary>
@@ -59,11 +59,11 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
 
           <div className="flex gap-3">
             <Button onClick={handleReset} variant="default">
-              <RefreshCw className="h-4 w-4 mr-2" />
+              <RefreshCw className="mr-2 h-4 w-4" />
               Try Again
             </Button>
             <Button onClick={handleGoHome} variant="outline">
-              <Home className="h-4 w-4 mr-2" />
+              <Home className="mr-2 h-4 w-4" />
               Go Home
             </Button>
           </div>

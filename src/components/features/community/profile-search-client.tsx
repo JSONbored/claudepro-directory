@@ -26,14 +26,14 @@ export interface ProfileSearchClientProps {
 function ProfileSearchClientComponent({ users }: ProfileSearchClientProps) {
   if (!users || users.length === 0) {
     return (
-      <div className="text-center py-12">
+      <div className="py-12 text-center">
         <p className="text-muted-foreground">No community members found</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {users.map((user, index) => (
         <ProfileCard key={user.slug || user.name || `user-${index}`} user={user} />
       ))}

@@ -111,23 +111,14 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
       aria-label="Site announcement"
       aria-live="polite"
       aria-atomic="true"
-      className="w-full pt-2 px-3 pb-2 hidden md:block relative z-[60]"
+      className="relative z-[60] hidden w-full px-3 pt-2 pb-2 md:block"
     >
       {/* Rounded pill container */}
       <div className="container mx-auto">
         <div
-          className={`
-            rounded-full
-            border border-accent/20
-            bg-accent/10
-            backdrop-blur-sm
-            transition-all
-            duration-300
-            motion-reduce:transition-none
-            shadow-sm
-            hover:shadow-md
-            hover:border-accent/30
-          `}
+          className={
+            'rounded-full border border-accent/20 bg-accent/10 shadow-sm backdrop-blur-sm transition-all duration-300 hover:border-accent/30 hover:shadow-md motion-reduce:transition-none'
+          }
         >
           <div className="px-4 py-2 md:px-6 md:py-2.5">
             <div className={UI_CLASSES.FLEX_COL_SM_ROW_ITEMS_CENTER_JUSTIFY_BETWEEN}>
@@ -137,12 +128,12 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                 className={'flex-1 border-none bg-transparent shadow-none'}
               >
                 {announcement.tag && (
-                  <AnnouncementTag className={'text-[9px] sm:text-xs flex-shrink-0 font-bold'}>
+                  <AnnouncementTag className={'flex-shrink-0 font-bold text-[9px] sm:text-xs'}>
                     {announcement.tag}
                   </AnnouncementTag>
                 )}
 
-                <AnnouncementTitle className="text-[11px] sm:text-sm font-semibold text-foreground">
+                <AnnouncementTitle className="font-semibold text-[11px] text-foreground sm:text-sm">
                   {announcement.href ? (
                     <Link
                       href={announcement.href}
@@ -151,7 +142,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent && (
                         <IconComponent
-                          className={'h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0'}
+                          className={'h-3 w-3 flex-shrink-0 sm:h-4 sm:w-4'}
                           aria-hidden="true"
                         />
                       )}
@@ -161,7 +152,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent && (
                         <IconComponent
-                          className={'h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0'}
+                          className={'h-3 w-3 flex-shrink-0 sm:h-4 sm:w-4'}
                           aria-hidden="true"
                         />
                       )}
@@ -176,21 +167,11 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                   type="button"
                   onClick={dismiss}
                   aria-label="Dismiss announcement"
-                  className={`
-                    flex items-center justify-center
-                    min-w-[36px] min-h-[36px]
-                    sm:min-w-[40px] sm:min-h-[40px]
-                    hover:bg-accent/20
-                    rounded-full
-                    transition-colors
-                    duration-200
-                    focus-visible:ring-2
-                    focus-visible:ring-accent
-                    focus-visible:ring-offset-2
-                    flex-shrink-0
-                  `}
+                  className={
+                    'flex min-h-[36px] min-w-[36px] flex-shrink-0 items-center justify-center rounded-full transition-colors duration-200 hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 sm:min-h-[40px] sm:min-w-[40px]'
+                  }
                 >
-                  <X className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-foreground" aria-hidden="true" />
+                  <X className="h-3.5 w-3.5 text-foreground sm:h-4 sm:w-4" aria-hidden="true" />
                 </button>
               )}
             </div>

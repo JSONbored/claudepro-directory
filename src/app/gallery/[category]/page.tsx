@@ -78,10 +78,10 @@ export default async function CategoryGalleryPage({ params }: CategoryGalleryPag
   const capitalizedCategory = category.charAt(0).toUpperCase() + category.slice(1);
 
   return (
-    <Container className="py-12 space-y-16">
+    <Container className="space-y-16 py-12">
       {/* Header */}
-      <div className="text-center space-y-4 max-w-3xl mx-auto">
-        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+      <div className="mx-auto max-w-3xl space-y-4 text-center">
+        <h1 className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text font-bold text-4xl text-transparent md:text-5xl">
           {capitalizedCategory} Screenshots
         </h1>
         <p className="text-lg text-muted-foreground">
@@ -93,7 +93,7 @@ export default async function CategoryGalleryPage({ params }: CategoryGalleryPag
       <section className="flex items-center gap-3 overflow-x-auto pb-2">
         <a
           href="/gallery"
-          className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-card border border-border hover:border-primary/30 hover:bg-primary/5 transition-colors whitespace-nowrap"
+          className="inline-flex items-center whitespace-nowrap rounded-full border border-border bg-card px-4 py-2 font-medium text-sm transition-colors hover:border-primary/30 hover:bg-primary/5"
         >
           All
         </a>
@@ -101,10 +101,10 @@ export default async function CategoryGalleryPage({ params }: CategoryGalleryPag
           <a
             key={cat}
             href={`/gallery/${cat}`}
-            className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap capitalize ${
+            className={`inline-flex items-center whitespace-nowrap rounded-full px-4 py-2 font-medium text-sm capitalize transition-colors ${
               cat === category
                 ? 'bg-primary text-primary-foreground'
-                : 'bg-card border border-border hover:border-primary/30 hover:bg-primary/5'
+                : 'border border-border bg-card hover:border-primary/30 hover:bg-primary/5'
             }`}
           >
             {cat}
@@ -116,14 +116,14 @@ export default async function CategoryGalleryPage({ params }: CategoryGalleryPag
       {trendingItems.length > 0 && (
         <section className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Trending {capitalizedCategory}</h2>
-            <span className="text-sm text-muted-foreground">
+            <h2 className="font-bold text-2xl">Trending {capitalizedCategory}</h2>
+            <span className="text-muted-foreground text-sm">
               {trendingItems.length} trending screenshots
             </span>
           </div>
           <Suspense
             fallback={
-              <div className="w-full aspect-[16/10] bg-card rounded-xl border-2 border-border animate-pulse" />
+              <div className="aspect-[16/10] w-full animate-pulse rounded-xl border-2 border-border bg-card" />
             }
           >
             <TrendingCarousel items={trendingItems} autoPlayInterval={5000} />
@@ -134,12 +134,12 @@ export default async function CategoryGalleryPage({ params }: CategoryGalleryPag
       {/* Masonry Grid */}
       <section className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">All {capitalizedCategory} Screenshots</h2>
-          <span className="text-sm text-muted-foreground">{items.length} total</span>
+          <h2 className="font-bold text-2xl">All {capitalizedCategory} Screenshots</h2>
+          <span className="text-muted-foreground text-sm">{items.length} total</span>
         </div>
         <Suspense
           fallback={
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {Array.from({ length: 12 }).map((_, i) => (
                 <Skeleton key={i} className="h-80 rounded-xl" />
               ))}
@@ -153,16 +153,16 @@ export default async function CategoryGalleryPage({ params }: CategoryGalleryPag
       {/* Empty State */}
       {items.length === 0 && (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center mb-4">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/5">
             <span className="text-3xl">📸</span>
           </div>
-          <h3 className="text-lg font-semibold mb-2">No {category} screenshots yet</h3>
-          <p className="text-sm text-muted-foreground max-w-md mb-6">
+          <h3 className="mb-2 font-semibold text-lg">No {category} screenshots yet</h3>
+          <p className="mb-6 max-w-md text-muted-foreground text-sm">
             Be the first to create and share code screenshots from {category}
           </p>
           <a
             href={`/${category}`}
-            className="inline-flex items-center px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Browse {capitalizedCategory}
           </a>

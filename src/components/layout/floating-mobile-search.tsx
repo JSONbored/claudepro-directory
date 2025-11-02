@@ -38,7 +38,7 @@ export function FloatingMobileSearch() {
 
   return (
     <motion.div
-      className="md:hidden fixed bottom-20 right-4 z-40"
+      className="fixed right-4 bottom-20 z-40 md:hidden"
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: 0.5, type: 'spring', stiffness: 260, damping: 20 }}
@@ -48,7 +48,7 @@ export function FloatingMobileSearch() {
       <Button
         variant="default"
         size="lg"
-        className="w-14 h-14 rounded-full bg-accent text-accent-foreground shadow-lg hover:shadow-xl transition-shadow duration-200"
+        className="h-14 w-14 rounded-full bg-accent text-accent-foreground shadow-lg transition-shadow duration-200 hover:shadow-xl"
         onClick={handleSearchClick}
         aria-label="Open search"
       >
