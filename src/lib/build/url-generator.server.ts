@@ -16,7 +16,7 @@ export interface SitemapUrl {
 }
 
 const SITE_URL_CACHE_TAG = 'site-urls';
-const SITE_URL_CACHE_SECONDS = 60 * 60 * 6; // 6 hours
+const SITE_URL_CACHE_SECONDS = 60 * 60; // 1 hour (2025 best practice - faster updates)
 
 interface SiteUrlRow {
   path: string;
@@ -25,6 +25,9 @@ interface SiteUrlRow {
   priority: number;
 }
 
+// Stale cache fallback - serves last good data if database unavailable
+let _staleCache: SiteUrlRow[] | null = null;
+
 const fetchSiteUrls = unstable_cache(
   async (): Promise<SiteUrlRow[]> => {
     const supabase = await createAdminClient();
@@ -32,10 +35,24 @@ const fetchSiteUrls = unstable_cache(
 
     if (error) {
       logger.error('Failed to fetch site URLs from Supabase', error);
+
+      // Return stale cache if available (graceful degradation)
+      if (_staleCache && _staleCache.length > 0) {
+        logger.warn('Returning stale cache due to database error', {
+          cachedUrlCount: _staleCache.length,
+        });
+        return _staleCache;
+      }
+
       throw new Error(`Failed to fetch site URLs: ${error.message}`);
     }
 
-    return (data ?? []) as SiteUrlRow[];
+    const urls = (data ?? []) as SiteUrlRow[];
+
+    // Update stale cache on successful fetch
+    _staleCache = urls;
+
+    return urls;
   },
   ['get-site-urls'],
   {

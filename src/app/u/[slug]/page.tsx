@@ -110,7 +110,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     }),
     supabase
       .from('tier_display_config')
-      .select('*')
+      .select('tier, label, css_classes')
       .eq('active', true)
       .then((res) => res.data || []),
   ]);

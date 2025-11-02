@@ -31,8 +31,12 @@ export default async function AccountDashboard() {
     .select('*', { count: 'exact', head: true })
     .eq('user_id', user.id);
 
-  // Get user profile
-  const { data: profile } = await supabase.from('users').select('*').eq('id', user.id).single();
+  // Get user profile - Optimized: Select only needed columns (4/21 = 81% reduction)
+  const { data: profile } = await supabase
+    .from('users')
+    .select('name, reputation_score, tier, created_at')
+    .eq('id', user.id)
+    .single();
 
   const accountAge = profile?.created_at
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))

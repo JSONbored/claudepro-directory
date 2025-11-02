@@ -4,7 +4,6 @@
  */
 
 import type { CategoryId } from '@/src/lib/config/category-types';
-import type { Database } from '@/src/types/database.types';
 
 /**
  * Discovery Metadata Type (matches database JSONB structure)

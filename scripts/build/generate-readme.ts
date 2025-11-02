@@ -5,9 +5,46 @@
  * Generates README.md by querying content and category_configs tables directly.
  */
 
-import { writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
+import type { Tables } from '@/src/types/database.types';
+
+// ============================================================================
+// Environment Loading
+// ============================================================================
+
+const ROOT = process.cwd();
+const ENV_LOCAL = join(ROOT, '.env.local');
+
+function loadEnvFromFile(): void {
+  if (!existsSync(ENV_LOCAL)) {
+    console.error('❌ .env.local not found. Run: vercel env pull .env.local --yes');
+    process.exit(1);
+  }
+
+  try {
+    const envContent = readFileSync(ENV_LOCAL, 'utf-8');
+    const envVars = envContent
+      .split('\n')
+      .filter((line) => line && !line.startsWith('#'))
+      .map((line) => {
+        const [key, ...values] = line.split('=');
+        return [key, values.join('=').replace(/^["']|["']$/g, '')];
+      });
+
+    for (const [key, value] of envVars) {
+      if (key && value) {
+        process.env[key] = value;
+      }
+    }
+  } catch (error) {
+    console.error('❌ Failed to read .env.local:', error);
+    process.exit(1);
+  }
+}
+
+loadEnvFromFile();
 
 // ============================================================================
 // Supabase Client
@@ -64,7 +101,7 @@ async function getCategoryConfigs() {
     .from('category_configs')
     .select('category, title, description, icon_name, url_slug')
     .in('category', README_CATEGORIES)
-    .order('category');
+    .order('title');
 
   if (error) throw new Error(`Failed to fetch categories: ${error.message}`);
   return data || [];
@@ -95,14 +132,17 @@ async function getTotalContentCount() {
 // README Generation
 // ============================================================================
 
-async function generateCategorySection(categoryConfig: any, contentItems: any[]) {
+async function generateCategorySection(
+  categoryConfig: Tables<'category_configs'>,
+  contentItems: Tables<'content'>[]
+) {
   const count = contentItems.length;
   if (count === 0) return '';
 
   const emoji = ICON_EMOJI_MAP[categoryConfig.icon_name] || '📄';
   const categoryName = categoryConfig.title.endsWith('y')
-    ? categoryConfig.title.slice(0, -1) + 'ies' // Rule → Rules
-    : categoryConfig.title + 's'; // Agent → Agents
+    ? `${categoryConfig.title.slice(0, -1)}ies` // Rule → Rules
+    : `${categoryConfig.title}s`; // Agent → Agents
 
   let section = `## ${emoji} ${categoryName} (${count})\n\n`;
   section += `${categoryConfig.description}\n\n`;
@@ -184,7 +224,7 @@ See our [Contributing Guide](.github/CONTRIBUTING.md) for detailed instructions.
 
 Browse all available Claude configurations by category:
 
-${categorySections.join('')}
+${categorySections.join('\n')}
 
 ---
 
@@ -242,8 +282,8 @@ async function main() {
       if (items.length > 0) {
         const emoji = ICON_EMOJI_MAP[cat.icon_name] || '📄';
         const categoryName = cat.title.endsWith('y')
-          ? cat.title.slice(0, -1) + 'ies'
-          : cat.title + 's';
+          ? `${cat.title.slice(0, -1)}ies`
+          : `${cat.title}s`;
         console.log(`   ${emoji} ${categoryName}: ${items.length}`);
       }
     }
@@ -253,4 +293,7 @@ async function main() {
   }
 }
 
-main();
+main().catch((error) => {
+  console.error('❌ Fatal error:', error);
+  process.exit(1);
+});

@@ -7,13 +7,13 @@ export default function Loading() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b border-border/50 bg-card/30">
+      <div className="border-border/50 border-b bg-card/30">
         <div className="container mx-auto px-4 py-8">
           {/* Back button */}
           <Skeleton size="sm" width="sm" className="mb-6" />
 
           {/* Title section */}
-          <div className="flex items-start gap-4 mb-6">
+          <div className="mb-6 flex items-start gap-4">
             <Skeleton size="xl" width="xs" className="shrink-0" />
             <div className="flex-1 space-y-4">
               <Skeleton size="xl" width="3/4" />

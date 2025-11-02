@@ -8,6 +8,7 @@
  */
 
 import { cache } from 'react';
+import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
 import type { Tables } from '@/src/types/database.types';
 import { AnnouncementBannerClient } from './announcement-banner-client';
@@ -33,7 +34,7 @@ const getActiveAnnouncement = cache(async (): Promise<Tables<'announcements'> | 
       .maybeSingle();
 
     if (error) {
-      console.error('Failed to load announcement:', error);
+      logger.error('Failed to load announcement', error, { source: 'AnnouncementBanner' });
       return null;
     }
 

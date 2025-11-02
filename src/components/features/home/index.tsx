@@ -38,6 +38,7 @@ import {
 } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { logger } from '@/src/lib/logger';
 import type { HomePageClientProps } from '@/src/lib/schemas/components/page-props.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -98,7 +99,7 @@ function HomePageClientComponent({
         // RPC returns search results - cast to ContentItem[]
         setSearchResults((data || []) as unknown as ContentItem[]);
       } catch (error) {
-        console.error('Search failed:', error);
+        logger.error('Search failed', error as Error, { source: 'HomePageSearch' });
         setSearchResults(allConfigs);
       } finally {
         setIsSearching(false);
@@ -130,7 +131,7 @@ function HomePageClientComponent({
 
   // Filter search results by active tab - optimized with Set lookups
   // When not searching, use the full dataset (allConfigs) instead of searchResults
-  // With TanStack Virtual, we pass the ENTIRE dataset - virtualization handles rendering
+  // With Intersection Observer infinite scroll, we pass the ENTIRE dataset - pagination handles rendering
   const filteredResults = useMemo((): ContentItem[] => {
     // Use allConfigs when not searching, searchResults when searching
     const dataSource = isSearching ? searchResults : allConfigs;

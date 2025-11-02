@@ -48,7 +48,7 @@ export const ConfigCard = memo(
     showCategory = true,
     showActions = true,
     renderSponsoredWrapper,
-    enableSwipeGestures = false, // Enable mobile swipe gestures (copy/bookmark)
+    enableSwipeGestures = true, // Enable mobile swipe gestures (copy/bookmark)
     useViewTransitions = true, // Enable smooth page morphing with View Transitions API (Baseline as of October 2025)
     showBorderBeam = false, // Position-based BorderBeam animation (top 3 featured items)
   }: ConfigCardProps) => {

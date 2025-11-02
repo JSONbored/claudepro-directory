@@ -28,7 +28,7 @@ import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unifi
 import { getCategoryConfig, isValidCategory } from '@/src/lib/config/category-config';
 import { detectLanguage } from '@/src/lib/content/language-detection';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import { highlightCode } from '@/src/lib/content/syntax-highlighting-starry';
+import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
@@ -103,42 +103,42 @@ export async function UnifiedDetailPage({
   // Generate display title (Server Component - direct computation)
   const displayTitle = getDisplayTitle(item);
 
+  // Extract metadata fields from metadata JSONB column
+  const metadata =
+    'metadata' in item && item.metadata ? (item.metadata as Record<string, unknown>) : {};
+
   // Generate content using data from database (generators moved to PostgreSQL)
   const installation = (() => {
-    if ('installation' in item && item.installation) {
-      if (typeof item.installation === 'object' && !Array.isArray(item.installation)) {
-        return item.installation as InstallationSteps;
-      }
+    // Check top-level first (for backward compatibility), then metadata
+    const inst = ('installation' in item && item.installation) || metadata.installation;
+    if (inst && typeof inst === 'object' && !Array.isArray(inst)) {
+      return inst as InstallationSteps;
     }
     return undefined;
   })();
 
   const useCases = (() => {
-    return 'use_cases' in item && Array.isArray(item.use_cases) && item.use_cases.length > 0
-      ? item.use_cases
-      : [];
+    // Check top-level first, then metadata
+    const cases = ('use_cases' in item && item.use_cases) || metadata.use_cases;
+    return Array.isArray(cases) && cases.length > 0 ? cases : [];
   })();
 
   const features = (() => {
-    return 'features' in item && Array.isArray(item.features) && item.features.length > 0
-      ? item.features
-      : [];
+    // Check top-level first, then metadata
+    const feats = ('features' in item && item.features) || metadata.features;
+    return Array.isArray(feats) && feats.length > 0 ? feats : [];
   })();
 
   const troubleshooting = (() => {
-    return 'troubleshooting' in item &&
-      Array.isArray(item.troubleshooting) &&
-      item.troubleshooting.length > 0
-      ? item.troubleshooting
-      : [];
+    // Check top-level first, then metadata
+    const trouble = ('troubleshooting' in item && item.troubleshooting) || metadata.troubleshooting;
+    return Array.isArray(trouble) && trouble.length > 0 ? trouble : [];
   })();
 
   const requirements = (() => {
-    return 'requirements' in item &&
-      Array.isArray(item.requirements) &&
-      item.requirements.length > 0
-      ? item.requirements
-      : [];
+    // Check top-level first, then metadata
+    const reqs = ('requirements' in item && item.requirements) || metadata.requirements;
+    return Array.isArray(reqs) && reqs.length > 0 ? reqs : [];
   })();
 
   // ============================================================================
@@ -155,15 +155,18 @@ export async function UnifiedDetailPage({
       return null;
     }
 
-    // Extract content from item
+    // Extract content from item (check top-level first, then metadata)
     let content = '';
     if ('content' in item && typeof (item as { content?: string }).content === 'string') {
       content = (item as { content: string }).content;
     } else if (
-      'configuration' in item &&
-      (item as unknown as { configuration?: unknown }).configuration
+      ('configuration' in item && (item as unknown as { configuration?: unknown }).configuration) ||
+      metadata.configuration
     ) {
-      const cfg = (item as unknown as { configuration?: unknown }).configuration;
+      const cfg =
+        ('configuration' in item &&
+          (item as unknown as { configuration?: unknown }).configuration) ||
+        metadata.configuration;
       content = typeof cfg === 'string' ? cfg : JSON.stringify(cfg, null, 2);
     }
 
@@ -184,13 +187,15 @@ export async function UnifiedDetailPage({
 
   // Pre-process configuration highlighting (ConfigurationSection data)
   const configData = await (async () => {
-    if (!('configuration' in item && item.configuration)) return null;
+    // Check top-level first, then metadata
+    const configuration = ('configuration' in item && item.configuration) || metadata.configuration;
+    if (!configuration) return null;
 
     const format = item.category === 'mcp' ? 'multi' : item.category === 'hooks' ? 'hook' : 'json';
 
     // Multi-format configuration (MCP servers)
     if (format === 'multi') {
-      const config = item.configuration as {
+      const config = configuration as {
         claudeDesktop?: Record<string, unknown>;
         claudeCode?: Record<string, unknown>;
         http?: Record<string, unknown>;
@@ -226,7 +231,7 @@ export async function UnifiedDetailPage({
 
     // Hook configuration format
     if (format === 'hook') {
-      const config = item.configuration as {
+      const config = configuration as {
         hookConfig?: { hooks?: Record<string, unknown> };
         scriptContent?: string;
       };
@@ -234,10 +239,10 @@ export async function UnifiedDetailPage({
       try {
         const [highlightedHookConfig, highlightedScript] = await batchFetch([
           config.hookConfig
-            ? highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json')
+            ? Promise.resolve(highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json'))
             : Promise.resolve(null),
           config.scriptContent
-            ? highlightCode(config.scriptContent, 'bash')
+            ? Promise.resolve(highlightCode(config.scriptContent, 'bash'))
             : Promise.resolve(null),
         ]);
 
@@ -266,7 +271,7 @@ export async function UnifiedDetailPage({
 
     // Default JSON configuration
     try {
-      const code = JSON.stringify(item.configuration, null, 2);
+      const code = JSON.stringify(configuration, null, 2);
       const html = await highlightCode(code, 'json');
       const filename = generateFilename({ item, language: 'json' });
 
@@ -327,6 +332,79 @@ export async function UnifiedDetailPage({
       );
 
       return highlightedExamples;
+    } catch (_error) {
+      return null;
+    }
+  })();
+
+  // Pre-process installation steps highlighting (InstallationSection data)
+  const installationData = await (async () => {
+    if (!installation) return null;
+
+    // Helper to detect if a step is a command (should be highlighted)
+    const isCommandStep = (step: string): boolean => {
+      return /^(claude|npm|npx|pnpm|yarn|git|curl|bash|sh|python|pip|brew|apt|docker|cd|mkdir|cp|mv|rm|cat|echo|export|source)\s/.test(
+        step.trim()
+      );
+    };
+
+    try {
+      // Process claudeCode steps
+      const claudeCodeSteps = installation.claudeCode?.steps
+        ? await batchMap(installation.claudeCode.steps, async (step) => {
+            if (isCommandStep(step)) {
+              const html = await highlightCode(step, 'bash');
+              return { type: 'command' as const, html, code: step };
+            }
+            return { type: 'text' as const, text: step };
+          })
+        : null;
+
+      // Process claudeDesktop steps
+      const claudeDesktopSteps = installation.claudeDesktop?.steps
+        ? await batchMap(installation.claudeDesktop.steps, async (step) => {
+            if (isCommandStep(step)) {
+              const html = await highlightCode(step, 'bash');
+              return { type: 'command' as const, html, code: step };
+            }
+            return { type: 'text' as const, text: step };
+          })
+        : null;
+
+      // Process SDK steps
+      const sdkSteps = installation.sdk?.steps
+        ? await batchMap(installation.sdk.steps, async (step) => {
+            if (isCommandStep(step)) {
+              const html = await highlightCode(step, 'bash');
+              return { type: 'command' as const, html, code: step };
+            }
+            return { type: 'text' as const, text: step };
+          })
+        : null;
+
+      return {
+        claudeCode: claudeCodeSteps
+          ? {
+              steps: claudeCodeSteps,
+              ...(installation.claudeCode?.configPath && {
+                configPath: installation.claudeCode.configPath,
+              }),
+              ...(installation.claudeCode?.configFormat && {
+                configFormat: installation.claudeCode.configFormat,
+              }),
+            }
+          : null,
+        claudeDesktop: claudeDesktopSteps
+          ? {
+              steps: claudeDesktopSteps,
+              ...(installation.claudeDesktop?.configPath && {
+                configPath: installation.claudeDesktop.configPath,
+              }),
+            }
+          : null,
+        sdk: sdkSteps ? { steps: sdkSteps } : null,
+        ...(installation.requirements && { requirements: installation.requirements }),
+      };
     } catch (_error) {
       return null;
     }
@@ -424,10 +502,10 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Installation Section */}
-            {config && config.sections.installation && installation && (
+            {config && config.sections.installation && installationData && (
               <UnifiedContentSection
                 variant="installation"
-                installation={installation}
+                installationData={installationData}
                 item={item}
               />
             )}

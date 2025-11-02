@@ -29,8 +29,6 @@
 import { usePathname } from 'next/navigation';
 import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useId, useState } from 'react';
-import { postCopyEmailCaptureAction } from '#lib/actions/email-capture';
-import { trackEvent } from '#lib/analytics/tracker';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -49,9 +47,12 @@ import {
 } from '@/src/components/primitives/sheet';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
+import { postCopyEmailCaptureAction } from '@/src/lib/actions/email-capture';
+import { trackEvent } from '@/src/lib/analytics/tracker';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
 import { Mail, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
+import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -489,8 +490,8 @@ function FooterBarVariant({
   const [isVisible, setIsVisible] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
-  // Pages that have their own InlineEmailCTA should not show sticky bar
-  const pagesWithInlineCTA = [
+  // Pages that have their own InlineEmailCTA (loaded from app_settings)
+  const [pagesWithInlineCTA, setPagesWithInlineCTA] = useState<string[]>([
     '/',
     '/trending',
     '/guides',
@@ -510,7 +511,32 @@ function FooterBarVariant({
     '/hooks/',
     '/statuslines/',
     '/collections/',
-  ];
+  ]);
+
+  // Load excluded pages from app_settings on mount
+  useEffect(() => {
+    const loadExcludedPages = async () => {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase.rpc('get_app_settings', {
+          p_category: 'newsletter',
+        });
+
+        if (data) {
+          const settings = data as Record<string, { value: unknown }>;
+          const excludedPages = settings['newsletter.excluded_pages']?.value;
+
+          if (Array.isArray(excludedPages) && excludedPages.length > 0) {
+            setPagesWithInlineCTA(excludedPages as string[]);
+          }
+        }
+      } catch {
+        // Silent fail - uses hardcoded fallback
+      }
+    };
+
+    loadExcludedPages();
+  }, []);
 
   const hasInlineCTA =
     respectInlineCTA && pagesWithInlineCTA.some((page) => pathname?.startsWith(page));

@@ -1003,7 +1003,7 @@
      Phase 1: Unified styling + max-height
      ======================================== */
 
-  /* Shiki syntax highlighting - line and word highlights */
+  /* Sugar High syntax highlighting - line and word highlights */
   .line--highlighted {
     background-color: var(--color-accent-subtle);
     border-left: 2px solid var(--color-accent);

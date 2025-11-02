@@ -39,6 +39,7 @@ const UnifiedNewsletterCapture = dynamic(
 );
 
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
+import { APP_CONFIG } from '@/src/lib/constants';
 import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -46,10 +47,22 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Generate metadata for changelog list page
+ * Includes RSS/Atom feed discovery links (2025 best practice)
  */
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    return generatePageMetadata('/changelog');
+    const baseMetadata = await generatePageMetadata('/changelog');
+
+    // Add RSS/Atom feed discovery links
+    return {
+      ...baseMetadata,
+      alternates: {
+        types: {
+          'application/rss+xml': `${APP_CONFIG.url}/changelog/rss.xml`,
+          'application/atom+xml': `${APP_CONFIG.url}/changelog/atom.xml`,
+        },
+      },
+    };
   } catch (error) {
     logger.error(
       'Failed to generate changelog metadata',
@@ -58,6 +71,12 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
       title: 'Changelog - Claude Pro Directory',
       description: 'Track all updates, features, and improvements to Claude Pro Directory.',
+      alternates: {
+        types: {
+          'application/rss+xml': `${APP_CONFIG.url}/changelog/rss.xml`,
+          'application/atom+xml': `${APP_CONFIG.url}/changelog/atom.xml`,
+        },
+      },
     };
   }
 }

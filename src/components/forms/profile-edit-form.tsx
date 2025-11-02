@@ -9,11 +9,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { refreshProfileFromOAuth, updateProfile } from '#lib/actions/user';
 import { FormField } from '@/src/components/forms/utilities/form-field';
 import { ListItemManager } from '@/src/components/forms/utilities/list-item-manager';
 import { ToggleField } from '@/src/components/forms/utilities/toggle-field';
 import { Button } from '@/src/components/primitives/button';
+import { refreshProfileFromOAuth, updateProfile } from '@/src/lib/actions/user.actions';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Tables } from '@/src/types/database.types';
 

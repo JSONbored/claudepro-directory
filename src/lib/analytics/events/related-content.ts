@@ -8,7 +8,7 @@
  * - Uses consolidated events (Umami best practices)
  */
 
-import { trackEvent } from '#lib/analytics/tracker';
+import { trackEvent } from '@/src/lib/analytics/tracker';
 
 /**
  * Track related content section view with consolidated analytics

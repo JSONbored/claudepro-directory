@@ -246,7 +246,7 @@ export function mockIntersectionObserver() {
 
   return {
     triggerIntersection(isIntersecting: boolean) {
-      callbacks.forEach((cb) => {
+      for (const cb of callbacks) {
         cb(
           [
             {
@@ -261,7 +261,7 @@ export function mockIntersectionObserver() {
           ],
           {} as IntersectionObserver
         );
-      });
+      }
     },
   };
 }

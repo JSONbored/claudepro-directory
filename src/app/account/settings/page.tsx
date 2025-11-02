@@ -32,10 +32,20 @@ export default async function SettingsPage() {
 
   if (!user) return null;
 
-  const [{ data: profile }, { data: userData }] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
+  const [profileResult, { data: userData }] = await Promise.all([
+    // Optimized: Select only needed columns (10/16 = 38% reduction)
+    supabase
+      .from('profiles')
+      .select(
+        'display_name, bio, work, website, social_x_link, interests, profile_public, follow_email, created_at, reputation_score'
+      )
+      .eq('id', user.id)
+      .single(),
     supabase.from('users').select('slug, name, image, tier').eq('id', user.id).single(),
   ]);
+
+  // Cast to partial profile type (form only uses selected fields)
+  const profile = profileResult.data as Database['public']['Tables']['profiles']['Row'] | null;
 
   if (!profile) {
     await supabase.from('profiles').upsert({

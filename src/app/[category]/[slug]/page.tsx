@@ -24,6 +24,7 @@ import {
 } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import type { Database } from '@/src/types/database.types';
 
 export const revalidate = 21600;
 
@@ -63,7 +64,7 @@ export async function generateMetadata({
 
   return generatePageMetadata('/:category/:slug', {
     params: { category, slug },
-    item: itemMeta as any,
+    item: itemMeta as unknown,
     categoryConfig: config || undefined,
     category,
     slug,
@@ -142,7 +143,11 @@ export default async function DetailPage({
             },
           ]}
         />
-        <CollectionDetailView collection={fullItem as any} />
+        <CollectionDetailView
+          collection={
+            fullItem as Database['public']['Tables']['content']['Row'] & { category: 'collections' }
+          }
+        />
       </>
     );
   }

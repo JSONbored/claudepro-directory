@@ -82,7 +82,6 @@ import {
 } from '@/src/lib/icons';
 import type { ContentItem } from '@/src/lib/schemas/component.schema';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
-import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
@@ -193,7 +192,27 @@ export type UnifiedContentSectionProps =
     }
   | {
       variant: 'installation';
-      installation: InstallationSteps;
+      installationData: {
+        claudeCode: {
+          steps: Array<
+            { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
+          >;
+          configPath?: Record<string, string>;
+          configFormat?: string;
+        } | null;
+        claudeDesktop: {
+          steps: Array<
+            { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
+          >;
+          configPath?: Record<string, string>;
+        } | null;
+        sdk: {
+          steps: Array<
+            { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
+          >;
+        } | null;
+        requirements?: string[];
+      };
       item: ContentItem;
       className?: string;
     };
@@ -535,7 +554,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
   // INSTALLATION VARIANT
   // ============================================================================
   if (props.variant === 'installation') {
-    const { installation, className } = props;
+    const { installationData, className } = props;
 
     return (
       <motion.div {...SCROLL_REVEAL_ANIMATION}>
@@ -547,87 +566,150 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
             </CardTitle>
             <CardDescription>Setup instructions and requirements</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
             {/* Claude Code installation */}
-            {typeof installation === 'object' &&
-              'claudeCode' in installation &&
-              installation.claudeCode && (
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-medium mb-2">Claude Code Setup</h4>
-                    <ol className="list-decimal list-inside space-y-1 text-sm">
-                      {installation.claudeCode.steps?.map((step: string) => (
-                        <li key={step.slice(0, 50)} className="leading-relaxed">
-                          {step}
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                  {installation.claudeCode.configPath && (
-                    <div>
-                      <h4 className="font-medium mb-2">Configuration Paths</h4>
-                      <div className="space-y-1 text-sm">
-                        {Object.entries(installation.claudeCode.configPath).map(
-                          ([location, path]) => (
-                            <div key={location} className={UI_CLASSES.FLEX_GAP_2}>
-                              <UnifiedBadge variant="base" style="outline" className="capitalize">
-                                {location}
-                              </UnifiedBadge>
-                              <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                                {String(path)}
-                              </code>
-                            </div>
-                          )
-                        )}
+            {installationData.claudeCode && (
+              <div className="space-y-4">
+                <h4 className="font-medium">Claude Code Setup</h4>
+                <div className="space-y-3">
+                  {installationData.claudeCode.steps.map((step, index) => {
+                    if (step.type === 'command') {
+                      return (
+                        <div key={`cc-${index}`} className="space-y-2">
+                          <div className="text-sm text-muted-foreground">
+                            Step {index + 1}: Run command
+                          </div>
+                          <ProductionCodeBlock
+                            html={step.html}
+                            code={step.code}
+                            language="bash"
+                            filename={`install-step-${index + 1}.sh`}
+                            maxLines={10}
+                          />
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={`cc-${index}`} className="flex items-start gap-3">
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                        <span className="text-sm leading-relaxed">{step.text}</span>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })}
                 </div>
-              )}
+                {installationData.claudeCode.configPath && (
+                  <div>
+                    <h5 className="font-medium mb-2 text-sm">Configuration Paths</h5>
+                    <div className="space-y-1 text-sm">
+                      {Object.entries(installationData.claudeCode.configPath).map(
+                        ([location, path]) => (
+                          <div key={location} className={UI_CLASSES.FLEX_GAP_2}>
+                            <UnifiedBadge variant="base" style="outline" className="capitalize">
+                              {location}
+                            </UnifiedBadge>
+                            <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                              {String(path)}
+                            </code>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Claude Desktop installation (for MCP servers) */}
-            {typeof installation === 'object' &&
-              'claudeDesktop' in installation &&
-              installation.claudeDesktop && (
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-medium mb-2">Claude Desktop Setup</h4>
-                    <ol className="list-decimal list-inside space-y-1 text-sm">
-                      {installation.claudeDesktop.steps?.map((step: string) => (
-                        <li key={step.slice(0, 50)} className="leading-relaxed">
-                          {step}
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                  {installation.claudeDesktop.configPath && (
-                    <div>
-                      <h4 className="font-medium mb-2">Configuration Paths</h4>
-                      <div className="space-y-1 text-sm">
-                        {Object.entries(installation.claudeDesktop.configPath).map(
-                          ([platform, path]) => (
-                            <div key={platform} className={UI_CLASSES.FLEX_GAP_2}>
-                              <UnifiedBadge variant="base" style="outline" className="capitalize">
-                                {platform}
-                              </UnifiedBadge>
-                              <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                                {String(path)}
-                              </code>
-                            </div>
-                          )
-                        )}
+            {installationData.claudeDesktop && (
+              <div className="space-y-4">
+                <h4 className="font-medium">Claude Desktop Setup</h4>
+                <div className="space-y-3">
+                  {installationData.claudeDesktop.steps.map((step, index) => {
+                    if (step.type === 'command') {
+                      return (
+                        <div key={`cd-${index}`} className="space-y-2">
+                          <div className="text-sm text-muted-foreground">
+                            Step {index + 1}: Run command
+                          </div>
+                          <ProductionCodeBlock
+                            html={step.html}
+                            code={step.code}
+                            language="bash"
+                            filename={`desktop-step-${index + 1}.sh`}
+                            maxLines={10}
+                          />
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={`cd-${index}`} className="flex items-start gap-3">
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                        <span className="text-sm leading-relaxed">{step.text}</span>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })}
                 </div>
-              )}
+                {installationData.claudeDesktop.configPath && (
+                  <div>
+                    <h5 className="font-medium mb-2 text-sm">Configuration Paths</h5>
+                    <div className="space-y-1 text-sm">
+                      {Object.entries(installationData.claudeDesktop.configPath).map(
+                        ([platform, path]) => (
+                          <div key={platform} className={UI_CLASSES.FLEX_GAP_2}>
+                            <UnifiedBadge variant="base" style="outline" className="capitalize">
+                              {platform}
+                            </UnifiedBadge>
+                            <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                              {String(path)}
+                            </code>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SDK installation */}
+            {installationData.sdk && (
+              <div className="space-y-4">
+                <h4 className="font-medium">SDK Setup</h4>
+                <div className="space-y-3">
+                  {installationData.sdk.steps.map((step, index) => {
+                    if (step.type === 'command') {
+                      return (
+                        <div key={`sdk-${index}`} className="space-y-2">
+                          <div className="text-sm text-muted-foreground">
+                            Step {index + 1}: Run command
+                          </div>
+                          <ProductionCodeBlock
+                            html={step.html}
+                            code={step.code}
+                            language="bash"
+                            filename={`sdk-step-${index + 1}.sh`}
+                            maxLines={10}
+                          />
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={`sdk-${index}`} className="flex items-start gap-3">
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                        <span className="text-sm leading-relaxed">{step.text}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Requirements */}
-            {installation.requirements && installation.requirements.length > 0 && (
-              <div className="mt-4">
+            {installationData.requirements && installationData.requirements.length > 0 && (
+              <div>
                 <h4 className="font-medium mb-2">Requirements</h4>
                 <ul className="space-y-2">
-                  {installation.requirements.map((requirement: string) => (
+                  {installationData.requirements.map((requirement: string) => (
                     <li
                       key={requirement.slice(0, 50)}
                       className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}

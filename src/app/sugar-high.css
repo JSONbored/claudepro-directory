@@ -1,0 +1,203 @@
+/**
+ * Sugar High Syntax Highlighting Styles
+ * Clean, modern theme with NO dark backgrounds on tokens
+ * Lightweight alternative to Starry Night (1KB vs 100KB+)
+ * @see https://github.com/huozhi/sugar-high
+ */
+
+/* Base Styles */
+.sugar-high {
+  color: var(--color-text, hsl(var(--foreground)));
+  background-color: transparent;
+  font-family: var(--font-mono, "Monaco", "Consolas", monospace);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Token Colors - Clean Dark Theme (NO backgrounds) */
+[data-sh-token-type="keyword"] {
+  color: #ff7b72;
+  font-weight: 500;
+}
+
+[data-sh-token-type="string"] {
+  color: #a5d6ff;
+}
+
+[data-sh-token-type="comment"] {
+  color: #8b949e;
+  font-style: italic;
+}
+
+[data-sh-token-type="class"] {
+  color: #8d85ff;
+}
+
+[data-sh-token-type="property"] {
+  color: #79c0ff;
+}
+
+[data-sh-token-type="entity"] {
+  color: #7ee787;
+}
+
+[data-sh-token-type="identifier"] {
+  color: #e6edf3;
+}
+
+[data-sh-token-type="number"] {
+  color: #79c0ff;
+}
+
+[data-sh-token-type="null"] {
+  color: #ff7b72;
+  font-weight: 500;
+}
+
+[data-sh-token-type="sign"] {
+  color: #ff7b72;
+}
+
+[data-sh-token-type="jsxliterals"] {
+  color: #e6edf3;
+}
+
+[data-sh-token-type="space"],
+[data-sh-token-type="break"] {
+  /* Invisible - no styling needed */
+}
+
+/* Light Theme Overrides */
+@media (prefers-color-scheme: light) {
+  .sugar-high {
+    color: hsl(var(--foreground));
+  }
+
+  [data-sh-token-type="keyword"] {
+    color: #cf222e;
+  }
+
+  [data-sh-token-type="string"] {
+    color: #0a3069;
+  }
+
+  [data-sh-token-type="comment"] {
+    color: #59636e;
+  }
+
+  [data-sh-token-type="class"] {
+    color: #8250df;
+  }
+
+  [data-sh-token-type="property"] {
+    color: #0550ae;
+  }
+
+  [data-sh-token-type="entity"] {
+    color: #0550ae;
+  }
+
+  [data-sh-token-type="identifier"] {
+    color: #1f2328;
+  }
+
+  [data-sh-token-type="number"] {
+    color: #0550ae;
+  }
+
+  [data-sh-token-type="null"] {
+    color: #cf222e;
+  }
+
+  [data-sh-token-type="sign"] {
+    color: #cf222e;
+  }
+
+  [data-sh-token-type="jsxliterals"] {
+    color: #1f2328;
+  }
+}
+
+/* Line Numbers */
+.sh__line::before {
+  content: attr(data-line);
+  display: inline-block;
+  width: 2.5rem;
+  padding-right: 1rem;
+  text-align: right;
+  color: var(--color-text-muted, hsl(var(--muted-foreground)));
+  user-select: none;
+  opacity: 0.5;
+}
+
+.sh__line {
+  display: block;
+}
+
+/* Line Highlighting (for specific lines) */
+.sh__line--highlighted {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-left: 2px solid var(--color-accent, hsl(var(--accent)));
+  padding-left: 0.5rem;
+  margin-left: -0.5rem;
+}
+
+@media (prefers-color-scheme: light) {
+  .sh__line--highlighted {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+}
+
+/* Code Block Enhancements */
+.sugar-high::-webkit-scrollbar {
+  height: 0.5rem;
+}
+
+.sugar-high::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sugar-high::-webkit-scrollbar-thumb {
+  background: var(--color-text-muted, hsl(var(--muted-foreground)));
+  border-radius: 0.25rem;
+  opacity: 0.5;
+}
+
+.sugar-high::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text, hsl(var(--foreground)));
+  opacity: 0.7;
+}
+
+/* Selection in code blocks */
+.sugar-high ::selection {
+  background-color: rgba(99, 102, 241, 0.2);
+}
+
+@media (prefers-color-scheme: light) {
+  .sugar-high ::selection {
+    background-color: rgba(99, 102, 241, 0.15);
+  }
+}
+
+/* Empty state */
+.sugar-high-empty {
+  color: var(--color-text-muted, hsl(var(--muted-foreground)));
+  font-style: italic;
+}
+
+/* Code block group wrapper */
+.sugar-high-group {
+  position: relative;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .sugar-high {
+    font-size: 0.8125rem;
+  }
+
+  .sh__line::before {
+    width: 2rem;
+    padding-right: 0.5rem;
+  }
+}

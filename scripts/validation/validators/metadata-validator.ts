@@ -4,12 +4,8 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import type {
-  ValidationError,
-  ValidationOptions,
-  ValidationResult,
-  Validator,
-} from '../core/types.js';
+import type { Tables } from '@/src/types/database.types';
+import type { ValidationError, ValidationResult, Validator } from '../core/types.js';
 
 // ============================================================================
 // Supabase Client
@@ -43,7 +39,7 @@ export class MetadataValidator implements Validator {
   description = 'Validates content.metadata JSONB for SEO requirements and schema compliance';
   enabled = true;
 
-  async validate(options: ValidationOptions): Promise<ValidationResult> {
+  async validate(): Promise<ValidationResult> {
     const startTime = Date.now();
     const errors: ValidationError[] = [];
     const warnings: ValidationError[] = [];
@@ -90,7 +86,7 @@ export class MetadataValidator implements Validator {
   }
 
   private validateMetadata(
-    record: any,
+    record: Tables<'content'>,
     errors: ValidationError[],
     warnings: ValidationError[]
   ): void {

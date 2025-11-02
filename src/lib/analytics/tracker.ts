@@ -30,13 +30,59 @@ interface EventConfig {
 // Environment checks using client-safe helpers
 const IS_PRODUCTION = isProduction;
 const IS_DEVELOPMENT = isDevelopment;
-const ENABLE_DEBUG = process.env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true';
+
+// Fallback for ENABLE_DEBUG (loaded from app_settings at runtime)
+const ENABLE_DEBUG_FALLBACK = process.env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true';
 
 /**
  * Cache for event config (loaded from database)
  */
 let _eventConfigCache: Record<string, EventConfig> | null = null;
 let _configFetchPromise: Promise<Record<string, EventConfig>> | null = null;
+
+/**
+ * Runtime app_settings cache (debug flag, PII keywords)
+ */
+let _debugEnabled: boolean = ENABLE_DEBUG_FALLBACK;
+let _piiKeywords: string[] = ['email', 'name', 'phone', 'address', 'ssn', 'credit', 'password'];
+let _appSettingsLoaded = false;
+
+/**
+ * Load app_settings for analytics (debug flag, PII keywords)
+ * Runs once on first trackEvent call
+ */
+async function loadAppSettings(): Promise<void> {
+  if (_appSettingsLoaded) return;
+
+  try {
+    const supabase = createClient();
+    const { data } = await supabase.rpc('get_app_settings', {
+      p_category: 'analytics',
+    });
+
+    if (data) {
+      const settings = data as Record<string, { value: unknown }>;
+
+      // Load debug flag
+      if (settings['analytics.debug_enabled']?.value !== undefined) {
+        _debugEnabled = Boolean(settings['analytics.debug_enabled'].value);
+      }
+
+      // Load PII keywords array
+      if (Array.isArray(settings['analytics.pii_keywords']?.value)) {
+        _piiKeywords = settings['analytics.pii_keywords'].value as string[];
+      }
+    }
+
+    _appSettingsLoaded = true;
+  } catch (error) {
+    logger.warn('App settings load failed, using defaults', {
+      source: 'AnalyticsTracker',
+      error: String(error),
+    });
+    _appSettingsLoaded = true;
+  }
+}
 
 /**
  * Fetch event configurations from database
@@ -92,8 +138,11 @@ function getEventConfig(eventName: string): EventConfig {
         _eventConfigCache = config;
         return config;
       })
-      .catch(() => {
-        // Fallback to empty cache on error
+      .catch((error) => {
+        logger.warn('Event config fetch failed, using defaults', {
+          source: 'AnalyticsTracker',
+          error: String(error),
+        });
         _eventConfigCache = {};
         return {};
       });
@@ -105,8 +154,9 @@ function getEventConfig(eventName: string): EventConfig {
 
 /**
  * Payload sanitization with typed data support
+ * Database-First: PII keywords loaded from app_settings
  *
- * UPDATED: Preserves numbers, booleans, and dates (Umami best practices)
+ * Preserves numbers, booleans, and dates (Umami best practices)
  * Removes PII and converts Date objects to ISO strings
  *
  * @see https://umami.is/docs/track-events - "For numeric values, dates, or booleans, the JavaScript method is recommended"
@@ -116,13 +166,12 @@ function sanitizePayload(
 ): Record<string, string | number | boolean | null> {
   if (!payload) return {};
 
-  const PII_KEYWORDS = ['email', 'name', 'phone', 'address', 'ssn', 'credit', 'password'];
   const sanitized: Record<string, string | number | boolean | null> = {};
 
   for (const [key, value] of Object.entries(payload)) {
-    // Skip PII keywords
+    // Skip PII keywords (loaded from app_settings)
     const lowerKey = key.toLowerCase();
-    if (PII_KEYWORDS.some((keyword) => lowerKey.includes(keyword))) {
+    if (_piiKeywords.some((keyword) => lowerKey.includes(keyword))) {
       continue;
     }
 
@@ -148,17 +197,28 @@ function sanitizePayload(
 /**
  * Universal tracking function that all components can use
  * Provides automatic validation, sampling, and error handling
+ * Database-First: Loads debug flag and PII keywords from app_settings
  *
  * @param eventName - Event name (e.g., 'content_viewed', 'code_copied')
  * @param payload - Event payload with custom properties
  */
 export function trackEvent(eventName: string, payload?: Record<string, unknown>): void {
+  // Load app_settings on first call (background, non-blocking)
+  if (!_appSettingsLoaded) {
+    loadAppSettings().catch((error) => {
+      logger.warn('Background app settings load failed', {
+        source: 'AnalyticsTracker',
+        error: String(error),
+      });
+    });
+  }
+
   // Check config
   const config = getEventConfig(eventName);
 
   // Check if event is enabled
   if (!config?.enabled) {
-    if (ENABLE_DEBUG) {
+    if (_debugEnabled) {
       logger.debug('[Analytics] Event disabled:', { eventName });
     }
     return;
@@ -172,7 +232,7 @@ export function trackEvent(eventName: string, payload?: Record<string, unknown>)
   // Apply sampling if configured
   if (config.sampleRate && config.sampleRate < 1) {
     if (Math.random() > config.sampleRate) {
-      if (ENABLE_DEBUG) {
+      if (_debugEnabled) {
         logger.debug('[Analytics] Event sampled out:', {
           eventName,
           sampleRate: config.sampleRate,
@@ -189,13 +249,13 @@ export function trackEvent(eventName: string, payload?: Record<string, unknown>)
       const sanitizedPayload = sanitizePayload(payload);
       window.umami?.track(eventName, sanitizedPayload);
 
-      if (ENABLE_DEBUG) {
+      if (_debugEnabled) {
         logger.debug('[Analytics] Tracked:', {
           event: eventName,
           payload: JSON.stringify(sanitizedPayload),
         });
       }
-    } else if (IS_DEVELOPMENT && ENABLE_DEBUG) {
+    } else if (IS_DEVELOPMENT && _debugEnabled) {
       // Development logging
       logger.debug('[Analytics Dev]', {
         event: eventName,

@@ -33,6 +33,7 @@ import {
   Tags,
   Terminal,
 } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Database } from '@/src/types/database.types';
 
@@ -217,7 +218,10 @@ async function fetchFieldsForContentType(
   });
 
   if (error) {
-    console.error(`Failed to load form fields for ${contentType}:`, error);
+    logger.error('Failed to load form fields', error, {
+      contentType,
+      source: 'SubmissionFormConfig',
+    });
     return emptySection();
   }
 

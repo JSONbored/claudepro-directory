@@ -9,7 +9,6 @@ import { APP_CONFIG } from '@/src/lib/constants';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 
-const SITE_NAME = 'Claude Pro Directory';
 const SEPARATOR = ' - ';
 
 export const MAX_TITLE_LENGTH = 60;
@@ -18,7 +17,7 @@ export const OPTIMAL_MAX = 60;
 export const MIN_ENHANCEMENT_GAIN = 3;
 
 function calculateSuffixLength(categoryDisplayName: string): number {
-  return SEPARATOR.length + categoryDisplayName.length + SEPARATOR.length + SITE_NAME.length;
+  return SEPARATOR.length + categoryDisplayName.length + SEPARATOR.length + APP_CONFIG.name.length;
 }
 
 export async function getSuffixLengths(): Promise<Record<CategoryId, number>> {
@@ -75,11 +74,26 @@ export async function getSeoConfig() {
   };
 }
 
+/**
+ * Get dynamic SEO description with live content count from database
+ * Database-first: Always queries live count, no hardcoded fallback
+ */
+export async function getDefaultDescription(): Promise<string> {
+  const supabase = createAnonClient();
+  const { count } = await supabase.from('content').select('*', { count: 'exact', head: true });
+
+  if (!count) {
+    throw new Error('Failed to fetch content count for SEO description');
+  }
+
+  return `Open-source directory of ${count}+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.`;
+}
+
 export const SEO_CONFIG = {
-  defaultTitle: 'Claude Pro Directory',
-  titleTemplate: '%s - Claude Pro Directory',
-  defaultDescription:
-    'Open-source directory of 150+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.',
+  defaultTitle: APP_CONFIG.name,
+  titleTemplate: `%s - ${APP_CONFIG.name}`,
+  // Note: Use getDefaultDescription() for runtime. This is only for type compatibility.
+  defaultDescription: '',
   keywords: [
     'claude ai',
     'claude pro',
@@ -158,7 +172,7 @@ export const validatedMetadataSchema = z.object({
     .refine(
       (url) => {
         // Allow trailing slash for homepage only
-        if (url === 'https://claudepro.directory/') return true;
+        if (url === `${APP_CONFIG.url}/`) return true;
         return !url.endsWith('/');
       },
       {

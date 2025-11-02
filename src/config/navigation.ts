@@ -18,6 +18,7 @@ import {
   Briefcase,
   Building,
   Calendar,
+  Camera,
   FileText,
   Handshake,
   Layers,
@@ -183,6 +184,13 @@ export const SECONDARY_NAVIGATION: NavigationGroup[] = [
         href: '/for-you',
         icon: Sparkles,
         description: 'Personalized recommendations',
+      },
+      {
+        label: 'Gallery',
+        href: '/gallery',
+        icon: Camera,
+        description: 'Code screenshot gallery',
+        isNew: true,
       },
       {
         label: 'Board',

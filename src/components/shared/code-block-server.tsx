@@ -1,9 +1,9 @@
 /**
  * Server-Side Code Block Component
  *
- * Renders syntax-highlighted code on the SERVER with production UX enhancements.
- * No client-side JavaScript needed for highlighting (Shiki runs server-side).
- * Client-side interactivity for copy, expand/collapse (zero bundle impact).
+ * Renders syntax-highlighted code on the SERVER with Sugar High.
+ * No client-side JavaScript needed for highlighting.
+ * Client-side interactivity for copy, screenshot, share (ProductionCodeBlock).
  *
  * Usage:
  * ```tsx
@@ -12,7 +12,7 @@
  */
 
 import { ProductionCodeBlock } from '@/src/components/content/production-code-block';
-import { highlightCode } from '@/src/lib/content/syntax-highlighting-starry';
+import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 
 export interface CodeBlockServerProps {
   code: string;
@@ -24,7 +24,7 @@ export interface CodeBlockServerProps {
 }
 
 /**
- * Async Server Component that pre-renders syntax highlighting
+ * Async Server Component that pre-renders syntax highlighting with Sugar High
  */
 export async function CodeBlockServer({
   code,

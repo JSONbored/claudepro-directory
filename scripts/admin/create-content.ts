@@ -5,7 +5,6 @@
  * Interactive discovery workflow → RPC submission → Discord announcement
  */
 
-import { join } from 'node:path';
 import * as readline from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
@@ -15,17 +14,17 @@ import {
   formatDiscoveryReport,
   validateDiscoveryQuality,
 } from '@/config/content/discovery/run-discovery';
+import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
 import type { Database } from '@/src/types/database.types';
 import { ensureEnvVars } from '../utils/env.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
-const ROOT_DIR = join(__dirname, '../..');
 
 // Environment setup
 await ensureEnvVars(['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY']);
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY)) {
   console.error('❌ Missing required environment variables');
@@ -56,9 +55,16 @@ async function main() {
   console.log('This tool guides you through evidence-based content discovery.\n');
 
   // Get basic content info
-  const category = await prompt(
+  const categoryInput = await prompt(
     '📁 Category (agents/mcp/commands/rules/hooks/statuslines/skills/collections/guides):'
   );
+
+  if (!isValidCategory(categoryInput)) {
+    console.error(`❌ Invalid category: ${categoryInput}`);
+    process.exit(1);
+  }
+
+  const category: CategoryId = categoryInput;
   const name = await prompt('📝 Content Name:');
   const description = await prompt('📄 Description:');
   const author = await prompt('👤 Author:');
@@ -137,13 +143,15 @@ async function main() {
   };
 
   // Show discovery report
-  console.log('\n' + formatDiscoveryReport(discoveryMetadata));
+  console.log(`\n${formatDiscoveryReport(discoveryMetadata)}`);
 
   // Quality validation (warnings only)
   const qualityCheck = validateDiscoveryQuality(discoveryMetadata);
   if (qualityCheck.warnings.length > 0) {
     console.log('\n⚠️  Quality Warnings (proceeding anyway):');
-    qualityCheck.warnings.forEach((w) => console.log(`   - ${w}`));
+    for (const w of qualityCheck.warnings) {
+      console.log(`   - ${w}`);
+    }
   }
 
   const approved = await confirm('\nApprove and create this content?');
@@ -164,7 +172,7 @@ async function main() {
 
   // Build RPC payload
   const payload = buildDatabasePayload({
-    category: category as any,
+    category,
     name,
     description,
     author,
@@ -202,8 +210,9 @@ async function main() {
   }
 
   // Call merge_submission_to_content RPC
+  const submissionData = submission as { id: string };
   const { data: merged, error: mergeError } = await supabase.rpc('merge_submission_to_content', {
-    p_submission_id: (submission as any).submission_id,
+    p_submission_id: submissionData.id,
   });
 
   if (mergeError || !merged) {

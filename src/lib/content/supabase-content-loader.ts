@@ -116,7 +116,12 @@ export async function getAllContent(filters?: ContentFilters): Promise<ContentIt
       withErrorHandling(
         async () => {
           const supabase = createAnonClient();
-          let query = supabase.from('content').select('*');
+          // Optimized: Select only commonly needed columns for list views (13/37 columns = 65% reduction)
+          let query = supabase
+            .from('content')
+            .select(
+              'id, category, slug, title, display_title, description, author, date_added, tags, features, use_cases, created_at, updated_at'
+            );
 
           if (filters?.category) {
             query = Array.isArray(filters.category)

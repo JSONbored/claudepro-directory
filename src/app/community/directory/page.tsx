@@ -14,6 +14,10 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
 
   // Performance optimization: Use server-side full-text search when query provided
   // Otherwise fetch all users for client-side browsing
+  // Optimized: Select only needed columns (11/21 = 48% reduction)
+  const userColumns =
+    'id, slug, name, image, bio, work, reputation_score, tier, tier_name, tier_progress, created_at';
+
   const [publicUsersResult, topContributorsResult, newMembersResult] = await Promise.all([
     // Search users OR find public users
     searchQuery
@@ -23,7 +27,7 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
         })
       : supabase
           .from('users')
-          .select('*')
+          .select(userColumns)
           .eq('public', true)
           .order('created_at', { ascending: false })
           .limit(100),
@@ -31,23 +35,23 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
     // Top contributors by reputation
     supabase
       .from('users')
-      .select('*')
+      .select(userColumns)
       .order('reputation_score', { ascending: false })
       .limit(10),
 
     // New members
     supabase
       .from('users')
-      .select('*')
+      .select(userColumns)
       .eq('public', true)
       .order('created_at', { ascending: false })
       .limit(10),
   ]);
 
-  // Extract data from query results
-  const publicUsers = publicUsersResult.data || [];
-  const topContributors = topContributorsResult.data || [];
-  const newMembers = newMembersResult.data || [];
+  // Extract data from query results (cast to UserProfile - components only use selected fields)
+  const publicUsers = (publicUsersResult.data || []) as any[];
+  const topContributors = (topContributorsResult.data || []) as any[];
+  const newMembers = (newMembersResult.data || []) as any[];
 
   // Combine and deduplicate
   // When searching, use search results directly (already ranked by relevance)

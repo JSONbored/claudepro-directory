@@ -10,6 +10,7 @@ import { TopContributors } from '@/src/components/features/community/top-contrib
 import { HomePageClient } from '@/src/components/features/home';
 import { LazySection } from '@/src/components/infra/lazy-section';
 import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 const RollingText = dynamicImport(
   () => import('@/src/components/magic/rolling-text').then((mod) => mod.RollingText),
@@ -39,6 +40,8 @@ import { type CategoryId, getHomepageCategoryIds } from '@/src/lib/config/catego
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
+
+export const metadata = await generatePageMetadata('/');
 
 export const revalidate = 900; // 15 minutes ISR
 
@@ -145,7 +148,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         supabase.from('users').select('*', { count: 'exact', head: true }).eq('public', true),
         supabase
           .from('users')
-          .select('*')
+          .select(
+            'id, slug, name, image, bio, work, reputation_score, tier, tier_name, tier_progress'
+          )
           .eq('public', true)
           .order('reputation_score', { ascending: false })
           .limit(6),

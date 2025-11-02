@@ -4,18 +4,10 @@
  */
 
 import { NextResponse } from 'next/server';
+import { isValidCategory } from '@/src/lib/config/category-config';
+import { APP_CONFIG } from '@/src/lib/constants';
+import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
-
-const VALID_CATEGORIES = [
-  'mcp',
-  'hooks',
-  'commands',
-  'rules',
-  'statuslines',
-  'skills',
-  'agents',
-  'collections',
-] as const;
 
 interface ApiResponse {
   content: Record<string, unknown>;
@@ -36,7 +28,7 @@ export async function GET(
   const { category, slug: slugWithExt } = await params;
   const slug = slugWithExt.replace(/\.json$/, '');
 
-  if (!VALID_CATEGORIES.includes(category as any)) {
+  if (!isValidCategory(category)) {
     return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
   }
 
@@ -48,7 +40,7 @@ export async function GET(
   });
 
   if (error) {
-    console.error('API content error:', error);
+    logger.error('API content error', error, { category, slug, source: 'ContentAPI' });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 
@@ -74,14 +66,17 @@ export async function GET(
     'Content-Type': 'application/json; charset=utf-8',
     ...dbHeaders,
     // SEO headers
-    Link: `<https://claudepro.directory/${category}/${slug}>; rel="canonical"`,
+    Link: `<${APP_CONFIG.url}/${category}/${slug}>; rel="canonical"`,
     'X-Robots-Tag': 'index, follow',
     'X-Content-Type-Options': 'nosniff',
   };
 
   return new NextResponse(JSON.stringify(enrichedContent, null, 2), {
     status: 200,
-    headers: responseHeaders,
+    headers: {
+      ...responseHeaders,
+      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+    },
   });
 }
 

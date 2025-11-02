@@ -6,7 +6,7 @@
  * Uploads to Cloudflare R2 for offsite storage
  */
 
-import { execSync } from 'node:child_process';
+import { type ExecException, execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
   createReadStream,
@@ -177,7 +177,7 @@ const findPgDump = (): string => {
   }
 };
 
-const pgDumpPath = findPgDump();
+findPgDump(); // Verify pg_dump is installed
 const outputPath = join(BACKUP_DIR, 'full_backup.sql.gz');
 
 console.log('📦 Creating compressed backup (using Supabase CLI)...');
@@ -203,8 +203,9 @@ try {
   console.log('   ✓ full_backup.sql.gz (compressed schema + data)');
 } catch (error) {
   console.error('   ✗ Database dump failed:', error instanceof Error ? error.message : error);
-  if (error instanceof Error && 'stdout' in error) {
-    console.error('   Output:', (error as any).stdout);
+  const execError = error as ExecException & { stdout?: string };
+  if (execError.stdout) {
+    console.error('   Output:', execError.stdout);
   }
   console.error('   💡 Make sure Supabase CLI is installed: npm install -g supabase');
   process.exit(1);
@@ -222,11 +223,8 @@ if (!currentHash) {
 // Save hash
 writeFileSync(BACKUP_HASH_FILE, currentHash, 'utf-8');
 
-// Create 'latest' symlink
-if (existsSync(LATEST_BACKUP_DIR)) {
-  execSync(`rm -f "${LATEST_BACKUP_DIR}"`, { cwd: ROOT });
-}
-execSync(`ln -s "${timestamp}" "${LATEST_BACKUP_DIR}"`, { cwd: join(ROOT, 'backups') });
+// Create 'latest' symlink (force overwrite if exists)
+execSync(`ln -sf "${timestamp}" "${LATEST_BACKUP_DIR}"`, { cwd: join(ROOT, 'backups') });
 
 // ============================================================================
 // README
@@ -312,7 +310,7 @@ if (r2Client && r2Bucket) {
     if (heartbeatUrl) {
       try {
         await fetch(`${heartbeatUrl}/fail`);
-      } catch (heartbeatError) {
+      } catch {
         console.error('   ⚠️  Failed to report failure to BetterStack');
       }
     }

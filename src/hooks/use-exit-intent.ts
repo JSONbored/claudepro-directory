@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createClient } from '@/src/lib/supabase/client';
 
 export interface UseExitIntentOptions {
   /**
@@ -74,6 +75,7 @@ export interface UseExitIntentReturn {
 /**
  * Hook to detect when user is about to leave the page (exit intent)
  * Triggers when mouse moves toward browser chrome (top of viewport)
+ * Database-First: Loads default config from app_settings
  *
  * @example
  * ```tsx
@@ -89,13 +91,55 @@ export interface UseExitIntentReturn {
  * ```
  */
 export function useExitIntent(options: UseExitIntentOptions = {}): UseExitIntentReturn {
+  // Hardcoded fallbacks (loaded from app_settings at mount)
+  const [dbDefaults, setDbDefaults] = useState({
+    enabled: true,
+    sensitivity: 20,
+    triggerDelay: 3000,
+    desktopOnly: true,
+    cookieKey: 'exit-intent-shown',
+    cookieDuration: 86400000,
+  });
+
+  // Load app_settings on mount (background, non-blocking)
+  useEffect(() => {
+    const loadDefaults = async () => {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase.rpc('get_app_settings', {
+          p_category: 'hooks',
+        });
+
+        if (data) {
+          const settings = data as Record<string, { value: unknown }>;
+
+          setDbDefaults({
+            enabled: (settings['hooks.exit_intent.enabled']?.value as boolean) ?? true,
+            sensitivity: (settings['hooks.exit_intent.sensitivity']?.value as number) ?? 20,
+            triggerDelay: (settings['hooks.exit_intent.trigger_delay']?.value as number) ?? 3000,
+            desktopOnly: (settings['hooks.exit_intent.desktop_only']?.value as boolean) ?? true,
+            cookieKey:
+              (settings['hooks.exit_intent.cookie_key']?.value as string) ?? 'exit-intent-shown',
+            cookieDuration:
+              (settings['hooks.exit_intent.cookie_duration']?.value as number) ?? 86400000,
+          });
+        }
+      } catch {
+        // Silent fail - uses hardcoded fallbacks
+      }
+    };
+
+    loadDefaults();
+  }, []);
+
+  // Merge user options with database defaults (user options take precedence)
   const {
-    enabled = true,
-    sensitivity = 20,
-    triggerDelay = 3000,
-    desktopOnly = true,
-    cookieKey = 'exit-intent-shown',
-    cookieDuration = 86400000, // 24 hours
+    enabled = dbDefaults.enabled,
+    sensitivity = dbDefaults.sensitivity,
+    triggerDelay = dbDefaults.triggerDelay,
+    desktopOnly = dbDefaults.desktopOnly,
+    cookieKey = dbDefaults.cookieKey,
+    cookieDuration = dbDefaults.cookieDuration,
     onExitIntent,
   } = options;
 

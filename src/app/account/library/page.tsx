@@ -15,7 +15,7 @@ import {
 } from '@/src/components/primitives/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import { ROUTES } from '@/src/lib/constants/routes';
-import { Bookmark, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
+import { Bookmark as BookmarkIcon, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
@@ -107,7 +107,7 @@ export default async function LibraryPage() {
       <Tabs defaultValue="bookmarks" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="bookmarks" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <Bookmark className="h-4 w-4" />
+            <BookmarkIcon className="h-4 w-4" />
             Bookmarks ({bookmarkCount})
           </TabsTrigger>
           <TabsTrigger value="collections" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -120,7 +120,7 @@ export default async function LibraryPage() {
           {!bookmarks || bookmarks.length === 0 ? (
             <Card>
               <CardContent className={'flex flex-col items-center py-12'}>
-                <Bookmark className="h-12 w-12 text-muted-foreground mb-4" />
+                <BookmarkIcon className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-xl font-semibold mb-2">No bookmarks yet</h3>
                 <p className={'text-muted-foreground text-center max-w-md'}>
                   Start exploring the directory and bookmark your favorite agents, MCP servers,

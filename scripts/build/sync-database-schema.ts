@@ -31,7 +31,7 @@
 
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ora from 'ora';
@@ -139,6 +139,7 @@ function hasRequiredEnvVars(): boolean {
 
 function pullVercelEnv(): boolean {
   // Skip if .env.local exists with required vars
+  // Note: .env.local is persistent and shared across scripts (backup, sync, etc.)
   if (hasRequiredEnvVars()) {
     return true;
   }
@@ -192,7 +193,7 @@ function calculateSchemaHash(dbUrl: string): string | null {
     });
 
     return createHash('sha256').update(result).digest('hex');
-  } catch (error) {
+  } catch {
     console.warn('⚠️  Could not query database schema');
     return null;
   }
@@ -222,14 +223,9 @@ function getSchemaHash(): string | null {
 }
 
 function cleanup(): void {
-  if (existsSync(ENV_LOCAL)) {
-    try {
-      unlinkSync(ENV_LOCAL);
-      console.log('🧹 Cleaned up .env.local');
-    } catch {
-      console.warn('⚠️  Failed to cleanup .env.local');
-    }
-  }
+  // DO NOT delete .env.local - it's a persistent development file
+  // Other scripts (backup-database.ts) depend on it existing
+  // The file is already gitignored for security
 }
 
 function readHash(filePath: string): string | null {

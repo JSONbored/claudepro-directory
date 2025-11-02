@@ -17,6 +17,8 @@ interface SettingValue<T = unknown> {
   description: string;
   category: string;
   environment: string | null;
+  enabled: boolean;
+  version: number;
 }
 
 type AppSettingsMap = Record<string, SettingValue>;

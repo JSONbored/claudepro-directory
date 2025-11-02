@@ -15,7 +15,7 @@ import { Suspense } from 'react';
 import './globals.css';
 import './view-transitions.css';
 import './micro-interactions.css';
-import './starry-night.css';
+import './sugar-high.css';
 import dynamic from 'next/dynamic';
 import { Toaster } from 'sonner';
 

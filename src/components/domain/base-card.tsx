@@ -38,7 +38,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { type UseCardNavigationOptions, useCardNavigation } from '@/src/hooks/use-card-navigation';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
+import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getViewTransitionStyle } from '@/src/lib/utils/view-transitions.utils';
 
@@ -196,7 +196,7 @@ export interface BaseCardProps {
    * Enable swipe gestures on mobile
    * Swipe right → Copy, Swipe left → Bookmark
    * Auto-detects mobile, respects prefers-reduced-motion
-   * @default false
+   * @default true
    */
   enableSwipeGestures?: boolean;
 
@@ -268,7 +268,7 @@ export const BaseCard = memo(
     className,
     topAccent = false,
     compactMode = false,
-    enableSwipeGestures = false,
+    enableSwipeGestures = true,
     onSwipeRight,
     onSwipeLeft,
     useViewTransitions = false,
@@ -467,7 +467,7 @@ export const BaseCard = memo(
       return (
         <SponsoredTracker
           sponsoredId={sponsoredId}
-          targetUrl={`https://claudepro.directory${targetPath}`}
+          targetUrl={`${APP_CONFIG.url}${targetPath}`}
           position={position}
         >
           {cardContent}

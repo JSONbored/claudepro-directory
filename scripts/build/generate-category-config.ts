@@ -23,6 +23,12 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = join(__dirname, '../..');
 const OUTPUT_FILE = join(ROOT, 'src/lib/config/category-config.generated.ts');
 
+interface BadgeConfig {
+  text?: string;
+  icon?: string;
+  hasDynamicCount?: boolean;
+}
+
 interface DatabaseConfigWithFeatures {
   category: string;
   title: string;
@@ -45,7 +51,7 @@ interface DatabaseConfigWithFeatures {
   schema_name: string | null;
   api_schema: unknown;
   metadata_fields: string[];
-  badges: unknown;
+  badges: BadgeConfig[] | null;
   features: Record<string, boolean>;
 }
 
@@ -57,10 +63,14 @@ async function generateCategoryConfig() {
     // Load environment
     await ensureEnvVars(['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY']);
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY)) {
+      throw new Error('Missing required environment variables');
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Fetch category configs from database
     console.log('📥 Fetching category configs from database...');
@@ -103,7 +113,7 @@ async function generateCategoryConfig() {
 
         // Transform badges
         const badges = Array.isArray(dbConfig.badges)
-          ? dbConfig.badges.map((badge: any) => {
+          ? dbConfig.badges.map((badge: BadgeConfig) => {
               if (typeof badge !== 'object' || !badge) return '{ text: "" }';
               const hasDynamic = badge.hasDynamicCount && badge.text;
               if (hasDynamic) {
@@ -129,7 +139,7 @@ async function generateCategoryConfig() {
     keywords: '${dbConfig.keywords.replace(/'/g, "\\'")}',
     metaDescription: '${dbConfig.meta_description.replace(/'/g, "\\'")}',
     schema: SCHEMA_MAP['${categoryId}'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
-    typeName: 'Database["public"]["Tables"]["content"]["Row"]',
+    typeName: '${dbConfig.title.replace(/'/g, "\\'")}',
     generateFullContent: ${features.generate_full_content ?? true},
     metadataFields: ${JSON.stringify(dbConfig.metadata_fields)},
     buildConfig: {

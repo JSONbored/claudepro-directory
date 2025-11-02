@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
+import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ArrowLeft, Edit, Share2 } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -68,7 +69,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     .returns<Array<Tables<'bookmarks'>>>();
 
   const shareUrl = collection.is_public
-    ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://claudepro.directory'}/u/${user.id}/collections/${collection.slug}`
+    ? `${APP_CONFIG.url}/u/${user.id}/collections/${collection.slug}`
     : null;
 
   return (

@@ -21,13 +21,11 @@ import archiver from 'archiver';
 import { transformSkillToMarkdown } from '@/src/lib/transformers/skill-to-md';
 import type { Database } from '@/src/types/database.types';
 import { ensureEnvVars } from '../utils/env.js';
-import { getHash, hasHashChanged, setHash } from '../utils/hash-cache.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Paths
-const PROJECT_ROOT = path.resolve(__dirname, '../..');
+const ROOT = path.resolve(__dirname, '../..');
+const HASH_CACHE_FILE = path.join(ROOT, '.skill-packages-hash-cache.json');
 
 type SkillRow = Database['public']['Tables']['content']['Row'] & { category: 'skills' };
 
@@ -37,10 +35,14 @@ const FIXED_DATE = new Date('2024-01-01T00:00:00.000Z'); // Deterministic ZIPs
 // Load environment (only pull if missing - saves 300-500ms on CI)
 await ensureEnvVars(['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY']);
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY)) {
+  throw new Error('Missing required environment variables');
+}
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 /**
  * Load hash cache (content hash → prevents unnecessary rebuilds)
@@ -131,7 +133,7 @@ async function processBatch(
       const fileSizeKB = (zipBuffer.length / 1024).toFixed(2);
 
       // Upload to Supabase Storage (source of truth)
-      const publicUrl = await uploadToStorage(skill, zipBuffer);
+      await uploadToStorage(skill, zipBuffer);
 
       // Update hash cache
       hashCache.set(skill.slug, hash);
@@ -256,7 +258,7 @@ async function main() {
   const successCount = allResults.filter((r) => r.status === 'success').length;
   const failCount = allResults.filter((r) => r.status === 'error').length;
 
-  console.log('\n' + '═'.repeat(80));
+  console.log(`\n${'═'.repeat(80)}`);
   console.log('\n📊 BUILD SUMMARY:\n');
   console.log(`   Total skills: ${skills.length}`);
   console.log(`   ✅ Built: ${successCount}/${skillsToRebuild.length}`);
@@ -268,11 +270,10 @@ async function main() {
 
   if (failCount > 0) {
     console.log('\n❌ FAILED BUILDS:\n');
-    allResults
-      .filter((r) => r.status === 'error')
-      .forEach((r) => {
-        console.log(`   ${r.slug}: ${r.message}`);
-      });
+    const failedResults = allResults.filter((r) => r.status === 'error');
+    for (const r of failedResults) {
+      console.log(`   ${r.slug}: ${r.message}`);
+    }
     process.exit(1);
   }
 

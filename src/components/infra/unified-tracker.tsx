@@ -8,6 +8,7 @@
 import { useEffect } from 'react';
 import { trackInteraction } from '@/src/lib/actions/analytics.actions';
 import { trackEvent } from '@/src/lib/analytics/tracker';
+import { logger } from '@/src/lib/logger';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 
 export type UnifiedTrackerProps =
@@ -35,9 +36,19 @@ function useTrackingEffect(
       try {
         const result = trackingFn();
         if (result instanceof Promise) {
-          result.catch(() => {});
+          result.catch((error) => {
+            logger.warn('Analytics tracking failed', {
+              source: 'UnifiedTracker',
+              error: String(error),
+            });
+          });
         }
-      } catch {}
+      } catch (error) {
+        logger.warn('Analytics tracking failed', {
+          source: 'UnifiedTracker',
+          error: String(error),
+        });
+      }
       return;
     }
 
@@ -45,9 +56,19 @@ function useTrackingEffect(
       try {
         const result = trackingFn();
         if (result instanceof Promise) {
-          result.catch(() => {});
+          result.catch((error) => {
+            logger.warn('Analytics tracking failed', {
+              source: 'UnifiedTracker',
+              error: String(error),
+            });
+          });
         }
-      } catch {}
+      } catch (error) {
+        logger.warn('Analytics tracking failed', {
+          source: 'UnifiedTracker',
+          error: String(error),
+        });
+      }
     }, delay);
 
     return () => clearTimeout(timer);

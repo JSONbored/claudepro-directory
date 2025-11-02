@@ -7,8 +7,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/src/types/database.types';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY)) {
   console.error('❌ Missing required environment variables:');
@@ -21,10 +21,6 @@ const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 // Use generated types from database
 type SubmissionStatus = Database['public']['Enums']['submission_status'];
-type SubmissionSummary = Pick<
-  Database['public']['Tables']['content_submissions']['Row'],
-  'id' | 'name' | 'submission_type' | 'status' | 'author' | 'created_at' | 'spam_score'
->;
 
 /**
  * List submissions with optional filtering
@@ -340,7 +336,7 @@ async function main() {
       case 'list':
         await listSubmissions(
           args[1] as SubmissionStatus | undefined,
-          Number.parseInt(args[2]) || 20
+          Number.parseInt(args[2], 10) || 20
         );
         break;
 
@@ -406,4 +402,7 @@ async function main() {
   }
 }
 
-main();
+main().catch((error) => {
+  console.error('❌ Fatal error:', error);
+  process.exit(1);
+});

@@ -6,8 +6,8 @@
  * SHA-XXXX: Made dynamic using HOMEPAGE_TAB_CATEGORIES
  *
  * Production 2025 Architecture:
- * - TanStack Virtual for list virtualization
- * - Only renders ~15 visible items regardless of total count
+ * - Intersection Observer infinite scroll for progressive loading
+ * - Loads items in batches as user scrolls
  * - Constant memory usage and 60fps performance
  * - Scales to 10,000+ items with same performance
  *

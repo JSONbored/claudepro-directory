@@ -21,12 +21,13 @@
  */
 
 import { useEffect, useState } from 'react';
-import { relatedContentService } from '#lib/related-content/service';
 import { BaseCard } from '@/src/components/domain/base-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { Sparkles } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
+import { relatedContentService } from '@/src/lib/related-content/service';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 /**
@@ -187,17 +188,24 @@ export function RelatedContentClient({
         // Service now returns properly typed RelatedContentItem[] with all required fields
         setItems(convertedItems);
         setCacheHit(response.performance.cacheHit);
-      } catch (_error) {
-        // Error handling - silently fail with empty results
-        // Production: Errors are tracked via trackEvent above
+      } catch (error) {
+        logger.error(
+          'Failed to fetch related content',
+          error instanceof Error ? error : new Error(String(error)),
+          { source: 'RelatedContentClient' }
+        );
         setItems([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRelatedContent().catch(() => {
-      // Silent failure - error already handled in fetchRelatedContent
+    fetchRelatedContent().catch((error) => {
+      logger.error(
+        'Related content fetch promise rejected',
+        error instanceof Error ? error : new Error(String(error)),
+        { source: 'RelatedContentClient' }
+      );
     });
   }, [pathname, currentTags, currentKeywords, featured, exclude, limit]);
 
@@ -205,7 +213,7 @@ export function RelatedContentClient({
   useEffect(() => {
     if (!trackingEnabled || items.length === 0) return;
 
-    import('#lib/analytics/events/related-content')
+    import('@/src/lib/analytics/events/related-content')
       .then((module) => {
         module.trackRelatedContentView(pathname, items.length, cacheHit);
       })
@@ -281,7 +289,7 @@ export function RelatedContentClient({
                     slug: relatedItem.slug,
                   });
 
-                  import('#lib/analytics/events/related-content')
+                  import('@/src/lib/analytics/events/related-content')
                     .then((module) => {
                       module.trackRelatedContentClick(
                         pathname,

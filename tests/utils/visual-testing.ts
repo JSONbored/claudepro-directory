@@ -394,11 +394,11 @@ export async function hideDynamicContent(page: Page, selectors: string[]): Promi
     await page
       .locator(selector)
       .evaluateAll((elements) => {
-        elements.forEach((el) => {
+        for (const el of elements) {
           if (el instanceof HTMLElement) {
             el.style.visibility = 'hidden';
           }
-        });
+        }
       })
       .catch(() => {
         // Ignore if selector not found

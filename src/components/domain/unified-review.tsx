@@ -40,14 +40,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useMemo, useState, useTransition } from 'react';
-// Server actions with Storybook mocking via #lib subpath imports
-import {
-  createReview,
-  deleteReview,
-  getReviewsWithStats,
-  markReviewHelpful,
-  updateReview,
-} from '#lib/actions/content';
 import { BaseCard } from '@/src/components/domain/base-card';
 import { ChartContainer, HorizontalBarChart } from '@/src/components/domain/horizontal-bar-chart';
 import { Button } from '@/src/components/primitives/button';
@@ -55,6 +47,13 @@ import { Card } from '@/src/components/primitives/card';
 import { Label } from '@/src/components/primitives/label';
 import { Rating, RatingButton } from '@/src/components/primitives/shadcn-io/rating';
 import { Textarea } from '@/src/components/primitives/textarea';
+import {
+  createReview,
+  deleteReview,
+  getReviewsWithStats,
+  markReviewHelpful,
+  updateReview,
+} from '@/src/lib/actions/content.actions';
 import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
 import { Edit, Star, ThumbsUp, Trash } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
