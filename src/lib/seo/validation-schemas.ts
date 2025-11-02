@@ -4,8 +4,11 @@
  */
 
 import { z } from 'zod';
+import type { ChangelogEntry } from '@/src/lib/changelog/loader';
 import { METADATA_QUALITY_RULES } from '@/src/lib/config/seo-config';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
+import type { Tables } from '@/src/types/database.types';
 
 // ============================================
 // LAYER 1: INPUT VALIDATION SCHEMAS
@@ -41,19 +44,8 @@ export const metadataContextSchema = z
     /** Dynamic route parameters from Next.js */
     params: z.record(z.string(), z.union([z.string(), z.array(z.string())])).optional(),
 
-    /** Content item data (from schema adapter or page data) */
-    item: z
-      .object({
-        title: z.string().optional(),
-        name: z.string().optional(),
-        description: z.string().optional(),
-        tags: z.array(z.string()).optional(),
-        author: z.string().optional(),
-        date_added: z.string().optional(),
-        lastModified: z.string().optional(),
-      })
-      .catchall(z.unknown())
-      .optional(),
+    /** Content item data (from database - all possible content types) */
+    item: z.custom<ContentItem | ChangelogEntry | Tables<'user_collections'>>().optional(),
 
     /** Category configuration from category_configs table */
     categoryConfig: z

@@ -74,13 +74,7 @@ export async function generateMetadata({
 
   return generatePageMetadata('/changelog/:slug', {
     params: { slug },
-    item: entry
-      ? {
-          title: entry.title ?? undefined,
-          description: entry.description ?? undefined,
-          date_added: entry.release_date ?? undefined,
-        }
-      : undefined,
+    item: entry ?? undefined,
     slug,
   });
 }

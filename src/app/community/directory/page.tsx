@@ -4,6 +4,7 @@ import { ProfileSearchClient } from '@/src/components/features/community/profile
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
+import type { Tables } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/community/directory');
 
@@ -48,10 +49,10 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
       .limit(10),
   ]);
 
-  // Extract data from query results (cast to UserProfile - components only use selected fields)
-  const publicUsers = (publicUsersResult.data || []) as any[];
-  const topContributors = (topContributorsResult.data || []) as any[];
-  const newMembers = (newMembersResult.data || []) as any[];
+  // Extract data from query results
+  const publicUsers = (publicUsersResult.data || []) as Tables<'users'>[];
+  const topContributors = (topContributorsResult.data || []) as Tables<'users'>[];
+  const newMembers = (newMembersResult.data || []) as Tables<'users'>[];
 
   // Combine and deduplicate
   // When searching, use search results directly (already ranked by relevance)

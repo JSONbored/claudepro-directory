@@ -22,6 +22,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database.types';
 
 // Collection pages may have private content
 export const dynamic = 'force-dynamic';
@@ -91,18 +92,9 @@ export async function generateMetadata({ params }: PublicCollectionPageProps): P
 
   const collectionData = await getCollectionDetail(slug, collectionSlug);
 
-  const collectionItem = collectionData
-    ? {
-        name: collectionData.collection.name,
-        description: collectionData.collection.description ?? undefined,
-        date_added: collectionData.collection.created_at,
-        lastModified: collectionData.collection.updated_at,
-      }
-    : undefined;
-
   return generatePageMetadata('/u/:slug/collections/:collectionSlug', {
     params: { slug, collectionSlug },
-    item: collectionItem,
+    item: collectionData?.collection as Tables<'user_collections'> | undefined,
     slug,
     collectionSlug,
   });

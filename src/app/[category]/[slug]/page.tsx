@@ -64,8 +64,8 @@ export async function generateMetadata({
 
   return generatePageMetadata('/:category/:slug', {
     params: { category, slug },
-    item: itemMeta as unknown,
-    categoryConfig: config || undefined,
+    item: itemMeta ?? undefined,
+    categoryConfig: config ?? undefined,
     category,
     slug,
   });

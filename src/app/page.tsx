@@ -80,30 +80,39 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
     };
 
     // Extract featured content (items with _featured flag)
-    const featuredByCategory: Record<string, ContentItem[]> = {};
+    const featuredByCategory: Record<string, unknown[]> = {};
     for (const [category, items] of Object.entries(enrichedData.categoryData)) {
       if (category === 'allConfigs') continue; // Skip allConfigs for featured
 
-      const featured = items
-        .filter((item: any) => item._featured)
-        .sort((a: any, b: any) => a._featured.rank - b._featured.rank)
+      const featured = (items as unknown[])
+        .filter((item: unknown) => {
+          const obj = item as Record<string, unknown>;
+          return (
+            '_featured' in obj &&
+            obj._featured !== null &&
+            typeof obj._featured === 'object' &&
+            'rank' in obj._featured
+          );
+        })
+        .sort((a: unknown, b: unknown) => {
+          const aObj = a as Record<string, { rank: number } | undefined>;
+          const bObj = b as Record<string, { rank: number } | undefined>;
+          return (aObj._featured?.rank ?? 0) - (bObj._featured?.rank ?? 0);
+        })
         .slice(0, 6);
 
       if (featured.length > 0) {
-        featuredByCategory[category] = featured as ContentItem[];
+        featuredByCategory[category] = featured;
       }
     }
 
-    const initialData: Record<string, ContentItem[]> = enrichedData.categoryData as Record<
-      string,
-      ContentItem[]
-    >;
+    const initialData = enrichedData.categoryData as Record<string, unknown[]>;
 
     return (
       <HomePageClient
-        initialData={initialData}
+        initialData={initialData as Record<string, ContentItem[]>}
         initialSearchQuery={searchQuery}
-        featuredByCategory={featuredByCategory}
+        featuredByCategory={featuredByCategory as Record<string, ContentItem[]>}
         stats={enrichedData.stats}
       />
     );

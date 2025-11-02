@@ -61,12 +61,18 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
     logger.error('Failed to fetch trending page data', error);
   }
 
-  const pageData = (data as any) || {
+  const pageData = (data || {
     trending: [],
     popular: [],
     recent: [],
     totalCount: 0,
     metadata: { period, metric, category: null, page, limit, algorithm: 'fallback' },
+  }) as {
+    trending: unknown[];
+    popular: unknown[];
+    recent: unknown[];
+    totalCount: number;
+    metadata: Record<string, unknown>;
   };
 
   const pageTitleId = 'trending-page-title';

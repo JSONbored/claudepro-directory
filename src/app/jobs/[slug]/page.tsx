@@ -38,7 +38,7 @@ export async function generateMetadata({
 
   return generatePageMetadata('/jobs/:slug', {
     params: { slug },
-    item: job ? ({ ...job, tags: job.tags as string[] } as any) : undefined,
+    item: job ? { ...job, tags: job.tags as string[] } : undefined,
     slug,
   });
 }

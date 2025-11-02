@@ -71,10 +71,11 @@ export default async function EmbedPage({ params, searchParams }: EmbedPageProps
   const firstExample = examples[0] as
     | { code?: string; language?: string; filename?: string }
     | undefined;
-  const metadata = content.metadata as Record<string, any> | null;
-  const installation = metadata?.installation;
-  const configuration = metadata?.configuration;
-  const codeToDisplay = firstExample?.code || configuration || installation?.claudeCode?.steps?.[0];
+  const metadata = content.metadata as Record<string, unknown> | null;
+  const installation = metadata?.installation as Record<string, unknown> | undefined;
+  const configuration = metadata?.configuration as string | undefined;
+  const claudeCode = installation?.claudeCode as { steps?: string[] } | undefined;
+  const codeToDisplay = firstExample?.code || configuration || claudeCode?.steps?.[0];
 
   if (!codeToDisplay) {
     return (
