@@ -91,12 +91,13 @@ export function ProductionCodeBlock({
       await navigator.clipboard.writeText(code);
       toasts.success.codeCopied();
 
-      // Track to user_interactions table (database-first, fire-and-forget)
       trackInteraction({
         interaction_type: 'copy',
         content_type: category,
         content_slug: slug,
-      }).catch(() => {});
+      }).catch(() => {
+        // Intentional
+      });
     } catch (_err) {
       setIsCopied(false);
       toasts.error.copyFailed('code');
@@ -136,7 +137,6 @@ export function ProductionCodeBlock({
       const filename = generateScreenshotFilename(category, slug);
       downloadScreenshot(screenshot.dataUrl, filename);
 
-      // Track screenshot generation (fire-and-forget)
       trackInteraction({
         interaction_type: 'screenshot',
         content_type: category,
@@ -145,7 +145,9 @@ export function ProductionCodeBlock({
           width: screenshot.width,
           height: screenshot.height,
         },
-      }).catch(() => {});
+      }).catch(() => {
+        // Intentional
+      });
     } catch (error) {
       toasts.error.screenshotFailed();
       logger.error('Screenshot generation failed', error as Error);
@@ -178,8 +180,9 @@ export function ProductionCodeBlock({
         }
       }
 
-      // Track share event (fire-and-forget)
-      trackShare({ platform, category, slug, url: currentUrl }).catch(() => {});
+      trackShare({ platform, category, slug, url: currentUrl }).catch(() => {
+        // Intentional
+      });
 
       setIsShareOpen(false);
     } catch (error) {
@@ -205,8 +208,9 @@ export function ProductionCodeBlock({
       if (success) {
         toasts.success.embedCopied();
 
-        // Track embed generation (fire-and-forget)
-        trackEmbedGeneration({ category, slug, format: 'iframe' }).catch(() => {});
+        trackEmbedGeneration({ category, slug, format: 'iframe' }).catch(() => {
+          // Intentional
+        });
       } else {
         toasts.error.copyFailed('embed code');
       }
@@ -293,7 +297,7 @@ export function ProductionCodeBlock({
                     })}
                     className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-foreground text-sm transition-colors hover:bg-accent/10"
                     onClick={() => {
-                      handleShare('twitter');
+                      void handleShare('twitter');
                     }}
                   >
                     <TwitterIcon size={20} round />
@@ -316,7 +320,7 @@ export function ProductionCodeBlock({
                     })}
                     className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-foreground text-sm transition-colors hover:bg-accent/10"
                     onClick={() => {
-                      handleShare('linkedin');
+                      void handleShare('linkedin');
                     }}
                   >
                     <LinkedinIcon size={20} round />

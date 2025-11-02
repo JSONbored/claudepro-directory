@@ -116,12 +116,13 @@ export function DetailHeaderActions({
 
     await copy(contentToCopy);
 
-    // Track user interaction for analytics and personalization
     trackInteraction({
       interaction_type: 'copy',
       content_type: category,
       content_slug: item.slug,
-    }).catch(() => {});
+    }).catch(() => {
+      // Intentional
+    });
   };
 
   // Handle action clicks based on type

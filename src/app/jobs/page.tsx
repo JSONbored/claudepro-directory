@@ -114,11 +114,11 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
 
     const merged = { ...currentParams, ...newParams };
 
-    Object.entries(merged).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(merged)) {
       if (value !== undefined && value !== null && value !== '') {
         urlParams.set(key, String(value));
       }
-    });
+    }
 
     return `/jobs${urlParams.toString() ? `?${urlParams.toString()}` : ''}`;
   };

@@ -425,7 +425,7 @@ export const EXTERNAL_SERVICES = externalServicesSchema.parse({
 
   // Main Domain
   app: {
-    main: APP_CONFIG.url,
+    main: 'https://claudepro.directory',
     www: 'https://www.claudepro.directory',
   },
 });

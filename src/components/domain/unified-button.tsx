@@ -370,7 +370,9 @@ function CopyMarkdownButton({
           trackUsage({
             content_id: result.data.content_id,
             action_type: 'copy',
-          }).catch(() => {});
+          }).catch(() => {
+            // Intentionally empty - analytics failures should not affect UX
+          });
         }
 
         // Trigger email modal
@@ -392,7 +394,9 @@ function CopyMarkdownButton({
               copyCount: 1,
             });
           })
-          .catch(() => {});
+          .catch(() => {
+            // Intentionally empty - analytics failures should not affect UX
+          });
       } else {
         throw new Error(result?.data?.error || 'Failed to generate markdown');
       }
@@ -462,7 +466,10 @@ function DownloadMarkdownButton({
       setIsLoadingUrl(false);
     };
 
-    fetchStorageData().catch(() => setIsLoadingUrl(false));
+    fetchStorageData().catch(() => {
+      // Intentionally empty - fetch errors handled by setting loading state to false
+      setIsLoadingUrl(false);
+    });
   }, [category, slug, supabase]);
 
   // Skills category: Download ZIP from Supabase Storage with trackUsage()
@@ -472,7 +479,9 @@ function DownloadMarkdownButton({
         trackUsage({
           content_id: contentId,
           action_type: 'download_zip',
-        }).catch(() => {});
+        }).catch(() => {
+          // Intentionally empty - analytics failures should not affect UX
+        });
       }
     };
 

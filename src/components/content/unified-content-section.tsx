@@ -573,9 +573,10 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                 <h4 className="font-medium">Claude Code Setup</h4>
                 <div className="space-y-3">
                   {installationData.claudeCode.steps.map((step, index) => {
+                    const stepKey = `cc-step-${index}-${step.type}`;
                     if (step.type === 'command') {
                       return (
-                        <div key={`cc-${index}`} className="space-y-2">
+                        <div key={stepKey} className="space-y-2">
                           <div className="text-muted-foreground text-sm">
                             Step {index + 1}: Run command
                           </div>
@@ -590,7 +591,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                       );
                     }
                     return (
-                      <div key={`cc-${index}`} className="flex items-start gap-3">
+                      <div key={stepKey} className="flex items-start gap-3">
                         <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
                         <span className="text-sm leading-relaxed">{step.text}</span>
                       </div>
@@ -625,9 +626,10 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                 <h4 className="font-medium">Claude Desktop Setup</h4>
                 <div className="space-y-3">
                   {installationData.claudeDesktop.steps.map((step, index) => {
+                    const stepKey = `cd-step-${index}-${step.type}`;
                     if (step.type === 'command') {
                       return (
-                        <div key={`cd-${index}`} className="space-y-2">
+                        <div key={stepKey} className="space-y-2">
                           <div className="text-muted-foreground text-sm">
                             Step {index + 1}: Run command
                           </div>
@@ -642,7 +644,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                       );
                     }
                     return (
-                      <div key={`cd-${index}`} className="flex items-start gap-3">
+                      <div key={stepKey} className="flex items-start gap-3">
                         <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
                         <span className="text-sm leading-relaxed">{step.text}</span>
                       </div>

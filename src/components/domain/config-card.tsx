@@ -76,7 +76,9 @@ export const ConfigCard = memo(
         interaction_type: 'copy',
         content_type: item.category,
         content_slug: item.slug,
-      }).catch(() => {});
+      }).catch(() => {
+        // Intentionally empty - analytics failures should not affect UX
+      });
 
       toasts.success.copied();
     }, [targetPath, copy, item.category, item.slug]);

@@ -18,12 +18,192 @@ interface JSONSectionRendererProps {
   sections: GuideSections;
 }
 
+interface CodeTab {
+  label: string;
+  code: string;
+  language: string;
+  filename?: string;
+}
+
+interface TabItem {
+  value: string;
+  label: string;
+  content: string;
+}
+
+interface AccordionItem {
+  title: string;
+  content: string;
+  defaultOpen?: boolean;
+}
+
+interface FaqQuestion {
+  question: string;
+  answer: string;
+  category?: string;
+}
+
+interface FeatureItem {
+  title: string;
+  description: string;
+  badge?: string;
+}
+
+interface StepItem {
+  number: number;
+  title: string;
+  description: string;
+  timeEstimate?: string;
+  code?: string;
+  language?: string;
+  notes?: string;
+}
+
+interface ChecklistItem {
+  task: string;
+  description?: string;
+  required?: boolean;
+}
+
+interface ResourceItem {
+  url: string;
+  title: string;
+  description: string;
+  type: string;
+  external?: boolean;
+}
+
+type SectionBase = {
+  id?: string;
+  className?: string;
+};
+
+type TextSection = SectionBase & {
+  type: 'text';
+  content: string;
+};
+
+type HeadingSection = SectionBase & {
+  type: 'heading';
+  level: 2 | 3 | 4 | 5 | 6;
+  content: string;
+};
+
+type CodeSection = SectionBase & {
+  type: 'code';
+  code: string;
+  language: string;
+  filename?: string;
+  showLineNumbers?: boolean;
+};
+
+type CodeGroupSection = SectionBase & {
+  type: 'code_group';
+  title?: string;
+  tabs: CodeTab[];
+};
+
+type CalloutSection = SectionBase & {
+  type: 'callout';
+  variant: 'info' | 'warning' | 'success' | 'error' | 'tip' | 'primary' | 'important';
+  title?: string;
+  content: string;
+};
+
+type TldrSection = SectionBase & {
+  type: 'tldr';
+  content: string;
+  keyPoints?: string[];
+};
+
+type FeatureGridSection = SectionBase & {
+  type: 'feature_grid';
+  title?: string;
+  description?: string;
+  features: FeatureItem[];
+  columns?: number | string;
+};
+
+type ExpertQuoteSection = SectionBase & {
+  type: 'expert_quote';
+  quote: string;
+  author: string;
+  title?: string;
+  company?: string;
+  avatarUrl?: string;
+};
+
+type ComparisonTableSection = SectionBase & {
+  type: 'comparison_table';
+  title?: string;
+  description?: string;
+  headers: string[];
+  data: (string[] | Record<string, string>)[];
+};
+
+type TabsSection = SectionBase & {
+  type: 'tabs';
+  title?: string;
+  description?: string;
+  items: TabItem[];
+};
+
+type AccordionSection = SectionBase & {
+  type: 'accordion';
+  title?: string;
+  description?: string;
+  items: AccordionItem[];
+};
+
+type FaqSection = SectionBase & {
+  type: 'faq';
+  title?: string;
+  description?: string;
+  questions: FaqQuestion[];
+};
+
+type StepsSection = SectionBase & {
+  type: 'steps';
+  title?: string;
+  steps: StepItem[];
+};
+
+type ChecklistSection = SectionBase & {
+  type: 'checklist';
+  title?: string;
+  items: ChecklistItem[];
+};
+
+type RelatedContentSection = SectionBase & {
+  type: 'related_content';
+  title?: string;
+  description?: string;
+  resources?: ResourceItem[];
+};
+
+type Section =
+  | TextSection
+  | HeadingSection
+  | CodeSection
+  | CodeGroupSection
+  | CalloutSection
+  | TldrSection
+  | FeatureGridSection
+  | ExpertQuoteSection
+  | ComparisonTableSection
+  | TabsSection
+  | AccordionSection
+  | FaqSection
+  | StepsSection
+  | ChecklistSection
+  | RelatedContentSection;
+
 function TrustedHTML({ html, className, id }: { html: string; className?: string; id?: string }) {
   // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is from owner-controlled JSON files, not user input
   return <div id={id} className={className} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-function render_section(section: any, index: number): React.ReactNode {
+function render_section(section: Section, index: number): React.ReactNode {
   const key = section.id || `section-${index}`;
 
   switch (section.type) {
@@ -70,7 +250,7 @@ function render_section(section: any, index: number): React.ReactNode {
         <div key={key} id={section.id} className={section.className}>
           {section.title && <h3 className="mb-4 font-semibold text-lg">{section.title}</h3>}
           <div className="overflow-hidden rounded-lg border">
-            {section.tabs.map((tab: any, idx: number) => (
+            {section.tabs.map((tab: CodeTab, idx: number) => (
               <details key={`${tab.label}-${idx}`} className="border-b last:border-0">
                 <summary className="cursor-pointer px-4 py-3 font-medium hover:bg-muted/50">
                   {tab.label} {tab.filename && `• ${tab.filename}`}
@@ -137,7 +317,7 @@ function render_section(section: any, index: number): React.ReactNode {
             variant="feature-grid"
             title={section.title || 'Key Features'}
             description={section.description || ''}
-            features={section.features.map((f: any) => ({
+            features={section.features.map((f: FeatureItem) => ({
               title: f.title,
               description: f.description,
               badge: f.badge,
@@ -168,7 +348,7 @@ function render_section(section: any, index: number): React.ReactNode {
     case 'comparison_table': {
       const headers = section.headers || [];
 
-      const items = section.data.map((row: any) => {
+      const items = section.data.map((row: string[] | Record<string, string>) => {
         if (Array.isArray(row)) {
           return {
             feature: row[0] || '',
@@ -209,7 +389,7 @@ function render_section(section: any, index: number): React.ReactNode {
             <p className="mb-4 text-muted-foreground">{section.description}</p>
           )}
           <div className="overflow-hidden rounded-lg border">
-            {section.items.map((item: any, idx: number) => (
+            {section.items.map((item: TabItem, idx: number) => (
               <details key={`${item.value}-${idx}`} className="border-b last:border-0">
                 <summary className="cursor-pointer px-4 py-3 font-medium hover:bg-muted/50">
                   {item.label}
@@ -228,7 +408,7 @@ function render_section(section: any, index: number): React.ReactNode {
             contentType="accordion"
             title={section.title}
             description={section.description || ''}
-            items={section.items.map((item: any) => ({
+            items={section.items.map((item: AccordionItem) => ({
               title: item.title,
               content: <TrustedHTML html={item.content} />,
               defaultOpen: item.defaultOpen ?? false,
@@ -245,7 +425,7 @@ function render_section(section: any, index: number): React.ReactNode {
             contentType="faq"
             title={section.title || 'Frequently Asked Questions'}
             description={section.description || ''}
-            questions={section.questions.map((q: any) => ({
+            questions={section.questions.map((q: FaqQuestion) => ({
               question: q.question,
               answer: q.answer,
               category: q.category,
@@ -262,7 +442,7 @@ function render_section(section: any, index: number): React.ReactNode {
         <div key={key} id={section.id} className={section.className}>
           {section.title && <h3 className="mb-4 font-semibold text-lg">{section.title}</h3>}
           <div className="space-y-6">
-            {section.steps.map((step: any) => (
+            {section.steps.map((step: StepItem) => (
               <div key={step.number} className="border-primary border-l-4 pl-6">
                 <h4 className="mb-2 font-semibold text-lg">
                   Step {step.number}: {step.title}
@@ -293,10 +473,10 @@ function render_section(section: any, index: number): React.ReactNode {
           <Checklist
             title={section.title}
             type="prerequisites"
-            items={section.items.map((item: any) => ({
+            items={section.items.map((item: ChecklistItem) => ({
               task: item.task,
               description: item.description,
-              completed: false, // User will check these off
+              completed: false,
               priority: (item.required ? 'high' : 'low') as 'high' | 'low',
             }))}
           />
@@ -315,7 +495,7 @@ function render_section(section: any, index: number): React.ReactNode {
           )}
           {section.resources && section.resources.length > 0 && (
             <div className="grid gap-4">
-              {section.resources.map((r: any, idx: number) => (
+              {section.resources.map((r: ResourceItem, idx: number) => (
                 <a
                   key={`${r.url}-${idx}`}
                   href={r.url}
@@ -339,7 +519,7 @@ function render_section(section: any, index: number): React.ReactNode {
 }
 
 export function JSONSectionRenderer({ sections }: JSONSectionRendererProps) {
-  const sections_array = Array.isArray(sections) ? sections : [];
+  const sections_array = Array.isArray(sections) ? (sections as Section[]) : [];
 
   if (sections_array.length === 0) {
     return null;

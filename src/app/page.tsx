@@ -128,9 +128,9 @@ async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
 
     // Return empty state on error
     const emptyData: Record<string, ContentItem[]> = {};
-    categoryIds.forEach((id) => {
+    for (const id of categoryIds) {
       emptyData[id] = [];
-    });
+    }
     emptyData.allConfigs = [];
 
     return (
