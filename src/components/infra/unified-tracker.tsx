@@ -95,7 +95,9 @@ function ViewVariant({
         interaction_type: 'view',
         content_type: category,
         content_slug: slug,
-      }).catch(() => {});
+      }).catch(() => {
+        // Intentional
+      });
     },
     delay,
     [category, slug]

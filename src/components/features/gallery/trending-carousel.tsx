@@ -152,9 +152,9 @@ export function TrendingCarousel({ items, autoPlayInterval = 5000 }: TrendingCar
 
       {/* Dots Indicator */}
       <div className="mt-6 flex items-center justify-center gap-2">
-        {items.map((_, index) => (
+        {items.map((item, index) => (
           <button
-            key={index}
+            key={`${item.category}-${item.slug}`}
             type="button"
             onClick={() => emblaApi?.scrollTo(index)}
             className={`h-2 rounded-full transition-all duration-300 ${

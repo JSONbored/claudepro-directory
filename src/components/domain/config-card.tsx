@@ -24,7 +24,7 @@ import { Button } from '@/src/components/primitives/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { trackInteraction } from '@/src/lib/actions/analytics.actions';
 import { addBookmark } from '@/src/lib/actions/user.actions';
-import { isValidCategory } from '@/src/lib/config/category-config';
+import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
 import {
   Award,
   Copy as CopyIcon,
@@ -53,7 +53,12 @@ export const ConfigCard = memo(
     showBorderBeam = false, // Position-based BorderBeam animation (top 3 featured items)
   }: ConfigCardProps) => {
     const displayTitle = getDisplayTitle(item);
-    const targetPath = getContentItemUrl(item as any);
+    const targetPath = getContentItemUrl({
+      category: item.category as CategoryId,
+      slug: item.slug,
+      subcategory:
+        'subcategory' in item ? (item.subcategory as string | null | undefined) : undefined,
+    });
     const router = useRouter();
     const { copy } = useCopyToClipboard({
       context: {
@@ -172,32 +177,28 @@ export const ConfigCard = memo(
         )}
 
         <BaseCard
-          {...({
-            targetPath,
-            displayTitle,
-            description: item.description,
-            author: 'author' in item && item.author ? item.author : undefined,
-            authorProfileUrl:
-              'author_profile_url' in item && item.author_profile_url
-                ? item.author_profile_url
-                : undefined,
-            source: 'source' in item && item.source ? (item.source as string) : undefined,
-            tags:
-              'tags' in item && item.tags && Array.isArray(item.tags)
-                ? (item.tags as string[])
-                : undefined,
-            variant,
-            showActions,
-            ariaLabel: `${displayTitle} - ${item.category} by ${('author' in item && item.author) || 'Community'}`,
-            isSponsored,
-            sponsoredId,
-            position,
-            enableSwipeGestures,
-            onSwipeRight: handleSwipeRightCopy,
-            onSwipeLeft: handleSwipeLeftBookmark,
-            useViewTransitions,
-            viewTransitionSlug: item.slug,
-          } as any)}
+          targetPath={targetPath}
+          displayTitle={displayTitle}
+          description={item.description}
+          {...('author' in item && item.author ? { author: item.author } : {})}
+          {...('author_profile_url' in item && item.author_profile_url
+            ? { authorProfileUrl: item.author_profile_url }
+            : {})}
+          {...('source' in item && item.source ? { source: item.source as string } : {})}
+          {...('tags' in item && item.tags && Array.isArray(item.tags)
+            ? { tags: item.tags as string[] }
+            : {})}
+          variant={variant}
+          showActions={showActions}
+          ariaLabel={`${displayTitle} - ${item.category} by ${('author' in item && item.author) || 'Community'}`}
+          {...(isSponsored !== undefined ? { isSponsored } : {})}
+          {...(sponsoredId !== undefined ? { sponsoredId } : {})}
+          {...(position !== undefined ? { position } : {})}
+          enableSwipeGestures={enableSwipeGestures}
+          onSwipeRight={handleSwipeRightCopy}
+          onSwipeLeft={handleSwipeLeftBookmark}
+          useViewTransitions={useViewTransitions}
+          viewTransitionSlug={item.slug}
           renderTopBadges={() => (
             <>
               {showCategory && (
@@ -421,7 +422,7 @@ export const ConfigCard = memo(
                 <UnifiedButton
                   variant="card-copy"
                   url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
-                  category={(item.category || 'agents') as any}
+                  category={(item.category || 'agents') as CategoryId}
                   slug={item.slug}
                   title={displayTitle}
                 />

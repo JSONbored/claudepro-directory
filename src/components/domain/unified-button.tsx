@@ -531,7 +531,9 @@ function DownloadMarkdownButton({
           trackUsage({
             content_id: result.data.content_id,
             action_type: 'download_markdown',
-          }).catch(() => {});
+          }).catch(() => {
+            // Intentional
+          });
         }
 
         // Track analytics (fire-and-forget)
@@ -545,7 +547,9 @@ function DownloadMarkdownButton({
               downloadCount: 1,
             });
           })
-          .catch(() => {});
+          .catch(() => {
+            // Intentional
+          });
       } else {
         throw new Error(result?.data?.error || 'Failed to generate markdown');
       }
@@ -623,7 +627,9 @@ function CopyLLMsButton({
         trackUsage({
           content_id: contentId,
           action_type: 'llmstxt',
-        }).catch(() => {});
+        }).catch(() => {
+          // Intentional
+        });
       }
 
       // Track analytics (fire-and-forget)
@@ -636,7 +642,9 @@ function CopyLLMsButton({
               contentLength: content.length,
             });
           })
-          .catch(() => {});
+          .catch(() => {
+            // Intentional
+          });
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
@@ -808,7 +816,9 @@ function CardCopyButton({
         interaction_type: 'copy',
         content_type: category,
         content_slug: slug,
-      }).catch(() => {});
+      }).catch(() => {
+        // Intentional
+      });
 
       toasts.success.linkCopied();
     } catch (error) {
@@ -994,7 +1004,9 @@ function GitHubStarsButton({
       }
     };
 
-    fetchStars().catch(() => {});
+    fetchStars().catch(() => {
+      // Intentional
+    });
   }, [repoUrl, executeAsync]);
 
   const handleClick = () => {

@@ -98,7 +98,9 @@ function UnifiedSearchComponent({
               },
             })
           )
-          .catch(() => {});
+          .catch(() => {
+            // Intentional
+          });
       }
     }, 500);
 

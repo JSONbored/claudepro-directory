@@ -96,7 +96,11 @@ export async function getUserSubmissions() {
     return [];
   }
 
-  const result = data as { submissions: any[]; companies: any[]; jobs: any[] };
+  const result = data as unknown as {
+    submissions: Array<Tables<'submissions'>>;
+    companies: Array<Tables<'companies'>>;
+    jobs: Array<Tables<'jobs'>>;
+  };
   return result.submissions || [];
 }
 
@@ -164,7 +168,7 @@ export const createCompany = rateLimitedAction
     revalidatePath('/companies');
     revalidatePath('/account/companies');
 
-    return data as { success: boolean; company: any };
+    return data as unknown as { success: boolean; company: Tables<'companies'> };
   });
 
 export const updateCompany = rateLimitedAction
@@ -185,7 +189,7 @@ export const updateCompany = rateLimitedAction
     });
 
     if (error) throw new Error(error.message);
-    const result = data as { success: boolean; company: any };
+    const result = data as unknown as { success: boolean; company: Tables<'companies'> };
 
     revalidatePath('/companies');
     revalidatePath(`/companies/${result.company.slug}`);
@@ -204,31 +208,29 @@ export async function getUserCompanies() {
   const { data, error } = await supabase.rpc('get_user_dashboard', { p_user_id: user.id });
   if (error) throw new Error(`Failed to fetch user dashboard: ${error.message}`);
 
-  const result = data as { submissions: any[]; companies: any[]; jobs: any[] };
+  const result = data as unknown as {
+    submissions: Array<Tables<'submissions'>>;
+    companies: Array<Tables<'companies'>>;
+    jobs: Array<Tables<'jobs'>>;
+  };
   return result.companies || [];
 }
 
-const createJobInputSchema = publicJobsInsertSchema.pick({
-  title: true,
-  company: true,
-  description: true,
-  category: true,
-  type: true,
-  link: true,
-  location: true,
-  salary: true,
-  remote: true,
-  workplace: true,
-  tags: true,
-  requirements: true,
-  benefits: true,
-  experience: true,
-  contact_email: true,
-}) as z.ZodType<any>;
+const createJobSchema = publicJobsInsertSchema
+  .omit({
+    tags: true,
+    requirements: true,
+    benefits: true,
+  })
+  .extend({
+    tags: z.unknown().optional(),
+    requirements: z.unknown().optional(),
+    benefits: z.unknown().optional(),
+  });
 
 export const createJob = rateLimitedAction
   .metadata({ actionName: 'createJob', category: 'form' })
-  .schema(createJobInputSchema)
+  .schema(createJobSchema)
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
     const {
@@ -248,21 +250,30 @@ export const createJob = rateLimitedAction
     revalidatePath('/jobs');
     revalidatePath('/account/jobs');
 
-    return data as { success: boolean; job: any; requiresPayment: boolean; message: string };
+    return data as unknown as {
+      success: boolean;
+      job: Tables<'jobs'>;
+      requiresPayment: boolean;
+      message: string;
+    };
   });
 
-const updateJobInputSchema = publicJobsUpdateSchema
-  .omit({ tags: true, requirements: true, benefits: true })
-  .extend({
-    tags: z.any().optional(),
-    requirements: z.any().optional(),
-    benefits: z.any().optional(),
+const updateJobSchema = publicJobsUpdateSchema
+  .omit({
+    tags: true,
+    requirements: true,
+    benefits: true,
   })
-  .required({ id: true }) as z.ZodType<any>;
+  .extend({
+    tags: z.unknown().optional(),
+    requirements: z.unknown().optional(),
+    benefits: z.unknown().optional(),
+  })
+  .required({ id: true });
 
 export const updateJob = rateLimitedAction
   .metadata({ actionName: 'updateJob', category: 'form' })
-  .schema(updateJobInputSchema)
+  .schema(updateJobSchema)
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
     const {
@@ -278,7 +289,7 @@ export const updateJob = rateLimitedAction
     });
 
     if (error) throw new Error(error.message);
-    const result = data as { success: boolean; job: any };
+    const result = data as unknown as { success: boolean; job: Tables<'jobs'> };
 
     revalidatePath('/jobs');
     revalidatePath(`/jobs/${result.job.slug}`);
@@ -314,7 +325,7 @@ export const toggleJobStatus = rateLimitedAction
     revalidatePath('/jobs');
     revalidatePath('/account/jobs');
 
-    return data as { success: boolean; job: any };
+    return data as unknown as { success: boolean; job: Tables<'jobs'> };
   });
 
 export const deleteJob = rateLimitedAction
@@ -352,8 +363,12 @@ export async function getUserJobs(): Promise<Array<Tables<'jobs'>>> {
   const { data, error } = await supabase.rpc('get_user_dashboard', { p_user_id: user.id });
   if (error) throw new Error(`Failed to fetch user dashboard: ${error.message}`);
 
-  const result = data as { submissions: any[]; companies: any[]; jobs: any[] };
-  return (result.jobs || []) as Array<Tables<'jobs'>>;
+  const result = data as unknown as {
+    submissions: Array<Tables<'submissions'>>;
+    companies: Array<Tables<'companies'>>;
+    jobs: Array<Tables<'jobs'>>;
+  };
+  return result.jobs || [];
 }
 
 // Sponsored content tracking schemas - Generated base + validation

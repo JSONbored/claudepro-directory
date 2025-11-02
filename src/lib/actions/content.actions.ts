@@ -483,8 +483,7 @@ export const getReviewsWithStats = rateLimitedAction
       throw new Error('Failed to fetch reviews. Please try again.');
     }
 
-    // RPC returns JSONB with reviews, hasMore, totalCount, aggregateRating
-    return data as any;
+    return data;
   });
 
 // DELETED: getReviews() - Use getReviewsWithStats() instead (optimized single RPC)

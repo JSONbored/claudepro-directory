@@ -10,6 +10,14 @@ import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import { createClient } from '@/src/lib/supabase/server';
+import type { Tables } from '@/src/types/database.types';
+
+type UserBadgeWithDetails = Pick<
+  Tables<'user_badges'>,
+  'id' | 'badge_id' | 'earned_at' | 'featured' | 'metadata'
+> & {
+  badge: Tables<'badges'>;
+};
 
 /**
  * Get user badges with full badge details
@@ -37,8 +45,7 @@ export const getUserBadges = authedAction
 
     if (error) throw new Error(`Failed to fetch badges: ${error.message}`);
 
-    // RPC returns JSONB array - cast to expected type
-    const badges = (data || []) as any;
+    const badges = (data || []) as unknown as UserBadgeWithDetails[];
     return { badges, total: Array.isArray(badges) ? badges.length : 0 };
   });
 
@@ -132,7 +139,7 @@ export async function getPublicUserBadges(
 
   if (error) throw new Error(`Failed to fetch badges: ${error.message}`);
 
-  return (data || []) as any;
+  return (data || []) as unknown as UserBadgeWithDetails[];
 }
 
 export async function userHasBadge(userId: string, badgeId: string): Promise<boolean> {

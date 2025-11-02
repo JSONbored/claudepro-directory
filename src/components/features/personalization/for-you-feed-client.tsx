@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { trackEvent } from '@/src/lib/analytics/tracker';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import type { ForYouFeedResponse } from '@/src/lib/schemas/personalization.schema';
 import type { Database } from '@/src/types/database.types';
 
@@ -57,14 +58,14 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
           {} as Database['public']['Tables']['content']['Row']['discovery_metadata'],
         _recommendationSource: rec.source,
         _recommendationReason: rec.reason,
-      })) as any,
+      })) as unknown as ContentItem[],
     [recommendations]
   );
 
   const filteredItems = useMemo(
     () =>
       selectedCategory
-        ? transformedRecommendations.filter((item: any) => item.category === selectedCategory)
+        ? transformedRecommendations.filter((item) => item.category === selectedCategory)
         : transformedRecommendations,
     [transformedRecommendations, selectedCategory]
   );
@@ -111,12 +112,14 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
         ariaLabel="Personalized recommendations"
       />
 
-      {filteredItems.some((item: any) => item._recommendationReason) && (
+      {filteredItems.some(
+        (item) => '_recommendationReason' in item && item._recommendationReason
+      ) && (
         <div className="mt-6 space-y-2">
-          {filteredItems.map((item: any) =>
-            item._recommendationReason ? (
+          {filteredItems.map((item) =>
+            '_recommendationReason' in item && item._recommendationReason ? (
               <p key={item.slug} className="text-muted-foreground text-xs italic">
-                <strong>{item.title}:</strong> {item._recommendationReason}
+                <strong>{item.title}:</strong> {item._recommendationReason as string}
               </p>
             ) : null
           )}

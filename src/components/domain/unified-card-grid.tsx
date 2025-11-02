@@ -186,10 +186,10 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
   useEffect(() => {
     if (prefetchCount > 0 && items.length > 0) {
       const itemsToPrefetch = items.slice(0, prefetchCount);
-      itemsToPrefetch.forEach((item) => {
+      for (const item of itemsToPrefetch) {
         const path = `/${item.category}/${item.slug}`;
         router.prefetch(path);
-      });
+      }
     }
   }, [items, prefetchCount, router]);
 

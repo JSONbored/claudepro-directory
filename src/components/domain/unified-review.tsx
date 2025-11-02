@@ -379,7 +379,11 @@ function SectionVariant({
   );
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const [aggregateRating, setAggregateRating] = useState<any>(null);
+  const [aggregateRating, setAggregateRating] = useState<{
+    count: number;
+    average: number;
+    distribution: Record<string, number>;
+  } | null>(null);
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   const router = useRouter();
 
@@ -399,13 +403,23 @@ function SectionVariant({
         });
 
         if (result?.data) {
-          const { reviews, hasMore, aggregateRating } = result.data as any;
-          setReviews((prev) => (pageNum === 1 ? reviews : [...prev, ...reviews]));
-          setHasMore(hasMore);
+          const responseData = result.data as unknown as {
+            reviews: ReviewItem[];
+            hasMore: boolean;
+            aggregateRating: {
+              count: number;
+              average: number;
+              distribution: Record<string, number>;
+            };
+          };
+          setReviews((prev) =>
+            pageNum === 1 ? responseData.reviews : [...prev, ...responseData.reviews]
+          );
+          setHasMore(responseData.hasMore);
 
           // Also update aggregate rating (no separate call needed!)
-          if (aggregateRating) {
-            setAggregateRating(aggregateRating);
+          if (responseData.aggregateRating) {
+            setAggregateRating(responseData.aggregateRating);
           }
         }
       } catch (_error) {

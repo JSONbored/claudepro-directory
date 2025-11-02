@@ -39,6 +39,7 @@ import {
 import { ROUTES } from '@/src/lib/constants/routes';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
+import type { FilterState } from '@/src/lib/schemas/component.schema';
 import type { HomePageClientProps } from '@/src/lib/schemas/components/page-props.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -108,7 +109,7 @@ function HomePageClientComponent({
     [allConfigs]
   );
 
-  const handleFiltersChange = useCallback((newFilters: any) => {
+  const handleFiltersChange = useCallback((newFilters: FilterState) => {
     setFilters(newFilters);
   }, []);
 

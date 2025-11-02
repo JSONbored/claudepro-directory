@@ -24,11 +24,16 @@ import { useEffect, useState } from 'react';
 import { BaseCard } from '@/src/components/domain/base-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
+import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { relatedContentService } from '@/src/lib/related-content/service';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
+import type { Database } from '@/src/types/database.types';
+
+type RelatedContentRPCResult =
+  Database['public']['Functions']['get_related_content']['Returns'][number];
 
 /**
  * Extended ContentItem for related content with matching metadata
@@ -164,9 +169,8 @@ export function RelatedContentClient({
           limit,
         });
 
-        // Convert service response to RelatedContentItem format
         const convertedItems = response.items.map(
-          (item: any): RelatedContentItem =>
+          (item: RelatedContentRPCResult): RelatedContentItem =>
             ({
               category: item.category,
               slug: item.slug,
@@ -175,7 +179,6 @@ export function RelatedContentClient({
               author: item.author,
               date_added: item.date_added,
               tags: item.tags,
-              // Add related content specific properties
               score: item.score,
               matchType: item.match_type,
               matchDetails: {
@@ -272,7 +275,7 @@ export function RelatedContentClient({
             <BaseCard
               key={`${relatedItem.category}-${relatedItem.slug}`}
               targetPath={getContentItemUrl({
-                category: relatedItem.category as any,
+                category: relatedItem.category as CategoryId,
                 slug: relatedItem.slug,
               })}
               displayTitle={relatedItem.title ?? relatedItem.slug}
@@ -285,7 +288,7 @@ export function RelatedContentClient({
                 // Track click with dynamic import (Storybook compatible)
                 if (trackingEnabled) {
                   const itemUrl = getContentItemUrl({
-                    category: relatedItem.category as any,
+                    category: relatedItem.category as CategoryId,
                     slug: relatedItem.slug,
                   });
 

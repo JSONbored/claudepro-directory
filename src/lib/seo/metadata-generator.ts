@@ -137,12 +137,12 @@ function buildCanonicalUrl(route: string, context?: MetadataContext): string {
   let path = route;
 
   if (context?.params) {
-    Object.entries(context.params).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(context.params)) {
       const paramValue = Array.isArray(value) ? value[0] : value;
       if (paramValue) {
         path = path.replace(`:${key}`, paramValue);
       }
-    });
+    }
   }
 
   if (path === '/') {

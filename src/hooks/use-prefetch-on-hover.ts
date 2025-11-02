@@ -152,9 +152,9 @@ export function useBatchPrefetch() {
 
   const batchPrefetch = useCallback(
     (urls: string[]) => {
-      urls.forEach((url) => {
+      for (const url of urls) {
         router.prefetch(url);
-      });
+      }
     },
     [router]
   );

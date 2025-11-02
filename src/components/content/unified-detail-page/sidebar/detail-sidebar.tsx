@@ -10,6 +10,7 @@ import { memo } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
+import type { CategoryId } from '@/src/lib/config/category-config';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
@@ -225,7 +226,10 @@ export const DetailSidebar = memo(function DetailSidebar({
               return (
                 <Link
                   key={relatedSlug}
-                  href={getContentItemUrl({ category: relatedCategory, slug: relatedSlug } as any)}
+                  href={getContentItemUrl({
+                    category: relatedCategory as CategoryId,
+                    slug: relatedSlug,
+                  })}
                   className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} block w-full cursor-pointer rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted/50`}
                 >
                   <div className={'min-w-0 flex-1'}>

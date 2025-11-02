@@ -150,7 +150,9 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         label="Interests & Skills"
         items={interests}
         onChange={(newInterests) => setValue('interests', newInterests, { shouldDirty: true })}
-        onFieldChange={() => {}}
+        onFieldChange={() => {
+          // Intentional
+        }}
         placeholder="Add an interest..."
         maxItems={10}
         maxLength={30}

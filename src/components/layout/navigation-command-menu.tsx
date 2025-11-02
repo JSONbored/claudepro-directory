@@ -104,7 +104,7 @@ export function NavigationCommandMenu({
 
   // Dynamic icon mapper
   const getIcon = (iconName: string) => {
-    const Icon = (Icons as any)[iconName];
+    const Icon = (Icons as Record<string, React.ComponentType<{ className?: string }>>)[iconName];
     return Icon ? <Icon className="h-4 w-4 flex-shrink-0 text-muted-foreground" /> : null;
   };
 

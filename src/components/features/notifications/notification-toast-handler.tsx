@@ -25,7 +25,9 @@ function markShown(id: string): void {
     const shown = getShownIds();
     shown.add(id);
     localStorage.setItem(SHOWN_KEY, JSON.stringify([...shown]));
-  } catch {}
+  } catch {
+    // Intentional
+  }
 }
 
 export function NotificationToastHandler() {

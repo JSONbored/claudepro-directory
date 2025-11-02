@@ -65,9 +65,9 @@ export function GalleryMasonryGrid({
   // Intersection Observer for infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
+      async (entries) => {
         if (entries[0]?.isIntersecting && hasMore && !loading) {
-          loadMore();
+          await loadMore();
         }
       },
       { threshold: 0.1, rootMargin: '200px' }

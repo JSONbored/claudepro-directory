@@ -19,7 +19,11 @@ const UnifiedSearch = dynamic(
 );
 
 import { HelpCircle } from '@/src/lib/icons';
-import type { ContentItem, ContentSearchClientProps } from '@/src/lib/schemas/component.schema';
+import type {
+  ContentItem,
+  ContentSearchClientProps,
+  FilterState,
+} from '@/src/lib/schemas/component.schema';
 import { ICON_NAME_MAP } from '@/src/lib/ui-constants';
 
 /**
@@ -41,13 +45,13 @@ function ContentSearchClientComponent<T extends ContentItem>({
 }: ContentSearchClientProps<T>) {
   // Local state for search (no server call needed - data already provided)
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState<FilterState>({});
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
   }, []);
 
-  const handleFiltersChange = useCallback((newFilters: any) => {
+  const handleFiltersChange = useCallback((newFilters: FilterState) => {
     setFilters(newFilters);
   }, []);
 

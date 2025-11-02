@@ -296,8 +296,8 @@ export function ProductionCodeBlock({
                       platform: 'twitter',
                     })}
                     className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-foreground text-sm transition-colors hover:bg-accent/10"
-                    onClick={() => {
-                      void handleShare('twitter');
+                    onClick={async () => {
+                      await handleShare('twitter');
                     }}
                   >
                     <TwitterIcon size={20} round />
@@ -319,8 +319,8 @@ export function ProductionCodeBlock({
                       platform: 'linkedin',
                     })}
                     className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-foreground text-sm transition-colors hover:bg-accent/10"
-                    onClick={() => {
-                      void handleShare('linkedin');
+                    onClick={async () => {
+                      await handleShare('linkedin');
                     }}
                   >
                     <LinkedinIcon size={20} round />

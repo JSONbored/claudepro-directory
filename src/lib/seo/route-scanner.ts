@@ -331,14 +331,14 @@ export function printReport(report: RouteScanReport): void {
 
     // Show first 3 routes as examples
     if (routes.length > 0) {
-      routes.slice(0, 3).forEach((route) => {
+      for (const route of routes.slice(0, 3)) {
         const confidenceIcon = route.classification.confidence === 1.0 ? '✓' : '⚠';
         const dynamicIcon = route.isDynamic ? '[D]' : '   ';
         cli.indent(
           `  ${confidenceIcon} ${dynamicIcon} ${route.route} (${route.classification.confidence.toFixed(1)})`,
           4
         );
-      });
+      }
 
       if (routes.length > 3) {
         cli.indent(`  ... and ${routes.length - 3} more`, 4);
