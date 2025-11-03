@@ -36,7 +36,12 @@ export function BoardListClient({ initialPosts }: BoardListClientProps) {
     const supabase = createClient();
 
     const channel = supabase
-      .channel('posts-realtime')
+      .channel('posts-realtime', {
+        config: {
+          broadcast: { ack: false },
+          presence: { key: '' },
+        },
+      })
       .on(
         'postgres_changes',
         {
@@ -57,28 +62,7 @@ export function BoardListClient({ initialPosts }: BoardListClientProps) {
         },
         (payload) => {
           const updated = payload.new as Post;
-          setPosts((prev) => {
-            const oldPost = prev.find((p) => p.id === updated.id);
-
-            if (!oldPost) return prev;
-
-            if (oldPost.vote_count !== updated.vote_count) {
-              const filtered = prev.filter((p) => p.id !== updated.id);
-              const insertIndex = filtered.findIndex(
-                (p) =>
-                  (p.vote_count || 0) < (updated.vote_count || 0) ||
-                  ((p.vote_count || 0) === (updated.vote_count || 0) &&
-                    new Date(p.created_at) < new Date(updated.created_at))
-              );
-
-              if (insertIndex === -1) {
-                return [...filtered, updated];
-              }
-              return [...filtered.slice(0, insertIndex), updated, ...filtered.slice(insertIndex)];
-            }
-
-            return prev.map((p) => (p.id === updated.id ? updated : p));
-          });
+          setPosts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
         }
       )
       .on(

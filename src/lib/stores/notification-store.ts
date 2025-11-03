@@ -71,11 +71,16 @@ export const useNotificationStore = create<NotificationStore>()(
           const supabase = createClient();
 
           const channel = supabase
-            .channel('notifications-realtime')
+            .channel('notifications-realtime', {
+              config: {
+                broadcast: { ack: false },
+                presence: { key: '' },
+              },
+            })
             .on(
               'postgres_changes',
               {
-                event: '*',
+                event: 'INSERT',
                 schema: 'public',
                 table: 'notifications',
               },

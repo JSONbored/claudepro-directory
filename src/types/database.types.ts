@@ -857,7 +857,6 @@ export type Database = {
           json_ld: Json | null
           metadata: Json
           og_type: string | null
-          popularity_score: number | null
           reading_time: number | null
           robots_follow: boolean | null
           robots_index: boolean | null
@@ -896,7 +895,6 @@ export type Database = {
           json_ld?: Json | null
           metadata?: Json
           og_type?: string | null
-          popularity_score?: number | null
           reading_time?: number | null
           robots_follow?: boolean | null
           robots_index?: boolean | null
@@ -935,7 +933,6 @@ export type Database = {
           json_ld?: Json | null
           metadata?: Json
           og_type?: string | null
-          popularity_score?: number | null
           reading_time?: number | null
           robots_follow?: boolean | null
           robots_index?: boolean | null
@@ -3835,6 +3832,44 @@ export type Database = {
         }
         Relationships: []
       }
+      mv_content_trending_metrics: {
+        Row: {
+          bookmarks_total: number | null
+          category: string | null
+          copies_total: number | null
+          created_at: string | null
+          days_old: number | null
+          engagement_score: number | null
+          freshness_score: number | null
+          last_refreshed: string | null
+          slug: string | null
+          trending_score: number | null
+          views_7d: number | null
+          views_prev_7d: number | null
+          views_total: number | null
+        }
+        Relationships: []
+      }
+      mv_featured_content_rankings: {
+        Row: {
+          bookmarks_total: number | null
+          category: string | null
+          copies_total: number | null
+          days_old: number | null
+          engagement_score: number | null
+          final_score: number | null
+          freshness_score: number | null
+          growth_rate_pct: number | null
+          last_refreshed: string | null
+          rank: number | null
+          slug: string | null
+          trending_score: number | null
+          views_7d: number | null
+          views_prev_7d: number | null
+          views_total: number | null
+        }
+        Relationships: []
+      }
       mv_search_facets: {
         Row: {
           all_tags: string[] | null
@@ -4503,6 +4538,23 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_content_detail_complete: {
+        Args: { p_category: string; p_slug: string; p_user_id?: string }
+        Returns: Json
+      }
+      get_content_paginated: {
+        Args: {
+          p_author?: string
+          p_category?: string
+          p_limit?: number
+          p_offset?: number
+          p_order_by?: string
+          p_order_direction?: string
+          p_search?: string
+          p_tags?: string[]
+        }
+        Returns: Json
+      }
       get_content_popularity: {
         Args: { p_content_type?: string; p_limit?: number }
         Returns: {
@@ -4699,6 +4751,10 @@ export type Database = {
           stars: number
           watchers: number
         }[]
+      }
+      get_homepage_complete: {
+        Args: { p_category_ids?: string[] }
+        Returns: Json
       }
       get_homepage_content_enriched: {
         Args: { p_category_ids: string[]; p_week_start?: string }
@@ -5056,6 +5112,10 @@ export type Database = {
       }
       get_user_library: { Args: { p_user_id: string }; Returns: Json }
       get_user_profile: {
+        Args: { p_user_slug: string; p_viewer_id?: string }
+        Returns: Json
+      }
+      get_user_profile_complete: {
         Args: { p_user_slug: string; p_viewer_id?: string }
         Returns: Json
       }

@@ -1,5 +1,6 @@
 /**
  * Dynamic detail pages for all content categories
+ * Optimized: Uses get_content_detail_complete() RPC (2-3 calls → 1, 50-67% reduction)
  */
 
 import { notFound } from 'next/navigation';
@@ -16,14 +17,10 @@ import {
   VALID_CATEGORIES,
 } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
-import {
-  type ContentItem,
-  getContentByCategory,
-  getContentBySlug,
-  getFullContentBySlug,
-} from '@/src/lib/content/supabase-content-loader';
+import { type ContentItem, getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { createClient } from '@/src/lib/supabase/server';
 import type { Database } from '@/src/types/database.types';
 
 export const revalidate = 21600;
@@ -59,7 +56,14 @@ export async function generateMetadata({
     });
   }
 
-  const itemMeta = await getContentBySlug(category, slug);
+  // Use consolidated RPC for metadata
+  const supabase = await createClient();
+  const { data } = await supabase.rpc('get_content_detail_complete', {
+    p_category: category,
+    p_slug: slug,
+  });
+
+  const itemMeta = data ? (data as { content: ContentItem }).content : null;
   const config = await getCategoryConfig(category as CategoryId);
 
   return generatePageMetadata('/:category/:slug', {
@@ -94,24 +98,29 @@ export default async function DetailPage({
     validated: true,
   });
 
-  // Load item metadata first for validation
-  const itemMeta = await getContentBySlug(category, slug);
+  // Consolidated RPC: 2-3 calls → 1 (50-67% reduction)
+  // get_content_detail_complete() includes: content + analytics + related items + collection items
+  const supabase = await createClient();
+  const { data: detailData, error: detailError } = await supabase.rpc(
+    'get_content_detail_complete',
+    {
+      p_category: category,
+      p_slug: slug,
+    }
+  );
 
-  if (!itemMeta) {
+  if (detailError || !detailData) {
     logger.warn('Item not found', { category, slug });
     notFound();
   }
 
-  // Optimized fetch strategy: Load full content from individual table (ALL fields)
-  // Use getFullContentBySlug to get category-specific fields like configuration, content, etc.
-  const fullItem = await getFullContentBySlug(category, slug);
-  const itemData = (fullItem || itemMeta) as ContentItem; // Fallback to metadata if full item fails
-
-  // Analytics data already included in itemMeta from get_enriched_content() RPC
-  // No need for separate mv_analytics_summary query
-  const viewCount =
-    'viewCount' in itemMeta && typeof itemMeta.viewCount === 'number' ? itemMeta.viewCount : 0;
-  const relatedItems: ContentItem[] = [];
+  // Extract data from RPC response (returns Json type, cast to expected structure)
+  const response = detailData as Record<string, unknown>;
+  const fullItem = response.content as ContentItem;
+  const itemData = fullItem;
+  const analytics = response.analytics as { view_count: number } | null;
+  const viewCount = analytics?.view_count || 0;
+  const relatedItems = (response.related as ContentItem[]) || [];
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles

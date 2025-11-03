@@ -17,17 +17,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { getPublicUserBadges } from '@/src/lib/actions/badges.actions';
-import { getUserReputation } from '@/src/lib/actions/reputation.actions';
 import { FolderOpen, Globe, MessageSquare, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
-
-// User profiles may show personalized content if authenticated
-export const dynamic = 'force-dynamic';
 
 interface UserProfilePageProps {
   params: Promise<{ slug: string }>;
@@ -90,6 +85,7 @@ type RPCContribution = Pick<
   status: string;
 };
 
+// Base profile data from get_user_profile()
 type ProfileData = {
   profile: UserProfile;
   stats: {
@@ -106,6 +102,28 @@ type ProfileData = {
   isOwner: boolean;
 };
 
+// Badge type from get_user_badges_with_details RPC
+type UserBadgeWithDetails = Pick<
+  Tables<'user_badges'>,
+  'id' | 'badge_id' | 'earned_at' | 'featured' | 'metadata'
+> & {
+  badge: Tables<'badges'>;
+};
+
+// Extended profile data from get_user_profile_complete() - adds reputation and badges
+type ProfileDataComplete = ProfileData & {
+  reputation: {
+    breakdown: {
+      from_posts: number;
+      from_votes_received: number;
+      from_comments: number;
+      from_submissions: number;
+      total: number;
+    };
+  } | null;
+  badges: UserBadgeWithDetails[];
+};
+
 export default async function UserProfilePage({ params }: UserProfilePageProps) {
   const { slug } = await params;
   const supabase = await createClient();
@@ -115,8 +133,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     data: { user: currentUser },
   } = await supabase.auth.getUser();
 
-  // Single RPC call replaces 6+ separate queries
-  const { data: profileData, error } = await supabase.rpc('get_user_profile', {
+  // Consolidated RPC: 4 calls → 1 (75% reduction)
+  // get_user_profile_complete() includes: profile + stats + posts + collections + contributions + reputation + badges
+  const { data: profileData, error } = await supabase.rpc('get_user_profile_complete', {
     p_user_slug: slug,
     ...(currentUser?.id && { p_viewer_id: currentUser.id }),
   });
@@ -128,25 +147,29 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     notFound();
   }
 
-  const data = profileData as ProfileData;
-  const { profile, stats, posts, collections, contributions, isFollowing, isOwner } = data;
+  // Type-safe extraction using ProfileDataComplete
+  const data = profileData as ProfileDataComplete;
+  const {
+    profile,
+    stats,
+    posts,
+    collections,
+    contributions,
+    isFollowing,
+    isOwner,
+    reputation,
+    badges,
+  } = data;
 
-  // Fetch reputation and badges in parallel (these use separate RPCs/actions)
-  const [reputationData, userBadges, tierConfigsResult] = await Promise.all([
-    getUserReputation(profile.id).catch((error) => {
-      logger.error('Failed to fetch reputation', error as Error, { profileId: profile.id });
-      return null;
-    }),
-    getPublicUserBadges(profile.id, { featuredOnly: false }).catch((error) => {
-      logger.error('Failed to fetch badges', error as Error, { profileId: profile.id });
-      return [];
-    }),
-    supabase
-      .from('tier_display_config')
-      .select('tier, label, css_classes')
-      .eq('active', true)
-      .then((res) => res.data || []),
-  ]);
+  // Only fetch tier config (can't consolidate - it's static config data)
+  const tierConfigsResult = await supabase
+    .from('tier_display_config')
+    .select('tier, label, css_classes')
+    .eq('active', true)
+    .then((res) => res.data || []);
+
+  const reputationData = reputation;
+  const userBadges = badges || [];
 
   const tierConfigs = Object.fromEntries(
     tierConfigsResult.map((t) => [t.tier, { label: t.label, className: t.css_classes }])
@@ -221,25 +244,13 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* Stats sidebar */}
           <div className="space-y-4">
-            {reputationData &&
-              typeof reputationData === 'object' &&
-              'breakdown' in reputationData &&
-              typeof reputationData.breakdown === 'object' &&
-              reputationData.breakdown !== null && (
-                <ReputationBreakdown
-                  breakdown={
-                    reputationData.breakdown as {
-                      from_posts: number;
-                      from_votes_received: number;
-                      from_comments: number;
-                      from_submissions: number;
-                      total: number;
-                    }
-                  }
-                  showDetails={true}
-                  showProgress={true}
-                />
-              )}
+            {reputationData?.breakdown && (
+              <ReputationBreakdown
+                breakdown={reputationData.breakdown}
+                showDetails={true}
+                showProgress={true}
+              />
+            )}
 
             {/* Quick Stats Card */}
             <Card>

@@ -1087,7 +1087,6 @@ export const publicContentRowSchema = z.object({
   json_ld: jsonSchema.nullable(),
   metadata: jsonSchema,
   og_type: z.string().nullable(),
-  popularity_score: z.number().nullable(),
   reading_time: z.number().nullable(),
   robots_follow: z.boolean().nullable(),
   robots_index: z.boolean().nullable(),
@@ -1127,7 +1126,6 @@ export const publicContentInsertSchema = z.object({
   json_ld: jsonSchema.optional().nullable(),
   metadata: jsonSchema.optional(),
   og_type: z.string().optional().nullable(),
-  popularity_score: z.number().optional().nullable(),
   reading_time: z.number().optional().nullable(),
   robots_follow: z.boolean().optional().nullable(),
   robots_index: z.boolean().optional().nullable(),
@@ -1167,7 +1165,6 @@ export const publicContentUpdateSchema = z.object({
   json_ld: jsonSchema.optional().nullable(),
   metadata: jsonSchema.optional(),
   og_type: z.string().optional().nullable(),
-  popularity_score: z.number().optional().nullable(),
   reading_time: z.number().optional().nullable(),
   robots_follow: z.boolean().optional().nullable(),
   robots_index: z.boolean().optional().nullable(),
@@ -4094,6 +4091,40 @@ export const publicMvContentTagIndexRowSchema = z.object({
   title: z.string().nullable(),
 });
 
+export const publicMvContentTrendingMetricsRowSchema = z.object({
+  bookmarks_total: z.number().nullable(),
+  category: z.string().nullable(),
+  copies_total: z.number().nullable(),
+  created_at: z.string().nullable(),
+  days_old: z.number().nullable(),
+  engagement_score: z.number().nullable(),
+  freshness_score: z.number().nullable(),
+  last_refreshed: z.string().nullable(),
+  slug: z.string().nullable(),
+  trending_score: z.number().nullable(),
+  views_7d: z.number().nullable(),
+  views_prev_7d: z.number().nullable(),
+  views_total: z.number().nullable(),
+});
+
+export const publicMvFeaturedContentRankingsRowSchema = z.object({
+  bookmarks_total: z.number().nullable(),
+  category: z.string().nullable(),
+  copies_total: z.number().nullable(),
+  days_old: z.number().nullable(),
+  engagement_score: z.number().nullable(),
+  final_score: z.number().nullable(),
+  freshness_score: z.number().nullable(),
+  growth_rate_pct: z.number().nullable(),
+  last_refreshed: z.string().nullable(),
+  rank: z.number().nullable(),
+  slug: z.string().nullable(),
+  trending_score: z.number().nullable(),
+  views_7d: z.number().nullable(),
+  views_prev_7d: z.number().nullable(),
+  views_total: z.number().nullable(),
+});
+
 export const publicMvSearchFacetsRowSchema = z.object({
   all_tags: z.array(z.string()).nullable(),
   author_count: z.number().nullable(),
@@ -4810,6 +4841,27 @@ export const publicGetContentByTagReturnsSchema = z.array(
   }),
 );
 
+export const publicGetContentDetailCompleteArgsSchema = z.object({
+  p_category: z.string(),
+  p_slug: z.string(),
+  p_user_id: z.string().optional(),
+});
+
+export const publicGetContentDetailCompleteReturnsSchema = jsonSchema;
+
+export const publicGetContentPaginatedArgsSchema = z.object({
+  p_author: z.string().optional(),
+  p_category: z.string().optional(),
+  p_limit: z.number().optional(),
+  p_offset: z.number().optional(),
+  p_order_by: z.string().optional(),
+  p_order_direction: z.string().optional(),
+  p_search: z.string().optional(),
+  p_tags: z.array(z.string()).optional(),
+});
+
+export const publicGetContentPaginatedReturnsSchema = jsonSchema;
+
 export const publicGetContentPopularityArgsSchema = z.object({
   p_content_type: z.string().optional(),
   p_limit: z.number().optional(),
@@ -5039,6 +5091,12 @@ export const publicGetGithubStarsReturnsSchema = z.array(
     watchers: z.number(),
   }),
 );
+
+export const publicGetHomepageCompleteArgsSchema = z.object({
+  p_category_ids: z.array(z.string()).optional(),
+});
+
+export const publicGetHomepageCompleteReturnsSchema = jsonSchema;
 
 export const publicGetHomepageContentEnrichedArgsSchema = z.object({
   p_category_ids: z.array(z.string()),
@@ -5499,6 +5557,13 @@ export const publicGetUserProfileArgsSchema = z.object({
 });
 
 export const publicGetUserProfileReturnsSchema = jsonSchema;
+
+export const publicGetUserProfileCompleteArgsSchema = z.object({
+  p_user_slug: z.string(),
+  p_viewer_id: z.string().optional(),
+});
+
+export const publicGetUserProfileCompleteReturnsSchema = jsonSchema;
 
 export const publicGetUserRecentInteractionsArgsSchema = z.object({
   p_limit: z.number().optional(),

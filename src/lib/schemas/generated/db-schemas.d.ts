@@ -751,6 +751,12 @@ export type PublicMvContentStatsRow = z.infer<
 export type PublicMvContentTagIndexRow = z.infer<
   typeof generated.publicMvContentTagIndexRowSchema
 >;
+export type PublicMvContentTrendingMetricsRow = z.infer<
+  typeof generated.publicMvContentTrendingMetricsRowSchema
+>;
+export type PublicMvFeaturedContentRankingsRow = z.infer<
+  typeof generated.publicMvFeaturedContentRankingsRowSchema
+>;
 export type PublicMvSearchFacetsRow = z.infer<
   typeof generated.publicMvSearchFacetsRowSchema
 >;
@@ -1096,6 +1102,18 @@ export type PublicGetContentByTagArgs = z.infer<
 export type PublicGetContentByTagReturns = z.infer<
   typeof generated.publicGetContentByTagReturnsSchema
 >;
+export type PublicGetContentDetailCompleteArgs = z.infer<
+  typeof generated.publicGetContentDetailCompleteArgsSchema
+>;
+export type PublicGetContentDetailCompleteReturns = z.infer<
+  typeof generated.publicGetContentDetailCompleteReturnsSchema
+>;
+export type PublicGetContentPaginatedArgs = z.infer<
+  typeof generated.publicGetContentPaginatedArgsSchema
+>;
+export type PublicGetContentPaginatedReturns = z.infer<
+  typeof generated.publicGetContentPaginatedReturnsSchema
+>;
 export type PublicGetContentPopularityArgs = z.infer<
   typeof generated.publicGetContentPopularityArgsSchema
 >;
@@ -1179,6 +1197,12 @@ export type PublicGetGithubStarsArgs = z.infer<
 >;
 export type PublicGetGithubStarsReturns = z.infer<
   typeof generated.publicGetGithubStarsReturnsSchema
+>;
+export type PublicGetHomepageCompleteArgs = z.infer<
+  typeof generated.publicGetHomepageCompleteArgsSchema
+>;
+export type PublicGetHomepageCompleteReturns = z.infer<
+  typeof generated.publicGetHomepageCompleteReturnsSchema
 >;
 export type PublicGetHomepageContentEnrichedArgs = z.infer<
   typeof generated.publicGetHomepageContentEnrichedArgsSchema
@@ -1455,6 +1479,12 @@ export type PublicGetUserProfileArgs = z.infer<
 >;
 export type PublicGetUserProfileReturns = z.infer<
   typeof generated.publicGetUserProfileReturnsSchema
+>;
+export type PublicGetUserProfileCompleteArgs = z.infer<
+  typeof generated.publicGetUserProfileCompleteArgsSchema
+>;
+export type PublicGetUserProfileCompleteReturns = z.infer<
+  typeof generated.publicGetUserProfileCompleteReturnsSchema
 >;
 export type PublicGetUserRecentInteractionsArgs = z.infer<
   typeof generated.publicGetUserRecentInteractionsArgsSchema

@@ -5,6 +5,34 @@
  * @see https://github.com/huozhi/sugar-high
  */
 
+/* Sugar High CSS Variables - WCAG AAA Dark Theme (19:1 to 20:1 contrast) */
+:root {
+  --sh-keyword: oklch(85% 0.25 80); /* Bright gold #FFD700 - 19:1 contrast */
+  --sh-string: oklch(82% 0.18 145); /* Bright lime #ABE338 - 18:1 contrast */
+  --sh-comment: oklch(78% 0.08 85); /* Soft beige #D4D0AB - 14:1 contrast */
+  --sh-class: oklch(80% 0.2 320); /* Bright magenta - 16:1 contrast */
+  --sh-property: oklch(78% 0.2 200); /* Bright cyan #00E0E0 - 20:1 contrast */
+  --sh-entity: oklch(82% 0.18 145); /* Fresh lime (matches strings) */
+  --sh-identifier: oklch(88% 0.02 60); /* Near-white with warmth */
+  --sh-sign: oklch(95% 0.01 60); /* Near white for operators */
+  --sh-jsxliterals: oklch(88% 0.02 60);
+}
+
+/* Light Theme Overrides - WCAG AAA (7:1+ contrast) */
+@media (prefers-color-scheme: light) {
+  :root {
+    --sh-keyword: oklch(58% 0.18 40); /* Deep amber #D97706 - 7.2:1 contrast */
+    --sh-string: oklch(48% 0.15 155); /* Forest green #059669 - 8.5:1 contrast */
+    --sh-comment: oklch(52% 0.02 60); /* Warm gray #78716C - 7.1:1 contrast */
+    --sh-class: oklch(50% 0.18 290); /* Deep purple - 8.2:1 contrast */
+    --sh-property: oklch(52% 0.14 220); /* Deep sky blue #0284C7 - 8.1:1 contrast */
+    --sh-entity: oklch(48% 0.15 155); /* Forest green (matches strings) */
+    --sh-identifier: oklch(28% 0.02 60); /* Dark gray #374151 - high contrast */
+    --sh-sign: oklch(20% 0.02 60); /* Charcoal for operators */
+    --sh-jsxliterals: oklch(28% 0.02 60);
+  }
+}
+
 /* Base Styles */
 .sugar-high {
   color: var(--color-text-primary, hsl(var(--foreground)));
@@ -15,115 +43,18 @@
   font-weight: 400;
 }
 
-/* Token Colors - WCAG AAA Dark Theme (19:1 to 20:1 contrast) */
-[data-sh-token-type="keyword"] {
-  color: oklch(85% 0.25 80); /* Bright gold #FFD700 - 19:1 contrast */
+/* Token-Specific Enhancements (weight, style) */
+.sh__token--keyword {
   font-weight: 600;
 }
 
-[data-sh-token-type="string"] {
-  color: oklch(82% 0.18 145); /* Bright lime #ABE338 - 18:1 contrast */
-}
-
-[data-sh-token-type="comment"] {
-  color: oklch(78% 0.08 85); /* Soft beige #D4D0AB - 14:1 contrast */
+.sh__token--comment {
   font-style: italic;
   opacity: 0.9;
 }
 
-[data-sh-token-type="class"] {
-  color: oklch(80% 0.2 320); /* Bright magenta - 16:1 contrast */
+.sh__token--class {
   font-weight: 500;
-}
-
-[data-sh-token-type="property"] {
-  color: oklch(78% 0.2 200); /* Bright cyan #00E0E0 - 20:1 contrast */
-}
-
-[data-sh-token-type="entity"] {
-  color: oklch(82% 0.18 145); /* Fresh lime (matches strings) */
-}
-
-[data-sh-token-type="identifier"] {
-  color: oklch(88% 0.02 60); /* Near-white with warmth */
-}
-
-[data-sh-token-type="number"] {
-  color: oklch(78% 0.15 25); /* Light coral #FFA07A - 15:1 contrast */
-}
-
-[data-sh-token-type="null"] {
-  color: oklch(85% 0.25 80); /* Bright gold (matches keywords) */
-  font-weight: 600;
-}
-
-[data-sh-token-type="sign"] {
-  color: oklch(95% 0.01 60); /* Near white for operators */
-}
-
-[data-sh-token-type="jsxliterals"] {
-  color: oklch(88% 0.02 60);
-}
-
-[data-sh-token-type="space"],
-[data-sh-token-type="break"] {
-  /* Invisible - no styling needed */
-}
-
-/* Light Theme Overrides - WCAG AAA (7:1+ contrast) */
-@media (prefers-color-scheme: light) {
-  .sugar-high {
-    color: var(--color-text-primary, hsl(var(--foreground)));
-  }
-
-  [data-sh-token-type="keyword"] {
-    color: oklch(58% 0.18 40); /* Deep amber #D97706 - 7.2:1 contrast */
-    font-weight: 600;
-  }
-
-  [data-sh-token-type="string"] {
-    color: oklch(48% 0.15 155); /* Forest green #059669 - 8.5:1 contrast */
-  }
-
-  [data-sh-token-type="comment"] {
-    color: oklch(52% 0.02 60); /* Warm gray #78716C - 7.1:1 contrast */
-    font-style: italic;
-    opacity: 0.9;
-  }
-
-  [data-sh-token-type="class"] {
-    color: oklch(50% 0.18 290); /* Deep purple - 8.2:1 contrast */
-    font-weight: 500;
-  }
-
-  [data-sh-token-type="property"] {
-    color: oklch(52% 0.14 220); /* Deep sky blue #0284C7 - 8.1:1 contrast */
-  }
-
-  [data-sh-token-type="entity"] {
-    color: oklch(48% 0.15 155); /* Forest green (matches strings) */
-  }
-
-  [data-sh-token-type="identifier"] {
-    color: oklch(28% 0.02 60); /* Dark gray #374151 - high contrast */
-  }
-
-  [data-sh-token-type="number"] {
-    color: oklch(55% 0.2 25); /* Crimson red #DC2626 - 7.5:1 contrast */
-  }
-
-  [data-sh-token-type="null"] {
-    color: oklch(58% 0.18 40); /* Deep amber (matches keywords) */
-    font-weight: 600;
-  }
-
-  [data-sh-token-type="sign"] {
-    color: oklch(20% 0.02 60); /* Charcoal for operators */
-  }
-
-  [data-sh-token-type="jsxliterals"] {
-    color: oklch(28% 0.02 60);
-  }
 }
 
 /* Line Numbers */

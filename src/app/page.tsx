@@ -3,7 +3,6 @@
  * All content from Supabase with ISR caching, dynamic category loading from PostgreSQL.
  */
 
-import { unstable_cache } from 'next/cache';
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
 import { TopContributors } from '@/src/components/features/community/top-contributors';
@@ -54,30 +53,21 @@ interface HomePageProps {
   }>;
 }
 
-async function HomeContentSection({ searchQuery }: { searchQuery: string }) {
+async function HomeContentSection({
+  searchQuery,
+  homepageContentData,
+}: {
+  searchQuery: string;
+  homepageContentData: {
+    categoryData: Record<string, EnrichedMetadata[]>;
+    stats: Record<string, number>;
+    weekStart: string;
+  };
+}) {
   const categoryIds = getHomepageCategoryIds();
 
   try {
-    const supabase = createAnonClient();
-
-    // Single RPC call replaces 135 lines of TypeScript enrichment logic
-    const { data, error } = await supabase.rpc('get_homepage_content_enriched', {
-      p_category_ids: categoryIds,
-    });
-
-    if (error) {
-      logger.error('Failed to load homepage content', error, {
-        source: 'HomePage',
-        operation: 'get_homepage_content_enriched',
-      });
-      throw error;
-    }
-
-    const enrichedData = data as {
-      categoryData: Record<string, EnrichedMetadata[]>;
-      stats: Record<string, number>;
-      weekStart: string;
-    };
+    const enrichedData = homepageContentData;
 
     // Extract featured content (items with _featured flag)
     const featuredByCategory: Record<string, unknown[]> = {};
@@ -148,35 +138,19 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const resolvedParams = await searchParams;
   const initialSearchQuery = resolvedParams.q || '';
 
-  // Cache user stats queries (15min revalidation) - 70% faster
-  // MUST use createAnonClient() - createClient() uses cookies() which is forbidden in unstable_cache()
-  const getCachedUserStats = unstable_cache(
-    async () => {
-      const supabase = createAnonClient();
-      const [memberCountResult, topContributorsResult] = await Promise.all([
-        supabase.from('users').select('*', { count: 'exact', head: true }).eq('public', true),
-        supabase
-          .from('users')
-          .select(
-            'id, slug, name, image, bio, work, reputation_score, tier, tier_name, tier_progress'
-          )
-          .eq('public', true)
-          .order('reputation_score', { ascending: false })
-          .limit(6),
-      ]);
-      return {
-        memberCount: memberCountResult.count,
-        topContributors: topContributorsResult.data || [],
-      };
-    },
-    ['homepage-user-stats'],
-    {
-      revalidate: 900, // 15 minutes
-      tags: ['homepage-stats', 'users'],
-    }
-  );
+  // Consolidated homepage data: get_homepage_complete() returns everything (67% fewer DB calls)
+  const supabase = createAnonClient();
+  const { data: homepageData, error: homepageError } = await supabase.rpc('get_homepage_complete', {
+    p_category_ids: getHomepageCategoryIds(),
+  });
 
-  const { memberCount, topContributors } = await getCachedUserStats();
+  // Extract member_count and top_contributors from consolidated response
+  const memberCount = homepageError
+    ? 0
+    : (homepageData as { member_count?: number })?.member_count || 0;
+  const topContributors = homepageError
+    ? []
+    : (homepageData as { top_contributors?: unknown[] })?.top_contributors || [];
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -200,7 +174,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               >
                 Join{' '}
                 <NumberTicker
-                  value={memberCount || 0}
+                  value={memberCount}
                   className="font-semibold text-accent"
                   suffix="+"
                 />{' '}
@@ -214,12 +188,31 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
         <div className={'relative'}>
           <Suspense fallback={<LoadingSkeleton />}>
-            <HomeContentSection searchQuery={initialSearchQuery} />
+            <HomeContentSection
+              searchQuery={initialSearchQuery}
+              homepageContentData={
+                (
+                  homepageData as {
+                    content: {
+                      categoryData: Record<string, EnrichedMetadata[]>;
+                      stats: Record<string, number>;
+                      weekStart: string;
+                    };
+                  }
+                )?.content || {
+                  categoryData: {},
+                  stats: {},
+                  weekStart: '',
+                }
+              }
+            />
           </Suspense>
         </div>
       </div>
 
-      {topContributors.length > 0 && <TopContributors contributors={topContributors as never[]} />}
+      {Array.isArray(topContributors) && topContributors.length > 0 && (
+        <TopContributors contributors={topContributors as never[]} />
+      )}
 
       <section className={'container mx-auto px-4 py-12'}>
         <Suspense fallback={null}>
