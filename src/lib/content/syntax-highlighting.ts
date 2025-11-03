@@ -45,11 +45,11 @@ export function highlightCode(
         })
         .join('\n');
 
-      return `<pre class="overflow-x-auto text-sm p-4 rounded-lg border border-border/80 bg-code/60 shadow-sm" style="line-height: 1.5;"><code class="sugar-high" style="display: grid; background: transparent; line-height: 1.5;">${numberedLines}</code></pre>`;
+      return `<pre class="overflow-x-auto text-sm p-4 rounded-lg border border-border bg-code/60" style="line-height: 1.5; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.15);"><code class="sugar-high" style="display: grid; background: transparent; line-height: 1.5;">${numberedLines}</code></pre>`;
     }
 
     // No line numbers - simple wrap
-    return `<pre class="overflow-x-auto text-sm p-4 rounded-lg border border-border/80 bg-code/60 shadow-sm" style="line-height: 1.5;"><code class="sugar-high" style="display: block; background: transparent; line-height: 1.5;">${highlighted}</code></pre>`;
+    return `<pre class="overflow-x-auto text-sm p-4 rounded-lg border border-border bg-code/60" style="line-height: 1.5; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.15);"><code class="sugar-high" style="display: block; background: transparent; line-height: 1.5;">${highlighted}</code></pre>`;
   } catch (_error) {
     // Fallback to plain text if highlighting fails
     const escapedCode = code

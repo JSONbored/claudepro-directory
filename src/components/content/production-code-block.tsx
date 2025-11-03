@@ -376,12 +376,14 @@ export function ProductionCodeBlock({
         </div>
       )}
 
-      {/* Code block container with CSS transitions (5-10 KB saved from bundle) */}
+      {/* Code block container with enhanced 4-layer shadow system */}
       <div
         ref={codeBlockRef}
-        className="relative overflow-hidden transition-[height] duration-300 ease-in-out"
+        className="relative overflow-hidden rounded-lg border border-border transition-[height] duration-300 ease-in-out"
         style={{
           height: needsCollapse && !isExpanded ? maxHeight : 'auto',
+          boxShadow:
+            '0 0 0 1px rgba(255, 255, 255, 0.03), 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.15)',
         }}
       >
         {/* Language badge - top right corner (when no filename) */}
