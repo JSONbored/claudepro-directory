@@ -155,10 +155,10 @@ export const UI_CLASSES = {
   INTERACTIVE_ITEM: 'px-4 py-3 border rounded-lg hover:bg-accent transition-colors text-left',
   LIST_DISC_SPACED: 'list-disc pl-6 space-y-2',
   CODE_BLOCK_HEADER:
-    'flex items-center justify-between px-4 py-2 bg-code/30 border border-b-0 border-border rounded-t-lg backdrop-blur-sm',
+    'flex items-center justify-between px-4 py-2.5 bg-code/40 border border-b-0 border-border/80 rounded-t-lg shadow-sm',
   CODE_BLOCK_PRE:
-    'overflow-x-auto text-sm leading-relaxed p-4 rounded-lg border border-border bg-code/50 backdrop-blur-sm',
-  CODE_BLOCK_FILENAME: 'text-sm font-mono text-muted-foreground',
+    'overflow-x-auto text-sm p-4 rounded-lg border border-border/80 bg-code/60 shadow-sm',
+  CODE_BLOCK_FILENAME: 'text-sm font-mono text-foreground font-medium',
   CODE_BLOCK_COPY_BUTTON_FLOATING:
     'absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-code/30 rounded-md',
   CODE_BLOCK_COPY_BUTTON_HEADER_FLOATING:

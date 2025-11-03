@@ -19,7 +19,7 @@ export interface CodeBlockServerProps {
   language?: string;
   filename?: string;
   maxLines?: number;
-  showLineNumbers?: boolean;
+  showLineNumbers?: boolean; // Default: true
   className?: string;
 }
 
@@ -31,11 +31,11 @@ export async function CodeBlockServer({
   language = 'text',
   filename,
   maxLines = 20,
-  showLineNumbers = false,
+  showLineNumbers = true,
   className = '',
 }: CodeBlockServerProps) {
-  // Highlight code on the server
-  const highlightedHtml = await highlightCode(code, language);
+  // Highlight code on the server with line numbers
+  const highlightedHtml = await highlightCode(code, language, showLineNumbers);
 
   return (
     <ProductionCodeBlock

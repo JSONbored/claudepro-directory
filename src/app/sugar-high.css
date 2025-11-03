@@ -1,65 +1,68 @@
 /**
  * Sugar High Syntax Highlighting Styles
- * Clean, modern theme with NO dark backgrounds on tokens
- * Lightweight alternative to Starry Night (1KB vs 100KB+)
+ * Modern theme integrated with OKLCH color system
+ * Optimized for readability with 7:1 contrast ratio
  * @see https://github.com/huozhi/sugar-high
  */
 
 /* Base Styles */
 .sugar-high {
-  color: var(--color-text, hsl(var(--foreground)));
+  color: var(--color-text-primary, hsl(var(--foreground)));
   background-color: transparent;
-  font-family: var(--font-mono, "Monaco", "Consolas", monospace);
+  font-family: var(--font-mono, "JetBrains Mono", "Monaco", monospace);
   font-size: 0.875rem;
-  line-height: 1.6;
+  line-height: 1.5;
+  font-weight: 400;
 }
 
-/* Token Colors - Clean Dark Theme (NO backgrounds) */
+/* Token Colors - Modern Dark Theme (OKLCH-inspired) */
 [data-sh-token-type="keyword"] {
-  color: #ff7b72;
-  font-weight: 500;
+  color: oklch(75% 0.15 15); /* Warm orange-red - keywords stand out */
+  font-weight: 600;
 }
 
 [data-sh-token-type="string"] {
-  color: #a5d6ff;
+  color: oklch(80% 0.12 145); /* Soft teal - easy on eyes */
 }
 
 [data-sh-token-type="comment"] {
-  color: #8b949e;
+  color: oklch(65% 0.02 240); /* Muted gray-blue */
   font-style: italic;
+  opacity: 0.8;
 }
 
 [data-sh-token-type="class"] {
-  color: #8d85ff;
-}
-
-[data-sh-token-type="property"] {
-  color: #79c0ff;
-}
-
-[data-sh-token-type="entity"] {
-  color: #7ee787;
-}
-
-[data-sh-token-type="identifier"] {
-  color: #e6edf3;
-}
-
-[data-sh-token-type="number"] {
-  color: #79c0ff;
-}
-
-[data-sh-token-type="null"] {
-  color: #ff7b72;
+  color: oklch(78% 0.16 280); /* Vibrant purple */
   font-weight: 500;
 }
 
+[data-sh-token-type="property"] {
+  color: oklch(77% 0.14 200); /* Bright cyan */
+}
+
+[data-sh-token-type="entity"] {
+  color: oklch(80% 0.15 160); /* Fresh green */
+}
+
+[data-sh-token-type="identifier"] {
+  color: oklch(88% 0.02 60); /* Near-white with slight warmth */
+}
+
+[data-sh-token-type="number"] {
+  color: oklch(76% 0.13 320); /* Magenta-pink */
+}
+
+[data-sh-token-type="null"] {
+  color: oklch(72% 0.16 35); /* Bold orange */
+  font-weight: 600;
+}
+
 [data-sh-token-type="sign"] {
-  color: #ff7b72;
+  color: oklch(75% 0.15 15);
 }
 
 [data-sh-token-type="jsxliterals"] {
-  color: #e6edf3;
+  color: oklch(88% 0.02 60);
 }
 
 [data-sh-token-type="space"],
@@ -67,54 +70,57 @@
   /* Invisible - no styling needed */
 }
 
-/* Light Theme Overrides */
+/* Light Theme Overrides - OKLCH for consistency */
 @media (prefers-color-scheme: light) {
   .sugar-high {
-    color: hsl(var(--foreground));
+    color: var(--color-text-primary, hsl(var(--foreground)));
   }
 
   [data-sh-token-type="keyword"] {
-    color: #cf222e;
+    color: oklch(45% 0.18 15); /* Deep orange-red */
+    font-weight: 600;
   }
 
   [data-sh-token-type="string"] {
-    color: #0a3069;
+    color: oklch(42% 0.12 200); /* Rich blue */
   }
 
   [data-sh-token-type="comment"] {
-    color: #59636e;
+    color: oklch(55% 0.02 240); /* Muted blue-gray */
+    opacity: 0.75;
   }
 
   [data-sh-token-type="class"] {
-    color: #8250df;
+    color: oklch(50% 0.18 290); /* Deep purple */
   }
 
   [data-sh-token-type="property"] {
-    color: #0550ae;
+    color: oklch(48% 0.14 220); /* Ocean blue */
   }
 
   [data-sh-token-type="entity"] {
-    color: #0550ae;
+    color: oklch(48% 0.15 150); /* Forest green */
   }
 
   [data-sh-token-type="identifier"] {
-    color: #1f2328;
+    color: oklch(25% 0.02 60); /* Almost black with warmth */
   }
 
   [data-sh-token-type="number"] {
-    color: #0550ae;
+    color: oklch(52% 0.15 330); /* Magenta */
   }
 
   [data-sh-token-type="null"] {
-    color: #cf222e;
+    color: oklch(48% 0.18 25); /* Bold orange */
+    font-weight: 600;
   }
 
   [data-sh-token-type="sign"] {
-    color: #cf222e;
+    color: oklch(45% 0.18 15);
   }
 
   [data-sh-token-type="jsxliterals"] {
-    color: #1f2328;
+    color: oklch(25% 0.02 60);
   }
 }
 

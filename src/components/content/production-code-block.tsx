@@ -39,7 +39,7 @@ import {
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 export interface ProductionCodeBlockProps {
-  /** Pre-rendered HTML from Shiki (server-side) */
+  /** Pre-rendered HTML from Sugar High (server-side) */
   html: string;
   /** Raw code for copy functionality */
   code: string;
@@ -49,7 +49,7 @@ export interface ProductionCodeBlockProps {
   filename?: string | undefined;
   /** Maximum visible lines before collapsing (default: 20) */
   maxLines?: number | undefined;
-  /** Show line numbers (default: false) */
+  /** Show line numbers (default: true) */
   showLineNumbers?: boolean | undefined;
   /** Additional CSS classes */
   className?: string | undefined;
@@ -61,7 +61,7 @@ export function ProductionCodeBlock({
   language = 'text',
   filename,
   maxLines = 20,
-  showLineNumbers = false,
+  showLineNumbers = true,
   className = '',
 }: ProductionCodeBlockProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -118,6 +118,11 @@ export function ProductionCodeBlock({
 
     setIsScreenshotting(true);
 
+    // Failsafe timeout: Reset state after 5 seconds regardless of outcome
+    const failsafeTimeout = setTimeout(() => {
+      setIsScreenshotting(false);
+    }, 5000);
+
     try {
       const watermark = `claudepro.directory/${category}/${slug}`;
       const screenshot = await generateCodeScreenshot({
@@ -152,6 +157,7 @@ export function ProductionCodeBlock({
       toasts.error.screenshotFailed();
       logger.error('Screenshot generation failed', error as Error);
     } finally {
+      clearTimeout(failsafeTimeout);
       setIsScreenshotting(false);
     }
   };
@@ -231,44 +237,40 @@ export function ProductionCodeBlock({
         <div className={UI_CLASSES.CODE_BLOCK_HEADER}>
           <span className={UI_CLASSES.CODE_BLOCK_FILENAME}>{filename}</span>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            {/* Language badge pill */}
+            {/* Language badge pill - modern design */}
             {language && language !== 'text' && (
-              <span className="rounded-full border border-accent/20 bg-accent/10 px-2 py-0.5 font-medium text-2xs text-accent uppercase tracking-wider">
+              <span className="rounded-full border border-accent/30 bg-gradient-to-r from-accent/15 to-accent/10 px-2.5 py-1 font-semibold text-2xs text-accent uppercase tracking-wider shadow-sm">
                 {language}
               </span>
             )}
 
-            {/* Screenshot button - camera icon */}
+            {/* Screenshot button - camera icon only */}
             <motion.button
               type="button"
               onClick={handleScreenshot}
               disabled={isScreenshotting}
-              animate={isScreenshotting ? { scale: [1, 1.05, 1] } : {}}
+              animate={isScreenshotting ? { scale: [1, 1.05, 1, 1.05, 1, 1.05, 1] } : {}}
               transition={{
-                duration: 0.3,
-                repeat: isScreenshotting ? Number.POSITIVE_INFINITY : 0,
+                duration: 1.5,
+                ease: 'easeInOut',
               }}
-              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} rounded-md px-3 py-1.5 font-medium text-muted-foreground text-xs transition-colors hover:bg-code/30 hover:text-foreground disabled:opacity-50`}
+              className="flex items-center justify-center rounded-md p-2 font-medium text-muted-foreground transition-colors hover:bg-code/30 hover:text-foreground disabled:opacity-50"
               style={{ minWidth: '48px', minHeight: '48px' }}
-              title="Screenshot code"
+              title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
-              <Camera className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">
-                {isScreenshotting ? 'Capturing...' : 'Screenshot'}
-              </span>
+              <Camera className="h-4 w-4" />
             </motion.button>
 
-            {/* Share dropdown button */}
+            {/* Share dropdown button - icon only */}
             <div className="relative">
               <motion.button
                 type="button"
                 onClick={() => setIsShareOpen(!isShareOpen)}
-                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} rounded-md px-3 py-1.5 font-medium text-muted-foreground text-xs transition-colors hover:bg-code/30 hover:text-foreground`}
+                className="flex items-center justify-center rounded-md p-2 font-medium text-muted-foreground transition-colors hover:bg-code/30 hover:text-foreground"
                 style={{ minWidth: '48px', minHeight: '48px' }}
                 title="Share code"
               >
-                <Share2 className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Share</span>
+                <Share2 className="h-4 w-4" />
               </motion.button>
 
               {/* Share dropdown menu */}
@@ -354,25 +356,20 @@ export function ProductionCodeBlock({
               )}
             </div>
 
-            {/* Copy button with pulse animation */}
+            {/* Copy button - icon only with pulse animation */}
             <motion.button
               type="button"
               onClick={handleCopy}
               animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: 0.3 }}
-              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} rounded-md px-3 py-1.5 font-medium text-muted-foreground text-xs transition-colors hover:bg-code/30 hover:text-foreground`}
-              title="Copy code"
+              className="flex items-center justify-center rounded-md p-2 font-medium text-muted-foreground transition-colors hover:bg-code/30 hover:text-foreground"
+              style={{ minWidth: '48px', minHeight: '48px' }}
+              title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <>
-                  <Check className="h-3.5 w-3.5 text-green-500" />
-                  <span>Copied!</span>
-                </>
+                <Check className="h-4 w-4 text-green-500" />
               ) : (
-                <>
-                  <Copy className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Copy</span>
-                </>
+                <Copy className="h-4 w-4" />
               )}
             </motion.button>
           </div>
@@ -387,9 +384,9 @@ export function ProductionCodeBlock({
           height: needsCollapse && !isExpanded ? maxHeight : 'auto',
         }}
       >
-        {/* Language badge - top right corner */}
+        {/* Language badge - top right corner (when no filename) */}
         {language && language !== 'text' && !filename && (
-          <div className="absolute top-3 right-3 z-20 rounded-md border border-accent/20 bg-accent/10 px-2 py-1 font-medium text-2xs text-accent uppercase tracking-wide backdrop-blur-sm">
+          <div className="absolute top-3 right-3 z-20 rounded-full border border-accent/30 bg-gradient-to-r from-accent/15 to-accent/10 px-2.5 py-1 font-semibold text-2xs text-accent uppercase tracking-wider shadow-md backdrop-blur-md">
             {language}
           </div>
         )}

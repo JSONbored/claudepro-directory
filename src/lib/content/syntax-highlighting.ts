@@ -45,11 +45,11 @@ export function highlightCode(
         })
         .join('\n');
 
-      return `<pre class="overflow-x-auto text-sm leading-relaxed p-4 rounded-lg border border-border bg-code/50 backdrop-blur-sm"><code class="sugar-high" style="display: grid; background: transparent;">${numberedLines}</code></pre>`;
+      return `<pre class="overflow-x-auto text-sm p-4 rounded-lg border border-border/80 bg-code/60 shadow-sm" style="line-height: 1.5;"><code class="sugar-high" style="display: grid; background: transparent; line-height: 1.5;">${numberedLines}</code></pre>`;
     }
 
     // No line numbers - simple wrap
-    return `<pre class="overflow-x-auto text-sm leading-relaxed p-4 rounded-lg border border-border bg-code/50 backdrop-blur-sm"><code class="sugar-high" style="display: block; background: transparent;">${highlighted}</code></pre>`;
+    return `<pre class="overflow-x-auto text-sm p-4 rounded-lg border border-border/80 bg-code/60 shadow-sm" style="line-height: 1.5;"><code class="sugar-high" style="display: block; background: transparent; line-height: 1.5;">${highlighted}</code></pre>`;
   } catch (_error) {
     // Fallback to plain text if highlighting fails
     const escapedCode = code
