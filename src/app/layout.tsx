@@ -9,7 +9,6 @@ const SpeedInsights = (
 
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { headers } from 'next/headers';
 import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
 import './globals.css';
@@ -29,28 +28,6 @@ const UnifiedNewsletterCapture = dynamic(
   }
 );
 
-// Lazy load notification system (40-50KB, only needed on interaction)
-// FAB, Sheet, and ToastHandler only render when user triggers notification
-const NotificationFAB = dynamic(
-  () =>
-    import('@/src/components/features/notifications/notification-fab').then((mod) => ({
-      default: mod.NotificationFAB,
-    })),
-  {
-    loading: () => null,
-  }
-);
-
-const NotificationSheet = dynamic(
-  () =>
-    import('@/src/components/features/notifications/notification-sheet').then((mod) => ({
-      default: mod.NotificationSheet,
-    })),
-  {
-    loading: () => null,
-  }
-);
-
 const NotificationToastHandler = dynamic(
   () =>
     import('@/src/components/features/notifications/notification-toast-handler').then((mod) => ({
@@ -65,19 +42,8 @@ import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { PostCopyEmailProvider } from '@/src/components/infra/providers/post-copy-email-provider';
 import { PwaInstallTracker } from '@/src/components/infra/pwa-install-tracker';
 import { OrganizationStructuredData } from '@/src/components/infra/structured-data/organization-schema';
-import { AnnouncementBanner } from '@/src/components/layout/announcement-banner-server';
-import { FloatingMobileSearch } from '@/src/components/layout/floating-mobile-search';
-import { Navigation } from '@/src/components/layout/navigation';
-import { BackToTopButton } from '@/src/components/shared/back-to-top-button';
-
-// Lazy load footer component for better performance (5-10KB bundle reduction)
-const Footer = dynamic(
-  () => import('@/src/components/layout/footer').then((mod) => ({ default: mod.Footer })),
-  {
-    loading: () => null,
-    ssr: true, // Still render on server for SEO
-  }
-);
+import { getActiveAnnouncement } from '@/src/components/layout/announcement-banner-server';
+import { LayoutContent } from '@/src/components/layout/layout-content';
 
 import { StructuredData } from '@/src/components/shared/structured-data';
 import { UmamiScript } from '@/src/components/shared/umami-script';
@@ -166,15 +132,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // REMOVED: await connection() to enable ISR/static generation
-  // CSP now uses hash-based strategy instead of nonces (see middleware.ts)
-  // This allows content pages to be pre-rendered and served from CDN edge
-
-  const headersList = await headers();
-
-  // Detect auth routes - hide navigation/footer for clean auth experience
-  const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || '';
-  const isAuthRoute = pathname.startsWith('/login') || pathname.includes('/(auth)/');
+  // Fetch announcement data server-side using anonymous client (ISR-safe)
+  const announcement = await getActiveAnnouncement();
 
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} font-sans`}>
@@ -221,30 +180,10 @@ export default async function RootLayout({
         >
           <PostCopyEmailProvider>
             <ErrorBoundary>
-              <a
-                href="#main-content"
-                className={
-                  'sr-only rounded-md focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground'
-                }
-              >
-                Skip to main content
-              </a>
-              <div className={'flex min-h-screen flex-col bg-background'}>
-                {!isAuthRoute && <AnnouncementBanner />}
-                {!isAuthRoute && <Navigation />}
-                {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
-                <main id="main-content" className="flex-1">
-                  {children}
-                </main>
-                {!isAuthRoute && <Footer />}
-                {!isAuthRoute && <FloatingMobileSearch />}
-                {!isAuthRoute && <BackToTopButton />}
-                {!isAuthRoute && <NotificationFAB />}
-                {!isAuthRoute && <NotificationSheet />}
-              </div>
+              <LayoutContent announcement={announcement}>{children}</LayoutContent>
             </ErrorBoundary>
             <Toaster />
-            {!isAuthRoute && <NotificationToastHandler />}
+            <NotificationToastHandler />
             <UnifiedNewsletterCapture variant="footer-bar" source="footer" />
           </PostCopyEmailProvider>
         </ThemeProvider>

@@ -6,7 +6,6 @@
 
 import type { Metadata } from 'next';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { logger } from '@/src/lib/logger';
 import { generateOGImageUrl, OG_IMAGE_DIMENSIONS } from '@/src/lib/og/url-generator';
 import type { MetadataContext } from '@/src/lib/seo/metadata-registry';
 import { generateMetadataFromDB } from '@/src/lib/seo/metadata-templates';
@@ -18,12 +17,6 @@ export async function generatePageMetadata(
   context?: MetadataContext
 ): Promise<Metadata> {
   const classification = classifyRoute(route);
-
-  logger.info(`🔍 Route classified as ${classification.pattern}`, {
-    route,
-    pattern: classification.pattern,
-    confidence: classification.confidence,
-  });
 
   const extractedContext = extractContext(classification, context?.params || {}, context?.item);
   const mergedContext: MetadataContext = {
@@ -80,12 +73,6 @@ export async function generatePageMetadata(
       site: '@JSONbored',
     },
   };
-
-  logger.info(`✅ Metadata generated for ${route}`, {
-    pattern: classification.pattern,
-    titleLength: metadata.title ? String(metadata.title).length : 0,
-    descLength: metadata.description?.length || 0,
-  });
 
   return metadata;
 }

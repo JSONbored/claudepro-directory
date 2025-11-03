@@ -10,7 +10,6 @@ import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { LazySection } from '@/src/components/infra/lazy-section';
 import { TrendingContent } from '@/src/components/shared/trending-content';
 import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
-import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
@@ -44,16 +43,8 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   const page = Number(rawParams?.page) || 1;
   const limit = Math.min(Number(rawParams?.limit) || 20, 100);
 
-  logger.info('Trending page accessed', {
-    period,
-    metric,
-    ...(category && { category }),
-    page,
-    limit,
-  });
-
   // Wrapped in unstable_cache for additional performance boost
-  const { data, error } = await unstable_cache(
+  const { data } = await unstable_cache(
     async () => {
       return supabase.rpc('get_trending_page', {
         p_period: period,
@@ -69,10 +60,6 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
       tags: ['trending', ...(category ? [`trending-${category}`] : [])],
     }
   )();
-
-  if (error) {
-    logger.error('Failed to fetch trending page data', error);
-  }
 
   const pageData = (data || {
     trending: [],

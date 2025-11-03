@@ -1,8 +1,9 @@
 /**
- * Server-side sidebar data fetching
+ * Server-side sidebar data fetching - ISR-compatible
+ * Uses anonymous client for static/ISR pages
  */
 
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { slugToTitle } from '@/src/lib/utils';
 
 interface TrendingGuide {
@@ -23,7 +24,7 @@ interface SidebarData {
 }
 
 export async function getSidebarData(limit = 5): Promise<SidebarData> {
-  const supabase = await createClient();
+  const supabase = createAnonClient();
   const { data, error } = await supabase.rpc('get_sidebar_guides_data', { p_limit: limit });
 
   if (error || !data) {

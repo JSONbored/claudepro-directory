@@ -9,7 +9,6 @@ import { GalleryMasonryGrid } from '@/src/components/features/gallery/gallery-ma
 import { TrendingCarousel } from '@/src/components/features/gallery/trending-carousel';
 import { Container } from '@/src/components/layout/container';
 import { Skeleton } from '@/src/components/primitives/skeleton';
-import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { getSkeletonKeys } from '@/src/lib/utils/skeleton-keys';
 
@@ -30,16 +29,11 @@ export const revalidate = 900;
 async function getGalleryData() {
   const supabase = createAnonClient();
 
-  const { data, error } = await supabase.rpc('get_gallery_trending', {
+  const { data } = await supabase.rpc('get_gallery_trending', {
     p_limit: 40,
     p_offset: 0,
     p_days_back: 90,
   });
-
-  if (error) {
-    logger.error('Failed to fetch gallery data', error, { source: 'GalleryPage' });
-    return [];
-  }
 
   return data || [];
 }

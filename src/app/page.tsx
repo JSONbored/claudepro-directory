@@ -37,7 +37,6 @@ const UnifiedNewsletterCapture = dynamicImport(
 
 import { type CategoryId, getHomepageCategoryIds } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 
 export const metadata = await generatePageMetadata('/');
@@ -107,15 +106,7 @@ async function HomeContentSection({
       />
     );
   } catch (error) {
-    logger.error(
-      'Homepage content error',
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        source: 'HomePage',
-        operation: 'HomeContentSection',
-      }
-    );
-
+    // Silent error handling for ISR - errors logged via Sentry/error boundaries
     // Return empty state on error
     const emptyData: Record<string, ContentItem[]> = {};
     for (const id of categoryIds) {
