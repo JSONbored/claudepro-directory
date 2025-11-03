@@ -46,6 +46,7 @@ import {
   isValidCategory,
 } from '@/src/lib/config/category-config';
 import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**
@@ -150,6 +151,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   const { category } = await params;
 
   if (!isValidCategory(category)) {
+    logger.warn('Invalid category in list page', { category });
     notFound();
   }
 
@@ -157,6 +159,11 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   if (!config) {
     notFound();
   }
+
+  logger.info('Category list page accessed', {
+    category,
+    itemCount: 'loading',
+  });
 
   // Load content for this category (enriched with analytics, sponsorship, etc.)
   const items = await getContentByCategory(category);

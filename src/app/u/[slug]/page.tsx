@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { FolderOpen, Globe, MessageSquare, Users } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -134,12 +135,17 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
   // Consolidated RPC: 4 calls → 1 (75% reduction)
   // get_user_profile_complete() includes: profile + stats + posts + collections + contributions + reputation + badges
-  const { data: profileData } = await supabase.rpc('get_user_profile_complete', {
+  const { data: profileData, error } = await supabase.rpc('get_user_profile_complete', {
     p_user_slug: slug,
     ...(currentUser?.id && { p_viewer_id: currentUser.id }),
   });
 
+  if (error) {
+    logger.error('Failed to load user profile', error);
+  }
+
   if (!profileData) {
+    logger.warn('User profile not found', { slug });
     notFound();
   }
 

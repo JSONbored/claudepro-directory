@@ -4,6 +4,7 @@
 
 import { unstable_cache } from 'next/cache';
 import type { CategoryId } from '@/src/lib/config/category-config';
+import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Tables } from '@/src/types/database.types';
 
@@ -31,7 +32,7 @@ async function withErrorHandling<T>(
   try {
     return await operation();
   } catch (error) {
-    // Silent error handling for ISR/static generation - errors logged via Sentry/error boundaries
+    logger.error(context, error instanceof Error ? error : new Error(String(error)));
     return fallback;
   }
 }

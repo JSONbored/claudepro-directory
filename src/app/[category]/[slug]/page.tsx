@@ -18,6 +18,7 @@ import {
 } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { type ContentItem, getContentByCategory } from '@/src/lib/content/supabase-content-loader';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Database } from '@/src/types/database.types';
@@ -82,6 +83,7 @@ export default async function DetailPage({
   const { category, slug } = await params;
 
   if (!isValidCategory(category)) {
+    logger.warn('Invalid category in detail page', { category, slug });
     notFound();
   }
 
@@ -89,6 +91,12 @@ export default async function DetailPage({
   if (!config) {
     notFound();
   }
+
+  logger.info('Detail page accessed', {
+    category,
+    slug,
+    validated: true,
+  });
 
   // Consolidated RPC: 2-3 calls → 1 (50-67% reduction)
   // get_content_detail_complete() includes: content + analytics + related items + collection items
@@ -103,6 +111,7 @@ export default async function DetailPage({
   );
 
   if (detailError || !detailData) {
+    logger.warn('Item not found', { category, slug });
     notFound();
   }
 
