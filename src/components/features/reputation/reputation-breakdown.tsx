@@ -18,7 +18,7 @@
 'use client';
 
 import { FileText, MessageSquare, Star, ThumbsUp, TrendingUp, Trophy } from 'lucide-react';
-import { memo, useEffect, useState } from 'react';
+import { memo } from 'react';
 import { HorizontalBarChart } from '@/src/components/domain/horizontal-bar-chart';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import {
@@ -28,7 +28,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import type { Tables } from '@/src/types/database.types';
@@ -50,6 +49,10 @@ type ReputationBreakdownType = {
 export interface ReputationBreakdownProps {
   /** Reputation breakdown data */
   breakdown: ReputationBreakdownType;
+  /** Reputation tiers from server */
+  tiers?: ReputationTier[];
+  /** Reputation actions (points per action type) from server */
+  actions?: Array<{ action_type: string; points: number }>;
   /** Show detailed breakdown chart */
   showDetails?: boolean;
   /** Show next tier progress */
@@ -112,51 +115,30 @@ const ACTIVITY_ICONS = {
  */
 export const ReputationBreakdown = memo(function ReputationBreakdown({
   breakdown,
+  tiers: serverTiers = [],
+  actions: serverActions = [],
   showDetails = true,
   showProgress = true,
   className,
 }: ReputationBreakdownProps) {
-  const [tiers, setTiers] = useState<ReputationTier[]>([]);
-  const [points, setPoints] = useState<Record<string, number>>({});
-
-  // Fetch tiers and points from database
-  useEffect(() => {
-    const fetchData = async () => {
-      const supabase = createClient();
-      const [tiersResult, pointsResult] = await Promise.all([
-        supabase
-          .from('reputation_tiers')
-          .select('*')
-          .eq('active', true)
-          .order('order', { ascending: true }),
-        supabase.from('reputation_actions').select('action_type, points').eq('active', true),
-      ]);
-
-      if (tiersResult.data) setTiers(tiersResult.data);
-      if (pointsResult.data) {
-        const pointsMap: Record<string, number> = {};
-        for (const action of pointsResult.data) {
-          pointsMap[action.action_type] = action.points;
-        }
-        setPoints(pointsMap);
-      }
-    };
-
-    fetchData().catch(() => {
-      // Silently fail - will show default values
-    });
-  }, []);
+  // Convert actions array to points map
+  const points: Record<string, number> = {};
+  for (const action of serverActions) {
+    points[action.action_type] = action.points;
+  }
 
   const currentTier =
-    tiers.find(
+    serverTiers.find(
       (tier) =>
         breakdown.total >= tier.min_score &&
         (tier.max_score === null || breakdown.total <= tier.max_score)
-    ) || tiers[0];
+    ) || serverTiers[0];
 
-  const currentIndex = currentTier ? tiers.findIndex((t) => t.name === currentTier.name) : -1;
+  const currentIndex = currentTier ? serverTiers.findIndex((t) => t.name === currentTier.name) : -1;
   const nextTierData =
-    currentIndex >= 0 && currentIndex < tiers.length - 1 ? tiers[currentIndex + 1] : null;
+    currentIndex >= 0 && currentIndex < serverTiers.length - 1
+      ? serverTiers[currentIndex + 1]
+      : null;
   const nextTier = nextTierData
     ? {
         tier: nextTierData,

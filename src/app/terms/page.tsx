@@ -7,6 +7,12 @@ export const metadata: Metadata = {
   description: `Terms of Service for ${APP_CONFIG.name}. Review our terms and conditions for using our Claude AI configuration directory and community platform.`,
 };
 
+/**
+ * ISR Configuration: Legal pages are static and never change
+ * revalidate: false = Cache forever (no automatic revalidation)
+ */
+export const revalidate = false;
+
 export default function TermsPage() {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">

@@ -7,6 +7,12 @@ export const metadata: Metadata = {
   description: `Privacy Policy for ${APP_CONFIG.name}. Learn how we collect, use, and protect your personal information when you use our Claude AI configuration directory.`,
 };
 
+/**
+ * ISR Configuration: Legal pages are static and never change
+ * revalidate: false = Cache forever (no automatic revalidation)
+ */
+export const revalidate = false;
+
 export default function PrivacyPage() {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">

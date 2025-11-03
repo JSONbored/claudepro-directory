@@ -22,7 +22,11 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata = generatePageMetadata('/community');
 
-// Enable ISR - revalidate every 24 hours for community page
+/**
+ * ISR Configuration: Marketing pages update infrequently
+ * revalidate: 86400 = Revalidate every 24 hours
+ */
+export const revalidate = 86400;
 
 export default function CommunityPage() {
   return (

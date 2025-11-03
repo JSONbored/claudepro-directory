@@ -10,6 +10,8 @@ import { searchContent } from '@/src/lib/search/server-search';
 import { sanitizers } from '@/src/lib/security/validators';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
+export const revalidate = 3600; // 1 hour ISR
+
 interface SearchPageProps {
   searchParams: Promise<{
     q?: string;

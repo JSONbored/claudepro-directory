@@ -2,6 +2,7 @@
  * Community Board - Real-time discussion board with database-first architecture
  */
 
+import { unstable_cache } from 'next/cache';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -23,12 +24,24 @@ const UnifiedNewsletterCapture = dynamic(
   }
 );
 
+export const revalidate = 300; // 5 minutes ISR
+
 export const metadata = generatePageMetadata('/board');
 
 export default async function BoardPage() {
   const supabase = await createClient();
 
-  const { data: posts } = await supabase.rpc('get_popular_posts');
+  // Wrapped in unstable_cache for additional performance boost
+  const { data: posts } = await unstable_cache(
+    async () => {
+      return supabase.rpc('get_popular_posts');
+    },
+    ['board-popular-posts'],
+    {
+      revalidate: 300, // 5 minutes (matches page ISR)
+      tags: ['board', 'posts'],
+    }
+  )();
 
   return (
     <div className={'min-h-screen bg-background'}>

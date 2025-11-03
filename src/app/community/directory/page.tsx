@@ -13,55 +13,28 @@ export const revalidate = 3600; // 1 hour ISR
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
   const supabase = await createClient();
 
-  // Performance optimization: Use server-side full-text search when query provided
-  // Otherwise fetch all users for client-side browsing
-  // Optimized: Select only needed columns (11/21 = 48% reduction)
-  const userColumns =
-    'id, slug, name, image, bio, work, reputation_score, tier, tier_name, tier_progress, created_at';
+  // Consolidated RPC: 3 queries + TypeScript deduplication → 1 (67% reduction)
+  const { data: directoryData } = await supabase.rpc(
+    'get_community_directory',
+    searchQuery ? { p_search_query: searchQuery, p_limit: 100 } : { p_limit: 100 }
+  );
 
-  const [publicUsersResult, topContributorsResult, newMembersResult] = await Promise.all([
-    // Search users OR find public users
-    searchQuery
-      ? supabase.rpc('search_users', {
-          search_query: searchQuery,
-          result_limit: 100,
-        })
-      : supabase
-          .from('users')
-          .select(userColumns)
-          .eq('public', true)
-          .order('created_at', { ascending: false })
-          .limit(100),
+  // Type assertion to database-generated Json type
+  type DirectoryResponse = {
+    all_users: Array<Tables<'users'>>;
+    top_contributors: Array<Tables<'users'>>;
+    new_members: Array<Tables<'users'>>;
+  };
 
-    // Top contributors by reputation
-    supabase
-      .from('users')
-      .select(userColumns)
-      .order('reputation_score', { ascending: false })
-      .limit(10),
+  const { all_users, top_contributors, new_members } = (directoryData || {
+    all_users: [],
+    top_contributors: [],
+    new_members: [],
+  }) as unknown as DirectoryResponse;
 
-    // New members
-    supabase
-      .from('users')
-      .select(userColumns)
-      .eq('public', true)
-      .order('created_at', { ascending: false })
-      .limit(10),
-  ]);
-
-  // Extract data from query results
-  const publicUsers = (publicUsersResult.data || []) as Tables<'users'>[];
-  const topContributors = (topContributorsResult.data || []) as Tables<'users'>[];
-  const newMembers = (newMembersResult.data || []) as Tables<'users'>[];
-
-  // Combine and deduplicate
-  // When searching, use search results directly (already ranked by relevance)
-  const allUsers = searchQuery
-    ? publicUsers
-    : [
-        ...topContributors,
-        ...publicUsers.filter((u) => !topContributors.some((tc) => tc.slug === u.slug)),
-      ];
+  const allUsers = all_users;
+  const topContributors = top_contributors;
+  const newMembers = new_members;
 
   return (
     <div className="container mx-auto px-4 py-8">

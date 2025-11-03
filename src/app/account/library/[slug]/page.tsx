@@ -43,30 +43,24 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     redirect('/login');
   }
 
-  const { data: collection } = await supabase
-    .from('user_collections')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('slug', slug)
-    .maybeSingle<Tables<'user_collections'>>();
+  // Consolidated RPC: 3 queries → 1 (67% reduction)
+  const { data: collectionData } = await supabase.rpc('get_collection_detail_with_items', {
+    p_user_id: user.id,
+    p_slug: slug,
+  });
 
-  if (!collection) {
+  if (!collectionData) {
     notFound();
   }
 
-  const { data: items } = await supabase
-    .from('collection_items')
-    .select('*')
-    .eq('collection_id', collection.id)
-    .order('order', { ascending: true })
-    .returns<Array<Tables<'collection_items'>>>();
+  // Type assertion to database-generated Json type
+  type CollectionResponse = {
+    collection: Tables<'user_collections'>;
+    items: Array<Tables<'collection_items'>>;
+    bookmarks: Array<Tables<'bookmarks'>>;
+  };
 
-  const { data: bookmarks } = await supabase
-    .from('bookmarks')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-    .returns<Array<Tables<'bookmarks'>>>();
+  const { collection, items, bookmarks } = collectionData as unknown as CollectionResponse;
 
   const shareUrl = collection.is_public
     ? `${APP_CONFIG.url}/u/${user.id}/collections/${collection.slug}`

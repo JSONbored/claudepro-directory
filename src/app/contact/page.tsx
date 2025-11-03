@@ -9,6 +9,12 @@ export const metadata: Metadata = {
   description: `Get in touch with the ${APP_CONFIG.name} team. Find support, report issues, or connect with us through GitHub, Discord, or email.`,
 };
 
+/**
+ * ISR Configuration: Marketing pages update infrequently
+ * revalidate: 86400 = Revalidate every 24 hours
+ */
+export const revalidate = 86400;
+
 export default function ContactPage() {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">

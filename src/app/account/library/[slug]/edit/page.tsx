@@ -33,23 +33,24 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
     redirect('/login');
   }
 
-  const { data: collection } = await supabase
-    .from('user_collections')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('slug', slug)
-    .maybeSingle<Tables<'user_collections'>>();
+  // Consolidated RPC: 2 queries → 1 (50% reduction)
+  const { data: collectionData } = await supabase.rpc('get_collection_detail_with_items', {
+    p_user_id: user.id,
+    p_slug: slug,
+  });
 
-  if (!collection) {
+  if (!collectionData) {
     notFound();
   }
 
-  const { data: bookmarks } = await supabase
-    .from('bookmarks')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-    .returns<Array<Tables<'bookmarks'>>>();
+  // Type assertion to database-generated Json type
+  type CollectionResponse = {
+    collection: Tables<'user_collections'>;
+    items: Array<Tables<'collection_items'>>;
+    bookmarks: Array<Tables<'bookmarks'>>;
+  };
+
+  const { collection, bookmarks } = collectionData as unknown as CollectionResponse;
 
   return (
     <div className="space-y-6">

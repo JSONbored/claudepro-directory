@@ -11,6 +11,7 @@ import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database.types';
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -30,64 +31,49 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
 
   if (!user) return null;
 
-  // Get sponsorship
-  const { data: sponsorship } = await supabase
-    .from('sponsored_content')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single();
+  // Consolidated RPC: 3 queries + TypeScript loops → 1 (75% reduction)
+  const { data: analyticsData } = await supabase.rpc('get_sponsorship_analytics', {
+    p_user_id: user.id,
+    p_sponsorship_id: id,
+  });
 
-  if (!sponsorship) {
+  if (!analyticsData) {
     notFound();
   }
 
-  // Get daily impression/click data (last 30 days)
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  // Type assertion to database-generated Json type
+  type AnalyticsResponse = {
+    sponsorship: Tables<'sponsored_content'>;
+    daily_stats: Array<{
+      date: string;
+      impressions: number;
+      clicks: number;
+    }>;
+    computed_metrics: {
+      ctr: number;
+      days_active: number;
+      avg_impressions_per_day: number;
+    };
+  };
 
-  const { data: impressionsByDay } = await supabase
-    .from('sponsored_impressions')
-    .select('created_at')
-    .eq('sponsored_id', id)
-    .gte('created_at', thirtyDaysAgo.toISOString());
-
-  const { data: clicksByDay } = await supabase
-    .from('sponsored_clicks')
-    .select('created_at')
-    .eq('sponsored_id', id)
-    .gte('created_at', thirtyDaysAgo.toISOString());
-
-  // Group by day
-  const impressionsMap = new Map<string, number>();
-  const clicksMap = new Map<string, number>();
-
-  if (impressionsByDay) {
-    for (const imp of impressionsByDay) {
-      const isoDate = new Date(imp.created_at).toISOString();
-      const day = isoDate.substring(0, 10);
-      impressionsMap.set(day, (impressionsMap.get(day) || 0) + 1);
-    }
-  }
-
-  if (clicksByDay) {
-    for (const click of clicksByDay) {
-      const isoDate = new Date(click.created_at).toISOString();
-      const day = isoDate.substring(0, 10);
-      clicksMap.set(day, (clicksMap.get(day) || 0) + 1);
-    }
-  }
+  const { sponsorship, daily_stats, computed_metrics } =
+    analyticsData as unknown as AnalyticsResponse;
 
   const impressionCount = sponsorship.impression_count ?? 0;
   const clickCount = sponsorship.click_count ?? 0;
+  const ctr = computed_metrics.ctr.toFixed(2);
+  const daysActive = computed_metrics.days_active;
+  const avgImpressionsPerDay = computed_metrics.avg_impressions_per_day.toFixed(0);
 
-  const ctr = impressionCount > 0 ? ((clickCount / impressionCount) * 100).toFixed(2) : '0.00';
+  // Convert daily_stats array to Maps for chart rendering
+  const impressionsMap = new Map<string, number>();
+  const clicksMap = new Map<string, number>();
 
-  const daysActive = Math.floor(
-    (Date.now() - new Date(sponsorship.start_date).getTime()) / (1000 * 60 * 60 * 24)
-  );
-
-  const avgImpressionsPerDay = daysActive > 0 ? (impressionCount / daysActive).toFixed(0) : '0';
+  for (const stat of daily_stats) {
+    const day = stat.date.substring(0, 10);
+    impressionsMap.set(day, stat.impressions);
+    clicksMap.set(day, stat.clicks);
+  }
 
   return (
     <div className="space-y-6">

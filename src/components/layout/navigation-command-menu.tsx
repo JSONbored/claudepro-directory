@@ -35,27 +35,35 @@ interface NavigationData {
 interface NavigationCommandMenuProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** Navigation data from server (optional) - falls back to client fetch if not provided */
+  initialData?: NavigationData;
 }
 
 export function NavigationCommandMenu({
   open: controlledOpen,
   onOpenChange,
+  initialData,
 }: NavigationCommandMenuProps = {}) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [navData, setNavData] = useState<NavigationData>({
-    primary: [],
-    secondary: [],
-    actions: [],
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  const [navData, setNavData] = useState<NavigationData>(
+    initialData ?? {
+      primary: [],
+      secondary: [],
+      actions: [],
+    }
+  );
+  const [isLoading, setIsLoading] = useState(!initialData);
   const router = useRouter();
   const inputId = useId();
 
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
 
-  // Fetch navigation data from database
+  // Fetch navigation data from database (only if not provided via props)
   useEffect(() => {
+    // Skip client-side fetch if server data was provided
+    if (initialData) return;
+
     let isMounted = true;
 
     async function fetchNavData() {
@@ -82,7 +90,7 @@ export function NavigationCommandMenu({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [initialData]);
 
   // Keyboard shortcut handler (⌘K / Ctrl+K)
   useEffect(() => {

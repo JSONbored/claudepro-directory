@@ -21,6 +21,12 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * ISR Configuration: Marketing pages update infrequently
+ * revalidate: 86400 = Revalidate every 24 hours
+ */
+export const revalidate = 86400;
+
 export default function ConsultingPage() {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">

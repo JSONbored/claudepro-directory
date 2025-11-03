@@ -11,6 +11,7 @@ import { Bookmark, Calendar } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database.types';
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -25,19 +26,28 @@ export default async function AccountDashboard() {
 
   if (!user) return null;
 
-  // Get user's bookmark count
-  const { count: bookmarkCount } = await supabase
-    .from('bookmarks')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.id);
+  // Consolidated RPC: 2 queries → 1 (50% reduction)
+  const { data: dashboardData } = await supabase.rpc('get_account_dashboard', {
+    p_user_id: user.id,
+  });
 
-  // Get user profile - Optimized: Select only needed columns (4/21 = 81% reduction)
-  const { data: profile } = await supabase
-    .from('users')
-    .select('name, reputation_score, tier, created_at')
-    .eq('id', user.id)
-    .single();
+  // Type assertion to database-generated Json type
+  type DashboardResponse = {
+    bookmark_count: number;
+    profile: Pick<Tables<'users'>, 'name' | 'reputation_score' | 'tier' | 'created_at'>;
+  };
 
+  const { bookmark_count, profile } = (dashboardData || {
+    bookmark_count: 0,
+    profile: {
+      name: null,
+      reputation_score: null,
+      tier: null,
+      created_at: new Date().toISOString(),
+    },
+  }) as unknown as DashboardResponse;
+
+  const bookmarkCount = bookmark_count;
   const accountAge = profile?.created_at
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
     : 0;

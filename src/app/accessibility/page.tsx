@@ -7,6 +7,12 @@ export const metadata: Metadata = {
   description: `Accessibility Statement for ${APP_CONFIG.name}. Learn about our commitment to digital accessibility and WCAG 2.1 AA compliance for our Claude AI directory.`,
 };
 
+/**
+ * ISR Configuration: Legal pages are static and never change
+ * revalidate: false = Cache forever (no automatic revalidation)
+ */
+export const revalidate = false;
+
 export default function AccessibilityPage() {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">

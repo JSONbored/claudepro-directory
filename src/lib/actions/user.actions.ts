@@ -8,10 +8,17 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
-import { publicUserActivitySummaryRowSchema } from '@/src/lib/schemas/generated/db-schemas';
 
-// Use generated schema from database materialized view
-const activitySummarySchema = publicUserActivitySummaryRowSchema;
+// Activity summary schema - manually defined (RPC returns Json/JSONB, no generated schema)
+// Matches get_user_activity_summary RPC return structure (uses denormalized columns)
+const activitySummarySchema = z.object({
+  total_posts: z.number(),
+  total_comments: z.number(),
+  total_votes: z.number(),
+  total_submissions: z.number(),
+  merged_submissions: z.number(),
+  total_activity: z.number(),
+});
 
 const activityFilterSchema = z.object({
   type: z.enum(['post', 'comment', 'vote', 'submission']).optional(),

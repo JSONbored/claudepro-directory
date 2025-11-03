@@ -161,15 +161,30 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     badges,
   } = data;
 
-  // Only fetch tier config (can't consolidate - it's static config data)
-  const tierConfigsResult = await supabase
-    .from('tier_display_config')
-    .select('tier, label, css_classes')
-    .eq('active', true)
-    .then((res) => res.data || []);
+  // Fetch reputation metadata (tiers + actions + tier display config)
+  const [tierConfigsResult, reputationTiersResult, reputationActionsResult] = await Promise.all([
+    supabase
+      .from('tier_display_config')
+      .select('tier, label, css_classes')
+      .eq('active', true)
+      .then((res) => res.data || []),
+    supabase
+      .from('reputation_tiers')
+      .select('*')
+      .eq('active', true)
+      .order('order', { ascending: true })
+      .then((res) => res.data || []),
+    supabase
+      .from('reputation_actions')
+      .select('action_type, points')
+      .eq('active', true)
+      .then((res) => res.data || []),
+  ]);
 
   const reputationData = reputation;
   const userBadges = badges || [];
+  const reputationTiers = reputationTiersResult;
+  const reputationActions = reputationActionsResult;
 
   const tierConfigs = Object.fromEntries(
     tierConfigsResult.map((t) => [t.tier, { label: t.label, className: t.css_classes }])
@@ -247,6 +262,8 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
             {reputationData?.breakdown && (
               <ReputationBreakdown
                 breakdown={reputationData.breakdown}
+                tiers={reputationTiers}
+                actions={reputationActions}
                 showDetails={true}
                 showProgress={true}
               />

@@ -1,44 +1,33 @@
-'use client';
-
 /**
- * Unified Sidebar - Database-First Architecture
+ * Unified Sidebar - Database-First Server Component
  *
  * OPTIMIZATIONS:
- * - Single RPC call for trending + recent guides (get_sidebar_guides_data)
- * - Removed legacy subcategory navigation (post-migration cleanup)
- * - Replaced non-functional search with command palette trigger
- * - 60%+ LOC reduction through consolidation
+ * - Converted to server component - zero client-side JS
+ * - Removed redundant search trigger (global ⌘K already available)
+ * - Data fetched server-side and passed as props
+ * - 70%+ LOC reduction through server-side rendering
  *
  * @see migrations/create_sidebar_guides_data_rpc.sql
  */
 
 import Link from 'next/link';
-import { memo, useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { SearchTrigger } from '@/src/components/features/search/search-trigger';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Clock, Sparkles, TrendingUp, Users } from '@/src/lib/icons';
 import type { RelatedGuide } from '@/src/lib/schemas/app.schema';
-import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { shallowEqual, slugToTitle } from '@/src/lib/utils';
 
-interface TrendingGuide {
+export interface TrendingGuide {
   title: string;
   slug: string;
   views: string;
 }
 
-interface RecentGuide {
+export interface RecentGuide {
   title: string;
   slug: string;
   date: string;
-}
-
-interface SidebarData {
-  trending: Array<{ slug: string; title: string; view_count: number }>;
-  recent: Array<{ slug: string; title: string; created_at: string }>;
 }
 
 interface UnifiedSidebarProps {
@@ -48,82 +37,17 @@ interface UnifiedSidebarProps {
     category?: string;
   };
   relatedGuides?: RelatedGuide[];
+  trending?: TrendingGuide[];
+  recent?: RecentGuide[];
 }
 
 function UnifiedSidebarComponent({
   mode = 'category',
   contentData,
   relatedGuides = [],
+  trending = [],
+  recent = [],
 }: UnifiedSidebarProps) {
-  const [sidebarData, setSidebarData] = useState<{
-    trending: TrendingGuide[];
-    recent: RecentGuide[];
-  }>({
-    trending: [],
-    recent: [],
-  });
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Fetch all sidebar data with single RPC call
-  useEffect(() => {
-    let isMounted = true;
-
-    async function fetchSidebarData() {
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase.rpc('get_sidebar_guides_data', { p_limit: 5 });
-
-        if (error || !data || !isMounted) return;
-
-        const result = data as unknown as SidebarData;
-
-        const trending: TrendingGuide[] = (result.trending || []).map((item) => ({
-          title: item.title || `Guide: ${slugToTitle(item.slug)}`,
-          slug: `/guides/${item.slug}`,
-          views: `${item.view_count?.toLocaleString() || 0} views`,
-        }));
-
-        const recent: RecentGuide[] = (result.recent || []).map((item) => ({
-          title: item.title || `Guide: ${slugToTitle(item.slug)}`,
-          slug: `/guides/${item.slug}`,
-          date: new Date(item.created_at).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          }),
-        }));
-
-        if (isMounted) {
-          setSidebarData({ trending, recent });
-        }
-      } catch {
-        // Silent fail - sidebar data is optional enhancement
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchSidebarData().catch(() => {
-      // Silent fail
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  // Trigger command palette
-  const handleSearchClick = () => {
-    const event = new KeyboardEvent('keydown', {
-      key: 'k',
-      metaKey: true,
-      bubbles: true,
-    });
-    document.dispatchEvent(event);
-  };
-
   return (
     <div
       className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto"
@@ -133,21 +57,8 @@ function UnifiedSidebarComponent({
       }}
     >
       <div className="space-y-3 pr-2 pb-4">
-        {/* Global Search Trigger */}
-        <Card className="border-muted/40 shadow-sm">
-          <CardContent className="p-3">
-            <SearchTrigger
-              onClick={handleSearchClick}
-              variant="minimal"
-              size="sm"
-              showShortcut={true}
-              className="w-full"
-            />
-          </CardContent>
-        </Card>
-
         {/* Trending Section */}
-        {(sidebarData.trending.length > 0 || isLoading) && (
+        {trending.length > 0 && (
           <Card className="border-muted/40 shadow-sm">
             <CardHeader className="px-3 pt-3 pb-2">
               <CardTitle className="flex items-center gap-1.5 font-medium text-xs">
@@ -157,29 +68,25 @@ function UnifiedSidebarComponent({
             </CardHeader>
             <CardContent className="px-3 pb-3">
               <div className="space-y-1.5">
-                {isLoading ? (
-                  <div className="text-muted-foreground text-xs">Loading trending guides...</div>
-                ) : (
-                  sidebarData.trending.map((guide, index) => (
-                    <Link
-                      key={guide.slug}
-                      href={guide.slug}
-                      className="group flex items-center justify-between rounded px-1.5 py-1 text-xs transition-colors hover:bg-muted/50"
+                {trending.map((guide, index) => (
+                  <Link
+                    key={guide.slug}
+                    href={guide.slug}
+                    className="group flex items-center justify-between rounded px-1.5 py-1 text-xs transition-colors hover:bg-muted/50"
+                  >
+                    <span className="flex-1 truncate text-muted-foreground group-hover:text-foreground">
+                      <span className="mr-1.5 text-muted-foreground/60">{index + 1}.</span>
+                      {guide.title}
+                    </span>
+                    <UnifiedBadge
+                      variant="base"
+                      style="secondary"
+                      className="h-4 bg-muted/50 px-1 text-2xs"
                     >
-                      <span className="flex-1 truncate text-muted-foreground group-hover:text-foreground">
-                        <span className="mr-1.5 text-muted-foreground/60">{index + 1}.</span>
-                        {guide.title}
-                      </span>
-                      <UnifiedBadge
-                        variant="base"
-                        style="secondary"
-                        className="h-4 bg-muted/50 px-1 text-2xs"
-                      >
-                        {guide.views}
-                      </UnifiedBadge>
-                    </Link>
-                  ))
-                )}
+                      {guide.views}
+                    </UnifiedBadge>
+                  </Link>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -263,7 +170,7 @@ function UnifiedSidebarComponent({
         )}
 
         {/* Recent Section */}
-        {sidebarData.recent.length > 0 && (
+        {recent.length > 0 && (
           <Card className="border-muted/40 shadow-sm">
             <CardHeader className="px-3 pt-3 pb-2">
               <CardTitle className="flex items-center gap-1.5 font-medium text-xs">
@@ -273,7 +180,7 @@ function UnifiedSidebarComponent({
             </CardHeader>
             <CardContent className="px-3 pb-3">
               <div className="space-y-1.5">
-                {sidebarData.recent.map((guide) => (
+                {recent.map((guide) => (
                   <Link key={guide.slug} href={guide.slug} className="group">
                     <div className="py-0.5 text-3xs text-muted-foreground transition-colors group-hover:text-primary">
                       <div className="truncate">{guide.title}</div>
@@ -287,7 +194,7 @@ function UnifiedSidebarComponent({
         )}
 
         {/* Getting Started - Show when no data */}
-        {!isLoading && sidebarData.trending.length === 0 && sidebarData.recent.length === 0 && (
+        {trending.length === 0 && recent.length === 0 && (
           <Card className="border-muted/40 shadow-sm">
             <CardHeader className="px-3 pt-3 pb-2">
               <CardTitle className="flex items-center gap-1.5 font-medium text-xs">
@@ -338,11 +245,4 @@ function UnifiedSidebarComponent({
   );
 }
 
-// Memoize the component to prevent unnecessary re-renders
-export const UnifiedSidebar = memo(UnifiedSidebarComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.mode === nextProps.mode &&
-    shallowEqual(prevProps.contentData, nextProps.contentData) &&
-    shallowEqual(prevProps.relatedGuides, nextProps.relatedGuides)
-  );
-});
+export const UnifiedSidebar = UnifiedSidebarComponent;

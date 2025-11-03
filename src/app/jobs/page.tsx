@@ -3,6 +3,7 @@
  * Single RPC call to filter_jobs() - all filtering in PostgreSQL
  */
 
+import { unstable_cache } from 'next/cache';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { JobCard } from '@/src/components/domain/job-card';
@@ -24,7 +25,7 @@ import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Database } from '@/src/types/database.types';
+import type { Tables } from '@/src/types/database.types';
 
 const UnifiedNewsletterCapture = dynamic(
   () =>
@@ -36,7 +37,7 @@ const UnifiedNewsletterCapture = dynamic(
   }
 );
 
-type JobRow = Database['public']['Tables']['jobs']['Row'];
+export const revalidate = 1800; // 30 minutes ISR
 
 export async function generateMetadata({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
@@ -62,27 +63,45 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
   const limit = Math.min(Number(rawParams?.limit) || 20, 100);
   const offset = (page - 1) * limit;
 
-  const { data: filteredJobs, error } = await supabase.rpc('filter_jobs', {
-    ...(searchQuery && { p_search_query: searchQuery }),
-    ...(category && category !== 'all' && { p_category: category }),
-    ...(employment && employment !== 'any' && { p_employment_type: employment }),
-    ...(remote && { p_remote_only: remote }),
-    ...(experience && experience !== 'any' && { p_experience_level: experience }),
-    p_limit: limit,
-    p_offset: offset,
-  });
+  // Enhanced RPC: 2 queries → 1 (50% reduction)
+  // Wrapped in unstable_cache for additional performance boost
+  const { data: jobsData, error } = await unstable_cache(
+    async () => {
+      return supabase.rpc('filter_jobs', {
+        ...(searchQuery && { p_search_query: searchQuery }),
+        ...(category && category !== 'all' && { p_category: category }),
+        ...(employment && employment !== 'any' && { p_employment_type: employment }),
+        ...(remote && { p_remote_only: remote }),
+        ...(experience && experience !== 'any' && { p_experience_level: experience }),
+        p_limit: limit,
+        p_offset: offset,
+      });
+    },
+    [
+      `jobs-${searchQuery || ''}-${category || ''}-${employment || ''}-${remote}-${experience || ''}-${page}-${limit}`,
+    ],
+    {
+      revalidate: 1800, // 30 minutes (matches page ISR)
+      tags: ['jobs', ...(category ? [`jobs-${category}`] : [])],
+    }
+  )();
 
   if (error) {
     logger.error('Failed to filter jobs', error);
   }
 
-  const jobs = (filteredJobs || []) as JobRow[];
+  // Type assertion to database-generated Json type
+  type JobsResponse = {
+    jobs: Array<Tables<'jobs'>>;
+    total_count: number;
+  };
 
-  const { count: totalJobs } = await supabase
-    .from('jobs')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'active')
-    .eq('active', true);
+  const { jobs, total_count } = (jobsData || {
+    jobs: [],
+    total_count: 0,
+  }) as unknown as JobsResponse;
+
+  const totalJobs = total_count;
 
   logger.info('Jobs page accessed', {
     ...(searchQuery && { search: searchQuery }),

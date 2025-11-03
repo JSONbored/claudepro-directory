@@ -17,7 +17,7 @@ import {
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Database } from '@/src/types/database.types';
+import type { Database, Tables } from '@/src/types/database.types';
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -32,20 +32,36 @@ export default async function SettingsPage() {
 
   if (!user) return null;
 
-  const [profileResult, { data: userData }] = await Promise.all([
-    // Optimized: Select only needed columns (10/16 = 38% reduction)
-    supabase
-      .from('profiles')
-      .select(
-        'display_name, bio, work, website, social_x_link, interests, profile_public, follow_email, created_at, reputation_score'
-      )
-      .eq('id', user.id)
-      .single(),
-    supabase.from('users').select('slug, name, image, tier').eq('id', user.id).single(),
-  ]);
+  // Consolidated RPC: 2 parallel queries → 1 (50% reduction)
+  const { data: settingsData } = await supabase.rpc('get_user_settings', {
+    p_user_id: user.id,
+  });
 
-  // Cast to partial profile type (form only uses selected fields)
-  const profile = profileResult.data as Database['public']['Tables']['profiles']['Row'] | null;
+  // Type assertion to database-generated Json type
+  type SettingsResponse = {
+    profile: Pick<
+      Tables<'profiles'>,
+      | 'display_name'
+      | 'bio'
+      | 'work'
+      | 'website'
+      | 'social_x_link'
+      | 'interests'
+      | 'profile_public'
+      | 'follow_email'
+      | 'created_at'
+      | 'reputation_score'
+    > | null;
+    user_data: Pick<Tables<'users'>, 'slug' | 'name' | 'image' | 'tier'> | null;
+  };
+
+  const { profile: profileData, user_data } = (settingsData || {
+    profile: null,
+    user_data: null,
+  }) as unknown as SettingsResponse;
+
+  const userData = user_data;
+  const profile = profileData as Database['public']['Tables']['profiles']['Row'] | null;
 
   if (!profile) {
     await supabase.from('profiles').upsert({

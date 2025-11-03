@@ -80,6 +80,12 @@ function formatTimeAgo(dateString: string): string {
 
 export const metadata = generatePageMetadata('/submit');
 
+/**
+ * ISR Configuration: Marketing pages update infrequently
+ * revalidate: 86400 = Revalidate every 24 hours
+ */
+export const revalidate = 86400;
+
 export default async function SubmitPage() {
   const [statsResult, recentResult, contributorsResult] = await batchFetch([
     getSubmissionStats({}),

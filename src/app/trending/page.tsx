@@ -3,6 +3,7 @@
  * Single RPC call to get_trending_page() - all logic in PostgreSQL
  */
 
+import { unstable_cache } from 'next/cache';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -25,6 +26,8 @@ const UnifiedNewsletterCapture = dynamic(
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
+
+export const revalidate = 300; // 5 minutes ISR
 
 export const metadata = generatePageMetadata('/trending');
 
@@ -49,13 +52,23 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
     limit,
   });
 
-  const { data, error } = await supabase.rpc('get_trending_page', {
-    p_period: period,
-    p_metric: metric,
-    ...(category && { p_category: category }),
-    p_page: page,
-    p_limit: limit,
-  });
+  // Wrapped in unstable_cache for additional performance boost
+  const { data, error } = await unstable_cache(
+    async () => {
+      return supabase.rpc('get_trending_page', {
+        p_period: period,
+        p_metric: metric,
+        ...(category && { p_category: category }),
+        p_page: page,
+        p_limit: limit,
+      });
+    },
+    [`trending-${period}-${metric}-${category || ''}-${page}-${limit}`],
+    {
+      revalidate: 300, // 5 minutes (matches page ISR)
+      tags: ['trending', ...(category ? [`trending-${category}`] : [])],
+    }
+  )();
 
   if (error) {
     logger.error('Failed to fetch trending page data', error);

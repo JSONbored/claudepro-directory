@@ -4,6 +4,7 @@
  * Config generated at build time by scripts/build/generate-category-config.ts
  */
 
+import { cache } from 'react';
 import {
   ALL_CATEGORY_IDS,
   CACHEABLE_CATEGORY_IDS,
@@ -19,13 +20,13 @@ import type {
 
 /**
  * Get all category configs (static, no database query)
+ * Cached with React cache() for request-level deduplication
  */
-export function getCategoryConfigs(): Record<
-  CategoryId,
-  UnifiedCategoryConfig<ContentType, CategoryId>
-> {
-  return CATEGORY_CONFIGS;
-}
+export const getCategoryConfigs = cache(
+  (): Record<CategoryId, UnifiedCategoryConfig<ContentType, CategoryId>> => {
+    return CATEGORY_CONFIGS;
+  }
+);
 
 export type { CategoryId, CategoryStatsConfig, ContentType, UnifiedCategoryConfig };
 export type UnifiedCategoryConfigValue = UnifiedCategoryConfig;
@@ -46,10 +47,11 @@ export const VALID_CATEGORIES: readonly CategoryId[] = [
 
 /**
  * Get category config by ID (static, no database query)
+ * Cached with React cache() for request-level deduplication
  */
-export function getCategoryConfig(slug: CategoryId): UnifiedCategoryConfigValue | null {
+export const getCategoryConfig = cache((slug: CategoryId): UnifiedCategoryConfigValue | null => {
   return CATEGORY_CONFIGS[slug] || null;
-}
+});
 
 /**
  * Check if category ID is valid (static)
@@ -60,24 +62,27 @@ export function isValidCategory(category: string): category is CategoryId {
 
 /**
  * Get all category IDs (static, no database query)
+ * Cached with React cache() for request-level deduplication
  */
-export function getAllCategoryIds(): CategoryId[] {
+export const getAllCategoryIds = cache((): CategoryId[] => {
   return [...ALL_CATEGORY_IDS];
-}
+});
 
 /**
  * Get homepage category IDs (static, no database query)
+ * Cached with React cache() for request-level deduplication
  */
-export function getHomepageCategoryIds(): CategoryId[] {
+export const getHomepageCategoryIds = cache((): CategoryId[] => {
   return [...HOMEPAGE_CATEGORY_IDS];
-}
+});
 
 /**
  * Get cacheable category IDs (static, no database query)
+ * Cached with React cache() for request-level deduplication
  */
-export function getCacheableCategoryIds(): CategoryId[] {
+export const getCacheableCategoryIds = cache((): CategoryId[] => {
   return [...CACHEABLE_CATEGORY_IDS];
-}
+});
 
 export const HOMEPAGE_FEATURED_CATEGORIES = [
   'agents',
@@ -107,15 +112,16 @@ export type HomepageTabCategory = (typeof HOMEPAGE_TAB_CATEGORIES)[number];
 
 /**
  * Get category stats config (static, no database query)
+ * Cached with React cache() for request-level deduplication
  */
-export function getCategoryStatsConfig(): readonly CategoryStatsConfig[] {
+export const getCategoryStatsConfig = cache((): readonly CategoryStatsConfig[] => {
   return Object.keys(CATEGORY_CONFIGS).map((id, index) => ({
     categoryId: id as CategoryId,
     icon: CATEGORY_CONFIGS[id as CategoryId].icon,
     displayText: CATEGORY_CONFIGS[id as CategoryId].pluralTitle,
     delay: index * 100,
   }));
-}
+});
 
 export function getTotalResourceCount(stats: Record<string, number>): number {
   return Object.values(stats).reduce((sum, count) => sum + count, 0);
