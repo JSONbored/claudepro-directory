@@ -15,7 +15,6 @@
  */
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import { logger } from '@/src/lib/logger';
 import type { Database } from '@/src/types/database.types';
 
 export function createAnonClient() {
@@ -89,7 +88,7 @@ export function createAnonClient() {
     );
   }
 
-  logger.info('Creating anonymous Supabase client (no cookies)');
+  // Note: No logger here - logger uses Date which breaks ISR static generation
 
   return createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
