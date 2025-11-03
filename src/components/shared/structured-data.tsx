@@ -1,4 +1,3 @@
-import { headers } from 'next/headers';
 import Script from 'next/script';
 import { isValidCategory } from '@/src/lib/config/category-config';
 import { SEO_CONFIG } from '@/src/lib/config/seo-config';
@@ -24,16 +23,15 @@ interface StructuredDataProps {
   breadcrumbs?: Array<{ name: string; url: string }>;
 }
 
-export async function StructuredData({
+export function StructuredData({
   type = 'website',
   data,
   pageTitle,
   pageDescription,
 }: StructuredDataProps) {
-  // Extract nonce from CSP header for script security
-  const headersList = await headers();
-  const cspHeader = headersList.get('content-security-policy');
-  const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
+  // Note: CSP nonce removed for ISR compatibility.
+  // JSON-LD scripts (type="application/ld+json") are data, not executable code,
+  // so they don't require CSP nonces.
 
   const generateLD = () => {
     const baseUrl = APP_CONFIG.url;
@@ -164,7 +162,6 @@ export async function StructuredData({
           __html: serializeJsonLd(jsonLd),
         }}
         strategy="afterInteractive"
-        nonce={nonce}
       />
     </>
   );
