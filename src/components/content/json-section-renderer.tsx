@@ -23,6 +23,7 @@ interface CodeTab {
   code: string;
   language: string;
   filename?: string;
+  html?: string;
 }
 
 interface TabItem {
@@ -56,6 +57,7 @@ interface StepItem {
   timeEstimate?: string;
   code?: string;
   language?: string;
+  html?: string;
   notes?: string;
 }
 
@@ -95,6 +97,7 @@ type CodeSection = SectionBase & {
   language: string;
   filename?: string;
   showLineNumbers?: boolean;
+  html?: string;
 };
 
 type CodeGroupSection = SectionBase & {
@@ -236,7 +239,7 @@ function render_section(section: Section, index: number): React.ReactNode {
       return (
         <div key={key} id={section.id} className={section.className}>
           <ProductionCodeBlock
-            html="" // Will be client-rendered
+            html={section.html || ''}
             code={section.code}
             language={section.language}
             filename={section.filename}
@@ -257,7 +260,7 @@ function render_section(section: Section, index: number): React.ReactNode {
                 </summary>
                 <div className="p-4">
                   <ProductionCodeBlock
-                    html=""
+                    html={tab.html || ''}
                     code={tab.code}
                     language={tab.language}
                     filename={tab.filename}
@@ -453,7 +456,7 @@ function render_section(section: Section, index: number): React.ReactNode {
                 )}
                 {step.code && (
                   <ProductionCodeBlock
-                    html=""
+                    html={step.html || ''}
                     code={step.code}
                     language={step.language || 'bash'}
                   />

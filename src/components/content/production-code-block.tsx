@@ -16,10 +16,10 @@
 import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { LinkedinIcon, LinkedinShareButton, TwitterIcon, TwitterShareButton } from 'react-share';
+import { LinkedinShareButton, TwitterShareButton } from 'react-share';
 import { trackInteraction } from '@/src/lib/actions/analytics.actions';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { Camera, Check, ChevronDown, Copy, Share2 } from '@/src/lib/icons';
+import { Camera, Check, ChevronDown, Code, Copy, Linkedin, Share2, Twitter } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { copyEmbedCode, trackEmbedGeneration } from '@/src/lib/utils/embed.utils';
@@ -78,6 +78,9 @@ export function ProductionCodeBlock({
   const category = pathParts[0] || 'unknown';
   const slug = pathParts[1] || 'unknown';
 
+  // Calculate current URL for sharing (needed during render for react-share components)
+  const currentUrl = `${APP_CONFIG.url}${pathname || ''}`;
+
   // Check if content exceeds maxLines (no DOM access needed - calculate from code prop)
   useEffect(() => {
     const lines = code.split('\n').length;
@@ -124,23 +127,27 @@ export function ProductionCodeBlock({
     }, 5000);
 
     try {
-      const watermark = `claudepro.directory/${category}/${slug}`;
       const screenshot = await generateCodeScreenshot({
         element: codeBlockRef.current,
-        watermark,
+        watermark: `claudepro.directory/${category}/${slug}`,
         watermarkPosition: 'bottom-right',
         scale: 2, // Retina quality
         maxWidth: 1200,
         padding: 24,
+        title: filename,
+        category: category,
       });
+
+      // Detect format from dataUrl
+      const format = screenshot.dataUrl.startsWith('data:image/webp') ? 'webp' : 'png';
+      const screenshotFilename = generateScreenshotFilename(category, slug, format);
 
       // Copy to clipboard (primary action)
       await copyScreenshotToClipboard(screenshot.blob);
       toasts.success.screenshotCopied();
 
       // Also trigger download for user convenience
-      const filename = generateScreenshotFilename(category, slug);
-      downloadScreenshot(screenshot.dataUrl, filename);
+      downloadScreenshot(screenshot.dataUrl, screenshotFilename);
 
       trackInteraction({
         interaction_type: 'screenshot',
@@ -167,8 +174,6 @@ export function ProductionCodeBlock({
    * Performance: Reuse pathname parsing, UTM tracking for viral attribution
    */
   const handleShare = async (platform: SharePlatform) => {
-    const currentUrl = `${APP_CONFIG.url}${pathname}`;
-
     try {
       if (platform === 'copy_link') {
         const success = await copyShareLink({
@@ -236,104 +241,75 @@ export function ProductionCodeBlock({
       {filename && (
         <div className={UI_CLASSES.CODE_BLOCK_HEADER}>
           <span className={UI_CLASSES.CODE_BLOCK_FILENAME}>{filename}</span>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            {/* Language badge pill - modern design */}
-            {language && language !== 'text' && (
-              <span className="rounded-full border border-accent/30 bg-gradient-to-r from-accent/15 to-accent/10 px-2.5 py-1 font-semibold text-2xs text-accent uppercase tracking-wider shadow-sm">
-                {language}
-              </span>
-            )}
-
-            {/* Screenshot button - camera icon only */}
+          <div className="flex items-center gap-1">
+            {/* Screenshot button */}
             <motion.button
               type="button"
               onClick={handleScreenshot}
               disabled={isScreenshotting}
-              animate={isScreenshotting ? { scale: [1, 1.05, 1, 1.05, 1, 1.05, 1] } : {}}
-              transition={{
-                duration: 1.5,
-                ease: 'easeInOut',
-              }}
-              className="flex items-center justify-center rounded-md p-2 font-medium text-muted-foreground transition-colors hover:bg-code/30 hover:text-foreground disabled:opacity-50"
-              style={{ minWidth: '48px', minHeight: '48px' }}
+              className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground disabled:opacity-50"
               title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
-              <Camera className="h-4 w-4" />
+              <Camera className="h-3.5 w-3.5" />
             </motion.button>
 
-            {/* Share dropdown button - icon only */}
+            {/* Share button with dropdown */}
             <div className="relative">
               <motion.button
                 type="button"
                 onClick={() => setIsShareOpen(!isShareOpen)}
-                className="flex items-center justify-center rounded-md p-2 font-medium text-muted-foreground transition-colors hover:bg-code/30 hover:text-foreground"
-                style={{ minWidth: '48px', minHeight: '48px' }}
+                className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
                 title="Share code"
               >
-                <Share2 className="h-4 w-4" />
+                <Share2 className="h-3.5 w-3.5" />
               </motion.button>
 
-              {/* Share dropdown menu */}
+              {/* Share dropdown - positioned below button */}
               {isShareOpen && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute top-12 right-0 z-50 w-56 rounded-lg border border-border bg-popover p-2 shadow-lg backdrop-blur-sm"
+                  className="absolute top-full right-0 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md z-50"
                   onMouseLeave={() => setIsShareOpen(false)}
                 >
                   {/* Twitter Share */}
-                  <TwitterShareButton
-                    url={generateShareUrl({
-                      url: `${APP_CONFIG.url}${pathname}`,
-                      title: `${category} - ${slug}`,
-                      platform: 'twitter',
-                      category,
-                      slug,
-                    })}
-                    title={generateShareText({
-                      url: pathname,
-                      title: `${category} - ${slug}`,
-                      platform: 'twitter',
-                    })}
-                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-foreground text-sm transition-colors hover:bg-accent/10"
-                    onClick={async () => {
-                      await handleShare('twitter');
-                    }}
-                  >
-                    <TwitterIcon size={20} round />
-                    <span>Share on Twitter</span>
-                  </TwitterShareButton>
+                  <div className="share-button-wrapper mb-1">
+                    <TwitterShareButton
+                      url={generateShareUrl({ url: currentUrl, category, slug, platform: 'twitter', title: `${category} - ${slug}` })}
+                      title={generateShareText({ url: currentUrl, category, slug, platform: 'twitter', title: `${category} - ${slug}` })}
+                      onClick={() => handleShare('twitter')}
+                    >
+                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all hover:bg-accent/15">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1DA1F2]/20">
+                          <Twitter className="h-3 w-3 text-[#1DA1F2]" />
+                        </div>
+                        <span className="text-foreground">Share on Twitter</span>
+                      </div>
+                    </TwitterShareButton>
+                  </div>
 
                   {/* LinkedIn Share */}
-                  <LinkedinShareButton
-                    url={generateShareUrl({
-                      url: `${APP_CONFIG.url}${pathname}`,
-                      title: `${category} - ${slug}`,
-                      platform: 'linkedin',
-                      category,
-                      slug,
-                    })}
-                    title={generateShareText({
-                      url: pathname,
-                      title: `${category} - ${slug}`,
-                      platform: 'linkedin',
-                    })}
-                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-foreground text-sm transition-colors hover:bg-accent/10"
-                    onClick={async () => {
-                      await handleShare('linkedin');
-                    }}
-                  >
-                    <LinkedinIcon size={20} round />
-                    <span>Share on LinkedIn</span>
-                  </LinkedinShareButton>
+                  <div className="share-button-wrapper mb-1">
+                    <LinkedinShareButton
+                      url={generateShareUrl({ url: currentUrl, category, slug, platform: 'linkedin', title: `${category} - ${slug}` })}
+                      title={generateShareText({ url: currentUrl, category, slug, platform: 'linkedin', title: `${category} - ${slug}` })}
+                      summary={`Check out this ${category} resource on claudepro.directory`}
+                      onClick={() => handleShare('linkedin')}
+                    >
+                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all hover:bg-accent/15">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0A66C2]/20">
+                          <Linkedin className="h-3 w-3 text-[#0A66C2]" />
+                        </div>
+                        <span className="text-foreground">Share on LinkedIn</span>
+                      </div>
+                    </LinkedinShareButton>
+                  </div>
 
                   {/* Copy Link */}
                   <button
                     type="button"
                     onClick={() => handleShare('copy_link')}
-                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-foreground text-sm transition-colors hover:bg-accent/10"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-foreground text-sm font-medium transition-all hover:bg-accent/15 hover:scale-[1.02] active:scale-[0.98]"
                   >
                     <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
                       <Copy className="h-3 w-3" />
@@ -345,10 +321,10 @@ export function ProductionCodeBlock({
                   <button
                     type="button"
                     onClick={handleEmbedCopy}
-                    className="mt-1 flex w-full items-center gap-3 rounded-md border-border/50 border-t px-3 py-2 pt-2 text-foreground text-sm transition-colors hover:bg-accent/10"
+                    className="mt-1 flex w-full items-center gap-3 rounded-md border-border/50 border-t px-3 py-2 pt-3 text-foreground text-sm transition-colors hover:bg-accent/10"
                   >
                     <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
-                      <span className="font-mono text-xs">&lt;/&gt;</span>
+                      <Code className="h-3 w-3" />
                     </div>
                     <span>Copy Embed Code</span>
                   </button>
@@ -356,22 +332,28 @@ export function ProductionCodeBlock({
               )}
             </div>
 
-            {/* Copy button - icon only with pulse animation */}
+            {/* Copy button */}
             <motion.button
               type="button"
               onClick={handleCopy}
               animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: 0.3 }}
-              className="flex items-center justify-center rounded-md p-2 font-medium text-muted-foreground transition-colors hover:bg-code/30 hover:text-foreground"
-              style={{ minWidth: '48px', minHeight: '48px' }}
+              className="flex items-center justify-center rounded-md bg-code/95 p-1.5 shadow-md backdrop-blur-md transition-colors hover:bg-code"
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <Check className="h-4 w-4 text-green-500" />
+                <Check className="h-3.5 w-3.5 text-green-500" />
               ) : (
-                <Copy className="h-4 w-4" />
+                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
               )}
             </motion.button>
+
+            {/* Language badge */}
+            {language && language !== 'text' && (
+              <div className="rounded-full border border-accent/30 bg-gradient-to-r from-accent/15 to-accent/10 px-2.5 py-1 font-semibold text-2xs text-accent uppercase tracking-wider shadow-md backdrop-blur-md">
+                {language}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -386,10 +368,121 @@ export function ProductionCodeBlock({
             '0 0 0 1px rgba(255, 255, 255, 0.03), 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.15)',
         }}
       >
-        {/* Language badge - top right corner (when no filename) */}
-        {language && language !== 'text' && !filename && (
-          <div className="absolute top-3 right-3 z-20 rounded-full border border-accent/30 bg-gradient-to-r from-accent/15 to-accent/10 px-2.5 py-1 font-semibold text-2xs text-accent uppercase tracking-wider shadow-md backdrop-blur-md">
-            {language}
+        {/* Top-right action buttons + badge (when no filename header) */}
+        {!filename && (
+          <div className="absolute top-3 right-3 z-20 flex items-center gap-1">
+            {/* Screenshot button */}
+            <motion.button
+              type="button"
+              onClick={handleScreenshot}
+              disabled={isScreenshotting}
+              className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground disabled:opacity-50"
+              title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
+            >
+              <Camera className="h-3.5 w-3.5" />
+            </motion.button>
+
+            {/* Share button with dropdown */}
+            <div className="relative">
+              <motion.button
+                type="button"
+                onClick={() => setIsShareOpen(!isShareOpen)}
+                className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
+                title="Share code"
+              >
+                <Share2 className="h-3.5 w-3.5" />
+              </motion.button>
+
+              {/* Share dropdown - positioned below button */}
+              {isShareOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="absolute top-full right-0 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md z-50"
+                  onMouseLeave={() => setIsShareOpen(false)}
+                >
+                  {/* Twitter Share */}
+                  <div className="share-button-wrapper mb-1">
+                    <TwitterShareButton
+                      url={generateShareUrl({ url: currentUrl, category, slug, platform: 'twitter', title: `${category} - ${slug}` })}
+                      title={generateShareText({ url: currentUrl, category, slug, platform: 'twitter', title: `${category} - ${slug}` })}
+                      onClick={() => handleShare('twitter')}
+                    >
+                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all hover:bg-accent/15">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1DA1F2]/20">
+                          <Twitter className="h-3 w-3 text-[#1DA1F2]" />
+                        </div>
+                        <span className="text-foreground">Share on Twitter</span>
+                      </div>
+                    </TwitterShareButton>
+                  </div>
+
+                  {/* LinkedIn Share */}
+                  <div className="share-button-wrapper mb-1">
+                    <LinkedinShareButton
+                      url={generateShareUrl({ url: currentUrl, category, slug, platform: 'linkedin', title: `${category} - ${slug}` })}
+                      title={generateShareText({ url: currentUrl, category, slug, platform: 'linkedin', title: `${category} - ${slug}` })}
+                      summary={`Check out this ${category} resource on claudepro.directory`}
+                      onClick={() => handleShare('linkedin')}
+                    >
+                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all hover:bg-accent/15">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0A66C2]/20">
+                          <Linkedin className="h-3 w-3 text-[#0A66C2]" />
+                        </div>
+                        <span className="text-foreground">Share on LinkedIn</span>
+                      </div>
+                    </LinkedinShareButton>
+                  </div>
+
+                  {/* Copy Link */}
+                  <button
+                    type="button"
+                    onClick={() => handleShare('copy_link')}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-foreground text-sm font-medium transition-all hover:bg-accent/15 hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
+                      <Copy className="h-3 w-3" />
+                    </div>
+                    <span>Copy Link</span>
+                  </button>
+
+                  {/* Embed Code */}
+                  <button
+                    type="button"
+                    onClick={handleEmbedCopy}
+                    className="mt-1 flex w-full items-center gap-3 rounded-md border-border/50 border-t px-3 py-2 pt-3 text-foreground text-sm transition-colors hover:bg-accent/10"
+                  >
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
+                      <Code className="h-3 w-3" />
+                    </div>
+                    <span>Copy Embed Code</span>
+                  </button>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Copy button */}
+            <motion.button
+              type="button"
+              onClick={handleCopy}
+              animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
+              transition={{ duration: 0.3 }}
+              className="flex items-center justify-center rounded-md bg-code/95 p-1.5 shadow-md backdrop-blur-md transition-colors hover:bg-code"
+              title={isCopied ? 'Copied!' : 'Copy code'}
+            >
+              {isCopied ? (
+                <Check className="h-3.5 w-3.5 text-green-500" />
+              ) : (
+                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+              )}
+            </motion.button>
+
+            {/* Language badge */}
+            {language && language !== 'text' && (
+              <div className="rounded-full border border-accent/30 bg-gradient-to-r from-accent/15 to-accent/10 px-2.5 py-1 font-semibold text-2xs text-accent uppercase tracking-wider shadow-md backdrop-blur-md">
+                {language}
+              </div>
+            )}
           </div>
         )}
 
@@ -412,7 +505,7 @@ export function ProductionCodeBlock({
         />
       </div>
 
-      {/* Expand/collapse button - shows on hover when collapsed, always visible when expanded */}
+      {/* Expand/collapse button - always visible for better UX */}
       {needsCollapse && (
         <button
           type="button"
@@ -420,7 +513,7 @@ export function ProductionCodeBlock({
           className={`flex w-full items-center justify-center gap-2 border-border/50 border-t bg-code/30 py-2 font-medium text-sm backdrop-blur-sm transition-all hover:scale-105 ${
             isExpanded
               ? 'text-foreground opacity-100'
-              : 'text-muted-foreground opacity-0 hover:text-foreground group-hover:opacity-100'
+              : 'text-muted-foreground opacity-100 hover:text-foreground'
           }`}
         >
           <div
@@ -435,24 +528,6 @@ export function ProductionCodeBlock({
         </button>
       )}
 
-      {/* Copy button (floating, for blocks without filename) */}
-      {!(filename || language) && (
-        <motion.button
-          type="button"
-          onClick={handleCopy}
-          animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
-          transition={{ duration: 0.3 }}
-          className={UI_CLASSES.CODE_BLOCK_COPY_BUTTON_FLOATING}
-          style={{ minWidth: '48px', minHeight: '48px' }}
-          title="Copy code"
-        >
-          {isCopied ? (
-            <Check className="h-4 w-4 text-green-500" />
-          ) : (
-            <Copy className={'h-4 w-4 text-muted-foreground'} />
-          )}
-        </motion.button>
-      )}
     </div>
   );
 }

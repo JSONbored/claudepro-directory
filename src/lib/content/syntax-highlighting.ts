@@ -21,8 +21,8 @@ import { highlight } from 'sugar-high';
  */
 export function highlightCode(
   code: string,
-  _language = 'javascript',
-  showLineNumbers = false
+  language = 'javascript',
+  showLineNumbers = true
 ): string {
   if (!code || code.trim() === '') {
     return '<pre class="sugar-high-empty"><code>No code provided</code></pre>';
@@ -35,6 +35,8 @@ export function highlightCode(
     // Split into lines for line number support
     const lines = highlighted.split('\n');
     const hasMultipleLines = lines.length > 1;
+    const totalLines = lines.length;
+    const visibleLines = Math.min(totalLines, 20);
 
     if (showLineNumbers && hasMultipleLines) {
       // Wrap each line in .sh__line with data-line attribute
@@ -45,11 +47,13 @@ export function highlightCode(
         })
         .join('\n');
 
-      return `<pre class="overflow-x-auto text-sm p-4 rounded-lg border border-border bg-code/60" style="line-height: 1.5; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.15);"><code class="sugar-high" style="display: grid; background: transparent; line-height: 1.5;">${numberedLines}</code></pre>`;
+      // Code block with header and expand button (matching mockup)
+      // Note: No header for now - will be added via component wrapper with proper filename
+      return `<div class="code-block-wrapper"><pre class="code-block-pre"><code class="sugar-high">${numberedLines}</code></pre>${totalLines > visibleLines ? `<button class="code-expand-btn">Expand ${totalLines - visibleLines} more lines</button>` : ''}</div>`;
     }
 
-    // No line numbers - simple wrap
-    return `<pre class="overflow-x-auto text-sm p-4 rounded-lg border border-border bg-code/60" style="line-height: 1.5; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.15);"><code class="sugar-high" style="display: block; background: transparent; line-height: 1.5;">${highlighted}</code></pre>`;
+    // No line numbers - simple wrap (no header)
+    return `<div class="code-block-wrapper"><pre class="code-block-pre"><code class="sugar-high">${highlighted}</code></pre></div>`;
   } catch (_error) {
     // Fallback to plain text if highlighting fails
     const escapedCode = code
@@ -59,7 +63,7 @@ export function highlightCode(
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
 
-    return `<pre class="overflow-x-auto text-sm leading-relaxed p-4 rounded-lg border border-border bg-code/50 backdrop-blur-sm"><code style="color: var(--color-text-secondary);">${escapedCode}</code></pre>`;
+    return `<pre class="code-block-pre code-block-fallback"><code>${escapedCode}</code></pre>`;
   }
 }
 

@@ -414,15 +414,60 @@ export async function UnifiedDetailPage({
     }
   })();
 
-  // GUIDES: Extract sections array from metadata for JSONSectionRenderer
-  const guideSections = (() => {
+  // GUIDES: Pre-process sections with server-side syntax highlighting
+  const guideSections = await (async () => {
     if (item.category !== 'guides') return null;
 
     const metadata = 'metadata' in item ? (item.metadata as Record<string, unknown>) : null;
     if (!(metadata?.sections && Array.isArray(metadata.sections))) return null;
 
-    // JSONSectionRenderer expects sections array, not full metadata
-    return metadata.sections;
+    const sections = metadata.sections as Array<{
+      type: string;
+      code?: string;
+      language?: string;
+      tabs?: Array<{ code: string; language: string; [key: string]: unknown }>;
+      steps?: Array<{ code?: string; language?: string; [key: string]: unknown }>;
+      [key: string]: unknown;
+    }>;
+
+    // Process sections in parallel - add pre-rendered HTML for syntax highlighting
+    return await Promise.all(
+      sections.map(async (section) => {
+        // Single code block
+        if (section.type === 'code' && section.code) {
+          const html = await highlightCode(section.code, section.language || 'text');
+          return { ...section, html };
+        }
+
+        // Code group (multiple tabs)
+        if (section.type === 'code_group' && section.tabs) {
+          const tabs = await Promise.all(
+            section.tabs.map(async (tab) => {
+              const html = await highlightCode(tab.code, tab.language || 'text');
+              return { ...tab, html };
+            })
+          );
+          return { ...section, tabs };
+        }
+
+        // Steps with optional code
+        if (section.type === 'steps' && section.steps) {
+          const steps = await Promise.all(
+            section.steps.map(async (step) => {
+              if (step.code) {
+                const html = await highlightCode(step.code, step.language || 'bash');
+                return { ...step, html };
+              }
+              return step;
+            })
+          );
+          return { ...section, steps };
+        }
+
+        // Non-code sections pass through unchanged
+        return section;
+      })
+    );
   })();
 
   // Handle case where config is not found - AFTER ALL HOOKS

@@ -110,8 +110,38 @@ export default async function DetailPage({
     }
   );
 
+  // DEBUG: Log the full RPC response
+  console.log(`[DetailPage] ${category}/${slug} RPC response:`, {
+    hasData: !!detailData,
+    hasError: !!detailError,
+    errorMessage: detailError?.message,
+    dataType: typeof detailData,
+    dataKeys: detailData ? Object.keys(detailData) : null,
+    rawData: JSON.stringify(detailData)?.substring(0, 200),
+  });
+
+  logger.info('RPC response', {
+    category,
+    slug,
+    hasData: !!detailData,
+    hasError: !!detailError,
+    errorMessage: detailError?.message ?? 'No error',
+    dataType: typeof detailData,
+    dataKeys: detailData ? Object.keys(detailData).join(',') : 'null',
+  });
+
   if (detailError || !detailData) {
-    logger.warn('Item not found', { category, slug });
+    console.log(
+      `[DetailPage] ${category}/${slug} CALLING notFound() - detailError:`,
+      detailError,
+      'detailData:',
+      detailData
+    );
+    logger.warn('Item not found', {
+      category,
+      slug,
+      error: detailError?.message ?? 'No error details',
+    });
     notFound();
   }
 
