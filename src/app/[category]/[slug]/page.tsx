@@ -20,7 +20,7 @@ import { APP_CONFIG } from '@/src/lib/constants';
 import { type ContentItem, getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Database } from '@/src/types/database.types';
 
 export const revalidate = 21600;
@@ -56,8 +56,8 @@ export async function generateMetadata({
     });
   }
 
-  // Use consolidated RPC for metadata
-  const supabase = await createClient();
+  // Use consolidated RPC for metadata (anon client for ISR/static generation)
+  const supabase = createAnonClient();
   const { data } = await supabase.rpc('get_content_detail_complete', {
     p_category: category,
     p_slug: slug,
@@ -100,7 +100,8 @@ export default async function DetailPage({
 
   // Consolidated RPC: 2-3 calls → 1 (50-67% reduction)
   // get_content_detail_complete() includes: content + analytics + related items + collection items
-  const supabase = await createClient();
+  // Use anon client for ISR/static generation (no cookies/auth)
+  const supabase = createAnonClient();
   const { data: detailData, error: detailError } = await supabase.rpc(
     'get_content_detail_complete',
     {

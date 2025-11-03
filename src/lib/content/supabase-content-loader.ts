@@ -230,42 +230,22 @@ export async function getTrendingContent(category?: CategoryId, limit = 20) {
         async () => {
           const supabase = createAnonClient();
 
-          // Use content table with denormalized columns (100x faster than content_popularity MV)
-          // Popularity score: view_count * 1 + bookmark_count * 5 + review_count * 3 + recency boost
+          // Use denormalized popularity_score column (3-10x faster than client-side calculation)
+          // Score computed via trigger: view_count + bookmark_count*5 + review_count*3 + recency boost
           let query = supabase
             .from('content')
             .select(
-              'category, slug, title, display_title, description, author, tags, created_at, view_count, bookmark_count, review_count, avg_rating'
+              'category, slug, title, display_title, description, author, tags, created_at, view_count, bookmark_count, review_count, avg_rating, popularity_score'
             )
-            .limit(limit)
-            .order('view_count', { ascending: false }); // Primary sort by views (denormalized)
+            .order('popularity_score', { ascending: false })
+            .limit(limit);
 
           if (category) query = query.eq('category', category);
 
           const { data, error } = await query;
           if (error) throw error;
 
-          // Calculate popularity score client-side and re-sort
-          // This is faster than complex SQL ORDER BY expression
-          const scored = (data || []).map((item) => ({
-            ...item,
-            popularity_score:
-              (item.view_count || 0) * 1 +
-              (item.bookmark_count || 0) * 5 +
-              (item.review_count || 0) * 3 +
-              // Recency boost: +10 if created in last 7 days, +5 if last 30 days
-              (new Date().getTime() - new Date(item.created_at).getTime() < 7 * 24 * 60 * 60 * 1000
-                ? 10
-                : 0) +
-              (new Date().getTime() - new Date(item.created_at).getTime() < 30 * 24 * 60 * 60 * 1000
-                ? 5
-                : 0),
-          }));
-
-          // Sort by calculated popularity score
-          scored.sort((a, b) => b.popularity_score - a.popularity_score);
-
-          return scored;
+          return data || [];
         },
         [],
         'getTrendingContent'

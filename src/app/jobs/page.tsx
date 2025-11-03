@@ -23,7 +23,7 @@ import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@/src/lib/icons'
 import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
@@ -51,7 +51,7 @@ export async function generateMetadata({ searchParams }: PagePropsWithSearchPara
 
 export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
-  const supabase = await createClient();
+  const supabase = createAnonClient();
 
   const searchQuery =
     (rawParams?.q as string) || (rawParams?.query as string) || (rawParams?.search as string);

@@ -576,6 +576,12 @@ export type PublicCalculateAllUserAffinitiesArgs = z.infer<
 export type PublicCalculateAllUserAffinitiesReturns = z.infer<
   typeof generated.publicCalculateAllUserAffinitiesReturnsSchema
 >;
+export type PublicCalculateContentPopularityScoreArgs = z.infer<
+  typeof generated.publicCalculateContentPopularityScoreArgsSchema
+>;
+export type PublicCalculateContentPopularityScoreReturns = z.infer<
+  typeof generated.publicCalculateContentPopularityScoreReturnsSchema
+>;
 export type PublicCalculateTagSimilarityArgs = z.infer<
   typeof generated.publicCalculateTagSimilarityArgsSchema
 >;

@@ -20,7 +20,7 @@ import {
 import { FolderOpen, Globe, MessageSquare, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
@@ -126,7 +126,7 @@ type ProfileDataComplete = ProfileData & {
 
 export default async function UserProfilePage({ params }: UserProfilePageProps) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createAnonClient();
 
   // Get current user (if logged in)
   const {

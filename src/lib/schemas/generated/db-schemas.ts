@@ -1098,6 +1098,7 @@ export const publicContentRowSchema = z.object({
   json_ld: jsonSchema.nullable(),
   metadata: jsonSchema,
   og_type: z.string().nullable(),
+  popularity_score: z.number().nullable(),
   reading_time: z.number().nullable(),
   review_count: z.number(),
   robots_follow: z.boolean().nullable(),
@@ -1141,6 +1142,7 @@ export const publicContentInsertSchema = z.object({
   json_ld: jsonSchema.optional().nullable(),
   metadata: jsonSchema.optional(),
   og_type: z.string().optional().nullable(),
+  popularity_score: z.number().optional().nullable(),
   reading_time: z.number().optional().nullable(),
   review_count: z.number().optional(),
   robots_follow: z.boolean().optional().nullable(),
@@ -1184,6 +1186,7 @@ export const publicContentUpdateSchema = z.object({
   json_ld: jsonSchema.optional().nullable(),
   metadata: jsonSchema.optional(),
   og_type: z.string().optional().nullable(),
+  popularity_score: z.number().optional().nullable(),
   reading_time: z.number().optional().nullable(),
   review_count: z.number().optional(),
   robots_follow: z.boolean().optional().nullable(),
@@ -4544,6 +4547,15 @@ export const publicCalculateAllUserAffinitiesReturnsSchema = z.array(
     interaction_summary: jsonSchema,
   })
 );
+
+export const publicCalculateContentPopularityScoreArgsSchema = z.object({
+  p_bookmark_count: z.number(),
+  p_created_at: z.string(),
+  p_review_count: z.number(),
+  p_view_count: z.number(),
+});
+
+export const publicCalculateContentPopularityScoreReturnsSchema = z.number();
 
 export const publicCalculateTagSimilarityArgsSchema = z.object({
   p_tags_a: z.array(z.string()),

@@ -14,7 +14,7 @@ import { CodeBlockServer } from '@/src/components/shared/code-block-server';
 import { isValidCategory } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ExternalLink } from '@/src/lib/icons';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 
 interface EmbedPageProps {
   params: Promise<{ category: string; slug: string }>;
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: EmbedPageProps): Promise<Meta
 export const revalidate = 3600; // 1 hour ISR
 
 async function getContentData(category: string, slug: string) {
-  const supabase = await createClient();
+  const supabase = createAnonClient();
 
   const { data, error } = await supabase
     .from('content')

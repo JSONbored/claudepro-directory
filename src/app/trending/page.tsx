@@ -13,7 +13,7 @@ import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Database } from '@/src/types/database.types';
 
@@ -36,7 +36,7 @@ type TrendingMetric = Database['public']['Enums']['trending_metric'];
 
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
-  const supabase = await createClient();
+  const supabase = createAnonClient();
 
   const period = (rawParams?.period as TrendingPeriod) || 'week';
   const metric = (rawParams?.metric as TrendingMetric) || 'views';

@@ -871,6 +871,7 @@ export type Database = {
           json_ld: Json | null;
           metadata: Json;
           og_type: string | null;
+          popularity_score: number | null;
           reading_time: number | null;
           review_count: number;
           robots_follow: boolean | null;
@@ -913,6 +914,7 @@ export type Database = {
           json_ld?: Json | null;
           metadata?: Json;
           og_type?: string | null;
+          popularity_score?: number | null;
           reading_time?: number | null;
           review_count?: number;
           robots_follow?: boolean | null;
@@ -955,6 +957,7 @@ export type Database = {
           json_ld?: Json | null;
           metadata?: Json;
           og_type?: string | null;
+          popularity_score?: number | null;
           reading_time?: number | null;
           review_count?: number;
           robots_follow?: boolean | null;
@@ -4348,6 +4351,15 @@ export type Database = {
           content_type: string;
           interaction_summary: Json;
         }[];
+      };
+      calculate_content_popularity_score: {
+        Args: {
+          p_bookmark_count: number;
+          p_created_at: string;
+          p_review_count: number;
+          p_view_count: number;
+        };
+        Returns: number;
       };
       calculate_tag_similarity: {
         Args: { p_tags_a: string[]; p_tags_b: string[] };

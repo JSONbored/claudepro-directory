@@ -20,7 +20,7 @@ import { trackInteraction } from '@/src/lib/actions/analytics.actions';
 import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
@@ -71,7 +71,7 @@ async function getCollectionDetail(
   collectionSlug: string,
   viewerId?: string
 ): Promise<CollectionDetailData | null> {
-  const supabase = await createClient();
+  const supabase = createAnonClient();
 
   const { data, error } = await supabase.rpc('get_user_collection_detail', {
     p_user_slug: slug,
@@ -104,7 +104,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   const { slug, collectionSlug } = await params;
 
   // Get current user (if logged in) for ownership check
-  const supabase = await createClient();
+  const supabase = createAnonClient();
   const {
     data: { user: currentUser },
   } = await supabase.auth.getUser();

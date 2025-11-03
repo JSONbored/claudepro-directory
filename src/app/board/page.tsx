@@ -11,7 +11,7 @@ import { Button } from '@/src/components/primitives/button';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { MessageSquare, Plus, TrendingUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 const UnifiedNewsletterCapture = dynamic(
@@ -29,7 +29,7 @@ export const revalidate = 300; // 5 minutes ISR
 export const metadata = generatePageMetadata('/board');
 
 export default async function BoardPage() {
-  const supabase = await createClient();
+  const supabase = createAnonClient();
 
   // Wrapped in unstable_cache for additional performance boost
   const { data: posts } = await unstable_cache(

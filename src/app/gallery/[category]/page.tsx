@@ -12,7 +12,7 @@ import { Container } from '@/src/components/layout/container';
 import { Skeleton } from '@/src/components/primitives/skeleton';
 import { isValidCategory, VALID_CATEGORIES } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { getSkeletonKeys } from '@/src/lib/utils/skeleton-keys';
 
 interface CategoryGalleryPageProps {
@@ -46,7 +46,7 @@ export async function generateStaticParams() {
 export const revalidate = 900;
 
 async function getCategoryGalleryData(category: string) {
-  const supabase = await createClient();
+  const supabase = createAnonClient();
 
   const { data, error } = await supabase.rpc('get_gallery_trending', {
     p_category: category,
