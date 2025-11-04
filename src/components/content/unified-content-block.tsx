@@ -59,14 +59,6 @@ import type {
   QuickReferenceProps,
   TLDRSummaryProps,
 } from '@/src/lib/schemas/component.schema';
-import {
-  caseStudyPropsSchema,
-  contentTabsPropsSchema,
-  expertQuotePropsSchema,
-  featureGridPropsSchema,
-  quickReferencePropsSchema,
-  tldrSummaryPropsSchema,
-} from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // ============================================================================
@@ -111,8 +103,8 @@ export function UnifiedContentBlock(props: UnifiedContentBlockProps) {
 // ============================================================================
 
 function CaseStudyVariant(props: CaseStudyProps) {
-  const validated = caseStudyPropsSchema.parse(props);
-  const { company, industry, challenge, solution, results, metrics, testimonial, logo } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { company, industry, challenge, solution, results, metrics, testimonial, logo } = props;
 
   return (
     <Card itemScope itemType="https://schema.org/Article" className={'my-8 overflow-hidden'}>
@@ -202,8 +194,8 @@ function CaseStudyVariant(props: CaseStudyProps) {
 // ============================================================================
 
 function FeatureGridVariant(props: FeatureGridProps) {
-  const validated = featureGridPropsSchema.parse(props);
-  const { features, title, description, columns } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { features, title, description, columns } = props;
   const validFeatures = features;
   const gridCols: Record<2 | 3 | 4, string> = {
     2: 'md:grid-cols-2',
@@ -288,8 +280,8 @@ function FeatureGridVariant(props: FeatureGridProps) {
 // ============================================================================
 
 function TLDRVariant(props: TLDRSummaryProps) {
-  const validated = tldrSummaryPropsSchema.parse(props);
-  const { content, keyPoints, title } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { content, keyPoints, title } = props;
 
   return (
     <Card
@@ -331,8 +323,8 @@ function TLDRVariant(props: TLDRSummaryProps) {
 // ============================================================================
 
 function ExpertQuoteVariant(props: ExpertQuoteProps) {
-  const validated = expertQuotePropsSchema.parse(props);
-  const { quote, author, role, company, imageUrl } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { quote, author, role, company, imageUrl } = props;
 
   return (
     <blockquote
@@ -378,8 +370,8 @@ function ExpertQuoteVariant(props: ExpertQuoteProps) {
 // ============================================================================
 
 function QuickReferenceVariant(props: QuickReferenceProps) {
-  const validated = quickReferencePropsSchema.parse(props);
-  const { title, description, items, columns } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { title, description, items, columns } = props;
   const validItems = items;
 
   if (validItems.length === 0) {
@@ -434,8 +426,8 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
 // ============================================================================
 
 function ContentTabsVariant(props: ContentTabsProps) {
-  const validated = contentTabsPropsSchema.parse(props);
-  const { items, title, description, defaultValue } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { items, title, description, defaultValue } = props;
   const validItems = items;
 
   if (validItems.length === 0) {

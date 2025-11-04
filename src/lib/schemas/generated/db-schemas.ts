@@ -1079,6 +1079,7 @@ export const publicContentRowSchema = z.object({
   bookmark_count: z.number(),
   category: z.string(),
   content: z.string().nullable(),
+  copy_count: z.number(),
   created_at: z.string(),
   date_added: z.string(),
   description: z.string(),
@@ -1123,6 +1124,7 @@ export const publicContentInsertSchema = z.object({
   bookmark_count: z.number().optional(),
   category: z.string(),
   content: z.string().optional().nullable(),
+  copy_count: z.number().optional(),
   created_at: z.string().optional(),
   date_added: z.string(),
   description: z.string(),
@@ -1167,6 +1169,7 @@ export const publicContentUpdateSchema = z.object({
   bookmark_count: z.number().optional(),
   category: z.string().optional(),
   content: z.string().optional().nullable(),
+  copy_count: z.number().optional(),
   created_at: z.string().optional(),
   date_added: z.string().optional(),
   description: z.string().optional(),
@@ -4791,24 +4794,6 @@ export const publicGetAllStructuredDataConfigsArgsSchema = z.never();
 
 export const publicGetAllStructuredDataConfigsReturnsSchema = jsonSchema;
 
-export const publicGetAnalyticsSummaryArgsSchema = z.object({
-  p_category: z.string().optional(),
-  p_slug: z.string().optional(),
-});
-
-export const publicGetAnalyticsSummaryReturnsSchema = z.array(
-  z.object({
-    bookmark_count: z.number().nullable(),
-    category: z.string().nullable(),
-    copy_count: z.number().nullable(),
-    last_interaction_at: z.string().nullable(),
-    last_viewed_at: z.string().nullable(),
-    slug: z.string().nullable(),
-    total_time_spent_seconds: z.number().nullable(),
-    view_count: z.number().nullable(),
-  })
-);
-
 export const publicGetApiCategoryContentArgsSchema = z.object({
   p_category: z.string(),
   p_limit: z.number().optional(),
@@ -4947,6 +4932,12 @@ export const publicGetCollectionDetailWithItemsArgsSchema = z.object({
 
 export const publicGetCollectionDetailWithItemsReturnsSchema = jsonSchema;
 
+export const publicGetCollectionItemsGroupedArgsSchema = z.object({
+  p_collection_slug: z.string(),
+});
+
+export const publicGetCollectionItemsGroupedReturnsSchema = jsonSchema;
+
 export const publicGetCommunityDirectoryArgsSchema = z.object({
   p_limit: z.number().optional(),
   p_search_query: z.string().optional(),
@@ -4992,21 +4983,6 @@ export const publicGetContentAffinityArgsSchema = z.object({
 
 export const publicGetContentAffinityReturnsSchema = z.number();
 
-export const publicGetContentByTagArgsSchema = z.object({
-  p_tag: z.string(),
-});
-
-export const publicGetContentByTagReturnsSchema = z.array(
-  z.object({
-    category: z.string().nullable(),
-    featured: z.boolean().nullable(),
-    priority: z.number().nullable(),
-    slug: z.string().nullable(),
-    tags: z.array(z.string()).nullable(),
-    title: z.string().nullable(),
-  })
-);
-
 export const publicGetContentDetailCompleteArgsSchema = z.object({
   p_category: z.string(),
   p_slug: z.string(),
@@ -5027,52 +5003,6 @@ export const publicGetContentPaginatedArgsSchema = z.object({
 });
 
 export const publicGetContentPaginatedReturnsSchema = jsonSchema;
-
-export const publicGetContentStatsArgsSchema = z.object({
-  p_category: z.string().optional(),
-  p_limit: z.number().optional(),
-});
-
-export const publicGetContentStatsReturnsSchema = z.array(
-  z.object({
-    author: z.string().nullable(),
-    bookmark_count: z.number().nullable(),
-    category: z.string().nullable(),
-    copy_count: z.number().nullable(),
-    created_at: z.string().nullable(),
-    description: z.string().nullable(),
-    difficulty_score: z.number().nullable(),
-    display_title: z.string().nullable(),
-    last_interaction_at: z.string().nullable(),
-    last_viewed_at: z.string().nullable(),
-    popularity_score: z.number().nullable(),
-    reading_time: z.number().nullable(),
-    slug: z.string().nullable(),
-    tags: z.array(z.string()).nullable(),
-    title: z.string().nullable(),
-    total_time_spent_seconds: z.number().nullable(),
-    updated_at: z.string().nullable(),
-    view_count: z.number().nullable(),
-  })
-);
-
-export const publicGetContentWithAnalyticsArgsSchema = z.object({
-  p_category: z.string().optional(),
-  p_limit: z.number().optional(),
-});
-
-export const publicGetContentWithAnalyticsReturnsSchema = z.array(
-  z.object({
-    bookmark_count: z.number(),
-    category: z.string(),
-    copy_count: z.number(),
-    date_added: z.string(),
-    description: z.string(),
-    slug: z.string(),
-    title: z.string(),
-    view_count: z.number(),
-  })
-);
 
 export const publicGetDatabaseFingerprintArgsSchema = z.never();
 
@@ -5555,6 +5485,18 @@ export const publicGetTopContributorsArgsSchema = z.object({
 
 export const publicGetTopContributorsReturnsSchema = jsonSchema;
 
+export const publicGetTopTagsForCategoryArgsSchema = z.object({
+  p_category: z.string(),
+  p_limit: z.number().optional(),
+});
+
+export const publicGetTopTagsForCategoryReturnsSchema = z.array(
+  z.object({
+    tag: z.string(),
+    tag_count: z.number(),
+  })
+);
+
 export const publicGetTrending24hArgsSchema = z.object({
   p_limit: z.number().optional(),
 });
@@ -5816,13 +5758,6 @@ export const publicIncrementArgsSchema = z.object({
 });
 
 export const publicIncrementReturnsSchema = z.undefined();
-
-export const publicIncrementUsageArgsSchema = z.object({
-  p_action_type: z.string(),
-  p_content_id: z.string(),
-});
-
-export const publicIncrementUsageReturnsSchema = z.undefined();
 
 export const publicInvokeEdgeFunctionArgsSchema = z.object({
   action_header: z.string(),
@@ -6320,3 +6255,9 @@ export const publicUserHasBadgeArgsSchema = z.object({
 });
 
 export const publicUserHasBadgeReturnsSchema = z.boolean();
+
+export const publicValidateContentMetadataArgsSchema = z.object({
+  metadata: jsonSchema,
+});
+
+export const publicValidateContentMetadataReturnsSchema = z.boolean();

@@ -15,12 +15,12 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { AlertTriangle, BookOpen, CheckCircle } from '@/src/lib/icons';
-import { type ChecklistProps, checklistPropsSchema } from '@/src/lib/schemas/component.schema';
+import type { ChecklistProps } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function Checklist(props: ChecklistProps) {
-  const validated = checklistPropsSchema.parse(props);
-  const { title, items, description, type } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { title, items, description, type } = props;
   const validItems = items;
 
   const [checkedItems, setCheckedItems] = React.useState<Set<number>>(

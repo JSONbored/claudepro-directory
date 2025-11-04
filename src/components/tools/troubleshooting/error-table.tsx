@@ -14,12 +14,12 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { AlertTriangle, Info } from '@/src/lib/icons';
-import { type ErrorTableProps, errorTablePropsSchema } from '@/src/lib/schemas/component.schema';
+import type { ErrorTableProps } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function ErrorTable(props: ErrorTableProps) {
-  const validated = errorTablePropsSchema.parse(props);
-  const { title, errors, description } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { title, errors, description } = props;
   const validErrors = errors;
 
   const severityColors = {

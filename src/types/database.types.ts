@@ -852,6 +852,7 @@ export type Database = {
           bookmark_count: number;
           category: string;
           content: string | null;
+          copy_count: number;
           created_at: string;
           date_added: string;
           description: string;
@@ -895,6 +896,7 @@ export type Database = {
           bookmark_count?: number;
           category: string;
           content?: string | null;
+          copy_count?: number;
           created_at?: string;
           date_added: string;
           description: string;
@@ -938,6 +940,7 @@ export type Database = {
           bookmark_count?: number;
           category?: string;
           content?: string | null;
+          copy_count?: number;
           created_at?: string;
           date_added?: string;
           description?: string;
@@ -4513,25 +4516,37 @@ export type Database = {
       };
       get_all_seo_config: { Args: never; Returns: Json };
       get_all_structured_data_configs: { Args: never; Returns: Json };
-      get_analytics_summary: {
-        Args: { p_category?: string; p_slug?: string };
-        Returns: {
-          bookmark_count: number | null;
-          category: string | null;
-          copy_count: number | null;
-          last_interaction_at: string | null;
-          last_viewed_at: string | null;
-          slug: string | null;
-          total_time_spent_seconds: number | null;
-          view_count: number | null;
-        }[];
-        SetofOptions: {
-          from: '*';
-          to: 'mv_analytics_summary';
-          isOneToOne: false;
-          isSetofReturn: true;
-        };
-      };
+      get_analytics_summary:
+        | {
+            Args: { p_category?: string; p_slug?: string };
+            Returns: {
+              bookmark_count: number | null;
+              category: string | null;
+              copy_count: number | null;
+              last_interaction_at: string | null;
+              last_viewed_at: string | null;
+              slug: string | null;
+              total_time_spent_seconds: number | null;
+              view_count: number | null;
+            }[];
+            SetofOptions: {
+              from: '*';
+              to: 'mv_analytics_summary';
+              isOneToOne: false;
+              isSetofReturn: true;
+            };
+          }
+        | {
+            Args: { p_category?: string };
+            Returns: {
+              avg_popularity: number;
+              category: string;
+              total_bookmarks: number;
+              total_copies: number;
+              total_items: number;
+              total_views: number;
+            }[];
+          };
       get_api_category_content: {
         Args: { p_category: string; p_limit?: number; p_offset?: number };
         Returns: Json;
@@ -4617,6 +4632,10 @@ export type Database = {
         Args: { p_slug: string; p_user_id: string };
         Returns: Json;
       };
+      get_collection_items_grouped: {
+        Args: { p_collection_slug: string };
+        Returns: Json;
+      };
       get_community_directory: {
         Args: { p_limit?: number; p_search_query?: string };
         Returns: Json;
@@ -4661,23 +4680,6 @@ export type Database = {
         };
         Returns: number;
       };
-      get_content_by_tag: {
-        Args: { p_tag: string };
-        Returns: {
-          category: string | null;
-          featured: boolean | null;
-          priority: number | null;
-          slug: string | null;
-          tags: string[] | null;
-          title: string | null;
-        }[];
-        SetofOptions: {
-          from: '*';
-          to: 'mv_content_tag_index';
-          isOneToOne: false;
-          isSetofReturn: true;
-        };
-      };
       get_content_detail_complete: {
         Args: { p_category: string; p_slug: string; p_user_id?: string };
         Returns: Json;
@@ -4695,48 +4697,33 @@ export type Database = {
         };
         Returns: Json;
       };
-      get_content_stats: {
-        Args: { p_category?: string; p_limit?: number };
-        Returns: {
-          author: string | null;
-          bookmark_count: number | null;
-          category: string | null;
-          copy_count: number | null;
-          created_at: string | null;
-          description: string | null;
-          difficulty_score: number | null;
-          display_title: string | null;
-          last_interaction_at: string | null;
-          last_viewed_at: string | null;
-          popularity_score: number | null;
-          reading_time: number | null;
-          slug: string | null;
-          tags: string[] | null;
-          title: string | null;
-          total_time_spent_seconds: number | null;
-          updated_at: string | null;
-          view_count: number | null;
-        }[];
-        SetofOptions: {
-          from: '*';
-          to: 'mv_content_stats';
-          isOneToOne: false;
-          isSetofReturn: true;
-        };
-      };
-      get_content_with_analytics: {
-        Args: { p_category?: string; p_limit?: number };
-        Returns: {
-          bookmark_count: number;
-          category: string;
-          copy_count: number;
-          date_added: string;
-          description: string;
-          slug: string;
-          title: string;
-          view_count: number;
-        }[];
-      };
+      get_content_with_analytics:
+        | {
+            Args: { p_category?: string; p_limit?: number };
+            Returns: {
+              bookmark_count: number;
+              category: string;
+              copy_count: number;
+              date_added: string;
+              description: string;
+              slug: string;
+              title: string;
+              view_count: number;
+            }[];
+          }
+        | {
+            Args: { p_category: string; p_slug: string };
+            Returns: {
+              bookmark_count: number;
+              category: string;
+              copy_count: number;
+              description: string;
+              id: string;
+              slug: string;
+              title: string;
+              view_count: number;
+            }[];
+          };
       get_database_fingerprint: { Args: never; Returns: Json };
       get_due_sequence_emails: { Args: never; Returns: Json };
       get_dynamic_featured_content: {
@@ -5099,6 +5086,13 @@ export type Database = {
         Returns: number;
       };
       get_top_contributors: { Args: { p_limit?: number }; Returns: Json };
+      get_top_tags_for_category: {
+        Args: { p_category: string; p_limit?: number };
+        Returns: {
+          tag: string;
+          tag_count: number;
+        }[];
+      };
       get_trending_24h: {
         Args: { p_limit?: number };
         Returns: {
@@ -5303,10 +5297,6 @@ export type Database = {
           row_id: string;
           table_name: string;
         };
-        Returns: undefined;
-      };
-      increment_usage: {
-        Args: { p_action_type: string; p_content_id: string };
         Returns: undefined;
       };
       invoke_edge_function: {
@@ -5685,6 +5675,7 @@ export type Database = {
         Args: { p_badge_slug: string; p_user_id: string };
         Returns: boolean;
       };
+      validate_content_metadata: { Args: { metadata: Json }; Returns: boolean };
     };
     Enums: {
       announcement_priority: 'high' | 'medium' | 'low';

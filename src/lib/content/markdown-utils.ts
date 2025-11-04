@@ -11,7 +11,6 @@ import { DOMPurify } from '@/src/lib/security/html-sanitizer';
 /**
  * Internal Markdown Schemas
  * These are only used within this file for markdown-to-HTML conversion
- * Moved from lib/schemas/markdown.schema.ts for better encapsulation
  */
 
 /**

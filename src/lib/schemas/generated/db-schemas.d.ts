@@ -738,12 +738,6 @@ export type PublicGetAllStructuredDataConfigsArgs = z.infer<
 export type PublicGetAllStructuredDataConfigsReturns = z.infer<
   typeof generated.publicGetAllStructuredDataConfigsReturnsSchema
 >;
-export type PublicGetAnalyticsSummaryArgs = z.infer<
-  typeof generated.publicGetAnalyticsSummaryArgsSchema
->;
-export type PublicGetAnalyticsSummaryReturns = z.infer<
-  typeof generated.publicGetAnalyticsSummaryReturnsSchema
->;
 export type PublicGetApiCategoryContentArgs = z.infer<
   typeof generated.publicGetApiCategoryContentArgsSchema
 >;
@@ -820,6 +814,12 @@ export type PublicGetCollectionDetailWithItemsArgs = z.infer<
 export type PublicGetCollectionDetailWithItemsReturns = z.infer<
   typeof generated.publicGetCollectionDetailWithItemsReturnsSchema
 >;
+export type PublicGetCollectionItemsGroupedArgs = z.infer<
+  typeof generated.publicGetCollectionItemsGroupedArgsSchema
+>;
+export type PublicGetCollectionItemsGroupedReturns = z.infer<
+  typeof generated.publicGetCollectionItemsGroupedReturnsSchema
+>;
 export type PublicGetCommunityDirectoryArgs = z.infer<
   typeof generated.publicGetCommunityDirectoryArgsSchema
 >;
@@ -838,10 +838,6 @@ export type PublicGetContentAffinityArgs = z.infer<
 export type PublicGetContentAffinityReturns = z.infer<
   typeof generated.publicGetContentAffinityReturnsSchema
 >;
-export type PublicGetContentByTagArgs = z.infer<typeof generated.publicGetContentByTagArgsSchema>;
-export type PublicGetContentByTagReturns = z.infer<
-  typeof generated.publicGetContentByTagReturnsSchema
->;
 export type PublicGetContentDetailCompleteArgs = z.infer<
   typeof generated.publicGetContentDetailCompleteArgsSchema
 >;
@@ -853,16 +849,6 @@ export type PublicGetContentPaginatedArgs = z.infer<
 >;
 export type PublicGetContentPaginatedReturns = z.infer<
   typeof generated.publicGetContentPaginatedReturnsSchema
->;
-export type PublicGetContentStatsArgs = z.infer<typeof generated.publicGetContentStatsArgsSchema>;
-export type PublicGetContentStatsReturns = z.infer<
-  typeof generated.publicGetContentStatsReturnsSchema
->;
-export type PublicGetContentWithAnalyticsArgs = z.infer<
-  typeof generated.publicGetContentWithAnalyticsArgsSchema
->;
-export type PublicGetContentWithAnalyticsReturns = z.infer<
-  typeof generated.publicGetContentWithAnalyticsReturnsSchema
 >;
 export type PublicGetDatabaseFingerprintArgs = z.infer<
   typeof generated.publicGetDatabaseFingerprintArgsSchema
@@ -1096,6 +1082,12 @@ export type PublicGetTopContributorsArgs = z.infer<
 export type PublicGetTopContributorsReturns = z.infer<
   typeof generated.publicGetTopContributorsReturnsSchema
 >;
+export type PublicGetTopTagsForCategoryArgs = z.infer<
+  typeof generated.publicGetTopTagsForCategoryArgsSchema
+>;
+export type PublicGetTopTagsForCategoryReturns = z.infer<
+  typeof generated.publicGetTopTagsForCategoryReturnsSchema
+>;
 export type PublicGetTrending24hArgs = z.infer<typeof generated.publicGetTrending24hArgsSchema>;
 export type PublicGetTrending24hReturns = z.infer<
   typeof generated.publicGetTrending24hReturnsSchema
@@ -1238,10 +1230,6 @@ export type PublicImportRedisSeedDataReturns = z.infer<
 >;
 export type PublicIncrementArgs = z.infer<typeof generated.publicIncrementArgsSchema>;
 export type PublicIncrementReturns = z.infer<typeof generated.publicIncrementReturnsSchema>;
-export type PublicIncrementUsageArgs = z.infer<typeof generated.publicIncrementUsageArgsSchema>;
-export type PublicIncrementUsageReturns = z.infer<
-  typeof generated.publicIncrementUsageReturnsSchema
->;
 export type PublicInvokeEdgeFunctionArgs = z.infer<
   typeof generated.publicInvokeEdgeFunctionArgsSchema
 >;
@@ -1424,3 +1412,9 @@ export type PublicUpsertGithubStarsReturns = z.infer<
 >;
 export type PublicUserHasBadgeArgs = z.infer<typeof generated.publicUserHasBadgeArgsSchema>;
 export type PublicUserHasBadgeReturns = z.infer<typeof generated.publicUserHasBadgeReturnsSchema>;
+export type PublicValidateContentMetadataArgs = z.infer<
+  typeof generated.publicValidateContentMetadataArgsSchema
+>;
+export type PublicValidateContentMetadataReturns = z.infer<
+  typeof generated.publicValidateContentMetadataReturnsSchema
+>;

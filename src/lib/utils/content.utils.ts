@@ -2,7 +2,7 @@
  * Content Utilities - Database-First Architecture
  */
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
+import type { CategoryId, GuideSubcategory } from '@/src/lib/schemas/shared.schema';
 
 const normalizeSlug = (value: string): string =>
   value
@@ -10,20 +10,6 @@ const normalizeSlug = (value: string): string =>
     .trim()
     .replace(/\s+/g, '-')
     .replace(/[^a-z0-9-]/g, '');
-
-export type GuideSubcategory =
-  | 'tutorials'
-  | 'comparisons'
-  | 'workflows'
-  | 'use-cases'
-  | 'troubleshooting';
-
-export interface ContentMetadata {
-  viewCount?: number;
-  bookmarkCount?: number;
-  shareCount?: number;
-  popularityScore?: number;
-}
 
 export function formatViewCount(count: number): string {
   if (count >= 1000) {

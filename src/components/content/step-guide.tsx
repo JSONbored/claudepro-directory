@@ -21,15 +21,12 @@ import { UnifiedContentBox } from '@/src/components/domain/unified-content-box';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import { Zap } from '@/src/lib/icons';
-import {
-  type StepByStepGuideProps,
-  stepGuidePropsSchema,
-} from '@/src/lib/schemas/component.schema';
+import type { StepByStepGuideProps } from '@/src/lib/schemas/component.schema';
 import { batchMap } from '@/src/lib/utils/batch.utils';
 
 export async function StepByStepGuide(props: StepByStepGuideProps) {
-  const validated = stepGuidePropsSchema.parse(props);
-  const { steps, title, description, totalTime } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { steps, title, description, totalTime } = props;
   const validSteps = steps;
 
   // Pre-render all code blocks with Shiki on the server

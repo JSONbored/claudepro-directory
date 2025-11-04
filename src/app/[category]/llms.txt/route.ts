@@ -115,7 +115,8 @@ export async function GET(
         includeDescription: true,
         includeTags: true,
         includeUrl: true,
-      }
+      },
+      category // Pass category ID for database-first tag aggregation
     );
 
     logger.info('Category llms.txt generated successfully', {

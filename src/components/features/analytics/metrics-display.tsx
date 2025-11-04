@@ -6,10 +6,7 @@
  */
 
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from '@/src/lib/icons';
-import {
-  type MetricsDisplayProps,
-  metricsDisplayPropsSchema,
-} from '@/src/lib/schemas/component.schema';
+import type { MetricsDisplayProps } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
@@ -52,8 +49,8 @@ function BadgeDelta({
 }
 
 export function MetricsDisplay(props: MetricsDisplayProps) {
-  const validated = metricsDisplayPropsSchema.parse(props);
-  const { title, metrics, description } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { title, metrics, description } = props;
   const validMetrics = metrics;
 
   return (

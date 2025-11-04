@@ -13,14 +13,11 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { CheckCircle } from '@/src/lib/icons';
-import {
-  type ComparisonTableProps,
-  comparisonTablePropsSchema,
-} from '@/src/lib/schemas/component.schema';
+import type { ComparisonTableProps } from '@/src/lib/schemas/component.schema';
 
 export function ComparisonTable(props: ComparisonTableProps) {
-  const validated = comparisonTablePropsSchema.parse(props);
-  const { title, description, headers, items } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { title, description, headers, items } = props;
   const validHeaders = headers;
   const validItems = items;
 

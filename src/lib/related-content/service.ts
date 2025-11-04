@@ -48,11 +48,16 @@ class RelatedContentService {
     type RelatedContentItem =
       Database['public']['Functions']['get_related_content']['Returns'][number];
 
+    // Filter out items with missing required fields (database-first validation)
+    const validItems = data.filter(
+      (item: RelatedContentItem) => item.title && item.slug && item.category
+    );
+
     return {
-      items: data.map((item: RelatedContentItem) => ({
-        category: item.category || '',
-        slug: item.slug || '',
-        title: item.title || '',
+      items: validItems.map((item: RelatedContentItem) => ({
+        category: item.category,
+        slug: item.slug,
+        title: item.title,
         description: item.description || '',
         author: item.author || 'Community',
         date_added: item.date_added
@@ -67,7 +72,7 @@ class RelatedContentService {
       performance: {
         fetchTime: Math.round(performance.now() - startTime),
         cacheHit: false,
-        itemCount: data.length,
+        itemCount: validItems.length,
         algorithmVersion: 'v3.0.0-database-first',
       },
       algorithm: 'v3.0.0-database-first',

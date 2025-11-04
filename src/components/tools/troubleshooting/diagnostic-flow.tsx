@@ -15,15 +15,12 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { CheckCircle } from '@/src/lib/icons';
-import {
-  type DiagnosticFlowProps,
-  diagnosticFlowPropsSchema,
-} from '@/src/lib/schemas/component.schema';
+import type { DiagnosticFlowProps } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function DiagnosticFlow(props: DiagnosticFlowProps) {
-  const validated = diagnosticFlowPropsSchema.parse(props);
-  const { title, steps, description } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { title, steps, description } = props;
 
   const validSteps =
     steps && Array.isArray(steps) && steps.length > 0

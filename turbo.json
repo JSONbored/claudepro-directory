@@ -26,8 +26,7 @@
         "src/lib/schemas/**/*.ts",
         "src/lib/config/category-config.ts",
         "src/lib/config/category-config.generated.ts",
-        "scripts/build/build-content.ts",
-        "src/lib/build/category-processor.server.ts"
+        "scripts/build/build-content.ts"
       ],
       "env": ["NODE_ENV"],
       "cache": true,

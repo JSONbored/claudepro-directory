@@ -698,7 +698,7 @@ export const deleteComment = authedAction
 
 /**
  * Track content usage (copy, download, etc.)
- * Increments both copy_count (unified frontend metric) and specific action counters
+ * Database-first: Inserts into user_interactions, trigger auto-increments content.copy_count
  */
 export const trackUsage = rateLimitedAction
   .metadata({ actionName: 'trackUsage', category: 'content' })
@@ -710,15 +710,48 @@ export const trackUsage = rateLimitedAction
   )
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
-    const { error } = await supabase.rpc('increment_usage', {
-      p_content_id: parsedInput.content_id,
-      p_action_type: parsedInput.action_type,
+
+    // Get authenticated user (may be null for anonymous)
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    // Get content details (category + slug required for user_interactions)
+    const { data: content, error: fetchError } = await supabase
+      .from('content')
+      .select('category, slug')
+      .eq('id', parsedInput.content_id)
+      .single();
+
+    if (fetchError || !content) {
+      logger.error(
+        'Failed to fetch content for usage tracking',
+        new Error(fetchError?.message || 'Content not found'),
+        {
+          content_id: parsedInput.content_id,
+        }
+      );
+      throw new Error('Content not found');
+    }
+
+    // Map action_type to interaction_type
+    // 'copy' stays 'copy', all downloads become 'download'
+    const interactionType = parsedInput.action_type === 'copy' ? 'copy' : 'download';
+
+    // Insert into user_interactions (trigger will increment content.copy_count)
+    const { error } = await supabase.from('user_interactions').insert({
+      user_id: user?.id || null, // null for anonymous users
+      content_type: content.category,
+      content_slug: content.slug,
+      interaction_type: interactionType,
+      metadata: { action_type: parsedInput.action_type }, // Preserve granular detail
     });
 
     if (error) {
       logger.error('Failed to track usage', new Error(error.message), {
         content_id: parsedInput.content_id,
         action_type: parsedInput.action_type,
+        interaction_type: interactionType,
       });
       throw new Error(error.message);
     }

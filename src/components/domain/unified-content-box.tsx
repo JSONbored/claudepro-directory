@@ -23,12 +23,6 @@ import type {
   FAQProps,
   InfoBoxProps,
 } from '@/src/lib/schemas/component.schema';
-import {
-  accordionPropsSchema,
-  calloutPropsSchema,
-  faqPropsSchema,
-  infoBoxPropsSchema,
-} from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { serializeJsonLd } from '@/src/lib/utils/jsonld.utils';
@@ -74,8 +68,8 @@ export function UnifiedContentBox(props: UnifiedContentBoxProps) {
 }
 
 function AccordionBox(props: AccordionVariant) {
-  const validated = accordionPropsSchema.parse(props);
-  const { items, title, description, allowMultiple } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { items, title, description, allowMultiple } = props;
   const validItems = items;
 
   const [openItems, setOpenItems] = useState<Set<number>>(
@@ -156,8 +150,8 @@ function AccordionBox(props: AccordionVariant) {
 }
 
 function FAQBox(props: FAQVariant) {
-  const validated = faqPropsSchema.parse(props);
-  const { questions, title, description } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { questions, title, description } = props;
   const validQuestions = questions;
 
   if (validQuestions.length === 0) {
@@ -228,8 +222,8 @@ function FAQBox(props: FAQVariant) {
 }
 
 function InfoBoxComponent(props: InfoBoxVariant) {
-  const validated = infoBoxPropsSchema.parse(props);
-  const { title, children, variant } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { title, children, variant } = props;
 
   const variantStyles = {
     default: 'border-border bg-card',
@@ -269,8 +263,8 @@ function InfoBoxComponent(props: InfoBoxVariant) {
 }
 
 function CalloutComponent(props: CalloutVariant) {
-  const validated = calloutPropsSchema.parse(props);
-  const { type, title, children } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { type, title, children } = props;
 
   return (
     <Alert className="my-6">
