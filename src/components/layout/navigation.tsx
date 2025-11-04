@@ -53,7 +53,7 @@ import {
 } from '@/src/components/primitives/dropdown-menu';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/primitives/sheet';
 import { PrefetchLink } from '@/src/components/shared/prefetch-link';
-import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
+import { ACTION_LINKS, PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import {
@@ -470,6 +470,25 @@ const NavigationComponent = () => {
                     />
                   </div>
 
+                  {/* Action Links - Submit Config Button */}
+                  {ACTION_LINKS.map((link) => {
+                    const ActionIcon = link.icon;
+                    return (
+                      <Button
+                        key={link.href}
+                        asChild
+                        variant="default"
+                        size="sm"
+                        className={'hidden md:flex'}
+                      >
+                        <Link href={link.href} prefetch={true}>
+                          {ActionIcon && <ActionIcon className="mr-2 h-4 w-4" />}
+                          {link.label}
+                        </Link>
+                      </Button>
+                    );
+                  })}
+
                   <Button
                     variant="ghost"
                     size="sm"
@@ -527,14 +546,40 @@ const NavigationComponent = () => {
                         {/* Main Navigation - Staggered animations */}
                         <div className={'flex-1 overflow-y-auto'}>
                           <nav className={'space-y-3 px-3'} aria-label="Primary navigation">
-                            {PRIMARY_NAVIGATION.map((link, index) => {
-                              const IconComponent = link.icon;
+                            {/* Action Links (Submit Config) - Prominent position */}
+                            {ACTION_LINKS.map((link, index) => {
+                              const ActionIcon = link.icon;
                               return (
                                 <motion.div
                                   key={link.href}
                                   initial={{ opacity: 0, x: -20 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ delay: 0.15 + index * 0.05 }}
+                                >
+                                  <Link
+                                    href={link.href}
+                                    onClick={() => setIsOpen(false)}
+                                    className="flex w-full items-center justify-center rounded-xl border-2 border-accent bg-accent px-5 py-4 font-semibold text-accent-foreground text-base transition-all duration-200 hover:bg-accent/90 active:scale-[0.97]"
+                                  >
+                                    {ActionIcon && (
+                                      <ActionIcon className="mr-2 h-5 w-5 flex-shrink-0" />
+                                    )}
+                                    <span>{link.label}</span>
+                                  </Link>
+                                </motion.div>
+                              );
+                            })}
+
+                            {/* Primary Navigation */}
+                            {PRIMARY_NAVIGATION.map((link, index) => {
+                              const IconComponent = link.icon;
+                              const adjustedIndex = ACTION_LINKS.length + index;
+                              return (
+                                <motion.div
+                                  key={link.href}
+                                  initial={{ opacity: 0, x: -20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: 0.15 + adjustedIndex * 0.05 }}
                                 >
                                   <NavLink
                                     href={link.href}

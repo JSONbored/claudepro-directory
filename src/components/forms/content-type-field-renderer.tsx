@@ -23,6 +23,7 @@ import { Input } from '@/src/components/primitives/input';
 import { Label } from '@/src/components/primitives/label';
 import { Textarea } from '@/src/components/primitives/textarea';
 import type { ContentTypeConfig, FieldDefinition, GridColumn } from '@/src/lib/forms/types';
+import { resolveFormIcon } from '@/src/lib/icons';
 import { getResponsiveGridClass } from '@/src/lib/ui-constants';
 
 // ============================================================================
@@ -57,7 +58,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
 
   const fieldId = `${formId}-${field.name}`;
   const gridClass = GRID_COLUMN_CLASSES[field.gridColumn || 'full'];
-  const Icon = field.icon;
+  const Icon = resolveFormIcon(field.iconName);
   const iconPosition = field.iconPosition || 'left';
 
   return (

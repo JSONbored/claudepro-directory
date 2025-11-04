@@ -8,7 +8,6 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
-import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import { createClient } from '@/src/lib/supabase/server';
 import type { Tables } from '@/src/types/database.types';
 
@@ -53,7 +52,7 @@ export const toggleBadgeFeatured = authedAction
   .metadata({ actionName: 'toggleBadgeFeatured', category: 'user' })
   .schema(
     z.object({
-      badgeId: z.string().uuid(),
+      badgeId: z.string(),
       featured: z.boolean(),
     })
   )
@@ -127,12 +126,11 @@ export async function getPublicUserBadges(
   targetUserId: string,
   options?: { limit?: number; featuredOnly?: boolean }
 ) {
-  const validatedUserId = nonEmptyString.uuid().parse(targetUserId);
   const supabase = await createClient();
 
   // Use optimized RPC
   const { data, error } = await supabase.rpc('get_user_badges_with_details', {
-    p_user_id: validatedUserId,
+    p_user_id: targetUserId,
     p_featured_only: options?.featuredOnly ?? false,
     ...(options?.limit !== undefined && { p_limit: options.limit }),
   });
@@ -147,8 +145,8 @@ export async function userHasBadge(userId: string, badgeId: string): Promise<boo
   const { count } = await supabase
     .from('user_badges')
     .select('id', { count: 'exact', head: true })
-    .eq('user_id', nonEmptyString.uuid().parse(userId))
-    .eq('badge_id', z.string().uuid().parse(badgeId));
+    .eq('user_id', userId)
+    .eq('badge_id', badgeId);
 
   return (count || 0) > 0;
 }

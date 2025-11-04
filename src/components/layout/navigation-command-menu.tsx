@@ -117,8 +117,15 @@ export function NavigationCommandMenu({
 
   // Dynamic icon mapper
   const getIcon = (iconName: string) => {
-    const Icon = (Icons as Record<string, React.ComponentType<{ className?: string }>>)[iconName];
-    return Icon ? <Icon className="h-4 w-4 flex-shrink-0 text-muted-foreground" /> : null;
+    const IconModule = Icons as Record<string, unknown>;
+    const Icon = IconModule[iconName];
+
+    // Type guard: check if it's a valid React component
+    if (typeof Icon === 'function') {
+      const IconComponent = Icon as React.ComponentType<{ className?: string }>;
+      return <IconComponent className="h-4 w-4 flex-shrink-0 text-muted-foreground" />;
+    }
+    return null;
   };
 
   const renderItem = (item: NavigationItem) => (

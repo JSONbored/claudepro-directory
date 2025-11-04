@@ -59,8 +59,7 @@ function ContentHeroSection<T extends ContentItem>({
                           ICON_NAME_MAP[badge.icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
                         return <BadgeIconComponent className="mr-1 h-3 w-3" aria-hidden="true" />;
                       }
-                      const BadgeIcon = badge.icon;
-                      return <BadgeIcon className="mr-1 h-3 w-3" aria-hidden="true" />;
+                      return null;
                     })()}
                   {badge.text}
                 </UnifiedBadge>

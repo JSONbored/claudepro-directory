@@ -7,16 +7,14 @@
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
 import { nonEmptyString, shortString } from '@/src/lib/schemas/primitives';
+import type { Enums } from '@/src/types/database.types';
 
 /**
- * UI Sort/Filter types (preserved from deprecated hooks)
- * Schemas removed - only types used in component.schema.ts
+ * UI Sort/Filter types - derived from database ENUM types
  */
 
-// UI Sort options for sort-dropdown component
-export type SortOption = 'popularity' | 'date' | 'name' | 'author';
-
-export type SortDirection = 'asc' | 'desc';
+export type SortOption = Enums<'sort_option'>;
+export type SortDirection = Enums<'sort_direction'>;
 
 /**
  * Helper to safely extract string arrays from content data

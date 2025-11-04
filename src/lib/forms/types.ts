@@ -1,10 +1,8 @@
-import type { LucideIcon } from '@/src/lib/icons';
+import type { Enums } from '@/src/types/database.types';
 
-export type FieldType = 'text' | 'textarea' | 'number' | 'select';
-
-export type GridColumn = 'full' | 'half' | 'third' | 'two-thirds';
-
-export type IconPosition = 'left' | 'right';
+export type FieldType = Enums<'form_field_type'>;
+export type GridColumn = Enums<'form_grid_column'>;
+export type IconPosition = Enums<'form_icon_position'>;
 
 export interface SelectOption {
   value: string;
@@ -18,7 +16,7 @@ interface BaseFieldDefinition {
   helpText?: string;
   required?: boolean;
   gridColumn?: GridColumn;
-  icon?: LucideIcon;
+  iconName?: string;
   iconPosition?: IconPosition;
 }
 

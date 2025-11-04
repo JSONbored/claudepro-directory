@@ -2,87 +2,80 @@
 
 /**
  * User Actions - Database-First Architecture
- * All business logic in PostgreSQL via RPC functions. TypeScript handles auth + validation only.
+ * PostgreSQL validates ALL data. TypeScript provides compile-time types only.
  */
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
+import type { Enums } from '@/src/types/database.types';
 
-// Activity summary schema - manually defined (RPC returns Json/JSONB, no generated schema)
-// Matches get_user_activity_summary RPC return structure (uses denormalized columns)
-const activitySummarySchema = z.object({
-  total_posts: z.number(),
-  total_comments: z.number(),
-  total_votes: z.number(),
-  total_submissions: z.number(),
-  merged_submissions: z.number(),
-  total_activity: z.number(),
-});
+// TypeScript types for RPC function returns (database validates, TypeScript trusts)
+type ActivitySummary = {
+  total_posts: number;
+  total_comments: number;
+  total_votes: number;
+  total_submissions: number;
+  merged_submissions: number;
+  total_activity: number;
+};
 
+// Activity filter schema (query parameters - NOT stored data, validation is useful here)
 const activityFilterSchema = z.object({
   type: z.enum(['post', 'comment', 'vote', 'submission']).optional(),
   limit: z.number().int().positive().max(100).default(50),
   offset: z.number().int().nonnegative().default(0),
 });
 
-// Activity item schema - discriminated union based on type field
-const baseActivitySchema = z.object({
-  id: z.string().uuid(),
-  type: z.enum(['post', 'comment', 'vote', 'submission']),
-  created_at: z.string(),
-  user_id: z.string().uuid(),
-});
+// Activity types (database validates structure via RPC function)
+type BaseActivity = {
+  id: string;
+  type: 'post' | 'comment' | 'vote' | 'submission';
+  created_at: string;
+  user_id: string;
+};
 
-const postActivitySchema = baseActivitySchema.extend({
-  type: z.literal('post'),
-  title: z.string(),
-  body: z.string(),
-  content_type: z.string(),
-  content_slug: z.string(),
-  updated_at: z.string(),
-});
+type PostActivity = BaseActivity & {
+  type: 'post';
+  title: string;
+  body: string;
+  content_type: string;
+  content_slug: string;
+  updated_at: string;
+};
 
-const commentActivitySchema = baseActivitySchema.extend({
-  type: z.literal('comment'),
-  body: z.string(),
-  post_id: z.string().uuid(),
-  parent_id: z.string().uuid().nullable(),
-  updated_at: z.string(),
-});
+type CommentActivity = BaseActivity & {
+  type: 'comment';
+  body: string;
+  post_id: string;
+  parent_id: string | null;
+  updated_at: string;
+};
 
-const voteActivitySchema = baseActivitySchema.extend({
-  type: z.literal('vote'),
-  vote_type: z.enum(['upvote', 'downvote']),
-  post_id: z.string().uuid(),
-});
+type VoteActivity = BaseActivity & {
+  type: 'vote';
+  vote_type: 'upvote' | 'downvote';
+  post_id: string;
+};
 
-const submissionActivitySchema = baseActivitySchema.extend({
-  type: z.literal('submission'),
-  title: z.string(),
-  description: z.string().nullable(),
-  content_type: z.string(),
-  submission_url: z.string().nullable(),
-  status: z.enum(['pending', 'approved', 'rejected']),
-  updated_at: z.string(),
-});
+type SubmissionActivity = BaseActivity & {
+  type: 'submission';
+  title: string;
+  description: string | null;
+  content_type: string;
+  submission_url: string | null;
+  status: Enums<'submission_status'>;
+  updated_at: string;
+};
 
-const activitySchema = z.discriminatedUnion('type', [
-  postActivitySchema,
-  commentActivitySchema,
-  voteActivitySchema,
-  submissionActivitySchema,
-]);
+export type Activity = PostActivity | CommentActivity | VoteActivity | SubmissionActivity;
 
-// Export Activity type for use in components
-export type Activity = z.infer<typeof activitySchema>;
-
-const activityTimelineResponseSchema = z.object({
-  activities: z.array(activitySchema),
-  hasMore: z.boolean(),
-  total: z.number(),
-});
+type ActivityTimelineResponse = {
+  activities: Activity[];
+  hasMore: boolean;
+  total: number;
+};
 
 import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
@@ -331,7 +324,7 @@ export const addBookmarkBatch = authedAction
 
 const followSchema = z.object({
   action: z.enum(['follow', 'unfollow']),
-  user_id: nonEmptyString.uuid(),
+  user_id: z.string(), // Database validates UUID format
   slug: z.string(),
 });
 
@@ -377,10 +370,10 @@ export async function isFollowing(user_id: string): Promise<boolean> {
   } = await supabase.auth.getUser();
   if (!user) return false;
 
-  const validatedUserId = nonEmptyString.uuid().parse(user_id);
+  // Database validates UUID format
   const { data } = await supabase.rpc('is_following', {
     follower_id: user.id,
-    following_id: validatedUserId,
+    following_id: user_id,
   });
 
   return data ?? false;
@@ -389,7 +382,6 @@ export async function isFollowing(user_id: string): Promise<boolean> {
 export const getActivitySummary = authedAction
   .metadata({ actionName: 'getActivitySummary', category: 'user' })
   .schema(z.void())
-  .outputSchema(activitySummarySchema)
   .action(async ({ ctx }) => {
     try {
       const supabase = await createClient();
@@ -399,8 +391,8 @@ export const getActivitySummary = authedAction
 
       if (error) throw new Error(`Failed to fetch user activity summary: ${error.message}`);
 
-      // RPC returns Json - validate with output schema
-      return activitySummarySchema.parse(data);
+      // Database validates structure, TypeScript provides compile-time types
+      return data as ActivitySummary;
     } catch (error) {
       logger.error(
         'Failed to get activity summary',
@@ -414,7 +406,6 @@ export const getActivitySummary = authedAction
 export const getActivityTimeline = authedAction
   .metadata({ actionName: 'getActivityTimeline', category: 'user' })
   .schema(activityFilterSchema)
-  .outputSchema(activityTimelineResponseSchema)
   .action(async ({ parsedInput: { type, limit = 20, offset = 0 }, ctx }) => {
     try {
       const supabase = await createClient();
@@ -426,8 +417,8 @@ export const getActivityTimeline = authedAction
       });
       if (error) throw new Error(`Failed to fetch activity timeline: ${error.message}`);
 
-      // Validate RPC response with Zod schema (runtime type safety)
-      return activityTimelineResponseSchema.parse(data);
+      // Database validates structure, TypeScript provides compile-time types
+      return data as ActivityTimelineResponse;
     } catch (error) {
       logger.error(
         'Failed to get activity timeline',

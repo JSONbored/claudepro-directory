@@ -9,7 +9,6 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
-import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import { createClient } from '@/src/lib/supabase/server';
 
 export const getReputationBreakdown = authedAction
@@ -62,11 +61,10 @@ export const recalculateReputation = authedAction
   });
 
 export async function getUserReputation(targetUserId: string) {
-  const validatedUserId = nonEmptyString.uuid().parse(targetUserId);
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc('get_user_reputation_breakdown', {
-    p_user_id: validatedUserId,
+    p_user_id: targetUserId,
   });
 
   if (error) throw new Error(`Failed to fetch user reputation: ${error.message}`);

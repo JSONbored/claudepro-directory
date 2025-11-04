@@ -262,28 +262,50 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
     const finalHeadline = headline || defaultHeadline;
     const finalDescription = description || defaultDescription;
 
-    // Hero Variant
+    // Hero Variant - Modern 2025 Design
     if (variant === 'hero') {
       return (
         <div
           className={cn(
-            'w-full bg-gradient-to-br from-primary/10 via-accent/5 to-background',
-            'rounded-lg border border-primary/20 p-8 md:p-12',
+            // Enhanced background with subtle gradient
+            'w-full bg-gradient-to-br from-card/80 via-card/60 to-card/40',
+            'backdrop-blur-sm',
+            // Modern border with subtle glow effect
+            'rounded-2xl border border-border/30',
+            // Better shadow for depth
+            'shadow-black/5 shadow-lg',
+            // Increased padding for breathing room
+            'p-10 md:p-16',
             'text-center',
             className
           )}
         >
-          <div className="mb-4 flex justify-center">
-            <div className="rounded-full bg-primary/10 p-4">
-              <Mail className="h-8 w-8 text-primary" aria-hidden="true" />
+          {/* Icon with enhanced styling */}
+          <div className="mb-6 flex justify-center">
+            <div className="rounded-2xl border border-accent/20 bg-accent/10 p-4 shadow-accent/10 shadow-md backdrop-blur-sm">
+              <Mail className="h-8 w-8 text-accent" aria-hidden="true" />
             </div>
           </div>
-          <h2 className="mb-4 font-bold text-3xl md:text-4xl">{finalHeadline}</h2>
-          <p className="mx-auto mb-6 max-w-2xl text-lg text-muted-foreground">{finalDescription}</p>
-          <div className="mx-auto max-w-md">
+
+          {/* Headline with improved typography */}
+          <h2 className="mb-4 font-bold text-3xl text-foreground leading-tight tracking-tight md:text-4xl">
+            {finalHeadline}
+          </h2>
+
+          {/* Description with better spacing and contrast */}
+          <p className="mx-auto mb-8 max-w-2xl text-base text-muted-foreground leading-relaxed md:text-lg">
+            {finalDescription}
+          </p>
+
+          {/* Form with optimal width */}
+          <div className="mx-auto max-w-xl">
             <FormVariant source={source} className="w-full" />
           </div>
-          <p className="mt-4 text-muted-foreground text-xs">{NEWSLETTER_CTA_CONFIG.footerText}</p>
+
+          {/* Trust signal with better visibility */}
+          <p className="mt-6 text-muted-foreground/80 text-sm">
+            {NEWSLETTER_CTA_CONFIG.footerText}
+          </p>
         </div>
       );
     }
@@ -418,13 +440,20 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
 // =============================================================================
 
 /**
- * Form Variant - Simple email form
+ * Form Variant - Modernized email form with enhanced UX
+ * 2025 Design Updates:
+ * - Larger input fields (52px height) for better touch targets
+ * - Improved spacing and visual hierarchy
+ * - Enhanced microinteractions (focus states, hover effects)
+ * - Better responsive behavior (vertical stack on mobile)
+ * - Accessibility improvements
  */
 function FormVariant({ source, className }: { source: NewsletterSource; className?: string }) {
   const { email, setEmail, isSubmitting, subscribe, error } = useNewsletter({
     source,
   });
   const errorId = useId();
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -432,38 +461,85 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
   };
 
   return (
-    <form onSubmit={handleSubmit} className={className}>
-      <div className="flex flex-col gap-2">
-        <div className="flex gap-2">
-          <Input
-            type="email"
-            placeholder="your@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={isSubmitting}
-            className="min-w-0 flex-1"
-            aria-label="Email address"
-            error={!!error}
-            {...(error ? { errorId } : {})}
-          />
+    <form onSubmit={handleSubmit} className={cn('w-full', className)}>
+      <div className="flex flex-col gap-3">
+        {/* Desktop: Horizontal layout | Mobile: Vertical stack */}
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <Input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              required
+              disabled={isSubmitting}
+              className={cn(
+                // Enhanced sizing (52px height)
+                'h-[52px] min-w-0 px-5 text-base',
+                // Improved borders and focus states
+                'border-border/40 bg-background/95 backdrop-blur-sm',
+                'transition-all duration-200 ease-out',
+                'focus:border-accent/50 focus:ring-2 focus:ring-accent/20',
+                // Error state
+                error && 'border-destructive/50 focus:border-destructive focus:ring-destructive/20',
+                // Disabled state
+                isSubmitting && 'cursor-not-allowed opacity-60'
+              )}
+              aria-label="Email address"
+              aria-invalid={!!error}
+              aria-describedby={error ? errorId : undefined}
+            />
+            {/* Focus indicator line */}
+            <div
+              className={cn(
+                'absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-accent to-primary transition-all duration-300 ease-out',
+                isFocused && !error ? 'w-full opacity-100' : 'w-0 opacity-0'
+              )}
+            />
+          </div>
           <Button
             type="submit"
-            disabled={isSubmitting}
-            className="flex-shrink-0 whitespace-nowrap bg-gradient-to-r from-accent to-primary font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:from-accent/90 hover:to-primary/90 hover:shadow-lg"
+            disabled={isSubmitting || !email.trim()}
+            size="lg"
+            className={cn(
+              // Enhanced sizing to match input (52px height)
+              'h-[52px] flex-shrink-0 whitespace-nowrap px-8',
+              // Modern gradient with better contrast
+              'bg-gradient-to-r from-accent via-accent to-primary font-semibold text-accent-foreground',
+              // Enhanced hover/active states
+              'shadow-md transition-all duration-200 ease-out',
+              'hover:scale-[1.02] hover:from-accent/90 hover:via-accent/90 hover:to-primary/90 hover:shadow-lg',
+              'active:scale-[0.98]',
+              // Focus state for accessibility
+              'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
+              // Disabled state
+              'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100',
+              // Full width on mobile
+              'w-full sm:w-auto sm:min-w-[140px]'
+            )}
           >
             {isSubmitting ? (
-              <>Joining...</>
+              <span className="flex items-center gap-2">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Subscribing...
+              </span>
             ) : (
-              <>
+              <span className="flex items-center gap-2">
                 {NEWSLETTER_CTA_CONFIG.buttonText}
-                <Mail className="ml-2 h-4 w-4" aria-hidden="true" />
-              </>
+                <Mail className="h-4 w-4" aria-hidden="true" />
+              </span>
             )}
           </Button>
         </div>
+        {/* Error message with animation */}
         {error && (
-          <p id={errorId} className="text-destructive text-sm" role="alert">
+          <p
+            id={errorId}
+            className="slide-in-from-top-1 fade-in animate-in text-destructive text-sm"
+            role="alert"
+          >
             {error}
           </p>
         )}

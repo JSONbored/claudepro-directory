@@ -302,8 +302,8 @@ export const toggleJobStatus = rateLimitedAction
   .metadata({ actionName: 'toggleJobStatus', category: 'form' })
   .schema(
     z.object({
-      id: z.string().uuid(),
-      status: z.enum(['draft', 'pending_review', 'active', 'expired', 'rejected']),
+      id: z.string(),
+      status: z.string(),
     })
   )
   .action(async ({ parsedInput }) => {
@@ -330,7 +330,7 @@ export const toggleJobStatus = rateLimitedAction
 
 export const deleteJob = rateLimitedAction
   .metadata({ actionName: 'deleteJob', category: 'form' })
-  .schema(z.object({ id: z.string().uuid() }))
+  .schema(z.object({ id: z.string() }))
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
     const {

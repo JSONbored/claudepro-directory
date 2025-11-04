@@ -68,31 +68,9 @@ async function HomeContentSection({
   try {
     const enrichedData = homepageContentData;
 
-    // Extract featured content (items with _featured flag)
-    const featuredByCategory: Record<string, EnrichedMetadata[]> = {};
-    for (const [category, items] of Object.entries(enrichedData.categoryData)) {
-      if (category === 'allConfigs') continue; // Skip allConfigs for featured
-
-      const featured = items
-        .filter((item) => {
-          return (
-            '_featured' in item &&
-            item._featured !== null &&
-            typeof item._featured === 'object' &&
-            'rank' in item._featured
-          );
-        })
-        .sort((a, b) => {
-          const aObj = a as EnrichedMetadata & { _featured?: { rank: number } };
-          const bObj = b as EnrichedMetadata & { _featured?: { rank: number } };
-          return (aObj._featured?.rank ?? 0) - (bObj._featured?.rank ?? 0);
-        })
-        .slice(0, 6);
-
-      if (featured.length > 0) {
-        featuredByCategory[category] = featured;
-      }
-    }
+    // Database now returns ONLY featured items (6 per category)
+    // No need for filter/sort/slice - already optimized at database level
+    const featuredByCategory = enrichedData.categoryData as Record<string, EnrichedMetadata[]>;
 
     const initialData = enrichedData.categoryData as Record<string, unknown[]>;
 

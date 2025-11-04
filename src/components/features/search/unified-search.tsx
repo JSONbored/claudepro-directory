@@ -59,7 +59,7 @@ function UnifiedSearchComponent({
     setIsFilterOpen,
   } = useUnifiedSearch({
     initialSort: initialFilters?.sort || 'trending',
-    onFiltersChange,
+    ...(onFiltersChange && { onFiltersChange }),
   });
 
   const searchInputId = useId();
@@ -70,7 +70,7 @@ function UnifiedSearchComponent({
   useEffect(() => {
     const timer = setTimeout(() => {
       const sanitized = sanitizers.sanitizeSearchQuerySync(localSearchQuery);
-      onSearch(sanitized);
+      onSearch?.(sanitized);
     }, 150);
 
     return () => clearTimeout(timer);

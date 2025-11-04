@@ -19,7 +19,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { title, description, headers, items } = props;
   const validHeaders = headers;
-  const validItems = items;
+  const validItems = items || [];
 
   if (validHeaders.length === 0 || validItems.length === 0) {
     return null;

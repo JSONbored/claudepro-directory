@@ -1,5 +1,5 @@
 /**
- * Shared schemas used across multiple domains (categories, guide subcategories)
+ * Shared schemas - Derived from database enum types for single source of truth
  */
 
 import { z } from 'zod';
@@ -8,7 +8,8 @@ import type { Enums } from '@/src/types/database.types';
 
 export type { CategoryId } from '@/src/lib/config/category-config';
 
-export const categoryIdSchema = z.enum([
+// Derive Zod schema from database enum type (validates user input against DB enum)
+const contentCategoryValues: readonly Enums<'content_category'>[] = [
   'agents',
   'mcp',
   'rules',
@@ -20,7 +21,11 @@ export const categoryIdSchema = z.enum([
   'guides',
   'jobs',
   'changelog',
-] as const satisfies readonly Enums<'content_category'>[]);
+] as const;
+
+export const categoryIdSchema = z.enum(
+  contentCategoryValues as [Enums<'content_category'>, ...Enums<'content_category'>[]]
+);
 
 // Static array - MUST NOT call async getCacheableCategoryIds() at module load time
 // This would trigger database queries during middleware initialization → 504 timeout
@@ -41,14 +46,18 @@ export const cacheableCategorySchema = z.enum([...CACHEABLE_CATEGORIES] as [
   ...CategoryId[],
 ]);
 
-export const GUIDE_SUBCATEGORIES = [
+// Derive from database enum type
+const guideSubcategoryValues: readonly Enums<'guide_subcategory'>[] = [
   'tutorials',
   'comparisons',
   'workflows',
   'use-cases',
   'troubleshooting',
-] as const satisfies readonly Enums<'guide_subcategory'>[];
+] as const;
 
+export const GUIDE_SUBCATEGORIES = guideSubcategoryValues;
 export type GuideSubcategory = (typeof GUIDE_SUBCATEGORIES)[number];
 
-export const guideSubcategorySchema = z.enum(GUIDE_SUBCATEGORIES);
+export const guideSubcategorySchema = z.enum(
+  guideSubcategoryValues as [Enums<'guide_subcategory'>, ...Enums<'guide_subcategory'>[]]
+);

@@ -56,7 +56,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
             Trending This Week
           </h2>
           <UnifiedCardGrid
-            items={trending}
+            items={trending || []}
             variant="list"
             emptyMessage="No trending content available yet. Check back soon!"
             ariaLabel="Trending content"
@@ -96,7 +96,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
             Most Popular
           </h2>
           <UnifiedCardGrid
-            items={popular}
+            items={popular || []}
             variant="list"
             emptyMessage="No popular content available yet. Check back soon!"
             ariaLabel="Popular content"
@@ -125,7 +125,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
             Recently Added
           </h2>
           <UnifiedCardGrid
-            items={recent}
+            items={recent || []}
             variant="list"
             emptyMessage="No recent content available yet. Check back soon!"
             ariaLabel="Recent content"

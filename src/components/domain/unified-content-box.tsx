@@ -8,15 +8,7 @@ import Script from 'next/script';
 import { useCallback, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import {
-  AlertTriangle,
-  CheckCircle,
-  ChevronDown,
-  ChevronUp,
-  Info,
-  Star,
-  Zap,
-} from '@/src/lib/icons';
+import { AlertTriangle, CheckCircle, ChevronDown, ChevronUp, Info, Zap } from '@/src/lib/icons';
 import type {
   AccordionProps,
   CalloutProps,
@@ -152,7 +144,7 @@ function AccordionBox(props: AccordionVariant) {
 function FAQBox(props: FAQVariant) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { questions, title, description } = props;
-  const validQuestions = questions;
+  const validQuestions = questions || [];
 
   if (validQuestions.length === 0) {
     return null;
@@ -162,8 +154,8 @@ function FAQBox(props: FAQVariant) {
   const faqPageSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage' as const,
-    name: title,
-    description: description || `Frequently asked questions about ${title}`,
+    name: title || 'FAQ',
+    description: description || `Frequently asked questions about ${title || 'this topic'}`,
     mainEntity: validQuestions.map((faq) => ({
       '@type': 'Question' as const,
       name: faq.question,
@@ -175,7 +167,7 @@ function FAQBox(props: FAQVariant) {
   };
 
   // Generate unique ID based on title to prevent duplicates
-  const scriptId = `faq-structured-data-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+  const scriptId = `faq-structured-data-${(title || 'faq').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
   return (
     <>
@@ -225,31 +217,29 @@ function InfoBoxComponent(props: InfoBoxVariant) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { title, children, variant } = props;
 
-  const variantStyles = {
-    default: 'border-border bg-card',
-    important: 'border-primary bg-primary/5',
-    success: 'border-green-500 bg-green-500/5',
-    warning: 'border-yellow-500 bg-yellow-500/5',
+  const variantStyles: Record<'info' | 'warning' | 'success' | 'error', string> = {
     info: 'border-blue-500 bg-blue-500/5',
+    warning: 'border-yellow-500 bg-yellow-500/5',
+    success: 'border-green-500 bg-green-500/5',
+    error: 'border-red-500 bg-red-500/5',
   };
 
-  const iconMap = {
-    default: <Info className="h-5 w-5" />,
-    important: <Star className="h-5 w-5 text-primary" />,
-    success: <CheckCircle className="h-5 w-5 text-green-500" />,
-    warning: <AlertTriangle className="h-5 w-5 text-yellow-500" />,
+  const iconMap: Record<'info' | 'warning' | 'success' | 'error', React.ReactElement> = {
     info: <Info className="h-5 w-5 text-blue-500" />,
+    warning: <AlertTriangle className="h-5 w-5 text-yellow-500" />,
+    success: <CheckCircle className="h-5 w-5 text-green-500" />,
+    error: <AlertTriangle className="h-5 w-5 text-red-500" />,
   };
 
   return (
     <div
       itemScope
       itemType="https://schema.org/Note"
-      className={cn('my-6 rounded-r-lg border-l-4 p-6', variantStyles[variant])}
+      className={cn('my-6 rounded-r-lg border-l-4 p-6', variantStyles[variant || 'info'])}
     >
       {title && (
         <div className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, 'mb-3')}>
-          {iconMap[variant]}
+          {iconMap[variant || 'info']}
           <h4 className="font-semibold text-foreground" itemProp="name">
             {title}
           </h4>

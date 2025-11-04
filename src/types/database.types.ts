@@ -1744,7 +1744,7 @@ export type Database = {
           salary: string | null;
           search_vector: unknown;
           slug: string;
-          status: string | null;
+          status: Database['public']['Enums']['job_status'];
           tags: Json;
           title: string;
           type: string;
@@ -1784,7 +1784,7 @@ export type Database = {
           salary?: string | null;
           search_vector?: unknown;
           slug?: string;
-          status?: string | null;
+          status?: Database['public']['Enums']['job_status'];
           tags?: Json;
           title: string;
           type: string;
@@ -1824,7 +1824,7 @@ export type Database = {
           salary?: string | null;
           search_vector?: unknown;
           slug?: string;
-          status?: string | null;
+          status?: Database['public']['Enums']['job_status'];
           tags?: Json;
           title?: string;
           type?: string;
@@ -1929,7 +1929,7 @@ export type Database = {
           ip_address: unknown;
           last_email_sent_at: string | null;
           referrer: string | null;
-          source: string | null;
+          source: Database['public']['Enums']['newsletter_source'] | null;
           status: string;
           subscribed_at: string | null;
           unsubscribed_at: string | null;
@@ -1950,7 +1950,7 @@ export type Database = {
           ip_address?: unknown;
           last_email_sent_at?: string | null;
           referrer?: string | null;
-          source?: string | null;
+          source?: Database['public']['Enums']['newsletter_source'] | null;
           status?: string;
           subscribed_at?: string | null;
           unsubscribed_at?: string | null;
@@ -1971,7 +1971,7 @@ export type Database = {
           ip_address?: unknown;
           last_email_sent_at?: string | null;
           referrer?: string | null;
-          source?: string | null;
+          source?: Database['public']['Enums']['newsletter_source'] | null;
           status?: string;
           subscribed_at?: string | null;
           unsubscribed_at?: string | null;
@@ -4786,7 +4786,7 @@ export type Database = {
           salary: string | null;
           search_vector: unknown;
           slug: string;
-          status: string | null;
+          status: Database['public']['Enums']['job_status'];
           tags: Json;
           title: string;
           type: string;
@@ -4869,6 +4869,12 @@ export type Database = {
         Args: { p_category_ids: string[]; p_week_start?: string };
         Returns: Json;
       };
+      get_homepage_featured_only:
+        | {
+            Args: { p_all_configs_limit?: number; p_category_ids: string[] };
+            Returns: Json;
+          }
+        | { Args: { p_category_ids: string[] }; Returns: Json };
       get_index_usage_trends: {
         Args: { p_weeks_lookback?: number };
         Returns: {
@@ -4915,7 +4921,7 @@ export type Database = {
           salary: string | null;
           search_vector: unknown;
           slug: string;
-          status: string | null;
+          status: Database['public']['Enums']['job_status'];
           tags: Json;
           title: string;
           type: string;
@@ -5477,12 +5483,13 @@ export type Database = {
           p_tags?: string[];
         };
         Returns: {
+          _featured: Json;
           author: string;
           author_profile_url: string;
           bookmark_count: number;
           category: string;
           combined_score: number;
-          copy_count: number;
+          copyCount: number;
           created_at: string;
           date_added: string;
           description: string;
@@ -5493,11 +5500,12 @@ export type Database = {
           id: string;
           relevance_score: number;
           slug: string;
+          source: string;
           tags: string[];
           title: string;
           updated_at: string;
           use_cases: Json;
-          view_count: number;
+          viewCount: number;
         }[];
       };
       search_jobs: {
@@ -5533,7 +5541,7 @@ export type Database = {
           salary: string | null;
           search_vector: unknown;
           slug: string;
-          status: string | null;
+          status: Database['public']['Enums']['job_status'];
           tags: Json;
           title: string;
           type: string;
@@ -5733,7 +5741,10 @@ export type Database = {
         | 'filter'
         | 'screenshot'
         | 'share'
-        | 'embed_generated';
+        | 'embed_generated'
+        | 'download';
+      job_status: 'draft' | 'pending_review' | 'active' | 'expired' | 'rejected';
+      newsletter_source: 'footer' | 'homepage' | 'modal' | 'content_page' | 'inline' | 'post_copy';
       notification_priority: 'high' | 'medium' | 'low';
       notification_type: 'announcement' | 'feedback';
       sort_direction: 'asc' | 'desc';
@@ -5939,7 +5950,10 @@ export const Constants = {
         'screenshot',
         'share',
         'embed_generated',
+        'download',
       ],
+      job_status: ['draft', 'pending_review', 'active', 'expired', 'rejected'],
+      newsletter_source: ['footer', 'homepage', 'modal', 'content_page', 'inline', 'post_copy'],
       notification_priority: ['high', 'medium', 'low'],
       notification_type: ['announcement', 'feedback'],
       sort_direction: ['asc', 'desc'],

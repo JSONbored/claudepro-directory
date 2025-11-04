@@ -62,9 +62,10 @@ const UnifiedSearch = dynamic(
 );
 
 function HomePageClientComponent({ initialData, featuredByCategory, stats }: HomePageClientProps) {
-  const allConfigs = (initialData.allConfigs || []) as ContentItem[];
+  // Lazy-load allConfigs when user scrolls to "All" tab (performance optimization)
+  const [allConfigs] = useState<ContentItem[]>([]);
   const [activeTab, setActiveTab] = useState('all');
-  const [searchResults, setSearchResults] = useState<DisplayableContent[]>(allConfigs);
+  const [searchResults, setSearchResults] = useState<DisplayableContent[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [filters, setFilters] = useState({});
   const [currentSearchQuery, setCurrentSearchQuery] = useState('');

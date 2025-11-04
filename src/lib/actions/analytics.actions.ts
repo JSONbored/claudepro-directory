@@ -378,19 +378,8 @@ export const trackInteraction = rateLimitedAction
     z.object({
       content_type: z.string(),
       content_slug: z.string(),
-      interaction_type: z.enum([
-        'view',
-        'copy',
-        'bookmark',
-        'click',
-        'time_spent',
-        'search',
-        'filter',
-        'screenshot',
-        'share',
-        'embed_generated',
-      ]),
-      session_id: z.string().uuid().optional(),
+      interaction_type: z.string(),
+      session_id: z.string().optional(),
       metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
     })
   )

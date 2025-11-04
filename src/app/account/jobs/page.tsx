@@ -136,7 +136,7 @@ export default async function MyJobsPage() {
                     </Button>
                   )}
 
-                  {(job.status === 'active' || job.status === 'paused') && (
+                  {job.status === 'active' && (
                     <UnifiedButton
                       variant="job-toggle"
                       jobId={job.id}

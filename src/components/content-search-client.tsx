@@ -71,7 +71,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
       {/* Unified Search & Filters */}
       <ErrorBoundary>
         <UnifiedSearch
-          placeholder={searchPlaceholder}
+          {...(searchPlaceholder && { placeholder: searchPlaceholder })}
           onSearch={handleSearch}
           onFiltersChange={handleFiltersChange}
           filters={filters}

@@ -74,7 +74,7 @@ export const createCollection = authedAction
  */
 export const updateCollection = authedAction
   .metadata({ actionName: 'updateCollection', category: 'user' })
-  .schema(collectionInsertTransformSchema.extend({ id: z.string().uuid() }))
+  .schema(collectionInsertTransformSchema.extend({ id: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
       const supabase = await createClient();
@@ -114,7 +114,7 @@ export const updateCollection = authedAction
  */
 export const deleteCollection = authedAction
   .metadata({ actionName: 'deleteCollection', category: 'user' })
-  .schema(z.object({ id: z.string().uuid() }))
+  .schema(z.object({ id: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
       const supabase = await createClient();
@@ -172,7 +172,7 @@ export const addItemToCollection = authedAction
  */
 export const removeItemFromCollection = authedAction
   .metadata({ actionName: 'removeItemFromCollection', category: 'user' })
-  .schema(z.object({ id: z.string().uuid(), collection_id: z.string().uuid() }))
+  .schema(z.object({ id: z.string(), collection_id: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     const supabase = await createClient();
     const { data, error } = await supabase.rpc('manage_collection', {
@@ -605,7 +605,7 @@ export const updatePost = authedAction
  */
 export const deletePost = authedAction
   .metadata({ actionName: 'deletePost', category: 'form' })
-  .schema(z.object({ id: z.string().uuid() }))
+  .schema(z.object({ id: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
       const supabase = await createClient();
@@ -634,7 +634,7 @@ export const deletePost = authedAction
 
 export const votePost = authedAction
   .metadata({ actionName: 'votePost', category: 'user' })
-  .schema(z.object({ post_id: z.string().uuid(), action: z.enum(['vote', 'unvote']) }))
+  .schema(z.object({ post_id: z.string(), action: z.enum(['vote', 'unvote']) }))
   .action(async ({ parsedInput, ctx }) => {
     const supabase = await createClient();
     const { data, error } = await supabase.rpc('toggle_post_vote', {
@@ -654,7 +654,7 @@ export const createComment = authedAction
   .metadata({ actionName: 'createComment', category: 'form' })
   .schema(
     z.object({
-      post_id: z.string().uuid(),
+      post_id: z.string(),
       content: nonEmptyString.min(1).max(2000),
     })
   )
@@ -677,7 +677,7 @@ export const createComment = authedAction
  */
 export const deleteComment = authedAction
   .metadata({ actionName: 'deleteComment', category: 'form' })
-  .schema(z.object({ id: z.string().uuid() }))
+  .schema(z.object({ id: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     const supabase = await createClient();
     const { data, error } = await supabase.rpc('manage_comment', {
@@ -704,7 +704,7 @@ export const trackUsage = rateLimitedAction
   .metadata({ actionName: 'trackUsage', category: 'content' })
   .schema(
     z.object({
-      content_id: z.string().uuid(),
+      content_id: z.string(),
       action_type: z.enum(['copy', 'download_zip', 'download_markdown', 'llmstxt']),
     })
   )

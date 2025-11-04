@@ -18,21 +18,6 @@ import type {
   TextFieldDefinition,
 } from '@/src/lib/forms/types';
 import { SUBMISSION_CONTENT_TYPES } from '@/src/lib/forms/types';
-import {
-  BookOpen,
-  Code,
-  ExternalLink,
-  Github,
-  Lightbulb,
-  type LucideIcon,
-  Rocket,
-  Send,
-  Server,
-  Sparkles,
-  Tag,
-  Tags,
-  Terminal,
-} from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Database } from '@/src/types/database.types';
@@ -42,21 +27,6 @@ type RpcRow =
 type RpcRows = Database['public']['Functions']['get_form_fields_for_content_type']['Returns'];
 
 type FieldProperties = Record<string, unknown>;
-
-const FORM_FIELD_ICON_MAP: Record<string, LucideIcon> = {
-  BookOpen,
-  Code,
-  ExternalLink,
-  Github,
-  Lightbulb,
-  Rocket,
-  Send,
-  Server,
-  Sparkles,
-  Tag,
-  Tags,
-  Terminal,
-};
 
 const ICON_POSITION_VALUES: readonly IconPosition[] = ['left', 'right'] as const;
 const GRID_COLUMN_VALUES: readonly GridColumn[] = ['full', 'half', 'third', 'two-thirds'] as const;
@@ -119,11 +89,6 @@ function mapIconPosition(value: RpcRow['icon_position']): IconPosition | undefin
   return undefined;
 }
 
-function mapIcon(iconName: RpcRow['icon']): LucideIcon | undefined {
-  if (!iconName) return undefined;
-  return FORM_FIELD_ICON_MAP[iconName] ?? undefined;
-}
-
 function mapSelectOptions(selectOptions: RpcRow['select_options']) {
   if (!(selectOptions && Array.isArray(selectOptions))) return [];
   return selectOptions
@@ -146,7 +111,7 @@ function mapField(row: RpcRow): FieldDefinition | null {
     helpText: row.help_text ?? undefined,
     required: row.required ?? false,
     gridColumn: mapGridColumn(row.grid_column),
-    icon: mapIcon(row.icon),
+    iconName: row.icon ?? undefined,
     iconPosition: mapIconPosition(row.icon_position),
   };
 

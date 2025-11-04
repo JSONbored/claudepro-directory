@@ -220,7 +220,7 @@ function FeatureGridVariant(props: FeatureGridProps) {
         )}
       </div>
 
-      <div className={`grid grid-cols-1 ${gridCols[columns]} gap-6`}>
+      <div className={`grid grid-cols-1 ${gridCols[columns || 3]} gap-6`}>
         {validFeatures.map((feature, index) => (
           <Card
             key={feature.title}
@@ -372,7 +372,7 @@ function ExpertQuoteVariant(props: ExpertQuoteProps) {
 function QuickReferenceVariant(props: QuickReferenceProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { title, description, items, columns } = props;
-  const validItems = items;
+  const validItems = items || [];
 
   if (validItems.length === 0) {
     return null;
@@ -428,7 +428,7 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
 function ContentTabsVariant(props: ContentTabsProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { items, title, description, defaultValue } = props;
-  const validItems = items;
+  const validItems = items || [];
 
   if (validItems.length === 0) {
     return null;

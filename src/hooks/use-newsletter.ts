@@ -10,8 +10,9 @@ import { subscribeToNewsletter } from '@/src/lib/actions/newsletter-signup';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { logger } from '@/src/lib/logger';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { Enums } from '@/src/types/database.types';
 
-export type NewsletterSource = 'footer' | 'homepage' | 'modal' | 'content_page' | 'inline';
+export type NewsletterSource = Enums<'newsletter_source'>;
 
 function getEmailSubscriptionEvent(source: NewsletterSource): string {
   const eventMap: Record<NewsletterSource, string> = {
@@ -20,6 +21,7 @@ function getEmailSubscriptionEvent(source: NewsletterSource): string {
     modal: 'email_subscribed_modal',
     content_page: 'email_subscribed_content_page',
     inline: 'email_subscribed_inline',
+    post_copy: 'email_subscribed_post_copy',
   };
   return eventMap[source];
 }

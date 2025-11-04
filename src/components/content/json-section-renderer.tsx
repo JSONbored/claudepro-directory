@@ -409,7 +409,7 @@ function render_section(section: Section, index: number): React.ReactNode {
         <div key={key} id={section.id} className={section.className}>
           <UnifiedContentBox
             contentType="accordion"
-            title={section.title}
+            {...(section.title && { title: section.title })}
             description={section.description || ''}
             items={section.items.map((item: AccordionItem) => ({
               title: item.title,
@@ -431,7 +431,7 @@ function render_section(section: Section, index: number): React.ReactNode {
             questions={section.questions.map((q: FaqQuestion) => ({
               question: q.question,
               answer: q.answer,
-              category: q.category,
+              ...(q.category && { category: q.category }),
             }))}
           />
         </div>

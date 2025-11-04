@@ -62,10 +62,10 @@ export function ErrorTable(props: ErrorTableProps) {
                     <UnifiedBadge
                       variant="base"
                       style="secondary"
-                      className={severityColors[error.severity]}
+                      className={severityColors[error.severity || 'info']}
                     >
                       <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                        {severityIcons[error.severity]}
+                        {severityIcons[error.severity || 'info']}
                         {error.severity}
                       </span>
                     </UnifiedBadge>

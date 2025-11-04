@@ -133,6 +133,24 @@ export const publicInteractionTypeSchema = z.union([
   z.literal('screenshot'),
   z.literal('share'),
   z.literal('embed_generated'),
+  z.literal('download'),
+]);
+
+export const publicJobStatusSchema = z.union([
+  z.literal('draft'),
+  z.literal('pending_review'),
+  z.literal('active'),
+  z.literal('expired'),
+  z.literal('rejected'),
+]);
+
+export const publicNewsletterSourceSchema = z.union([
+  z.literal('footer'),
+  z.literal('homepage'),
+  z.literal('modal'),
+  z.literal('content_page'),
+  z.literal('inline'),
+  z.literal('post_copy'),
 ]);
 
 export const publicNotificationPrioritySchema = z.union([
@@ -1977,7 +1995,7 @@ export const publicJobsRowSchema = z.object({
   salary: z.string().nullable(),
   search_vector: z.unknown(),
   slug: z.string(),
-  status: z.string().nullable(),
+  status: publicJobStatusSchema,
   tags: jsonSchema,
   title: z.string(),
   type: z.string(),
@@ -2018,7 +2036,7 @@ export const publicJobsInsertSchema = z.object({
   salary: z.string().optional().nullable(),
   search_vector: z.unknown().optional(),
   slug: z.string().optional(),
-  status: z.string().optional().nullable(),
+  status: publicJobStatusSchema.optional(),
   tags: jsonSchema.optional(),
   title: z.string(),
   type: z.string(),
@@ -2059,7 +2077,7 @@ export const publicJobsUpdateSchema = z.object({
   salary: z.string().optional().nullable(),
   search_vector: z.unknown().optional(),
   slug: z.string().optional(),
-  status: z.string().optional().nullable(),
+  status: publicJobStatusSchema.optional(),
   tags: jsonSchema.optional(),
   title: z.string().optional(),
   type: z.string().optional(),
@@ -2164,7 +2182,7 @@ export const publicNewsletterSubscriptionsRowSchema = z.object({
   ip_address: z.unknown(),
   last_email_sent_at: z.string().nullable(),
   referrer: z.string().nullable(),
-  source: z.string().nullable(),
+  source: publicNewsletterSourceSchema.nullable(),
   status: z.string(),
   subscribed_at: z.string().nullable(),
   unsubscribed_at: z.string().nullable(),
@@ -2186,7 +2204,7 @@ export const publicNewsletterSubscriptionsInsertSchema = z.object({
   ip_address: z.unknown().optional(),
   last_email_sent_at: z.string().optional().nullable(),
   referrer: z.string().optional().nullable(),
-  source: z.string().optional().nullable(),
+  source: publicNewsletterSourceSchema.optional().nullable(),
   status: z.string().optional(),
   subscribed_at: z.string().optional().nullable(),
   unsubscribed_at: z.string().optional().nullable(),
@@ -2208,7 +2226,7 @@ export const publicNewsletterSubscriptionsUpdateSchema = z.object({
   ip_address: z.unknown().optional(),
   last_email_sent_at: z.string().optional().nullable(),
   referrer: z.string().optional().nullable(),
-  source: z.string().optional().nullable(),
+  source: publicNewsletterSourceSchema.optional().nullable(),
   status: z.string().optional(),
   subscribed_at: z.string().optional().nullable(),
   unsubscribed_at: z.string().optional().nullable(),
@@ -5078,7 +5096,7 @@ export const publicGetFeaturedJobsReturnsSchema = z.array(
     salary: z.string().nullable(),
     search_vector: z.unknown(),
     slug: z.string(),
-    status: z.string().nullable(),
+    status: publicJobStatusSchema,
     tags: jsonSchema,
     title: z.string(),
     type: z.string(),
@@ -5242,7 +5260,7 @@ export const publicGetJobsByCategoryReturnsSchema = z.array(
     salary: z.string().nullable(),
     search_vector: z.unknown(),
     slug: z.string(),
-    status: z.string().nullable(),
+    status: publicJobStatusSchema,
     tags: jsonSchema,
     title: z.string(),
     type: z.string(),
@@ -6014,12 +6032,13 @@ export const publicSearchContentOptimizedArgsSchema = z.object({
 
 export const publicSearchContentOptimizedReturnsSchema = z.array(
   z.object({
+    _featured: jsonSchema,
     author: z.string(),
     author_profile_url: z.string(),
     bookmark_count: z.number(),
     category: z.string(),
     combined_score: z.number(),
-    copy_count: z.number(),
+    copyCount: z.number(),
     created_at: z.string(),
     date_added: z.string(),
     description: z.string(),
@@ -6030,11 +6049,12 @@ export const publicSearchContentOptimizedReturnsSchema = z.array(
     id: z.string(),
     relevance_score: z.number(),
     slug: z.string(),
+    source: z.string(),
     tags: z.array(z.string()),
     title: z.string(),
     updated_at: z.string(),
     use_cases: jsonSchema,
-    view_count: z.number(),
+    viewCount: z.number(),
   })
 );
 
@@ -6075,7 +6095,7 @@ export const publicSearchJobsReturnsSchema = z.array(
     salary: z.string().nullable(),
     search_vector: z.unknown(),
     slug: z.string(),
-    status: z.string().nullable(),
+    status: publicJobStatusSchema,
     tags: jsonSchema,
     title: z.string(),
     type: z.string(),
