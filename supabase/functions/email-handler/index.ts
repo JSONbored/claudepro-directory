@@ -257,31 +257,14 @@ function getPreviousWeekStart(): string {
 }
 
 async function getAllSubscribers(): Promise<string[]> {
-  const RESEND_AUDIENCE_ID = Deno.env.get('RESEND_AUDIENCE_ID');
-  if (!RESEND_AUDIENCE_ID) return [];
+  const { data, error } = await supabase.rpc('get_active_subscribers');
 
-  const subscribers: string[] = [];
-  let hasMore = true;
-  let page = 1;
-
-  while (hasMore) {
-    const response = await fetch(
-      `https://api.resend.com/audiences/${RESEND_AUDIENCE_ID}/contacts?page=${page}`,
-      { headers: { Authorization: `Bearer ${RESEND_ENV.apiKey}` } }
-    );
-
-    const json: any = await response.json();
-    const contacts = json.data?.data || [];
-
-    if (contacts.length === 0) {
-      hasMore = false;
-    } else {
-      subscribers.push(...contacts.map((c: any) => c.email));
-      page++;
-    }
+  if (error) {
+    console.error('Failed to fetch subscribers from database:', error);
+    return [];
   }
 
-  return subscribers;
+  return data || [];
 }
 
 async function sendBatchDigest(subscribers: string[], digestData: any) {

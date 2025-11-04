@@ -144,94 +144,78 @@ type Example = CodeExample | RuleExample | string;
  */
 import type { FullContentItem } from '@/src/lib/content/supabase-content-loader';
 
+/**
+ * LLM Content Builder - Formats database content for llms.txt API routes
+ * Accesses metadata JSONB for installation/configuration/security/troubleshooting
+ */
 export function buildRichContent(item: ContentItem | FullContentItem): string {
   const sections: string[] = [];
 
-  // Extract fields from database (now pre-populated by triggers)
-  // No generators needed - all fields are populated in PostgreSQL
+  const metadata =
+    'metadata' in item && item.metadata ? (item.metadata as Record<string, unknown>) : null;
+
   const features = 'features' in item && Array.isArray(item.features) ? item.features : [];
+  const useCases = 'use_cases' in item && Array.isArray(item.use_cases) ? item.use_cases : [];
+  const examples = 'examples' in item && item.examples ? item.examples : null;
 
-  const requirements =
-    'requirements' in item && Array.isArray(item.requirements)
-      ? (item.requirements as string[])
-      : [];
+  const installation = metadata?.installation || null;
+  const configuration = metadata?.configuration || null;
+  const security = Array.isArray(metadata?.security) ? (metadata.security as string[]) : [];
+  const troubleshooting = Array.isArray(metadata?.troubleshooting) ? metadata.troubleshooting : [];
+  const requirements = Array.isArray(metadata?.requirements)
+    ? (metadata.requirements as string[])
+    : [];
+  const preview = metadata?.preview as string | undefined;
 
-  const useCases =
-    'use_cases' in item && Array.isArray(item.use_cases) ? (item.use_cases as string[]) : [];
+  const content = 'content' in item && typeof item.content === 'string' ? item.content : null;
 
-  const troubleshooting =
-    'troubleshooting' in item && Array.isArray(item.troubleshooting) ? item.troubleshooting : [];
-
-  const installation = 'installation' in item && item.installation ? item.installation : null;
-
-  // 1. MAIN CONTENT SECTION (matches UnifiedDetailPage lines 148-155)
-  // The primary content field - agents, commands, rules have markdown content
-  // NOTE: Do NOT add "CONTENT" header here - generator.ts adds it when converting to plain text
-  // We pass the raw content and buildRichContent() output to generator as the 'content' field
-  // Generator will add: "CONTENT\n-------\n" + markdownToPlainText(content)
-  if ('content' in item && typeof item.content === 'string' && item.content.trim().length > 0) {
-    sections.push(item.content.trim());
+  if (content?.trim()) {
+    sections.push(content.trim());
   }
 
-  // 2. FEATURES SECTION
   if (features.length > 0) {
     sections.push(formatBulletList('KEY FEATURES', features));
   }
 
-  // 3. REQUIREMENTS SECTION
   if (requirements.length > 0) {
     sections.push(formatBulletList('REQUIREMENTS', requirements));
   }
 
-  // 4. INSTALLATION SECTION
   if (installation) {
     sections.push(formatInstallation(installation));
   }
 
-  // 5. CONFIGURATION SECTION
-  if ('configuration' in item && item.configuration) {
+  if (configuration) {
     sections.push(
-      formatConfiguration(item.configuration as Record<string, unknown>, item.category || '')
+      formatConfiguration(configuration as Record<string, unknown>, item.category || '')
     );
   }
 
-  // 6. USE CASES SECTION
   if (useCases.length > 0) {
     sections.push(formatBulletList('USE CASES', useCases));
   }
 
-  // 7. SECURITY SECTION (MCP-specific)
-  if ('security' in item && Array.isArray(item.security) && item.security.length > 0) {
-    sections.push(formatBulletList('SECURITY BEST PRACTICES', item.security as string[]));
+  if (security.length > 0) {
+    sections.push(formatBulletList('SECURITY BEST PRACTICES', security));
   }
 
-  // 8. TROUBLESHOOTING SECTION
   if (troubleshooting.length > 0) {
     sections.push(formatTroubleshooting(troubleshooting));
   }
 
-  // 9. EXAMPLES SECTION
-  if ('examples' in item && Array.isArray(item.examples) && item.examples.length > 0) {
-    // Type assertion: item.examples from baseUsageExampleSchema matches our Example type
-    // Safe because Example = CodeExample | RuleExample | string, and baseUsageExampleSchema = CodeExample
-    sections.push(formatExamples(item.examples as Example[], item.category));
+  if (examples && Array.isArray(examples) && examples.length > 0) {
+    sections.push(formatExamples(examples as Example[], item.category));
   }
 
-  // 10. TECHNICAL DETAILS SECTION (sidebar content - metadata, links, etc.)
   sections.push(buildTechnicalDetails(item));
 
-  // 11. PREVIEW SECTION (statuslines only - rendered above content in actual page)
-  if (item.category === 'statuslines' && 'preview' in item && item.preview) {
-    sections.push(`PREVIEW\n-------\n\n${item.preview}`);
+  if (item.category === 'statuslines' && preview) {
+    sections.push(`PREVIEW\n-------\n\n${preview}`);
   }
 
-  // Join all sections with double newlines
   return sections.filter((s) => s.length > 0).join('\n\n');
 }
 
-/**
- * Format array as bullet list with title
- */
 function formatBulletList(title: string, items: string[]): string {
   const lines = [title, '-'.repeat(title.length), ''];
   for (const item of items) {
@@ -240,10 +224,6 @@ function formatBulletList(title: string, items: string[]): string {
   return lines.join('\n');
 }
 
-/**
- * Type guard for Installation type
- * Validates that value is a plain object (not null, array, Date, or RegExp)
- */
 function isInstallation(value: unknown): value is Installation {
   return (
     value !== null &&
@@ -254,9 +234,6 @@ function isInstallation(value: unknown): value is Installation {
   );
 }
 
-/**
- * Format installation instructions with type-safe handling
- */
 function formatInstallation(installation: unknown): string {
   if (!isInstallation(installation)) {
     return '';
@@ -265,7 +242,6 @@ function formatInstallation(installation: unknown): string {
   const inst = installation as Installation;
   const lines = ['INSTALLATION', '------------', ''];
 
-  // Claude Desktop installation
   if (inst.claudeDesktop) {
     lines.push('CLAUDE DESKTOP:', '');
 
@@ -285,16 +261,12 @@ function formatInstallation(installation: unknown): string {
     lines.push('');
   }
 
-  // Claude Code installation
   if (inst.claudeCode) {
     lines.push('CLAUDE CODE:', '');
 
-    // For MCP servers, claudeCode is a string (simple command)
     if (typeof inst.claudeCode === 'string') {
       lines.push(inst.claudeCode);
-    }
-    // For hooks/commands, claudeCode has steps
-    else if (inst.claudeCode.steps) {
+    } else if (inst.claudeCode.steps) {
       inst.claudeCode.steps.forEach((step, idx) => {
         lines.push(`${idx + 1}. ${step}`);
       });
@@ -303,7 +275,6 @@ function formatInstallation(installation: unknown): string {
     lines.push('');
   }
 
-  // Requirements
   if (inst.requirements) {
     lines.push('Requirements:');
     for (const req of inst.requirements) {
@@ -315,76 +286,25 @@ function formatInstallation(installation: unknown): string {
   return lines.join('\n');
 }
 
-/**
- * Configuration formatter function type
- * Takes raw config object and returns formatted text output
- */
 type ConfigFormatter = (config: Record<string, unknown>) => string;
 
-/**
- * Configuration formatter registry - eliminates switch/case pattern
- *
- * Registry-driven approach for mapping categories to formatters.
- * Replaces 14-line switch statement with type-safe lookup.
- *
- * Architecture:
- * - Partial mapping allows categories without configuration sections
- * - Type-safe with explicit formatter signatures
- * - Shared formatter for agents/commands/rules (formatAiConfiguration)
- * - Zero updates needed when adding non-config categories
- *
- * @see formatMcpConfiguration - MCP server config formatter
- * @see formatHookConfiguration - Hook script config formatter
- * @see formatStatuslineConfiguration - Statusline display config formatter
- * @see formatAiConfiguration - AI model config formatter (agents/commands/rules)
- */
 const CONFIG_FORMATTERS: Partial<Record<string, ConfigFormatter>> = {
   mcp: (config) => formatMcpConfiguration(config as MCPConfiguration),
   hooks: (config) => formatHookConfiguration(config as HookConfiguration),
   statuslines: (config) => formatStatuslineConfiguration(config as StatuslineConfiguration),
-  // Shared AI configuration formatter for content types with temperature/maxTokens
   agents: (config) => formatAiConfiguration(config as AIConfiguration),
   commands: (config) => formatAiConfiguration(config as AIConfiguration),
   rules: (config) => formatAiConfiguration(config as AIConfiguration),
 };
 
-/**
- * Format configuration based on content type using registry-driven approach
- *
- * Modern 2025 Architecture:
- * - Configuration-driven: Uses CONFIG_FORMATTERS registry
- * - Type-safe: Explicit formatter mapping
- * - Zero duplication: Eliminated 14-line switch statement
- * - Extensible: Add new formatters without modifying this function
- *
- * @param config - Configuration object to format
- * @param category - Content category identifier
- * @returns Formatted configuration text or empty string if no formatter
- *
- * @example
- * ```typescript
- * // MCP configuration
- * formatConfiguration({ claudeDesktop: {...} }, 'mcp')
- * // Returns: "CONFIGURATION\n-------------\n..."
- *
- * // Category without configuration
- * formatConfiguration({}, 'collections')
- * // Returns: ""
- * ```
- */
 function formatConfiguration(config: Record<string, unknown>, category: string): string {
   const formatter = CONFIG_FORMATTERS[category];
   return formatter ? formatter(config) : '';
 }
 
-/**
- * Format MCP server configuration with type safety
- * Internal: reads from 'mcp' field (consistent with schema)
- */
 function formatMcpConfiguration(config: MCPConfiguration): string {
   const lines = ['CONFIGURATION', '-------------', ''];
 
-  // Claude Desktop MCP Servers
   if (config.claudeDesktop?.mcp) {
     lines.push('Claude Desktop MCP Servers:', '');
 
@@ -459,20 +379,15 @@ function formatMcpConfiguration(config: MCPConfiguration): string {
   return lines.join('\n');
 }
 
-/**
- * Format hook configuration with script content and type safety
- */
 function formatHookConfiguration(config: HookConfiguration): string {
   const lines = ['CONFIGURATION', '-------------', ''];
 
-  // Hook Config
   if (config.hookConfig?.hooks) {
     lines.push('Hook Configuration:', '');
 
     for (const [hook_type, hookConfigValue] of Object.entries(config.hookConfig.hooks)) {
       lines.push(`Hook Type: ${hook_type}`);
 
-      // Handle both single config and array of configs
       const configs = Array.isArray(hookConfigValue) ? hookConfigValue : [hookConfigValue];
 
       for (const [idx, hook] of configs.entries()) {
