@@ -1189,6 +1189,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      content_templates: {
+        Row: {
+          active: boolean;
+          category: Database['public']['Enums']['content_category'];
+          created_at: string;
+          description: string;
+          display_order: number;
+          id: string;
+          is_featured: boolean;
+          name: string;
+          template_data: Json;
+          updated_at: string;
+          usage_count: number;
+        };
+        Insert: {
+          active?: boolean;
+          category: Database['public']['Enums']['content_category'];
+          created_at?: string;
+          description: string;
+          display_order?: number;
+          id?: string;
+          is_featured?: boolean;
+          name: string;
+          template_data: Json;
+          updated_at?: string;
+          usage_count?: number;
+        };
+        Update: {
+          active?: boolean;
+          category?: Database['public']['Enums']['content_category'];
+          created_at?: string;
+          description?: string;
+          display_order?: number;
+          id?: string;
+          is_featured?: boolean;
+          name?: string;
+          template_data?: Json;
+          updated_at?: string;
+          usage_count?: number;
+        };
+        Relationships: [];
+      };
       email_blocklist: {
         Row: {
           created_at: string;
@@ -4697,6 +4739,7 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_content_templates: { Args: { p_category: string }; Returns: Json };
       get_content_with_analytics:
         | {
             Args: { p_category?: string; p_limit?: number };

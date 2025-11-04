@@ -1435,6 +1435,48 @@ export const publicContentSubmissionsUpdateSchema = z.object({
   updated_at: z.string().optional(),
 });
 
+export const publicContentTemplatesRowSchema = z.object({
+  active: z.boolean(),
+  category: publicContentCategorySchema,
+  created_at: z.string(),
+  description: z.string(),
+  display_order: z.number(),
+  id: z.string(),
+  is_featured: z.boolean(),
+  name: z.string(),
+  template_data: jsonSchema,
+  updated_at: z.string(),
+  usage_count: z.number(),
+});
+
+export const publicContentTemplatesInsertSchema = z.object({
+  active: z.boolean().optional(),
+  category: publicContentCategorySchema,
+  created_at: z.string().optional(),
+  description: z.string(),
+  display_order: z.number().optional(),
+  id: z.string().optional(),
+  is_featured: z.boolean().optional(),
+  name: z.string(),
+  template_data: jsonSchema,
+  updated_at: z.string().optional(),
+  usage_count: z.number().optional(),
+});
+
+export const publicContentTemplatesUpdateSchema = z.object({
+  active: z.boolean().optional(),
+  category: publicContentCategorySchema.optional(),
+  created_at: z.string().optional(),
+  description: z.string().optional(),
+  display_order: z.number().optional(),
+  id: z.string().optional(),
+  is_featured: z.boolean().optional(),
+  name: z.string().optional(),
+  template_data: jsonSchema.optional(),
+  updated_at: z.string().optional(),
+  usage_count: z.number().optional(),
+});
+
 export const publicEmailBlocklistRowSchema = z.object({
   created_at: z.string(),
   email: z.string(),
@@ -5021,6 +5063,12 @@ export const publicGetContentPaginatedArgsSchema = z.object({
 });
 
 export const publicGetContentPaginatedReturnsSchema = jsonSchema;
+
+export const publicGetContentTemplatesArgsSchema = z.object({
+  p_category: z.string(),
+});
+
+export const publicGetContentTemplatesReturnsSchema = jsonSchema;
 
 export const publicGetDatabaseFingerprintArgsSchema = z.never();
 

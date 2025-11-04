@@ -161,51 +161,60 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
     if (descInput) descInput.value = template.description;
 
     const categoryInput = form.querySelector('[name="category"]') as HTMLInputElement;
-    if (categoryInput) categoryInput.value = template.category;
+    if (categoryInput && template.category) categoryInput.value = template.category;
 
     const tagsInput = form.querySelector('[name="tags"]') as HTMLInputElement;
-    if (tagsInput) tagsInput.value = template.tags;
+    if (tagsInput && template.tags) tagsInput.value = template.tags;
 
-    // Type-specific fields with TypeScript type narrowing
     if (template.type === 'agent') {
       const promptInput = form.querySelector('[name="systemPrompt"]') as HTMLTextAreaElement;
-      if (promptInput) promptInput.value = template.systemPrompt;
+      if (promptInput && typeof template.systemPrompt === 'string')
+        promptInput.value = template.systemPrompt;
 
       const tempInput = form.querySelector('[name="temperature"]') as HTMLInputElement;
-      if (tempInput) tempInput.value = template.temperature.toString();
+      if (tempInput && typeof template.temperature === 'number')
+        tempInput.value = template.temperature.toString();
 
       const tokensInput = form.querySelector('[name="maxTokens"]') as HTMLInputElement;
-      if (tokensInput) tokensInput.value = template.maxTokens.toString();
+      if (tokensInput && typeof template.maxTokens === 'number')
+        tokensInput.value = template.maxTokens.toString();
     }
 
     if (template.type === 'rules') {
       const rulesInput = form.querySelector('[name="rulesContent"]') as HTMLTextAreaElement;
-      if (rulesInput) rulesInput.value = template.rulesContent;
+      if (rulesInput && typeof template.rulesContent === 'string')
+        rulesInput.value = template.rulesContent;
 
       const tempInput = form.querySelector('[name="temperature"]') as HTMLInputElement;
-      if (tempInput) tempInput.value = template.temperature.toString();
+      if (tempInput && typeof template.temperature === 'number')
+        tempInput.value = template.temperature.toString();
 
       const tokensInput = form.querySelector('[name="maxTokens"]') as HTMLInputElement;
-      if (tokensInput) tokensInput.value = template.maxTokens.toString();
+      if (tokensInput && typeof template.maxTokens === 'number')
+        tokensInput.value = template.maxTokens.toString();
     }
 
     if (template.type === 'mcp') {
       const npmInput = form.querySelector('[name="npmPackage"]') as HTMLInputElement;
-      if (npmInput) npmInput.value = template.npmPackage;
+      if (npmInput && typeof template.npmPackage === 'string') npmInput.value = template.npmPackage;
 
       const typeInput = form.querySelector('[name="serverType"]') as HTMLSelectElement;
-      if (typeInput) typeInput.value = template.serverType;
+      if (typeInput && typeof template.serverType === 'string')
+        typeInput.value = template.serverType;
 
       const installInput = form.querySelector('[name="installCommand"]') as HTMLInputElement;
-      if (installInput) installInput.value = template.installCommand;
+      if (installInput && typeof template.installCommand === 'string')
+        installInput.value = template.installCommand;
 
       const configInput = form.querySelector('[name="configCommand"]') as HTMLInputElement;
-      if (configInput) configInput.value = template.configCommand;
+      if (configInput && typeof template.configCommand === 'string')
+        configInput.value = template.configCommand;
 
       const toolsInput = form.querySelector('[name="toolsDescription"]') as HTMLTextAreaElement;
-      if (toolsInput) toolsInput.value = template.toolsDescription;
+      if (toolsInput && typeof template.toolsDescription === 'string')
+        toolsInput.value = template.toolsDescription;
 
-      if (template.envVars) {
+      if (template.envVars && typeof template.envVars === 'string') {
         const envInput = form.querySelector('[name="envVars"]') as HTMLTextAreaElement;
         if (envInput) envInput.value = template.envVars;
       }
@@ -213,7 +222,8 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
 
     if (template.type === 'command') {
       const cmdInput = form.querySelector('[name="commandContent"]') as HTMLTextAreaElement;
-      if (cmdInput) cmdInput.value = template.commandContent;
+      if (cmdInput && typeof template.commandContent === 'string')
+        cmdInput.value = template.commandContent;
     }
 
     toasts.success.templateApplied();

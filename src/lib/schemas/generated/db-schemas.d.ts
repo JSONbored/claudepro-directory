@@ -172,6 +172,13 @@ export type PublicContentSubmissionsInsert = z.infer<
 export type PublicContentSubmissionsUpdate = z.infer<
   typeof generated.publicContentSubmissionsUpdateSchema
 >;
+export type PublicContentTemplatesRow = z.infer<typeof generated.publicContentTemplatesRowSchema>;
+export type PublicContentTemplatesInsert = z.infer<
+  typeof generated.publicContentTemplatesInsertSchema
+>;
+export type PublicContentTemplatesUpdate = z.infer<
+  typeof generated.publicContentTemplatesUpdateSchema
+>;
 export type PublicEmailBlocklistRow = z.infer<typeof generated.publicEmailBlocklistRowSchema>;
 export type PublicEmailBlocklistInsert = z.infer<typeof generated.publicEmailBlocklistInsertSchema>;
 export type PublicEmailBlocklistUpdate = z.infer<typeof generated.publicEmailBlocklistUpdateSchema>;
@@ -851,6 +858,12 @@ export type PublicGetContentPaginatedArgs = z.infer<
 >;
 export type PublicGetContentPaginatedReturns = z.infer<
   typeof generated.publicGetContentPaginatedReturnsSchema
+>;
+export type PublicGetContentTemplatesArgs = z.infer<
+  typeof generated.publicGetContentTemplatesArgsSchema
+>;
+export type PublicGetContentTemplatesReturns = z.infer<
+  typeof generated.publicGetContentTemplatesReturnsSchema
 >;
 export type PublicGetDatabaseFingerprintArgs = z.infer<
   typeof generated.publicGetDatabaseFingerprintArgsSchema
