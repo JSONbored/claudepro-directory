@@ -303,7 +303,10 @@ export const BaseCard = memo(
     const cardElement = (
       <Card
         className={`${disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? 'p-6' : ''} ${variant === 'review' ? 'rounded-lg border p-4' : ''} ${compactMode ? 'p-4' : ''} ${className || ''} relative`}
-        style={viewTransitionStyle}
+        style={{
+          ...viewTransitionStyle,
+          contain: 'paint',
+        }}
         onClick={disableNavigation ? undefined : handleCardClick}
         role="article"
         aria-label={ariaLabel}
@@ -436,14 +439,14 @@ export const BaseCard = memo(
     ) : (
       <motion.div
         whileHover={{
-          scale: 1.02,
-          y: -4,
-          transition: { type: 'spring', stiffness: 400, damping: 25 },
+          y: -2,
+          transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
         }}
         whileTap={{
-          scale: 0.98,
-          transition: { type: 'spring', stiffness: 400, damping: 25 },
+          y: 0,
+          transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] },
         }}
+        style={{ willChange: 'transform' }}
       >
         {cardElement}
       </motion.div>

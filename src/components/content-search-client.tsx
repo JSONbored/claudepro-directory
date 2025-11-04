@@ -20,8 +20,8 @@ const UnifiedSearch = dynamic(
 
 import { HelpCircle } from '@/src/lib/icons';
 import type {
-  ContentItem,
   ContentSearchClientProps,
+  DisplayableContent,
   FilterState,
 } from '@/src/lib/schemas/component.schema';
 import { ICON_NAME_MAP } from '@/src/lib/ui-constants';
@@ -37,7 +37,7 @@ import { ICON_NAME_MAP } from '@/src/lib/ui-constants';
  * - Memoized to prevent re-renders when parent state changes
  * - Only re-renders when items/searchPlaceholder/title/icon props change
  */
-function ContentSearchClientComponent<T extends ContentItem>({
+function ContentSearchClientComponent<T extends DisplayableContent>({
   items,
   searchPlaceholder,
   title,

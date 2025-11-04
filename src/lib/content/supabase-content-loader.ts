@@ -47,16 +47,6 @@ export async function getContentByCategory(category: CategoryId): Promise<Conten
         p_offset: 0,
       });
 
-      // DEBUG: Log RPC response
-      console.log(`[getContentByCategory] ${category}:`, {
-        hasData: !!data,
-        hasError: !!error,
-        errorMessage: error?.message,
-        dataType: typeof data,
-        isArray: Array.isArray(data),
-        itemCount: Array.isArray(data) ? data.length : 'N/A',
-      });
-
       if (error) throw error;
       return (data || []) as ContentItem[];
     },

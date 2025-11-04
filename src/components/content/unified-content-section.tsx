@@ -65,6 +65,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
+import { SCROLL_REVEAL } from '@/src/lib/constants/animations';
 import {
   Bookmark,
   BookOpen,
@@ -231,14 +232,9 @@ const BULLET_COLORS = {
 
 /**
  * Scroll-triggered reveal animation config
- * Fade-in + slide-up effect when scrolling into view
+ * Centralized animation constants imported for consistency
  */
-const SCROLL_REVEAL_ANIMATION = {
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: '-50px' },
-  transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-} as const;
+const SCROLL_REVEAL_ANIMATION = SCROLL_REVEAL;
 
 /**
  * UnifiedContentSection Component

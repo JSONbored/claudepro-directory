@@ -269,17 +269,29 @@ export function ProductionCodeBlock({
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="absolute top-full right-0 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md z-50"
+                  className="absolute top-full right-0 z-50 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md"
                   onMouseLeave={() => setIsShareOpen(false)}
                 >
                   {/* Twitter Share */}
                   <div className="share-button-wrapper mb-1">
                     <TwitterShareButton
-                      url={generateShareUrl({ url: currentUrl, category, slug, platform: 'twitter', title: `${category} - ${slug}` })}
-                      title={generateShareText({ url: currentUrl, category, slug, platform: 'twitter', title: `${category} - ${slug}` })}
+                      url={generateShareUrl({
+                        url: currentUrl,
+                        category,
+                        slug,
+                        platform: 'twitter',
+                        title: `${category} - ${slug}`,
+                      })}
+                      title={generateShareText({
+                        url: currentUrl,
+                        category,
+                        slug,
+                        platform: 'twitter',
+                        title: `${category} - ${slug}`,
+                      })}
                       onClick={() => handleShare('twitter')}
                     >
-                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all hover:bg-accent/15">
+                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
                         <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1DA1F2]/20">
                           <Twitter className="h-3 w-3 text-[#1DA1F2]" />
                         </div>
@@ -291,12 +303,24 @@ export function ProductionCodeBlock({
                   {/* LinkedIn Share */}
                   <div className="share-button-wrapper mb-1">
                     <LinkedinShareButton
-                      url={generateShareUrl({ url: currentUrl, category, slug, platform: 'linkedin', title: `${category} - ${slug}` })}
-                      title={generateShareText({ url: currentUrl, category, slug, platform: 'linkedin', title: `${category} - ${slug}` })}
+                      url={generateShareUrl({
+                        url: currentUrl,
+                        category,
+                        slug,
+                        platform: 'linkedin',
+                        title: `${category} - ${slug}`,
+                      })}
+                      title={generateShareText({
+                        url: currentUrl,
+                        category,
+                        slug,
+                        platform: 'linkedin',
+                        title: `${category} - ${slug}`,
+                      })}
                       summary={`Check out this ${category} resource on claudepro.directory`}
                       onClick={() => handleShare('linkedin')}
                     >
-                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all hover:bg-accent/15">
+                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
                         <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0A66C2]/20">
                           <Linkedin className="h-3 w-3 text-[#0A66C2]" />
                         </div>
@@ -309,7 +333,7 @@ export function ProductionCodeBlock({
                   <button
                     type="button"
                     onClick={() => handleShare('copy_link')}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-foreground text-sm font-medium transition-all hover:bg-accent/15 hover:scale-[1.02] active:scale-[0.98]"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-foreground text-sm transition-all hover:scale-[1.02] hover:bg-accent/15 active:scale-[0.98]"
                   >
                     <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
                       <Copy className="h-3 w-3" />
@@ -398,17 +422,29 @@ export function ProductionCodeBlock({
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="absolute top-full right-0 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md z-50"
+                  className="absolute top-full right-0 z-50 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md"
                   onMouseLeave={() => setIsShareOpen(false)}
                 >
                   {/* Twitter Share */}
                   <div className="share-button-wrapper mb-1">
                     <TwitterShareButton
-                      url={generateShareUrl({ url: currentUrl, category, slug, platform: 'twitter', title: `${category} - ${slug}` })}
-                      title={generateShareText({ url: currentUrl, category, slug, platform: 'twitter', title: `${category} - ${slug}` })}
+                      url={generateShareUrl({
+                        url: currentUrl,
+                        category,
+                        slug,
+                        platform: 'twitter',
+                        title: `${category} - ${slug}`,
+                      })}
+                      title={generateShareText({
+                        url: currentUrl,
+                        category,
+                        slug,
+                        platform: 'twitter',
+                        title: `${category} - ${slug}`,
+                      })}
                       onClick={() => handleShare('twitter')}
                     >
-                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all hover:bg-accent/15">
+                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
                         <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1DA1F2]/20">
                           <Twitter className="h-3 w-3 text-[#1DA1F2]" />
                         </div>
@@ -420,12 +456,24 @@ export function ProductionCodeBlock({
                   {/* LinkedIn Share */}
                   <div className="share-button-wrapper mb-1">
                     <LinkedinShareButton
-                      url={generateShareUrl({ url: currentUrl, category, slug, platform: 'linkedin', title: `${category} - ${slug}` })}
-                      title={generateShareText({ url: currentUrl, category, slug, platform: 'linkedin', title: `${category} - ${slug}` })}
+                      url={generateShareUrl({
+                        url: currentUrl,
+                        category,
+                        slug,
+                        platform: 'linkedin',
+                        title: `${category} - ${slug}`,
+                      })}
+                      title={generateShareText({
+                        url: currentUrl,
+                        category,
+                        slug,
+                        platform: 'linkedin',
+                        title: `${category} - ${slug}`,
+                      })}
                       summary={`Check out this ${category} resource on claudepro.directory`}
                       onClick={() => handleShare('linkedin')}
                     >
-                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all hover:bg-accent/15">
+                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
                         <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0A66C2]/20">
                           <Linkedin className="h-3 w-3 text-[#0A66C2]" />
                         </div>
@@ -438,7 +486,7 @@ export function ProductionCodeBlock({
                   <button
                     type="button"
                     onClick={() => handleShare('copy_link')}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-foreground text-sm font-medium transition-all hover:bg-accent/15 hover:scale-[1.02] active:scale-[0.98]"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-foreground text-sm transition-all hover:scale-[1.02] hover:bg-accent/15 active:scale-[0.98]"
                   >
                     <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
                       <Copy className="h-3 w-3" />
@@ -527,7 +575,6 @@ export function ProductionCodeBlock({
           </span>
         </button>
       )}
-
     </div>
   );
 }

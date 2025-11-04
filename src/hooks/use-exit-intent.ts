@@ -129,7 +129,9 @@ export function useExitIntent(options: UseExitIntentOptions = {}): UseExitIntent
       }
     };
 
-    loadDefaults();
+    loadDefaults().catch(() => {
+      // Silent fail - uses hardcoded fallbacks
+    });
   }, []);
 
   // Merge user options with database defaults (user options take precedence)

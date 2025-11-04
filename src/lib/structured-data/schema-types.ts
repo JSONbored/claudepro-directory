@@ -4,6 +4,7 @@
  */
 
 import type { ContentItem, FullContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import {
   buildBreadcrumb,
   buildCreativeWork,
@@ -171,7 +172,7 @@ export async function generateAllSchemasForContent(item: UnifiedContent): Promis
         slug: item.slug,
         name: displayName,
         description: item.description,
-        category: item.category as any,
+        category: item.category,
         applicationSubCategory: dbConfig.applicationSubCategory,
         keywords: keywords as string[],
         author: 'author' in item ? (item.author as string) : '',
@@ -194,7 +195,7 @@ export async function generateAllSchemasForContent(item: UnifiedContent): Promis
     schemas.push(
       buildCreativeWork({
         slug: item.slug,
-        category: item.category as any,
+        category: item.category,
         name: displayName,
         description: dbConfig.creativeWorkDescription,
         content: itemContent,
@@ -207,7 +208,7 @@ export async function generateAllSchemasForContent(item: UnifiedContent): Promis
     schemas.push(
       buildHowTo({
         slug: item.slug,
-        category: item.category as any,
+        category: item.category,
         name: displayName,
         description: `Step-by-step guide to implement ${displayName}`,
         steps: generateHowToSteps(item, displayName, dbConfig.categoryDisplayName),
@@ -230,7 +231,7 @@ export async function generateAllSchemasForContent(item: UnifiedContent): Promis
         { name: dbConfig.categoryDisplayName, url: `/${item.category}` },
         {
           name: displayTitle,
-          url: getContentItemUrl({ category: item.category as any, slug: item.slug }),
+          url: getContentItemUrl({ category: item.category as CategoryId, slug: item.slug }),
         },
       ])
     );

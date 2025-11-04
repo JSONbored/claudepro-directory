@@ -85,7 +85,9 @@ export const useNotificationStore = create<NotificationStore>()(
                 table: 'notifications',
               },
               () => {
-                refreshFromDatabase();
+                refreshFromDatabase().catch(() => {
+                  // Silent fail - notification refresh failed, state remains unchanged
+                });
               }
             )
             .subscribe(async (status) => {
@@ -104,7 +106,9 @@ export const useNotificationStore = create<NotificationStore>()(
             unreadCount: state.notifications.filter((n) => n.id !== id).length,
           }));
 
-          refreshFromDatabase();
+          refreshFromDatabase().catch(() => {
+            // Silent fail - notification already removed from UI
+          });
         },
 
         dismissAll: () => {
@@ -114,7 +118,9 @@ export const useNotificationStore = create<NotificationStore>()(
             unreadCount: 0,
           }));
 
-          refreshFromDatabase();
+          refreshFromDatabase().catch(() => {
+            // Silent fail - all notifications already cleared from UI
+          });
         },
 
         openSheet: () => set({ isSheetOpen: true }),

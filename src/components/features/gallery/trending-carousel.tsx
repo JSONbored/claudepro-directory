@@ -63,8 +63,9 @@ export function TrendingCarousel({ items, autoPlayInterval = 5000 }: TrendingCar
   }, [emblaApi, onSelect]);
 
   return (
-    <div
+    <section
       className="relative w-full"
+      aria-label="Trending content carousel"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
@@ -164,6 +165,6 @@ export function TrendingCarousel({ items, autoPlayInterval = 5000 }: TrendingCar
           />
         ))}
       </div>
-    </div>
+    </section>
   );
 }

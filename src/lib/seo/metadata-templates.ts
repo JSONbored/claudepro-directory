@@ -6,7 +6,7 @@
 import type { MetadataContext } from '@/src/lib/seo/metadata-registry';
 import type { RoutePattern } from '@/src/lib/seo/route-classifier';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
-import type { Tables } from '@/src/types/database.types';
+import type { Json, Tables } from '@/src/types/database.types';
 
 export interface MetadataConfig {
   title: string;
@@ -40,14 +40,18 @@ export async function generateMetadataFromDB(
     plural_title: context.categoryConfig?.pluralTitle,
     kw1: context.categoryConfig?.keywords?.split(',')[0]?.trim(),
     kw2: context.categoryConfig?.keywords?.split(',')[1]?.trim(),
-    display_title: (context.item as any)?.title || (context.item as any)?.name,
+    display_title:
+      (context.item as Record<string, unknown>)?.title ||
+      (context.item as Record<string, unknown>)?.name,
     category_name: context.categoryConfig?.title,
-    name: (context.profile as any)?.name || context.params?.slug,
-    follower_count: (context.profile as any)?.followerCount,
-    post_count: (context.profile as any)?.postCount,
+    name: (context.profile as Record<string, unknown>)?.name || context.params?.slug,
+    follower_count: (context.profile as Record<string, unknown>)?.followerCount,
+    post_count: (context.profile as Record<string, unknown>)?.postCount,
     meta_description: context.categoryConfig?.metaDescription,
-    description: (context.item as any)?.description,
-    keywords: (context.item as any)?.tags || (context.item as any)?.keywords,
+    description: (context.item as Record<string, unknown>)?.description,
+    keywords:
+      (context.item as Record<string, unknown>)?.tags ||
+      (context.item as Record<string, unknown>)?.keywords,
     item: context.item,
   };
 
@@ -56,12 +60,12 @@ export async function generateMetadataFromDB(
     route
       ? {
           p_route_pattern: pattern,
-          p_context: contextPayload as any,
+          p_context: contextPayload as Json,
           p_route: route,
         }
       : {
           p_route_pattern: pattern,
-          p_context: contextPayload as any,
+          p_context: contextPayload as Json,
         }
   );
 

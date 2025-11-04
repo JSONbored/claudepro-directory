@@ -137,7 +137,7 @@ export async function generateCodeScreenshot(
 
     // Remove expand/collapse button if present (appears after code content)
     const expandButtons = clone.querySelectorAll('button');
-    expandButtons.forEach((button) => {
+    for (const button of expandButtons) {
       // Remove buttons that contain ChevronDown icon or expand text
       if (
         button.textContent?.toLowerCase().includes('expand') ||
@@ -146,7 +146,7 @@ export async function generateCodeScreenshot(
       ) {
         button.remove();
       }
-    });
+    }
 
     wrapper.appendChild(clone);
 

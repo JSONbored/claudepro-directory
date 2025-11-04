@@ -321,7 +321,7 @@ export function QuizForm() {
                         if (isMultiSelect && fieldKey) {
                           toggleArrayAnswer(fieldKey, option.value);
                         } else if (fieldKey) {
-                          updateAnswer(fieldKey, option.value as any);
+                          updateAnswer(fieldKey, option.value as string);
                         }
                       }}
                       disabled={!canSelect}

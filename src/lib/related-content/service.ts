@@ -5,6 +5,7 @@
 
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
+import type { Database } from '@/src/types/database.types';
 
 export interface RelatedContentInput {
   currentPath: string;
@@ -44,8 +45,11 @@ class RelatedContentService {
       };
     }
 
+    type RelatedContentItem =
+      Database['public']['Functions']['get_related_content']['Returns'][number];
+
     return {
-      items: data.map((item: any) => ({
+      items: data.map((item: RelatedContentItem) => ({
         category: item.category || '',
         slug: item.slug || '',
         title: item.title || '',

@@ -7,6 +7,18 @@ import type { Database } from '@/src/types/database.types';
 
 type SkillRow = Database['public']['Tables']['content']['Row'] & { category: 'skills' };
 
+interface SkillExample {
+  title: string;
+  code: string;
+  language: string;
+  description?: string;
+}
+
+interface TroubleshootingItem {
+  issue: string;
+  solution: string;
+}
+
 export function transformSkillToMarkdown(skill: SkillRow): string {
   const frontmatter = generateYamlFrontmatter(skill);
   const body = generateMarkdownBody(skill);
@@ -37,10 +49,10 @@ export function generateMarkdownBody(skill: SkillRow): string {
   const useCases = generateUseCasesSection(skill.use_cases as string[] | null);
   if (useCases) sections.push(useCases);
 
-  const examples = generateExamplesSection(skill.examples as any);
+  const examples = generateExamplesSection(skill.examples as SkillExample[] | null);
   if (examples) sections.push(examples);
 
-  const troubleshooting = metadata.troubleshooting as any;
+  const troubleshooting = metadata.troubleshooting as TroubleshootingItem[] | null;
   const troubleshootingSection = generateTroubleshootingSection(troubleshooting);
   if (troubleshootingSection) sections.push(troubleshootingSection);
 
@@ -68,7 +80,7 @@ export function generateUseCasesSection(useCases: string[] | null): string {
   return `## Use Cases\n\n${items}`;
 }
 
-export function generateExamplesSection(examples: any[] | null): string {
+export function generateExamplesSection(examples: SkillExample[] | null): string {
   if (!examples || examples.length === 0) return '';
 
   const exampleBlocks = examples
@@ -84,7 +96,9 @@ export function generateExamplesSection(examples: any[] | null): string {
   return `## Examples\n\n${exampleBlocks}`;
 }
 
-export function generateTroubleshootingSection(troubleshooting: any[] | null): string {
+export function generateTroubleshootingSection(
+  troubleshooting: TroubleshootingItem[] | null
+): string {
   if (!troubleshooting || troubleshooting.length === 0) return '';
 
   const items = troubleshooting.map((item) => `### ${item.issue}\n\n${item.solution}`).join('\n\n');

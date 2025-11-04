@@ -9,6 +9,7 @@ import { Suspense } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { LazySection } from '@/src/components/infra/lazy-section';
 import { TrendingContent } from '@/src/components/shared/trending-content';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
@@ -81,9 +82,9 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
     totalCount: 0,
     metadata: { period, metric, category: null, page, limit, algorithm: 'fallback' },
   }) as {
-    trending: unknown[];
-    popular: unknown[];
-    recent: unknown[];
+    trending: ContentItem[];
+    popular: ContentItem[];
+    recent: ContentItem[];
     totalCount: number;
     metadata: Record<string, unknown>;
   };

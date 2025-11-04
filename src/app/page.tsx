@@ -54,10 +54,8 @@ interface HomePageProps {
 }
 
 async function HomeContentSection({
-  searchQuery,
   homepageContentData,
 }: {
-  searchQuery: string;
   homepageContentData: {
     categoryData: Record<string, EnrichedMetadata[]>;
     stats: Record<string, number>;
@@ -101,7 +99,6 @@ async function HomeContentSection({
     return (
       <HomePageClient
         initialData={initialData as Record<string, ContentItem[]>}
-        initialSearchQuery={searchQuery}
         featuredByCategory={featuredByCategory as Record<string, ContentItem[]>}
         stats={enrichedData.stats}
       />
@@ -121,7 +118,6 @@ async function HomeContentSection({
     return (
       <HomePageClient
         initialData={emptyData}
-        initialSearchQuery={searchQuery}
         featuredByCategory={{}}
         stats={Object.fromEntries(categoryIds.map((id) => [id, 0]))}
       />
@@ -130,8 +126,7 @@ async function HomeContentSection({
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
-  const resolvedParams = await searchParams;
-  const initialSearchQuery = resolvedParams.q || '';
+  await searchParams;
 
   // Consolidated homepage data: get_homepage_complete() returns everything (67% fewer DB calls)
   const supabase = createAnonClient();
@@ -184,7 +179,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <div className={'relative'}>
           <Suspense fallback={<LoadingSkeleton />}>
             <HomeContentSection
-              searchQuery={initialSearchQuery}
               homepageContentData={
                 (
                   homepageData as {

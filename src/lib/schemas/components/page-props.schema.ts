@@ -23,8 +23,6 @@ import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 export interface HomePageClientProps {
   /** Initial server-side data for client hydration (from content table) */
   initialData: Record<string, ContentItem[]>;
-  /** Initial search query from URL parameter */
-  initialSearchQuery?: string;
   /** Weekly featured content grouped by category */
   featuredByCategory?: Record<string, ContentItem[]>;
   /** Content category statistics */

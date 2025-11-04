@@ -123,26 +123,28 @@ export function createClientInputSchema<T extends ZodRawShape>(
     {} as Record<keyof T, true>
   );
 
-  let schema: any =
+  let schema =
     omitRecord && Object.keys(omitRecord).length > 0
       ? databaseSchema.omit(omitRecord)
       : databaseSchema;
 
   // Step 2: Apply transformations
   if (Object.keys(transforms).length > 0) {
-    schema = schema.extend(transforms as any);
+    schema = schema.extend(transforms);
   }
 
   // Step 3: Apply defaults
   if (Object.keys(defaults).length > 0) {
-    schema = schema.extend(defaults as any);
+    schema = schema.extend(defaults);
   }
 
   // Step 4: Make specified fields required
   if (required.length > 0) {
     const requiredFields = required.reduce(
       (acc, field) => {
-        const fieldSchema = schema.shape[field as string];
+        const fieldSchema = (schema.shape as unknown as Record<string, ZodTypeAny>)[
+          field as string
+        ];
         if (fieldSchema) {
           acc[field] = fieldSchema;
         }
@@ -151,7 +153,7 @@ export function createClientInputSchema<T extends ZodRawShape>(
       {} as Record<keyof T, ZodTypeAny>
     );
 
-    schema = schema.extend(requiredFields as any);
+    schema = schema.extend(requiredFields) as unknown as typeof schema;
   }
 
   return schema;
@@ -194,4 +196,4 @@ export const SOCIAL_SERVER_FIELDS = [
 /**
  * Utility type to extract client input type from factory-generated schema
  */
-export type ClientInput<T extends ZodObject<any>> = ReturnType<T['parse']>;
+export type ClientInput<T extends ZodObject<ZodRawShape>> = ReturnType<T['parse']>;

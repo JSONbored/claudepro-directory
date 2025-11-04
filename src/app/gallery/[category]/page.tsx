@@ -9,7 +9,7 @@ import { Suspense } from 'react';
 import { GalleryMasonryGrid } from '@/src/components/features/gallery/gallery-masonry-grid';
 import { TrendingCarousel } from '@/src/components/features/gallery/trending-carousel';
 import { Container } from '@/src/components/layout/container';
-import { Skeleton } from '@/src/components/primitives/skeleton';
+import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { isValidCategory, VALID_CATEGORIES } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';

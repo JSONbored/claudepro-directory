@@ -11,6 +11,10 @@ type SearchContentArgs = Database['public']['Functions']['search_content_optimiz
 type SearchContentReturn = Database['public']['Functions']['search_content_optimized']['Returns'];
 type SearchByPopularityReturn = Database['public']['Functions']['search_by_popularity']['Returns'];
 
+/**
+ * Search result from search_content_optimized RPC
+ * Returns subset of content fields optimized for search performance
+ */
 export type SearchResult = SearchContentReturn[number];
 
 export type SearchFilters = Omit<SearchContentArgs, 'p_query'> & {

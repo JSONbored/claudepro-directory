@@ -21,13 +21,6 @@ export function createAnonClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // DEBUG: Check if env vars are available
-  console.log('[createAnonClient] ENV CHECK:', {
-    hasUrl: !!supabaseUrl,
-    hasKey: !!supabaseAnonKey,
-    url: supabaseUrl?.substring(0, 30) + '...',
-  });
-
   // In development without env vars, return a mock client
   if (!(supabaseUrl && supabaseAnonKey)) {
     if (process.env.NODE_ENV === 'development') {

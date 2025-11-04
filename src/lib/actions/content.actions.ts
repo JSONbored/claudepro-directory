@@ -174,7 +174,7 @@ export const reorderCollectionItems = authedAction
       throw new Error(`Failed to reorder items: ${error.message}`);
     }
 
-    const result = data as { success: boolean; updated: number; errors: any[] };
+    const result = data as { success: boolean; updated: number; errors: unknown[] };
 
     if (!result.success) {
       throw new Error('Failed to reorder collection items');

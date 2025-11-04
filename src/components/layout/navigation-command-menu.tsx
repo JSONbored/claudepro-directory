@@ -85,7 +85,12 @@ export function NavigationCommandMenu({
       }
     }
 
-    fetchNavData();
+    fetchNavData().catch(() => {
+      // Silent fail - uses initial data fallback
+      if (isMounted) {
+        setIsLoading(false);
+      }
+    });
 
     return () => {
       isMounted = false;

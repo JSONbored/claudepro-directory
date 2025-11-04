@@ -36,7 +36,10 @@ export const CACHEABLE_CATEGORIES = [
   'guides',
 ] as const satisfies readonly CategoryId[];
 
-export const cacheableCategorySchema = z.enum(CACHEABLE_CATEGORIES as any);
+export const cacheableCategorySchema = z.enum([...CACHEABLE_CATEGORIES] as [
+  CategoryId,
+  ...CategoryId[],
+]);
 
 export const GUIDE_SUBCATEGORIES = [
   'tutorials',

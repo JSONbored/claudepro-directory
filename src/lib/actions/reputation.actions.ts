@@ -35,7 +35,7 @@ export const getActivityCounts = authedAction
     });
 
     if (error) throw new Error(`Failed to fetch activity counts: ${error.message}`);
-    return (data as any).activityCounts;
+    return (data as { activityCounts: unknown }).activityCounts;
   });
 
 export const recalculateReputation = authedAction

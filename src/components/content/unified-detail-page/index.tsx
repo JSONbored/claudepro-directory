@@ -43,6 +43,7 @@ import {
   transformMcpConfigForDisplay,
 } from '@/src/lib/utils/content.utils';
 import { getViewTransitionStyle } from '@/src/lib/utils/view-transitions.utils';
+import type { Database } from '@/src/types/database.types';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 import { DetailSidebar } from './sidebar/detail-sidebar';
@@ -510,7 +511,11 @@ export async function UnifiedDetailPage({
           <div className="space-y-8 lg:col-span-2">
             {/* GUIDES: Render structured sections from metadata using JSONSectionRenderer */}
             {guideSections && guideSections.length > 0 && (
-              <JSONSectionRenderer sections={guideSections} />
+              <JSONSectionRenderer
+                sections={
+                  guideSections as unknown as Database['public']['Tables']['content']['Row']['metadata']
+                }
+              />
             )}
 
             {/* Content/Code section (non-guides) */}

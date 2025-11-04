@@ -52,7 +52,7 @@ export type SEOPageData = {
   readingTime?: string;
   difficulty?: string;
   category?: string;
-  sections?: any[];
+  sections?: Record<string, unknown>[];
   isJsonGuide?: boolean;
 };
 

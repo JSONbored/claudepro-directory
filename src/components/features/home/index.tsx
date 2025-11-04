@@ -23,7 +23,7 @@
 import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import {
   LazyFeaturedSections,
   LazySearchSection,
@@ -39,9 +39,10 @@ import {
 import { ROUTES } from '@/src/lib/constants/routes';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
-import type { FilterState } from '@/src/lib/schemas/component.schema';
+import type { DisplayableContent, FilterState } from '@/src/lib/schemas/component.schema';
 import type { HomePageClientProps } from '@/src/lib/schemas/components/page-props.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * OPTIMIZATION (2025-10-22): Enabled SSR for UnifiedSearch
@@ -60,53 +61,82 @@ const UnifiedSearch = dynamic(
   }
 );
 
-function HomePageClientComponent({
-  initialData,
-  initialSearchQuery,
-  featuredByCategory,
-  stats,
-}: HomePageClientProps) {
+function HomePageClientComponent({ initialData, featuredByCategory, stats }: HomePageClientProps) {
   const allConfigs = (initialData.allConfigs || []) as ContentItem[];
   const [activeTab, setActiveTab] = useState('all');
-  const [searchResults, setSearchResults] = useState<ContentItem[]>(allConfigs);
+  const [searchResults, setSearchResults] = useState<DisplayableContent[]>(allConfigs);
   const [isSearching, setIsSearching] = useState(false);
   const [filters, setFilters] = useState({});
+  const [currentSearchQuery, setCurrentSearchQuery] = useState('');
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Get category configs from static imports (client-side)
   const categoryStatsConfig = useMemo(() => getCategoryStatsConfig(), []);
   const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
 
   // Handle search using direct Supabase RPC call (database-first)
+  // Performance optimized: Category filter at DB level, request cancellation
   const handleSearch = useCallback(
-    async (query: string) => {
+    async (query: string, categoryOverride?: string) => {
+      // Cancel previous request if still pending
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
       if (!query.trim()) {
         setSearchResults(allConfigs);
         setIsSearching(false);
+        setCurrentSearchQuery('');
+        abortControllerRef.current = null;
         return;
       }
 
+      setCurrentSearchQuery(query.trim());
       setIsSearching(true);
+      abortControllerRef.current = new AbortController();
+      const currentController = abortControllerRef.current;
+
       try {
         // Direct database RPC call - no API route middleman
         const { createClient } = await import('@/src/lib/supabase/client');
         const supabase = createClient();
 
-        const { data, error } = await supabase.rpc('search_content_optimized', {
+        // Performance optimization: Filter by category at database level
+        const effectiveTab = categoryOverride ?? activeTab;
+        const rpcParams: {
+          p_query: string;
+          p_limit: number;
+          p_categories?: string[];
+        } = {
           p_query: query.trim(),
           p_limit: 50,
-        });
+        };
+
+        // Only filter by category if not "all" or "community" tab
+        if (effectiveTab !== 'all' && effectiveTab !== 'community') {
+          rpcParams.p_categories = [effectiveTab];
+        }
+
+        const { data, error } = await supabase.rpc('search_content_optimized', rpcParams);
+
+        // Ignore results if this request was aborted
+        if (currentController.signal.aborted) return;
 
         if (error) throw error;
-        // RPC returns search results - cast to ContentItem[]
-        setSearchResults((data || []) as unknown as ContentItem[]);
+
+        // Use proper database-generated type from search RPC
+        type SearchResultType =
+          Database['public']['Functions']['search_content_optimized']['Returns'][number];
+        setSearchResults((data || []) as SearchResultType[]);
       } catch (error) {
+        // Ignore abort errors (expected when fast typing)
+        if (currentController.signal.aborted) return;
+
         logger.error('Search failed', error as Error, { source: 'HomePageSearch' });
         setSearchResults(allConfigs);
-      } finally {
-        setIsSearching(false);
       }
     },
-    [allConfigs]
+    [allConfigs, activeTab]
   );
 
   const handleFiltersChange = useCallback((newFilters: FilterState) => {
@@ -117,6 +147,7 @@ function HomePageClientComponent({
 
   // Create lookup maps dynamically for all featured categories
   // O(1) slug checking instead of O(n) array.some() calls
+  // Only used for non-search tab filtering
   const slugLookupMaps = useMemo(() => {
     const maps: Record<string, Set<string>> = {};
 
@@ -130,12 +161,17 @@ function HomePageClientComponent({
     return maps;
   }, [initialData]);
 
-  // Filter search results by active tab - optimized with Set lookups
-  // When not searching, use the full dataset (allConfigs) instead of searchResults
-  // With Intersection Observer infinite scroll, we pass the ENTIRE dataset - pagination handles rendering
-  const filteredResults = useMemo((): ContentItem[] => {
-    // Use allConfigs when not searching, searchResults when searching
-    const dataSource = isSearching ? searchResults : allConfigs;
+  // Filter results by active tab
+  // Performance: When searching, DB filters by category (no client-side filtering needed)
+  // When not searching, use Set lookups for O(1) filtering
+  const filteredResults = useMemo((): DisplayableContent[] => {
+    if (isSearching) {
+      // DB already filtered by category - return as-is
+      return searchResults || [];
+    }
+
+    // Not searching - filter allConfigs by tab
+    const dataSource = allConfigs;
 
     if (activeTab === 'all' || activeTab === 'community') {
       return dataSource || [];
@@ -147,14 +183,25 @@ function HomePageClientComponent({
       : dataSource || [];
   }, [searchResults, allConfigs, activeTab, slugLookupMaps, isSearching]);
 
-  // Handle tab change
-  const handleTabChange = useCallback((value: string) => {
-    setActiveTab(value);
-  }, []);
+  // Handle tab change - re-trigger search if currently searching
+  const handleTabChange = useCallback(
+    (value: string) => {
+      setActiveTab(value);
+      // If currently searching, re-run search with new category filter (DB-side)
+      if (isSearching && currentSearchQuery) {
+        handleSearch(currentSearchQuery, value).catch(() => {
+          // Silent fail - search will retry on next user interaction
+        });
+      }
+    },
+    [isSearching, currentSearchQuery, handleSearch]
+  );
 
   // Handle clear search
   const handleClearSearch = useCallback(() => {
-    handleSearch('');
+    handleSearch('').catch(() => {
+      // Silent fail - search cleared on error
+    });
   }, [handleSearch]);
 
   return (

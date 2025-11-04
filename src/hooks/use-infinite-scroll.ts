@@ -89,7 +89,9 @@ export function useInfiniteScroll({
       }
     };
 
-    loadDefaults();
+    loadDefaults().catch(() => {
+      // Silent fail - uses hardcoded fallbacks
+    });
   }, []);
 
   // Merge user options with database defaults (user options take precedence)

@@ -21,7 +21,7 @@ import { highlight } from 'sugar-high';
  */
 export function highlightCode(
   code: string,
-  language = 'javascript',
+  _language = 'javascript',
   showLineNumbers = true
 ): string {
   if (!code || code.trim() === '') {

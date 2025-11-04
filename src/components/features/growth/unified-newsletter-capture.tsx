@@ -535,7 +535,9 @@ function FooterBarVariant({
       }
     };
 
-    loadExcludedPages();
+    loadExcludedPages().catch(() => {
+      // Silent fail - uses hardcoded fallback
+    });
   }, []);
 
   const hasInlineCTA =

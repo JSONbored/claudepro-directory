@@ -63,7 +63,7 @@ export interface SectionConfig {
  * All content fields (installation, use_cases, troubleshooting, etc.) are now pre-populated
  * in the database before TypeScript ever sees them.
  */
-export type GeneratorConfig = {};
+export type GeneratorConfig = Record<string, never>;
 
 /**
  * Custom renderer functions for specialized content

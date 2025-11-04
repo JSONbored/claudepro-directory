@@ -34,7 +34,7 @@ import { memo, useEffect } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { DisplayableContent } from '@/src/lib/schemas/component.schema';
 
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -47,14 +47,14 @@ export type GridVariant = 'normal' | 'tight' | 'wide' | 'list';
 /**
  * Base props shared by all variants
  *
- * **ARCHITECTURAL DECISION: ContentItem Only**
- * This component requires ContentItem - NOT a generic GridItem.
- * Previous generic approach created type complexity for zero benefit.
- * All 12 usage sites pass ContentItem objects.
+ * **ARCHITECTURAL DECISION: DisplayableContent (Database-Generated Union)**
+ * Accepts ContentItem (full table) OR SearchResult (RPC subset) - both from database.types.ts
+ * ConfigCard and rendering logic handle both types via discriminated union patterns
+ * Only uses fields present in both types (slug, category, title, description, etc.)
  */
 interface BaseGridProps {
   /** Array of items to display */
-  items: readonly ContentItem[];
+  items: readonly DisplayableContent[];
 
   /** Grid layout variant (default: 'normal') */
   variant?: GridVariant;
@@ -78,7 +78,7 @@ interface BaseGridProps {
   /** ARIA label for the grid section */
   ariaLabel?: string;
   /** Function to extract unique key from item (default: uses slug) */
-  keyExtractor?: (item: ContentItem, index: number) => string | number;
+  keyExtractor?: (item: DisplayableContent, index: number) => string | number;
 
   /** Number of items to prefetch for faster navigation (default: 0) */
   prefetchCount?: number;
@@ -89,7 +89,7 @@ interface BaseGridProps {
  * Type-safe: each branch has exactly what it needs
  *
  * ARCHITECTURAL DECISION: Only ConfigCard or custom renderCard
- * - ConfigCard: Standard card with defaults
+ * - ConfigCard: Standard card with defaults (accepts DisplayableContent)
  * - renderCard: Full control (can use BaseCard with custom props)
  * - Removed generic ComponentType branch (unused, type-unsafe)
  */
@@ -101,7 +101,7 @@ type CardRenderingProps =
     }
   | {
       /** Custom render function */
-      renderCard: (item: ContentItem, index: number) => ReactNode;
+      renderCard: (item: DisplayableContent, index: number) => ReactNode;
       cardComponent?: never;
     };
 
@@ -204,8 +204,8 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
   // Determine items to display
   const displayedItems = infiniteScroll ? items.slice(0, displayCount) : items;
 
-  // Default key extractor uses slug (standard across all ContentItem)
-  const getKey = keyExtractor || ((item: ContentItem, index: number) => item.slug || index);
+  // Default key extractor uses slug (present in both ContentItem and SearchResult)
+  const getKey = keyExtractor || ((item: DisplayableContent, index: number) => item.slug || index);
 
   // Empty state
   if (items.length === 0 && !loading) {

@@ -433,24 +433,27 @@ function SectionVariant({
 
   // Initial load - useEffect for async operations (fire-and-forget pattern)
   useEffect(() => {
-    // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
-    void loadReviewsWithStats(1, sortBy);
+    loadReviewsWithStats(1, sortBy).catch(() => {
+      // Silent fail - reviews remain in initial state
+    });
   }, [loadReviewsWithStats, sortBy]);
 
-  // Handle sort change (fire-and-forget pattern)
+  // Handle sort change
   const handleSortChange = (newSort: typeof sortBy) => {
     setSortBy(newSort);
     setPage(1);
-    // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
-    void loadReviewsWithStats(1, newSort);
+    loadReviewsWithStats(1, newSort).catch(() => {
+      // Silent fail - reviews remain in current state
+    });
   };
 
-  // Handle load more (fire-and-forget pattern)
+  // Handle load more
   const handleLoadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
-    // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
-    void loadReviewsWithStats(nextPage, sortBy);
+    loadReviewsWithStats(nextPage, sortBy).catch(() => {
+      // Silent fail - pagination remains in current state
+    });
   };
 
   // Handle delete
@@ -461,8 +464,9 @@ function SectionVariant({
         toasts.success.itemDeleted('Review');
         setReviews((prev) => prev.filter((r) => r.id !== reviewId));
         // Refresh stats after deletion
-        // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
-        void loadReviewsWithStats(1, sortBy);
+        loadReviewsWithStats(1, sortBy).catch(() => {
+          // Silent fail - review already removed from UI
+        });
         router.refresh();
       }
     } catch (_error) {

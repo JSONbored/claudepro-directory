@@ -4,7 +4,6 @@
 
 import type { Metadata } from 'next';
 import { ContentSearchClient } from '@/src/components/content-search-client';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import type { SearchFilters } from '@/src/lib/search/server-search';
 import { searchContent } from '@/src/lib/search/server-search';
 import { sanitizers } from '@/src/lib/security/validators';
@@ -61,7 +60,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         {sanitizedQuery ? `Search: "${sanitizedQuery}"` : 'Search Claude Code Directory'}
       </h1>
       <ContentSearchClient
-        items={results as unknown as ContentItem[]}
+        items={results}
         type="agents"
         searchPlaceholder="Search agents, MCP servers, rules, commands..."
         title="Results"

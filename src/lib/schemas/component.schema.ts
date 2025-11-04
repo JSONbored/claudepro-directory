@@ -19,23 +19,24 @@ import {
   ultraLongString,
   veryLongCodeString,
 } from '@/src/lib/schemas/primitives';
+import type { SearchResult } from '@/src/lib/search/server-search';
 import type { Database } from '@/src/types/database.types';
 import type { HomePageClientProps } from './components/page-props.schema';
 import type { SortOption } from './content-filter.schema';
 import type { CategoryId } from './shared.schema';
 
+/**
+ * Content that can be displayed - either full content item or search result
+ * SearchResult is from search_content_optimized RPC (subset of fields for performance)
+ */
+export type DisplayableContent = ContentItem | SearchResult;
+
 export interface ConfigCardProps {
-  item: ContentItem;
+  item: DisplayableContent;
   variant?: 'default' | 'detailed';
   showCategory?: boolean;
   showActions?: boolean;
   className?: string;
-  renderSponsoredWrapper?: (
-    children: React.ReactNode,
-    sponsoredId: string,
-    targetUrl: string,
-    position?: number
-  ) => React.ReactNode;
   enableSwipeGestures?: boolean;
   useViewTransitions?: boolean;
   showBorderBeam?: boolean;
@@ -97,9 +98,9 @@ export interface UnifiedSearchProps {
 }
 
 export interface TrendingContentProps {
-  trending: any[];
-  popular: any[];
-  recent: any[];
+  trending: ContentItem[];
+  popular: ContentItem[];
+  recent: ContentItem[];
 }
 
 export type ContentListServerProps<T extends ContentItem = ContentItem> = {
@@ -129,7 +130,7 @@ export type FloatingSearchSidebarProps = {
   placeholder?: string;
 };
 
-export type ContentSearchClientProps<T extends ContentItem = ContentItem> = {
+export type ContentSearchClientProps<T extends DisplayableContent = DisplayableContent> = {
   items: readonly T[] | T[];
   type: CategoryId;
   searchPlaceholder: string;
