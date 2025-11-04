@@ -113,7 +113,13 @@
     "BETTERSTACK_SOURCE_TOKEN",
     "KV_URL",
     "REDIS_URL",
-    "LOGTAIL_URL"
+    "LOGTAIL_URL",
+    "LOGTAIL_SOURCE_TOKEN",
+    "REVALIDATE_SECRET",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY",
+    "R2_ENDPOINT",
+    "R2_BUCKET_NAME"
   ],
   "globalPassThroughEnv": [
     "VERCEL",

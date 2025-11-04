@@ -39,6 +39,7 @@ import { type CategoryId, getHomepageCategoryIds } from '@/src/lib/config/catego
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
+import type { Tables } from '@/src/types/database.types';
 
 export const metadata = await generatePageMetadata('/');
 
@@ -68,23 +69,22 @@ async function HomeContentSection({
     const enrichedData = homepageContentData;
 
     // Extract featured content (items with _featured flag)
-    const featuredByCategory: Record<string, unknown[]> = {};
+    const featuredByCategory: Record<string, EnrichedMetadata[]> = {};
     for (const [category, items] of Object.entries(enrichedData.categoryData)) {
       if (category === 'allConfigs') continue; // Skip allConfigs for featured
 
-      const featured = (items as unknown[])
-        .filter((item: unknown) => {
-          const obj = item as Record<string, unknown>;
+      const featured = items
+        .filter((item) => {
           return (
-            '_featured' in obj &&
-            obj._featured !== null &&
-            typeof obj._featured === 'object' &&
-            'rank' in obj._featured
+            '_featured' in item &&
+            item._featured !== null &&
+            typeof item._featured === 'object' &&
+            'rank' in item._featured
           );
         })
-        .sort((a: unknown, b: unknown) => {
-          const aObj = a as Record<string, { rank: number } | undefined>;
-          const bObj = b as Record<string, { rank: number } | undefined>;
+        .sort((a, b) => {
+          const aObj = a as EnrichedMetadata & { _featured?: { rank: number } };
+          const bObj = b as EnrichedMetadata & { _featured?: { rank: number } };
           return (aObj._featured?.rank ?? 0) - (bObj._featured?.rank ?? 0);
         })
         .slice(0, 6);
@@ -135,12 +135,26 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   });
 
   // Extract member_count and top_contributors from consolidated response
+  type UserRow = Pick<
+    Tables<'users'>,
+    | 'id'
+    | 'slug'
+    | 'name'
+    | 'image'
+    | 'bio'
+    | 'work'
+    | 'reputation_score'
+    | 'tier'
+    | 'tier_name'
+    | 'tier_progress'
+  >;
+
   const memberCount = homepageError
     ? 0
     : (homepageData as { member_count?: number })?.member_count || 0;
   const topContributors = homepageError
     ? []
-    : (homepageData as { top_contributors?: unknown[] })?.top_contributors || [];
+    : (homepageData as { top_contributors?: UserRow[] })?.top_contributors || [];
 
   return (
     <div className={'min-h-screen bg-background'}>

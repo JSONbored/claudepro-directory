@@ -170,23 +170,22 @@ export function RelatedContentClient({
         });
 
         const convertedItems = response.items.map(
-          (item: RelatedContentRPCResult): RelatedContentItem =>
-            ({
-              category: item.category,
-              slug: item.slug,
-              title: item.title,
-              description: item.description,
-              author: item.author,
-              date_added: item.date_added,
-              tags: item.tags,
-              score: item.score,
-              matchType: item.match_type,
-              matchDetails: {
-                matchedTags: item.matched_tags || [],
-                matchedKeywords: [],
-              },
-            }) as unknown as RelatedContentItem
-        );
+          (item: RelatedContentRPCResult): Partial<RelatedContentItem> => ({
+            category: item.category,
+            slug: item.slug,
+            title: item.title,
+            description: item.description,
+            author: item.author,
+            date_added: item.date_added,
+            tags: item.tags,
+            score: item.score,
+            matchType: item.match_type,
+            matchDetails: {
+              matchedTags: item.matched_tags || [],
+              matchedKeywords: [],
+            },
+          })
+        ) as RelatedContentItem[];
 
         // Service now returns properly typed RelatedContentItem[] with all required fields
         setItems(convertedItems);

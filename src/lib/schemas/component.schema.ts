@@ -58,10 +58,6 @@ export interface ContentViewerProps {
   className?: string;
 }
 
-export interface EnhancedGuidesPageProps {
-  guides: Record<string, import('@/src/lib/utils/content.utils').GuideItemWithCategory[]>;
-}
-
 export interface ErrorBoundaryProps {
   children: React.ReactNode;
   fallback?: React.ComponentType<ErrorFallbackProps>;
