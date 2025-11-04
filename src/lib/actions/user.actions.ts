@@ -8,6 +8,7 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
+import { logger } from '@/src/lib/logger';
 
 // Activity summary schema - manually defined (RPC returns Json/JSONB, no generated schema)
 // Matches get_user_activity_summary RPC return structure (uses denormalized columns)
@@ -110,54 +111,72 @@ export const updateProfile = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const { userId } = ctx;
-    const supabase = await createClient();
+    try {
+      const { userId } = ctx;
+      const supabase = await createClient();
 
-    const { data, error } = await supabase.rpc('update_user_profile', {
-      p_user_id: userId,
-      ...(parsedInput.display_name && { p_display_name: parsedInput.display_name }),
-      ...(parsedInput.bio !== undefined && { p_bio: parsedInput.bio }),
-      ...(parsedInput.work !== undefined && { p_work: parsedInput.work }),
-      ...(parsedInput.website !== undefined && { p_website: parsedInput.website }),
-      ...(parsedInput.social_x_link !== undefined && {
-        p_social_x_link: parsedInput.social_x_link,
-      }),
-      ...(parsedInput.interests && { p_interests: parsedInput.interests }),
-      ...(parsedInput.profile_public !== undefined && {
-        p_profile_public: parsedInput.profile_public,
-      }),
-      ...(parsedInput.follow_email !== undefined && { p_follow_email: parsedInput.follow_email }),
-    });
+      const { data, error } = await supabase.rpc('update_user_profile', {
+        p_user_id: userId,
+        ...(parsedInput.display_name && { p_display_name: parsedInput.display_name }),
+        ...(parsedInput.bio !== undefined && { p_bio: parsedInput.bio }),
+        ...(parsedInput.work !== undefined && { p_work: parsedInput.work }),
+        ...(parsedInput.website !== undefined && { p_website: parsedInput.website }),
+        ...(parsedInput.social_x_link !== undefined && {
+          p_social_x_link: parsedInput.social_x_link,
+        }),
+        ...(parsedInput.interests && { p_interests: parsedInput.interests }),
+        ...(parsedInput.profile_public !== undefined && {
+          p_profile_public: parsedInput.profile_public,
+        }),
+        ...(parsedInput.follow_email !== undefined && { p_follow_email: parsedInput.follow_email }),
+      });
 
-    if (error) {
-      throw new Error(`Failed to update profile: ${error.message}`);
+      if (error) {
+        throw new Error(`Failed to update profile: ${error.message}`);
+      }
+
+      const result = data as { success: boolean; profile: { slug: string } };
+
+      revalidatePath(`/u/${result.profile.slug}`);
+      revalidatePath('/account');
+      revalidatePath('/account/settings');
+
+      return result;
+    } catch (error) {
+      logger.error(
+        'Failed to update user profile',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId, hasDisplayName: !!parsedInput.display_name }
+      );
+      throw error;
     }
-
-    const result = data as { success: boolean; profile: { slug: string } };
-
-    revalidatePath(`/u/${result.profile.slug}`);
-    revalidatePath('/account');
-    revalidatePath('/account/settings');
-
-    return result;
   });
 
 export const refreshProfileFromOAuth = authedAction
   .metadata({ actionName: 'refreshProfileFromOAuth', category: 'user' })
   .schema(z.void())
   .action(async ({ ctx }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('refresh_profile_from_oauth', {
-      user_id: ctx.userId,
-    });
-    if (error) throw new Error(`Failed to refresh profile from OAuth: ${error.message}`);
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('refresh_profile_from_oauth', {
+        user_id: ctx.userId,
+      });
+      if (error) throw new Error(`Failed to refresh profile from OAuth: ${error.message}`);
 
-    const profile = data as { slug: string } | null;
-    if (profile?.slug) revalidatePath(`/u/${profile.slug}`);
-    revalidatePath('/account');
-    revalidatePath('/account/settings');
+      const profile = data as { slug: string } | null;
+      if (profile?.slug) revalidatePath(`/u/${profile.slug}`);
+      revalidatePath('/account');
+      revalidatePath('/account/settings');
 
-    return { success: true, message: 'Profile refreshed from OAuth provider' };
+      return { success: true, message: 'Profile refreshed from OAuth provider' };
+    } catch (error) {
+      logger.error(
+        'Failed to refresh profile from OAuth',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId }
+      );
+      throw error;
+    }
   });
 
 export const addBookmark = authedAction
@@ -167,26 +186,39 @@ export const addBookmark = authedAction
   })
   .schema(bookmarkInsertTransformSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const { content_type, content_slug, notes } = parsedInput;
-    const { userId } = ctx;
-    const supabase = await createClient();
+    try {
+      const { content_type, content_slug, notes } = parsedInput;
+      const { userId } = ctx;
+      const supabase = await createClient();
 
-    const { data, error } = await supabase.rpc('add_bookmark', {
-      p_user_id: userId,
-      p_content_type: content_type,
-      p_content_slug: content_slug,
-      ...(notes && { p_notes: notes }),
-    });
+      const { data, error } = await supabase.rpc('add_bookmark', {
+        p_user_id: userId,
+        p_content_type: content_type,
+        p_content_slug: content_slug,
+        ...(notes && { p_notes: notes }),
+      });
 
-    if (error) {
-      throw new Error(`Failed to create bookmark: ${error.message}`);
+      if (error) {
+        throw new Error(`Failed to create bookmark: ${error.message}`);
+      }
+
+      revalidatePath('/account');
+      revalidatePath('/account/library');
+      revalidatePath('/for-you');
+
+      return data as { success: boolean; bookmark: unknown };
+    } catch (error) {
+      logger.error(
+        'Failed to add bookmark',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          contentType: parsedInput.content_type,
+          contentSlug: parsedInput.content_slug,
+        }
+      );
+      throw error;
     }
-
-    revalidatePath('/account');
-    revalidatePath('/account/library');
-    revalidatePath('/for-you');
-
-    return data as { success: boolean; bookmark: unknown };
   });
 
 export const removeBookmark = authedAction
@@ -196,26 +228,39 @@ export const removeBookmark = authedAction
   })
   .schema(removeBookmarkSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const { content_type, content_slug } = parsedInput;
-    const { userId } = ctx;
-    const supabase = await createClient();
+    try {
+      const { content_type, content_slug } = parsedInput;
+      const { userId } = ctx;
+      const supabase = await createClient();
 
-    const { data, error } = await supabase.rpc('remove_bookmark', {
-      p_user_id: userId,
-      p_content_type: content_type,
-      p_content_slug: content_slug,
-    });
+      const { data, error } = await supabase.rpc('remove_bookmark', {
+        p_user_id: userId,
+        p_content_type: content_type,
+        p_content_slug: content_slug,
+      });
 
-    if (error) {
-      throw new Error(`Failed to delete bookmark: ${error.message}`);
+      if (error) {
+        throw new Error(`Failed to delete bookmark: ${error.message}`);
+      }
+
+      revalidatePath('/account');
+      revalidatePath('/account/library');
+      revalidateTag(`user-${userId}`, 'max');
+      revalidatePath('/for-you');
+
+      return data as { success: boolean };
+    } catch (error) {
+      logger.error(
+        'Failed to remove bookmark',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          contentType: parsedInput.content_type,
+          contentSlug: parsedInput.content_slug,
+        }
+      );
+      throw error;
     }
-
-    revalidatePath('/account');
-    revalidatePath('/account/library');
-    revalidateTag(`user-${userId}`, 'max');
-    revalidatePath('/for-you');
-
-    return data as { success: boolean };
   });
 
 export async function isBookmarked(content_type: string, content_slug: string): Promise<boolean> {
@@ -253,26 +298,35 @@ export const addBookmarkBatch = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const { userId } = ctx;
-    const supabase = await createClient();
+    try {
+      const { userId } = ctx;
+      const supabase = await createClient();
 
-    const { data, error } = await supabase.rpc('batch_add_bookmarks', {
-      p_user_id: userId,
-      p_items: JSON.stringify(parsedInput.items),
-    });
+      const { data, error } = await supabase.rpc('batch_add_bookmarks', {
+        p_user_id: userId,
+        p_items: JSON.stringify(parsedInput.items),
+      });
 
-    if (error) {
-      throw new Error(`Failed to save bookmarks: ${error.message}`);
+      if (error) {
+        throw new Error(`Failed to save bookmarks: ${error.message}`);
+      }
+
+      const result = data as { success: boolean; saved_count: number; total_requested: number };
+
+      revalidatePath('/account');
+      revalidatePath('/account/library');
+      revalidateTag(`user-${userId}`, 'max');
+      revalidatePath('/for-you');
+
+      return result;
+    } catch (error) {
+      logger.error(
+        'Failed to batch add bookmarks',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId, itemCount: parsedInput.items.length }
+      );
+      throw error;
     }
-
-    const result = data as { success: boolean; saved_count: number; total_requested: number };
-
-    revalidatePath('/account');
-    revalidatePath('/account/library');
-    revalidateTag(`user-${userId}`, 'max');
-    revalidatePath('/for-you');
-
-    return result;
   });
 
 const followSchema = z.object({
@@ -288,23 +342,32 @@ export const toggleFollow = authedAction
   })
   .schema(followSchema)
   .action(async ({ parsedInput: { action, user_id, slug }, ctx }) => {
-    const { userId } = ctx;
-    const supabase = await createClient();
+    try {
+      const { userId } = ctx;
+      const supabase = await createClient();
 
-    const { data, error } = await supabase.rpc('toggle_follow', {
-      p_follower_id: userId,
-      p_following_id: user_id,
-      p_action: action,
-    });
+      const { data, error } = await supabase.rpc('toggle_follow', {
+        p_follower_id: userId,
+        p_following_id: user_id,
+        p_action: action,
+      });
 
-    if (error) {
-      throw new Error(`Failed to ${action} user: ${error.message}`);
+      if (error) {
+        throw new Error(`Failed to ${action} user: ${error.message}`);
+      }
+
+      revalidatePath(`/u/${slug}`);
+      revalidatePath('/account');
+
+      return data as { success: boolean; action: string };
+    } catch (error) {
+      logger.error(
+        `Failed to ${action} user`,
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId, targetUserId: user_id, action }
+      );
+      throw error;
     }
-
-    revalidatePath(`/u/${slug}`);
-    revalidatePath('/account');
-
-    return data as { success: boolean; action: string };
   });
 
 export async function isFollowing(user_id: string): Promise<boolean> {
@@ -328,15 +391,24 @@ export const getActivitySummary = authedAction
   .schema(z.void())
   .outputSchema(activitySummarySchema)
   .action(async ({ ctx }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('get_user_activity_summary', {
-      p_user_id: ctx.userId,
-    });
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('get_user_activity_summary', {
+        p_user_id: ctx.userId,
+      });
 
-    if (error) throw new Error(`Failed to fetch user activity summary: ${error.message}`);
+      if (error) throw new Error(`Failed to fetch user activity summary: ${error.message}`);
 
-    // RPC returns Json - validate with output schema
-    return activitySummarySchema.parse(data);
+      // RPC returns Json - validate with output schema
+      return activitySummarySchema.parse(data);
+    } catch (error) {
+      logger.error(
+        'Failed to get activity summary',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId }
+      );
+      throw error;
+    }
   });
 
 export const getActivityTimeline = authedAction
@@ -344,15 +416,24 @@ export const getActivityTimeline = authedAction
   .schema(activityFilterSchema)
   .outputSchema(activityTimelineResponseSchema)
   .action(async ({ parsedInput: { type, limit = 20, offset = 0 }, ctx }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('get_user_activity_timeline', {
-      p_user_id: ctx.userId,
-      ...(type && { p_type: type }),
-      p_limit: limit,
-      p_offset: offset,
-    });
-    if (error) throw new Error(`Failed to fetch activity timeline: ${error.message}`);
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('get_user_activity_timeline', {
+        p_user_id: ctx.userId,
+        ...(type && { p_type: type }),
+        p_limit: limit,
+        p_offset: offset,
+      });
+      if (error) throw new Error(`Failed to fetch activity timeline: ${error.message}`);
 
-    // Validate RPC response with Zod schema (runtime type safety)
-    return activityTimelineResponseSchema.parse(data);
+      // Validate RPC response with Zod schema (runtime type safety)
+      return activityTimelineResponseSchema.parse(data);
+    } catch (error) {
+      logger.error(
+        'Failed to get activity timeline',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId, type: type || 'all', limit, offset }
+      );
+      throw error;
+    }
   });

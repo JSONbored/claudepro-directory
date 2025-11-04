@@ -26,20 +26,46 @@ import type { Database } from '@/src/types/database.types';
 export const revalidate = 21600;
 
 export async function generateStaticParams() {
-  const allParams: Array<{ category: string; slug: string }> = [];
+  try {
+    const allParams: Array<{ category: string; slug: string }> = [];
 
-  for (const category of VALID_CATEGORIES) {
-    const items = await getContentByCategory(category);
+    for (const category of VALID_CATEGORIES) {
+      try {
+        const items = await getContentByCategory(category);
 
-    for (const item of items) {
-      allParams.push({
-        category,
-        slug: item.slug,
-      });
+        for (const item of items) {
+          allParams.push({
+            category,
+            slug: item.slug,
+          });
+        }
+      } catch (error) {
+        logger.error(
+          'getContentByCategory error in generateStaticParams',
+          error instanceof Error ? error : new Error(String(error)),
+          {
+            category,
+            phase: 'build-time',
+            route: '[category]/[slug]/page.tsx',
+          }
+        );
+        // Continue with next category (partial build better than full failure)
+      }
     }
-  }
 
-  return allParams;
+    return allParams;
+  } catch (error) {
+    logger.error(
+      'generateStaticParams error in [category]/[slug]',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        phase: 'build-time',
+        route: '[category]/[slug]/page.tsx',
+      }
+    );
+    // Return empty array (prevents build failure, skips detail pages)
+    return [];
+  }
 }
 
 export async function generateMetadata({
@@ -58,12 +84,32 @@ export async function generateMetadata({
 
   // Use consolidated RPC for metadata (anon client for ISR/static generation)
   const supabase = createAnonClient();
-  const { data } = await supabase.rpc('get_content_detail_complete', {
+  const { data, error } = await supabase.rpc('get_content_detail_complete', {
     p_category: category,
     p_slug: slug,
   });
 
+  if (error) {
+    logger.error('Build-time RPC error in generateMetadata', error, {
+      category,
+      slug,
+      phase: 'generateMetadata',
+      rpcFunction: 'get_content_detail_complete',
+    });
+  }
+
   const itemMeta = data ? (data as { content: ContentItem }).content : null;
+
+  if (!itemMeta) {
+    logger.warn('No content found in generateMetadata', {
+      category,
+      slug,
+      phase: 'generateMetadata',
+      hasData: !!data,
+      hasError: !!error,
+    });
+  }
+
   const config = await getCategoryConfig(category as CategoryId);
 
   return generatePageMetadata('/:category/:slug', {
@@ -89,14 +135,9 @@ export default async function DetailPage({
 
   const config = await getCategoryConfig(category as CategoryId);
   if (!config) {
+    logger.warn('No category config found', { category, slug });
     notFound();
   }
-
-  logger.info('Detail page accessed', {
-    category,
-    slug,
-    validated: true,
-  });
 
   // Consolidated RPC: 2-3 calls → 1 (50-67% reduction)
   // get_content_detail_complete() includes: content + analytics + related items + collection items
@@ -110,21 +151,22 @@ export default async function DetailPage({
     }
   );
 
-  logger.info('RPC response', {
-    category,
-    slug,
-    hasData: !!detailData,
-    hasError: !!detailError,
-    errorMessage: detailError?.message ?? 'No error',
-    dataType: typeof detailData,
-    dataKeys: detailData ? Object.keys(detailData).join(',') : 'null',
-  });
-
-  if (detailError || !detailData) {
-    logger.warn('Item not found', {
+  if (detailError) {
+    logger.error('RPC error loading content detail', detailError, {
       category,
       slug,
-      error: detailError?.message ?? 'No error details',
+      rpcFunction: 'get_content_detail_complete',
+      phase: 'page-render',
+    });
+    notFound();
+  }
+
+  if (!detailData) {
+    logger.warn('No content data returned from RPC', {
+      category,
+      slug,
+      rpcFunction: 'get_content_detail_complete',
+      phase: 'page-render',
     });
     notFound();
   }

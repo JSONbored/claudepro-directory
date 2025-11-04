@@ -14,12 +14,17 @@
 
 import { revalidatePath } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/src/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
     // Verify webhook secret from header
     const secret = request.headers.get('x-webhook-secret');
     if (secret !== process.env.REVALIDATE_SECRET) {
+      logger.warn('Revalidate webhook unauthorized', {
+        hasSecret: !!secret,
+        ip: request.headers.get('x-forwarded-for') || 'unknown',
+      });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -30,6 +35,11 @@ export async function POST(request: NextRequest) {
 
     // Validate route
     if (!route || typeof route !== 'string') {
+      logger.warn('Revalidate webhook invalid payload', {
+        hasRoute: !!route,
+        routeType: typeof route,
+        bodyKeys: Object.keys(body).join(', '),
+      });
       return NextResponse.json(
         { error: 'Missing or invalid route in webhook payload' },
         { status: 400 }
@@ -46,6 +56,14 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
+    logger.error(
+      'Revalidate webhook error',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        endpoint: '/api/revalidate',
+        phase: 'webhook-handler',
+      }
+    );
     return NextResponse.json(
       {
         error: 'Revalidation failed',

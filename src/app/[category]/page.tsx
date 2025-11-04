@@ -78,11 +78,24 @@ export const revalidate = 3600; // 1 hour
  * // ]
  */
 export async function generateStaticParams() {
-  const { VALID_CATEGORIES } = await import('@/src/lib/config/category-config');
+  try {
+    const { VALID_CATEGORIES } = await import('@/src/lib/config/category-config');
 
-  return VALID_CATEGORIES.map((category) => ({
-    category,
-  }));
+    return VALID_CATEGORIES.map((category) => ({
+      category,
+    }));
+  } catch (error) {
+    logger.error(
+      'generateStaticParams error in [category]',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        phase: 'build-time',
+        route: '[category]/page.tsx',
+      }
+    );
+    // Return empty array (prevents build failure, skips category pages)
+    return [];
+  }
 }
 
 /**
@@ -160,13 +173,23 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     notFound();
   }
 
-  logger.info('Category list page accessed', {
-    category,
-    itemCount: 'loading',
-  });
-
   // Load content for this category (enriched with analytics, sponsorship, etc.)
-  const items = await getContentByCategory(category);
+  let items: Awaited<ReturnType<typeof getContentByCategory>>;
+  try {
+    items = await getContentByCategory(category);
+  } catch (error) {
+    logger.error(
+      'getContentByCategory error in [category]',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        category,
+        phase: 'page-render',
+        route: '[category]/page.tsx',
+      }
+    );
+    // Return empty array on error (shows empty state instead of crashing)
+    items = [];
+  }
 
   // Process badges (handle dynamic count badges)
   const badges = config.listPage.badges.map((badge) => {

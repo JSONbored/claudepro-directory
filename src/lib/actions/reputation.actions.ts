@@ -42,8 +42,6 @@ export const recalculateReputation = authedAction
   .metadata({ actionName: 'recalculateReputation', category: 'reputation' })
   .schema(z.void())
   .action(async ({ ctx }) => {
-    logger.info('Recalculating reputation', { userId: ctx.userId });
-
     const supabase = await createClient();
     const { data, error } = await supabase.rpc('calculate_user_reputation', {
       target_user_id: ctx.userId,
@@ -52,11 +50,10 @@ export const recalculateReputation = authedAction
     if (error) {
       logger.error('Failed to recalculate reputation', new Error(error.message), {
         userId: ctx.userId,
+        rpcFunction: 'calculate_user_reputation',
       });
       throw new Error(`Failed to recalculate reputation: ${error.message}`);
     }
-
-    logger.info(`Reputation recalculated: ${data}`, { userId: ctx.userId });
 
     revalidatePath('/account');
     revalidatePath('/u/*');

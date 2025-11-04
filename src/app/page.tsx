@@ -134,6 +134,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     p_category_ids: getHomepageCategoryIds(),
   });
 
+  if (homepageError) {
+    logger.error('Homepage RPC error', homepageError, {
+      rpcFunction: 'get_homepage_complete',
+      phase: 'homepage-render',
+    });
+  }
+
   // Extract member_count and top_contributors from consolidated response
   type UserRow = Pick<
     Tables<'users'>,

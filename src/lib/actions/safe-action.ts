@@ -41,7 +41,7 @@ export const actionClient = createSafeActionClient({
   });
 });
 
-export const rateLimitedAction = actionClient.use(async ({ next, metadata, ctx }) => {
+export const rateLimitedAction = actionClient.use(async ({ next, metadata }) => {
   const parsedMetadata = actionMetadataSchema.safeParse(metadata);
   if (!parsedMetadata.success) {
     logger.error('Invalid action metadata', new Error(parsedMetadata.error.message), {
@@ -50,25 +50,8 @@ export const rateLimitedAction = actionClient.use(async ({ next, metadata, ctx }
     throw new Error('Invalid action configuration');
   }
 
-  const { actionName, category } = parsedMetadata.data;
-
-  logger.info(`Action started: ${actionName}`, {
-    actionName,
-    category: category || 'uncategorized',
-    userAgent: ctx.userAgent,
-  });
-
-  const result = await next();
-
-  const duration = performance.now() - ctx.startTime;
-  logger.info(`Action completed: ${actionName}`, {
-    actionName,
-    category: category || 'uncategorized',
-    duration: Number(duration.toFixed(2)),
-    success: result.data !== undefined,
-  });
-
-  return result;
+  // Only errors are logged - handleServerError catches failures
+  return next();
 });
 
 export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => {
@@ -79,14 +62,6 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
     data: { user },
     error,
   } = await supabase.auth.getUser();
-
-  logger.info('authedAction getUser result', {
-    hasUser: !!user,
-    userId: user?.id ?? 'none',
-    hasError: !!error,
-    errorMessage: error?.message ?? 'none',
-    actionName: metadata?.actionName ?? 'unknown',
-  });
 
   if (error || !user) {
     const headersList = await headers();
@@ -115,14 +90,6 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
     logger.warn('Unauthorized action attempt', warnData);
     throw new Error('Unauthorized. Please sign in to continue.');
   }
-
-  const logData: Record<string, string> = {
-    actionName: metadata?.actionName || 'unknown',
-    userId: user.id,
-  };
-  if (user.email) logData.userEmail = user.email;
-
-  logger.info(`Authenticated action: ${metadata?.actionName}`, logData);
 
   const authCtx: { userId: string; userEmail?: string } = {
     userId: user.id,

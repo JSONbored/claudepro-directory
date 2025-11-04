@@ -37,21 +37,36 @@ export const createCollection = authedAction
   .metadata({ actionName: 'createCollection', category: 'user' })
   .schema(collectionInsertTransformSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('manage_collection', {
-      p_action: 'create',
-      p_user_id: ctx.userId,
-      p_data: parsedInput,
-    });
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('manage_collection', {
+        p_action: 'create',
+        p_user_id: ctx.userId,
+        p_data: parsedInput,
+      });
 
-    if (error) throw new Error(error.message);
-    const result = data as unknown as { success: boolean; collection: Tables<'user_collections'> };
+      if (error) throw new Error(error.message);
+      const result = data as unknown as {
+        success: boolean;
+        collection: Tables<'user_collections'>;
+      };
 
-    revalidatePath('/account');
-    revalidatePath('/account/library');
-    if (result.collection?.is_public) revalidatePath('/u/[slug]', 'page');
+      revalidatePath('/account');
+      revalidatePath('/account/library');
+      if (result.collection?.is_public) revalidatePath('/u/[slug]', 'page');
 
-    return result;
+      return result;
+    } catch (error) {
+      logger.error(
+        'Failed to create collection',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          collectionName: parsedInput.name,
+        }
+      );
+      throw error;
+    }
   });
 
 /**
@@ -61,22 +76,37 @@ export const updateCollection = authedAction
   .metadata({ actionName: 'updateCollection', category: 'user' })
   .schema(collectionInsertTransformSchema.extend({ id: z.string().uuid() }))
   .action(async ({ parsedInput, ctx }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('manage_collection', {
-      p_action: 'update',
-      p_user_id: ctx.userId,
-      p_data: parsedInput,
-    });
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('manage_collection', {
+        p_action: 'update',
+        p_user_id: ctx.userId,
+        p_data: parsedInput,
+      });
 
-    if (error) throw new Error(error.message);
-    const result = data as unknown as { success: boolean; collection: Tables<'user_collections'> };
+      if (error) throw new Error(error.message);
+      const result = data as unknown as {
+        success: boolean;
+        collection: Tables<'user_collections'>;
+      };
 
-    revalidatePath('/account');
-    revalidatePath('/account/library');
-    revalidatePath(`/account/library/${result.collection.slug}`);
-    if (result.collection.is_public) revalidatePath('/u/[slug]', 'page');
+      revalidatePath('/account');
+      revalidatePath('/account/library');
+      revalidatePath(`/account/library/${result.collection.slug}`);
+      if (result.collection.is_public) revalidatePath('/u/[slug]', 'page');
 
-    return result;
+      return result;
+    } catch (error) {
+      logger.error(
+        'Failed to update collection',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          collectionId: parsedInput.id,
+        }
+      );
+      throw error;
+    }
   });
 
 /**
@@ -86,20 +116,32 @@ export const deleteCollection = authedAction
   .metadata({ actionName: 'deleteCollection', category: 'user' })
   .schema(z.object({ id: z.string().uuid() }))
   .action(async ({ parsedInput, ctx }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('manage_collection', {
-      p_action: 'delete',
-      p_user_id: ctx.userId,
-      p_data: parsedInput,
-    });
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('manage_collection', {
+        p_action: 'delete',
+        p_user_id: ctx.userId,
+        p_data: parsedInput,
+      });
 
-    if (error) throw new Error(error.message);
+      if (error) throw new Error(error.message);
 
-    revalidatePath('/account');
-    revalidatePath('/account/library');
-    revalidatePath('/u/[slug]', 'page');
+      revalidatePath('/account');
+      revalidatePath('/account/library');
+      revalidatePath('/u/[slug]', 'page');
 
-    return data as { success: boolean };
+      return data as { success: boolean };
+    } catch (error) {
+      logger.error(
+        'Failed to delete collection',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          collectionId: parsedInput.id,
+        }
+      );
+      throw error;
+    }
   });
 
 /**
@@ -501,17 +543,29 @@ export const createPost = authedAction
   .metadata({ actionName: 'createPost', category: 'form' })
   .schema(createPostSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('manage_post', {
-      p_action: 'create',
-      p_user_id: ctx.userId,
-      p_data: parsedInput,
-    });
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('manage_post', {
+        p_action: 'create',
+        p_user_id: ctx.userId,
+        p_data: parsedInput,
+      });
 
-    if (error) throw new Error(error.message);
+      if (error) throw new Error(error.message);
 
-    revalidatePath('/board');
-    return data as unknown as { success: boolean; post: Tables<'posts'> };
+      revalidatePath('/board');
+      return data as unknown as { success: boolean; post: Tables<'posts'> };
+    } catch (error) {
+      logger.error(
+        'Failed to create post',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          title: parsedInput.title,
+        }
+      );
+      throw error;
+    }
   });
 
 /**
@@ -521,17 +575,29 @@ export const updatePost = authedAction
   .metadata({ actionName: 'updatePost', category: 'form' })
   .schema(updatePostSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('manage_post', {
-      p_action: 'update',
-      p_user_id: ctx.userId,
-      p_data: parsedInput,
-    });
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('manage_post', {
+        p_action: 'update',
+        p_user_id: ctx.userId,
+        p_data: parsedInput,
+      });
 
-    if (error) throw new Error(error.message);
+      if (error) throw new Error(error.message);
 
-    revalidatePath('/board');
-    return data as unknown as { success: boolean; post: Tables<'posts'> };
+      revalidatePath('/board');
+      return data as unknown as { success: boolean; post: Tables<'posts'> };
+    } catch (error) {
+      logger.error(
+        'Failed to update post',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          postId: parsedInput.id,
+        }
+      );
+      throw error;
+    }
   });
 
 /**
@@ -541,17 +607,29 @@ export const deletePost = authedAction
   .metadata({ actionName: 'deletePost', category: 'form' })
   .schema(z.object({ id: z.string().uuid() }))
   .action(async ({ parsedInput, ctx }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('manage_post', {
-      p_action: 'delete',
-      p_user_id: ctx.userId,
-      p_data: parsedInput,
-    });
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('manage_post', {
+        p_action: 'delete',
+        p_user_id: ctx.userId,
+        p_data: parsedInput,
+      });
 
-    if (error) throw new Error(error.message);
+      if (error) throw new Error(error.message);
 
-    revalidatePath('/board');
-    return data as { success: boolean };
+      revalidatePath('/board');
+      return data as { success: boolean };
+    } catch (error) {
+      logger.error(
+        'Failed to delete post',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          postId: parsedInput.id,
+        }
+      );
+      throw error;
+    }
   });
 
 export const votePost = authedAction
