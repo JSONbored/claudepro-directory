@@ -25,6 +25,8 @@ import {
   successResponse,
   methodNotAllowedResponse,
   badRequestResponse,
+  jsonResponse,
+  publicCorsHeaders,
 } from '../_shared/utils/response.ts';
 
 // React Email Templates
@@ -42,15 +44,11 @@ const supabase = createClient(SUPABASE_ENV.url, SUPABASE_ENV.serviceRoleKey);
 const hookSecret = AUTH_HOOK_ENV.secret.replace('v1,whsec_', '');
 
 Deno.serve(async (req: Request) => {
-  // Handle CORS preflight
+  // Handle CORS preflight - Use public headers (no Authorization to avoid CSRF)
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, X-Email-Action, Authorization',
-      },
+      headers: publicCorsHeaders,
     });
   }
 
@@ -163,20 +161,13 @@ async function handleSubscribe(req: Request): Promise<Response> {
       }
       if (dbError.message?.includes('Rate limit')) {
         // Rate limit exceeded (triggered by database trigger)
-        return new Response(
-          JSON.stringify({
+        return jsonResponse(
+          {
             error: 'Rate limit exceeded',
             message: 'Too many subscription attempts. Please try again later.',
-          }),
-          {
-            status: 429,
-            headers: {
-              'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'POST, OPTIONS',
-              'Access-Control-Allow-Headers': 'Content-Type, X-Email-Action, Authorization',
-            },
-          }
+          },
+          429,
+          publicCorsHeaders
         );
       }
       throw new Error(`Database insert failed: ${dbError.message}`);

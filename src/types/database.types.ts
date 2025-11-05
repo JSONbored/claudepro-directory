@@ -4819,6 +4819,15 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_enriched_content_list: {
+        Args: {
+          p_category?: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_slugs?: string[];
+        };
+        Returns: Json;
+      };
       get_featured_jobs: {
         Args: never;
         Returns: {

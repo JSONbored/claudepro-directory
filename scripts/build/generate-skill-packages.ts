@@ -12,20 +12,18 @@
  * 6. Memory-efficient: Stream ZIPs directly to storage (no disk writes)
  */
 
-import { createHash } from 'node:crypto';
-import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
 import archiver from 'archiver';
 import { transformSkillToMarkdown } from '@/src/lib/transformers/skill-to-md';
 import type { Database } from '@/src/types/database.types';
+import { computeHash, hasHashChanged, setHash } from '../utils/build-cache.js';
 import { ensureEnvVars } from '../utils/env.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const ROOT = path.resolve(__dirname, '../..');
-const HASH_CACHE_FILE = path.join(ROOT, '.skill-packages-hash-cache.json');
+const _ROOT = path.resolve(__dirname, '../..');
 
 type SkillRow = Database['public']['Tables']['content']['Row'] & { category: 'skills' };
 
@@ -43,26 +41,6 @@ if (!(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY)) {
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-/**
- * Load hash cache (content hash → prevents unnecessary rebuilds)
- */
-async function loadHashCache(): Promise<Map<string, string>> {
-  try {
-    const cacheContent = await fs.readFile(HASH_CACHE_FILE, 'utf-8');
-    return new Map(JSON.parse(cacheContent));
-  } catch {
-    return new Map(); // Cache doesn't exist yet
-  }
-}
-
-/**
- * Save hash cache
- */
-async function saveHashCache(cache: Map<string, string>): Promise<void> {
-  const cacheContent = JSON.stringify(Array.from(cache.entries()));
-  await fs.writeFile(HASH_CACHE_FILE, cacheContent, 'utf-8');
-}
 
 /**
  * Fetch all skills from database (single query)
@@ -85,14 +63,9 @@ async function loadAllSkillsFromDatabase(): Promise<SkillRow[]> {
  * OPTIMIZATION: Check if skill needs rebuild using content hash
  * Only rebuild if SKILL.md content actually changed
  */
-function needsRebuild(
-  skill: SkillRow,
-  skillMdContent: string,
-  hashCache: Map<string, string>
-): boolean {
-  const contentHash = createHash('sha256').update(skillMdContent).digest('hex');
-  const cachedHash = hashCache.get(skill.slug);
-  return cachedHash !== contentHash;
+function needsRebuild(skill: SkillRow, skillMdContent: string): boolean {
+  const contentHash = computeHash(skillMdContent);
+  return hasHashChanged(`skill:${skill.slug}`, contentHash);
 }
 
 /**
@@ -123,11 +96,12 @@ async function generateZipBuffer(slug: string, skillMdContent: string): Promise<
  * OPTIMIZATION: Process skills in parallel batches
  */
 async function processBatch(
-  skills: Array<{ skill: SkillRow; skillMd: string; hash: string }>,
-  hashCache: Map<string, string>
+  skills: Array<{ skill: SkillRow; skillMd: string; hash: string }>
 ): Promise<Array<{ slug: string; status: 'success' | 'error'; message: string }>> {
   const results = await Promise.allSettled(
     skills.map(async ({ skill, skillMd, hash }) => {
+      const buildStartTime = performance.now();
+
       // Generate ZIP
       const zipBuffer = await generateZipBuffer(skill.slug, skillMd);
       const fileSizeKB = (zipBuffer.length / 1024).toFixed(2);
@@ -135,8 +109,14 @@ async function processBatch(
       // Upload to Supabase Storage (source of truth)
       await uploadToStorage(skill, zipBuffer);
 
-      // Update hash cache
-      hashCache.set(skill.slug, hash);
+      const buildDuration = performance.now() - buildStartTime;
+
+      // Update unified cache
+      setHash(`skill:${skill.slug}`, hash, {
+        reason: 'Skill package rebuilt',
+        duration: buildDuration,
+        files: [`${skill.slug}.zip`],
+      });
 
       return {
         slug: skill.slug,
@@ -202,9 +182,9 @@ async function main() {
 
   const startTime = performance.now();
 
-  // 1. Load hash cache and skills in parallel
-  console.log('\n📊 Loading skills and hash cache...');
-  const [hashCache, skills] = await Promise.all([loadHashCache(), loadAllSkillsFromDatabase()]);
+  // 1. Load skills from database
+  console.log('\n📊 Loading skills from database...');
+  const skills = await loadAllSkillsFromDatabase();
   console.log(`✅ Found ${skills.length} skills in database\n`);
 
   // 2. OPTIMIZATION: Filter skills using content hash (not storage API)
@@ -213,9 +193,9 @@ async function main() {
 
   for (const skill of skills) {
     const skillMd = transformSkillToMarkdown(skill);
-    const hash = createHash('sha256').update(skillMd).digest('hex');
+    const hash = computeHash(skillMd);
 
-    if (needsRebuild(skill, skillMd, hashCache)) {
+    if (needsRebuild(skill, skillMd)) {
       skillsToRebuild.push({ skill, skillMd, hash });
     }
   }
@@ -235,7 +215,7 @@ async function main() {
 
   for (let i = 0; i < skillsToRebuild.length; i += CONCURRENCY) {
     const batch = skillsToRebuild.slice(i, i + CONCURRENCY);
-    const batchResults = await processBatch(batch, hashCache);
+    const batchResults = await processBatch(batch);
 
     allResults.push(...batchResults);
 
@@ -249,10 +229,7 @@ async function main() {
     }
   }
 
-  // 4. Save updated hash cache
-  await saveHashCache(hashCache);
-
-  // 5. Summary
+  // 4. Summary
   const endTime = performance.now();
   const duration = ((endTime - startTime) / 1000).toFixed(2);
   const successCount = allResults.filter((r) => r.status === 'success').length;

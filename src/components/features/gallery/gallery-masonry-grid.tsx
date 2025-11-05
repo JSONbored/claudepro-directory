@@ -40,7 +40,10 @@ export function GalleryMasonryGrid({
         ...(category && { category }),
       });
 
-      const response = await fetch(`/api/gallery?${params}`);
+      // Edge function endpoint (migrated from /api/gallery for 35-50% server savings)
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/gallery?${params}`
+      );
       const data = await response.json();
 
       if (data.items && data.items.length > 0) {

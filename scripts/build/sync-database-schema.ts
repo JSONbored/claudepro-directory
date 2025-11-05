@@ -34,11 +34,11 @@
  */
 
 import { execSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ora from 'ora';
+import { computeHash, hasHashChanged, setHash } from '../utils/build-cache.js';
 import { ensureEnvVars } from '../utils/env.js';
 
 // ============================================================================
@@ -55,11 +55,6 @@ const ZOD_OUTPUT_FILE = join(ROOT, 'src/lib/schemas/generated/db-schemas.ts');
 const ZOD_TYPES_FILE = join(ROOT, 'src/lib/schemas/generated/db-schemas.d.ts');
 const ZOD_CONFIG_FILE = join(ROOT, 'supazod.config.ts');
 const ZOD_OUTPUT_DIR = join(ROOT, 'src/lib/schemas/generated');
-
-// Hash files
-const SCHEMA_HASH_FILE = join(ROOT, '.schema-dump-hash');
-const TYPES_HASH_FILE = join(ROOT, '.db-schema-hash');
-const ZOD_HASH_FILE = join(ROOT, '.zod-schema-hash');
 
 /**
  * Comprehensive schema query covering all database objects
@@ -145,7 +140,7 @@ function calculateSchemaHash(dbUrl: string): string | null {
       stdio: 'pipe',
     });
 
-    return createHash('sha256').update(result).digest('hex');
+    return computeHash(result);
   } catch {
     console.warn('⚠️  Could not query database schema');
     return null;
@@ -181,21 +176,6 @@ function cleanup(): void {
   // The file is already gitignored for security
 }
 
-function readHash(filePath: string): string | null {
-  if (!existsSync(filePath)) {
-    return null;
-  }
-  try {
-    return readFileSync(filePath, 'utf-8').trim();
-  } catch {
-    return null;
-  }
-}
-
-function writeHash(filePath: string, hash: string): void {
-  writeFileSync(filePath, hash, 'utf-8');
-}
-
 // ============================================================================
 // Step 1: Schema Dump
 // ============================================================================
@@ -217,9 +197,8 @@ async function generateSchemaDump(
       spinner.start('Checking for schema changes...');
       // OPTIMIZATION: Use cached hash if provided (avoids redundant database query)
       const currentHash = cachedHash !== undefined ? cachedHash : await getSchemaHash();
-      const storedHash = readHash(SCHEMA_HASH_FILE);
 
-      if (currentHash && storedHash === currentHash) {
+      if (currentHash && !hasHashChanged('schema-dump', currentHash)) {
         spinner.info('Schema unchanged - skipping dump');
         return {
           step: 'Schema Dump',
@@ -249,11 +228,15 @@ async function generateSchemaDump(
 
     // Store hash (refresh cache after successful dump)
     const currentHash = await getSchemaHash(true);
+    const duration = Math.round(performance.now() - startTime);
+
     if (currentHash) {
-      writeHash(SCHEMA_HASH_FILE, currentHash);
+      setHash('schema-dump', currentHash, {
+        reason: 'Schema dump generated',
+        duration,
+      });
     }
 
-    const duration = Math.round(performance.now() - startTime);
     spinner.succeed(`Schema dump complete (${duration}ms)`);
 
     return {
@@ -293,9 +276,8 @@ async function generateTypes(isForce: boolean, cachedHash?: string | null): Prom
       spinner.start('Checking for schema changes...');
       // OPTIMIZATION: Use cached hash if provided (avoids redundant database query)
       const currentHash = cachedHash !== undefined ? cachedHash : await getSchemaHash();
-      const storedHash = readHash(TYPES_HASH_FILE);
 
-      if (currentHash && storedHash === currentHash) {
+      if (currentHash && !hasHashChanged('db-schema', currentHash)) {
         spinner.info('Schema unchanged - skipping type generation');
         return {
           step: 'TypeScript Types',
@@ -329,11 +311,15 @@ async function generateTypes(isForce: boolean, cachedHash?: string | null): Prom
 
     // Store hash (use cached value, no need to refresh)
     const currentHash = cachedHash !== undefined ? cachedHash : await getSchemaHash();
+    const duration = Math.round(performance.now() - startTime);
+
     if (currentHash) {
-      writeHash(TYPES_HASH_FILE, currentHash);
+      setHash('db-schema', currentHash, {
+        reason: 'Database types regenerated',
+        duration,
+      });
     }
 
-    const duration = Math.round(performance.now() - startTime);
     spinner.succeed(`Type generation complete (${duration}ms)`);
 
     return {
@@ -382,10 +368,9 @@ async function generateZodSchemas(isForce: boolean): Promise<StepResult> {
       }
 
       const typesContent = readFileSync(TYPES_FILE, 'utf-8');
-      const currentHash = createHash('sha256').update(typesContent).digest('hex');
-      const storedHash = readHash(ZOD_HASH_FILE);
+      const currentHash = computeHash(typesContent);
 
-      if (storedHash === currentHash) {
+      if (!hasHashChanged('zod-schemas', currentHash)) {
         spinner.info('Types unchanged - skipping Zod generation');
         return {
           step: 'Zod Schemas',
@@ -431,10 +416,14 @@ async function generateZodSchemas(isForce: boolean): Promise<StepResult> {
 
     // Store hash
     const typesContent = readFileSync(TYPES_FILE, 'utf-8');
-    const currentHash = createHash('sha256').update(typesContent).digest('hex');
-    writeHash(ZOD_HASH_FILE, currentHash);
-
+    const currentHash = computeHash(typesContent);
     const duration = Math.round(performance.now() - startTime);
+
+    setHash('zod-schemas', currentHash, {
+      reason: 'Zod schemas regenerated from types',
+      duration,
+    });
+
     spinner.succeed(`Zod schema generation complete (${duration}ms)`);
 
     return {
@@ -495,16 +484,17 @@ async function main() {
       cachedSchemaHashForRun = await getSchemaHash();
 
       if (cachedSchemaHashForRun) {
-        const schemaUpToDate =
-          readHash(SCHEMA_HASH_FILE) === cachedSchemaHashForRun &&
-          readHash(TYPES_HASH_FILE) === cachedSchemaHashForRun;
+        const schemaUpToDate = !(
+          hasHashChanged('schema-dump', cachedSchemaHashForRun) ||
+          hasHashChanged('db-schema', cachedSchemaHashForRun)
+        );
 
         // Check Zod separately (depends on types content, not schema)
         let zodUpToDate = false;
         if (existsSync(TYPES_FILE)) {
           const typesContent = readFileSync(TYPES_FILE, 'utf-8');
-          const typesHash = createHash('sha256').update(typesContent).digest('hex');
-          zodUpToDate = readHash(ZOD_HASH_FILE) === typesHash;
+          const typesHash = computeHash(typesContent);
+          zodUpToDate = !hasHashChanged('zod-schemas', typesHash);
         }
 
         if (schemaUpToDate && zodUpToDate) {

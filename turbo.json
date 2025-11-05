@@ -8,7 +8,10 @@
       "outputs": [
         "src/lib/config/category-config.generated.ts"
       ],
-      "inputs": ["scripts/build/generate-category-config.ts"],
+      "inputs": [
+        "scripts/build/generate-category-config.ts",
+        ".build-cache/cache.json"
+      ],
       "cache": true,
       "passThroughEnv": ["VERCEL_DEPLOYMENT_ID", "NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]
     },
@@ -21,7 +24,8 @@
         "content/skills/*.json",
         "content/skills/*.zip",
         "scripts/build/generate-skill-packages.ts",
-        "src/lib/transformers/skill-to-md.ts"
+        "src/lib/transformers/skill-to-md.ts",
+        ".build-cache/cache.json"
       ],
       "cache": true,
       "persistent": true,
@@ -35,7 +39,8 @@
         "src/lib/config/category-config.ts",
         "src/lib/config/category-config.generated.ts",
         "src/lib/constants/security.ts",
-        "package.json"
+        "package.json",
+        ".build-cache/cache.json"
       ],
       "cache": true,
       "passThroughEnv": [

@@ -5169,6 +5169,15 @@ export const publicGetEnrichedContentArgsSchema = z.object({
 
 export const publicGetEnrichedContentReturnsSchema = jsonSchema;
 
+export const publicGetEnrichedContentListArgsSchema = z.object({
+  p_category: z.string().optional(),
+  p_limit: z.number().optional(),
+  p_offset: z.number().optional(),
+  p_slugs: z.array(z.string()).optional(),
+});
+
+export const publicGetEnrichedContentListReturnsSchema = jsonSchema;
+
 export const publicGetFeaturedJobsArgsSchema = z.never();
 
 export const publicGetFeaturedJobsReturnsSchema = z.array(

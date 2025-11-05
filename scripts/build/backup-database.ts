@@ -7,7 +7,6 @@
  */
 
 import { type ExecException, execSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import {
   createReadStream,
   existsSync,
@@ -20,11 +19,11 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { createClient } from '@supabase/supabase-js';
+import { computeHash, hasHashChanged, setHash } from '../utils/build-cache.js';
 import { ensureEnvVars } from '../utils/env.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = join(__dirname, '../..');
-const BACKUP_HASH_FILE = join(ROOT, '.backup-db-hash');
 const LATEST_BACKUP_DIR = join(ROOT, 'backups/latest');
 
 const forceBackup = process.argv.includes('--force');
@@ -83,13 +82,15 @@ if (supabaseUrl && supabaseKey) {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Get lightweight database state fingerprint (table row counts + modification times)
+    // NOTE: Fingerprint includes last_vacuum timestamps which change frequently,
+    // so hash may differ even without data changes. This is acceptable for backups.
     // This is ~1KB query vs ~50MB full dump - 50,000x less egress!
     const { data, error } = await supabase.rpc('get_database_fingerprint');
 
     if (error) throw error;
 
     // Create hash from fingerprint
-    currentHash = createHash('sha256').update(JSON.stringify(data)).digest('hex');
+    currentHash = computeHash(data);
 
     console.log('   ✓ Using database fingerprint for change detection');
   } catch (error) {
@@ -105,11 +106,7 @@ if (supabaseUrl && supabaseKey) {
 // ============================================================================
 // Check if backup needed (compare hashes)
 // ============================================================================
-const storedHash = existsSync(BACKUP_HASH_FILE)
-  ? readFileSync(BACKUP_HASH_FILE, 'utf-8').trim()
-  : null;
-
-if (!forceBackup && currentHash && storedHash === currentHash) {
+if (!forceBackup && currentHash && !hasHashChanged('backup-db', currentHash)) {
   console.log('   ⊘ Database unchanged - backup not needed');
   if (existsSync(LATEST_BACKUP_DIR)) {
     console.log(`   📁 Latest backup: ${LATEST_BACKUP_DIR}`);
@@ -202,14 +199,12 @@ try {
 // ============================================================================
 // OPTIMIZATION 3: Hash compressed file (3MB vs 10MB - 3x faster)
 // ============================================================================
+const backupStartTime = Date.now();
 if (!currentHash) {
   console.log('🔐 Computing backup hash...');
   const compressedContent = readFileSync(outputPath);
-  currentHash = createHash('sha256').update(compressedContent).digest('hex');
+  currentHash = computeHash(compressedContent.toString('base64'));
 }
-
-// Save hash
-writeFileSync(BACKUP_HASH_FILE, currentHash, 'utf-8');
 
 // Create 'latest' symlink (force overwrite if exists)
 execSync(`ln -sf "${timestamp}" "${LATEST_BACKUP_DIR}"`, { cwd: join(ROOT, 'backups') });
@@ -254,6 +249,15 @@ const compressionRatio = (
   (1 - Number.parseInt(compressedSize, 10) / Number.parseInt(uncompressedSize, 10)) *
   100
 ).toFixed(1);
+
+const backupDuration = Date.now() - backupStartTime;
+
+// Save hash with metadata
+setHash('backup-db', currentHash, {
+  reason: 'Scheduled database backup',
+  duration: backupDuration,
+  files: [timestamp],
+});
 
 console.log('\n✅ Optimized backup created!');
 console.log(`📁 Location: ${BACKUP_DIR}`);

@@ -553,7 +553,7 @@ function ModalVariant({
     },
     customAnalyticsEvent: 'newsletter_subscription_post_copy',
     successMessage: 'Check your inbox for a welcome email',
-    showToasts: false,
+    showToasts: true, // Let hook handle all toast notifications based on actual async results
     logContext: {
       variant: 'modal',
       copyType,
@@ -589,21 +589,9 @@ function ModalVariant({
       return;
     }
 
-    try {
-      await subscribe();
-      toasts.raw.success('Welcome to the newsletter! 🎉', {
-        description: 'Check your inbox for a welcome email',
-        duration: 5000,
-      });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to subscribe. Please try again.';
-
-      toasts.raw.error('Failed to subscribe', {
-        description: errorMessage,
-        duration: 4000,
-      });
-    }
+    // Hook handles all toast notifications internally via showToasts: true
+    // subscribe() uses startTransition(), so we don't await or try/catch here
+    subscribe();
   };
 
   const handleMaybeLater = () => {

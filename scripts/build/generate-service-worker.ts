@@ -9,7 +9,6 @@
  * - Input-based hashing (skips template rendering when inputs unchanged)
  */
 
-import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,7 +16,7 @@ import { z } from 'zod';
 import { ALL_CATEGORY_IDS } from '../../src/lib/config/category-config.generated.js';
 import { SECURITY_CONFIG } from '../../src/lib/constants/security.js';
 import { ParseStrategy, safeParse } from '../../src/lib/utils/data.utils.js';
-import { hasHashChanged, setHash } from '../utils/hash-cache.js';
+import { computeHash, hasHashChanged, setHash } from '../utils/build-cache.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -61,11 +60,11 @@ async function generateServiceWorker() {
     const allowedOrigins = SECURITY_CONFIG.allowedOrigins.map((origin) => `"${origin}"`);
 
     // OPTIMIZATION: Hash inputs instead of output (faster - skips template rendering)
-    const inputHash = createHash('sha256')
-      .update(JSON.stringify(categoryIds))
-      .update(JSON.stringify(SECURITY_CONFIG.allowedOrigins))
-      .update(version)
-      .digest('hex');
+    const inputHash = computeHash({
+      categoryIds,
+      allowedOrigins: SECURITY_CONFIG.allowedOrigins,
+      version,
+    });
 
     if (!hasHashChanged('service-worker', inputHash)) {
       console.log('✓ Service worker unchanged (inputs identical), skipping generation');
@@ -85,10 +84,14 @@ async function generateServiceWorker() {
     const outputPath = join(ROOT_DIR, 'public', 'service-worker.js');
     await writeFile(outputPath, serviceWorkerCode, 'utf-8');
 
-    // Save input hash for next build
-    setHash('service-worker', inputHash);
-
     const duration = Date.now() - startTime;
+
+    // Save input hash for next build with metadata
+    setHash('service-worker', inputHash, {
+      reason: 'Service worker regenerated',
+      duration,
+      files: [outputPath],
+    });
     console.log(`✅ Service worker generated in ${duration}ms`);
     console.log(`📝 Output: ${outputPath}`);
     console.log(`🎯 Categories: ${categoryIds.length} routes cached`);

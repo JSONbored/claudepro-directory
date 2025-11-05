@@ -923,6 +923,12 @@ export type PublicGetEnrichedContentArgs = z.infer<
 export type PublicGetEnrichedContentReturns = z.infer<
   typeof generated.publicGetEnrichedContentReturnsSchema
 >;
+export type PublicGetEnrichedContentListArgs = z.infer<
+  typeof generated.publicGetEnrichedContentListArgsSchema
+>;
+export type PublicGetEnrichedContentListReturns = z.infer<
+  typeof generated.publicGetEnrichedContentListReturnsSchema
+>;
 export type PublicGetFeaturedJobsArgs = z.infer<typeof generated.publicGetFeaturedJobsArgsSchema>;
 export type PublicGetFeaturedJobsReturns = z.infer<
   typeof generated.publicGetFeaturedJobsReturnsSchema
