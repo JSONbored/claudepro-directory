@@ -22,7 +22,15 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data.session) {
-      await supabase.rpc('refresh_profile_from_oauth', { user_id: data.user.id });
+      try {
+        await supabase.rpc('refresh_profile_from_oauth', { user_id: data.user.id });
+        logger.info('Auth callback refreshed profile from OAuth', { userId: data.user.id });
+      } catch (refreshError) {
+        logger.warn('Auth callback failed to refresh profile', {
+          userId: data.user.id,
+          error: refreshError instanceof Error ? refreshError.message : 'Unknown error',
+        });
+      }
 
       const forwardedHost = request.headers.get('x-forwarded-host');
       const isLocalEnv = process.env.NODE_ENV === 'development';

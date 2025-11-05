@@ -41,7 +41,7 @@ import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Tables } from '@/src/types/database.types';
 
-export const metadata = await generatePageMetadata('/');
+export const metadata = generatePageMetadata('/');
 
 export const revalidate = 900; // 15 minutes ISR
 
