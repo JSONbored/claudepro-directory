@@ -143,7 +143,7 @@
     "@biomejs/biome": "2.2.7",
     "@faker-js/faker": "^10.1.0",
     "@next/bundle-analyzer": "^16.0.1",
-    "@types/archiver": "^6.0.4",
+    "@types/archiver": "^7.0.0",
     "archiver": "^7.0.1",
     "babel-plugin-react-compiler": "^1.0.0",
     "fast-xml-parser": "^5.3.1",
