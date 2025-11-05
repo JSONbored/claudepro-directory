@@ -68,7 +68,7 @@ jobs:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 8  # Reduced from 15min (2x typical run time)
-    needs: [build-for-codeql]  # Removed 'changes' dependency (redundant - already in build-for-codeql)
+    needs: [changes, build-for-codeql]  # Added 'changes' dependency for output access
     # Skip on ui-only PRs (weekly schedule still runs for comprehensive check)
     if: |
       github.event_name == 'schedule' ||
@@ -84,8 +84,6 @@ jobs:
       uses: actions/checkout@v5
 
     - uses: ./.github/actions/setup-node-deps
-      with:
-        skip-build-content: 'true'
 
     - name: Download CI build artifact (if available)
       id: dl-ci

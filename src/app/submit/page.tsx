@@ -44,6 +44,7 @@ const TYPE_LABELS: Record<string, string> = {
   commands: 'Command',
   hooks: 'Hook',
   statuslines: 'Statusline',
+  skills: 'Skill',
 };
 
 function formatTimeAgo(dateString: string): string {

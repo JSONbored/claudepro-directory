@@ -121,16 +121,17 @@ jobs:
           SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
-          # Install Supabase JS client
-          npm install -g @supabase/supabase-js
+          # Install Supabase JS client using pnpm
+          pnpm install -g @supabase/supabase-js
 
           # Create Node.js script to call RPC function (database-first)
           cat > insert-via-rpc.mjs << 'EOF'
           import { createClient } from '@supabase/supabase-js';
+          import { readFileSync } from 'fs';
 
           const supabaseUrl = process.env.SUPABASE_URL;
           const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-          const submissionData = JSON.parse(process.env.SUBMISSION_DATA);
+          const submissionData = JSON.parse(readFileSync('submission.json', 'utf8'));
 
           const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -158,8 +159,13 @@ jobs:
           console.log('MESSAGE=' + data.message);
           EOF
 
+          # Write submission to file to avoid environment variable size limits
+          cat > submission.json << 'SUBMISSION_EOF'
+          ${{ steps.extract.outputs.result.submission }}
+          SUBMISSION_EOF
+          
           # Run RPC call
-          SUBMISSION_DATA='${{ steps.extract.outputs.result.submission }}' node insert-via-rpc.mjs
+          node insert-via-rpc.mjs
 
       - name: Comment on PR - Success
         if: steps.extract.outputs.result && fromJSON(steps.extract.outputs.result).valid && success()

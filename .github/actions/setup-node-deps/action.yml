@@ -1,15 +1,11 @@
 name: 'Setup Node.js with Dependencies'
-description: 'Setup Node.js with optimized caching, install dependencies, and generate content'
+description: 'Setup Node.js with optimized caching and install dependencies'
 
 inputs:
   node-version:
     description: 'Node.js version to use'
     required: false
     default: '22'
-  skip-build-content:
-    description: 'Skip building content metadata'
-    required: false
-    default: 'false'
   install-args:
     description: 'Additional arguments for pnpm install'
     required: false
@@ -51,8 +47,3 @@ runs:
           echo "Installing all dependencies..."
           pnpm install --frozen-lockfile ${{ inputs.install-args }}
         fi
-
-    - name: Generate content metadata
-      if: inputs.skip-build-content != 'true'
-      shell: bash
-      run: pnpm build:content
