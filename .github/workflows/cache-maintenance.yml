@@ -30,8 +30,8 @@ jobs:
           # Install gh actions-cache extension
           gh extension install actions/gh-actions-cache || true
 
-          # Delete caches older than 7 days
-          echo "Deleting caches older than 7 days..."
+          # Delete all caches to free up storage
+          echo "Deleting all caches..."
           gh actions-cache delete --all --repo ${{ github.repository }} || true
 
           # List current caches

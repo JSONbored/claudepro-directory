@@ -83,24 +83,24 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
-      - uses: ./.github/actions/setup-node-deps
+    - uses: ./.github/actions/setup-node-deps
       with:
         skip-build-content: 'true'
 
-      - name: Download CI build artifact (if available)
-        id: dl-ci
-        continue-on-error: true
-        uses: actions/download-artifact@v6
-        with:
-          name: build-${{ github.event.pull_request.number || 'ci' }}-${{ github.sha }}
-          path: ./
+    - name: Download CI build artifact (if available)
+      id: dl-ci
+      continue-on-error: true
+      uses: actions/download-artifact@v6
+      with:
+        name: build-${{ github.event.pull_request.number || 'ci' }}-${{ github.sha }}
+        path: ./
 
-      - name: Download build artifact from build job (fallback)
-        if: steps.dl-ci.outcome == 'failure'
-        uses: actions/download-artifact@v6
-        with:
-          name: ${{ needs.build-for-codeql.outputs.artifact-name }}
-          path: ./
+    - name: Download build artifact from build job (fallback)
+      if: steps.dl-ci.outcome == 'failure'
+      uses: actions/download-artifact@v6
+      with:
+        name: ${{ needs.build-for-codeql.outputs.artifact-name }}
+        path: ./
 
     - name: Verify build restoration
       run: |
@@ -163,7 +163,7 @@ jobs:
     - uses: ./.github/actions/setup-node-deps
 
     - name: Run pnpm audit
-      run: pnpm audit --audit-level=moderate
+      run: pnpm audit --audit-level=moderate --json > pnpm-audit.json || true
       continue-on-error: true
 
     - name: Upload audit results

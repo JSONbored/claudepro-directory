@@ -164,10 +164,16 @@ jobs:
       - name: Comment on PR - Success
         if: steps.extract.outputs.result && fromJSON(steps.extract.outputs.result).valid && success()
         uses: actions/github-script@v8
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
         with:
           script: |
             const result = ${{ steps.extract.outputs.result }};
             const submission = result.submission;
+            
+            // Extract project ID from Supabase URL (format: https://PROJECT_ID.supabase.co)
+            const supabaseUrl = process.env.SUPABASE_URL || '';
+            const projectId = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || 'PROJECT_ID';
 
             const comment = `## ✅ Content Submission Received
 
@@ -185,7 +191,7 @@ jobs:
             2. Once approved, your content will be merged to the main directory
             3. You'll be notified via GitHub when the PR is merged
 
-            **Review your submission:** [Supabase Dashboard](https://supabase.com/dashboard/project/${process.env.SUPABASE_PROJECT_ID || 'PROJECT_ID'}/editor/content_submissions)
+            **Review your submission:** [Supabase Dashboard](https://supabase.com/dashboard/project/${projectId}/editor/content_submissions)
 
             Thank you for contributing to Claude Pro Directory! 🎉`;
 
