@@ -4,6 +4,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 
@@ -22,27 +23,33 @@ interface HealthStatus {
 }
 
 export async function GET() {
-  const supabase = createAnonClient();
+  try {
+    const supabase = createAnonClient();
 
-  const { data, error } = await supabase.rpc('get_api_health');
+    const { data, error } = await supabase.rpc('get_api_health');
 
-  if (error) {
-    logger.error('Health check failed', error, { source: 'HealthCheckAPI' });
-    return NextResponse.json(
-      { status: 'unhealthy', error: error.message },
-      { status: 503, headers: { 'Cache-Control': 'no-store, max-age=0' } }
-    );
+    if (error) {
+      throw error;
+    }
+
+    const health = data as unknown as HealthStatus;
+    const statusCode = health.status === 'healthy' ? 200 : health.status === 'degraded' ? 200 : 503;
+
+    logger.info('Health check completed', { status: health.status });
+
+    return NextResponse.json(health, {
+      status: statusCode,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, max-age=0',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    });
+  } catch (error: unknown) {
+    return handleApiError(error, {
+      route: '/api/status',
+      operation: 'get_api_health',
+      method: 'GET',
+    });
   }
-
-  const health = data as unknown as HealthStatus;
-  const statusCode = health.status === 'healthy' ? 200 : health.status === 'degraded' ? 200 : 503;
-
-  return NextResponse.json(health, {
-    status: statusCode,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store, max-age=0',
-      'X-Content-Type-Options': 'nosniff',
-    },
-  });
 }

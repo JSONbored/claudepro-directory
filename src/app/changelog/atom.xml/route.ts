@@ -31,6 +31,7 @@ import { NextResponse } from 'next/server';
 import { getAllChangelogEntries, parseChangelogChanges } from '@/src/lib/changelog/loader';
 import { formatChangelogDateISO8601, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
 /**
@@ -136,28 +137,11 @@ ${categories.map((cat) => `    <category term="${escapeXml(cat)}" label="${escap
         'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
       },
     });
-  } catch (error) {
-    logger.error(
-      'Atom feed generation failed',
-      error instanceof Error ? error : new Error(String(error))
-    );
-
-    // Return minimal error feed
-    const errorAtom = `<?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <title>${escapeXml(APP_CONFIG.name)} Changelog</title>
-  <link href="${APP_CONFIG.url}/changelog" rel="alternate" type="text/html" />
-  <id>${APP_CONFIG.url}/changelog</id>
-  <updated>${new Date().toISOString()}</updated>
-  <subtitle>Error generating changelog feed. Please try again later.</subtitle>
-</feed>`;
-
-    return new NextResponse(errorAtom, {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/atom+xml; charset=utf-8',
-        'Cache-Control': 'no-store, must-revalidate',
-      },
+  } catch (error: unknown) {
+    return handleApiError(error, {
+      route: '/changelog/atom.xml',
+      operation: 'generate_atom_feed',
+      method: 'GET',
     });
   }
 }

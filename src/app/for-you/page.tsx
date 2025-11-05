@@ -23,7 +23,7 @@ const UnifiedNewsletterCapture = dynamicImport(
   }
 );
 
-import { getForYouFeed } from '@/src/lib/actions/analytics.actions';
+import { getForYouFeed } from '@/src/lib/analytics/client';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 
@@ -47,7 +47,7 @@ export default async function ForYouPage() {
   // Fetch initial recommendations
   const result = await getForYouFeed({ limit: 12, offset: 0, exclude_bookmarked: false });
 
-  if (!result?.data) {
+  if (!result) {
     return (
       <div className="container mx-auto px-4 py-12">
         <h1 className="mb-4 font-bold text-3xl">For You</h1>
@@ -63,13 +63,13 @@ export default async function ForYouPage() {
       <div className="mb-8">
         <h1 className="mb-3 font-bold text-4xl">For You</h1>
         <p className="text-lg text-muted-foreground">
-          {result.data.user_has_history
+          {result.user_has_history
             ? 'Personalized recommendations based on your activity'
             : 'Popular configurations to get you started'}
         </p>
       </div>
 
-      <ForYouFeedClient initialData={result.data} />
+      <ForYouFeedClient initialData={result} />
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>

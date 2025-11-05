@@ -31,6 +31,7 @@ import { NextResponse } from 'next/server';
 import { getAllChangelogEntries, parseChangelogChanges } from '@/src/lib/changelog/loader';
 import { formatChangelogDateRFC822, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
 /**
@@ -127,28 +128,11 @@ ${categories.map((cat) => `      <category>${escapeXml(cat)}</category>`).join('
         'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
       },
     });
-  } catch (error) {
-    logger.error(
-      'RSS feed generation failed',
-      error instanceof Error ? error : new Error(String(error))
-    );
-
-    // Return minimal error feed
-    const errorRss = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-  <channel>
-    <title>${escapeXml(APP_CONFIG.name)} Changelog</title>
-    <link>${APP_CONFIG.url}/changelog</link>
-    <description>Error generating changelog feed. Please try again later.</description>
-  </channel>
-</rss>`;
-
-    return new NextResponse(errorRss, {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/rss+xml; charset=utf-8',
-        'Cache-Control': 'no-store, must-revalidate',
-      },
+  } catch (error: unknown) {
+    return handleApiError(error, {
+      route: '/changelog/rss.xml',
+      operation: 'generate_rss_feed',
+      method: 'GET',
     });
   }
 }

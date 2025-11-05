@@ -11,8 +11,8 @@ import { z } from 'zod';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { Separator } from '@/src/components/primitives/separator';
-import { generateConfigRecommendations } from '@/src/lib/actions/analytics.actions';
 import { getQuizConfiguration } from '@/src/lib/actions/quiz.actions';
+import { generateConfigRecommendations } from '@/src/lib/analytics/client';
 
 type QuizQuestion = {
   id: string;
@@ -143,17 +143,17 @@ export function QuizForm() {
         try {
           const result = await generateConfigRecommendations(validatedAnswers);
 
-          if (result?.data?.success && result.data.recommendations) {
+          if (result?.success && result.recommendations) {
             const encoded = encodeQuizAnswers(validatedAnswers);
 
             router.push(
-              `/tools/config-recommender/results/${result.data.recommendations.id}?answers=${encoded}`
+              `/tools/config-recommender/results/${result.recommendations.id}?answers=${encoded}`
             );
 
             logger.info('Quiz completed', {
               useCase: validatedAnswers.useCase,
               experienceLevel: validatedAnswers.experienceLevel,
-              resultId: result.data.recommendations.id,
+              resultId: result.recommendations.id,
             });
           } else {
             throw new Error('Failed to generate recommendations');

@@ -30,6 +30,7 @@ import { NextResponse } from 'next/server';
 import { getAllChangelogEntries, parseChangelogChanges } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
 /**
@@ -127,26 +128,11 @@ Last generated: ${new Date().toISOString()}
         'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
       },
     });
-  } catch (error) {
-    logger.error(
-      'Changelog llms.txt generation failed',
-      error instanceof Error ? error : new Error(String(error))
-    );
-
-    // Return minimal error response
-    const errorText = `# ${APP_CONFIG.name} - Changelog
-
-Error generating changelog content. Please try again later.
-
-URL: ${APP_CONFIG.url}/changelog
-`;
-
-    return new NextResponse(errorText, {
-      status: 500,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-store, must-revalidate',
-      },
+  } catch (error: unknown) {
+    return handleApiError(error, {
+      route: '/changelog/llms.txt',
+      operation: 'generate_changelog_llmstxt',
+      method: 'GET',
     });
   }
 }

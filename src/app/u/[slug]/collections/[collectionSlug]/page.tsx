@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { Separator } from '@/src/components/primitives/separator';
-import { trackInteraction } from '@/src/lib/actions/analytics.actions';
+import { trackInteraction } from '@/src/lib/analytics/client';
 import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

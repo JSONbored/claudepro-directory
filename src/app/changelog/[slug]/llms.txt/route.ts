@@ -34,6 +34,7 @@ import {
 } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
 /**
@@ -162,26 +163,14 @@ For more updates, visit: ${APP_CONFIG.url}/changelog
         'X-Content-Type-Options': 'nosniff',
       },
     });
-  } catch (error) {
-    logger.error(
-      'Changelog entry llms.txt generation failed',
-      error instanceof Error ? error : new Error(String(error))
-    );
+  } catch (error: unknown) {
+    const { slug } = await context.params.catch(() => ({ slug: 'unknown' }));
 
-    // Return minimal error response
-    const errorText = `# Changelog Entry
-
-Error generating changelog entry content. Please try again later.
-
-URL: ${APP_CONFIG.url}/changelog
-`;
-
-    return new NextResponse(errorText, {
-      status: 500,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-      },
+    return handleApiError(error, {
+      route: '/changelog/[slug]/llms.txt',
+      operation: 'generate_changelog_entry_llmstxt',
+      method: 'GET',
+      logContext: { slug },
     });
   }
 }

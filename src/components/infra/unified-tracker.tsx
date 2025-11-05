@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { trackInteraction } from '@/src/lib/actions/analytics.actions';
+import { trackInteraction } from '@/src/lib/analytics/client';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import type { CategoryId } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';

@@ -161,7 +161,7 @@ export async function trackShare(options: {
 }): Promise<void> {
   try {
     // Import trackInteraction dynamically to avoid circular deps
-    const { trackInteraction } = await import('@/src/lib/actions/analytics.actions');
+    const { trackInteraction } = await import('@/src/lib/analytics/client');
 
     await trackInteraction({
       interaction_type: 'share',

@@ -15,9 +15,14 @@
  */
 
 import { APP_CONFIG } from '@/src/lib/constants';
+import { handleApiError } from '@/src/lib/error-handler';
+import { logger } from '@/src/lib/logger';
 
 export async function GET() {
-  const content = `# Configuration Recommender - ${APP_CONFIG.name}
+  try {
+    logger.info('Config recommender llms.txt requested');
+
+    const content = `# Configuration Recommender - ${APP_CONFIG.name}
 
 > AI-powered tool for finding the perfect Claude configuration
 
@@ -120,10 +125,19 @@ Maintained by: ${APP_CONFIG.author}
 License: ${APP_CONFIG.license}
 `;
 
-  return new Response(content, {
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
-    },
-  });
+    logger.info('Config recommender llms.txt generated successfully');
+
+    return new Response(content, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
+      },
+    });
+  } catch (error: unknown) {
+    return handleApiError(error, {
+      route: '/tools/config-recommender/llms.txt',
+      operation: 'generate_recommender_llmstxt',
+      method: 'GET',
+    });
+  }
 }

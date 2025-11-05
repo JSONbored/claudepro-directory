@@ -14,6 +14,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
+import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
 export async function POST(request: NextRequest) {
@@ -55,21 +56,11 @@ export async function POST(request: NextRequest) {
       type: body.type,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
-    logger.error(
-      'Revalidate webhook error',
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        endpoint: '/api/revalidate',
-        phase: 'webhook-handler',
-      }
-    );
-    return NextResponse.json(
-      {
-        error: 'Revalidation failed',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleApiError(error, {
+      route: '/api/revalidate',
+      operation: 'revalidate_path',
+      method: 'POST',
+    });
   }
 }

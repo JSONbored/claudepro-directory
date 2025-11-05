@@ -6,7 +6,6 @@ import type { Metadata } from 'next';
 import { ContentSearchClient } from '@/src/components/content-search-client';
 import type { SearchFilters } from '@/src/lib/search/server-search';
 import { searchContent } from '@/src/lib/search/server-search';
-import { sanitizers } from '@/src/lib/security/validators';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 export const revalidate = 3600; // 1 hour ISR
@@ -36,8 +35,7 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const resolvedParams = await searchParams;
-  const rawQuery = resolvedParams.q || '';
-  const sanitizedQuery = (await sanitizers.sanitizeSearchQuery(rawQuery)).slice(0, 200);
+  const query = (resolvedParams.q || '').trim().slice(0, 200);
 
   const categories = resolvedParams.category?.split(',').filter(Boolean);
   const tags = resolvedParams.tags?.split(',').filter(Boolean);
@@ -52,12 +50,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   if (author) filters.p_authors = [author];
   filters.p_limit = 50;
 
-  const results = await searchContent(sanitizedQuery, filters);
+  const results = await searchContent(query, filters);
 
   return (
     <main className="container mx-auto px-4 py-8">
       <h1 className="mb-8 font-bold text-4xl">
-        {sanitizedQuery ? `Search: "${sanitizedQuery}"` : 'Search Claude Code Directory'}
+        {query ? `Search: "${query}"` : 'Search Claude Code Directory'}
       </h1>
       <ContentSearchClient
         items={results}

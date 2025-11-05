@@ -23,7 +23,6 @@ import {
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/schemas/component.schema';
-import { sanitizers } from '@/src/lib/security/validators-sync';
 import { cn } from '@/src/lib/utils';
 
 export type { FilterState };
@@ -69,7 +68,7 @@ function UnifiedSearchComponent({
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const sanitized = sanitizers.sanitizeSearchQuerySync(localSearchQuery);
+      const sanitized = localSearchQuery.trim().slice(0, 100);
       onSearch?.(sanitized);
     }, 150);
 
@@ -82,16 +81,16 @@ function UnifiedSearchComponent({
     }
 
     const analyticsTimer = setTimeout(() => {
-      const sanitized = sanitizers.sanitizeSearchQuerySync(localSearchQuery);
+      const sanitized = localSearchQuery.trim().slice(0, 100);
       if (sanitized && sanitized.length > 0) {
         const category = pathname?.split('/')[1] || 'global';
 
-        import('@/src/lib/actions/analytics.actions')
+        import('@/src/lib/analytics/client')
           .then((module) =>
             module.trackInteraction({
               interaction_type: 'click',
               content_type: category,
-              content_slug: `search:${sanitized.substring(0, 100)}`,
+              content_slug: `search:${sanitized}`,
               metadata: {
                 resultsCount: resultCount,
                 filtersApplied: activeFilterCount > 0,

@@ -12,12 +12,12 @@ import { usePostCopyEmail } from '@/src/components/infra/providers/post-copy-ema
 import { Button } from '@/src/components/primitives/button';
 import { useButtonSuccess } from '@/src/hooks/use-button-success';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
-import { trackInteraction } from '@/src/lib/actions/analytics.actions';
 import { deleteJob, toggleJobStatus } from '@/src/lib/actions/business.actions';
 import { trackUsage } from '@/src/lib/actions/content.actions';
 import { getGitHubStars } from '@/src/lib/actions/github.actions';
 import { copyMarkdownAction, downloadMarkdownAction } from '@/src/lib/actions/markdown-actions';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
+import { trackInteraction } from '@/src/lib/analytics/client';
 import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import {

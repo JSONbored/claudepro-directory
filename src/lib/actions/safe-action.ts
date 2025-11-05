@@ -6,7 +6,6 @@ import { headers } from 'next/headers';
 import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
-import { logAuthFailure } from '@/src/lib/security/security-monitor.server';
 
 const actionMetadataSchema = z.object({
   actionName: z.string().min(1),
@@ -72,22 +71,14 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
       'unknown';
     const referer = headersList.get('referer') || 'unknown';
 
-    await logAuthFailure({
+    logger.warn('Auth failure - Unauthorized action attempt', {
       clientIP,
       path: referer,
+      actionName: metadata?.actionName || 'unknown',
       reason: error?.message || 'No valid session',
-      metadata: {
-        actionName: metadata?.actionName || 'unknown',
-        errorCode: error?.name || 'AUTH_REQUIRED',
-      },
+      errorCode: error?.name || 'AUTH_REQUIRED',
     });
 
-    const warnData: Record<string, string> = {
-      actionName: metadata?.actionName || 'unknown',
-    };
-    if (error?.message) warnData.error = error.message;
-
-    logger.warn('Unauthorized action attempt', warnData);
     throw new Error('Unauthorized. Please sign in to continue.');
   }
 

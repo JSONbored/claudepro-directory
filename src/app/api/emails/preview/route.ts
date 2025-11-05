@@ -15,6 +15,8 @@ import {
 } from '@/src/emails/templates/newsletter-welcome';
 import { renderEmailHtml } from '@/src/emails/utils/render';
 import { isDevelopment } from '@/src/lib/env-client';
+import { handleApiError } from '@/src/lib/error-handler';
+import { logger } from '@/src/lib/logger';
 
 /**
  * Available email templates for preview
@@ -45,64 +47,85 @@ const sampleProps: Record<TemplateName, NewsletterWelcomeProps> = {
  * - source: Override source (optional)
  */
 export async function GET(request: Request): Promise<Response> {
-  // Dev-only route
-  if (!isDevelopment) {
-    return new NextResponse('Not found', { status: 404 });
-  }
+  try {
+    // Dev-only route
+    if (!isDevelopment) {
+      return new NextResponse('Not found', { status: 404 });
+    }
 
-  const { searchParams } = new URL(request.url);
-  const templateName = searchParams.get('template') as TemplateName | null;
-  const email = searchParams.get('email');
-  const source = searchParams.get('source');
+    const { searchParams } = new URL(request.url);
+    const templateName = searchParams.get('template') as TemplateName | null;
+    const email = searchParams.get('email');
+    const source = searchParams.get('source');
 
-  // No template specified - show API info
-  if (!templateName) {
-    return NextResponse.json(
-      {
-        message: 'Email preview API',
-        availableTemplates: Object.keys(templates),
-        usage: '/api/emails/preview?template=newsletter-welcome',
+    logger.info('Email preview requested', {
+      ...(templateName && { templateName }),
+      ...(email && { email }),
+      ...(source && { source }),
+    });
+
+    // No template specified - show API info
+    if (!templateName) {
+      return NextResponse.json(
+        {
+          message: 'Email preview API',
+          availableTemplates: Object.keys(templates),
+          usage: '/api/emails/preview?template=newsletter-welcome',
+        },
+        {
+          headers: { 'Cache-Control': 'no-store, must-revalidate' },
+        }
+      );
+    }
+
+    // Template not found
+    if (!templates[templateName]) {
+      return NextResponse.json(
+        { error: `Template '${templateName}' not found` },
+        {
+          status: 404,
+          headers: { 'Cache-Control': 'no-store, must-revalidate' },
+        }
+      );
+    }
+
+    // Render template
+    const TemplateComponent = templates[templateName];
+    const baseProps = sampleProps[templateName];
+    const props: NewsletterWelcomeProps = {
+      email: email || baseProps.email,
+      ...(source ? { source } : baseProps.source ? { source: baseProps.source } : {}),
+    };
+
+    const html = await renderEmailHtml(TemplateComponent(props));
+    if (!html) {
+      return NextResponse.json(
+        { error: 'Failed to render email template' },
+        {
+          status: 500,
+          headers: { 'Cache-Control': 'no-store, must-revalidate' },
+        }
+      );
+    }
+
+    logger.info('Email preview rendered successfully', { templateName });
+
+    return new NextResponse(html, {
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-store, must-revalidate',
       },
-      {
-        headers: { 'Cache-Control': 'no-store, must-revalidate' },
-      }
+    });
+  } catch (error: unknown) {
+    logger.error(
+      'Failed to render email preview',
+      error instanceof Error ? error : new Error(String(error))
     );
+
+    return handleApiError(error, {
+      route: '/api/emails/preview',
+      operation: 'render_email_preview',
+      method: 'GET',
+    });
   }
-
-  // Template not found
-  if (!templates[templateName]) {
-    return NextResponse.json(
-      { error: `Template '${templateName}' not found` },
-      {
-        status: 404,
-        headers: { 'Cache-Control': 'no-store, must-revalidate' },
-      }
-    );
-  }
-
-  // Render template
-  const TemplateComponent = templates[templateName];
-  const baseProps = sampleProps[templateName];
-  const props: NewsletterWelcomeProps = {
-    email: email || baseProps.email,
-    ...(source ? { source } : baseProps.source ? { source: baseProps.source } : {}),
-  };
-
-  const html = await renderEmailHtml(TemplateComponent(props));
-  if (!html) {
-    return NextResponse.json(
-      { error: 'Failed to render email template' },
-      {
-        status: 500,
-        headers: { 'Cache-Control': 'no-store, must-revalidate' },
-      }
-    );
-  }
-
-  return new NextResponse(html, {
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'no-store, must-revalidate',
-    },
-  });
 }

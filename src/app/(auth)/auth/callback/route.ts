@@ -3,6 +3,7 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server';
+import { SECURITY_CONFIG } from '@/src/lib/constants/security';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
 
@@ -34,9 +35,14 @@ export async function GET(request: NextRequest) {
 
       const forwardedHost = request.headers.get('x-forwarded-host');
       const isLocalEnv = process.env.NODE_ENV === 'development';
+
+      // Validate forwarded host against allowed origins to prevent open redirect attacks
+      const allowedHosts = SECURITY_CONFIG.allowedOrigins.map((url) => new URL(url).hostname);
+      const isValidHost = forwardedHost ? allowedHosts.includes(forwardedHost) : false;
+
       const redirectUrl = isLocalEnv
         ? `${origin}${next}`
-        : forwardedHost
+        : forwardedHost && isValidHost
           ? `https://${forwardedHost}${next}`
           : `${origin}${next}`;
 

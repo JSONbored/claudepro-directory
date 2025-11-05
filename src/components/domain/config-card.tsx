@@ -22,8 +22,8 @@ import { UnifiedReview } from '@/src/components/domain/unified-review';
 import { BorderBeam } from '@/src/components/magic/border-beam';
 import { Button } from '@/src/components/primitives/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
-import { trackInteraction } from '@/src/lib/actions/analytics.actions';
 import { addBookmark } from '@/src/lib/actions/user.actions';
+import { trackInteraction } from '@/src/lib/analytics/client';
 import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
 import {
   Award,
