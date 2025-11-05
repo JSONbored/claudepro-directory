@@ -135,7 +135,6 @@ jobs:
       continue-on-error: true
 
     - name: Upload audit results
-      if: failure()
       uses: actions/upload-artifact@v5
       with:
         name: pnpm-audit-results
