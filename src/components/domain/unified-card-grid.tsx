@@ -211,7 +211,9 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
   // Trigger onFetchMore when we've displayed all loaded items
   useEffect(() => {
     if (infiniteScroll && onFetchMore && displayCount >= items.length && hasMore) {
-      onFetchMore();
+      onFetchMore().catch(() => {
+        // Silent fail - pagination will retry on next scroll
+      });
     }
   }, [displayCount, items.length, infiniteScroll, onFetchMore, hasMore]);
 

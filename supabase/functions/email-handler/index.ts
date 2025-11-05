@@ -302,9 +302,13 @@ async function handleDigest(req: Request): Promise<Response> {
 
   if (digestError) throw digestError;
 
-  const digestData = digest as Database['public']['Functions']['get_weekly_digest']['Returns'];
+  const digestData =
+    (digest as Database['public']['Functions']['get_weekly_digest']['Returns'] | null);
 
-  if (!digestData.newContent?.length && !digestData.trendingContent?.length) {
+  if (
+    !digestData ||
+    (!digestData.newContent?.length && !digestData.trendingContent?.length)
+  ) {
     return successResponse({ skipped: true, reason: 'no_content' });
   }
 

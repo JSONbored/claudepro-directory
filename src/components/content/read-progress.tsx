@@ -28,9 +28,9 @@ import { useEffect, useState } from 'react';
 export interface ReadProgressProps {
   /**
    * Position of the progress bar
-   * @default 'top'
+   * @default 'below-nav' (positions below sticky navigation)
    */
-  position?: 'top' | 'bottom';
+  position?: 'top' | 'bottom' | 'below-nav';
 
   /**
    * Color variant (maps to CSS variables)
@@ -40,13 +40,13 @@ export interface ReadProgressProps {
 
   /**
    * Height of the progress bar in pixels
-   * @default 2
+   * @default 3
    */
   height?: number;
 
   /**
    * Z-index for stacking context
-   * @default 50
+   * @default 49 (below navigation at z-50)
    */
   zIndex?: number;
 
@@ -71,10 +71,10 @@ const COLOR_MAP = {
 } as const;
 
 export function ReadProgress({
-  position = 'top',
+  position = 'below-nav',
   color = 'accent',
-  height = 2,
-  zIndex = 50,
+  height = 3,
+  zIndex = 49,
   springConfig = {
     stiffness: 100,
     damping: 30,
@@ -82,6 +82,7 @@ export function ReadProgress({
   },
 }: ReadProgressProps) {
   const [isMounted, setIsMounted] = useState(false);
+  const [navHeight, setNavHeight] = useState(0);
 
   // Track scroll progress (0 to 1)
   const { scrollYProgress } = useScroll();
@@ -89,21 +90,58 @@ export function ReadProgress({
   // Apply spring physics for smooth animation
   const scaleX = useSpring(scrollYProgress, springConfig);
 
-  // Prevent hydration mismatch
+  // Dynamically measure navigation height
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+
+    if (position !== 'below-nav') {
+      return;
+    }
+
+    // Query the navigation header element
+    const updateNavHeight = () => {
+      const nav = document.querySelector('header');
+      if (nav) {
+        setNavHeight(nav.offsetHeight);
+      }
+    };
+
+    // Initial measurement
+    updateNavHeight();
+
+    // Update on resize (nav might change height at different breakpoints)
+    const resizeObserver = new ResizeObserver(updateNavHeight);
+    const nav = document.querySelector('header');
+    if (nav) {
+      resizeObserver.observe(nav);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [position]);
 
   // Don't render on server or before mount
   if (!isMounted) {
     return null;
   }
 
+  // Calculate position based on mode
+  const getPositionStyle = () => {
+    if (position === 'below-nav') {
+      return { top: `${navHeight}px` };
+    }
+    if (position === 'top') {
+      return { top: 0 };
+    }
+    return { bottom: 0 };
+  };
+
   return (
     <motion.div
       className="fixed right-0 left-0 origin-left"
       style={{
-        [position]: 0,
+        ...getPositionStyle(),
         height: `${height}px`,
         backgroundColor: COLOR_MAP[color],
         scaleX,

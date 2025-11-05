@@ -15,14 +15,18 @@ import {
   methodNotAllowedResponse,
 } from '../_shared/utils/response.ts';
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
 
-// GET-specific CORS headers for read-only public endpoint
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error('Missing required environment variables: SUPABASE_URL and/or SUPABASE_ANON_KEY');
+}
+
+// GET-specific CORS headers for read-only public endpoint with Authorization support
 const getCorsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
 Deno.serve(async (req: Request) => {
@@ -45,10 +49,18 @@ Deno.serve(async (req: Request) => {
     const limit = Number.parseInt(url.searchParams.get('limit') || '30', 10);
     const category = url.searchParams.get('category') || 'all';
 
-    // Validation
-    if (offset < 0 || limit < 1 || limit > 100) {
+    // Validation - check for NaN first
+    if (Number.isNaN(offset) || offset < 0) {
       return jsonResponse(
-        { error: 'Invalid parameters', message: 'offset >= 0, 1 <= limit <= 100' },
+        { error: 'Invalid parameters', message: 'offset must be a non-negative integer' },
+        400,
+        getCorsHeaders
+      );
+    }
+
+    if (Number.isNaN(limit) || limit < 1 || limit > 100) {
+      return jsonResponse(
+        { error: 'Invalid parameters', message: 'limit must be between 1 and 100' },
         400,
         getCorsHeaders
       );

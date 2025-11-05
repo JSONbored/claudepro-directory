@@ -10,8 +10,12 @@ import {
   methodNotAllowedResponse,
 } from '../_shared/utils/response.ts';
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error('Missing required environment variables: SUPABASE_URL and SUPABASE_ANON_KEY must be set');
+}
 
 interface HealthStatus {
   status: 'healthy' | 'degraded' | 'unhealthy';
@@ -50,6 +54,12 @@ Deno.serve(async (req) => {
     if (error) throw error;
 
     const health = data as unknown as HealthStatus;
+
+    // Validate response structure
+    if (!health || typeof health.status !== 'string' || !['healthy', 'degraded', 'unhealthy'].includes(health.status)) {
+      throw new Error('Invalid health status response from database');
+    }
+
     const statusCode = health.status === 'healthy' ? 200 : health.status === 'degraded' ? 200 : 503;
     const payload = JSON.stringify(health);
 
