@@ -1,33 +1,6 @@
 /**
- * Route Pattern Classifier
- *
- * **Enterprise Pattern-Based Metadata Architecture (October 2025)**
- *
- * Automatically classifies Next.js App Router routes into metadata generation patterns.
- * Eliminates manual metadata configuration by recognizing route structures and mapping
- * them to reusable templates (same approach used by Airbnb, Netflix, Shopify).
- *
- * **Architecture:**
- * - Pattern Recognition: Priority-based algorithm classifies routes into 8 patterns
- * - Single Source of Truth: Leverages UNIFIED_CATEGORY_REGISTRY for validation
- * - Zero Configuration: New routes automatically classified without manual setup
- * - Type-Safe: Full TypeScript support with branded types
- *
- * **8 Route Patterns:**
- * 1. HOMEPAGE - Root route (/)
- * 2. CATEGORY - Category list pages (/:category)
- * 3. CONTENT_DETAIL - Content detail pages (/:category/:slug, /guides/:category/:slug)
- * 4. USER_PROFILE - User profile pages (/u/:slug)
- * 5. ACCOUNT - Account management pages (/account/*)
- * 6. TOOL - Tool pages (/tools/*)
- * 7. STATIC - Static pages (/trending, /search, etc.)
- * 8. AUTH - Authentication pages (/auth/*)
- *
- * **Classification Algorithm:**
- * - Priority-based pattern matching (HOMEPAGE → AUTH → ACCOUNT → TOOL → etc.)
- * - Category validation via UNIFIED_CATEGORY_REGISTRY
- * - Dynamic segment detection ([slug] → :slug)
- * - Confidence scoring (0-1 scale)
+ * Route Pattern Classifier - Database-First
+ * Classifies Next.js routes into metadata patterns using category_configs table validation.
  *
  * **Usage:**
  * ```typescript
@@ -98,7 +71,6 @@ export interface RouteClassification {
  * - USER_PROFILE (/u/:slug) → 1.0 confidence
  * - CATEGORY (/:category) → 1.0 confidence (if valid category)
  * - CONTENT_DETAIL (/:category/:slug) → 1.0 confidence (if valid category)
- * - CONTENT_DETAIL (/guides/:category/:slug) → 1.0 confidence
  * - STATIC (fallback) → 0.5 confidence
  *
  * @param route - Next.js route string (e.g., '/agents/code-reviewer', '/:category/:slug')
@@ -243,42 +215,6 @@ export function classifyRoute(route: string): RouteClassification {
         route: normalizedRoute,
       };
     }
-  }
-
-  // PRIORITY 10: Guide subcategory pattern - Three segments
-  // Handles: /guides/:category/:slug, /guides/tutorials/build-mcp-server
-  if (segments.length === 3 && segments[0] === 'guides') {
-    return {
-      pattern: 'CONTENT_DETAIL',
-      confidence: 1.0,
-      segments,
-      isDynamic: true, // Guide detail pages have dynamic slugs
-      route: normalizedRoute,
-    };
-  }
-
-  // PRIORITY 11: SEO compare pattern - Two segments starting with compare
-  // Handles: /compare/:slug, /(seo)/compare/:slug
-  if (segments.some((seg) => seg === 'compare' || seg === '(seo)')) {
-    return {
-      pattern: 'CONTENT_DETAIL',
-      confidence: 0.9,
-      segments,
-      isDynamic: true,
-      route: normalizedRoute,
-    };
-  }
-
-  // PRIORITY 12: Changelog pattern - Two segments
-  // Handles: /changelog/:slug
-  if (segments.length === 2 && segments[0] === 'changelog') {
-    return {
-      pattern: 'CONTENT_DETAIL',
-      confidence: 1.0,
-      segments,
-      isDynamic: true,
-      route: normalizedRoute,
-    };
   }
 
   // FALLBACK: Static pages (lower confidence)

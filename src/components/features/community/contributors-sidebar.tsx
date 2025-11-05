@@ -28,7 +28,7 @@ export interface ContributorsSidebarProps {
 
 function ContributorsSidebarComponent({ topContributors, newMembers }: ContributorsSidebarProps) {
   return (
-    <aside className="space-y-6 sticky top-4">
+    <aside className="sticky top-4 space-y-6">
       {/* Trending Contributors */}
       <Card>
         <CardHeader>
@@ -45,7 +45,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
               <Link
                 key={slug}
                 href={`/u/${slug}`}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted/50"
               >
                 <div className="relative flex-shrink-0">
                   {contributor.image ? (
@@ -54,15 +54,15 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                       alt={displayName}
                       width={40}
                       height={40}
-                      className="w-10 h-10 rounded-full object-cover"
+                      className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-sm font-bold">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent font-bold text-sm">
                       {displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
                   {index < 3 && (
-                    <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-1">
+                    <div className="-bottom-1 -right-1 absolute rounded-full bg-background p-1">
                       <Medal
                         className={`h-3 w-3 ${
                           index === 0
@@ -75,10 +75,10 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                     </div>
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{displayName}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium text-sm">{displayName}</p>
                   {contributor.total_contributions !== undefined && (
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1 text-muted-foreground text-xs">
                       <Award className="h-3 w-3" />
                       <span>{contributor.total_contributions} contributions</span>
                     </div>
@@ -104,7 +104,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                 <Link
                   key={slug}
                   href={`/u/${slug}`}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted/50"
                 >
                   {member.image ? (
                     <Image
@@ -112,17 +112,17 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                       alt={displayName}
                       width={32}
                       height={32}
-                      className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                      className="h-8 w-8 flex-shrink-0 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-xs font-bold flex-shrink-0">
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-accent font-bold text-xs">
                       {displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{displayName}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-sm">{displayName}</p>
                     {member.work && (
-                      <p className="text-xs text-muted-foreground truncate">{member.work}</p>
+                      <p className="truncate text-muted-foreground text-xs">{member.work}</p>
                     )}
                   </div>
                 </Link>
@@ -139,7 +139,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
         </CardHeader>
         <CardContent className="space-y-2">
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-            <span className="text-xs text-muted-foreground">Total Members</span>
+            <span className="text-muted-foreground text-xs">Total Members</span>
             <UnifiedBadge variant="base" style="secondary" className="text-xs">
               {topContributors.length + newMembers.length}
             </UnifiedBadge>

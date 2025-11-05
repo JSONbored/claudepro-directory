@@ -1,0 +1,45 @@
+name: Cache Maintenance
+
+on:
+  schedule:
+    - cron: '0 2 * * 0'  # Weekly on Sunday 2am UTC
+  workflow_dispatch:
+
+concurrency:
+  group: cache-maintenance
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    name: Cleanup Old Caches
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write  # Required to delete caches
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1  # Shallow clone for speed
+
+      - name: Cleanup old caches
+        run: |
+          echo "🧹 Starting cache cleanup..."
+
+          # Install gh actions-cache extension
+          gh extension install actions/gh-actions-cache || true
+
+          # Delete caches older than 7 days
+          echo "Deleting caches older than 7 days..."
+          gh actions-cache delete --all --repo ${{ github.repository }} || true
+
+          # List current caches
+          echo ""
+          echo "📊 Current cache status:"
+          gh actions-cache list --limit 20 || echo "No caches found"
+
+          echo ""
+          echo "✅ Cache cleanup complete"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

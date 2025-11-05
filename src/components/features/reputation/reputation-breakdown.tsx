@@ -28,15 +28,19 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import {
-  getNextTier,
-  getReputationTier,
-  getTierProgress,
-  REPUTATION_POINTS,
-  type ReputationBreakdown as ReputationBreakdownType,
-} from '@/src/lib/config/reputation.config';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import type { Tables } from '@/src/types/database.types';
+
+type ReputationTier = Tables<'reputation_tiers'>;
+
+type ReputationBreakdownType = {
+  from_posts: number;
+  from_votes_received: number;
+  from_comments: number;
+  from_submissions: number;
+  total: number;
+};
 
 // =============================================================================
 // TYPES
@@ -45,6 +49,10 @@ import { cn } from '@/src/lib/utils';
 export interface ReputationBreakdownProps {
   /** Reputation breakdown data */
   breakdown: ReputationBreakdownType;
+  /** Reputation tiers from server */
+  tiers?: ReputationTier[];
+  /** Reputation actions (points per action type) from server */
+  actions?: Array<{ action_type: string; points: number }>;
   /** Show detailed breakdown chart */
   showDetails?: boolean;
   /** Show next tier progress */
@@ -107,13 +115,48 @@ const ACTIVITY_ICONS = {
  */
 export const ReputationBreakdown = memo(function ReputationBreakdown({
   breakdown,
+  tiers: serverTiers = [],
+  actions: serverActions = [],
   showDetails = true,
   showProgress = true,
   className,
 }: ReputationBreakdownProps) {
-  const currentTier = getReputationTier(breakdown.total);
-  const nextTier = getNextTier(breakdown.total);
-  const progress = getTierProgress(breakdown.total);
+  // Convert actions array to points map
+  const points: Record<string, number> = {};
+  for (const action of serverActions) {
+    points[action.action_type] = action.points;
+  }
+
+  const currentTier =
+    serverTiers.find(
+      (tier) =>
+        breakdown.total >= tier.min_score &&
+        (tier.max_score === null || breakdown.total <= tier.max_score)
+    ) || serverTiers[0];
+
+  const currentIndex = currentTier ? serverTiers.findIndex((t) => t.name === currentTier.name) : -1;
+  const nextTierData =
+    currentIndex >= 0 && currentIndex < serverTiers.length - 1
+      ? serverTiers[currentIndex + 1]
+      : null;
+  const nextTier = nextTierData
+    ? {
+        tier: nextTierData,
+        pointsNeeded: nextTierData.min_score - breakdown.total,
+      }
+    : null;
+
+  const progress =
+    currentTier && currentTier.max_score !== null
+      ? Math.min(
+          100,
+          Math.round(
+            ((breakdown.total - currentTier.min_score) /
+              (currentTier.max_score - currentTier.min_score)) *
+              100
+          )
+        )
+      : 100;
 
   // Prepare chart data for breakdown visualization
   const chartData = [
@@ -158,8 +201,8 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
             variant="base"
             style="secondary"
             className={cn(
-              'text-base font-bold px-3 py-1',
-              TIER_COLORS[currentTier.name] || TIER_COLORS.Newcomer
+              'px-3 py-1 font-bold text-base',
+              TIER_COLORS[currentTier?.name || 'Newcomer'] || TIER_COLORS.Newcomer
             )}
           >
             {breakdown.total}
@@ -175,13 +218,18 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
             <UnifiedBadge
               variant="base"
               style="outline"
-              className={cn('gap-1.5', TIER_COLORS[currentTier.name] || TIER_COLORS.Newcomer)}
+              className={cn(
+                'gap-1.5',
+                TIER_COLORS[currentTier?.name || 'Newcomer'] || TIER_COLORS.Newcomer
+              )}
             >
-              <span className="text-base">{currentTier.icon}</span>
-              {currentTier.name}
+              <span className="text-base">{currentTier?.icon || '🌱'}</span>
+              {currentTier?.name || 'Newcomer'}
             </UnifiedBadge>
           </div>
-          <p className="text-xs text-muted-foreground">{currentTier.description}</p>
+          <p className="text-muted-foreground text-xs">
+            {currentTier?.description || 'Just getting started'}
+          </p>
         </div>
 
         {/* Progress to Next Tier */}
@@ -189,11 +237,11 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
           <div className="space-y-2">
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
               <span className={UI_CLASSES.TEXT_SM_MUTED}>Progress to {nextTier.tier.name}</span>
-              <span className="text-sm font-medium">{progress}%</span>
+              <span className="font-medium text-sm">{progress}%</span>
             </div>
-            <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+            <div className="relative h-2 overflow-hidden rounded-full bg-muted">
               <div
-                className="absolute top-0 left-0 h-full bg-primary rounded-full transition-all duration-300"
+                className="absolute top-0 left-0 h-full rounded-full bg-primary transition-all duration-300"
                 style={{ width: `${progress}%` }}
                 role="progressbar"
                 aria-valuenow={progress}
@@ -204,7 +252,7 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
             </div>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
               <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 {nextTier.pointsNeeded} points needed for {nextTier.tier.icon} {nextTier.tier.name}
               </p>
             </div>
@@ -214,7 +262,7 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
         {/* Detailed Breakdown */}
         {showDetails && breakdown.total > 0 && (
           <div className="space-y-4">
-            <h4 className="text-sm font-medium">Reputation Breakdown</h4>
+            <h4 className="font-medium text-sm">Reputation Breakdown</h4>
 
             {/* Breakdown Chart */}
             <HorizontalBarChart
@@ -247,12 +295,12 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
               }).map(([key, { label, value, icon: Icon }]) => (
                 <div
                   key={key}
-                  className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 border border-border/40"
+                  className="flex items-center gap-2 rounded-lg border border-border/40 bg-muted/30 p-2"
                 >
-                  <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground truncate">{label}</p>
-                    <p className="text-sm font-semibold">{value} pts</p>
+                  <Icon className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-muted-foreground text-xs">{label}</p>
+                    <p className="font-semibold text-sm">{value} pts</p>
                   </div>
                 </div>
               ))}
@@ -260,21 +308,19 @@ export const ReputationBreakdown = memo(function ReputationBreakdown({
 
             {/* Point Values Reference */}
             <details className="group">
-              <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors">
+              <summary className="cursor-pointer text-muted-foreground text-xs transition-colors hover:text-foreground">
                 How reputation is calculated
               </summary>
-              <div className="mt-3 space-y-2 text-xs text-muted-foreground">
+              <div className="mt-3 space-y-2 text-muted-foreground text-xs">
                 <p>Points are earned for different activities:</p>
-                <ul className="space-y-1 ml-4">
-                  <li>• Create a post: +{REPUTATION_POINTS.POST} points</li>
-                  <li>• Receive an upvote: +{REPUTATION_POINTS.VOTE_RECEIVED} points</li>
-                  <li>• Write a comment: +{REPUTATION_POINTS.COMMENT} points</li>
-                  <li>• Get submission merged: +{REPUTATION_POINTS.SUBMISSION_MERGED} points</li>
-                  <li>• Write a review: +{REPUTATION_POINTS.REVIEW} points</li>
-                  <li>
-                    • Content bookmarked by others: +{REPUTATION_POINTS.BOOKMARK_RECEIVED} points
-                  </li>
-                  <li>• Gain a follower: +{REPUTATION_POINTS.FOLLOWER} point</li>
+                <ul className="ml-4 space-y-1">
+                  <li>• Create a post: +{points.post || 10} points</li>
+                  <li>• Receive an upvote: +{points.vote_received || 5} points</li>
+                  <li>• Write a comment: +{points.comment || 2} points</li>
+                  <li>• Get submission merged: +{points.submission_merged || 20} points</li>
+                  <li>• Write a review: +{points.review || 5} points</li>
+                  <li>• Content bookmarked by others: +{points.bookmark_received || 3} points</li>
+                  <li>• Gain a follower: +{points.follower || 1} point</li>
                 </ul>
               </div>
             </details>

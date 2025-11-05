@@ -9,7 +9,7 @@ const UnifiedNewsletterCapture = dynamic(
       default: mod.UnifiedNewsletterCapture,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
 
@@ -44,42 +44,42 @@ export default function PHWaitlistPage() {
   return (
     <div className={'container mx-auto px-4 py-12'}>
       {/* Hero Section */}
-      <div className={'max-w-3xl mx-auto text-center mb-16'}>
+      <div className={'mx-auto mb-16 max-w-3xl text-center'}>
         <div
           className={
-            'inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-full mb-6'
+            'mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-primary/10'
           }
         >
           <Bell className="h-10 w-10 text-primary" />
         </div>
-        <h1 className={'text-4xl md:text-6xl font-bold mb-6'}>Join the Launch Community</h1>
-        <p className={'text-xl md:text-2xl text-muted-foreground mb-8'}>
+        <h1 className={'mb-6 font-bold text-4xl md:text-6xl'}>Join the Launch Community</h1>
+        <p className={'mb-8 text-muted-foreground text-xl md:text-2xl'}>
           Be the first to know when we launch on Product Hunt and help us{' '}
-          <span className="text-primary font-semibold">reach #1 Product of the Day</span>
+          <span className="font-semibold text-primary">reach #1 Product of the Day</span>
         </p>
-        <div className="flex items-center justify-center gap-4 flex-wrap">
-          <UnifiedBadge variant="base" className="bg-primary/10 text-primary border-primary/20">
-            <Calendar className="h-3 w-3 mr-1" />
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          <UnifiedBadge variant="base" className="border-primary/20 bg-primary/10 text-primary">
+            <Calendar className="mr-1 h-3 w-3" />
             November 4, 2025
           </UnifiedBadge>
           <UnifiedBadge
             variant="base"
-            className="bg-green-500/10 text-green-500 border-green-500/20"
+            className="border-green-500/20 bg-green-500/10 text-green-500"
           >
-            <Rocket className="h-3 w-3 mr-1" />
+            <Rocket className="mr-1 h-3 w-3" />
             Community Launch
           </UnifiedBadge>
         </div>
       </div>
 
       {/* Email Signup Form - Using UnifiedNewsletterCapture */}
-      <div className={'max-w-2xl mx-auto mb-16'}>
-        <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-2 border-primary/30">
+      <div className={'mx-auto mb-16 max-w-2xl'}>
+        <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
           <CardContent className="pt-8 pb-8">
-            <div className="text-center mb-6">
-              <Sparkles className={'h-12 w-12 text-primary mx-auto mb-4'} />
-              <h2 className={'text-2xl font-bold mb-2'}>Get Notified on Launch Day</h2>
-              <p className="text-sm text-muted-foreground">
+            <div className="mb-6 text-center">
+              <Sparkles className={'mx-auto mb-4 h-12 w-12 text-primary'} />
+              <h2 className={'mb-2 font-bold text-2xl'}>Get Notified on Launch Day</h2>
+              <p className="text-muted-foreground text-sm">
                 Join our community and be first to support us on Product Hunt
               </p>
             </div>
@@ -87,15 +87,15 @@ export default function PHWaitlistPage() {
             <UnifiedNewsletterCapture source="homepage" variant="card" context="ph-waitlist-main" />
 
             <div className={'mt-6 space-y-3'}>
-              <div className="flex items-center gap-3 justify-center">
+              <div className="flex items-center justify-center gap-3">
                 <Check className="h-5 w-5 text-green-500" />
                 <span className="text-sm">Launch day notification via email</span>
               </div>
-              <div className="flex items-center gap-3 justify-center">
+              <div className="flex items-center justify-center gap-3">
                 <Check className="h-5 w-5 text-green-500" />
                 <span className="text-sm">Early access to new configurations</span>
               </div>
-              <div className="flex items-center gap-3 justify-center">
+              <div className="flex items-center justify-center gap-3">
                 <Check className="h-5 w-5 text-green-500" />
                 <span className="text-sm">Community contributor badge</span>
               </div>
@@ -105,19 +105,19 @@ export default function PHWaitlistPage() {
       </div>
 
       {/* Why Join Section */}
-      <div className={'max-w-4xl mx-auto mb-16'}>
-        <h2 className={'text-3xl font-bold text-center mb-12'}>Why Join Our Community?</h2>
+      <div className={'mx-auto mb-16 max-w-4xl'}>
+        <h2 className={'mb-12 text-center font-bold text-3xl'}>Why Join Our Community?</h2>
         <div className="grid gap-6 md:grid-cols-3">
           <Card>
             <CardHeader>
-              <div className={'p-3 bg-primary/10 rounded-lg w-fit mb-3'}>
+              <div className={'mb-3 w-fit rounded-lg bg-primary/10 p-3'}>
                 <Rocket className="h-6 w-6 text-primary" />
               </div>
               <CardTitle className="text-xl">Help Us Launch</CardTitle>
               <CardDescription>Your upvote on Product Hunt makes a huge difference</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Early momentum is critical. Be notified the moment we go live so you can support us
                 with your upvote and help us reach #1 Product of the Day.
               </p>
@@ -126,14 +126,14 @@ export default function PHWaitlistPage() {
 
           <Card>
             <CardHeader>
-              <div className={'p-3 bg-green-500/10 rounded-lg w-fit mb-3'}>
+              <div className={'mb-3 w-fit rounded-lg bg-green-500/10 p-3'}>
                 <Sparkles className="h-6 w-6 text-green-500" />
               </div>
               <CardTitle className="text-xl">Early Access</CardTitle>
               <CardDescription>Get new configurations before anyone else</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Community members get early access to new Claude configurations, experimental
                 features, and beta testing opportunities.
               </p>
@@ -142,14 +142,14 @@ export default function PHWaitlistPage() {
 
           <Card>
             <CardHeader>
-              <div className={'p-3 bg-blue-500/10 rounded-lg w-fit mb-3'}>
+              <div className={'mb-3 w-fit rounded-lg bg-blue-500/10 p-3'}>
                 <Users className="h-6 w-6 text-blue-500" />
               </div>
               <CardTitle className="text-xl">Shape the Future</CardTitle>
               <CardDescription>Your feedback drives our roadmap</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Community members influence what we build next, contribute configurations, and help
                 shape the directory's direction.
               </p>
@@ -159,8 +159,8 @@ export default function PHWaitlistPage() {
       </div>
 
       {/* Timeline */}
-      <div className={'max-w-3xl mx-auto mb-16'}>
-        <h2 className={'text-3xl font-bold text-center mb-12'}>Launch Timeline</h2>
+      <div className={'mx-auto mb-16 max-w-3xl'}>
+        <h2 className={'mb-12 text-center font-bold text-3xl'}>Launch Timeline</h2>
         <Card>
           <CardContent className="pt-6">
             <div className="space-y-6">
@@ -169,16 +169,16 @@ export default function PHWaitlistPage() {
                 <div className={'flex flex-col items-center'}>
                   <div
                     className={
-                      'flex items-center justify-center w-10 h-10 bg-primary/10 rounded-full'
+                      'flex h-10 w-10 items-center justify-center rounded-full bg-primary/10'
                     }
                   >
                     <Calendar className="h-5 w-5 text-primary" />
                   </div>
-                  <div className={'w-px h-full bg-border mt-2'} />
+                  <div className={'mt-2 h-full w-px bg-border'} />
                 </div>
                 <div className="pb-6">
-                  <p className={'font-semibold mb-1'}>November 3rd - Day Before</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className={'mb-1 font-semibold'}>November 3rd - Day Before</p>
+                  <p className="text-muted-foreground text-sm">
                     Pre-launch email reminder with Product Hunt link
                   </p>
                 </div>
@@ -189,16 +189,16 @@ export default function PHWaitlistPage() {
                 <div className={'flex flex-col items-center'}>
                   <div
                     className={
-                      'flex items-center justify-center w-10 h-10 bg-green-500/10 rounded-full'
+                      'flex h-10 w-10 items-center justify-center rounded-full bg-green-500/10'
                     }
                   >
                     <Rocket className="h-5 w-5 text-green-500" />
                   </div>
-                  <div className={'w-px h-full bg-border mt-2'} />
+                  <div className={'mt-2 h-full w-px bg-border'} />
                 </div>
                 <div className="pb-6">
-                  <p className={'font-semibold mb-1'}>November 4th - 12:01 AM PST</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className={'mb-1 font-semibold'}>November 4th - 12:01 AM PST</p>
+                  <p className="text-muted-foreground text-sm">
                     Official Product Hunt launch - upvote to help us reach #1
                   </p>
                 </div>
@@ -209,16 +209,16 @@ export default function PHWaitlistPage() {
                 <div className={'flex flex-col items-center'}>
                   <div
                     className={
-                      'flex items-center justify-center w-10 h-10 bg-blue-500/10 rounded-full'
+                      'flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/10'
                     }
                   >
                     <Bell className="h-5 w-5 text-blue-500" />
                   </div>
-                  <div className={'w-px h-full bg-border mt-2'} />
+                  <div className={'mt-2 h-full w-px bg-border'} />
                 </div>
                 <div className="pb-6">
-                  <p className={'font-semibold mb-1'}>November 4th - 12:00 PM PST</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className={'mb-1 font-semibold'}>November 4th - 12:00 PM PST</p>
+                  <p className="text-muted-foreground text-sm">
                     Mid-day reminder to share and upvote
                   </p>
                 </div>
@@ -229,15 +229,15 @@ export default function PHWaitlistPage() {
                 <div className={'flex flex-col items-center'}>
                   <div
                     className={
-                      'flex items-center justify-center w-10 h-10 bg-purple-500/10 rounded-full'
+                      'flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/10'
                     }
                   >
                     <TrendingUp className="h-5 w-5 text-purple-500" />
                   </div>
                 </div>
                 <div>
-                  <p className={'font-semibold mb-1'}>November 4th - 11:59 PM PST</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className={'mb-1 font-semibold'}>November 4th - 11:59 PM PST</p>
+                  <p className="text-muted-foreground text-sm">
                     Launch day ends - thank you for your support!
                   </p>
                 </div>
@@ -248,37 +248,37 @@ export default function PHWaitlistPage() {
       </div>
 
       {/* Social Proof */}
-      <div className={'max-w-4xl mx-auto mb-16'}>
-        <Card className="bg-primary/5 border-primary/20">
+      <div className={'mx-auto mb-16 max-w-4xl'}>
+        <Card className="border-primary/20 bg-primary/5">
           <CardContent className="pt-8 pb-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div className="grid grid-cols-2 gap-6 text-center md:grid-cols-4">
               <div>
-                <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="mb-2 flex items-center justify-center gap-2">
                   <Users className="h-5 w-5 text-primary" />
-                  <p className={'text-2xl font-bold text-primary'}>1,000+</p>
+                  <p className={'font-bold text-2xl text-primary'}>1,000+</p>
                 </div>
-                <p className="text-xs text-muted-foreground">Active Users</p>
+                <p className="text-muted-foreground text-xs">Active Users</p>
               </div>
               <div>
-                <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="mb-2 flex items-center justify-center gap-2">
                   <Star className="h-5 w-5 text-primary" />
-                  <p className={'text-2xl font-bold text-primary'}>4.9/5</p>
+                  <p className={'font-bold text-2xl text-primary'}>4.9/5</p>
                 </div>
-                <p className="text-xs text-muted-foreground">User Rating</p>
+                <p className="text-muted-foreground text-xs">User Rating</p>
               </div>
               <div>
-                <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="mb-2 flex items-center justify-center gap-2">
                   <Zap className="h-5 w-5 text-primary" />
-                  <p className={'text-2xl font-bold text-primary'}>500+</p>
+                  <p className={'font-bold text-2xl text-primary'}>500+</p>
                 </div>
-                <p className="text-xs text-muted-foreground">Configurations</p>
+                <p className="text-muted-foreground text-xs">Configurations</p>
               </div>
               <div>
-                <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="mb-2 flex items-center justify-center gap-2">
                   <Rocket className="h-5 w-5 text-primary" />
-                  <p className={'text-2xl font-bold text-primary'}>100%</p>
+                  <p className={'font-bold text-2xl text-primary'}>100%</p>
                 </div>
-                <p className="text-xs text-muted-foreground">Free Forever</p>
+                <p className="text-muted-foreground text-xs">Free Forever</p>
               </div>
             </div>
           </CardContent>
@@ -286,15 +286,15 @@ export default function PHWaitlistPage() {
       </div>
 
       {/* FAQ Section */}
-      <div className={'max-w-3xl mx-auto mb-16'}>
-        <h2 className={'text-3xl font-bold text-center mb-12'}>Frequently Asked Questions</h2>
+      <div className={'mx-auto mb-16 max-w-3xl'}>
+        <h2 className={'mb-12 text-center font-bold text-3xl'}>Frequently Asked Questions</h2>
         <div className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">When exactly does the launch happen?</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 We launch on Product Hunt on November 4th, 2025 at 12:01 AM PST. Waitlist
                 subscribers will receive an email notification as soon as we go live.
               </p>
@@ -306,7 +306,7 @@ export default function PHWaitlistPage() {
               <CardTitle className="text-lg">Why should I upvote on Product Hunt?</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Your upvote helps us reach more developers who need quality Claude configurations.
                 Higher visibility means a stronger community and better resources for everyone.
               </p>
@@ -318,7 +318,7 @@ export default function PHWaitlistPage() {
               <CardTitle className="text-lg">What benefits do community members get?</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Early access to new configurations, beta testing opportunities, influence on our
                 roadmap, contributor badges, and direct connection with other Claude power users.
               </p>
@@ -330,7 +330,7 @@ export default function PHWaitlistPage() {
               <CardTitle className="text-lg">Is everything really free?</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Yes! All configurations, agents, MCP servers, and resources are 100% free. We're
                 building the best community-driven directory for Claude configurations.
               </p>
@@ -340,29 +340,29 @@ export default function PHWaitlistPage() {
       </div>
 
       {/* Final CTA */}
-      <div className={'text-center max-w-2xl mx-auto'}>
-        <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+      <div className={'mx-auto max-w-2xl text-center'}>
+        <Card className="border-primary/20 bg-gradient-to-r from-primary/10 to-primary/5">
           <CardContent className="pt-8 pb-8">
-            <h2 className={'text-2xl font-bold mb-4'}>Ready to Join Our Community?</h2>
-            <p className={'text-muted-foreground mb-6'}>
+            <h2 className={'mb-4 font-bold text-2xl'}>Ready to Join Our Community?</h2>
+            <p className={'mb-6 text-muted-foreground'}>
               Enter your email above to get notified when we launch. Be part of the Product Hunt
               launch day!
             </p>
-            <div className={'flex flex-col sm:flex-row gap-4 justify-center'}>
+            <div className={'flex flex-col justify-center gap-4 sm:flex-row'}>
               <Button size="lg" asChild>
                 <Link href={ROUTES.HOME}>
-                  <Sparkles className={'h-4 w-4 mr-2'} />
+                  <Sparkles className={'mr-2 h-4 w-4'} />
                   Explore Configurations
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
                 <Link href={ROUTES.HOME}>
-                  <Users className={'h-4 w-4 mr-2'} />
+                  <Users className={'mr-2 h-4 w-4'} />
                   Join the Community
                 </Link>
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-4">
+            <p className="mt-4 text-muted-foreground text-xs">
               Unsubscribe anytime • 100% free, forever
             </p>
           </CardContent>

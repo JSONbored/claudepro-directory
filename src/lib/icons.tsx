@@ -48,9 +48,11 @@ import {
   Building,
   Building2,
   Calendar,
+  Camera,
   Check,
   CheckCircle,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   ChevronUp,
   Chrome,
@@ -76,6 +78,7 @@ import {
   Globe,
   Handshake,
   Hash,
+  Heart,
   HelpCircle,
   Home,
   Info,
@@ -155,6 +158,7 @@ export {
 export {
   ArrowLeft,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   ChevronUp,
   Info,
@@ -186,6 +190,7 @@ export {
   Building,
   Building2,
   Calendar,
+  Camera,
   Chrome,
   Circle,
   Code,
@@ -204,6 +209,7 @@ export {
   Globe,
   Handshake,
   Hash,
+  Heart,
   HelpCircle,
   Home,
   Layers,
@@ -294,3 +300,28 @@ export const LogoIcon = ({ className }: { className?: string }) => (
     <circle cx="12" cy="12" r="1" fill="white" />
   </svg>
 );
+
+/**
+ * Icon Name to Component Resolver
+ * Maps database icon name strings to LucideIcon components for form fields
+ * Supports React 19 server→client serialization (strings only)
+ */
+const FORM_ICON_MAP: Record<string, LucideIcon> = {
+  BookOpen,
+  Code,
+  ExternalLink,
+  Github,
+  Lightbulb,
+  Rocket,
+  Send,
+  Server,
+  Sparkles,
+  Tag,
+  Tags,
+  Terminal,
+};
+
+export function resolveFormIcon(iconName?: string): LucideIcon | undefined {
+  if (!iconName) return undefined;
+  return FORM_ICON_MAP[iconName];
+}

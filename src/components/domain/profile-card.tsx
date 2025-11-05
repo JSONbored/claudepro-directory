@@ -19,27 +19,17 @@ import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Award, Briefcase, ExternalLink, Medal, Users } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database.types';
 
 /**
- * User profile data structure (matches Supabase users table)
+ * User profile data with runtime-added stats from materialized views
  */
-export interface UserProfile {
-  slug: string | null;
-  name: string | null;
-  bio: string | null;
-  image: string | null;
-  hero: string | null;
-  work: string | null;
-  website: string | null;
-  social_x_link: string | null;
-  interests: unknown; // Json type from database
-  reputation_score: number | null;
-  tier: string | null; // Database type is string, validated to 'free' | 'pro' | 'enterprise' at runtime
+export type UserProfile = Tables<'users'> & {
   // Runtime-added stats (from materialized view)
   total_contributions?: number;
   followers_count?: number;
   following_count?: number;
-}
+};
 
 export interface ProfileCardProps {
   user: UserProfile;
@@ -111,7 +101,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
                   key={interest}
                   variant="base"
                   style="secondary"
-                  className="text-xs border-primary/20 text-primary"
+                  className="border-primary/20 text-primary text-xs"
                 >
                   {interest}
                 </UnifiedBadge>
@@ -125,7 +115,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="h-7 px-2.5 gap-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 font-medium"
+              className="h-7 gap-1.5 border-amber-500/20 bg-amber-500/10 px-2.5 font-medium text-amber-600 dark:text-amber-400"
             >
               <Medal className="h-3.5 w-3.5" aria-hidden="true" />
               <span className="text-xs">{formatReputation(user.reputation_score)}</span>
@@ -137,7 +127,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="h-7 px-2.5 gap-1.5 bg-primary/10 text-primary border-primary/20 font-medium"
+              className="h-7 gap-1.5 border-primary/20 bg-primary/10 px-2.5 font-medium text-primary"
             >
               <Award className="h-3.5 w-3.5" aria-hidden="true" />
               <span className="text-xs">{user.total_contributions}</span>
@@ -149,7 +139,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="h-7 px-2.5 gap-1.5 bg-muted/50 text-foreground border-border font-medium"
+              className="h-7 gap-1.5 border-border bg-muted/50 px-2.5 font-medium text-foreground"
             >
               <Users className="h-3.5 w-3.5" aria-hidden="true" />
               <span className="text-xs">{user.followers_count}</span>
@@ -210,7 +200,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
         user.work ? (
           <>
             <Briefcase className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
-            <span className="text-xs text-muted-foreground">{user.work}</span>
+            <span className="text-muted-foreground text-xs">{user.work}</span>
           </>
         ) : null
       }

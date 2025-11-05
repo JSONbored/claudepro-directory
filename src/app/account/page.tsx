@@ -11,6 +11,10 @@ import { Bookmark, Calendar } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database.types';
+
+// Force dynamic rendering - requires authentication
+export const dynamic = 'force-dynamic';
 
 export const metadata = generatePageMetadata('/account');
 
@@ -22,15 +26,28 @@ export default async function AccountDashboard() {
 
   if (!user) return null;
 
-  // Get user's bookmark count
-  const { count: bookmarkCount } = await supabase
-    .from('bookmarks')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.id);
+  // Consolidated RPC: 2 queries → 1 (50% reduction)
+  const { data: dashboardData } = await supabase.rpc('get_account_dashboard', {
+    p_user_id: user.id,
+  });
 
-  // Get user profile
-  const { data: profile } = await supabase.from('users').select('*').eq('id', user.id).single();
+  // Type assertion to database-generated Json type
+  type DashboardResponse = {
+    bookmark_count: number;
+    profile: Pick<Tables<'users'>, 'name' | 'reputation_score' | 'tier' | 'created_at'>;
+  };
 
+  const { bookmark_count, profile } = (dashboardData || {
+    bookmark_count: 0,
+    profile: {
+      name: null,
+      reputation_score: null,
+      tier: null,
+      created_at: new Date().toISOString(),
+    },
+  }) as unknown as DashboardResponse;
+
+  const bookmarkCount = bookmark_count;
   const accountAge = profile?.created_at
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
     : 0;
@@ -38,12 +55,12 @@ export default async function AccountDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+        <h1 className="mb-2 font-bold text-3xl">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back, {profile?.name || 'User'}!</p>
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Reputation</CardTitle>
@@ -51,9 +68,9 @@ export default async function AccountDashboard() {
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-2xl">🏆</span>
-              <span className="text-3xl font-bold">{profile?.reputation_score || 0}</span>
+              <span className="font-bold text-3xl">{profile?.reputation_score || 0}</span>
             </div>
-            <p className={'text-xs text-muted-foreground mt-2'}>Total points</p>
+            <p className={'mt-2 text-muted-foreground text-xs'}>Total points</p>
           </CardContent>
         </Card>
 
@@ -64,9 +81,9 @@ export default async function AccountDashboard() {
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Bookmark className="h-5 w-5 text-primary" />
-              <span className="text-3xl font-bold">{bookmarkCount || 0}</span>
+              <span className="font-bold text-3xl">{bookmarkCount || 0}</span>
             </div>
-            <p className={'text-xs text-muted-foreground mt-2'}>Saved items</p>
+            <p className={'mt-2 text-muted-foreground text-xs'}>Saved items</p>
           </CardContent>
         </Card>
 
@@ -84,7 +101,7 @@ export default async function AccountDashboard() {
                 ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
                 : 'Free'}
             </UnifiedBadge>
-            <p className={'text-xs text-muted-foreground mt-2'}>Membership level</p>
+            <p className={'mt-2 text-muted-foreground text-xs'}>Membership level</p>
           </CardContent>
         </Card>
 
@@ -95,9 +112,9 @@ export default async function AccountDashboard() {
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Calendar className="h-5 w-5 text-primary" />
-              <span className="text-3xl font-bold">{accountAge}</span>
+              <span className="font-bold text-3xl">{accountAge}</span>
             </div>
-            <p className={'text-xs text-muted-foreground mt-2'}>Days active</p>
+            <p className={'mt-2 text-muted-foreground text-xs'}>Days active</p>
           </CardContent>
         </Card>
       </div>

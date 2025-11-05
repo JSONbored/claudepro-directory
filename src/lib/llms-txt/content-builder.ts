@@ -10,24 +10,12 @@
  * This ensures llms.txt content matches UnifiedDetailPage rendering EXACTLY for optimal LLM citation accuracy
  */
 
-import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
-import type { AgentContent } from '@/src/lib/schemas/content/agent.schema';
-import type { CommandContent } from '@/src/lib/schemas/content/command.schema';
-import type { HookContent } from '@/src/lib/schemas/content/hook.schema';
-import type { McpContent } from '@/src/lib/schemas/content/mcp.schema';
-import type { RuleContent } from '@/src/lib/schemas/content/rule.schema';
-import type { StatuslineContent } from '@/src/lib/schemas/content/statusline.schema';
+import type { Tables } from '@/src/types/database.types';
 
 /**
  * Union type for all content items
  */
-export type ContentItem =
-  | McpContent
-  | AgentContent
-  | HookContent
-  | CommandContent
-  | RuleContent
-  | StatuslineContent;
+export type ContentItem = Tables<'content'>;
 
 /**
  * Type-safe installation configuration types
@@ -108,15 +96,9 @@ interface AIConfiguration {
   systemPrompt?: string;
 }
 
-/**
- * Type-safe troubleshooting item types
- */
-interface TroubleshootingItem {
-  issue: string;
-  solution: string;
-}
+import type { Json } from '@/src/types/database.types';
 
-type TroubleshootingEntry = TroubleshootingItem | string;
+type TroubleshootingEntry = Json | string;
 
 /**
  * Type-safe example types
@@ -153,153 +135,95 @@ type Example = CodeExample | RuleExample | string;
  * Build complete rich content string from any content item
  * Extracts ALL available fields based on content type
  *
- * CRITICAL: Section order MUST match UnifiedDetailPage rendering exactly for consistency
- * @see src/components/unified-detail-page/index.tsx lines 146-235
+ * All content fields are now pre-populated in PostgreSQL via database triggers.
+ * No runtime generation needed - fields like installation, use_cases, and troubleshooting
+ * are populated when content is inserted/updated in the database.
  *
  * @param item - Content item (mcp, agent, hook, command, rule, statusline)
  * @returns Complete formatted content string for llms.txt
- *
- * @remarks
- * Each content type has different fields - this function handles all types safely
- * Section order mirrors the page rendering for optimal LLM citation accuracy
- * Uses generators from content-type-configs to fill missing fields (matches UnifiedDetailPage exactly)
  */
-export function buildRichContent(item: ContentItem): string {
+import type { FullContentItem } from '@/src/lib/content/supabase-content-loader';
+
+/**
+ * LLM Content Builder - Formats database content for llms.txt API routes
+ * Accesses metadata JSONB for installation/configuration/security/troubleshooting
+ */
+export function buildRichContent(item: ContentItem | FullContentItem): string {
   const sections: string[] = [];
 
-  // Get content type config for generators (matches UnifiedDetailPage line 49)
-  const config = getContentTypeConfig(item.category);
+  const metadata =
+    'metadata' in item && item.metadata ? (item.metadata as Record<string, unknown>) : null;
 
-  // Generate dynamic fields using config generators (matches UnifiedDetailPage lines 54-96)
-  // Extract generator functions first to avoid conditional calls
-  const genFeatures = config?.generators.features;
-  const genRequirements = config?.generators.requirements;
-  const genUseCases = config?.generators.useCases;
-  const genTroubleshooting = config?.generators.troubleshooting;
+  const features = 'features' in item && Array.isArray(item.features) ? item.features : [];
+  const useCases = 'use_cases' in item && Array.isArray(item.use_cases) ? item.use_cases : [];
+  const examples = 'examples' in item && item.examples ? item.examples : null;
 
-  const features =
-    'features' in item && Array.isArray(item.features) && item.features.length > 0
-      ? item.features
-      : genFeatures?.(item) || [];
+  const installation = metadata?.installation || null;
+  const configuration = metadata?.configuration || null;
+  const security = Array.isArray(metadata?.security) ? (metadata.security as string[]) : [];
+  const troubleshooting = Array.isArray(metadata?.troubleshooting) ? metadata.troubleshooting : [];
+  const requirements = Array.isArray(metadata?.requirements)
+    ? (metadata.requirements as string[])
+    : [];
+  const preview = metadata?.preview as string | undefined;
 
-  const requirements =
-    'requirements' in item && Array.isArray(item.requirements) && item.requirements.length > 0
-      ? item.requirements
-      : genRequirements?.(item) || [];
+  const content = 'content' in item && typeof item.content === 'string' ? item.content : null;
 
-  const useCases =
-    'useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0
-      ? item.useCases
-      : genUseCases?.(item) || [];
-
-  const troubleshooting =
-    'troubleshooting' in item &&
-    Array.isArray(item.troubleshooting) &&
-    item.troubleshooting.length > 0
-      ? item.troubleshooting
-      : genTroubleshooting?.(item) || [];
-
-  // Handle installation: prefer schema field, fallback to generator
-  const installation = (() => {
-    if ('installation' in item && item.installation) {
-      return item.installation;
-    }
-    return config?.generators.installation?.(item);
-  })();
-
-  // 1. MAIN CONTENT SECTION (matches UnifiedDetailPage lines 148-155)
-  // The primary content field - agents, commands, rules have markdown content
-  // NOTE: Do NOT add "CONTENT" header here - generator.ts adds it when converting to plain text
-  // We pass the raw content and buildRichContent() output to generator as the 'content' field
-  // Generator will add: "CONTENT\n-------\n" + markdownToPlainText(content)
-  if ('content' in item && typeof item.content === 'string' && item.content.trim().length > 0) {
-    sections.push(item.content.trim());
+  if (content?.trim()) {
+    sections.push(content.trim());
   }
 
-  // 2. FEATURES SECTION (matches UnifiedDetailPage lines 157-166)
-  // Uses generated features if not in schema
-  if (config?.sections.features && features.length > 0) {
+  if (features.length > 0) {
     sections.push(formatBulletList('KEY FEATURES', features));
   }
 
-  // 3. REQUIREMENTS SECTION (matches UnifiedDetailPage lines 168-177)
-  // Uses generated requirements if not in schema
   if (requirements.length > 0) {
     sections.push(formatBulletList('REQUIREMENTS', requirements));
   }
 
-  // 4. INSTALLATION SECTION (matches UnifiedDetailPage lines 179-182)
-  // Uses generated installation if not in schema
-  if (config?.sections.installation && installation) {
+  if (installation) {
     sections.push(formatInstallation(installation));
   }
 
-  // 5. CONFIGURATION SECTION (matches UnifiedDetailPage lines 184-193)
-  if (config?.sections.configuration && 'configuration' in item && item.configuration) {
-    sections.push(formatConfiguration(item.configuration, item.category));
+  if (configuration) {
+    sections.push(
+      formatConfiguration(configuration as Record<string, unknown>, item.category || '')
+    );
   }
 
-  // 6. USE CASES SECTION (matches UnifiedDetailPage lines 195-204)
-  // Uses generated useCases if not in schema
-  if (config?.sections.useCases && useCases.length > 0) {
+  if (useCases.length > 0) {
     sections.push(formatBulletList('USE CASES', useCases));
   }
 
-  // 7. SECURITY SECTION (MCP-specific, matches UnifiedDetailPage lines 206-215)
-  if (
-    config?.sections.security &&
-    'security' in item &&
-    Array.isArray(item.security) &&
-    item.security.length > 0
-  ) {
-    sections.push(formatBulletList('SECURITY BEST PRACTICES', item.security));
+  if (security.length > 0) {
+    sections.push(formatBulletList('SECURITY BEST PRACTICES', security));
   }
 
-  // 8. TROUBLESHOOTING SECTION (matches UnifiedDetailPage lines 217-223)
-  // Uses generated troubleshooting if not in schema
-  if (config?.sections.troubleshooting && troubleshooting.length > 0) {
+  if (troubleshooting.length > 0) {
     sections.push(formatTroubleshooting(troubleshooting));
   }
 
-  // 9. EXAMPLES SECTION (MCP-specific, matches UnifiedDetailPage lines 225-235)
-  if (
-    config?.sections.examples &&
-    'examples' in item &&
-    Array.isArray(item.examples) &&
-    item.examples.length > 0
-  ) {
-    // Type assertion: item.examples from baseUsageExampleSchema matches our Example type
-    // Safe because Example = CodeExample | RuleExample | string, and baseUsageExampleSchema = CodeExample
-    sections.push(formatExamples(item.examples as Example[], item.category));
+  if (examples && Array.isArray(examples) && examples.length > 0) {
+    sections.push(formatExamples(examples as Example[], item.category));
   }
 
-  // 10. TECHNICAL DETAILS SECTION (sidebar content - metadata, links, etc.)
   sections.push(buildTechnicalDetails(item));
 
-  // 11. PREVIEW SECTION (statuslines only - rendered above content in actual page)
-  if (item.category === 'statuslines' && 'preview' in item && item.preview) {
-    sections.push(`PREVIEW\n-------\n\n${item.preview}`);
+  if (item.category === 'statuslines' && preview) {
+    sections.push(`PREVIEW\n-------\n\n${preview}`);
   }
 
-  // Join all sections with double newlines
   return sections.filter((s) => s.length > 0).join('\n\n');
 }
 
-/**
- * Format array as bullet list with title
- */
 function formatBulletList(title: string, items: string[]): string {
   const lines = [title, '-'.repeat(title.length), ''];
   for (const item of items) {
-    lines.push(`• ${item}`);
+    lines.push(`? ${item}`);
   }
   return lines.join('\n');
 }
 
-/**
- * Type guard for Installation type
- * Validates that value is a plain object (not null, array, Date, or RegExp)
- */
 function isInstallation(value: unknown): value is Installation {
   return (
     value !== null &&
@@ -310,9 +234,6 @@ function isInstallation(value: unknown): value is Installation {
   );
 }
 
-/**
- * Format installation instructions with type-safe handling
- */
 function formatInstallation(installation: unknown): string {
   if (!isInstallation(installation)) {
     return '';
@@ -321,7 +242,6 @@ function formatInstallation(installation: unknown): string {
   const inst = installation as Installation;
   const lines = ['INSTALLATION', '------------', ''];
 
-  // Claude Desktop installation
   if (inst.claudeDesktop) {
     lines.push('CLAUDE DESKTOP:', '');
 
@@ -341,16 +261,12 @@ function formatInstallation(installation: unknown): string {
     lines.push('');
   }
 
-  // Claude Code installation
   if (inst.claudeCode) {
     lines.push('CLAUDE CODE:', '');
 
-    // For MCP servers, claudeCode is a string (simple command)
     if (typeof inst.claudeCode === 'string') {
       lines.push(inst.claudeCode);
-    }
-    // For hooks/commands, claudeCode has steps
-    else if (inst.claudeCode.steps) {
+    } else if (inst.claudeCode.steps) {
       inst.claudeCode.steps.forEach((step, idx) => {
         lines.push(`${idx + 1}. ${step}`);
       });
@@ -359,11 +275,10 @@ function formatInstallation(installation: unknown): string {
     lines.push('');
   }
 
-  // Requirements
   if (inst.requirements) {
     lines.push('Requirements:');
     for (const req of inst.requirements) {
-      lines.push(`• ${req}`);
+      lines.push(`? ${req}`);
     }
     lines.push('');
   }
@@ -371,76 +286,25 @@ function formatInstallation(installation: unknown): string {
   return lines.join('\n');
 }
 
-/**
- * Configuration formatter function type
- * Takes raw config object and returns formatted text output
- */
 type ConfigFormatter = (config: Record<string, unknown>) => string;
 
-/**
- * Configuration formatter registry - eliminates switch/case pattern
- *
- * Registry-driven approach for mapping categories to formatters.
- * Replaces 14-line switch statement with type-safe lookup.
- *
- * Architecture:
- * - Partial mapping allows categories without configuration sections
- * - Type-safe with explicit formatter signatures
- * - Shared formatter for agents/commands/rules (formatAiConfiguration)
- * - Zero updates needed when adding non-config categories
- *
- * @see formatMcpConfiguration - MCP server config formatter
- * @see formatHookConfiguration - Hook script config formatter
- * @see formatStatuslineConfiguration - Statusline display config formatter
- * @see formatAiConfiguration - AI model config formatter (agents/commands/rules)
- */
 const CONFIG_FORMATTERS: Partial<Record<string, ConfigFormatter>> = {
   mcp: (config) => formatMcpConfiguration(config as MCPConfiguration),
   hooks: (config) => formatHookConfiguration(config as HookConfiguration),
   statuslines: (config) => formatStatuslineConfiguration(config as StatuslineConfiguration),
-  // Shared AI configuration formatter for content types with temperature/maxTokens
   agents: (config) => formatAiConfiguration(config as AIConfiguration),
   commands: (config) => formatAiConfiguration(config as AIConfiguration),
   rules: (config) => formatAiConfiguration(config as AIConfiguration),
 };
 
-/**
- * Format configuration based on content type using registry-driven approach
- *
- * Modern 2025 Architecture:
- * - Configuration-driven: Uses CONFIG_FORMATTERS registry
- * - Type-safe: Explicit formatter mapping
- * - Zero duplication: Eliminated 14-line switch statement
- * - Extensible: Add new formatters without modifying this function
- *
- * @param config - Configuration object to format
- * @param category - Content category identifier
- * @returns Formatted configuration text or empty string if no formatter
- *
- * @example
- * ```typescript
- * // MCP configuration
- * formatConfiguration({ claudeDesktop: {...} }, 'mcp')
- * // Returns: "CONFIGURATION\n-------------\n..."
- *
- * // Category without configuration
- * formatConfiguration({}, 'collections')
- * // Returns: ""
- * ```
- */
 function formatConfiguration(config: Record<string, unknown>, category: string): string {
   const formatter = CONFIG_FORMATTERS[category];
   return formatter ? formatter(config) : '';
 }
 
-/**
- * Format MCP server configuration with type safety
- * Internal: reads from 'mcp' field (consistent with schema)
- */
 function formatMcpConfiguration(config: MCPConfiguration): string {
   const lines = ['CONFIGURATION', '-------------', ''];
 
-  // Claude Desktop MCP Servers
   if (config.claudeDesktop?.mcp) {
     lines.push('Claude Desktop MCP Servers:', '');
 
@@ -515,20 +379,15 @@ function formatMcpConfiguration(config: MCPConfiguration): string {
   return lines.join('\n');
 }
 
-/**
- * Format hook configuration with script content and type safety
- */
 function formatHookConfiguration(config: HookConfiguration): string {
   const lines = ['CONFIGURATION', '-------------', ''];
 
-  // Hook Config
   if (config.hookConfig?.hooks) {
     lines.push('Hook Configuration:', '');
 
-    for (const [hookType, hookConfigValue] of Object.entries(config.hookConfig.hooks)) {
-      lines.push(`Hook Type: ${hookType}`);
+    for (const [hook_type, hookConfigValue] of Object.entries(config.hookConfig.hooks)) {
+      lines.push(`Hook Type: ${hook_type}`);
 
-      // Handle both single config and array of configs
       const configs = Array.isArray(hookConfigValue) ? hookConfigValue : [hookConfigValue];
 
       for (const [idx, hook] of configs.entries()) {
@@ -589,17 +448,14 @@ function formatAiConfiguration(config: AIConfiguration): string {
   return lines.join('\n');
 }
 
-/**
- * Type guard for TroubleshootingItem
- */
-function isTroubleshootingItem(value: unknown): value is TroubleshootingItem {
+function isTroubleshootingItem(value: unknown): value is { issue: string; solution: string } {
   return (
     typeof value === 'object' &&
     value !== null &&
     'issue' in value &&
     'solution' in value &&
-    typeof (value as TroubleshootingItem).issue === 'string' &&
-    typeof (value as TroubleshootingItem).solution === 'string'
+    typeof (value as { issue: unknown; solution: unknown }).issue === 'string' &&
+    typeof (value as { issue: unknown; solution: unknown }).solution === 'string'
   );
 }
 
@@ -615,7 +471,7 @@ function formatTroubleshooting(items: TroubleshootingEntry[]): string {
       lines.push(`   Solution: ${item.solution}`);
       lines.push('');
     } else if (typeof item === 'string') {
-      lines.push(`• ${item}`);
+      lines.push(`? ${item}`);
     }
   }
 
@@ -677,7 +533,7 @@ function formatExamples(examples: Example[], category: string): string {
     }
     // Simple string examples (fallback)
     else if (typeof example === 'string') {
-      lines.push(`• ${example}`);
+      lines.push(`? ${example}`);
     }
   }
 
@@ -687,7 +543,7 @@ function formatExamples(examples: Example[], category: string): string {
 /**
  * Build technical details section
  */
-function buildTechnicalDetails(item: ContentItem): string {
+function buildTechnicalDetails(item: ContentItem | FullContentItem): string {
   const lines = ['TECHNICAL DETAILS', '-----------------', ''];
 
   // Package info (MCP servers)
@@ -696,13 +552,13 @@ function buildTechnicalDetails(item: ContentItem): string {
   }
 
   // Hook type
-  if (item.category === 'hooks' && 'hookType' in item) {
-    lines.push(`Hook Type: ${item.hookType}`);
+  if (item.category === 'hooks' && 'hook_type' in item) {
+    lines.push(`Hook Type: ${item.hook_type}`);
   }
 
   // Statusline type
-  if (item.category === 'statuslines' && 'statuslineType' in item) {
-    lines.push(`Statusline Type: ${item.statuslineType}`);
+  if (item.category === 'statuslines' && 'statusline_type' in item) {
+    lines.push(`Statusline Type: ${item.statusline_type}`);
   }
 
   // Authentication (MCP)
@@ -715,23 +571,27 @@ function buildTechnicalDetails(item: ContentItem): string {
     }
 
     // Permissions
-    if ('permissions' in item && item.permissions && item.permissions.length > 0) {
-      lines.push(`Permissions: ${item.permissions.join(', ')}`);
+    if ('permissions' in item && Array.isArray(item.permissions) && item.permissions.length > 0) {
+      lines.push(`Permissions: ${(item.permissions as string[]).join(', ')}`);
     }
 
     // Tools/Resources provided
-    if ('toolsProvided' in item && item.toolsProvided && item.toolsProvided.length > 0) {
-      lines.push(`Tools Provided: ${item.toolsProvided.join(', ')}`);
+    if (
+      'toolsProvided' in item &&
+      Array.isArray(item.toolsProvided) &&
+      item.toolsProvided.length > 0
+    ) {
+      lines.push(`Tools Provided: ${(item.toolsProvided as string[]).join(', ')}`);
     }
     if (
       'resourcesProvided' in item &&
-      item.resourcesProvided &&
+      Array.isArray(item.resourcesProvided) &&
       item.resourcesProvided.length > 0
     ) {
-      lines.push(`Resources Provided: ${item.resourcesProvided.join(', ')}`);
+      lines.push(`Resources Provided: ${(item.resourcesProvided as string[]).join(', ')}`);
     }
-    if ('dataTypes' in item && item.dataTypes && item.dataTypes.length > 0) {
-      lines.push(`Data Types: ${item.dataTypes.join(', ')}`);
+    if ('dataTypes' in item && Array.isArray(item.dataTypes) && item.dataTypes.length > 0) {
+      lines.push(`Data Types: ${(item.dataTypes as string[]).join(', ')}`);
     }
 
     // MCP protocol version
@@ -752,25 +612,25 @@ function buildTechnicalDetails(item: ContentItem): string {
   if (
     item.category === 'rules' &&
     'relatedRules' in item &&
-    item.relatedRules &&
+    Array.isArray(item.relatedRules) &&
     item.relatedRules.length > 0
   ) {
-    lines.push(`Related Rules: ${item.relatedRules.join(', ')}`);
+    lines.push(`Related Rules: ${(item.relatedRules as string[]).join(', ')}`);
   }
 
   // Expertise areas (rules only)
   if (
     item.category === 'rules' &&
     'expertiseAreas' in item &&
-    item.expertiseAreas &&
+    Array.isArray(item.expertiseAreas) &&
     item.expertiseAreas.length > 0
   ) {
-    lines.push(`Expertise Areas: ${item.expertiseAreas.join(', ')}`);
+    lines.push(`Expertise Areas: ${(item.expertiseAreas as string[]).join(', ')}`);
   }
 
   // Documentation URL
-  if ('documentationUrl' in item && item.documentationUrl) {
-    lines.push(`Documentation: ${item.documentationUrl}`);
+  if ('documentation_url' in item && item.documentation_url) {
+    lines.push(`Documentation: ${item.documentation_url}`);
   }
 
   // GitHub URL (commands, rules)

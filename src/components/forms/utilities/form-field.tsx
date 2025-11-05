@@ -217,7 +217,7 @@ export function FormField(props: FormFieldProps) {
       {/* Label */}
       <Label htmlFor={fieldId}>
         {label}
-        {required && <span className="text-destructive ml-1">*</span>}
+        {required && <span className="ml-1 text-destructive">*</span>}
       </Label>
 
       {/* Field variant */}
@@ -298,21 +298,21 @@ export function FormField(props: FormFieldProps) {
 
       {/* Helper text */}
       {description && (
-        <p id={descriptionId} className="text-xs text-muted-foreground">
+        <p id={descriptionId} className="text-muted-foreground text-xs">
           {description}
         </p>
       )}
 
       {/* Character count */}
       {showCharCount && maxLength && (
-        <p id={charCountId} className="text-xs text-muted-foreground">
+        <p id={charCountId} className="text-muted-foreground text-xs">
           {currentCharCount}/{maxLength} characters
         </p>
       )}
 
       {/* Error message */}
       {error && errorMessage && (
-        <p id={errorId} className="text-xs text-destructive" role="alert">
+        <p id={errorId} className="text-destructive text-xs" role="alert">
           {errorMessage}
         </p>
       )}

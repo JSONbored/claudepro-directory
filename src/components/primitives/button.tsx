@@ -128,7 +128,7 @@ const Button = ({
         {ripples.map((ripple) => (
           <motion.span
             key={ripple.id}
-            className="absolute rounded-full bg-white/30 pointer-events-none"
+            className="pointer-events-none absolute rounded-full bg-white/30"
             style={{
               left: ripple.x,
               top: ripple.y,

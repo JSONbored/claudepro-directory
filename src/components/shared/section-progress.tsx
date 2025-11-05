@@ -106,7 +106,7 @@ export function SectionProgress({
       {/* Optional percentage label */}
       {showLabel && (
         <motion.div
-          className="fixed top-4 right-4 z-50 rounded-full bg-background/80 px-3 py-1 text-xs font-medium backdrop-blur-sm border border-border"
+          className="fixed top-4 right-4 z-50 rounded-full border border-border bg-background/80 px-3 py-1 font-medium text-xs backdrop-blur-sm"
           style={{
             opacity: progress,
           }}

@@ -2,32 +2,23 @@
  * Dynamic Sitemap Generation (Next.js App Router)
  *
  * SEO-Critical Production Implementation:
- * - Dynamically generates sitemap from content metadata
- * - Auto-updates when new content is published
+ * - Dynamically generates sitemap from Supabase content
+ * - Auto-updates when new content is synced to database
  * - Replaces static public/sitemap.xml (which becomes stale)
  * - Uses centralized URL generator for consistency
  *
  * Performance:
  * - Generated at build time (SSG)
  * - Cached with ISR (revalidate: 3600 = 1 hour)
- * - 425+ URLs generated from live content metadata
+ * - 425+ URLs generated from live Supabase content
+ * - Content fetched via getAllContent() with ISR caching
+ *
+ * Migration: Replaced /generated/* metadata imports with Supabase queries
  *
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap
  */
 
 import type { MetadataRoute } from 'next';
-// Import metadata from generated files (build-time)
-import { agentsMetadata } from '@/generated/agents-metadata';
-import { changelogMetadata } from '@/generated/changelog-metadata';
-import { collectionsMetadata } from '@/generated/collections-metadata';
-import { commandsMetadata } from '@/generated/commands-metadata';
-import { guidesMetadata } from '@/generated/guides-metadata';
-import { hooksMetadata } from '@/generated/hooks-metadata';
-import { jobsMetadata } from '@/generated/jobs-metadata';
-import { mcpMetadata } from '@/generated/mcp-metadata';
-import { rulesMetadata } from '@/generated/rules-metadata';
-import { skillsMetadata } from '@/generated/skills-metadata';
-import { statuslinesMetadata } from '@/generated/statuslines-metadata';
 import { generateAllSiteUrls } from '@/src/lib/build/url-generator.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 
@@ -45,28 +36,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = APP_CONFIG.url;
 
   // Generate all site URLs using centralized URL generator
-  const sitemapUrls = await generateAllSiteUrls(
-    {
-      agentsMetadata,
-      changelogMetadata,
-      collectionsMetadata,
-      commandsMetadata,
-      guidesMetadata,
-      hooksMetadata,
-      jobsMetadata,
-      mcpMetadata,
-      rulesMetadata,
-      skillsMetadata,
-      statuslinesMetadata,
-    },
-    {
-      baseUrl,
-      includeGuides: true,
-      includeChangelog: true,
-      includeLlmsTxt: true,
-      includeTools: true,
-    }
-  );
+  // Data comes from mv_site_urls materialized view (cached via get_site_urls RPC)
+  const sitemapUrls = await generateAllSiteUrls({ baseUrl });
 
   // Convert to Next.js MetadataRoute.Sitemap format
   return sitemapUrls.map((url) => ({

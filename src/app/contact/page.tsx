@@ -9,17 +9,23 @@ export const metadata: Metadata = {
   description: `Get in touch with the ${APP_CONFIG.name} team. Find support, report issues, or connect with us through GitHub, Discord, or email.`,
 };
 
+/**
+ * ISR Configuration: Marketing pages update infrequently
+ * revalidate: 86400 = Revalidate every 24 hours
+ */
+export const revalidate = 86400;
+
 export default function ContactPage() {
   return (
-    <div className="container mx-auto px-4 py-8 sm:py-12 max-w-4xl">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl sm:text-4xl font-bold mb-4">Contact Us</h1>
-        <p className="text-muted-foreground text-lg">
+    <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">
+      <div className="mb-8 text-center">
+        <h1 className="mb-4 font-bold text-3xl sm:text-4xl">Contact Us</h1>
+        <p className="text-lg text-muted-foreground">
           We'd love to hear from you. Choose the best way to reach us below.
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6 mb-12">
+      <div className="mb-12 grid gap-6 md:grid-cols-2">
         {/* GitHub Discussions */}
         <Card>
           <CardHeader>
@@ -29,7 +35,7 @@ export default function ContactPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">
+            <p className="mb-4 text-muted-foreground">
               Join the conversation, ask questions, and share ideas with the community.
             </p>
             <Link
@@ -52,7 +58,7 @@ export default function ContactPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">
+            <p className="mb-4 text-muted-foreground">
               Chat with other users, get help, and stay updated on the latest developments.
             </p>
             <Link
@@ -75,7 +81,7 @@ export default function ContactPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">
+            <p className="mb-4 text-muted-foreground">
               Found a bug or have a feature request? Open an issue on GitHub.
             </p>
             <Link
@@ -98,7 +104,7 @@ export default function ContactPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">
+            <p className="mb-4 text-muted-foreground">
               For private inquiries, partnerships, or other matters, reach us via email.
             </p>
             <a
@@ -113,7 +119,7 @@ export default function ContactPage() {
 
       {/* Additional Information */}
       <div className="prose prose-invert max-w-none">
-        <h2 className="text-2xl font-semibold mb-4">Frequently Asked Questions</h2>
+        <h2 className="mb-4 font-semibold text-2xl">Frequently Asked Questions</h2>
         <p className="mb-4">
           Before reaching out, you might find answers in our{' '}
           <Link href="/help" className="text-accent hover:underline">
@@ -122,13 +128,13 @@ export default function ContactPage() {
           .
         </p>
 
-        <h2 className="text-2xl font-semibold mb-4 mt-8">Response Time</h2>
+        <h2 className="mt-8 mb-4 font-semibold text-2xl">Response Time</h2>
         <p className="mb-4">
           We typically respond to inquiries within 24-48 hours during business days. For urgent
           matters, please use GitHub Issues or Discord for faster community support.
         </p>
 
-        <h2 className="text-2xl font-semibold mb-4 mt-8">Contributing</h2>
+        <h2 className="mt-8 mb-4 font-semibold text-2xl">Contributing</h2>
         <p className="mb-4">
           Interested in contributing to {APP_CONFIG.name}? Check out our{' '}
           <Link href="/submit" className="text-accent hover:underline">

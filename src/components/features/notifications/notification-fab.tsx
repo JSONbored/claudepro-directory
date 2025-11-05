@@ -43,21 +43,9 @@ export function NotificationFAB() {
           stiffness: 400,
           damping: 17,
         }}
-        className={`
-          fixed bottom-6 right-6 md:hidden
-          z-30
-          h-14 w-14
-          rounded-full
-          bg-primary
-          text-primary-foreground
-          shadow-lg shadow-black/20 dark:shadow-black/40
-          flex items-center justify-center
-          hover:bg-primary/90
-          focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background
-          transition-colors duration-200
-          will-change-transform
-          relative
-        `}
+        className={
+          'fixed relative right-6 bottom-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-black/20 shadow-lg transition-colors duration-200 will-change-transform hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background md:hidden dark:shadow-black/40'
+        }
         aria-label={`${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`}
       >
         <Bell className="h-6 w-6" aria-hidden="true" />

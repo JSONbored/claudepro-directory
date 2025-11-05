@@ -11,11 +11,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
+import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ArrowLeft, Edit, Share2 } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database.types';
 
 interface CollectionPageProps {
   params: Promise<{ slug: string }>;
@@ -25,6 +27,9 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
   const { slug } = await params;
   return generatePageMetadata('/account/library/:slug', { params: { slug } });
 }
+
+// Force dynamic rendering - requires authentication
+export const dynamic = 'force-dynamic';
 
 export default async function CollectionDetailPage({ params }: CollectionPageProps) {
   const { slug } = await params;
@@ -38,34 +43,27 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     redirect('/login');
   }
 
-  // Get collection
-  const { data: collection } = await supabase
-    .from('user_collections')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('slug', slug)
-    .single();
+  // Consolidated RPC: 3 queries → 1 (67% reduction)
+  const { data: collectionData } = await supabase.rpc('get_collection_detail_with_items', {
+    p_user_id: user.id,
+    p_slug: slug,
+  });
 
-  if (!collection) {
+  if (!collectionData) {
     notFound();
   }
 
-  // Get collection items
-  const { data: items } = await supabase
-    .from('collection_items')
-    .select('*')
-    .eq('collection_id', collection.id)
-    .order('order', { ascending: true });
+  // Type assertion to database-generated Json type
+  type CollectionResponse = {
+    collection: Tables<'user_collections'>;
+    items: Array<Tables<'collection_items'>>;
+    bookmarks: Array<Tables<'bookmarks'>>;
+  };
 
-  // Get available bookmarks to add
-  const { data: bookmarks } = await supabase
-    .from('bookmarks')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  const { collection, items, bookmarks } = collectionData as unknown as CollectionResponse;
 
   const shareUrl = collection.is_public
-    ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://claudepro.directory'}/u/${user.id}/collections/${collection.slug}`
+    ? `${APP_CONFIG.url}/u/${user.id}/collections/${collection.slug}`
     : null;
 
   return (
@@ -82,7 +80,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
         <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
           <div className="flex-1">
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
-              <h1 className="text-3xl font-bold">{collection.name}</h1>
+              <h1 className="font-bold text-3xl">{collection.name}</h1>
               {collection.is_public && (
                 <UnifiedBadge variant="base" style="outline" className="text-xs">
                   Public
@@ -92,7 +90,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
             {collection.description && (
               <p className="text-muted-foreground">{collection.description}</p>
             )}
-            <div className={'text-sm text-muted-foreground mt-2'}>
+            <div className={'mt-2 text-muted-foreground text-sm'}>
               {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'} •{' '}
               {collection.view_count} views
             </div>
@@ -143,26 +141,26 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Total Items</CardTitle>
+            <CardTitle className="font-medium text-sm">Total Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{collection.item_count}</div>
+            <div className="font-bold text-2xl">{collection.item_count}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Views</CardTitle>
+            <CardTitle className="font-medium text-sm">Views</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{collection.view_count}</div>
+            <div className="font-bold text-2xl">{collection.view_count}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Visibility</CardTitle>
+            <CardTitle className="font-medium text-sm">Visibility</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{collection.is_public ? 'Public' : 'Private'}</div>
+            <div className="font-bold text-2xl">{collection.is_public ? 'Public' : 'Private'}</div>
           </CardContent>
         </Card>
       </div>

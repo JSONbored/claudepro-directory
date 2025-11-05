@@ -32,7 +32,7 @@ export const llmsTxtItemSchema = z
     category: z.string().min(1).describe('Content category (agents, mcp, rules, etc)'),
     tags: z.array(z.string()).default([]).describe('Content tags'),
     author: z.string().optional().describe('Content author'),
-    dateAdded: z.string().optional().describe('Date added (ISO format)'),
+    date_added: z.string().optional().describe('Date added (ISO format)'),
     url: z.string().url().optional().describe('Full URL to content'),
   })
   .describe('Content item for llms.txt generation - no length limits for AI consumption');
@@ -177,8 +177,8 @@ export async function generateLLMsTxt(
         metadata.push(`**Author:** ${validatedItem.author}`);
       }
 
-      if (validatedItem.dateAdded) {
-        metadata.push(`**Added:** ${formatDate(validatedItem.dateAdded)}`);
+      if (validatedItem.date_added) {
+        metadata.push(`**Added:** ${formatDate(validatedItem.date_added)}`);
       }
 
       if (validatedItem.tags && validatedItem.tags.length > 0 && opts.includeTags) {
@@ -262,7 +262,8 @@ export async function generateCategoryLLMsTxt(
   items: LLMsTxtItem[],
   categoryName: string,
   categoryDescription: string,
-  options?: Partial<LLMsTxtOptions>
+  options?: Partial<LLMsTxtOptions>,
+  categoryId?: string
 ): Promise<string> {
   try {
     const opts = llmsTxtOptionsSchema.parse(options || {});
@@ -312,18 +313,28 @@ export async function generateCategoryLLMsTxt(
     }
 
     // Popular Tags Section (AI categorization helper)
-    const allTags = items.flatMap((item) => item.tags || []);
-    const tagCounts = allTags.reduce(
-      (acc, tag) => {
-        acc[tag] = (acc[tag] || 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>
-    );
-    const topTags = Object.entries(tagCounts)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 10)
-      .map(([tag]) => tag);
+    // Use database RPC for optimal performance if categoryId provided
+    let topTags: string[] = [];
+
+    if (categoryId) {
+      try {
+        const { createClient } = await import('@/src/lib/supabase/server');
+        const supabase = await createClient();
+        const { data, error } = await supabase.rpc('get_top_tags_for_category', {
+          p_category: categoryId,
+          p_limit: 10,
+        });
+
+        if (!error && data) {
+          topTags = data.map((row: { tag: string }) => row.tag);
+        }
+      } catch (error) {
+        logger.warn('Failed to fetch tags from RPC, skipping', {
+          categoryId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
 
     if (topTags.length > 0) {
       sections.push('');

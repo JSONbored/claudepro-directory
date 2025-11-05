@@ -7,10 +7,10 @@
  */
 
 import { z } from 'zod';
-import { getAllCategoryIds } from '@/src/lib/config/category-config';
+import { getConfigValue } from '@/src/lib/config/app-settings';
 
 /**
- * Application Information Schema
+ * Application Information
  */
 const appConfigSchema = z.object({
   name: z.string().min(1).max(100),
@@ -83,15 +83,13 @@ export const CLAUDE_CONFIG = claudeConfigSchema.parse({
 });
 
 /**
- * Content Categories
- * **ARCHITECTURAL FIX**: Removed CONTENT_CATEGORIES and SEO_CATEGORIES constants (outdated)
- * Use UNIFIED_CATEGORY_REGISTRY from category-config.ts as single source of truth instead
+ * Content Categories - Database-First
+ * Use category_configs table as single source of truth (category-config.ts)
  */
 
 // CONSOLIDATION: Export unified main content categories for splitting logic
-// **ARCHITECTURAL FIX**: Now dynamically generated from UNIFIED_CATEGORY_REGISTRY
-// Auto-generated from UNIFIED_CATEGORY_REGISTRY - single source of truth
-export const MAIN_CONTENT_CATEGORIES = getAllCategoryIds() as readonly string[];
+// **ARCHITECTURAL FIX**: Import from category-config where needed to avoid circular dependency
+// MAIN_CONTENT_CATEGORIES moved to category-config.ts as VALID_CATEGORIES
 
 // **ARCHITECTURAL FIX**: Removed unused SEO_CATEGORIES (guide subcategories, not top-level categories)
 
@@ -156,6 +154,7 @@ export const GUIDE_CATEGORIES = {
 
 /**
  * UI Constants
+ * Note: Breakpoints are in ui-constants.ts for consistency
  */
 export const UI_CONFIG = {
   pagination: {
@@ -166,32 +165,15 @@ export const UI_CONFIG = {
     duration: 300,
     easing: 'ease-in-out',
   },
-  breakpoints: {
-    mobile: '768px',
-    tablet: '1024px',
-    desktop: '1280px',
-  },
 } as const;
 
 /**
- * Date & Version Configuration Schema
+ * Date & Version Configuration - Database-First
+ * Loads from app_settings table with hardcoded fallbacks
  */
-const dateConfigSchema = z.object({
-  currentMonth: z
-    .string()
-    .regex(
-      /^(January|February|March|April|May|June|July|August|September|October|November|December)$/
-    ),
-  currentYear: z.number().min(2024).max(2030),
-  currentDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  lastReviewed: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  claudeModels: z.object({
-    sonnet: z.string(),
-    opus: z.string(),
-  }),
-});
 
-export const DATE_CONFIG = dateConfigSchema.parse({
+// Hardcoded fallbacks (used at build time and if database unavailable)
+const DATE_CONFIG_FALLBACK = {
   currentMonth: 'October',
   currentYear: 2025,
   currentDate: '2025-10-01',
@@ -200,11 +182,42 @@ export const DATE_CONFIG = dateConfigSchema.parse({
     sonnet: 'Claude Sonnet 4.5',
     opus: 'Claude Opus 4.1',
   },
-});
+} as const;
 
-// Computed date strings for templates
-export const CURRENT_DATE_STRING = `${DATE_CONFIG.currentMonth} ${DATE_CONFIG.currentYear}`;
-export const SEO_DATE_STRING = `${DATE_CONFIG.currentMonth.toLowerCase()} ${DATE_CONFIG.currentYear}`;
+/**
+ * Get current date configuration from database
+ * Falls back to hardcoded values if database unavailable
+ */
+export async function getDateConfig() {
+  const [currentMonth, currentYear, currentDate, lastReviewed] = await Promise.all([
+    getConfigValue<string>('date.current_month', DATE_CONFIG_FALLBACK.currentMonth),
+    getConfigValue<number>('date.current_year', DATE_CONFIG_FALLBACK.currentYear),
+    getConfigValue<string>('date.current_date', DATE_CONFIG_FALLBACK.currentDate),
+    getConfigValue<string>('date.last_reviewed', DATE_CONFIG_FALLBACK.lastReviewed),
+  ]);
+
+  return {
+    currentMonth,
+    currentYear,
+    currentDate,
+    lastReviewed,
+    claudeModels: DATE_CONFIG_FALLBACK.claudeModels, // Models don't change, keep hardcoded
+  };
+}
+
+/**
+ * Get formatted date strings for SEO templates
+ */
+export async function getDateStrings() {
+  const config = await getDateConfig();
+  return {
+    current: `${config.currentMonth} ${config.currentYear}`,
+    seo: `${config.currentMonth.toLowerCase()} ${config.currentYear}`,
+  };
+}
+
+// Export fallback for build-time usage (static generation)
+export const DATE_CONFIG = DATE_CONFIG_FALLBACK;
 
 /**
  * Analytics Configuration
@@ -229,14 +242,35 @@ export const DEV_CONFIG = {
 } as const;
 
 /**
- * Search Configuration
- * Settings for search functionality
+ * Search Configuration - Database-First
+ * Loads from app_settings table with hardcoded fallbacks
  */
-export const SEARCH_CONFIG = {
-  debounceMs: 150, // Debounce delay for search input
-  threshold: 0.3, // Fuzzy search threshold (0-1, lower = more strict)
-  maxResults: 50, // Maximum search results to display
+const SEARCH_CONFIG_FALLBACK = {
+  debounceMs: 150,
+  threshold: 0.3,
+  maxResults: 50,
 } as const;
+
+/**
+ * Get search configuration from database
+ * Falls back to hardcoded values if database unavailable
+ */
+export async function getSearchConfig() {
+  const [debounceMs, threshold, maxResults] = await Promise.all([
+    getConfigValue<number>('search.debounce_ms', SEARCH_CONFIG_FALLBACK.debounceMs),
+    getConfigValue<number>('search.threshold', SEARCH_CONFIG_FALLBACK.threshold),
+    getConfigValue<number>('search.max_results', SEARCH_CONFIG_FALLBACK.maxResults),
+  ]);
+
+  return {
+    debounceMs,
+    threshold,
+    maxResults,
+  };
+}
+
+// Export fallback for build-time usage (static generation)
+export const SEARCH_CONFIG = SEARCH_CONFIG_FALLBACK;
 
 /**
  * Common Acronyms for Text Transformation
@@ -453,7 +487,6 @@ export const SITEMAP_CONFIG = {
     '/trending': 0.8, // High-value discovery
     '/guides': 0.7, // Educational content
     '/u/*': 0.6, // User profiles
-    '/compare/*': 0.7, // Comparison pages
   } as Record<string, number>,
 
   /**
@@ -469,6 +502,5 @@ export const SITEMAP_CONFIG = {
     '/ph-waitlist': 'weekly',
     '/changelog': 'daily',
     '/u/*': 'weekly',
-    '/compare/*': 'monthly',
   } as Record<string, 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never'>,
 } as const;

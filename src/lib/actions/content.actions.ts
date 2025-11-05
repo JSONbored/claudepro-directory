@@ -1,33 +1,16 @@
 'use server';
 
 /**
- * Content Actions
- * Consolidated server actions for all content-related functionality
- *
- * This file consolidates the following domains into a single, tree-shakeable module:
- * - Collections (create, update, delete, add/remove items, reorder)
- * - Reviews (create, update, delete, mark helpful, get aggregate ratings)
- * - Posts (create, update, delete, vote, comments)
- *
- * Architecture:
- * - All authenticated actions use authedAction middleware
- * - Repository pattern for database operations
- * - Fully tree-shakeable with named exports
- * - Type-safe with Zod schemas
- *
- * Benefits:
- * - Single source of truth for content domain
- * - Reduced import overhead
- * - Consistent error handling and logging
- * - Easier maintenance and testing
+ * Content Actions - Database-First Architecture
+ * Collections, reviews, posts with PostgreSQL RPC functions for business logic.
  */
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction, rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
-import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
-import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
+import { nonEmptyString } from '@/src/lib/schemas/primitives';
+// categoryIdSchema removed - using generated types only
 import {
   collectionInsertTransformSchema,
   collectionItemInsertTransformSchema,
@@ -41,6 +24,7 @@ import {
   updatePostSchema,
 } from '@/src/lib/schemas/transforms/data-normalization.schema';
 import { createClient } from '@/src/lib/supabase/server';
+import type { Tables } from '@/src/types/database.types';
 
 // =====================================================
 // COLLECTION ACTIONS
@@ -50,270 +34,160 @@ import { createClient } from '@/src/lib/supabase/server';
  * Create a new collection
  */
 export const createCollection = authedAction
-  .metadata({
-    actionName: 'createCollection',
-    category: 'user',
-  })
+  .metadata({ actionName: 'createCollection', category: 'user' })
   .schema(collectionInsertTransformSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const { name, slug, description, is_public } = parsedInput;
-    const { userId } = ctx;
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('manage_collection', {
+        p_action: 'create',
+        p_user_id: ctx.userId,
+        p_data: parsedInput,
+      });
 
-    const supabase = await createClient();
+      if (error) throw new Error(error.message);
+      const result = data as unknown as {
+        success: boolean;
+        collection: Tables<'user_collections'>;
+      };
 
-    // Create collection - database handles timestamps and default counts
-    const { data: collection, error } = await supabase
-      .from('user_collections')
-      .insert({
-        user_id: userId,
-        name,
-        slug: slug ?? name.toLowerCase().replace(/\s+/g, '-'),
-        description: description ?? null,
-        is_public,
-      })
-      .select()
-      .single();
+      revalidatePath('/account');
+      revalidatePath('/account/library');
+      if (result.collection?.is_public) revalidatePath('/u/[slug]', 'page');
 
-    if (error) {
-      if (error.code === '23505') {
-        throw new Error('A collection with this slug already exists');
-      }
-      throw new Error(`Failed to create collection: ${error.message}`);
+      return result;
+    } catch (error) {
+      logger.error(
+        'Failed to create collection',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          collectionName: parsedInput.name,
+        }
+      );
+      throw error;
     }
-
-    // Revalidate account pages
-    revalidatePath('/account');
-    revalidatePath('/account/library');
-    if (collection?.is_public) {
-      revalidatePath('/u/[slug]', 'page');
-    }
-
-    return {
-      success: true,
-      collection,
-    };
   });
 
 /**
  * Update an existing collection
  */
 export const updateCollection = authedAction
-  .metadata({
-    actionName: 'updateCollection',
-    category: 'user',
-  })
-  .schema(
-    collectionInsertTransformSchema.extend({
-      id: z.string().uuid('Invalid collection ID'),
-    })
-  )
+  .metadata({ actionName: 'updateCollection', category: 'user' })
+  .schema(collectionInsertTransformSchema.extend({ id: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
-    const { id, name, slug, description, is_public } = parsedInput;
-    const { userId } = ctx;
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('manage_collection', {
+        p_action: 'update',
+        p_user_id: ctx.userId,
+        p_data: parsedInput,
+      });
 
-    const supabase = await createClient();
+      if (error) throw new Error(error.message);
+      const result = data as unknown as {
+        success: boolean;
+        collection: Tables<'user_collections'>;
+      };
 
-    // Build update object conditionally to avoid exactOptionalPropertyTypes issues
-    const updateData: {
-      name: string;
-      slug?: string;
-      description: string | null;
-      is_public: boolean;
-    } = {
-      name,
-      description: description ?? null,
-      is_public,
-    };
+      revalidatePath('/account');
+      revalidatePath('/account/library');
+      revalidatePath(`/account/library/${result.collection.slug}`);
+      if (result.collection.is_public) revalidatePath('/u/[slug]', 'page');
 
-    if (slug !== undefined) {
-      updateData.slug = slug;
+      return result;
+    } catch (error) {
+      logger.error(
+        'Failed to update collection',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          collectionId: parsedInput.id,
+        }
+      );
+      throw error;
     }
-
-    // Update collection with ownership verification (atomic)
-    const { data: collection, error } = await supabase
-      .from('user_collections')
-      .update(updateData)
-      .eq('id', id)
-      .eq('user_id', userId)
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        throw new Error('Collection not found or you do not have permission to update it');
-      }
-      if (error.code === '23505') {
-        throw new Error('A collection with this slug already exists');
-      }
-      throw new Error(`Failed to update collection: ${error.message}`);
-    }
-
-    // Revalidate relevant pages
-    revalidatePath('/account');
-    revalidatePath('/account/library');
-    revalidatePath(`/account/library/${collection.slug}`);
-    if (collection.is_public) {
-      revalidatePath('/u/[slug]', 'page');
-    }
-
-    return {
-      success: true,
-      collection,
-    };
   });
 
 /**
  * Delete a collection
  */
 export const deleteCollection = authedAction
-  .metadata({
-    actionName: 'deleteCollection',
-    category: 'user',
-  })
-  .schema(
-    z.object({
-      id: z.string().uuid('Invalid collection ID'),
-    })
-  )
+  .metadata({ actionName: 'deleteCollection', category: 'user' })
+  .schema(z.object({ id: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
-    const { id } = parsedInput;
-    const { userId } = ctx;
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('manage_collection', {
+        p_action: 'delete',
+        p_user_id: ctx.userId,
+        p_data: parsedInput,
+      });
 
-    const supabase = await createClient();
+      if (error) throw new Error(error.message);
 
-    // Delete collection with ownership verification (CASCADE will delete items)
-    const { error } = await supabase
-      .from('user_collections')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', userId);
+      revalidatePath('/account');
+      revalidatePath('/account/library');
+      revalidatePath('/u/[slug]', 'page');
 
-    if (error) {
-      throw new Error(`Failed to delete collection: ${error.message}`);
+      return data as { success: boolean };
+    } catch (error) {
+      logger.error(
+        'Failed to delete collection',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          collectionId: parsedInput.id,
+        }
+      );
+      throw error;
     }
-
-    // Revalidate account pages
-    revalidatePath('/account');
-    revalidatePath('/account/library');
-    revalidatePath('/u/[slug]', 'page');
-
-    return {
-      success: true,
-    };
   });
 
 /**
  * Add an item to a collection
  */
 export const addItemToCollection = authedAction
-  .metadata({
-    actionName: 'addItemToCollection',
-    category: 'user',
-  })
+  .metadata({ actionName: 'addItemToCollection', category: 'user' })
   .schema(collectionItemInsertTransformSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const { collection_id, content_type, content_slug, notes, order } = parsedInput;
-    const { userId } = ctx;
-
     const supabase = await createClient();
+    const { data, error } = await supabase.rpc('manage_collection', {
+      p_action: 'add_item',
+      p_user_id: ctx.userId,
+      p_data: parsedInput,
+    });
 
-    // Verify collection belongs to user
-    const { data: collection, error: checkError } = await supabase
-      .from('user_collections')
-      .select('user_id')
-      .eq('id', collection_id)
-      .single();
+    if (error) throw new Error(error.message);
 
-    if (checkError || !collection) {
-      throw new Error('Collection not found or you do not have permission');
-    }
-
-    if (collection.user_id !== userId) {
-      throw new Error('You do not have permission to add items to this collection');
-    }
-
-    // Add item (unique constraint prevents duplicates)
-    const { data: item, error } = await supabase
-      .from('collection_items')
-      .insert({
-        collection_id,
-        user_id: userId,
-        content_type,
-        content_slug,
-        notes: notes || null,
-        order,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === '23505') {
-        throw new Error('Item already exists in collection');
-      }
-      throw new Error(`Failed to add item to collection: ${error.message}`);
-    }
-
-    // Revalidate collection pages
     revalidatePath('/account/library');
     revalidatePath('/account/library/[slug]', 'page');
     revalidatePath('/u/[slug]', 'page');
 
-    return {
-      success: true,
-      item,
-    };
+    return data as unknown as { success: boolean; item: Tables<'collection_items'> };
   });
 
 /**
  * Remove an item from a collection
  */
 export const removeItemFromCollection = authedAction
-  .metadata({
-    actionName: 'removeItemFromCollection',
-    category: 'user',
-  })
-  .schema(
-    z.object({
-      id: z.string().uuid('Invalid item ID'),
-      collection_id: z.string().uuid('Invalid collection ID'),
-    })
-  )
+  .metadata({ actionName: 'removeItemFromCollection', category: 'user' })
+  .schema(z.object({ id: z.string(), collection_id: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
-    const { id, collection_id } = parsedInput;
-    const { userId } = ctx;
-
     const supabase = await createClient();
+    const { data, error } = await supabase.rpc('manage_collection', {
+      p_action: 'remove_item',
+      p_user_id: ctx.userId,
+      p_data: parsedInput,
+    });
 
-    // Verify collection ownership
-    const { data: collection, error: checkError } = await supabase
-      .from('user_collections')
-      .select('user_id')
-      .eq('id', collection_id)
-      .single();
+    if (error) throw new Error(error.message);
 
-    if (checkError || !collection) {
-      throw new Error('Collection not found or you do not have permission');
-    }
-
-    if (collection.user_id !== userId) {
-      throw new Error('You do not have permission to remove items from this collection');
-    }
-
-    // Remove item
-    const { error } = await supabase.from('collection_items').delete().eq('id', id);
-
-    if (error) {
-      throw new Error(`Failed to remove item from collection: ${error.message}`);
-    }
-
-    // Revalidate collection pages
     revalidatePath('/account/library');
     revalidatePath('/account/library/[slug]', 'page');
     revalidatePath('/u/[slug]', 'page');
 
-    return {
-      success: true,
-    };
+    return data as { success: boolean };
   });
 
 /**
@@ -331,37 +205,27 @@ export const reorderCollectionItems = authedAction
 
     const supabase = await createClient();
 
-    // Verify collection belongs to user
-    const { data: collection, error: checkError } = await supabase
-      .from('user_collections')
-      .select('user_id')
-      .eq('id', collection_id)
-      .single();
+    // RPC handles ownership verification and atomic batch update
+    const { data, error } = await supabase.rpc('reorder_collection_items', {
+      p_collection_id: collection_id,
+      p_user_id: userId,
+      p_items: items,
+    });
 
-    if (checkError || !collection) {
-      throw new Error('Collection not found or you do not have permission');
+    if (error) {
+      throw new Error(`Failed to reorder items: ${error.message}`);
     }
 
-    if (collection.user_id !== userId) {
-      throw new Error('You do not have permission to reorder items in this collection');
+    const result = data as { success: boolean; updated: number; errors: unknown[] };
+
+    if (!result.success) {
+      throw new Error('Failed to reorder collection items');
     }
 
-    // OPTIMIZATION: Batch operation (N queries → parallel batch)
-    // Performance gain: Significant for collections with 10-50 items
-    const updates = items.map((item) =>
-      supabase
-        .from('collection_items')
-        .update({ order: item.order })
-        .eq('id', item.id)
-        .eq('collection_id', collection_id)
-    );
-
-    const results = await Promise.all(updates);
-
-    // Check for errors
-    const errors = results.filter((r) => r.error);
-    if (errors.length > 0) {
-      throw new Error(`Failed to reorder items: ${errors[0]?.error?.message}`);
+    if (result.errors && Array.isArray(result.errors) && result.errors.length > 0) {
+      logger.warn('Some items failed to reorder', undefined, {
+        errorCount: result.errors.length,
+      });
     }
 
     // Revalidate collection pages
@@ -371,6 +235,7 @@ export const reorderCollectionItems = authedAction
 
     return {
       success: true,
+      updated: result.updated,
     };
   });
 
@@ -413,7 +278,7 @@ export async function getCollectionWithItems(collectionId: string) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Get collection with items (optimized JOIN query)
+  // Get collection with items (optimized JOIN query with LIMIT for scalability)
   const { data, error } = await supabase
     .from('user_collections')
     .select(
@@ -424,6 +289,7 @@ export async function getCollectionWithItems(collectionId: string) {
     )
     .eq('id', collectionId)
     .order('order', { referencedTable: 'collection_items', ascending: true })
+    .limit(100)
     .single();
 
   if (error) {
@@ -460,6 +326,7 @@ export async function getPublicCollectionBySlug(userSlug: string, collectionSlug
     .eq('is_public', true)
     .eq('users.slug', userSlug)
     .order('order', { referencedTable: 'collection_items', ascending: true })
+    .limit(100)
     .single();
 
   if (error) {
@@ -478,345 +345,154 @@ export async function getPublicCollectionBySlug(userSlug: string, collectionSlug
 
 /**
  * Create a new review
- *
- * Rate limit: 10 requests per hour per IP
- * Prevents spam while allowing legitimate reviews
  */
 export const createReview = authedAction
-  .metadata({
-    actionName: 'createReview',
-    category: 'user',
-  })
+  .metadata({ actionName: 'createReview', category: 'user' })
   .schema(reviewInsertTransformSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const { content_type, content_slug, rating, review_text } = parsedInput;
-    const { userId } = ctx;
-
     const supabase = await createClient();
-
-    // Check if user has already reviewed this content
-    const { data: existingReview, error: checkError } = await supabase
-      .from('review_ratings')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('content_type', content_type)
-      .eq('content_slug', content_slug)
-      .single();
-
-    if (checkError && checkError.code !== 'PGRST116') {
-      throw new Error(`Failed to check for existing review: ${checkError.message}`);
-    }
-
-    if (existingReview) {
-      throw new Error(
-        'You have already reviewed this content. Use the update action to modify your review.'
-      );
-    }
-
-    // Create review
-    const { data: review, error } = await supabase
-      .from('review_ratings')
-      .insert({
-        user_id: userId,
-        content_type,
-        content_slug,
-        rating,
-        review_text: review_text || null,
-        helpful_count: 0,
-      })
-      .select()
-      .single();
+    const { data, error } = await supabase.rpc('manage_review', {
+      p_action: 'create',
+      p_user_id: ctx.userId,
+      p_data: parsedInput,
+    });
 
     if (error) {
       logger.error('Failed to create review', new Error(error.message), {
-        userId,
-        content_type,
-        content_slug,
-        error: error.message,
+        userId: ctx.userId,
+        content_type: parsedInput.content_type,
+        content_slug: parsedInput.content_slug,
       });
-      throw new Error(`Failed to create review: ${error.message}`);
+      throw new Error(error.message);
     }
 
-    // Track interaction for personalization (fire-and-forget)
-    createClient()
-      .then((supabaseForTracking) =>
-        supabaseForTracking.from('user_interactions').insert({
-          content_type,
-          content_slug,
-          interaction_type: 'view',
-          user_id: userId,
-          session_id: null,
-          metadata: { source: 'review_creation' },
-        })
-      )
-      .catch((err) => {
-        logger.warn('Failed to track interaction for review', undefined, {
-          userId,
-          content_type,
-          content_slug,
-          error: err instanceof Error ? err.message : String(err),
-        });
-      });
+    const result = data as unknown as { success: boolean; review: Tables<'review_ratings'> };
+    const { content_type, content_slug } = result.review;
 
-    // Revalidate detail page and list pages
     revalidatePath(`/${content_type}/${content_slug}`);
     revalidatePath(`/${content_type}`);
     revalidateTag(`reviews:${content_type}:${content_slug}`, 'max');
 
-    // Ensure data exists before accessing properties
-    if (!review) {
-      throw new Error('Review created but no data returned');
-    }
-
     logger.info('Review created', {
-      userId,
-      reviewId: review.id,
+      userId: ctx.userId,
+      reviewId: result.review.id,
       content_type,
       content_slug,
-      rating,
-      hasText: !!review_text,
+      rating: result.review.rating,
     });
 
-    return {
-      success: true,
-      review,
-    };
+    return result;
   });
 
 /**
  * Update an existing review
- *
- * Rate limit: 10 requests per hour per IP
- * Users can only update their own reviews
  */
 export const updateReview = authedAction
-  .metadata({
-    actionName: 'updateReview',
-    category: 'user',
-  })
+  .metadata({ actionName: 'updateReview', category: 'user' })
   .schema(reviewUpdateInputSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const { review_id, rating, review_text } = parsedInput;
-    const { userId } = ctx;
-
     const supabase = await createClient();
-
-    // Build update object
-    const updateData: { rating?: number; review_text?: string | null } = {};
-    if (rating !== undefined) {
-      updateData.rating = rating;
-    }
-    if (review_text !== undefined) {
-      updateData.review_text = review_text || null;
-    }
-
-    // If no updates provided, return error
-    if (Object.keys(updateData).length === 0) {
-      throw new Error('No updates provided');
-    }
-
-    // Update review with ownership verification
-    const { data: review, error } = await supabase
-      .from('review_ratings')
-      .update(updateData)
-      .eq('id', review_id)
-      .eq('user_id', userId)
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        throw new Error('Review not found or you do not have permission to update it');
-      }
-      logger.error('Failed to update review', new Error(error.message), {
-        userId,
-        reviewId: review_id,
-        error: error.message,
-      });
-      throw new Error(`Failed to update review: ${error.message}`);
-    }
-
-    // Revalidate detail page and list pages
-    revalidatePath(`/${review.content_type}/${review.content_slug}`);
-    revalidatePath(`/${review.content_type}`);
-    revalidateTag(`reviews:${review.content_type}:${review.content_slug}`, 'max');
-
-    logger.info('Review updated', {
-      userId,
-      reviewId: review_id,
-      content_type: review.content_type,
-      content_slug: review.content_slug,
-      updatedFields: Object.keys(updateData).join(', '),
+    const { data, error } = await supabase.rpc('manage_review', {
+      p_action: 'update',
+      p_user_id: ctx.userId,
+      p_data: parsedInput,
     });
 
-    return {
-      success: true,
-      review,
-    };
+    if (error) {
+      logger.error('Failed to update review', new Error(error.message), {
+        userId: ctx.userId,
+        reviewId: parsedInput.review_id,
+      });
+      throw new Error(error.message);
+    }
+
+    const result = data as unknown as { success: boolean; review: Tables<'review_ratings'> };
+    const { content_type, content_slug } = result.review;
+
+    revalidatePath(`/${content_type}/${content_slug}`);
+    revalidatePath(`/${content_type}`);
+    revalidateTag(`reviews:${content_type}:${content_slug}`, 'max');
+
+    logger.info('Review updated', {
+      userId: ctx.userId,
+      reviewId: parsedInput.review_id,
+      content_type,
+      content_slug,
+    });
+
+    return result;
   });
 
 /**
  * Delete a review
- *
- * Rate limit: 5 requests per hour per IP
- * Users can only delete their own reviews
  */
 export const deleteReview = authedAction
-  .metadata({
-    actionName: 'deleteReview',
-    category: 'user',
-  })
+  .metadata({ actionName: 'deleteReview', category: 'user' })
   .schema(reviewDeleteSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const { review_id } = parsedInput;
-    const { userId } = ctx;
-
     const supabase = await createClient();
-
-    // First fetch review to get content info for revalidation
-    const { data: reviewToDelete, error: fetchError } = await supabase
-      .from('review_ratings')
-      .select('content_type, content_slug, user_id')
-      .eq('id', review_id)
-      .single();
-
-    if (fetchError || !reviewToDelete) {
-      throw new Error('Review not found');
-    }
-
-    if (reviewToDelete.user_id !== userId) {
-      throw new Error('You can only delete your own reviews');
-    }
-
-    // Delete review (cascades to helpful votes via foreign key)
-    const { error } = await supabase.from('review_ratings').delete().eq('id', review_id);
+    const { data, error } = await supabase.rpc('manage_review', {
+      p_action: 'delete',
+      p_user_id: ctx.userId,
+      p_data: parsedInput,
+    });
 
     if (error) {
       logger.error('Failed to delete review', new Error(error.message), {
-        userId,
-        reviewId: review_id,
-        error: error.message,
+        userId: ctx.userId,
+        reviewId: parsedInput.review_id,
       });
-      throw new Error(`Failed to delete review: ${error.message}`);
+      throw new Error(error.message);
     }
 
-    // Revalidate detail page and list pages
-    revalidatePath(`/${reviewToDelete.content_type}/${reviewToDelete.content_slug}`);
-    revalidatePath(`/${reviewToDelete.content_type}`);
-    revalidateTag(`reviews:${reviewToDelete.content_type}:${reviewToDelete.content_slug}`, 'max');
+    const result = data as { success: boolean; content_type: string; content_slug: string };
+
+    revalidatePath(`/${result.content_type}/${result.content_slug}`);
+    revalidatePath(`/${result.content_type}`);
+    revalidateTag(`reviews:${result.content_type}:${result.content_slug}`, 'max');
 
     logger.info('Review deleted', {
-      userId,
-      reviewId: review_id,
-      content_type: reviewToDelete.content_type,
-      content_slug: reviewToDelete.content_slug,
+      userId: ctx.userId,
+      reviewId: parsedInput.review_id,
+      content_type: result.content_type,
+      content_slug: result.content_slug,
     });
 
-    return {
-      success: true,
-    };
+    return { success: true };
   });
 
-/**
- * Mark a review as helpful (or remove helpful vote)
- *
- * Rate limit: 50 requests per hour per IP
- * Higher limit to allow engagement
- */
 export const markReviewHelpful = authedAction
-  .metadata({
-    actionName: 'markReviewHelpful',
-    category: 'user',
-  })
+  .metadata({ actionName: 'markReviewHelpful', category: 'user' })
   .schema(helpfulVoteSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const { review_id, helpful } = parsedInput;
-    const { userId } = ctx;
-
     const supabase = await createClient();
+    const { data, error } = await supabase.rpc('toggle_review_helpful', {
+      p_review_id: parsedInput.review_id,
+      p_user_id: ctx.userId,
+      p_helpful: parsedInput.helpful,
+    });
+    if (error) throw new Error(error.message);
 
-    // Get review to verify it exists and get author
-    const { data: review, error: fetchError } = await supabase
-      .from('review_ratings')
-      .select('user_id, content_type, content_slug')
-      .eq('id', review_id)
-      .single();
-
-    if (fetchError || !review) {
-      throw new Error('Review not found');
-    }
-
-    // Prevent users from voting on their own reviews
-    if (review.user_id === userId) {
-      throw new Error('You cannot vote on your own review');
-    }
-
-    if (helpful) {
-      // Add helpful vote
-      const { error } = await supabase.from('review_helpful_votes').insert({
-        review_id,
-        user_id: userId,
-      });
-
-      if (error) {
-        // Ignore duplicate key errors (user already voted)
-        if (error.code !== '23505') {
-          logger.error('Failed to add helpful vote', new Error(error.message), {
-            userId,
-            reviewId: review_id,
-            error: error.message,
-          });
-          throw new Error(`Failed to mark review as helpful: ${error.message}`);
-        }
-      } else {
-        logger.info('Review marked helpful', {
-          userId,
-          reviewId: review_id,
-          reviewAuthor: review.user_id,
-        });
-      }
-    } else {
-      // Remove helpful vote
-      const { error } = await supabase
-        .from('review_helpful_votes')
-        .delete()
-        .eq('review_id', review_id)
-        .eq('user_id', userId);
-
-      if (error) {
-        logger.error('Failed to remove helpful vote', new Error(error.message), {
-          userId,
-          reviewId: review_id,
-          error: error.message,
-        });
-        throw new Error(`Failed to remove helpful vote: ${error.message}`);
-      }
-
-      logger.info('Helpful vote removed', {
-        userId,
-        reviewId: review_id,
-      });
-    }
-
-    // Revalidate detail page (helpful count changed)
-    revalidatePath(`/${review.content_type}/${review.content_slug}`);
-    revalidateTag(`reviews:${review.content_type}:${review.content_slug}`, 'max');
-
-    return {
-      success: true,
-      helpful,
+    const result = data as {
+      success: boolean;
+      helpful: boolean;
+      content_type: string;
+      content_slug: string;
     };
+    revalidatePath(`/${result.content_type}/${result.content_slug}`);
+    revalidateTag(`reviews:${result.content_type}:${result.content_slug}`, 'max');
+
+    return { success: result.success, helpful: result.helpful };
   });
 
 /**
- * Get reviews for a content item
- *
- * This is a server action (not rate limited) for fetching reviews
- * Used by ReviewSection component for initial load and pagination
+ * Get reviews with aggregate stats - OPTIMIZED
+ * Uses single RPC call instead of separate getReviews + getAggregateRating
+ * Replaces 2 queries with 1
  */
-export const getReviews = rateLimitedAction
+export const getReviewsWithStats = rateLimitedAction
   .metadata({
-    actionName: 'getReviews',
+    actionName: 'getReviewsWithStats',
     category: 'content',
   })
   .schema(getReviewsSchema)
@@ -830,55 +506,18 @@ export const getReviews = rateLimitedAction
       data: { user },
     } = await supabase.auth.getUser();
 
-    // Build query
-    let query = supabase
-      .from('review_ratings')
-      .select(
-        `
-        *,
-        users:user_id (
-          slug,
-          name,
-          image,
-          reputation_score,
-          tier
-        )
-      `,
-        { count: 'exact' }
-      )
-      .eq('content_type', content_type)
-      .eq('content_slug', content_slug);
-
-    // Apply sorting
-    switch (sort_by) {
-      case 'helpful':
-        query = query
-          .order('helpful_count', { ascending: false })
-          .order('created_at', { ascending: false });
-        break;
-      case 'rating_high':
-        query = query
-          .order('rating', { ascending: false })
-          .order('created_at', { ascending: false });
-        break;
-      case 'rating_low':
-        query = query
-          .order('rating', { ascending: true })
-          .order('created_at', { ascending: false });
-        break;
-      default:
-        // 'recent' and any other value: sort by most recent first
-        query = query.order('created_at', { ascending: false });
-        break;
-    }
-
-    // Apply pagination
-    query = query.range(offset, offset + limit - 1);
-
-    const { data: reviews, error, count } = await query;
+    // Use optimized RPC - single query for reviews + aggregate stats
+    const { data, error } = await supabase.rpc('get_reviews_with_stats', {
+      p_content_type: content_type,
+      p_content_slug: content_slug,
+      ...(sort_by && { p_sort_by: sort_by }),
+      ...(offset !== undefined && { p_offset: offset }),
+      ...(limit !== undefined && { p_limit: limit }),
+      ...(user?.id && { p_user_id: user.id }),
+    });
 
     if (error) {
-      logger.error('Failed to fetch reviews', new Error(error.message), {
+      logger.error('Failed to fetch reviews with stats', new Error(error.message), {
         content_type,
         content_slug,
         sort_by,
@@ -887,99 +526,11 @@ export const getReviews = rateLimitedAction
       throw new Error('Failed to fetch reviews. Please try again.');
     }
 
-    // If user is authenticated, fetch their helpful votes for these reviews
-    let userHelpfulVotes: Set<string> = new Set();
-    if (user && reviews && reviews.length > 0) {
-      const reviewIds = reviews.map((r) => r.id);
-      const { data: votes } = await supabase
-        .from('review_helpful_votes')
-        .select('review_id')
-        .eq('user_id', user.id)
-        .in('review_id', reviewIds);
-
-      if (votes) {
-        userHelpfulVotes = new Set(votes.map((v) => v.review_id));
-      }
-    }
-
-    // Attach user helpful vote status to each review
-    const reviewsWithVoteStatus = (reviews || []).map((review) => ({
-      ...review,
-      user_has_voted_helpful: userHelpfulVotes.has(review.id),
-    }));
-
-    return {
-      success: true,
-      reviews: reviewsWithVoteStatus,
-      total: count || 0,
-      hasMore: (count || 0) > offset + limit,
-    };
+    return data;
   });
 
-/**
- * Get aggregate rating stats for a content item
- *
- * Returns average rating, total count, and rating distribution
- * Used for displaying star ratings on ConfigCard and detail pages
- */
-export const getAggregateRating = rateLimitedAction
-  .metadata({
-    actionName: 'getAggregateRating',
-    category: 'content',
-  })
-  .schema(
-    z.object({
-      content_type: categoryIdSchema,
-      content_slug: nonEmptyString.max(200),
-    })
-  )
-  .action(async ({ parsedInput }) => {
-    const { content_type, content_slug } = parsedInput;
-    const { createClient } = await import('@/src/lib/supabase/server');
-    const supabase = await createClient();
-
-    // Fetch all ratings for this content
-    const { data: ratings, error } = await supabase
-      .from('review_ratings')
-      .select('rating')
-      .eq('content_type', content_type)
-      .eq('content_slug', content_slug);
-
-    if (error) {
-      logger.error('Failed to fetch aggregate rating', new Error(error.message), {
-        content_type,
-        content_slug,
-        error: error.message,
-      });
-      throw new Error('Failed to fetch rating statistics. Please try again.');
-    }
-
-    if (!ratings || ratings.length === 0) {
-      return {
-        success: true,
-        average: 0,
-        count: 0,
-        distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
-      };
-    }
-
-    // Calculate average
-    const sum = ratings.reduce((acc, r) => acc + r.rating, 0);
-    const average = sum / ratings.length;
-
-    // Calculate distribution
-    const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    for (const r of ratings) {
-      distribution[r.rating as keyof typeof distribution] += 1;
-    }
-
-    return {
-      success: true,
-      average: Number(average.toFixed(1)), // Round to 1 decimal
-      count: ratings.length,
-      distribution,
-    };
-  });
+// DELETED: getReviews() - Use getReviewsWithStats() instead (optimized single RPC)
+// DELETED: getAggregateRating() - Use getReviewsWithStats() instead (optimized single RPC)
 
 // ============================================
 // POST ACTIONS
@@ -989,248 +540,221 @@ export const getAggregateRating = rateLimitedAction
  * Create a new post
  */
 export const createPost = authedAction
-  .metadata({
-    actionName: 'createPost',
-    category: 'form',
-  })
+  .metadata({ actionName: 'createPost', category: 'form' })
   .schema(createPostSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const { title, content, url } = parsedInput;
-    const { userId } = ctx;
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('manage_post', {
+        p_action: 'create',
+        p_user_id: ctx.userId,
+        p_data: parsedInput,
+      });
 
-    const supabase = await createClient();
+      if (error) throw new Error(error.message);
 
-    // Check for duplicate URL submissions
-    if (url) {
-      const { data: existing, error: checkError } = await supabase
-        .from('posts')
-        .select('id')
-        .eq('url', url)
-        .limit(1)
-        .single();
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw new Error(`Failed to check for duplicate URL: ${checkError.message}`);
-      }
-
-      if (existing) {
-        throw new Error('This URL has already been submitted');
-      }
+      revalidatePath('/board');
+      return data as unknown as { success: boolean; post: Tables<'posts'> };
+    } catch (error) {
+      logger.error(
+        'Failed to create post',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          title: parsedInput.title,
+        }
+      );
+      throw error;
     }
-
-    // Create post
-    const { data: post, error } = await supabase
-      .from('posts')
-      .insert({
-        user_id: userId,
-        title,
-        content: content || null,
-        url: url || null,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Failed to create post: ${error.message}`);
-    }
-
-    revalidatePath('/board');
-
-    return {
-      success: true,
-      post,
-    };
   });
 
 /**
  * Update a post (own posts only)
  */
 export const updatePost = authedAction
-  .metadata({
-    actionName: 'updatePost',
-    category: 'form',
-  })
+  .metadata({ actionName: 'updatePost', category: 'form' })
   .schema(updatePostSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const { id, title, content } = parsedInput;
-    const { userId } = ctx;
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('manage_post', {
+        p_action: 'update',
+        p_user_id: ctx.userId,
+        p_data: parsedInput,
+      });
 
-    const supabase = await createClient();
+      if (error) throw new Error(error.message);
 
-    // Update with ownership verification
-    const { data: post, error } = await supabase
-      .from('posts')
-      .update({
-        ...(title && { title }),
-        ...(content !== undefined && { content }),
-      })
-      .eq('id', id)
-      .eq('user_id', userId)
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Failed to update post: ${error.message}`);
+      revalidatePath('/board');
+      return data as unknown as { success: boolean; post: Tables<'posts'> };
+    } catch (error) {
+      logger.error(
+        'Failed to update post',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          postId: parsedInput.id,
+        }
+      );
+      throw error;
     }
-
-    revalidatePath('/board');
-
-    return {
-      success: true,
-      post,
-    };
   });
 
 /**
  * Delete a post (own posts only)
  */
 export const deletePost = authedAction
-  .metadata({
-    actionName: 'deletePost',
-    category: 'form',
-  })
-  .schema(z.object({ id: z.string().uuid() }))
+  .metadata({ actionName: 'deletePost', category: 'form' })
+  .schema(z.object({ id: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
-    const { id } = parsedInput;
-    const { userId } = ctx;
-
-    const supabase = await createClient();
-
-    // Delete with ownership verification
-    const { error } = await supabase.from('posts').delete().eq('id', id).eq('user_id', userId);
-
-    if (error) {
-      throw new Error(`Failed to delete post: ${error.message}`);
-    }
-
-    revalidatePath('/board');
-
-    return {
-      success: true,
-    };
-  });
-
-/**
- * Vote on a post (upvote/unvote toggle)
- */
-export const votePost = authedAction
-  .metadata({
-    actionName: 'votePost',
-    category: 'user',
-  })
-  .schema(
-    z.object({
-      post_id: z.string().uuid(),
-      action: z.enum(['vote', 'unvote']),
-    })
-  )
-  .action(async ({ parsedInput, ctx }) => {
-    const { post_id, action } = parsedInput;
-    const { userId } = ctx;
-
-    const supabase = await createClient();
-
-    if (action === 'vote') {
-      // Add vote - PostgREST handles duplicate detection via unique constraint
-      const { error } = await supabase.from('votes').insert({
-        user_id: userId,
-        post_id,
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('manage_post', {
+        p_action: 'delete',
+        p_user_id: ctx.userId,
+        p_data: parsedInput,
       });
 
-      if (error) {
-        if (error.code === '23505') {
-          throw new Error('You have already voted on this post');
+      if (error) throw new Error(error.message);
+
+      revalidatePath('/board');
+      return data as { success: boolean };
+    } catch (error) {
+      logger.error(
+        'Failed to delete post',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          postId: parsedInput.id,
         }
-        throw new Error(`Failed to vote: ${error.message}`);
-      }
-    } else {
-      // Remove vote
-      const { error } = await supabase
-        .from('votes')
-        .delete()
-        .eq('user_id', userId)
-        .eq('post_id', post_id);
-
-      if (error) {
-        throw new Error(`Failed to remove vote: ${error.message}`);
-      }
+      );
+      throw error;
     }
+  });
 
+export const votePost = authedAction
+  .metadata({ actionName: 'votePost', category: 'user' })
+  .schema(z.object({ post_id: z.string(), action: z.enum(['vote', 'unvote']) }))
+  .action(async ({ parsedInput, ctx }) => {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc('toggle_post_vote', {
+      p_post_id: parsedInput.post_id,
+      p_user_id: ctx.userId,
+      p_action: parsedInput.action,
+    });
+    if (error) throw new Error(error.message);
     revalidatePath('/board');
-
-    return {
-      success: true,
-      action,
-    };
+    return data as { success: boolean; action: string };
   });
 
 /**
  * Create a comment on a post
  */
 export const createComment = authedAction
-  .metadata({
-    actionName: 'createComment',
-    category: 'form',
-  })
+  .metadata({ actionName: 'createComment', category: 'form' })
   .schema(
     z.object({
-      post_id: z.string().uuid(),
-      content: nonEmptyString.min(1).max(2000, 'Comment must be less than 2000 characters'),
+      post_id: z.string(),
+      content: nonEmptyString.min(1).max(2000),
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const { post_id, content } = parsedInput;
-    const { userId } = ctx;
-
     const supabase = await createClient();
+    const { data, error } = await supabase.rpc('manage_comment', {
+      p_action: 'create',
+      p_user_id: ctx.userId,
+      p_data: parsedInput,
+    });
 
-    const { data: comment, error } = await supabase
-      .from('comments')
-      .insert({
-        user_id: userId,
-        post_id,
-        content,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Failed to create comment: ${error.message}`);
-    }
+    if (error) throw new Error(error.message);
 
     revalidatePath('/board');
-
-    return {
-      success: true,
-      comment,
-    };
+    return data as unknown as { success: boolean; comment: Tables<'comments'> };
   });
 
 /**
  * Delete a comment (own comments only)
  */
 export const deleteComment = authedAction
-  .metadata({
-    actionName: 'deleteComment',
-    category: 'form',
-  })
-  .schema(z.object({ id: z.string().uuid() }))
+  .metadata({ actionName: 'deleteComment', category: 'form' })
+  .schema(z.object({ id: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
-    const { id } = parsedInput;
-    const { userId } = ctx;
-
     const supabase = await createClient();
+    const { data, error } = await supabase.rpc('manage_comment', {
+      p_action: 'delete',
+      p_user_id: ctx.userId,
+      p_data: parsedInput,
+    });
 
-    // Delete with ownership verification - PostgREST enforces both conditions atomically
-    const { error } = await supabase.from('comments').delete().eq('id', id).eq('user_id', userId);
-
-    if (error) {
-      throw new Error(`Failed to delete comment: ${error.message}`);
-    }
+    if (error) throw new Error(error.message);
 
     revalidatePath('/board');
+    return data as { success: boolean };
+  });
 
-    return {
-      success: true,
-    };
+// ============================================
+// USAGE TRACKING ACTIONS
+// ============================================
+
+/**
+ * Track content usage (copy, download, etc.)
+ * Database-first: Inserts into user_interactions, trigger auto-increments content.copy_count
+ */
+export const trackUsage = rateLimitedAction
+  .metadata({ actionName: 'trackUsage', category: 'content' })
+  .schema(
+    z.object({
+      content_id: z.string(),
+      action_type: z.enum(['copy', 'download_zip', 'download_markdown', 'llmstxt']),
+    })
+  )
+  .action(async ({ parsedInput }) => {
+    const supabase = await createClient();
+
+    // Get authenticated user (may be null for anonymous)
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    // Get content details (category + slug required for user_interactions)
+    const { data: content, error: fetchError } = await supabase
+      .from('content')
+      .select('category, slug')
+      .eq('id', parsedInput.content_id)
+      .single();
+
+    if (fetchError || !content) {
+      logger.error(
+        'Failed to fetch content for usage tracking',
+        new Error(fetchError?.message || 'Content not found'),
+        {
+          content_id: parsedInput.content_id,
+        }
+      );
+      throw new Error('Content not found');
+    }
+
+    // Map action_type to interaction_type
+    // 'copy' stays 'copy', all downloads become 'download'
+    const interactionType = parsedInput.action_type === 'copy' ? 'copy' : 'download';
+
+    // Insert into user_interactions (trigger will increment content.copy_count)
+    const { error } = await supabase.from('user_interactions').insert({
+      user_id: user?.id || null, // null for anonymous users
+      content_type: content.category,
+      content_slug: content.slug,
+      interaction_type: interactionType,
+      metadata: { action_type: parsedInput.action_type }, // Preserve granular detail
+    });
+
+    if (error) {
+      logger.error('Failed to track usage', new Error(error.message), {
+        content_id: parsedInput.content_id,
+        action_type: parsedInput.action_type,
+        interaction_type: interactionType,
+      });
+      throw new Error(error.message);
+    }
+
+    return { success: true };
   });

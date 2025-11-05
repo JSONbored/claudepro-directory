@@ -1,0 +1,138 @@
+name: Performance Issue
+description: Report slow page loads, queries, or other performance problems
+title: "[Performance]: "
+labels: ["performance", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us identify and fix performance bottlenecks. Please provide as much detail as possible.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Performance Area
+      description: Where is the performance issue occurring?
+      options:
+        - Page Load Time
+        - Database Query Performance
+        - API Response Time
+        - Search Performance
+        - Image Loading
+        - Build Time
+        - Client-Side Rendering
+        - Server-Side Rendering (SSR)
+        - Static Generation (SSG)
+        - Realtime Subscriptions
+        - Bundle Size
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Performance Issue Description
+      description: Describe the performance problem
+      placeholder: |
+        What's slow?
+        - Specific page/feature affected
+        - How slow is it? (seconds)
+        - When does it occur?
+        - How often does it happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce the performance issue?
+      placeholder: |
+        1. Navigate to /agents
+        2. Click on a specific agent
+        3. Notice page takes 5+ seconds to load
+        4. Check Network tab - see slow RPC call
+    validations:
+      required: true
+
+  - type: textarea
+    id: measurements
+    attributes:
+      label: Performance Measurements
+      description: Provide timing data, metrics, or profiling results
+      placeholder: |
+        - Page load time: 5.2s
+        - Time to First Byte (TTFB): 2.1s
+        - Largest Contentful Paint (LCP): 3.8s
+        - Database query time: 1.5s
+        - Bundle size: 2.5MB
+        - Lighthouse score: 45/100
+
+        (Attach screenshots of Chrome DevTools Performance tab, Lighthouse report, etc.)
+
+  - type: textarea
+    id: expected_performance
+    attributes:
+      label: Expected Performance
+      description: What performance level do you expect?
+      placeholder: |
+        - Page should load in <1s
+        - API response should be <200ms
+        - LCP should be <2.5s
+        - Bundle size should be <500KB
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Where does the performance issue occur?
+      placeholder: |
+        - Device: Desktop / Mobile / Tablet
+        - OS: macOS 14, Windows 11, iOS 17
+        - Browser: Chrome 121, Safari 17, Firefox 122
+        - Network: WiFi, 4G, 5G, Slow 3G
+        - Location: US, EU, Asia
+      render: markdown
+
+  - type: textarea
+    id: potential_cause
+    attributes:
+      label: Potential Cause (Optional)
+      description: Do you have ideas about what might be causing the slowness?
+      placeholder: |
+        Possible causes:
+        - Database query missing index
+        - Large component re-renders
+        - Unoptimized images
+        - Slow RPC function
+        - Large bundle import
+
+  - type: textarea
+    id: proposed_fix
+    attributes:
+      label: Proposed Fix (Optional)
+      description: Suggest potential optimizations
+      placeholder: |
+        Suggested optimizations:
+        - Add database index on `column_name`
+        - Implement pagination for large lists
+        - Add image optimization
+        - Use React.memo() for expensive components
+        - Code-split large dependencies
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have measured the performance issue with DevTools or similar tools
+          required: true
+        - label: I have searched existing issues for duplicates
+          required: true
+        - label: I have tested on latest version
+          required: false

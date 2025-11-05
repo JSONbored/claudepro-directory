@@ -1,6 +1,6 @@
 import Script from 'next/script';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
-import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
+import { serializeJsonLd } from '@/src/lib/utils/jsonld.utils';
 
 /**
  * Generate organization structured data for the entire site

@@ -1,0 +1,119 @@
+name: UI/UX Improvement
+description: Suggest improvements to design, user interface, or user experience
+title: "[UI/UX]: "
+labels: ["ui/ux", "design", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve our UI/UX! Design feedback is invaluable for creating a better user experience.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area of Improvement
+      description: Which area needs improvement?
+      options:
+        - Homepage/Landing Page
+        - Content Browse Pages (Agents, MCP, Rules, etc.)
+        - Content Detail Pages
+        - Submit Form (/submit)
+        - User Profile Pages
+        - Search/Discovery
+        - Mobile Responsiveness
+        - Accessibility
+        - Dark Mode
+        - Loading States/Animations
+        - Navigation/Menu
+        - Typography/Spacing
+        - Color Scheme
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_experience
+    attributes:
+      label: Current Experience
+      description: Describe the current UI/UX that needs improvement
+      placeholder: |
+        What specific UI/UX issue are you experiencing?
+        - Where does it occur?
+        - What makes it confusing/frustrating?
+        - How does it impact usability?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_improvement
+    attributes:
+      label: Proposed Improvement
+      description: Describe your suggested improvement
+      placeholder: |
+        What would you change?
+        - Specific UI elements to modify
+        - Visual/interaction improvements
+        - Layout changes
+        - Component redesigns
+    validations:
+      required: true
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups/Screenshots/Examples
+      description: Add screenshots, mockups, or links to similar designs
+      placeholder: |
+        - Screenshots of current state
+        - Mockups/wireframes of proposed changes
+        - Links to similar UI patterns you like
+        - Before/after examples
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Impact/Priority
+      description: How much does this affect user experience?
+      options:
+        - Critical - Blocks core functionality
+        - High - Significantly impacts UX
+        - Medium - Noticeable improvement
+        - Low - Nice to have
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: devices
+    attributes:
+      label: Affected Devices
+      description: Which devices/browsers are affected?
+      options:
+        - label: Desktop
+        - label: Mobile
+        - label: Tablet
+        - label: Specific browser (please specify in additional context)
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context, accessibility concerns, or design considerations
+      placeholder: |
+        - Accessibility concerns
+        - Performance impact
+        - Related design system components
+        - Color contrast issues
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate
+          required: true
+        - label: I have provided screenshots/mockups if applicable
+          required: false
+        - label: This improvement aligns with modern UX best practices
+          required: false

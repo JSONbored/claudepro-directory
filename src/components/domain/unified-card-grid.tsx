@@ -34,7 +34,8 @@ import { memo, useEffect } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import type { DisplayableContent } from '@/src/lib/schemas/component.schema';
+
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
@@ -46,14 +47,14 @@ export type GridVariant = 'normal' | 'tight' | 'wide' | 'list';
 /**
  * Base props shared by all variants
  *
- * **ARCHITECTURAL DECISION: UnifiedContentItem Only**
- * This component requires UnifiedContentItem - NOT a generic GridItem.
- * Previous generic approach created type complexity for zero benefit.
- * All 12 usage sites pass UnifiedContentItem objects.
+ * **ARCHITECTURAL DECISION: DisplayableContent (Database-Generated Union)**
+ * Accepts ContentItem (full table) OR SearchResult (RPC subset) - both from database.types.ts
+ * ConfigCard and rendering logic handle both types via discriminated union patterns
+ * Only uses fields present in both types (slug, category, title, description, etc.)
  */
 interface BaseGridProps {
   /** Array of items to display */
-  items: readonly UnifiedContentItem[];
+  items: readonly DisplayableContent[];
 
   /** Grid layout variant (default: 'normal') */
   variant?: GridVariant;
@@ -77,7 +78,7 @@ interface BaseGridProps {
   /** ARIA label for the grid section */
   ariaLabel?: string;
   /** Function to extract unique key from item (default: uses slug) */
-  keyExtractor?: (item: UnifiedContentItem, index: number) => string | number;
+  keyExtractor?: (item: DisplayableContent, index: number) => string | number;
 
   /** Number of items to prefetch for faster navigation (default: 0) */
   prefetchCount?: number;
@@ -88,7 +89,7 @@ interface BaseGridProps {
  * Type-safe: each branch has exactly what it needs
  *
  * ARCHITECTURAL DECISION: Only ConfigCard or custom renderCard
- * - ConfigCard: Standard card with defaults
+ * - ConfigCard: Standard card with defaults (accepts DisplayableContent)
  * - renderCard: Full control (can use BaseCard with custom props)
  * - Removed generic ComponentType branch (unused, type-unsafe)
  */
@@ -100,7 +101,7 @@ type CardRenderingProps =
     }
   | {
       /** Custom render function */
-      renderCard: (item: UnifiedContentItem, index: number) => ReactNode;
+      renderCard: (item: DisplayableContent, index: number) => ReactNode;
       cardComponent?: never;
     };
 
@@ -123,7 +124,7 @@ const GRID_VARIANTS: Record<GridVariant, string> = {
 /**
  * UnifiedCardGrid Component
  *
- * Renders UnifiedContentItem objects in a responsive CSS Grid with optional infinite scroll.
+ * Renders ContentItem objects in a responsive CSS Grid with optional infinite scroll.
  * Designed for maximum reusability and type safety.
  *
  * @example
@@ -185,10 +186,10 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
   useEffect(() => {
     if (prefetchCount > 0 && items.length > 0) {
       const itemsToPrefetch = items.slice(0, prefetchCount);
-      itemsToPrefetch.forEach((item) => {
+      for (const item of itemsToPrefetch) {
         const path = `/${item.category}/${item.slug}`;
         router.prefetch(path);
-      });
+      }
     }
   }, [items, prefetchCount, router]);
 
@@ -203,8 +204,8 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
   // Determine items to display
   const displayedItems = infiniteScroll ? items.slice(0, displayCount) : items;
 
-  // Default key extractor uses slug (standard across all UnifiedContentItem)
-  const getKey = keyExtractor || ((item: UnifiedContentItem, index: number) => item.slug || index);
+  // Default key extractor uses slug (present in both ContentItem and SearchResult)
+  const getKey = keyExtractor || ((item: DisplayableContent, index: number) => item.slug || index);
 
   // Empty state
   if (items.length === 0 && !loading) {
@@ -221,7 +222,7 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
       <output className="flex items-center justify-center py-12" aria-live="polite">
         <div className="flex items-center gap-2">
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">{loadingMessage}</p>
+          <p className="text-muted-foreground text-sm">{loadingMessage}</p>
         </div>
       </output>
     );
@@ -274,7 +275,7 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
             <div className="flex items-center gap-2">
               {/* Spinner - shadcn design pattern */}
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              <p className="text-sm text-muted-foreground">{loadingMessage}</p>
+              <p className="text-muted-foreground text-sm">{loadingMessage}</p>
             </div>
           )}
         </div>

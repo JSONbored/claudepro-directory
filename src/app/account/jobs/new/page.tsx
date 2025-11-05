@@ -3,6 +3,9 @@ import { JobForm } from '@/src/components/forms/job-form';
 import { createJob } from '@/src/lib/actions/business.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
+// Force dynamic rendering - requires authentication
+export const dynamic = 'force-dynamic';
+
 export const metadata = generatePageMetadata('/account/jobs/new');
 
 export default function NewJobPage() {
@@ -27,7 +30,7 @@ export default function NewJobPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Post a Job</h1>
+        <h1 className="mb-2 font-bold text-3xl">Post a Job</h1>
         <p className="text-muted-foreground">
           Create a new job listing to reach talented developers
         </p>

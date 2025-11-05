@@ -105,7 +105,7 @@ export function RollingText({
   return (
     <span
       ref={localRef}
-      className={cn('inline-block relative', className)}
+      className={cn('relative inline-block', className)}
       aria-live="polite"
       aria-atomic="true"
       style={{

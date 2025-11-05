@@ -21,8 +21,13 @@
 import { memo } from 'react';
 import { JSONSectionRenderer } from '@/src/components/content/json-section-renderer';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import type { ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
-import type { GuideSection } from '@/src/lib/schemas/content/guide.schema';
+import type { ChangelogEntry } from '@/src/lib/changelog/loader';
+import { parseChangelogChanges } from '@/src/lib/changelog/loader';
+import type { Database } from '@/src/types/database.types';
+
+type ContentRow = Database['public']['Tables']['content']['Row'];
+type GuideSection = ContentRow['metadata'];
+
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
@@ -53,17 +58,20 @@ export interface ChangelogContentProps {
  * ```
  */
 export const ChangelogContent = memo(({ entry, sections }: ChangelogContentProps) => {
+  // Parse changes JSONB field with type safety
+  const changes = parseChangelogChanges(entry.changes);
+
   // Get non-empty categories for badge display
   const nonEmptyCategories = [];
-  if (entry.categories.Added.length > 0) nonEmptyCategories.push('Added');
-  if (entry.categories.Changed.length > 0) nonEmptyCategories.push('Changed');
-  if (entry.categories.Deprecated.length > 0) nonEmptyCategories.push('Deprecated');
-  if (entry.categories.Removed.length > 0) nonEmptyCategories.push('Removed');
-  if (entry.categories.Fixed.length > 0) nonEmptyCategories.push('Fixed');
-  if (entry.categories.Security.length > 0) nonEmptyCategories.push('Security');
+  if (changes.Added && changes.Added.length > 0) nonEmptyCategories.push('Added');
+  if (changes.Changed && changes.Changed.length > 0) nonEmptyCategories.push('Changed');
+  if (changes.Deprecated && changes.Deprecated.length > 0) nonEmptyCategories.push('Deprecated');
+  if (changes.Removed && changes.Removed.length > 0) nonEmptyCategories.push('Removed');
+  if (changes.Fixed && changes.Fixed.length > 0) nonEmptyCategories.push('Fixed');
+  if (changes.Security && changes.Security.length > 0) nonEmptyCategories.push('Security');
 
   return (
-    <article className={'space-y-6 max-w-none'}>
+    <article className={'max-w-none space-y-6'}>
       {/* Category Badges */}
       {nonEmptyCategories.length > 0 && (
         <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} py-2`}>

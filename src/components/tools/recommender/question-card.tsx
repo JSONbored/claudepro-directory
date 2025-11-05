@@ -57,7 +57,7 @@ export function QuestionCard({ question, description, required, children }: Ques
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold flex items-center gap-2">
+        <h3 className="flex items-center gap-2 font-semibold text-lg">
           {question}
           {required && (
             <span className="text-destructive text-sm" title="Required">
@@ -65,7 +65,7 @@ export function QuestionCard({ question, description, required, children }: Ques
             </span>
           )}
         </h3>
-        {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
+        {description && <p className="mt-1 text-muted-foreground text-sm">{description}</p>}
       </div>
       {children}
     </div>

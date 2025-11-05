@@ -96,20 +96,7 @@ export function BackToTopButton({ threshold = 300, className = '' }: BackToTopBu
             stiffness: 400,
             damping: 17,
           }}
-          className={`
-            fixed top-20 right-6 md:top-24 md:right-12 z-40
-            h-11 w-11 md:h-12 md:w-12
-            rounded-full
-            bg-card/95 backdrop-blur-md
-            border border-border/50
-            shadow-lg shadow-black/10 dark:shadow-black/30
-            flex items-center justify-center
-            text-foreground
-            hover:bg-accent hover:text-accent-foreground hover:border-accent/50
-            focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background
-            transition-colors duration-200
-            will-change-transform
-            ${className}
+          className={`fixed top-20 right-6 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-border/50 bg-card/95 text-foreground shadow-black/10 shadow-lg backdrop-blur-md transition-colors duration-200 will-change-transform hover:border-accent/50 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background md:top-24 md:right-12 md:h-12 md:w-12 dark:shadow-black/30 ${className}
           `}
           aria-label="Scroll to top"
         >

@@ -53,7 +53,7 @@ import {
 } from '@/src/components/primitives/dropdown-menu';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/primitives/sheet';
 import { PrefetchLink } from '@/src/components/shared/prefetch-link';
-import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
+import { ACTION_LINKS, PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import {
@@ -159,7 +159,7 @@ const NavigationComponent = () => {
       {/* Skip to main content link for keyboard navigation (WCAG 2.1 AA) */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-accent focus:text-accent-foreground focus:rounded-md focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background transition-all duration-200"
+        className="sr-only transition-all duration-200 focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background"
       >
         Skip to main content
       </a>
@@ -168,7 +168,7 @@ const NavigationComponent = () => {
       <NavigationCommandMenu open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
 
       <motion.header
-        className="sticky top-0 z-50 w-full pt-1 px-3 pb-3 will-change-transform contain-layout"
+        className="sticky top-0 z-50 w-full px-3 pt-1 pb-3 will-change-transform contain-layout"
         style={{ opacity: navOpacity }}
       >
         <div className="container mx-auto">
@@ -189,7 +189,7 @@ const NavigationComponent = () => {
                 <Link
                   href={ROUTES.HOME}
                   prefetch={true}
-                  className="flex items-center flex-shrink-0 no-underline"
+                  className="flex flex-shrink-0 items-center no-underline"
                   aria-label="heyclaude - Go to homepage"
                 >
                   <motion.div style={{ scale: logoScale }}>
@@ -199,7 +199,7 @@ const NavigationComponent = () => {
 
                 {/* Desktop Navigation - ONLY show at xl: (1280px+) */}
                 <nav
-                  className={`hidden xl:flex ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} lg:gap-4 text-sm lg:text-base`}
+                  className={`hidden xl:flex ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm lg:gap-4 lg:text-base`}
                   aria-label="Primary navigation"
                 >
                   {PRIMARY_NAVIGATION.map((link) => {
@@ -211,7 +211,7 @@ const NavigationComponent = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors px-2 py-1 text-sm font-medium"
+                              className="px-2 py-1 font-medium text-muted-foreground text-sm transition-colors hover:bg-accent/10 hover:text-foreground"
                               aria-label={`Open ${link.label} menu`}
                             >
                               {link.label}
@@ -227,18 +227,18 @@ const NavigationComponent = () => {
                                     <Link
                                       href={child.href}
                                       prefetch={true}
-                                      className="flex items-center gap-2.5 w-full cursor-pointer px-2.5 py-2 rounded-md hover:bg-accent/10 transition-colors duration-150 group"
+                                      className="group flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors duration-150 hover:bg-accent/10"
                                     >
                                       {ChildIcon && (
-                                        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-muted/50 group-hover:bg-accent/15 transition-colors flex-shrink-0">
+                                        <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-muted/50 transition-colors group-hover:bg-accent/15">
                                           <ChildIcon
-                                            className="h-3.5 w-3.5 text-muted-foreground group-hover:text-accent transition-colors"
+                                            className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-accent"
                                             aria-hidden="true"
                                           />
                                         </div>
                                       )}
-                                      <div className="flex flex-col items-start gap-0.5 flex-1 min-w-0">
-                                        <div className="text-sm font-medium group-hover:text-accent transition-colors truncate w-full flex items-center gap-1.5">
+                                      <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
+                                        <div className="flex w-full items-center gap-1.5 truncate font-medium text-sm transition-colors group-hover:text-accent">
                                           {child.label}
                                           {child.isNew && (
                                             <UnifiedBadge
@@ -248,7 +248,7 @@ const NavigationComponent = () => {
                                           )}
                                         </div>
                                         {child.description && (
-                                          <div className="text-[11px] text-muted-foreground/80 group-hover:text-foreground/60 transition-colors line-clamp-1">
+                                          <div className="line-clamp-1 text-[11px] text-muted-foreground/80 transition-colors group-hover:text-foreground/60">
                                             {child.description}
                                           </div>
                                         )}
@@ -288,7 +288,7 @@ const NavigationComponent = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors"
+                        className="text-muted-foreground transition-colors hover:bg-accent/10 hover:text-foreground"
                         aria-label="Open additional navigation menu"
                       >
                         More
@@ -300,17 +300,17 @@ const NavigationComponent = () => {
                       <Link
                         href="/for-you"
                         prefetch={true}
-                        className="mb-4 block p-4 rounded-lg bg-gradient-to-br from-accent/10 via-accent/5 to-transparent border border-accent/20 hover:border-accent/30 transition-all duration-300 group no-underline"
+                        className="group mb-4 block rounded-lg border border-accent/20 bg-gradient-to-br from-accent/10 via-accent/5 to-transparent p-4 no-underline transition-all duration-300 hover:border-accent/30"
                       >
                         <div className="flex items-start gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20 group-hover:bg-accent/30 transition-colors flex-shrink-0">
+                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-accent/20 transition-colors group-hover:bg-accent/30">
                             <Sparkles className="h-5 w-5 text-accent" aria-hidden="true" />
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors mb-1">
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-1 font-semibold text-foreground text-sm transition-colors group-hover:text-accent">
                               For You
                             </div>
-                            <div className="text-xs text-muted-foreground/90 leading-relaxed">
+                            <div className="text-muted-foreground/90 text-xs leading-relaxed">
                               AI-powered personalized recommendations based on your interests and
                               browsing history
                             </div>
@@ -319,10 +319,10 @@ const NavigationComponent = () => {
                       </Link>
 
                       {/* 2-column grid for quick links */}
-                      <div className="grid gap-4 grid-cols-2 mb-3">
+                      <div className="mb-3 grid grid-cols-2 gap-4">
                         {SECONDARY_NAVIGATION.map((group) => (
                           <div key={group.heading} className="space-y-2">
-                            <DropdownMenuLabel className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-1">
+                            <DropdownMenuLabel className="px-2 py-1 font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">
                               {group.heading}
                             </DropdownMenuLabel>
                             <DropdownMenuGroup className="space-y-0.5">
@@ -334,31 +334,31 @@ const NavigationComponent = () => {
                                       href={link.href}
                                       prefetch={true}
                                       className={
-                                        'flex items-center gap-2.5 w-full cursor-pointer px-2.5 py-2 rounded-md hover:bg-accent/10 transition-colors duration-150 group'
+                                        'group flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors duration-150 hover:bg-accent/10'
                                       }
                                     >
                                       {IconComponent && (
                                         <div
                                           className={
-                                            'flex h-7 w-7 items-center justify-center rounded-md bg-muted/50 group-hover:bg-accent/15 transition-colors flex-shrink-0'
+                                            'flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-muted/50 transition-colors group-hover:bg-accent/15'
                                           }
                                         >
                                           <IconComponent
-                                            className="h-3.5 w-3.5 text-muted-foreground group-hover:text-accent transition-colors"
+                                            className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-accent"
                                             aria-hidden="true"
                                           />
                                         </div>
                                       )}
                                       <div
                                         className={
-                                          'flex flex-col items-start gap-0.5 flex-1 min-w-0'
+                                          'flex min-w-0 flex-1 flex-col items-start gap-0.5'
                                         }
                                       >
-                                        <div className="text-sm font-medium group-hover:text-accent transition-colors truncate w-full">
+                                        <div className="w-full truncate font-medium text-sm transition-colors group-hover:text-accent">
                                           {link.label}
                                         </div>
                                         {link.description && (
-                                          <div className="text-[11px] text-muted-foreground/80 group-hover:text-foreground/60 transition-colors line-clamp-1">
+                                          <div className="line-clamp-1 text-[11px] text-muted-foreground/80 transition-colors group-hover:text-foreground/60">
                                             {link.description}
                                           </div>
                                         )}
@@ -378,39 +378,39 @@ const NavigationComponent = () => {
                         <Link
                           href="/community"
                           prefetch={true}
-                          className="flex items-center gap-2 px-3 py-2.5 rounded-md hover:bg-accent/10 transition-colors group no-underline"
+                          className="group flex items-center gap-2 rounded-md px-3 py-2.5 no-underline transition-colors hover:bg-accent/10"
                         >
                           <Users
-                            className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors"
+                            className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-accent"
                             aria-hidden="true"
                           />
-                          <div className="text-sm font-medium text-foreground group-hover:text-accent transition-colors">
+                          <div className="font-medium text-foreground text-sm transition-colors group-hover:text-accent">
                             Community
                           </div>
                         </Link>
                         <Link
                           href="/partner"
                           prefetch={true}
-                          className="flex items-center gap-2 px-3 py-2.5 rounded-md hover:bg-accent/10 transition-colors group no-underline"
+                          className="group flex items-center gap-2 rounded-md px-3 py-2.5 no-underline transition-colors hover:bg-accent/10"
                         >
                           <Handshake
-                            className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors"
+                            className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-accent"
                             aria-hidden="true"
                           />
-                          <div className="text-sm font-medium text-foreground group-hover:text-accent transition-colors">
+                          <div className="font-medium text-foreground text-sm transition-colors group-hover:text-accent">
                             Partner Program
                           </div>
                         </Link>
                         <Link
                           href="/consulting"
                           prefetch={true}
-                          className="flex items-center gap-2 px-3 py-2.5 rounded-md hover:bg-accent/10 transition-colors group no-underline"
+                          className="group flex items-center gap-2 rounded-md px-3 py-2.5 no-underline transition-colors hover:bg-accent/10"
                         >
                           <Briefcase
-                            className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors"
+                            className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-accent"
                             aria-hidden="true"
                           />
-                          <div className="text-sm font-medium text-foreground group-hover:text-accent transition-colors">
+                          <div className="font-medium text-foreground text-sm transition-colors group-hover:text-accent">
                             Consulting
                           </div>
                         </Link>
@@ -421,7 +421,7 @@ const NavigationComponent = () => {
 
                 {/* Tablet Navigation (768px-1279px) - Horizontal scroll with Motion.dev */}
                 <motion.nav
-                  className="hidden md:flex xl:hidden overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+                  className="scrollbar-hide hidden snap-x snap-mandatory overflow-x-auto md:flex xl:hidden"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, ease: 'easeOut' }}
@@ -440,7 +440,7 @@ const NavigationComponent = () => {
                           href={link.href}
                           isActive={isActive}
                           onClick={() => setIsOpen(false)}
-                          className="text-xs px-3 py-2 whitespace-nowrap"
+                          className="whitespace-nowrap px-3 py-2 text-xs"
                         >
                           {link.label}
                         </NavLink>
@@ -450,7 +450,7 @@ const NavigationComponent = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => setIsOpen(true)}
-                      className="text-xs whitespace-nowrap"
+                      className="whitespace-nowrap text-xs"
                       aria-label="Open more navigation options"
                     >
                       More
@@ -469,6 +469,25 @@ const NavigationComponent = () => {
                       onClick={() => setCommandPaletteOpen(true)}
                     />
                   </div>
+
+                  {/* Action Links - Submit Config Button */}
+                  {ACTION_LINKS.map((link) => {
+                    const ActionIcon = link.icon;
+                    return (
+                      <Button
+                        key={link.href}
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className={'hidden md:flex'}
+                      >
+                        <Link href={link.href} prefetch={true}>
+                          {ActionIcon && <ActionIcon className="mr-2 h-4 w-4" />}
+                          {link.label}
+                        </Link>
+                      </Button>
+                    );
+                  })}
 
                   <Button
                     variant="ghost"
@@ -498,11 +517,11 @@ const NavigationComponent = () => {
                     </SheetTrigger>
                     <SheetContent
                       side="right"
-                      className="w-full sm:w-[380px] border-l border-border/50"
+                      className="w-full border-border/50 border-l sm:w-[380px]"
                     >
                       {/* Swipe-to-close indicator */}
                       <motion.div
-                        className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-border/50 rounded-full cursor-grab active:cursor-grabbing"
+                        className="-translate-x-1/2 absolute top-2 left-1/2 h-1 w-12 cursor-grab rounded-full bg-border/50 active:cursor-grabbing"
                         drag="y"
                         dragConstraints={{ top: 0, bottom: 50 }}
                         onDragEnd={(_, info) => {
@@ -513,10 +532,10 @@ const NavigationComponent = () => {
                       />
 
                       <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                      <div className={'flex flex-col h-full pt-8'}>
+                      <div className={'flex h-full flex-col pt-8'}>
                         {/* Header with Motion.dev fade-in */}
                         <motion.div
-                          className={'flex items-center pb-8 px-1'}
+                          className={'flex items-center px-1 pb-8'}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.1 }}
@@ -527,8 +546,9 @@ const NavigationComponent = () => {
                         {/* Main Navigation - Staggered animations */}
                         <div className={'flex-1 overflow-y-auto'}>
                           <nav className={'space-y-3 px-3'} aria-label="Primary navigation">
-                            {PRIMARY_NAVIGATION.map((link, index) => {
-                              const IconComponent = link.icon;
+                            {/* Action Links (Submit Config) - Prominent position */}
+                            {ACTION_LINKS.map((link, index) => {
+                              const ActionIcon = link.icon;
                               return (
                                 <motion.div
                                   key={link.href}
@@ -536,14 +556,39 @@ const NavigationComponent = () => {
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ delay: 0.15 + index * 0.05 }}
                                 >
+                                  <Link
+                                    href={link.href}
+                                    onClick={() => setIsOpen(false)}
+                                    className="flex w-full items-center justify-center rounded-xl border-2 border-accent bg-accent px-5 py-4 font-semibold text-accent-foreground text-base transition-all duration-200 hover:bg-accent/90 active:scale-[0.97]"
+                                  >
+                                    {ActionIcon && (
+                                      <ActionIcon className="mr-2 h-5 w-5 flex-shrink-0" />
+                                    )}
+                                    <span>{link.label}</span>
+                                  </Link>
+                                </motion.div>
+                              );
+                            })}
+
+                            {/* Primary Navigation */}
+                            {PRIMARY_NAVIGATION.map((link, index) => {
+                              const IconComponent = link.icon;
+                              const adjustedIndex = ACTION_LINKS.length + index;
+                              return (
+                                <motion.div
+                                  key={link.href}
+                                  initial={{ opacity: 0, x: -20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: 0.15 + adjustedIndex * 0.05 }}
+                                >
                                   <NavLink
                                     href={link.href}
                                     isActive={isActive}
                                     onClick={() => setIsOpen(false)}
-                                    className="flex items-center w-full px-5 py-4 text-base font-medium rounded-xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                                    className="flex w-full items-center rounded-xl border border-border bg-card px-5 py-4 font-medium text-base transition-all duration-200 hover:border-accent/50 hover:bg-accent/10 active:scale-[0.97]"
                                   >
                                     {IconComponent && (
-                                      <IconComponent className="h-5 w-5 mr-3 flex-shrink-0" />
+                                      <IconComponent className="mr-3 h-5 w-5 flex-shrink-0" />
                                     )}
                                     <span>{link.label}</span>
                                     {link.isNew && (
@@ -560,7 +605,7 @@ const NavigationComponent = () => {
 
                             {/* Secondary Navigation */}
                             <nav
-                              className={'pt-6 mt-4 border-t border-border/30'}
+                              className={'mt-4 border-border/30 border-t pt-6'}
                               aria-label="Secondary navigation"
                             >
                               <div className="space-y-3">
@@ -580,10 +625,10 @@ const NavigationComponent = () => {
                                           href={link.href}
                                           isActive={isActive}
                                           onClick={() => setIsOpen(false)}
-                                          className="flex items-center w-full px-5 py-4 text-sm font-medium text-muted-foreground rounded-xl bg-card/50 border border-border/40 hover:bg-accent/5 hover:text-foreground hover:border-accent/30 transition-all duration-200 active:scale-[0.98]"
+                                          className="flex w-full items-center rounded-xl border border-border/40 bg-card/50 px-5 py-4 font-medium text-muted-foreground text-sm transition-all duration-200 hover:border-accent/30 hover:bg-accent/5 hover:text-foreground active:scale-[0.98]"
                                         >
                                           {IconComponent && (
-                                            <IconComponent className="h-4 w-4 mr-3 flex-shrink-0" />
+                                            <IconComponent className="mr-3 h-4 w-4 flex-shrink-0" />
                                           )}
                                           <span>{link.label}</span>
                                         </NavLink>
@@ -598,7 +643,7 @@ const NavigationComponent = () => {
 
                         {/* Footer with spring animation on tap */}
                         <motion.div
-                          className={'border-t border-border/30 pt-6 pb-6'}
+                          className={'border-border/30 border-t pt-6 pb-6'}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.3 }}
@@ -627,7 +672,7 @@ const NavigationComponent = () => {
                                 <Button
                                   variant="outline"
                                   size="lg"
-                                  className={`w-full h-20 rounded-2xl border-border/40 bg-card hover:bg-${item.color}/10 hover:border-${item.color}/30 transition-all duration-200`}
+                                  className={`h-20 w-full rounded-2xl border-border/40 bg-card hover:bg-${item.color}/10 hover:border-${item.color}/30 transition-all duration-200`}
                                   onClick={item.onClick}
                                   aria-label={item.label}
                                 >

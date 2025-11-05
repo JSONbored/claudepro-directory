@@ -61,7 +61,7 @@ export function BorderBeam({
   return (
     <motion.div
       className={cn(
-        'pointer-events-none absolute inset-0 rounded-[inherit] overflow-hidden',
+        'pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]',
         className
       )}
       style={{
@@ -90,7 +90,7 @@ export function BorderBeam({
           ease: 'linear',
         }}
       >
-        <div className="h-full w-full bg-background rounded-[inherit]" />
+        <div className="h-full w-full rounded-[inherit] bg-background" />
       </motion.div>
     </motion.div>
   );

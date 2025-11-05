@@ -1,9 +1,14 @@
 /**
  * Global type declarations for the application
- * All types are sourced from Zod schemas for runtime validation
  */
 
-import type { UmamiEventData, UmamiGlobal } from '@/src/lib/schemas/analytics.schema';
+// Umami analytics types (no schema validation needed for global window object)
+export type UmamiEventData = Record<string, string | number | boolean | null>;
+
+export interface UmamiGlobal {
+  track: (eventName: string, data?: UmamiEventData) => void;
+  identify: (data: UmamiEventData) => void;
+}
 
 declare global {
   interface Window {

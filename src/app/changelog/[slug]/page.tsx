@@ -12,7 +12,7 @@
  *
  * Performance:
  * - ISR: 600s (10 minutes) for fresh content
- * - Redis-cached entry loading
+ * - Database-cached entry loading
  * - Static params generation
  *
  * Production Standards:
@@ -37,7 +37,6 @@ import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ArrowLeft, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import type { GuideSection } from '@/src/lib/schemas/content/guide.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -75,7 +74,7 @@ export async function generateMetadata({
 
   return generatePageMetadata('/changelog/:slug', {
     params: { slug },
-    item: entry || undefined,
+    item: entry ?? undefined,
     slug,
   });
 }
@@ -96,12 +95,6 @@ export default async function ChangelogEntryPage({
     if (!entry) {
       notFound();
     }
-
-    // Load generated full content with JSON sections
-    const { getChangelogFullContent } = await import('@/generated/content');
-    const fullContent = await getChangelogFullContent(slug);
-    // Extract sections with proper type casting
-    const sections = fullContent?.sections as GuideSection[] | undefined;
 
     const canonicalUrl = getChangelogUrl(entry.slug);
 
@@ -130,12 +123,12 @@ export default async function ChangelogEntryPage({
           ]}
         />
 
-        <article className="container max-w-4xl py-8 space-y-8">
+        <article className="container max-w-4xl space-y-8 py-8">
           {/* Navigation */}
           <Link
             href={ROUTES.CHANGELOG}
             className={
-              'inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors'
+              'inline-flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground'
             }
           >
             <ArrowLeft className="h-4 w-4" />
@@ -144,19 +137,21 @@ export default async function ChangelogEntryPage({
 
           {/* Header */}
           <header className="space-y-4 pb-6">
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-sm text-muted-foreground`}>
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-muted-foreground text-sm`}>
               <Calendar className="h-4 w-4" />
-              <time dateTime={entry.date}>{formatChangelogDate(entry.date)}</time>
+              <time dateTime={entry.release_date ?? undefined}>
+                {formatChangelogDate(entry.release_date)}
+              </time>
             </div>
 
-            <h1 className="text-4xl font-bold tracking-tight">{entry.title}</h1>
+            <h1 className="font-bold text-4xl tracking-tight">{entry.title}</h1>
 
             {/* Canonical URL */}
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
               <span className="text-muted-foreground">Permanent link:</span>
               <a
                 href={canonicalUrl}
-                className="text-primary hover:text-primary/80 transition-colors truncate"
+                className="truncate text-primary transition-colors hover:text-primary/80"
               >
                 {canonicalUrl}
               </a>
@@ -166,7 +161,7 @@ export default async function ChangelogEntryPage({
           <Separator className="my-6" />
 
           {/* Content */}
-          <ChangelogContent entry={entry} {...(sections !== undefined && { sections })} />
+          <ChangelogContent entry={entry} />
         </article>
       </>
     );
@@ -183,13 +178,13 @@ export default async function ChangelogEntryPage({
           <Link
             href={ROUTES.CHANGELOG}
             className={
-              'inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors'
+              'inline-flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground'
             }
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Changelog</span>
           </Link>
-          <h1 className="text-4xl font-bold tracking-tight">Error Loading Entry</h1>
+          <h1 className="font-bold text-4xl tracking-tight">Error Loading Entry</h1>
           <p className="text-muted-foreground">
             Unable to load this changelog entry. Please try again later.
           </p>

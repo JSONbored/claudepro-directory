@@ -16,7 +16,7 @@
  *
  * Performance:
  * - ISR: 600s (10 minutes)
- * - Redis-cached entry loading
+ * - Database-cached entry loading
  * - CDATA wrapping for HTML content
  *
  * Production Standards:
@@ -27,10 +27,10 @@
  */
 
 import type { NextRequest } from 'next/server';
-import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
+import { NextResponse } from 'next/server';
+import { getAllChangelogEntries, parseChangelogChanges } from '@/src/lib/changelog/loader';
 import { formatChangelogDateRFC822, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { apiResponse } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
 /**
@@ -63,7 +63,7 @@ export async function GET(_request: NextRequest): Promise<Response> {
   try {
     logger.info('RSS feed generation started');
 
-    // Load changelog entries (cached with Redis)
+    // Load changelog entries (database-cached)
     const allEntries = await getAllChangelogEntries();
 
     // Limit to last 50 entries
@@ -77,7 +77,7 @@ export async function GET(_request: NextRequest): Promise<Response> {
     <link>${APP_CONFIG.url}/changelog</link>
     <description>Track all updates, new features, bug fixes, and improvements to ${escapeXml(APP_CONFIG.name)}.</description>
     <language>en-us</language>
-    <lastBuildDate>${formatChangelogDateRFC822(entries[0]?.date || new Date().toISOString().split('T')[0] || '')}</lastBuildDate>
+    <lastBuildDate>${formatChangelogDateRFC822(entries[0]?.release_date || new Date().toISOString().split('T')[0] || '')}</lastBuildDate>
     <atom:link href="${APP_CONFIG.url}/changelog/rss.xml" rel="self" type="application/rss+xml" />
     <generator>${APP_CONFIG.name} Changelog Generator</generator>
     <webMaster>${escapeXml('contact@claudepro.directory')} (${escapeXml(APP_CONFIG.author)})</webMaster>
@@ -85,22 +85,25 @@ export async function GET(_request: NextRequest): Promise<Response> {
 ${entries
   .map((entry) => {
     const entryUrl = getChangelogUrl(entry.slug);
-    const description = entry.tldr || entry.content.slice(0, 300);
+    const description = entry.tldr || entry.content?.slice(0, 300) || '';
+
+    // Parse changes JSONB field with type safety
+    const changes = parseChangelogChanges(entry.changes);
 
     // Build category list for description
     const categories = [];
-    if (entry.categories.Added.length > 0) categories.push('Added');
-    if (entry.categories.Changed.length > 0) categories.push('Changed');
-    if (entry.categories.Fixed.length > 0) categories.push('Fixed');
-    if (entry.categories.Removed.length > 0) categories.push('Removed');
-    if (entry.categories.Deprecated.length > 0) categories.push('Deprecated');
-    if (entry.categories.Security.length > 0) categories.push('Security');
+    if (changes.Added && changes.Added.length > 0) categories.push('Added');
+    if (changes.Changed && changes.Changed.length > 0) categories.push('Changed');
+    if (changes.Fixed && changes.Fixed.length > 0) categories.push('Fixed');
+    if (changes.Removed && changes.Removed.length > 0) categories.push('Removed');
+    if (changes.Deprecated && changes.Deprecated.length > 0) categories.push('Deprecated');
+    if (changes.Security && changes.Security.length > 0) categories.push('Security');
 
     return `    <item>
       <title>${escapeXml(entry.title)}</title>
       <link>${escapeXml(entryUrl)}</link>
       <guid isPermaLink="true">${escapeXml(entryUrl)}</guid>
-      <pubDate>${formatChangelogDateRFC822(entry.date)}</pubDate>
+      <pubDate>${formatChangelogDateRFC822(entry.release_date)}</pubDate>
       <description><![CDATA[${description}]]></description>
       <content:encoded xmlns:content="http://purl.org/rss/1.0/modules/content/"><![CDATA[
 ${entry.content}
@@ -117,10 +120,12 @@ ${categories.map((cat) => `      <category>${escapeXml(cat)}</category>`).join('
       entriesCount: entries.length,
     });
 
-    // Return RSS XML via unified builder
-    return apiResponse.raw(rss, {
-      contentType: 'application/rss+xml; charset=utf-8',
-      cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
+    // Return RSS XML with cache headers
+    return new NextResponse(rss, {
+      headers: {
+        'Content-Type': 'application/rss+xml; charset=utf-8',
+        'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
+      },
     });
   } catch (error) {
     logger.error(
@@ -138,10 +143,12 @@ ${categories.map((cat) => `      <category>${escapeXml(cat)}</category>`).join('
   </channel>
 </rss>`;
 
-    return apiResponse.raw(errorRss, {
-      contentType: 'application/rss+xml; charset=utf-8',
+    return new NextResponse(errorRss, {
       status: 500,
-      cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
+      headers: {
+        'Content-Type': 'application/rss+xml; charset=utf-8',
+        'Cache-Control': 'no-store, must-revalidate',
+      },
     });
   }
 }

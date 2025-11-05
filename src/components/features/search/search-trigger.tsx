@@ -29,20 +29,14 @@ export function SearchTrigger({
       <button
         type="button"
         onClick={onClick}
-        className={`
-          flex items-center gap-3 w-full max-w-md px-4 py-2.5
-          bg-background border border-border rounded-lg
-          text-muted-foreground hover:text-foreground
-          hover:border-border/80 transition-colors
-          group cursor-pointer
-          ${className}
+        className={`group flex w-full max-w-md cursor-pointer items-center gap-3 rounded-lg border border-border bg-background px-4 py-2.5 text-muted-foreground transition-colors hover:border-border/80 hover:text-foreground ${className}
         `}
       >
         <Search className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
         <span className={'flex-1 text-left text-sm'}>Search content...</span>
         {showShortcut && (
           <div className={'flex items-center gap-1 text-xs'}>
-            <kbd className={'px-1.5 py-0.5 text-xs bg-muted border rounded'}>⌘K</kbd>
+            <kbd className={'rounded border bg-muted px-1.5 py-0.5 text-xs'}>⌘K</kbd>
           </div>
         )}
       </button>
@@ -55,7 +49,7 @@ export function SearchTrigger({
       <span className="sr-only">Search</span>
       {showShortcut && size !== 'sm' && (
         <div className={'ml-2 flex items-center gap-1'}>
-          <kbd className={'px-1.5 py-0.5 text-xs bg-muted border rounded hidden sm:inline-block'}>
+          <kbd className={'hidden rounded border bg-muted px-1.5 py-0.5 text-xs sm:inline-block'}>
             ⌘K
           </kbd>
         </div>

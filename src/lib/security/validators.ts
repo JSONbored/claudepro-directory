@@ -5,8 +5,7 @@
  */
 
 import { z } from 'zod';
-import { isValidCategory } from '@/src/lib/config/category-config';
-import { VALID_CATEGORIES } from '@/src/lib/config/category-types';
+import { isValidCategory, VALID_CATEGORIES } from '@/src/lib/config/category-config';
 import { DOMPurify } from './html-sanitizer';
 import { VALIDATION_PATTERNS } from './patterns';
 
@@ -74,7 +73,7 @@ export const baseSchemas = {
     .string()
     .regex(VALIDATION_PATTERNS.CONTENT_TYPE, 'Invalid content type')
     .describe(
-      'Content category identifier with .json extension. Auto-validated against UNIFIED_CATEGORY_REGISTRY categories.'
+      'Content category identifier with .json extension. Auto-validated against category_configs table categories.'
     ),
 
   // Search query with sanitization
@@ -151,7 +150,7 @@ export const baseSchemas = {
     .string()
     .regex(VALIDATION_PATTERNS.CACHE_KEY, 'Invalid cache key format')
     .describe(
-      'Redis-compatible cache key. Alphanumeric with colons, hyphens, and underscores for namespace separation.'
+      'Cache key with alphanumeric characters, colons, hyphens, and underscores for namespace separation.'
     ),
 
   // Auth token validation
@@ -209,7 +208,7 @@ export const apiSchemas = {
         .default(false)
         .describe('Force cache refresh even if cache is warm (default: false)'),
     })
-    .describe('Cache warming API parameters for pre-loading content into Redis'),
+    .describe('Cache warming API parameters for pre-loading content'),
 
   // Pagination query parameters
   paginationQuery: z
@@ -402,9 +401,8 @@ export const sanitizers = {
   },
 
   /**
-   * Validate and sanitize category input
-   * Ensures only valid categories are accepted
-   * Auto-validated against UNIFIED_CATEGORY_REGISTRY
+   * Validate and sanitize category input - Database-First
+   * Auto-validated against category_configs table
    */
   sanitizeCategory: async (category: string): Promise<string | null> => {
     const sanitized = (await sanitizers.sanitizeFormInput(category, 50)).toLowerCase();

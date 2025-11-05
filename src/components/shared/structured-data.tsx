@@ -1,10 +1,9 @@
-import { headers } from 'next/headers';
 import Script from 'next/script';
 import { isValidCategory } from '@/src/lib/config/category-config';
 import { SEO_CONFIG } from '@/src/lib/config/seo-config';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
+import { serializeJsonLd } from '@/src/lib/utils/jsonld.utils';
 
 interface StructuredDataProps {
   type?: string;
@@ -24,16 +23,15 @@ interface StructuredDataProps {
   breadcrumbs?: Array<{ name: string; url: string }>;
 }
 
-export async function StructuredData({
+export function StructuredData({
   type = 'website',
   data,
   pageTitle,
   pageDescription,
 }: StructuredDataProps) {
-  // Extract nonce from CSP header for script security
-  const headersList = await headers();
-  const cspHeader = headersList.get('content-security-policy');
-  const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
+  // Note: CSP nonce removed for ISR compatibility.
+  // JSON-LD scripts (type="application/ld+json") are data, not executable code,
+  // so they don't require CSP nonces.
 
   const generateLD = () => {
     const baseUrl = APP_CONFIG.url;
@@ -79,8 +77,8 @@ export async function StructuredData({
             '@type': 'Person',
             name: data.author,
           },
-          datePublished: data.dateAdded,
-          dateModified: data.lastModified || data.dateAdded,
+          datePublished: data.date_added,
+          dateModified: data.lastModified || data.date_added,
           keywords: data.tags?.join(', '),
           url: `${baseUrl}${getContentItemUrl({
             category: data.category && isValidCategory(data.category) ? data.category : 'agents',
@@ -127,8 +125,8 @@ export async function StructuredData({
             '@type': 'Person',
             name: data.author,
           },
-          datePublished: data.dateAdded,
-          dateModified: data.lastModified || data.dateAdded,
+          datePublished: data.date_added,
+          dateModified: data.lastModified || data.date_added,
           publisher: {
             '@type': 'Organization',
             name: APP_CONFIG.name,
@@ -164,7 +162,6 @@ export async function StructuredData({
           __html: serializeJsonLd(jsonLd),
         }}
         strategy="afterInteractive"
-        nonce={nonce}
       />
     </>
   );

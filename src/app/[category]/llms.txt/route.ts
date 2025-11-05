@@ -6,13 +6,17 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
-import { isValidCategory, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+import { NextResponse } from 'next/server';
+import {
+  type CategoryId,
+  getCategoryConfig,
+  isValidCategory,
+} from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { getContentByCategory } from '@/src/lib/content/content-loaders';
-import { apiResponse, handleApiError } from '@/src/lib/error-handler';
+import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
+import { handleApiError } from '@/src/lib/error-handler';
 import { generateCategoryLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
-import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 
 /**
  * Generate static params for all valid categories
@@ -50,17 +54,17 @@ export async function GET(
         category,
       });
 
-      return apiResponse.raw('Category not found', {
-        contentType: 'text/plain; charset=utf-8',
+      return new NextResponse('Category not found', {
         status: 404,
-        cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-store, must-revalidate',
+        },
       });
     }
 
-    // Get category configuration and content
-    const config = UNIFIED_CATEGORY_REGISTRY[category];
+    const config = await getCategoryConfig(category as CategoryId);
 
-    // Handle case where config is not found (should never happen with validation above)
     if (!config) {
       logger.error(
         'Category config not found despite validation',
@@ -68,26 +72,37 @@ export async function GET(
         { category }
       );
 
-      return apiResponse.raw('Internal server error', {
-        contentType: 'text/plain; charset=utf-8',
+      return new NextResponse('Internal server error', {
         status: 500,
-        cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-store, must-revalidate',
+        },
       });
     }
 
     const items = await getContentByCategory(category);
 
     // Transform items to LLMsTxtItem format
-    const llmsItems: LLMsTxtItem[] = items.map((item) => ({
-      slug: item.slug,
-      title: item.title || item.name || item.slug,
-      description: item.description,
-      category: item.category,
-      tags: item.tags || [],
-      author: item.author,
-      dateAdded: item.dateAdded,
-      url: `${APP_CONFIG.url}/${category}/${item.slug}`,
-    }));
+    const llmsItems: LLMsTxtItem[] = items.map((item) => {
+      // Type guard for tags - ensure it's a string array
+      let tags: string[] = [];
+      const itemTags = item.tags as unknown;
+      if (Array.isArray(itemTags)) {
+        tags = itemTags.filter((tag): tag is string => typeof tag === 'string');
+      }
+
+      return {
+        slug: item.slug,
+        title: item.title || item.slug,
+        description: item.description,
+        category: item.category,
+        tags,
+        author: 'author' in item ? (item.author as string | undefined) : undefined,
+        date_added: 'date_added' in item ? (item.date_added as string | undefined) : undefined,
+        url: `${APP_CONFIG.url}/${category}/${item.slug}`,
+      };
+    });
 
     // Generate llms.txt content (config is now guaranteed non-null)
     const llmsTxt = await generateCategoryLLMsTxt(
@@ -99,7 +114,8 @@ export async function GET(
         includeDescription: true,
         includeTags: true,
         includeUrl: true,
-      }
+      },
+      category // Pass category ID for database-first tag aggregation
     );
 
     logger.info('Category llms.txt generated successfully', {
@@ -109,10 +125,12 @@ export async function GET(
     });
 
     // Return plain text response
-    return apiResponse.raw(llmsTxt, {
-      contentType: 'text/plain; charset=utf-8',
-      headers: { 'X-Robots-Tag': 'index, follow' },
-      cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
+    return new NextResponse(llmsTxt, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Robots-Tag': 'index, follow',
+        'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
+      },
     });
   } catch (error: unknown) {
     const { category } = await context.params.catch(() => ({ category: 'unknown' }));
@@ -123,16 +141,11 @@ export async function GET(
       { category }
     );
 
-    // Use centralized error handling
-    const validatedError = errorInputSchema.safeParse(error);
-    return handleApiError(
-      validatedError.success ? validatedError.data : { message: 'Failed to generate llms.txt' },
-      {
-        route: '/[category]/llms.txt',
-        operation: 'generate_category_llmstxt',
-        method: 'GET',
-        logContext: { category },
-      }
-    );
+    return handleApiError(error, {
+      route: '/[category]/llms.txt',
+      operation: 'generate_category_llmstxt',
+      method: 'GET',
+      logContext: { category },
+    });
   }
 }

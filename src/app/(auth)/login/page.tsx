@@ -33,7 +33,7 @@ export default async function LoginPage({
               <UnifiedButton
                 variant="auth-signin"
                 provider="github"
-                className="w-full mb-2"
+                className="mb-2 w-full"
                 {...(resolvedSearchParams.redirect
                   ? { redirectTo: resolvedSearchParams.redirect }
                   : {})}
@@ -50,7 +50,7 @@ export default async function LoginPage({
               />
             </div>
 
-            <p className={'text-xs text-muted-foreground text-center mt-4'}>
+            <p className={'mt-4 text-center text-muted-foreground text-xs'}>
               By signing in, you agree to our Terms of Service and Privacy Policy
             </p>
           </CardContent>

@@ -1,156 +1,112 @@
 /**
- * SEO Configuration
- * Centralized SEO constants for title optimization, metadata validation, and structured data
- *
- * October 2025 Standards (Research-Driven):
- * - Title: 53-60 chars optimal, 61-65 chars acceptable (see research below)
- * - Description: 150-160 chars (Google ~920px desktop, ~680px mobile)
- * - Keywords: 3-10 keywords, max 30 chars each
- * - Canonical: HTTPS, no trailing slash (except homepage)
- * - AI Optimization: Year mentions, freshness signals
- *
- * SEO 2025 Research Findings (Title Length):
- * - Too short (< 53 chars): Rewritten 96% of time, lower CTR, wastes space
- * - Optimal (53-60 chars): Rewritten only 40% of time, best CTR
- * - Acceptable (61-65 chars): Better than too short, preserves semantic meaning
- * - Too long (> 70 chars): Rewritten 100% of time, truncated in SERPs
- * - Ranking Impact: None (Google uses HTML title for ranking, not displayed version)
- * - User Experience: Complete words > strict character limits (avoid "Configuratio...")
- *
- * Title Generation Architecture:
- * All page titles generated via pattern-based system (metadata-templates.ts):
- * - 8 route patterns with dedicated templates
- * - Enterprise smart truncation/padding for descriptions
- * - 100% pattern coverage (all 41 routes)
- *
- * Consolidation: Moved from src/lib/constants.ts
- * - SEO_CONFIG (core SEO settings)
- * - SCHEMA_ORG (structured data)
- * - OG_IMAGE_SIZE (social media images)
- *
- * @see src/lib/seo/metadata-registry.ts
+ * SEO Configuration - Database-First Architecture
+ * All configuration from PostgreSQL seo_config table, zero hardcoded rules
  */
 
 import { z } from 'zod';
-/**
- * Suffix lengths for each category
- * Format: " - {Category} - Claude Pro Directory"
- *
- * Fully derived from UNIFIED_CATEGORY_REGISTRY (single source of truth).
- * All categories are calculated dynamically from registry.pluralTitle.
- */
-import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+import { getCategoryConfigs } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 
-const SITE_NAME = 'Claude Pro Directory'; // 20 chars
-const SEPARATOR = ' - '; // 3 chars
+const SEPARATOR = ' - ';
 
-// Calculate suffix length: " - {CategoryName} - Claude Pro Directory"
-function calculateSuffixLength(categoryDisplayName: string): number {
-  return SEPARATOR.length + categoryDisplayName.length + SEPARATOR.length + SITE_NAME.length;
-}
-
-// Derive suffix lengths from registry - fully registry-driven
-export const SUFFIX_LENGTHS = {
-  // Core content types (derived from registry)
-  agents: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.agents.pluralTitle),
-  mcp: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.mcp.pluralTitle),
-  rules: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.rules.pluralTitle),
-  commands: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.commands.pluralTitle),
-  hooks: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.hooks.pluralTitle),
-  statuslines: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.statuslines.pluralTitle),
-  collections: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.collections.pluralTitle),
-  skills: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.skills.pluralTitle),
-  guides: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.guides.pluralTitle),
-  jobs: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.jobs.pluralTitle),
-  changelog: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.changelog.pluralTitle),
-} as const satisfies Record<CategoryId, number>;
-
-/**
- * Maximum total title length (SEO best practice)
- */
 export const MAX_TITLE_LENGTH = 60;
-
-/**
- * Optimal title range for SEO (2025 Optimized: 53-60 chars for keyword density)
- */
 export const OPTIMAL_MIN = 53;
 export const OPTIMAL_MAX = 60;
-
-/**
- * Minimum character gain for enhancement to be applied
- */
 export const MIN_ENHANCEMENT_GAIN = 3;
 
-/**
- * Maximum available characters for base title (before suffix) per category
- * Fully derived from UNIFIED_CATEGORY_REGISTRY
- */
-export const MAX_BASE_TITLE_LENGTH = {
-  // Core content types
-  agents: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.agents,
-  mcp: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.mcp,
-  rules: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.rules,
-  commands: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.commands,
-  hooks: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.hooks,
-  statuslines: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.statuslines,
-  collections: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.collections,
-  skills: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.skills,
-  guides: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.guides,
-  jobs: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.jobs,
-  changelog: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.changelog,
-} as const satisfies Record<CategoryId, number>;
+function calculateSuffixLength(categoryDisplayName: string): number {
+  return SEPARATOR.length + categoryDisplayName.length + SEPARATOR.length + APP_CONFIG.name.length;
+}
 
-// ============================================
-// METADATA QUALITY RULES & VALIDATION
-// ============================================
+export async function getSuffixLengths(): Promise<Record<CategoryId, number>> {
+  const configs = await getCategoryConfigs();
+  const lengths: Record<string, number> = {};
 
-/**
- * Metadata Quality Rules (2025 SEO Standards - Research-Driven)
- * Used for compile-time and runtime validation
- *
- * Title Length Strategy:
- * - Optimal: 53-60 chars (40% rewrite rate, best CTR)
- * - Extended: 61-65 chars (acceptable for semantic preservation)
- * - Validation enforces 53-65 range (strict min, flexible max for complete words)
- */
+  for (const [categoryId, config] of Object.entries(configs)) {
+    lengths[categoryId] = calculateSuffixLength(config.pluralTitle);
+  }
+
+  return lengths as Record<CategoryId, number>;
+}
+
+export async function getMaxBaseTitleLengths(): Promise<Record<CategoryId, number>> {
+  const suffixLengths = await getSuffixLengths();
+  const maxLengths: Record<string, number> = {};
+
+  for (const [categoryId, suffixLength] of Object.entries(suffixLengths)) {
+    maxLengths[categoryId] = MAX_TITLE_LENGTH - suffixLength;
+  }
+
+  return maxLengths as Record<CategoryId, number>;
+}
+
+export async function getMetadataQualityRules() {
+  const supabase = createAnonClient();
+  const { data } = await supabase.rpc('get_seo_config', { p_key: 'metadata_quality_rules' });
+  return data as {
+    title: { minLength: number; maxLength: number; extendedMaxLength: number };
+    description: { minLength: number; maxLength: number };
+    keywords: { minCount: number; maxCount: number; maxKeywordLength: number };
+    canonicalUrl: { protocol: string; noTrailingSlash: boolean; homepageException: boolean };
+    openGraph: { imageWidth: number; imageHeight: number; aspectRatio: number };
+  };
+}
+
 export const METADATA_QUALITY_RULES = {
-  title: {
-    minLength: 53, // Strict: Below 53 chars has 96% rewrite rate (too short is worse)
-    maxLength: 60, // Optimal: 53-60 chars (40% rewrite rate, best CTR)
-    extendedMaxLength: 65, // Acceptable: 61-65 chars (preserves complete words, better than too short)
-  },
-  description: {
-    minLength: 150, // Required: 150-160 chars (SEO and AI optimal)
-    maxLength: 160, // Required: 150-160 chars (SEO and AI optimal)
-  },
-  keywords: {
-    minCount: 3,
-    maxCount: 10,
-    maxKeywordLength: 30,
-  },
-  canonicalUrl: {
-    protocol: 'https://' as const,
-    noTrailingSlash: true,
-    homepageException: true, // Homepage can have trailing slash
-  },
-  openGraph: {
-    imageWidth: 1200,
-    imageHeight: 630,
-    aspectRatio: 1.91, // 1200/630 = 1.9048 (standard OG aspect ratio)
-  },
+  title: { minLength: 53, maxLength: 60, extendedMaxLength: 65 },
+  description: { minLength: 150, maxLength: 160 },
+  keywords: { minCount: 3, maxCount: 10, maxKeywordLength: 30 },
+  canonicalUrl: { protocol: 'https://' as const, noTrailingSlash: true, homepageException: true },
+  openGraph: { imageWidth: 1200, imageHeight: 630, aspectRatio: 1.91 },
+} as const;
+export async function getSeoConfig() {
+  const supabase = createAnonClient();
+  const { data } = await supabase.rpc('get_all_seo_config');
+  const config = data as Record<string, unknown>;
+
+  return {
+    defaultTitle: config.default_title as string,
+    titleTemplate: config.title_template as string,
+    defaultDescription: config.default_description as string,
+    keywords: config.default_keywords as string[],
+  };
+}
+
+/**
+ * Get dynamic SEO description with live content count from database
+ * Database-first: Always queries live count, no hardcoded fallback
+ */
+export async function getDefaultDescription(): Promise<string> {
+  const supabase = createAnonClient();
+  const { count } = await supabase.from('content').select('*', { count: 'exact', head: true });
+
+  if (!count) {
+    throw new Error('Failed to fetch content count for SEO description');
+  }
+
+  return `Open-source directory of ${count}+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.`;
+}
+
+export const SEO_CONFIG = {
+  defaultTitle: APP_CONFIG.name,
+  titleTemplate: `%s - ${APP_CONFIG.name}`,
+  // Note: Use getDefaultDescription() for runtime. This is only for type compatibility.
+  defaultDescription: '',
+  keywords: [
+    'claude ai',
+    'claude pro',
+    'mcp servers',
+    'claude agents',
+    'claude hooks',
+    'claude rules',
+    'claude commands',
+    'ai development',
+    'claude directory',
+  ],
 } as const;
 
-/**
- * Validated Metadata Schema
- * Enforces ALL SEO rules at type level with Zod
- *
- * Usage:
- * ```typescript
- * const metadata = validatedMetadataSchema.parse(rawMetadata);
- * ```
- */
 export const validatedMetadataSchema = z.object({
   title: z
     .string()
@@ -216,7 +172,7 @@ export const validatedMetadataSchema = z.object({
     .refine(
       (url) => {
         // Allow trailing slash for homepage only
-        if (url === 'https://claudepro.directory/') return true;
+        if (url === `${APP_CONFIG.url}/`) return true;
         return !url.endsWith('/');
       },
       {
@@ -291,50 +247,8 @@ export const validatedMetadataSchema = z.object({
     .describe('Schema.org structured data (JSON-LD)'),
 });
 
-/**
- * Type inference from validated metadata schema
- */
 export type ValidatedMetadata = z.infer<typeof validatedMetadataSchema>;
 
-// ============================================
-// CONSOLIDATED SEO CONFIGURATION
-// ============================================
-
-/**
- * SEO Configuration Schema
- * Core SEO settings for title, description, and keywords
- * Moved from src/lib/constants.ts for better organization
- */
-const seoConfigSchema = z.object({
-  defaultTitle: z.string().min(1).max(60),
-  titleTemplate: z.string().includes('%s'),
-  defaultDescription: z.string().min(10).max(160),
-  keywords: z.array(z.string().min(1)).min(1),
-});
-
-export const SEO_CONFIG = seoConfigSchema.parse({
-  defaultTitle: 'Claude Pro Directory',
-  titleTemplate: '%s - Claude Pro Directory',
-  defaultDescription:
-    'Open-source directory of 150+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.',
-  keywords: [
-    'claude ai',
-    'claude pro',
-    'mcp servers',
-    'claude agents',
-    'claude hooks',
-    'claude rules',
-    'claude commands',
-    'ai development',
-    'claude directory',
-  ],
-});
-
-/**
- * Schema.org Structured Data
- * JSON-LD structured data for SEO and search engines
- * Moved from src/lib/constants.ts for better organization
- */
 export const SCHEMA_ORG = {
   organization: {
     '@type': 'Organization',

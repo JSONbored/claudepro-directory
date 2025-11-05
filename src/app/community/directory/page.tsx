@@ -4,6 +4,7 @@ import { ProfileSearchClient } from '@/src/components/features/community/profile
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
+import type { Tables } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/community/directory');
 
@@ -12,64 +13,41 @@ export const revalidate = 3600; // 1 hour ISR
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
   const supabase = await createClient();
 
-  // Performance optimization: Use server-side full-text search when query provided
-  // Otherwise fetch all users for client-side browsing
-  const [publicUsersResult, topContributorsResult, newMembersResult] = await Promise.all([
-    // Search users OR find public users
-    searchQuery
-      ? supabase.rpc('search_users', {
-          search_query: searchQuery,
-          result_limit: 100,
-        })
-      : supabase
-          .from('users')
-          .select('*')
-          .eq('public', true)
-          .order('created_at', { ascending: false })
-          .limit(100),
+  // Consolidated RPC: 3 queries + TypeScript deduplication → 1 (67% reduction)
+  const { data: directoryData } = await supabase.rpc(
+    'get_community_directory',
+    searchQuery ? { p_search_query: searchQuery, p_limit: 100 } : { p_limit: 100 }
+  );
 
-    // Top contributors by reputation
-    supabase
-      .from('users')
-      .select('*')
-      .order('reputation_score', { ascending: false })
-      .limit(10),
+  // Type assertion to database-generated Json type
+  type DirectoryResponse = {
+    all_users: Array<Tables<'users'>>;
+    top_contributors: Array<Tables<'users'>>;
+    new_members: Array<Tables<'users'>>;
+  };
 
-    // New members
-    supabase
-      .from('users')
-      .select('*')
-      .eq('public', true)
-      .order('created_at', { ascending: false })
-      .limit(10),
-  ]);
+  const { all_users, top_contributors, new_members } = (directoryData || {
+    all_users: [],
+    top_contributors: [],
+    new_members: [],
+  }) as unknown as DirectoryResponse;
 
-  // Extract data from query results
-  const publicUsers = publicUsersResult.data || [];
-  const topContributors = topContributorsResult.data || [];
-  const newMembers = newMembersResult.data || [];
-
-  // Combine and deduplicate
-  // When searching, use search results directly (already ranked by relevance)
-  const allUsers = searchQuery
-    ? publicUsers
-    : [
-        ...topContributors,
-        ...publicUsers.filter((u) => !topContributors.some((tc) => tc.slug === u.slug)),
-      ];
+  const allUsers = all_users;
+  const topContributors = top_contributors;
+  const newMembers = new_members;
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="max-w-3xl mx-auto text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Community Directory</h1>
+      <div className="mx-auto mb-12 max-w-3xl text-center">
+        <h1 className="mb-4 font-bold text-4xl">Community Directory</h1>
         <p className="text-lg text-muted-foreground">
           Connect with Claude Code contributors, power users, and community experts
         </p>
       </div>
 
       {/* Two-column layout: Main content + Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
         {/* Main Content - User Grid */}
         <div className="lg:col-span-3">
           <ProfileSearchClient users={allUsers} />

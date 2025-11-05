@@ -2,14 +2,6 @@
 
 /**
  * DetailSidebar - Sidebar orchestrator for detail pages
- *
- * Consolidates sidebar rendering logic from unified-detail-page.tsx (lines 434-507)
- * and custom-sidebars.tsx (renderAgentSidebar, renderMCPSidebar)
- *
- * Uses SidebarCard directly with inline configuration for optimal tree-shaking
- *
- * @see components/unified-detail-page.tsx - Original implementation
- * @see lib/config/custom-sidebars.tsx - Custom sidebar renderers
  */
 
 import Link from 'next/link';
@@ -18,9 +10,10 @@ import { memo } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
+import type { CategoryId } from '@/src/lib/config/category-config';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
@@ -29,8 +22,8 @@ import { getContentItemUrl } from '@/src/lib/utils/content.utils';
  * Props for DetailSidebar
  */
 export interface DetailSidebarProps {
-  item: UnifiedContentItem;
-  relatedItems: UnifiedContentItem[];
+  item: ContentItem;
+  relatedItems: ContentItem[];
   config: {
     typeName: string;
     metadata?:
@@ -43,8 +36,8 @@ export interface DetailSidebarProps {
   };
   customRenderer?:
     | ((
-        item: UnifiedContentItem,
-        relatedItems: UnifiedContentItem[],
+        item: ContentItem,
+        relatedItems: ContentItem[],
         router: ReturnType<typeof useRouter>
       ) => React.ReactNode)
     | undefined;
@@ -77,15 +70,19 @@ export const DetailSidebar = memo(function DetailSidebar({
       : null;
 
   const showGitHubLink = config.metadata?.showGitHubLink ?? true;
-  const hasConfiguration = 'configuration' in item && typeof item.configuration === 'object';
-  const hasPackage = 'package' in item && item.package;
-  const hasAuth = 'requiresAuth' in item;
-  const hasPermissions = 'permissions' in item && Array.isArray(item.permissions);
+  const hasDocumentationUrl = 'documentation_url' in item && item.documentation_url;
+  const metadata = ('metadata' in item && (item.metadata as Record<string, unknown>)) || {};
+  const hasConfiguration = metadata.configuration && typeof metadata.configuration === 'object';
+  const packageName = metadata.package as string | undefined;
+  const hasPackage = !!packageName;
+  const hasAuth = 'requiresAuth' in metadata;
+  const hasPermissions = 'permissions' in metadata;
+  const hasSource = 'source' in item && item.source;
 
   return (
     <div className="space-y-6">
       {/* Resources Card */}
-      {!!(showGitHubLink || item.documentationUrl) && (
+      {!!(showGitHubLink || hasDocumentationUrl) && (
         <Card>
           <CardHeader>
             <CardTitle>Resources</CardTitle>
@@ -94,15 +91,15 @@ export const DetailSidebar = memo(function DetailSidebar({
             {showGitHubLink && githubUrl && (
               <Button variant="outline" className="w-full justify-start" asChild>
                 <a href={githubUrl} target="_blank" rel="noopener noreferrer">
-                  <Github className="h-4 w-4 mr-2" />
+                  <Github className="mr-2 h-4 w-4" />
                   View on GitHub
                 </a>
               </Button>
             )}
-            {item.documentationUrl && (
+            {hasDocumentationUrl && 'documentation_url' in item && item.documentation_url && (
               <Button variant="outline" className="w-full justify-start" asChild>
-                <a href={item.documentationUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4 mr-2" />
+                <a href={item.documentation_url} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="mr-2 h-4 w-4" />
                   Documentation
                 </a>
               </Button>
@@ -112,7 +109,7 @@ export const DetailSidebar = memo(function DetailSidebar({
       )}
 
       {/* Type-specific Details Card */}
-      {!!(hasConfiguration || hasPackage || hasAuth || hasPermissions || item.source) && (
+      {!!(hasConfiguration || hasPackage || hasAuth || hasPermissions || hasSource) && (
         <Card>
           <CardHeader>
             <CardTitle>{`${config.typeName} Details`}</CardTitle>
@@ -120,11 +117,11 @@ export const DetailSidebar = memo(function DetailSidebar({
           <CardContent className="space-y-4">
             {item.category && (
               <div>
-                <h4 className={'font-medium mb-1'}>Category</h4>
+                <h4 className={'mb-1 font-medium'}>Category</h4>
                 <UnifiedBadge
                   variant="base"
                   style="default"
-                  className={`text-xs font-medium ${
+                  className={`font-medium text-xs ${
                     BADGE_COLORS.category[item.category as CategoryType] ||
                     BADGE_COLORS.category.default
                   }`}
@@ -136,49 +133,60 @@ export const DetailSidebar = memo(function DetailSidebar({
               </div>
             )}
 
-            {hasConfiguration &&
-              'temperature' in (item.configuration as object) &&
-              typeof (item.configuration as { temperature?: number }).temperature === 'number' && (
+            {(() => {
+              if (
+                !hasConfiguration ||
+                typeof metadata.configuration !== 'object' ||
+                metadata.configuration === null
+              ) {
+                return null;
+              }
+              const config = metadata.configuration as { temperature?: number };
+              if (typeof config.temperature !== 'number') {
+                return null;
+              }
+              return (
                 <div>
-                  <h4 className={'font-medium mb-1'}>Temperature</h4>
+                  <h4 className={'mb-1 font-medium'}>Temperature</h4>
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                     <Thermometer className="h-3 w-3 text-orange-500" />
                     <UnifiedBadge
                       variant="base"
                       style="outline"
                       className={
-                        'text-xs font-medium bg-orange-500/10 text-orange-600 border-orange-500/30'
+                        'border-orange-500/30 bg-orange-500/10 font-medium text-orange-600 text-xs'
                       }
                     >
-                      {String((item.configuration as { temperature: number }).temperature)}
+                      {String(config.temperature)}
                     </UnifiedBadge>
                   </div>
                 </div>
-              )}
+              );
+            })()}
 
-            {hasPackage && (
+            {hasPackage && packageName && (
               <div>
-                <h4 className={'font-medium mb-1'}>Package</h4>
+                <h4 className={'mb-1 font-medium'}>Package</h4>
                 <UnifiedBadge variant="base" style="outline" className="font-mono text-xs">
-                  {String((item as { package: string }).package)}
+                  {packageName}
                 </UnifiedBadge>
               </div>
             )}
 
             {hasAuth && (
               <div>
-                <h4 className={'font-medium mb-1'}>Authentication</h4>
+                <h4 className={'mb-1 font-medium'}>Authentication</h4>
                 <p className={UI_CLASSES.TEXT_SM_MUTED}>
-                  {(item as { requiresAuth: boolean }).requiresAuth ? 'Required' : 'Not required'}
+                  {(metadata.requiresAuth as boolean) ? 'Required' : 'Not required'}
                 </p>
               </div>
             )}
 
-            {hasPermissions && (item.permissions as string[]).length > 0 && (
+            {hasPermissions && (metadata.permissions as string[])?.length > 0 && (
               <div>
-                <h4 className={'font-medium mb-1'}>Permissions</h4>
+                <h4 className={'mb-1 font-medium'}>Permissions</h4>
                 <div className="flex flex-wrap gap-1">
-                  {(item.permissions as string[]).map((perm: string) => (
+                  {(metadata.permissions as string[]).map((perm: string) => (
                     <UnifiedBadge key={perm} variant="base" style="outline" className="text-xs">
                       {perm}
                     </UnifiedBadge>
@@ -187,9 +195,9 @@ export const DetailSidebar = memo(function DetailSidebar({
               </div>
             )}
 
-            {item.source && (
+            {hasSource && 'source' in item && item.source && (
               <div>
-                <h4 className={'font-medium mb-1'}>Source</h4>
+                <h4 className={'mb-1 font-medium'}>Source</h4>
                 <UnifiedBadge variant="base" style="outline">
                   {item.source}
                 </UnifiedBadge>
@@ -206,21 +214,36 @@ export const DetailSidebar = memo(function DetailSidebar({
             <CardTitle>{`Related ${config.typeName}s`}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {relatedItems.slice(0, 5).map((relatedItem) => (
-              <Link
-                key={relatedItem.slug}
-                href={getContentItemUrl(relatedItem)}
-                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer w-full text-left block`}
-              >
-                <div className={'flex-1 min-w-0'}>
-                  <h4 className="font-medium text-sm truncate">{getDisplayTitle(relatedItem)}</h4>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {relatedItem.description}
-                  </p>
-                </div>
-                <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0 ml-2" />
-              </Link>
-            ))}
+            {relatedItems.slice(0, 5).map((relatedItem) => {
+              const relatedCategory =
+                'category' in relatedItem && typeof relatedItem.category === 'string'
+                  ? relatedItem.category
+                  : '';
+              const relatedSlug =
+                'slug' in relatedItem && typeof relatedItem.slug === 'string'
+                  ? relatedItem.slug
+                  : '';
+              return (
+                <Link
+                  key={relatedSlug}
+                  href={getContentItemUrl({
+                    category: relatedCategory as CategoryId,
+                    slug: relatedSlug,
+                  })}
+                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} block w-full cursor-pointer rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted/50`}
+                >
+                  <div className={'min-w-0 flex-1'}>
+                    <h4 className="truncate font-medium text-sm">{getDisplayTitle(relatedItem)}</h4>
+                    <p className="truncate text-muted-foreground text-xs">
+                      {'description' in relatedItem && typeof relatedItem.description === 'string'
+                        ? relatedItem.description
+                        : ''}
+                    </p>
+                  </div>
+                  <ExternalLink className="ml-2 h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                </Link>
+              );
+            })}
           </CardContent>
         </Card>
       )}

@@ -12,15 +12,15 @@ on:
       tests:
         description: 'Test changes present'
         value: ${{ jobs.filter.outputs.tests }}
-      content:
-        description: 'Content changes present'
-        value: ${{ jobs.filter.outputs.content }}
-      seo:
-        description: 'SEO-affecting changes present'
-        value: ${{ jobs.filter.outputs.seo }}
+      database:
+        description: 'Database schema changes present'
+        value: ${{ jobs.filter.outputs.database }}
       public:
         description: 'Public assets changed'
         value: ${{ jobs.filter.outputs.public }}
+      generated:
+        description: 'Auto-generated files changed'
+        value: ${{ jobs.filter.outputs.generated }}
 
 jobs:
   filter:
@@ -31,9 +31,9 @@ jobs:
       code: ${{ steps.filter.outputs.code }}
       deps: ${{ steps.filter.outputs.deps }}
       tests: ${{ steps.filter.outputs.tests }}
-      content: ${{ steps.filter.outputs.content }}
-      seo: ${{ steps.filter.outputs.seo }}
+      database: ${{ steps.filter.outputs.database }}
       public: ${{ steps.filter.outputs.public }}
+      generated: ${{ steps.filter.outputs.generated }}
 
     steps:
       - uses: actions/checkout@v5
@@ -47,24 +47,25 @@ jobs:
               - 'src/**/*.{ts,tsx,js,jsx}'
               - 'scripts/**'
               - 'config/**'
+              - 'supabase/functions/**'
               - 'next.config.mjs'
               - 'tailwind.config.ts'
             deps:
               - 'package.json'
-              - 'package-lock.json'
+              - 'pnpm-lock.yaml'
             tests:
               - 'tests/**'
               - 'src/**/*.test.{ts,tsx,js,jsx}'
               - 'jest.config.*'
               - 'config/tools/playwright.config.ts'
-            content:
-              - 'content/**/*.json'
-              - 'content/**/*.mdx'
-              - 'templates/**'
-            seo:
-              - 'content/**/*.mdx'
-              - 'content/**/*.json'
-              - 'src/app/**/page.tsx'
-              - 'src/lib/seo/**'
+            database:
+              - 'supabase/schema.sql'
+              - 'supabase/migrations/**'
+              - 'src/types/database.types.ts'
+              - 'generated/db-schemas.ts'
             public:
               - 'public/**'
+            generated:
+              - 'generated/**'
+              - 'src/types/database.types.ts'
+              - 'public/service-worker.js'

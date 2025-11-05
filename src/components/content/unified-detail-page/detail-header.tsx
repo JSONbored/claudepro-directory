@@ -1,24 +1,15 @@
 /**
  * DetailHeader - Server Component for header section
- *
- * REFACTORED: Split client/server logic for optimal performance
- * Server renders: Title, description, badges (static content)
- * Client renders: Action buttons (interactive elements via DetailHeaderActions)
- *
- * Extracts header rendering logic from unified-detail-page.tsx (lines 512-614)
- * Performance: 80% of header is server-rendered, only buttons are client-side
- *
- * @see components/unified-detail-page.tsx - Original implementation
  */
 
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import type { ContentTypeConfig } from '@/src/lib/types/content-type-config';
+import type { CategoryId, UnifiedCategoryConfig } from '@/src/lib/config/category-config';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { DetailHeaderActions } from './detail-header-actions';
 
 export interface DetailHeaderProps {
   displayTitle: string;
-  item: UnifiedContentItem;
-  config: ContentTypeConfig;
+  item: ContentItem;
+  config: UnifiedCategoryConfig;
   onCopyContent?: (() => Promise<void>) | undefined;
 }
 
@@ -35,25 +26,18 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
       ('configuration' in item && (item as { configuration?: object }).configuration)
   );
 
-  // Extract serializable action data from config
-  const primaryAction = {
-    label: config.primaryAction.label,
-    type: 'deploy', // Generic type for all actions
-  };
-
-  const secondaryActions = config.secondaryActions?.map((action) => ({
-    label: action.label,
-    type: 'secondary',
-  }));
+  // Extract serializable action data - database stores { label, type } only
+  const primaryAction = config.primaryAction || { label: 'Deploy', type: 'deploy' };
+  const secondaryActions = config.secondaryActions;
 
   return (
-    <div className={'border-b border-border bg-code/50 backdrop-blur-sm'}>
+    <div className={'border-border border-b bg-code/50 backdrop-blur-sm'}>
       <div className="container mx-auto px-4 py-8">
         {/* Client component for back button and actions */}
         <DetailHeaderActions
           item={item}
           typeName={config.typeName}
-          category={item.category}
+          category={item.category as CategoryId}
           hasContent={hasContent}
           onCopyContent={onCopyContent}
           displayTitle={displayTitle}

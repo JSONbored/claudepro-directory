@@ -8,6 +8,9 @@ import { ArrowLeft } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 
+// Force dynamic rendering - requires authentication
+export const dynamic = 'force-dynamic';
+
 export const metadata = generatePageMetadata('/account/library/new');
 
 export default async function NewCollectionPage() {
@@ -36,7 +39,7 @@ export default async function NewCollectionPage() {
             Back to Library
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold mb-2">Create Collection</h1>
+        <h1 className="mb-2 font-bold text-3xl">Create Collection</h1>
         <p className="text-muted-foreground">Organize your bookmarks into a custom collection</p>
       </div>
 

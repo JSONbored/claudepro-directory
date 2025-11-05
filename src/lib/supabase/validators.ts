@@ -383,12 +383,8 @@ export function validateWithLogging<T extends ZodSchema>(
   return validateRow(schema, data, {
     ...options,
     strict: false,
-    onError: (error) => {
-      console.error('[Validation Error]', {
-        schema: error.context.schema,
-        errors: error.context.errors,
-        data: error.context.data,
-      });
+    onError: () => {
+      // Intentional
     },
   });
 }

@@ -4,19 +4,23 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'src/**'
+      - 'src/**/*.{ts,tsx,js,jsx}'  # Only code files
+      - '!src/**/*.test.{ts,tsx}'    # Exclude tests
+      - '!src/**/*.spec.{ts,tsx}'    # Exclude specs
       - 'package.json'
       - 'pnpm-lock.yaml'
-      - 'config/**'
-      - '.github/**'
+      - '.github/workflows/security.yml'  # Only this workflow
+      - 'supabase/**/*.sql'  # Database code
   pull_request:
     branches: [ main ]
     paths:
-      - 'src/**'
+      - 'src/**/*.{ts,tsx,js,jsx}'  # Only code files
+      - '!src/**/*.test.{ts,tsx}'    # Exclude tests
+      - '!src/**/*.spec.{ts,tsx}'    # Exclude specs
       - 'package.json'
       - 'pnpm-lock.yaml'
-      - 'config/**'
-      - '.github/**'
+      - '.github/workflows/security.yml'  # Only this workflow
+      - 'supabase/**/*.sql'  # Database code
   schedule:
     - cron: '0 3 * * 1'  # Weekly security scan on Mondays at 3am UTC
 
@@ -31,7 +35,7 @@ jobs:
   secrets:
     name: Secret Scanning
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5  # Reduced from 10min (fail fast on hangs)
     needs: [changes]
     # Skip on scheduled runs; run for PRs or when code/deps changed
     if: github.event_name != 'schedule' && (github.event_name == 'pull_request' || needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true')
@@ -39,7 +43,7 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        fetch-depth: 0  # Full history for better secret detection
+        fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}  # Shallow clone (PR needs 2 commits for diff)
 
     - name: Check for hardcoded secrets
       uses: trufflesecurity/trufflehog@main
@@ -54,8 +58,8 @@ jobs:
   build-for-codeql:
     name: Build for CodeQL
     uses: ./.github/workflows/build-reusable.yml
-    needs: [precheck]
-    if: needs.precheck.outputs.run-security == 'true'
+    needs: [changes]
+    if: github.event_name == 'schedule' || needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true'
     with:
       cache-key-suffix: ${{ github.event.pull_request.number || 'codeql' }}
       upload-artifact: true
@@ -63,9 +67,13 @@ jobs:
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: [precheck, build-for-codeql]
-    if: needs.precheck.outputs.run-security == 'true'
+    timeout-minutes: 8  # Reduced from 15min (2x typical run time)
+    needs: [build-for-codeql]  # Removed 'changes' dependency (redundant - already in build-for-codeql)
+    # Skip on ui-only PRs (weekly schedule still runs for comprehensive check)
+    if: |
+      github.event_name == 'schedule' ||
+      ((needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true') &&
+       !contains(github.event.pull_request.labels.*.name, 'ui-only'))
     permissions:
       actions: read
       contents: read
@@ -82,14 +90,14 @@ jobs:
       - name: Download CI build artifact (if available)
         id: dl-ci
         continue-on-error: true
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: build-${{ github.event.pull_request.number || 'ci' }}-${{ github.sha }}
           path: ./
 
       - name: Download build artifact from build job (fallback)
         if: steps.dl-ci.outcome == 'failure'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: ${{ needs.build-for-codeql.outputs.artifact-name }}
           path: ./
@@ -117,7 +125,7 @@ jobs:
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 3  # Reduced from 10min (fast check)
     needs: [changes]
     if: github.event_name == 'pull_request' && needs.changes.outputs.deps == 'true'
     permissions:
@@ -126,6 +134,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v5
+      with:
+        fetch-depth: 1  # Shallow clone for speed
 
     - name: Dependency Review
       uses: actions/dependency-review-action@v4
@@ -139,7 +149,7 @@ jobs:
   pnpm-audit:
     name: PNPM Security Audit
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5  # Reduced from 10min
     needs: [changes]
     # Run when dependencies change or on schedule
     if: needs.changes.outputs.deps == 'true' || github.event_name == 'schedule'
@@ -147,6 +157,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
+      with:
+        fetch-depth: 1  # Shallow clone for speed
 
     - uses: ./.github/actions/setup-node-deps
 
@@ -156,7 +168,7 @@ jobs:
 
     - name: Upload audit results
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: pnpm-audit-results
         path: pnpm-audit.json
@@ -166,7 +178,7 @@ jobs:
   socket-security:
     name: Socket Security Scan
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5  # Reduced from 10min
     needs: [changes]
     if: vars.SOCKET_SECURITY_API_KEY != '' && (needs.changes.outputs.deps == 'true' || github.event_name == 'schedule')
     permissions:
@@ -177,9 +189,11 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
+      with:
+        fetch-depth: 1  # Shallow clone for speed
 
     - name: Setup Python for Socket CLI
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.x'
 

@@ -1,15 +1,14 @@
 /**
- * Page Component Props Schema - Modern 2025 Configuration-Driven
+ * Page Component Props Schema - Database-First Architecture
  * Defines props for Next.js page components with proper typing
  *
- * Modern 2025 Architecture:
- * - Dynamic schema generation from UNIFIED_CATEGORY_REGISTRY
- * - Zero hardcoded category lists in type definitions
- * - Auto-updates when new categories added to registry
+ * DATABASE-FIRST 2025 Architecture:
+ * - Uses ContentItem from database content table
+ * - Zero manual schema maintenance
+ * - Auto-updates when database schema changes
  */
 
-import { z } from 'zod';
-import { unifiedContentItemSchema } from './content-item.schema';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 
 /**
  * SHA-2100: slugParamsSchema moved to app.schema.ts (canonical location)
@@ -17,33 +16,15 @@ import { unifiedContentItemSchema } from './content-item.schema';
  */
 
 /**
- * Client component props for home page - Configuration-Driven
- *
- * Modern 2025 Architecture:
- * - Dynamic stats object derived from UNIFIED_CATEGORY_REGISTRY
- * - Zero hardcoded category fields
- * - Auto-includes Skills and future categories
+ * Client component props for home page - Database-First
+ * Uses ContentItem from content table, stats from PostgreSQL RPC.
+ * Category configs are imported statically on client (no serialization needed).
  */
-const homePageClientPropsSchema = z
-  .object({
-    initialData: z
-      .record(z.string(), z.array(unifiedContentItemSchema))
-      .describe('Initial server-side data for client hydration (dynamic categories)'),
-    initialSearchQuery: z
-      .string()
-      .optional()
-      .describe('Initial search query from URL parameter (for SearchAction schema integration)'),
-    featuredByCategory: z
-      .record(z.string(), z.array(unifiedContentItemSchema))
-      .optional()
-      .describe(
-        'Weekly featured content grouped by category (algorithm-selected, max 6 per category)'
-      ),
-    stats: z
-      .record(z.string(), z.number())
-      .optional()
-      .describe('Content category statistics (dynamic from registry)'),
-  })
-  .describe('Props for client-side home page component with SSR hydration data');
-
-export type HomePageClientProps = z.infer<typeof homePageClientPropsSchema>;
+export interface HomePageClientProps {
+  /** Initial server-side data for client hydration (from content table) */
+  initialData: Record<string, ContentItem[]>;
+  /** Weekly featured content grouped by category */
+  featuredByCategory?: Record<string, ContentItem[]>;
+  /** Content category statistics */
+  stats?: Record<string, number>;
+}

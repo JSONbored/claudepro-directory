@@ -171,8 +171,8 @@ function ContentListSkeleton({
   return (
     <div className={cn('space-y-4', className)} {...props}>
       {[...Array(count)].map((_, i) => (
-        <div key={`content-skeleton-${i + 1}`} className="border rounded-lg p-4">
-          <div className={'flex items-start justify-between mb-3'}>
+        <div key={`content-skeleton-${i + 1}`} className="rounded-lg border p-4">
+          <div className={'mb-3 flex items-start justify-between'}>
             <div className="flex-1">
               <Skeleton size="md" width="2/3" className="mb-2" />
               <Skeleton size="sm" width="3xl" />
@@ -192,7 +192,7 @@ function ContentListSkeleton({
 
 function SearchBarSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('flex gap-4 mb-6', className)} {...props}>
+    <div className={cn('mb-6 flex gap-4', className)} {...props}>
       <Skeleton size="lg" width="3xl" />
       <Skeleton size="lg" width="lg" />
     </div>
@@ -202,14 +202,14 @@ function SearchBarSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDiv
 function FilterBarSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('bg-card/30 border border-border/50 rounded-lg p-6 space-y-6', className)}
+      className={cn('space-y-6 rounded-lg border border-border/50 bg-card/30 p-6', className)}
       {...props}
     >
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <Skeleton size="md" width="lg" />
         <Skeleton size="sm" width="sm" />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
           <div key={`filter-skeleton-${i + 1}`} className="space-y-2">
             <Skeleton size="sm" width="sm" />
@@ -236,7 +236,7 @@ function TableSkeleton({
   columns?: number;
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('border rounded-lg', className)} {...props}>
+    <div className={cn('rounded-lg border', className)} {...props}>
       <div className="border-b p-4">
         <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
           {[...Array(columns)].map((_, i) => (
@@ -299,7 +299,7 @@ function FeaturedSectionSkeleton({ className, ...props }: React.HTMLAttributes<H
 function HomepageStatsSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('flex-wrap justify-center gap-4 lg:gap-6 text-xs lg:text-sm', className)}
+      className={cn('flex-wrap justify-center gap-4 text-xs lg:gap-6 lg:text-sm', className)}
       {...props}
     >
       {[...Array(7)].map((_, i) => (

@@ -16,6 +16,9 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
+// Force dynamic rendering - requires authentication
+export const dynamic = 'force-dynamic';
+
 export const metadata = generatePageMetadata('/account/jobs');
 
 export default async function MyJobsPage() {
@@ -45,14 +48,14 @@ export default async function MyJobsPage() {
     <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
-          <h1 className="text-3xl font-bold mb-2">My Job Listings</h1>
+          <h1 className="mb-2 font-bold text-3xl">My Job Listings</h1>
           <p className="text-muted-foreground">
             {jobs.length} {jobs.length === 1 ? 'listing' : 'listings'}
           </p>
         </div>
         <Button asChild>
           <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             Post a Job
           </Link>
         </Button>
@@ -61,14 +64,14 @@ export default async function MyJobsPage() {
       {jobs.length === 0 ? (
         <Card>
           <CardContent className={'flex flex-col items-center py-12'}>
-            <Briefcase className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No job listings yet</h3>
-            <p className={'text-muted-foreground text-center max-w-md mb-4'}>
+            <Briefcase className="mb-4 h-12 w-12 text-muted-foreground" />
+            <h3 className="mb-2 font-semibold text-xl">No job listings yet</h3>
+            <p className={'mb-4 max-w-md text-center text-muted-foreground'}>
               Post your first job listing to reach talented developers in the Claude community
             </p>
             <Button asChild>
               <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="mr-2 h-4 w-4" />
                 Post Your First Job
               </Link>
             </Button>
@@ -100,7 +103,7 @@ export default async function MyJobsPage() {
               </CardHeader>
 
               <CardContent>
-                <div className={'flex flex-wrap gap-4 mb-4 text-sm text-muted-foreground'}>
+                <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                     <Eye className="h-4 w-4" />
                     {job.view_count ?? 0} views
@@ -112,14 +115,14 @@ export default async function MyJobsPage() {
                 <div className={UI_CLASSES.FLEX_GAP_2}>
                   <Button variant="outline" size="sm" asChild>
                     <Link href={`/account/jobs/${job.id}/edit`}>
-                      <Edit className="h-3 w-3 mr-1" />
+                      <Edit className="mr-1 h-3 w-3" />
                       Edit
                     </Link>
                   </Button>
 
                   <Button variant="outline" size="sm" asChild>
                     <Link href={`/account/jobs/${job.id}/analytics`}>
-                      <BarChart className="h-3 w-3 mr-1" />
+                      <BarChart className="mr-1 h-3 w-3" />
                       Analytics
                     </Link>
                   </Button>
@@ -127,13 +130,13 @@ export default async function MyJobsPage() {
                   {job.slug && (
                     <Button variant="ghost" size="sm" asChild>
                       <Link href={`/jobs/${job.slug}`}>
-                        <ExternalLink className="h-3 w-3 mr-1" />
+                        <ExternalLink className="mr-1 h-3 w-3" />
                         View
                       </Link>
                     </Button>
                   )}
 
-                  {(job.status === 'active' || job.status === 'paused') && (
+                  {job.status === 'active' && (
                     <UnifiedButton
                       variant="job-toggle"
                       jobId={job.id}

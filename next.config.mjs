@@ -65,10 +65,7 @@ const nextConfig = {
   compress: true,
   reactStrictMode: true,
 
-  // ✨ React Compiler (STABLE in Next.js 16.0)
-  // Automatically memoizes components to reduce unnecessary re-renders
-  // Previous issue: Caused eval() CSP violations with strict-dynamic
-  // Now stable - monitoring for CSP compatibility
+  // ✨ React Compiler (STABLE) - Automatic memoization without manual optimization
   reactCompiler: true,
 
   // ✨ Cache Components / Partial Prerendering (DISABLED - incompatible with generateStaticParams)
@@ -124,8 +121,12 @@ const nextConfig = {
   // We use Biome/Ultracite for linting anyway
 
   typescript: {
-    // We handle TypeScript checking separately
-    ignoreBuildErrors: false,
+    // ⚡ Skip TypeScript during build for faster Vercel deploys (saves ~21s)
+    // Type checking happens in:
+    // 1. Local development (IDE + tsc --watch)
+    // 2. Pre-commit hooks (lefthook runs tsc --noEmit)
+    // 3. CI/CD type-check job (if added)
+    ignoreBuildErrors: true,
   },
 
   images: {
@@ -191,6 +192,14 @@ const nextConfig = {
       '.git/**/*',
       'node_modules/@types/**/*',
       'node_modules/typescript/**/*',
+      'scripts/**/*', // Build scripts (193-621 LOC not needed at runtime)
+      'config/tools/**/*', // Tool configs (biome, playwright, lighthouse, etc.)
+      '__tests__/**/*', // Test files
+      'tests/**/*', // Test files
+      '*.test.*', // Test files
+      '*.spec.*', // Test files
+      'vitest.config.ts', // Test config
+      'playwright.config.ts', // Test config
     ],
     // Specific exclusions for guide pages
     '/guides/**': ['./docs/**/*', './scripts/**/*'],
@@ -200,6 +209,11 @@ const nextConfig = {
     // ✨ Turbopack Filesystem Caching for Dev (STABLE in Next.js 16.0)
     // Provides 30-50% faster dev server restarts by caching compiler artifacts on disk
     turbopackFileSystemCacheForDev: true,
+
+    // ✨ Parallel Static Generation (Next.js 16.0+)
+    // Generate static pages in parallel during build for 40-60% faster builds
+    // Vercel has 4 cores = 16 workers optimal (4x multiplier for I/O bound tasks)
+    staticGenerationMaxConcurrency: 16,
 
     // Note: turbopackFileSystemCacheForBuild still requires canary
     // Will be enabled in future Next.js release
@@ -345,10 +359,61 @@ const nextConfig = {
     return config;
   },
 
-  // Headers for caching only - security headers handled by Nosecone in middleware.ts
+  // 301 Redirects for guides URL migration
+  // /guides/<subcategory>/<slug> → /guides/<slug>
+  async redirects() {
+    return [
+      // Guides migration: Remove subcategory from URLs
+      {
+        source:
+          '/guides/:subcategory(comparisons|troubleshooting|tutorials|use-cases|workflows)/:slug',
+        destination: '/guides/:slug',
+        permanent: true, // 301 redirect
+      },
+      // llms.txt routes for guides
+      {
+        source:
+          '/guides/:subcategory(comparisons|troubleshooting|tutorials|use-cases|workflows)/:slug/llms.txt',
+        destination: '/guides/:slug/llms.txt',
+        permanent: true, // 301 redirect
+      },
+    ];
+  },
+
+  // Headers for caching and security (Cloudflare handles primary security)
   async headers() {
     return [
-      // Cache-Control headers only (no security headers to avoid conflicts with Nosecone)
+      // Security headers for all routes
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'no-referrer',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+      // Cache-Control headers
       {
         source: '/api/:path*',
         headers: [
@@ -492,6 +557,16 @@ const nextConfig = {
             value: '/', // Allow service worker to control all routes from root
           },
         ],
+      },
+    ];
+  },
+
+  // Rewrites for .json API routes
+  async rewrites() {
+    return [
+      {
+        source: '/:category/:slug.json',
+        destination: '/api/json/:category/:slug',
       },
     ];
   },

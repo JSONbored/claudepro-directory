@@ -26,6 +26,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "tsBuildInfoFile": "../../.next/cache/.tsbuildinfo",
     "plugins": [
       {
         "name": "next"

@@ -38,10 +38,10 @@ function FooterComponent() {
   }, []);
 
   return (
-    <footer className={'border-t border-border/50 bg-background/95 backdrop-blur'}>
+    <footer className={'border-border/50 border-t bg-background/95 backdrop-blur'}>
       <div className="container mx-auto px-4 py-8 md:py-12">
         {/* Four-column grid with better mobile stacking */}
-        <div className="grid gap-8 md:gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12 lg:grid-cols-4">
           {/* About Section - Takes full width on mobile */}
           <motion.div
             className="text-center md:text-left"
@@ -53,12 +53,12 @@ function FooterComponent() {
             <div className={'mb-4 flex justify-center md:justify-start'}>
               <HeyClaudeLogo size="md" inView={true} duration={1.5} />
             </div>
-            <p className={'text-sm md:text-xs text-muted-foreground mb-6 max-w-sm mx-auto md:mx-0'}>
+            <p className={'mx-auto mb-6 max-w-sm text-muted-foreground text-sm md:mx-0 md:text-xs'}>
               {APP_CONFIG.description}
             </p>
 
             {/* Social Icons + Theme Toggle + Badge - Vertical stack */}
-            <div className="flex flex-col items-center md:items-start gap-4">
+            <div className="flex flex-col items-center gap-4 md:items-start">
               <div className="flex items-center gap-4">
                 {[
                   { href: SOCIAL_LINKS.github || '#', icon: Github, label: 'GitHub' },
@@ -85,7 +85,7 @@ function FooterComponent() {
                 style="outline"
                 className="border-accent/20 bg-accent/5 text-accent"
               >
-                <ExternalLink className="h-3 w-3 mr-1 text-accent" />
+                <ExternalLink className="mr-1 h-3 w-3 text-accent" />
                 Open Source
               </UnifiedBadge>
             </div>
@@ -99,7 +99,7 @@ function FooterComponent() {
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.1 }}
           >
-            <h3 className={'font-semibold mb-4 text-lg md:text-base'}>Browse</h3>
+            <h3 className={'mb-4 font-semibold text-lg md:text-base'}>Browse</h3>
             <ul className={'space-y-3 md:space-y-2'}>
               {[
                 { href: ROUTES.AGENTS, label: 'Agents' },
@@ -126,7 +126,7 @@ function FooterComponent() {
                   >
                     <Link
                       href={link.href}
-                      className="link-accent-underline text-base md:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="link-accent-underline text-base text-muted-foreground transition-colors hover:text-foreground md:text-sm"
                     >
                       {link.label}
                     </Link>
@@ -144,7 +144,7 @@ function FooterComponent() {
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.2 }}
           >
-            <h3 className={'font-semibold mb-4 text-lg md:text-base'}>Resources</h3>
+            <h3 className={'mb-4 font-semibold text-lg md:text-base'}>Resources</h3>
             <ul className={'space-y-3 md:space-y-2'}>
               {[
                 { href: ROUTES.GUIDES, label: 'Guides', icon: null },
@@ -169,7 +169,7 @@ function FooterComponent() {
                   >
                     <Link
                       href={link.href}
-                      className="text-base md:text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-2"
+                      className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground md:text-sm"
                       aria-label={link.label}
                     >
                       {link.icon && <link.icon className="h-4 w-4" />}
@@ -189,7 +189,7 @@ function FooterComponent() {
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.3 }}
           >
-            <h3 className={'font-semibold mb-4 text-lg md:text-base'}>Support</h3>
+            <h3 className={'mb-4 font-semibold text-lg md:text-base'}>Support</h3>
             <ul className={'space-y-3 md:space-y-2'}>
               {[
                 { href: '/consulting', label: 'Work with JSONbored' },
@@ -214,7 +214,7 @@ function FooterComponent() {
                   >
                     <Link
                       href={link.href}
-                      className="link-accent-underline text-base md:text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="link-accent-underline text-base text-muted-foreground transition-colors hover:text-foreground md:text-sm"
                     >
                       {link.label}
                     </Link>
@@ -228,7 +228,7 @@ function FooterComponent() {
         {/* Bottom Bar - Clean layout */}
         <motion.div
           className={
-            'mt-8 md:mt-12 pt-6 border-t border-border/30 flex flex-col md:flex-row items-center justify-between gap-4'
+            'mt-8 flex flex-col items-center justify-between gap-4 border-border/30 border-t pt-6 md:mt-12 md:flex-row'
           }
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -236,7 +236,7 @@ function FooterComponent() {
           transition={{ delay: 0.4 }}
         >
           {/* Left: Copyright */}
-          <div className="text-sm text-muted-foreground">
+          <div className="text-muted-foreground text-sm">
             <p>© {currentYear} heyclau.de / Claude Pro Directory. All rights reserved.</p>
           </div>
 

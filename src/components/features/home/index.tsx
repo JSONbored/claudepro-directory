@@ -2,31 +2,28 @@
 
 /**
  * Homepage Client Component
- * Production 2025 Architecture: TanStack Virtual + Configuration-Driven Design
+ * Database-First 2025 Architecture: Server data with client interactivity
  *
  * PERFORMANCE CRITICAL: This is the first page users see
- * Must maintain optimal performance with multiple content sections
+ * Data fetched server-side, search redirects to /search page
  *
- * Optimizations Applied:
- * 1. ✅ TanStack Virtual for list virtualization (~15 visible items)
- * 2. ✅ Memoized featured sections to prevent unnecessary re-renders
- * 3. ✅ Memoized lookup maps for O(1) category filtering
- * 4. ✅ Lazy-loaded heavy components (UnifiedSearch)
- * 5. ✅ Proper memo wrapping for all sub-components
- * 6. ✅ Constant memory usage regardless of item count
- * 7. ✅ 60fps scroll performance with 10,000+ items
+ * Architecture Changes (2025-10-30):
+ * 1. ✅ Data fetched from content table (server-side in page.tsx)
+ * 2. ✅ Search uses direct Supabase RPC (database-first, no API route)
+ * 3. ✅ No client-side filtering - just display and navigation
+ * 4. ✅ Client-only for animations and interactions
  *
  * Component Organization:
- * 1. ✅ Extracted SearchSection (search UI + virtualized results)
- * 2. ✅ Extracted FeaturedSections (5 featured categories + jobs)
- * 3. ✅ Extracted TabsSection (tabbed navigation with virtualization)
- * Result: Clean, maintainable, production-grade architecture
+ * 1. ✅ Display server-fetched data
+ * 2. ✅ Handle search navigation
+ * 3. ✅ Interactive UI elements (motion, tabs)
+ * Result: Hybrid architecture - server data, client UX
  */
 
 import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import {
   LazyFeaturedSections,
   LazySearchSection,
@@ -34,14 +31,18 @@ import {
 } from '@/src/components/features/home/lazy-homepage-sections';
 import { NumberTicker } from '@/src/components/magic/number-ticker';
 import { HomepageStatsSkeleton, Skeleton } from '@/src/components/primitives/loading-skeleton';
-import { useSearch } from '@/src/hooks/use-search';
 import {
+  getCategoryConfigs,
   getCategoryStatsConfig,
   HOMEPAGE_FEATURED_CATEGORIES,
 } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
-import type { HomePageClientProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { logger } from '@/src/lib/logger';
+import type { DisplayableContent, FilterState } from '@/src/lib/schemas/component.schema';
+import type { HomePageClientProps } from '@/src/lib/schemas/components/page-props.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * OPTIMIZATION (2025-10-22): Enabled SSR for UnifiedSearch
@@ -60,54 +61,118 @@ const UnifiedSearch = dynamic(
   }
 );
 
-function HomePageClientComponent({
-  initialData,
-  initialSearchQuery,
-  featuredByCategory,
-  stats,
-}: HomePageClientProps) {
-  const allConfigs = (initialData.allConfigs || []) as UnifiedContentItem[];
-
+function HomePageClientComponent({ initialData, featuredByCategory, stats }: HomePageClientProps) {
+  // Lazy-load allConfigs when user scrolls to "All" tab (performance optimization)
+  const [allConfigs] = useState<ContentItem[]>([]);
   const [activeTab, setActiveTab] = useState('all');
+  const [searchResults, setSearchResults] = useState<DisplayableContent[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [filters, setFilters] = useState({});
+  const [currentSearchQuery, setCurrentSearchQuery] = useState('');
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Memoize search options to prevent infinite re-renders
-  const searchOptions = useMemo(
-    () => ({
-      threshold: 0.3,
-      minMatchCharLength: 2,
-    }),
-    []
+  // Get category configs from static imports (client-side)
+  const categoryStatsConfig = useMemo(() => getCategoryStatsConfig(), []);
+  const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
+
+  // Handle search using direct Supabase RPC call (database-first)
+  // Performance optimized: Category filter at DB level, request cancellation
+  const handleSearch = useCallback(
+    async (query: string, categoryOverride?: string) => {
+      // Cancel previous request if still pending
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      if (!query.trim()) {
+        setSearchResults(allConfigs);
+        setIsSearching(false);
+        setCurrentSearchQuery('');
+        abortControllerRef.current = null;
+        return;
+      }
+
+      setCurrentSearchQuery(query.trim());
+      setIsSearching(true);
+      abortControllerRef.current = new AbortController();
+      const currentController = abortControllerRef.current;
+
+      try {
+        // Direct database RPC call - no API route middleman
+        const { createClient } = await import('@/src/lib/supabase/client');
+        const supabase = createClient();
+
+        // Performance optimization: Filter by category at database level
+        const effectiveTab = categoryOverride ?? activeTab;
+        const rpcParams: {
+          p_query: string;
+          p_limit: number;
+          p_categories?: string[];
+        } = {
+          p_query: query.trim(),
+          p_limit: 50,
+        };
+
+        // Only filter by category if not "all" or "community" tab
+        if (effectiveTab !== 'all' && effectiveTab !== 'community') {
+          rpcParams.p_categories = [effectiveTab];
+        }
+
+        const { data, error } = await supabase.rpc('search_content_optimized', rpcParams);
+
+        // Ignore results if this request was aborted
+        if (currentController.signal.aborted) return;
+
+        if (error) throw error;
+
+        // Use proper database-generated type from search RPC
+        type SearchResultType =
+          Database['public']['Functions']['search_content_optimized']['Returns'][number];
+        setSearchResults((data || []) as SearchResultType[]);
+      } catch (error) {
+        // Ignore abort errors (expected when fast typing)
+        if (currentController.signal.aborted) return;
+
+        logger.error('Search failed', error as Error, { source: 'HomePageSearch' });
+        setSearchResults(allConfigs);
+      }
+    },
+    [allConfigs, activeTab]
   );
 
-  // Use React 19 optimized search hook with initial query from URL
-  const { filters, searchResults, filterOptions, handleSearch, handleFiltersChange, isSearching } =
-    useSearch({
-      data: allConfigs,
-      searchOptions,
-      ...(initialSearchQuery ? { initialQuery: initialSearchQuery } : {}),
-    });
+  const handleFiltersChange = useCallback((newFilters: FilterState) => {
+    setFilters(newFilters);
+  }, []);
+
+  const filterOptions = { tags: [], authors: [], categories: [] };
 
   // Create lookup maps dynamically for all featured categories
   // O(1) slug checking instead of O(n) array.some() calls
+  // Only used for non-search tab filtering
   const slugLookupMaps = useMemo(() => {
     const maps: Record<string, Set<string>> = {};
 
     for (const category of HOMEPAGE_FEATURED_CATEGORIES) {
       const categoryData = initialData[category as keyof typeof initialData];
       if (categoryData && Array.isArray(categoryData)) {
-        maps[category] = new Set(categoryData.map((item: UnifiedContentItem) => item.slug));
+        maps[category] = new Set(categoryData.map((item: ContentItem) => item.slug));
       }
     }
 
     return maps;
   }, [initialData]);
 
-  // Filter search results by active tab - optimized with Set lookups
-  // When not searching, use the full dataset (allConfigs) instead of searchResults
-  // With TanStack Virtual, we pass the ENTIRE dataset - virtualization handles rendering
-  const filteredResults = useMemo((): UnifiedContentItem[] => {
-    // Use allConfigs when not searching, searchResults when searching
-    const dataSource = isSearching ? searchResults : allConfigs;
+  // Filter results by active tab
+  // Performance: When searching, DB filters by category (no client-side filtering needed)
+  // When not searching, use Set lookups for O(1) filtering
+  const filteredResults = useMemo((): DisplayableContent[] => {
+    if (isSearching) {
+      // DB already filtered by category - return as-is
+      return searchResults || [];
+    }
+
+    // Not searching - filter allConfigs by tab
+    const dataSource = allConfigs;
 
     if (activeTab === 'all' || activeTab === 'community') {
       return dataSource || [];
@@ -119,21 +184,32 @@ function HomePageClientComponent({
       : dataSource || [];
   }, [searchResults, allConfigs, activeTab, slugLookupMaps, isSearching]);
 
-  // Handle tab change
-  const handleTabChange = useCallback((value: string) => {
-    setActiveTab(value);
-  }, []);
+  // Handle tab change - re-trigger search if currently searching
+  const handleTabChange = useCallback(
+    (value: string) => {
+      setActiveTab(value);
+      // If currently searching, re-run search with new category filter (DB-side)
+      if (isSearching && currentSearchQuery) {
+        handleSearch(currentSearchQuery, value).catch(() => {
+          // Silent fail - search will retry on next user interaction
+        });
+      }
+    },
+    [isSearching, currentSearchQuery, handleSearch]
+  );
 
   // Handle clear search
   const handleClearSearch = useCallback(() => {
-    handleSearch('');
+    handleSearch('').catch(() => {
+      // Silent fail - search cleared on error
+    });
   }, [handleSearch]);
 
   return (
     <>
       {/* Search Section */}
       <section className={'container mx-auto px-4 pt-8 pb-12'}>
-        <div className={'max-w-4xl mx-auto'}>
+        <div className={'mx-auto max-w-4xl'}>
           <UnifiedSearch
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
             onSearch={handleSearch}
@@ -152,45 +228,40 @@ function HomePageClientComponent({
             <>
               {/* Mobile Stats - Compact horizontal scroll carousel */}
               <motion.div
-                className="md:hidden mt-6 overflow-x-auto scrollbar-hide"
+                className="scrollbar-hide mt-6 overflow-x-auto md:hidden"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
                 <div className="flex gap-3 px-4 pb-2">
-                  {getCategoryStatsConfig()
-                    .slice(0, 5)
-                    .map(({ categoryId, icon: Icon, delay }) => {
-                      const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
+                  {categoryStatsConfig.slice(0, 5).map(({ categoryId, icon: Icon, delay }) => {
+                    const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
 
-                      return (
-                        <Link key={categoryId} href={categoryRoute}>
-                          <motion.div
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border/40 bg-card/50 backdrop-blur-sm whitespace-nowrap min-w-fit"
-                            whileTap={{ scale: 0.95 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                          >
-                            <Icon
-                              className="h-4 w-4 text-accent flex-shrink-0"
-                              aria-hidden="true"
-                            />
-                            <span className="text-sm font-medium">
-                              <NumberTicker value={stats[categoryId] || 0} delay={delay} />
-                            </span>
-                          </motion.div>
-                        </Link>
-                      );
-                    })}
+                    return (
+                      <Link key={categoryId} href={categoryRoute}>
+                        <motion.div
+                          className="flex min-w-fit items-center gap-2 whitespace-nowrap rounded-lg border border-border/40 bg-card/50 px-4 py-2.5 backdrop-blur-sm"
+                          whileTap={{ scale: 0.95 }}
+                          transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                        >
+                          <Icon className="h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
+                          <span className="font-medium text-sm">
+                            <NumberTicker value={stats[categoryId] || 0} delay={delay} />
+                          </span>
+                        </motion.div>
+                      </Link>
+                    );
+                  })}
                 </div>
               </motion.div>
 
               {/* Desktop Stats - Full layout (unchanged) */}
               <div
                 className={
-                  'hidden md:flex flex-wrap justify-center gap-2 lg:gap-3 text-xs lg:text-sm text-muted-foreground mt-6'
+                  'mt-6 hidden flex-wrap justify-center gap-2 text-muted-foreground text-xs md:flex lg:gap-3 lg:text-sm'
                 }
               >
-                {getCategoryStatsConfig().map(({ categoryId, icon: Icon, displayText, delay }) => {
+                {categoryStatsConfig.map(({ categoryId, icon: Icon, displayText, delay }) => {
                   // Get category route from ROUTES constant
                   const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
 
@@ -202,7 +273,7 @@ function HomePageClientComponent({
                       aria-label={`View all ${displayText}`}
                     >
                       <motion.div
-                        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} px-2 py-1 rounded-md border border-transparent transition-colors cursor-pointer`}
+                        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} cursor-pointer rounded-md border border-transparent px-2 py-1 transition-colors`}
                         whileHover={{
                           scale: 1.05,
                           y: -2,
@@ -244,7 +315,12 @@ function HomePageClientComponent({
         />
 
         {/* Featured Content Sections - Render immediately (above the fold) */}
-        {!isSearching && <LazyFeaturedSections categories={featuredByCategory || initialData} />}
+        {!isSearching && (
+          <LazyFeaturedSections
+            categories={featuredByCategory || initialData}
+            categoryConfigs={categoryConfigs}
+          />
+        )}
 
         {/* Tabs Section - Render immediately (above the fold) */}
         {!isSearching && (
@@ -252,6 +328,7 @@ function HomePageClientComponent({
             activeTab={activeTab}
             filteredResults={filteredResults}
             onTabChange={handleTabChange}
+            categoryConfigs={categoryConfigs}
           />
         )}
       </section>

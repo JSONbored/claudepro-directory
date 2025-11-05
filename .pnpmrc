@@ -8,4 +8,5 @@ enable-pre-post-scripts=true
 # These are essential for the build process
 lifecycle-scripts-allow-list[]=sharp
 lifecycle-scripts-allow-list[]=esbuild
+lifecycle-scripts-allow-list[]=msw
 lifecycle-scripts-allow-list[]=lefthook

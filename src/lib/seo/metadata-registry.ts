@@ -20,7 +20,10 @@
  */
 
 import { z } from 'zod';
+import type { ChangelogEntry } from '@/src/lib/changelog/loader';
 import { APP_CONFIG } from '@/src/lib/constants';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { Tables } from '@/src/types/database.types';
 
 /**
  * Metadata Source Type
@@ -44,21 +47,10 @@ export interface MetadataContext {
   /** Dynamic route parameters from Next.js (e.g., { category: 'agents', slug: 'code-reviewer' }) */
   params?: Record<string, string | string[]> | undefined;
 
-  /** Content item data (from schema adapter or page data) */
-  item?:
-    | {
-        title?: string | undefined;
-        name?: string | undefined;
-        description?: string | undefined;
-        tags?: string[] | undefined;
-        author?: string | undefined;
-        dateAdded?: string | undefined;
-        lastModified?: string | undefined;
-        [key: string]: unknown;
-      }
-    | undefined;
+  /** Content item data (from database - all possible content types) */
+  item?: ContentItem | ChangelogEntry | Tables<'user_collections'> | undefined;
 
-  /** Category configuration from UNIFIED_CATEGORY_REGISTRY */
+  /** Category configuration from category_configs table */
   categoryConfig?:
     | {
         title?: string | undefined;

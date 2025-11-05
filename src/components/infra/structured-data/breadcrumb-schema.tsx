@@ -16,7 +16,7 @@
 
 import Script from 'next/script';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
+import { serializeJsonLd } from '@/src/lib/utils/jsonld.utils';
 
 export interface BreadcrumbItem {
   /** Display name for breadcrumb */

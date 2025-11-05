@@ -22,9 +22,6 @@
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "**/*.stories.ts",
-    "**/*.stories.tsx",
-    ".storybook"
+    "**/*.spec.tsx"
   ]
 }

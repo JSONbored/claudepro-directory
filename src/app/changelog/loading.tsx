@@ -10,7 +10,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export default function ChangelogLoading() {
   return (
-    <div className="container max-w-6xl py-8 space-y-8">
+    <div className="container max-w-6xl space-y-8 py-8">
       {/* Header Skeleton */}
       <div className="space-y-4">
         <Skeleton size="sm" width="xs" className="mb-4" />
@@ -22,7 +22,7 @@ export default function ChangelogLoading() {
       </div>
 
       {/* Category Filter Skeleton */}
-      <div className="grid w-full lg:w-auto lg:grid-flow-col gap-1">
+      <div className="grid w-full gap-1 lg:w-auto lg:grid-flow-col">
         {[...Array(7)].map((_, i) => (
           <Skeleton key={`tab-${i + 1}`} size="lg" width="lg" rounded="md" />
         ))}
@@ -32,7 +32,7 @@ export default function ChangelogLoading() {
       <div className="space-y-6">
         {[...Array(6)].map((_, i) => (
           <div key={`changelog-skeleton-${i + 1}`} className="rounded-lg border bg-card p-6">
-            <div className={'flex items-center gap-2 mb-3'}>
+            <div className={'mb-3 flex items-center gap-2'}>
               <Skeleton size="sm" width="xs" />
               <Skeleton size="sm" width="sm" />
             </div>

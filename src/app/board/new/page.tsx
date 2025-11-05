@@ -8,7 +8,7 @@ const UnifiedNewsletterCapture = dynamic(
       default: mod.UnifiedNewsletterCapture,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
 
@@ -41,7 +41,7 @@ export default function NewPostPage() {
       <div className={'container mx-auto max-w-2xl'}>
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Create a Post</h1>
+            <h1 className="mb-2 font-bold text-3xl">Create a Post</h1>
             <p className="text-muted-foreground">
               Share a link, ask a question, or start a discussion
             </p>

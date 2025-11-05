@@ -101,7 +101,7 @@ export function ReadProgress({
 
   return (
     <motion.div
-      className="fixed left-0 right-0 origin-left"
+      className="fixed right-0 left-0 origin-left"
       style={{
         [position]: 0,
         height: `${height}px`,

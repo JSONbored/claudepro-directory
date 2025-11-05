@@ -1,34 +1,16 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "remoteCache": {
+    "signature": true
+  },
   "tasks": {
     "generate:categories:exec": {
       "outputs": [
-        "src/lib/config/category-types.ts",
-        "src/lib/ui-constants-categories.ts"
+        "src/lib/config/category-config.generated.ts"
       ],
-      "inputs": ["src/lib/config/category-config.ts"],
+      "inputs": ["scripts/build/generate-category-config.ts"],
       "cache": true,
-      "passThroughEnv": ["VERCEL_DEPLOYMENT_ID"]
-    },
-    "build:content:exec": {
-      "outputs": [
-        "generated/**",
-        "src/generated/**",
-        "public/static-api/**",
-        ".vercel-cache/build-content/**"
-      ],
-      "inputs": [
-        "content/**/*.json",
-        "CHANGELOG.md",
-        "src/lib/schemas/**/*.ts",
-        "src/lib/config/category-config.ts",
-        "scripts/build/build-content.ts",
-        "src/lib/build/category-processor.server.ts"
-      ],
-      "env": ["NODE_ENV"],
-      "cache": true,
-      "persistent": true,
-      "passThroughEnv": ["VERCEL_DEPLOYMENT_ID"]
+      "passThroughEnv": ["VERCEL_DEPLOYMENT_ID", "NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]
     },
     "build:skills:exec": {
       "outputs": [
@@ -46,15 +28,21 @@
       "passThroughEnv": ["VERCEL_DEPLOYMENT_ID"]
     },
     "generate:service-worker:exec": {
+      "dependsOn": ["generate:categories:exec"],
       "outputs": ["public/service-worker.js", ".next/cache/sw-hash.txt"],
       "inputs": [
         "scripts/build/generate-service-worker.ts",
         "src/lib/config/category-config.ts",
+        "src/lib/config/category-config.generated.ts",
         "src/lib/constants/security.ts",
         "package.json"
       ],
       "cache": true,
-      "passThroughEnv": ["VERCEL_DEPLOYMENT_ID"]
+      "passThroughEnv": [
+        "VERCEL_DEPLOYMENT_ID",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+      ]
     },
     "type-check": {
       "outputs": ["**/*.tsbuildinfo"],
@@ -78,11 +66,6 @@
     "VIEW_COUNT_SALT",
     "WEBHOOK_SECRET",
     "CRON_SECRET",
-    "KV_URL",
-    "KV_REST_API_TOKEN",
-    "KV_REST_API_URL",
-    "KV_REST_API_READ_ONLY_TOKEN",
-    "REDIS_URL",
     "GITHUB_TOKEN",
     "GITHUB_OWNER",
     "GITHUB_REPO",
@@ -101,8 +84,20 @@
     "SUPABASE_ANON_KEY",
     "SUPABASE_SERVICE_ROLE_KEY",
     "SUPABASE_JWT_SECRET",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
     "BETTERSTACK_HEARTBEAT_WEEKLY_TASKS",
-    "BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE"
+    "BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE",
+    "BETTERSTACK_SOURCE_TOKEN",
+    "KV_URL",
+    "REDIS_URL",
+    "LOGTAIL_URL",
+    "LOGTAIL_SOURCE_TOKEN",
+    "REVALIDATE_SECRET",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY",
+    "R2_ENDPOINT",
+    "R2_BUCKET_NAME"
   ],
   "globalPassThroughEnv": [
     "VERCEL",
@@ -117,6 +112,7 @@
     "VERCEL_GIT_REPO_OWNER",
     "VERCEL_GIT_REPO_ID",
     "VERCEL_GIT_PULL_REQUEST_ID",
+    "TURBO_REMOTE_CACHE_SIGNATURE_KEY",
     "CI",
     "CONTINUOUS_INTEGRATION"
   ]

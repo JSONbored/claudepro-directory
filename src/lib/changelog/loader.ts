@@ -1,293 +1,243 @@
 /**
- * Changelog Content Loader
- *
- * High-level API for loading changelog entries with Redis caching.
- * Provides a simple interface for pages and components to access changelog data.
- *
- * Architecture:
- * - Redis cache-aside pattern with 1-hour TTL
- * - Falls back to parser on cache miss
- * - Automatic cache invalidation on build
- * - Type-safe with Zod validation
- *
- * Performance:
- * - Cache hit: ~0.1-1ms
- * - Cache miss: ~10-20ms (parser + cache write)
- * - TTL: 3600s (1 hour) - balances freshness and performance
- *
- * Production Standards:
- * - Async/await for all operations
- * - Comprehensive error handling with fallbacks
- * - Proper logging for debugging
- * - Type-safe return values
+ * Changelog Loader - Database-First Architecture
+ * Calls get_changelog_entries() RPC - all enrichment in PostgreSQL.
  */
 
-import { contentCache } from '@/src/lib/cache.server';
+import { unstable_cache } from 'next/cache';
+import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
-import type { ChangelogEntry, ParsedChangelog } from '@/src/lib/schemas/changelog.schema';
-import {
-  getAllChangelogEntries as parseAllEntries,
-  parseChangelog,
-  getChangelogEntryBySlug as parseEntryBySlug,
-} from './parser';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
+import type { Json, Tables } from '@/src/types/database.types';
 
-/**
- * Cache TTL configuration
- * 1 hour cache - balances freshness (manual changelog updates) with performance
- */
-const CHANGELOG_CACHE_TTL = 21600; // 6 hours in seconds
+// Zod schema for changelog entry changes structure (JSONB validation)
+const changeItemSchema = z.object({
+  content: z.string(),
+});
 
-/**
- * Get complete parsed changelog with all entries and metadata
- *
- * @returns Parsed changelog with entries and metadata
- *
- * @example
- * const changelog = await getChangelog();
- * console.log(`Total entries: ${changelog.metadata.totalEntries}`);
- * console.log(`Latest: ${changelog.metadata.latestEntry?.title}`);
- */
-export async function getChangelog(): Promise<ParsedChangelog> {
-  const cacheKey = 'changelog:full';
+const changesSchema = z.object({
+  Added: z.array(changeItemSchema).optional(),
+  Changed: z.array(changeItemSchema).optional(),
+  Fixed: z.array(changeItemSchema).optional(),
+  Removed: z.array(changeItemSchema).optional(),
+  Deprecated: z.array(changeItemSchema).optional(),
+  Security: z.array(changeItemSchema).optional(),
+});
 
+// Use database type directly - no custom extensions
+export type ChangelogEntry = Tables<'changelog_entries'>;
+
+// Validated changes type (for runtime use after parsing)
+export type ChangelogChanges = z.infer<typeof changesSchema>;
+
+export type ChangelogCategory =
+  | 'Added'
+  | 'Changed'
+  | 'Deprecated'
+  | 'Removed'
+  | 'Fixed'
+  | 'Security';
+
+// Helper to safely parse changes JSONB field
+export function parseChangelogChanges(changes: unknown): ChangelogChanges {
   try {
-    return await contentCache.cacheWithRefresh(
-      cacheKey,
-      async () => {
-        logger.debug('Parsing full CHANGELOG.md (cache miss)');
-        return await parseChangelog();
-      },
-      CHANGELOG_CACHE_TTL
-    );
+    return changesSchema.parse(changes);
   } catch (error) {
     logger.error(
-      'Failed to load full changelog',
+      'Failed to parse changelog changes',
       error instanceof Error ? error : new Error(String(error))
     );
-
-    // Fallback: try to parse directly without cache
-    try {
-      return await parseChangelog();
-    } catch (fallbackError) {
-      logger.error(
-        'Critical: Changelog parser failed',
-        fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError))
-      );
-
-      // Return empty changelog as last resort
-      return {
-        entries: [],
-        metadata: {
-          totalEntries: 0,
-          latestEntry: undefined,
-          dateRange: undefined,
-          categoryCounts: {
-            Added: 0,
-            Changed: 0,
-            Deprecated: 0,
-            Removed: 0,
-            Fixed: 0,
-            Security: 0,
-          },
-        },
-      };
-    }
+    return {}; // Return empty object if parsing fails
   }
 }
 
-/**
- * Get all changelog entries sorted by date (newest first)
- *
- * Lightweight alternative to getChangelog() when you only need entries.
- *
- * @returns Array of all changelog entries
- *
- * @example
- * const entries = await getAllChangelogEntries();
- * console.log(`Found ${entries.length} changelog entries`);
- */
+export async function getChangelog() {
+  return unstable_cache(
+    async () => {
+      try {
+        const supabase = createAnonClient();
+        const { data, error } = await supabase.rpc('get_changelog_entries', {
+          p_published_only: true,
+          p_limit: 1000,
+        });
+
+        if (error) throw error;
+
+        const result = data as {
+          entries: ChangelogEntry[];
+          total: number;
+          limit: number;
+          offset: number;
+          hasMore: boolean;
+        };
+        return result;
+      } catch (error) {
+        logger.error(
+          'Failed to load changelog',
+          error instanceof Error ? error : new Error(String(error))
+        );
+        return { entries: [], total: 0, limit: 1000, offset: 0, hasMore: false };
+      }
+    },
+    ['changelog-entries'],
+    {
+      revalidate: 3600, // 1 hour
+      tags: ['changelog'],
+    }
+  )();
+}
+
 export async function getAllChangelogEntries(): Promise<ChangelogEntry[]> {
-  const cacheKey = 'changelog:entries';
+  return unstable_cache(
+    async () => {
+      try {
+        const supabase = createAnonClient();
+        const { data, error } = await supabase.rpc('get_changelog_entries', {
+          p_published_only: false,
+          p_limit: 10000,
+        });
 
-  try {
-    return await contentCache.cacheWithRefresh(
-      cacheKey,
-      async () => {
-        logger.debug('Parsing changelog entries (cache miss)');
-        return await parseAllEntries();
-      },
-      CHANGELOG_CACHE_TTL
-    );
-  } catch (error) {
-    logger.error(
-      'Failed to load changelog entries',
-      error instanceof Error ? error : new Error(String(error))
-    );
+        if (error) throw error;
 
-    // Fallback: try to parse directly
-    try {
-      return await parseAllEntries();
-    } catch (fallbackError) {
-      logger.error(
-        'Critical: Changelog entry parser failed',
-        fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError))
-      );
-      return [];
+        const result = data as { entries: ChangelogEntry[] };
+        return result.entries || [];
+      } catch (error) {
+        logger.error(
+          'Failed to load changelog entries',
+          error instanceof Error ? error : new Error(String(error))
+        );
+        return [];
+      }
+    },
+    ['changelog-entries-all'],
+    {
+      revalidate: 3600, // 1 hour
+      tags: ['changelog'],
     }
-  }
+  )();
 }
 
-/**
- * Get a specific changelog entry by slug
- *
- * @param slug - Entry slug (e.g., "2025-10-06-automated-submission-tracking")
- * @returns Changelog entry or undefined if not found
- *
- * @example
- * const entry = await getChangelogEntryBySlug("2025-10-06-automated-submission-tracking");
- * if (entry) {
- *   console.log(`Title: ${entry.title}`);
- *   console.log(`Date: ${entry.date}`);
- * }
- */
-export async function getChangelogEntryBySlug(slug: string): Promise<ChangelogEntry | undefined> {
-  const cacheKey = `changelog:entry:${slug}`;
+export async function getChangelogEntryBySlug(slug: string): Promise<ChangelogEntry | null> {
+  return unstable_cache(
+    async () => {
+      try {
+        const supabase = createAnonClient();
+        const { data, error } = await supabase.rpc('get_changelog_entry_by_slug', {
+          p_slug: slug,
+        });
 
-  try {
-    return await contentCache.cacheWithRefresh(
-      cacheKey,
-      async () => {
-        logger.debug(`Parsing changelog entry for slug: ${slug} (cache miss)`);
-        return await parseEntryBySlug(slug);
-      },
-      CHANGELOG_CACHE_TTL
-    );
-  } catch (error) {
-    logger.error(
-      `Failed to load changelog entry: ${slug}`,
-      error instanceof Error ? error : new Error(String(error))
-    );
-
-    // Fallback: try to parse directly
-    try {
-      return await parseEntryBySlug(slug);
-    } catch (fallbackError) {
-      logger.error(
-        `Critical: Changelog entry parser failed for slug: ${slug}`,
-        fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError))
-      );
-      return undefined;
+        if (error) throw error;
+        return (data as ChangelogEntry) || null;
+      } catch (error) {
+        logger.error(
+          `Failed to load changelog entry: ${slug}`,
+          error instanceof Error ? error : new Error(String(error))
+        );
+        return null;
+      }
+    },
+    [`changelog-entry-${slug}`],
+    {
+      revalidate: 3600, // 1 hour
+      tags: ['changelog', `changelog-${slug}`],
     }
-  }
+  )();
 }
 
-/**
- * Get recent changelog entries (n most recent)
- *
- * @param limit - Number of entries to return (default: 5)
- * @returns Array of recent changelog entries
- *
- * @example
- * const recentEntries = await getRecentChangelogEntries(3);
- * // Returns: [latest, second-latest, third-latest]
- */
 export async function getRecentChangelogEntries(limit = 5): Promise<ChangelogEntry[]> {
-  const cacheKey = `changelog:recent:${limit}`;
+  return unstable_cache(
+    async () => {
+      try {
+        const supabase = createAnonClient();
+        const { data, error } = await supabase.rpc('get_changelog_entries', {
+          p_published_only: true,
+          p_limit: limit,
+        });
 
+        if (error) throw error;
+
+        const result = data as { entries: ChangelogEntry[] };
+        return result.entries || [];
+      } catch (error) {
+        logger.error(
+          `Failed to load recent changelog entries (limit: ${limit})`,
+          error instanceof Error ? error : new Error(String(error))
+        );
+        return [];
+      }
+    },
+    [`changelog-recent-${limit}`],
+    {
+      revalidate: 3600, // 1 hour
+      tags: ['changelog'],
+    }
+  )();
+}
+
+export async function getChangelogEntriesByCategory(category: string): Promise<ChangelogEntry[]> {
+  return unstable_cache(
+    async () => {
+      try {
+        const supabase = createAnonClient();
+        const { data, error } = await supabase.rpc('get_changelog_entries', {
+          p_category: category,
+          p_published_only: true,
+          p_limit: 1000,
+        });
+
+        if (error) throw error;
+
+        const result = data as { entries: ChangelogEntry[] };
+        return result.entries || [];
+      } catch (error) {
+        logger.error(
+          `Failed to filter changelog entries by category: ${category}`,
+          error instanceof Error ? error : new Error(String(error))
+        );
+        return [];
+      }
+    },
+    [`changelog-category-${category}`],
+    {
+      revalidate: 3600, // 1 hour
+      tags: ['changelog', `changelog-category-${category}`],
+    }
+  )();
+}
+
+export async function getFeaturedChangelogEntries(limit = 3): Promise<ChangelogEntry[]> {
   try {
-    return await contentCache.cacheWithRefresh(
-      cacheKey,
-      async () => {
-        logger.debug(`Fetching ${limit} recent changelog entries (cache miss)`);
-        const allEntries = await parseAllEntries();
-        return allEntries.slice(0, limit);
-      },
-      CHANGELOG_CACHE_TTL
-    );
+    const supabase = createAnonClient();
+    const { data, error } = await supabase.rpc('get_changelog_entries', {
+      p_published_only: true,
+      p_featured_only: true,
+      p_limit: limit,
+    });
+
+    if (error) throw error;
+
+    const result = data as { entries: ChangelogEntry[] };
+    return result.entries || [];
   } catch (error) {
     logger.error(
-      `Failed to load recent changelog entries (limit: ${limit})`,
+      `Failed to load featured changelog entries (limit: ${limit})`,
       error instanceof Error ? error : new Error(String(error))
     );
-
-    // Fallback: try to parse directly
-    try {
-      const allEntries = await parseAllEntries();
-      return allEntries.slice(0, limit);
-    } catch (fallbackError) {
-      logger.error(
-        'Critical: Recent changelog entries parser failed',
-        fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError))
-      );
-      return [];
-    }
+    return [];
   }
 }
 
-/**
- * Get changelog entries filtered by category
- *
- * @param category - Category to filter by (Added, Fixed, Changed, etc.)
- * @returns Array of entries containing the specified category
- *
- * @example
- * const addedEntries = await getChangelogEntriesByCategory("Added");
- * // Returns: All entries with "Added" sections
- */
-export async function getChangelogEntriesByCategory(
-  category: 'Added' | 'Changed' | 'Deprecated' | 'Removed' | 'Fixed' | 'Security'
-): Promise<ChangelogEntry[]> {
-  const cacheKey = `changelog:category:${category}`;
-
+export async function getChangelogMetadata() {
   try {
-    return await contentCache.cacheWithRefresh(
-      cacheKey,
-      async () => {
-        logger.debug(`Filtering changelog entries by category: ${category} (cache miss)`);
-        const allEntries = await parseAllEntries();
-        return allEntries.filter((entry) => entry.categories[category].length > 0);
-      },
-      CHANGELOG_CACHE_TTL
-    );
+    const supabase = createAnonClient();
+    const { data, error } = await supabase.rpc('get_changelog_metadata');
+
+    if (error) throw error;
+    return data as Json;
   } catch (error) {
     logger.error(
-      `Failed to filter changelog entries by category: ${category}`,
+      'Failed to load changelog metadata',
       error instanceof Error ? error : new Error(String(error))
     );
-
-    // Fallback: try to parse and filter directly
-    try {
-      const allEntries = await parseAllEntries();
-      return allEntries.filter((entry) => entry.categories[category].length > 0);
-    } catch (fallbackError) {
-      logger.error(
-        `Critical: Category filter parser failed for: ${category}`,
-        fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError))
-      );
-      return [];
-    }
-  }
-}
-
-/**
- * Invalidate all changelog caches
- *
- * Call this when CHANGELOG.md is updated to force cache refresh.
- * Typically used in build scripts or webhook handlers.
- *
- * @example
- * // In a build script or webhook handler
- * await invalidateChangelogCache();
- */
-export async function invalidateChangelogCache(): Promise<void> {
-  try {
-    logger.info('Invalidating changelog cache');
-    await contentCache.invalidatePattern('changelog:*');
-    logger.info('Changelog cache invalidated successfully');
-  } catch (error) {
-    logger.error(
-      'Failed to invalidate changelog cache',
-      error instanceof Error ? error : new Error(String(error))
-    );
+    return null;
   }
 }

@@ -8,13 +8,13 @@
  * Note: This route is dynamic (no caching) as it's dev-only and renders email templates on-demand
  */
 
-import { z } from 'zod';
+import { NextResponse } from 'next/server';
 import {
   NewsletterWelcome,
   type NewsletterWelcomeProps,
 } from '@/src/emails/templates/newsletter-welcome';
 import { renderEmailHtml } from '@/src/emails/utils/render';
-import { apiResponse, createApiRoute, handleApiError } from '@/src/lib/error-handler';
+import { isDevelopment } from '@/src/lib/env-client';
 
 /**
  * Available email templates for preview
@@ -44,81 +44,65 @@ const sampleProps: Record<TemplateName, NewsletterWelcomeProps> = {
  * - email: Override email address (optional)
  * - source: Override source (optional)
  */
-const querySchema = z.object({
-  template: z.enum(['newsletter-welcome']).optional(),
-  email: z.string().email().optional(),
-  source: z.string().max(100).optional(),
-});
+export async function GET(request: Request): Promise<Response> {
+  // Dev-only route
+  if (!isDevelopment) {
+    return new NextResponse('Not found', { status: 404 });
+  }
 
-const route = createApiRoute({
-  auth: { type: 'devOnly' },
-  validate: { query: querySchema },
-  response: { envelope: false },
-  handlers: {
-    GET: async ({ query }) => {
-      const params = query as z.infer<typeof querySchema>;
+  const { searchParams } = new URL(request.url);
+  const templateName = searchParams.get('template') as TemplateName | null;
+  const email = searchParams.get('email');
+  const source = searchParams.get('source');
 
-      const templateName = params.template as TemplateName | undefined;
-      if (!templateName) {
-        return apiResponse.okRaw(
-          {
-            message: 'Email preview API',
-            availableTemplates: Object.keys(templates),
-            usage: '/api/emails/preview?template=newsletter-welcome',
-          },
-          { sMaxAge: 0, staleWhileRevalidate: 0 }
-        );
-      }
-
-      if (!templates[templateName]) {
-        return handleApiError(new Error(`Template '${templateName}' not found`), {
-          route: '/api/emails/preview',
-          method: 'GET',
-          operation: 'email_template_lookup',
-          customMessage: `Template '${templateName}' not found`,
-          logContext: {
-            templateName,
-            availableTemplates: Object.keys(templates).join(', '),
-          },
-          logLevel: 'warn',
-        });
-      }
-
-      const TemplateComponent = templates[templateName];
-      const baseProps = sampleProps[templateName];
-      const props: NewsletterWelcomeProps = {
-        email: params.email || baseProps.email,
-        ...(params.source
-          ? { source: params.source }
-          : baseProps.source
-            ? { source: baseProps.source }
-            : {}),
-      };
-
-      const html = await renderEmailHtml(TemplateComponent(props));
-      if (!html) {
-        return handleApiError(new Error('Failed to render email template'), {
-          route: '/api/emails/preview',
-          method: 'GET',
-          operation: 'email_template_render',
-          logContext: { template: templateName },
-          logLevel: 'error',
-        });
-      }
-
-      return apiResponse.raw(html, {
-        contentType: 'text/html; charset=utf-8',
+  // No template specified - show API info
+  if (!templateName) {
+    return NextResponse.json(
+      {
+        message: 'Email preview API',
+        availableTemplates: Object.keys(templates),
+        usage: '/api/emails/preview?template=newsletter-welcome',
+      },
+      {
         headers: { 'Cache-Control': 'no-store, must-revalidate' },
-        cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
-      });
-    },
-  },
-});
+      }
+    );
+  }
 
-export async function GET(
-  request: Request,
-  context: { params: Promise<Record<string, never>> }
-): Promise<Response> {
-  if (!route.GET) return new Response('Method Not Allowed', { status: 405 });
-  return route.GET(request, context);
+  // Template not found
+  if (!templates[templateName]) {
+    return NextResponse.json(
+      { error: `Template '${templateName}' not found` },
+      {
+        status: 404,
+        headers: { 'Cache-Control': 'no-store, must-revalidate' },
+      }
+    );
+  }
+
+  // Render template
+  const TemplateComponent = templates[templateName];
+  const baseProps = sampleProps[templateName];
+  const props: NewsletterWelcomeProps = {
+    email: email || baseProps.email,
+    ...(source ? { source } : baseProps.source ? { source: baseProps.source } : {}),
+  };
+
+  const html = await renderEmailHtml(TemplateComponent(props));
+  if (!html) {
+    return NextResponse.json(
+      { error: 'Failed to render email template' },
+      {
+        status: 500,
+        headers: { 'Cache-Control': 'no-store, must-revalidate' },
+      }
+    );
+  }
+
+  return new NextResponse(html, {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store, must-revalidate',
+    },
+  });
 }

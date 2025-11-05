@@ -1,73 +1,37 @@
 /**
- * Component prop schemas for React components
- * Provides type-safe validation for component props
- *
- * SHA-2100: Removed ui-props.schema.ts (177 lines of unused runtime validation)
- * Extracted only the ConfigCardProps type that's actually used
- *
- * MODERNIZATION: All category types now derived from CategoryId (registry-driven)
+ * Component Props - TypeScript types only (database validates data)
+ * Database function validate_content_metadata() enforces all validation rules
  */
 
-import { z } from 'zod';
-import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
-import type { TrendingContentItem } from '@/src/lib/trending/calculator.server';
-import type { UnifiedContentItem } from './components/content-item.schema';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { SearchResult } from '@/src/lib/search/server-search';
+import type { Database } from '@/src/types/database.types';
 import type { HomePageClientProps } from './components/page-props.schema';
 import type { SortOption } from './content-filter.schema';
-import { type CategoryId, categoryIdSchema } from './shared.schema';
+import type { CategoryId } from './shared.schema';
 
-/**
- * Config card component props (extracted from deleted ui-props.schema.ts)
- * Used for displaying configuration cards in lists
- */
+export type DisplayableContent = ContentItem | SearchResult;
+
 export interface ConfigCardProps {
-  item: UnifiedContentItem;
+  item: DisplayableContent;
   variant?: 'default' | 'detailed';
   showCategory?: boolean;
   showActions?: boolean;
   className?: string;
-  /**
-   * Optional render function for sponsored wrapper
-   * Only kept for backwards compatibility with BaseCard
-   * (Will be removed once all consumers are migrated to direct SponsoredTracker usage)
-   */
-  renderSponsoredWrapper?: (
-    children: React.ReactNode,
-    sponsoredId: string,
-    targetUrl: string,
-    position?: number
-  ) => React.ReactNode;
-  /**
-   * Enable mobile swipe gestures
-   * Swipe right → Copy, Swipe left → Bookmark
-   * @default false
-   */
   enableSwipeGestures?: boolean;
-  /**
-   * Enable View Transitions API for smooth page morphing
-   * Progressive enhancement - works where supported, instant elsewhere
-   * @default false
-   */
   useViewTransitions?: boolean;
-  /**
-   * Show BorderBeam animation (reserved for top 3 featured items)
-   * @default false
-   */
   showBorderBeam?: boolean;
 }
 
-// Re-export commonly used types from ./components
-export type { HomePageClientProps, UnifiedContentItem };
+export type { HomePageClientProps, ContentItem };
 
-// ContentListWithLoadMore component props
 export interface ContentListWithLoadMoreProps {
-  items: UnifiedContentItem[];
+  items: ContentItem[];
   initialCount?: number;
   loadMoreCount?: number;
   gridCols?: string;
 }
 
-// ContentViewer component props
 export interface ContentViewerProps {
   content: string;
   language?: string;
@@ -75,12 +39,6 @@ export interface ContentViewerProps {
   className?: string;
 }
 
-// EnhancedGuidesPage component props
-export interface EnhancedGuidesPageProps {
-  guides: Record<string, import('@/src/lib/utils/content.utils').GuideItemWithCategory[]>;
-}
-
-// ErrorBoundary component props
 export interface ErrorBoundaryProps {
   children: React.ReactNode;
   fallback?: React.ComponentType<ErrorFallbackProps>;
@@ -91,12 +49,10 @@ export interface ErrorFallbackProps {
   resetErrorBoundary: () => void;
 }
 
-// JobCard component props
 export interface JobCardProps {
-  job: import('@/src/lib/schemas/content/job.schema').JobContent;
+  job: Database['public']['Tables']['jobs']['Row'];
 }
 
-// UnifiedSearch component props
 export interface FilterState {
   sort?: string;
   category?: string;
@@ -108,9 +64,9 @@ export interface FilterState {
 
 export interface UnifiedSearchProps {
   placeholder?: string;
-  onSearch: (query: string) => void;
-  onFiltersChange: (filters: FilterState) => void;
-  filters: FilterState;
+  onSearch?: (query: string) => void;
+  onFiltersChange?: (filters: FilterState) => void;
+  filters?: FilterState;
   availableTags?: string[];
   availableAuthors?: string[];
   availableCategories?: string[];
@@ -118,118 +74,213 @@ export interface UnifiedSearchProps {
   className?: string;
 }
 
-// TrendingContent component props
 export interface TrendingContentProps {
-  trending: TrendingContentItem[];
-  popular: TrendingContentItem[];
-  recent: TrendingContentItem[];
+  trending?: ContentItem[];
+  popular?: ContentItem[];
+  recent?: ContentItem[];
+  category?: CategoryId;
+  limit?: number;
+  period?: 'day' | 'week' | 'month' | 'all';
 }
 
-/**
- * View tracker props
- * DEPRECATED: Use UnifiedTrackerProps from unified-tracker.tsx instead
- * Kept for backwards compatibility during migration
- */
-const viewTrackerPropsSchema = z.object({
-  category: categoryIdSchema.describe(
-    'Content category for view tracking (derived from UNIFIED_CATEGORY_REGISTRY)'
-  ),
-  slug: nonEmptyString.max(200),
-});
-
-export type ViewTrackerProps = z.infer<typeof viewTrackerPropsSchema>;
-
-/**
- * Content list server props
- */
-export type ContentListServerProps<T extends UnifiedContentItem = UnifiedContentItem> = {
+export type ContentListServerProps<T extends ContentItem = ContentItem> = {
   title: string;
   description: string;
   icon: string;
-  items: readonly T[] | T[];
-  type: CategoryId;
+  items: T[];
+  type: string;
   searchPlaceholder?: string;
-  badges?: Array<{
-    icon?: string | React.ComponentType<{ className?: string }>;
-    text: string;
-  }>;
+  badges?: Array<{ icon?: string; text: string }>;
+  category?: CategoryId;
+  featured?: boolean;
+  gridCols?: string;
 };
 
-/**
- * Related configs props
- */
-export type RelatedConfigsProps<T extends UnifiedContentItem = UnifiedContentItem> = {
-  configs: T[];
-  title?: string;
-  type?: CategoryId;
+export type RelatedConfigsProps<T extends ContentItem = ContentItem> = {
+  items: T[];
+  category?: CategoryId;
 };
 
-/**
- * Floating search sidebar props
- */
 export type FloatingSearchSidebarProps = {
   isOpen: boolean;
   onClose: () => void;
-  items: UnifiedContentItem[];
-  onItemSelect: (item: UnifiedContentItem) => void;
-  placeholder?: string;
+  searchQuery?: string;
+  onSearch?: (query: string) => void;
 };
 
-/**
- * Content search client props
- */
-export type ContentSearchClientProps<T extends UnifiedContentItem = UnifiedContentItem> = {
-  items: readonly T[] | T[];
-  type: CategoryId;
-  searchPlaceholder: string;
+export type ContentSearchClientProps<T extends DisplayableContent = DisplayableContent> = {
+  items: T[];
+  searchPlaceholder?: string;
   title: string;
   icon: string;
+  type?: string;
 };
 
-/**
- * Content sidebar props
- */
-export type ContentSidebarProps<T extends UnifiedContentItem = UnifiedContentItem> = {
-  item: T;
-  relatedItems: T[];
-  type: import('./shared.schema').CategoryId;
-  typeName: string;
+export type ContentSidebarProps<T extends ContentItem = ContentItem> = {
+  content: T[];
+  category?: CategoryId;
 };
 
-/**
- * Sort dropdown props
- */
 export type SortDropdownProps = {
-  sortBy: SortOption;
-  sortDirection: import('./content-filter.schema').SortDirection;
-  onSortChange: (
-    option: SortOption,
-    direction?: import('./content-filter.schema').SortDirection
-  ) => void;
+  value?: SortOption;
+  onChange?: (value: SortOption) => void;
 };
 
-/**
- * Code highlight props schema
- */
-const codeHighlightPropsSchema = z.object({
-  code: nonEmptyString,
-  language: nonEmptyString.default('typescript'),
-  title: nonEmptyString.optional(),
-  showCopy: z.boolean().default(true),
-});
-
-export type CodeHighlightProps = z.infer<typeof codeHighlightPropsSchema>;
-
-/**
- * Search hook types
- */
 export interface SearchOptions {
-  threshold?: number;
-  includeScore?: boolean;
+  query?: string;
+  category?: CategoryId;
+  sort?: SortOption;
+  limit?: number;
+  offset?: number;
 }
 
 export interface UseSearchProps {
-  data: UnifiedContentItem[];
-  searchOptions?: SearchOptions;
-  initialQuery?: string; // Initial search query from URL (for SearchAction schema integration)
+  initialQuery?: string;
+  initialCategory?: CategoryId;
+  debounceMs?: number;
 }
+
+// Component metadata types (database validates structure via validate_content_metadata())
+export type Feature = {
+  icon?: string | undefined;
+  badge?: string | undefined;
+  title: string;
+  description: string;
+};
+export type AccordionItem = { title: string; content: React.ReactNode; defaultOpen?: boolean };
+export type CalloutProps = {
+  type: 'info' | 'warning' | 'success' | 'error' | 'tip';
+  title?: string | undefined;
+  children: React.ReactNode;
+};
+export type TLDRSummaryProps = {
+  content?: string | undefined;
+  keyPoints?: string[] | undefined;
+  title?: string | undefined;
+};
+export type GuideStep = {
+  title: string;
+  description?: string;
+  content?: unknown;
+  code?: string;
+  tip?: string;
+  time: string;
+  defaultOpen?: boolean;
+};
+export type CodeExample = { language: string; filename?: string; code: string };
+export type ComparisonItem = {
+  feature: string;
+  option1: string | boolean;
+  option2: string | boolean;
+  option3?: string | boolean | undefined;
+  winner?: string | undefined;
+};
+export type TabItem = { label: string; value: string; content: React.ReactNode };
+export type QuickReferenceItem = { label?: string; value?: string; description: string };
+export type ExpertQuoteProps = {
+  quote: string;
+  author: string;
+  role?: string | null | undefined;
+  company?: string | null | undefined;
+  imageUrl?: string | null | undefined;
+};
+export type FeatureGridProps = {
+  features: Feature[];
+  title?: string;
+  description?: string;
+  columns?: 2 | 3 | 4;
+};
+export type AccordionProps = {
+  items: AccordionItem[];
+  title?: string;
+  description?: string;
+  allowMultiple?: boolean;
+};
+export type StepByStepGuideProps = {
+  steps: GuideStep[];
+  title?: string;
+  description?: string;
+  totalTime?: string;
+};
+export type ComparisonTableProps = {
+  headers: string[];
+  rows?: ComparisonItem[] | undefined;
+  items?:
+    | Array<{ feature: string; option1: string; option2: string; option3?: string | undefined }>
+    | undefined;
+  title?: string | undefined;
+  description?: string | undefined;
+};
+export type ContentTabsProps = {
+  tabs?: TabItem[];
+  items?: Array<{ label: string; value: string; content: React.ReactNode }>;
+  title?: string;
+  description?: string;
+  defaultValue?: string;
+};
+export type QuickReferenceProps = {
+  items?: QuickReferenceItem[] | undefined;
+  title?: string;
+  description?: string;
+  columns?: 2 | 3 | 4;
+};
+export type FAQProps = {
+  items?: { question: string; answer: string }[];
+  questions?: { question: string; answer: string; category?: string }[];
+  title?: string;
+  description?: string;
+};
+export type MetricsDisplayProps = {
+  metrics: Array<{ label: string; value: string; change?: string; trend?: string }>;
+  title?: string;
+  description?: string;
+};
+export type ChecklistProps = {
+  items: Array<{
+    task: string;
+    description?: string | undefined;
+    priority?: 'critical' | 'high' | 'medium' | 'low' | undefined;
+    completed?: boolean | undefined;
+  }>;
+  title?: string | undefined;
+  description?: string | undefined;
+  type: 'prerequisites' | 'security' | 'testing';
+};
+export type CaseStudyProps = {
+  title?: string;
+  description?: string;
+  challenge: string;
+  solution: string;
+  results: string[];
+  company?: string;
+  industry?: string;
+  metrics?: Array<{ label: string; value: string; change?: string; trend?: string }>;
+  testimonial?: { quote: string; author: string; role?: string };
+  logo?: string;
+};
+export type ErrorItem = {
+  code: string;
+  message: string;
+  cause: string;
+  solution: string;
+  severity?: 'critical' | 'warning' | 'info';
+};
+export type ErrorTableProps = { errors: ErrorItem[]; title?: string; description?: string };
+export type DiagnosticStep = {
+  step?: string;
+  check?: string;
+  action?: string;
+  success?: boolean;
+  question?: string;
+  solution?: string;
+  yesPath?: string;
+  noPath?: string;
+};
+export type DiagnosticFlowProps = { steps: DiagnosticStep[]; title?: string; description?: string };
+export type InfoBoxProps = {
+  type?: 'info' | 'warning' | 'success' | 'error';
+  variant?: 'info' | 'warning' | 'success' | 'error';
+  title?: string;
+  content?: string;
+  children?: React.ReactNode;
+};

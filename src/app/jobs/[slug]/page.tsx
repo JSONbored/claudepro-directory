@@ -1,3 +1,7 @@
+/**
+ * Job Detail Page - Database-first job listing display
+ */
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -7,7 +11,7 @@ import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
-import { jobs } from '@/src/lib/data/jobs';
+import { getJobBySlug } from '@/src/lib/data/jobs';
 import {
   ArrowLeft,
   Building2,
@@ -30,33 +34,26 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-
-  // Load job data for metadata generation
-  const job = jobs.find((j) => j.slug === slug);
+  const job = await getJobBySlug(slug);
 
   return generatePageMetadata('/jobs/:slug', {
     params: { slug },
-    item: job || undefined,
+    item: job ? { ...job, tags: job.tags as string[] } : undefined,
     slug,
   });
 }
 
 export async function generateStaticParams() {
-  const jobParams = jobs.map((job) => ({
-    slug: job.slug,
-  }));
+  const { getJobs } = await import('@/src/lib/data/jobs');
+  const jobs = await getJobs();
 
-  // Cache Components requires at least one param
-  // If no jobs exist, return a placeholder to prevent build error
-  if (jobParams.length === 0) {
-    logger.warn('No jobs available - returning placeholder param for Cache Components');
+  if (jobs.length === 0) {
+    logger.warn('No jobs available - returning placeholder param');
     return [{ slug: 'placeholder' }];
   }
 
-  return jobParams;
+  return jobs.map((job) => ({ slug: job.slug }));
 }
-
-// Enable ISR - revalidate every 4 hours
 
 export default async function JobPage({ params }: PageProps) {
   if (!params) {
@@ -64,38 +61,30 @@ export default async function JobPage({ params }: PageProps) {
   }
 
   const rawParams = await params;
-
-  // Validate slug parameter
   const validationResult = slugParamsSchema.safeParse(rawParams);
 
   if (!validationResult.success) {
     logger.error(
       'Invalid slug parameter for job page',
       new Error(validationResult.error.issues[0]?.message || 'Invalid slug'),
-      {
-        slug: String(rawParams.slug),
-        errorCount: validationResult.error.issues.length,
-      }
+      { slug: String(rawParams.slug), errorCount: validationResult.error.issues.length }
     );
     notFound();
   }
 
   const { slug } = validationResult.data;
-
-  logger.info('Job page accessed', {
-    slug: slug,
-    validated: true,
-  });
-
-  const job = jobs.find((j) => j.slug === slug);
+  const job = await getJobBySlug(slug);
 
   if (!job) {
     notFound();
   }
 
+  const tags = job.tags as unknown as string[];
+  const requirements = job.requirements as unknown as string[];
+  const benefits = job.benefits as unknown as string[];
+
   return (
     <>
-      {/* Breadcrumb Schema - SEO optimization */}
       <BreadcrumbSchema
         items={[
           {
@@ -110,29 +99,27 @@ export default async function JobPage({ params }: PageProps) {
       />
 
       <div className={'min-h-screen bg-background'}>
-        {/* Header */}
-        <div className={'border-b border-border/50 bg-card/30'}>
+        <div className={'border-border/50 border-b bg-card/30'}>
           <div className="container mx-auto px-4 py-8">
             <Button variant="ghost" asChild className="mb-6">
               <Link href={ROUTES.JOBS}>
-                <ArrowLeft className={'h-4 w-4 mr-2'} />
+                <ArrowLeft className={'mr-2 h-4 w-4'} />
                 Back to Jobs
               </Link>
             </Button>
 
             <div className="max-w-4xl">
-              <div className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} gap-4 mb-6`}>
-                <div className={'p-3 bg-accent/10 rounded-lg'}>
+              <div className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} mb-6 gap-4`}>
+                <div className={'rounded-lg bg-accent/10 p-3'}>
                   <Building2 className="h-6 w-6 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold mb-2">{job.title}</h1>
-                  <p className={'text-xl text-muted-foreground'}>{job.company}</p>
+                  <h1 className="mb-2 font-bold text-3xl">{job.title}</h1>
+                  <p className={'text-muted-foreground text-xl'}>{job.company}</p>
                 </div>
               </div>
 
-              {/* Job Meta */}
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
+              <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                   <MapPin className="h-4 w-4" />
                   <span>{job.location}</span>
@@ -151,13 +138,12 @@ export default async function JobPage({ params }: PageProps) {
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                   <Calendar className="h-4 w-4" />
-                  <span>Posted {job.postedAt}</span>
+                  <span>Posted {job.posted_at}</span>
                 </div>
               </div>
 
-              {/* Tags */}
               <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-                {job.tags.map((skill) => (
+                {tags.map((skill) => (
                   <UnifiedBadge key={skill} variant="base" style="secondary">
                     {skill}
                   </UnifiedBadge>
@@ -167,12 +153,9 @@ export default async function JobPage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* Content */}
         <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className={'lg:col-span-2 space-y-8'}>
-              {/* Description */}
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <div className={'space-y-8 lg:col-span-2'}>
               <Card>
                 <CardHeader>
                   <CardTitle>About this role</CardTitle>
@@ -182,16 +165,15 @@ export default async function JobPage({ params }: PageProps) {
                 </CardContent>
               </Card>
 
-              {/* Requirements */}
               <Card>
                 <CardHeader>
                   <CardTitle>Requirements</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {job.requirements.map((req) => (
+                    {requirements.map((req) => (
                       <li key={req} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-                        <span className="text-accent mt-1">•</span>
+                        <span className="mt-1 text-accent">•</span>
                         <span>{req}</span>
                       </li>
                     ))}
@@ -199,17 +181,16 @@ export default async function JobPage({ params }: PageProps) {
                 </CardContent>
               </Card>
 
-              {/* Benefits */}
-              {job.benefits && job.benefits.length > 0 && (
+              {benefits.length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Benefits</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
-                      {job.benefits.map((benefit) => (
+                      {benefits.map((benefit) => (
                         <li key={benefit} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-                          <span className="text-green-500 mt-1">✓</span>
+                          <span className="mt-1 text-green-500">✓</span>
                           <span>{benefit}</span>
                         </li>
                       ))}
@@ -219,7 +200,6 @@ export default async function JobPage({ params }: PageProps) {
               )}
             </div>
 
-            {/* Sidebar */}
             <div className="space-y-6">
               {/* Apply Actions */}
               <Card>
@@ -228,15 +208,15 @@ export default async function JobPage({ params }: PageProps) {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <Button className="w-full" asChild>
-                    <a href={job.applyUrl} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className={'h-4 w-4 mr-2'} />
+                    <a href={job.link} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className={'mr-2 h-4 w-4'} />
                       Apply Now
                     </a>
                   </Button>
-                  {job.contactEmail && (
+                  {job.contact_email && (
                     <Button variant="outline" className="w-full" asChild>
-                      <a href={`mailto:${job.contactEmail}`}>
-                        <Building2 className={'h-4 w-4 mr-2'} />
+                      <a href={`mailto:${job.contact_email}`}>
+                        <Building2 className={'mr-2 h-4 w-4'} />
                         Contact Company
                       </a>
                     </Button>

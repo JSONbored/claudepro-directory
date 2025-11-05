@@ -21,13 +21,19 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * ISR Configuration: Marketing pages update infrequently
+ * revalidate: 86400 = Revalidate every 24 hours
+ */
+export const revalidate = 86400;
+
 export default function ConsultingPage() {
   return (
-    <div className="container mx-auto px-4 py-12 max-w-4xl">
+    <div className="container mx-auto max-w-4xl px-4 py-12">
       {/* Header */}
       <div className="mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">Engineering Consulting</h1>
-        <p className="text-xl text-muted-foreground">
+        <h1 className="mb-4 font-bold text-4xl md:text-5xl">Engineering Consulting</h1>
+        <p className="text-muted-foreground text-xl">
           I'm{' '}
           <Link href="https://github.com/jsonbored" className="link-accent-underline">
             JSONbored
@@ -39,17 +45,17 @@ export default function ConsultingPage() {
 
       {/* What I Do */}
       <section className="mb-16">
-        <h2 className="text-3xl font-bold mb-8">What I Do</h2>
+        <h2 className="mb-8 font-bold text-3xl">What I Do</h2>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid gap-6 md:grid-cols-2">
           {/* AI & Automation */}
-          <div className="border border-border rounded-lg p-6 hover:border-accent/50 transition-colors">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="p-2 rounded-lg bg-accent/10">
+          <div className="rounded-lg border border-border p-6 transition-colors hover:border-accent/50">
+            <div className="mb-4 flex items-start gap-3">
+              <div className="rounded-lg bg-accent/10 p-2">
                 <Sparkles className="h-5 w-5 text-accent" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">AI & Automation</h3>
+                <h3 className="mb-2 font-semibold text-xl">AI & Automation</h3>
                 <UnifiedBadge
                   variant="base"
                   style="outline"
@@ -68,13 +74,13 @@ export default function ConsultingPage() {
           </div>
 
           {/* Infrastructure & DevOps */}
-          <div className="border border-border rounded-lg p-6 hover:border-accent/50 transition-colors">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="p-2 rounded-lg bg-blue-500/10">
+          <div className="rounded-lg border border-border p-6 transition-colors hover:border-accent/50">
+            <div className="mb-4 flex items-start gap-3">
+              <div className="rounded-lg bg-blue-500/10 p-2">
                 <Database className="h-5 w-5 text-blue-500" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">Infrastructure & DevOps</h3>
+                <h3 className="mb-2 font-semibold text-xl">Infrastructure & DevOps</h3>
                 <UnifiedBadge variant="base" style="outline" className="mb-3">
                   Web3 Specialist
                 </UnifiedBadge>
@@ -89,13 +95,13 @@ export default function ConsultingPage() {
           </div>
 
           {/* Full-Stack Development */}
-          <div className="border border-border rounded-lg p-6 hover:border-accent/50 transition-colors">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="p-2 rounded-lg bg-green-500/10">
+          <div className="rounded-lg border border-border p-6 transition-colors hover:border-accent/50">
+            <div className="mb-4 flex items-start gap-3">
+              <div className="rounded-lg bg-green-500/10 p-2">
                 <Code className="h-5 w-5 text-green-500" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">Full-Stack Development</h3>
+                <h3 className="mb-2 font-semibold text-xl">Full-Stack Development</h3>
                 <UnifiedBadge variant="base" style="outline" className="mb-3">
                   Modern Stack
                 </UnifiedBadge>
@@ -104,19 +110,19 @@ export default function ConsultingPage() {
             <ul className="space-y-2 text-muted-foreground">
               <li>• Modern web apps (Next.js, React, TypeScript)</li>
               <li>• API design and implementation (REST, GraphQL, tRPC)</li>
-              <li>• Database architecture (PostgreSQL, D1, Redis)</li>
+              <li>• Database architecture (PostgreSQL, D1)</li>
               <li>• Real-time systems (WebSockets, Server-Sent Events)</li>
             </ul>
           </div>
 
           {/* Process */}
-          <div className="border border-border rounded-lg p-6 hover:border-accent/50 transition-colors">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="p-2 rounded-lg bg-purple-500/10">
+          <div className="rounded-lg border border-border p-6 transition-colors hover:border-accent/50">
+            <div className="mb-4 flex items-start gap-3">
+              <div className="rounded-lg bg-purple-500/10 p-2">
                 <Workflow className="h-5 w-5 text-purple-500" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">How I Work</h3>
+                <h3 className="mb-2 font-semibold text-xl">How I Work</h3>
                 <UnifiedBadge variant="base" style="outline" className="mb-3">
                   Flexible Engagements
                 </UnifiedBadge>
@@ -141,8 +147,8 @@ export default function ConsultingPage() {
 
       {/* Recent Work */}
       <section className="mb-16">
-        <h2 className="text-3xl font-bold mb-6">Recent Work</h2>
-        <div className="border-l-4 border-l-accent pl-6 space-y-4 text-muted-foreground">
+        <h2 className="mb-6 font-bold text-3xl">Recent Work</h2>
+        <div className="space-y-4 border-l-4 border-l-accent pl-6 text-muted-foreground">
           <p>
             • Built <strong>ClaudePro Directory</strong>: Largest Claude Code resource library with
             100,000+ monthly visits
@@ -163,12 +169,12 @@ export default function ConsultingPage() {
 
       {/* Best For */}
       <section className="mb-16">
-        <h2 className="text-3xl font-bold mb-6">Let's Talk</h2>
+        <h2 className="mb-6 font-bold text-3xl">Let's Talk</h2>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="mb-8 grid gap-6 md:grid-cols-2">
           {/* Good Fit */}
-          <div className="border border-green-500/30 bg-green-500/5 rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <div className="rounded-lg border border-green-500/30 bg-green-500/5 p-6">
+            <h3 className="mb-4 flex items-center gap-2 font-semibold text-xl">
               <Zap className="h-5 w-5 text-green-500" />
               Best For
             </h3>
@@ -181,8 +187,8 @@ export default function ConsultingPage() {
           </div>
 
           {/* Not a Fit */}
-          <div className="border border-border rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <div className="rounded-lg border border-border p-6">
+            <h3 className="mb-4 flex items-center gap-2 font-semibold text-xl">
               <Briefcase className="h-5 w-5 text-muted-foreground" />
               Not a Fit
             </h3>
@@ -196,16 +202,16 @@ export default function ConsultingPage() {
         </div>
 
         {/* Contact */}
-        <div className="border border-accent/30 bg-accent/5 rounded-lg p-8 text-center">
-          <h3 className="text-2xl font-semibold mb-4">Ready to Work Together?</h3>
-          <p className="text-muted-foreground mb-6">
+        <div className="rounded-lg border border-accent/30 bg-accent/5 p-8 text-center">
+          <h3 className="mb-4 font-semibold text-2xl">Ready to Work Together?</h3>
+          <p className="mb-6 text-muted-foreground">
             Typical engagement: <strong>2-4 week sprints</strong> focused on shipping production
             systems.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="mailto:contact@heyclau.de"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors font-medium"
+              className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-accent-foreground transition-colors hover:bg-accent/90"
             >
               Email Me
             </Link>
@@ -213,12 +219,12 @@ export default function ConsultingPage() {
               href="https://github.com/jsonbored"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 border border-border rounded-lg hover:border-accent/50 transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 transition-colors hover:border-accent/50"
             >
               View GitHub
             </Link>
           </div>
-          <p className="text-sm text-muted-foreground mt-6">
+          <p className="mt-6 text-muted-foreground text-sm">
             I'll respond within 24 hours. We'll schedule a 30-minute intro call to discuss fit and
             scope.
           </p>
@@ -226,7 +232,7 @@ export default function ConsultingPage() {
       </section>
 
       {/* Footer Note */}
-      <div className="text-center text-sm text-muted-foreground border-t border-border pt-8">
+      <div className="border-border border-t pt-8 text-center text-muted-foreground text-sm">
         <p>
           Currently accepting projects for <strong>Q1 2026</strong>. Limited availability.
         </p>

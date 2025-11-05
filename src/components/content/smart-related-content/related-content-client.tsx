@@ -21,16 +21,55 @@
  */
 
 import { useEffect, useState } from 'react';
-import { relatedContentService } from '#lib/related-content/service';
 import { BaseCard } from '@/src/components/domain/base-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
+import type { CategoryId } from '@/src/lib/config/category-config';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { Sparkles } from '@/src/lib/icons';
-import type {
-  RelatedContentItem,
-  SmartRelatedContentProps,
-} from '@/src/lib/schemas/related-content.schema';
+import { logger } from '@/src/lib/logger';
+import { relatedContentService } from '@/src/lib/related-content/service';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
+import type { Database } from '@/src/types/database.types';
+
+type RelatedContentRPCResult =
+  Database['public']['Functions']['get_related_content']['Returns'][number];
+
+/**
+ * Extended ContentItem for related content with matching metadata
+ */
+type RelatedContentItem = ContentItem & {
+  score?: number;
+  matchType?: string;
+  matchDetails?: {
+    matchedTags: string[];
+    matchedKeywords: string[];
+  };
+};
+
+/**
+ * Props for SmartRelatedContentProps
+ */
+export interface SmartRelatedContentProps {
+  /** Current pathname for context */
+  pathname?: string;
+  /** Current tags for matching */
+  currentTags?: string[];
+  /** Current keywords for matching */
+  currentKeywords?: string[];
+  /** Show featured content */
+  featured?: boolean;
+  /** Slugs to exclude from results */
+  exclude?: string[];
+  /** Maximum number of items to show */
+  limit?: number;
+  /** Enable analytics tracking */
+  trackingEnabled?: boolean;
+  /** Section title */
+  title?: string;
+  /** Show section title */
+  showTitle?: boolean;
+}
 
 /**
  * Get category color styles for badges
@@ -97,7 +136,7 @@ function getCategoryFromPath(pathname: string | undefined): string {
  * ```
  */
 export function RelatedContentClient({
-  featured = [],
+  featured = false,
   exclude = [],
   limit = 3,
   trackingEnabled = true,
@@ -107,6 +146,7 @@ export function RelatedContentClient({
   title = 'Related Content',
   showTitle = true,
 }: SmartRelatedContentProps) {
+  // Extended ContentItem with related content properties already exists in schema
   const [items, setItems] = useState<RelatedContentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [cacheHit, setCacheHit] = useState(false);
@@ -129,20 +169,45 @@ export function RelatedContentClient({
           limit,
         });
 
+        const convertedItems = response.items.map(
+          (item: RelatedContentRPCResult): Partial<RelatedContentItem> => ({
+            category: item.category,
+            slug: item.slug,
+            title: item.title,
+            description: item.description,
+            author: item.author,
+            date_added: item.date_added,
+            tags: item.tags,
+            score: item.score,
+            matchType: item.match_type,
+            matchDetails: {
+              matchedTags: item.matched_tags || [],
+              matchedKeywords: [],
+            },
+          })
+        ) as RelatedContentItem[];
+
         // Service now returns properly typed RelatedContentItem[] with all required fields
-        setItems(response.items);
+        setItems(convertedItems);
         setCacheHit(response.performance.cacheHit);
-      } catch (_error) {
-        // Error handling - silently fail with empty results
-        // Production: Errors are tracked via trackEvent above
+      } catch (error) {
+        logger.error(
+          'Failed to fetch related content',
+          error instanceof Error ? error : new Error(String(error)),
+          { source: 'RelatedContentClient' }
+        );
         setItems([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRelatedContent().catch(() => {
-      // Silent failure - error already handled in fetchRelatedContent
+    fetchRelatedContent().catch((error) => {
+      logger.error(
+        'Related content fetch promise rejected',
+        error instanceof Error ? error : new Error(String(error)),
+        { source: 'RelatedContentClient' }
+      );
     });
   }, [pathname, currentTags, currentKeywords, featured, exclude, limit]);
 
@@ -150,7 +215,7 @@ export function RelatedContentClient({
   useEffect(() => {
     if (!trackingEnabled || items.length === 0) return;
 
-    import('#lib/analytics/events/related-content')
+    import('@/src/lib/analytics/events/related-content')
       .then((module) => {
         module.trackRelatedContentView(pathname, items.length, cacheHit);
       })
@@ -167,17 +232,17 @@ export function RelatedContentClient({
       aria-label="Related content"
     >
       {showTitle && (
-        <div className="mb-8 p-4 sm:p-6 bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="mb-8 rounded-xl border border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 p-4 sm:p-6">
+          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              <div className="flex-shrink-0 rounded-lg bg-primary/10 p-2">
+                <Sparkles className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
               </div>
               <div className="min-w-0">
-                <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1" itemProp="name">
+                <h2 className="mb-1 font-bold text-foreground text-xl sm:text-2xl" itemProp="name">
                   {title}
                 </h2>
-                <p className="text-xs sm:text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-xs sm:text-sm">
                   Intelligently curated based on your current content
                 </p>
               </div>
@@ -185,7 +250,7 @@ export function RelatedContentClient({
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="bg-primary/10 text-primary border-primary/30 font-medium px-2 sm:px-3 py-1 text-xs sm:text-sm flex-shrink-0"
+              className="flex-shrink-0 border-primary/30 bg-primary/10 px-2 py-1 font-medium text-primary text-xs sm:px-3 sm:text-sm"
             >
               AI Powered
             </UnifiedBadge>
@@ -194,43 +259,45 @@ export function RelatedContentClient({
       )}
 
       <UnifiedCardGrid
-        items={items}
+        items={items as readonly ContentItem[]}
         variant="tight"
         loading={loading}
         emptyMessage="No related content available"
         loadingMessage="Finding related content..."
         renderCard={(item, index) => {
-          const matchBadge = getMatchTypeBadge(item.matchType ?? 'unknown');
-          const categoryBadge = getCategoryBadgeClass(item.category);
+          // Cast back to RelatedContentItem to access extended properties
+          const relatedItem = item as RelatedContentItem;
+          const matchBadge = getMatchTypeBadge(relatedItem.matchType ?? 'unknown');
+          const categoryBadge = getCategoryBadgeClass(relatedItem.category);
 
           return (
             <BaseCard
-              key={`${item.category}-${item.slug}`}
+              key={`${relatedItem.category}-${relatedItem.slug}`}
               targetPath={getContentItemUrl({
-                category: item.category,
-                slug: item.slug,
+                category: relatedItem.category as CategoryId,
+                slug: relatedItem.slug,
               })}
-              displayTitle={item.title ?? item.name ?? item.slug}
-              description={item.description}
-              tags={item.matchDetails?.matchedTags?.slice(0, 2) ?? []}
+              displayTitle={relatedItem.title ?? relatedItem.slug}
+              description={relatedItem.description}
+              tags={relatedItem.matchDetails?.matchedTags?.slice(0, 2) ?? []}
               topAccent
               compactMode
-              ariaLabel={`Related: ${item.title || item.name}`}
+              ariaLabel={`Related: ${relatedItem.title}`}
               onBeforeNavigate={() => {
                 // Track click with dynamic import (Storybook compatible)
                 if (trackingEnabled) {
                   const itemUrl = getContentItemUrl({
-                    category: item.category,
-                    slug: item.slug,
+                    category: relatedItem.category as CategoryId,
+                    slug: relatedItem.slug,
                   });
 
-                  import('#lib/analytics/events/related-content')
+                  import('@/src/lib/analytics/events/related-content')
                     .then((module) => {
                       module.trackRelatedContentClick(
                         pathname,
                         itemUrl,
                         index + 1,
-                        item.score ?? 0
+                        relatedItem.score ?? 0
                       );
                     })
                     .catch(() => {
@@ -239,19 +306,19 @@ export function RelatedContentClient({
                 }
               }}
               renderTopBadges={() => (
-                <div className="flex items-center justify-between gap-2 w-full">
+                <div className="flex w-full items-center justify-between gap-2">
                   <UnifiedBadge
-                    className={`${categoryBadge} font-medium px-2 sm:px-3 py-1 border text-xs sm:text-sm flex-shrink-0`}
+                    className={`${categoryBadge} flex-shrink-0 border px-2 py-1 font-medium text-xs sm:px-3 sm:text-sm`}
                     variant="base"
                     style="secondary"
                   >
-                    {item.category}
+                    {relatedItem.category}
                   </UnifiedBadge>
                   <div title={matchBadge.label === 'Keyword' ? 'Keyword Match' : matchBadge.label}>
                     <UnifiedBadge
                       variant="base"
                       style={matchBadge.variant}
-                      className="text-2xs sm:text-xs font-medium border px-1.5 sm:px-2 py-1 flex-shrink-0"
+                      className="flex-shrink-0 border px-1.5 py-1 font-medium text-2xs sm:px-2 sm:text-xs"
                     >
                       {matchBadge.label}
                     </UnifiedBadge>

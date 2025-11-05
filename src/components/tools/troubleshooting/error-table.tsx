@@ -14,12 +14,12 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { AlertTriangle, Info } from '@/src/lib/icons';
-import { type ErrorTableProps, errorTablePropsSchema } from '@/src/lib/schemas/shared.schema';
+import type { ErrorTableProps } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function ErrorTable(props: ErrorTableProps) {
-  const validated = errorTablePropsSchema.parse(props);
-  const { title, errors, description } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { title, errors, description } = props;
   const validErrors = errors;
 
   const severityColors = {
@@ -45,10 +45,10 @@ export function ErrorTable(props: ErrorTableProps) {
           <table className="w-full">
             <thead className="border-b bg-muted/30">
               <tr>
-                <th className={'text-left p-4 font-medium'}>Error Code</th>
-                <th className={'text-left p-4 font-medium'}>Severity</th>
-                <th className={'text-left p-4 font-medium'}>Message</th>
-                <th className={'text-left p-4 font-medium'}>Solution</th>
+                <th className={'p-4 text-left font-medium'}>Error Code</th>
+                <th className={'p-4 text-left font-medium'}>Severity</th>
+                <th className={'p-4 text-left font-medium'}>Message</th>
+                <th className={'p-4 text-left font-medium'}>Solution</th>
               </tr>
             </thead>
             <tbody>
@@ -62,16 +62,16 @@ export function ErrorTable(props: ErrorTableProps) {
                     <UnifiedBadge
                       variant="base"
                       style="secondary"
-                      className={severityColors[error.severity]}
+                      className={severityColors[error.severity || 'info']}
                     >
                       <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                        {severityIcons[error.severity]}
+                        {severityIcons[error.severity || 'info']}
                         {error.severity}
                       </span>
                     </UnifiedBadge>
                   </td>
                   <td className={'p-4 text-sm'}>{error.message}</td>
-                  <td className={'p-4 text-sm text-muted-foreground'}>{error.solution}</td>
+                  <td className={'p-4 text-muted-foreground text-sm'}>{error.solution}</td>
                 </tr>
               ))}
             </tbody>

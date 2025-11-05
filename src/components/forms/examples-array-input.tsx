@@ -206,7 +206,7 @@ export function ExamplesArrayInput({
       {/* Header */}
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
-          <Label className="text-base font-semibold">Usage Examples (optional)</Label>
+          <Label className="font-semibold text-base">Usage Examples (optional)</Label>
           <p className={cn('text-sm', 'text-muted-foreground', 'mt-1')}>
             Add code examples to help users understand how to use this configuration. Max{' '}
             {maxExamples} examples.
@@ -230,8 +230,8 @@ export function ExamplesArrayInput({
         {examples.length === 0 && (
           <Card className="border-dashed">
             <CardContent className="py-8">
-              <div className="text-center space-y-2">
-                <Code className="h-8 w-8 mx-auto text-muted-foreground" />
+              <div className="space-y-2 text-center">
+                <Code className="mx-auto h-8 w-8 text-muted-foreground" />
                 <p className={cn('text-sm', 'text-muted-foreground')}>
                   No examples added yet. Click "Add Example" to get started.
                 </p>
@@ -255,7 +255,7 @@ export function ExamplesArrayInput({
                   <button
                     type="button"
                     onClick={() => toggleExpanded(index)}
-                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-left flex-1 hover:opacity-70 transition-opacity`}
+                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} flex-1 text-left transition-opacity hover:opacity-70`}
                   >
                     {isExpanded ? (
                       <ChevronUp className="h-4 w-4" />
@@ -334,7 +334,7 @@ export function ExamplesArrayInput({
                       value={example.code}
                       onChange={(e) => updateExample(index, 'code', e.target.value)}
                       placeholder="export default { ... }"
-                      className="font-mono text-sm min-h-[150px]"
+                      className="min-h-[150px] font-mono text-sm"
                       maxLength={10000}
                       required
                     />
@@ -372,7 +372,7 @@ export function ExamplesArrayInput({
           variant="outline"
           size="sm"
           onClick={addExample}
-          className="w-full flex items-center gap-2"
+          className="flex w-full items-center gap-2"
         >
           <Plus className="h-4 w-4" />
           Add Another Example ({examples.length}/{maxExamples})

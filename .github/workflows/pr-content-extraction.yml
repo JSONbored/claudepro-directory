@@ -1,0 +1,265 @@
+name: PR Content Extraction
+
+on:
+  pull_request:
+    types: [opened, edited]
+    branches: [main]
+
+jobs:
+  extract-content:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1  # Shallow clone for speed
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+
+      - name: Extract plaintext submission
+        id: extract
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const prBody = context.payload.pull_request.body || '';
+
+            // Check if this is a plaintext submission
+            const hasPlaintextSubmission = /Content-Type:\s*\w+/i.test(prBody);
+
+            if (!hasPlaintextSubmission) {
+              console.log('No plaintext submission detected in PR body');
+              return { hasSubmission: false };
+            }
+
+            // Extract structured data using regex
+            const extractField = (field) => {
+              const regex = new RegExp(`${field}:\\s*(.+)`, 'i');
+              const match = prBody.match(regex);
+              return match ? match[1].trim() : null;
+            };
+
+            const extractJSON = () => {
+              const jsonMatch = prBody.match(/Content-JSON:\s*```json\s*(\{[\s\S]*?\})\s*```/i) ||
+                                prBody.match(/Content-JSON:\s*(\{[\s\S]*?\})/i);
+              if (jsonMatch) {
+                try {
+                  return JSON.parse(jsonMatch[1]);
+                } catch (e) {
+                  console.error('Failed to parse Content-JSON:', e);
+                  return null;
+                }
+              }
+              return null;
+            };
+
+            const extractTags = (tagsStr) => {
+              if (!tagsStr) return [];
+              return tagsStr.split(',').map(t => t.trim()).filter(Boolean);
+            };
+
+            // Extract all fields
+            const contentType = extractField('Content-Type');
+            const name = extractField('Name');
+            const author = extractField('Author');
+            const authorProfile = extractField('Author-Profile');
+            const description = extractField('Description');
+            const githubUrl = extractField('GitHub-URL');
+            const tagsStr = extractField('Tags');
+            const contentJSON = extractJSON();
+
+            // Validate required fields
+            const errors = [];
+            if (!contentType) errors.push('Content-Type is required');
+            if (!name) errors.push('Name is required');
+            if (!author) errors.push('Author is required');
+            if (!description) errors.push('Description is required');
+            if (!contentJSON) errors.push('Content-JSON is required');
+
+            if (errors.length > 0) {
+              console.error('Validation errors:', errors);
+              return {
+                hasSubmission: true,
+                valid: false,
+                errors: errors
+              };
+            }
+
+            // Build submission object
+            const submission = {
+              submission_type: contentType,
+              status: 'pending',
+              name: name,
+              description: description,
+              category: contentType, // Category matches submission_type for content submissions
+              author: author,
+              author_profile_url: authorProfile || null,
+              github_url: githubUrl || null,
+              tags: extractTags(tagsStr),
+              content_data: contentJSON,
+              submitter_email: context.payload.pull_request.user.email || null,
+              github_pr_url: context.payload.pull_request.html_url,
+            };
+
+            console.log('Extracted submission:', JSON.stringify(submission, null, 2));
+
+            return {
+              hasSubmission: true,
+              valid: true,
+              submission: submission
+            };
+
+      - name: Insert to Supabase via RPC (Database-First)
+        if: steps.extract.outputs.result && fromJSON(steps.extract.outputs.result).valid
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # Install Supabase JS client
+          npm install -g @supabase/supabase-js
+
+          # Create Node.js script to call RPC function (database-first)
+          cat > insert-via-rpc.mjs << 'EOF'
+          import { createClient } from '@supabase/supabase-js';
+
+          const supabaseUrl = process.env.SUPABASE_URL;
+          const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+          const submissionData = JSON.parse(process.env.SUBMISSION_DATA);
+
+          const supabase = createClient(supabaseUrl, supabaseKey);
+
+          // Call database RPC function (includes validation, rate limiting, auto-approve)
+          const { data, error } = await supabase.rpc('submit_content_for_review', {
+            p_submission_type: submissionData.submission_type,
+            p_name: submissionData.name,
+            p_description: submissionData.description,
+            p_category: submissionData.category,
+            p_author: submissionData.author,
+            p_content_data: submissionData.content_data,
+            p_author_profile_url: submissionData.author_profile_url || null,
+            p_github_url: submissionData.github_url || null,
+            p_tags: submissionData.tags || []
+          });
+
+          if (error) {
+            console.error('RPC error:', error);
+            process.exit(1);
+          }
+
+          console.log('Submission created via RPC:', data);
+          console.log('SUBMISSION_ID=' + data.submission_id);
+          console.log('STATUS=' + data.status);
+          console.log('MESSAGE=' + data.message);
+          EOF
+
+          # Run RPC call
+          SUBMISSION_DATA='${{ steps.extract.outputs.result.submission }}' node insert-via-rpc.mjs
+
+      - name: Comment on PR - Success
+        if: steps.extract.outputs.result && fromJSON(steps.extract.outputs.result).valid && success()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const result = ${{ steps.extract.outputs.result }};
+            const submission = result.submission;
+
+            const comment = `## ✅ Content Submission Received
+
+            Your plaintext submission has been successfully extracted and submitted for review!
+
+            **Submission Details:**
+            - **Type:** \`${submission.submission_type}\`
+            - **Name:** ${submission.name}
+            - **Author:** ${submission.author}
+            - **Category:** \`${submission.category}\`
+            - **Status:** \`pending\` (awaiting moderator review)
+
+            **Next Steps:**
+            1. A moderator will review your submission in our Discord channel
+            2. Once approved, your content will be merged to the main directory
+            3. You'll be notified via GitHub when the PR is merged
+
+            **Review your submission:** [Supabase Dashboard](https://supabase.com/dashboard/project/${process.env.SUPABASE_PROJECT_ID || 'PROJECT_ID'}/editor/content_submissions)
+
+            Thank you for contributing to Claude Pro Directory! 🎉`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+
+      - name: Comment on PR - Validation Errors
+        if: steps.extract.outputs.result && fromJSON(steps.extract.outputs.result).hasSubmission && !fromJSON(steps.extract.outputs.result).valid
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const result = ${{ steps.extract.outputs.result }};
+            const errors = result.errors.map(e => `- ❌ ${e}`).join('\n');
+
+            const comment = `## ⚠️ Submission Validation Failed
+
+            We detected a plaintext submission in your PR description, but it has validation errors:
+
+            ${errors}
+
+            **Please fix these errors and update your PR description.**
+
+            **Template Format:**
+            \`\`\`
+            Content-Type: agents
+            Name: Your Content Name Here
+            Author: Your Name
+            Author-Profile: https://github.com/yourusername
+            Description: A concise 1-2 sentence description
+            GitHub-URL: https://github.com/yourusername/your-repo
+            Tags: tag1, tag2, tag3
+
+            Content-JSON:
+            \`\`\`json
+            {
+              "paste": "your",
+              "json": "content"
+            }
+            \`\`\`
+            \`\`\`
+
+            **Need help?** Check our [submission guide](https://github.com/JSONbored/claudepro-directory/blob/main/.github/CONTRIBUTING.md)`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+
+      - name: Comment on PR - Insertion Error
+        if: steps.extract.outputs.result && fromJSON(steps.extract.outputs.result).valid && failure()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const comment = `## ❌ Submission Failed
+
+            We successfully extracted your plaintext submission, but encountered an error inserting it into our database.
+
+            **This is likely a temporary issue.** Our team has been notified and will manually process your submission.
+
+            **What you can do:**
+            1. Wait for a moderator to review and manually process your submission
+            2. Or try submitting via our [web form](https://claudepro.directory/submit) instead
+
+            We apologize for the inconvenience!`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });

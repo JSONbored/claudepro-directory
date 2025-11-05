@@ -6,8 +6,8 @@
  * SHA-XXXX: Made dynamic using HOMEPAGE_TAB_CATEGORIES
  *
  * Production 2025 Architecture:
- * - TanStack Virtual for list virtualization
- * - Only renders ~15 visible items regardless of total count
+ * - Intersection Observer infinite scroll for progressive loading
+ * - Loads items in batches as user scrolls
  * - Constant memory usage and 60fps performance
  * - Scales to 10,000+ items with same performance
  *
@@ -23,21 +23,23 @@ import { Button } from '@/src/components/primitives/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import {
   HOMEPAGE_TAB_CATEGORIES,
-  UNIFIED_CATEGORY_REGISTRY,
+  type UnifiedCategoryConfig,
 } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { DisplayableContent } from '@/src/lib/schemas/component.schema';
 
 interface TabsSectionProps {
   activeTab: string;
-  filteredResults: readonly UnifiedContentItem[];
+  filteredResults: readonly DisplayableContent[];
   onTabChange: (value: string) => void;
+  categoryConfigs: Record<string, UnifiedCategoryConfig>;
 }
 
 const TabsSectionComponent: FC<TabsSectionProps> = ({
   activeTab,
   filteredResults,
   onTabChange,
+  categoryConfigs,
 }) => {
   // Get content tabs (exclude 'community' which has custom content)
   const contentTabs = useMemo(
@@ -48,14 +50,13 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-8">
       {/* Tabs with horizontal scroll on mobile/tablet */}
-      <TabsList className="w-full overflow-x-auto lg:w-auto lg:grid lg:grid-flow-col lg:auto-cols-fr gap-1 scrollbar-hide">
-        <div className="flex lg:contents min-w-max lg:min-w-0">
+      <TabsList className="scrollbar-hide w-full gap-1 overflow-x-auto lg:grid lg:w-auto lg:auto-cols-fr lg:grid-flow-col">
+        <div className="flex min-w-max lg:contents lg:min-w-0">
           {HOMEPAGE_TAB_CATEGORIES.map((tab) => {
-            // Get display name from category config, or use tab name
             let displayName = tab.charAt(0).toUpperCase() + tab.slice(1);
 
             if (tab !== 'all' && tab !== 'community') {
-              const config = UNIFIED_CATEGORY_REGISTRY[tab];
+              const config = categoryConfigs[tab];
               if (config) {
                 displayName = config.pluralTitle;
               }
@@ -69,7 +70,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
               >
                 <TabsTrigger
                   value={tab}
-                  className="text-xs sm:text-sm px-3 sm:px-4 whitespace-nowrap"
+                  className="whitespace-nowrap px-3 text-xs sm:px-4 sm:text-sm"
                 >
                   {displayName}
                 </TabsTrigger>
@@ -84,7 +85,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
         const categoryName =
           tab === 'all'
             ? 'configurations'
-            : UNIFIED_CATEGORY_REGISTRY[tab]?.pluralTitle?.toLowerCase() || tab;
+            : categoryConfigs[tab]?.pluralTitle?.toLowerCase() || tab;
 
         return (
           <TabsContent key={tab} value={tab} className="space-y-6">
@@ -96,7 +97,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
               emptyMessage={`No ${categoryName} found. Try adjusting your filters.`}
               ariaLabel={`${categoryName} results`}
               keyExtractor={(item) => item.slug}
-              renderCard={(item: UnifiedContentItem) => (
+              renderCard={(item) => (
                 <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
               )}
             />
@@ -106,20 +107,20 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
 
       {/* Community tab with custom content */}
       <TabsContent value="community" className="space-y-6">
-        <div className={'text-center mb-8'}>
-          <h3 className={'text-2xl font-bold mb-2'}>Featured Contributors</h3>
+        <div className={'mb-8 text-center'}>
+          <h3 className={'mb-2 font-bold text-2xl'}>Featured Contributors</h3>
           <p className="text-muted-foreground">
             Meet the experts creating amazing Claude configurations
           </p>
         </div>
 
         <div className="text-center">
-          <p className={'text-lg text-muted-foreground mb-6'}>
+          <p className={'mb-6 text-lg text-muted-foreground'}>
             Coming soon! Featured contributors who create amazing Claude configurations.
           </p>
         </div>
 
-        <div className={'text-center pt-8'}>
+        <div className={'pt-8 text-center'}>
           <Button variant="outline" asChild>
             <Link href={ROUTES.COMMUNITY}>View All Contributors</Link>
           </Button>

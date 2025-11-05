@@ -4,15 +4,5 @@
   "buildCommand": "pnpm build",
   "outputDirectory": ".next",
   "framework": "nextjs",
-  "regions": ["iad1"],
-  "crons": [
-    {
-      "path": "/api/cron/daily-maintenance",
-      "schedule": "0 3 * * *"
-    },
-    {
-      "path": "/api/cron/weekly-tasks",
-      "schedule": "0 0 * * 1"
-    }
-  ]
+  "regions": ["iad1"]
 }

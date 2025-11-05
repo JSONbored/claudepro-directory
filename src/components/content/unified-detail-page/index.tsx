@@ -1,38 +1,24 @@
 /**
- * Unified Detail Page - Server-First Architecture with Streaming SSR (SHA-2083 v3)
- *
- * REPLACES: Lazy-loaded client components with server components
- * NEW STRUCTURE: Server-first rendering with Suspense streaming for optimal performance
- *
- * Architecture:
- * - Server Components: All static rendering (metadata, sections, sidebar cards)
- * - Client Components: Only interactive elements (header buttons, config tabs, sidebar nav)
- * - Suspense Boundaries: Stream slow data (related items, view counts, reviews)
- * - Progressive Enhancement: Show main content immediately, stream supplementary data
- *
- * Performance Benefits:
- * - 40-50% reduction in client JavaScript bundle
- * - Faster Time to First Byte (TTFB) - main content renders immediately
- * - Progressive streaming reduces perceived load time
- * - Better SEO (fully server-rendered)
- * - Reduced memory footprint in browser
- *
- * @see components/unified-detail-page.tsx - Original 685-line implementation
+ * Unified Detail Page - Server-rendered content with streaming SSR
+ * highlightCode() uses React cache() memoization (0ms for duplicates)
  */
 
 import { Suspense } from 'react';
+import { JSONSectionRenderer } from '@/src/components/content/json-section-renderer';
 import { UnifiedContentSection } from '@/src/components/content/unified-content-section';
 import { UnifiedReview } from '@/src/components/domain/unified-review';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
-import { isValidCategory } from '@/src/lib/config/category-config';
-import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
+import {
+  type CategoryId,
+  getCategoryConfig,
+  isValidCategory,
+} from '@/src/lib/config/category-config';
 import { detectLanguage } from '@/src/lib/content/language-detection';
-import { highlightCode } from '@/src/lib/content/syntax-highlighting-starry';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import { createClient } from '@/src/lib/supabase/server';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { getDisplayTitle } from '@/src/lib/utils';
-import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
 import {
   generateFilename,
   generateHookFilename,
@@ -40,42 +26,37 @@ import {
   transformMcpConfigForDisplay,
 } from '@/src/lib/utils/content.utils';
 import { getViewTransitionStyle } from '@/src/lib/utils/view-transitions.utils';
+import type { Database } from '@/src/types/database.types';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 import { DetailSidebar } from './sidebar/detail-sidebar';
 
 export interface UnifiedDetailPageProps {
-  item: UnifiedContentItem;
-  relatedItems?: UnifiedContentItem[];
+  item: ContentItem;
+  relatedItems?: ContentItem[];
   viewCount?: number;
-  relatedItemsPromise?: Promise<UnifiedContentItem[]>;
+  relatedItemsPromise?: Promise<ContentItem[]>;
   viewCountPromise?: Promise<number>;
 }
 
-/**
- * Async component to stream view count metadata
- */
 async function ViewCountMetadata({
   item,
   viewCountPromise,
 }: {
-  item: UnifiedContentItem;
+  item: ContentItem;
   viewCountPromise: Promise<number>;
 }) {
   const viewCount = await viewCountPromise;
   return <DetailMetadata item={item} viewCount={viewCount} />;
 }
 
-/**
- * Async component to stream sidebar with related items
- */
 async function SidebarWithRelated({
   item,
   relatedItemsPromise,
   config,
 }: {
-  item: UnifiedContentItem;
-  relatedItemsPromise: Promise<UnifiedContentItem[]>;
+  item: ContentItem;
+  relatedItemsPromise: Promise<ContentItem[]>;
   config: {
     typeName: string;
     metadata?:
@@ -98,81 +79,57 @@ export async function UnifiedDetailPage({
   relatedItemsPromise,
   viewCountPromise,
 }: UnifiedDetailPageProps) {
-  // Get configuration for this content type (Server Component - no hooks)
-  const config = getContentTypeConfig(item.category);
-
-  // Generate display title (Server Component - direct computation)
+  const config = await getCategoryConfig(item.category as CategoryId);
   const displayTitle = getDisplayTitle(item);
+  const metadata =
+    'metadata' in item && item.metadata ? (item.metadata as Record<string, unknown>) : {};
 
-  // Get current user for review functionality (Server Component - async)
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const currentUserId = user?.id;
-
-  // Generate content using generators (Server Component - direct computation)
   const installation = (() => {
-    if (!config) return undefined;
-    if ('installation' in item && item.installation) {
-      if (typeof item.installation === 'object' && !Array.isArray(item.installation)) {
-        return item.installation as InstallationSteps;
-      }
-    }
-    return config.generators.installation?.(item);
+    const inst = ('installation' in item && item.installation) || metadata.installation;
+    return inst && typeof inst === 'object' && !Array.isArray(inst)
+      ? (inst as InstallationSteps)
+      : undefined;
   })();
 
   const useCases = (() => {
-    if (!config) return [];
-    return 'useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0
-      ? item.useCases
-      : // biome-ignore lint/correctness/useHookAtTopLevel: config.generators.useCases is a generator function, not a React hook - false positive due to "use" in property name
-        config.generators.useCases?.(item) || [];
+    const cases = ('use_cases' in item && item.use_cases) || metadata.use_cases;
+    return Array.isArray(cases) && cases.length > 0 ? cases : [];
   })();
 
   const features = (() => {
-    if (!config) return [];
-    return 'features' in item && Array.isArray(item.features) && item.features.length > 0
-      ? item.features
-      : config.generators.features?.(item) || [];
+    const feats = ('features' in item && item.features) || metadata.features;
+    return Array.isArray(feats) && feats.length > 0 ? feats : [];
   })();
 
   const troubleshooting = (() => {
-    if (!config) return [];
-    return 'troubleshooting' in item &&
-      Array.isArray(item.troubleshooting) &&
-      item.troubleshooting.length > 0
-      ? item.troubleshooting
-      : config.generators.troubleshooting?.(item) || [];
+    const trouble = ('troubleshooting' in item && item.troubleshooting) || metadata.troubleshooting;
+    return Array.isArray(trouble) && trouble.length > 0 ? trouble : [];
   })();
 
   const requirements = (() => {
-    if (!config) return [];
-    return 'requirements' in item &&
-      Array.isArray(item.requirements) &&
-      item.requirements.length > 0
-      ? item.requirements
-      : config.generators.requirements?.(item) || [];
+    const reqs = ('requirements' in item && item.requirements) || metadata.requirements;
+    return Array.isArray(reqs) && reqs.length > 0 ? reqs : [];
   })();
 
-  // ============================================================================
-  // DATA LAYER: Pre-process ALL async operations (syntax highlighting)
-  // ============================================================================
-  // Architecture: Page-level async processing (data layer) → Client components (presentation layer)
-  // Benefits: Parallel processing, testable components, proper separation of concerns
-  // PERFORMANCE: All utilities imported at module level (no dynamic import overhead)
-
-  // Pre-process content highlighting (ContentSection data)
+  // Pre-process content highlighting
   const contentData = await (async () => {
-    // Extract content from item
+    // GUIDES: Skip content processing - structured sections rendered separately
+    if (item.category === 'guides') {
+      return null;
+    }
+
+    // Extract content from item (check top-level first, then metadata)
     let content = '';
     if ('content' in item && typeof (item as { content?: string }).content === 'string') {
       content = (item as { content: string }).content;
     } else if (
-      'configuration' in item &&
-      (item as unknown as { configuration?: unknown }).configuration
+      ('configuration' in item && (item as unknown as { configuration?: unknown }).configuration) ||
+      metadata.configuration
     ) {
-      const cfg = (item as unknown as { configuration?: unknown }).configuration;
+      const cfg =
+        ('configuration' in item &&
+          (item as unknown as { configuration?: unknown }).configuration) ||
+        metadata.configuration;
       content = typeof cfg === 'string' ? cfg : JSON.stringify(cfg, null, 2);
     }
 
@@ -183,7 +140,7 @@ export async function UnifiedDetailPage({
         'language' in item ? (item as { language?: string }).language : undefined;
       const language = await detectLanguage(content, languageHint);
       const filename = generateFilename({ item, language });
-      const html = await highlightCode(content, language);
+      const html = highlightCode(content, language);
 
       return { html, code: content, language, filename };
     } catch (_error) {
@@ -193,13 +150,15 @@ export async function UnifiedDetailPage({
 
   // Pre-process configuration highlighting (ConfigurationSection data)
   const configData = await (async () => {
-    if (!('configuration' in item && item.configuration)) return null;
+    // Check top-level first, then metadata
+    const configuration = ('configuration' in item && item.configuration) || metadata.configuration;
+    if (!configuration) return null;
 
     const format = item.category === 'mcp' ? 'multi' : item.category === 'hooks' ? 'hook' : 'json';
 
     // Multi-format configuration (MCP servers)
     if (format === 'multi') {
-      const config = item.configuration as {
+      const config = configuration as {
         claudeDesktop?: Record<string, unknown>;
         claudeCode?: Record<string, unknown>;
         http?: Record<string, unknown>;
@@ -207,7 +166,7 @@ export async function UnifiedDetailPage({
       };
 
       try {
-        const highlightedConfigs = await batchMap(Object.entries(config), async ([key, value]) => {
+        const highlightedConfigs = Object.entries(config).map(([key, value]) => {
           if (!value) return null;
 
           const displayValue =
@@ -216,7 +175,7 @@ export async function UnifiedDetailPage({
               : value;
 
           const code = JSON.stringify(displayValue, null, 2);
-          const html = await highlightCode(code, 'json');
+          const html = highlightCode(code, 'json');
           const filename = generateMultiFormatFilename(item, key, 'json');
 
           return { key, html, code, filename };
@@ -235,7 +194,7 @@ export async function UnifiedDetailPage({
 
     // Hook configuration format
     if (format === 'hook') {
-      const config = item.configuration as {
+      const config = configuration as {
         hookConfig?: { hooks?: Record<string, unknown> };
         scriptContent?: string;
       };
@@ -243,10 +202,10 @@ export async function UnifiedDetailPage({
       try {
         const [highlightedHookConfig, highlightedScript] = await batchFetch([
           config.hookConfig
-            ? highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json')
+            ? Promise.resolve(highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json'))
             : Promise.resolve(null),
           config.scriptContent
-            ? highlightCode(config.scriptContent, 'bash')
+            ? Promise.resolve(highlightCode(config.scriptContent, 'bash'))
             : Promise.resolve(null),
         ]);
 
@@ -273,10 +232,9 @@ export async function UnifiedDetailPage({
       }
     }
 
-    // Default JSON configuration
     try {
-      const code = JSON.stringify(item.configuration, null, 2);
-      const html = await highlightCode(code, 'json');
+      const code = JSON.stringify(configuration, null, 2);
+      const html = highlightCode(code, 'json');
       const filename = generateFilename({ item, language: 'json' });
 
       return { format: 'json' as const, html, code, filename };
@@ -288,9 +246,9 @@ export async function UnifiedDetailPage({
   // Pre-process usage examples highlighting (UsageExamplesSection data)
   const examplesData = await (async () => {
     if (
-      !('examples' in item && Array.isArray(item.examples)) ||
+      !('examples' in item && item.examples && Array.isArray(item.examples)) ||
       item.examples.length === 0 ||
-      !item.examples.every((ex) => typeof ex === 'object' && 'code' in ex)
+      !item.examples.every((ex: unknown) => typeof ex === 'object' && ex !== null && 'code' in ex)
     ) {
       return null;
     }
@@ -305,7 +263,7 @@ export async function UnifiedDetailPage({
 
       const highlightedExamples = await Promise.all(
         examples.map(async (example) => {
-          const html = await highlightCode(example.code, example.language);
+          const html = highlightCode(example.code, example.language);
           // Generate filename from title
           const filename = `${example.title
             .toLowerCase()
@@ -341,14 +299,135 @@ export async function UnifiedDetailPage({
     }
   })();
 
+  // Pre-process installation steps highlighting (InstallationSection data)
+  const installationData = await (async () => {
+    if (!installation) return null;
+
+    // Helper to detect if a step is a command (should be highlighted)
+    const isCommandStep = (step: string): boolean => {
+      return /^(claude|npm|npx|pnpm|yarn|git|curl|bash|sh|python|pip|brew|apt|docker|cd|mkdir|cp|mv|rm|cat|echo|export|source)\s/.test(
+        step.trim()
+      );
+    };
+
+    try {
+      const claudeCodeSteps = installation.claudeCode?.steps
+        ? installation.claudeCode.steps.map((step) => {
+            if (isCommandStep(step)) {
+              const html = highlightCode(step, 'bash');
+              return { type: 'command' as const, html, code: step };
+            }
+            return { type: 'text' as const, text: step };
+          })
+        : null;
+
+      const claudeDesktopSteps = installation.claudeDesktop?.steps
+        ? installation.claudeDesktop.steps.map((step) => {
+            if (isCommandStep(step)) {
+              const html = highlightCode(step, 'bash');
+              return { type: 'command' as const, html, code: step };
+            }
+            return { type: 'text' as const, text: step };
+          })
+        : null;
+
+      const sdkSteps = installation.sdk?.steps
+        ? installation.sdk.steps.map((step) => {
+            if (isCommandStep(step)) {
+              const html = highlightCode(step, 'bash');
+              return { type: 'command' as const, html, code: step };
+            }
+            return { type: 'text' as const, text: step };
+          })
+        : null;
+
+      return {
+        claudeCode: claudeCodeSteps
+          ? {
+              steps: claudeCodeSteps,
+              ...(installation.claudeCode?.configPath && {
+                configPath: installation.claudeCode.configPath,
+              }),
+              ...(installation.claudeCode?.configFormat && {
+                configFormat: installation.claudeCode.configFormat,
+              }),
+            }
+          : null,
+        claudeDesktop: claudeDesktopSteps
+          ? {
+              steps: claudeDesktopSteps,
+              ...(installation.claudeDesktop?.configPath && {
+                configPath: installation.claudeDesktop.configPath,
+              }),
+            }
+          : null,
+        sdk: sdkSteps ? { steps: sdkSteps } : null,
+        ...(installation.requirements && { requirements: installation.requirements }),
+      };
+    } catch (_error) {
+      return null;
+    }
+  })();
+
+  // GUIDES: Pre-process sections with server-side syntax highlighting
+  const guideSections = await (async () => {
+    if (item.category !== 'guides') return null;
+
+    const metadata = 'metadata' in item ? (item.metadata as Record<string, unknown>) : null;
+    if (!(metadata?.sections && Array.isArray(metadata.sections))) return null;
+
+    const sections = metadata.sections as Array<{
+      type: string;
+      code?: string;
+      language?: string;
+      tabs?: Array<{ code: string; language: string; [key: string]: unknown }>;
+      steps?: Array<{ code?: string; language?: string; [key: string]: unknown }>;
+      [key: string]: unknown;
+    }>;
+
+    return await Promise.all(
+      sections.map(async (section) => {
+        if (section.type === 'code' && section.code) {
+          const html = highlightCode(section.code, section.language || 'text');
+          return { ...section, html };
+        }
+
+        if (section.type === 'code_group' && section.tabs) {
+          const tabs = await Promise.all(
+            section.tabs.map(async (tab) => {
+              const html = highlightCode(tab.code, tab.language || 'text');
+              return { ...tab, html };
+            })
+          );
+          return { ...section, tabs };
+        }
+
+        if (section.type === 'steps' && section.steps) {
+          const steps = await Promise.all(
+            section.steps.map(async (step) => {
+              if (step.code) {
+                const html = highlightCode(step.code, step.language || 'bash');
+                return { ...step, html };
+              }
+              return step;
+            })
+          );
+          return { ...section, steps };
+        }
+
+        return section;
+      })
+    );
+  })();
+
   // Handle case where config is not found - AFTER ALL HOOKS
   if (!config) {
     return (
       <div className={'min-h-screen bg-background'}>
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Configuration Not Found</h1>
-            <p className="text-muted-foreground mb-6">
+            <h1 className="mb-4 font-bold text-2xl">Configuration Not Found</h1>
+            <p className="mb-6 text-muted-foreground">
               No configuration found for content type: {item.category}
             </p>
           </div>
@@ -376,11 +455,20 @@ export async function UnifiedDetailPage({
         className="container mx-auto px-4 py-8"
         style={getViewTransitionStyle('card', item.slug)}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Primary content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Content/Code section */}
-            {contentData && (
+          <div className="space-y-8 lg:col-span-2">
+            {/* GUIDES: Render structured sections from metadata using JSONSectionRenderer */}
+            {guideSections && guideSections.length > 0 && (
+              <JSONSectionRenderer
+                sections={
+                  guideSections as unknown as Database['public']['Tables']['content']['Row']['metadata']
+                }
+              />
+            )}
+
+            {/* Content/Code section (non-guides) */}
+            {contentData && config && (
               <UnifiedContentSection
                 variant="content"
                 title={`${config.typeName} Content`}
@@ -393,13 +481,13 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Features Section */}
-            {config.sections.features && features.length > 0 && (
+            {config?.sections.features && features.length > 0 && (
               <UnifiedContentSection
                 variant="bullets"
                 title="Features"
                 description="Key capabilities and functionality"
-                items={features}
-                category={item.category}
+                items={features as string[]}
+                category={item.category as CategoryId}
                 bulletColor="primary"
               />
             )}
@@ -410,23 +498,23 @@ export async function UnifiedDetailPage({
                 variant="bullets"
                 title="Requirements"
                 description="Prerequisites and dependencies"
-                items={requirements}
-                category={item.category}
+                items={requirements as string[]}
+                category={item.category as CategoryId}
                 bulletColor="orange"
               />
             )}
 
             {/* Installation Section */}
-            {config.sections.installation && installation && (
+            {config?.sections.installation && installationData && (
               <UnifiedContentSection
                 variant="installation"
-                installation={installation}
+                installationData={installationData}
                 item={item}
               />
             )}
 
             {/* Configuration Section */}
-            {config.sections.configuration && configData && (
+            {config?.sections.configuration && configData && (
               <UnifiedContentSection
                 variant="configuration"
                 {...(configData.format === 'multi'
@@ -447,51 +535,50 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Use Cases Section */}
-            {config.sections.useCases && useCases.length > 0 && (
+            {config?.sections.use_cases && useCases.length > 0 && (
               <UnifiedContentSection
                 variant="bullets"
                 title="Use Cases"
                 description="Common scenarios and applications"
-                items={useCases}
-                category={item.category}
+                items={useCases as string[]}
+                category={item.category as CategoryId}
                 bulletColor="accent"
               />
             )}
 
             {/* Security Section (MCP-specific) */}
-            {config.sections.security && 'security' in item && Array.isArray(item.security) && (
+            {config?.sections.security && 'security' in item && (
               <UnifiedContentSection
                 variant="bullets"
                 title="Security Best Practices"
                 description="Important security considerations"
                 items={item.security as string[]}
-                category={item.category}
+                category={item.category as CategoryId}
                 bulletColor="orange"
               />
             )}
 
             {/* Troubleshooting Section */}
-            {config.sections.troubleshooting && troubleshooting.length > 0 && (
+            {config?.sections.troubleshooting && troubleshooting.length > 0 && (
               <UnifiedContentSection
                 variant="troubleshooting"
-                items={troubleshooting}
+                items={troubleshooting as Array<string | { issue: string; solution: string }>}
                 description="Common issues and solutions"
               />
             )}
 
             {/* Usage Examples Section - GitHub-style code snippets with syntax highlighting */}
-            {config.sections.examples && examplesData && examplesData.length > 0 && (
+            {config?.sections.examples && examplesData && examplesData.length > 0 && (
               <UnifiedContentSection variant="examples" examples={examplesData} />
             )}
 
             {/* Reviews & Ratings Section */}
             {isValidCategory(item.category) && (
-              <div className="mt-12 pt-12 border-t">
+              <div className="mt-12 border-t pt-12">
                 <UnifiedReview
                   variant="section"
                   contentType={item.category}
                   contentSlug={item.slug}
-                  {...(currentUserId && { currentUserId })}
                 />
               </div>
             )}
@@ -506,8 +593,8 @@ export async function UnifiedDetailPage({
           </div>
 
           {/* Sidebar - Stream related items if promise provided */}
-          <aside className="lg:sticky lg:top-24 lg:self-start space-y-6">
-            {relatedItemsPromise ? (
+          <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+            {relatedItemsPromise && config ? (
               <Suspense
                 fallback={
                   <DetailSidebar
@@ -529,7 +616,7 @@ export async function UnifiedDetailPage({
                   }}
                 />
               </Suspense>
-            ) : (
+            ) : config ? (
               <DetailSidebar
                 item={item}
                 relatedItems={relatedItems}
@@ -538,7 +625,7 @@ export async function UnifiedDetailPage({
                   metadata: config.metadata,
                 }}
               />
-            )}
+            ) : null}
           </aside>
         </div>
       </div>

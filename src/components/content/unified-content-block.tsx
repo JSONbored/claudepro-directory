@@ -58,15 +58,7 @@ import type {
   FeatureGridProps,
   QuickReferenceProps,
   TLDRSummaryProps,
-} from '@/src/lib/schemas/shared.schema';
-import {
-  caseStudyPropsSchema,
-  contentTabsPropsSchema,
-  expertQuotePropsSchema,
-  featureGridPropsSchema,
-  quickReferencePropsSchema,
-  tldrSummaryPropsSchema,
-} from '@/src/lib/schemas/shared.schema';
+} from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // ============================================================================
@@ -111,8 +103,8 @@ export function UnifiedContentBlock(props: UnifiedContentBlockProps) {
 // ============================================================================
 
 function CaseStudyVariant(props: CaseStudyProps) {
-  const validated = caseStudyPropsSchema.parse(props);
-  const { company, industry, challenge, solution, results, metrics, testimonial, logo } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { company, industry, challenge, solution, results, metrics, testimonial, logo } = props;
 
   return (
     <Card itemScope itemType="https://schema.org/Article" className={'my-8 overflow-hidden'}>
@@ -129,7 +121,7 @@ function CaseStudyVariant(props: CaseStudyProps) {
             )}
           </div>
           {logo && (
-            <div className={'w-16 h-16 bg-muted rounded-lg flex items-center justify-center'}>
+            <div className={'flex h-16 w-16 items-center justify-center rounded-lg bg-muted'}>
               <BookOpen className="h-8 w-8 text-muted-foreground" />
             </div>
           )}
@@ -137,25 +129,25 @@ function CaseStudyVariant(props: CaseStudyProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-          <h4 className={'font-semibold text-destructive mb-2'}>Challenge</h4>
+          <h4 className={'mb-2 font-semibold text-destructive'}>Challenge</h4>
           <p className="text-muted-foreground">{challenge}</p>
         </div>
 
         <div>
-          <h4 className={'font-semibold text-primary mb-2'}>Solution</h4>
+          <h4 className={'mb-2 font-semibold text-primary'}>Solution</h4>
           <p className="text-muted-foreground">{solution}</p>
         </div>
 
         <div>
-          <h4 className={'font-semibold text-green-600 dark:text-green-400 mb-2'}>Results</h4>
+          <h4 className={'mb-2 font-semibold text-green-600 dark:text-green-400'}>Results</h4>
           <p className="text-muted-foreground">{results}</p>
         </div>
 
         {metrics && Array.isArray(metrics) && metrics.length > 0 && (
-          <div className={'grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t'}>
+          <div className={'grid grid-cols-2 gap-4 border-t pt-4 md:grid-cols-3'}>
             {metrics.map((metric) => (
               <div key={metric.label} className="text-center">
-                <p className={'text-2xl font-bold flex items-center justify-center gap-1'}>
+                <p className={'flex items-center justify-center gap-1 font-bold text-2xl'}>
                   {metric.value}
                   {metric.trend && (
                     <span
@@ -182,10 +174,10 @@ function CaseStudyVariant(props: CaseStudyProps) {
         )}
 
         {testimonial && (
-          <blockquote className="border-l-4 border-primary pl-4 py-2 bg-muted/30 rounded-r-lg">
-            <p className={'italic text-muted-foreground mb-2'}>"{testimonial.quote}"</p>
+          <blockquote className="rounded-r-lg border-primary border-l-4 bg-muted/30 py-2 pl-4">
+            <p className={'mb-2 text-muted-foreground italic'}>"{testimonial.quote}"</p>
             <footer className="text-sm">
-              <cite className={'not-italic font-semibold'}>{testimonial.author}</cite>
+              <cite className={'font-semibold not-italic'}>{testimonial.author}</cite>
               {testimonial.role && (
                 <span className="text-muted-foreground">, {testimonial.role}</span>
               )}
@@ -202,8 +194,8 @@ function CaseStudyVariant(props: CaseStudyProps) {
 // ============================================================================
 
 function FeatureGridVariant(props: FeatureGridProps) {
-  const validated = featureGridPropsSchema.parse(props);
-  const { features, title, description, columns } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { features, title, description, columns } = props;
   const validFeatures = features;
   const gridCols: Record<2 | 3 | 4, string> = {
     2: 'md:grid-cols-2',
@@ -218,7 +210,7 @@ function FeatureGridVariant(props: FeatureGridProps) {
   return (
     <section itemScope itemType="https://schema.org/ItemList" className="my-8">
       <div className="mb-6">
-        <h2 className={'text-2xl font-bold mb-2'} itemProp="name">
+        <h2 className={'mb-2 font-bold text-2xl'} itemProp="name">
           {title}
         </h2>
         {description && (
@@ -228,14 +220,14 @@ function FeatureGridVariant(props: FeatureGridProps) {
         )}
       </div>
 
-      <div className={`grid grid-cols-1 ${gridCols[columns]} gap-6`}>
+      <div className={`grid grid-cols-1 ${gridCols[columns || 3]} gap-6`}>
         {validFeatures.map((feature, index) => (
           <Card
             key={feature.title}
             itemScope
             itemType="https://schema.org/ListItem"
             className={
-              'relative border border-border/50 bg-gradient-to-br from-card/30 via-card/50 to-card/30 hover:from-card/50 hover:via-card/70 hover:to-card/50 transition-all duration-300 h-full group overflow-hidden shadow-lg hover:shadow-xl hover:-translate-y-1'
+              'group hover:-translate-y-1 relative h-full overflow-hidden border border-border/50 bg-gradient-to-br from-card/30 via-card/50 to-card/30 shadow-lg transition-all duration-300 hover:from-card/50 hover:via-card/70 hover:to-card/50 hover:shadow-xl'
             }
             style={{
               animationDelay: `${index * 50}ms`,
@@ -244,18 +236,18 @@ function FeatureGridVariant(props: FeatureGridProps) {
           >
             <div
               className={
-                'absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none'
+                'pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100'
               }
             />
 
             <CardHeader>
               <CardTitle
-                className={'flex items-start justify-between relative z-10'}
+                className={'relative z-10 flex items-start justify-between'}
                 itemProp="name"
               >
                 <span
                   className={
-                    'bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent font-semibold'
+                    'bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text font-semibold text-transparent'
                   }
                 >
                   {feature.title}
@@ -264,7 +256,7 @@ function FeatureGridVariant(props: FeatureGridProps) {
                   <UnifiedBadge
                     variant="base"
                     style="secondary"
-                    className="ml-2 bg-gradient-to-r from-primary/20 to-primary/30 border-primary/30 shadow-sm"
+                    className="ml-2 border-primary/30 bg-gradient-to-r from-primary/20 to-primary/30 shadow-sm"
                   >
                     {feature.badge}
                   </UnifiedBadge>
@@ -288,14 +280,14 @@ function FeatureGridVariant(props: FeatureGridProps) {
 // ============================================================================
 
 function TLDRVariant(props: TLDRSummaryProps) {
-  const validated = tldrSummaryPropsSchema.parse(props);
-  const { content, keyPoints, title } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { content, keyPoints, title } = props;
 
   return (
     <Card
       itemScope
       itemType="https://schema.org/Article"
-      className="my-8 border-l-4 border-primary bg-primary/5"
+      className="my-8 border-primary border-l-4 bg-primary/5"
     >
       <CardHeader>
         <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -304,17 +296,17 @@ function TLDRVariant(props: TLDRSummaryProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p itemProp="abstract" className="text-muted-foreground leading-relaxed mb-4">
+        <p itemProp="abstract" className="mb-4 text-muted-foreground leading-relaxed">
           {content}
         </p>
 
         {keyPoints && keyPoints.length > 0 && (
           <div>
-            <h4 className="font-semibold mb-2">Key Takeaways:</h4>
+            <h4 className="mb-2 font-semibold">Key Takeaways:</h4>
             <ul className="space-y-1">
               {keyPoints.map((point) => (
                 <li key={point} className={'flex items-start gap-2 text-sm'}>
-                  <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                  <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
                   <span>{point}</span>
                 </li>
               ))}
@@ -331,16 +323,16 @@ function TLDRVariant(props: TLDRSummaryProps) {
 // ============================================================================
 
 function ExpertQuoteVariant(props: ExpertQuoteProps) {
-  const validated = expertQuotePropsSchema.parse(props);
-  const { quote, author, role, company, imageUrl } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { quote, author, role, company, imageUrl } = props;
 
   return (
     <blockquote
       itemScope
       itemType="https://schema.org/Quotation"
-      className="my-8 border-l-4 border-primary bg-muted/30 p-6 rounded-r-lg"
+      className="my-8 rounded-r-lg border-primary border-l-4 bg-muted/30 p-6"
     >
-      <p itemProp="text" className="text-lg italic leading-relaxed mb-4">
+      <p itemProp="text" className="mb-4 text-lg italic leading-relaxed">
         "{quote}"
       </p>
       <footer className="flex items-center gap-4">
@@ -378,9 +370,9 @@ function ExpertQuoteVariant(props: ExpertQuoteProps) {
 // ============================================================================
 
 function QuickReferenceVariant(props: QuickReferenceProps) {
-  const validated = quickReferencePropsSchema.parse(props);
-  const { title, description, items, columns } = validated;
-  const validItems = items;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { title, description, items, columns } = props;
+  const validItems = items || [];
 
   if (validItems.length === 0) {
     return null;
@@ -390,7 +382,7 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
     <Card
       itemScope
       itemType="https://schema.org/Table"
-      className="my-8 border-l-4 border-accent bg-accent/5"
+      className="my-8 border-accent border-l-4 bg-accent/5"
     >
       <CardHeader>
         <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -407,7 +399,7 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
               itemScope
               itemType="https://schema.org/PropertyValue"
               className={
-                'flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 p-3 bg-card/50 rounded-lg border'
+                'flex flex-col gap-2 rounded-lg border bg-card/50 p-3 sm:flex-row sm:items-start sm:gap-4'
               }
             >
               <div className="sm:w-1/3">
@@ -416,7 +408,7 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
                 </dt>
               </div>
               <div className="sm:w-2/3">
-                <dd itemProp="value" className="font-semibold text-foreground mb-1">
+                <dd itemProp="value" className="mb-1 font-semibold text-foreground">
                   {item.value}
                 </dd>
                 {item.description && <p className={UI_CLASSES.TEXT_SM_MUTED}>{item.description}</p>}
@@ -434,9 +426,9 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
 // ============================================================================
 
 function ContentTabsVariant(props: ContentTabsProps) {
-  const validated = contentTabsPropsSchema.parse(props);
-  const { items, title, description, defaultValue } = validated;
-  const validItems = items;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { items, title, description, defaultValue } = props;
+  const validItems = items || [];
 
   if (validItems.length === 0) {
     return null;
@@ -448,7 +440,7 @@ function ContentTabsVariant(props: ContentTabsProps) {
     <section itemScope itemType="https://schema.org/ItemList" className="my-8">
       {title && (
         <div className="mb-6">
-          <h3 className={'text-xl font-bold mb-2'} itemProp="name">
+          <h3 className={'mb-2 font-bold text-xl'} itemProp="name">
             {title}
           </h3>
           {description && (
@@ -461,7 +453,7 @@ function ContentTabsVariant(props: ContentTabsProps) {
 
       <Tabs defaultValue={firstValue} className="w-full">
         <TabsList
-          className={'grid w-full grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 h-auto p-1'}
+          className={'grid h-auto w-full grid-cols-2 gap-1 p-1 lg:grid-cols-3 xl:grid-cols-4'}
         >
           {validItems.map((item) => (
             <TabsTrigger

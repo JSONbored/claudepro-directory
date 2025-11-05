@@ -1,97 +1,125 @@
 /**
- * Notification Store - Zustand State Management
- *
- * ARCHITECTURE: Derived State Pattern (2025)
- * - Stores computed values as state (not computed on access)
- * - Updates derived state when dismissedIds changes
- * - Prevents infinite re-render loops (React Error #185)
- * - Components select stable state references
- *
- * Performance:
- * - O(1) state access (no filtering on every render)
- * - Memoized derived state updates only when dismissedIds changes
- * - Stable array references prevent unnecessary component re-renders
- *
- * @module lib/stores/notification-store
+ * Notification Store - Database-First with Realtime
+ * Zero client-side filtering via PostgreSQL RPC + instant updates via Supabase Realtime.
  */
 
 'use client';
 
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { getActiveNotifications, type Notification } from '@/src/config/notifications';
+import { logger } from '@/src/lib/logger';
+import { createClient } from '@/src/lib/supabase/client';
+import type { Tables } from '@/src/types/database.types';
 
-/**
- * Helper: Compute active notifications (non-dismissed)
- */
-function computeActiveNotifications(dismissedIds: string[]): Notification[] {
-  return getActiveNotifications().filter((n) => !dismissedIds.includes(n.id));
-}
+type Notification = Tables<'notifications'>;
 
 export interface NotificationStore {
-  /** List of dismissed notification IDs (persisted) */
   dismissedIds: string[];
-
-  /** Whether the notification sheet is open */
   isSheetOpen: boolean;
-
-  /** Derived state: Active, non-dismissed notifications (STABLE REFERENCE) */
-  activeNotifications: Notification[];
-
-  /** Derived state: Unread count (STABLE VALUE) */
+  notifications: Notification[];
   unreadCount: number;
+  channel: RealtimeChannel | null;
 
-  /** Dismiss a notification by ID */
+  initializeRealtime: () => void;
   dismiss: (id: string) => void;
-
-  /** Dismiss all notifications */
   dismissAll: () => void;
-
-  /** Open the notification sheet */
   openSheet: () => void;
-
-  /** Close the notification sheet */
   closeSheet: () => void;
-
-  /** Toggle the notification sheet */
   toggleSheet: () => void;
-
-  /** Check if notification is dismissed */
   isDismissed: (id: string) => boolean;
+  cleanup: () => void;
 }
 
 export const useNotificationStore = create<NotificationStore>()(
   persist(
     (set, get) => {
-      // Initialize derived state
-      const initialDismissedIds: string[] = [];
-      const initialActiveNotifications = computeActiveNotifications(initialDismissedIds);
+      const refreshFromDatabase = async () => {
+        const supabase = createClient();
+        const { dismissedIds } = get();
+
+        try {
+          const { data, error } = await supabase.rpc('get_active_notifications', {
+            p_dismissed_ids: dismissedIds,
+          });
+
+          if (error) {
+            logger.error('Failed to refresh notifications', error);
+            return;
+          }
+
+          set({
+            notifications: data || [],
+            unreadCount: (data || []).length,
+          });
+        } catch (error) {
+          logger.error(
+            'Failed to refresh notifications',
+            error instanceof Error ? error : new Error(String(error))
+          );
+        }
+      };
 
       return {
-        dismissedIds: initialDismissedIds,
+        dismissedIds: [],
         isSheetOpen: false,
-        activeNotifications: initialActiveNotifications,
-        unreadCount: initialActiveNotifications.length,
+        notifications: [],
+        unreadCount: 0,
+        channel: null,
+
+        initializeRealtime: () => {
+          const supabase = createClient();
+
+          const channel = supabase
+            .channel('notifications-realtime', {
+              config: {
+                broadcast: { ack: false },
+                presence: { key: '' },
+              },
+            })
+            .on(
+              'postgres_changes',
+              {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'notifications',
+              },
+              () => {
+                refreshFromDatabase().catch(() => {
+                  // Silent fail - notification refresh failed, state remains unchanged
+                });
+              }
+            )
+            .subscribe(async (status) => {
+              if (status === 'SUBSCRIBED') {
+                await refreshFromDatabase();
+              }
+            });
+
+          set({ channel });
+        },
 
         dismiss: (id: string) => {
-          set((state) => {
-            const newDismissedIds = [...state.dismissedIds, id];
-            const newActiveNotifications = computeActiveNotifications(newDismissedIds);
+          set((state) => ({
+            dismissedIds: [...state.dismissedIds, id],
+            notifications: state.notifications.filter((n) => n.id !== id),
+            unreadCount: state.notifications.filter((n) => n.id !== id).length,
+          }));
 
-            return {
-              dismissedIds: newDismissedIds,
-              activeNotifications: newActiveNotifications,
-              unreadCount: newActiveNotifications.length,
-            };
+          refreshFromDatabase().catch(() => {
+            // Silent fail - notification already removed from UI
           });
         },
 
         dismissAll: () => {
-          const allIds = getActiveNotifications().map((n) => n.id);
-          set({
-            dismissedIds: allIds,
-            activeNotifications: [],
+          set((state) => ({
+            dismissedIds: [...state.dismissedIds, ...state.notifications.map((n) => n.id)],
+            notifications: [],
             unreadCount: 0,
+          }));
+
+          refreshFromDatabase().catch(() => {
+            // Silent fail - all notifications already cleared from UI
           });
         },
 
@@ -105,17 +133,21 @@ export const useNotificationStore = create<NotificationStore>()(
           const { dismissedIds } = get();
           return dismissedIds.includes(id);
         },
+
+        cleanup: () => {
+          const { channel } = get();
+          if (channel) {
+            channel.unsubscribe();
+          }
+        },
       };
     },
     {
-      name: 'notification-storage', // localStorage key
-      partialize: (state) => ({ dismissedIds: state.dismissedIds }), // Only persist dismissedIds
+      name: 'notification-storage',
+      partialize: (state) => ({ dismissedIds: state.dismissedIds }),
       onRehydrateStorage: () => (state) => {
-        // After rehydration, recompute derived state from persisted dismissedIds
         if (state) {
-          const activeNotifications = computeActiveNotifications(state.dismissedIds);
-          state.activeNotifications = activeNotifications;
-          state.unreadCount = activeNotifications.length;
+          state.initializeRealtime();
         }
       },
     }

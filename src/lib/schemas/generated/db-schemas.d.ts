@@ -6,10 +6,75 @@
 
 import { z } from 'zod';
 import * as generated from './../../../../../../../../../../src/lib/schemas/generated/db-schemas';
+export type PublicAnnouncementPriority = z.infer<typeof generated.publicAnnouncementPrioritySchema>;
+export type PublicAnnouncementVariant = z.infer<typeof generated.publicAnnouncementVariantSchema>;
+export type PublicBadgeRarity = z.infer<typeof generated.publicBadgeRaritySchema>;
+export type PublicChangelogCategory = z.infer<typeof generated.publicChangelogCategorySchema>;
+export type PublicContentCategory = z.infer<typeof generated.publicContentCategorySchema>;
+export type PublicExperienceLevel = z.infer<typeof generated.publicExperienceLevelSchema>;
+export type PublicFieldScope = z.infer<typeof generated.publicFieldScopeSchema>;
+export type PublicFieldType = z.infer<typeof generated.publicFieldTypeSchema>;
+export type PublicFocusAreaType = z.infer<typeof generated.publicFocusAreaTypeSchema>;
+export type PublicFormFieldType = z.infer<typeof generated.publicFormFieldTypeSchema>;
+export type PublicFormGridColumn = z.infer<typeof generated.publicFormGridColumnSchema>;
+export type PublicFormIconPosition = z.infer<typeof generated.publicFormIconPositionSchema>;
+export type PublicGridColumn = z.infer<typeof generated.publicGridColumnSchema>;
+export type PublicGuideSubcategory = z.infer<typeof generated.publicGuideSubcategorySchema>;
+export type PublicIconPosition = z.infer<typeof generated.publicIconPositionSchema>;
+export type PublicIntegrationType = z.infer<typeof generated.publicIntegrationTypeSchema>;
+export type PublicInteractionType = z.infer<typeof generated.publicInteractionTypeSchema>;
+export type PublicJobStatus = z.infer<typeof generated.publicJobStatusSchema>;
+export type PublicNewsletterSource = z.infer<typeof generated.publicNewsletterSourceSchema>;
+export type PublicNotificationPriority = z.infer<typeof generated.publicNotificationPrioritySchema>;
+export type PublicNotificationType = z.infer<typeof generated.publicNotificationTypeSchema>;
+export type PublicSortDirection = z.infer<typeof generated.publicSortDirectionSchema>;
+export type PublicSortOption = z.infer<typeof generated.publicSortOptionSchema>;
+export type PublicSubmissionStatus = z.infer<typeof generated.publicSubmissionStatusSchema>;
+export type PublicSubmissionType = z.infer<typeof generated.publicSubmissionTypeSchema>;
+export type PublicTrendingMetric = z.infer<typeof generated.publicTrendingMetricSchema>;
+export type PublicTrendingPeriod = z.infer<typeof generated.publicTrendingPeriodSchema>;
+export type PublicUseCaseType = z.infer<typeof generated.publicUseCaseTypeSchema>;
 export type Json = z.infer<typeof generated.jsonSchema>;
 export type PublicAffinityConfigRow = z.infer<typeof generated.publicAffinityConfigRowSchema>;
 export type PublicAffinityConfigInsert = z.infer<typeof generated.publicAffinityConfigInsertSchema>;
 export type PublicAffinityConfigUpdate = z.infer<typeof generated.publicAffinityConfigUpdateSchema>;
+export type PublicAnalyticsEventCategoriesRow = z.infer<
+  typeof generated.publicAnalyticsEventCategoriesRowSchema
+>;
+export type PublicAnalyticsEventCategoriesInsert = z.infer<
+  typeof generated.publicAnalyticsEventCategoriesInsertSchema
+>;
+export type PublicAnalyticsEventCategoriesUpdate = z.infer<
+  typeof generated.publicAnalyticsEventCategoriesUpdateSchema
+>;
+export type PublicAnalyticsEventsRow = z.infer<typeof generated.publicAnalyticsEventsRowSchema>;
+export type PublicAnalyticsEventsInsert = z.infer<
+  typeof generated.publicAnalyticsEventsInsertSchema
+>;
+export type PublicAnalyticsEventsUpdate = z.infer<
+  typeof generated.publicAnalyticsEventsUpdateSchema
+>;
+export type PublicAnalyticsEventsRelationships = z.infer<
+  typeof generated.publicAnalyticsEventsRelationshipsSchema
+>;
+export type PublicAnnouncementDismissalsRow = z.infer<
+  typeof generated.publicAnnouncementDismissalsRowSchema
+>;
+export type PublicAnnouncementDismissalsInsert = z.infer<
+  typeof generated.publicAnnouncementDismissalsInsertSchema
+>;
+export type PublicAnnouncementDismissalsUpdate = z.infer<
+  typeof generated.publicAnnouncementDismissalsUpdateSchema
+>;
+export type PublicAnnouncementDismissalsRelationships = z.infer<
+  typeof generated.publicAnnouncementDismissalsRelationshipsSchema
+>;
+export type PublicAnnouncementsRow = z.infer<typeof generated.publicAnnouncementsRowSchema>;
+export type PublicAnnouncementsInsert = z.infer<typeof generated.publicAnnouncementsInsertSchema>;
+export type PublicAnnouncementsUpdate = z.infer<typeof generated.publicAnnouncementsUpdateSchema>;
+export type PublicAppSettingsRow = z.infer<typeof generated.publicAppSettingsRowSchema>;
+export type PublicAppSettingsInsert = z.infer<typeof generated.publicAppSettingsInsertSchema>;
+export type PublicAppSettingsUpdate = z.infer<typeof generated.publicAppSettingsUpdateSchema>;
 export type PublicBadgesRow = z.infer<typeof generated.publicBadgesRowSchema>;
 export type PublicBadgesInsert = z.infer<typeof generated.publicBadgesInsertSchema>;
 export type PublicBadgesUpdate = z.infer<typeof generated.publicBadgesUpdateSchema>;
@@ -18,6 +83,33 @@ export type PublicBookmarksInsert = z.infer<typeof generated.publicBookmarksInse
 export type PublicBookmarksUpdate = z.infer<typeof generated.publicBookmarksUpdateSchema>;
 export type PublicBookmarksRelationships = z.infer<
   typeof generated.publicBookmarksRelationshipsSchema
+>;
+export type PublicCategoryConfigsRow = z.infer<typeof generated.publicCategoryConfigsRowSchema>;
+export type PublicCategoryConfigsInsert = z.infer<
+  typeof generated.publicCategoryConfigsInsertSchema
+>;
+export type PublicCategoryConfigsUpdate = z.infer<
+  typeof generated.publicCategoryConfigsUpdateSchema
+>;
+export type PublicChangelogRow = z.infer<typeof generated.publicChangelogRowSchema>;
+export type PublicChangelogInsert = z.infer<typeof generated.publicChangelogInsertSchema>;
+export type PublicChangelogUpdate = z.infer<typeof generated.publicChangelogUpdateSchema>;
+export type PublicChangelogChangesRow = z.infer<typeof generated.publicChangelogChangesRowSchema>;
+export type PublicChangelogChangesInsert = z.infer<
+  typeof generated.publicChangelogChangesInsertSchema
+>;
+export type PublicChangelogChangesUpdate = z.infer<
+  typeof generated.publicChangelogChangesUpdateSchema
+>;
+export type PublicChangelogChangesRelationships = z.infer<
+  typeof generated.publicChangelogChangesRelationshipsSchema
+>;
+export type PublicChangelogEntriesRow = z.infer<typeof generated.publicChangelogEntriesRowSchema>;
+export type PublicChangelogEntriesInsert = z.infer<
+  typeof generated.publicChangelogEntriesInsertSchema
+>;
+export type PublicChangelogEntriesUpdate = z.infer<
+  typeof generated.publicChangelogEntriesUpdateSchema
 >;
 export type PublicCollectionItemsRow = z.infer<typeof generated.publicCollectionItemsRowSchema>;
 export type PublicCollectionItemsInsert = z.infer<
@@ -41,9 +133,27 @@ export type PublicCompaniesUpdate = z.infer<typeof generated.publicCompaniesUpda
 export type PublicCompaniesRelationships = z.infer<
   typeof generated.publicCompaniesRelationshipsSchema
 >;
-export type PublicContentItemsRow = z.infer<typeof generated.publicContentItemsRowSchema>;
-export type PublicContentItemsInsert = z.infer<typeof generated.publicContentItemsInsertSchema>;
-export type PublicContentItemsUpdate = z.infer<typeof generated.publicContentItemsUpdateSchema>;
+export type PublicContentRow = z.infer<typeof generated.publicContentRowSchema>;
+export type PublicContentInsert = z.infer<typeof generated.publicContentInsertSchema>;
+export type PublicContentUpdate = z.infer<typeof generated.publicContentUpdateSchema>;
+export type PublicContentGenerationTrackingRow = z.infer<
+  typeof generated.publicContentGenerationTrackingRowSchema
+>;
+export type PublicContentGenerationTrackingInsert = z.infer<
+  typeof generated.publicContentGenerationTrackingInsertSchema
+>;
+export type PublicContentGenerationTrackingUpdate = z.infer<
+  typeof generated.publicContentGenerationTrackingUpdateSchema
+>;
+export type PublicContentSeoOverridesRow = z.infer<
+  typeof generated.publicContentSeoOverridesRowSchema
+>;
+export type PublicContentSeoOverridesInsert = z.infer<
+  typeof generated.publicContentSeoOverridesInsertSchema
+>;
+export type PublicContentSeoOverridesUpdate = z.infer<
+  typeof generated.publicContentSeoOverridesUpdateSchema
+>;
 export type PublicContentSimilaritiesRow = z.infer<
   typeof generated.publicContentSimilaritiesRowSchema
 >;
@@ -53,6 +163,37 @@ export type PublicContentSimilaritiesInsert = z.infer<
 export type PublicContentSimilaritiesUpdate = z.infer<
   typeof generated.publicContentSimilaritiesUpdateSchema
 >;
+export type PublicContentSubmissionsRow = z.infer<
+  typeof generated.publicContentSubmissionsRowSchema
+>;
+export type PublicContentSubmissionsInsert = z.infer<
+  typeof generated.publicContentSubmissionsInsertSchema
+>;
+export type PublicContentSubmissionsUpdate = z.infer<
+  typeof generated.publicContentSubmissionsUpdateSchema
+>;
+export type PublicContentTemplatesRow = z.infer<typeof generated.publicContentTemplatesRowSchema>;
+export type PublicContentTemplatesInsert = z.infer<
+  typeof generated.publicContentTemplatesInsertSchema
+>;
+export type PublicContentTemplatesUpdate = z.infer<
+  typeof generated.publicContentTemplatesUpdateSchema
+>;
+export type PublicEmailBlocklistRow = z.infer<typeof generated.publicEmailBlocklistRowSchema>;
+export type PublicEmailBlocklistInsert = z.infer<typeof generated.publicEmailBlocklistInsertSchema>;
+export type PublicEmailBlocklistUpdate = z.infer<typeof generated.publicEmailBlocklistUpdateSchema>;
+export type PublicEmailSequenceScheduleRow = z.infer<
+  typeof generated.publicEmailSequenceScheduleRowSchema
+>;
+export type PublicEmailSequenceScheduleInsert = z.infer<
+  typeof generated.publicEmailSequenceScheduleInsertSchema
+>;
+export type PublicEmailSequenceScheduleUpdate = z.infer<
+  typeof generated.publicEmailSequenceScheduleUpdateSchema
+>;
+export type PublicEmailSequencesRow = z.infer<typeof generated.publicEmailSequencesRowSchema>;
+export type PublicEmailSequencesInsert = z.infer<typeof generated.publicEmailSequencesInsertSchema>;
+export type PublicEmailSequencesUpdate = z.infer<typeof generated.publicEmailSequencesUpdateSchema>;
 export type PublicFeaturedConfigsRow = z.infer<typeof generated.publicFeaturedConfigsRowSchema>;
 export type PublicFeaturedConfigsInsert = z.infer<
   typeof generated.publicFeaturedConfigsInsertSchema
@@ -66,10 +207,69 @@ export type PublicFollowersUpdate = z.infer<typeof generated.publicFollowersUpda
 export type PublicFollowersRelationships = z.infer<
   typeof generated.publicFollowersRelationshipsSchema
 >;
+export type PublicFormFieldConfigsRow = z.infer<typeof generated.publicFormFieldConfigsRowSchema>;
+export type PublicFormFieldConfigsInsert = z.infer<
+  typeof generated.publicFormFieldConfigsInsertSchema
+>;
+export type PublicFormFieldConfigsUpdate = z.infer<
+  typeof generated.publicFormFieldConfigsUpdateSchema
+>;
+export type PublicFormFieldDefinitionsRow = z.infer<
+  typeof generated.publicFormFieldDefinitionsRowSchema
+>;
+export type PublicFormFieldDefinitionsInsert = z.infer<
+  typeof generated.publicFormFieldDefinitionsInsertSchema
+>;
+export type PublicFormFieldDefinitionsUpdate = z.infer<
+  typeof generated.publicFormFieldDefinitionsUpdateSchema
+>;
+export type PublicFormFieldVersionsRow = z.infer<typeof generated.publicFormFieldVersionsRowSchema>;
+export type PublicFormFieldVersionsInsert = z.infer<
+  typeof generated.publicFormFieldVersionsInsertSchema
+>;
+export type PublicFormFieldVersionsUpdate = z.infer<
+  typeof generated.publicFormFieldVersionsUpdateSchema
+>;
+export type PublicFormFieldVersionsRelationships = z.infer<
+  typeof generated.publicFormFieldVersionsRelationshipsSchema
+>;
+export type PublicFormSelectOptionsRow = z.infer<typeof generated.publicFormSelectOptionsRowSchema>;
+export type PublicFormSelectOptionsInsert = z.infer<
+  typeof generated.publicFormSelectOptionsInsertSchema
+>;
+export type PublicFormSelectOptionsUpdate = z.infer<
+  typeof generated.publicFormSelectOptionsUpdateSchema
+>;
+export type PublicFormSelectOptionsRelationships = z.infer<
+  typeof generated.publicFormSelectOptionsRelationshipsSchema
+>;
+export type PublicGithubRepoStatsRow = z.infer<typeof generated.publicGithubRepoStatsRowSchema>;
+export type PublicGithubRepoStatsInsert = z.infer<
+  typeof generated.publicGithubRepoStatsInsertSchema
+>;
+export type PublicGithubRepoStatsUpdate = z.infer<
+  typeof generated.publicGithubRepoStatsUpdateSchema
+>;
+export type PublicIndexUsageSnapshotsRow = z.infer<
+  typeof generated.publicIndexUsageSnapshotsRowSchema
+>;
+export type PublicIndexUsageSnapshotsInsert = z.infer<
+  typeof generated.publicIndexUsageSnapshotsInsertSchema
+>;
+export type PublicIndexUsageSnapshotsUpdate = z.infer<
+  typeof generated.publicIndexUsageSnapshotsUpdateSchema
+>;
 export type PublicJobsRow = z.infer<typeof generated.publicJobsRowSchema>;
 export type PublicJobsInsert = z.infer<typeof generated.publicJobsInsertSchema>;
 export type PublicJobsUpdate = z.infer<typeof generated.publicJobsUpdateSchema>;
 export type PublicJobsRelationships = z.infer<typeof generated.publicJobsRelationshipsSchema>;
+export type PublicMetadataTemplatesRow = z.infer<typeof generated.publicMetadataTemplatesRowSchema>;
+export type PublicMetadataTemplatesInsert = z.infer<
+  typeof generated.publicMetadataTemplatesInsertSchema
+>;
+export type PublicMetadataTemplatesUpdate = z.infer<
+  typeof generated.publicMetadataTemplatesUpdateSchema
+>;
 export type PublicNewsletterSubscriptionsRow = z.infer<
   typeof generated.publicNewsletterSubscriptionsRowSchema
 >;
@@ -79,6 +279,21 @@ export type PublicNewsletterSubscriptionsInsert = z.infer<
 export type PublicNewsletterSubscriptionsUpdate = z.infer<
   typeof generated.publicNewsletterSubscriptionsUpdateSchema
 >;
+export type PublicNotificationDismissalsRow = z.infer<
+  typeof generated.publicNotificationDismissalsRowSchema
+>;
+export type PublicNotificationDismissalsInsert = z.infer<
+  typeof generated.publicNotificationDismissalsInsertSchema
+>;
+export type PublicNotificationDismissalsUpdate = z.infer<
+  typeof generated.publicNotificationDismissalsUpdateSchema
+>;
+export type PublicNotificationDismissalsRelationships = z.infer<
+  typeof generated.publicNotificationDismissalsRelationshipsSchema
+>;
+export type PublicNotificationsRow = z.infer<typeof generated.publicNotificationsRowSchema>;
+export type PublicNotificationsInsert = z.infer<typeof generated.publicNotificationsInsertSchema>;
+export type PublicNotificationsUpdate = z.infer<typeof generated.publicNotificationsUpdateSchema>;
 export type PublicPaymentsRow = z.infer<typeof generated.publicPaymentsRowSchema>;
 export type PublicPaymentsInsert = z.infer<typeof generated.publicPaymentsInsertSchema>;
 export type PublicPaymentsUpdate = z.infer<typeof generated.publicPaymentsUpdateSchema>;
@@ -89,6 +304,39 @@ export type PublicPostsRow = z.infer<typeof generated.publicPostsRowSchema>;
 export type PublicPostsInsert = z.infer<typeof generated.publicPostsInsertSchema>;
 export type PublicPostsUpdate = z.infer<typeof generated.publicPostsUpdateSchema>;
 export type PublicPostsRelationships = z.infer<typeof generated.publicPostsRelationshipsSchema>;
+export type PublicProfilesRow = z.infer<typeof generated.publicProfilesRowSchema>;
+export type PublicProfilesInsert = z.infer<typeof generated.publicProfilesInsertSchema>;
+export type PublicProfilesUpdate = z.infer<typeof generated.publicProfilesUpdateSchema>;
+export type PublicQuizOptionsRow = z.infer<typeof generated.publicQuizOptionsRowSchema>;
+export type PublicQuizOptionsInsert = z.infer<typeof generated.publicQuizOptionsInsertSchema>;
+export type PublicQuizOptionsUpdate = z.infer<typeof generated.publicQuizOptionsUpdateSchema>;
+export type PublicQuizOptionsRelationships = z.infer<
+  typeof generated.publicQuizOptionsRelationshipsSchema
+>;
+export type PublicQuizQuestionsRow = z.infer<typeof generated.publicQuizQuestionsRowSchema>;
+export type PublicQuizQuestionsInsert = z.infer<typeof generated.publicQuizQuestionsInsertSchema>;
+export type PublicQuizQuestionsUpdate = z.infer<typeof generated.publicQuizQuestionsUpdateSchema>;
+export type PublicRateLimitTrackerRow = z.infer<typeof generated.publicRateLimitTrackerRowSchema>;
+export type PublicRateLimitTrackerInsert = z.infer<
+  typeof generated.publicRateLimitTrackerInsertSchema
+>;
+export type PublicRateLimitTrackerUpdate = z.infer<
+  typeof generated.publicRateLimitTrackerUpdateSchema
+>;
+export type PublicReputationActionsRow = z.infer<typeof generated.publicReputationActionsRowSchema>;
+export type PublicReputationActionsInsert = z.infer<
+  typeof generated.publicReputationActionsInsertSchema
+>;
+export type PublicReputationActionsUpdate = z.infer<
+  typeof generated.publicReputationActionsUpdateSchema
+>;
+export type PublicReputationTiersRow = z.infer<typeof generated.publicReputationTiersRowSchema>;
+export type PublicReputationTiersInsert = z.infer<
+  typeof generated.publicReputationTiersInsertSchema
+>;
+export type PublicReputationTiersUpdate = z.infer<
+  typeof generated.publicReputationTiersUpdateSchema
+>;
 export type PublicReviewHelpfulVotesRow = z.infer<
   typeof generated.publicReviewHelpfulVotesRowSchema
 >;
@@ -106,6 +354,18 @@ export type PublicReviewRatingsInsert = z.infer<typeof generated.publicReviewRat
 export type PublicReviewRatingsUpdate = z.infer<typeof generated.publicReviewRatingsUpdateSchema>;
 export type PublicReviewRatingsRelationships = z.infer<
   typeof generated.publicReviewRatingsRelationshipsSchema
+>;
+export type PublicSeoConfigRow = z.infer<typeof generated.publicSeoConfigRowSchema>;
+export type PublicSeoConfigInsert = z.infer<typeof generated.publicSeoConfigInsertSchema>;
+export type PublicSeoConfigUpdate = z.infer<typeof generated.publicSeoConfigUpdateSchema>;
+export type PublicSeoEnrichmentRulesRow = z.infer<
+  typeof generated.publicSeoEnrichmentRulesRowSchema
+>;
+export type PublicSeoEnrichmentRulesInsert = z.infer<
+  typeof generated.publicSeoEnrichmentRulesInsertSchema
+>;
+export type PublicSeoEnrichmentRulesUpdate = z.infer<
+  typeof generated.publicSeoEnrichmentRulesUpdateSchema
 >;
 export type PublicSponsoredClicksRow = z.infer<typeof generated.publicSponsoredClicksRowSchema>;
 export type PublicSponsoredClicksInsert = z.infer<
@@ -139,6 +399,18 @@ export type PublicSponsoredImpressionsUpdate = z.infer<
 export type PublicSponsoredImpressionsRelationships = z.infer<
   typeof generated.publicSponsoredImpressionsRelationshipsSchema
 >;
+export type PublicStaticRoutesRow = z.infer<typeof generated.publicStaticRoutesRowSchema>;
+export type PublicStaticRoutesInsert = z.infer<typeof generated.publicStaticRoutesInsertSchema>;
+export type PublicStaticRoutesUpdate = z.infer<typeof generated.publicStaticRoutesUpdateSchema>;
+export type PublicStructuredDataConfigRow = z.infer<
+  typeof generated.publicStructuredDataConfigRowSchema
+>;
+export type PublicStructuredDataConfigInsert = z.infer<
+  typeof generated.publicStructuredDataConfigInsertSchema
+>;
+export type PublicStructuredDataConfigUpdate = z.infer<
+  typeof generated.publicStructuredDataConfigUpdateSchema
+>;
 export type PublicSubmissionsRow = z.infer<typeof generated.publicSubmissionsRowSchema>;
 export type PublicSubmissionsInsert = z.infer<typeof generated.publicSubmissionsInsertSchema>;
 export type PublicSubmissionsUpdate = z.infer<typeof generated.publicSubmissionsUpdateSchema>;
@@ -150,6 +422,22 @@ export type PublicSubscriptionsInsert = z.infer<typeof generated.publicSubscript
 export type PublicSubscriptionsUpdate = z.infer<typeof generated.publicSubscriptionsUpdateSchema>;
 export type PublicSubscriptionsRelationships = z.infer<
   typeof generated.publicSubscriptionsRelationshipsSchema
+>;
+export type PublicTableBloatSnapshotsRow = z.infer<
+  typeof generated.publicTableBloatSnapshotsRowSchema
+>;
+export type PublicTableBloatSnapshotsInsert = z.infer<
+  typeof generated.publicTableBloatSnapshotsInsertSchema
+>;
+export type PublicTableBloatSnapshotsUpdate = z.infer<
+  typeof generated.publicTableBloatSnapshotsUpdateSchema
+>;
+export type PublicTierDisplayConfigRow = z.infer<typeof generated.publicTierDisplayConfigRowSchema>;
+export type PublicTierDisplayConfigInsert = z.infer<
+  typeof generated.publicTierDisplayConfigInsertSchema
+>;
+export type PublicTierDisplayConfigUpdate = z.infer<
+  typeof generated.publicTierDisplayConfigUpdateSchema
 >;
 export type PublicUserAffinitiesRow = z.infer<typeof generated.publicUserAffinitiesRowSchema>;
 export type PublicUserAffinitiesInsert = z.infer<typeof generated.publicUserAffinitiesInsertSchema>;
@@ -216,21 +504,30 @@ export type PublicWebhookEventsRow = z.infer<typeof generated.publicWebhookEvent
 export type PublicWebhookEventsInsert = z.infer<typeof generated.publicWebhookEventsInsertSchema>;
 export type PublicWebhookEventsUpdate = z.infer<typeof generated.publicWebhookEventsUpdateSchema>;
 export type PublicCompanyJobStatsRow = z.infer<typeof generated.publicCompanyJobStatsRowSchema>;
-export type PublicContentPopularityRow = z.infer<typeof generated.publicContentPopularityRowSchema>;
-export type PublicRecommendedContentRow = z.infer<
-  typeof generated.publicRecommendedContentRowSchema
+export type PublicMvAnalyticsSummaryRow = z.infer<
+  typeof generated.publicMvAnalyticsSummaryRowSchema
 >;
-export type PublicRecommendedContentRelationships = z.infer<
-  typeof generated.publicRecommendedContentRelationshipsSchema
+export type PublicMvContentStatsRow = z.infer<typeof generated.publicMvContentStatsRowSchema>;
+export type PublicMvContentTagIndexRow = z.infer<typeof generated.publicMvContentTagIndexRowSchema>;
+export type PublicMvContentTrendingMetricsRow = z.infer<
+  typeof generated.publicMvContentTrendingMetricsRowSchema
+>;
+export type PublicMvFeaturedContentRankingsRow = z.infer<
+  typeof generated.publicMvFeaturedContentRankingsRowSchema
+>;
+export type PublicMvSearchFacetsRow = z.infer<typeof generated.publicMvSearchFacetsRowSchema>;
+export type PublicMvSiteUrlsRow = z.infer<typeof generated.publicMvSiteUrlsRowSchema>;
+export type PublicMvTimezoneNamesRow = z.infer<typeof generated.publicMvTimezoneNamesRowSchema>;
+export type PublicMvTrendingContentRow = z.infer<typeof generated.publicMvTrendingContentRowSchema>;
+export type PublicMvUserLeaderboardRow = z.infer<typeof generated.publicMvUserLeaderboardRowSchema>;
+export type PublicMvWeeklyNewContentRow = z.infer<
+  typeof generated.publicMvWeeklyNewContentRowSchema
 >;
 export type PublicSubmissionStatsSummaryRow = z.infer<
   typeof generated.publicSubmissionStatsSummaryRowSchema
 >;
 export type PublicTrendingContent24hRow = z.infer<
   typeof generated.publicTrendingContent24hRowSchema
->;
-export type PublicUserActivitySummaryRow = z.infer<
-  typeof generated.publicUserActivitySummaryRowSchema
 >;
 export type PublicUserAffinityScoresRow = z.infer<
   typeof generated.publicUserAffinityScoresRowSchema
@@ -240,6 +537,30 @@ export type PublicUserAffinityScoresRelationships = z.infer<
 >;
 export type PublicUserBadgeStatsRow = z.infer<typeof generated.publicUserBadgeStatsRowSchema>;
 export type PublicUserStatsRow = z.infer<typeof generated.publicUserStatsRowSchema>;
+export type PublicAddBookmarkArgs = z.infer<typeof generated.publicAddBookmarkArgsSchema>;
+export type PublicAddBookmarkReturns = z.infer<typeof generated.publicAddBookmarkReturnsSchema>;
+export type PublicApproveSubmissionArgs = z.infer<
+  typeof generated.publicApproveSubmissionArgsSchema
+>;
+export type PublicApproveSubmissionReturns = z.infer<
+  typeof generated.publicApproveSubmissionReturnsSchema
+>;
+export type PublicAutoAwardBadgesArgs = z.infer<typeof generated.publicAutoAwardBadgesArgsSchema>;
+export type PublicAutoAwardBadgesReturns = z.infer<
+  typeof generated.publicAutoAwardBadgesReturnsSchema
+>;
+export type PublicBatchAddBookmarksArgs = z.infer<
+  typeof generated.publicBatchAddBookmarksArgsSchema
+>;
+export type PublicBatchAddBookmarksReturns = z.infer<
+  typeof generated.publicBatchAddBookmarksReturnsSchema
+>;
+export type PublicBatchRecalculateAllReputationArgs = z.infer<
+  typeof generated.publicBatchRecalculateAllReputationArgsSchema
+>;
+export type PublicBatchRecalculateAllReputationReturns = z.infer<
+  typeof generated.publicBatchRecalculateAllReputationReturnsSchema
+>;
 export type PublicBatchRecalculateReputationArgs = z.infer<
   typeof generated.publicBatchRecalculateReputationArgsSchema
 >;
@@ -264,11 +585,47 @@ export type PublicCalculateAllUserAffinitiesArgs = z.infer<
 export type PublicCalculateAllUserAffinitiesReturns = z.infer<
   typeof generated.publicCalculateAllUserAffinitiesReturnsSchema
 >;
+export type PublicCalculateContentPopularityScoreArgs = z.infer<
+  typeof generated.publicCalculateContentPopularityScoreArgsSchema
+>;
+export type PublicCalculateContentPopularityScoreReturns = z.infer<
+  typeof generated.publicCalculateContentPopularityScoreReturnsSchema
+>;
+export type PublicCalculateTagSimilarityArgs = z.infer<
+  typeof generated.publicCalculateTagSimilarityArgsSchema
+>;
+export type PublicCalculateTagSimilarityReturns = z.infer<
+  typeof generated.publicCalculateTagSimilarityReturnsSchema
+>;
 export type PublicCalculateUserReputationArgs = z.infer<
   typeof generated.publicCalculateUserReputationArgsSchema
 >;
 export type PublicCalculateUserReputationReturns = z.infer<
   typeof generated.publicCalculateUserReputationReturnsSchema
+>;
+export type PublicCalculateUserReputationScoreArgs = z.infer<
+  typeof generated.publicCalculateUserReputationScoreArgsSchema
+>;
+export type PublicCalculateUserReputationScoreReturns = z.infer<
+  typeof generated.publicCalculateUserReputationScoreReturnsSchema
+>;
+export type PublicCancelEmailSequenceArgs = z.infer<
+  typeof generated.publicCancelEmailSequenceArgsSchema
+>;
+export type PublicCancelEmailSequenceReturns = z.infer<
+  typeof generated.publicCancelEmailSequenceReturnsSchema
+>;
+export type PublicCaptureIndexUsageSnapshotArgs = z.infer<
+  typeof generated.publicCaptureIndexUsageSnapshotArgsSchema
+>;
+export type PublicCaptureIndexUsageSnapshotReturns = z.infer<
+  typeof generated.publicCaptureIndexUsageSnapshotReturnsSchema
+>;
+export type PublicCaptureTableBloatSnapshotArgs = z.infer<
+  typeof generated.publicCaptureTableBloatSnapshotArgsSchema
+>;
+export type PublicCaptureTableBloatSnapshotReturns = z.infer<
+  typeof generated.publicCaptureTableBloatSnapshotReturnsSchema
 >;
 export type PublicCheckAllBadgesArgs = z.infer<typeof generated.publicCheckAllBadgesArgsSchema>;
 export type PublicCheckAllBadgesReturns = z.infer<
@@ -280,17 +637,159 @@ export type PublicCheckAndAwardBadgeArgs = z.infer<
 export type PublicCheckAndAwardBadgeReturns = z.infer<
   typeof generated.publicCheckAndAwardBadgeReturnsSchema
 >;
+export type PublicCheckAndAwardBadgesManualArgs = z.infer<
+  typeof generated.publicCheckAndAwardBadgesManualArgsSchema
+>;
+export type PublicCheckAndAwardBadgesManualReturns = z.infer<
+  typeof generated.publicCheckAndAwardBadgesManualReturnsSchema
+>;
+export type PublicCheckVacuumNeededArgs = z.infer<
+  typeof generated.publicCheckVacuumNeededArgsSchema
+>;
+export type PublicCheckVacuumNeededReturns = z.infer<
+  typeof generated.publicCheckVacuumNeededReturnsSchema
+>;
 export type PublicCleanupOldInteractionsArgs = z.infer<
   typeof generated.publicCleanupOldInteractionsArgsSchema
 >;
 export type PublicCleanupOldInteractionsReturns = z.infer<
   typeof generated.publicCleanupOldInteractionsReturnsSchema
 >;
+export type PublicEnrollInEmailSequenceArgs = z.infer<
+  typeof generated.publicEnrollInEmailSequenceArgsSchema
+>;
+export type PublicEnrollInEmailSequenceReturns = z.infer<
+  typeof generated.publicEnrollInEmailSequenceReturnsSchema
+>;
+export type PublicEvaluateBadgeCriteriaArgs = z.infer<
+  typeof generated.publicEvaluateBadgeCriteriaArgsSchema
+>;
+export type PublicEvaluateBadgeCriteriaReturns = z.infer<
+  typeof generated.publicEvaluateBadgeCriteriaReturnsSchema
+>;
 export type PublicExtractTagsForSearchArgs = z.infer<
   typeof generated.publicExtractTagsForSearchArgsSchema
 >;
 export type PublicExtractTagsForSearchReturns = z.infer<
   typeof generated.publicExtractTagsForSearchReturnsSchema
+>;
+export type PublicFilterJobsArgs = z.infer<typeof generated.publicFilterJobsArgsSchema>;
+export type PublicFilterJobsReturns = z.infer<typeof generated.publicFilterJobsReturnsSchema>;
+export type PublicFormatDateIsoArgs = z.infer<typeof generated.publicFormatDateIsoArgsSchema>;
+export type PublicFormatDateIsoReturns = z.infer<typeof generated.publicFormatDateIsoReturnsSchema>;
+export type PublicFormatDateLongArgs = z.infer<typeof generated.publicFormatDateLongArgsSchema>;
+export type PublicFormatDateLongReturns = z.infer<
+  typeof generated.publicFormatDateLongReturnsSchema
+>;
+export type PublicFormatDateShortArgs = z.infer<typeof generated.publicFormatDateShortArgsSchema>;
+export type PublicFormatDateShortReturns = z.infer<
+  typeof generated.publicFormatDateShortReturnsSchema
+>;
+export type PublicFormatRelativeDateArgs = z.infer<
+  typeof generated.publicFormatRelativeDateArgsSchema
+>;
+export type PublicFormatRelativeDateReturns = z.infer<
+  typeof generated.publicFormatRelativeDateReturnsSchema
+>;
+export type PublicFormatWeekRangeArgs = z.infer<typeof generated.publicFormatWeekRangeArgsSchema>;
+export type PublicFormatWeekRangeReturns = z.infer<
+  typeof generated.publicFormatWeekRangeReturnsSchema
+>;
+export type PublicGenerateCommandInstallationArgs = z.infer<
+  typeof generated.publicGenerateCommandInstallationArgsSchema
+>;
+export type PublicGenerateCommandInstallationReturns = z.infer<
+  typeof generated.publicGenerateCommandInstallationReturnsSchema
+>;
+export type PublicGenerateContentFieldArgs = z.infer<
+  typeof generated.publicGenerateContentFieldArgsSchema
+>;
+export type PublicGenerateContentFieldReturns = z.infer<
+  typeof generated.publicGenerateContentFieldReturnsSchema
+>;
+export type PublicGenerateHookInstallationArgs = z.infer<
+  typeof generated.publicGenerateHookInstallationArgsSchema
+>;
+export type PublicGenerateHookInstallationReturns = z.infer<
+  typeof generated.publicGenerateHookInstallationReturnsSchema
+>;
+export type PublicGenerateMarkdownExportArgs = z.infer<
+  typeof generated.publicGenerateMarkdownExportArgsSchema
+>;
+export type PublicGenerateMarkdownExportReturns = z.infer<
+  typeof generated.publicGenerateMarkdownExportReturnsSchema
+>;
+export type PublicGenerateMetadataForRouteArgs = z.infer<
+  typeof generated.publicGenerateMetadataForRouteArgsSchema
+>;
+export type PublicGenerateMetadataForRouteReturns = z.infer<
+  typeof generated.publicGenerateMetadataForRouteReturnsSchema
+>;
+export type PublicGenerateSlugArgs = z.infer<typeof generated.publicGenerateSlugArgsSchema>;
+export type PublicGenerateSlugReturns = z.infer<typeof generated.publicGenerateSlugReturnsSchema>;
+export type PublicGenerateSlugFromFilenameArgs = z.infer<
+  typeof generated.publicGenerateSlugFromFilenameArgsSchema
+>;
+export type PublicGenerateSlugFromFilenameReturns = z.infer<
+  typeof generated.publicGenerateSlugFromFilenameReturnsSchema
+>;
+export type PublicGetAccountDashboardArgs = z.infer<
+  typeof generated.publicGetAccountDashboardArgsSchema
+>;
+export type PublicGetAccountDashboardReturns = z.infer<
+  typeof generated.publicGetAccountDashboardReturnsSchema
+>;
+export type PublicGetActiveNotificationsArgs = z.infer<
+  typeof generated.publicGetActiveNotificationsArgsSchema
+>;
+export type PublicGetActiveNotificationsReturns = z.infer<
+  typeof generated.publicGetActiveNotificationsReturnsSchema
+>;
+export type PublicGetActiveSponsoredContentArgs = z.infer<
+  typeof generated.publicGetActiveSponsoredContentArgsSchema
+>;
+export type PublicGetActiveSponsoredContentReturns = z.infer<
+  typeof generated.publicGetActiveSponsoredContentReturnsSchema
+>;
+export type PublicGetActiveSubscribersArgs = z.infer<
+  typeof generated.publicGetActiveSubscribersArgsSchema
+>;
+export type PublicGetActiveSubscribersReturns = z.infer<
+  typeof generated.publicGetActiveSubscribersReturnsSchema
+>;
+export type PublicGetAllContentCategoriesArgs = z.infer<
+  typeof generated.publicGetAllContentCategoriesArgsSchema
+>;
+export type PublicGetAllContentCategoriesReturns = z.infer<
+  typeof generated.publicGetAllContentCategoriesReturnsSchema
+>;
+export type PublicGetAllSeoConfigArgs = z.infer<typeof generated.publicGetAllSeoConfigArgsSchema>;
+export type PublicGetAllSeoConfigReturns = z.infer<
+  typeof generated.publicGetAllSeoConfigReturnsSchema
+>;
+export type PublicGetAllStructuredDataConfigsArgs = z.infer<
+  typeof generated.publicGetAllStructuredDataConfigsArgsSchema
+>;
+export type PublicGetAllStructuredDataConfigsReturns = z.infer<
+  typeof generated.publicGetAllStructuredDataConfigsReturnsSchema
+>;
+export type PublicGetApiCategoryContentArgs = z.infer<
+  typeof generated.publicGetApiCategoryContentArgsSchema
+>;
+export type PublicGetApiCategoryContentReturns = z.infer<
+  typeof generated.publicGetApiCategoryContentReturnsSchema
+>;
+export type PublicGetApiContentArgs = z.infer<typeof generated.publicGetApiContentArgsSchema>;
+export type PublicGetApiContentReturns = z.infer<typeof generated.publicGetApiContentReturnsSchema>;
+export type PublicGetApiHealthArgs = z.infer<typeof generated.publicGetApiHealthArgsSchema>;
+export type PublicGetApiHealthReturns = z.infer<typeof generated.publicGetApiHealthReturnsSchema>;
+export type PublicGetAppSettingsArgs = z.infer<typeof generated.publicGetAppSettingsArgsSchema>;
+export type PublicGetAppSettingsReturns = z.infer<
+  typeof generated.publicGetAppSettingsReturnsSchema
+>;
+export type PublicGetBloatedTablesArgs = z.infer<typeof generated.publicGetBloatedTablesArgsSchema>;
+export type PublicGetBloatedTablesReturns = z.infer<
+  typeof generated.publicGetBloatedTablesReturnsSchema
 >;
 export type PublicGetBookmarkCountsByCategoryArgs = z.infer<
   typeof generated.publicGetBookmarkCountsByCategoryArgsSchema
@@ -308,19 +807,565 @@ export type PublicGetBulkUserStatsRealtimeArgs = z.infer<
 export type PublicGetBulkUserStatsRealtimeReturns = z.infer<
   typeof generated.publicGetBulkUserStatsRealtimeReturnsSchema
 >;
+export type PublicGetCategoryConfigArgs = z.infer<
+  typeof generated.publicGetCategoryConfigArgsSchema
+>;
+export type PublicGetCategoryConfigReturns = z.infer<
+  typeof generated.publicGetCategoryConfigReturnsSchema
+>;
+export type PublicGetCategoryConfigsWithFeaturesArgs = z.infer<
+  typeof generated.publicGetCategoryConfigsWithFeaturesArgsSchema
+>;
+export type PublicGetCategoryConfigsWithFeaturesReturns = z.infer<
+  typeof generated.publicGetCategoryConfigsWithFeaturesReturnsSchema
+>;
+export type PublicGetChangelogEntriesArgs = z.infer<
+  typeof generated.publicGetChangelogEntriesArgsSchema
+>;
+export type PublicGetChangelogEntriesReturns = z.infer<
+  typeof generated.publicGetChangelogEntriesReturnsSchema
+>;
+export type PublicGetChangelogEntryBySlugArgs = z.infer<
+  typeof generated.publicGetChangelogEntryBySlugArgsSchema
+>;
+export type PublicGetChangelogEntryBySlugReturns = z.infer<
+  typeof generated.publicGetChangelogEntryBySlugReturnsSchema
+>;
+export type PublicGetChangelogMetadataArgs = z.infer<
+  typeof generated.publicGetChangelogMetadataArgsSchema
+>;
+export type PublicGetChangelogMetadataReturns = z.infer<
+  typeof generated.publicGetChangelogMetadataReturnsSchema
+>;
+export type PublicGetChangelogWithCategoryStatsArgs = z.infer<
+  typeof generated.publicGetChangelogWithCategoryStatsArgsSchema
+>;
+export type PublicGetChangelogWithCategoryStatsReturns = z.infer<
+  typeof generated.publicGetChangelogWithCategoryStatsReturnsSchema
+>;
+export type PublicGetCollectionDetailWithItemsArgs = z.infer<
+  typeof generated.publicGetCollectionDetailWithItemsArgsSchema
+>;
+export type PublicGetCollectionDetailWithItemsReturns = z.infer<
+  typeof generated.publicGetCollectionDetailWithItemsReturnsSchema
+>;
+export type PublicGetCollectionItemsGroupedArgs = z.infer<
+  typeof generated.publicGetCollectionItemsGroupedArgsSchema
+>;
+export type PublicGetCollectionItemsGroupedReturns = z.infer<
+  typeof generated.publicGetCollectionItemsGroupedReturnsSchema
+>;
+export type PublicGetCommunityDirectoryArgs = z.infer<
+  typeof generated.publicGetCommunityDirectoryArgsSchema
+>;
+export type PublicGetCommunityDirectoryReturns = z.infer<
+  typeof generated.publicGetCommunityDirectoryReturnsSchema
+>;
+export type PublicGetCompanyJobStatsArgs = z.infer<
+  typeof generated.publicGetCompanyJobStatsArgsSchema
+>;
+export type PublicGetCompanyJobStatsReturns = z.infer<
+  typeof generated.publicGetCompanyJobStatsReturnsSchema
+>;
+export type PublicGetContentAffinityArgs = z.infer<
+  typeof generated.publicGetContentAffinityArgsSchema
+>;
+export type PublicGetContentAffinityReturns = z.infer<
+  typeof generated.publicGetContentAffinityReturnsSchema
+>;
+export type PublicGetContentDetailCompleteArgs = z.infer<
+  typeof generated.publicGetContentDetailCompleteArgsSchema
+>;
+export type PublicGetContentDetailCompleteReturns = z.infer<
+  typeof generated.publicGetContentDetailCompleteReturnsSchema
+>;
+export type PublicGetContentPaginatedArgs = z.infer<
+  typeof generated.publicGetContentPaginatedArgsSchema
+>;
+export type PublicGetContentPaginatedReturns = z.infer<
+  typeof generated.publicGetContentPaginatedReturnsSchema
+>;
+export type PublicGetContentTemplatesArgs = z.infer<
+  typeof generated.publicGetContentTemplatesArgsSchema
+>;
+export type PublicGetContentTemplatesReturns = z.infer<
+  typeof generated.publicGetContentTemplatesReturnsSchema
+>;
+export type PublicGetCurrentWeekStartArgs = z.infer<
+  typeof generated.publicGetCurrentWeekStartArgsSchema
+>;
+export type PublicGetCurrentWeekStartReturns = z.infer<
+  typeof generated.publicGetCurrentWeekStartReturnsSchema
+>;
+export type PublicGetDatabaseFingerprintArgs = z.infer<
+  typeof generated.publicGetDatabaseFingerprintArgsSchema
+>;
+export type PublicGetDatabaseFingerprintReturns = z.infer<
+  typeof generated.publicGetDatabaseFingerprintReturnsSchema
+>;
+export type PublicGetDaysAgoArgs = z.infer<typeof generated.publicGetDaysAgoArgsSchema>;
+export type PublicGetDaysAgoReturns = z.infer<typeof generated.publicGetDaysAgoReturnsSchema>;
+export type PublicGetDueSequenceEmailsArgs = z.infer<
+  typeof generated.publicGetDueSequenceEmailsArgsSchema
+>;
+export type PublicGetDueSequenceEmailsReturns = z.infer<
+  typeof generated.publicGetDueSequenceEmailsReturnsSchema
+>;
+export type PublicGetDynamicFeaturedContentArgs = z.infer<
+  typeof generated.publicGetDynamicFeaturedContentArgsSchema
+>;
+export type PublicGetDynamicFeaturedContentReturns = z.infer<
+  typeof generated.publicGetDynamicFeaturedContentReturnsSchema
+>;
+export type PublicGetEnrichedContentArgs = z.infer<
+  typeof generated.publicGetEnrichedContentArgsSchema
+>;
+export type PublicGetEnrichedContentReturns = z.infer<
+  typeof generated.publicGetEnrichedContentReturnsSchema
+>;
+export type PublicGetFeaturedJobsArgs = z.infer<typeof generated.publicGetFeaturedJobsArgsSchema>;
+export type PublicGetFeaturedJobsReturns = z.infer<
+  typeof generated.publicGetFeaturedJobsReturnsSchema
+>;
+export type PublicGetFormFieldConfigArgs = z.infer<
+  typeof generated.publicGetFormFieldConfigArgsSchema
+>;
+export type PublicGetFormFieldConfigReturns = z.infer<
+  typeof generated.publicGetFormFieldConfigReturnsSchema
+>;
+export type PublicGetFormFieldsForContentTypeArgs = z.infer<
+  typeof generated.publicGetFormFieldsForContentTypeArgsSchema
+>;
+export type PublicGetFormFieldsForContentTypeReturns = z.infer<
+  typeof generated.publicGetFormFieldsForContentTypeReturnsSchema
+>;
+export type PublicGetFormFieldsGroupedArgs = z.infer<
+  typeof generated.publicGetFormFieldsGroupedArgsSchema
+>;
+export type PublicGetFormFieldsGroupedReturns = z.infer<
+  typeof generated.publicGetFormFieldsGroupedReturnsSchema
+>;
+export type PublicGetGalleryTrendingArgs = z.infer<
+  typeof generated.publicGetGalleryTrendingArgsSchema
+>;
+export type PublicGetGalleryTrendingReturns = z.infer<
+  typeof generated.publicGetGalleryTrendingReturnsSchema
+>;
+export type PublicGetGenerationConfigArgs = z.infer<
+  typeof generated.publicGetGenerationConfigArgsSchema
+>;
+export type PublicGetGenerationConfigReturns = z.infer<
+  typeof generated.publicGetGenerationConfigReturnsSchema
+>;
+export type PublicGetGithubStarsArgs = z.infer<typeof generated.publicGetGithubStarsArgsSchema>;
+export type PublicGetGithubStarsReturns = z.infer<
+  typeof generated.publicGetGithubStarsReturnsSchema
+>;
+export type PublicGetHomepageCompleteArgs = z.infer<
+  typeof generated.publicGetHomepageCompleteArgsSchema
+>;
+export type PublicGetHomepageCompleteReturns = z.infer<
+  typeof generated.publicGetHomepageCompleteReturnsSchema
+>;
+export type PublicGetHomepageContentEnrichedArgs = z.infer<
+  typeof generated.publicGetHomepageContentEnrichedArgsSchema
+>;
+export type PublicGetHomepageContentEnrichedReturns = z.infer<
+  typeof generated.publicGetHomepageContentEnrichedReturnsSchema
+>;
+export type PublicGetIndexUsageTrendsArgs = z.infer<
+  typeof generated.publicGetIndexUsageTrendsArgsSchema
+>;
+export type PublicGetIndexUsageTrendsReturns = z.infer<
+  typeof generated.publicGetIndexUsageTrendsReturnsSchema
+>;
+export type PublicGetJobDetailArgs = z.infer<typeof generated.publicGetJobDetailArgsSchema>;
+export type PublicGetJobDetailReturns = z.infer<typeof generated.publicGetJobDetailReturnsSchema>;
+export type PublicGetJobsByCategoryArgs = z.infer<
+  typeof generated.publicGetJobsByCategoryArgsSchema
+>;
+export type PublicGetJobsByCategoryReturns = z.infer<
+  typeof generated.publicGetJobsByCategoryReturnsSchema
+>;
+export type PublicGetJobsCountArgs = z.infer<typeof generated.publicGetJobsCountArgsSchema>;
+export type PublicGetJobsCountReturns = z.infer<typeof generated.publicGetJobsCountReturnsSchema>;
+export type PublicGetJobsListArgs = z.infer<typeof generated.publicGetJobsListArgsSchema>;
+export type PublicGetJobsListReturns = z.infer<typeof generated.publicGetJobsListReturnsSchema>;
+export type PublicGetMetadataTemplateArgs = z.infer<
+  typeof generated.publicGetMetadataTemplateArgsSchema
+>;
+export type PublicGetMetadataTemplateReturns = z.infer<
+  typeof generated.publicGetMetadataTemplateReturnsSchema
+>;
+export type PublicGetMySubmissionsArgs = z.infer<typeof generated.publicGetMySubmissionsArgsSchema>;
+export type PublicGetMySubmissionsReturns = z.infer<
+  typeof generated.publicGetMySubmissionsReturnsSchema
+>;
+export type PublicGetNavigationMenuArgs = z.infer<
+  typeof generated.publicGetNavigationMenuArgsSchema
+>;
+export type PublicGetNavigationMenuReturns = z.infer<
+  typeof generated.publicGetNavigationMenuReturnsSchema
+>;
+export type PublicGetNewContentForWeekArgs = z.infer<
+  typeof generated.publicGetNewContentForWeekArgsSchema
+>;
+export type PublicGetNewContentForWeekReturns = z.infer<
+  typeof generated.publicGetNewContentForWeekReturnsSchema
+>;
+export type PublicGetPendingResendSyncsArgs = z.infer<
+  typeof generated.publicGetPendingResendSyncsArgsSchema
+>;
+export type PublicGetPendingResendSyncsReturns = z.infer<
+  typeof generated.publicGetPendingResendSyncsReturnsSchema
+>;
+export type PublicGetPendingSubmissionsArgs = z.infer<
+  typeof generated.publicGetPendingSubmissionsArgsSchema
+>;
+export type PublicGetPendingSubmissionsReturns = z.infer<
+  typeof generated.publicGetPendingSubmissionsReturnsSchema
+>;
+export type PublicGetPerformanceBaselineArgs = z.infer<
+  typeof generated.publicGetPerformanceBaselineArgsSchema
+>;
+export type PublicGetPerformanceBaselineReturns = z.infer<
+  typeof generated.publicGetPerformanceBaselineReturnsSchema
+>;
+export type PublicGetPersonalizedFeedArgs = z.infer<
+  typeof generated.publicGetPersonalizedFeedArgsSchema
+>;
+export type PublicGetPersonalizedFeedReturns = z.infer<
+  typeof generated.publicGetPersonalizedFeedReturnsSchema
+>;
 export type PublicGetPopularPostsArgs = z.infer<typeof generated.publicGetPopularPostsArgsSchema>;
 export type PublicGetPopularPostsReturns = z.infer<
   typeof generated.publicGetPopularPostsReturnsSchema
 >;
+export type PublicGetQuizConfigurationArgs = z.infer<
+  typeof generated.publicGetQuizConfigurationArgsSchema
+>;
+export type PublicGetQuizConfigurationReturns = z.infer<
+  typeof generated.publicGetQuizConfigurationReturnsSchema
+>;
+export type PublicGetRecentMergedArgs = z.infer<typeof generated.publicGetRecentMergedArgsSchema>;
+export type PublicGetRecentMergedReturns = z.infer<
+  typeof generated.publicGetRecentMergedReturnsSchema
+>;
+export type PublicGetRecommendationsArgs = z.infer<
+  typeof generated.publicGetRecommendationsArgsSchema
+>;
+export type PublicGetRecommendationsReturns = z.infer<
+  typeof generated.publicGetRecommendationsReturnsSchema
+>;
+export type PublicGetRelatedContentArgs = z.infer<
+  typeof generated.publicGetRelatedContentArgsSchema
+>;
+export type PublicGetRelatedContentReturns = z.infer<
+  typeof generated.publicGetRelatedContentReturnsSchema
+>;
+export type PublicGetReviewsWithStatsArgs = z.infer<
+  typeof generated.publicGetReviewsWithStatsArgsSchema
+>;
+export type PublicGetReviewsWithStatsReturns = z.infer<
+  typeof generated.publicGetReviewsWithStatsReturnsSchema
+>;
+export type PublicGetSearchCountArgs = z.infer<typeof generated.publicGetSearchCountArgsSchema>;
+export type PublicGetSearchCountReturns = z.infer<
+  typeof generated.publicGetSearchCountReturnsSchema
+>;
+export type PublicGetSearchSuggestionsArgs = z.infer<
+  typeof generated.publicGetSearchSuggestionsArgsSchema
+>;
+export type PublicGetSearchSuggestionsReturns = z.infer<
+  typeof generated.publicGetSearchSuggestionsReturnsSchema
+>;
+export type PublicGetSeoConfigArgs = z.infer<typeof generated.publicGetSeoConfigArgsSchema>;
+export type PublicGetSeoConfigReturns = z.infer<typeof generated.publicGetSeoConfigReturnsSchema>;
+export type PublicGetSidebarGuidesDataArgs = z.infer<
+  typeof generated.publicGetSidebarGuidesDataArgsSchema
+>;
+export type PublicGetSidebarGuidesDataReturns = z.infer<
+  typeof generated.publicGetSidebarGuidesDataReturnsSchema
+>;
+export type PublicGetSimilarContentArgs = z.infer<
+  typeof generated.publicGetSimilarContentArgsSchema
+>;
+export type PublicGetSimilarContentReturns = z.infer<
+  typeof generated.publicGetSimilarContentReturnsSchema
+>;
+export type PublicGetSiteUrlsArgs = z.infer<typeof generated.publicGetSiteUrlsArgsSchema>;
+export type PublicGetSiteUrlsReturns = z.infer<typeof generated.publicGetSiteUrlsReturnsSchema>;
+export type PublicGetSponsorshipAnalyticsArgs = z.infer<
+  typeof generated.publicGetSponsorshipAnalyticsArgsSchema
+>;
+export type PublicGetSponsorshipAnalyticsReturns = z.infer<
+  typeof generated.publicGetSponsorshipAnalyticsReturnsSchema
+>;
+export type PublicGetStructuredDataConfigArgs = z.infer<
+  typeof generated.publicGetStructuredDataConfigArgsSchema
+>;
+export type PublicGetStructuredDataConfigReturns = z.infer<
+  typeof generated.publicGetStructuredDataConfigReturnsSchema
+>;
+export type PublicGetSubmissionDashboardArgs = z.infer<
+  typeof generated.publicGetSubmissionDashboardArgsSchema
+>;
+export type PublicGetSubmissionDashboardReturns = z.infer<
+  typeof generated.publicGetSubmissionDashboardReturnsSchema
+>;
+export type PublicGetSubmissionStatsArgs = z.infer<
+  typeof generated.publicGetSubmissionStatsArgsSchema
+>;
+export type PublicGetSubmissionStatsReturns = z.infer<
+  typeof generated.publicGetSubmissionStatsReturnsSchema
+>;
+export type PublicGetSubmissionStatsSummaryArgs = z.infer<
+  typeof generated.publicGetSubmissionStatsSummaryArgsSchema
+>;
+export type PublicGetSubmissionStatsSummaryReturns = z.infer<
+  typeof generated.publicGetSubmissionStatsSummaryReturnsSchema
+>;
+export type PublicGetTierNameFromScoreArgs = z.infer<
+  typeof generated.publicGetTierNameFromScoreArgsSchema
+>;
+export type PublicGetTierNameFromScoreReturns = z.infer<
+  typeof generated.publicGetTierNameFromScoreReturnsSchema
+>;
+export type PublicGetTierProgressFromScoreArgs = z.infer<
+  typeof generated.publicGetTierProgressFromScoreArgsSchema
+>;
+export type PublicGetTierProgressFromScoreReturns = z.infer<
+  typeof generated.publicGetTierProgressFromScoreReturnsSchema
+>;
+export type PublicGetTopContributorsArgs = z.infer<
+  typeof generated.publicGetTopContributorsArgsSchema
+>;
+export type PublicGetTopContributorsReturns = z.infer<
+  typeof generated.publicGetTopContributorsReturnsSchema
+>;
+export type PublicGetTopTagsForCategoryArgs = z.infer<
+  typeof generated.publicGetTopTagsForCategoryArgsSchema
+>;
+export type PublicGetTopTagsForCategoryReturns = z.infer<
+  typeof generated.publicGetTopTagsForCategoryReturnsSchema
+>;
+export type PublicGetTrending24hArgs = z.infer<typeof generated.publicGetTrending24hArgsSchema>;
+export type PublicGetTrending24hReturns = z.infer<
+  typeof generated.publicGetTrending24hReturnsSchema
+>;
+export type PublicGetTrendingContentArgs = z.infer<
+  typeof generated.publicGetTrendingContentArgsSchema
+>;
+export type PublicGetTrendingContentReturns = z.infer<
+  typeof generated.publicGetTrendingContentReturnsSchema
+>;
+export type PublicGetTrendingPageArgs = z.infer<typeof generated.publicGetTrendingPageArgsSchema>;
+export type PublicGetTrendingPageReturns = z.infer<
+  typeof generated.publicGetTrendingPageReturnsSchema
+>;
+export type PublicGetUnusedIndexesArgs = z.infer<typeof generated.publicGetUnusedIndexesArgsSchema>;
+export type PublicGetUnusedIndexesReturns = z.infer<
+  typeof generated.publicGetUnusedIndexesReturnsSchema
+>;
+export type PublicGetUsageRecommendationsArgs = z.infer<
+  typeof generated.publicGetUsageRecommendationsArgsSchema
+>;
+export type PublicGetUsageRecommendationsReturns = z.infer<
+  typeof generated.publicGetUsageRecommendationsReturnsSchema
+>;
+export type PublicGetUserActivitySummaryArgs = z.infer<
+  typeof generated.publicGetUserActivitySummaryArgsSchema
+>;
+export type PublicGetUserActivitySummaryReturns = z.infer<
+  typeof generated.publicGetUserActivitySummaryReturnsSchema
+>;
+export type PublicGetUserActivityTimelineArgs = z.infer<
+  typeof generated.publicGetUserActivityTimelineArgsSchema
+>;
+export type PublicGetUserActivityTimelineReturns = z.infer<
+  typeof generated.publicGetUserActivityTimelineReturnsSchema
+>;
+export type PublicGetUserAffinitiesArgs = z.infer<
+  typeof generated.publicGetUserAffinitiesArgsSchema
+>;
+export type PublicGetUserAffinitiesReturns = z.infer<
+  typeof generated.publicGetUserAffinitiesReturnsSchema
+>;
+export type PublicGetUserAffinityScoresArgs = z.infer<
+  typeof generated.publicGetUserAffinityScoresArgsSchema
+>;
+export type PublicGetUserAffinityScoresReturns = z.infer<
+  typeof generated.publicGetUserAffinityScoresReturnsSchema
+>;
+export type PublicGetUserBadgeStatsArgs = z.infer<
+  typeof generated.publicGetUserBadgeStatsArgsSchema
+>;
+export type PublicGetUserBadgeStatsReturns = z.infer<
+  typeof generated.publicGetUserBadgeStatsReturnsSchema
+>;
+export type PublicGetUserBadgesWithDetailsArgs = z.infer<
+  typeof generated.publicGetUserBadgesWithDetailsArgsSchema
+>;
+export type PublicGetUserBadgesWithDetailsReturns = z.infer<
+  typeof generated.publicGetUserBadgesWithDetailsReturnsSchema
+>;
+export type PublicGetUserCollectionDetailArgs = z.infer<
+  typeof generated.publicGetUserCollectionDetailArgsSchema
+>;
+export type PublicGetUserCollectionDetailReturns = z.infer<
+  typeof generated.publicGetUserCollectionDetailReturnsSchema
+>;
+export type PublicGetUserDashboardArgs = z.infer<typeof generated.publicGetUserDashboardArgsSchema>;
+export type PublicGetUserDashboardReturns = z.infer<
+  typeof generated.publicGetUserDashboardReturnsSchema
+>;
+export type PublicGetUserFavoriteCategoriesArgs = z.infer<
+  typeof generated.publicGetUserFavoriteCategoriesArgsSchema
+>;
+export type PublicGetUserFavoriteCategoriesReturns = z.infer<
+  typeof generated.publicGetUserFavoriteCategoriesReturnsSchema
+>;
+export type PublicGetUserInteractionSummaryArgs = z.infer<
+  typeof generated.publicGetUserInteractionSummaryArgsSchema
+>;
+export type PublicGetUserInteractionSummaryReturns = z.infer<
+  typeof generated.publicGetUserInteractionSummaryReturnsSchema
+>;
+export type PublicGetUserLibraryArgs = z.infer<typeof generated.publicGetUserLibraryArgsSchema>;
+export type PublicGetUserLibraryReturns = z.infer<
+  typeof generated.publicGetUserLibraryReturnsSchema
+>;
+export type PublicGetUserProfileArgs = z.infer<typeof generated.publicGetUserProfileArgsSchema>;
+export type PublicGetUserProfileReturns = z.infer<
+  typeof generated.publicGetUserProfileReturnsSchema
+>;
+export type PublicGetUserProfileCompleteArgs = z.infer<
+  typeof generated.publicGetUserProfileCompleteArgsSchema
+>;
+export type PublicGetUserProfileCompleteReturns = z.infer<
+  typeof generated.publicGetUserProfileCompleteReturnsSchema
+>;
+export type PublicGetUserRecentInteractionsArgs = z.infer<
+  typeof generated.publicGetUserRecentInteractionsArgsSchema
+>;
+export type PublicGetUserRecentInteractionsReturns = z.infer<
+  typeof generated.publicGetUserRecentInteractionsReturnsSchema
+>;
+export type PublicGetUserReputationBreakdownArgs = z.infer<
+  typeof generated.publicGetUserReputationBreakdownArgsSchema
+>;
+export type PublicGetUserReputationBreakdownReturns = z.infer<
+  typeof generated.publicGetUserReputationBreakdownReturnsSchema
+>;
+export type PublicGetUserSettingsArgs = z.infer<typeof generated.publicGetUserSettingsArgsSchema>;
+export type PublicGetUserSettingsReturns = z.infer<
+  typeof generated.publicGetUserSettingsReturnsSchema
+>;
+export type PublicGetWeekEndArgs = z.infer<typeof generated.publicGetWeekEndArgsSchema>;
+export type PublicGetWeekEndReturns = z.infer<typeof generated.publicGetWeekEndReturnsSchema>;
+export type PublicGetWeeklyDigestArgs = z.infer<typeof generated.publicGetWeeklyDigestArgsSchema>;
+export type PublicGetWeeklyDigestReturns = z.infer<
+  typeof generated.publicGetWeeklyDigestReturnsSchema
+>;
+export type PublicGetWeeklyNewContentArgs = z.infer<
+  typeof generated.publicGetWeeklyNewContentArgsSchema
+>;
+export type PublicGetWeeklyNewContentReturns = z.infer<
+  typeof generated.publicGetWeeklyNewContentReturnsSchema
+>;
+export type PublicHandleWebhookBounceArgs = z.infer<
+  typeof generated.publicHandleWebhookBounceArgsSchema
+>;
+export type PublicHandleWebhookBounceReturns = z.infer<
+  typeof generated.publicHandleWebhookBounceReturnsSchema
+>;
+export type PublicHandleWebhookComplaintArgs = z.infer<
+  typeof generated.publicHandleWebhookComplaintArgsSchema
+>;
+export type PublicHandleWebhookComplaintReturns = z.infer<
+  typeof generated.publicHandleWebhookComplaintReturnsSchema
+>;
+export type PublicHandleWebhookContactCreatedArgs = z.infer<
+  typeof generated.publicHandleWebhookContactCreatedArgsSchema
+>;
+export type PublicHandleWebhookContactCreatedReturns = z.infer<
+  typeof generated.publicHandleWebhookContactCreatedReturnsSchema
+>;
+export type PublicHandleWebhookContactDeletedArgs = z.infer<
+  typeof generated.publicHandleWebhookContactDeletedArgsSchema
+>;
+export type PublicHandleWebhookContactDeletedReturns = z.infer<
+  typeof generated.publicHandleWebhookContactDeletedReturnsSchema
+>;
+export type PublicHandleWebhookEmailSentArgs = z.infer<
+  typeof generated.publicHandleWebhookEmailSentArgsSchema
+>;
+export type PublicHandleWebhookEmailSentReturns = z.infer<
+  typeof generated.publicHandleWebhookEmailSentReturnsSchema
+>;
+export type PublicImportRedisSeedDataArgs = z.infer<
+  typeof generated.publicImportRedisSeedDataArgsSchema
+>;
+export type PublicImportRedisSeedDataReturns = z.infer<
+  typeof generated.publicImportRedisSeedDataReturnsSchema
+>;
 export type PublicIncrementArgs = z.infer<typeof generated.publicIncrementArgsSchema>;
 export type PublicIncrementReturns = z.infer<typeof generated.publicIncrementReturnsSchema>;
+export type PublicInvokeEdgeFunctionArgs = z.infer<
+  typeof generated.publicInvokeEdgeFunctionArgsSchema
+>;
+export type PublicInvokeEdgeFunctionReturns = z.infer<
+  typeof generated.publicInvokeEdgeFunctionReturnsSchema
+>;
+export type PublicIsAdminArgs = z.infer<typeof generated.publicIsAdminArgsSchema>;
+export type PublicIsAdminReturns = z.infer<typeof generated.publicIsAdminReturnsSchema>;
+export type PublicIsBookmarkedArgs = z.infer<typeof generated.publicIsBookmarkedArgsSchema>;
+export type PublicIsBookmarkedReturns = z.infer<typeof generated.publicIsBookmarkedReturnsSchema>;
 export type PublicIsFollowingArgs = z.infer<typeof generated.publicIsFollowingArgsSchema>;
 export type PublicIsFollowingReturns = z.infer<typeof generated.publicIsFollowingReturnsSchema>;
-export type PublicRefreshContentPopularityArgs = z.infer<
-  typeof generated.publicRefreshContentPopularityArgsSchema
+export type PublicIsInFutureArgs = z.infer<typeof generated.publicIsInFutureArgsSchema>;
+export type PublicIsInFutureReturns = z.infer<typeof generated.publicIsInFutureReturnsSchema>;
+export type PublicIsInPastArgs = z.infer<typeof generated.publicIsInPastArgsSchema>;
+export type PublicIsInPastReturns = z.infer<typeof generated.publicIsInPastReturnsSchema>;
+export type PublicJobSlugArgs = z.infer<typeof generated.publicJobSlugArgsSchema>;
+export type PublicJobSlugReturns = z.infer<typeof generated.publicJobSlugReturnsSchema>;
+export type PublicManageCollectionArgs = z.infer<typeof generated.publicManageCollectionArgsSchema>;
+export type PublicManageCollectionReturns = z.infer<
+  typeof generated.publicManageCollectionReturnsSchema
 >;
-export type PublicRefreshContentPopularityReturns = z.infer<
-  typeof generated.publicRefreshContentPopularityReturnsSchema
+export type PublicManageCommentArgs = z.infer<typeof generated.publicManageCommentArgsSchema>;
+export type PublicManageCommentReturns = z.infer<typeof generated.publicManageCommentReturnsSchema>;
+export type PublicManageCompanyArgs = z.infer<typeof generated.publicManageCompanyArgsSchema>;
+export type PublicManageCompanyReturns = z.infer<typeof generated.publicManageCompanyReturnsSchema>;
+export type PublicManageJobArgs = z.infer<typeof generated.publicManageJobArgsSchema>;
+export type PublicManageJobReturns = z.infer<typeof generated.publicManageJobReturnsSchema>;
+export type PublicManagePostArgs = z.infer<typeof generated.publicManagePostArgsSchema>;
+export type PublicManagePostReturns = z.infer<typeof generated.publicManagePostReturnsSchema>;
+export type PublicManageReviewArgs = z.infer<typeof generated.publicManageReviewArgsSchema>;
+export type PublicManageReviewReturns = z.infer<typeof generated.publicManageReviewReturnsSchema>;
+export type PublicMarkResendSyncCompleteArgs = z.infer<
+  typeof generated.publicMarkResendSyncCompleteArgsSchema
+>;
+export type PublicMarkResendSyncCompleteReturns = z.infer<
+  typeof generated.publicMarkResendSyncCompleteReturnsSchema
+>;
+export type PublicMarkSequenceEmailProcessedArgs = z.infer<
+  typeof generated.publicMarkSequenceEmailProcessedArgsSchema
+>;
+export type PublicMarkSequenceEmailProcessedReturns = z.infer<
+  typeof generated.publicMarkSequenceEmailProcessedReturnsSchema
+>;
+export type PublicPopulateContentSeoDataArgs = z.infer<
+  typeof generated.publicPopulateContentSeoDataArgsSchema
+>;
+export type PublicPopulateContentSeoDataReturns = z.infer<
+  typeof generated.publicPopulateContentSeoDataReturnsSchema
+>;
+export type PublicRefreshMvSiteUrlsArgs = z.infer<
+  typeof generated.publicRefreshMvSiteUrlsArgsSchema
+>;
+export type PublicRefreshMvSiteUrlsReturns = z.infer<
+  typeof generated.publicRefreshMvSiteUrlsReturnsSchema
 >;
 export type PublicRefreshProfileFromOauthArgs = z.infer<
   typeof generated.publicRefreshProfileFromOauthArgsSchema
@@ -336,9 +1381,53 @@ export type PublicRefreshUserStatsArgs = z.infer<typeof generated.publicRefreshU
 export type PublicRefreshUserStatsReturns = z.infer<
   typeof generated.publicRefreshUserStatsReturnsSchema
 >;
+export type PublicRejectSubmissionArgs = z.infer<typeof generated.publicRejectSubmissionArgsSchema>;
+export type PublicRejectSubmissionReturns = z.infer<
+  typeof generated.publicRejectSubmissionReturnsSchema
+>;
+export type PublicRemoveBookmarkArgs = z.infer<typeof generated.publicRemoveBookmarkArgsSchema>;
+export type PublicRemoveBookmarkReturns = z.infer<
+  typeof generated.publicRemoveBookmarkReturnsSchema
+>;
+export type PublicRenderGuideSectionsToMarkdownArgs = z.infer<
+  typeof generated.publicRenderGuideSectionsToMarkdownArgsSchema
+>;
+export type PublicRenderGuideSectionsToMarkdownReturns = z.infer<
+  typeof generated.publicRenderGuideSectionsToMarkdownReturnsSchema
+>;
+export type PublicReorderCollectionItemsArgs = z.infer<
+  typeof generated.publicReorderCollectionItemsArgsSchema
+>;
+export type PublicReorderCollectionItemsReturns = z.infer<
+  typeof generated.publicReorderCollectionItemsReturnsSchema
+>;
+export type PublicReplaceTitlePlaceholderArgs = z.infer<
+  typeof generated.publicReplaceTitlePlaceholderArgsSchema
+>;
+export type PublicReplaceTitlePlaceholderReturns = z.infer<
+  typeof generated.publicReplaceTitlePlaceholderReturnsSchema
+>;
+export type PublicScheduleNextSequenceStepArgs = z.infer<
+  typeof generated.publicScheduleNextSequenceStepArgsSchema
+>;
+export type PublicScheduleNextSequenceStepReturns = z.infer<
+  typeof generated.publicScheduleNextSequenceStepReturnsSchema
+>;
+export type PublicSearchByPopularityArgs = z.infer<
+  typeof generated.publicSearchByPopularityArgsSchema
+>;
+export type PublicSearchByPopularityReturns = z.infer<
+  typeof generated.publicSearchByPopularityReturnsSchema
+>;
 export type PublicSearchCompaniesArgs = z.infer<typeof generated.publicSearchCompaniesArgsSchema>;
 export type PublicSearchCompaniesReturns = z.infer<
   typeof generated.publicSearchCompaniesReturnsSchema
+>;
+export type PublicSearchContentOptimizedArgs = z.infer<
+  typeof generated.publicSearchContentOptimizedArgsSchema
+>;
+export type PublicSearchContentOptimizedReturns = z.infer<
+  typeof generated.publicSearchContentOptimizedReturnsSchema
 >;
 export type PublicSearchJobsArgs = z.infer<typeof generated.publicSearchJobsArgsSchema>;
 export type PublicSearchJobsReturns = z.infer<typeof generated.publicSearchJobsReturnsSchema>;
@@ -348,6 +1437,50 @@ export type PublicShowLimitArgs = z.infer<typeof generated.publicShowLimitArgsSc
 export type PublicShowLimitReturns = z.infer<typeof generated.publicShowLimitReturnsSchema>;
 export type PublicShowTrgmArgs = z.infer<typeof generated.publicShowTrgmArgsSchema>;
 export type PublicShowTrgmReturns = z.infer<typeof generated.publicShowTrgmReturnsSchema>;
+export type PublicSlugToTitleArgs = z.infer<typeof generated.publicSlugToTitleArgsSchema>;
+export type PublicSlugToTitleReturns = z.infer<typeof generated.publicSlugToTitleReturnsSchema>;
+export type PublicSubmitContentForReviewArgs = z.infer<
+  typeof generated.publicSubmitContentForReviewArgsSchema
+>;
+export type PublicSubmitContentForReviewReturns = z.infer<
+  typeof generated.publicSubmitContentForReviewReturnsSchema
+>;
+export type PublicSubscribeNewsletterArgs = z.infer<
+  typeof generated.publicSubscribeNewsletterArgsSchema
+>;
+export type PublicSubscribeNewsletterReturns = z.infer<
+  typeof generated.publicSubscribeNewsletterReturnsSchema
+>;
+export type PublicSuggestVacuumCommandsArgs = z.infer<
+  typeof generated.publicSuggestVacuumCommandsArgsSchema
+>;
+export type PublicSuggestVacuumCommandsReturns = z.infer<
+  typeof generated.publicSuggestVacuumCommandsReturnsSchema
+>;
+export type PublicToggleBadgeFeaturedArgs = z.infer<
+  typeof generated.publicToggleBadgeFeaturedArgsSchema
+>;
+export type PublicToggleBadgeFeaturedReturns = z.infer<
+  typeof generated.publicToggleBadgeFeaturedReturnsSchema
+>;
+export type PublicToggleFollowArgs = z.infer<typeof generated.publicToggleFollowArgsSchema>;
+export type PublicToggleFollowReturns = z.infer<typeof generated.publicToggleFollowReturnsSchema>;
+export type PublicTogglePostVoteArgs = z.infer<typeof generated.publicTogglePostVoteArgsSchema>;
+export type PublicTogglePostVoteReturns = z.infer<
+  typeof generated.publicTogglePostVoteReturnsSchema
+>;
+export type PublicToggleReviewHelpfulArgs = z.infer<
+  typeof generated.publicToggleReviewHelpfulArgsSchema
+>;
+export type PublicToggleReviewHelpfulReturns = z.infer<
+  typeof generated.publicToggleReviewHelpfulReturnsSchema
+>;
+export type PublicTrackSponsoredEventArgs = z.infer<
+  typeof generated.publicTrackSponsoredEventArgsSchema
+>;
+export type PublicTrackSponsoredEventReturns = z.infer<
+  typeof generated.publicTrackSponsoredEventReturnsSchema
+>;
 export type PublicUnaccentArgs = z.infer<typeof generated.publicUnaccentArgsSchema>;
 export type PublicUnaccentReturns = z.infer<typeof generated.publicUnaccentReturnsSchema>;
 export type PublicUpdateUserAffinityScoresArgs = z.infer<
@@ -355,4 +1488,24 @@ export type PublicUpdateUserAffinityScoresArgs = z.infer<
 >;
 export type PublicUpdateUserAffinityScoresReturns = z.infer<
   typeof generated.publicUpdateUserAffinityScoresReturnsSchema
+>;
+export type PublicUpdateUserProfileArgs = z.infer<
+  typeof generated.publicUpdateUserProfileArgsSchema
+>;
+export type PublicUpdateUserProfileReturns = z.infer<
+  typeof generated.publicUpdateUserProfileReturnsSchema
+>;
+export type PublicUpsertGithubStarsArgs = z.infer<
+  typeof generated.publicUpsertGithubStarsArgsSchema
+>;
+export type PublicUpsertGithubStarsReturns = z.infer<
+  typeof generated.publicUpsertGithubStarsReturnsSchema
+>;
+export type PublicUserHasBadgeArgs = z.infer<typeof generated.publicUserHasBadgeArgsSchema>;
+export type PublicUserHasBadgeReturns = z.infer<typeof generated.publicUserHasBadgeReturnsSchema>;
+export type PublicValidateContentMetadataArgs = z.infer<
+  typeof generated.publicValidateContentMetadataArgsSchema
+>;
+export type PublicValidateContentMetadataReturns = z.infer<
+  typeof generated.publicValidateContentMetadataReturnsSchema
 >;

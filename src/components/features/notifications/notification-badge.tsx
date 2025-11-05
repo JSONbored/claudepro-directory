@@ -36,16 +36,7 @@ export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-        className={`
-          absolute -top-1 -right-1
-          h-5 w-5
-          rounded-full
-          bg-destructive
-          text-destructive-foreground
-          text-xs font-medium
-          flex items-center justify-center
-          shadow-md
-          ${className}
+        className={`-top-1 -right-1 absolute flex h-5 w-5 items-center justify-center rounded-full bg-destructive font-medium text-destructive-foreground text-xs shadow-md ${className}
         `}
         aria-live="polite"
         aria-label={`${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`}

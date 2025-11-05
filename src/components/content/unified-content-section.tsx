@@ -1,59 +1,8 @@
 'use client';
 
 /**
- * UnifiedContentSection - Client Component with Discriminated Union
- *
- * **ARCHITECTURE: Proper Data/Presentation Separation (Phase 4 Consolidation)**
- *
- * This component consolidates 6 section components into one configuration-driven component:
- * - BulletListSection (120 LOC)
- * - ContentSection (83 LOC)
- * - ConfigurationSection (207 LOC)
- * - UsageExamplesSection (251 LOC)
- * - TroubleshootingSection (105 LOC)
- * - InstallationSection (155 LOC)
- *
- * **Consolidation Metrics:**
- * - Old: 6 files, 921 LOC (components only)
- * - New: 1 file, 559 LOC (component) + 510 LOC (comprehensive Storybook stories)
- * - Component reduction: 362 LOC eliminated (39% reduction)
- * - Added: Full Storybook coverage that didn't exist before
- *
- * **KEY ARCHITECTURAL IMPROVEMENT:**
- *
- * **PROBLEM (Before):**
- * - Components were performing async operations (syntax highlighting)
- * - Mixed data fetching and presentation logic
- * - Not Storybook-compatible (server dependencies)
- * - Sequential async operations (performance bottleneck)
- *
- * **SOLUTION (After):**
- * - DATA LAYER (Server): All async operations happen at page level (unified-detail-page/index.tsx)
- * - PRESENTATION LAYER (Client): This component receives pre-processed HTML and renders UI
- * - Parallel async processing using Promise.all, batchMap, batchFetch
- * - Proper separation of concerns
- *
- * **Benefits:**
- * - ✅ Proper separation of concerns (data vs presentation)
- * - ✅ Parallel async processing at page level (performance)
- * - ✅ Storybook-compatible (no server dependencies)
- * - ✅ Testable in isolation (no async dependencies)
- * - ✅ Type-safe discriminated union (enforces valid prop combinations)
- * - ✅ Zero backward compatibility - modern patterns only
- * - ✅ 6 variants consolidated: bullets, content, configuration (json/multi/hook), examples, troubleshooting, installation
- *
- * **Discriminated Union Pattern:**
- * The props use TypeScript discriminated unions to ensure type safety. Each variant has
- * its own specific required props, and TypeScript enforces that only valid combinations
- * can be used. This eliminates entire classes of runtime errors.
- *
- * **Motion.dev Enhancements (Phase 1.5 - October 2025):**
- * - Scroll-triggered reveals (fade-in + slide-up animations)
- * - Viewport-based animations with whileInView
- * - Respects prefers-reduced-motion automatically
- *
- * @see unified-detail-page/index.tsx - Data layer (async processing, lines 108-291)
- * @see unified-content-section.stories.tsx - Comprehensive Storybook documentation
+ * Configuration-driven content section with 6 variants (bullets, content, configuration, examples, troubleshooting, installation).
+ * All async operations happen at page level - this component receives pre-processed data and renders UI.
  */
 
 import { motion } from 'motion/react';
@@ -81,16 +30,11 @@ import {
   Terminal,
   Zap,
 } from '@/src/lib/icons';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/schemas/component.schema';
 import type { CategoryId } from '@/src/lib/schemas/shared.schema';
-import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
-/**
- * Category to icon mapping for client-side resolution
- * This prevents passing React components across server/client boundary
- */
 const CATEGORY_ICONS: Record<CategoryId, LucideIcon> = {
   agents: Sparkles,
   mcp: Package,
@@ -105,10 +49,6 @@ const CATEGORY_ICONS: Record<CategoryId, LucideIcon> = {
   changelog: Bot,
 };
 
-/**
- * Discriminated union for all 6 section variants
- * Each variant has its own specific props, enforced by TypeScript
- */
 export type UnifiedContentSectionProps =
   | {
       variant: 'bullets';
@@ -194,14 +134,31 @@ export type UnifiedContentSectionProps =
     }
   | {
       variant: 'installation';
-      installation: InstallationSteps;
-      item: UnifiedContentItem;
+      installationData: {
+        claudeCode: {
+          steps: Array<
+            { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
+          >;
+          configPath?: Record<string, string>;
+          configFormat?: string;
+        } | null;
+        claudeDesktop: {
+          steps: Array<
+            { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
+          >;
+          configPath?: Record<string, string>;
+        } | null;
+        sdk: {
+          steps: Array<
+            { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
+          >;
+        } | null;
+        requirements?: string[];
+      };
+      item: ContentItem;
       className?: string;
     };
 
-/**
- * Bullet color mapping for bullets variant
- */
 const BULLET_COLORS = {
   primary: 'bg-primary',
   accent: 'bg-accent',
@@ -211,10 +168,6 @@ const BULLET_COLORS = {
   blue: 'bg-blue-500',
 } as const;
 
-/**
- * Scroll-triggered reveal animation config
- * Fade-in + slide-up effect when scrolling into view
- */
 const SCROLL_REVEAL_ANIMATION = {
   initial: { opacity: 0, y: 20 },
   whileInView: { opacity: 1, y: 0 },
@@ -222,17 +175,7 @@ const SCROLL_REVEAL_ANIMATION = {
   transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
 } as const;
 
-/**
- * UnifiedContentSection Component
- *
- * Configuration-driven section rendering with discriminated union type safety.
- * All async operations are handled at the page level (data layer).
- * This component purely renders pre-processed data (presentation layer).
- */
 export function UnifiedContentSection(props: UnifiedContentSectionProps) {
-  // ============================================================================
-  // BULLETS VARIANT
-  // ============================================================================
   if (props.variant === 'bullets') {
     const {
       title,
@@ -246,7 +189,6 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
 
     if (items.length === 0) return null;
 
-    // Resolve icon from category on client side
     const Icon = CATEGORY_ICONS[category];
 
     const bulletClass = BULLET_COLORS[bulletColor];
@@ -266,7 +208,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
             <ul className="space-y-2">
               {items.map((item) => (
                 <li key={item.slice(0, 50)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-                  <div className={cn('h-1.5 w-1.5 rounded-full mt-2 flex-shrink-0', bulletClass)} />
+                  <div className={cn('mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full', bulletClass)} />
                   <span className={cn('leading-relaxed', textClass)}>{item}</span>
                 </li>
               ))}
@@ -277,9 +219,6 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
     );
   }
 
-  // ============================================================================
-  // CONTENT VARIANT
-  // ============================================================================
   if (props.variant === 'content') {
     const { title, description, html, code, language, filename, className } = props;
 
@@ -307,11 +246,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
     );
   }
 
-  // ============================================================================
-  // CONFIGURATION VARIANT
-  // ============================================================================
   if (props.variant === 'configuration') {
-    // Multi-format configuration (MCP servers)
     if (props.format === 'multi') {
       const { configs, className } = props;
 
@@ -345,7 +280,6 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
       );
     }
 
-    // Hook configuration format
     if (props.format === 'hook') {
       const { hookConfig, scriptContent, className } = props;
 
@@ -384,7 +318,6 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
       );
     }
 
-    // Default JSON configuration
     const { html, code, filename, className } = props;
 
     return (
@@ -411,9 +344,6 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
     );
   }
 
-  // ============================================================================
-  // USAGE EXAMPLES VARIANT
-  // ============================================================================
   if (props.variant === 'examples') {
     const {
       title = 'Usage Examples',
@@ -446,12 +376,12 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
                   itemType="https://schema.org/SoftwareSourceCode"
                 >
                   <div className="space-y-1">
-                    <h4 className="text-base font-semibold text-foreground" itemProp="name">
+                    <h4 className="font-semibold text-base text-foreground" itemProp="name">
                       {example.title}
                     </h4>
                     {example.description && (
                       <p
-                        className="text-sm text-muted-foreground leading-relaxed"
+                        className="text-muted-foreground text-sm leading-relaxed"
                         itemProp="description"
                       >
                         {example.description}
@@ -479,9 +409,6 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
     );
   }
 
-  // ============================================================================
-  // TROUBLESHOOTING VARIANT
-  // ============================================================================
   if (props.variant === 'troubleshooting') {
     const { description, items, className } = props;
 
@@ -500,24 +427,22 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
           <CardContent>
             <ul className="space-y-4">
               {items.map((trouble) => {
-                // Simple string format
                 if (typeof trouble === 'string') {
                   return (
                     <li key={trouble.slice(0, 50)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-                      <div className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                      <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-500" />
                       <span className="text-sm leading-relaxed">{trouble}</span>
                     </li>
                   );
                 }
 
-                // Issue/solution object format
                 return (
                   <li key={trouble.issue.slice(0, 50)} className="space-y-2">
                     <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-                      <div className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                      <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-500" />
                       <div className="space-y-1">
-                        <p className="text-sm font-medium text-foreground">{trouble.issue}</p>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
+                        <p className="font-medium text-foreground text-sm">{trouble.issue}</p>
+                        <p className="text-muted-foreground text-sm leading-relaxed">
                           {trouble.solution}
                         </p>
                       </div>
@@ -532,11 +457,8 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
     );
   }
 
-  // ============================================================================
-  // INSTALLATION VARIANT
-  // ============================================================================
   if (props.variant === 'installation') {
-    const { installation, className } = props;
+    const { installationData, className } = props;
 
     return (
       <motion.div {...SCROLL_REVEAL_ANIMATION}>
@@ -548,92 +470,154 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
             </CardTitle>
             <CardDescription>Setup instructions and requirements</CardDescription>
           </CardHeader>
-          <CardContent>
-            {/* Claude Code installation */}
-            {typeof installation === 'object' &&
-              'claudeCode' in installation &&
-              installation.claudeCode && (
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-medium mb-2">Claude Code Setup</h4>
-                    <ol className="list-decimal list-inside space-y-1 text-sm">
-                      {installation.claudeCode.steps?.map((step: string) => (
-                        <li key={step.slice(0, 50)} className="leading-relaxed">
-                          {step}
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                  {installation.claudeCode.configPath && (
-                    <div>
-                      <h4 className="font-medium mb-2">Configuration Paths</h4>
-                      <div className="space-y-1 text-sm">
-                        {Object.entries(installation.claudeCode.configPath).map(
-                          ([location, path]) => (
-                            <div key={location} className={UI_CLASSES.FLEX_GAP_2}>
-                              <UnifiedBadge variant="base" style="outline" className="capitalize">
-                                {location}
-                              </UnifiedBadge>
-                              <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                                {String(path)}
-                              </code>
-                            </div>
-                          )
-                        )}
+          <CardContent className="space-y-6">
+            {installationData.claudeCode && (
+              <div className="space-y-4">
+                <h4 className="font-medium">Claude Code Setup</h4>
+                <div className="space-y-3">
+                  {installationData.claudeCode.steps.map((step, index) => {
+                    const stepKey = `cc-step-${index}-${step.type}`;
+                    if (step.type === 'command') {
+                      return (
+                        <div key={stepKey} className="space-y-2">
+                          <div className="text-muted-foreground text-sm">
+                            Step {index + 1}: Run command
+                          </div>
+                          <ProductionCodeBlock
+                            html={step.html}
+                            code={step.code}
+                            language="bash"
+                            filename={`install-step-${index + 1}.sh`}
+                            maxLines={10}
+                          />
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={stepKey} className="flex items-start gap-3">
+                        <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
+                        <span className="text-sm leading-relaxed">{step.text}</span>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })}
                 </div>
-              )}
-
-            {/* Claude Desktop installation (for MCP servers) */}
-            {typeof installation === 'object' &&
-              'claudeDesktop' in installation &&
-              installation.claudeDesktop && (
-                <div className="space-y-4">
+                {installationData.claudeCode.configPath && (
                   <div>
-                    <h4 className="font-medium mb-2">Claude Desktop Setup</h4>
-                    <ol className="list-decimal list-inside space-y-1 text-sm">
-                      {installation.claudeDesktop.steps?.map((step: string) => (
-                        <li key={step.slice(0, 50)} className="leading-relaxed">
-                          {step}
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                  {installation.claudeDesktop.configPath && (
-                    <div>
-                      <h4 className="font-medium mb-2">Configuration Paths</h4>
-                      <div className="space-y-1 text-sm">
-                        {Object.entries(installation.claudeDesktop.configPath).map(
-                          ([platform, path]) => (
-                            <div key={platform} className={UI_CLASSES.FLEX_GAP_2}>
-                              <UnifiedBadge variant="base" style="outline" className="capitalize">
-                                {platform}
-                              </UnifiedBadge>
-                              <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                                {String(path)}
-                              </code>
-                            </div>
-                          )
-                        )}
-                      </div>
+                    <h5 className="mb-2 font-medium text-sm">Configuration Paths</h5>
+                    <div className="space-y-1 text-sm">
+                      {Object.entries(installationData.claudeCode.configPath).map(
+                        ([location, path]) => (
+                          <div key={location} className={UI_CLASSES.FLEX_GAP_2}>
+                            <UnifiedBadge variant="base" style="outline" className="capitalize">
+                              {location}
+                            </UnifiedBadge>
+                            <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                              {String(path)}
+                            </code>
+                          </div>
+                        )
+                      )}
                     </div>
-                  )}
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
+            )}
 
-            {/* Requirements */}
-            {installation.requirements && installation.requirements.length > 0 && (
-              <div className="mt-4">
-                <h4 className="font-medium mb-2">Requirements</h4>
+            {installationData.claudeDesktop && (
+              <div className="space-y-4">
+                <h4 className="font-medium">Claude Desktop Setup</h4>
+                <div className="space-y-3">
+                  {installationData.claudeDesktop.steps.map((step, index) => {
+                    const stepKey = `cd-step-${index}-${step.type}`;
+                    if (step.type === 'command') {
+                      return (
+                        <div key={stepKey} className="space-y-2">
+                          <div className="text-muted-foreground text-sm">
+                            Step {index + 1}: Run command
+                          </div>
+                          <ProductionCodeBlock
+                            html={step.html}
+                            code={step.code}
+                            language="bash"
+                            filename={`desktop-step-${index + 1}.sh`}
+                            maxLines={10}
+                          />
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={stepKey} className="flex items-start gap-3">
+                        <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
+                        <span className="text-sm leading-relaxed">{step.text}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                {installationData.claudeDesktop.configPath && (
+                  <div>
+                    <h5 className="mb-2 font-medium text-sm">Configuration Paths</h5>
+                    <div className="space-y-1 text-sm">
+                      {Object.entries(installationData.claudeDesktop.configPath).map(
+                        ([platform, path]) => (
+                          <div key={platform} className={UI_CLASSES.FLEX_GAP_2}>
+                            <UnifiedBadge variant="base" style="outline" className="capitalize">
+                              {platform}
+                            </UnifiedBadge>
+                            <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                              {String(path)}
+                            </code>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {installationData.sdk && (
+              <div className="space-y-4">
+                <h4 className="font-medium">SDK Setup</h4>
+                <div className="space-y-3">
+                  {installationData.sdk.steps.map((step, index) => {
+                    const stepKey = `sdk-step-${index}-${step.type}`;
+                    if (step.type === 'command') {
+                      return (
+                        <div key={stepKey} className="space-y-2">
+                          <div className="text-muted-foreground text-sm">
+                            Step {index + 1}: Run command
+                          </div>
+                          <ProductionCodeBlock
+                            html={step.html}
+                            code={step.code}
+                            language="bash"
+                            filename={`sdk-step-${index + 1}.sh`}
+                            maxLines={10}
+                          />
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={stepKey} className="flex items-start gap-3">
+                        <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
+                        <span className="text-sm leading-relaxed">{step.text}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {installationData.requirements && installationData.requirements.length > 0 && (
+              <div>
+                <h4 className="mb-2 font-medium">Requirements</h4>
                 <ul className="space-y-2">
-                  {installation.requirements.map((requirement: string) => (
+                  {installationData.requirements.map((requirement: string) => (
                     <li
                       key={requirement.slice(0, 50)}
                       className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}
                     >
-                      <div className="h-1.5 w-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
+                      <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-orange-500" />
                       <span className="text-sm leading-relaxed">{requirement}</span>
                     </li>
                   ))}
@@ -646,6 +630,5 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
     );
   }
 
-  // TypeScript exhaustiveness check
   return null;
 }

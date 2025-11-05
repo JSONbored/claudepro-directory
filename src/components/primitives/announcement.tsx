@@ -87,7 +87,7 @@ export function AnnouncementTag({ className, ...props }: AnnouncementTagProps) {
         // Base styles
         'inline-flex items-center justify-center',
         'px-1.5 py-0.5',
-        'text-[10px] font-semibold uppercase tracking-wider',
+        'font-semibold text-[10px] uppercase tracking-wider',
         'rounded',
         'bg-accent text-accent-foreground',
         'flex-shrink-0',
@@ -110,7 +110,7 @@ export function AnnouncementTitle({ className, ...props }: AnnouncementTitleProp
     <span
       className={cn(
         // Typography
-        'text-sm font-medium',
+        'font-medium text-sm',
         // Layout
         'inline-flex items-center gap-1',
         // Responsive

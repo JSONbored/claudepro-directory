@@ -12,7 +12,7 @@
  *
  * Performance:
  * - ISR: 300s (5 minutes) for fresh content
- * - Redis-cached entry loading
+ * - Database-cached entry loading
  * - Static generation at build time
  *
  * Production Standards:
@@ -34,11 +34,12 @@ const UnifiedNewsletterCapture = dynamic(
       default: mod.UnifiedNewsletterCapture,
     })),
   {
-    loading: () => <div className="h-32 animate-pulse bg-muted/20 rounded-lg" />,
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
 
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
+import { APP_CONFIG } from '@/src/lib/constants';
 import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -46,10 +47,22 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Generate metadata for changelog list page
+ * Includes RSS/Atom feed discovery links (2025 best practice)
  */
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    return generatePageMetadata('/changelog');
+    const baseMetadata = await generatePageMetadata('/changelog');
+
+    // Add RSS/Atom feed discovery links
+    return {
+      ...baseMetadata,
+      alternates: {
+        types: {
+          'application/rss+xml': `${APP_CONFIG.url}/changelog/rss.xml`,
+          'application/atom+xml': `${APP_CONFIG.url}/changelog/atom.xml`,
+        },
+      },
+    };
   } catch (error) {
     logger.error(
       'Failed to generate changelog metadata',
@@ -58,6 +71,12 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
       title: 'Changelog - Claude Pro Directory',
       description: 'Track all updates, features, and improvements to Claude Pro Directory.',
+      alternates: {
+        types: {
+          'application/rss+xml': `${APP_CONFIG.url}/changelog/rss.xml`,
+          'application/atom+xml': `${APP_CONFIG.url}/changelog/atom.xml`,
+        },
+      },
     };
   }
 }
@@ -67,21 +86,46 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function ChangelogPage() {
   try {
-    // Load all changelog entries (cached with Redis)
+    // Load all changelog entries (database-cached)
     const entries = await getAllChangelogEntries();
+
+    // Calculate category counts for filtering based on change types
+    const categoryCounts: Record<string, number> = {
+      Added: 0,
+      Changed: 0,
+      Fixed: 0,
+      Removed: 0,
+      Deprecated: 0,
+      Security: 0,
+    };
+
+    // Count entries that have changes in each category
+    for (const entry of entries) {
+      if (entry.changes && typeof entry.changes === 'object') {
+        const changes = entry.changes as Record<string, unknown>;
+        for (const category of Object.keys(categoryCounts)) {
+          const categoryChanges = changes[category];
+          if (Array.isArray(categoryChanges) && categoryChanges.length > 0) {
+            if (typeof categoryCounts[category] === 'number') {
+              categoryCounts[category]++;
+            }
+          }
+        }
+      }
+    }
 
     return (
       <>
         {/* Structured Data - Blog Schema */}
         <ChangelogBlogStructuredData entries={entries} />
 
-        <div className="container max-w-6xl py-8 space-y-8">
+        <div className="container max-w-6xl space-y-8 py-8">
           {/* Header */}
           <div className="space-y-4">
             <Link
               href="/"
               className={
-                'inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors'
+                'inline-flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground'
               }
             >
               <ArrowLeft className="h-4 w-4" />
@@ -89,7 +133,7 @@ export default async function ChangelogPage() {
             </Link>
 
             <div className="space-y-2">
-              <h1 className="text-4xl font-bold tracking-tight">Changelog</h1>
+              <h1 className="font-bold text-4xl tracking-tight">Changelog</h1>
               <p className="text-lg text-muted-foreground">
                 Track all updates, new features, bug fixes, and improvements to Claude Pro
                 Directory.
@@ -97,7 +141,7 @@ export default async function ChangelogPage() {
             </div>
 
             {/* Stats */}
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6} text-sm text-muted-foreground`}>
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6} text-muted-foreground text-sm`}>
               <div>
                 <span className="font-semibold text-foreground">{entries.length}</span> total
                 updates
@@ -105,8 +149,8 @@ export default async function ChangelogPage() {
               {entries.length > 0 && entries[0] && (
                 <div>
                   Latest:{' '}
-                  <time dateTime={entries[0].date} className="font-medium text-foreground">
-                    {new Date(entries[0].date).toLocaleDateString('en-US', {
+                  <time dateTime={entries[0].release_date} className="font-medium text-foreground">
+                    {new Date(entries[0].release_date).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
@@ -118,7 +162,7 @@ export default async function ChangelogPage() {
           </div>
 
           {/* Client-side filtered list */}
-          <ChangelogListClient entries={entries} />
+          <ChangelogListClient entries={entries} categoryCounts={categoryCounts} />
         </div>
 
         {/* Email CTA - Footer section (matching homepage pattern) */}
@@ -137,7 +181,7 @@ export default async function ChangelogPage() {
     return (
       <div className="container max-w-6xl py-8">
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight">Changelog</h1>
+          <h1 className="font-bold text-4xl tracking-tight">Changelog</h1>
           <p className="text-muted-foreground">
             Unable to load changelog entries. Please try again later.
           </p>

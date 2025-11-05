@@ -1,79 +1,9 @@
 /**
- * UI Class Constants
- * SHA-2101: Centralized className patterns to eliminate duplication
- *
- * Usage: Replace long className strings with these constants
- * Before: className="card-gradient hover-lift transition-smooth group"
- * After: className={UI_CLASSES.CARD_GRADIENT_HOVER}
- *
- * =============================================================================
- * RESPONSIVE BREAKPOINT STRATEGY (Tailwind CSS)
- * =============================================================================
- *
- * Standard Breakpoints:
- * - Mobile:   < 768px   (default, no prefix)
- * - Tablet:   ≥ 768px   (md: prefix)
- * - Desktop:  ≥ 1024px  (lg: prefix)
- * - Wide:     ≥ 1280px  (xl: prefix)
- *
- * IMPORTANT: Avoid sm: (640px) breakpoint for consistency
- * - Reason: Creates inconsistent behavior between mobile (< 768px) and tablet (≥ 768px)
- * - Grid layouts use md: and lg: breakpoints
- * - Navigation shows/hides at md: (768px) and lg: (1024px)
- *
- * Standard Patterns:
- * 1. Mobile → Tablet transition: Use md: (768px)
- *    Example: flex flex-col md:flex-row
- *
- * 2. Tablet → Desktop transition: Use lg: (1024px)
- *    Example: hidden md:block lg:flex
- *
- * 3. Grid layouts:
- *    Example: grid-cols-1 md:grid-cols-2 lg:grid-cols-3
- *
- * 4. Navigation visibility:
- *    Desktop nav: hidden md:flex
- *    Mobile menu: lg:hidden
- *
- * Architecture Decision:
- * - This ensures no "gap" where neither mobile nor desktop UI shows
- * - Aligns all responsive breakpoints across components
- * - Follows Tailwind's mobile-first philosophy
- * - Matches industry standard tablet breakpoint (768px iPad)
- *
- * =============================================================================
- * RESPONSIVE DESIGN TOKENS (2025 Modern Architecture)
- * =============================================================================
- *
- * Configuration-driven responsive system for systematic multi-viewport support.
- * Use these tokens for viewport testing, container queries, and responsive logic.
- *
- * @see BREAKPOINTS - Standard viewport sizes for testing and media queries
- * @see CONTAINER_BREAKPOINTS - Container query breakpoints (Tailwind v4 @container)
- * @see RESPONSIVE_SPACING - Proportional spacing that scales across viewports
+ * UI Constants - Centralized className patterns, breakpoints, spacing, gradients, shadows
+ * Breakpoints: mobile<768 (md:), tablet≥768, desktop≥1024 (lg:), wide≥1280 (xl:). Avoid sm: for consistency.
  */
 
-/**
- * Standard Viewport Breakpoints (px values)
- * Aligned with Tailwind CSS defaults and industry standards
- *
- * Usage:
- * - Playwright viewport configuration
- * - Visual regression testing
- * - Responsive logic in components
- * - Media query generation
- *
- * @example
- * ```typescript
- * import { BREAKPOINTS } from '@/src/lib/ui-constants';
- *
- * // Playwright viewport configuration
- * viewport: { width: BREAKPOINTS.tablet, height: 1024 }
- *
- * // Responsive logic
- * if (windowWidth >= BREAKPOINTS.desktop) { ... }
- * ```
- */
+/** Standard viewport breakpoints (mobile:320, tablet:768, desktop:1024, wide:1280, ultra:1920) */
 export const BREAKPOINTS = {
   /** Mobile (iPhone SE, small phones) - 320px */
   mobile: 320,
@@ -87,34 +17,7 @@ export const BREAKPOINTS = {
   ultra: 1920,
 } as const;
 
-/**
- * Container Query Breakpoints (px values)
- * For use with Tailwind v4 @container queries
- *
- * Container queries allow components to adapt based on their parent container width,
- * not viewport width. This makes components truly reusable in any context.
- *
- * Usage:
- * - Use @container in parent: className="@container"
- * - Use @<size>: in children: className="@md:grid-cols-2"
- *
- * When to Use:
- * - ✅ Reusable components (cards, modals, sidebars)
- * - ✅ Components used in multiple layout contexts
- * - ✅ Design system components
- * - ❌ Page-level layouts (use regular breakpoints)
- *
- * @example
- * ```tsx
- * // Parent container
- * <div className="@container">
- *   {/* Child adapts to container, not viewport *\/}
- *   <div className="grid @md:grid-cols-2 @lg:grid-cols-3">
- *     <ConfigCard />
- *   </div>
- * </div>
- * ```
- */
+/** Container query breakpoints for Tailwind v4 @container (sm:384, md:448, lg:512, xl:576, 2xl:672) */
 export const CONTAINER_BREAKPOINTS = {
   /** Small container - 384px */
   sm: 384,
@@ -128,25 +31,7 @@ export const CONTAINER_BREAKPOINTS = {
   '2xl': 672,
 } as const;
 
-/**
- * Responsive Spacing Scale
- * Proportional spacing tokens that scale gracefully across viewports
- *
- * Philosophy:
- * - Mobile: Tighter spacing (space is precious)
- * - Tablet: Medium spacing (balanced)
- * - Desktop: Generous spacing (ample screen real estate)
- *
- * Usage: Use these in gap, padding, margin for responsive scaling
- *
- * @example
- * ```tsx
- * import { RESPONSIVE_SPACING } from '@/src/lib/ui-constants';
- *
- * // Component with responsive gap
- * <div className={`flex gap-${RESPONSIVE_SPACING.gap.mobile} md:gap-${RESPONSIVE_SPACING.gap.tablet}`}>
- * ```
- */
+/** Responsive spacing scale (gap, container, section) for mobile/tablet/desktop */
 export const RESPONSIVE_SPACING = {
   /** Gap spacing across viewports */
   gap: {
@@ -168,23 +53,7 @@ export const RESPONSIVE_SPACING = {
   },
 } as const;
 
-/**
- * Viewport Dimension Presets
- * Common device dimensions for visual testing and responsive development
- *
- * Usage:
- * - Playwright projects configuration
- * - Storybook viewport addon
- * - Visual regression testing baselines
- *
- * @example
- * ```typescript
- * import { VIEWPORT_PRESETS } from '@/src/lib/ui-constants';
- *
- * // Playwright config
- * use: { viewport: VIEWPORT_PRESETS.iphone13 }
- * ```
- */
+/** Viewport dimension presets for testing (iPhone, iPad, laptop, desktop variants) */
 export const VIEWPORT_PRESETS = {
   /** iPhone SE (smallest modern phone) */
   iphoneSE: { width: 375, height: 667 },
@@ -210,52 +79,30 @@ export const VIEWPORT_PRESETS = {
   desktop4k: { width: 3840, height: 2160 },
 } as const;
 
-/**
- * Type-safe breakpoint keys
- */
+/** Type-safe breakpoint keys */
 export type BreakpointKey = keyof typeof BREAKPOINTS;
 export type ContainerBreakpointKey = keyof typeof CONTAINER_BREAKPOINTS;
 export type ViewportPresetKey = keyof typeof VIEWPORT_PRESETS;
 
 export const UI_CLASSES = {
-  /**
-   * Card Styles
-   */
   CARD_INTERACTIVE:
     'card-gradient hover-lift transition-smooth group cursor-pointer border-border/50 hover:border-accent/20',
   CARD_GRADIENT_HOVER: 'card-gradient hover-lift transition-smooth group',
-  /**
-   * Button Styles - Common patterns
-   */
   BUTTON_PRIMARY_LARGE:
     'flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200',
   BUTTON_SECONDARY_MEDIUM:
     'flex items-center w-full px-6 py-5 text-base font-medium text-muted-foreground rounded-xl bg-card/50 border border-border/40 hover:bg-accent/5 hover:text-foreground hover:border-accent/30 transition-all duration-200 active:scale-[0.98]',
   BUTTON_GHOST_ICON: 'hover:bg-accent/10 hover:text-accent',
 
-  /**
-   * Grid Layouts
-   * Fixed spacing issues by removing auto-rows-fr and items-start
-   * which caused increasing gaps with Motion.dev stagger animations
-   */
   GRID_RESPONSIVE_3: 'grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
   GRID_RESPONSIVE_3_TIGHT: 'grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
   GRID_RESPONSIVE_4: 'grid gap-6 md:grid-cols-2 lg:grid-cols-4',
   GRID_RESPONSIVE_LIST: 'grid gap-6 md:grid-cols-2 lg:grid-cols-3 list-none',
-  /**
-   * Text Styles
-   */
   TEXT_HEADING_HERO: 'text-4xl lg:text-6xl font-bold mb-6 text-foreground',
   TEXT_HEADING_LARGE: 'text-xl text-muted-foreground mb-8 leading-relaxed',
   TEXT_HEADING_MEDIUM: 'text-lg text-muted-foreground mb-8 leading-relaxed',
-  /**
-   * Container Styles
-   */
   CONTAINER_CARD_MUTED: 'text-center py-12 bg-card/50 rounded-xl border border-border/50',
   CONTAINER_OVERFLOW_BORDER: 'relative overflow-hidden border-b border-border/50 bg-card/30',
-  /**
-   * Flexbox Layouts - Common patterns
-   */
   FLEX_ITEMS_CENTER_GAP_1: 'flex items-center gap-1',
   FLEX_ITEMS_CENTER_GAP_1_5: 'flex items-center gap-1.5',
   FLEX_ITEMS_CENTER_GAP_2: 'flex items-center gap-2',
@@ -270,9 +117,6 @@ export const UI_CLASSES = {
   FLEX_GAP_2: 'flex gap-2',
   FLEX_WRAP_GAP_2: 'flex flex-wrap gap-2',
   FLEX_WRAP_GAP_3: 'flex flex-wrap gap-3',
-  /**
-   * Flex Layouts - Extended
-   */
   FLEX_COL_ITEMS_CENTER_GAP_4: 'flex flex-col items-center gap-4',
   FLEX_COL_ITEMS_CENTER_JUSTIFY_CENTER: 'flex flex-col items-center justify-center py-12',
   FLEX_COL_SM_ROW_GAP_2: 'flex flex-col sm:flex-row gap-2 sm:gap-3',
@@ -280,19 +124,10 @@ export const UI_CLASSES = {
   FLEX_COL_SM_ROW_ITEMS_START: 'flex flex-col sm:flex-row items-start gap-3',
   FLEX_COL_SM_ROW_ITEMS_CENTER_JUSTIFY_BETWEEN:
     'flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4',
-  /**
-   * Flexbox - Extended
-   */
   FLEX_SHRINK_0_MT_0_5: 'flex-shrink-0 mt-0.5',
-  /**
-   * Text Size & Color Combinations
-   */
   TEXT_XS_MUTED: 'text-xs text-muted-foreground',
   TEXT_SM_MUTED: 'text-sm text-muted-foreground',
   TEXT_MUTED: 'text-muted-foreground',
-  /**
-   * Spacing Utilities - Most common patterns
-   */
   SPACE_Y_2: 'space-y-2',
   SPACE_Y_3: 'space-y-3',
   SPACE_Y_4: 'space-y-4',
@@ -300,9 +135,6 @@ export const UI_CLASSES = {
   MB_4: 'mb-4',
   MB_6: 'mb-6',
   MB_8: 'mb-8',
-  /**
-   * Icon Sizes - Common patterns
-   */
   ICON_SM: 'h-3 w-3',
   ICON_SM_MR: 'h-3 w-3 mr-1',
   ICON_MD: 'h-4 w-4',
@@ -310,41 +142,22 @@ export const UI_CLASSES = {
   ICON_LG: 'h-5 w-5',
   ICON_LG_PRIMARY: 'h-5 w-5 text-primary',
   ICON_SUCCESS_INDICATOR: 'h-4 w-4 text-green-500 mt-0.5',
-  /**
-   * Heading Styles - Common patterns
-   */
   HEADING_2XL: 'text-2xl font-bold',
   HEADING_2XL_MB: 'text-2xl font-bold mb-4',
   HEADING_2XL_SEMIBOLD_MB: 'text-2xl font-semibold mb-4',
   HEADING_LG_SEMIBOLD_MB: 'text-lg font-semibold mb-3',
-  /**
-   * Text Modifiers
-   */
   TEXT_SM: 'text-sm',
   TEXT_SM_MEDIUM: 'text-sm font-medium',
   TEXT_XS: 'text-xs',
   FONT_MEDIUM: 'font-medium',
-  /**
-   * Layout Utilities
-   */
   FLEX_1: 'flex-1',
   CONTAINER_PAGE: 'container mx-auto px-4 py-8',
-  /**
-   * Interactive Elements
-   */
   INTERACTIVE_ITEM: 'px-4 py-3 border rounded-lg hover:bg-accent transition-colors text-left',
-  /**
-   * List Styles
-   */
   LIST_DISC_SPACED: 'list-disc pl-6 space-y-2',
-  /**
-   * Code Block Styles - Production-grade patterns
-   */
   CODE_BLOCK_HEADER:
-    'flex items-center justify-between px-4 py-2 bg-code/30 border border-b-0 border-border rounded-t-lg backdrop-blur-sm',
-  CODE_BLOCK_PRE:
-    'overflow-x-auto text-sm leading-relaxed p-4 rounded-lg border border-border bg-code/50 backdrop-blur-sm',
-  CODE_BLOCK_FILENAME: 'text-sm font-mono text-muted-foreground',
+    'flex items-center justify-between px-4 py-2.5 bg-code/40 border border-b-0 border-border rounded-t-lg',
+  CODE_BLOCK_PRE: 'overflow-x-auto text-sm p-4 rounded-lg border border-border bg-code/60',
+  CODE_BLOCK_FILENAME: 'text-sm font-mono text-foreground font-medium',
   CODE_BLOCK_COPY_BUTTON_FLOATING:
     'absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-code/30 rounded-md',
   CODE_BLOCK_COPY_BUTTON_HEADER_FLOATING:
@@ -354,55 +167,62 @@ export const UI_CLASSES = {
   CODE_BLOCK_TAB_INACTIVE: 'text-muted-foreground border-transparent hover:text-foreground',
   CODE_BLOCK_GROUP_WRAPPER: 'relative group my-6',
 
-  /**
-   * Responsive Card Layouts
-   * Mobile-first design with progressive enhancement
-   * Breakpoint strategy: md: (768px) aligns with grid layouts (md:grid-cols-2 lg:grid-cols-3)
-   */
   CARD_BADGE_CONTAINER: 'flex flex-wrap gap-1.5 md:gap-2 mb-4',
   CARD_FOOTER_RESPONSIVE: 'flex flex-col gap-2 md:flex-row md:items-center md:justify-between',
   CARD_METADATA_BADGES: 'flex items-center gap-1 text-xs flex-wrap md:flex-nowrap',
 } as const;
 
-/**
- * Type-safe UI class constant keys
- */
+/** Type-safe UI class constant keys */
 export type UIClassKey = keyof typeof UI_CLASSES;
 
-/**
- * Content Card Behavior Configuration - AUTO-GENERATED
- *
- * Note: CARD_BEHAVIORS is now imported directly from ui-constants-categories.ts
- * to avoid barrel file anti-pattern. Import from source:
- *
- * ```typescript
- * import { CARD_BEHAVIORS } from '@/src/lib/ui-constants-categories';
- * ```
- *
- * @see src/lib/ui-constants-categories.ts - Auto-generated category behaviors
- * @see scripts/build/generate-category-artifacts.ts - Generation script
- */
-export type { CardBehaviorKey } from './ui-constants-categories';
+/** Card behavior configuration keys */
+export type CardBehaviorKey = 'default' | 'code' | 'link';
 
-/**
- * Badge Color Constants
- * Centralized color schemes for badges to eliminate inline color definitions
- * SHA-2101: Part of consolidation effort to reduce duplication
- *
- * Usage: Replace inline badge color objects with these constants
- * Before: const colors = { 'full-time': 'bg-green-500/10...' }
- * After: className={BADGE_COLORS.jobType['full-time']}
- *
- * Note: Category badge colors are auto-generated from UNIFIED_CATEGORY_REGISTRY
- * @see src/lib/ui-constants-categories.ts
- */
-import { CATEGORY_BADGE_COLORS } from './ui-constants-categories';
+/** Badge color constants for categories */
+const CATEGORY_BADGE_COLORS = {
+  agents: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  mcp: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+  commands: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  rules: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  hooks: 'bg-green-500/10 text-green-400 border-green-500/20',
+  statuslines: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
+  collections: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+  skills: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
+  guides: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
+  jobs: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+  changelog: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
+  default: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+} as const;
+
+/** Card behavior configuration (copy vs link actions) */
+export const CARD_BEHAVIORS = {
+  default: {
+    primaryAction: 'copy' as const,
+    showCopyButton: true,
+    showBookmark: true,
+    showViewCount: true,
+    showCopyCount: true,
+    showRating: false,
+  },
+  code: {
+    primaryAction: 'copy' as const,
+    showCopyButton: true,
+    showBookmark: true,
+    showViewCount: true,
+    showCopyCount: true,
+    showRating: false,
+  },
+  link: {
+    primaryAction: 'link' as const,
+    showCopyButton: false,
+    showBookmark: true,
+    showViewCount: true,
+    showCopyCount: false,
+    showRating: true,
+  },
+} as const;
 
 export const BADGE_COLORS = {
-  /**
-   * Job type badge colors
-   * Used in: JobCard, job detail pages, job listings
-   */
   jobType: {
     'full-time': 'bg-green-500/10 text-green-400 border-green-500/20',
     'part-time': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -411,20 +231,12 @@ export const BADGE_COLORS = {
     remote: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
   },
 
-  /**
-   * Difficulty level badge colors
-   * Used in: Collection cards, guide pages, content filters
-   */
   difficulty: {
     beginner: 'bg-green-500/10 text-green-400 border-green-500/20',
     intermediate: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
     advanced: 'bg-red-500/10 text-red-400 border-red-500/20',
   },
 
-  /**
-   * Collection type badge colors
-   * Used in: Collection cards, collection detail pages
-   */
   collectionType: {
     'starter-kit': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     workflow: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
@@ -432,10 +244,6 @@ export const BADGE_COLORS = {
     'use-case': 'bg-green-500/10 text-green-400 border-green-500/20',
   },
 
-  /**
-   * Changelog category badge colors
-   * Used in: Changelog cards, changelog pages
-   */
   changelogCategory: {
     Added: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20',
     Changed: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
@@ -445,10 +253,6 @@ export const BADGE_COLORS = {
     Security: 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20',
   },
 
-  /**
-   * Generic status badge colors
-   * Used in: Various status indicators throughout the app
-   */
   status: {
     success: 'bg-green-500/10 text-green-400 border-green-500/20',
     warning: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
@@ -456,17 +260,8 @@ export const BADGE_COLORS = {
     info: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   },
 
-  /**
-   * Content category badge colors - AUTO-GENERATED
-   * Generated from UNIFIED_CATEGORY_REGISTRY colorScheme values at build time
-   * @see src/lib/ui-constants-categories.ts - Auto-generated from registry
-   */
   category: CATEGORY_BADGE_COLORS,
 
-  /**
-   * Submission status badge colors (SHA-3146)
-   * Used in: User submissions page, submission tracking
-   */
   submissionStatus: {
     pending: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
     approved: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -474,10 +269,6 @@ export const BADGE_COLORS = {
     rejected: 'bg-red-500/10 text-red-400 border-red-500/20',
   },
 
-  /**
-   * Job posting status badge colors (SHA-3146)
-   * Used in: Job dashboard, job analytics, job listings
-   */
   jobStatus: {
     active: 'bg-green-500/10 text-green-400 border-green-500/20',
     draft: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
@@ -486,9 +277,7 @@ export const BADGE_COLORS = {
   },
 } as const;
 
-/**
- * Type-safe badge color keys
- */
+/** Type-safe badge color keys */
 export type JobType = keyof typeof BADGE_COLORS.jobType;
 export type DifficultyLevel = keyof typeof BADGE_COLORS.difficulty;
 export type CollectionType = keyof typeof BADGE_COLORS.collectionType;

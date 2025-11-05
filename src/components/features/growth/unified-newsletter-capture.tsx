@@ -29,8 +29,6 @@
 import { usePathname } from 'next/navigation';
 import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useId, useState } from 'react';
-import { postCopyEmailCaptureAction } from '#lib/actions/email-capture';
-import { trackEvent } from '#lib/analytics/tracker';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -49,9 +47,12 @@ import {
 } from '@/src/components/primitives/sheet';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
+import { postCopyEmailCaptureAction } from '@/src/lib/actions/email-capture';
+import { trackEvent } from '@/src/lib/analytics/tracker';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
 import { Mail, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
+import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -261,28 +262,50 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
     const finalHeadline = headline || defaultHeadline;
     const finalDescription = description || defaultDescription;
 
-    // Hero Variant
+    // Hero Variant - Modern 2025 Design
     if (variant === 'hero') {
       return (
         <div
           className={cn(
-            'w-full bg-gradient-to-br from-primary/10 via-accent/5 to-background',
-            'border border-primary/20 rounded-lg p-8 md:p-12',
+            // Enhanced background with subtle gradient
+            'w-full bg-gradient-to-br from-card/80 via-card/60 to-card/40',
+            'backdrop-blur-sm',
+            // Modern border with subtle glow effect
+            'rounded-2xl border border-border/30',
+            // Better shadow for depth
+            'shadow-black/5 shadow-lg',
+            // Increased padding for breathing room
+            'p-10 md:p-16',
             'text-center',
             className
           )}
         >
-          <div className="flex justify-center mb-4">
-            <div className="p-4 bg-primary/10 rounded-full">
-              <Mail className="h-8 w-8 text-primary" aria-hidden="true" />
+          {/* Icon with enhanced styling */}
+          <div className="mb-6 flex justify-center">
+            <div className="rounded-2xl border border-accent/20 bg-accent/10 p-4 shadow-accent/10 shadow-md backdrop-blur-sm">
+              <Mail className="h-8 w-8 text-accent" aria-hidden="true" />
             </div>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{finalHeadline}</h2>
-          <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">{finalDescription}</p>
-          <div className="max-w-md mx-auto">
+
+          {/* Headline with improved typography */}
+          <h2 className="mb-4 font-bold text-3xl text-foreground leading-tight tracking-tight md:text-4xl">
+            {finalHeadline}
+          </h2>
+
+          {/* Description with better spacing and contrast */}
+          <p className="mx-auto mb-8 max-w-2xl text-base text-muted-foreground leading-relaxed md:text-lg">
+            {finalDescription}
+          </p>
+
+          {/* Form with optimal width */}
+          <div className="mx-auto max-w-xl">
             <FormVariant source={source} className="w-full" />
           </div>
-          <p className="mt-4 text-xs text-muted-foreground">{NEWSLETTER_CTA_CONFIG.footerText}</p>
+
+          {/* Trust signal with better visibility */}
+          <p className="mt-6 text-muted-foreground/80 text-sm">
+            {NEWSLETTER_CTA_CONFIG.footerText}
+          </p>
         </div>
       );
     }
@@ -293,16 +316,16 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
         <Card
           className={cn(
             'border-primary/20 bg-gradient-to-br from-primary/5 via-accent/5 to-background/95',
-            'backdrop-blur-sm shadow-lg',
+            'shadow-lg backdrop-blur-sm',
             className
           )}
         >
           <CardHeader className="pb-5">
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-3`}>
-              <div className="p-2.5 bg-primary/10 rounded-lg border border-primary/20">
+              <div className="rounded-lg border border-primary/20 bg-primary/10 p-2.5">
                 <Mail className="h-5 w-5 text-primary" aria-hidden="true" />
               </div>
-              <CardTitle className="text-xl font-bold">{finalHeadline}</CardTitle>
+              <CardTitle className="font-bold text-xl">{finalHeadline}</CardTitle>
             </div>
             <CardDescription className="text-base leading-relaxed">
               {finalDescription}
@@ -310,7 +333,7 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <FormVariant source={source} />
-            <div className="text-xs text-muted-foreground text-center">
+            <div className="text-center text-muted-foreground text-xs">
               <span>{NEWSLETTER_CTA_CONFIG.footerText}</span>
             </div>
           </CardContent>
@@ -323,16 +346,16 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
       return (
         <div
           className={cn(
-            'flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-between p-4 sm:p-5',
-            'bg-accent/5 border border-border/50 rounded-lg',
+            'flex flex-col items-stretch justify-between gap-4 p-4 sm:flex-row sm:items-center sm:p-5',
+            'rounded-lg border border-border/50 bg-accent/5',
             className
           )}
         >
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} flex-1 min-w-0`}>
-            <Mail className="h-5 w-5 text-primary flex-shrink-0" aria-hidden="true" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{finalHeadline}</p>
-              <p className="text-xs text-muted-foreground truncate">{finalDescription}</p>
+          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} min-w-0 flex-1`}>
+            <Mail className="h-5 w-5 flex-shrink-0 text-primary" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-medium text-sm">{finalHeadline}</p>
+              <p className="truncate text-muted-foreground text-xs">{finalDescription}</p>
             </div>
           </div>
           <FormVariant
@@ -348,18 +371,18 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
       return (
         <Card
           className={cn(
-            'h-full flex flex-col border-primary/20 bg-gradient-to-br from-primary/5 via-accent/5 to-background/95',
-            'backdrop-blur-sm shadow-lg',
+            'flex h-full flex-col border-primary/20 bg-gradient-to-br from-primary/5 via-accent/5 to-background/95',
+            'shadow-lg backdrop-blur-sm',
             className
           )}
         >
           <CardHeader className="flex-1">
             <div className="mb-4">
-              <div className="inline-flex p-3 bg-primary/10 rounded-lg border border-primary/20">
+              <div className="inline-flex rounded-lg border border-primary/20 bg-primary/10 p-3">
                 <Mail className="h-6 w-6 text-primary" aria-hidden="true" />
               </div>
             </div>
-            <CardTitle className="text-xl mb-3 font-bold">{finalHeadline}</CardTitle>
+            <CardTitle className="mb-3 font-bold text-xl">{finalHeadline}</CardTitle>
             <CardDescription className="text-sm leading-relaxed">
               {finalDescription}
             </CardDescription>
@@ -367,7 +390,7 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
           <CardContent className="space-y-4">
             <FormVariant source={source} />
             <div className="text-center">
-              <p className="text-xs text-muted-foreground">{NEWSLETTER_CTA_CONFIG.footerText}</p>
+              <p className="text-muted-foreground text-xs">{NEWSLETTER_CTA_CONFIG.footerText}</p>
             </div>
           </CardContent>
         </Card>
@@ -417,13 +440,20 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
 // =============================================================================
 
 /**
- * Form Variant - Simple email form
+ * Form Variant - Modernized email form with enhanced UX
+ * 2025 Design Updates:
+ * - Larger input fields (52px height) for better touch targets
+ * - Improved spacing and visual hierarchy
+ * - Enhanced microinteractions (focus states, hover effects)
+ * - Better responsive behavior (vertical stack on mobile)
+ * - Accessibility improvements
  */
 function FormVariant({ source, className }: { source: NewsletterSource; className?: string }) {
   const { email, setEmail, isSubmitting, subscribe, error } = useNewsletter({
     source,
   });
   const errorId = useId();
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -431,38 +461,85 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
   };
 
   return (
-    <form onSubmit={handleSubmit} className={className}>
-      <div className="flex flex-col gap-2">
-        <div className="flex gap-2">
-          <Input
-            type="email"
-            placeholder="your@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={isSubmitting}
-            className="flex-1 min-w-0"
-            aria-label="Email address"
-            error={!!error}
-            {...(error ? { errorId } : {})}
-          />
+    <form onSubmit={handleSubmit} className={cn('w-full', className)}>
+      <div className="flex flex-col gap-3">
+        {/* Desktop: Horizontal layout | Mobile: Vertical stack */}
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <Input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              required
+              disabled={isSubmitting}
+              className={cn(
+                // Enhanced sizing (52px height)
+                'h-[52px] min-w-0 px-5 text-base',
+                // Improved borders and focus states
+                'border-border/40 bg-background/95 backdrop-blur-sm',
+                'transition-all duration-200 ease-out',
+                'focus:border-accent/50 focus:ring-2 focus:ring-accent/20',
+                // Error state
+                error && 'border-destructive/50 focus:border-destructive focus:ring-destructive/20',
+                // Disabled state
+                isSubmitting && 'cursor-not-allowed opacity-60'
+              )}
+              aria-label="Email address"
+              aria-invalid={!!error}
+              aria-describedby={error ? errorId : undefined}
+            />
+            {/* Focus indicator line */}
+            <div
+              className={cn(
+                'absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-accent to-primary transition-all duration-300 ease-out',
+                isFocused && !error ? 'w-full opacity-100' : 'w-0 opacity-0'
+              )}
+            />
+          </div>
           <Button
             type="submit"
-            disabled={isSubmitting}
-            className="bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] whitespace-nowrap flex-shrink-0"
+            disabled={isSubmitting || !email.trim()}
+            size="lg"
+            className={cn(
+              // Enhanced sizing to match input (52px height)
+              'h-[52px] flex-shrink-0 whitespace-nowrap px-8',
+              // Modern gradient with better contrast
+              'bg-gradient-to-r from-accent via-accent to-primary font-semibold text-accent-foreground',
+              // Enhanced hover/active states
+              'shadow-md transition-all duration-200 ease-out',
+              'hover:scale-[1.02] hover:from-accent/90 hover:via-accent/90 hover:to-primary/90 hover:shadow-lg',
+              'active:scale-[0.98]',
+              // Focus state for accessibility
+              'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
+              // Disabled state
+              'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100',
+              // Full width on mobile
+              'w-full sm:w-auto sm:min-w-[140px]'
+            )}
           >
             {isSubmitting ? (
-              <>Joining...</>
+              <span className="flex items-center gap-2">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Subscribing...
+              </span>
             ) : (
-              <>
+              <span className="flex items-center gap-2">
                 {NEWSLETTER_CTA_CONFIG.buttonText}
-                <Mail className="ml-2 h-4 w-4" aria-hidden="true" />
-              </>
+                <Mail className="h-4 w-4" aria-hidden="true" />
+              </span>
             )}
           </Button>
         </div>
+        {/* Error message with animation */}
         {error && (
-          <p id={errorId} className="text-sm text-destructive" role="alert">
+          <p
+            id={errorId}
+            className="slide-in-from-top-1 fade-in animate-in text-destructive text-sm"
+            role="alert"
+          >
             {error}
           </p>
         )}
@@ -489,8 +566,8 @@ function FooterBarVariant({
   const [isVisible, setIsVisible] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
-  // Pages that have their own InlineEmailCTA should not show sticky bar
-  const pagesWithInlineCTA = [
+  // Pages that have their own InlineEmailCTA (loaded from app_settings)
+  const [pagesWithInlineCTA, setPagesWithInlineCTA] = useState<string[]>([
     '/',
     '/trending',
     '/guides',
@@ -510,7 +587,34 @@ function FooterBarVariant({
     '/hooks/',
     '/statuslines/',
     '/collections/',
-  ];
+  ]);
+
+  // Load excluded pages from app_settings on mount
+  useEffect(() => {
+    const loadExcludedPages = async () => {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase.rpc('get_app_settings', {
+          p_category: 'newsletter',
+        });
+
+        if (data) {
+          const settings = data as Record<string, { value: unknown }>;
+          const excludedPages = settings['newsletter.excluded_pages']?.value;
+
+          if (Array.isArray(excludedPages) && excludedPages.length > 0) {
+            setPagesWithInlineCTA(excludedPages as string[]);
+          }
+        }
+      } catch {
+        // Silent fail - uses hardcoded fallback
+      }
+    };
+
+    loadExcludedPages().catch(() => {
+      // Silent fail - uses hardcoded fallback
+    });
+  }, []);
 
   const hasInlineCTA =
     respectInlineCTA && pagesWithInlineCTA.some((page) => pathname?.startsWith(page));
@@ -544,25 +648,25 @@ function FooterBarVariant({
 
   return (
     <aside
-      className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-bg-overlay)] backdrop-blur-xl border-t-2 border-[var(--color-border-medium)] shadow-xl animate-in slide-in-from-bottom duration-300"
+      className="slide-in-from-bottom fixed right-0 bottom-0 left-0 z-50 animate-in border-[var(--color-border-medium)] border-t-2 bg-[var(--color-bg-overlay)] shadow-xl backdrop-blur-xl duration-300"
       aria-label="Newsletter signup"
     >
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--color-accent)]/30 to-transparent" />
+      <div className="absolute top-0 right-0 left-0 h-px bg-gradient-to-r from-transparent via-[var(--color-accent)]/30 to-transparent" />
       <div className="container mx-auto px-4 py-6 md:py-4">
         {/* Desktop layout */}
-        <div className="hidden md:flex items-center justify-between gap-6 max-w-5xl mx-auto">
-          <div className="flex-shrink-0 flex items-center gap-3">
-            <div className="p-2.5 bg-accent/10 rounded-lg border border-accent/20">
+        <div className="mx-auto hidden max-w-5xl items-center justify-between gap-6 md:flex">
+          <div className="flex flex-shrink-0 items-center gap-3">
+            <div className="rounded-lg border border-accent/20 bg-accent/10 p-2.5">
               <Mail className="h-5 w-5 text-accent" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-base font-semibold text-foreground">
+              <p className="font-semibold text-base text-foreground">
                 {NEWSLETTER_CTA_CONFIG.headline}
               </p>
-              <p className="text-sm text-muted-foreground">{NEWSLETTER_CTA_CONFIG.description}</p>
+              <p className="text-muted-foreground text-sm">{NEWSLETTER_CTA_CONFIG.description}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex flex-shrink-0 items-center gap-3">
             <FormVariant source={source} className="min-w-[360px]" />
             {dismissible && (
               <Button
@@ -579,11 +683,11 @@ function FooterBarVariant({
         </div>
 
         {/* Mobile layout */}
-        <div className="flex md:hidden flex-col gap-3">
+        <div className="flex flex-col gap-3 md:hidden">
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-accent flex-shrink-0" aria-hidden="true" />
-              <p className="text-sm font-medium text-foreground">
+              <Mail className="h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
+              <p className="font-medium text-foreground text-sm">
                 {NEWSLETTER_CTA_CONFIG.headline}
               </p>
             </div>
@@ -631,37 +735,33 @@ function ModalVariant({
       const now = Date.now();
       setShowTime(now);
 
-      import('#lib/analytics/events.constants')
-        .then(({ EVENTS }) => {
-          trackEvent(EVENTS.EMAIL_MODAL_SHOWN, {
-            trigger_source: 'post_copy',
-            copy_type: copyType,
-            session_copy_count: 1,
-          });
-        })
-        .catch(() => {
-          // Analytics tracking failure is non-critical - silently fail
-        });
+      trackEvent('email_modal_shown', {
+        trigger_source: 'post_copy',
+        copy_type: copyType,
+        session_copy_count: 1,
+      });
     }
   }, [open, copyType]);
 
   const { execute, status } = useAction(postCopyEmailCaptureAction, {
     onSuccess: (result) => {
-      if (result.data?.success) {
+      if (result.data) {
         toasts.raw.success('Welcome to the newsletter! 🎉', {
           description: 'Check your inbox for a welcome email',
           duration: 5000,
         });
 
-        if (result.data.analytics) {
-          const { event, ...eventData } = result.data.analytics;
-          trackEvent(event, eventData);
-        }
+        trackEvent('newsletter_subscription_post_copy', {
+          contact_id: result.data.id,
+          copy_type: result.data.copy_type,
+          copy_category: result.data.copy_category,
+          copy_slug: result.data.copy_slug,
+        });
 
         onOpenChange(false);
         setEmail('');
       } else {
-        throw new Error(result.data?.error || 'Subscription failed');
+        throw new Error('Subscription failed');
       }
     },
     onError: (error) => {
@@ -716,17 +816,11 @@ function ModalVariant({
     if (showTime) {
       const timeShown = Date.now() - showTime;
 
-      import('#lib/analytics/events.constants')
-        .then(({ EVENTS }) => {
-          trackEvent(EVENTS.EMAIL_MODAL_DISMISSED, {
-            trigger_source: 'post_copy',
-            dismissal_method: 'maybe_later',
-            time_shown_ms: timeShown,
-          });
-        })
-        .catch(() => {
-          // Analytics tracking failure is non-critical - silently fail
-        });
+      trackEvent('email_modal_dismissed', {
+        trigger_source: 'post_copy',
+        dismissal_method: 'maybe_later',
+        time_shown_ms: timeShown,
+      });
     }
 
     onOpenChange(false);
@@ -737,17 +831,11 @@ function ModalVariant({
     if (!open && showTime) {
       const timeShown = Date.now() - showTime;
 
-      import('#lib/analytics/events.constants')
-        .then(({ EVENTS }) => {
-          trackEvent(EVENTS.EMAIL_MODAL_DISMISSED, {
-            trigger_source: 'post_copy',
-            dismissal_method: 'close_button',
-            time_shown_ms: timeShown,
-          });
-        })
-        .catch(() => {
-          // Analytics tracking failure is non-critical - silently fail
-        });
+      trackEvent('email_modal_dismissed', {
+        trigger_source: 'post_copy',
+        dismissal_method: 'close_button',
+        time_shown_ms: timeShown,
+      });
     }
 
     onOpenChange(open);
@@ -760,7 +848,7 @@ function ModalVariant({
 
   return (
     <Sheet open={open} onOpenChange={handleDismiss}>
-      <SheetContent side="bottom" className="sm:max-w-md sm:mx-auto">
+      <SheetContent side="bottom" className="sm:mx-auto sm:max-w-md">
         <SheetHeader>
           <SheetTitle>{NEWSLETTER_CTA_CONFIG.headline}</SheetTitle>
           <SheetDescription>{NEWSLETTER_CTA_CONFIG.description}</SheetDescription>
@@ -774,14 +862,14 @@ function ModalVariant({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
-              className="text-base h-12"
+              className="h-12 text-base"
               autoComplete="email"
               aria-label="Email address"
               required
             />
           </div>
 
-          <div className="flex gap-3 flex-col sm:flex-row">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <Button
               type="submit"
               disabled={isLoading || !email.trim()}
@@ -804,7 +892,7 @@ function ModalVariant({
           </div>
         </form>
 
-        <p className="mt-4 text-xs text-muted-foreground text-center">
+        <p className="mt-4 text-center text-muted-foreground text-xs">
           By subscribing, you agree to receive updates about Claude tools and resources.
         </p>
       </SheetContent>

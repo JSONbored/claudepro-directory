@@ -6,7 +6,7 @@
  *
  * **Architecture:**
  * - All functions are pure, synchronous, and browser-compatible
- * - Zero Node.js dependencies (no node:*, no Redis, no filesystem)
+ * - Zero Node.js dependencies (no node:*, no filesystem)
  * - Safe to import in 'use client' components
  * - Safe for Storybook
  *
