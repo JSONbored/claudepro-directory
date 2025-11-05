@@ -879,12 +879,6 @@ export type PublicGetContentDetailCompleteArgs = z.infer<
 export type PublicGetContentDetailCompleteReturns = z.infer<
   typeof generated.publicGetContentDetailCompleteReturnsSchema
 >;
-export type PublicGetContentPaginatedArgs = z.infer<
-  typeof generated.publicGetContentPaginatedArgsSchema
->;
-export type PublicGetContentPaginatedReturns = z.infer<
-  typeof generated.publicGetContentPaginatedReturnsSchema
->;
 export type PublicGetContentTemplatesArgs = z.infer<
   typeof generated.publicGetContentTemplatesArgsSchema
 >;

@@ -10,8 +10,12 @@ import {
   methodNotAllowedResponse,
 } from '../_shared/utils/response.ts';
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error('Missing required environment variables: SUPABASE_URL and/or SUPABASE_ANON_KEY');
+}
 
 // Public CORS headers for GET (allow all origins)
 const getCorsHeaders = {
@@ -34,6 +38,22 @@ Deno.serve(async (req) => {
     const category = url.searchParams.get('category');
     const page = Number.parseInt(url.searchParams.get('page') || '1', 10);
     const limit = Number.parseInt(url.searchParams.get('limit') || '20', 10);
+
+    // Validate pagination parameters
+    if (Number.isNaN(page) || page < 1) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid page parameter', message: 'Page must be a positive integer' }),
+        { status: 400, headers: { 'Content-Type': 'application/json', ...getCorsHeaders } }
+      );
+    }
+
+    if (Number.isNaN(limit) || limit < 1 || limit > 100) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid limit parameter', message: 'Limit must be between 1 and 100' }),
+        { status: 400, headers: { 'Content-Type': 'application/json', ...getCorsHeaders } }
+      );
+    }
+
     const offset = (page - 1) * limit;
 
     const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);

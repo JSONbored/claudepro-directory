@@ -75,7 +75,17 @@ function main() {
     case 'clear': {
       if (arg) {
         // Clear specific pattern (e.g., "skill:*" or "db-*")
-        const pattern = new RegExp(arg.replace(/\*/g, '.*'));
+        // Escape regex metacharacters before substituting wildcards
+        const WILDCARD_PLACEHOLDER = '___WILDCARD___';
+        const escapeForRegex = (value: string) =>
+          value.replace(/[\\^$.*+?()[\]{}|]/g, (match) =>
+            match === '*' ? WILDCARD_PLACEHOLDER : `\\${match}`
+          );
+        const patternSource = escapeForRegex(arg).replace(
+          new RegExp(WILDCARD_PLACEHOLDER, 'g'),
+          '.*'
+        );
+        const pattern = new RegExp(`^${patternSource}$`);
         const keys = getCacheKeys();
         const matchingKeys = keys.filter((k) => pattern.test(k));
 

@@ -82,6 +82,9 @@ interface BaseGridProps {
 
   /** Number of items to prefetch for faster navigation (default: 0) */
   prefetchCount?: number;
+
+  /** Callback to fetch more items (for pagination) */
+  onFetchMore?: () => Promise<void>;
 }
 
 /**
@@ -178,6 +181,7 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
     ariaLabel,
     keyExtractor,
     prefetchCount = 0,
+    onFetchMore,
   } = props;
 
   const router = useRouter();
@@ -203,6 +207,13 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
 
   // Determine items to display
   const displayedItems = infiniteScroll ? items.slice(0, displayCount) : items;
+
+  // Trigger onFetchMore when we've displayed all loaded items
+  useEffect(() => {
+    if (infiniteScroll && onFetchMore && displayCount >= items.length && hasMore) {
+      onFetchMore();
+    }
+  }, [displayCount, items.length, infiniteScroll, onFetchMore, hasMore]);
 
   // Default key extractor uses slug (present in both ContentItem and SearchResult)
   const getKey = keyExtractor || ((item: DisplayableContent, index: number) => item.slug || index);

@@ -13,7 +13,7 @@
         ".build-cache/cache.json"
       ],
       "cache": true,
-      "passThroughEnv": ["VERCEL_DEPLOYMENT_ID", "NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY"]
     },
     "build:skills:exec": {
       "outputs": [
@@ -29,11 +29,11 @@
       ],
       "cache": true,
       "persistent": true,
-      "passThroughEnv": ["VERCEL_DEPLOYMENT_ID"]
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY"]
     },
     "generate:service-worker:exec": {
       "dependsOn": ["generate:categories:exec"],
-      "outputs": ["public/service-worker.js", ".next/cache/sw-hash.txt"],
+      "outputs": ["public/service-worker.js"],
       "inputs": [
         "scripts/build/generate-service-worker.ts",
         "src/lib/config/category-config.ts",
@@ -42,12 +42,7 @@
         "package.json",
         ".build-cache/cache.json"
       ],
-      "cache": true,
-      "passThroughEnv": [
-        "VERCEL_DEPLOYMENT_ID",
-        "NEXT_PUBLIC_SUPABASE_URL",
-        "NEXT_PUBLIC_SUPABASE_ANON_KEY"
-      ]
+      "cache": true
     },
     "type-check": {
       "outputs": ["**/*.tsbuildinfo"],
@@ -65,44 +60,8 @@
   "globalDependencies": ["package.json", "pnpm-lock.yaml"],
   "globalEnv": [
     "NODE_ENV",
-    "ARCJET_KEY",
-    "RATE_LIMIT_SECRET",
-    "CACHE_WARM_AUTH_TOKEN",
-    "VIEW_COUNT_SALT",
-    "WEBHOOK_SECRET",
-    "CRON_SECRET",
-    "GITHUB_TOKEN",
-    "GITHUB_OWNER",
-    "GITHUB_REPO",
-    "GITHUB_BRANCH",
-    "RESEND_API_KEY",
-    "RESEND_AUDIENCE_ID",
-    "RESEND_WEBHOOK_SECRET",
-    "POSTGRES_URL",
-    "POSTGRES_PRISMA_URL",
-    "POSTGRES_URL_NON_POOLING",
-    "POSTGRES_USER",
-    "POSTGRES_PASSWORD",
-    "POSTGRES_DATABASE",
-    "POSTGRES_HOST",
-    "SUPABASE_URL",
-    "SUPABASE_ANON_KEY",
-    "SUPABASE_SERVICE_ROLE_KEY",
-    "SUPABASE_JWT_SECRET",
     "NEXT_PUBLIC_SUPABASE_URL",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-    "BETTERSTACK_HEARTBEAT_WEEKLY_TASKS",
-    "BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE",
-    "BETTERSTACK_SOURCE_TOKEN",
-    "KV_URL",
-    "REDIS_URL",
-    "LOGTAIL_URL",
-    "LOGTAIL_SOURCE_TOKEN",
-    "REVALIDATE_SECRET",
-    "R2_ACCESS_KEY_ID",
-    "R2_SECRET_ACCESS_KEY",
-    "R2_ENDPOINT",
-    "R2_BUCKET_NAME"
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY"
   ],
   "globalPassThroughEnv": [
     "VERCEL",

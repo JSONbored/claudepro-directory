@@ -87,7 +87,18 @@ Deno.serve(async (req: Request) => {
  * Full flow: Validate → Resend audience → Database → Welcome email → Sequence
  */
 async function handleSubscribe(req: Request): Promise<Response> {
-  const payload = await req.json();
+  // Parse and validate JSON body
+  let payload: any;
+  try {
+    payload = await req.json();
+  } catch {
+    return badRequestResponse('Valid JSON body is required');
+  }
+
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return badRequestResponse('Valid JSON body is required');
+  }
+
   const { email, source, referrer, copy_type, copy_category, copy_slug } = payload;
 
   // Validate email format

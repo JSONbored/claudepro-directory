@@ -23,7 +23,7 @@
 import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   LazyFeaturedSections,
   LazySearchSection,
@@ -62,8 +62,9 @@ const UnifiedSearch = dynamic(
 );
 
 function HomePageClientComponent({ initialData, featuredByCategory, stats }: HomePageClientProps) {
-  // Extract allConfigs from server data (201 items for "All" tab)
-  const [allConfigs] = useState<ContentItem[]>((initialData.allConfigs as ContentItem[]) || []);
+  const [allConfigs, setAllConfigs] = useState<ContentItem[]>([]);
+  const [isLoadingAllConfigs, setIsLoadingAllConfigs] = useState(false);
+  const [hasMoreAllConfigs, setHasMoreAllConfigs] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
   const [searchResults, setSearchResults] = useState<DisplayableContent[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -71,12 +72,58 @@ function HomePageClientComponent({ initialData, featuredByCategory, stats }: Hom
   const [currentSearchQuery, setCurrentSearchQuery] = useState('');
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Get category configs from static imports (client-side)
   const categoryStatsConfig = useMemo(() => getCategoryStatsConfig(), []);
   const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
 
-  // Handle search using direct Supabase RPC call (database-first)
-  // Performance optimized: Category filter at DB level, request cancellation
+  const fetchAllConfigs = useCallback(
+    async (offset: number, limit = 30) => {
+      if (isLoadingAllConfigs || !hasMoreAllConfigs) return;
+
+      setIsLoadingAllConfigs(true);
+
+      try {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (!(supabaseUrl && supabaseKey)) {
+          throw new Error('Missing Supabase environment variables');
+        }
+
+        const url = `${supabaseUrl}/functions/v1/content-paginated?offset=${offset}&limit=${limit}&category=all`;
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${supabaseKey}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const newItems: ContentItem[] = await response.json();
+
+        if (newItems.length < limit) {
+          setHasMoreAllConfigs(false);
+        }
+
+        setAllConfigs((prev) => [...prev, ...newItems]);
+      } catch (error) {
+        logger.error('Failed to load content', error as Error, { source: 'fetchAllConfigs' });
+      } finally {
+        setIsLoadingAllConfigs(false);
+      }
+    },
+    [isLoadingAllConfigs, hasMoreAllConfigs]
+  );
+
+  useEffect(() => {
+    if (activeTab === 'all' && allConfigs.length === 0 && !isLoadingAllConfigs) {
+      fetchAllConfigs(0).catch(() => {
+        // Error already logged in fetchAllConfigs
+      });
+    }
+  }, [activeTab, allConfigs.length, fetchAllConfigs, isLoadingAllConfigs]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleSearch = useCallback(
     async (query: string, categoryOverride?: string) => {
       // Cancel previous request if still pending
@@ -329,6 +376,9 @@ function HomePageClientComponent({ initialData, featuredByCategory, stats }: Hom
             filteredResults={filteredResults}
             onTabChange={handleTabChange}
             categoryConfigs={categoryConfigs}
+            onFetchMore={async () => {
+              await fetchAllConfigs(allConfigs.length);
+            }}
           />
         )}
       </section>

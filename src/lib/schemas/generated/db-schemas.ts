@@ -5100,19 +5100,6 @@ export const publicGetContentDetailCompleteArgsSchema = z.object({
 
 export const publicGetContentDetailCompleteReturnsSchema = jsonSchema;
 
-export const publicGetContentPaginatedArgsSchema = z.object({
-  p_author: z.string().optional(),
-  p_category: z.string().optional(),
-  p_limit: z.number().optional(),
-  p_offset: z.number().optional(),
-  p_order_by: z.string().optional(),
-  p_order_direction: z.string().optional(),
-  p_search: z.string().optional(),
-  p_tags: z.array(z.string()).optional(),
-});
-
-export const publicGetContentPaginatedReturnsSchema = jsonSchema;
-
 export const publicGetContentTemplatesArgsSchema = z.object({
   p_category: z.string(),
 });
@@ -6226,7 +6213,6 @@ export const publicSearchContentOptimizedReturnsSchema = z.array(
     discovery_metadata: jsonSchema,
     examples: jsonSchema,
     features: jsonSchema,
-    fts_vector: z.unknown(),
     id: z.string(),
     relevance_score: z.number(),
     slug: z.string(),

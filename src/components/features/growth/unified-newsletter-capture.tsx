@@ -65,7 +65,6 @@ export interface ModalVariantProps extends UnifiedNewsletterCaptureBaseProps {
   onOpenChange: (open: boolean) => void;
   copyType: CopyType;
   slug?: string;
-  referrer?: string;
 }
 
 export type UnifiedNewsletterCaptureProps =

@@ -68,10 +68,7 @@ async function HomeContentSection({
   try {
     const enrichedData = homepageContentData;
 
-    // Database now returns ONLY featured items (6 per category)
-    // No need for filter/sort/slice - already optimized at database level
     const featuredByCategory = enrichedData.categoryData as Record<string, EnrichedMetadata[]>;
-
     const initialData = enrichedData.categoryData as Record<string, unknown[]>;
 
     return (
@@ -86,12 +83,10 @@ async function HomeContentSection({
       'Homepage content section error',
       error instanceof Error ? error : new Error(String(error))
     );
-    // Return empty state on error
     const emptyData: Record<string, ContentItem[]> = {};
     for (const id of categoryIds) {
       emptyData[id] = [];
     }
-    emptyData.allConfigs = [];
 
     return (
       <HomePageClient

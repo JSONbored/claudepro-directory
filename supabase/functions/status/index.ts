@@ -24,10 +24,10 @@ interface HealthStatus {
   };
 }
 
-// Public CORS headers for GET (allow all origins)
+// Public CORS headers for GET/HEAD (allow all origins)
 const getCorsHeaders = {
   ...publicCorsHeaders,
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
 };
 
 Deno.serve(async (req) => {
@@ -36,8 +36,10 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: getCorsHeaders });
   }
 
-  if (req.method !== 'GET') {
-    return methodNotAllowedResponse('GET', getCorsHeaders);
+  const isHead = req.method === 'HEAD';
+
+  if (req.method !== 'GET' && !isHead) {
+    return methodNotAllowedResponse('GET, HEAD', getCorsHeaders);
   }
 
   try {
@@ -49,8 +51,9 @@ Deno.serve(async (req) => {
 
     const health = data as unknown as HealthStatus;
     const statusCode = health.status === 'healthy' ? 200 : health.status === 'degraded' ? 200 : 503;
+    const payload = JSON.stringify(health);
 
-    return new Response(JSON.stringify(health), {
+    return new Response(isHead ? null : payload, {
       status: statusCode,
       headers: {
         'Content-Type': 'application/json',

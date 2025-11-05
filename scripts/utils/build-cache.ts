@@ -121,7 +121,7 @@ export function getHash(scriptKey: string): string | null {
 }
 
 /**
- * Set hash with metadata
+ * Set hash with metadata (with concurrent write protection)
  */
 export function setHash(
   scriptKey: string,
@@ -132,13 +132,34 @@ export function setHash(
     files?: string[];
   }
 ): void {
-  const cache = loadCache();
-  cache.caches[scriptKey] = {
-    hash,
-    timestamp: new Date().toISOString(),
-    metadata,
-  };
-  saveCache(cache);
+  // Read-modify-write pattern with retry to handle concurrent updates
+  const maxRetries = 3;
+  let attempt = 0;
+
+  while (attempt < maxRetries) {
+    try {
+      // Always load fresh cache to merge concurrent writes
+      const cache = loadCache();
+
+      // Update only this script's entry
+      cache.caches[scriptKey] = {
+        hash,
+        timestamp: new Date().toISOString(),
+        metadata,
+      };
+
+      saveCache(cache);
+      return; // Success
+    } catch (error) {
+      attempt++;
+      if (attempt >= maxRetries) {
+        throw new Error(`Failed to update cache after ${maxRetries} attempts: ${error}`);
+      }
+      // Brief exponential backoff: 10ms, 20ms, 40ms
+      const backoffMs = 10 * 2 ** (attempt - 1);
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, backoffMs);
+    }
+  }
 }
 
 /**
