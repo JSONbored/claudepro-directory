@@ -44,5 +44,12 @@ export const highlightCode = cache(
 );
 
 export function extractRawCode(highlightedHtml: string): string {
-  return highlightedHtml.replace(/<[^>]*>/g, '').trim();
+  // Use iterative approach to handle nested/malformed tags (CodeQL security recommendation)
+  let prev: string;
+  let stripped = highlightedHtml;
+  do {
+    prev = stripped;
+    stripped = stripped.replace(/<[^>]*>/g, '');
+  } while (stripped !== prev);
+  return stripped.trim();
 }

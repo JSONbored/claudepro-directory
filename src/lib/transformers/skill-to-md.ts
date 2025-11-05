@@ -120,7 +120,8 @@ function escapeYamlString(str: string): string {
     str.includes('\n');
 
   if (needsQuoting) {
-    const escaped = str.replace(/"/g, '\\"');
+    // Escape backslashes first, then double quotes (CodeQL security recommendation)
+    const escaped = str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
     return `"${escaped}"`;
   }
 

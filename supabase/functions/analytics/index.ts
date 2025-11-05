@@ -87,11 +87,12 @@ Deno.serve(async (req) => {
         });
     }
   } catch (error) {
+    // Log full error details server-side for debugging
     console.error('Edge function error:', error);
+    // Only return generic error to client (don't expose internal details - CodeQL security recommendation)
     return new Response(
       JSON.stringify({ 
-        error: 'Internal server error',
-        message: error instanceof Error ? error.message : String(error)
+        error: 'Internal server error'
       }),
       {
         status: 500,

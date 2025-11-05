@@ -43,7 +43,14 @@ function convertListItem(line: string): string {
 }
 
 function stripHtmlTags(text: string): string {
-  return text.replace(/<[^>]*>/g, '');
+  // Use iterative approach to handle nested/malformed tags (CodeQL security recommendation)
+  let prev: string;
+  let stripped = text;
+  do {
+    prev = stripped;
+    stripped = stripped.replace(/<[^>]*>/g, '');
+  } while (stripped !== prev);
+  return stripped;
 }
 
 function normalizeWhitespace(text: string): string {
