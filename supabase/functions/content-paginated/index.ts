@@ -69,9 +69,9 @@ Deno.serve(async (req: Request) => {
     // Call RPC function (using anon key for public read-only access)
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const { data, error } = await supabase.rpc('get_content_paginated', {
-      p_offset: offset,
-      p_limit: limit,
       p_category: category,
+      p_limit: limit,
+      p_offset: offset,
     });
 
     if (error) {
@@ -79,8 +79,11 @@ Deno.serve(async (req: Request) => {
       return errorResponse(error, 'get_content_paginated', getCorsHeaders);
     }
 
+    // Extract items array from JSONB response
+    const items = data?.items || [];
+
     // Return with caching headers (15 minutes = 900 seconds)
-    return new Response(JSON.stringify(data), {
+    return new Response(JSON.stringify(items), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',

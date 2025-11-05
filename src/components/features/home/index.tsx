@@ -116,6 +116,10 @@ function HomePageClientComponent({ initialData, featuredByCategory, stats }: Hom
     [isLoadingAllConfigs, hasMoreAllConfigs]
   );
 
+  const handleFetchMore = useCallback(async () => {
+    await fetchAllConfigs(allConfigs.length);
+  }, [fetchAllConfigs, allConfigs.length]);
+
   useEffect(() => {
     if (activeTab === 'all' && allConfigs.length === 0 && !isLoadingAllConfigs) {
       fetchAllConfigs(0).catch(() => {
@@ -376,9 +380,7 @@ function HomePageClientComponent({ initialData, featuredByCategory, stats }: Hom
             filteredResults={filteredResults}
             onTabChange={handleTabChange}
             categoryConfigs={categoryConfigs}
-            onFetchMore={async () => {
-              await fetchAllConfigs(allConfigs.length);
-            }}
+            onFetchMore={handleFetchMore}
           />
         )}
       </section>
