@@ -10,7 +10,8 @@ import { HeyClaudeLogo } from '@/src/components/layout/heyclaude-logo';
 export function AuthMobileHeader() {
   return (
     <motion.div
-      className="border-border border-b bg-background/80 px-6 py-6 backdrop-blur-sm"
+      className="px-6 py-6"
+      style={{ backgroundColor: 'oklch(74% 0.2 35)' }}
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -20,7 +21,7 @@ export function AuthMobileHeader() {
       </div>
 
       <motion.p
-        className="mt-2 text-muted-foreground text-xs"
+        className="mt-2 text-white/90 text-xs"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}

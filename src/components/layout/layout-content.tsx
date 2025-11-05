@@ -64,16 +64,8 @@ export function LayoutContent({ children, announcement }: LayoutContentProps) {
   if (isAuthRoute) {
     return (
       <>
-        <a
-          href="#main-content"
-          className={
-            'sr-only rounded-md focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground'
-          }
-        >
-          Skip to main content
-        </a>
         {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
-        <main id="main-content" className="w-full">
+        <main id="main-content" className="h-[100dvh] w-full overflow-hidden">
           {children}
         </main>
       </>

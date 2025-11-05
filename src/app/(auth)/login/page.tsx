@@ -19,21 +19,10 @@ export default async function LoginPage({
   return (
     <Suspense fallback={null}>
       <SplitAuthLayout
-        brandPanel={
-          <AuthBrandPanel
-          // Optional: Add real stats when available
-          // stats={[
-          //   { value: '10,000+', label: 'Configurations' },
-          //   { value: '5,000+', label: 'Community Members' },
-          // ]}
-          />
-        }
+        brandPanel={<AuthBrandPanel />}
         mobileHeader={<AuthMobileHeader />}
         authPanel={
-          <AuthFormPanel
-            title="Welcome back"
-            description="Sign in to bookmark configurations, submit content, and join the community"
-          >
+          <AuthFormPanel title="Sign in" description="Choose your preferred sign-in method">
             <OAuthProviderButton provider="github" redirectTo={redirectTo} />
             <OAuthProviderButton provider="google" redirectTo={redirectTo} />
             <OAuthProviderButton provider="discord" redirectTo={redirectTo} />

@@ -1,13 +1,12 @@
 /**
- * OAuth button - icon + label with loading states
+ * OAuth button - Circular icon style with white GitHub icon
  */
 
 'use client';
 
 import { motion } from 'motion/react';
 import { useState } from 'react';
-import { Button } from '@/src/components/primitives/button';
-import { Chrome, DiscordIcon, Github } from '@/src/lib/icons';
+import { DiscordBrandIcon, GithubBrandIcon, GoogleBrandIcon } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -15,34 +14,25 @@ import { toasts } from '@/src/lib/utils/toast.utils';
 interface OAuthProviderButtonProps {
   provider: 'github' | 'google' | 'discord';
   redirectTo?: string | undefined;
-  size?: 'default' | 'lg';
   className?: string;
 }
 
 const PROVIDER_CONFIG = {
   github: {
-    icon: Github,
+    icon: GithubBrandIcon,
     label: 'GitHub',
-    brandColor: 'hover:bg-foreground/5',
   },
   google: {
-    icon: Chrome,
+    icon: GoogleBrandIcon,
     label: 'Google',
-    brandColor: 'hover:bg-blue-500/5',
   },
   discord: {
-    icon: DiscordIcon,
+    icon: DiscordBrandIcon,
     label: 'Discord',
-    brandColor: 'hover:bg-discord/10',
   },
 } as const;
 
-export function OAuthProviderButton({
-  provider,
-  redirectTo,
-  size = 'lg',
-  className,
-}: OAuthProviderButtonProps) {
+export function OAuthProviderButton({ provider, redirectTo, className }: OAuthProviderButtonProps) {
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
 
@@ -63,39 +53,44 @@ export function OAuthProviderButton({
       toasts.error.authFailed(`Sign in failed: ${error.message}`);
       setLoading(false);
     }
-    // If successful, OAuth redirect happens automatically
   };
 
   return (
-    <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-      <Button
-        onClick={handleSignIn}
-        disabled={loading}
-        size={size}
-        variant="outline"
+    <button
+      type="button"
+      onClick={handleSignIn}
+      disabled={loading}
+      className={cn(
+        'flex flex-col items-center gap-4 px-6',
+        loading && 'cursor-wait opacity-60',
+        className
+      )}
+    >
+      {/* Circular icon button */}
+      <div
         className={cn(
-          'w-full gap-3 font-medium transition-all duration-200',
-          config.brandColor,
-          loading && 'cursor-wait opacity-60',
-          className
+          'flex h-16 w-16 items-center justify-center rounded-full border bg-white/5 transition-all duration-200 hover:scale-105 hover:bg-white/10',
+          loading && 'cursor-wait'
         )}
+        style={{ borderColor: 'oklch(74% 0.2 35 / 0.3)' }}
       >
         {loading ? (
-          <>
-            <motion.div
-              className="h-5 w-5 rounded-full border-2 border-muted-foreground border-t-foreground"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 0.8, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
-            />
-            <span>Signing in...</span>
-          </>
+          <motion.div
+            className="h-7 w-7 rounded-full border-2 border-white/20 border-t-white/80"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 0.8, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
+          />
         ) : (
-          <>
-            <IconComponent className="h-5 w-5" />
-            <span>Continue with {config.label}</span>
-          </>
+          <div style={{ width: '28px', height: '28px' }} className="text-foreground">
+            <IconComponent style={{ width: '28px', height: '28px', display: 'block' }} />
+          </div>
         )}
-      </Button>
-    </motion.div>
+      </div>
+
+      {/* Label below */}
+      <span className="font-medium text-foreground text-sm">
+        {loading ? 'Signing in...' : config.label}
+      </span>
+    </button>
   );
 }
