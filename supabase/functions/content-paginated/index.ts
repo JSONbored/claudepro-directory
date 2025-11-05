@@ -13,23 +13,29 @@ import {
   errorResponse,
   jsonResponse,
   methodNotAllowedResponse,
-  publicCorsHeaders,
 } from '../_shared/utils/response.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+
+// GET-specific CORS headers for read-only public endpoint
+const getCorsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
 
 Deno.serve(async (req: Request) => {
   // Handle CORS preflight - public endpoint (read-only content)
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 200,
-      headers: publicCorsHeaders,
+      headers: getCorsHeaders,
     });
   }
 
   if (req.method !== 'GET') {
-    return methodNotAllowedResponse('GET', publicCorsHeaders);
+    return methodNotAllowedResponse('GET', getCorsHeaders);
   }
 
   try {
@@ -44,7 +50,7 @@ Deno.serve(async (req: Request) => {
       return jsonResponse(
         { error: 'Invalid parameters', message: 'offset >= 0, 1 <= limit <= 100' },
         400,
-        publicCorsHeaders
+        getCorsHeaders
       );
     }
 
@@ -58,7 +64,7 @@ Deno.serve(async (req: Request) => {
 
     if (error) {
       console.error('RPC error:', error);
-      return errorResponse(error, 'get_content_paginated', publicCorsHeaders);
+      return errorResponse(error, 'get_content_paginated', getCorsHeaders);
     }
 
     // Return with caching headers (15 minutes = 900 seconds)
@@ -67,11 +73,11 @@ Deno.serve(async (req: Request) => {
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'public, s-maxage=900, stale-while-revalidate=1800',
-        ...publicCorsHeaders,
+        ...getCorsHeaders,
       },
     });
   } catch (error) {
     console.error('Edge function error:', error);
-    return errorResponse(error, 'content-paginated', publicCorsHeaders);
+    return errorResponse(error, 'content-paginated', getCorsHeaders);
   }
 });
