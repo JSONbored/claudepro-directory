@@ -3,30 +3,34 @@
  * Unified Database Schema Sync Script
  *
  * Single script that handles all database-related artifact generation:
- * 1. Schema dump (supabase/schema.sql)
- * 2. TypeScript types (src/types/database.types.ts)
- * 3. Zod schemas (src/lib/schemas/generated/db-schemas.ts)
+ * 1. Schema dump (supabase/schema.sql) - OPTIONAL, for version control only
+ * 2. TypeScript types (src/types/database.types.ts) - queries database directly
+ * 3. Zod schemas (src/lib/schemas/generated/db-schemas.ts) - reads from types file
  *
  * Features:
+ * - Smart defaults: skips schema.sql by default (not needed for type generation)
  * - Comprehensive change detection (tables, views, functions, indexes, triggers)
- * - Smart execution order (dump → types → zod)
  * - Individual operation support (--only-dump, --only-types, --only-zod)
  * - Skip flags (--skip-dump, --skip-types, --skip-zod)
  * - Force regeneration (--force)
  * - Hash-based caching for performance
  *
  * Usage:
- *   pnpm sync:db                # Sync all artifacts with change detection
- *   pnpm sync:db --force        # Force regeneration of all artifacts
- *   pnpm sync:db --only-types   # Only regenerate TypeScript types
- *   pnpm sync:db --only-zod     # Only regenerate Zod schemas
- *   pnpm sync:db --only-dump    # Only dump schema.sql
- *   pnpm sync:db --skip-dump    # Skip schema dump
+ *   pnpm sync:db                # Fast mode: types + zod only (~13-20s)
+ *   pnpm sync:db:full           # Complete sync including schema.sql (~60s)
+ *   pnpm sync:db --force        # Force regeneration (respects skip flags)
+ *   pnpm sync:db:types          # Only regenerate TypeScript types
+ *   pnpm sync:db:zod            # Only regenerate Zod schemas
+ *   pnpm sync:db:dump           # Only dump schema.sql
  *
  * Performance:
- * - Full sync (all changed): ~8-12 seconds
- * - Partial sync (some changed): ~4-8 seconds
+ * - Fast mode (types + zod): ~13-20 seconds ⚡
+ * - Full sync (with schema.sql): ~60 seconds
  * - No changes: ~200-500ms (early exit after hash check)
+ *
+ * Note: schema.sql is NOT required for type generation. Types are generated
+ * directly from the database using --db-url. Use sync:db:full when you need
+ * to update schema.sql for version control or documentation purposes.
  */
 
 import { execSync } from 'node:child_process';
@@ -35,6 +39,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ora from 'ora';
+import { ensureEnvVars } from '../utils/env.js';
 
 // ============================================================================
 // Constants
@@ -42,7 +47,6 @@ import ora from 'ora';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = join(__dirname, '../..');
-const ENV_LOCAL = join(ROOT, '.env.local');
 
 // Output files
 const SCHEMA_FILE = join(ROOT, 'supabase/schema.sql');
@@ -124,63 +128,12 @@ interface StepResult {
 // Shared Utilities
 // ============================================================================
 
-function hasRequiredEnvVars(): boolean {
-  if (!existsSync(ENV_LOCAL)) {
-    return false;
-  }
-
+async function getDatabaseUrl(): Promise<string | null> {
   try {
-    const envContent = readFileSync(ENV_LOCAL, 'utf-8');
-    return envContent.includes('POSTGRES_URL_NON_POOLING=');
-  } catch {
-    return false;
-  }
-}
-
-function pullVercelEnv(): boolean {
-  // Skip if .env.local exists with required vars
-  // Note: .env.local is persistent and shared across scripts (backup, sync, etc.)
-  if (hasRequiredEnvVars()) {
-    return true;
-  }
-
-  try {
-    console.log('📥 Pulling environment variables from Vercel...');
-    execSync('vercel env pull .env.local --yes', {
-      cwd: ROOT,
-      stdio: 'inherit',
-    });
-
-    if (!existsSync(ENV_LOCAL)) {
-      console.error('❌ Failed to pull environment variables');
-      return false;
-    }
-
-    return true;
+    await ensureEnvVars(['POSTGRES_URL_NON_POOLING']);
+    return process.env.POSTGRES_URL_NON_POOLING || null;
   } catch (error) {
-    console.error('❌ Failed to pull Vercel environment:', error);
-    return false;
-  }
-}
-
-function getDatabaseUrl(): string | null {
-  if (!existsSync(ENV_LOCAL)) {
-    console.error('❌ .env.local not found');
-    return null;
-  }
-
-  try {
-    const envContent = readFileSync(ENV_LOCAL, 'utf-8');
-    const match = envContent.match(/POSTGRES_URL_NON_POOLING=(.+)/);
-
-    if (!match) {
-      console.error('❌ POSTGRES_URL_NON_POOLING not found in environment');
-      return null;
-    }
-
-    return match[1].trim();
-  } catch (error) {
-    console.error('❌ Failed to read .env.local:', error);
+    console.error('❌ Failed to load environment variables:', error);
     return null;
   }
 }
@@ -199,26 +152,26 @@ function calculateSchemaHash(dbUrl: string): string | null {
   }
 }
 
-// Cache schema hash to avoid redundant queries (saves 3 queries per run)
+// Cache schema hash to avoid redundant queries
+// OPTIMIZATION: Single query per script run (was 3 queries before)
 let cachedSchemaHash: string | null | undefined;
+let cacheInitialized = false;
 
-function getSchemaHash(): string | null {
-  if (cachedSchemaHash !== undefined) {
+async function getSchemaHash(forceRefresh = false): Promise<string | null> {
+  // Return cached value if available and not forcing refresh
+  if (cacheInitialized && !forceRefresh && cachedSchemaHash !== undefined) {
     return cachedSchemaHash;
   }
 
-  if (!pullVercelEnv()) {
-    cachedSchemaHash = null;
-    return null;
-  }
-
-  const dbUrl = getDatabaseUrl();
+  const dbUrl = await getDatabaseUrl();
   if (!dbUrl) {
     cachedSchemaHash = null;
+    cacheInitialized = true;
     return null;
   }
 
   cachedSchemaHash = calculateSchemaHash(dbUrl);
+  cacheInitialized = true;
   return cachedSchemaHash;
 }
 
@@ -247,7 +200,10 @@ function writeHash(filePath: string, hash: string): void {
 // Step 1: Schema Dump
 // ============================================================================
 
-function generateSchemaDump(isForce: boolean): StepResult {
+async function generateSchemaDump(
+  isForce: boolean,
+  cachedHash?: string | null
+): Promise<StepResult> {
   const startTime = performance.now();
   const spinner = ora();
 
@@ -259,7 +215,8 @@ function generateSchemaDump(isForce: boolean): StepResult {
     // Check if regeneration needed
     if (!isForce) {
       spinner.start('Checking for schema changes...');
-      const currentHash = getSchemaHash();
+      // OPTIMIZATION: Use cached hash if provided (avoids redundant database query)
+      const currentHash = cachedHash !== undefined ? cachedHash : await getSchemaHash();
       const storedHash = readHash(SCHEMA_HASH_FILE);
 
       if (currentHash && storedHash === currentHash) {
@@ -290,8 +247,8 @@ function generateSchemaDump(isForce: boolean): StepResult {
       throw new Error('Generated schema appears invalid');
     }
 
-    // Store hash
-    const currentHash = getSchemaHash();
+    // Store hash (refresh cache after successful dump)
+    const currentHash = await getSchemaHash(true);
     if (currentHash) {
       writeHash(SCHEMA_HASH_FILE, currentHash);
     }
@@ -322,7 +279,7 @@ function generateSchemaDump(isForce: boolean): StepResult {
 // Step 2: TypeScript Types
 // ============================================================================
 
-function generateTypes(isForce: boolean): StepResult {
+async function generateTypes(isForce: boolean, cachedHash?: string | null): Promise<StepResult> {
   const startTime = performance.now();
   const spinner = ora();
 
@@ -334,7 +291,8 @@ function generateTypes(isForce: boolean): StepResult {
     // Check if regeneration needed
     if (!isForce) {
       spinner.start('Checking for schema changes...');
-      const currentHash = getSchemaHash();
+      // OPTIMIZATION: Use cached hash if provided (avoids redundant database query)
+      const currentHash = cachedHash !== undefined ? cachedHash : await getSchemaHash();
       const storedHash = readHash(TYPES_HASH_FILE);
 
       if (currentHash && storedHash === currentHash) {
@@ -352,7 +310,7 @@ function generateTypes(isForce: boolean): StepResult {
 
     spinner.start('Generating TypeScript types from Supabase...');
 
-    const dbUrl = getDatabaseUrl();
+    const dbUrl = await getDatabaseUrl();
     if (!dbUrl) {
       throw new Error('Database URL not found');
     }
@@ -369,8 +327,8 @@ function generateTypes(isForce: boolean): StepResult {
       throw new Error('Generated types appear invalid');
     }
 
-    // Store hash
-    const currentHash = getSchemaHash();
+    // Store hash (use cached value, no need to refresh)
+    const currentHash = cachedHash !== undefined ? cachedHash : await getSchemaHash();
     if (currentHash) {
       writeHash(TYPES_HASH_FILE, currentHash);
     }
@@ -401,7 +359,7 @@ function generateTypes(isForce: boolean): StepResult {
 // Step 3: Zod Schemas
 // ============================================================================
 
-function generateZodSchemas(isForce: boolean): StepResult {
+async function generateZodSchemas(isForce: boolean): Promise<StepResult> {
   const startTime = performance.now();
   const spinner = ora();
 
@@ -528,15 +486,18 @@ async function main() {
   const results: StepResult[] = [];
 
   try {
+    // OPTIMIZATION: Single schema hash query for all checks (was 3 queries before)
+    let cachedSchemaHashForRun: string | null | undefined;
+
     // Early exit optimization: Check if anything needs regeneration
     if (!isForce && runDump && runTypes && runZod) {
       console.log('🔍 Checking if database schema has changed...\n');
-      const currentSchemaHash = getSchemaHash();
+      cachedSchemaHashForRun = await getSchemaHash();
 
-      if (currentSchemaHash) {
+      if (cachedSchemaHashForRun) {
         const schemaUpToDate =
-          readHash(SCHEMA_HASH_FILE) === currentSchemaHash &&
-          readHash(TYPES_HASH_FILE) === currentSchemaHash;
+          readHash(SCHEMA_HASH_FILE) === cachedSchemaHashForRun &&
+          readHash(TYPES_HASH_FILE) === cachedSchemaHashForRun;
 
         // Check Zod separately (depends on types content, not schema)
         let zodUpToDate = false;
@@ -555,25 +516,28 @@ async function main() {
 
         console.log('📊 Database schema has changed - syncing artifacts\n');
       }
+    } else if (!isForce && (runDump || runTypes)) {
+      // Pre-fetch schema hash if we'll need it (single query for both dump and types)
+      cachedSchemaHashForRun = await getSchemaHash();
     }
 
-    // Run operations in order
+    // Run operations in order, passing cached hash to avoid redundant queries
     if (runDump) {
-      results.push(generateSchemaDump(isForce));
+      results.push(await generateSchemaDump(isForce, cachedSchemaHashForRun));
       if (!results[results.length - 1].success) {
         throw new Error('Schema dump failed - aborting');
       }
     }
 
     if (runTypes) {
-      results.push(generateTypes(isForce));
+      results.push(await generateTypes(isForce, cachedSchemaHashForRun));
       if (!results[results.length - 1].success) {
         throw new Error('Type generation failed - aborting');
       }
     }
 
     if (runZod) {
-      results.push(generateZodSchemas(isForce));
+      results.push(await generateZodSchemas(isForce));
       if (!results[results.length - 1].success) {
         throw new Error('Zod generation failed - aborting');
       }

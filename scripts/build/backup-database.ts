@@ -20,10 +20,10 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { createClient } from '@supabase/supabase-js';
+import { ensureEnvVars } from '../utils/env.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = join(__dirname, '../..');
-const ENV_FILE = join(ROOT, '.env.local');
 const BACKUP_HASH_FILE = join(ROOT, '.backup-db-hash');
 const LATEST_BACKUP_DIR = join(ROOT, 'backups/latest');
 
@@ -34,38 +34,26 @@ console.log('🔒 Starting optimized incremental database backup...\n');
 // ============================================================================
 // Load environment and create Supabase client
 // ============================================================================
-if (!existsSync(ENV_FILE)) {
-  console.error('❌ .env.local not found - run: vercel env pull .env.local');
-  process.exit(1);
+await ensureEnvVars([
+  'POSTGRES_URL_NON_POOLING',
+  'NEXT_PUBLIC_SUPABASE_URL',
+  'SUPABASE_SERVICE_ROLE_KEY',
+]);
+
+// Properly handle environment variables with type safety
+const dbUrl = process.env.POSTGRES_URL_NON_POOLING;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!(dbUrl && supabaseUrl && supabaseKey)) {
+  throw new Error('Required environment variables are missing after ensureEnvVars');
 }
 
-const envContent = readFileSync(ENV_FILE, 'utf-8');
-const dbUrlMatch = envContent.match(/POSTGRES_URL_NON_POOLING=(.+)/);
-const supabaseUrlMatch = envContent.match(/NEXT_PUBLIC_SUPABASE_URL=(.+)/);
-const supabaseKeyMatch = envContent.match(/SUPABASE_SERVICE_ROLE_KEY=(.+)/);
-const r2AccessKeyMatch = envContent.match(/R2_ACCESS_KEY_ID=(.+)/);
-const r2SecretKeyMatch = envContent.match(/R2_SECRET_ACCESS_KEY=(.+)/);
-const r2EndpointMatch = envContent.match(/R2_ENDPOINT=(.+)/);
-const r2BucketMatch = envContent.match(/R2_BUCKET_NAME=(.+)/);
-
-if (!dbUrlMatch) {
-  console.error('❌ POSTGRES_URL_NON_POOLING not found in .env.local');
-  process.exit(1);
-}
-
-// Helper to strip quotes from env values
-const stripQuotes = (str: string) => str.replace(/^["']|["']$/g, '');
-
-const dbUrl = stripQuotes(dbUrlMatch[1].trim());
-const supabaseUrl = supabaseUrlMatch?.[1] ? stripQuotes(supabaseUrlMatch[1].trim()) : undefined;
-const supabaseKey = supabaseKeyMatch?.[1] ? stripQuotes(supabaseKeyMatch[1].trim()) : undefined;
-const r2AccessKey = r2AccessKeyMatch?.[1] ? stripQuotes(r2AccessKeyMatch[1].trim()) : undefined;
-const r2SecretKey = r2SecretKeyMatch?.[1] ? stripQuotes(r2SecretKeyMatch[1].trim()) : undefined;
-const r2Endpoint = r2EndpointMatch?.[1] ? stripQuotes(r2EndpointMatch[1].trim()) : undefined;
-const r2Bucket = r2BucketMatch?.[1] ? stripQuotes(r2BucketMatch[1].trim()) : undefined;
-const heartbeatUrl = envContent.match(/BETTERSTACK_HEARTBEAT_DB_BACKUP=(.+)/)?.[1]
-  ? stripQuotes(envContent.match(/BETTERSTACK_HEARTBEAT_DB_BACKUP=(.+)/)?.[1].trim() || '')
-  : undefined;
+const r2AccessKey = process.env.R2_ACCESS_KEY_ID;
+const r2SecretKey = process.env.R2_SECRET_ACCESS_KEY;
+const r2Endpoint = process.env.R2_ENDPOINT;
+const r2Bucket = process.env.R2_BUCKET_NAME;
+const heartbeatUrl = process.env.BETTERSTACK_HEARTBEAT_DB_BACKUP;
 
 // Initialize R2 client if credentials available
 let r2Client: S3Client | null = null;

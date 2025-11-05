@@ -35,7 +35,8 @@
     "generate:service-worker": "turbo run generate:service-worker:exec",
     "generate:service-worker:exec": "tsx scripts/build/generate-service-worker.ts",
     "generate:readme": "tsx scripts/build/generate-readme.ts",
-    "sync:db": "tsx scripts/build/sync-database-schema.ts",
+    "sync:db": "tsx scripts/build/sync-database-schema.ts --skip-dump",
+    "sync:db:full": "tsx scripts/build/sync-database-schema.ts",
     "sync:db:force": "tsx scripts/build/sync-database-schema.ts --force",
     "sync:db:types": "tsx scripts/build/sync-database-schema.ts --only-types",
     "sync:db:zod": "tsx scripts/build/sync-database-schema.ts --only-zod",
@@ -77,8 +78,7 @@
     "admin:submissions:spam": "tsx scripts/admin/review-submissions.ts spam",
     "admin:submissions:merge": "tsx scripts/admin/review-submissions.ts merge",
     "admin:submissions:bulk-approve": "tsx scripts/admin/review-submissions.ts bulk-approve",
-    "admin:content:create": "tsx scripts/admin/create-content.ts",
-    "audit:tracking": "tsx scripts/audit/verify-copy-download-tracking.ts"
+    "admin:content:create": "tsx scripts/admin/create-content.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

@@ -5,46 +5,17 @@
  * Generates README.md by querying content and category_configs tables directly.
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 import type { Tables } from '@/src/types/database.types';
+import { ensureEnvVars } from '../utils/env.js';
 
 // ============================================================================
 // Environment Loading
 // ============================================================================
 
-const ROOT = process.cwd();
-const ENV_LOCAL = join(ROOT, '.env.local');
-
-function loadEnvFromFile(): void {
-  if (!existsSync(ENV_LOCAL)) {
-    console.error('❌ .env.local not found. Run: vercel env pull .env.local --yes');
-    process.exit(1);
-  }
-
-  try {
-    const envContent = readFileSync(ENV_LOCAL, 'utf-8');
-    const envVars = envContent
-      .split('\n')
-      .filter((line) => line && !line.startsWith('#'))
-      .map((line) => {
-        const [key, ...values] = line.split('=');
-        return [key, values.join('=').replace(/^["']|["']$/g, '')];
-      });
-
-    for (const [key, value] of envVars) {
-      if (key && value) {
-        process.env[key] = value;
-      }
-    }
-  } catch (error) {
-    console.error('❌ Failed to read .env.local:', error);
-    process.exit(1);
-  }
-}
-
-loadEnvFromFile();
+await ensureEnvVars(['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY']);
 
 // ============================================================================
 // Supabase Client

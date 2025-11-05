@@ -5,7 +5,9 @@
       "*.{ts,tsx,js,jsx,mjs,cjs}",
       "src/**/*",
       "tests/**/*",
-      "scripts/**/*",
+      "scripts/**/*.ts",
+      "scripts/**/*.mjs",
+      "scripts/utils/**/*.js",
       "content/**/*",
       "config/**/*"
     ],
@@ -18,6 +20,8 @@
       "src/lib/schemas/generated/**/*",
       "src/lib/schemas/generated/db-schemas.d.ts",
       "src/types/database.types.ts",
+      "scripts/build/templates/**/*",
+      "scripts/build/templates/service-worker.template.js",
       "node_modules/**/*",
       "test-results/**/*",
       "playwright-report/**/*",
@@ -391,6 +395,15 @@
             "noExplicitAny": "off"
           }
         }
+      }
+    },
+    {
+      "includes": ["scripts/build/templates/**/*.js"],
+      "linter": {
+        "enabled": false
+      },
+      "formatter": {
+        "enabled": false
       }
     }
   ]
