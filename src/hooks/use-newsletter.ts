@@ -13,6 +13,8 @@ import type { Enums } from '@/src/types/database.types';
 
 export type NewsletterSource = Enums<'newsletter_source'>;
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
 function getEmailSubscriptionEvent(source: NewsletterSource): string {
   const eventMap: Record<NewsletterSource, string> = {
     footer: 'email_subscribed_footer',
@@ -33,6 +35,17 @@ export interface UseNewsletterOptions {
   successMessage?: string;
   errorTitle?: string;
   showToasts?: boolean;
+  /** Optional metadata for contextual tracking (copy actions, campaigns, etc.) */
+  metadata?: {
+    copy_type?: string;
+    copy_category?: string;
+    copy_slug?: string;
+    [key: string]: unknown;
+  };
+  /** Optional custom analytics event name (overrides default source-based event) */
+  customAnalyticsEvent?: string;
+  /** Optional context for error logging (variant, component-specific metadata) */
+  logContext?: Record<string, unknown>;
 }
 
 export interface UseNewsletterReturn {
@@ -52,6 +65,9 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
     successMessage = "You're now subscribed to our newsletter.",
     errorTitle = 'Subscription failed',
     showToasts = true,
+    metadata,
+    customAnalyticsEvent,
+    logContext,
   } = options;
 
   const [email, setEmail] = useState('');
@@ -78,13 +94,11 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
       try {
         const referrer = typeof window !== 'undefined' ? window.location.href : undefined;
 
-        // Call Edge Function directly
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        if (!supabaseUrl) {
+        if (!SUPABASE_URL) {
           throw new Error('Supabase URL not configured');
         }
 
-        const response = await fetch(`${supabaseUrl}/functions/v1/email-handler`, {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/email-handler`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -94,6 +108,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
             email,
             source,
             ...(referrer && { referrer }),
+            ...(metadata && metadata),
           }),
         });
 
@@ -106,10 +121,11 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
             });
           }
 
-          const eventName = getEmailSubscriptionEvent(source);
+          const eventName = customAnalyticsEvent || getEmailSubscriptionEvent(source);
           trackEvent(eventName, {
             contact_id: result.subscription_id,
             ...(referrer && { referrer }),
+            ...(metadata && metadata),
           });
 
           reset();
@@ -132,6 +148,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
             source,
             email: `${email.substring(0, 3)}***`,
             status: response.status,
+            ...logContext,
           });
         }
       } catch (err) {
@@ -151,10 +168,23 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
         logger.error('Newsletter subscription error', err instanceof Error ? err : undefined, {
           component: 'useNewsletter',
           source,
+          ...logContext,
         });
       }
     });
-  }, [email, source, onSuccess, onError, successMessage, errorTitle, showToasts, reset]);
+  }, [
+    email,
+    source,
+    onSuccess,
+    onError,
+    successMessage,
+    errorTitle,
+    showToasts,
+    reset,
+    customAnalyticsEvent,
+    metadata,
+    logContext,
+  ]);
 
   return {
     email,

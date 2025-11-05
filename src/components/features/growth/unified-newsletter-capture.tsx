@@ -1,29 +1,8 @@
 'use client';
 
 /**
- * Unified Newsletter Capture Component
- *
- * Consolidated newsletter capture component that replaces:
- * - newsletter-form.tsx (basic form)
- * - inline-email-cta.tsx (hero, inline, minimal, card variants)
- * - footer-newsletter-bar.tsx (sticky footer with dismissal)
- * - post-copy-email-modal.tsx (modal with copy tracking)
- *
- * Production Standards:
- * - Type-safe discriminated union for all variants
- * - Centralized useNewsletter hook integration
- * - Consistent analytics tracking across all contexts
- * - Accessibility with ARIA labels and error handling
- * - Responsive layouts for all variants
- * - Toast notifications and loading states
- *
- * Consolidation Benefits:
- * - Single source of truth for all newsletter capture UX
- * - 75% reduction in component files (4 → 1)
- * - Unified prop API across all contexts
- * - Easier maintenance and consistency
- *
- * @module components/features/growth/unified-newsletter-capture
+ * Unified Newsletter Capture - All-in-one component for 7 newsletter capture variants
+ * Database-first with centralized useNewsletter hook integration
  */
 
 import { usePathname } from 'next/navigation';
@@ -49,99 +28,52 @@ import { useNewsletter } from '@/src/hooks/use-newsletter';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
 import { Mail, X } from '@/src/lib/icons';
-import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
-// =============================================================================
-// TYPES
-// =============================================================================
-
-/**
- * Copy type for modal tracking context
- */
 export type CopyType = 'llmstxt' | 'markdown' | 'code' | 'link';
 
-/**
- * Base props shared across all variants
- */
 interface UnifiedNewsletterCaptureBaseProps {
-  /** Newsletter source for analytics tracking */
   source: NewsletterSource;
-  /** Additional CSS classes */
   className?: string;
-  /** Optional content category for contextual messaging */
   category?: string;
 }
 
-/**
- * Form variant props - Simple email form (replaces newsletter-form.tsx)
- */
 export interface FormVariantProps extends UnifiedNewsletterCaptureBaseProps {
   variant: 'form';
 }
 
-/**
- * CTA variant props - Contextual CTAs (replaces inline-email-cta.tsx)
- */
 export interface CTAVariantProps extends UnifiedNewsletterCaptureBaseProps {
   variant: 'hero' | 'inline' | 'minimal' | 'card';
-  /** Context for analytics tracking */
   context: string;
-  /** Custom headline (overrides default) */
   headline?: string;
-  /** Custom description (overrides default) */
   description?: string;
 }
 
-/**
- * Footer bar variant props - Sticky footer (replaces footer-newsletter-bar.tsx)
- */
 export interface FooterBarVariantProps extends UnifiedNewsletterCaptureBaseProps {
   variant: 'footer-bar';
-  /** Whether bar is dismissible */
   dismissible?: boolean;
-  /** Delay in ms before showing bar */
   showAfterDelay?: number;
-  /** Don't show on pages with inline CTA */
   respectInlineCTA?: boolean;
 }
 
-/**
- * Modal variant props - Sheet modal (replaces post-copy-email-modal.tsx)
- */
 export interface ModalVariantProps extends UnifiedNewsletterCaptureBaseProps {
   variant: 'modal';
-  /** Whether modal is open */
   open: boolean;
-  /** Callback when modal open state changes */
   onOpenChange: (open: boolean) => void;
-  /** Type of content that was copied */
   copyType: CopyType;
-  /** Content slug identifier */
   slug?: string;
-  /** Optional referrer URL */
   referrer?: string;
 }
 
-/**
- * Discriminated union of all UnifiedNewsletterCapture variants
- */
 export type UnifiedNewsletterCaptureProps =
   | FormVariantProps
   | CTAVariantProps
   | FooterBarVariantProps
   | ModalVariantProps;
 
-// =============================================================================
-// HELPER FUNCTIONS
-// =============================================================================
-
-/**
- * Get contextual messaging based on category
- */
 function getContextualMessage(category?: string): {
   headline: string;
   description: string;
@@ -187,71 +119,12 @@ function getContextualMessage(category?: string): {
   };
 }
 
-// =============================================================================
-// UNIFIED NEWSLETTER CAPTURE COMPONENT
-// =============================================================================
-
-/**
- * UnifiedNewsletterCapture Component
- *
- * All-in-one newsletter capture component with 7 variants:
- * - form: Simple email form
- * - hero: Large prominent CTA for landing pages
- * - inline: Mid-content card for detail pages
- * - minimal: Compact single-line for category pages
- * - card: Grid item for browse pages
- * - footer-bar: Sticky footer with dismissal
- * - modal: Sheet modal for post-copy capture
- *
- * @param props - Variant-specific props
- * @returns Newsletter capture UI for specified variant
- *
- * @example
- * ```tsx
- * // Form variant
- * <UnifiedNewsletterCapture variant="form" source="footer" />
- *
- * // Hero CTA variant
- * <UnifiedNewsletterCapture
- *   variant="hero"
- *   source="homepage"
- *   context="homepage"
- *   category="agents"
- * />
- *
- * // Footer bar variant
- * <UnifiedNewsletterCapture
- *   variant="footer-bar"
- *   source="footer"
- *   dismissible={true}
- *   showAfterDelay={3000}
- * />
- *
- * // Modal variant
- * <UnifiedNewsletterCapture
- *   variant="modal"
- *   source="modal"
- *   open={isOpen}
- *   onOpenChange={setIsOpen}
- *   copyType="markdown"
- *   category="agents"
- * />
- * ```
- */
 export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
   const { variant, source, className, category } = props;
-
-  // =============================================================================
-  // FORM VARIANT
-  // =============================================================================
 
   if (variant === 'form') {
     return <FormVariant source={source} {...(className && { className })} />;
   }
-
-  // =============================================================================
-  // CTA VARIANTS (hero, inline, minimal, card)
-  // =============================================================================
 
   if (variant === 'hero' || variant === 'inline' || variant === 'minimal' || variant === 'card') {
     const { headline, description } = props;
@@ -260,47 +133,37 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
     const finalHeadline = headline || defaultHeadline;
     const finalDescription = description || defaultDescription;
 
-    // Hero Variant - Modern 2025 Design
     if (variant === 'hero') {
       return (
         <div
           className={cn(
-            // Enhanced background with subtle gradient
             'w-full bg-gradient-to-br from-card/80 via-card/60 to-card/40',
             'backdrop-blur-sm',
-            // Modern border with subtle glow effect
             'rounded-2xl border border-border/30',
-            // Better shadow for depth
             'shadow-black/5 shadow-lg',
-            // Increased padding for breathing room
             'p-10 md:p-16',
             'text-center',
             className
           )}
         >
-          {/* Icon with enhanced styling */}
           <div className="mb-6 flex justify-center">
             <div className="rounded-2xl border border-accent/20 bg-accent/10 p-4 shadow-accent/10 shadow-md backdrop-blur-sm">
               <Mail className="h-8 w-8 text-accent" aria-hidden="true" />
             </div>
           </div>
 
-          {/* Headline with improved typography */}
           <h2 className="mb-4 font-bold text-3xl text-foreground leading-tight tracking-tight md:text-4xl">
             {finalHeadline}
           </h2>
 
-          {/* Description with better spacing and contrast */}
           <p className="mx-auto mb-8 max-w-2xl text-base text-muted-foreground leading-relaxed md:text-lg">
             {finalDescription}
           </p>
 
-          {/* Form with optimal width */}
           <div className="mx-auto max-w-xl">
             <FormVariant source={source} className="w-full" />
           </div>
 
-          {/* Trust signal with better visibility */}
           <p className="mt-6 text-muted-foreground/80 text-sm">
             {NEWSLETTER_CTA_CONFIG.footerText}
           </p>
@@ -308,7 +171,6 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
       );
     }
 
-    // Inline Variant
     if (variant === 'inline') {
       return (
         <Card
@@ -339,7 +201,6 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
       );
     }
 
-    // Minimal Variant
     if (variant === 'minimal') {
       return (
         <div
@@ -364,7 +225,6 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
       );
     }
 
-    // Card Variant
     if (variant === 'card') {
       return (
         <Card
@@ -396,10 +256,6 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
     }
   }
 
-  // =============================================================================
-  // FOOTER BAR VARIANT
-  // =============================================================================
-
   if (variant === 'footer-bar') {
     const { dismissible = true, showAfterDelay = 3000, respectInlineCTA = true } = props;
     return (
@@ -412,12 +268,8 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
     );
   }
 
-  // =============================================================================
-  // MODAL VARIANT
-  // =============================================================================
-
   if (variant === 'modal') {
-    const { open, onOpenChange, copyType, slug, referrer } = props;
+    const { open, onOpenChange, copyType, slug } = props;
     return (
       <ModalVariant
         open={open}
@@ -425,7 +277,6 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
         copyType={copyType}
         {...(category && { category })}
         {...(slug && { slug })}
-        {...(referrer && { referrer })}
       />
     );
   }
@@ -433,19 +284,6 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
   return null;
 }
 
-// =============================================================================
-// INTERNAL VARIANT COMPONENTS
-// =============================================================================
-
-/**
- * Form Variant - Modernized email form with enhanced UX
- * 2025 Design Updates:
- * - Larger input fields (52px height) for better touch targets
- * - Improved spacing and visual hierarchy
- * - Enhanced microinteractions (focus states, hover effects)
- * - Better responsive behavior (vertical stack on mobile)
- * - Accessibility improvements
- */
 function FormVariant({ source, className }: { source: NewsletterSource; className?: string }) {
   const { email, setEmail, isSubmitting, subscribe, error } = useNewsletter({
     source,
@@ -461,7 +299,6 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
   return (
     <form onSubmit={handleSubmit} className={cn('w-full', className)}>
       <div className="flex flex-col gap-3">
-        {/* Desktop: Horizontal layout | Mobile: Vertical stack */}
         <div className="flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <Input
@@ -474,22 +311,17 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
               required
               disabled={isSubmitting}
               className={cn(
-                // Enhanced sizing (52px height)
                 'h-[52px] min-w-0 px-5 text-base',
-                // Improved borders and focus states
                 'border-border/40 bg-background/95 backdrop-blur-sm',
                 'transition-all duration-200 ease-out',
                 'focus:border-accent/50 focus:ring-2 focus:ring-accent/20',
-                // Error state
                 error && 'border-destructive/50 focus:border-destructive focus:ring-destructive/20',
-                // Disabled state
                 isSubmitting && 'cursor-not-allowed opacity-60'
               )}
               aria-label="Email address"
               aria-invalid={!!error}
               aria-describedby={error ? errorId : undefined}
             />
-            {/* Focus indicator line */}
             <div
               className={cn(
                 'absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-accent to-primary transition-all duration-300 ease-out',
@@ -502,19 +334,13 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
             disabled={isSubmitting || !email.trim()}
             size="lg"
             className={cn(
-              // Enhanced sizing to match input (52px height)
               'h-[52px] flex-shrink-0 whitespace-nowrap px-8',
-              // Modern gradient with better contrast
               'bg-gradient-to-r from-accent via-accent to-primary font-semibold text-accent-foreground',
-              // Enhanced hover/active states
               'shadow-md transition-all duration-200 ease-out',
               'hover:scale-[1.02] hover:from-accent/90 hover:via-accent/90 hover:to-primary/90 hover:shadow-lg',
               'active:scale-[0.98]',
-              // Focus state for accessibility
               'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
-              // Disabled state
               'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100',
-              // Full width on mobile
               'w-full sm:w-auto sm:min-w-[140px]'
             )}
           >
@@ -531,7 +357,6 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
             )}
           </Button>
         </div>
-        {/* Error message with animation */}
         {error && (
           <p
             id={errorId}
@@ -546,9 +371,6 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
   );
 }
 
-/**
- * Footer Bar Variant - Sticky footer with dismissal
- */
 function FooterBarVariant({
   source,
   dismissible,
@@ -563,8 +385,6 @@ function FooterBarVariant({
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
   const [isClient, setIsClient] = useState(false);
-
-  // Pages that have their own InlineEmailCTA (loaded from app_settings)
   const [pagesWithInlineCTA, setPagesWithInlineCTA] = useState<string[]>([
     '/',
     '/trending',
@@ -587,7 +407,6 @@ function FooterBarVariant({
     '/collections/',
   ]);
 
-  // Load excluded pages from app_settings on mount
   useEffect(() => {
     const loadExcludedPages = async () => {
       try {
@@ -605,12 +424,12 @@ function FooterBarVariant({
           }
         }
       } catch {
-        // Silent fail - uses hardcoded fallback
+        // Silent fail
       }
     };
 
     loadExcludedPages().catch(() => {
-      // Silent fail - uses hardcoded fallback
+      // Intentionally ignore errors
     });
   }, []);
 
@@ -716,18 +535,35 @@ function ModalVariant({
   onOpenChange,
   copyType,
   slug,
-  referrer,
 }: {
   category?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   copyType: CopyType;
   slug?: string;
-  referrer?: string;
 }) {
-  const [email, setEmail] = useState('');
   const [showTime, setShowTime] = useState<number | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { email, setEmail, isSubmitting, subscribe } = useNewsletter({
+    source: 'post_copy',
+    metadata: {
+      copy_type: copyType,
+      ...(category && { copy_category: category }),
+      ...(slug && { copy_slug: slug }),
+    },
+    customAnalyticsEvent: 'newsletter_subscription_post_copy',
+    successMessage: 'Check your inbox for a welcome email',
+    showToasts: false,
+    logContext: {
+      variant: 'modal',
+      copyType,
+      ...(category && { category }),
+      ...(slug && { slug }),
+    },
+    onSuccess: () => {
+      onOpenChange(false);
+    },
+  });
 
   useEffect(() => {
     if (open) {
@@ -753,74 +589,20 @@ function ModalVariant({
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      // Call Edge Function directly
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      if (!supabaseUrl) {
-        throw new Error('Supabase URL not configured');
-      }
-
-      const response = await fetch(`${supabaseUrl}/functions/v1/email-handler`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Email-Action': 'subscribe',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          source: 'post_copy',
-          ...(referrer && { referrer }),
-          copy_type: copyType,
-          ...(category && { copy_category: category }),
-          ...(slug && { copy_slug: slug }),
-        }),
+      await subscribe();
+      toasts.raw.success('Welcome to the newsletter! 🎉', {
+        description: 'Check your inbox for a welcome email',
+        duration: 5000,
       });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        toasts.raw.success('Welcome to the newsletter! 🎉', {
-          description: 'Check your inbox for a welcome email',
-          duration: 5000,
-        });
-
-        trackEvent('newsletter_subscription_post_copy', {
-          contact_id: result.subscription_id,
-          copy_type: copyType,
-          ...(category && { copy_category: category }),
-          ...(slug && { copy_slug: slug }),
-        });
-
-        onOpenChange(false);
-        setEmail('');
-      } else {
-        const errorMessage = result.message || result.error || 'Failed to subscribe';
-        throw new Error(errorMessage);
-      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to subscribe. Please try again.';
-
-      logger.error(
-        'Post-copy email capture failed',
-        error instanceof Error ? error : new Error(errorMessage),
-        {
-          component: 'UnifiedNewsletterCapture',
-          variant: 'modal',
-          copyType,
-          ...(category && { category }),
-          ...(slug && { slug }),
-        }
-      );
 
       toasts.raw.error('Failed to subscribe', {
         description: errorMessage,
         duration: 4000,
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

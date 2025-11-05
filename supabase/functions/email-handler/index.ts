@@ -92,8 +92,9 @@ async function handleSubscribe(req: Request): Promise<Response> {
   const payload = await req.json();
   const { email, source, referrer, copy_type, copy_category, copy_slug } = payload;
 
-  // Validate email format (basic)
-  if (!email || typeof email !== 'string' || !email.includes('@')) {
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || typeof email !== 'string' || !emailRegex.test(email)) {
     return badRequestResponse('Valid email address is required');
   }
 
@@ -160,8 +161,8 @@ async function handleSubscribe(req: Request): Promise<Response> {
         // Email already exists (UNIQUE constraint violation)
         return badRequestResponse('This email is already subscribed to our newsletter');
       }
-      if (dbError.code === '429' || dbError.message?.includes('Rate limit')) {
-        // Rate limit exceeded
+      if (dbError.message?.includes('Rate limit')) {
+        // Rate limit exceeded (triggered by database trigger)
         return new Response(
           JSON.stringify({
             error: 'Rate limit exceeded',
@@ -293,13 +294,13 @@ async function handleTransactional(req: Request): Promise<Response> {
 async function handleDigest(req: Request): Promise<Response> {
   const previousWeekStart = getPreviousWeekStart();
 
-  const { data: digest, error: digestError } = await supabase.rpc('get_weekly_digest', {
+  const { data: digest, error: digestError} = await supabase.rpc('get_weekly_digest', {
     p_week_start: previousWeekStart,
   });
 
   if (digestError) throw digestError;
 
-  const digestData = digest as any;
+  const digestData = digest as Database['public']['Functions']['get_weekly_digest']['Returns'];
 
   if (!digestData.newContent?.length && !digestData.trendingContent?.length) {
     return successResponse({ skipped: true, reason: 'no_content' });
@@ -331,7 +332,7 @@ async function handleSequence(req: Request): Promise<Response> {
 
   if (error) throw error;
 
-  const dueEmails = (data as any[]) || [];
+  const dueEmails = (data as Database['public']['Functions']['get_due_sequence_emails']['Returns']) || [];
 
   if (dueEmails.length === 0) {
     return successResponse({ sent: 0, failed: 0 });

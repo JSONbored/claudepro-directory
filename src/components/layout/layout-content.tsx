@@ -58,7 +58,12 @@ interface LayoutContentProps {
 
 export function LayoutContent({ children, announcement }: LayoutContentProps) {
   const pathname = usePathname();
-  const isAuthRoute = pathname.startsWith('/login') || pathname.includes('/(auth)/');
+
+  // Auth route prefixes - Next.js strips route groups like (auth) from URLs
+  const AUTH_ROUTE_PREFIXES = ['/login', '/auth-code-error', '/auth/'];
+  const isAuthRoute = AUTH_ROUTE_PREFIXES.some((prefix) =>
+    prefix.endsWith('/') ? pathname.startsWith(prefix) : pathname === prefix
+  );
 
   // Auth routes: minimal wrapper with no height constraints for true fullscreen experience
   if (isAuthRoute) {

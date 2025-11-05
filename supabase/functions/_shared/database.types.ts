@@ -15,6 +15,56 @@ export type Json =
 
 export interface Database {
   public: {
+    Functions: {
+      get_weekly_digest: {
+        Args: { p_week_start?: string }
+        Returns: Json
+      }
+      get_due_sequence_emails: {
+        Args: Record<string, never>
+        Returns: Json
+      }
+      get_personalized_feed: {
+        Args: { p_user_id: string; p_category?: string; p_limit?: number }
+        Returns: Json
+      }
+      get_similar_content: {
+        Args: { p_content_type: string; p_content_slug: string; p_limit?: number }
+        Returns: Json
+      }
+      get_usage_recommendations: {
+        Args: { p_user_id: string; p_trigger: string; p_content_type?: string; p_content_slug?: string; p_category?: string; p_limit?: number }
+        Returns: Json
+      }
+      get_content_affinity: {
+        Args: { p_user_id: string; p_content_type: string; p_content_slug: string }
+        Returns: Json
+      }
+      get_user_affinities: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
+      get_user_favorite_categories: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
+      get_user_recent_interactions: {
+        Args: { p_user_id: string; p_limit?: number }
+        Returns: Json
+      }
+      get_user_interaction_summary: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
+      get_recommendations: {
+        Args: { p_user_profile: Json; p_limit?: number }
+        Returns: Json
+      }
+      update_user_affinity_scores: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
+    }
     Tables: {
       content_submissions: {
         Row: {

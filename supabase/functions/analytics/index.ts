@@ -1,9 +1,15 @@
 /**
- * Analytics Edge Function - All analytics/personalization logic colocated with PostgreSQL
+ * Analytics Edge Function - Authenticated endpoint with origin-restricted CORS
+ * All analytics/personalization logic colocated with PostgreSQL
  */
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import type { Database } from '../_shared/database.types.ts';
+import {
+  getAuthenticatedCorsHeaders,
+  jsonResponse,
+  unauthorizedResponse,
+} from '../_shared/utils/response.ts';
 
 const SITE_URL = Deno.env.get('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -16,23 +22,17 @@ function getContentItemUrl(category: string, slug: string): string {
 }
 
 Deno.serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const corsHeaders = getAuthenticatedCorsHeaders(origin);
+
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'authorization, content-type',
-      },
-    });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return unauthorizedResponse('Missing authorization header', corsHeaders);
     }
 
     const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
@@ -48,64 +48,52 @@ Deno.serve(async (req) => {
 
     switch (action) {
       case 'trackInteraction':
-        return await handleTrackInteraction(supabase, user, body);
-      
+        return await handleTrackInteraction(supabase, user, body, corsHeaders);
+
       case 'getForYouFeed':
-        return await handleGetForYouFeed(supabase, user, body);
-      
+        return await handleGetForYouFeed(supabase, user, body, corsHeaders);
+
       case 'getSimilarConfigs':
-        return await handleGetSimilarConfigs(supabase, body);
-      
+        return await handleGetSimilarConfigs(supabase, body, corsHeaders);
+
       case 'getUsageRecommendations':
-        return await handleGetUsageRecommendations(supabase, user, body);
-      
+        return await handleGetUsageRecommendations(supabase, user, body, corsHeaders);
+
       case 'getUserAffinities':
-        return await handleGetUserAffinities(supabase, user, body);
-      
+        return await handleGetUserAffinities(supabase, user, body, corsHeaders);
+
       case 'calculateUserAffinities':
-        return await handleCalculateUserAffinities(supabase, user);
-      
+        return await handleCalculateUserAffinities(supabase, user, corsHeaders);
+
       case 'getContentAffinity':
-        return await handleGetContentAffinity(supabase, user, body);
-      
+        return await handleGetContentAffinity(supabase, user, body, corsHeaders);
+
       case 'getUserFavoriteCategories':
-        return await handleGetUserFavoriteCategories(supabase, user);
-      
+        return await handleGetUserFavoriteCategories(supabase, user, corsHeaders);
+
       case 'getUserRecentInteractions':
-        return await handleGetUserRecentInteractions(supabase, user, body);
-      
+        return await handleGetUserRecentInteractions(supabase, user, body, corsHeaders);
+
       case 'getUserInteractionSummary':
-        return await handleGetUserInteractionSummary(supabase, user);
-      
+        return await handleGetUserInteractionSummary(supabase, user, corsHeaders);
+
       case 'generateConfigRecommendations':
-        return await handleGenerateConfigRecommendations(supabase, body);
+        return await handleGenerateConfigRecommendations(supabase, body, corsHeaders);
       
       default:
-        return new Response(JSON.stringify({ error: `Unknown action: ${action}` }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return jsonResponse({ error: `Unknown action: ${action}` }, 400, corsHeaders);
     }
   } catch (error) {
-    // Log full error details server-side for debugging
     console.error('Edge function error:', error);
-    // Only return generic error to client (don't expose internal details - CodeQL security recommendation)
-    return new Response(
-      JSON.stringify({ 
-        error: 'Internal server error'
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    return jsonResponse({ error: 'Internal server error' }, 500, corsHeaders);
   }
 });
 
 async function handleTrackInteraction(
   supabase: any,
   user: any,
-  body: any
+  body: any,
+  corsHeaders: Record<string, string>
 ) {
   const { content_type, content_slug, interaction_type, session_id, metadata } = body;
 
@@ -120,24 +108,15 @@ async function handleTrackInteraction(
 
   if (error) {
     console.error('Failed to track interaction:', error);
-    return new Response(
-      JSON.stringify({ success: false, message: error.message }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
+    return jsonResponse({ success: false, message: error.message }, 200, corsHeaders);
   }
 
-  return new Response(
-    JSON.stringify({ success: true }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
-  );
+  return jsonResponse({ success: true }, 200, corsHeaders);
 }
 
-async function handleGetForYouFeed(supabase: any, user: any, body: any) {
+async function handleGetForYouFeed(supabase: any, user: any, body: any, corsHeaders: Record<string, string>) {
   if (!user) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return unauthorizedResponse('Unauthorized', corsHeaders);
   }
 
   const { category, limit = 12 } = body;
@@ -149,13 +128,10 @@ async function handleGetForYouFeed(supabase: any, user: any, body: any) {
   });
 
   if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonResponse({ error: error.message }, 500, corsHeaders);
   }
 
-  const feed = feedData as any;
+  const feed = feedData as Database['public']['Functions']['get_personalized_feed']['Returns'];
   const response = {
     recommendations: feed.recommendations.map((rec: any) => ({
       ...rec,
@@ -167,13 +143,10 @@ async function handleGetForYouFeed(supabase: any, user: any, body: any) {
     generated_at: feed.generated_at,
   };
 
-  return new Response(JSON.stringify(response), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return jsonResponse(response, 200, corsHeaders);
 }
 
-async function handleGetSimilarConfigs(supabase: any, body: any) {
+async function handleGetSimilarConfigs(supabase: any, body: any, corsHeaders: Record<string, string>) {
   const { content_type, content_slug, limit = 6 } = body;
 
   const { data, error } = await supabase.rpc('get_similar_content', {
@@ -183,30 +156,21 @@ async function handleGetSimilarConfigs(supabase: any, body: any) {
   });
 
   if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonResponse({ error: error.message }, 500, corsHeaders);
   }
 
-  const result = data as any;
-  result.similar_items = result.similar_items.map((item: any) => ({
+  const result = data as Database['public']['Functions']['get_similar_content']['Returns'];
+  (result as { similar_items: any[] }).similar_items = (result as { similar_items: any[] }).similar_items.map((item: any) => ({
     ...item,
     url: getContentItemUrl(item.category, item.slug),
   }));
 
-  return new Response(JSON.stringify(result), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return jsonResponse(result, 200, corsHeaders);
 }
 
-async function handleGetUsageRecommendations(supabase: any, user: any, body: any) {
+async function handleGetUsageRecommendations(supabase: any, user: any, body: any, corsHeaders: Record<string, string>) {
   if (!user) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return unauthorizedResponse('Unauthorized', corsHeaders);
   }
 
   const { trigger, content_type, content_slug, category } = body;
@@ -221,13 +185,10 @@ async function handleGetUsageRecommendations(supabase: any, user: any, body: any
   });
 
   if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonResponse({ error: error.message }, 500, corsHeaders);
   }
 
-  const rpcResponse = data as any;
+  const rpcResponse = data as Database['public']['Functions']['get_usage_recommendations']['Returns'];
   const response = {
     recommendations: rpcResponse.recommendations.map((rec: any) => ({
       ...rec,
@@ -237,18 +198,12 @@ async function handleGetUsageRecommendations(supabase: any, user: any, body: any
     context: { content_type, content_slug, category },
   };
 
-  return new Response(JSON.stringify(response), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return jsonResponse(response, 200, corsHeaders);
 }
 
-async function handleGetUserAffinities(supabase: any, user: any, body: any) {
+async function handleGetUserAffinities(supabase: any, user: any, body: any, corsHeaders: Record<string, string>) {
   if (!user) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return unauthorizedResponse('Unauthorized', corsHeaders);
   }
 
   const { limit = 50, min_score = 10 } = body;
@@ -260,24 +215,15 @@ async function handleGetUserAffinities(supabase: any, user: any, body: any) {
   });
 
   if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonResponse({ error: error.message }, 500, corsHeaders);
   }
 
-  return new Response(JSON.stringify(data), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return jsonResponse(data, 200, corsHeaders);
 }
 
-async function handleCalculateUserAffinities(supabase: any, user: any) {
+async function handleCalculateUserAffinities(supabase: any, user: any, corsHeaders: Record<string, string>) {
   if (!user) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return unauthorizedResponse('Unauthorized', corsHeaders);
   }
 
   const { data, error } = await supabase.rpc('update_user_affinity_scores', {
@@ -285,31 +231,22 @@ async function handleCalculateUserAffinities(supabase: any, user: any) {
   });
 
   if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonResponse({ error: error.message }, 500, corsHeaders);
   }
 
   const result = data?.[0];
-  return new Response(
-    JSON.stringify({
-      success: true,
-      message: `Affinities calculated (${result?.inserted_count || 0} new, ${result?.updated_count || 0} updated)`,
-      affinities_calculated: result?.total_affinity_count || 0,
-      inserted_count: result?.inserted_count || 0,
-      updated_count: result?.updated_count || 0,
-    }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
-  );
+  return jsonResponse({
+    success: true,
+    message: `Affinities calculated (${result?.inserted_count || 0} new, ${result?.updated_count || 0} updated)`,
+    affinities_calculated: result?.total_affinity_count || 0,
+    inserted_count: result?.inserted_count || 0,
+    updated_count: result?.updated_count || 0,
+  }, 200, corsHeaders);
 }
 
-async function handleGetContentAffinity(supabase: any, user: any, body: any) {
+async function handleGetContentAffinity(supabase: any, user: any, body: any, corsHeaders: Record<string, string>) {
   if (!user) {
-    return new Response(JSON.stringify({ affinity: null }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonResponse({ affinity: null }, 200, corsHeaders);
   }
 
   const { content_type, content_slug } = body;
@@ -320,18 +257,12 @@ async function handleGetContentAffinity(supabase: any, user: any, body: any) {
     p_content_slug: content_slug,
   });
 
-  return new Response(JSON.stringify({ affinity: error ? null : data }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return jsonResponse({ affinity: error ? null : data }, 200, corsHeaders);
 }
 
-async function handleGetUserFavoriteCategories(supabase: any, user: any) {
+async function handleGetUserFavoriteCategories(supabase: any, user: any, corsHeaders: Record<string, string>) {
   if (!user) {
-    return new Response(JSON.stringify({ categories: [] }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonResponse({ categories: [] }, 200, corsHeaders);
   }
 
   const { data, error } = await supabase.rpc('get_user_favorite_categories', {
@@ -339,18 +270,12 @@ async function handleGetUserFavoriteCategories(supabase: any, user: any) {
     p_limit: 3,
   });
 
-  return new Response(JSON.stringify({ categories: error ? [] : data }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return jsonResponse({ categories: error ? [] : data }, 200, corsHeaders);
 }
 
-async function handleGetUserRecentInteractions(supabase: any, user: any, body: any) {
+async function handleGetUserRecentInteractions(supabase: any, user: any, body: any, corsHeaders: Record<string, string>) {
   if (!user) {
-    return new Response(JSON.stringify({ interactions: [] }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonResponse({ interactions: [] }, 200, corsHeaders);
   }
 
   const { limit = 20 } = body;
@@ -361,19 +286,13 @@ async function handleGetUserRecentInteractions(supabase: any, user: any, body: a
   });
 
   if (error) {
-    return new Response(JSON.stringify({ interactions: [] }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonResponse({ interactions: [] }, 200, corsHeaders);
   }
 
-  return new Response(JSON.stringify({ interactions: data }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return jsonResponse({ interactions: data }, 200, corsHeaders);
 }
 
-async function handleGetUserInteractionSummary(supabase: any, user: any) {
+async function handleGetUserInteractionSummary(supabase: any, user: any, corsHeaders: Record<string, string>) {
   const defaultSummary = {
     total_interactions: 0,
     views: 0,
@@ -383,23 +302,17 @@ async function handleGetUserInteractionSummary(supabase: any, user: any) {
   };
 
   if (!user) {
-    return new Response(JSON.stringify(defaultSummary), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonResponse(defaultSummary, 200, corsHeaders);
   }
 
   const { data, error } = await supabase.rpc('get_user_interaction_summary', {
     p_user_id: user.id,
   });
 
-  return new Response(JSON.stringify(error ? defaultSummary : data), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return jsonResponse(error ? defaultSummary : data, 200, corsHeaders);
 }
 
-async function handleGenerateConfigRecommendations(supabase: any, body: any) {
+async function handleGenerateConfigRecommendations(supabase: any, body: any, corsHeaders: Record<string, string>) {
   const { useCase, experienceLevel, toolPreferences, integrations = [], focusAreas = [] } = body;
   const startTime = performance.now();
 
@@ -413,13 +326,10 @@ async function handleGenerateConfigRecommendations(supabase: any, body: any) {
   });
 
   if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonResponse({ error: error.message }, 500, corsHeaders);
   }
 
-  const enrichedResult = dbResult as any;
+  const enrichedResult = dbResult as Database['public']['Functions']['get_recommendations']['Returns'];
   const resultId = `rec_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
   const duration = performance.now() - startTime;
 
@@ -436,8 +346,5 @@ async function handleGenerateConfigRecommendations(supabase: any, body: any) {
     generatedAt: new Date().toISOString(),
   };
 
-  return new Response(
-    JSON.stringify({ success: true, recommendations: response }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
-  );
+  return jsonResponse({ success: true, recommendations: response }, 200, corsHeaders);
 }
