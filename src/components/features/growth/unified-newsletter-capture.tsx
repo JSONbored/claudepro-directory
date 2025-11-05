@@ -27,7 +27,6 @@
  */
 
 import { usePathname } from 'next/navigation';
-import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useId, useState } from 'react';
 import { Button } from '@/src/components/primitives/button';
 import {
@@ -47,7 +46,6 @@ import {
 } from '@/src/components/primitives/sheet';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
-import { postCopyEmailCaptureAction } from '@/src/lib/actions/email-capture';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
 import { Mail, X } from '@/src/lib/icons';
@@ -729,6 +727,7 @@ function ModalVariant({
 }) {
   const [email, setEmail] = useState('');
   const [showTime, setShowTime] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -743,54 +742,6 @@ function ModalVariant({
     }
   }, [open, copyType]);
 
-  const { execute, status } = useAction(postCopyEmailCaptureAction, {
-    onSuccess: (result) => {
-      if (result.data) {
-        toasts.raw.success('Welcome to the newsletter! 🎉', {
-          description: 'Check your inbox for a welcome email',
-          duration: 5000,
-        });
-
-        trackEvent('newsletter_subscription_post_copy', {
-          contact_id: result.data.id,
-          copy_type: result.data.copy_type,
-          copy_category: result.data.copy_category,
-          copy_slug: result.data.copy_slug,
-        });
-
-        onOpenChange(false);
-        setEmail('');
-      } else {
-        throw new Error('Subscription failed');
-      }
-    },
-    onError: (error) => {
-      const serverError = error.error?.serverError;
-      const errorMessage =
-        serverError &&
-        typeof serverError === 'object' &&
-        'message' in serverError &&
-        typeof (serverError as { message?: unknown }).message === 'string'
-          ? (serverError as { message: string }).message
-          : typeof serverError === 'string'
-            ? serverError
-            : 'Failed to subscribe';
-
-      logger.error('Post-copy email capture failed', new Error(errorMessage), {
-        component: 'UnifiedNewsletterCapture',
-        variant: 'modal',
-        copyType,
-        ...(category && { category }),
-        ...(slug && { slug }),
-      });
-
-      toasts.raw.error('Failed to subscribe', {
-        description: errorMessage,
-        duration: 4000,
-      });
-    },
-  });
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -802,14 +753,75 @@ function ModalVariant({
       return;
     }
 
-    await execute({
-      email: email.trim(),
-      source: 'post_copy',
-      ...(referrer && { referrer }),
-      copy_type: copyType,
-      ...(category && { copy_category: category }),
-      ...(slug && { copy_slug: slug }),
-    });
+    setIsSubmitting(true);
+
+    try {
+      // Call Edge Function directly
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      if (!supabaseUrl) {
+        throw new Error('Supabase URL not configured');
+      }
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/email-handler`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Email-Action': 'subscribe',
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          source: 'post_copy',
+          ...(referrer && { referrer }),
+          copy_type: copyType,
+          ...(category && { copy_category: category }),
+          ...(slug && { copy_slug: slug }),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        toasts.raw.success('Welcome to the newsletter! 🎉', {
+          description: 'Check your inbox for a welcome email',
+          duration: 5000,
+        });
+
+        trackEvent('newsletter_subscription_post_copy', {
+          contact_id: result.subscription_id,
+          copy_type: copyType,
+          ...(category && { copy_category: category }),
+          ...(slug && { copy_slug: slug }),
+        });
+
+        onOpenChange(false);
+        setEmail('');
+      } else {
+        const errorMessage = result.message || result.error || 'Failed to subscribe';
+        throw new Error(errorMessage);
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to subscribe. Please try again.';
+
+      logger.error(
+        'Post-copy email capture failed',
+        error instanceof Error ? error : new Error(errorMessage),
+        {
+          component: 'UnifiedNewsletterCapture',
+          variant: 'modal',
+          copyType,
+          ...(category && { category }),
+          ...(slug && { slug }),
+        }
+      );
+
+      toasts.raw.error('Failed to subscribe', {
+        description: errorMessage,
+        duration: 4000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleMaybeLater = () => {
@@ -844,7 +856,7 @@ function ModalVariant({
     }
   };
 
-  const isLoading = status === 'executing';
+  const isLoading = isSubmitting;
 
   return (
     <Sheet open={open} onOpenChange={handleDismiss}>

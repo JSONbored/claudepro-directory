@@ -54,6 +54,8 @@ Deno.serve(async (req: Request) => {
 
   try {
     switch (action) {
+      case 'subscribe':
+        return await handleSubscribe(req);
       case 'welcome':
         return await handleWelcome(req);
       case 'transactional':
@@ -69,6 +71,141 @@ Deno.serve(async (req: Request) => {
     return errorResponse(error, `email-handler:${action}`);
   }
 });
+
+/**
+ * Handle Newsletter Subscription
+ * Full flow: Validate → Resend audience → Database → Welcome email → Sequence
+ */
+async function handleSubscribe(req: Request): Promise<Response> {
+  const payload = await req.json();
+  const { email, source, referrer, copy_type, copy_category, copy_slug } = payload;
+
+  // Validate email format (basic)
+  if (!email || typeof email !== 'string' || !email.includes('@')) {
+    return badRequestResponse('Valid email address is required');
+  }
+
+  // Normalize email
+  const normalizedEmail = email.toLowerCase().trim();
+
+  try {
+    // Step 1: Add to Resend audience
+    let resendContactId: string | null = null;
+    let syncStatus: 'synced' | 'failed' | 'skipped' = 'synced';
+    let syncError: string | null = null;
+
+    try {
+      const { data: contact, error: resendError } = await resend.contacts.create({
+        audienceId: RESEND_ENV.audienceId,
+        email: normalizedEmail,
+        unsubscribed: false,
+      });
+
+      if (resendError) {
+        // If email already exists in Resend, that's OK - just log it
+        if (resendError.message?.includes('already exists') || resendError.message?.includes('duplicate')) {
+          console.log(`Email ${normalizedEmail} already in Resend audience - skipping sync`);
+          syncStatus = 'skipped';
+          syncError = 'Email already in audience';
+        } else {
+          // Other Resend errors - log but don't fail the entire request
+          console.error('Resend audience sync failed:', resendError);
+          syncStatus = 'failed';
+          syncError = resendError.message || 'Unknown Resend error';
+        }
+      } else if (contact?.id) {
+        resendContactId = contact.id;
+        console.log(`Added ${normalizedEmail} to Resend audience: ${resendContactId}`);
+      }
+    } catch (resendException) {
+      // Catch any unexpected Resend errors
+      console.error('Unexpected Resend error:', resendException);
+      syncStatus = 'failed';
+      syncError = resendException instanceof Error ? resendException.message : 'Unknown error';
+    }
+
+    // Step 2: Insert into database (rate limiting handled by BEFORE INSERT trigger)
+    const { data: subscription, error: dbError } = await supabase
+      .from('newsletter_subscriptions')
+      .insert({
+        email: normalizedEmail,
+        source: source || 'footer',
+        referrer: referrer || null,
+        copy_type: copy_type || null,
+        copy_category: copy_category || null,
+        copy_slug: copy_slug || null,
+        resend_contact_id: resendContactId,
+        sync_status: syncStatus,
+        sync_error: syncError,
+        last_sync_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      // Handle specific database errors
+      if (dbError.code === '23505') {
+        // Email already exists (UNIQUE constraint violation)
+        return badRequestResponse('This email is already subscribed to our newsletter');
+      }
+      if (dbError.code === '429' || dbError.message?.includes('Rate limit')) {
+        // Rate limit exceeded
+        return new Response(
+          JSON.stringify({
+            error: 'Rate limit exceeded',
+            message: 'Too many subscription attempts. Please try again later.',
+          }),
+          {
+            status: 429,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+      }
+      throw new Error(`Database insert failed: ${dbError.message}`);
+    }
+
+    // Step 3: Send welcome email
+    const html = await renderAsync(React.createElement(NewsletterWelcome, { email: normalizedEmail }));
+
+    const { data: emailData, error: emailError } = await resend.emails.send({
+      from: 'ClaudePro Directory <hello@mail.claudepro.directory>',
+      to: normalizedEmail,
+      subject: 'Welcome to Claude Pro Directory! 🎉',
+      html,
+      tags: [{ name: 'type', value: 'newsletter' }],
+    });
+
+    if (emailError) {
+      // Log email error but don't fail the request - subscription is saved
+      console.error('Welcome email failed:', emailError);
+    }
+
+    // Step 4: Enroll in onboarding sequence
+    try {
+      await supabase.rpc('enroll_in_email_sequence', {
+        p_email: normalizedEmail,
+        p_sequence_type: 'onboarding',
+      });
+    } catch (sequenceError) {
+      // Log sequence error but don't fail - subscription is saved
+      console.error('Sequence enrollment failed:', sequenceError);
+    }
+
+    // Return success
+    return successResponse({
+      success: true,
+      subscription_id: subscription.id,
+      email: normalizedEmail,
+      resend_contact_id: resendContactId,
+      sync_status: syncStatus,
+      email_sent: !emailError,
+      email_id: emailData?.id || null,
+    });
+  } catch (error) {
+    console.error('Newsletter subscription failed:', error);
+    return errorResponse(error, 'handleSubscribe');
+  }
+}
 
 async function handleWelcome(req: Request): Promise<Response> {
   const triggerSource = req.headers.get('X-Trigger-Source');

@@ -117,6 +117,7 @@ export const SUPABASE_ENV = {
  */
 export const RESEND_ENV = {
   apiKey: Deno.env.get('RESEND_API_KEY') ?? '',
+  audienceId: Deno.env.get('RESEND_AUDIENCE_ID') ?? '',
 } as const;
 
 /**
@@ -140,6 +141,7 @@ export function validateEnvironment(required: ('supabase' | 'resend' | 'auth-hoo
 
   if (required.includes('resend')) {
     if (!RESEND_ENV.apiKey) missing.push('RESEND_API_KEY');
+    if (!RESEND_ENV.audienceId) missing.push('RESEND_AUDIENCE_ID');
   }
 
   if (required.includes('auth-hook')) {

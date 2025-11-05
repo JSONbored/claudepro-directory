@@ -1,12 +1,11 @@
 /**
  * Newsletter Subscription Hook - Client-side state management for newsletter forms
- * Thin wrapper over subscribeToNewsletter server action with analytics tracking
+ * Calls Supabase Edge Function directly for better observability
  */
 
 'use client';
 
 import { useCallback, useState, useTransition } from 'react';
-import { subscribeToNewsletter } from '@/src/lib/actions/newsletter-signup';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { logger } from '@/src/lib/logger';
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -79,13 +78,28 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
       try {
         const referrer = typeof window !== 'undefined' ? window.location.href : undefined;
 
-        const result = await subscribeToNewsletter({
-          email,
-          source,
-          ...(referrer && { referrer }),
+        // Call Edge Function directly
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        if (!supabaseUrl) {
+          throw new Error('Supabase URL not configured');
+        }
+
+        const response = await fetch(`${supabaseUrl}/functions/v1/email-handler`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Email-Action': 'subscribe',
+          },
+          body: JSON.stringify({
+            email,
+            source,
+            ...(referrer && { referrer }),
+          }),
         });
 
-        if (result?.data) {
+        const result = await response.json();
+
+        if (response.ok && result.success) {
           if (showToasts) {
             toasts.raw.success('Welcome!', {
               description: successMessage,
@@ -94,14 +108,14 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
 
           const eventName = getEmailSubscriptionEvent(source);
           trackEvent(eventName, {
-            contact_id: result.data.id,
+            contact_id: result.subscription_id,
             ...(referrer && { referrer }),
           });
 
           reset();
           onSuccess?.();
         } else {
-          const errorMessage = result?.serverError || 'Please try again later.';
+          const errorMessage = result.message || result.error || 'Please try again later.';
 
           setError(errorMessage);
 
@@ -117,6 +131,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
             component: 'useNewsletter',
             source,
             email: `${email.substring(0, 3)}***`,
+            status: response.status,
           });
         }
       } catch (err) {
