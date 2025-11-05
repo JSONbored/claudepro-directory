@@ -7,19 +7,84 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
-import {
-  determineErrorType,
-  type ErrorContext,
-  type ErrorHandlerConfig,
-  type ErrorResponse,
-  type ErrorType,
-  errorInputSchema,
-  validateErrorContext,
-  validateErrorInput,
-} from '@/src/lib/schemas/error.schema';
 import { ValidationError } from '@/src/lib/security/validators';
 
-/** HTTP status code mapping for different error types */
+type ErrorType =
+  | 'ValidationError'
+  | 'DatabaseError'
+  | 'AuthenticationError'
+  | 'AuthorizationError'
+  | 'NotFoundError'
+  | 'RateLimitError'
+  | 'NetworkError'
+  | 'FileSystemError'
+  | 'ConfigurationError'
+  | 'TimeoutError'
+  | 'ServiceUnavailableError'
+  | 'InternalServerError';
+
+type ErrorContext = Record<string, string | number | boolean>;
+
+type ErrorHandlerConfig = {
+  route?: string;
+  operation?: string;
+  method?: string;
+  userId?: string;
+  requestId?: string;
+  includeStack?: boolean;
+  includeDetails?: boolean;
+  customMessage?: string;
+  logLevel?: 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+  logContext?: ErrorContext;
+  sanitizeResponse?: boolean;
+  hideInternalErrors?: boolean;
+};
+
+type ErrorResponse = {
+  success: false;
+  error: string;
+  message: string;
+  code: string;
+  timestamp: string;
+  requestId?: string;
+  details?: Array<{ path?: string; message: string; code?: string }>;
+  stack?: string;
+  severity?: string;
+  type?: string;
+};
+
+function determineErrorType(error: unknown): ErrorType {
+  if (!(error instanceof Error)) return 'InternalServerError';
+
+  const name = error.name.toLowerCase();
+  const msg = error.message.toLowerCase();
+
+  if (name.includes('validation') || msg.includes('validation')) return 'ValidationError';
+  if (name.includes('database') || msg.includes('database')) return 'DatabaseError';
+  if (name.includes('auth') && msg.includes('auth')) return 'AuthenticationError';
+  if (msg.includes('access denied') || msg.includes('forbidden')) return 'AuthorizationError';
+  if (msg.includes('not found') || name.includes('notfound')) return 'NotFoundError';
+  if (msg.includes('rate limit') || msg.includes('too many')) return 'RateLimitError';
+  if (msg.includes('network') || msg.includes('connection')) return 'NetworkError';
+  if (msg.includes('timeout') || name.includes('timeout')) return 'TimeoutError';
+  if (msg.includes('unavailable') || msg.includes('service')) return 'ServiceUnavailableError';
+  if (name.includes('file') || msg.includes('file')) return 'FileSystemError';
+  if (msg.includes('config')) return 'ConfigurationError';
+
+  return 'InternalServerError';
+}
+
+function validateErrorContext(ctx: unknown): ErrorContext {
+  if (!ctx || typeof ctx !== 'object') return {};
+  const result: ErrorContext = {};
+  for (const [k, v] of Object.entries(ctx as Record<string, unknown>)) {
+    if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
+      result[k] = v;
+    }
+  }
+  return result;
+}
+
 const ERROR_STATUS_MAP: Record<ErrorType, number> = {
   ValidationError: 400,
   DatabaseError: 500,
@@ -35,7 +100,6 @@ const ERROR_STATUS_MAP: Record<ErrorType, number> = {
   InternalServerError: 500,
 } as const;
 
-/** User-friendly error messages */
 const USER_FRIENDLY_MESSAGES: Record<ErrorType, string> = {
   ValidationError: 'The provided data is invalid. Please check your input and try again.',
   DatabaseError: 'A database error occurred. Please try again later.',
@@ -51,7 +115,6 @@ const USER_FRIENDLY_MESSAGES: Record<ErrorType, string> = {
   InternalServerError: 'An internal server error occurred. Please try again later.',
 } as const;
 
-/** Central error handler class */
 export class ErrorHandler {
   private static instance: ErrorHandler;
 
@@ -64,27 +127,13 @@ export class ErrorHandler {
     return ErrorHandler.instance;
   }
 
-  /** Handle any error and return standardized response */
-  public handleError(
-    error: z.infer<typeof errorInputSchema>,
-    config: ErrorHandlerConfig = {}
-  ): ErrorResponse {
+  public handleError(error: unknown, config: ErrorHandlerConfig = {}): ErrorResponse {
     const startTime = performance.now();
 
     try {
-      // Validate and extract error information
-      const validationResult = validateErrorInput(error);
-      const validatedError = validationResult.type === 'error' ? validationResult.error : undefined;
-      const fallback =
-        validationResult.type === 'string' || validationResult.type === 'invalid'
-          ? validationResult.fallback
-          : undefined;
       const errorType = determineErrorType(error);
-
-      // Generate request ID if not provided
       const requestId = config.requestId || this.generateRequestId();
 
-      // Create base error context
       const baseContext: ErrorContext = {
         route: config.route || 'unknown',
         operation: config.operation || 'unknown',
@@ -93,7 +142,6 @@ export class ErrorHandler {
         timestamp: new Date().toISOString(),
       };
 
-      // Merge with provided context
       const fullContext = validateErrorContext({
         ...baseContext,
         ...config.logContext,
@@ -102,10 +150,8 @@ export class ErrorHandler {
         processingTime: `${(performance.now() - startTime).toFixed(2)}ms`,
       });
 
-      // Log the error with appropriate level
       this.logError(error, errorType, fullContext, config.logLevel || 'error');
 
-      // Handle specific error types
       if (error instanceof z.ZodError) {
         return this.handleZodError(error, requestId, config);
       }
@@ -114,20 +160,9 @@ export class ErrorHandler {
         return this.handleValidationError(error, requestId, config);
       }
 
-      // Handle generic errors - create a proper Error object
-      const errorToHandle = validatedError
-        ? new Error(validatedError.message)
-        : new Error(fallback || 'Unknown error');
-
-      // Copy properties if they exist
-      if (validatedError) {
-        if (validatedError.name) errorToHandle.name = validatedError.name;
-        if (validatedError.stack) errorToHandle.stack = validatedError.stack;
-      }
-
-      return this.handleGenericError(errorToHandle, errorType, requestId, config);
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      return this.handleGenericError(errorObj, errorType, requestId, config);
     } catch (handlerError) {
-      // Fallback error handling if the error handler itself fails
       logger.fatal(
         'Error handler failed',
         handlerError instanceof Error ? handlerError : new Error(String(handlerError)),
@@ -141,9 +176,6 @@ export class ErrorHandler {
     }
   }
 
-  /**
-   * Handle Zod validation errors specifically
-   */
   private handleZodError(
     zodError: z.ZodError,
     requestId: string,
@@ -170,9 +202,6 @@ export class ErrorHandler {
     };
   }
 
-  /**
-   * Handle custom ValidationError instances
-   */
   private handleValidationError(
     validationError: ValidationError,
     requestId: string,
@@ -184,9 +213,6 @@ export class ErrorHandler {
     });
   }
 
-  /**
-   * Handle generic errors
-   */
   private handleGenericError(
     error: Error,
     errorType: ErrorType,
@@ -208,7 +234,6 @@ export class ErrorHandler {
       requestId,
     };
 
-    // Include stack trace in development or if explicitly requested
     if ((isDevelopment || config.includeStack) && error.stack) {
       response.stack = error.stack;
     }
@@ -216,9 +241,6 @@ export class ErrorHandler {
     return response;
   }
 
-  /**
-   * Create fallback error response when error handler fails
-   */
   private createFallbackErrorResponse(requestId?: string): ErrorResponse {
     return {
       success: false,
@@ -230,19 +252,16 @@ export class ErrorHandler {
     };
   }
 
-  /**
-   * Log errors with appropriate level and context
-   */
   private logError(
-    error: z.infer<typeof errorInputSchema>,
+    error: unknown,
     errorType: ErrorType,
-    context: ErrorContext | null,
+    context: ErrorContext,
     level: 'debug' | 'info' | 'warn' | 'error' | 'fatal'
   ): void {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const logMessage = `${errorType}: ${errorMessage}`;
 
-    const logContext = context || {};
+    const logContext = context;
     const metadata: Record<string, string | number | boolean> = {
       errorType,
       errorConstructor: error?.constructor?.name || 'Unknown',
@@ -285,29 +304,17 @@ export class ErrorHandler {
     }
   }
 
-  /**
-   * Generate unique request ID
-   */
   private generateRequestId(): string {
     return randomUUID();
   }
 
-  /**
-   * Generate structured error codes
-   */
   private generateErrorCode(errorType: ErrorType): string {
     const typeCode = errorType.replace('Error', '').toUpperCase();
     const timestamp = Date.now().toString(36).toUpperCase();
     return `${typeCode.slice(0, 3)}_${timestamp.slice(-8)}`;
   }
 
-  /**
-   * Create Next.js Response from ErrorResponse
-   */
-  public createNextResponse(
-    error: z.infer<typeof errorInputSchema>,
-    config: ErrorHandlerConfig = {}
-  ): NextResponse {
+  public createNextResponse(error: unknown, config: ErrorHandlerConfig = {}): NextResponse {
     const errorResponse = this.handleError(error, config);
     const statusCode = this.getStatusCodeForError(error);
 
@@ -321,17 +328,11 @@ export class ErrorHandler {
     });
   }
 
-  /**
-   * Get appropriate HTTP status code for error
-   */
   private getStatusCodeForError(error: unknown): number {
     const errorType = determineErrorType(error);
     return ERROR_STATUS_MAP[errorType] || 500;
   }
 
-  /**
-   * Async error handler for use in try-catch blocks
-   */
   public async handleAsync<T>(
     operation: () => Promise<T>,
     config: ErrorHandlerConfig = {}
@@ -340,21 +341,13 @@ export class ErrorHandler {
       const data = await operation();
       return { success: true, data };
     } catch (error) {
-      const validatedError = errorInputSchema.safeParse(error);
-      const errorResponse = this.handleError(
-        validatedError.success ? validatedError.data : { message: 'Unknown error occurred' },
-        config
-      );
+      const errorResponse = this.handleError(error, config);
       return { success: false, error: errorResponse };
     }
   }
 
-  /**
-   * Middleware-friendly error handler for Next.js
-   * Uses standard Request (Next.js 15 middleware compatibility)
-   */
   public handleMiddlewareError(
-    error: z.infer<typeof errorInputSchema>,
+    error: unknown,
     request: Request,
     config: Partial<ErrorHandlerConfig> = {}
   ): NextResponse {
@@ -378,14 +371,9 @@ export class ErrorHandler {
   }
 }
 
-// Singleton instance
 const errorHandler = ErrorHandler.getInstance();
 
-// Convenience functions for common use cases
-export const handleApiError = (
-  error: z.infer<typeof errorInputSchema>,
-  config: ErrorHandlerConfig = {}
-): NextResponse => {
+export const handleApiError = (error: unknown, config: ErrorHandlerConfig = {}): NextResponse => {
   return errorHandler.createNextResponse(error, {
     hideInternalErrors: true,
     sanitizeResponse: true,

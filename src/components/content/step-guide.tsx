@@ -1,18 +1,6 @@
 /**
- * StepByStepGuide - Tutorial step component with animated progression (SERVER COMPONENT)
- *
- * @server This is a SERVER-ONLY component (async, imports batch.utils → cache.server)
- *
- * PRODUCTION-GRADE: Server-side Shiki syntax highlighting
- * - Used in 24+ MDX files across the codebase
- * - Zero client-side JavaScript for syntax highlighting
- * - Secure: Uses trusted Shiki renderer
- * - Performant: Pre-rendered on server
- *
- * **Architecture:**
- * - Server Component: Uses batchMap from batch.utils
- * - NOT Storybook-compatible (requires server-side execution)
- * - Correct usage: Server components can import server-only code
+ * StepByStepGuide - Server-rendered tutorial steps with syntax highlighting
+ * Uses React cache() memoization for highlightCode() (0ms overhead for duplicates)
  */
 
 import { ProductionCodeBlock } from '@/src/components/content/production-code-block';
@@ -22,18 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import { Zap } from '@/src/lib/icons';
 import type { StepByStepGuideProps } from '@/src/lib/schemas/component.schema';
-import { batchMap } from '@/src/lib/utils/batch.utils';
 
-export async function StepByStepGuide(props: StepByStepGuideProps) {
-  // Database CHECK constraint validates structure - no runtime validation needed
+export function StepByStepGuide(props: StepByStepGuideProps) {
   const { steps, title, description, totalTime } = props;
-  const validSteps = steps;
 
-  // Pre-render all code blocks with Shiki on the server
-  const highlightedSteps = await batchMap(validSteps, async (step) => {
+  const highlightedSteps = steps.map((step) => {
     if (!step.code) return { ...step, highlightedHtml: null };
-
-    const html = await highlightCode(step.code, 'bash');
+    const html = highlightCode(step.code, 'bash');
     return { ...step, highlightedHtml: html };
   });
 

@@ -5148,6 +5148,10 @@ export type Database = {
         Args: { p_category: string };
         Returns: Json;
       };
+      get_submission_dashboard: {
+        Args: { p_contributors_limit?: number; p_recent_limit?: number };
+        Returns: Json;
+      };
       get_submission_stats: { Args: never; Returns: Json };
       get_submission_stats_summary: {
         Args: never;
@@ -5457,10 +5461,6 @@ export type Database = {
           p_success?: boolean;
         };
         Returns: undefined;
-      };
-      merge_submission_to_content: {
-        Args: { p_submission_id: string };
-        Returns: Json;
       };
       populate_content_seo_data: {
         Args: never;

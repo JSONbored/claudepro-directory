@@ -5593,6 +5593,13 @@ export const publicGetStructuredDataConfigArgsSchema = z.object({
 
 export const publicGetStructuredDataConfigReturnsSchema = jsonSchema;
 
+export const publicGetSubmissionDashboardArgsSchema = z.object({
+  p_contributors_limit: z.number().optional(),
+  p_recent_limit: z.number().optional(),
+});
+
+export const publicGetSubmissionDashboardReturnsSchema = jsonSchema;
+
 export const publicGetSubmissionStatsArgsSchema = z.never();
 
 export const publicGetSubmissionStatsReturnsSchema = jsonSchema;
@@ -6039,12 +6046,6 @@ export const publicMarkSequenceEmailProcessedArgsSchema = z.object({
 });
 
 export const publicMarkSequenceEmailProcessedReturnsSchema = z.undefined();
-
-export const publicMergeSubmissionToContentArgsSchema = z.object({
-  p_submission_id: z.string(),
-});
-
-export const publicMergeSubmissionToContentReturnsSchema = jsonSchema;
 
 export const publicPopulateContentSeoDataArgsSchema = z.never();
 

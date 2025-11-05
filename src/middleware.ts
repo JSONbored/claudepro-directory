@@ -6,7 +6,16 @@ import { logger } from '@/src/lib/logger';
 // Force Node.js runtime for middleware
 export const runtime = 'nodejs';
 
-import { sanitizePathForLogging } from '@/src/lib/schemas/middleware.schema';
+/**
+ * Sanitize path for logging - removes sensitive information
+ */
+function sanitizePathForLogging(path: string): string {
+  return path
+    .replace(/\/api\/[^/]*\/[a-f0-9-]{36}/g, '/api/*/[UUID]') // Replace UUIDs
+    .replace(/\/api\/[^/]*\/\d+/g, '/api/*/[ID]') // Replace numeric IDs
+    .replace(/\?.*$/g, '') // Remove query parameters
+    .slice(0, 200); // Limit length for logging
+}
 
 /**
  * Simplified Middleware - Security with Cloudflare Enterprise

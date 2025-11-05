@@ -18,7 +18,6 @@ import { handleApiError } from '@/src/lib/error-handler';
 import { buildRichContent } from '@/src/lib/llms-txt/content-builder';
 import { generateLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
-import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 import type { Database } from '@/src/types/database.types';
 
 export async function generateStaticParams() {
@@ -263,16 +262,11 @@ export async function GET(
       { category, slug }
     );
 
-    // Use centralized error handling
-    const validatedError = errorInputSchema.safeParse(error);
-    return handleApiError(
-      validatedError.success ? validatedError.data : { message: 'Failed to generate llms.txt' },
-      {
-        route: '/[category]/[slug]/llms.txt',
-        operation: 'generate_item_llmstxt',
-        method: 'GET',
-        logContext: { category, slug },
-      }
-    );
+    return handleApiError(error, {
+      route: '/[category]/[slug]/llms.txt',
+      operation: 'generate_item_llmstxt',
+      method: 'GET',
+      logContext: { category, slug },
+    });
   }
 }

@@ -20,15 +20,14 @@ const UnifiedNewsletterCapture = dynamic(
 );
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import {
-  getRecentMerged,
-  getSubmissionStats,
-  getTopContributors,
-} from '@/src/lib/actions/business.actions';
+import { getSubmissionDashboard } from '@/src/lib/actions/business.actions';
 import { CheckCircle, Clock, Lightbulb, Medal, TrendingUp, Trophy } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { batchFetch } from '@/src/lib/utils/batch.utils';
+
+type DashboardData = Awaited<ReturnType<typeof getSubmissionDashboard>>['data'];
+type RecentSubmission = NonNullable<DashboardData>['recent'][number];
+type TopContributor = NonNullable<DashboardData>['contributors'][number];
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',
@@ -45,25 +44,6 @@ const TYPE_LABELS: Record<string, string> = {
   commands: 'Command',
   hooks: 'Hook',
   statuslines: 'Statusline',
-};
-
-// Types for RPC returns
-type RecentMergedItem = {
-  id: string | number;
-  content_name: string;
-  content_type: string;
-  merged_at: string;
-  user?: {
-    slug: string;
-    name: string;
-  } | null;
-};
-
-type TopContributor = {
-  slug: string;
-  name: string;
-  rank: number;
-  mergedCount: number;
 };
 
 function formatTimeAgo(dateString: string): string {
@@ -87,19 +67,14 @@ export const metadata = generatePageMetadata('/submit');
 export const revalidate = 86400;
 
 export default async function SubmitPage() {
-  const [statsResult, recentResult, contributorsResult] = await batchFetch([
-    getSubmissionStats({}),
-    getRecentMerged({ limit: 5 }),
-    getTopContributors({ limit: 5 }),
-  ]);
+  const dashboardResult = await getSubmissionDashboard({
+    recentLimit: 5,
+    contributorsLimit: 5,
+  });
 
-  const stats = statsResult?.data || { total: 0, pending: 0, mergedThisWeek: 0 };
-
-  // Type guard for recent merged submissions
-  const recentMerged = Array.isArray(recentResult?.data) ? recentResult.data : [];
-
-  // Type guard for top contributors
-  const topContributors = Array.isArray(contributorsResult?.data) ? contributorsResult.data : [];
+  const stats = dashboardResult?.data?.stats || { total: 0, pending: 0, mergedThisWeek: 0 };
+  const recentMerged = dashboardResult?.data?.recent || [];
+  const topContributors = dashboardResult?.data?.contributors || [];
 
   const formConfig = await getSubmissionFormConfig();
 
@@ -160,7 +135,7 @@ export default async function SubmitPage() {
                 <CardTitle className={'font-medium text-sm'}>🔥 Recently Merged</CardTitle>
               </CardHeader>
               <CardContent className={'space-y-3'}>
-                {(recentMerged as RecentMergedItem[]).map((submission) => (
+                {(recentMerged as RecentSubmission[]).map((submission) => (
                   <div
                     key={submission.id}
                     className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} border-border/50 border-b pb-3 last:border-0 last:pb-0`}

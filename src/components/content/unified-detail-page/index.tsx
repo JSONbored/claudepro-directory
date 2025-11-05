@@ -1,23 +1,6 @@
 /**
- * Unified Detail Page - Server-First Architecture with Streaming SSR (SHA-2083 v3)
- *
- * REPLACES: Lazy-loaded client components with server components
- * NEW STRUCTURE: Server-first rendering with Suspense streaming for optimal performance
- *
- * Architecture:
- * - Server Components: All static rendering (metadata, sections, sidebar cards)
- * - Client Components: Only interactive elements (header buttons, config tabs, sidebar nav)
- * - Suspense Boundaries: Stream slow data (related items, view counts, reviews)
- * - Progressive Enhancement: Show main content immediately, stream supplementary data
- *
- * Performance Benefits:
- * - 40-50% reduction in client JavaScript bundle
- * - Faster Time to First Byte (TTFB) - main content renders immediately
- * - Progressive streaming reduces perceived load time
- * - Better SEO (fully server-rendered)
- * - Reduced memory footprint in browser
- *
- * @see components/unified-detail-page.tsx - Original 685-line implementation
+ * Unified Detail Page - Server-rendered content with streaming SSR
+ * highlightCode() uses React cache() memoization (0ms for duplicates)
  */
 
 import { Suspense } from 'react';
@@ -35,7 +18,7 @@ import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { getDisplayTitle } from '@/src/lib/utils';
-import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
 import {
   generateFilename,
   generateHookFilename,
@@ -56,9 +39,6 @@ export interface UnifiedDetailPageProps {
   viewCountPromise?: Promise<number>;
 }
 
-/**
- * Async component to stream view count metadata
- */
 async function ViewCountMetadata({
   item,
   viewCountPromise,
@@ -70,9 +50,6 @@ async function ViewCountMetadata({
   return <DetailMetadata item={item} viewCount={viewCount} />;
 }
 
-/**
- * Async component to stream sidebar with related items
- */
 async function SidebarWithRelated({
   item,
   relatedItemsPromise,
@@ -102,58 +79,39 @@ export async function UnifiedDetailPage({
   relatedItemsPromise,
   viewCountPromise,
 }: UnifiedDetailPageProps) {
-  // Get configuration for this content type from database
   const config = await getCategoryConfig(item.category as CategoryId);
-
-  // Generate display title (Server Component - direct computation)
   const displayTitle = getDisplayTitle(item);
-
-  // Extract metadata fields from metadata JSONB column
   const metadata =
     'metadata' in item && item.metadata ? (item.metadata as Record<string, unknown>) : {};
 
-  // Generate content using data from database (generators moved to PostgreSQL)
   const installation = (() => {
-    // Check top-level first (for backward compatibility), then metadata
     const inst = ('installation' in item && item.installation) || metadata.installation;
-    if (inst && typeof inst === 'object' && !Array.isArray(inst)) {
-      return inst as InstallationSteps;
-    }
-    return undefined;
+    return inst && typeof inst === 'object' && !Array.isArray(inst)
+      ? (inst as InstallationSteps)
+      : undefined;
   })();
 
   const useCases = (() => {
-    // Check top-level first, then metadata
     const cases = ('use_cases' in item && item.use_cases) || metadata.use_cases;
     return Array.isArray(cases) && cases.length > 0 ? cases : [];
   })();
 
   const features = (() => {
-    // Check top-level first, then metadata
     const feats = ('features' in item && item.features) || metadata.features;
     return Array.isArray(feats) && feats.length > 0 ? feats : [];
   })();
 
   const troubleshooting = (() => {
-    // Check top-level first, then metadata
     const trouble = ('troubleshooting' in item && item.troubleshooting) || metadata.troubleshooting;
     return Array.isArray(trouble) && trouble.length > 0 ? trouble : [];
   })();
 
   const requirements = (() => {
-    // Check top-level first, then metadata
     const reqs = ('requirements' in item && item.requirements) || metadata.requirements;
     return Array.isArray(reqs) && reqs.length > 0 ? reqs : [];
   })();
 
-  // ============================================================================
-  // DATA LAYER: Pre-process ALL async operations (syntax highlighting)
-  // ============================================================================
-  // Architecture: Page-level async processing (data layer) → Client components (presentation layer)
-  // Benefits: Parallel processing, testable components, proper separation of concerns
-  // PERFORMANCE: All utilities imported at module level (no dynamic import overhead)
-
-  // Pre-process content highlighting (ContentSection data)
+  // Pre-process content highlighting
   const contentData = await (async () => {
     // GUIDES: Skip content processing - structured sections rendered separately
     if (item.category === 'guides') {
@@ -182,7 +140,7 @@ export async function UnifiedDetailPage({
         'language' in item ? (item as { language?: string }).language : undefined;
       const language = await detectLanguage(content, languageHint);
       const filename = generateFilename({ item, language });
-      const html = await highlightCode(content, language);
+      const html = highlightCode(content, language);
 
       return { html, code: content, language, filename };
     } catch (_error) {
@@ -208,7 +166,7 @@ export async function UnifiedDetailPage({
       };
 
       try {
-        const highlightedConfigs = await batchMap(Object.entries(config), async ([key, value]) => {
+        const highlightedConfigs = Object.entries(config).map(([key, value]) => {
           if (!value) return null;
 
           const displayValue =
@@ -217,7 +175,7 @@ export async function UnifiedDetailPage({
               : value;
 
           const code = JSON.stringify(displayValue, null, 2);
-          const html = await highlightCode(code, 'json');
+          const html = highlightCode(code, 'json');
           const filename = generateMultiFormatFilename(item, key, 'json');
 
           return { key, html, code, filename };
@@ -274,10 +232,9 @@ export async function UnifiedDetailPage({
       }
     }
 
-    // Default JSON configuration
     try {
       const code = JSON.stringify(configuration, null, 2);
-      const html = await highlightCode(code, 'json');
+      const html = highlightCode(code, 'json');
       const filename = generateFilename({ item, language: 'json' });
 
       return { format: 'json' as const, html, code, filename };
@@ -306,7 +263,7 @@ export async function UnifiedDetailPage({
 
       const highlightedExamples = await Promise.all(
         examples.map(async (example) => {
-          const html = await highlightCode(example.code, example.language);
+          const html = highlightCode(example.code, example.language);
           // Generate filename from title
           const filename = `${example.title
             .toLowerCase()
@@ -354,33 +311,30 @@ export async function UnifiedDetailPage({
     };
 
     try {
-      // Process claudeCode steps
       const claudeCodeSteps = installation.claudeCode?.steps
-        ? await batchMap(installation.claudeCode.steps, async (step) => {
+        ? installation.claudeCode.steps.map((step) => {
             if (isCommandStep(step)) {
-              const html = await highlightCode(step, 'bash');
+              const html = highlightCode(step, 'bash');
               return { type: 'command' as const, html, code: step };
             }
             return { type: 'text' as const, text: step };
           })
         : null;
 
-      // Process claudeDesktop steps
       const claudeDesktopSteps = installation.claudeDesktop?.steps
-        ? await batchMap(installation.claudeDesktop.steps, async (step) => {
+        ? installation.claudeDesktop.steps.map((step) => {
             if (isCommandStep(step)) {
-              const html = await highlightCode(step, 'bash');
+              const html = highlightCode(step, 'bash');
               return { type: 'command' as const, html, code: step };
             }
             return { type: 'text' as const, text: step };
           })
         : null;
 
-      // Process SDK steps
       const sdkSteps = installation.sdk?.steps
-        ? await batchMap(installation.sdk.steps, async (step) => {
+        ? installation.sdk.steps.map((step) => {
             if (isCommandStep(step)) {
-              const html = await highlightCode(step, 'bash');
+              const html = highlightCode(step, 'bash');
               return { type: 'command' as const, html, code: step };
             }
             return { type: 'text' as const, text: step };
@@ -431,32 +385,28 @@ export async function UnifiedDetailPage({
       [key: string]: unknown;
     }>;
 
-    // Process sections in parallel - add pre-rendered HTML for syntax highlighting
     return await Promise.all(
       sections.map(async (section) => {
-        // Single code block
         if (section.type === 'code' && section.code) {
-          const html = await highlightCode(section.code, section.language || 'text');
+          const html = highlightCode(section.code, section.language || 'text');
           return { ...section, html };
         }
 
-        // Code group (multiple tabs)
         if (section.type === 'code_group' && section.tabs) {
           const tabs = await Promise.all(
             section.tabs.map(async (tab) => {
-              const html = await highlightCode(tab.code, tab.language || 'text');
+              const html = highlightCode(tab.code, tab.language || 'text');
               return { ...tab, html };
             })
           );
           return { ...section, tabs };
         }
 
-        // Steps with optional code
         if (section.type === 'steps' && section.steps) {
           const steps = await Promise.all(
             section.steps.map(async (step) => {
               if (step.code) {
-                const html = await highlightCode(step.code, step.language || 'bash');
+                const html = highlightCode(step.code, step.language || 'bash');
                 return { ...step, html };
               }
               return step;
@@ -465,7 +415,6 @@ export async function UnifiedDetailPage({
           return { ...section, steps };
         }
 
-        // Non-code sections pass through unchanged
         return section;
       })
     );

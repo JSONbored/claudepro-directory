@@ -1,57 +1,49 @@
 /**
  * Client-Safe Error Handler Utilities
- *
- * This module contains error handling utilities that are safe to use in client components.
- * Uses the production logger which is client-safe and properly structured.
- *
- * **Bundle Optimization:**
- * - Client-safe logger with structured output
- * - Lightweight client bundle (< 5KB)
- * - Tree-shakeable exports
- *
- * @see {@link src/lib/error-handler.ts} - Full error handler with server utilities
- * @see {@link src/lib/logger.ts} - Production logger (client-safe)
  */
 
 import { randomUUID } from 'node:crypto';
 import { logger } from '@/src/lib/logger';
-import {
-  determineErrorType,
-  type ErrorContext,
-  type ErrorResponse,
-  validateErrorContext,
-} from '@/src/lib/schemas/error.schema';
 
-// Client-safe environment check - doesn't trigger server env validation
 const isDevelopment = process.env.NODE_ENV === 'development';
 
-/**
- * Handle errors in React Error Boundaries (client-side only)
- *
- * This is a lightweight version of the server-side error handler,
- * designed specifically for client components.
- *
- * @param error - The error thrown by a React component
- * @param errorInfo - Component stack information from React
- * @returns Structured error response for logging and analytics
- *
- * @example
- * ```tsx
- * function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
- *   const errorResponse = createErrorBoundaryFallback(error, {
- *     componentStack: errorInfo.componentStack || '',
- *   });
- *
- *   // Use errorResponse for analytics tracking
- *   window.umami?.track('error_boundary_triggered', {
- *     request_id: errorResponse.requestId,
- *     error_type: error.name,
- *   });
- *
- *   return <div>Error UI...</div>;
- * }
- * ```
- */
+type ErrorContext = Record<string, string | number | boolean>;
+
+type ErrorResponse = {
+  success: false;
+  error: string;
+  message: string;
+  code: string;
+  timestamp: string;
+  requestId?: string;
+  stack?: string;
+};
+
+function determineErrorType(error: unknown): string {
+  if (!(error instanceof Error)) return 'InternalServerError';
+
+  const name = error.name.toLowerCase();
+  const msg = error.message.toLowerCase();
+
+  if (name.includes('validation') || msg.includes('validation')) return 'ValidationError';
+  if (name.includes('database') || msg.includes('database')) return 'DatabaseError';
+  if (name.includes('auth') && msg.includes('auth')) return 'AuthenticationError';
+  if (msg.includes('not found') || name.includes('notfound')) return 'NotFoundError';
+
+  return 'InternalServerError';
+}
+
+function validateErrorContext(ctx: unknown): ErrorContext {
+  if (!ctx || typeof ctx !== 'object') return {};
+  const result: ErrorContext = {};
+  for (const [k, v] of Object.entries(ctx as Record<string, unknown>)) {
+    if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
+      result[k] = v;
+    }
+  }
+  return result;
+}
+
 export function createErrorBoundaryFallback(
   error: Error,
   errorInfo: { componentStack: string }
@@ -59,12 +51,9 @@ export function createErrorBoundaryFallback(
   const startTime = performance.now();
 
   try {
-    // Determine error type for context
     const errorType = determineErrorType(error);
-
     const requestId = randomUUID();
 
-    // Create error context
     const baseContext: ErrorContext = {
       route: typeof window !== 'undefined' ? window.location.pathname : 'unknown',
       operation: 'react_render',
@@ -73,7 +62,6 @@ export function createErrorBoundaryFallback(
       timestamp: new Date().toISOString(),
     };
 
-    // Merge with component stack info
     const fullContext = validateErrorContext({
       ...baseContext,
       requestId,
@@ -82,14 +70,12 @@ export function createErrorBoundaryFallback(
       processingTime: `${(performance.now() - startTime).toFixed(2)}ms`,
     });
 
-    // Log error using production logger (client-safe)
     logger.error(
       `Error Boundary: ${error.name || 'Unknown'}: ${error.message}`,
       error,
       fullContext
     );
 
-    // Return structured error response
     const errorResponse: ErrorResponse = {
       success: false,
       error: error.name || 'React Error',
@@ -97,13 +83,11 @@ export function createErrorBoundaryFallback(
       code: generateErrorCode(errorType),
       timestamp: new Date().toISOString(),
       requestId,
-      // Include stack in development only
       ...(isDevelopment && error.stack && { stack: error.stack }),
     };
 
     return errorResponse;
   } catch (handlerError) {
-    // Fallback if error handler itself fails
     const fallbackError = handlerError instanceof Error ? handlerError : new Error('Unknown error');
     logger.error('Error boundary fallback failed', fallbackError, {
       originalError: error.message,
@@ -120,21 +104,12 @@ export function createErrorBoundaryFallback(
   }
 }
 
-/**
- * Generate structured error codes (client-side version)
- */
 function generateErrorCode(errorType: string): string {
   const typeCode = errorType.replace('Error', '').toUpperCase();
   const timestamp = Date.now().toString(36).toUpperCase();
   return `${typeCode.slice(0, 3)}_${timestamp.slice(-8)}`;
 }
 
-/**
- * Client-safe error formatter for display in UI
- *
- * @param error - Error to format
- * @returns User-friendly error message
- */
 export function formatErrorForDisplay(error: Error | unknown): string {
   if (error instanceof Error) {
     return error.message || 'An unexpected error occurred';
@@ -147,21 +122,13 @@ export function formatErrorForDisplay(error: Error | unknown): string {
   return 'An unexpected error occurred';
 }
 
-/**
- * Check if error should be reported to analytics
- *
- * @param error - Error to check
- * @returns true if error should be tracked
- */
 export function shouldReportError(error: Error | unknown): boolean {
   if (!(error instanceof Error)) return false;
 
-  // Don't report development-only errors
   if (error.message.includes('hydration') || error.message.includes('HMR')) {
     return !isDevelopment;
   }
 
-  // Don't report network errors from ad blockers or extensions
   if (error.message.includes('umami') || error.message.includes('analytics')) {
     return false;
   }

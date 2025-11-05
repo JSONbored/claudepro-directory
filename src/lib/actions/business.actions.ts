@@ -104,46 +104,50 @@ export async function getUserSubmissions() {
   return result.submissions || [];
 }
 
-export const getSubmissionStats = rateLimitedAction
-  .metadata({ actionName: 'getSubmissionStats', category: 'analytics' })
-  .schema(z.object({}))
-  .action(async () => {
+export const getSubmissionDashboard = rateLimitedAction
+  .metadata({ actionName: 'getSubmissionDashboard', category: 'analytics' })
+  .schema(
+    z.object({
+      recentLimit: nonNegativeInt.min(1).max(10).default(5),
+      contributorsLimit: nonNegativeInt.min(1).max(10).default(5),
+    })
+  )
+  .action(async ({ parsedInput }) => {
     const supabase = await createClient();
+    const { data, error } = await supabase.rpc('get_submission_dashboard', {
+      p_recent_limit: parsedInput.recentLimit,
+      p_contributors_limit: parsedInput.contributorsLimit,
+    });
+    if (error) throw new Error(`Failed to fetch dashboard: ${error.message}`);
 
-    // Database-first: Call RPC function for aggregated stats
-    const { data, error } = await supabase.rpc('get_submission_stats');
+    type DashboardResult = {
+      stats: { total: number; pending: number; merged_this_week: number };
+      recent: Array<{
+        id: string | number;
+        content_name: string;
+        content_type: string;
+        merged_at: string;
+        user?: { name: string; slug: string } | null;
+      }>;
+      contributors: Array<{
+        name: string;
+        slug: string;
+        rank: number;
+        mergedCount: number;
+      }>;
+    };
 
-    if (error) throw new Error(`Failed to fetch submission stats: ${error.message}`);
+    const result = data as DashboardResult;
 
     return {
-      total: (data as { total: number; pending: number; merged_this_week: number }).total ?? 0,
-      pending: (data as { total: number; pending: number; merged_this_week: number }).pending ?? 0,
-      mergedThisWeek:
-        (data as { total: number; pending: number; merged_this_week: number }).merged_this_week ??
-        0,
+      stats: {
+        total: result.stats.total ?? 0,
+        pending: result.stats.pending ?? 0,
+        mergedThisWeek: result.stats.merged_this_week ?? 0,
+      },
+      recent: result.recent ?? [],
+      contributors: result.contributors ?? [],
     };
-  });
-
-export const getRecentMerged = rateLimitedAction
-  .metadata({ actionName: 'getRecentMerged', category: 'analytics' })
-  .schema(z.object({ limit: nonNegativeInt.min(1).max(10).default(5) }))
-  .action(async ({ parsedInput }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('get_recent_merged', { p_limit: parsedInput.limit });
-    if (error) throw new Error(`Failed to fetch recent merged: ${error.message}`);
-    return data ?? [];
-  });
-
-export const getTopContributors = rateLimitedAction
-  .metadata({ actionName: 'getTopContributors', category: 'analytics' })
-  .schema(z.object({ limit: nonNegativeInt.min(1).max(10).default(5) }))
-  .action(async ({ parsedInput }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('get_top_contributors', {
-      p_limit: parsedInput.limit,
-    });
-    if (error) throw new Error(`Failed to fetch contributors: ${error.message}`);
-    return data ?? [];
   });
 
 export const createCompany = rateLimitedAction

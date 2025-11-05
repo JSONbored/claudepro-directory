@@ -17,7 +17,6 @@ import { getContentByCategory } from '@/src/lib/content/supabase-content-loader'
 import { handleApiError } from '@/src/lib/error-handler';
 import { generateCategoryLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
-import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 
 /**
  * Generate static params for all valid categories
@@ -142,16 +141,11 @@ export async function GET(
       { category }
     );
 
-    // Use centralized error handling
-    const validatedError = errorInputSchema.safeParse(error);
-    return handleApiError(
-      validatedError.success ? validatedError.data : { message: 'Failed to generate llms.txt' },
-      {
-        route: '/[category]/llms.txt',
-        operation: 'generate_category_llmstxt',
-        method: 'GET',
-        logContext: { category },
-      }
-    );
+    return handleApiError(error, {
+      route: '/[category]/llms.txt',
+      operation: 'generate_category_llmstxt',
+      method: 'GET',
+      logContext: { category },
+    });
   }
 }

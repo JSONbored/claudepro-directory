@@ -1107,6 +1107,12 @@ export type PublicGetStructuredDataConfigArgs = z.infer<
 export type PublicGetStructuredDataConfigReturns = z.infer<
   typeof generated.publicGetStructuredDataConfigReturnsSchema
 >;
+export type PublicGetSubmissionDashboardArgs = z.infer<
+  typeof generated.publicGetSubmissionDashboardArgsSchema
+>;
+export type PublicGetSubmissionDashboardReturns = z.infer<
+  typeof generated.publicGetSubmissionDashboardReturnsSchema
+>;
 export type PublicGetSubmissionStatsArgs = z.infer<
   typeof generated.publicGetSubmissionStatsArgsSchema
 >;
@@ -1348,12 +1354,6 @@ export type PublicMarkSequenceEmailProcessedArgs = z.infer<
 >;
 export type PublicMarkSequenceEmailProcessedReturns = z.infer<
   typeof generated.publicMarkSequenceEmailProcessedReturnsSchema
->;
-export type PublicMergeSubmissionToContentArgs = z.infer<
-  typeof generated.publicMergeSubmissionToContentArgsSchema
->;
-export type PublicMergeSubmissionToContentReturns = z.infer<
-  typeof generated.publicMergeSubmissionToContentReturnsSchema
 >;
 export type PublicPopulateContentSeoDataArgs = z.infer<
   typeof generated.publicPopulateContentSeoDataArgsSchema

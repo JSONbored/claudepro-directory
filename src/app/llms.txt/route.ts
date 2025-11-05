@@ -11,7 +11,6 @@ import { getContentByCategory } from '@/src/lib/content/supabase-content-loader'
 import { handleApiError } from '@/src/lib/error-handler';
 import { generateSiteLLMsTxt } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
-import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 
 /**
  * Handle GET request for site-wide llms.txt
@@ -131,15 +130,10 @@ export async function GET(): Promise<Response> {
       error instanceof Error ? error : new Error(String(error))
     );
 
-    // Use centralized error handling
-    const validatedError = errorInputSchema.safeParse(error);
-    return handleApiError(
-      validatedError.success ? validatedError.data : { message: 'Failed to generate llms.txt' },
-      {
-        route: '/llms.txt',
-        operation: 'generate_site_llmstxt',
-        method: 'GET',
-      }
-    );
+    return handleApiError(error, {
+      route: '/llms.txt',
+      operation: 'generate_site_llmstxt',
+      method: 'GET',
+    });
   }
 }

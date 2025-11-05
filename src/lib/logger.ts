@@ -4,22 +4,46 @@
  */
 
 import { isDevelopment, isProduction, isVercel } from './env-client';
-import {
-  type LogContext,
-  type LogEntry,
-  parseDevelopmentLogComponents,
-  sanitizeLogMessage,
-  validateLogContext,
-} from './schemas/logger.schema';
+
+type LogContext = Record<string, string | number | boolean>;
+
+type LogEntry = {
+  level: 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+  message: string;
+  context?: LogContext;
+  metadata?: Record<string, string | number | boolean>;
+  error?: Error | string;
+};
+
+function sanitizeLogMessage(msg: unknown): string {
+  const str = String(msg).slice(0, 10000);
+  return str.replace(/<script|javascript:|data:/gi, '[BLOCKED]');
+}
+
+function validateLogContext(ctx: unknown): LogContext | null {
+  if (!ctx || typeof ctx !== 'object') return null;
+  const result: LogContext = {};
+  for (const [k, v] of Object.entries(ctx as Record<string, unknown>)) {
+    if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
+      result[k] = v;
+    }
+  }
+  return result;
+}
+
+function parseDevelopmentLogComponents(obj: Record<string, unknown>): {
+  success: boolean;
+  data?: Record<string, unknown>;
+  error?: string;
+} {
+  return { success: true, data: obj };
+}
 
 class Logger {
   private isDevelopment = isDevelopment;
   private isProduction = isProduction;
   private isVercel = isVercel;
 
-  /**
-   * Format log entry for structured output
-   */
   private formatLog(entry: LogEntry): string {
     const timestamp = new Date().toISOString();
 
@@ -48,23 +72,22 @@ class Logger {
     return this.isDevelopment ? this.formatForDevelopment(logObject) : JSON.stringify(logObject);
   }
 
-  /**
-   * Format logs for better readability in development
-   */
   private formatForDevelopment(logObject: Record<string, unknown>): string {
-    // Use safe parsing with Zod validation
     const components = parseDevelopmentLogComponents(logObject);
-    if (!components) {
+    if (!(components?.success && components.data)) {
       return `[INVALID LOG] ${JSON.stringify(logObject)}`;
     }
 
-    if (!components.success) {
-      return `[INVALID LOG] ${components.error}`;
-    }
+    const { timestamp, level, message, context, metadata, error } = components.data as {
+      timestamp?: string;
+      level?: string;
+      message?: string;
+      context?: Record<string, unknown>;
+      metadata?: Record<string, unknown>;
+      error?: Record<string, unknown>;
+    };
 
-    const { timestamp, level, message, context, metadata, error } = components.data;
-
-    let output = `[${timestamp}] ${level.toUpperCase()}: ${message}`;
+    let output = `[${timestamp}] ${String(level).toUpperCase()}: ${message}`;
 
     if (context && Object.keys(context).length > 0) {
       output += `\n  Context: ${JSON.stringify(context, null, 2)}`;
@@ -81,12 +104,7 @@ class Logger {
     return output;
   }
 
-  /**
-   * Output log entry using appropriate method
-   * IMPORTANT: True server-only logging - never expose to browser console
-   */
   private output(entry: LogEntry): void {
-    // Multiple checks to ensure we're truly server-side only
     if (
       typeof window !== 'undefined' ||
       typeof document !== 'undefined' ||
@@ -96,27 +114,17 @@ class Logger {
       return;
     }
 
-    // Additional check for Node.js server environment
-    if (!process?.env) {
-      return;
-    }
+    if (!process?.env) return;
+    if (this.isProduction && entry.level === 'debug') return;
 
-    // In production, output info, warn, error, and fatal logs (skip debug only)
-    if (this.isProduction && entry.level === 'debug') {
-      return;
-    }
-
-    // For debug logs, write directly to process.stdout to avoid SSR leakage
     const formattedLog = this.formatLog(entry);
 
     if (entry.level === 'debug' && this.isDevelopment) {
-      // Use console.debug for debug logs (Edge Runtime compatible)
       // biome-ignore lint/suspicious/noConsole: Development debug logging
       console.debug(`[DEBUG] ${formattedLog}`);
       return;
     }
 
-    // Server-only console output for non-debug levels
     switch (entry.level) {
       case 'info':
         // biome-ignore lint/suspicious/noConsole: Server-only logger implementation
@@ -137,9 +145,6 @@ class Logger {
     }
   }
 
-  /**
-   * Debug level logging
-   */
   debug(
     message: string,
     context?: LogContext,
@@ -161,9 +166,6 @@ class Logger {
     }
   }
 
-  /**
-   * Info level logging
-   */
   info(
     message: string,
     context?: LogContext,
@@ -183,9 +185,6 @@ class Logger {
     this.output(entry);
   }
 
-  /**
-   * Warning level logging
-   */
   warn(
     message: string,
     context?: LogContext,
@@ -205,9 +204,6 @@ class Logger {
     this.output(entry);
   }
 
-  /**
-   * Error level logging
-   */
   error(
     message: string,
     error?: Error | string,
@@ -230,9 +226,6 @@ class Logger {
     this.output(entry);
   }
 
-  /**
-   * Fatal level logging for critical errors
-   */
   fatal(
     message: string,
     error?: Error | string,
@@ -255,13 +248,9 @@ class Logger {
     this.output(entry);
   }
 
-  /**
-   * Create contextual logger with predefined context
-   */
   withContext(baseContext: LogContext): Logger {
     const contextualLogger = new Logger();
 
-    // Override debug method
     contextualLogger.debug = (
       message: string,
       context?: LogContext,
@@ -271,7 +260,6 @@ class Logger {
       this.debug(message, finalContext, metadata);
     };
 
-    // Override info method
     contextualLogger.info = (
       message: string,
       context?: LogContext,
@@ -281,7 +269,6 @@ class Logger {
       this.info(message, finalContext, metadata);
     };
 
-    // Override warn method
     contextualLogger.warn = (
       message: string,
       context?: LogContext,
@@ -291,7 +278,6 @@ class Logger {
       this.warn(message, finalContext, metadata);
     };
 
-    // Override error method
     contextualLogger.error = (
       message: string,
       error?: Error | string,
@@ -302,7 +288,6 @@ class Logger {
       this.error(message, error, finalContext, metadata);
     };
 
-    // Override fatal method
     contextualLogger.fatal = (
       message: string,
       error?: Error | string,
@@ -316,9 +301,6 @@ class Logger {
     return contextualLogger;
   }
 
-  /**
-   * Create request-scoped logger with HTTP context
-   */
   forRequest(request: Request): Logger {
     const url = new URL(request.url);
     const context: LogContext = {
@@ -329,7 +311,6 @@ class Logger {
       timestamp: new Date().toISOString(),
     };
 
-    // Add Vercel-specific headers if available
     if (this.isVercel) {
       const vercelContext = {
         region: request.headers.get('x-vercel-id') || undefined,
@@ -342,9 +323,6 @@ class Logger {
     return this.withContext(context);
   }
 
-  /**
-   * Performance timing helper
-   */
   time<T>(label: string, fn: () => T | Promise<T>, context?: LogContext): Promise<T> {
     return this.timeAsync(label, fn, context);
   }
@@ -384,75 +362,44 @@ class Logger {
     }
   }
 
-  /**
-   * CLI-specific logging methods for scripts and build processes
-   * Provides environment-aware output suitable for command line interfaces
-   */
-
-  /**
-   * Simple console log for CLI scripts (environment-aware)
-   */
   log(message: string, ...args: unknown[]): void {
     const isProduction = process.env.NODE_ENV === 'production';
     const isVerbose = process.env.VERBOSE === 'true';
     const isCI = process.env.CI === 'true' || process.env.VERCEL === '1';
 
-    // Always output in dev, verbose mode, or CI/build environments
     if (!isProduction || isVerbose || isCI) {
       // biome-ignore lint/suspicious/noConsole: CLI output for scripts
       console.log(message, ...args);
     }
   }
 
-  /**
-   * Progress indicator for long-running operations
-   */
   progress(message: string): void {
     const isProduction = process.env.NODE_ENV === 'production';
     const isVerbose = process.env.VERBOSE === 'true';
     const isCI = process.env.CI === 'true' || process.env.VERCEL === '1';
 
-    // Always output in dev, verbose mode, or CI/build environments
     if (!isProduction || isVerbose || isCI) {
-      // Use console.log for progress messages (Edge Runtime compatible)
       // biome-ignore lint/suspicious/noConsole: Progress logging
       console.log(message);
     }
   }
 
-  /**
-   * Success message with emoji for CLI
-   */
   success(message: string): void {
     const isProduction = process.env.NODE_ENV === 'production';
     const isVerbose = process.env.VERBOSE === 'true';
     const isCI = process.env.CI === 'true' || process.env.VERCEL === '1';
 
-    // Always output in dev, verbose mode, or CI/build environments
     if (!isProduction || isVerbose || isCI) {
       // biome-ignore lint/suspicious/noConsole: CLI output for scripts
       console.log(`? ${message}`);
     }
   }
 
-  /**
-   * Failure message with emoji for CLI (always shown)
-   */
   failure(message: string): void {
-    // Always log failures
     // biome-ignore lint/suspicious/noConsole: CLI output for scripts
     console.error(`? ${message}`);
   }
 
-  /**
-   * Metadata Quality Monitoring
-   * Track metadata validation results for production observability
-   *
-   * October 2025 SEO Enhancement:
-   * - Monitors metadata quality across all routes
-   * - Alerts on validation failures
-   * - Tracks SEO compliance metrics
-   */
   metadataValidation(
     route: string,
     success: boolean,
@@ -479,10 +426,6 @@ class Logger {
     }
   }
 
-  /**
-   * Track metadata generation performance
-   * Monitors slow metadata generation that could impact page load times
-   */
   metadataPerformance(route: string, durationMs: number): void {
     const metadata = {
       route,
@@ -496,10 +439,6 @@ class Logger {
     }
   }
 
-  /**
-   * Track SEO compliance metrics
-   * Monitors overall SEO health of the application
-   */
   seoMetrics(metrics: {
     totalRoutes: number;
     validatedRoutes: number;
@@ -519,5 +458,4 @@ class Logger {
   }
 }
 
-// Export singleton instance
 export const logger = new Logger();
