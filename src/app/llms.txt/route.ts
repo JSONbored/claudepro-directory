@@ -6,34 +6,11 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
-import type { NextRequest } from 'next/server';
-import {
-  agents,
-  collections,
-  commands,
-  hooks,
-  mcp,
-  rules,
-  skills,
-  statuslines,
-} from '@/generated/content';
-import { apiResponse, handleApiError } from '@/src/lib/error-handler';
+import { NextResponse } from 'next/server';
+import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
+import { handleApiError } from '@/src/lib/error-handler';
 import { generateSiteLLMsTxt } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
-import { errorInputSchema } from '@/src/lib/schemas/error.schema';
-import { batchLoadContent } from '@/src/lib/utils/batch.utils';
-
-/**
- * Runtime configuration
- * Use Node.js runtime for better performance with text generation
- */
-export const runtime = 'nodejs';
-
-/**
- * ISR revalidation
- * AI training data changes infrequently - revalidate every hour
- */
-export const revalidate = 3600;
 
 /**
  * Handle GET request for site-wide llms.txt
@@ -48,34 +25,33 @@ export const revalidate = 3600;
  *
  * Response format:
  * - Plain text (text/plain charset=utf-8)
- * - Cached for 1 hour via ISR
+ * - Cached for 1 hour via Cache Components
  * - Public cache headers for CDN distribution
  */
-export async function GET(request: NextRequest): Promise<Response> {
-  const requestLogger = logger.forRequest(request);
-
+export async function GET(): Promise<Response> {
   try {
-    requestLogger.info('Site llms.txt generation started');
+    logger.info('Site llms.txt generation started');
 
-    // Gather category statistics - await all promises in parallel
-    const {
-      mcp: mcpItems,
-      commands: commandsItems,
-      hooks: hooksItems,
-      rules: rulesItems,
-      agents: agentsItems,
-      statuslines: statuslinesItems,
-      collections: collectionsItems,
-    } = await batchLoadContent({
-      mcp,
-      commands,
-      hooks,
-      rules,
-      agents,
-      statuslines,
-      collections,
-      skills,
-    });
+    // Fetch all content from Supabase (parallel queries with ISR caching)
+    const [
+      mcpItems,
+      commandsItems,
+      hooksItems,
+      rulesItems,
+      agentsItems,
+      statuslinesItems,
+      collectionsItems,
+      skillsItems,
+    ] = await Promise.all([
+      getContentByCategory('mcp'),
+      getContentByCategory('commands'),
+      getContentByCategory('hooks'),
+      getContentByCategory('rules'),
+      getContentByCategory('agents'),
+      getContentByCategory('statuslines'),
+      getContentByCategory('collections'),
+      getContentByCategory('skills'),
+    ]);
 
     const categoryStats = [
       {
@@ -124,7 +100,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       },
       {
         name: 'Skills',
-        count: (await skills).length,
+        count: skillsItems.length,
         url: '/skills',
         description:
           'Task-focused capability guides with dependencies, examples, and troubleshooting for document/data workflows',
@@ -134,33 +110,30 @@ export async function GET(request: NextRequest): Promise<Response> {
     // Generate llms.txt content
     const llmsTxt = await generateSiteLLMsTxt(categoryStats);
 
-    requestLogger.info('Site llms.txt generated successfully', {
+    logger.info('Site llms.txt generated successfully', {
       categoriesCount: categoryStats.length,
       totalItems: categoryStats.reduce((sum, cat) => sum + cat.count, 0),
       contentLength: llmsTxt.length,
     });
 
-    // Return plain text response via unified builder
-    return apiResponse.raw(llmsTxt, {
-      contentType: 'text/plain; charset=utf-8',
-      headers: { 'X-Robots-Tag': 'index, follow' },
-      cache: { sMaxAge: 3600, staleWhileRevalidate: 86400 },
+    // Return plain text response with cache headers
+    return new NextResponse(llmsTxt, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Robots-Tag': 'index, follow',
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+      },
     });
   } catch (error: unknown) {
-    requestLogger.error(
+    logger.error(
       'Failed to generate site llms.txt',
       error instanceof Error ? error : new Error(String(error))
     );
 
-    // Use centralized error handling
-    const validatedError = errorInputSchema.safeParse(error);
-    return handleApiError(
-      validatedError.success ? validatedError.data : { message: 'Failed to generate llms.txt' },
-      {
-        route: '/llms.txt',
-        operation: 'generate_site_llmstxt',
-        method: 'GET',
-      }
-    );
+    return handleApiError(error, {
+      route: '/llms.txt',
+      operation: 'generate_site_llmstxt',
+      method: 'GET',
+    });
   }
 }

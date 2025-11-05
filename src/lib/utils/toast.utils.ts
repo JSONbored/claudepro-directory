@@ -52,6 +52,8 @@ export const successToasts = {
   copied: (item?: string) => toast.success(`${item ? `${item} c` : 'C'}opied to clipboard!`),
   linkCopied: () => toast.success('Link copied to clipboard!'),
   codeCopied: () => toast.success('Code copied to clipboard!'),
+  screenshotCopied: () => toast.success('Screenshot copied & downloaded!'),
+  embedCopied: () => toast.success('Embed code copied to clipboard!'),
 
   // Library & Bookmarks
   savedToLibrary: (count: number, total?: number) =>
@@ -106,6 +108,9 @@ export const errorToasts = {
 
   // Clipboard
   copyFailed: (item?: string) => toast.error(`Failed to copy${item ? ` ${item}` : ''}`),
+  screenshotFailed: () => toast.error('Failed to generate screenshot'),
+  shareFailed: () => toast.error('Failed to share'),
+  embedFailed: () => toast.error('Failed to copy embed code'),
 
   // Profile & User Actions
   profileUpdateFailed: () => toast.error('Failed to update profile'),

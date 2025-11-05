@@ -25,25 +25,14 @@ import {
   removeItemFromCollection,
   reorderCollectionItems,
 } from '@/src/lib/actions/content.actions';
+import type { CategoryId } from '@/src/lib/config/category-config';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@/src/lib/icons';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { Tables } from '@/src/types/database.types';
 
-interface CollectionItem {
-  id: string;
-  collection_id: string;
-  content_type: string;
-  content_slug: string;
-  notes?: string;
-  order: number;
-}
-
-interface Bookmark {
-  id: string;
-  content_type: string;
-  content_slug: string;
-}
+type CollectionItem = Tables<'collection_items'>;
+type Bookmark = Tables<'bookmarks'>;
 
 interface CollectionItemManagerProps {
   collectionId: string;
@@ -81,6 +70,7 @@ export function CollectionItemManager({
 
     startTransition(async () => {
       try {
+        // Server-side schema validation handles content_type validation via categoryIdSchema
         const result = await addItemToCollection({
           collection_id: collectionId,
           content_type: bookmark.content_type as CategoryId,
@@ -190,14 +180,14 @@ export function CollectionItemManager({
       {/* Add Item Section */}
       <div className={'flex items-end gap-2 pb-4'}>
         <div className="flex-1">
-          <div className={'text-sm font-medium mb-2 block'}>Add Bookmark to Collection</div>
+          <div className={'mb-2 block font-medium text-sm'}>Add Bookmark to Collection</div>
           <Select value={selectedBookmarkId} onValueChange={setSelectedBookmarkId}>
             <SelectTrigger>
               <SelectValue placeholder="Select a bookmark to add" />
             </SelectTrigger>
             <SelectContent>
               {availableToAdd.length === 0 ? (
-                <div className="p-2 text-sm text-muted-foreground">
+                <div className="p-2 text-muted-foreground text-sm">
                   All bookmarks have been added
                 </div>
               ) : (
@@ -229,7 +219,7 @@ export function CollectionItemManager({
 
       {/* Items List */}
       {items.length === 0 ? (
-        <div className="text-center py-12 border border-dashed rounded-lg">
+        <div className="rounded-lg border border-dashed py-12 text-center">
           <p className={'text-muted-foreground'}>
             No items in this collection yet. Add bookmarks above to get started.
           </p>
@@ -239,7 +229,7 @@ export function CollectionItemManager({
           {items.map((item: CollectionItem, index: number) => (
             <div
               key={item.id}
-              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors`}
+              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50`}
             >
               {/* Order Controls */}
               <div className="flex flex-col gap-1">
@@ -266,7 +256,7 @@ export function CollectionItemManager({
               </div>
 
               {/* Order Number */}
-              <div className="text-sm font-medium text-muted-foreground w-8 text-center">
+              <div className="w-8 text-center font-medium text-muted-foreground text-sm">
                 #{index + 1}
               </div>
 
@@ -276,9 +266,9 @@ export function CollectionItemManager({
                   <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                     {item.content_type}
                   </UnifiedBadge>
-                  <span className="text-sm font-medium">{item.content_slug}</span>
+                  <span className="font-medium text-sm">{item.content_slug}</span>
                 </div>
-                {item.notes && <p className={'text-xs text-muted-foreground mt-1'}>{item.notes}</p>}
+                {item.notes && <p className={'mt-1 text-muted-foreground text-xs'}>{item.notes}</p>}
               </div>
 
               {/* Actions */}

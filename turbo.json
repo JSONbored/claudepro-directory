@@ -1,0 +1,119 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "remoteCache": {
+    "signature": true
+  },
+  "tasks": {
+    "generate:categories:exec": {
+      "outputs": [
+        "src/lib/config/category-config.generated.ts"
+      ],
+      "inputs": ["scripts/build/generate-category-config.ts"],
+      "cache": true,
+      "passThroughEnv": ["VERCEL_DEPLOYMENT_ID", "NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]
+    },
+    "build:skills:exec": {
+      "outputs": [
+        "content/skills/*.zip",
+        "public/downloads/skills/*.zip"
+      ],
+      "inputs": [
+        "content/skills/*.json",
+        "content/skills/*.zip",
+        "scripts/build/generate-skill-packages.ts",
+        "src/lib/transformers/skill-to-md.ts"
+      ],
+      "cache": true,
+      "persistent": true,
+      "passThroughEnv": ["VERCEL_DEPLOYMENT_ID"]
+    },
+    "generate:service-worker:exec": {
+      "dependsOn": ["generate:categories:exec"],
+      "outputs": ["public/service-worker.js", ".next/cache/sw-hash.txt"],
+      "inputs": [
+        "scripts/build/generate-service-worker.ts",
+        "src/lib/config/category-config.ts",
+        "src/lib/config/category-config.generated.ts",
+        "src/lib/constants/security.ts",
+        "package.json"
+      ],
+      "cache": true,
+      "passThroughEnv": [
+        "VERCEL_DEPLOYMENT_ID",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+      ]
+    },
+    "type-check": {
+      "outputs": ["**/*.tsbuildinfo"],
+      "cache": true
+    },
+    "lint": {
+      "outputs": [],
+      "cache": true
+    },
+    "test:unit": {
+      "outputs": ["coverage/**"],
+      "cache": true
+    }
+  },
+  "globalDependencies": ["package.json", "pnpm-lock.yaml"],
+  "globalEnv": [
+    "NODE_ENV",
+    "ARCJET_KEY",
+    "RATE_LIMIT_SECRET",
+    "CACHE_WARM_AUTH_TOKEN",
+    "VIEW_COUNT_SALT",
+    "WEBHOOK_SECRET",
+    "CRON_SECRET",
+    "GITHUB_TOKEN",
+    "GITHUB_OWNER",
+    "GITHUB_REPO",
+    "GITHUB_BRANCH",
+    "RESEND_API_KEY",
+    "RESEND_AUDIENCE_ID",
+    "RESEND_WEBHOOK_SECRET",
+    "POSTGRES_URL",
+    "POSTGRES_PRISMA_URL",
+    "POSTGRES_URL_NON_POOLING",
+    "POSTGRES_USER",
+    "POSTGRES_PASSWORD",
+    "POSTGRES_DATABASE",
+    "POSTGRES_HOST",
+    "SUPABASE_URL",
+    "SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "SUPABASE_JWT_SECRET",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "BETTERSTACK_HEARTBEAT_WEEKLY_TASKS",
+    "BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE",
+    "BETTERSTACK_SOURCE_TOKEN",
+    "KV_URL",
+    "REDIS_URL",
+    "LOGTAIL_URL",
+    "LOGTAIL_SOURCE_TOKEN",
+    "REVALIDATE_SECRET",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY",
+    "R2_ENDPOINT",
+    "R2_BUCKET_NAME"
+  ],
+  "globalPassThroughEnv": [
+    "VERCEL",
+    "VERCEL_ENV",
+    "VERCEL_URL",
+    "VERCEL_DEPLOYMENT_ID",
+    "VERCEL_GIT_COMMIT_SHA",
+    "VERCEL_GIT_COMMIT_MESSAGE",
+    "VERCEL_GIT_COMMIT_AUTHOR_LOGIN",
+    "VERCEL_GIT_COMMIT_AUTHOR_NAME",
+    "VERCEL_GIT_REPO_SLUG",
+    "VERCEL_GIT_REPO_OWNER",
+    "VERCEL_GIT_REPO_ID",
+    "VERCEL_GIT_PULL_REQUEST_ID",
+    "TURBO_REMOTE_CACHE_SIGNATURE_KEY",
+    "CI",
+    "CONTINUOUS_INTEGRATION"
+  ]
+}

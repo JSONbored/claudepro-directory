@@ -9,14 +9,28 @@
  * - Analytics tracking
  */
 
+import dynamicImport from 'next/dynamic';
 import { redirect } from 'next/navigation';
-import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { ForYouFeedClient } from '@/src/components/features/personalization/for-you-feed-client';
-import { getForYouFeed } from '@/src/lib/actions/analytics.actions';
+
+const UnifiedNewsletterCapture = dynamicImport(
+  () =>
+    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+      default: mod.UnifiedNewsletterCapture,
+    })),
+  {
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+  }
+);
+
+import { getForYouFeed } from '@/src/lib/analytics/client';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 
 export const metadata = generatePageMetadata('/for-you');
+
+// Force dynamic rendering - personalized content requires auth
+export const dynamic = 'force-dynamic';
 
 export default async function ForYouPage() {
   // Check authentication
@@ -33,10 +47,10 @@ export default async function ForYouPage() {
   // Fetch initial recommendations
   const result = await getForYouFeed({ limit: 12, offset: 0, exclude_bookmarked: false });
 
-  if (!result?.data) {
+  if (!result) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold mb-4">For You</h1>
+        <h1 className="mb-4 font-bold text-3xl">For You</h1>
         <p className="text-muted-foreground">
           Unable to load recommendations. Please try again later.
         </p>
@@ -47,25 +61,19 @@ export default async function ForYouPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-3">For You</h1>
+        <h1 className="mb-3 font-bold text-4xl">For You</h1>
         <p className="text-lg text-muted-foreground">
-          {result.data.user_has_history
+          {result.user_has_history
             ? 'Personalized recommendations based on your activity'
             : 'Popular configurations to get you started'}
         </p>
       </div>
 
-      <ForYouFeedClient initialData={result.data} />
+      <ForYouFeedClient initialData={result} />
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
-        <UnifiedNewsletterCapture
-          source="content_page"
-          variant="hero"
-          context="for-you-page"
-          headline="Join 1,000+ Claude Power Users"
-          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
-        />
+        <UnifiedNewsletterCapture source="content_page" variant="hero" context="for-you-page" />
       </section>
     </div>
   );

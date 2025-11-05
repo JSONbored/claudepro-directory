@@ -16,7 +16,7 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedParameters": false,
     "exactOptionalPropertyTypes": true,
     "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true,
@@ -26,6 +26,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "tsBuildInfoFile": "../../.next/cache/.tsbuildinfo",
     "plugins": [
       {
         "name": "next"

@@ -1,16 +1,10 @@
 /**
- * Schema Types
- * Type definitions for unified structured data generation
+ * Schema Types - Database-First Architecture
+ * All configuration from PostgreSQL, zero hardcoded rules
  */
 
-import type { AgentContent } from '@/src/lib/schemas/content/agent.schema';
-import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
-import type { CommandContent } from '@/src/lib/schemas/content/command.schema';
-import type { HookContent } from '@/src/lib/schemas/content/hook.schema';
-import type { McpContent } from '@/src/lib/schemas/content/mcp.schema';
-import type { RuleContent } from '@/src/lib/schemas/content/rule.schema';
-import type { SkillContent } from '@/src/lib/schemas/content/skill.schema';
-import type { StatuslineContent } from '@/src/lib/schemas/content/statusline.schema';
+import type { CategoryId } from '@/src/lib/config/category-config';
+import type { ContentItem, FullContentItem } from '@/src/lib/content/supabase-content-loader';
 import {
   buildBreadcrumb,
   buildCreativeWork,
@@ -22,447 +16,99 @@ import {
   type FAQItem,
   type SchemaObject,
 } from '@/src/lib/structured-data/schema-builder';
+import { createClient } from '@/src/lib/supabase/server';
 import { getContentItemUrl, transformMcpConfigForDisplay } from '@/src/lib/utils/content.utils';
+import type { Database } from '@/src/types/database.types';
 
-/**
- * Discriminated union for all content types
- */
-export type UnifiedContent =
-  | ({ category: 'agents' } & AgentContent)
-  | ({ category: 'collections' } & CollectionContent)
-  | ({ category: 'commands' } & CommandContent)
-  | ({ category: 'hooks' } & HookContent)
-  | ({ category: 'mcp' } & McpContent)
-  | ({ category: 'rules' } & RuleContent)
-  | ({ category: 'statuslines' } & StatuslineContent)
-  | ({ category: 'skills' } & SkillContent);
+export type UnifiedContent = FullContentItem | ContentItem;
 
-/**
- * Props for unified structured data component
- */
 export interface UnifiedStructuredDataProps {
   item: UnifiedContent;
 }
 
-/**
- * Type guards for content discrimination
- */
 export function isAgentContent(
   item: UnifiedContent
-): item is AgentContent & { category: 'agents' } {
+): item is Database['public']['Tables']['content']['Row'] & { category: 'agents' } {
   return item.category === 'agents';
 }
 
 export function isCommandContent(
   item: UnifiedContent
-): item is CommandContent & { category: 'commands' } {
+): item is Database['public']['Tables']['content']['Row'] & { category: 'commands' } {
   return item.category === 'commands';
 }
 
 export function isCollectionContent(
   item: UnifiedContent
-): item is CollectionContent & { category: 'collections' } {
+): item is Database['public']['Tables']['content']['Row'] & { category: 'collections' } {
   return item.category === 'collections';
 }
 
-export function isHookContent(item: UnifiedContent): item is HookContent & { category: 'hooks' } {
+export function isHookContent(
+  item: UnifiedContent
+): item is Database['public']['Tables']['content']['Row'] & { category: 'hooks' } {
   return item.category === 'hooks';
 }
 
-export function isMcpContent(item: UnifiedContent): item is McpContent & { category: 'mcp' } {
+export function isMcpContent(
+  item: UnifiedContent
+): item is Database['public']['Tables']['content']['Row'] & { category: 'mcp' } {
   return item.category === 'mcp';
 }
 
-export function isRuleContent(item: UnifiedContent): item is RuleContent & { category: 'rules' } {
+export function isRuleContent(
+  item: UnifiedContent
+): item is Database['public']['Tables']['content']['Row'] & { category: 'rules' } {
   return item.category === 'rules';
 }
 
 export function isStatuslineContent(
   item: UnifiedContent
-): item is StatuslineContent & { category: 'statuslines' } {
+): item is Database['public']['Tables']['content']['Row'] & { category: 'statuslines' } {
   return item.category === 'statuslines';
 }
 
 export function isSkillContent(
   item: UnifiedContent
-): item is SkillContent & { category: 'skills' } {
+): item is Database['public']['Tables']['content']['Row'] & { category: 'skills' } {
   return item.category === 'skills';
 }
 
-/**
- * Type guard to check if content has troubleshooting field
- * Used for FAQPage schema generation
- */
-export function hasContentTroubleshooting(item: UnifiedContent): item is (
-  | AgentContent
-  | CollectionContent
-  | CommandContent
-  | HookContent
-  | McpContent
-  | RuleContent
-  | SkillContent
-  | StatuslineContent
-) & {
-  troubleshooting: Array<{ issue: string; solution: string }>;
-} {
-  return 'troubleshooting' in item && Array.isArray(item.troubleshooting);
+export function hasContentTroubleshooting(item: UnifiedContent): boolean {
+  if ('metadata' in item && item.metadata && typeof item.metadata === 'object') {
+    const meta = item.metadata as Record<string, unknown>;
+    return 'troubleshooting' in meta && Array.isArray(meta.troubleshooting);
+  }
+  return false;
 }
 
-/**
- * Configuration for schema generation per content type
- */
-export interface SchemaGenerationConfig {
-  generateApplication: boolean;
-  generateSourceCode: boolean;
-  generateHowTo: boolean;
-  generateCreativeWork: boolean;
-  generateFAQ: boolean;
-  generateBreadcrumb: boolean;
-  generateSpeakable: boolean;
-}
-
-export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGenerationConfig> = {
-  agents: {
-    generateApplication: true,
-    generateSourceCode: true,
-    generateHowTo: true,
-    generateCreativeWork: true,
-    generateFAQ: true, // Agents now have troubleshooting field
-    generateBreadcrumb: true,
-    generateSpeakable: true,
-  },
-  commands: {
-    generateApplication: false,
-    generateSourceCode: true,
-    generateHowTo: true,
-    generateCreativeWork: false,
-    generateFAQ: true, // Commands now have troubleshooting field
-    generateBreadcrumb: true,
-    generateSpeakable: false,
-  },
-  collections: {
-    generateApplication: false,
-    generateSourceCode: false,
-    generateHowTo: true,
-    generateCreativeWork: true,
-    generateFAQ: true, // Collections now have troubleshooting field
-    generateBreadcrumb: true,
-    generateSpeakable: false,
-  },
-  hooks: {
-    generateApplication: true,
-    generateSourceCode: true,
-    generateHowTo: true,
-    generateCreativeWork: false,
-    generateFAQ: true, // Hooks have troubleshooting field
-    generateBreadcrumb: true,
-    generateSpeakable: false,
-  },
-  mcp: {
-    generateApplication: true,
-    generateSourceCode: true,
-    generateHowTo: true,
-    generateCreativeWork: false,
-    generateFAQ: true, // MCP has troubleshooting field
-    generateBreadcrumb: true,
-    generateSpeakable: false,
-  },
-  rules: {
-    generateApplication: true,
-    generateSourceCode: false,
-    generateHowTo: true,
-    generateCreativeWork: true,
-    generateFAQ: true, // Rules have troubleshooting field
-    generateBreadcrumb: true,
-    generateSpeakable: true,
-  },
-  statuslines: {
-    generateApplication: true,
-    generateSourceCode: true,
-    generateHowTo: true,
-    generateCreativeWork: false,
-    generateFAQ: true, // Statuslines have troubleshooting field
-    generateBreadcrumb: true,
-    generateSpeakable: false,
-  },
-  skills: {
-    generateApplication: false,
-    generateSourceCode: true,
-    generateHowTo: true,
-    generateCreativeWork: true,
-    generateFAQ: true,
-    generateBreadcrumb: true,
-    generateSpeakable: true,
-  },
-};
-
-/**
- * STRUCTURED_DATA_RULES
- * Central configuration for schema generation logic
- * Maps content type → schema generation rules (builders, extractors, transformers)
- */
-export interface StructuredDataRule {
-  // Schema type mappings
-  schemaTypes: {
-    application?: boolean;
-    sourceCode?: boolean;
-    creativeWork?: boolean;
-    howTo?: boolean;
-    faq?: boolean;
-    breadcrumb?: boolean;
-    speakable?: boolean;
-    review?: boolean;
-    aggregateRating?: boolean;
-    videoObject?: boolean;
-    course?: boolean;
-    jobPosting?: boolean;
-    collectionPage?: boolean;
-  };
-
-  // Property extractors (centralize what was scattered inline)
-  extractors: {
-    applicationSubCategory: (item: UnifiedContent) => string;
-    keywords: (item: UnifiedContent) => string[];
-    requirements: (item: UnifiedContent) => string[];
-    configuration: (item: UnifiedContent) => unknown;
-    creativeWorkDescription: (item: UnifiedContent) => string;
-  };
-
-  // Display name mapping
-  categoryDisplayName: string;
-}
-
-export const STRUCTURED_DATA_RULES: Record<UnifiedContent['category'], StructuredDataRule> = {
-  agents: {
-    schemaTypes: {
-      application: true,
-      sourceCode: true,
-      creativeWork: true,
-      howTo: true,
-      faq: true,
-      breadcrumb: true,
-      speakable: true,
-    },
-    extractors: {
-      applicationSubCategory: () => 'AI Agent',
-      keywords: (item) => [
-        'Claude Agent',
-        'AI Assistant Agent',
-        item.category,
-        'Claude',
-        ...(item.tags || []),
-      ],
-      requirements: () => ['Claude Desktop or Claude Code'],
-      configuration: (item) => (isAgentContent(item) ? item.configuration : undefined),
-      creativeWorkDescription: () => 'Agent system prompt and instructions',
-    },
-    categoryDisplayName: 'Agents',
-  },
-  commands: {
-    schemaTypes: {
-      sourceCode: true,
-      howTo: true,
-      faq: true,
-      breadcrumb: true,
-    },
-    extractors: {
-      applicationSubCategory: () => 'Claude Command',
-      keywords: (item) => [
-        'Claude Command',
-        'AI Assistant Command',
-        item.category,
-        'Claude',
-        ...(item.tags || []),
-      ],
-      requirements: () => ['Claude Desktop or Claude Code'],
-      configuration: (item) => (isCommandContent(item) ? item.configuration : undefined),
-      creativeWorkDescription: () => 'Command template',
-    },
-    categoryDisplayName: 'Commands',
-  },
-  collections: {
-    schemaTypes: {
-      howTo: true,
-      creativeWork: true,
-      faq: true,
-      breadcrumb: true,
-      collectionPage: true,
-    },
-    extractors: {
-      applicationSubCategory: () => 'Configuration Collection',
-      keywords: (item) => [
-        'Claude Collection',
-        'Configuration Bundle',
-        'Setup Package',
-        item.category,
-        'Claude',
-        ...(item.tags || []),
-      ],
-      requirements: (item) => {
-        const base = ['Claude Desktop or Claude Code'];
-        return isCollectionContent(item) && item.prerequisites
-          ? [...base, ...item.prerequisites]
-          : base;
-      },
-      configuration: () => undefined,
-      creativeWorkDescription: () => 'Curated collection of configurations',
-    },
-    categoryDisplayName: 'Collections',
-  },
-  hooks: {
-    schemaTypes: {
-      application: true,
-      sourceCode: true,
-      howTo: true,
-      breadcrumb: true,
-    },
-    extractors: {
-      applicationSubCategory: (item) =>
-        isHookContent(item) ? `${item.hookType || 'Hook'} - Claude Hook` : 'Claude Hook',
-      keywords: (item) => {
-        const hookType = isHookContent(item) ? item.hookType : undefined;
-        return [
-          'Claude Hook',
-          hookType || 'Hook',
-          'Automation',
-          item.category,
-          'Claude',
-          ...(item.tags || []),
-        ];
-      },
-      requirements: (item) => {
-        const base = ['Claude Desktop or Claude Code'];
-        return isHookContent(item) && item.requirements ? [...base, ...item.requirements] : base;
-      },
-      configuration: (item) => (isHookContent(item) ? item.configuration : undefined),
-      creativeWorkDescription: () => 'Hook automation script',
-    },
-    categoryDisplayName: 'Hooks',
-  },
-  mcp: {
-    schemaTypes: {
-      application: true,
-      sourceCode: true,
-      howTo: true,
-      faq: true,
-      breadcrumb: true,
-    },
-    extractors: {
-      applicationSubCategory: () => 'MCP Server',
-      keywords: (item) => [
-        'MCP Server',
-        'Model Context Protocol',
-        'AI Development',
-        item.category,
-        'Claude',
-        ...(item.tags || []),
-      ],
-      requirements: (item) => {
-        const base = ['Claude Desktop or Claude Code'];
-        return isMcpContent(item) && item.installation?.requirements
-          ? [...base, ...item.installation.requirements]
-          : base;
-      },
-      configuration: (item) => (isMcpContent(item) ? item.configuration : undefined),
-      creativeWorkDescription: () => 'MCP server configuration',
-    },
-    categoryDisplayName: 'MCP Servers',
-  },
-  rules: {
-    schemaTypes: {
-      application: true,
-      creativeWork: true,
-      howTo: true,
-      breadcrumb: true,
-      speakable: true,
-    },
-    extractors: {
-      applicationSubCategory: () => 'Development Rule',
-      keywords: (item) => [
-        'Development Rule',
-        'Code Standards',
-        'Best Practices',
-        item.category,
-        'Claude',
-        ...(item.tags || []),
-      ],
-      requirements: () => ['Claude Desktop or Claude Code'],
-      configuration: (item) => (isRuleContent(item) ? item.configuration : undefined),
-      creativeWorkDescription: () => 'Development rule and best practices',
-    },
-    categoryDisplayName: 'Rules',
-  },
-  statuslines: {
-    schemaTypes: {
-      application: true,
-      sourceCode: true,
-      howTo: true,
-      breadcrumb: true,
-    },
-    extractors: {
-      applicationSubCategory: (item) =>
-        isStatuslineContent(item)
-          ? `${item.statuslineType || 'Statusline'} - CLI Statusline`
-          : 'CLI Statusline',
-      keywords: (item) => {
-        const statuslineType = isStatuslineContent(item) ? item.statuslineType : undefined;
-        return [
-          'Claude Statusline',
-          'CLI Statusline',
-          'Terminal Customization',
-          statuslineType || 'Statusline',
-          item.category,
-          'Claude',
-          ...(item.tags || []),
-        ];
-      },
-      requirements: (item) => {
-        const base = ['Claude Desktop or Claude Code'];
-        return isStatuslineContent(item) && item.requirements
-          ? [...base, ...item.requirements]
-          : base;
-      },
-      configuration: (item) => (isStatuslineContent(item) ? item.configuration : undefined),
-      creativeWorkDescription: () => 'Statusline display script',
-    },
-    categoryDisplayName: 'Statuslines',
-  },
-  skills: {
-    schemaTypes: {
-      sourceCode: true,
-      howTo: true,
-      creativeWork: true,
-      faq: true,
-      breadcrumb: true,
-      speakable: true,
-    },
-    extractors: {
-      applicationSubCategory: () => 'Skill Guide',
-      keywords: (item) => [
-        'Claude Skill',
-        'Document Processing',
-        item.category,
-        'Claude',
-        ...(item.tags || []),
-      ],
-      requirements: (item) => (isSkillContent(item) && item.requirements ? item.requirements : []),
-      configuration: () => undefined,
-      creativeWorkDescription: () => 'Skill guide and examples',
-    },
-    categoryDisplayName: 'Skills',
-  },
-};
-
-/**
- * generateAllSchemasForContent()
- * Central orchestrator for schema generation - replaces scattered inline logic
- * Configuration-driven approach using STRUCTURED_DATA_RULES
- */
-export function generateAllSchemasForContent(item: UnifiedContent): SchemaObject[] {
+export async function generateAllSchemasForContent(item: UnifiedContent): Promise<SchemaObject[]> {
   const schemas: SchemaObject[] = [];
-  const rules = STRUCTURED_DATA_RULES[item.category];
+  const supabase = await createClient();
 
-  // Type-safe property access
+  const { data: config } = await supabase.rpc('get_structured_data_config', {
+    p_category: item.category,
+  });
+
+  if (!config) return schemas;
+
+  const dbConfig = config as unknown as {
+    schemaTypes: {
+      application: boolean;
+      sourceCode: boolean;
+      howTo: boolean;
+      creativeWork: boolean;
+      faq: boolean;
+      breadcrumb: boolean;
+      speakable: boolean;
+    };
+    categoryDisplayName: string;
+    applicationSubCategory: string;
+    defaultKeywords: string[];
+    defaultRequirements: string[];
+    creativeWorkDescription: string;
+  };
+
   const itemTitle = 'title' in item ? (item.title as string | undefined) : undefined;
   const itemName = 'name' in item ? (item.name as string | undefined) : undefined;
   const itemGithubUrl = 'githubUrl' in item ? (item.githubUrl as string | undefined) : undefined;
@@ -473,101 +119,140 @@ export function generateAllSchemasForContent(item: UnifiedContent): SchemaObject
   const displayName = itemTitle || itemName || item.slug;
   const displayTitle = itemTitle || itemName || item.slug;
 
-  // 1. SoftwareApplication Schema
-  if (rules.schemaTypes.application) {
+  const itemTags = Array.isArray(item.tags) ? item.tags : [];
+  const keywords = [
+    ...(Array.isArray(dbConfig.defaultKeywords) ? (dbConfig.defaultKeywords as string[]) : []),
+    item.category,
+    ...itemTags,
+  ];
+
+  // Extract category-specific fields from metadata JSONB
+  const metadata = ('metadata' in item && (item.metadata as Record<string, unknown>)) || {};
+
+  let requirements = [
+    ...(Array.isArray(dbConfig.defaultRequirements)
+      ? (dbConfig.defaultRequirements as string[])
+      : []),
+  ];
+  if (
+    isCollectionContent(item) &&
+    metadata.prerequisites &&
+    Array.isArray(metadata.prerequisites)
+  ) {
+    requirements = [...requirements, ...(metadata.prerequisites as string[])];
+  } else if (isHookContent(item) && metadata.requirements && Array.isArray(metadata.requirements)) {
+    requirements = [...requirements, ...(metadata.requirements as string[])];
+  } else if (isMcpContent(item)) {
+    const installation = metadata.installation as { requirements?: string[] } | null;
+    if (installation?.requirements && Array.isArray(installation.requirements)) {
+      requirements = [...requirements, ...installation.requirements];
+    }
+  } else if (isStatuslineContent(item)) {
+    const skillReqs = metadata.requirements;
+    if (Array.isArray(skillReqs)) {
+      requirements = [...requirements, ...(skillReqs as string[])];
+    }
+  } else if (isSkillContent(item)) {
+    const skillReqs = metadata.requirements;
+    if (Array.isArray(skillReqs)) {
+      requirements = skillReqs as string[];
+    }
+  }
+
+  let configuration: unknown;
+  if (isAgentContent(item) || isCommandContent(item) || isRuleContent(item)) {
+    configuration = metadata.configuration;
+  } else if (isHookContent(item) || isMcpContent(item) || isStatuslineContent(item)) {
+    configuration = metadata.configuration;
+  }
+
+  if (dbConfig.schemaTypes.application) {
     schemas.push(
       buildSoftwareApplication({
         slug: item.slug,
         name: displayName,
         description: item.description,
         category: item.category,
-        applicationSubCategory: rules.extractors.applicationSubCategory(item),
-        keywords: rules.extractors.keywords(item),
-        author: item.author,
+        applicationSubCategory: dbConfig.applicationSubCategory,
+        keywords: keywords as string[],
+        author: 'author' in item ? (item.author as string) : '',
         githubUrl: itemGithubUrl,
-        dateAdded: item.dateAdded,
+        date_added: 'date_added' in item ? (item.date_added as string) : '',
         lastModified: itemLastModified,
         features: itemFeatures,
-        requirements: rules.extractors.requirements(item),
-        configuration: rules.extractors.configuration(item),
+        requirements,
+        configuration,
       })
     );
   }
 
-  // 2. SoftwareSourceCode Schema(s)
-  if (rules.schemaTypes.sourceCode) {
-    schemas.push(...generateSourceCodeSchemas(item, displayName, itemGithubUrl));
+  if (dbConfig.schemaTypes.sourceCode) {
+    schemas.push(...(await generateSourceCodeSchemas(item, displayName, itemGithubUrl)));
   }
 
-  // 3. CreativeWork Schema
-  if (rules.schemaTypes.creativeWork && item.content) {
+  const itemContent = 'content' in item ? (item.content as string | null) : null;
+  if (dbConfig.schemaTypes.creativeWork && itemContent) {
     schemas.push(
       buildCreativeWork({
         slug: item.slug,
         category: item.category,
         name: displayName,
-        description: rules.extractors.creativeWorkDescription(item),
-        content: item.content,
-        author: item.author,
+        description: dbConfig.creativeWorkDescription,
+        content: itemContent,
+        author: 'author' in item ? (item.author as string) : '',
       })
     );
   }
 
-  // 4. HowTo Schema
-  if (rules.schemaTypes.howTo) {
+  if (dbConfig.schemaTypes.howTo) {
     schemas.push(
       buildHowTo({
         slug: item.slug,
         category: item.category,
         name: displayName,
         description: `Step-by-step guide to implement ${displayName}`,
-        steps: generateHowToSteps(item, displayName, rules.categoryDisplayName),
+        steps: generateHowToSteps(item, displayName, dbConfig.categoryDisplayName),
       })
     );
   }
 
-  // 5. FAQPage Schema
-  if (rules.schemaTypes.faq && hasContentTroubleshooting(item) && item.troubleshooting.length > 0) {
-    schemas.push(
-      buildFAQPage(item.slug, item.category, displayName, item.troubleshooting as FAQItem[])
-    );
+  if (dbConfig.schemaTypes.faq && hasContentTroubleshooting(item)) {
+    const troubleshooting =
+      'troubleshooting' in item ? (item.troubleshooting as unknown as FAQItem[]) : undefined;
+    if (Array.isArray(troubleshooting) && troubleshooting.length > 0) {
+      schemas.push(buildFAQPage(item.slug, item.category, displayName, troubleshooting));
+    }
   }
 
-  // 6. Breadcrumb Schema
-  if (rules.schemaTypes.breadcrumb) {
+  if (dbConfig.schemaTypes.breadcrumb) {
     schemas.push(
       buildBreadcrumb([
         { name: 'Home', url: '/' },
-        { name: rules.categoryDisplayName, url: `/${item.category}` },
+        { name: dbConfig.categoryDisplayName, url: `/${item.category}` },
         {
           name: displayTitle,
-          url: getContentItemUrl({ category: item.category, slug: item.slug }),
+          url: getContentItemUrl({ category: item.category as CategoryId, slug: item.slug }),
         },
       ])
     );
   }
 
-  // 7. WebPage Speakable Schema
-  if (rules.schemaTypes.speakable) {
+  if (dbConfig.schemaTypes.speakable) {
     schemas.push(buildWebPageSpeakable(item.slug, item.category));
   }
 
   return schemas;
 }
 
-/**
- * Helper: Generate source code schemas for all content types
- * Centralized from scattered inline logic in unified-structured-data.tsx
- */
-function generateSourceCodeSchemas(
+async function generateSourceCodeSchemas(
   item: UnifiedContent,
   displayName: string,
   githubUrl?: string
-): SchemaObject[] {
+): Promise<SchemaObject[]> {
   const schemas: SchemaObject[] = [];
+  const metadata = ('metadata' in item && (item.metadata as Record<string, unknown>)) || {};
 
-  // Agent configuration
-  if (isAgentContent(item) && item.configuration) {
+  if (isAgentContent(item) && metadata.configuration) {
     schemas.push(
       buildSoftwareSourceCode({
         slug: item.slug,
@@ -575,7 +260,7 @@ function generateSourceCodeSchemas(
         name: `${displayName} - Configuration`,
         description: 'Agent configuration for Claude',
         programmingLanguage: 'JSON',
-        code: JSON.stringify(item.configuration, null, 2),
+        code: JSON.stringify(metadata.configuration, null, 2),
         encodingFormat: 'application/json',
         githubUrl,
         fragmentId: 'configuration',
@@ -583,7 +268,6 @@ function generateSourceCodeSchemas(
     );
   }
 
-  // Command content
   if (isCommandContent(item) && item.content) {
     schemas.push(
       buildSoftwareSourceCode({
@@ -600,45 +284,50 @@ function generateSourceCodeSchemas(
     );
   }
 
-  // Hook script
-  if (isHookContent(item) && item.configuration?.scriptContent) {
-    schemas.push(
-      buildSoftwareSourceCode({
-        slug: item.slug,
-        category: item.category,
-        name: `${displayName} - Script`,
-        description: `${item.hookType || 'Hook'} script for Claude`,
-        programmingLanguage: 'Shell Script',
-        code: item.configuration.scriptContent,
-        encodingFormat: 'text/x-shellscript',
-        githubUrl,
-        fragmentId: 'script',
-      })
-    );
-
-    if (item.configuration.hookConfig) {
+  if (isHookContent(item) && metadata.configuration) {
+    const config = metadata.configuration as { scriptContent?: string; hookConfig?: unknown };
+    const hookType = metadata.hook_type as string | undefined;
+    if (config.scriptContent) {
       schemas.push(
         buildSoftwareSourceCode({
           slug: item.slug,
           category: item.category,
-          name: `${displayName} - Configuration`,
-          description: 'Hook configuration',
-          programmingLanguage: 'JSON',
-          code: JSON.stringify(item.configuration.hookConfig, null, 2),
-          encodingFormat: 'application/json',
+          name: `${displayName} - Script`,
+          description: `${hookType || 'Hook'} script for Claude`,
+          programmingLanguage: 'Shell Script',
+          code: config.scriptContent,
+          encodingFormat: 'text/x-shellscript',
           githubUrl,
-          fragmentId: 'config',
+          fragmentId: 'script',
         })
       );
+
+      if (config.hookConfig) {
+        schemas.push(
+          buildSoftwareSourceCode({
+            slug: item.slug,
+            category: item.category,
+            name: `${displayName} - Configuration`,
+            description: 'Hook configuration',
+            programmingLanguage: 'JSON',
+            code: JSON.stringify(config.hookConfig, null, 2),
+            encodingFormat: 'application/json',
+            githubUrl,
+            fragmentId: 'config',
+          })
+        );
+      }
     }
   }
 
-  // MCP configurations
-  if (isMcpContent(item)) {
-    if (item.configuration?.claudeDesktop) {
-      const displayConfig = transformMcpConfigForDisplay(
-        item.configuration.claudeDesktop as Record<string, unknown>
-      );
+  if (isMcpContent(item) && metadata.configuration) {
+    const config = metadata.configuration as {
+      claudeDesktop?: Record<string, unknown>;
+      claudeCode?: Record<string, unknown>;
+    };
+
+    if (config.claudeDesktop) {
+      const displayConfig = transformMcpConfigForDisplay(config.claudeDesktop);
 
       schemas.push(
         buildSoftwareSourceCode({
@@ -655,10 +344,8 @@ function generateSourceCodeSchemas(
       );
     }
 
-    if (item.configuration?.claudeCode) {
-      const displayConfig = transformMcpConfigForDisplay(
-        item.configuration.claudeCode as Record<string, unknown>
-      );
+    if (config.claudeCode) {
+      const displayConfig = transformMcpConfigForDisplay(config.claudeCode);
 
       schemas.push(
         buildSoftwareSourceCode({
@@ -676,18 +363,20 @@ function generateSourceCodeSchemas(
     }
   }
 
-  // Statusline script
   if (isStatuslineContent(item) && item.content) {
+    const config = metadata.configuration as { format?: string } | null;
+    const statuslineType = metadata.statusline_type as string | undefined;
+    const isPython = config?.format === 'python';
+
     schemas.push(
       buildSoftwareSourceCode({
         slug: item.slug,
         category: item.category,
         name: `${displayName} - Script`,
-        description: `${item.statuslineType || 'Statusline'} script for Claude Code`,
-        programmingLanguage: item.configuration?.format === 'python' ? 'Python' : 'Shell Script',
+        description: `${statuslineType || 'Statusline'} script for Claude Code`,
+        programmingLanguage: isPython ? 'Python' : 'Shell Script',
         code: item.content,
-        encodingFormat:
-          item.configuration?.format === 'python' ? 'text/x-python' : 'text/x-shellscript',
+        encodingFormat: isPython ? 'text/x-python' : 'text/x-shellscript',
         githubUrl,
         fragmentId: 'script',
       })
@@ -697,15 +386,13 @@ function generateSourceCodeSchemas(
   return schemas;
 }
 
-/**
- * Helper: Generate HowTo steps for all content types
- * Centralized from scattered inline logic in unified-structured-data.tsx
- */
 function generateHowToSteps(
   item: UnifiedContent,
   displayName: string,
   categoryDisplayName: string
 ) {
+  const metadata = ('metadata' in item && (item.metadata as Record<string, unknown>)) || {};
+
   const baseSteps = [
     {
       position: 1,
@@ -720,7 +407,9 @@ function generateHowToSteps(
   ];
 
   if (isAgentContent(item) || isCommandContent(item) || isRuleContent(item)) {
-    const configCode = item.configuration ? JSON.stringify(item.configuration, null, 2) : undefined;
+    const configCode = metadata.configuration
+      ? JSON.stringify(metadata.configuration, null, 2)
+      : undefined;
     baseSteps.push({
       position: 3,
       name: 'Apply configuration',
@@ -730,7 +419,8 @@ function generateHowToSteps(
   }
 
   if (isHookContent(item)) {
-    const scriptContent = item.configuration?.scriptContent;
+    const config = metadata.configuration as { scriptContent?: string } | null;
+    const scriptContent = config?.scriptContent;
     baseSteps.push({
       position: 3,
       name: 'Create hook script',
@@ -743,11 +433,13 @@ function generateHowToSteps(
   }
 
   if (isMcpContent(item)) {
+    const installation = metadata.installation as { claudeCode?: string } | null;
+    const packageName = metadata.package as string | undefined;
     const installText =
-      typeof item.installation?.claudeCode === 'string'
-        ? item.installation.claudeCode
-        : item.package
-          ? `npm install ${item.package}`
+      typeof installation?.claudeCode === 'string'
+        ? installation.claudeCode
+        : packageName
+          ? `npm install ${packageName}`
           : 'Install the MCP server package';
     baseSteps.push({
       position: 3,

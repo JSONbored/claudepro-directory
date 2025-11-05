@@ -66,7 +66,7 @@ import {
   TooltipTrigger,
 } from '@/src/components/primitives/tooltip';
 import type { LucideIcon } from '@/src/lib/icons';
-import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
+import { nonEmptyString } from '@/src/lib/schemas/primitives';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
@@ -103,37 +103,31 @@ export function CategoryNavigationCard({
   categories,
   basePath = '/guides',
 }: CategoryNavigationCardProps) {
-  // Validate props
-  const validatedProps = categoryNavigationCardPropsSchema.parse({
-    currentCategory,
-    categories,
-    basePath,
-  });
-
+  // Database CHECK constraint validates structure - no runtime validation needed
   return (
     <TooltipProvider delayDuration={300}>
       <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} px-1`}>
-        {Object.entries(validatedProps.categories).map(([key, info]) => {
+        {Object.entries(categories).map(([key, info]) => {
           const Icon = info.icon;
-          const isActive = validatedProps.currentCategory === key;
+          const isActive = currentCategory === key;
 
           return (
             <Tooltip key={key}>
               <TooltipTrigger asChild>
                 <Link
-                  href={`${validatedProps.basePath}/${key}`}
-                  className={`p-2 rounded-lg transition-all duration-200 ${
+                  href={`${basePath}/${key}`}
+                  className={`rounded-lg p-2 transition-all duration-200 ${
                     isActive
-                      ? info.activeColor || 'text-primary bg-primary/10'
-                      : `text-muted-foreground ${info.color || 'hover:text-primary hover:bg-muted/50'}`
+                      ? info.activeColor || 'bg-primary/10 text-primary'
+                      : `text-muted-foreground ${info.color || 'hover:bg-muted/50 hover:text-primary'}`
                   }`}
                 >
                   <Icon className="h-4 w-4" />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs max-w-[200px]">
+              <TooltipContent side="bottom" className="max-w-[200px] text-xs">
                 <div className="font-semibold">{info.label}</div>
-                <div className="text-muted-foreground mt-0.5">{info.description}</div>
+                <div className="mt-0.5 text-muted-foreground">{info.description}</div>
               </TooltipContent>
             </Tooltip>
           );

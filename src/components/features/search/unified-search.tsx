@@ -1,18 +1,12 @@
 'use client';
 
 /**
- * Unified Search Component (SHA-2087 Refactored)
- *
- * CONSOLIDATION: Now uses shared hook and filter panel component
- * - useUnifiedSearch hook for state management (~80 lines removed)
- * - SearchFilterPanel for filter UI (~200 lines removed)
- *
- * Previous: 420 lines of duplicated logic
- * Current: 180 lines (57% reduction)
+ * Unified Search Component - Database-First Architecture
+ * Search UI with filters. Analytics tracked via server action.
  */
 
 import { usePathname } from 'next/navigation';
-import { useCallback, useEffect, useId, useState } from 'react';
+import { memo, useCallback, useEffect, useId, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
@@ -29,19 +23,15 @@ import {
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/schemas/component.schema';
-import { sanitizers } from '@/src/lib/security/validators-sync';
-
 import { cn } from '@/src/lib/utils';
 
-// Re-export FilterState for backward compatibility
 export type { FilterState };
 
-// SearchErrorFallback component moved outside to avoid recreation on every render
 const SearchErrorFallback = () => (
   <div className="p-4 text-center text-muted-foreground">Error loading search</div>
 );
 
-export function UnifiedSearch({
+function UnifiedSearchComponent({
   placeholder = 'Search...',
   onSearch,
   onFiltersChange,
@@ -57,7 +47,6 @@ export function UnifiedSearch({
   const [announcement, setAnnouncement] = useState('');
   const pathname = usePathname();
 
-  // Use consolidated search hook
   const {
     filters,
     isFilterOpen,
@@ -69,70 +58,71 @@ export function UnifiedSearch({
     setIsFilterOpen,
   } = useUnifiedSearch({
     initialSort: initialFilters?.sort || 'trending',
-    onFiltersChange,
+    ...(onFiltersChange && { onFiltersChange }),
   });
 
-  // Generate unique IDs
   const searchInputId = useId();
   const searchResultsId = useId();
   const filterPanelId = useId();
   const sortSelectId = useId();
 
-  // Debounced search with sanitization and analytics tracking
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Use sync version for client-side sanitization
-      const sanitized = sanitizers.sanitizeSearchQuerySync(localSearchQuery);
-      onSearch(sanitized);
+      const sanitized = localSearchQuery.trim().slice(0, 100);
+      onSearch?.(sanitized);
+    }, 150);
 
-      // Track search event with context-specific analytics (only for non-empty queries)
+    return () => clearTimeout(timer);
+  }, [localSearchQuery, onSearch]);
+
+  useEffect(() => {
+    if (!localSearchQuery || localSearchQuery.length === 0) {
+      return;
+    }
+
+    const analyticsTimer = setTimeout(() => {
+      const sanitized = localSearchQuery.trim().slice(0, 100);
       if (sanitized && sanitized.length > 0) {
         const category = pathname?.split('/')[1] || 'global';
 
-        // Dynamic imports to avoid server-only module issues in Storybook
-        Promise.all([import('#lib/analytics/event-mapper'), import('#lib/analytics/tracker')])
-          .then(([{ getSearchEvent }, { trackEvent }]) => {
-            const eventName = getSearchEvent(category);
-            trackEvent(eventName, {
-              query: sanitized.substring(0, 100), // Truncate for privacy
-              results_count: resultCount,
-              filters_applied: activeFilterCount > 0,
-              time_to_results: 0, // Could add performance timing if needed
-            });
-          })
+        import('@/src/lib/analytics/client')
+          .then((module) =>
+            module.trackInteraction({
+              interaction_type: 'click',
+              content_type: category,
+              content_slug: `search:${sanitized}`,
+              metadata: {
+                resultsCount: resultCount,
+                filtersApplied: activeFilterCount > 0,
+              },
+            })
+          )
           .catch(() => {
-            // Silent fail in Storybook - analytics not critical for component rendering
+            // Intentional
           });
       }
-    }, 300);
+    }, 500);
 
-    return () => clearTimeout(timer);
-  }, [localSearchQuery, onSearch, resultCount, pathname, activeFilterCount]);
+    return () => clearTimeout(analyticsTimer);
+  }, [localSearchQuery, resultCount, pathname, activeFilterCount]);
 
-  // Update ARIA live announcement for all search result scenarios
   useEffect(() => {
     if (!localSearchQuery) {
-      // Search cleared
       setAnnouncement('Search cleared. Showing all results.');
     } else if (resultCount === 0) {
-      // No results found
       setAnnouncement(`No results found for "${localSearchQuery}".`);
     } else if (resultCount === 1) {
-      // Single result
       setAnnouncement(`1 result found for "${localSearchQuery}".`);
     } else {
-      // Multiple results
       setAnnouncement(`${resultCount} results found for "${localSearchQuery}".`);
     }
   }, [localSearchQuery, resultCount]);
 
-  // Apply filters and close panel
   const applyFilters = useCallback(() => {
     handleFiltersChange(filters);
     setIsFilterOpen(false);
   }, [filters, handleFiltersChange, setIsFilterOpen]);
 
-  // Handle sort change directly (no need to apply)
   const handleSortChange = useCallback(
     (value: FilterState['sort']) => {
       const newFilters = { ...filters, sort: value || 'trending' };
@@ -144,10 +134,9 @@ export function UnifiedSearch({
   return (
     <ErrorBoundary fallback={SearchErrorFallback}>
       <search className={cn('w-full space-y-4', className)}>
-        {/* Search Bar */}
         <div className="space-y-3">
           <div className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+            <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-4 z-10">
               <Search className="h-5 w-5 text-accent" aria-hidden="true" />
             </div>
             <Input
@@ -158,7 +147,7 @@ export function UnifiedSearch({
               onChange={(e) => setLocalSearchQuery(e.target.value)}
               placeholder={placeholder}
               className={
-                'pl-12 pr-4 h-14 text-base bg-card/50 backdrop-blur-sm border-border/50 focus:border-accent/50 focus:bg-card transition-smooth w-full'
+                'h-14 w-full border-border/50 bg-card/50 pr-4 pl-12 text-base backdrop-blur-sm transition-smooth focus:border-accent/50 focus:bg-card'
               }
               aria-label="Search configurations"
               aria-describedby={resultCount > 0 && localSearchQuery ? searchResultsId : undefined}
@@ -166,10 +155,8 @@ export function UnifiedSearch({
             />
           </div>
 
-          {/* Sort and Filter Controls */}
           {showFilters && (
-            <div className={'flex gap-2 justify-end'}>
-              {/* Sort Dropdown styled as button */}
+            <div className={'flex justify-end gap-2'}>
               <Select
                 value={filters.sort || 'trending'}
                 onValueChange={(value) => handleSortChange(value as FilterState['sort'])}
@@ -178,7 +165,7 @@ export function UnifiedSearch({
                 <SelectTrigger
                   id={sortSelectId}
                   className={
-                    'w-auto h-10 px-4 bg-background border-border hover:bg-accent/10 transition-smooth'
+                    'h-10 w-auto border-border bg-background px-4 transition-smooth hover:bg-accent/10'
                   }
                   aria-label="Sort configurations"
                 >
@@ -192,14 +179,13 @@ export function UnifiedSearch({
                 </SelectContent>
               </Select>
 
-              {/* Filter Button */}
               <Button
                 variant="outline"
                 size="default"
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                 className={cn(
-                  'h-10 px-4 gap-2 transition-smooth',
-                  isFilterOpen && 'bg-accent/10 border-accent'
+                  'h-10 gap-2 px-4 transition-smooth',
+                  isFilterOpen && 'border-accent bg-accent/10'
                 )}
                 aria-expanded={isFilterOpen}
                 aria-controls={filterPanelId}
@@ -211,31 +197,29 @@ export function UnifiedSearch({
                   <UnifiedBadge
                     variant="base"
                     style="secondary"
-                    className="ml-1 px-1.5 py-0 h-5"
+                    className="ml-1 h-5 px-1.5 py-0"
                     aria-label={`${activeFilterCount} active filters`}
                   >
                     {activeFilterCount}
                   </UnifiedBadge>
                 )}
                 {isFilterOpen ? (
-                  <ChevronUp className="h-3 w-3 ml-1" aria-hidden="true" />
+                  <ChevronUp className="ml-1 h-3 w-3" aria-hidden="true" />
                 ) : (
-                  <ChevronDown className="h-3 w-3 ml-1" aria-hidden="true" />
+                  <ChevronDown className="ml-1 h-3 w-3" aria-hidden="true" />
                 )}
               </Button>
             </div>
           )}
         </div>
 
-        {/* Comprehensive ARIA live announcements for all search scenarios */}
         <div
-          className={'text-sm text-muted-foreground'}
+          className={'text-muted-foreground text-sm'}
           id={searchResultsId}
           aria-live="polite"
           aria-atomic="true"
         >
           {announcement && <span className="sr-only">{announcement}</span>}
-          {/* Visual display (different from screen reader announcement) */}
           {localSearchQuery && resultCount > 0 && (
             <span aria-hidden="true">
               {resultCount} {resultCount === 1 ? 'result' : 'results'} found
@@ -246,7 +230,6 @@ export function UnifiedSearch({
           )}
         </div>
 
-        {/* Collapsible Filter Panel */}
         <Collapsible open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <CollapsibleContent>
             <section id={filterPanelId} aria-label="Filter options">
@@ -270,3 +253,19 @@ export function UnifiedSearch({
     </ErrorBoundary>
   );
 }
+
+export const UnifiedSearch = memo(UnifiedSearchComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.placeholder === nextProps.placeholder &&
+    prevProps.resultCount === nextProps.resultCount &&
+    prevProps.className === nextProps.className &&
+    prevProps.showFilters === nextProps.showFilters &&
+    JSON.stringify(prevProps.availableTags) === JSON.stringify(nextProps.availableTags) &&
+    JSON.stringify(prevProps.availableAuthors) === JSON.stringify(nextProps.availableAuthors) &&
+    JSON.stringify(prevProps.availableCategories) ===
+      JSON.stringify(nextProps.availableCategories) &&
+    JSON.stringify(prevProps.filters) === JSON.stringify(nextProps.filters)
+  );
+});
+
+UnifiedSearch.displayName = 'UnifiedSearch';

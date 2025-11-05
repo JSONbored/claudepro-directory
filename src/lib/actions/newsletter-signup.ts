@@ -1,58 +1,47 @@
 'use server';
 
-import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { newsletterSignupSchema } from '@/src/lib/schemas/newsletter.schema';
-import { emailOrchestrationService } from '@/src/lib/services/email-orchestration.server';
-
 /**
- * Newsletter signup server action
- * SHA-3151: Refactored to use unified email orchestration service
- *
- * Features:
- * - Rate limited: 5 requests per 300 seconds (5 minutes) per IP to prevent spam
- * - Automatic Zod validation for email format
- * - Centralized error handling and logging via middleware
- * - Type-safe with full TypeScript inference
- * - Idempotent: duplicate signups return success
- * - Full orchestration: subscription + welcome email + sequence enrollment
- *
- * Usage:
- * ```tsx
- * const result = await subscribeToNewsletter({
- *   email: 'user@example.com',
- *   source: 'footer'
- * });
- *
- * if (result?.data?.success) {
- *   toast.success('Subscribed!');
- * } else {
- *   toast.error(result?.serverError || 'Failed to subscribe');
- * }
- * ```
- *
- * Rate Limit: 5 signups per 5 minutes per IP
- * - Stricter than default (100 req/60s) to prevent newsletter spam
- * - Allows legitimate retries while blocking abuse
+ * Newsletter Signup - Database-First Architecture
+ * Database trigger handles: welcome email + sequence enrollment
  */
+
+import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { logger } from '@/src/lib/logger';
+import { publicNewsletterSubscriptionsInsertSchema } from '@/src/lib/schemas/generated/db-schemas';
+import { normalizeEmail } from '@/src/lib/schemas/primitives/sanitization-transforms';
+import { createClient } from '@/src/lib/supabase/server';
+
 export const subscribeToNewsletter = rateLimitedAction
-  .metadata({
-    actionName: 'subscribeToNewsletter',
-    category: 'form',
-    rateLimit: {
-      maxRequests: 5,
-      windowSeconds: 300, // 5 minutes
-    },
-  })
-  .schema(newsletterSignupSchema)
+  .metadata({ actionName: 'subscribeToNewsletter', category: 'form' })
+  .schema(
+    publicNewsletterSubscriptionsInsertSchema.pick({
+      email: true,
+      source: true,
+      referrer: true,
+    })
+  )
   .action(async ({ parsedInput: { email, source, referrer } }) => {
-    // Use unified orchestration service
-    return await emailOrchestrationService.subscribeWithOrchestration({
-      email,
-      metadata: {
-        ...(source && { source }),
-        ...(referrer && { referrer }),
-      },
-      includeCopyAnalytics: false,
-      logContext: ' (newsletter)',
-    });
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from('newsletter_subscriptions')
+        .insert({
+          email: normalizeEmail(email),
+          source: source ?? null,
+          referrer: referrer ?? null,
+        })
+        .select()
+        .single();
+
+      if (error) throw new Error(error.message);
+      return data;
+      // Database trigger automatically handles: welcome email + sequence enrollment
+    } catch (error) {
+      logger.error(
+        'Failed to subscribe to newsletter',
+        error instanceof Error ? error : new Error(String(error)),
+        { email, source: source || 'unknown', referrer: referrer || 'unknown' }
+      );
+      throw error;
+    }
   });

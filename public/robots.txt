@@ -8,9 +8,6 @@
 # OpenAI GPTBot - ChatGPT Search & Training Data Collection
 User-agent: GPTBot
 Allow: /
-Allow: /api-docs
-Allow: /openapi.json
-Allow: /.well-known/api-catalog
 Allow: /llms.txt
 Allow: /*/llms.txt
 Allow: /*/*/llms.txt
@@ -18,8 +15,6 @@ Allow: /*/*/llms.txt
 # OpenAI SearchBot - ChatGPT Browse Feature
 User-agent: OAI-SearchBot
 Allow: /
-Allow: /api-docs
-Allow: /openapi.json
 Allow: /llms.txt
 Allow: /*/llms.txt
 Allow: /*/*/llms.txt
@@ -27,8 +22,6 @@ Allow: /*/*/llms.txt
 # ChatGPT User - Direct ChatGPT User Queries
 User-agent: ChatGPT-User
 Allow: /
-Allow: /api-docs
-Allow: /openapi.json
 Allow: /llms.txt
 Allow: /*/llms.txt
 Allow: /*/*/llms.txt
@@ -36,9 +29,6 @@ Allow: /*/*/llms.txt
 # Perplexity AI - Perplexity Search Engine
 User-agent: PerplexityBot
 Allow: /
-Allow: /api-docs
-Allow: /openapi.json
-Allow: /.well-known/api-catalog
 Allow: /changelog
 Allow: /changelog/*
 Allow: /changelog/rss.xml
@@ -50,9 +40,6 @@ Allow: /*/*/llms.txt
 # Anthropic Claude - ClaudeBot Crawler
 User-agent: ClaudeBot
 Allow: /
-Allow: /api-docs
-Allow: /openapi.json
-Allow: /.well-known/api-catalog
 Allow: /llms.txt
 Allow: /*/llms.txt
 Allow: /*/*/llms.txt
@@ -60,8 +47,6 @@ Allow: /*/*/llms.txt
 # Google Gemini - Google AI Crawler
 User-agent: Google-Extended
 Allow: /
-Allow: /api-docs
-Allow: /openapi.json
 Allow: /llms.txt
 Allow: /*/llms.txt
 Allow: /*/*/llms.txt
@@ -85,12 +70,6 @@ Allow: /trending*
 Allow: /community*
 Allow: /jobs*
 Allow: /tools*
-
-# API Documentation & Discovery (RFC 9727, OpenAPI 3.1)
-Allow: /api-docs*
-Allow: /api-docs-static.html
-Allow: /openapi.json
-Allow: /.well-known/api-catalog
 
 # API endpoints (allow for better indexing of JSON-LD structured data)
 Allow: /api/*

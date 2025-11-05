@@ -21,14 +21,13 @@
  */
 
 import { useEffect } from 'react';
-import { EVENTS } from '@/src/lib/analytics/events.constants';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 
 export function PwaInstallTracker() {
   useEffect(() => {
     // Track when PWA becomes installable
     const handleInstallable = () => {
-      trackEvent(EVENTS.PWA_INSTALLABLE, {
+      trackEvent('pwa_installable', {
         platform: navigator.platform || 'unknown',
         user_agent: navigator.userAgent,
       });
@@ -36,7 +35,7 @@ export function PwaInstallTracker() {
 
     // Track successful installation
     const handleInstalled = () => {
-      trackEvent(EVENTS.PWA_INSTALLED, {
+      trackEvent('pwa_installed', {
         platform: navigator.platform || 'unknown',
         timestamp: new Date().toISOString(),
       });
@@ -45,7 +44,7 @@ export function PwaInstallTracker() {
     // Track standalone launch (from home screen)
     const handleStandaloneLaunch = () => {
       if (window.matchMedia('(display-mode: standalone)').matches) {
-        trackEvent(EVENTS.PWA_LAUNCHED, {
+        trackEvent('pwa_launched', {
           platform: navigator.platform || 'unknown',
           timestamp: new Date().toISOString(),
         });

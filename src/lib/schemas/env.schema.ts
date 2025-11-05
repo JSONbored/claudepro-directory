@@ -5,7 +5,7 @@
  */
 
 import { z } from 'zod';
-import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives/base-strings';
+import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives';
 
 // Logger import - must be lazy to avoid circular dependency during env initialization
 function getLogger(): {
@@ -42,14 +42,6 @@ const serverEnvSchema = z
       .enum(['development', 'production', 'test'])
       .default('development')
       .describe('Application runtime environment mode'),
-
-    // Redis/Upstash configuration
-    KV_REST_API_URL: urlString
-      .optional()
-      .describe('Upstash Redis REST API endpoint URL for key-value storage'),
-    KV_REST_API_TOKEN: nonEmptyString
-      .optional()
-      .describe('Authentication token for Upstash Redis REST API'),
 
     // Arcjet security - Required in production for rate limiting and DDoS protection
     ARCJET_KEY: nonEmptyString
@@ -124,6 +116,15 @@ const serverEnvSchema = z
       .min(32)
       .optional()
       .describe('Secret key for cron job authorization (minimum 32 characters)'),
+
+    // ISR revalidation security
+    REVALIDATE_SECRET: z
+      .string()
+      .min(32)
+      .optional()
+      .describe(
+        'Secret key for on-demand ISR revalidation from Supabase webhooks (minimum 32 characters)'
+      ),
 
     // BetterStack Heartbeat Monitoring (optional - for cron job health monitoring)
     BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE: urlString

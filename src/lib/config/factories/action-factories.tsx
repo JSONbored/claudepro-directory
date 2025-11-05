@@ -21,16 +21,18 @@
  */
 
 import type { ReactNode } from 'react';
-import { BookOpen, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import { SOCIAL_LINKS } from '@/src/lib/constants';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { Download, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
+
 import type { ActionButtonConfig } from '@/src/lib/types/content-type-config';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 /**
  * Content extractor function type
- * Extracts content string from UnifiedContentItem for copying
+ * Extracts content string from ContentItem for copying
  */
-export type ContentExtractor = (item: UnifiedContentItem) => string;
+export type ContentExtractor = (item: ContentItem) => string;
 
 /**
  * Create a copy-to-clipboard action handler
@@ -67,7 +69,7 @@ export function createCopyAction(
   return {
     label,
     icon,
-    handler: async (item: UnifiedContentItem) => {
+    handler: async (item: ContentItem) => {
       const content = contentExtractor(item);
       await navigator.clipboard.writeText(content);
       toasts.raw.success(successTitle, {
@@ -154,6 +156,44 @@ export function createNotificationAction(
 }
 
 /**
+ * Create a download file action handler
+ *
+ * Triggers browser download of a file using window.location.href.
+ * Used for downloadable assets like skill ZIP packages.
+ *
+ * @param label - Button label text (e.g., "Download Skill")
+ * @param icon - React icon component to display
+ * @param pathTemplate - Download path template with {slug} placeholder
+ * @returns ActionButtonConfig with download handler
+ *
+ * @example
+ * ```tsx
+ * // skills category
+ * primaryAction: createDownloadAction(
+ *   'Download Skill',
+ *   <Download className={`h-4 w-4 mr-2`} />,
+ *   '/downloads/skills/{slug}.zip'
+ * )
+ * ```
+ */
+export function createDownloadAction(
+  label: string,
+  icon: ReactNode,
+  pathTemplate: string
+): ActionButtonConfig {
+  return {
+    label,
+    icon,
+    handler: (item: ContentItem) => {
+      if ('slug' in item && item.slug) {
+        const downloadPath = pathTemplate.replace('{slug}', item.slug);
+        window.location.href = downloadPath;
+      }
+    },
+  };
+}
+
+/**
  * Create a GitHub link action handler
  *
  * Standardizes GitHub repository link opening pattern.
@@ -166,23 +206,25 @@ export function createNotificationAction(
  *
  * @example
  * ```tsx
+ * import { SOCIAL_LINKS } from '@/src/lib/constants';
+ *
  * // hooks category
  * primaryAction: createGitHubLinkAction(
  *   'View on GitHub',
  *   <Webhook className={`h-4 w-4 mr-2`} />,
- *   'https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/{slug}.json'
+ *   `${SOCIAL_LINKS.github}/blob/main/content/hooks/{slug}.json`
  * )
  * ```
  */
 export function createGitHubLinkAction(
   pathTemplate: string,
   label = 'View on GitHub',
-  icon: ReactNode = <Webhook className={'h-4 w-4 mr-2'} />
+  icon: ReactNode = <Webhook className={'mr-2 h-4 w-4'} />
 ): ActionButtonConfig {
   return {
     label,
     icon,
-    handler: (item: UnifiedContentItem) => {
+    handler: (item: ContentItem) => {
       if ('slug' in item && item.slug) {
         const url = pathTemplate.replace('{slug}', item.slug);
         window.open(url, '_blank');
@@ -204,7 +246,7 @@ export const commonActions = {
   copyCommand: () =>
     createCopyAction(
       'Copy Command',
-      <Terminal className={'h-4 w-4 mr-2'} />,
+      <Terminal className={'mr-2 h-4 w-4'} />,
       (item) => ('content' in item && typeof item.content === 'string' ? item.content : ''),
       'Copied!',
       'Command content has been copied to your clipboard.'
@@ -216,7 +258,7 @@ export const commonActions = {
   copyScript: () =>
     createCopyAction(
       'Copy Script',
-      <Terminal className={'h-4 w-4 mr-2'} />,
+      <Terminal className={'mr-2 h-4 w-4'} />,
       (item) =>
         'configuration' in item &&
         typeof item.configuration === 'object' &&
@@ -235,7 +277,7 @@ export const commonActions = {
   viewConfiguration: () =>
     createScrollAction(
       'View Configuration',
-      <Server className={'h-4 w-4 mr-2'} />,
+      <Server className={'mr-2 h-4 w-4'} />,
       'configuration'
     ),
 
@@ -243,22 +285,26 @@ export const commonActions = {
    * View collection action (for collections category)
    */
   viewCollection: () =>
-    createScrollAction('View Collection', <Layers className={'h-4 w-4 mr-2'} />, 'items'),
+    createScrollAction('View Collection', <Layers className={'mr-2 h-4 w-4'} />, 'items'),
 
   /**
-   * Apply skill action (for skills category)
-   * Renamed from useSkill to avoid React hook naming convention
+   * Download skill ZIP package (for skills category)
+   * Downloads Claude Desktop-compatible SKILL.md package
    */
   applySkill: () =>
-    createScrollAction('Use Skill', <BookOpen className={'h-4 w-4 mr-2'} />, 'content'),
+    createDownloadAction(
+      'Download Skill',
+      <Download className={'mr-2 h-4 w-4'} />,
+      '/downloads/skills/{slug}.zip'
+    ),
 
   /**
    * View hooks on GitHub action (for hooks category)
    */
   viewHookOnGitHub: () =>
     createGitHubLinkAction(
-      'https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/{slug}.json',
+      `${SOCIAL_LINKS.github}/blob/main/content/hooks/{slug}.json`,
       'View on GitHub',
-      <Webhook className={'h-4 w-4 mr-2'} />
+      <Webhook className={'mr-2 h-4 w-4'} />
     ),
 } as const;

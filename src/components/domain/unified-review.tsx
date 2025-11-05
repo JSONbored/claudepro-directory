@@ -40,15 +40,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useMemo, useState, useTransition } from 'react';
-// Server actions with Storybook mocking via #lib subpath imports
-import {
-  createReview,
-  deleteReview,
-  getAggregateRating,
-  getReviews,
-  markReviewHelpful,
-  updateReview,
-} from '#lib/actions/content';
 import { BaseCard } from '@/src/components/domain/base-card';
 import { ChartContainer, HorizontalBarChart } from '@/src/components/domain/horizontal-bar-chart';
 import { Button } from '@/src/components/primitives/button';
@@ -56,8 +47,15 @@ import { Card } from '@/src/components/primitives/card';
 import { Label } from '@/src/components/primitives/label';
 import { Rating, RatingButton } from '@/src/components/primitives/shadcn-io/rating';
 import { Textarea } from '@/src/components/primitives/textarea';
+import {
+  createReview,
+  deleteReview,
+  getReviewsWithStats,
+  markReviewHelpful,
+  updateReview,
+} from '@/src/lib/actions/content.actions';
+import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
 import { Edit, Star, ThumbsUp, Trash } from '@/src/lib/icons';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatDistanceToNow } from '@/src/lib/utils/data.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -127,16 +125,7 @@ export interface ReviewItem {
   } | null;
 }
 
-/**
- * Rating Distribution Data
- */
-export interface RatingDistribution {
-  1: number;
-  2: number;
-  3: number;
-  4: number;
-  5: number;
-}
+// NO manual types - will use whatever the RPC returns
 
 /**
  * Discriminated Union for Unified Review Component
@@ -162,7 +151,7 @@ export type UnifiedReviewProps =
     }
   | {
       variant: 'histogram';
-      distribution: RatingDistribution;
+      distribution: Record<string, number>;
       totalReviews: number;
       averageRating: number;
     }
@@ -310,16 +299,16 @@ function FormVariant({
             ))}
           </Rating>
           {rating > 0 && (
-            <span className="text-sm text-muted-foreground ml-1 font-medium">
+            <span className="ml-1 font-medium text-muted-foreground text-sm">
               {rating.toFixed(1)}
             </span>
           )}
         </div>
         {rating === 0 && !showRatingError && (
-          <p className="text-xs text-muted-foreground mt-1">Click a star to rate</p>
+          <p className="mt-1 text-muted-foreground text-xs">Click a star to rate</p>
         )}
         {showRatingError && (
-          <p id={ratingErrorId} className="text-sm text-destructive mt-1" role="alert">
+          <p id={ratingErrorId} className="mt-1 text-destructive text-sm" role="alert">
             Please select a star rating before submitting
           </p>
         )}
@@ -328,7 +317,7 @@ function FormVariant({
       {/* Review Text */}
       <div>
         <Label htmlFor={textareaId} className="mb-2 block">
-          Your Review <span className="text-xs text-muted-foreground font-normal">(optional)</span>
+          Your Review <span className="font-normal text-muted-foreground text-xs">(optional)</span>
         </Label>
         <Textarea
           id={textareaId}
@@ -342,12 +331,12 @@ function FormVariant({
           {...(hasTextError ? { errorId: textareaErrorId } : {})}
         />
         {hasTextError && (
-          <p id={textareaErrorId} className="text-sm text-destructive mt-1" role="alert">
+          <p id={textareaErrorId} className="mt-1 text-destructive text-sm" role="alert">
             Review text cannot exceed {MAX_REVIEW_LENGTH} characters
           </p>
         )}
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mt-1`}>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Help others by sharing details about your experience
           </p>
           <p
@@ -391,21 +380,21 @@ function SectionVariant({
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [aggregateRating, setAggregateRating] = useState<{
-    average: number;
     count: number;
-    distribution: RatingDistribution;
+    average: number;
+    distribution: Record<string, number>;
   } | null>(null);
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   const router = useRouter();
 
   const REVIEWS_PER_PAGE = 10;
 
-  // Load reviews - wrapped in useCallback for stable reference
-  const loadReviews = useCallback(
+  // Load reviews with stats - OPTIMIZED: Single RPC call
+  const loadReviewsWithStats = useCallback(
     async (pageNum: number, sort: typeof sortBy) => {
       setIsLoading(true);
       try {
-        const result = await getReviews({
+        const result = await getReviewsWithStats({
           content_type: contentType,
           content_slug: contentSlug,
           sort_by: sort,
@@ -414,9 +403,24 @@ function SectionVariant({
         });
 
         if (result?.data) {
-          const { reviews, hasMore } = result.data;
-          setReviews((prev) => (pageNum === 1 ? reviews : [...prev, ...reviews]));
-          setHasMore(hasMore);
+          const responseData = result.data as unknown as {
+            reviews: ReviewItem[];
+            hasMore: boolean;
+            aggregateRating: {
+              count: number;
+              average: number;
+              distribution: Record<string, number>;
+            };
+          };
+          setReviews((prev) =>
+            pageNum === 1 ? responseData.reviews : [...prev, ...responseData.reviews]
+          );
+          setHasMore(responseData.hasMore);
+
+          // Also update aggregate rating (no separate call needed!)
+          if (responseData.aggregateRating) {
+            setAggregateRating(responseData.aggregateRating);
+          }
         }
       } catch (_error) {
         toasts.error.reviewActionFailed('load');
@@ -427,44 +431,29 @@ function SectionVariant({
     [contentType, contentSlug]
   );
 
-  // Load aggregate rating - wrapped in useCallback for stable reference
-  const loadAggregateRating = useCallback(async () => {
-    try {
-      const result = await getAggregateRating({
-        content_type: contentType,
-        content_slug: contentSlug,
-      });
-
-      if (result?.data) {
-        setAggregateRating(result.data);
-      }
-    } catch (_error) {
-      // Silent fail - optional feature
-    }
-  }, [contentType, contentSlug]);
-
   // Initial load - useEffect for async operations (fire-and-forget pattern)
   useEffect(() => {
-    // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
-    void loadReviews(1, sortBy);
-    // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
-    void loadAggregateRating();
-  }, [loadReviews, loadAggregateRating, sortBy]);
+    loadReviewsWithStats(1, sortBy).catch(() => {
+      // Silent fail - reviews remain in initial state
+    });
+  }, [loadReviewsWithStats, sortBy]);
 
-  // Handle sort change (fire-and-forget pattern)
+  // Handle sort change
   const handleSortChange = (newSort: typeof sortBy) => {
     setSortBy(newSort);
     setPage(1);
-    // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
-    void loadReviews(1, newSort);
+    loadReviewsWithStats(1, newSort).catch(() => {
+      // Silent fail - reviews remain in current state
+    });
   };
 
-  // Handle load more (fire-and-forget pattern)
+  // Handle load more
   const handleLoadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
-    // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
-    void loadReviews(nextPage, sortBy);
+    loadReviewsWithStats(nextPage, sortBy).catch(() => {
+      // Silent fail - pagination remains in current state
+    });
   };
 
   // Handle delete
@@ -474,8 +463,10 @@ function SectionVariant({
       if (result?.data?.success) {
         toasts.success.itemDeleted('Review');
         setReviews((prev) => prev.filter((r) => r.id !== reviewId));
-        // biome-ignore lint/complexity/noVoid: Intentional fire-and-forget async pattern
-        void loadAggregateRating();
+        // Refresh stats after deletion
+        loadReviewsWithStats(1, sortBy).catch(() => {
+          // Silent fail - review already removed from UI
+        });
         router.refresh();
       }
     } catch (_error) {
@@ -499,16 +490,16 @@ function SectionVariant({
 
       {/* Sort Controls */}
       <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}`}>
-        <h3 className="text-lg font-semibold">Reviews ({aggregateRating?.count || 0})</h3>
+        <h3 className="font-semibold text-lg">Reviews ({aggregateRating?.count || 0})</h3>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <Label htmlFor={sortSelectId} className="text-sm text-muted-foreground">
+          <Label htmlFor={sortSelectId} className="text-muted-foreground text-sm">
             Sort by:
           </Label>
           <select
             id={sortSelectId}
             value={sortBy}
             onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
-            className="text-sm border rounded px-2 py-1"
+            className="rounded border px-2 py-1 text-sm"
           >
             <option value="recent">Most Recent</option>
             <option value="helpful">Most Helpful</option>
@@ -520,12 +511,12 @@ function SectionVariant({
 
       {/* Reviews List */}
       {isLoading && page === 1 ? (
-        <div className="text-center py-8">
+        <div className="py-8 text-center">
           <p className="text-muted-foreground">Loading reviews...</p>
         </div>
       ) : reviews.length === 0 ? (
-        <Card className="p-8 text-center bg-muted/50">
-          <Star className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" aria-hidden="true" />
+        <Card className="bg-muted/50 p-8 text-center">
+          <Star className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" aria-hidden="true" />
           <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
         </Card>
       ) : (
@@ -546,7 +537,7 @@ function SectionVariant({
 
       {/* Load More */}
       {hasMore && !isLoading && (
-        <div className="text-center pt-4">
+        <div className="pt-4 text-center">
           <Button variant="outline" onClick={handleLoadMore}>
             Load More Reviews
           </Button>
@@ -583,11 +574,16 @@ function ReviewCardItem({
     needsTruncation && !showFullText ? `${reviewText.slice(0, 200)}...` : reviewText;
 
   if (isEditing && isOwnReview) {
+    // Type guard validation - should never fail for reviews from database
+    if (!isValidCategory(review.content_type)) {
+      return null;
+    }
+
     return (
       <Card className="p-6">
         <UnifiedReview
           variant="form"
-          contentType={review.content_type as CategoryId}
+          contentType={review.content_type}
           contentSlug={review.content_slug}
           existingReview={{
             id: review.id,
@@ -615,9 +611,9 @@ function ReviewCardItem({
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}`}>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
               <StarDisplay rating={review.rating} size="sm" />
-              <span className="text-xs text-muted-foreground ml-1">{review.rating.toFixed(1)}</span>
+              <span className="ml-1 text-muted-foreground text-xs">{review.rating.toFixed(1)}</span>
             </div>
-            <time className="text-xs text-muted-foreground" dateTime={review.created_at}>
+            <time className="text-muted-foreground text-xs" dateTime={review.created_at}>
               {formatDistanceToNow(new Date(review.created_at))} ago
             </time>
           </div>
@@ -625,12 +621,12 @@ function ReviewCardItem({
           {/* Review Text */}
           {reviewText && (
             <div>
-              <p className="text-sm text-foreground whitespace-pre-wrap">{displayText}</p>
+              <p className="whitespace-pre-wrap text-foreground text-sm">{displayText}</p>
               {needsTruncation && (
                 <button
                   type="button"
                   onClick={() => setShowFullText(!showFullText)}
-                  className="text-xs text-primary hover:underline mt-1"
+                  className="mt-1 text-primary text-xs hover:underline"
                 >
                   {showFullText ? 'Show less' : 'Read more'}
                 </button>
@@ -656,7 +652,7 @@ function ReviewCardItem({
                 }}
                 className={UI_CLASSES.BUTTON_GHOST_ICON}
               >
-                <ThumbsUp className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
+                <ThumbsUp className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
                 Helpful ({review.helpful_count})
               </Button>
             )}
@@ -670,7 +666,7 @@ function ReviewCardItem({
                   onClick={onEdit}
                   className={UI_CLASSES.BUTTON_GHOST_ICON}
                 >
-                  <Edit className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
+                  <Edit className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
                   Edit
                 </Button>
                 <Button
@@ -679,7 +675,7 @@ function ReviewCardItem({
                   onClick={onDelete}
                   className={`${UI_CLASSES.BUTTON_GHOST_ICON} text-destructive hover:text-destructive`}
                 >
-                  <Trash className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
+                  <Trash className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
                   Delete
                 </Button>
               </>
@@ -703,7 +699,7 @@ function HistogramVariant({
   // ARCHITECTURAL FIX: Memoize chart data to prevent unnecessary recalculation
   const chartData = useMemo(() => {
     return [5, 4, 3, 2, 1].map((stars) => {
-      const count = distribution[stars as keyof typeof distribution];
+      const count = distribution[String(stars)] || 0;
       const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
 
       return {
@@ -717,12 +713,12 @@ function HistogramVariant({
 
   if (totalReviews === 0) {
     return (
-      <Card className="p-6 bg-muted/50">
+      <Card className="bg-muted/50 p-6">
         <div className="text-center">
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} justify-center mb-2`}>
+          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2 justify-center`}>
             <Star className="h-8 w-8 text-muted-foreground/30" aria-hidden="true" />
           </div>
-          <p className="text-sm text-muted-foreground">No reviews yet. Be the first to review!</p>
+          <p className="text-muted-foreground text-sm">No reviews yet. Be the first to review!</p>
         </div>
       </Card>
     );
@@ -733,19 +729,19 @@ function HistogramVariant({
       {/* Header: Average Rating */}
       <div className="mb-6">
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-2`}>
-          <div className="text-4xl font-bold">{averageRating.toFixed(1)}</div>
+          <div className="font-bold text-4xl">{averageRating.toFixed(1)}</div>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
             <StarDisplay rating={averageRating} size="md" />
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Based on {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
         </p>
       </div>
 
       {/* Chart: Rating Distribution */}
       <div>
-        <h3 className="text-sm font-semibold mb-3">Rating Distribution</h3>
+        <h3 className="mb-3 font-semibold text-sm">Rating Distribution</h3>
         <ChartContainer height="200px" className="w-full">
           <HorizontalBarChart
             data={chartData}
@@ -799,7 +795,7 @@ function RatingInteractiveVariant({
         ))}
       </Rating>
       {showValue && (
-        <span className="text-sm text-muted-foreground ml-1 font-medium">{value.toFixed(1)}</span>
+        <span className="ml-1 font-medium text-muted-foreground text-sm">{value.toFixed(1)}</span>
       )}
     </div>
   );

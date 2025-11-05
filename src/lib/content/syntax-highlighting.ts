@@ -1,73 +1,55 @@
 /**
- * Server-Side Syntax Highlighting with Shiki
- *
- * Runs syntax highlighting on the SERVER, eliminating client-side blocking.
- * Pre-renders highlighted HTML that's sent to the browser instantly.
- *
- * Benefits:
- * - Zero client-side JavaScript for highlighting
- * - No browser main thread blocking
- * - Instant page loads with pre-rendered HTML
- * - Beautiful Shiki syntax highlighting
- * - Shared singleton with MDX processing (no duplicate instances)
+ * Syntax Highlighting - React cache() memoized Sugar High renderer
  */
 
-import { getSharedHighlighter } from './shiki-singleton';
+import { cache } from 'react';
+import { highlight } from 'sugar-high';
 
-/**
- * Highlight code on the server with optional line numbers
- * Returns pre-rendered HTML string ready for dangerouslySetInnerHTML
- */
-export async function highlightCode(
-  code: string,
-  language = 'text',
-  showLineNumbers = true
-): Promise<string> {
-  try {
-    const highlighter = await getSharedHighlighter();
+export const highlightCode = cache(
+  (code: string, _language = 'javascript', showLineNumbers = true): string => {
+    if (!code || code.trim() === '') {
+      return '<pre class="sugar-high-empty"><code>No code provided</code></pre>';
+    }
 
-    const html = highlighter.codeToHtml(code, {
-      lang: language,
-      themes: {
-        dark: 'github-dark-dimmed',
-        light: 'github-light',
-      },
-      defaultColor: 'dark',
-      transformers: [
-        {
-          name: 'line-numbers',
-          pre(node) {
-            node.properties.style = undefined;
-            node.properties.class =
-              'overflow-x-auto text-sm leading-relaxed p-4 rounded-lg border border-border bg-code/50 backdrop-blur-sm';
-          },
-          code(node) {
-            if (showLineNumbers) {
-              node.properties.style = 'display: grid; background: transparent;';
-            } else {
-              node.properties.style = 'display: block; background: transparent;';
-            }
-          },
-          line(node, line) {
-            if (showLineNumbers) {
-              node.properties['data-line'] = line;
-              node.properties.class = 'line-number';
-            }
-          },
-        },
-      ],
-    });
+    try {
+      const highlighted = highlight(code);
+      const lines = highlighted.split('\n');
+      const hasMultipleLines = lines.length > 1;
+      const totalLines = lines.length;
+      const visibleLines = Math.min(totalLines, 20);
 
-    return html;
-  } catch (_error) {
-    // Fallback to plain text if highlighting fails
-    const escapedCode = code
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+      if (showLineNumbers && hasMultipleLines) {
+        const numberedLines = lines
+          .map((line, index) => {
+            const lineNum = index + 1;
+            return `<span class="sh__line" data-line="${lineNum}">${line || ' '}</span>`;
+          })
+          .join('\n');
 
-    return `<pre class="overflow-x-auto text-sm leading-relaxed p-4 rounded-lg border border-border bg-code/50 backdrop-blur-sm"><code style="color: var(--color-text-secondary);">${escapedCode}</code></pre>`;
+        return `<div class="code-block-wrapper"><pre class="code-block-pre"><code class="sugar-high">${numberedLines}</code></pre>${totalLines > visibleLines ? `<button class="code-expand-btn">Expand ${totalLines - visibleLines} more lines</button>` : ''}</div>`;
+      }
+
+      return `<div class="code-block-wrapper"><pre class="code-block-pre"><code class="sugar-high">${highlighted}</code></pre></div>`;
+    } catch (_error) {
+      const escapedCode = code
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+      return `<pre class="code-block-pre code-block-fallback"><code>${escapedCode}</code></pre>`;
+    }
   }
+);
+
+export function extractRawCode(highlightedHtml: string): string {
+  // Use iterative approach to handle nested/malformed tags (CodeQL security recommendation)
+  let prev: string;
+  let stripped = highlightedHtml;
+  do {
+    prev = stripped;
+    stripped = stripped.replace(/<[^>]*>/g, '');
+  } while (stripped !== prev);
+  return stripped.trim();
 }

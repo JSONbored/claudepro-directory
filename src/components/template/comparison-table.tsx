@@ -13,16 +13,13 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { CheckCircle } from '@/src/lib/icons';
-import {
-  type ComparisonTableProps,
-  comparisonTablePropsSchema,
-} from '@/src/lib/schemas/shared.schema';
+import type { ComparisonTableProps } from '@/src/lib/schemas/component.schema';
 
 export function ComparisonTable(props: ComparisonTableProps) {
-  const validated = comparisonTablePropsSchema.parse(props);
-  const { title, description, headers, items } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { title, description, headers, items } = props;
   const validHeaders = headers;
-  const validItems = items;
+  const validItems = items || [];
 
   if (validHeaders.length === 0 || validItems.length === 0) {
     return null;
@@ -41,9 +38,9 @@ export function ComparisonTable(props: ComparisonTableProps) {
           <table className="w-full">
             <thead className="border-b">
               <tr>
-                <th className={'text-left p-4 font-medium'}>Feature</th>
+                <th className={'p-4 text-left font-medium'}>Feature</th>
                 {validHeaders.map((header) => (
-                  <th key={header} className={'text-left p-4 font-medium'}>
+                  <th key={header} className={'p-4 text-left font-medium'}>
                     {header}
                   </th>
                 ))}

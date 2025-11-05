@@ -6,10 +6,7 @@
  */
 
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from '@/src/lib/icons';
-import {
-  type MetricsDisplayProps,
-  metricsDisplayPropsSchema,
-} from '@/src/lib/schemas/shared.schema';
+import type { MetricsDisplayProps } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
@@ -23,11 +20,11 @@ function BadgeDelta({
 }) {
   const icon =
     deltaType === 'increase' ? (
-      <ArrowUpIcon className="w-3 h-3" />
+      <ArrowUpIcon className="h-3 w-3" />
     ) : deltaType === 'decrease' ? (
-      <ArrowDownIcon className="w-3 h-3" />
+      <ArrowDownIcon className="h-3 w-3" />
     ) : (
-      <MinusIcon className="w-3 h-3" />
+      <MinusIcon className="h-3 w-3" />
     );
 
   const colorClass =
@@ -40,7 +37,7 @@ function BadgeDelta({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs',
+        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs',
         colorClass,
         className
       )}
@@ -52,8 +49,8 @@ function BadgeDelta({
 }
 
 export function MetricsDisplay(props: MetricsDisplayProps) {
-  const validated = metricsDisplayPropsSchema.parse(props);
-  const { title, metrics, description } = validated;
+  // Database CHECK constraint validates structure - no runtime validation needed
+  const { title, metrics, description } = props;
   const validMetrics = metrics;
 
   return (
@@ -61,12 +58,12 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
       {(title || description) && (
         <div className="mb-8 text-center">
           {title && (
-            <h3 className={'text-xl font-semibold mb-3 text-foreground'} itemProp="name">
+            <h3 className={'mb-3 font-semibold text-foreground text-xl'} itemProp="name">
               {title}
             </h3>
           )}
           {description && (
-            <p className={'text-muted-foreground text-lg max-w-3xl mx-auto'} itemProp="description">
+            <p className={'mx-auto max-w-3xl text-lg text-muted-foreground'} itemProp="description">
               {description}
             </p>
           )}
@@ -94,19 +91,19 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
             <div
               key={`${metricLabel}-${metricValue}`}
               className={cn(
-                'rounded-lg p-6 bg-gradient-to-br border backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl',
+                'rounded-lg border bg-gradient-to-br p-6 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl',
                 gradientClass
               )}
             >
               {/* Metric Label */}
-              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+              <p className="font-medium text-muted-foreground text-sm uppercase tracking-wide">
                 {metricLabel}
               </p>
 
               {/* Metric Value */}
               <p
                 className={
-                  'mt-2 text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent'
+                  'mt-2 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text font-bold text-3xl text-transparent'
                 }
               >
                 {metricValue}
@@ -116,7 +113,7 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
               {metricChange && (
                 <div className={`mt-4 ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}>
                   <BadgeDelta deltaType={deltaType} className="font-semibold" />
-                  <span className="text-sm font-medium text-muted-foreground">{metricChange}</span>
+                  <span className="font-medium text-muted-foreground text-sm">{metricChange}</span>
                 </div>
               )}
             </div>

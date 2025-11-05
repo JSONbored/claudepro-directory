@@ -16,7 +16,7 @@
  *
  * Performance:
  * - ISR: 600s (10 minutes)
- * - Redis-cached entry loading
+ * - Database-cached entry loading
  * - Static params generation
  *
  * Production Standards:
@@ -26,23 +26,16 @@
  * - AI citation optimized
  */
 
-import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
+import {
+  getAllChangelogEntries,
+  getChangelogEntryBySlug,
+  parseChangelogChanges,
+} from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
-
-/**
- * Runtime configuration
- */
-export const runtime = 'nodejs';
-
-/**
- * ISR revalidation
- * Changelog entries update occasionally - revalidate every 15 minutes
- */
-export const revalidate = 900;
 
 /**
  * Generate static params for all changelog entries
@@ -73,21 +66,19 @@ export async function generateStaticParams() {
  * @returns Plain text response with full entry content
  */
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  _request: Request,
+  context: { params: Promise<{ slug: string }> }
 ): Promise<Response> {
-  const requestLogger = logger.forRequest(request);
-
   try {
-    const { slug } = await params;
+    const { slug } = await context.params;
 
-    requestLogger.info('Changelog entry llms.txt generation started', { slug });
+    logger.info('Changelog entry llms.txt generation started', { slug });
 
     // Load changelog entry
     const entry = await getChangelogEntryBySlug(slug);
 
     if (!entry) {
-      requestLogger.warn('Changelog entry not found for llms.txt', { slug });
+      logger.warn('Changelog entry not found for llms.txt', { slug });
 
       return new NextResponse('Changelog entry not found', {
         status: 404,
@@ -105,13 +96,16 @@ export async function GET(
 > ${APP_CONFIG.name} Changelog Entry
 
 URL: ${entryUrl}
-Date: ${formatChangelogDate(entry.date)}
+Date: ${formatChangelogDate(entry.release_date)}
 Slug: ${entry.slug}
 ${entry.tldr ? `\nSummary: ${entry.tldr}` : ''}
 
 ---
 
 `;
+
+    // Parse changes JSONB field with type safety
+    const changes = parseChangelogChanges(entry.changes);
 
     // Add category sections with items
     const categoryOrder = [
@@ -124,8 +118,8 @@ ${entry.tldr ? `\nSummary: ${entry.tldr}` : ''}
     ] as const;
 
     for (const categoryName of categoryOrder) {
-      const items = entry.categories[categoryName];
-      if (items.length > 0) {
+      const items = changes[categoryName];
+      if (items && items.length > 0) {
         llmsTxt += `## ${categoryName}\n\n`;
         for (const item of items) {
           llmsTxt += `- ${item.content}\n`;
@@ -144,7 +138,7 @@ ${entry.content}
 ## Metadata
 
 - **Platform:** ${APP_CONFIG.name}
-- **Date:** ${entry.date}
+- **Date:** ${entry.release_date}
 - **Permanent URL:** ${entryUrl}
 - **Format:** Keep a Changelog 1.0.0
 - **License:** ${APP_CONFIG.license}
@@ -155,7 +149,7 @@ ${entry.content}
 For more updates, visit: ${APP_CONFIG.url}/changelog
 `;
 
-    requestLogger.info('Changelog entry llms.txt generated successfully', {
+    logger.info('Changelog entry llms.txt generated successfully', {
       slug: entry.slug,
       size: Buffer.byteLength(llmsTxt, 'utf8'),
     });
@@ -169,26 +163,14 @@ For more updates, visit: ${APP_CONFIG.url}/changelog
         'X-Content-Type-Options': 'nosniff',
       },
     });
-  } catch (error) {
-    requestLogger.error(
-      'Changelog entry llms.txt generation failed',
-      error instanceof Error ? error : new Error(String(error))
-    );
+  } catch (error: unknown) {
+    const { slug } = await context.params.catch(() => ({ slug: 'unknown' }));
 
-    // Return minimal error response
-    const errorText = `# Changelog Entry
-
-Error generating changelog entry content. Please try again later.
-
-URL: ${APP_CONFIG.url}/changelog
-`;
-
-    return new NextResponse(errorText, {
-      status: 500,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-      },
+    return handleApiError(error, {
+      route: '/changelog/[slug]/llms.txt',
+      operation: 'generate_changelog_entry_llmstxt',
+      method: 'GET',
+      logContext: { slug },
     });
   }
 }

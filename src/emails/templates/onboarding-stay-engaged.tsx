@@ -8,6 +8,8 @@
 
 import { Button, Hr, Section, Text } from '@react-email/components';
 import type * as React from 'react';
+import { addUTMToURL } from '@/src/lib/utils/email-utm';
+import { EMAIL_UTM_TEMPLATES } from '@/src/lib/utils/utm-templates';
 import { BaseLayout } from '../layouts/base-layout';
 import {
   cardStyle,
@@ -41,8 +43,11 @@ export interface OnboardingStayEngagedProps {
  * Stay Engaged Email Component (Step 5 of 5)
  */
 export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
+  const baseUrl = 'https://claudepro.directory';
+  const utm = EMAIL_UTM_TEMPLATES.ONBOARDING_STAY_ENGAGED;
+
   return (
-    <BaseLayout preview="Stay Engaged with ClaudePro - Your Feedback Matters!">
+    <BaseLayout preview="Stay Engaged with ClaudePro - Your Feedback Matters!" utm={utm}>
       {/* Hero section */}
       <Section style={heroSection}>
         <Text style={headingStyle}>You're All Set! 🎉</Text>
@@ -123,7 +128,10 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
           <li style={listItemStyle}>Any success stories to share?</li>
         </ul>
 
-        <Button href="https://claudepro.directory/feedback" style={primaryButtonStyle}>
+        <Button
+          href={addUTMToURL(`${baseUrl}/feedback`, { ...utm, content: 'feedback_cta' })}
+          style={primaryButtonStyle}
+        >
           Share Your Feedback
         </Button>
       </Section>
@@ -137,11 +145,17 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
           Continue exploring new configurations and join our growing community.
         </Text>
 
-        <Button href="https://claudepro.directory" style={secondaryButtonStyle}>
+        <Button
+          href={addUTMToURL(baseUrl, { ...utm, content: 'browse_cta' })}
+          style={secondaryButtonStyle}
+        >
           Browse Directory
         </Button>
 
-        <Button href="https://claudepro.directory/trending" style={secondaryButtonStyle}>
+        <Button
+          href={addUTMToURL(`${baseUrl}/trending`, { ...utm, content: 'trending_cta' })}
+          style={secondaryButtonStyle}
+        >
           View Trending
         </Button>
       </Section>

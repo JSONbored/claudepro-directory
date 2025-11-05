@@ -16,6 +16,7 @@
 'use client';
 
 import { cva } from 'class-variance-authority';
+import { motion } from 'motion/react';
 import type * as React from 'react';
 import {
   Tooltip,
@@ -201,58 +202,90 @@ export type UnifiedBadgeProps =
  * />
  * ```
  */
+
+/**
+ * BadgeWrapper - Wrap badges with hover animation
+ * Extracted to module scope to avoid nested component definition
+ */
+const BadgeWrapper = ({ children }: { children: React.ReactNode }) => (
+  <motion.div
+    className="inline-block"
+    whileHover={{
+      y: -2,
+      transition: { type: 'spring', stiffness: 400, damping: 17 },
+    }}
+    whileTap={{ scale: 0.95 }}
+  >
+    {children}
+  </motion.div>
+);
+
 export function UnifiedBadge(props: UnifiedBadgeProps) {
   // Base badge variant
   if (props.variant === 'base') {
     return (
-      <div className={cn(baseBadgeVariants({ variant: props.style }), props.className)}>
-        {props.children}
-      </div>
+      <BadgeWrapper>
+        <div
+          className={cn(
+            baseBadgeVariants({ variant: props.style }),
+            'hover:shadow-md hover:shadow-primary/20',
+            props.className
+          )}
+        >
+          {props.children}
+        </div>
+      </BadgeWrapper>
     );
   }
 
   // Category badge variant
   if (props.variant === 'category') {
     return (
-      <div
-        className={cn(
-          'text-xs font-medium border transition-colors',
-          categoryBadgeStyles[props.category],
-          props.className
-        )}
-      >
-        {props.children}
-      </div>
+      <BadgeWrapper>
+        <div
+          className={cn(
+            'border font-medium text-xs transition-colors hover:shadow-md hover:shadow-primary/20',
+            categoryBadgeStyles[props.category],
+            props.className
+          )}
+        >
+          {props.children}
+        </div>
+      </BadgeWrapper>
     );
   }
 
   // Source badge variant
   if (props.variant === 'source') {
     return (
-      <div
-        className={cn(
-          'text-xs font-medium border transition-colors',
-          sourceBadgeStyles[props.source],
-          props.className
-        )}
-      >
-        {props.children}
-      </div>
+      <BadgeWrapper>
+        <div
+          className={cn(
+            'border font-medium text-xs transition-colors hover:shadow-md hover:shadow-primary/20',
+            sourceBadgeStyles[props.source],
+            props.className
+          )}
+        >
+          {props.children}
+        </div>
+      </BadgeWrapper>
     );
   }
 
   // Status badge variant
   if (props.variant === 'status') {
     return (
-      <div
-        className={cn(
-          'text-xs font-medium border transition-colors',
-          statusBadgeStyles[props.status],
-          props.className
-        )}
-      >
-        {props.children}
-      </div>
+      <BadgeWrapper>
+        <div
+          className={cn(
+            'border font-medium text-xs transition-colors hover:shadow-md hover:shadow-primary/20',
+            statusBadgeStyles[props.status],
+            props.className
+          )}
+        >
+          {props.children}
+        </div>
+      </BadgeWrapper>
     );
   }
 
@@ -263,11 +296,11 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
 
       switch (props.tier) {
         case 'featured':
-          return <Star className="h-3 w-3 mr-1 fill-current" aria-hidden="true" />;
+          return <Star className="mr-1 h-3 w-3 fill-current" aria-hidden="true" />;
         case 'promoted':
-          return <TrendingUp className="h-3 w-3 mr-1" aria-hidden="true" />;
+          return <TrendingUp className="mr-1 h-3 w-3" aria-hidden="true" />;
         case 'spotlight':
-          return <Zap className="h-3 w-3 mr-1" aria-hidden="true" />;
+          return <Zap className="mr-1 h-3 w-3" aria-hidden="true" />;
         default:
           return null;
       }
@@ -289,7 +322,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     return (
       <div
         className={cn(
-          'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors',
+          'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-colors',
           sponsoredBadgeStyles[props.tier],
           props.className
         )}
@@ -309,7 +342,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         <button
           type="button"
           className={cn(
-            'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-all duration-200',
+            'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-all duration-200',
             'cursor-pointer bg-accent text-accent-foreground shadow-lg shadow-primary/25',
             props.className
           )}
@@ -337,8 +370,8 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <button
         type="button"
         className={cn(
-          'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-all duration-200',
-          'cursor-pointer hover:bg-accent/10 hover:border-accent/30 border-muted-foreground/20 text-muted-foreground hover:text-accent',
+          'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-all duration-200',
+          'cursor-pointer border-muted-foreground/20 text-muted-foreground hover:border-accent/30 hover:bg-accent/10 hover:text-accent',
           props.className
         )}
         onClick={handleClick}
@@ -383,7 +416,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
               />
             </output>
           </TooltipTrigger>
-          <TooltipContent side={side} className="text-xs font-medium">
+          <TooltipContent side={side} className="font-medium text-xs">
             <p>{label}</p>
           </TooltipContent>
         </Tooltip>
@@ -406,7 +439,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         className={cn(
           'inline-flex items-center justify-center',
           'px-1.5 py-0.5',
-          'text-[10px] font-semibold uppercase tracking-wider',
+          'font-semibold text-[10px] uppercase tracking-wider',
           'rounded border',
           'transition-colors duration-200',
           variantStyles[badgeVariant],

@@ -9,21 +9,42 @@ const SpeedInsights = (
 
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { headers } from 'next/headers';
-import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
 import './globals.css';
+import './view-transitions.css';
+import './micro-interactions.css';
+import './sugar-high.css';
+import dynamic from 'next/dynamic';
 import { Toaster } from 'sonner';
-import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+
+const UnifiedNewsletterCapture = dynamic(
+  () =>
+    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+      default: mod.UnifiedNewsletterCapture,
+    })),
+  {
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+  }
+);
+
+const NotificationToastHandler = dynamic(
+  () =>
+    import('@/src/components/features/notifications/notification-toast-handler').then((mod) => ({
+      default: mod.NotificationToastHandler,
+    })),
+  {
+    loading: () => null,
+  }
+);
+
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
-import { PerformanceOptimizer } from '@/src/components/infra/performance-optimizer';
 import { PostCopyEmailProvider } from '@/src/components/infra/providers/post-copy-email-provider';
 import { PwaInstallTracker } from '@/src/components/infra/pwa-install-tracker';
 import { OrganizationStructuredData } from '@/src/components/infra/structured-data/organization-schema';
-import { AnnouncementBanner } from '@/src/components/layout/announcement-banner';
-import { Footer } from '@/src/components/layout/footer';
-import { Navigation } from '@/src/components/layout/navigation';
+import { getActiveAnnouncement } from '@/src/components/layout/announcement-banner-server';
+import { LayoutContent } from '@/src/components/layout/layout-content';
+
 import { StructuredData } from '@/src/components/shared/structured-data';
 import { UmamiScript } from '@/src/components/shared/umami-script';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -48,7 +69,7 @@ const inter = Inter({
 
 // Generate homepage metadata from centralized registry
 export async function generateMetadata(): Promise<Metadata> {
-  const homeMetadata = generatePageMetadata('/');
+  const homeMetadata = await generatePageMetadata('/');
 
   return {
     ...homeMetadata,
@@ -67,10 +88,6 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: {
       ...homeMetadata.alternates,
       types: {
-        // OpenAPI 3.1.0 Specification for AI Discovery (RFC 9727)
-        'application/openapi+json': '/openapi.json',
-        // API Catalog for RFC 9727 Compliant Discovery
-        'application/json': '/.well-known/api-catalog',
         // LLMs.txt for AI-Optimized Plain Text Content (llmstxt.org)
         'text/plain': '/llms.txt',
       },
@@ -115,17 +132,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Opt-out of static generation for every page so the CSP nonce can be applied
-  await connection();
-
-  // Get CSP nonce for inline scripts
-  const headersList = await headers();
-  const cspHeader = headersList.get('content-security-policy');
-  const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
+  // Fetch announcement data server-side using anonymous client (ISR-safe)
+  const announcement = await getActiveAnnouncement();
 
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} font-sans`}>
       <head>
+        {/* Viewport for responsive design */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+
         {/* PWA Manifest - Next.js generates at /manifest.webmanifest from src/app/manifest.ts */}
         {/* Manifest link is automatically injected by Next.js metadata API (line 109) */}
 
@@ -137,11 +152,6 @@ export default async function RootLayout({
 
         {/* Theme Color for Mobile Browsers */}
         <meta name="theme-color" content="#000000" />
-
-        {/* API Discovery Metadata for AI Crawlers (RFC 9727) */}
-        <meta name="api-spec" content="/openapi.json" />
-        <meta name="api-version" content="1.0.0" />
-        <meta name="api-catalog" content="/.well-known/api-catalog" />
 
         {/* Strategic Resource Hints - Only for confirmed external connections */}
 
@@ -161,37 +171,22 @@ export default async function RootLayout({
           {await OrganizationStructuredData()}
         </Suspense>
         <ThemeProvider
-          attribute="class"
+          attribute="data-theme"
           defaultTheme="dark"
           enableSystem
-          disableTransitionOnChange
-          {...(nonce ? { nonce } : {})}
+          storageKey="claudepro-theme"
+          disableTransitionOnChange={false}
+          enableColorScheme={false}
         >
           <PostCopyEmailProvider>
             <ErrorBoundary>
-              <a
-                href="#main-content"
-                className={
-                  'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground rounded-md'
-                }
-              >
-                Skip to main content
-              </a>
-              <div className={'min-h-screen bg-background flex flex-col'}>
-                <AnnouncementBanner />
-                <Navigation />
-                {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
-                <main id="main-content" className="flex-1">
-                  {children}
-                </main>
-                <Footer />
-              </div>
+              <LayoutContent announcement={announcement}>{children}</LayoutContent>
             </ErrorBoundary>
             <Toaster />
+            <NotificationToastHandler />
             <UnifiedNewsletterCapture variant="footer-bar" source="footer" />
           </PostCopyEmailProvider>
         </ThemeProvider>
-        <PerformanceOptimizer />
         <Analytics />
         <SpeedInsights />
         {/* Umami Analytics - Privacy-focused analytics (production only) */}
@@ -200,13 +195,7 @@ export default async function RootLayout({
         {/* PWA Install Tracking - Tracks PWA installation events */}
         <PwaInstallTracker />
         {/* Service Worker Registration for PWA Support */}
-        {/* suppressHydrationWarning: Browsers remove nonce attribute after execution (security feature), causing harmless hydration warning */}
-        <script
-          src="/scripts/service-worker-init.js"
-          nonce={nonce}
-          defer
-          suppressHydrationWarning
-        />
+        <script src="/scripts/service-worker-init.js" defer />
       </body>
     </html>
   );

@@ -1,85 +1,69 @@
+/**
+ * Search Page - Database-First RPC via search_content_optimized()
+ */
+
 import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
-import { sanitizers } from '@/src/lib/security/validators';
+import { ContentSearchClient } from '@/src/components/content-search-client';
+import type { SearchFilters } from '@/src/lib/search/server-search';
+import { searchContent } from '@/src/lib/search/server-search';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-/**
- * Search Page - SearchAction Schema.org Endpoint
- *
- * PURPOSE:
- * - Fulfills SearchAction structured data contract (schema.org/SearchAction)
- * - Provides a canonical search URL for search engines and external tools
- * - Redirects to homepage with search activated client-side
- *
- * ARCHITECTURE DECISION:
- * We use client-side search on the homepage for optimal UX (instant results, no page reloads).
- * This page serves as a bridge for external search integrations while maintaining that UX.
- *
- * SECURITY:
- * - Query sanitization via validators.sanitizeSearchQuery
- * - Length limits (max 200 chars)
- * - XSS prevention through URL encoding
- *
- * PERFORMANCE:
- * - Instant redirect (no data fetching)
- * - Query parameter preserved in URL for client-side hydration
- * - Static generation where possible
- *
- * SEO:
- * - Proper metadata for search result pages
- * - OpenGraph support for social sharing
- * - Canonical URL pattern matching SearchAction schema
- */
+export const revalidate = 3600; // 1 hour ISR
 
 interface SearchPageProps {
   searchParams: Promise<{
     q?: string;
+    category?: string;
+    tags?: string;
+    author?: string;
+    sort?: string;
   }>;
 }
 
-// Generate metadata for search page
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
   const resolvedParams = await searchParams;
   const query = resolvedParams.q || '';
-  return generatePageMetadata('/search', { params: { q: query } });
+
+  return generatePageMetadata('/search', {
+    params: { q: query },
+    title: query ? `Search results for "${query}"` : 'Search',
+    description: query
+      ? `Find agents, MCP servers, rules, commands, and more matching "${query}"`
+      : 'Search the Claude Code directory',
+  });
 }
 
-/**
- * Search Page Server Component
- *
- * FLOW:
- * 1. Receive query parameter from SearchAction or external link
- * 2. Sanitize and validate query
- * 3. Redirect to homepage with query preserved
- * 4. Homepage client component handles search via useSearch hook
- *
- * NOTE: We redirect instead of rendering here because:
- * - Homepage has all content pre-loaded (better performance)
- * - Unified search experience (one search implementation)
- * - Client-side search provides instant results
- * - Avoids duplicate search logic in two places
- */
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const resolvedParams = await searchParams;
-  const rawQuery = resolvedParams.q || '';
+  const query = (resolvedParams.q || '').trim().slice(0, 200);
 
-  // SECURITY: Sanitize query parameter
-  // - Removes HTML/script tags
-  // - Limits length to 200 characters
-  // - Trims whitespace
-  const sanitizedQuery = (await sanitizers.sanitizeSearchQuery(rawQuery)).slice(0, 200);
+  const categories = resolvedParams.category?.split(',').filter(Boolean);
+  const tags = resolvedParams.tags?.split(',').filter(Boolean);
+  const author = resolvedParams.author;
+  const sort = resolvedParams.sort as SearchFilters['sort'];
 
-  // Redirect to homepage with search query
-  // The homepage client component will:
-  // 1. Read the query from URL
-  // 2. Activate search mode
-  // 3. Display filtered results
-  if (sanitizedQuery) {
-    // PERFORMANCE: Use permanent redirect (308) for caching
-    // Search queries should always go to homepage
-    redirect(`/?q=${encodeURIComponent(sanitizedQuery)}`);
-  }
+  const filters: SearchFilters = {};
 
-  // Empty query - redirect to homepage
-  redirect('/');
+  if (sort) filters.sort = sort;
+  if (categories && categories.length > 0) filters.p_categories = categories;
+  if (tags && tags.length > 0) filters.p_tags = tags;
+  if (author) filters.p_authors = [author];
+  filters.p_limit = 50;
+
+  const results = await searchContent(query, filters);
+
+  return (
+    <main className="container mx-auto px-4 py-8">
+      <h1 className="mb-8 font-bold text-4xl">
+        {query ? `Search: "${query}"` : 'Search Claude Code Directory'}
+      </h1>
+      <ContentSearchClient
+        items={results}
+        type="agents"
+        searchPlaceholder="Search agents, MCP servers, rules, commands..."
+        title="Results"
+        icon="Search"
+      />
+    </main>
+  );
 }

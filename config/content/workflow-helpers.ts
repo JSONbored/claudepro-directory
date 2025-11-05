@@ -96,7 +96,7 @@ export const WORKFLOW_INSTRUCTIONS = {
     inputs: ['category', 'intent'],
     outputs: ['topics', 'keywords', 'confidence'],
     instructions: [
-      '1. Import generateLongtailQuery from discovery/trend-detection.ts',
+      '1. Import generateLongtailQuery from generation-rules.ts',
       '2. Generate search query for the category',
       '3. Execute WebSearch with the query',
       '4. Parse results to extract topics and keywords',

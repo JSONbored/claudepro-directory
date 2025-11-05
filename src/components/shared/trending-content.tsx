@@ -6,7 +6,7 @@ import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import { Clock, Star, TrendingUp } from '@/src/lib/icons';
-import type { TrendingContentProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem, TrendingContentProps } from '@/src/lib/schemas/component.schema';
 
 /**
  * Trending Content Component
@@ -27,20 +27,20 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
   return (
     <Tabs defaultValue="trending" className="space-y-8">
       <TabsList
-        className={'grid w-full grid-cols-3 max-w-md mx-auto'}
+        className={'mx-auto grid w-full max-w-md grid-cols-3'}
         role="tablist"
         aria-label="Trending content categories"
       >
         <TabsTrigger value="trending" aria-label="View trending configurations">
-          <TrendingUp className={'h-4 w-4 mr-2'} aria-hidden="true" />
+          <TrendingUp className={'mr-2 h-4 w-4'} aria-hidden="true" />
           Trending
         </TabsTrigger>
         <TabsTrigger value="popular" aria-label="View most popular configurations">
-          <Star className={'h-4 w-4 mr-2'} aria-hidden="true" />
+          <Star className={'mr-2 h-4 w-4'} aria-hidden="true" />
           Popular
         </TabsTrigger>
         <TabsTrigger value="recent" aria-label="View recently added configurations">
-          <Clock className={'h-4 w-4 mr-2'} aria-hidden="true" />
+          <Clock className={'mr-2 h-4 w-4'} aria-hidden="true" />
           Recent
         </TabsTrigger>
       </TabsList>
@@ -52,11 +52,11 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
         aria-labelledby={trendingHeadingId}
       >
         <div>
-          <h2 id={trendingHeadingId} className={'text-2xl font-bold mb-4'}>
+          <h2 id={trendingHeadingId} className={'mb-4 font-bold text-2xl'}>
             Trending This Week
           </h2>
           <UnifiedCardGrid
-            items={trending}
+            items={trending || []}
             variant="list"
             emptyMessage="No trending content available yet. Check back soon!"
             ariaLabel="Trending content"
@@ -65,7 +65,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
               <div key={item.slug} className="relative">
                 {index < 3 && (
                   <UnifiedBadge
-                    className={'absolute -top-2 -right-2 z-10'}
+                    className={'-top-2 -right-2 absolute z-10'}
                     variant="base"
                     style="default"
                     aria-label={`Rank ${index + 1}`}
@@ -74,7 +74,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
                   </UnifiedBadge>
                 )}
                 <ConfigCard
-                  item={{ ...item, position: index } as UnifiedContentItem}
+                  item={{ ...item, position: index } as unknown as ContentItem}
                   variant="default"
                   showCategory={true}
                   showActions={false}
@@ -92,11 +92,11 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
         aria-labelledby={popularHeadingId}
       >
         <div>
-          <h2 id={popularHeadingId} className={'text-2xl font-bold mb-4'}>
+          <h2 id={popularHeadingId} className={'mb-4 font-bold text-2xl'}>
             Most Popular
           </h2>
           <UnifiedCardGrid
-            items={popular}
+            items={popular || []}
             variant="list"
             emptyMessage="No popular content available yet. Check back soon!"
             ariaLabel="Popular content"
@@ -104,7 +104,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
             renderCard={(item, index) => (
               <ConfigCard
                 key={item.slug}
-                item={{ ...item, position: index } as UnifiedContentItem}
+                item={{ ...item, position: index } as unknown as ContentItem}
                 variant="default"
                 showCategory={true}
                 showActions={false}
@@ -121,11 +121,11 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
         aria-labelledby={recentHeadingId}
       >
         <div>
-          <h2 id={recentHeadingId} className={'text-2xl font-bold mb-4'}>
+          <h2 id={recentHeadingId} className={'mb-4 font-bold text-2xl'}>
             Recently Added
           </h2>
           <UnifiedCardGrid
-            items={recent}
+            items={recent || []}
             variant="list"
             emptyMessage="No recent content available yet. Check back soon!"
             ariaLabel="Recent content"
@@ -133,7 +133,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
             renderCard={(item, index) => (
               <ConfigCard
                 key={item.slug}
-                item={{ ...item, position: index } as UnifiedContentItem}
+                item={{ ...item, position: index } as unknown as ContentItem}
                 variant="default"
                 showCategory={true}
                 showActions={false}

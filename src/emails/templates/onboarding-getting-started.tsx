@@ -8,6 +8,8 @@
 
 import { Button, Hr, Section, Text } from '@react-email/components';
 import type * as React from 'react';
+import { addUTMToURL } from '@/src/lib/utils/email-utm';
+import { EMAIL_UTM_TEMPLATES } from '@/src/lib/utils/utm-templates';
 import { BaseLayout } from '../layouts/base-layout';
 import {
   cardStyle,
@@ -39,8 +41,14 @@ export interface OnboardingGettingStartedProps {
  * Getting Started Email Component (Step 2 of 5)
  */
 export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProps) {
+  const baseUrl = 'https://claudepro.directory';
+  const utm = EMAIL_UTM_TEMPLATES.ONBOARDING_GETTING_STARTED;
+
   return (
-    <BaseLayout preview="Getting Started with ClaudePro Directory - Your Quick Start Guide">
+    <BaseLayout
+      preview="Getting Started with Claude Pro Directory - Your Quick Start Guide"
+      utm={utm}
+    >
       {/* Hero section */}
       <Section style={heroSection}>
         <Text style={headingStyle}>Ready to Supercharge Claude? 🚀</Text>
@@ -62,7 +70,10 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
             Start with our most popular AI agents. These pre-configured prompts help Claude handle
             specific tasks like code review, API building, and technical documentation.
           </Text>
-          <Button href="https://claudepro.directory/agents" style={stepButtonStyle}>
+          <Button
+            href={addUTMToURL(`${baseUrl}/agents`, { ...utm, content: 'step_1_agents' })}
+            style={stepButtonStyle}
+          >
             View Top Agents
           </Button>
         </Section>
@@ -74,7 +85,10 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
             Model Context Protocol (MCP) servers extend Claude's capabilities with real-time data,
             tool integrations, and custom workflows.
           </Text>
-          <Button href="https://claudepro.directory/mcp" style={stepButtonStyle}>
+          <Button
+            href={addUTMToURL(`${baseUrl}/mcp`, { ...utm, content: 'step_2_mcp' })}
+            style={stepButtonStyle}
+          >
             Explore MCP Servers
           </Button>
         </Section>
@@ -86,7 +100,10 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
             Customize Claude's behavior with rules that define coding standards, response formats,
             and project-specific guidelines.
           </Text>
-          <Button href="https://claudepro.directory/rules" style={stepButtonStyle}>
+          <Button
+            href={addUTMToURL(`${baseUrl}/rules`, { ...utm, content: 'step_3_rules' })}
+            style={stepButtonStyle}
+          >
             Browse Rules
           </Button>
         </Section>
@@ -114,7 +131,10 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
           </li>
         </ul>
 
-        <Button href="https://claudepro.directory/trending" style={primaryButtonStyle}>
+        <Button
+          href={addUTMToURL(`${baseUrl}/trending`, { ...utm, content: 'trending_cta' })}
+          style={primaryButtonStyle}
+        >
           See All Trending
         </Button>
       </Section>
@@ -128,8 +148,11 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
           Check out our tutorials and guides for step-by-step instructions on using Claude
           configurations effectively.
         </Text>
-        <Button href="https://claudepro.directory/guides/tutorials" style={secondaryButtonStyle}>
-          View Tutorials
+        <Button
+          href={addUTMToURL(`${baseUrl}/guides`, { ...utm, content: 'guides_cta' })}
+          style={secondaryButtonStyle}
+        >
+          View Guides
         </Button>
       </Section>
 

@@ -1,54 +1,24 @@
 'use client';
 
 /**
- * Unified Button Component
- *
- * Production-grade, configuration-driven button system consolidating ALL button patterns.
- * Replaces 13 separate button files with a single discriminated union architecture.
- *
- * Architecture Benefits:
- * - DRY: Single source for ALL button logic (~1,279 LOC reduction)
- * - Type-safe: Discriminated unions enforce valid prop combinations
- * - Tree-shakeable: Unused variants compile out
- * - Zero wrappers: Complete consolidation, no backward compatibility
- * - Performance: Optimized re-renders with proper state management
- *
- * Consolidates:
- * - BaseActionButton (509 LOC)
- * - CopyMarkdownButton (206 LOC)
- * - DownloadMarkdownButton (184 LOC)
- * - CopyLLMsButton (189 LOC)
- * - BookmarkButton (149 LOC)
- * - CardCopyAction (74 LOC)
- * - AuthButtons (110 LOC)
- * - GitHubStarsButton (111 LOC)
- * - JobActions (113 LOC)
- *
- * Production Standards (October 2025):
- * - Server action integration with next-safe-action
- * - Supabase auth integration
- * - Rate limiting via server actions
- * - Toast notifications
- * - Analytics tracking
- * - Error boundaries and logging
- * - Email capture integration
- *
- * @module components/ui/unified-button
+ * Unified Button - Database-first button system with 12 variants (auth, content actions, navigation)
  */
 
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useState, useTransition } from 'react';
-import { deleteJob, toggleJobStatus } from '#lib/actions/business';
-import { copyMarkdownAction, downloadMarkdownAction } from '#lib/actions/markdown';
-import { trackCopy } from '#lib/actions/track-view';
-import { addBookmark, removeBookmark } from '#lib/actions/user';
-import { usePostCopyEmail } from '#lib/providers/post-copy-email';
-import { createClient } from '#lib/supabase/client';
+import { usePostCopyEmail } from '@/src/components/infra/providers/post-copy-email-provider';
 import { Button } from '@/src/components/primitives/button';
+import { useButtonSuccess } from '@/src/hooks/use-button-success';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
-import { type CategoryId, VALID_CATEGORIES } from '@/src/lib/config/category-types';
+import { deleteJob, toggleJobStatus } from '@/src/lib/actions/business.actions';
+import { trackUsage } from '@/src/lib/actions/content.actions';
+import { getGitHubStars } from '@/src/lib/actions/github.actions';
+import { copyMarkdownAction, downloadMarkdownAction } from '@/src/lib/actions/markdown-actions';
+import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
+import { trackInteraction } from '@/src/lib/analytics/client';
+import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import {
   ArrowLeft,
@@ -68,18 +38,10 @@ import {
   Trash,
 } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
+import { createClient } from '@/src/lib/supabase/client';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
-/**
- * ==============================================================================
- * DISCRIMINATED UNION TYPE DEFINITIONS
- * ==============================================================================
- */
-
-/**
- * Shared button styling props
- */
 interface ButtonStyleProps {
   size?: 'default' | 'sm' | 'lg' | 'icon';
   buttonVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
@@ -105,7 +67,7 @@ type AuthSignOutVariant = {
  */
 type CopyMarkdownVariant = {
   variant: 'copy-markdown';
-  category: string;
+  category: CategoryId;
   slug: string;
   label?: string;
   showIcon?: boolean;
@@ -115,7 +77,7 @@ type CopyMarkdownVariant = {
 
 type DownloadMarkdownVariant = {
   variant: 'download-markdown';
-  category: string;
+  category: CategoryId;
   slug: string;
   label?: string;
   showIcon?: boolean;
@@ -126,6 +88,9 @@ type CopyLLMsVariant = {
   llmsTxtUrl: string;
   label?: string;
   showIcon?: boolean;
+  category?: CategoryId;
+  slug?: string;
+  contentId?: string;
 } & ButtonStyleProps;
 
 type BookmarkVariant = {
@@ -226,12 +191,6 @@ export type UnifiedButtonProps =
   | LinkVariant
   | AsyncActionVariant;
 
-/**
- * ==============================================================================
- * UNIFIED BUTTON COMPONENT
- * ==============================================================================
- */
-
 export function UnifiedButton(props: UnifiedButtonProps) {
   // Route to specific implementation based on discriminated union variant
   switch (props.variant) {
@@ -269,15 +228,6 @@ export function UnifiedButton(props: UnifiedButtonProps) {
   }
 }
 
-/**
- * ==============================================================================
- * VARIANT IMPLEMENTATIONS
- * ==============================================================================
- */
-
-/**
- * Auth Sign-In Button (GitHub/Google OAuth)
- */
 function AuthSignInButton({
   provider,
   redirectTo,
@@ -295,7 +245,7 @@ function AuthSignInButton({
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback${redirectTo ? `?next=${redirectTo}` : ''}`,
+        redirectTo: `${window.location.origin}/auth/callback${redirectTo ? `?next=${encodeURIComponent(redirectTo)}` : ''}`,
       },
     });
 
@@ -364,7 +314,7 @@ function AuthSignOutButton({
       variant={buttonVariant}
       className={className}
     >
-      <LogOut className="h-4 w-4 mr-2" />
+      <LogOut className="mr-2 h-4 w-4" />
       {loading ? 'Signing out...' : 'Sign out'}
     </Button>
   );
@@ -385,7 +335,7 @@ function CopyMarkdownButton({
   includeMetadata = true,
   includeFooter = false,
 }: CopyMarkdownVariant) {
-  const [isSuccess, setIsSuccess] = useState(false);
+  const { isSuccess, triggerSuccess } = useButtonSuccess();
   const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
   const { showModal } = usePostCopyEmail();
   const { copy } = useCopyToClipboard({
@@ -410,11 +360,20 @@ function CopyMarkdownButton({
 
       if (result?.data?.success && result.data.markdown) {
         await copy(result.data.markdown);
-        setIsSuccess(true);
-        setTimeout(() => setIsSuccess(false), 2000);
+        triggerSuccess();
         toasts.raw.success('Copied to clipboard!', {
           description: 'Markdown content ready to paste',
         });
+
+        // Track usage with database-first trackUsage()
+        if (result.data.content_id) {
+          trackUsage({
+            content_id: result.data.content_id,
+            action_type: 'copy',
+          }).catch(() => {
+            // Intentionally empty - analytics failures should not affect UX
+          });
+        }
 
         // Trigger email modal
         showModal({
@@ -424,19 +383,19 @@ function CopyMarkdownButton({
           ...(referrer && { referrer }),
         });
 
-        // Track analytics (dynamic import for Storybook compatibility)
+        // Track analytics (fire-and-forget)
         const contentLength = result.data.markdown.length;
-        Promise.all([import('#lib/analytics/event-mapper'), import('#lib/analytics/tracker')])
-          .then(([eventMapper, tracker]) => {
-            tracker.trackEvent(eventMapper.getCopyMarkdownEvent(category), {
+        import('@/src/lib/analytics/tracker')
+          .then((tracker) => {
+            tracker.trackEvent('markdown_copied', {
+              category,
               slug,
-              include_metadata: includeMetadata,
-              include_footer: includeFooter,
-              content_length: contentLength,
+              contentLength,
+              copyCount: 1,
             });
           })
           .catch(() => {
-            // Silent fail in Storybook
+            // Intentionally empty - analytics failures should not affect UX
           });
       } else {
         throw new Error(result?.data?.error || 'Failed to generate markdown');
@@ -449,20 +408,22 @@ function CopyMarkdownButton({
   };
 
   return (
-    <Button
-      variant={buttonVariant}
-      size={size}
-      onClick={handleClick}
-      disabled={disabled || status === 'executing' || isSuccess}
-      className={cn(
-        'gap-2 transition-all',
-        isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
-        className
-      )}
-    >
-      {showIcon && (isSuccess ? <Check className="h-4 w-4" /> : <FileText className="h-4 w-4" />)}
-      {size !== 'icon' && <span>{isSuccess ? 'Copied!' : label}</span>}
-    </Button>
+    <motion.div animate={isSuccess ? { scale: [1, 1.05, 1] } : {}} transition={{ duration: 0.3 }}>
+      <Button
+        variant={buttonVariant}
+        size={size}
+        onClick={handleClick}
+        disabled={disabled || status === 'executing' || isSuccess}
+        className={cn(
+          'gap-2 transition-all',
+          isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
+          className
+        )}
+      >
+        {showIcon && (isSuccess ? <Check className="h-4 w-4" /> : <FileText className="h-4 w-4" />)}
+        {size !== 'icon' && <span>{isSuccess ? 'Copied!' : label}</span>}
+      </Button>
+    </motion.div>
   );
 }
 
@@ -479,8 +440,66 @@ function DownloadMarkdownButton({
   showIcon = true,
   disabled = false,
 }: DownloadMarkdownVariant) {
-  const [isSuccess, setIsSuccess] = useState(false);
+  const { isSuccess, triggerSuccess } = useButtonSuccess();
   const { executeAsync, status } = useAction(downloadMarkdownAction);
+  const [zipUrl, setZipUrl] = useState<string | null>(null);
+  const [isLoadingUrl, setIsLoadingUrl] = useState(category === 'skills');
+  const [contentId, setContentId] = useState<string | null>(null);
+  const supabase = createClient();
+
+  // Skills category: Fetch storage_url from database
+  useEffect(() => {
+    if (category !== 'skills') return;
+
+    const fetchStorageData = async () => {
+      const { data, error } = await supabase
+        .from('content')
+        .select('id, storage_url')
+        .eq('category', 'skills')
+        .eq('slug', slug)
+        .single();
+
+      if (!error && data) {
+        setZipUrl(data.storage_url);
+        setContentId(data.id);
+      }
+      setIsLoadingUrl(false);
+    };
+
+    fetchStorageData().catch(() => {
+      // Intentionally empty - fetch errors handled by setting loading state to false
+      setIsLoadingUrl(false);
+    });
+  }, [category, slug, supabase]);
+
+  // Skills category: Download ZIP from Supabase Storage with trackUsage()
+  if (category === 'skills') {
+    const handleZipClick = async () => {
+      if (contentId) {
+        trackUsage({
+          content_id: contentId,
+          action_type: 'download_zip',
+        }).catch(() => {
+          // Intentionally empty - analytics failures should not affect UX
+        });
+      }
+    };
+
+    return (
+      <Button
+        variant={buttonVariant}
+        size={size}
+        asChild
+        disabled={disabled || isLoadingUrl || !zipUrl}
+        className={cn('gap-2 transition-all', className)}
+      >
+        <a href={zipUrl || '#'} download onClick={handleZipClick}>
+          {showIcon && <Download className="h-4 w-4" />}
+          <span>{isLoadingUrl ? 'Loading...' : 'Download ZIP'}</span>
+        </a>
+      </Button>
+    );
+  }
 
   const handleClick = async () => {
     if (status === 'executing') return;
@@ -502,25 +521,34 @@ function DownloadMarkdownButton({
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        setIsSuccess(true);
-        setTimeout(() => setIsSuccess(false), 2000);
+        triggerSuccess();
         toasts.raw.success('Downloaded successfully!', {
           description: `Saved as ${result.data.filename}`,
         });
 
-        // Track analytics (dynamic import for Storybook compatibility)
-        const filename = result.data.filename;
+        // Track usage with database-first trackUsage()
+        if (result.data.content_id) {
+          trackUsage({
+            content_id: result.data.content_id,
+            action_type: 'download_markdown',
+          }).catch(() => {
+            // Intentional
+          });
+        }
+
+        // Track analytics (fire-and-forget)
         const fileSize = blob.size;
-        Promise.all([import('#lib/analytics/event-mapper'), import('#lib/analytics/tracker')])
-          .then(([eventMapper, tracker]) => {
-            tracker.trackEvent(eventMapper.getDownloadMarkdownEvent(category), {
+        import('@/src/lib/analytics/tracker')
+          .then((tracker) => {
+            tracker.trackEvent('markdown_downloaded', {
+              category,
               slug,
-              filename,
-              file_size: fileSize,
+              fileSize,
+              downloadCount: 1,
             });
           })
           .catch(() => {
-            // Silent fail in Storybook
+            // Intentional
           });
       } else {
         throw new Error(result?.data?.error || 'Failed to generate markdown');
@@ -533,20 +561,22 @@ function DownloadMarkdownButton({
   };
 
   return (
-    <Button
-      variant={buttonVariant}
-      size={size}
-      onClick={handleClick}
-      disabled={disabled || status === 'executing' || isSuccess}
-      className={cn(
-        'gap-2 transition-all',
-        isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
-        className
-      )}
-    >
-      {showIcon && (isSuccess ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />)}
-      {size !== 'icon' && <span>{isSuccess ? 'Downloaded!' : label}</span>}
-    </Button>
+    <motion.div animate={isSuccess ? { scale: [1, 1.05, 1] } : {}} transition={{ duration: 0.3 }}>
+      <Button
+        variant={buttonVariant}
+        size={size}
+        onClick={handleClick}
+        disabled={disabled || status === 'executing' || isSuccess}
+        className={cn(
+          'gap-2 transition-all',
+          isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
+          className
+        )}
+      >
+        {showIcon && (isSuccess ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />)}
+        {size !== 'icon' && <span>{isSuccess ? 'Downloaded!' : label}</span>}
+      </Button>
+    </motion.div>
   );
 }
 
@@ -561,9 +591,12 @@ function CopyLLMsButton({
   className,
   showIcon = true,
   disabled = false,
+  category,
+  slug,
+  contentId,
 }: CopyLLMsVariant) {
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const { isSuccess, triggerSuccess } = useButtonSuccess();
   const { copy } = useCopyToClipboard({
     context: {
       component: 'UnifiedButton-CopyLLMs',
@@ -584,11 +617,35 @@ function CopyLLMsButton({
       const content = await response.text();
       await copy(content);
 
-      setIsSuccess(true);
-      setTimeout(() => setIsSuccess(false), 2000);
+      triggerSuccess();
       toasts.raw.success('Copied to clipboard!', {
         description: 'AI-optimized content ready to paste',
       });
+
+      // Track usage with database-first trackUsage() (uses prop from server component)
+      if (contentId) {
+        trackUsage({
+          content_id: contentId,
+          action_type: 'llmstxt',
+        }).catch(() => {
+          // Intentional
+        });
+      }
+
+      // Track analytics (fire-and-forget)
+      if (category && slug) {
+        import('@/src/lib/analytics/tracker')
+          .then((tracker) => {
+            tracker.trackEvent('llmstxt_copied', {
+              category,
+              slug,
+              contentLength: content.length,
+            });
+          })
+          .catch(() => {
+            // Intentional
+          });
+      }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       logger.error('Failed to fetch llms.txt content', err, { llmsTxtUrl });
@@ -601,32 +658,34 @@ function CopyLLMsButton({
   };
 
   return (
-    <Button
-      variant={buttonVariant}
-      size={size}
-      onClick={handleClick}
-      disabled={disabled || isLoading || isSuccess}
-      className={cn(
-        'gap-2 transition-all',
-        isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
-        className
-      )}
-    >
-      {showIcon &&
-        (isSuccess ? (
-          <Check className="h-4 w-4" />
-        ) : isLoading ? (
-          <motion.div
-            animate={{ opacity: [1, 0.5, 1] }}
-            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
-          >
+    <motion.div animate={isSuccess ? { scale: [1, 1.05, 1] } : {}} transition={{ duration: 0.3 }}>
+      <Button
+        variant={buttonVariant}
+        size={size}
+        onClick={handleClick}
+        disabled={disabled || isLoading || isSuccess}
+        className={cn(
+          'gap-2 transition-all',
+          isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
+          className
+        )}
+      >
+        {showIcon &&
+          (isSuccess ? (
+            <Check className="h-4 w-4" />
+          ) : isLoading ? (
+            <motion.div
+              animate={{ opacity: [1, 0.5, 1] }}
+              transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
+            >
+              <Sparkles className="h-4 w-4" />
+            </motion.div>
+          ) : (
             <Sparkles className="h-4 w-4" />
-          </motion.div>
-        ) : (
-          <Sparkles className="h-4 w-4" />
-        ))}
-      {size !== 'icon' && <span>{isSuccess ? 'Copied!' : isLoading ? 'Loading...' : label}</span>}
-    </Button>
+          ))}
+        {size !== 'icon' && <span>{isSuccess ? 'Copied!' : isLoading ? 'Loading...' : label}</span>}
+      </Button>
+    </motion.div>
   );
 }
 
@@ -653,8 +712,8 @@ function BookmarkButton({
   const handleToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    // Validate category - early return if invalid
-    if (!VALID_CATEGORIES.includes(contentType as CategoryId)) {
+    // Type guard validation
+    if (!isValidCategory(contentType)) {
       logger.error('Invalid content type', new Error('Invalid content type'), {
         contentType,
         contentSlug,
@@ -663,8 +722,7 @@ function BookmarkButton({
       return;
     }
 
-    // Safe to cast after validation
-    const validatedCategory = contentType as CategoryId;
+    const validatedCategory = contentType;
 
     startTransition(async () => {
       try {
@@ -753,17 +811,13 @@ function CardCopyButton({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
 
-      // Track copy action (silent fail for analytics)
-      trackCopy({ category, slug }).catch((trackError) => {
-        logger.error(
-          'Failed to track copy action',
-          trackError instanceof Error ? trackError : new Error(String(trackError)),
-          {
-            component: 'UnifiedButton-CardCopy',
-            category,
-            slug,
-          }
-        );
+      // Track copy action (fire-and-forget)
+      trackInteraction({
+        interaction_type: 'copy',
+        content_type: category,
+        content_slug: slug,
+      }).catch(() => {
+        // Intentional
       });
 
       toasts.success.linkCopied();
@@ -814,13 +868,13 @@ function JobToggleButton({
   const [isPending, startTransition] = useTransition();
 
   const handleToggle = () => {
-    const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+    const newStatus = currentStatus === 'active' ? 'draft' : 'active';
 
     startTransition(async () => {
       try {
         const result = await toggleJobStatus({
           id: jobId,
-          status: newStatus as 'active' | 'paused' | 'draft' | 'expired' | 'deleted',
+          status: newStatus as 'draft' | 'pending_review' | 'active' | 'expired' | 'rejected',
         });
 
         if (result?.data?.success) {
@@ -847,12 +901,12 @@ function JobToggleButton({
     >
       {currentStatus === 'active' ? (
         <>
-          <Pause className="h-3 w-3 mr-1" />
+          <Pause className="mr-1 h-3 w-3" />
           Pause
         </>
       ) : (
         <>
-          <Play className="h-3 w-3 mr-1" />
+          <Play className="mr-1 h-3 w-3" />
           Resume
         </>
       )}
@@ -908,14 +962,14 @@ function JobDeleteButton({
       disabled={disabled || isPending || isDeleting}
       className={cn('text-destructive', className)}
     >
-      <Trash className="h-3 w-3 mr-1" />
+      <Trash className="mr-1 h-3 w-3" />
       Delete
     </Button>
   );
 }
 
 /**
- * GitHub Stars Button
+ * GitHub Stars Button - Database-first with 1-hour caching
  */
 function GitHubStarsButton({
   repoUrl = SOCIAL_LINKS.github,
@@ -925,59 +979,42 @@ function GitHubStarsButton({
   disabled = false,
 }: GitHubStarsVariant) {
   const [stars, setStars] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const { executeAsync, status } = useAction(getGitHubStars);
 
   useEffect(() => {
-    const match = repoUrl.match(/github\.com\/([^/]+\/[^/]+)/);
-    if (!match?.[1]) {
-      setLoading(false);
-      return;
-    }
-
-    const repo: string = match[1];
-
     const fetchStars = async () => {
       try {
-        const response = await fetch(`https://api.github.com/repos/${repo}`, {
-          next: { revalidate: 3600 },
-        });
+        const result = await executeAsync({ repo_url: repoUrl });
 
-        if (!response.ok) {
-          throw new Error(`GitHub API returned ${response.status}`);
+        if (
+          result &&
+          'data' in result &&
+          result.data &&
+          typeof result.data === 'object' &&
+          'stars' in result.data
+        ) {
+          setStars(result.data.stars as number);
         }
-
-        const data = await response.json();
-
-        if (typeof data.stargazers_count !== 'number') {
-          throw new Error('Invalid response: missing stargazers_count');
-        }
-
-        setStars(data.stargazers_count);
-        setError(false);
       } catch (err) {
         logger.error(
           'Failed to fetch GitHub stars',
           err instanceof Error ? err : new Error(String(err)),
-          { repo }
+          { repoUrl }
         );
-        setError(true);
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchStars().catch((err) => {
-      logger.error(
-        'Unhandled error in fetchStars',
-        err instanceof Error ? err : new Error(String(err))
-      );
+    fetchStars().catch(() => {
+      // Intentional
     });
-  }, [repoUrl]);
+  }, [repoUrl, executeAsync]);
 
   const handleClick = () => {
     window.open(repoUrl, '_blank', 'noopener,noreferrer');
   };
+
+  const isLoading = status === 'executing';
+  const hasError = status === 'hasErrored';
 
   return (
     <Button
@@ -986,11 +1023,11 @@ function GitHubStarsButton({
       onClick={handleClick}
       disabled={disabled}
       className={cn('gap-2', className)}
-      aria-label={`Star us on GitHub${stars ? ` - ${stars} stars` : ''}${error ? ' (star count unavailable)' : ''}`}
-      title={error ? 'Star count temporarily unavailable. Click to visit GitHub.' : undefined}
+      aria-label={`Star us on GitHub${stars ? ` - ${stars} stars` : ''}${hasError ? ' (star count unavailable)' : ''}`}
+      title={hasError ? 'Star count temporarily unavailable. Click to visit GitHub.' : undefined}
     >
       <Github className="h-4 w-4" aria-hidden="true" />
-      {!loading && stars !== null && !error && (
+      {!isLoading && stars !== null && !hasError && (
         <span className="font-medium tabular-nums">{stars.toLocaleString()}</span>
       )}
     </Button>
@@ -1017,7 +1054,7 @@ function BackButton({
       disabled={disabled}
       className={cn('text-muted-foreground hover:text-foreground', className)}
     >
-      <ArrowLeft className="h-4 w-4 mr-2" />
+      <ArrowLeft className="mr-2 h-4 w-4" />
       {label}
     </Button>
   );
@@ -1078,17 +1115,7 @@ function AsyncActionButton({
   onClick,
 }: AsyncActionVariant) {
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  const handleSetSuccess = (success: boolean) => {
-    setIsSuccess(success);
-
-    if (success) {
-      setTimeout(() => {
-        setIsSuccess(false);
-      }, successDuration);
-    }
-  };
+  const { isSuccess, triggerSuccess } = useButtonSuccess(successDuration);
 
   const showError = (message: string, description?: string) => {
     toasts.raw.error(message, {
@@ -1117,7 +1144,7 @@ function AsyncActionButton({
     try {
       await onClick({
         setLoading: setIsLoading,
-        setSuccess: handleSetSuccess,
+        setSuccess: triggerSuccess,
         showError,
         showSuccess,
         logError,

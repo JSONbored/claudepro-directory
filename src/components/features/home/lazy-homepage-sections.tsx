@@ -3,8 +3,9 @@ import { FeaturedSectionSkeleton, Skeleton } from '@/src/components/primitives/l
 
 /**
  * Lazy-loaded FeaturedSections with skeleton loading state
- * Client-only: Individual content pages are fully SSR'd for SEO
- * Reduces initial bundle by ~15-20KB, improves Time to Interactive
+ * OPTIMIZATION (2025-10-22): Enabled SSR for better perceived performance and SEO
+ * SSR renders content immediately, eliminating skeleton flash
+ * Code-splitting still reduces initial bundle by ~15-20KB
  */
 export const LazyFeaturedSections = dynamic(
   () =>
@@ -13,21 +14,22 @@ export const LazyFeaturedSections = dynamic(
     })),
   {
     loading: () => (
-      <div className="space-y-16 mb-16">
+      <div className="mb-16 space-y-16">
         {/* 5 featured categories + 1 jobs section */}
         {[...Array(6)].map((_, i) => (
           <FeaturedSectionSkeleton key={`featured-loading-${i + 1}`} />
         ))}
       </div>
     ),
-    ssr: false, // Client-only: Content already indexed via individual pages
+    ssr: true, // SSR enabled: Better UX and SEO, content rendered immediately
   }
 );
 
 /**
  * Lazy-loaded TabsSection with skeleton loading state
- * Client-only: Interactive tabs - users click to reveal content
- * Reduces initial bundle by ~10-15KB, improves Time to Interactive
+ * OPTIMIZATION (2025-10-22): Enabled SSR for better perceived performance
+ * SSR renders tabs immediately, eliminating skeleton flash
+ * Interactive functionality works client-side after hydration
  */
 export const LazyTabsSection = dynamic(
   () =>
@@ -38,7 +40,7 @@ export const LazyTabsSection = dynamic(
     loading: () => (
       <div className="space-y-8">
         {/* Tabs skeleton */}
-        <div className="flex gap-2 p-1 bg-muted rounded-lg">
+        <div className="flex gap-2 rounded-lg bg-muted p-1">
           {[...Array(7)].map((_, i) => (
             <Skeleton key={`tab-skeleton-${i + 1}`} size="lg" width="3xl" className="flex-1" />
           ))}
@@ -47,7 +49,7 @@ export const LazyTabsSection = dynamic(
         <FeaturedSectionSkeleton />
       </div>
     ),
-    ssr: false, // Client-only: Interactive component, no SEO benefit
+    ssr: true, // SSR enabled: Better UX, tabs render immediately
   }
 );
 

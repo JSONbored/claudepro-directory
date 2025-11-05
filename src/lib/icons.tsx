@@ -39,6 +39,7 @@ import {
   ArrowUpRight,
   Award,
   BarChart,
+  Bell,
   Bookmark,
   BookmarkCheck,
   BookOpen,
@@ -47,9 +48,11 @@ import {
   Building,
   Building2,
   Calendar,
+  Camera,
   Check,
   CheckCircle,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   ChevronUp,
   Chrome,
@@ -75,6 +78,7 @@ import {
   Globe,
   Handshake,
   Hash,
+  Heart,
   HelpCircle,
   Home,
   Info,
@@ -154,6 +158,7 @@ export {
 export {
   ArrowLeft,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   ChevronUp,
   Info,
@@ -177,6 +182,7 @@ export {
   Medal,
   Trophy,
   BarChart,
+  Bell,
   Bookmark,
   BookmarkCheck,
   Bot,
@@ -184,6 +190,7 @@ export {
   Building,
   Building2,
   Calendar,
+  Camera,
   Chrome,
   Circle,
   Code,
@@ -202,6 +209,7 @@ export {
   Globe,
   Handshake,
   Hash,
+  Heart,
   HelpCircle,
   Home,
   Layers,
@@ -279,23 +287,41 @@ export const LogoIcon = ({ className }: { className?: string }) => (
     role="img"
     aria-label="Claude Pro Directory Logo"
   >
-    {/* Background circle in theme background */}
-    <circle
-      cx="12"
-      cy="12"
-      r="11"
-      fill="hsl(var(--background))"
-      stroke="hsl(var(--accent))"
-      strokeWidth="2"
-    />
-    {/* 8-pointed star/asterisk rays in Claude orange */}
+    {/* Background with Claude brand color */}
+    <rect width="24" height="24" rx="4.5" fill="#CC785C" />
+    {/* 8-pointed star/asterisk rays - white */}
     <path
       d="M12 2 L12 8 M12 16 L12 22 M4 12 L8 12 M16 12 L20 12 M6.5 6.5 L9 9 M15 15 L17.5 17.5 M17.5 6.5 L15 9 M9 15 L6.5 17.5"
-      stroke="hsl(var(--accent))"
+      stroke="white"
       strokeWidth="1.5"
       strokeLinecap="round"
     />
-    {/* Center dot in Claude orange */}
-    <circle cx="12" cy="12" r="1" fill="hsl(var(--accent))" />
+    {/* Center dot - white */}
+    <circle cx="12" cy="12" r="1" fill="white" />
   </svg>
 );
+
+/**
+ * Icon Name to Component Resolver
+ * Maps database icon name strings to LucideIcon components for form fields
+ * Supports React 19 server→client serialization (strings only)
+ */
+const FORM_ICON_MAP: Record<string, LucideIcon> = {
+  BookOpen,
+  Code,
+  ExternalLink,
+  Github,
+  Lightbulb,
+  Rocket,
+  Send,
+  Server,
+  Sparkles,
+  Tag,
+  Tags,
+  Terminal,
+};
+
+export function resolveFormIcon(iconName?: string): LucideIcon | undefined {
+  if (!iconName) return undefined;
+  return FORM_ICON_MAP[iconName];
+}

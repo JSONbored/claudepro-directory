@@ -1,17 +1,12 @@
-import { headers } from 'next/headers';
 import Script from 'next/script';
-import { APP_CONFIG } from '@/src/lib/constants';
-import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
+import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
+import { serializeJsonLd } from '@/src/lib/utils/jsonld.utils';
 
 /**
  * Generate organization structured data for the entire site
  * This provides search engines and AI with comprehensive information about the organization
  */
 export async function OrganizationStructuredData() {
-  // Extract nonce from CSP header for script security
-  const headersList = await headers();
-  const cspHeader = headersList.get('content-security-policy');
-  const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
   const baseUrl = APP_CONFIG.url;
 
   const organizationSchema = {
@@ -33,10 +28,10 @@ export async function OrganizationStructuredData() {
 
     // Contact and social media
     sameAs: [
-      'https://github.com/claudepro-directory',
-      'https://twitter.com/claudepro',
-      'https://linkedin.com/company/claudepro-directory',
-    ],
+      SOCIAL_LINKS.github,
+      ...(SOCIAL_LINKS.twitter ? [SOCIAL_LINKS.twitter] : []),
+      ...(SOCIAL_LINKS.discord ? [SOCIAL_LINKS.discord] : []),
+    ].filter(Boolean),
 
     // Publishing information
     publishingPrinciples: `${baseUrl}/about#publishing-principles`,
@@ -275,7 +270,6 @@ export async function OrganizationStructuredData() {
             __html: serializeJsonLd(schema),
           }}
           strategy="afterInteractive"
-          nonce={nonce}
         />
       ))}
     </>

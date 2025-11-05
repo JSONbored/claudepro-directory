@@ -22,6 +22,8 @@ import {
   Text,
 } from '@react-email/components';
 import type * as React from 'react';
+import { addUTMToURL } from '@/src/lib/utils/email-utm';
+import type { EmailUTMParams } from '@/src/lib/utils/utm-templates';
 import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme';
 
 export interface BaseLayoutProps {
@@ -45,6 +47,12 @@ export interface BaseLayoutProps {
    * Custom footer content (overrides default footer)
    */
   customFooter?: React.ReactNode;
+
+  /**
+   * UTM parameters for email tracking
+   * Used to add UTM tags to footer links
+   */
+  utm?: EmailUTMParams;
 }
 
 /**
@@ -63,7 +71,16 @@ export function BaseLayout({
   children,
   showFooter = true,
   customFooter,
+  utm,
 }: BaseLayoutProps) {
+  const baseUrl = 'https://claudepro.directory';
+
+  // Helper to add UTM to URL if utm params are provided
+  const utmLink = (url: string, contentId: string) => {
+    if (!utm) return url;
+    return addUTMToURL(url, { ...utm, content: contentId });
+  };
+
   return (
     <Html lang="en" dir="ltr">
       <Head>
@@ -75,7 +92,7 @@ export function BaseLayout({
         <Container style={containerStyle}>
           {/* Header with Claude branding */}
           <Section style={headerStyle}>
-            <Link href="https://claudepro.directory" style={logoLinkStyle}>
+            <Link href={utmLink(baseUrl, 'header_logo')} style={logoLinkStyle}>
               <Text style={logoTextStyle}>
                 <span style={logoClaudeStyle}>Claude</span>
                 <span style={logoProStyle}>Pro</span>
@@ -94,7 +111,7 @@ export function BaseLayout({
                 <Section style={footerStyle}>
                   <Text style={footerTextStyle}>
                     You received this email because you subscribed to{' '}
-                    <Link href="https://claudepro.directory" style={footerLinkStyle}>
+                    <Link href={utmLink(baseUrl, 'footer_home')} style={footerLinkStyle}>
                       ClaudePro Directory
                     </Link>
                     .
@@ -108,7 +125,10 @@ export function BaseLayout({
                       Email Preferences
                     </Link>
                     {' · '}
-                    <Link href="https://claudepro.directory/privacy" style={footerLinkStyle}>
+                    <Link
+                      href={utmLink(`${baseUrl}/privacy`, 'footer_privacy')}
+                      style={footerLinkStyle}
+                    >
                       Privacy Policy
                     </Link>
                   </Text>

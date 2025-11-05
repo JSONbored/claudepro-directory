@@ -35,11 +35,16 @@ lerna-debug.log*
 # Project specific
 .claude/
 .cursor/
-src/generated/
-generated/
 
 # Build-generated API files
 public/static-api/
+
+# Skill ZIP packages (build artifacts copied from content/skills/*.zip)
+# Source ZIPs in content/skills/ are git-tracked for GitHub discoverability
+public/downloads/skills/*.zip
+
+# Exception: Allow skill ZIPs in content/skills/ (overrides global ~/.gitignore_global *.zip rule)
+!content/skills/*.zip
 
 # Dynamic sitemap served by src/app/sitemap.ts (do not commit generated file)
 public/sitemap.xml
@@ -62,6 +67,7 @@ coverage/
 .parcel-cache/
 .turbo/
 .temp/
+.vercel-cache/
 
 # Test artifacts
 test-results/
@@ -79,6 +85,8 @@ config/reports/lighthouse/
 # Backup files
 *.orig
 *.bak
+backups/
+.backup-db-hash
 
 # Build analysis
 stats.html
@@ -102,3 +110,26 @@ config/tools/tech-debt/.history.json
 
 *storybook.log
 storybook-static
+
+MIGRATION_GUIDE.md
+
+redis-export.json
+
+.zod-schema-hash
+
+scripts/import-redis-seed-data.ts
+
+scripts/redis-export.ts
+
+.skill-packages-hash-cache
+
+# Supabase schema dump (contains secrets in trigger definitions)
+supabase/schema.sql
+
+.launchd/com.claudepro.backup.plist
+
+.launchd/install.sh
+
+.launchd/README.md
+
+.launchd/uninstall.sh

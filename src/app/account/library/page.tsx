@@ -1,3 +1,8 @@
+/**
+ * Library Page - Database-First RPC Architecture
+ * Single RPC call to get_user_library() replaces 2 separate queries
+ */
+
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
@@ -10,12 +15,50 @@ import {
 } from '@/src/components/primitives/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import { ROUTES } from '@/src/lib/constants/routes';
-import { Bookmark, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
+import { Bookmark as BookmarkIcon, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
+// Force dynamic rendering - requires authentication
+export const dynamic = 'force-dynamic';
+
 export const metadata = generatePageMetadata('/account/library');
+
+type Bookmark = {
+  id: string;
+  user_id: string;
+  content_type: string;
+  content_slug: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type UserCollection = {
+  id: string;
+  user_id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  is_public: boolean;
+  item_count: number;
+  view_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
+type LibraryData = {
+  bookmarks: Bookmark[];
+  collections: UserCollection[];
+  stats: {
+    bookmarkCount: number;
+    collectionCount: number;
+    totalCollectionItems: number;
+    totalCollectionViews: number;
+  };
+};
 
 export default async function LibraryPage() {
   const supabase = await createClient();
@@ -25,28 +68,30 @@ export default async function LibraryPage() {
 
   if (!user) return null;
 
-  // Get user's bookmarks
-  const { data: bookmarks } = await supabase
-    .from('bookmarks')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  // Single RPC call replaces 2 separate queries
+  const { data, error } = await supabase.rpc('get_user_library', {
+    p_user_id: user.id,
+  });
 
-  // Get user's collections
-  const { data: collections } = await supabase
-    .from('user_collections')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  if (error) {
+    logger.error('Failed to load user library', error, { userId: user.id });
+    return (
+      <div className="space-y-6">
+        <h1 className="font-bold text-3xl">My Library</h1>
+        <p className="text-muted-foreground">Unable to load library. Please try again later.</p>
+      </div>
+    );
+  }
 
-  const bookmarkCount = bookmarks?.length || 0;
-  const collectionCount = collections?.length || 0;
+  const libraryData = data as LibraryData;
+  const { bookmarks, collections, stats } = libraryData;
+  const { bookmarkCount, collectionCount } = stats;
 
   return (
     <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
-          <h1 className="text-3xl font-bold mb-2">My Library</h1>
+          <h1 className="mb-2 font-bold text-3xl">My Library</h1>
           <p className="text-muted-foreground">
             {bookmarkCount} bookmarks • {collectionCount} collections
           </p>
@@ -62,7 +107,7 @@ export default async function LibraryPage() {
       <Tabs defaultValue="bookmarks" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="bookmarks" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <Bookmark className="h-4 w-4" />
+            <BookmarkIcon className="h-4 w-4" />
             Bookmarks ({bookmarkCount})
           </TabsTrigger>
           <TabsTrigger value="collections" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -75,9 +120,9 @@ export default async function LibraryPage() {
           {!bookmarks || bookmarks.length === 0 ? (
             <Card>
               <CardContent className={'flex flex-col items-center py-12'}>
-                <Bookmark className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold mb-2">No bookmarks yet</h3>
-                <p className={'text-muted-foreground text-center max-w-md'}>
+                <BookmarkIcon className="mb-4 h-12 w-12 text-muted-foreground" />
+                <h3 className="mb-2 font-semibold text-xl">No bookmarks yet</h3>
+                <p className={'max-w-md text-center text-muted-foreground'}>
                   Start exploring the directory and bookmark your favorite agents, MCP servers,
                   rules, and more!
                 </p>
@@ -112,7 +157,7 @@ export default async function LibraryPage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className={'text-xs text-muted-foreground'}>
+                    <p className={'text-muted-foreground text-xs'}>
                       Saved {new Date(bookmark.created_at).toLocaleDateString()}
                     </p>
                   </CardContent>
@@ -126,9 +171,9 @@ export default async function LibraryPage() {
           {!collections || collections.length === 0 ? (
             <Card>
               <CardContent className={'flex flex-col items-center py-12'}>
-                <FolderOpen className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold mb-2">No collections yet</h3>
-                <p className={'text-muted-foreground text-center max-w-md mb-4'}>
+                <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
+                <h3 className="mb-2 font-semibold text-xl">No collections yet</h3>
+                <p className={'mb-4 max-w-md text-center text-muted-foreground'}>
                   Organize your bookmarks into custom collections! Group related configurations
                   together and share them with others.
                 </p>
@@ -167,10 +212,10 @@ export default async function LibraryPage() {
                     </CardHeader>
                     <CardContent>
                       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                        <p className={'text-xs text-muted-foreground'}>
+                        <p className={'text-muted-foreground text-xs'}>
                           {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'}
                         </p>
-                        <p className={'text-xs text-muted-foreground'}>
+                        <p className={'text-muted-foreground text-xs'}>
                           {collection.view_count} views
                         </p>
                       </div>

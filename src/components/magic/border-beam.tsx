@@ -50,99 +50,48 @@ interface BorderBeamProps {
 
 export function BorderBeam({
   className,
-  size = 200,
   duration = 8,
   delay = 0,
   colorFrom = '#ffaa40',
   colorTo = '#9c40ff',
   borderWidth = 1.5,
-}: BorderBeamProps) {
+}: Omit<BorderBeamProps, 'size'>) {
+  // Animated gradient border that traces the full perimeter
+  // Using Motion.dev for universal browser compatibility
   return (
-    <div
+    <motion.div
       className={cn(
         'pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]',
         className
       )}
+      style={{
+        padding: borderWidth,
+      }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay }}
     >
-      {/* Top border beam */}
       <motion.div
-        className="absolute h-[2px]"
-        style={{
-          top: 0,
-          left: 0,
-          width: `${size}px`,
-          height: `${borderWidth}px`,
-          background: `linear-gradient(to right, ${colorFrom}, ${colorTo}, transparent)`,
-        }}
-        initial={{ x: 0 }}
-        animate={{ x: '100vw' }}
+        className="h-full w-full"
+        style={
+          {
+            background: `conic-gradient(from var(--angle), transparent 0%, ${colorFrom} 5%, ${colorTo} 10%, ${colorFrom} 15%, transparent 20%, transparent 100%)`,
+            ['--angle' as string]: '0deg',
+          } satisfies Record<string, string>
+        }
+        animate={
+          {
+            ['--angle' as string]: '360deg',
+          } satisfies Record<string, string>
+        }
         transition={{
           duration,
-          delay,
           repeat: Number.POSITIVE_INFINITY,
           ease: 'linear',
         }}
-      />
-
-      {/* Right border beam */}
-      <motion.div
-        className="absolute w-[2px]"
-        style={{
-          top: 0,
-          right: 0,
-          width: `${borderWidth}px`,
-          height: `${size}px`,
-          background: `linear-gradient(to bottom, ${colorFrom}, ${colorTo}, transparent)`,
-        }}
-        initial={{ y: 0 }}
-        animate={{ y: '100vh' }}
-        transition={{
-          duration,
-          delay: delay + duration / 4,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: 'linear',
-        }}
-      />
-
-      {/* Bottom border beam */}
-      <motion.div
-        className="absolute h-[2px]"
-        style={{
-          bottom: 0,
-          right: 0,
-          width: `${size}px`,
-          height: `${borderWidth}px`,
-          background: `linear-gradient(to left, ${colorFrom}, ${colorTo}, transparent)`,
-        }}
-        initial={{ x: 0 }}
-        animate={{ x: '-100vw' }}
-        transition={{
-          duration,
-          delay: delay + duration / 2,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: 'linear',
-        }}
-      />
-
-      {/* Left border beam */}
-      <motion.div
-        className="absolute w-[2px]"
-        style={{
-          bottom: 0,
-          left: 0,
-          width: `${borderWidth}px`,
-          height: `${size}px`,
-          background: `linear-gradient(to top, ${colorFrom}, ${colorTo}, transparent)`,
-        }}
-        initial={{ y: 0 }}
-        animate={{ y: '-100vh' }}
-        transition={{
-          duration,
-          delay: delay + (duration * 3) / 4,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: 'linear',
-        }}
-      />
-    </div>
+      >
+        <div className="h-full w-full rounded-[inherit] bg-background" />
+      </motion.div>
+    </motion.div>
   );
 }

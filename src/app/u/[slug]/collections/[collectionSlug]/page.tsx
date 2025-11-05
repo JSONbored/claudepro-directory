@@ -1,3 +1,8 @@
+/**
+ * User Collection Detail Page - Database-First RPC Architecture
+ * Single RPC call to get_user_collection_detail() replaces 3 separate queries
+ */
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -11,69 +16,85 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { Separator } from '@/src/components/primitives/separator';
-import { trackView } from '@/src/lib/actions/track-view';
+import { trackInteraction } from '@/src/lib/analytics/client';
 import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
-import { createClient } from '@/src/lib/supabase/server';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database.types';
+
+// Collection pages may have private content
+export const dynamic = 'force-dynamic';
 
 interface PublicCollectionPageProps {
   params: Promise<{ slug: string; collectionSlug: string }>;
 }
 
+type CollectionDetailData = {
+  user: {
+    id: string;
+    slug: string;
+    name: string;
+    image: string | null;
+    tier: string;
+  };
+  collection: {
+    id: string;
+    user_id: string;
+    slug: string;
+    name: string;
+    description: string | null;
+    is_public: boolean;
+    item_count: number;
+    view_count: number;
+    created_at: string;
+    updated_at: string;
+  };
+  items: Array<{
+    id: string;
+    collection_id: string;
+    content_type: string;
+    content_slug: string;
+    notes: string | null;
+    order: number;
+    added_at: string;
+  }>;
+  isOwner: boolean;
+};
+
 /**
- * Fetch public user collection data
- *
- * Shared data loader for both metadata generation and page rendering.
- * Next.js 15 automatically deduplicates this during the same render cycle.
- *
- * @param slug - User profile slug
- * @param collectionSlug - Collection slug
- * @returns Collection data or null if not found
+ * Fetch collection detail using optimized RPC
  */
-async function getPublicCollection(slug: string, collectionSlug: string) {
-  const supabase = await createAdminClient();
+async function getCollectionDetail(
+  slug: string,
+  collectionSlug: string,
+  viewerId?: string
+): Promise<CollectionDetailData | null> {
+  const supabase = createAnonClient();
 
-  // Fetch profile user
-  const { data: profileUser } = await supabase.from('users').select('*').eq('slug', slug).single();
+  const { data, error } = await supabase.rpc('get_user_collection_detail', {
+    p_user_slug: slug,
+    p_collection_slug: collectionSlug,
+    ...(viewerId && { p_viewer_id: viewerId }),
+  });
 
-  if (!profileUser) {
+  if (error) {
+    logger.error('Failed to load collection detail', error, { slug, collectionSlug });
     return null;
   }
 
-  // Fetch public collection
-  const { data: collection } = await supabase
-    .from('user_collections')
-    .select('*')
-    .eq('user_id', profileUser.id)
-    .eq('slug', collectionSlug)
-    .eq('is_public', true)
-    .single();
-
-  return collection;
+  return data as CollectionDetailData | null;
 }
 
 export async function generateMetadata({ params }: PublicCollectionPageProps): Promise<Metadata> {
   const { slug, collectionSlug } = await params;
 
-  // Load collection data (automatically deduplicated by Next.js)
-  const collection = await getPublicCollection(slug, collectionSlug);
-
-  // Transform to metadata context item
-  // Converts null to undefined for TypeScript compatibility
-  const collectionItem = collection
-    ? {
-        name: collection.name,
-        description: collection.description ?? undefined,
-        dateAdded: collection.created_at,
-        lastModified: collection.updated_at,
-      }
-    : undefined;
+  const collectionData = await getCollectionDetail(slug, collectionSlug);
 
   return generatePageMetadata('/u/:slug/collections/:collectionSlug', {
     params: { slug, collectionSlug },
-    item: collectionItem,
+    item: collectionData?.collection as Tables<'user_collections'> | undefined,
     slug,
     collectionSlug,
   });
@@ -83,43 +104,28 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   const { slug, collectionSlug } = await params;
 
   // Get current user (if logged in) for ownership check
-  const currentUserClient = await createClient();
+  const supabase = createAnonClient();
   const {
     data: { user: currentUser },
-  } = await currentUserClient.auth.getUser();
+  } = await supabase.auth.getUser();
 
-  // Load collection data (automatically deduplicated by Next.js with generateMetadata call)
-  const collection = await getPublicCollection(slug, collectionSlug);
+  // Single RPC call replaces 3 separate queries (user, collection, items)
+  const collectionData = await getCollectionDetail(slug, collectionSlug, currentUser?.id);
 
-  if (!collection) {
+  if (!collectionData) {
     notFound();
   }
 
-  // Get profile owner for display
-  const supabase = await createAdminClient();
-  const { data: profileUser } = await supabase.from('users').select('*').eq('slug', slug).single();
-
-  if (!profileUser) {
-    notFound();
-  }
-
-  // Get collection items
-  const { data: items } = await supabase
-    .from('collection_items')
-    .select('*')
-    .eq('collection_id', collection.id)
-    .order('order', { ascending: true });
+  const { user: profileUser, collection, items, isOwner } = collectionData;
 
   // Track view (async, non-blocking)
-  // Note: Using 'guides' category as a placeholder since trackView expects specific content types
-  trackView({
-    category: 'guides',
-    slug: `user-collection-${slug}-${collectionSlug}`,
+  trackInteraction({
+    interaction_type: 'view',
+    content_type: 'guides',
+    content_slug: `user-collection-${slug}-${collectionSlug}`,
   }).catch(() => {
     // Ignore tracking errors
   });
-
-  const isOwner = currentUser?.id === profileUser.id;
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -137,7 +143,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           <div>
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-2`}>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <h1 className="text-3xl font-bold">{collection.name}</h1>
+                <h1 className="font-bold text-3xl">{collection.name}</h1>
                 <UnifiedBadge variant="base" style="outline">
                   Public
                 </UnifiedBadge>
@@ -152,10 +158,10 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
             </div>
 
             {collection.description && (
-              <p className={'text-muted-foreground max-w-3xl'}>{collection.description}</p>
+              <p className={'max-w-3xl text-muted-foreground'}>{collection.description}</p>
             )}
 
-            <div className={'text-sm text-muted-foreground mt-2'}>
+            <div className={'mt-2 text-muted-foreground text-sm'}>
               Created by{' '}
               <Link href={`/u/${slug}`} className="text-primary hover:underline">
                 {profileUser.name || slug}
@@ -167,7 +173,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
           {/* Collection Items */}
           <div>
-            <h2 className="text-xl font-semibold mb-4">Items in this Collection</h2>
+            <h2 className="mb-4 font-semibold text-xl">Items in this Collection</h2>
 
             {!items || items.length === 0 ? (
               <Card>
@@ -181,7 +187,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                   <Card key={item.id}>
                     <CardHeader>
                       <div className="flex items-start gap-4">
-                        <div className="text-2xl font-bold text-muted-foreground/50 w-8">
+                        <div className="w-8 font-bold text-2xl text-muted-foreground/50">
                           {index + 1}
                         </div>
                         <div className="flex-1">
@@ -222,26 +228,26 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           <div className="grid gap-4 sm:grid-cols-3">
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Total Items</CardTitle>
+                <CardTitle className="font-medium text-sm">Total Items</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{collection.item_count}</div>
+                <div className="font-bold text-2xl">{collection.item_count}</div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Views</CardTitle>
+                <CardTitle className="font-medium text-sm">Views</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{collection.view_count}</div>
+                <div className="font-bold text-2xl">{collection.view_count}</div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Created</CardTitle>
+                <CardTitle className="font-medium text-sm">Created</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-base font-medium">
+                <div className="font-medium text-base">
                   {new Date(collection.created_at).toLocaleDateString('en-US', {
                     month: 'long',
                     day: 'numeric',

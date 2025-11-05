@@ -7,7 +7,7 @@
  * Renders collection-specific sections: prerequisites, embedded items, installation order, compatibility.
  *
  * **Architecture:**
- * - Server Component: Uses batchFetch from batch.utils (imports cache.server)
+ * - Server Component: Uses batchFetch from batch.utils
  * - NOT Storybook-compatible (requires server-side execution)
  * - Follows composition pattern from unified-detail-page
  * - Reuses ConfigCard for embedded item display
@@ -26,34 +26,30 @@ import { Suspense } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
-import { getContentBySlug } from '@/src/lib/content/content-loaders';
+import { getCategoryConfigs, isValidCategory } from '@/src/lib/config/category-config';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { getContentBySlug } from '@/src/lib/content/supabase-content-loader';
 import { AlertTriangle, CheckCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import type {
-  CollectionContent,
-  CollectionItemReference,
-} from '@/src/lib/schemas/content/collection.schema';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
+
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchMap } from '@/src/lib/utils/batch.utils';
 import { getViewTransitionStyle } from '@/src/lib/utils/view-transitions.utils';
+import type { Database } from '@/src/types/database.types';
 
-/**
- * Item with loaded content data
- */
-interface ItemWithData extends CollectionItemReference {
-  data: UnifiedContentItem;
+interface ItemWithData {
+  category: string;
+  slug: string;
+  reason?: string;
+  data: ContentItem;
 }
-
-import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 
 /**
  * Collection Detail View Props
  */
 export interface CollectionDetailViewProps {
   /** Collection content with all metadata */
-  collection: CollectionContent;
+  collection: Database['public']['Tables']['content']['Row'] & { category: 'collections' };
 }
 
 /**
@@ -66,22 +62,40 @@ export interface CollectionDetailViewProps {
  * @returns Collection detail view JSX
  */
 export async function CollectionDetailView({ collection }: CollectionDetailViewProps) {
-  // Load all referenced items with full content (parallel batch operation)
-  const itemsWithContent = await batchMap(
-    collection.items,
-    async (itemRef: CollectionItemReference): Promise<ItemWithData | null> => {
-      try {
-        const item = await getContentBySlug(itemRef.category as CategoryId, itemRef.slug);
-        return item ? { ...itemRef, data: item } : null;
-      } catch (error) {
-        logger.error('Failed to load collection item', error as Error, {
-          category: itemRef.category,
-          slug: itemRef.slug,
-        });
+  // Load category configs once (single RPC call)
+  const categoryConfigs = await getCategoryConfigs();
+
+  const metadata = (collection.metadata as Record<string, unknown>) || {};
+  const items =
+    (metadata.items as Array<{ category: string; slug: string; reason?: string }>) || [];
+
+  const itemsWithContent = await batchMap(items, async (itemRef): Promise<ItemWithData | null> => {
+    const refData = itemRef as { category: string; slug: string; reason?: string };
+
+    try {
+      // Type guard validation
+      if (!isValidCategory(refData.category)) {
+        logger.error(
+          'Invalid category in collection item reference',
+          new Error('Invalid category'),
+          {
+            category: refData.category,
+            slug: refData.slug,
+          }
+        );
         return null;
       }
+
+      const item = await getContentBySlug(refData.category, refData.slug);
+      return item ? { ...refData, data: item } : null;
+    } catch (error) {
+      logger.error('Failed to load collection item', error as Error, {
+        category: refData.category,
+        slug: refData.slug,
+      });
+      return null;
     }
-  );
+  });
 
   // Filter out failed loads
   const validItems = itemsWithContent.filter(
@@ -108,26 +122,32 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
     categories: Object.keys(itemsByCategory).length,
   });
 
+  const prerequisites = metadata.prerequisites as string[] | undefined;
+  const installationOrder = metadata.installation_order as string[] | undefined;
+  const compatibility = metadata.compatibility as
+    | { claudeDesktop?: boolean; claudeCode?: boolean }
+    | undefined;
+
   return (
     <div className="space-y-12" style={getViewTransitionStyle('card', collection.slug)}>
       {/* Prerequisites Section */}
-      {collection.prerequisites && collection.prerequisites.length > 0 && (
+      {prerequisites && prerequisites.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-xl">
               <AlertTriangle className="h-5 w-5 text-yellow-500" aria-hidden="true" />
               Prerequisites
             </CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {collection.prerequisites.map((prereq: string) => (
+              {prerequisites.map((prereq: string) => (
                 <li key={prereq} className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
                   <CheckCircle
                     className={`h-4 w-4 text-muted-foreground ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
                     aria-hidden="true"
                   />
-                  <span className="text-sm text-muted-foreground">{prereq}</span>
+                  <span className="text-muted-foreground text-sm">{prereq}</span>
                 </li>
               ))}
             </ul>
@@ -137,7 +157,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
 
       {/* What's Included Section - Embedded ConfigCards */}
       <div>
-        <h2 className="text-2xl font-bold text-foreground mb-6">
+        <h2 className="mb-6 font-bold text-2xl text-foreground">
           What's Included ({validItems.length} {validItems.length === 1 ? 'item' : 'items'})
         </h2>
 
@@ -154,9 +174,9 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
             {(Object.entries(itemsByCategory) as [string, ItemWithData[]][]).map(
               ([category, items]) => (
                 <div key={category}>
-                  <h3 className="text-lg font-semibold text-foreground mb-4">
-                    {UNIFIED_CATEGORY_REGISTRY[category as keyof typeof UNIFIED_CATEGORY_REGISTRY]
-                      ?.pluralTitle || category}{' '}
+                  <h3 className="mb-4 font-semibold text-foreground text-lg">
+                    {categoryConfigs[category as keyof typeof categoryConfigs]?.pluralTitle ||
+                      category}{' '}
                     ({items.length})
                   </h3>
                   <div className="grid gap-4 sm:grid-cols-1">
@@ -179,26 +199,26 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
       </div>
 
       {/* Installation Order Section */}
-      {collection.installationOrder && collection.installationOrder.length > 0 && (
+      {installationOrder && installationOrder.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-xl">Recommended Installation Order</CardTitle>
           </CardHeader>
           <CardContent>
             <ol className="space-y-2">
-              {collection.installationOrder.map((slug: string, index: number) => {
+              {installationOrder.map((slug: string, index: number) => {
                 const item = validItems.find((i: ItemWithData) => i?.slug === slug);
                 return (
                   <li key={slug} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                     <span
                       className={
-                        'flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-sm font-semibold'
+                        'flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary text-sm'
                       }
                       aria-hidden="true"
                     >
                       {index + 1}
                     </span>
-                    <span className="text-sm text-foreground mt-0.5">
+                    <span className="mt-0.5 text-foreground text-sm">
                       {item?.data?.title || slug}
                     </span>
                   </li>
@@ -210,7 +230,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
       )}
 
       {/* Compatibility Section */}
-      {collection.compatibility && (
+      {compatibility && (
         <Card>
           <CardHeader>
             <CardTitle className="text-xl">Compatibility</CardTitle>
@@ -218,25 +238,23 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                {collection.compatibility.claudeDesktop ? (
+                {compatibility.claudeDesktop ? (
                   <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
                 ) : (
                   <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
                 )}
-                <span className="text-sm text-muted-foreground">
-                  Claude Desktop{' '}
-                  {collection.compatibility.claudeDesktop ? '(Supported)' : '(Not Supported)'}
+                <span className="text-muted-foreground text-sm">
+                  Claude Desktop {compatibility.claudeDesktop ? '(Supported)' : '(Not Supported)'}
                 </span>
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                {collection.compatibility.claudeCode ? (
+                {compatibility.claudeCode ? (
                   <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
                 ) : (
                   <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
                 )}
-                <span className="text-sm text-muted-foreground">
-                  Claude Code{' '}
-                  {collection.compatibility.claudeCode ? '(Supported)' : '(Not Supported)'}
+                <span className="text-muted-foreground text-sm">
+                  Claude Code {compatibility.claudeCode ? '(Supported)' : '(Not Supported)'}
                 </span>
               </div>
             </div>

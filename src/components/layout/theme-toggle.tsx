@@ -75,13 +75,30 @@ export function ThemeToggle() {
   };
 
   /**
+   * Async localStorage write - deferred to prevent blocking animations
+   * Uses requestIdleCallback for true non-blocking persistence
+   */
+  const saveThemeToStorage = (newTheme: 'light' | 'dark') => {
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        localStorage.setItem('theme', newTheme);
+      });
+    } else {
+      // Fallback for Safari (no requestIdleCallback)
+      setTimeout(() => {
+        localStorage.setItem('theme', newTheme);
+      }, 0);
+    }
+  };
+
+  /**
    * Handle theme toggle with View Transition animation
    * Captures click position for circular reveal effect
    *
    * Performance optimizations:
    * - DOM updates before React state (prevents blocking)
    * - Deferred React state update (after animation starts)
-   * - localStorage write happens async
+   * - localStorage write deferred to requestIdleCallback (non-blocking)
    *
    * Performance monitoring (development only):
    * - Tracks animation start/end timing
@@ -100,8 +117,10 @@ export function ThemeToggle() {
       const transition = startTransition(() => {
         // Update DOM immediately (this is what the animation sees)
         document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
       });
+
+      // Defer localStorage write to prevent blocking animation
+      saveThemeToStorage(newTheme);
 
       // Update React state after animation starts (non-blocking)
       // This prevents React re-render from blocking the animation
@@ -128,7 +147,7 @@ export function ThemeToggle() {
       document.documentElement.classList.add('theme-transition');
 
       setTheme(newTheme);
-      localStorage.setItem('theme', newTheme);
+      saveThemeToStorage(newTheme);
       document.documentElement.setAttribute('data-theme', newTheme);
 
       setTimeout(() => {
@@ -159,8 +178,10 @@ export function ThemeToggle() {
 
             startTransition(() => {
               document.documentElement.setAttribute('data-theme', newTheme);
-              localStorage.setItem('theme', newTheme);
             });
+
+            // Defer localStorage write to prevent blocking
+            saveThemeToStorage(newTheme);
 
             requestAnimationFrame(() => {
               setTheme(newTheme);
@@ -168,7 +189,7 @@ export function ThemeToggle() {
           } else {
             document.documentElement.classList.add('theme-transition');
             setTheme(newTheme);
-            localStorage.setItem('theme', newTheme);
+            saveThemeToStorage(newTheme);
             document.documentElement.setAttribute('data-theme', newTheme);
             setTimeout(() => {
               document.documentElement.classList.remove('theme-transition');

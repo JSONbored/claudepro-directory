@@ -1,219 +1,217 @@
 'use server';
 
 /**
- * User Actions
- * Consolidated server actions for all user-related functionality
- *
- * This file consolidates the following domains into a single, tree-shakeable module:
- * - Profile management (update, refresh from OAuth)
- * - Bookmarks (add, remove, batch operations, check status)
- * - Follow relationships (follow/unfollow, check status)
- * - Activity tracking (summary, timeline)
- *
- * Architecture:
- * - All actions use authedAction or rateLimitedAction middleware
- * - Repository pattern for database operations
- * - Fully tree-shakeable with named exports
- * - Type-safe with Zod schemas
- *
- * Benefits:
- * - Single source of truth for user domain
- * - Reduced import overhead
- * - Consistent error handling and logging
- * - Easier maintenance and testing
+ * User Actions - Database-First Architecture
+ * PostgreSQL validates ALL data. TypeScript provides compile-time types only.
  */
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
-import { activityRepository } from '@/src/lib/repositories/activity.repository';
-import { bookmarkRepository } from '@/src/lib/repositories/bookmark.repository';
-import { followerRepository } from '@/src/lib/repositories/follower.repository';
-import { type User, userRepository } from '@/src/lib/repositories/user.repository';
-import { userInteractionRepository } from '@/src/lib/repositories/user-interaction.repository';
-import {
-  activityFilterSchema,
-  activitySummarySchema,
-  activityTimelineResponseSchema,
-} from '@/src/lib/schemas/activity.schema';
-import { userIdSchema } from '@/src/lib/schemas/branded-types.schema';
-import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
-import { updateProfileSchema } from '@/src/lib/schemas/profile.schema';
-import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
-import { batchAll } from '@/src/lib/utils/batch.utils';
+import { Constants, type Enums } from '@/src/types/database.types';
 
-// ============================================
-// PROFILE ACTIONS
-// ============================================
+// TypeScript types for RPC function returns (database validates, TypeScript trusts)
+type ActivitySummary = {
+  total_posts: number;
+  total_comments: number;
+  total_votes: number;
+  total_submissions: number;
+  merged_submissions: number;
+  total_activity: number;
+};
 
-/**
- * Update user profile
- */
-export const updateProfile = authedAction
-  .metadata({
-    actionName: 'updateProfile',
-    category: 'user',
-  })
-  .schema(updateProfileSchema)
-  .action(async ({ parsedInput, ctx }) => {
-    const { userId } = ctx;
-
-    // Transform data for database storage
-    // Empty strings → null for nullable text fields (bio, work, website, social_x_link)
-    // This handles the impedance mismatch between form inputs (empty string for clearing)
-    // and database representation (null for absent values)
-    const updateData: Partial<User> = {};
-
-    for (const [key, value] of Object.entries(parsedInput)) {
-      if (value !== undefined) {
-        // Convert empty strings to null for nullable text fields
-        if (['bio', 'work', 'website', 'social_x_link'].includes(key) && value === '') {
-          updateData[key as keyof User] = null as never;
-        } else {
-          updateData[key as keyof User] = value as never;
-        }
-      }
-    }
-
-    // Update via repository (includes caching and automatic error handling)
-    const result = await userRepository.update(userId, updateData);
-
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to update profile');
-    }
-
-    if (!result.data) {
-      throw new Error('Profile data not returned');
-    }
-
-    const data = result.data;
-
-    // Revalidate relevant paths
-    revalidatePath(`/u/${data.slug}`);
-    revalidatePath('/account');
-    revalidatePath('/account/settings');
-
-    return {
-      success: true,
-      profile: data,
-    };
-  });
-
-/**
- * Refresh profile from OAuth provider
- * Syncs latest avatar and name from GitHub/Google
- */
-export const refreshProfileFromOAuth = authedAction
-  .metadata({
-    actionName: 'refreshProfileFromOAuth',
-    category: 'user',
-    rateLimit: {
-      maxRequests: 5, // Limit to 5 refreshes per minute
-      windowSeconds: 60,
-    },
-  })
-  .schema(z.void())
-  .action(async ({ ctx }) => {
-    const { userId } = ctx;
-
-    // Refresh via repository (includes cache invalidation and syncing)
-    const result = await userRepository.refreshFromOAuth(userId);
-
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to refresh profile');
-    }
-
-    const profile = result.data;
-
-    // Revalidate paths
-    if (profile?.slug) {
-      revalidatePath(`/u/${profile.slug}`);
-    }
-    revalidatePath('/account');
-    revalidatePath('/account/settings');
-
-    return {
-      success: true,
-      message: 'Profile refreshed from OAuth provider',
-    };
-  });
-
-// ============================================
-// BOOKMARK ACTIONS
-// ============================================
-
-// Bookmark schema
-const bookmarkSchema = z.object({
-  content_type: categoryIdSchema,
-  content_slug: nonEmptyString
-    .max(200, 'Content slug is too long')
-    .regex(
-      /^[a-zA-Z0-9-_/]+$/,
-      'Slug can only contain letters, numbers, hyphens, underscores, and forward slashes'
-    )
-    .transform((val: string) => val.toLowerCase().trim()),
-  notes: z.string().max(500).optional(),
+// Activity filter schema (query parameters - NOT stored data, validation is useful here)
+const activityFilterSchema = z.object({
+  type: z.enum(['post', 'comment', 'vote', 'submission']).optional(),
+  limit: z.number().int().positive().max(100).default(50),
+  offset: z.number().int().nonnegative().default(0),
 });
 
-/**
- * Add a bookmark
- */
+// Activity types (database validates structure via RPC function)
+type BaseActivity = {
+  id: string;
+  type: 'post' | 'comment' | 'vote' | 'submission';
+  created_at: string;
+  user_id: string;
+};
+
+type PostActivity = BaseActivity & {
+  type: 'post';
+  title: string;
+  body: string;
+  content_type: string;
+  content_slug: string;
+  updated_at: string;
+};
+
+type CommentActivity = BaseActivity & {
+  type: 'comment';
+  body: string;
+  post_id: string;
+  parent_id: string | null;
+  updated_at: string;
+};
+
+type VoteActivity = BaseActivity & {
+  type: 'vote';
+  vote_type: 'upvote' | 'downvote';
+  post_id: string;
+};
+
+type SubmissionActivity = BaseActivity & {
+  type: 'submission';
+  title: string;
+  description: string | null;
+  content_type: string;
+  submission_url: string | null;
+  status: Enums<'submission_status'>;
+  updated_at: string;
+};
+
+export type Activity = PostActivity | CommentActivity | VoteActivity | SubmissionActivity;
+
+type ActivityTimelineResponse = {
+  activities: Activity[];
+  hasMore: boolean;
+  total: number;
+};
+
+import { nonEmptyString } from '@/src/lib/schemas/primitives';
+import {
+  bookmarkInsertTransformSchema,
+  removeBookmarkSchema,
+} from '@/src/lib/schemas/transforms/data-normalization.schema';
+
+import { createClient } from '@/src/lib/supabase/server';
+
+export const updateProfile = authedAction
+  .metadata({
+    actionName: 'updateProfile' as const,
+    category: 'user' as const,
+  })
+  .schema(
+    z.object({
+      display_name: z.string().optional(),
+      bio: z.string().optional(),
+      work: z.string().optional(),
+      website: z.string().optional().or(z.literal('')),
+      social_x_link: z.string().optional(),
+      interests: z.array(z.string()).optional(),
+      profile_public: z.boolean().optional(),
+      follow_email: z.boolean().optional(),
+    })
+  )
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      const { userId } = ctx;
+      const supabase = await createClient();
+
+      const { data, error } = await supabase.rpc('update_user_profile', {
+        p_user_id: userId,
+        ...(parsedInput.display_name && { p_display_name: parsedInput.display_name }),
+        ...(parsedInput.bio !== undefined && { p_bio: parsedInput.bio }),
+        ...(parsedInput.work !== undefined && { p_work: parsedInput.work }),
+        ...(parsedInput.website !== undefined && { p_website: parsedInput.website }),
+        ...(parsedInput.social_x_link !== undefined && {
+          p_social_x_link: parsedInput.social_x_link,
+        }),
+        ...(parsedInput.interests && { p_interests: parsedInput.interests }),
+        ...(parsedInput.profile_public !== undefined && {
+          p_profile_public: parsedInput.profile_public,
+        }),
+        ...(parsedInput.follow_email !== undefined && { p_follow_email: parsedInput.follow_email }),
+      });
+
+      if (error) {
+        throw new Error(`Failed to update profile: ${error.message}`);
+      }
+
+      const result = data as { success: boolean; profile: { slug: string } };
+
+      revalidatePath(`/u/${result.profile.slug}`);
+      revalidatePath('/account');
+      revalidatePath('/account/settings');
+
+      return result;
+    } catch (error) {
+      logger.error(
+        'Failed to update user profile',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId, hasDisplayName: !!parsedInput.display_name }
+      );
+      throw error;
+    }
+  });
+
+export const refreshProfileFromOAuth = authedAction
+  .metadata({ actionName: 'refreshProfileFromOAuth', category: 'user' })
+  .schema(z.void())
+  .action(async ({ ctx }) => {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('refresh_profile_from_oauth', {
+        user_id: ctx.userId,
+      });
+      if (error) throw new Error(`Failed to refresh profile from OAuth: ${error.message}`);
+
+      const profile = data as { slug: string } | null;
+      if (profile?.slug) revalidatePath(`/u/${profile.slug}`);
+      revalidatePath('/account');
+      revalidatePath('/account/settings');
+
+      return { success: true, message: 'Profile refreshed from OAuth provider' };
+    } catch (error) {
+      logger.error(
+        'Failed to refresh profile from OAuth',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId }
+      );
+      throw error;
+    }
+  });
+
 export const addBookmark = authedAction
   .metadata({
     actionName: 'addBookmark',
     category: 'user',
   })
-  .schema(bookmarkSchema)
+  .schema(bookmarkInsertTransformSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const { content_type, content_slug, notes } = parsedInput;
-    const { userId } = ctx;
+    try {
+      const { content_type, content_slug, notes } = parsedInput;
+      const { userId } = ctx;
+      const supabase = await createClient();
 
-    // Create bookmark via repository
-    const result = await bookmarkRepository.create({
-      user_id: userId,
-      content_type,
-      content_slug,
-      notes: notes || null,
-      created_at: new Date().toISOString(),
-    });
-
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to create bookmark');
-    }
-
-    // Track interaction for personalization (fire-and-forget)
-    userInteractionRepository
-      .track(content_type, content_slug, 'bookmark', userId, undefined, {})
-      .catch((err) => {
-        logger.warn('Failed to track bookmark interaction', undefined, {
-          content_type,
-          content_slug,
-          error: err instanceof Error ? err.message : String(err),
-        });
+      const { data, error } = await supabase.rpc('add_bookmark', {
+        p_user_id: userId,
+        p_content_type: content_type,
+        p_content_slug: content_slug,
+        ...(notes && { p_notes: notes }),
       });
 
-    // Revalidate account pages
-    revalidatePath('/account');
-    revalidatePath('/account/library');
+      if (error) {
+        throw new Error(`Failed to create bookmark: ${error.message}`);
+      }
 
-    // OPTIMIZATION: Invalidate personalization caches
-    // User bookmarked content → For You feed should update recommendations
-    revalidatePath('/for-you');
+      revalidatePath('/account');
+      revalidatePath('/account/library');
+      revalidatePath('/for-you');
 
-    return {
-      success: true,
-      bookmark: result.data,
-    };
+      return data as { success: boolean; bookmark: unknown };
+    } catch (error) {
+      logger.error(
+        'Failed to add bookmark',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          contentType: parsedInput.content_type,
+          contentSlug: parsedInput.content_slug,
+        }
+      );
+      throw error;
+    }
   });
-
-/**
- * Remove a bookmark
- */
-const removeBookmarkSchema = z.object({
-  content_type: categoryIdSchema,
-  content_slug: nonEmptyString,
-});
 
 export const removeBookmark = authedAction
   .metadata({
@@ -222,177 +220,116 @@ export const removeBookmark = authedAction
   })
   .schema(removeBookmarkSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const { content_type, content_slug } = parsedInput;
-    const { userId } = ctx;
+    try {
+      const { content_type, content_slug } = parsedInput;
+      const { userId } = ctx;
+      const supabase = await createClient();
 
-    // Delete bookmark via repository
-    const result = await bookmarkRepository.deleteByUserAndContent(
-      userId,
-      content_type,
-      content_slug
-    );
+      const { data, error } = await supabase.rpc('remove_bookmark', {
+        p_user_id: userId,
+        p_content_type: content_type,
+        p_content_slug: content_slug,
+      });
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to remove bookmark');
+      if (error) {
+        throw new Error(`Failed to delete bookmark: ${error.message}`);
+      }
+
+      revalidatePath('/account');
+      revalidatePath('/account/library');
+      revalidateTag(`user-${userId}`, 'max');
+      revalidatePath('/for-you');
+
+      return data as { success: boolean };
+    } catch (error) {
+      logger.error(
+        'Failed to remove bookmark',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          userId: ctx.userId,
+          contentType: parsedInput.content_type,
+          contentSlug: parsedInput.content_slug,
+        }
+      );
+      throw error;
     }
-
-    // Revalidate account pages
-    revalidatePath('/account');
-    revalidatePath('/account/library');
-
-    // OPTIMIZATION: Invalidate personalization caches
-    // User removed bookmark → For You feed should update recommendations
-    revalidateTag(`user-${userId}`);
-    revalidatePath('/for-you');
-
-    return {
-      success: true,
-    };
   });
 
-/**
- * Check if content is bookmarked
- * Note: This is a server action for client components
- */
 export async function isBookmarked(content_type: string, content_slug: string): Promise<boolean> {
-  const { createClient } = await import('@/src/lib/supabase/server');
   const supabase = await createClient();
-
-  // Get current user
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (!user) return false;
 
-  if (!user) {
-    return false;
-  }
+  const { data } = await supabase.rpc('is_bookmarked', {
+    p_user_id: user.id,
+    p_content_type: content_type,
+    p_content_slug: content_slug,
+  });
 
-  // Check via repository
-  const result = await bookmarkRepository.findByUserAndContent(user.id, content_type, content_slug);
-
-  return result.success && result.data !== null;
+  return data ?? false;
 }
 
-/**
- * Add multiple bookmarks at once (bulk operation)
- * Useful for "save all recommendations" feature
- */
 export const addBookmarkBatch = authedAction
   .metadata({
     actionName: 'addBookmarkBatch',
     category: 'user',
-    rateLimit: {
-      maxRequests: 10, // Limited to prevent abuse
-      windowSeconds: 60,
-    },
   })
   .schema(
     z.object({
       items: z
         .array(
           z.object({
-            content_type: categoryIdSchema,
+            content_type: z.enum([...Constants.public.Enums.content_category] as [
+              Enums<'content_category'>,
+              ...Enums<'content_category'>[],
+            ]),
             content_slug: nonEmptyString,
           })
         )
         .min(1)
-        .max(20), // Max 20 bookmarks at once
+        .max(20),
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const { userId } = ctx;
-
-    // Get Supabase client for direct database operations
-    const { createClient } = await import('@/src/lib/supabase/server');
-    const supabase = await createClient();
-
     try {
-      // Prepare batch insert
-      const bookmarksToInsert = parsedInput.items.map((item) => ({
-        user_id: userId,
-        content_type: item.content_type,
-        content_slug: item.content_slug,
-        notes: null,
-      }));
+      const { userId } = ctx;
+      const supabase = await createClient();
 
-      // Batch insert (will skip duplicates due to unique constraint)
-      const { data, error } = await supabase
-        .from('bookmarks')
-        .upsert(bookmarksToInsert, {
-          onConflict: 'user_id,content_type,content_slug',
-          ignoreDuplicates: true,
-        })
-        .select();
-
-      if (error) {
-        logger.error('Failed to batch bookmark', error);
-        throw new Error('Failed to save bookmarks');
-      }
-
-      // Track interactions for each bookmark (non-blocking)
-      const interactionPromises = parsedInput.items.map((item) =>
-        Promise.resolve(
-          supabase
-            .from('user_interactions')
-            .insert({
-              user_id: userId,
-              content_type: item.content_type,
-              content_slug: item.content_slug,
-              interaction_type: 'bookmark',
-              metadata: { source: 'bulk_save' },
-            })
-            .then(({ error: intError }) => {
-              if (intError) {
-                logger.warn('Failed to track batch bookmark interaction', undefined, {
-                  content_type: item.content_type,
-                  content_slug: item.content_slug,
-                });
-              }
-            })
-        )
-      );
-
-      // Fire and forget interaction tracking
-      batchAll(interactionPromises, 'bookmark-interactions').catch(() => {
-        // Non-critical - don't block on tracking failures
+      const { data, error } = await supabase.rpc('batch_add_bookmarks', {
+        p_user_id: userId,
+        p_items: JSON.stringify(parsedInput.items),
       });
 
-      // Revalidate pages
+      if (error) {
+        throw new Error(`Failed to save bookmarks: ${error.message}`);
+      }
+
+      const result = data as { success: boolean; saved_count: number; total_requested: number };
+
       revalidatePath('/account');
       revalidatePath('/account/library');
-
-      // OPTIMIZATION: Invalidate personalization caches
-      // Bulk bookmark operation → For You feed should update recommendations
-      revalidateTag(`user-${userId}`);
+      revalidateTag(`user-${userId}`, 'max');
       revalidatePath('/for-you');
 
-      return {
-        success: true,
-        saved_count: data?.length || 0,
-        total_requested: parsedInput.items.length,
-      };
+      return result;
     } catch (error) {
       logger.error(
-        'Batch bookmark failed',
-        error instanceof Error ? error : new Error(String(error))
+        'Failed to batch add bookmarks',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId, itemCount: parsedInput.items.length }
       );
-      throw new Error('Failed to save bookmarks');
+      throw error;
     }
   });
 
-// ============================================
-// FOLLOW ACTIONS
-// ============================================
-
 const followSchema = z.object({
   action: z.enum(['follow', 'unfollow']),
-  user_id: userIdSchema,
-  slug: z.string(), // User slug for revalidation
+  user_id: z.string(), // Database validates UUID format
+  slug: z.string(),
 });
 
-/**
- * Follow/unfollow a user
- */
 export const toggleFollow = authedAction
   .metadata({
     actionName: 'toggleFollow',
@@ -400,118 +337,96 @@ export const toggleFollow = authedAction
   })
   .schema(followSchema)
   .action(async ({ parsedInput: { action, user_id, slug }, ctx }) => {
-    const { userId } = ctx;
+    try {
+      const { userId } = ctx;
+      const supabase = await createClient();
 
-    // Can't follow yourself
-    if (userId === user_id) {
-      throw new Error('You cannot follow yourself');
-    }
-
-    if (action === 'follow') {
-      // Create follow relationship via repository (includes caching)
-      const result = await followerRepository.create({
-        follower_id: userId,
-        following_id: user_id,
+      const { data, error } = await supabase.rpc('toggle_follow', {
+        p_follower_id: userId,
+        p_following_id: user_id,
+        p_action: action,
       });
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to follow user');
+      if (error) {
+        throw new Error(`Failed to ${action} user: ${error.message}`);
       }
 
-      // TODO: Send email notification (if user has follow_email enabled)
-      // This would use resendService similar to existing email flows
-    } else {
-      // Delete follow relationship via repository (includes cache invalidation)
-      const result = await followerRepository.deleteByUserIds(userId, user_id);
+      revalidatePath(`/u/${slug}`);
+      revalidatePath('/account');
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to unfollow user');
-      }
+      return data as { success: boolean; action: string };
+    } catch (error) {
+      logger.error(
+        `Failed to ${action} user`,
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId, targetUserId: user_id, action }
+      );
+      throw error;
     }
-
-    revalidatePath(`/u/${slug}`);
-    revalidatePath('/account');
-
-    return {
-      success: true,
-      action,
-    };
   });
 
-/**
- * Check if current user follows another user via repository (includes caching)
- */
 export async function isFollowing(user_id: string): Promise<boolean> {
-  const { createClient } = await import('@/src/lib/supabase/server');
   const supabase = await createClient();
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (!user) return false;
 
-  if (!user) {
-    return false;
-  }
-
-  // Validate user_id at boundary
-  const validatedUserId = userIdSchema.parse(user_id);
-
-  // Check via repository (includes caching)
-  const result = await followerRepository.isFollowing(user.id, validatedUserId);
-
-  return result.success ? (result.data ?? false) : false;
-}
-
-// ============================================
-// ACTIVITY ACTIONS
-// ============================================
-
-/**
- * Get user's activity summary statistics
- */
-export const getActivitySummary = authedAction
-  .metadata({
-    actionName: 'getActivitySummary',
-    category: 'user',
-  })
-  .schema(z.void())
-  .outputSchema(activitySummarySchema)
-  .action(async ({ ctx }) => {
-    const { userId } = ctx;
-
-    // Fetch via repository (includes caching and parallel queries)
-    const result = await activityRepository.getSummary(userId);
-
-    if (!(result.success && result.data)) {
-      throw new Error(result.error || 'Failed to fetch activity summary');
-    }
-
-    return result.data;
+  // Database validates UUID format
+  const { data } = await supabase.rpc('is_following', {
+    follower_id: user.id,
+    following_id: user_id,
   });
 
-/**
- * Get user's activity timeline
- */
-export const getActivityTimeline = authedAction
-  .metadata({
-    actionName: 'getActivityTimeline',
-    category: 'user',
-  })
-  .schema(activityFilterSchema)
-  .outputSchema(activityTimelineResponseSchema)
-  .action(async ({ parsedInput: { type, limit, offset }, ctx }) => {
-    const { userId } = ctx;
+  return data ?? false;
+}
 
-    // Fetch via repository (includes type filtering, sorting, and pagination)
-    const result = await activityRepository.getTimeline(userId, {
-      ...(type ? { type } : {}),
-      limit,
-      offset,
-    });
+export const getActivitySummary = authedAction
+  .metadata({ actionName: 'getActivitySummary', category: 'user' })
+  .schema(z.void())
+  .action(async ({ ctx }) => {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('get_user_activity_summary', {
+        p_user_id: ctx.userId,
+      });
 
-    if (!(result.success && result.data)) {
-      throw new Error(result.error || 'Failed to fetch activity timeline');
+      if (error) throw new Error(`Failed to fetch user activity summary: ${error.message}`);
+
+      // Database validates structure, TypeScript provides compile-time types
+      return data as ActivitySummary;
+    } catch (error) {
+      logger.error(
+        'Failed to get activity summary',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId }
+      );
+      throw error;
     }
+  });
 
-    return result.data;
+export const getActivityTimeline = authedAction
+  .metadata({ actionName: 'getActivityTimeline', category: 'user' })
+  .schema(activityFilterSchema)
+  .action(async ({ parsedInput: { type, limit = 20, offset = 0 }, ctx }) => {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('get_user_activity_timeline', {
+        p_user_id: ctx.userId,
+        ...(type && { p_type: type }),
+        p_limit: limit,
+        p_offset: offset,
+      });
+      if (error) throw new Error(`Failed to fetch activity timeline: ${error.message}`);
+
+      // Database validates structure, TypeScript provides compile-time types
+      return data as ActivityTimelineResponse;
+    } catch (error) {
+      logger.error(
+        'Failed to get activity timeline',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId, type: type || 'all', limit, offset }
+      );
+      throw error;
+    }
   });

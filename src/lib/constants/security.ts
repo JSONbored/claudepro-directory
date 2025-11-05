@@ -7,6 +7,8 @@
  * @module constants/security
  */
 
+import { APP_CONFIG } from '@/src/lib/constants';
+
 /**
  * Security Configuration
  * Used for trusted hostname validation, security headers, and allowed origins
@@ -26,7 +28,7 @@ export const SECURITY_CONFIG = {
   },
   // Allowed origins for postMessage
   allowedOrigins: [
-    'https://claudepro.directory',
+    APP_CONFIG.url,
     'https://www.claudepro.directory',
     'https://dev.claudepro.directory',
   ] as const,

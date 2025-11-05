@@ -12,7 +12,6 @@
  */
 
 import { motion } from 'motion/react';
-import Link from 'next/link';
 import { useId, useState, useTransition } from 'react';
 import { z } from 'zod';
 import { Button } from '@/src/components/primitives/button';
@@ -26,9 +25,14 @@ import {
 import { Input } from '@/src/components/primitives/input';
 import { Label } from '@/src/components/primitives/label';
 import { submitConfiguration } from '@/src/lib/actions/business.actions';
-import { COMMON_FIELDS, FORM_CONFIGS, TAGS_FIELD } from '@/src/lib/config/form-field-config';
-import { ROUTES } from '@/src/lib/constants/routes';
-import { CheckCircle, ExternalLink, Github, Send } from '@/src/lib/icons';
+import {
+  SUBMISSION_CONTENT_TYPES,
+  type SubmissionContentType,
+  type SubmissionFormConfig,
+  type SubmissionFormSection,
+  type TextFieldDefinition,
+} from '@/src/lib/forms/types';
+import { CheckCircle, Github, Send } from '@/src/lib/icons';
 import type { configSubmissionSchema } from '@/src/lib/schemas/form.schema';
 // Note: Server action already validates with configSubmissionSchema
 // Client-side validation would be redundant and cause type mismatches
@@ -46,7 +50,38 @@ import { type Template, TemplateSelector } from './template-selector';
  */
 const examplesArraySchema = z.array(z.string());
 
-type ContentType = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills';
+const DEFAULT_CONTENT_TYPE: SubmissionContentType = 'agents';
+
+const EMPTY_SECTION: SubmissionFormSection = {
+  nameField: null,
+  common: [],
+  typeSpecific: [],
+  tags: [],
+};
+
+const FALLBACK_NAME_FIELD: TextFieldDefinition = {
+  type: 'text',
+  name: 'name',
+  label: 'Name *',
+  placeholder: 'e.g., "React Query Expert" or "Supabase MCP Server"',
+  required: true,
+  helpText: 'A clear, descriptive name for your configuration',
+  gridColumn: 'full',
+};
+
+const FORM_TYPE_LABELS: Record<SubmissionContentType, string> = {
+  agents: 'Claude Agent (System Prompt)',
+  mcp: 'MCP Server',
+  rules: 'Claude Rule (Expertise)',
+  commands: 'Command',
+  hooks: 'Hook',
+  statuslines: 'Statusline',
+  skills: 'Skill',
+};
+
+interface SubmitFormClientProps {
+  formConfig: SubmissionFormConfig;
+}
 
 /**
  * Submit Form - Uncontrolled Form Pattern with Minimal State
@@ -82,13 +117,13 @@ type ContentType = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statusli
  * @see https://react.dev/reference/react-dom/components/input#controlling-an-input-with-a-state-variable
  * @see https://developer.mozilla.org/en-US/docs/Web/API/FormData
  */
-export function SubmitFormClient() {
+export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
   /**
    * Minimal React State (only what requires reactivity)
    */
 
   /** Content type for dynamic field rendering */
-  const [contentType, setContentType] = useState<ContentType>('agents');
+  const [contentType, setContentType] = useState<SubmissionContentType>(DEFAULT_CONTENT_TYPE);
 
   /** Name for real-time duplicate checking */
   const [name, setName] = useState('');
@@ -98,9 +133,9 @@ export function SubmitFormClient() {
 
   /** Submission result for success message display */
   const [submissionResult, setSubmissionResult] = useState<{
-    prUrl: string;
-    prNumber: number;
-    slug: string;
+    submission_id: string;
+    status: string;
+    message: string;
   } | null>(null);
 
   /**
@@ -126,51 +161,60 @@ export function SubmitFormClient() {
     if (descInput) descInput.value = template.description;
 
     const categoryInput = form.querySelector('[name="category"]') as HTMLInputElement;
-    if (categoryInput) categoryInput.value = template.category;
+    if (categoryInput && template.category) categoryInput.value = template.category;
 
     const tagsInput = form.querySelector('[name="tags"]') as HTMLInputElement;
-    if (tagsInput) tagsInput.value = template.tags;
+    if (tagsInput && template.tags) tagsInput.value = template.tags;
 
-    // Type-specific fields with TypeScript type narrowing
     if (template.type === 'agent') {
       const promptInput = form.querySelector('[name="systemPrompt"]') as HTMLTextAreaElement;
-      if (promptInput) promptInput.value = template.systemPrompt;
+      if (promptInput && typeof template.systemPrompt === 'string')
+        promptInput.value = template.systemPrompt;
 
       const tempInput = form.querySelector('[name="temperature"]') as HTMLInputElement;
-      if (tempInput) tempInput.value = template.temperature.toString();
+      if (tempInput && typeof template.temperature === 'number')
+        tempInput.value = template.temperature.toString();
 
       const tokensInput = form.querySelector('[name="maxTokens"]') as HTMLInputElement;
-      if (tokensInput) tokensInput.value = template.maxTokens.toString();
+      if (tokensInput && typeof template.maxTokens === 'number')
+        tokensInput.value = template.maxTokens.toString();
     }
 
     if (template.type === 'rules') {
       const rulesInput = form.querySelector('[name="rulesContent"]') as HTMLTextAreaElement;
-      if (rulesInput) rulesInput.value = template.rulesContent;
+      if (rulesInput && typeof template.rulesContent === 'string')
+        rulesInput.value = template.rulesContent;
 
       const tempInput = form.querySelector('[name="temperature"]') as HTMLInputElement;
-      if (tempInput) tempInput.value = template.temperature.toString();
+      if (tempInput && typeof template.temperature === 'number')
+        tempInput.value = template.temperature.toString();
 
       const tokensInput = form.querySelector('[name="maxTokens"]') as HTMLInputElement;
-      if (tokensInput) tokensInput.value = template.maxTokens.toString();
+      if (tokensInput && typeof template.maxTokens === 'number')
+        tokensInput.value = template.maxTokens.toString();
     }
 
     if (template.type === 'mcp') {
       const npmInput = form.querySelector('[name="npmPackage"]') as HTMLInputElement;
-      if (npmInput) npmInput.value = template.npmPackage;
+      if (npmInput && typeof template.npmPackage === 'string') npmInput.value = template.npmPackage;
 
       const typeInput = form.querySelector('[name="serverType"]') as HTMLSelectElement;
-      if (typeInput) typeInput.value = template.serverType;
+      if (typeInput && typeof template.serverType === 'string')
+        typeInput.value = template.serverType;
 
       const installInput = form.querySelector('[name="installCommand"]') as HTMLInputElement;
-      if (installInput) installInput.value = template.installCommand;
+      if (installInput && typeof template.installCommand === 'string')
+        installInput.value = template.installCommand;
 
       const configInput = form.querySelector('[name="configCommand"]') as HTMLInputElement;
-      if (configInput) configInput.value = template.configCommand;
+      if (configInput && typeof template.configCommand === 'string')
+        configInput.value = template.configCommand;
 
       const toolsInput = form.querySelector('[name="toolsDescription"]') as HTMLTextAreaElement;
-      if (toolsInput) toolsInput.value = template.toolsDescription;
+      if (toolsInput && typeof template.toolsDescription === 'string')
+        toolsInput.value = template.toolsDescription;
 
-      if (template.envVars) {
+      if (template.envVars && typeof template.envVars === 'string') {
         const envInput = form.querySelector('[name="envVars"]') as HTMLTextAreaElement;
         if (envInput) envInput.value = template.envVars;
       }
@@ -178,7 +222,8 @@ export function SubmitFormClient() {
 
     if (template.type === 'command') {
       const cmdInput = form.querySelector('[name="commandContent"]') as HTMLTextAreaElement;
-      if (cmdInput) cmdInput.value = template.commandContent;
+      if (cmdInput && typeof template.commandContent === 'string')
+        cmdInput.value = template.commandContent;
     }
 
     toasts.success.templateApplied();
@@ -257,9 +302,9 @@ export function SubmitFormClient() {
 
         if (result?.data?.success) {
           setSubmissionResult({
-            prUrl: result.data.prUrl,
-            prNumber: result.data.prNumber,
-            slug: result.data.slug,
+            submission_id: result.data.submission_id,
+            status: result.data.status,
+            message: result.data.message,
           });
 
           toasts.success.submissionCreated(contentType);
@@ -272,6 +317,20 @@ export function SubmitFormClient() {
     });
   };
 
+  const getSection = (type: SubmissionContentType): SubmissionFormSection => {
+    return formConfig[type] ?? EMPTY_SECTION;
+  };
+
+  const activeSection = getSection(contentType);
+  const sharedSection = formConfig[DEFAULT_CONTENT_TYPE] ?? EMPTY_SECTION;
+
+  const nameFieldConfig = activeSection.nameField ?? sharedSection.nameField ?? FALLBACK_NAME_FIELD;
+
+  const commonFields =
+    activeSection.common.length > 0 ? activeSection.common : sharedSection.common;
+  const tagFields = activeSection.tags.length > 0 ? activeSection.tags : sharedSection.tags;
+  const typeSpecificFields = activeSection.typeSpecific;
+
   return (
     <>
       {/* Success Message */}
@@ -282,22 +341,13 @@ export function SubmitFormClient() {
               <CheckCircle
                 className={`h-5 w-5 text-green-500 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
               />
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="font-medium">Submission Successful! 🎉</p>
-                <p className={'text-sm text-muted-foreground mt-1'}>
-                  Your configuration has been submitted for review. Pull Request #
-                  {submissionResult.prNumber} created on GitHub.
+                <p className={'mt-1 text-muted-foreground text-sm'}>{submissionResult.message}</p>
+                <p className={'mt-1 text-muted-foreground text-xs'}>
+                  Status: {submissionResult.status} • ID:{' '}
+                  {submissionResult.submission_id.slice(0, 8)}...
                 </p>
-                <div className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_2} mt-3`}>
-                  <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
-                    <a href={submissionResult.prUrl} target="_blank" rel="noopener noreferrer">
-                      View PR <ExternalLink className="h-3 w-3 ml-1" />
-                    </a>
-                  </Button>
-                  <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
-                    <Link href={ROUTES.ACCOUNT_SUBMISSIONS}>Track Status</Link>
-                  </Button>
-                </div>
               </div>
             </div>
           </CardContent>
@@ -315,14 +365,14 @@ export function SubmitFormClient() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Type Selection + Template Selector */}
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor={`${formId}-type`}>Content Type *</Label>
                 <select
                   id={`${formId}-type`}
                   value={contentType}
                   onChange={(e) => {
-                    setContentType(e.target.value as ContentType);
+                    setContentType(e.target.value as SubmissionContentType);
                     setName(''); // Reset name when type changes
                   }}
                   required
@@ -330,13 +380,11 @@ export function SubmitFormClient() {
                     'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm'
                   }
                 >
-                  <option value="agents">Claude Agent (System Prompt)</option>
-                  <option value="mcp">MCP Server</option>
-                  <option value="rules">Claude Rule (Expertise)</option>
-                  <option value="commands">Command</option>
-                  <option value="hooks">Hook</option>
-                  <option value="statuslines">Statusline</option>
-                  <option value="skills">Skill</option>
+                  {SUBMISSION_CONTENT_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {FORM_TYPE_LABELS[type]}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -348,29 +396,35 @@ export function SubmitFormClient() {
 
             {/* Name Field + Duplicate Warning (Special case - has interactive validation) */}
             <div className="space-y-2">
-              <Label htmlFor={`${formId}-name`}>Name *</Label>
+              <Label htmlFor={`${formId}-name`}>{nameFieldConfig.label}</Label>
               <Input
                 id={`${formId}-name`}
                 name="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., React Query Expert or Supabase MCP Server"
-                required
+                placeholder={nameFieldConfig.placeholder}
+                required={nameFieldConfig.required ?? true}
               />
-              <p className="text-xs text-muted-foreground">
-                A clear, descriptive name for your configuration
+              <p className="text-muted-foreground text-xs">
+                {nameFieldConfig.helpText ?? 'A clear, descriptive name for your configuration'}
               </p>
               <DuplicateWarning contentType={contentType} name={name} />
             </div>
 
             {/* Common Fields - Config-Driven Rendering (description, category, author, github) */}
-            <ContentTypeFieldRenderer config={{ fields: COMMON_FIELDS.slice(1) }} formId={formId} />
+            {commonFields.length > 0 && (
+              <ContentTypeFieldRenderer config={{ fields: commonFields }} formId={formId} />
+            )}
 
             {/* Type-Specific Fields - Config-Driven Rendering */}
-            <ContentTypeFieldRenderer config={FORM_CONFIGS[contentType]} formId={formId} />
+            {typeSpecificFields.length > 0 && (
+              <ContentTypeFieldRenderer config={{ fields: typeSpecificFields }} formId={formId} />
+            )}
 
             {/* Tags Field - Config-Driven Rendering */}
-            <ContentTypeFieldRenderer config={{ fields: [TAGS_FIELD] }} formId={formId} />
+            {tagFields.length > 0 && (
+              <ContentTypeFieldRenderer config={{ fields: tagFields }} formId={formId} />
+            )}
 
             {/* Usage Examples (All Types - Optional) */}
             <ExamplesArrayInput name="examples" maxExamples={10} />
@@ -407,12 +461,12 @@ export function SubmitFormClient() {
             </div>
 
             {/* Info Box */}
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 sm:p-4">
+            <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-3 sm:p-4">
               <div className={`${UI_CLASSES.FLEX_GAP_2} sm:gap-3`}>
                 <Github className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
-                <div className="flex-1 min-w-0">
-                  <p className={'text-sm font-medium text-blue-400'}>How it works</p>
-                  <p className={'text-sm text-muted-foreground mt-1'}>
+                <div className="min-w-0 flex-1">
+                  <p className={'font-medium text-blue-400 text-sm'}>How it works</p>
+                  <p className={'mt-1 text-muted-foreground text-sm'}>
                     We'll automatically create a Pull Request with your submission. Our team reviews
                     for quality and accuracy, then merges it to make your contribution live!
                   </p>

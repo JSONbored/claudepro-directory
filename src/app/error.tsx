@@ -23,9 +23,9 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <div className={'flex flex-col items-center min-h-screen justify-center p-4'}>
+    <div className={'flex min-h-screen flex-col items-center justify-center p-4'}>
       <div className={'max-w-md rounded-lg border border-border bg-card p-8 text-center'}>
-        <h2 className="mb-4 text-2xl font-bold text-destructive">Something went wrong!</h2>
+        <h2 className="mb-4 font-bold text-2xl text-destructive">Something went wrong!</h2>
         <p className="mb-6 text-muted-foreground">
           An unexpected error occurred. We've been notified and are working on a fix.
         </p>
@@ -33,7 +33,7 @@ export default function ErrorBoundary({
           type="button"
           onClick={reset}
           className={
-            'rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 transition-colors'
+            'rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90'
           }
         >
           Try again

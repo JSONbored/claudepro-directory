@@ -25,26 +25,60 @@ export async function createClient() {
         '⚠️  Supabase env vars not found - using mock server client for development. Database features will not work.'
       );
       // Return a mock client that matches the Supabase client interface
+      // Chainable query builder that returns a Promise with chainable methods
+      type MockQueryResult = Promise<{ data: null; error: null }>;
+
+      const promise = Promise.resolve({ data: null, error: null }) as MockQueryResult;
+
+      const mockQueryBuilder = promise as MockQueryResult & {
+        select: () => MockQueryResult;
+        insert: () => MockQueryResult;
+        update: () => MockQueryResult;
+        delete: () => MockQueryResult;
+        eq: () => MockQueryResult;
+        neq: () => MockQueryResult;
+        gt: () => MockQueryResult;
+        gte: () => MockQueryResult;
+        lt: () => MockQueryResult;
+        lte: () => MockQueryResult;
+        like: () => MockQueryResult;
+        ilike: () => MockQueryResult;
+        is: () => MockQueryResult;
+        in: () => MockQueryResult;
+        order: () => MockQueryResult;
+        limit: () => MockQueryResult;
+        range: () => MockQueryResult;
+        single: () => MockQueryResult;
+        maybeSingle: () => MockQueryResult;
+      };
+
+      // Assign chainable methods
+      mockQueryBuilder.select = () => mockQueryBuilder;
+      mockQueryBuilder.insert = () => mockQueryBuilder;
+      mockQueryBuilder.update = () => mockQueryBuilder;
+      mockQueryBuilder.delete = () => mockQueryBuilder;
+      mockQueryBuilder.eq = () => mockQueryBuilder;
+      mockQueryBuilder.neq = () => mockQueryBuilder;
+      mockQueryBuilder.gt = () => mockQueryBuilder;
+      mockQueryBuilder.gte = () => mockQueryBuilder;
+      mockQueryBuilder.lt = () => mockQueryBuilder;
+      mockQueryBuilder.lte = () => mockQueryBuilder;
+      mockQueryBuilder.like = () => mockQueryBuilder;
+      mockQueryBuilder.ilike = () => mockQueryBuilder;
+      mockQueryBuilder.is = () => mockQueryBuilder;
+      mockQueryBuilder.in = () => mockQueryBuilder;
+      mockQueryBuilder.order = () => mockQueryBuilder;
+      mockQueryBuilder.limit = () => mockQueryBuilder;
+      mockQueryBuilder.range = () => mockQueryBuilder;
+      mockQueryBuilder.single = () => mockQueryBuilder;
+      mockQueryBuilder.maybeSingle = () => mockQueryBuilder;
+
       return {
         auth: {
           getUser: async () => ({ data: { user: null }, error: null }),
           signOut: async () => ({ error: null }),
         },
-        from: () => ({
-          select: () => ({
-            eq: () => ({
-              single: async () => ({ data: null, error: null }),
-              maybeSingle: async () => ({ data: null, error: null }),
-            }),
-            order: () => ({
-              limit: async () => ({ data: [], error: null }),
-            }),
-            limit: async () => ({ data: [], error: null }),
-          }),
-          insert: async () => ({ data: null, error: null }),
-          update: async () => ({ data: null, error: null }),
-          delete: async () => ({ data: null, error: null }),
-        }),
+        from: () => mockQueryBuilder,
       } as unknown as ReturnType<typeof createServerClient<Database>>;
     }
     throw new Error(

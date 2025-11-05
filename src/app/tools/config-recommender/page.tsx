@@ -18,8 +18,8 @@
  */
 
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import {
   Card,
   CardContent,
@@ -27,40 +27,50 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
+
+const UnifiedNewsletterCapture = dynamic(
+  () =>
+    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+      default: mod.UnifiedNewsletterCapture,
+    })),
+  {
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+  }
+);
+
 import { QuizForm } from '@/src/components/tools/recommender/quiz-form';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Generate metadata from centralized registry
-export const metadata: Metadata = generatePageMetadata('/tools/config-recommender');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/tools/config-recommender');
+}
 
-// ISR Configuration - Static page, no revalidation needed
-export const revalidate = false;
-
-export default function ConfigRecommenderPage() {
+export default async function ConfigRecommenderPage() {
   return (
     <div className={'min-h-screen bg-background'}>
       {/* Hero Section */}
-      <section className={'relative py-16 px-4 overflow-hidden'}>
-        <div className={'container mx-auto text-center max-w-4xl'}>
+      <section className={'relative overflow-hidden px-4 py-16'}>
+        <div className={'container mx-auto max-w-4xl text-center'}>
           {/* Badge */}
           <UnifiedBadge
             variant="base"
             style="outline"
             className={'mb-6 border-primary/20 bg-accent/5 text-primary'}
           >
-            <Sparkles className="h-3 w-3 mr-1" aria-hidden="true" />
+            <Sparkles className="mr-1 h-3 w-3" aria-hidden="true" />
             AI-Powered Recommendations
           </UnifiedBadge>
 
           {/* Title */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+          <h1 className="mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text font-bold text-4xl text-transparent md:text-5xl lg:text-6xl">
             Find Your Perfect Claude Configuration
           </h1>
 
           {/* Description */}
-          <p className={'text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8'}>
+          <p className={'mx-auto mb-8 max-w-3xl text-lg text-muted-foreground md:text-xl'}>
             Answer 7 quick questions and get personalized recommendations from our catalog of 147+
             configurations. Instant results, zero cost, tailored to your needs.
           </p>
@@ -68,14 +78,14 @@ export default function ConfigRecommenderPage() {
           {/* Stats */}
           <div className={'flex flex-wrap justify-center gap-3'}>
             <UnifiedBadge variant="base" style="secondary" className="text-sm">
-              <Clock className="h-3 w-3 mr-1" aria-hidden="true" />2 minutes
+              <Clock className="mr-1 h-3 w-3" aria-hidden="true" />2 minutes
             </UnifiedBadge>
             <UnifiedBadge variant="base" style="secondary" className="text-sm">
-              <Target className="h-3 w-3 mr-1" aria-hidden="true" />
+              <Target className="mr-1 h-3 w-3" aria-hidden="true" />
               147+ configs analyzed
             </UnifiedBadge>
             <UnifiedBadge variant="base" style="secondary" className="text-sm">
-              <Zap className="h-3 w-3 mr-1" aria-hidden="true" />
+              <Zap className="mr-1 h-3 w-3" aria-hidden="true" />
               Instant results
             </UnifiedBadge>
           </div>
@@ -84,15 +94,15 @@ export default function ConfigRecommenderPage() {
 
       {/* Quiz Section */}
       <section className={'container mx-auto px-4 pb-16'}>
-        <div className={'max-w-4xl mx-auto'}>
+        <div className={'mx-auto max-w-4xl'}>
           <QuizForm />
         </div>
       </section>
 
       {/* Benefits Section */}
       <section className={'container mx-auto px-4 pb-16'}>
-        <div className={'max-w-4xl mx-auto'}>
-          <h2 className="text-2xl font-bold text-center mb-8">How It Works</h2>
+        <div className={'mx-auto max-w-4xl'}>
+          <h2 className="mb-8 text-center font-bold text-2xl">How It Works</h2>
 
           <div className="grid gap-6 md:grid-cols-3">
             <Card>
@@ -100,7 +110,7 @@ export default function ConfigRecommenderPage() {
                 <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
                   <span
                     className={
-                      'flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold'
+                      'flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm'
                     }
                   >
                     1
@@ -121,7 +131,7 @@ export default function ConfigRecommenderPage() {
                 <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
                   <span
                     className={
-                      'flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold'
+                      'flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm'
                     }
                   >
                     2
@@ -142,7 +152,7 @@ export default function ConfigRecommenderPage() {
                 <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
                   <span
                     className={
-                      'flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold'
+                      'flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-sm'
                     }
                   >
                     3
@@ -162,8 +172,8 @@ export default function ConfigRecommenderPage() {
 
       {/* Features Section */}
       <section className={'container mx-auto px-4 pb-16'}>
-        <div className={'max-w-4xl mx-auto'}>
-          <Card className="bg-accent/5 border-accent/20">
+        <div className={'mx-auto max-w-4xl'}>
+          <Card className="border-accent/20 bg-accent/5">
             <CardHeader>
               <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <BarChart className="h-5 w-5 text-primary" />
@@ -208,8 +218,6 @@ export default function ConfigRecommenderPage() {
           source="content_page"
           variant="hero"
           context="config-recommender-page"
-          headline="Join 1,000+ Claude Power Users"
-          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
         />
       </section>
     </div>

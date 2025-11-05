@@ -10,11 +10,14 @@
 
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import { useTheme } from 'next-themes';
+import { memo, useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
+import { HeyClaudeLogo } from '@/src/components/layout/heyclaude-logo';
+import { ThemeToggle } from '@/src/components/layout/theme-toggle';
+import { APP_CONFIG, EXTERNAL_SERVICES, SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { DiscordIcon, ExternalLink, Github, Sparkles } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Footer Component
@@ -24,239 +27,241 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
  * @remarks
  * Includes llms.txt link for AI assistant discoverability per LLMs.txt specification
  */
-export function Footer() {
+function FooterComponent() {
   const currentYear = new Date().getFullYear();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Wait for client-side mount to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
-    <footer className={'border-t border-border/50 bg-background/95 backdrop-blur'}>
-      <div className="container mx-auto px-4 py-8">
-        <div className={`${UI_CLASSES.GRID_RESPONSIVE_3} gap-8`}>
-          {/* About Section */}
-          <div>
-            <h3 className={'font-semibold mb-4'}>{APP_CONFIG.name}</h3>
-            <p className={'text-sm text-muted-foreground mb-4'}>{APP_CONFIG.description}</p>
-            <div className="flex items-center gap-4">
-              <motion.div
-                whileHover={{ scale: 1.1, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-              >
-                <Link
-                  href={SOCIAL_LINKS.github || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors-smooth"
-                  aria-label="GitHub"
-                >
-                  <Github className="h-5 w-5" />
-                </Link>
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.1, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-              >
-                <Link
-                  href={SOCIAL_LINKS.discord || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors-smooth"
-                  aria-label="Discord"
-                >
-                  <DiscordIcon className="h-5 w-5" />
-                </Link>
-              </motion.div>
+    <footer className={'border-border/50 border-t bg-background/95 backdrop-blur'}>
+      <div className="container mx-auto px-4 py-8 md:py-12">
+        {/* Four-column grid with better mobile stacking */}
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12 lg:grid-cols-4">
+          {/* About Section - Takes full width on mobile */}
+          <motion.div
+            className="text-center md:text-left"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+          >
+            <div className={'mb-4 flex justify-center md:justify-start'}>
+              <HeyClaudeLogo size="md" inView={true} duration={1.5} />
+            </div>
+            <p className={'mx-auto mb-6 max-w-sm text-muted-foreground text-sm md:mx-0 md:text-xs'}>
+              {APP_CONFIG.description}
+            </p>
+
+            {/* Social Icons + Theme Toggle + Badge - Vertical stack */}
+            <div className="flex flex-col items-center gap-4 md:items-start">
+              <div className="flex items-center gap-4">
+                {[
+                  { href: SOCIAL_LINKS.github || '#', icon: Github, label: 'GitHub' },
+                  { href: SOCIAL_LINKS.discord || '#', icon: DiscordIcon, label: 'Discord' },
+                ].map((social) => (
+                  <Link
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="link-icon text-muted-foreground"
+                    aria-label={social.label}
+                  >
+                    <social.icon className="h-5 w-5" />
+                  </Link>
+                ))}
+                {/* Theme Toggle */}
+                <ThemeToggle />
+              </div>
+
+              {/* Open Source Badge */}
               <UnifiedBadge
                 variant="base"
                 style="outline"
-                className="border-accent/20 bg-accent/5 text-accent ml-2"
+                className="border-accent/20 bg-accent/5 text-accent"
               >
-                <ExternalLink className="h-3 w-3 mr-1 text-accent" />
+                <ExternalLink className="mr-1 h-3 w-3 text-accent" />
                 Open Source
               </UnifiedBadge>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Quick Links Section */}
-          <div>
-            <h3 className={'font-semibold mb-4'}>Quick Links</h3>
-            <ul className={'space-y-2 text-sm'}>
-              <li>
-                <motion.div
-                  whileHover={{ scale: 1.05, x: 2 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                  className="inline-block"
-                >
-                  <Link
-                    href={ROUTES.GUIDES}
-                    className={
-                      'text-muted-foreground hover:text-foreground transition-colors-smooth'
-                    }
-                  >
-                    Guides
-                  </Link>
-                </motion.div>
-              </li>
-              <li>
-                <motion.div
-                  whileHover={{ scale: 1.05, x: 2 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                  className="inline-block"
-                >
-                  <Link
-                    href={ROUTES.COLLECTIONS}
-                    className={
-                      'text-muted-foreground hover:text-foreground transition-colors-smooth'
-                    }
-                  >
-                    Collections
-                  </Link>
-                </motion.div>
-              </li>
-              <li>
-                <motion.div
-                  whileHover={{ scale: 1.05, x: 2 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                  className="inline-block"
-                >
-                  <Link
-                    href={ROUTES.CHANGELOG}
-                    className={
-                      'text-muted-foreground hover:text-foreground transition-colors-smooth'
-                    }
-                  >
-                    Changelog
-                  </Link>
-                </motion.div>
-              </li>
-              <li>
-                <motion.div
-                  whileHover={{ scale: 1.05, x: 2 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                  className="inline-block"
-                >
-                  <Link
-                    href={ROUTES.COMMUNITY}
-                    className={
-                      'text-muted-foreground hover:text-foreground transition-colors-smooth'
-                    }
-                  >
-                    Community
-                  </Link>
-                </motion.div>
-              </li>
-              <li>
-                <motion.div
-                  whileHover={{ scale: 1.05, x: 2 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                  className="inline-block"
-                >
-                  <Link
-                    href={ROUTES.SUBMIT}
-                    className={
-                      'text-muted-foreground hover:text-foreground transition-colors-smooth'
-                    }
-                  >
-                    Submit
-                  </Link>
-                </motion.div>
-              </li>
-            </ul>
-          </div>
-
-          {/* AI & Resources Section */}
-          <div>
-            <h3 className={'font-semibold mb-4'}>AI & Resources</h3>
-            <ul className={'space-y-2 text-sm'}>
-              <li>
-                <motion.div
-                  whileHover={{ scale: 1.05, x: 2 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                  className="inline-block"
-                >
-                  <Link
-                    href={ROUTES.LLMS_TXT}
-                    className={
-                      'text-muted-foreground hover:text-foreground transition-colors-smooth inline-flex items-center gap-2'
-                    }
-                    aria-label="LLMs.txt - AI-optimized content"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    <span>LLMs.txt</span>
-                  </Link>
-                </motion.div>
-              </li>
-              <li>
-                <motion.div
-                  whileHover={{ scale: 1.05, x: 2 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                  className="inline-block"
-                >
-                  <Link
-                    href={ROUTES.API_DOCS}
-                    className={
-                      'text-muted-foreground hover:text-foreground transition-colors-smooth'
-                    }
-                  >
-                    API Docs
-                  </Link>
-                </motion.div>
-              </li>
-              <li>
-                <motion.div
-                  whileHover={{ scale: 1.05, x: 2 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                  className="inline-block"
-                >
-                  <Link
-                    href={ROUTES.PARTNER}
-                    className={
-                      'text-muted-foreground hover:text-foreground transition-colors-smooth'
-                    }
-                  >
-                    Partner Program
-                  </Link>
-                </motion.div>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div
-          className={
-            'mt-8 pt-6 border-t border-border/30 flex flex-col sm:flex-row items-center justify-between gap-4'
-          }
-        >
-          <p className={'text-sm text-muted-foreground'}>
-            © {currentYear} {APP_CONFIG.author}. All rights reserved.
-          </p>
+          {/* Browse - All 8 main categories */}
           <motion.div
-            whileHover={{ scale: 1.05, x: 2 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-            className="inline-block"
+            className="text-center md:text-left"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.1 }}
           >
-            <p className={'text-xs text-muted-foreground'}>
-              <Link
-                href={ROUTES.LLMS_TXT}
-                className="hover:text-foreground transition-colors inline-flex items-center gap-1"
-              >
-                <Sparkles className="h-3 w-3" />
-                AI-optimized content available
-              </Link>
-            </p>
+            <h3 className={'mb-4 font-semibold text-lg md:text-base'}>Browse</h3>
+            <ul className={'space-y-3 md:space-y-2'}>
+              {[
+                { href: ROUTES.AGENTS, label: 'Agents' },
+                { href: ROUTES.MCP, label: 'MCP Servers' },
+                { href: ROUTES.COMMANDS, label: 'Commands' },
+                { href: ROUTES.RULES, label: 'Rules' },
+                { href: ROUTES.HOOKS, label: 'Hooks' },
+                { href: ROUTES.STATUSLINES, label: 'Statuslines' },
+                { href: ROUTES.SKILLS, label: 'Skills' },
+                { href: ROUTES.COLLECTIONS, label: 'Collections' },
+              ].map((link, index) => (
+                <motion.li
+                  key={link.href}
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.15 + index * 0.05 }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05, x: 3 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                    className="inline-block"
+                  >
+                    <Link
+                      href={link.href}
+                      className="link-accent-underline text-base text-muted-foreground transition-colors hover:text-foreground md:text-sm"
+                    >
+                      {link.label}
+                    </Link>
+                  </motion.div>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/* Resources */}
+          <motion.div
+            className="text-center md:text-left"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
+            <h3 className={'mb-4 font-semibold text-lg md:text-base'}>Resources</h3>
+            <ul className={'space-y-3 md:space-y-2'}>
+              {[
+                { href: ROUTES.GUIDES, label: 'Guides', icon: null },
+                { href: ROUTES.CHANGELOG, label: 'Changelog', icon: null },
+                { href: ROUTES.COMMUNITY, label: 'Community', icon: null },
+                { href: ROUTES.SUBMIT, label: 'Submit Content', icon: null },
+                { href: ROUTES.PARTNER, label: 'Partner Program', icon: null },
+                { href: ROUTES.LLMS_TXT, label: 'LLMs.txt', icon: Sparkles },
+              ].map((link, index) => (
+                <motion.li
+                  key={link.href}
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2 + index * 0.05 }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05, x: 3 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                    className="inline-block"
+                  >
+                    <Link
+                      href={link.href}
+                      className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground md:text-sm"
+                      aria-label={link.label}
+                    >
+                      {link.icon && <link.icon className="h-4 w-4" />}
+                      <span>{link.label}</span>
+                    </Link>
+                  </motion.div>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/* Support */}
+          <motion.div
+            className="text-center md:text-left"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+          >
+            <h3 className={'mb-4 font-semibold text-lg md:text-base'}>Support</h3>
+            <ul className={'space-y-3 md:space-y-2'}>
+              {[
+                { href: '/consulting', label: 'Work with JSONbored' },
+                { href: '/cookies', label: 'Cookie Policy' },
+                { href: '/contact', label: 'Contact Us' },
+                { href: '/help', label: 'Help Center' },
+                { href: '/accessibility', label: 'Accessibility' },
+                { href: '/sitemap.xml', label: 'Sitemap' },
+              ].map((link, index) => (
+                <motion.li
+                  key={link.href}
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.25 + index * 0.05 }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05, x: 3 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                    className="inline-block"
+                  >
+                    <Link
+                      href={link.href}
+                      className="link-accent-underline text-base text-muted-foreground transition-colors hover:text-foreground md:text-sm"
+                    >
+                      {link.label}
+                    </Link>
+                  </motion.div>
+                </motion.li>
+              ))}
+            </ul>
           </motion.div>
         </div>
+
+        {/* Bottom Bar - Clean layout */}
+        <motion.div
+          className={
+            'mt-8 flex flex-col items-center justify-between gap-4 border-border/30 border-t pt-6 md:mt-12 md:flex-row'
+          }
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4 }}
+        >
+          {/* Left: Copyright */}
+          <div className="text-muted-foreground text-sm">
+            <p>© {currentYear} heyclau.de / Claude Pro Directory. All rights reserved.</p>
+          </div>
+
+          {/* Right: Status Badge */}
+          <div className="flex items-center">
+            {/* BetterStack Status Badge - Theme-aware */}
+            {mounted && (
+              <iframe
+                src={`${EXTERNAL_SERVICES.betterstack.status}/badge?theme=${resolvedTheme === 'light' ? 'light' : 'dark'}`}
+                width="250"
+                height="30"
+                frameBorder="0"
+                scrolling="no"
+                title="System Status"
+                className="rounded-md"
+                loading="lazy"
+                style={{ colorScheme: 'normal' }}
+              />
+            )}
+          </div>
+        </motion.div>
       </div>
     </footer>
   );
 }
+
+export const Footer = memo(FooterComponent);
+Footer.displayName = 'Footer';

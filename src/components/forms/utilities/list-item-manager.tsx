@@ -253,11 +253,11 @@ export function ListItemManager(props: ListItemManagerProps) {
       </div>
 
       {/* Description */}
-      {description && <p className="text-xs text-muted-foreground">{description}</p>}
+      {description && <p className="text-muted-foreground text-xs">{description}</p>}
 
       {/* Counter */}
       {showCounter && maxItems && (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           {items.length}/{maxItems} {label.toLowerCase()} {items.length === 1 ? 'item' : 'items'}
         </p>
       )}
@@ -299,7 +299,7 @@ export function ListItemManager(props: ListItemManagerProps) {
                 return (
                   <div
                     key={itemKey}
-                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-2 border rounded`}
+                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} rounded border p-2`}
                   >
                     <span className="text-sm">{item}</span>
                     <Button
@@ -329,21 +329,21 @@ export function ListItemManager(props: ListItemManagerProps) {
 
       {/* Min items error */}
       {showMinError && (
-        <p className="text-xs text-destructive">
+        <p className="text-destructive text-xs">
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
       )}
 
       {/* Custom error message */}
       {errorMessage && (
-        <p className="text-xs text-destructive" role="alert">
+        <p className="text-destructive text-xs" role="alert">
           {errorMessage}
         </p>
       )}
 
       {/* Empty state message for required fields */}
       {minItems && items.length === 0 && (
-        <p className="text-xs text-destructive">
+        <p className="text-destructive text-xs">
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
       )}

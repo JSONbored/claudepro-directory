@@ -37,18 +37,18 @@ pre-commit:
           echo "   • src/ is clean"
           echo "   • No new debt in tests/"
           echo ""
-          echo "💡 Run 'npm run tech-debt:report' to see full report"
+          echo "💡 Run 'pnpm tech-debt:report' to see full report"
           exit 0
         else
           echo ""
           echo "❌ Technical debt check failed"
           echo ""
           echo "Quick fixes:"
-          echo "  • Run 'npm run format' to auto-fix linting issues"
-          echo "  • Run 'npm run tech-debt:report' for detailed analysis"
+          echo "  • Run 'pnpm format' to auto-fix linting issues"
+          echo "  • Run 'pnpm tech-debt:report' for detailed analysis"
           echo ""
           echo "If you cleaned up debt, update baseline:"
-          echo "  • npm run tech-debt:baseline"
+          echo "  • pnpm tech-debt:baseline"
           exit 1
         fi
       fail_text: "❌ Technical debt check failed. Fix issues or update baseline after cleanup."
@@ -58,20 +58,20 @@ pre-commit:
       glob: "content/**/*.json"
       run: |
         echo "📝 Regenerating README from content files..."
-        npm run generate:readme
+        pnpm generate:readme
         git add README.md
       fail_text: "❌ README generation failed."
 
     # 3. Content Validation (only when content files change)
     content-validation:
       glob: "content/**/*.json"
-      run: npm run validate:content
+      run: pnpm validate:content
       fail_text: "❌ Content validation failed. Check your JSON files."
 
     # 4. SEO Validation (only when MDX content changes)
     seo-validation:
       glob: "content/**/*.mdx"
-      run: npm run validate:seo
+      run: pnpm validate:seo
       fail_text: "❌ SEO validation failed. Fix H1 tags, titles, and descriptions."
 
     # 5. Metadata Validation (when metadata-related files change)
@@ -80,7 +80,7 @@ pre-commit:
       glob: "src/lib/seo/**/*.ts"
       run: |
         echo "🔍 Validating metadata with pattern system..."
-        npm run validate:metadata:quick
+        pnpm validate:metadata:quick
       fail_text: "❌ Metadata validation failed. Check titles (53-60 chars) and descriptions (150-160 chars)."
 
     # 6. Run tests ONLY for changed files (smart, not strict)
@@ -112,7 +112,7 @@ pre-commit:
 
         if [ -n "$TEST_FILES" ]; then
           echo "🧪 Running tests for changed files..."
-          npm run test:unit -- $TEST_FILES --run --reporter=dot
+          pnpm test:unit -- $TEST_FILES --run --reporter=dot
         else
           echo "⚠️  No tests found for changed files. Consider adding tests."
         fi
@@ -130,14 +130,14 @@ pre-push:
     test-suite:
       run: |
         echo "🧪 Running full test suite..."
-        npm run test:unit -- --run --reporter=dot || echo "⚠️  Some tests failed but not blocking push"
+        pnpm test:unit -- --run --reporter=dot || echo "⚠️  Some tests failed but not blocking push"
       fail_text: "⚠️  Test suite has failures (not blocking - fix iteratively)."
 
     # 2. Build verification (catches build-time issues)
     build:
       run: |
         echo "🏗️  Verifying production build..."
-        npm run build
+        pnpm build
       fail_text: "❌ Build failed. Fix errors before pushing."
 
     # 3. E2E Metadata validation for ALL pages (optional, skippable with LEFTHOOK_EXCLUDE)
@@ -148,14 +148,14 @@ pre-push:
       run: |
         echo "🔍 Validating metadata for all sitemap pages (E2E)..."
         echo "   (Skip with: LEFTHOOK_EXCLUDE=e2e-metadata-validation git push)"
-        npm run test:e2e:metadata || echo "⚠️  Metadata validation failed (not blocking - fix before production deploy)"
+        pnpm test:e2e:metadata || echo "⚠️  Metadata validation failed (not blocking - fix before production deploy)"
       fail_text: "⚠️  Metadata validation has failures (not blocking)."
 
     # 4. Security audit (moderate+ severity only, not overly strict)
     security:
       run: |
         echo "🔒 Running security audit..."
-        npm audit --audit-level=moderate --production || true
+        pnpm audit --audit-level=moderate --prod || true
       fail_text: "⚠️  Security vulnerabilities found (not blocking)."
 
 # ============================================================================
@@ -204,11 +204,11 @@ post-merge:
   commands:
     deps-install:
       files: git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD
-      glob: "package*.json"
+      glob: "{package.json,pnpm-lock.yaml}"
       run: |
         echo "📦 Dependencies changed. Installing updates..."
-        npm install
-      fail_text: "⚠️  Dependency installation failed. Run 'npm install' manually."
+        pnpm install
+      fail_text: "⚠️  Dependency installation failed. Run 'pnpm install' manually."
 
 # ============================================================================
 # CONFIGURATION

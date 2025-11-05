@@ -1,63 +1,50 @@
 name: 'Setup Node.js with Dependencies'
-description: 'Setup Node.js with optimized caching, install dependencies, and generate content'
+description: 'Setup Node.js with optimized caching and install dependencies'
 
 inputs:
   node-version:
     description: 'Node.js version to use'
     required: false
     default: '22'
-  skip-build-content:
-    description: 'Skip building content metadata'
-    required: false
-    default: 'false'
   install-args:
-    description: 'Additional arguments for npm ci'
+    description: 'Additional arguments for pnpm install'
     required: false
     default: ''
   production-only:
-    description: 'Install only production dependencies (--omit=dev)'
+    description: 'Install only production dependencies (--prod)'
     required: false
     default: 'false'
 
 outputs:
   cache-hit:
     description: 'Whether dependencies cache was hit'
-    value: ${{ steps.cache-deps.outputs.cache-hit }}
+    value: ${{ steps.setup-node.outputs.cache-hit }}
 
 runs:
   using: 'composite'
   steps:
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10.20.0
+
     - name: Setup Node.js
-      uses: actions/setup-node@v5
+      id: setup-node
+      uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.node-version }}
-        cache: 'npm'
+        cache: 'pnpm'
 
-    - name: Cache dependencies and build outputs
-      id: cache-deps
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.npm
-          node_modules
-          .next/cache
-        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.ts', '**/*.tsx', '!node_modules/**') }}
-        restore-keys: |
-          ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}-
-          ${{ runner.os }}-npm-
+    # Cache is handled by actions/setup-node@v6 above (cache: 'pnpm')
+    # No need for duplicate caching - setup-node handles pnpm store automatically
 
     - name: Install dependencies
       shell: bash
       run: |
         if [ "${{ inputs.production-only }}" = "true" ]; then
           echo "Installing production dependencies only..."
-          npm ci --ignore-scripts --omit=dev ${{ inputs.install-args }}
+          pnpm install --frozen-lockfile --prod ${{ inputs.install-args }}
         else
           echo "Installing all dependencies..."
-          npm ci ${{ inputs.install-args }}
+          pnpm install --frozen-lockfile ${{ inputs.install-args }}
         fi
-
-    - name: Generate content metadata
-      if: inputs.skip-build-content != 'true'
-      shell: bash
-      run: npm run build:content

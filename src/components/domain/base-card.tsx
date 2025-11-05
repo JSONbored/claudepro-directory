@@ -38,7 +38,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { type UseCardNavigationOptions, useCardNavigation } from '@/src/hooks/use-card-navigation';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
+import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getViewTransitionStyle } from '@/src/lib/utils/view-transitions.utils';
 
@@ -66,6 +66,12 @@ export interface BaseCardProps {
    * Author name (optional for review/changelog variants)
    */
   author?: string;
+
+  /**
+   * Author profile URL (GitHub, personal site, etc.)
+   * Falls back to SOCIAL_LINKS.authorProfile if not provided
+   */
+  authorProfileUrl?: string;
 
   /**
    * Content source (e.g., "official", "community")
@@ -190,7 +196,7 @@ export interface BaseCardProps {
    * Enable swipe gestures on mobile
    * Swipe right → Copy, Swipe left → Bookmark
    * Auto-detects mobile, respects prefers-reduced-motion
-   * @default false
+   * @default true
    */
   enableSwipeGestures?: boolean;
 
@@ -240,6 +246,7 @@ export const BaseCard = memo(
     displayTitle,
     description,
     author,
+    authorProfileUrl,
     source,
     tags,
     maxVisibleTags = 4,
@@ -261,7 +268,7 @@ export const BaseCard = memo(
     className,
     topAccent = false,
     compactMode = false,
-    enableSwipeGestures = false,
+    enableSwipeGestures = true,
     onSwipeRight,
     onSwipeLeft,
     useViewTransitions = false,
@@ -295,8 +302,11 @@ export const BaseCard = memo(
     // Card content wrapper - conditionally render with or without motion animations
     const cardElement = (
       <Card
-        className={`${disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? 'p-6' : ''} ${variant === 'review' ? 'p-4 rounded-lg border' : ''} ${compactMode ? 'p-4' : ''} ${className || ''} relative`}
-        style={viewTransitionStyle}
+        className={`${disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? 'p-6' : ''} ${variant === 'review' ? 'rounded-lg border p-4' : ''} ${compactMode ? 'p-4' : ''} ${className || ''} relative`}
+        style={{
+          ...viewTransitionStyle,
+          contain: 'paint',
+        }}
         onClick={disableNavigation ? undefined : handleCardClick}
         role="article"
         aria-label={ariaLabel}
@@ -305,11 +315,11 @@ export const BaseCard = memo(
       >
         {/* Top accent border for related content */}
         {topAccent && (
-          <div className="absolute top-0 left-0 right-0 h-px bg-border opacity-70 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute top-0 right-0 left-0 h-px bg-border opacity-70 transition-opacity group-hover:opacity-100" />
         )}
 
         <CardHeader
-          className={`${variant === 'review' ? 'p-0 mb-3' : 'pb-3'} ${compactMode ? 'pb-2' : ''}`}
+          className={`${variant === 'review' ? 'mb-3 p-0' : 'pb-3'} ${compactMode ? 'pb-2' : ''}`}
         >
           {/* Custom header slot (for review avatar/rating, changelog date) */}
           {renderHeader?.()}
@@ -320,19 +330,19 @@ export const BaseCard = memo(
               <div className="flex-1">
                 {/* Top badges slot (type, difficulty, sponsored, etc.) */}
                 {renderTopBadges && (
-                  <div className={'flex items-center gap-2 mb-1'}>{renderTopBadges()}</div>
+                  <div className={'mb-1 flex items-center gap-2'}>{renderTopBadges()}</div>
                 )}
 
                 {/* Title */}
                 <CardTitle
-                  className={`text-lg font-semibold text-foreground ${disableNavigation ? '' : 'group-hover:text-accent transition-colors-smooth'}`}
+                  className={`font-semibold text-foreground text-lg ${disableNavigation ? '' : 'transition-colors-smooth group-hover:text-accent'}`}
                 >
                   {displayTitle}
                 </CardTitle>
 
                 {/* Description */}
                 {description && (
-                  <CardDescription className={'text-sm text-muted-foreground mt-1 line-clamp-2'}>
+                  <CardDescription className={'mt-1 line-clamp-2 text-muted-foreground text-sm'}>
                     {description}
                   </CardDescription>
                 )}
@@ -340,7 +350,7 @@ export const BaseCard = memo(
 
               {/* Source badge (right side of header) */}
               {source && (
-                <div className={'flex items-center gap-1 ml-2'}>
+                <div className={'ml-2 flex items-center gap-1'}>
                   <UnifiedBadge
                     variant="source"
                     source={
@@ -377,7 +387,7 @@ export const BaseCard = memo(
                 <UnifiedBadge
                   variant="base"
                   style="outline"
-                  className={'text-xs border-muted-foreground/20 text-muted-foreground'}
+                  className={'border-muted-foreground/20 text-muted-foreground text-xs'}
                 >
                   +{overflowCount}
                 </UnifiedBadge>
@@ -389,15 +399,15 @@ export const BaseCard = memo(
           <div className={UI_CLASSES.CARD_FOOTER_RESPONSIVE}>
             {/* Left side: Author and custom metadata */}
             {(showAuthor && author) || customMetadataText ? (
-              <div className={'flex items-center gap-2 text-xs text-muted-foreground'}>
+              <div className={'flex items-center gap-2 text-muted-foreground text-xs'}>
                 {showAuthor && author && (
                   <span>
                     by{' '}
                     <a
-                      href={SOCIAL_LINKS.authorProfile}
+                      href={authorProfileUrl || SOCIAL_LINKS.authorProfile}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:underline hover:text-foreground transition-colors"
+                      className="transition-colors hover:text-foreground hover:underline"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {author}
@@ -429,14 +439,14 @@ export const BaseCard = memo(
     ) : (
       <motion.div
         whileHover={{
-          scale: 1.02,
-          y: -4,
-          transition: { type: 'spring', stiffness: 400, damping: 25 },
+          y: -2,
+          transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
         }}
         whileTap={{
-          scale: 0.98,
-          transition: { type: 'spring', stiffness: 400, damping: 25 },
+          y: 0,
+          transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] },
         }}
+        style={{ willChange: 'transform' }}
       >
         {cardElement}
       </motion.div>
@@ -460,7 +470,7 @@ export const BaseCard = memo(
       return (
         <SponsoredTracker
           sponsoredId={sponsoredId}
-          targetUrl={`https://claudepro.directory${targetPath}`}
+          targetUrl={`${APP_CONFIG.url}${targetPath}`}
           position={position}
         >
           {cardContent}

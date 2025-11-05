@@ -1,63 +1,78 @@
 'use client';
 
 /**
- * Configuration Recommender Quiz Form
- *
- * Multi-step form that collects user preferences to generate
- * personalized configuration recommendations.
- *
- * Features:
- * - 7 questions with progressive disclosure
- * - Client-side validation with Zod
- * - Progress tracking
- * - Smooth transitions
- * - Mobile-optimized
- * - Keyboard navigation
- * - Accessible (ARIA labels, screen reader support)
+ * Quiz Form - Database-First Architecture
+ * All questions/options fetched from PostgreSQL.
  */
 
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
+import { z } from 'zod';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { Separator } from '@/src/components/primitives/separator';
-import { generateConfigRecommendations } from '@/src/lib/actions/analytics.actions';
+import { getQuizConfiguration } from '@/src/lib/actions/quiz.actions';
+import { generateConfigRecommendations } from '@/src/lib/analytics/client';
+
+type QuizQuestion = {
+  id: string;
+  question: string;
+  description: string | null;
+  required: boolean;
+  displayOrder: number;
+  options: Array<{
+    value: string;
+    label: string;
+    description: string | null;
+    iconName: string | null;
+  }>;
+};
+
 import { ArrowLeft, ArrowRight, Loader2, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import {
-  type ExperienceLevel,
-  encodeQuizAnswers,
-  type FocusArea,
-  type IntegrationNeed,
-  type QuizAnswers,
-  quizAnswersSchema,
-  type TeamSize,
-  type ToolPreference,
-  type UseCase,
-} from '@/src/lib/schemas/recommender.schema';
+import { publicGetRecommendationsArgsSchema } from '@/src/lib/schemas/generated/db-schemas';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import { QuestionCard } from './question-card';
 import { QuizProgress } from './quiz-progress';
 
-const TOTAL_QUESTIONS = 7;
+const quizAnswersSchema = publicGetRecommendationsArgsSchema
+  .omit({ p_use_case: true, p_experience_level: true, p_tool_preferences: true })
+  .extend({
+    useCase: z.string(),
+    experienceLevel: z.string(),
+    toolPreferences: z.array(z.string()).min(1).max(5),
+    teamSize: z.string().optional(),
+    timestamp: z.string().datetime().optional(),
+  });
+
+type QuizAnswers = z.infer<typeof quizAnswersSchema>;
+
+function encodeQuizAnswers(answers: QuizAnswers): string {
+  return Buffer.from(JSON.stringify(answers)).toString('base64url');
+}
 
 export function QuizForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-
-  // Quiz state
+  const [quizConfig, setQuizConfig] = useState<QuizQuestion[] | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [answers, setAnswers] = useState<Partial<QuizAnswers>>({
     toolPreferences: [],
-    integrations: [],
-    focusAreas: [],
+    p_integrations: [],
+    p_focus_areas: [],
   });
-
-  // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Answer handlers for each question type
+  useEffect(() => {
+    getQuizConfiguration()
+      .then((data) => setQuizConfig(data as QuizQuestion[]))
+      .catch((err) => {
+        logger.error('Failed to load quiz configuration', err);
+        toasts.error.actionFailed('load quiz');
+      });
+  }, []);
+
   const updateAnswer = <K extends keyof QuizAnswers>(key: K, value: QuizAnswers[K]) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: '' }));
@@ -72,37 +87,34 @@ export function QuizForm() {
     updateAnswer(key, newArray as QuizAnswers[K]);
   };
 
-  // Validate current question
   const validateCurrentQuestion = (): boolean => {
-    const newErrors: Record<string, string> = {};
+    if (!quizConfig) return false;
 
-    switch (currentQuestion) {
-      case 1:
-        if (!answers.useCase) {
-          newErrors.useCase = 'Please select a use case';
-        }
-        break;
-      case 2:
-        if (!answers.experienceLevel) {
-          newErrors.experienceLevel = 'Please select your experience level';
-        }
-        break;
-      case 3:
-        if (!answers.toolPreferences || answers.toolPreferences.length === 0) {
-          newErrors.toolPreferences = 'Please select at least one tool type';
-        }
-        break;
-      // Questions 4-7 are optional
+    const question = quizConfig[currentQuestion - 1];
+    if (!question?.required) return true;
+
+    const newErrors: Record<string, string> = {};
+    const fieldMap: Record<string, keyof QuizAnswers> = {
+      use_case: 'useCase',
+      experience_level: 'experienceLevel',
+      tool_preferences: 'toolPreferences',
+    };
+
+    const fieldKey = fieldMap[question.id];
+    if (fieldKey) {
+      const value = answers[fieldKey];
+      if (!value || (Array.isArray(value) && value.length === 0)) {
+        newErrors[fieldKey] = `Please select ${question.question.toLowerCase()}`;
+      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Navigation handlers
   const goToNext = () => {
     if (validateCurrentQuestion()) {
-      if (currentQuestion < TOTAL_QUESTIONS) {
+      if (quizConfig && currentQuestion < quizConfig.length) {
         setCurrentQuestion((prev) => prev + 1);
       }
     }
@@ -114,41 +126,34 @@ export function QuizForm() {
     }
   };
 
-  // Submit handler
   const handleSubmit = async () => {
-    // Validate all required fields
     if (!(answers.useCase && answers.experienceLevel && answers.toolPreferences?.length)) {
       toasts.error.requiredFields();
-      setCurrentQuestion(1); // Go back to first unanswered question
+      setCurrentQuestion(1);
       return;
     }
 
     try {
-      // Final validation with Zod
       const validatedAnswers = quizAnswersSchema.parse({
         ...answers,
         timestamp: new Date().toISOString(),
       });
 
-      // Generate recommendations via server action
       startTransition(async () => {
         try {
           const result = await generateConfigRecommendations(validatedAnswers);
 
-          if (result?.data?.success && result.data.recommendations) {
-            // Encode answers for URL
+          if (result?.success && result.recommendations) {
             const encoded = encodeQuizAnswers(validatedAnswers);
 
-            // Navigate to results page
             router.push(
-              `/tools/config-recommender/results/${result.data.recommendations.id}?answers=${encoded}`
+              `/tools/config-recommender/results/${result.recommendations.id}?answers=${encoded}`
             );
 
-            // Track analytics
             logger.info('Quiz completed', {
               useCase: validatedAnswers.useCase,
               experienceLevel: validatedAnswers.experienceLevel,
-              resultId: result.data.recommendations.id,
+              resultId: result.recommendations.id,
             });
           } else {
             throw new Error('Failed to generate recommendations');
@@ -170,316 +175,61 @@ export function QuizForm() {
     }
   };
 
-  const progressPercentage = Math.round((currentQuestion / TOTAL_QUESTIONS) * 100);
+  if (!quizConfig) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const totalQuestions = quizConfig.length;
+  const progressPercentage = Math.round((currentQuestion / totalQuestions) * 100);
+  const currentQuestionData = quizConfig[currentQuestion - 1];
+
+  if (!currentQuestionData) return null;
+
+  const fieldMap: Record<string, keyof QuizAnswers> = {
+    use_case: 'useCase',
+    experience_level: 'experienceLevel',
+    tool_preferences: 'toolPreferences',
+    integrations: 'p_integrations',
+    focus_areas: 'p_focus_areas',
+    team_size: 'teamSize',
+  };
+
+  const fieldKey = fieldMap[currentQuestionData.id];
+  const isMultiSelect = ['tool_preferences', 'integrations', 'focus_areas'].includes(
+    currentQuestionData.id
+  );
 
   return (
     <div className="space-y-6">
-      {/* Progress indicator */}
       <QuizProgress
         currentQuestion={currentQuestion}
-        totalQuestions={TOTAL_QUESTIONS}
+        totalQuestions={totalQuestions}
         percentComplete={progressPercentage}
       />
 
-      {/* Question cards */}
       <Card className="relative overflow-hidden">
         <CardHeader>
           <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <span className="text-sm text-muted-foreground">
-              Question {currentQuestion} of {TOTAL_QUESTIONS}
+            <span className="text-muted-foreground text-sm">
+              Question {currentQuestion} of {totalQuestions}
             </span>
           </CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Question 1: Use Case */}
-          {currentQuestion === 1 && (
+          {currentQuestionData.id === 'review' ? (
             <QuestionCard
-              question="What's your primary use case?"
-              description="Select what you'll mainly use Claude for"
-              required
-            >
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  {
-                    value: 'code-review',
-                    label: 'Code Review & Optimization',
-                    desc: 'Review code quality, suggest improvements',
-                  },
-                  {
-                    value: 'api-development',
-                    label: 'API Development',
-                    desc: 'Build REST/GraphQL APIs',
-                  },
-                  {
-                    value: 'frontend-development',
-                    label: 'Frontend Development',
-                    desc: 'React, Vue, UI components',
-                  },
-                  {
-                    value: 'data-science',
-                    label: 'Data Science & ML',
-                    desc: 'Analysis, machine learning, Python',
-                  },
-                  {
-                    value: 'content-creation',
-                    label: 'Content & Documentation',
-                    desc: 'Writing docs, blog posts',
-                  },
-                  {
-                    value: 'devops-infrastructure',
-                    label: 'DevOps & Infrastructure',
-                    desc: 'Deployment, Docker, CI/CD',
-                  },
-                  {
-                    value: 'general-development',
-                    label: 'General Development',
-                    desc: 'Full-stack development',
-                  },
-                  {
-                    value: 'testing-qa',
-                    label: 'Testing & QA',
-                    desc: 'Test automation, quality assurance',
-                  },
-                  {
-                    value: 'security-audit',
-                    label: 'Security & Compliance',
-                    desc: 'Security audits, vulnerabilities',
-                  },
-                ].map(({ value, label, desc }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => updateAnswer('useCase', value as UseCase)}
-                    className={`p-4 text-left rounded-lg border-2 transition-all ${
-                      answers.useCase === value
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="font-medium">{label}</div>
-                    <div className="text-sm text-muted-foreground mt-1">{desc}</div>
-                  </button>
-                ))}
-              </div>
-              {errors.useCase && <p className="text-sm text-destructive mt-2">{errors.useCase}</p>}
-            </QuestionCard>
-          )}
-
-          {/* Question 2: Experience Level */}
-          {currentQuestion === 2 && (
-            <QuestionCard
-              question="What's your experience level with Claude?"
-              description="This helps us recommend appropriate complexity"
-              required
-            >
-              <div className="grid gap-3">
-                {[
-                  {
-                    value: 'beginner',
-                    label: 'Beginner',
-                    desc: 'New to Claude, learning the basics',
-                  },
-                  {
-                    value: 'intermediate',
-                    label: 'Intermediate',
-                    desc: 'Comfortable with Claude, ready for more',
-                  },
-                  {
-                    value: 'advanced',
-                    label: 'Advanced',
-                    desc: 'Expert user, looking for advanced features',
-                  },
-                ].map(({ value, label, desc }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => updateAnswer('experienceLevel', value as ExperienceLevel)}
-                    className={`p-4 text-left rounded-lg border-2 transition-all ${
-                      answers.experienceLevel === value
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="font-medium">{label}</div>
-                    <div className="text-sm text-muted-foreground mt-1">{desc}</div>
-                  </button>
-                ))}
-              </div>
-              {errors.experienceLevel && (
-                <p className="text-sm text-destructive mt-2">{errors.experienceLevel}</p>
-              )}
-            </QuestionCard>
-          )}
-
-          {/* Question 3: Tool Preferences */}
-          {currentQuestion === 3 && (
-            <QuestionCard
-              question="Which tool types interest you?"
-              description="Select all that apply (1-5 selections)"
-              required
-            >
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  { value: 'agents', label: 'Agents', desc: 'Specialized AI personas' },
-                  {
-                    value: 'mcp',
-                    label: 'MCP Servers',
-                    desc: 'Model Context Protocol integrations',
-                  },
-                  { value: 'rules', label: 'Rules', desc: 'Custom instructions & guidelines' },
-                  { value: 'commands', label: 'Commands', desc: 'Quick action commands' },
-                  { value: 'hooks', label: 'Hooks', desc: 'Event automation' },
-                  { value: 'statuslines', label: 'Statuslines', desc: 'Custom status displays' },
-                  { value: 'collections', label: 'Collections', desc: 'Curated bundles' },
-                ].map(({ value, label, desc }) => {
-                  const isSelected = answers.toolPreferences?.includes(value as ToolPreference);
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => toggleArrayAnswer('toolPreferences', value)}
-                      className={`p-4 text-left rounded-lg border-2 transition-all ${
-                        isSelected
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="font-medium">{label}</div>
-                      <div className="text-sm text-muted-foreground mt-1">{desc}</div>
-                    </button>
-                  );
-                })}
-              </div>
-              {errors.toolPreferences && (
-                <p className="text-sm text-destructive mt-2">{errors.toolPreferences}</p>
-              )}
-            </QuestionCard>
-          )}
-
-          {/* Question 4: Integrations (Optional) */}
-          {currentQuestion === 4 && (
-            <QuestionCard
-              question="Do you need specific integrations?"
-              description="Optional: Select any required integrations"
-            >
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  { value: 'github', label: 'GitHub', desc: 'Git repository access' },
-                  { value: 'database', label: 'Database', desc: 'SQL, PostgreSQL, MongoDB' },
-                  { value: 'cloud-aws', label: 'AWS', desc: 'Amazon Web Services' },
-                  { value: 'cloud-gcp', label: 'Google Cloud', desc: 'GCP services' },
-                  { value: 'cloud-azure', label: 'Azure', desc: 'Microsoft Azure' },
-                  { value: 'communication', label: 'Communication', desc: 'Slack, Discord, email' },
-                  { value: 'none', label: 'No integrations needed', desc: 'Standalone tools only' },
-                ].map(({ value, label, desc }) => {
-                  const isSelected = answers.integrations?.includes(value as IntegrationNeed);
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => toggleArrayAnswer('integrations', value)}
-                      className={`p-4 text-left rounded-lg border-2 transition-all ${
-                        isSelected
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="font-medium">{label}</div>
-                      <div className="text-sm text-muted-foreground mt-1">{desc}</div>
-                    </button>
-                  );
-                })}
-              </div>
-            </QuestionCard>
-          )}
-
-          {/* Question 5: Focus Areas (Optional) */}
-          {currentQuestion === 5 && (
-            <QuestionCard
-              question="What are your focus areas?"
-              description="Optional: Select up to 3 areas"
-            >
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  { value: 'security', label: 'Security', desc: 'Security audits, compliance' },
-                  { value: 'performance', label: 'Performance', desc: 'Speed, optimization' },
-                  {
-                    value: 'documentation',
-                    label: 'Documentation',
-                    desc: 'Docs, guides, tutorials',
-                  },
-                  { value: 'testing', label: 'Testing', desc: 'Test automation, QA' },
-                  {
-                    value: 'code-quality',
-                    label: 'Code Quality',
-                    desc: 'Clean code, best practices',
-                  },
-                  { value: 'automation', label: 'Automation', desc: 'Workflows, CI/CD' },
-                ].map(({ value, label, desc }) => {
-                  const isSelected = answers.focusAreas?.includes(value as FocusArea);
-                  const canSelect = !isSelected && (answers.focusAreas?.length || 0) < 3;
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => toggleArrayAnswer('focusAreas', value)}
-                      disabled={!(isSelected || canSelect)}
-                      className={`p-4 text-left rounded-lg border-2 transition-all ${
-                        isSelected
-                          ? 'border-primary bg-primary/5'
-                          : canSelect
-                            ? 'border-border hover:border-primary/50'
-                            : 'border-border opacity-50 cursor-not-allowed'
-                      }`}
-                    >
-                      <div className="font-medium">{label}</div>
-                      <div className="text-sm text-muted-foreground mt-1">{desc}</div>
-                    </button>
-                  );
-                })}
-              </div>
-            </QuestionCard>
-          )}
-
-          {/* Question 6: Team Size (Optional) */}
-          {currentQuestion === 6 && (
-            <QuestionCard
-              question="What's your team size?"
-              description="Optional: Helps us recommend collaboration features"
-            >
-              <div className="grid gap-3">
-                {[
-                  { value: 'solo', label: 'Solo Developer', desc: 'Working independently' },
-                  { value: 'small', label: 'Small Team (2-10)', desc: 'Small collaborative team' },
-                  { value: 'large', label: 'Large Team (10+)', desc: 'Enterprise or large team' },
-                ].map(({ value, label, desc }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => updateAnswer('teamSize', value as TeamSize)}
-                    className={`p-4 text-left rounded-lg border-2 transition-all ${
-                      answers.teamSize === value
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="font-medium">{label}</div>
-                    <div className="text-sm text-muted-foreground mt-1">{desc}</div>
-                  </button>
-                ))}
-              </div>
-            </QuestionCard>
-          )}
-
-          {/* Question 7: Review & Submit */}
-          {currentQuestion === 7 && (
-            <QuestionCard
-              question="Review your selections"
-              description="Ready to get your personalized recommendations?"
+              question={currentQuestionData.question}
+              {...(currentQuestionData.description && {
+                description: currentQuestionData.description,
+              })}
             >
               <div className="space-y-4">
-                <div className="p-4 bg-muted rounded-lg space-y-2">
+                <div className="space-y-2 rounded-lg bg-muted p-4">
                   <div>
                     <span className="font-medium">Use Case:</span>{' '}
                     <span className="text-muted-foreground">
@@ -496,18 +246,20 @@ export function QuizForm() {
                       {answers.toolPreferences?.join(', ')}
                     </span>
                   </div>
-                  {answers.integrations && answers.integrations.length > 0 && (
+                  {answers.p_integrations && answers.p_integrations.length > 0 && (
                     <div>
                       <span className="font-medium">Integrations:</span>{' '}
                       <span className="text-muted-foreground">
-                        {answers.integrations.join(', ')}
+                        {answers.p_integrations.join(', ')}
                       </span>
                     </div>
                   )}
-                  {answers.focusAreas && answers.focusAreas.length > 0 && (
+                  {answers.p_focus_areas && answers.p_focus_areas.length > 0 && (
                     <div>
                       <span className="font-medium">Focus Areas:</span>{' '}
-                      <span className="text-muted-foreground">{answers.focusAreas.join(', ')}</span>
+                      <span className="text-muted-foreground">
+                        {answers.p_focus_areas.join(', ')}
+                      </span>
                     </div>
                   )}
                   {answers.teamSize && (
@@ -518,27 +270,81 @@ export function QuizForm() {
                   )}
                 </div>
 
-                <Card className="bg-primary/5 border-primary/20">
+                <Card className="border-primary/20 bg-primary/5">
                   <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-lg">
                       <Sparkles className="h-5 w-5 text-primary" />
                       What happens next?
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• We'll analyze 147+ configurations</li>
-                      <li>• Match them to your specific needs</li>
-                      <li>• Show you the top 8-10 best fits</li>
-                      <li>• Explain why each was recommended</li>
+                    <ul className="space-y-2 text-muted-foreground text-sm">
+                      <li>? We'll analyze 147+ configurations</li>
+                      <li>? Match them to your specific needs</li>
+                      <li>? Show you the top 8-10 best fits</li>
+                      <li>? Explain why each was recommended</li>
                     </ul>
                   </CardContent>
                 </Card>
               </div>
             </QuestionCard>
+          ) : (
+            <QuestionCard
+              question={currentQuestionData.question}
+              required={currentQuestionData.required}
+              {...(currentQuestionData.description && {
+                description: currentQuestionData.description,
+              })}
+            >
+              <div
+                className={`grid gap-3 ${currentQuestionData.options.length > 3 ? 'sm:grid-cols-2' : ''}`}
+              >
+                {currentQuestionData.options.map((option) => {
+                  if (!fieldKey) return null;
+
+                  const isSelected = isMultiSelect
+                    ? (answers[fieldKey] as string[])?.includes(option.value)
+                    : answers[fieldKey] === option.value;
+
+                  const canSelect =
+                    !isMultiSelect ||
+                    isSelected ||
+                    (currentQuestionData.id === 'focus_areas' &&
+                      ((answers[fieldKey] as string[])?.length || 0) < 3) ||
+                    currentQuestionData.id !== 'focus_areas';
+
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        if (isMultiSelect && fieldKey) {
+                          toggleArrayAnswer(fieldKey, option.value);
+                        } else if (fieldKey) {
+                          updateAnswer(fieldKey, option.value as string);
+                        }
+                      }}
+                      disabled={!canSelect}
+                      className={`rounded-lg border-2 p-4 text-left transition-all ${
+                        isSelected
+                          ? 'border-primary bg-primary/5'
+                          : canSelect
+                            ? 'border-border hover:border-primary/50'
+                            : 'cursor-not-allowed border-border opacity-50'
+                      }`}
+                    >
+                      <div className="font-medium">{option.label}</div>
+                      <div className="mt-1 text-muted-foreground text-sm">{option.description}</div>
+                    </button>
+                  );
+                })}
+              </div>
+              {fieldKey && errors[fieldKey] && (
+                <p className="mt-2 text-destructive text-sm">{errors[fieldKey]}</p>
+              )}
+            </QuestionCard>
           )}
 
-          {/* Navigation buttons */}
           <Separator className="my-6" />
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <Button
@@ -547,14 +353,14 @@ export function QuizForm() {
               onClick={goToPrevious}
               disabled={currentQuestion === 1 || isPending}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="mr-2 h-4 w-4" />
               Previous
             </Button>
 
-            {currentQuestion < TOTAL_QUESTIONS ? (
+            {currentQuestion < totalQuestions ? (
               <Button type="button" onClick={goToNext} disabled={isPending}>
                 Next
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             ) : (
               <Button
@@ -565,12 +371,12 @@ export function QuizForm() {
               >
                 {isPending ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="h-4 w-4 mr-2" />
+                    <Sparkles className="mr-2 h-4 w-4" />
                     Get Results
                   </>
                 )}

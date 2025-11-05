@@ -18,6 +18,7 @@ import {
   Briefcase,
   Building,
   Calendar,
+  Camera,
   FileText,
   Handshake,
   Layers,
@@ -78,62 +79,90 @@ export interface NavigationGroup {
  *
  * Main navigation items displayed prominently in the nav bar.
  * Order matters - these appear left-to-right on desktop.
+ *
+ * Structure: Configs (dropdown) | Trending | Guides | Jobs | Contact | More
  */
 export const PRIMARY_NAVIGATION: NavigationLink[] = [
   {
-    label: 'Agents',
-    href: '/agents',
-    icon: Terminal,
-    description: 'AI-powered task automation agents',
-  },
-  {
-    label: 'Skills',
-    href: '/skills',
-    icon: BookOpen,
-    description: 'Task-focused capability guides (PDF/DOCX/PPTX/XLSX)',
-    isNew: true,
-  },
-  {
-    label: 'Commands',
-    href: '/commands',
-    icon: Zap,
-    description: 'Slash commands for Claude Code',
-  },
-  {
-    label: 'Hooks',
-    href: '/hooks',
+    label: 'Configs',
+    href: '#',
     icon: Layers,
-    description: 'Event-driven automation workflows',
+    description: 'Browse all configuration types',
+    children: [
+      {
+        label: 'Agents',
+        href: '/agents',
+        icon: Terminal,
+        description: 'AI-powered task automation agents',
+      },
+      {
+        label: 'Commands',
+        href: '/commands',
+        icon: Zap,
+        description: 'Slash commands for Claude Code',
+      },
+      {
+        label: 'Hooks',
+        href: '/hooks',
+        icon: Layers,
+        description: 'Event-driven automation workflows',
+      },
+      {
+        label: 'MCP',
+        href: '/mcp',
+        icon: Plug,
+        description: 'Model Context Protocol servers',
+      },
+      {
+        label: 'Rules',
+        href: '/rules',
+        icon: FileText,
+        description: 'Project rules and guidelines',
+      },
+      {
+        label: 'Skills',
+        href: '/skills',
+        icon: BookOpen,
+        description: 'Task-focused capability guides (PDF/DOCX/PPTX/XLSX)',
+        isNew: true,
+      },
+      {
+        label: 'Statuslines',
+        href: '/statuslines',
+        icon: Terminal,
+        description: 'Customizable editor status bars',
+      },
+      {
+        label: 'Collections',
+        href: '/collections',
+        icon: Layers,
+        description: 'Curated content bundles',
+      },
+    ],
   },
   {
-    label: 'MCP',
-    href: '/mcp',
-    icon: Plug,
-    description: 'Model Context Protocol servers',
-  },
-  {
-    label: 'Rules',
-    href: '/rules',
-    icon: FileText,
-    description: 'Project rules and guidelines',
-  },
-  {
-    label: 'Statuslines',
-    href: '/statuslines',
-    icon: Terminal,
-    description: 'Customizable editor status bars',
-  },
-  {
-    label: 'Collections',
-    href: '/collections',
-    icon: Layers,
-    description: 'Curated content bundles',
+    label: 'Trending',
+    href: '/trending',
+    icon: TrendingUp,
+    description: 'Popular configurations',
   },
   {
     label: 'Guides',
     href: '/guides',
     icon: BookOpen,
     description: 'Tutorials and how-to guides',
+  },
+  {
+    label: 'Jobs',
+    href: '/jobs',
+    icon: Briefcase,
+    description: 'Find career opportunities',
+  },
+  {
+    label: 'Contact',
+    href: '/contact',
+    icon: MessageSquare,
+    description: 'Get in touch with us',
   },
 ];
 
@@ -142,6 +171,9 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
  *
  * Additional links displayed in "More" dropdown or secondary menu.
  * Grouped by category for better organization.
+ *
+ * Note: Primary nav has Configs (dropdown), Trending, Guides, Jobs, Contact
+ * More dropdown contains: For You (featured), Board, Companies, Changelog, Community, Partner Program
  */
 export const SECONDARY_NAVIGATION: NavigationGroup[] = [
   {
@@ -154,10 +186,11 @@ export const SECONDARY_NAVIGATION: NavigationGroup[] = [
         description: 'Personalized recommendations',
       },
       {
-        label: 'Trending',
-        href: '/trending',
-        icon: TrendingUp,
-        description: 'Popular configurations',
+        label: 'Gallery',
+        href: '/gallery',
+        icon: Camera,
+        description: 'Code screenshot gallery',
+        isNew: true,
       },
       {
         label: 'Board',
@@ -181,12 +214,6 @@ export const SECONDARY_NAVIGATION: NavigationGroup[] = [
         href: '/changelog',
         icon: Calendar,
         description: 'Latest updates and releases',
-      },
-      {
-        label: 'Jobs',
-        href: '/jobs',
-        icon: Briefcase,
-        description: 'Find career opportunities',
       },
     ],
   },

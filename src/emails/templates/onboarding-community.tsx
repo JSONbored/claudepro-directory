@@ -8,6 +8,8 @@
 
 import { Button, Hr, Section, Text } from '@react-email/components';
 import type * as React from 'react';
+import { addUTMToURL } from '@/src/lib/utils/email-utm';
+import { EMAIL_UTM_TEMPLATES } from '@/src/lib/utils/utm-templates';
 import { BaseLayout } from '../layouts/base-layout';
 import {
   cardStyle,
@@ -39,8 +41,11 @@ export interface OnboardingCommunityProps {
  * Community Spotlight Email Component (Step 4 of 5)
  */
 export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
+  const baseUrl = 'https://claudepro.directory';
+  const utm = EMAIL_UTM_TEMPLATES.ONBOARDING_COMMUNITY;
+
   return (
-    <BaseLayout preview="Join the ClaudePro Community - Contribute & Connect">
+    <BaseLayout preview="Join the Claude Pro Community - Contribute & Connect" utm={utm}>
       {/* Hero section */}
       <Section style={heroSection}>
         <Text style={headingStyle}>Welcome to the Community! 🤝</Text>
@@ -125,7 +130,10 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
           </Text>
         </Section>
 
-        <Button href="https://claudepro.directory/submit" style={primaryButtonStyle}>
+        <Button
+          href={addUTMToURL(`${baseUrl}/submit`, { ...utm, content: 'submit_cta' })}
+          style={primaryButtonStyle}
+        >
           Submit Your Configuration
         </Button>
       </Section>
@@ -154,7 +162,10 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
           </li>
         </ul>
 
-        <Button href="https://claudepro.directory/community" style={secondaryButtonStyle}>
+        <Button
+          href={addUTMToURL(`${baseUrl}/community`, { ...utm, content: 'community_cta' })}
+          style={secondaryButtonStyle}
+        >
           See All Community Contributions
         </Button>
       </Section>
@@ -170,12 +181,21 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
 
         <div style={connectLinksStyle}>
           <Button
-            href="https://github.com/yourusername/claudepro-directory"
+            href={addUTMToURL('https://github.com/yourusername/claudepro-directory', {
+              ...utm,
+              content: 'github_link',
+            })}
             style={linkButtonStyle}
           >
             GitHub
           </Button>
-          <Button href="https://twitter.com/claudeprodirectory" style={linkButtonStyle}>
+          <Button
+            href={addUTMToURL('https://twitter.com/claudeprodirectory', {
+              ...utm,
+              content: 'twitter_link',
+            })}
+            style={linkButtonStyle}
+          >
             Twitter
           </Button>
         </div>

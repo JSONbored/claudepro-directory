@@ -1,0 +1,100 @@
+name: Submit Content
+description: Submit new agents, MCP servers, rules, commands, hooks, skills, statuslines, or collections
+title: "[Submit]: "
+labels: ["content-submission", "needs-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Submit Your Content
+
+        Thank you for contributing to the Claude Pro Directory!
+
+        **Please use our submission form at [claudepro.directory/submit](https://claudepro.directory/submit)**
+
+        Our database-driven submission system provides:
+        - ✅ Dynamic form validation based on content type
+        - ✅ Real-time field validation
+        - ✅ Automatic schema compliance checking
+        - ✅ Rich text editing with preview
+        - ✅ Category-specific field generation
+
+        ### Why Use the Web Form?
+
+        1. **Validation**: Fields are automatically validated against our database schema
+        2. **Guided Experience**: Only see fields relevant to your content type
+        3. **Error Prevention**: Catch issues before submission
+        4. **Faster Processing**: Database-first approach speeds up review time
+
+        ### Alternative: Manual JSON Submission
+
+        If you prefer to submit via GitHub, please:
+
+        1. Visit [/submit](https://claudepro.directory/submit) to see required fields
+        2. Download the auto-generated JSON template for your content type
+        3. Fill out the JSON following the schema
+        4. Create a new issue with the completed JSON
+        5. Our automated validation workflow will check your submission
+
+        ### Content Types Supported
+
+        - **Agents**: AI agent configurations and prompts
+        - **MCP Servers**: Model Context Protocol servers
+        - **Rules**: Claude Code rules and guidelines
+        - **Commands**: Slash commands for Claude Code
+        - **Hooks**: Git hooks and automation scripts
+        - **Skills**: Reusable skill packages
+        - **Statuslines**: Status line configurations
+        - **Collections**: Curated content collections
+
+        ---
+
+        **Ready to submit? Visit [claudepro.directory/submit](https://claudepro.directory/submit) now!**
+
+  - type: dropdown
+    id: content_type
+    attributes:
+      label: Content Type
+      description: What type of content are you submitting?
+      options:
+        - Agent
+        - MCP Server
+        - Rule
+        - Command
+        - Hook
+        - Skill
+        - Statusline
+        - Collection
+    validations:
+      required: true
+
+  - type: textarea
+    id: json_data
+    attributes:
+      label: JSON Submission (Optional - prefer web form)
+      description: If submitting manually, paste your validated JSON here
+      placeholder: |
+        {
+          "slug": "your-content-slug",
+          "name": "Your Content Name",
+          "description": "Brief description...",
+          ...
+        }
+      render: json
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Submission Checklist
+      description: Please confirm the following
+      options:
+        - label: I have read the [submission guidelines](https://claudepro.directory/help)
+          required: true
+        - label: My content follows the required schema for its type
+          required: true
+        - label: I have tested my configuration/code before submitting
+          required: true
+        - label: I agree to the [terms of service](https://claudepro.directory/terms)
+          required: true

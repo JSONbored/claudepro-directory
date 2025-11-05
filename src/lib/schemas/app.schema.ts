@@ -1,74 +1,39 @@
 /**
- * App-level schemas for common patterns
- * Provides type-safe validation for Next.js app components
+ * App-level schemas and types for Next.js components
  */
 
 import { z } from 'zod';
-import {
-  nonEmptyString,
-  optionalUrlString,
-  shortString,
-  slugString,
-} from '@/src/lib/schemas/primitives/base-strings';
+import { slugString } from '@/src/lib/schemas/primitives';
 
-/**
- * Next.js 15 compatible page props - EXACTLY matches Next.js generated types
- * Both params and searchParams are optional as per Next.js 15 type generation
- */
 export type PageProps = {
   params?: Promise<{ [key: string]: string | string[] | undefined }>;
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-/**
- * Page props specifically for pages that use searchParams
- */
 export type PagePropsWithSearchParams = {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-/**
- * Slug-specific params validation schema
- * Canonical location for slug params - used across all [slug] pages
- */
 export const slugParamsSchema = z.object({
-  slug: slugString, // Uses canonical slugString from primitives (max 100, strict validation)
+  slug: slugString,
 });
 
 export type SlugParams = z.infer<typeof slugParamsSchema>;
 
-/**
- * Form state schema for server actions
- */
-const formStateSchema = z.object({
-  success: z.boolean().optional(),
-  error: z.string().optional(),
-  errors: z.record(z.string(), z.array(z.string())).optional(),
-  issueUrl: optionalUrlString,
-  fallback: z.boolean().optional(),
-});
+export type FormState = {
+  success?: boolean;
+  error?: string;
+  errors?: Record<string, string[]>;
+  issueUrl?: string | null;
+  fallback?: boolean;
+};
 
-export type FormState = z.infer<typeof formStateSchema>;
-
-/**
- * SHA-2100: Removed lazyLoadedDataSchema and lazyLoaderOptionsSchema
- * These Zod schemas were never used for runtime validation in lazy-loader.ts
- * Only the TypeScript types LazyLoadedData<T> and LazyLoaderOptions<T> were used
- * Keeping types below for backward compatibility
- */
-
-/**
- * Type for lazy-loaded data wrapper
- */
 export type LazyLoadedData<T> = {
   isLoaded: boolean;
   data: T | null;
   loadPromise: Promise<T> | null;
 };
 
-/**
- * Type for lazy loader configuration options
- */
 export type LazyLoaderOptions<T> = {
   preload?: boolean;
   cacheTimeout?: number;
@@ -76,49 +41,23 @@ export type LazyLoaderOptions<T> = {
   onError?: (error: Error) => void;
 };
 
-/**
- * SEO page data schema
- * @property seoTitle - Short title for <title> tag optimization (<60 chars), falls back to full title
- * @property title - Full title for H1 heading and longtail keywords
- */
-const seoPageDataSchema = z.object({
-  title: nonEmptyString.max(200),
-  seoTitle: shortString.max(60).optional(),
-  description: nonEmptyString.max(500),
-  keywords: z.array(shortString.max(50)).max(20),
-  dateUpdated: shortString,
-  content: nonEmptyString,
-  author: shortString.optional(),
-  readingTime: shortString.optional(),
-  difficulty: shortString.optional(),
-  category: shortString.optional(),
-});
+export type SEOPageData = {
+  title: string;
+  seoTitle?: string;
+  description: string;
+  keywords: string[];
+  dateUpdated: string;
+  content: string;
+  author?: string;
+  readingTime?: string;
+  difficulty?: string;
+  category?: string;
+  sections?: Record<string, unknown>[];
+  isJsonGuide?: boolean;
+};
 
-export type SEOPageData = z.infer<typeof seoPageDataSchema>;
-
-/**
- * Related guide schema
- */
-const relatedGuideSchema = z.object({
-  title: nonEmptyString.max(200),
-  slug: nonEmptyString.max(200),
-  category: nonEmptyString.max(100),
-});
-
-export type RelatedGuide = z.infer<typeof relatedGuideSchema>;
-
-/**
- * Comparison data schema for SEO comparison pages
- */
-const comparisonDataSchema = z.object({
-  title: nonEmptyString.max(200),
-  description: nonEmptyString.max(500),
-  content: nonEmptyString,
-  item1Id: nonEmptyString.max(100),
-  item2Id: nonEmptyString.max(100),
-  category1: nonEmptyString.max(100),
-  category2: nonEmptyString.max(100),
-  lastUpdated: shortString,
-});
-
-export type ComparisonData = z.infer<typeof comparisonDataSchema>;
+export type RelatedGuide = {
+  title: string;
+  slug: string;
+  category: string;
+};

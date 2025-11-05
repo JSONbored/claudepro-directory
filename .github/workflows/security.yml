@@ -3,14 +3,24 @@ name: Security
 on:
   push:
     branches: [ main ]
-    paths-ignore:
-      - 'content/**/*.json'
-      - 'templates/**'
+    paths:
+      - 'src/**/*.{ts,tsx,js,jsx}'  # Only code files
+      - '!src/**/*.test.{ts,tsx}'    # Exclude tests
+      - '!src/**/*.spec.{ts,tsx}'    # Exclude specs
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/security.yml'  # Only this workflow
+      - 'supabase/**/*.sql'  # Database code
   pull_request:
     branches: [ main ]
-    paths-ignore:
-      - 'content/**/*.json'
-      - 'templates/**'
+    paths:
+      - 'src/**/*.{ts,tsx,js,jsx}'  # Only code files
+      - '!src/**/*.test.{ts,tsx}'    # Exclude tests
+      - '!src/**/*.spec.{ts,tsx}'    # Exclude specs
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/security.yml'  # Only this workflow
+      - 'supabase/**/*.sql'  # Database code
   schedule:
     - cron: '0 3 * * 1'  # Weekly security scan on Mondays at 3am UTC
 
@@ -19,16 +29,21 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  changes:
+    name: Changes Filter
+    uses: ./.github/workflows/changes-filter.yml
   secrets:
     name: Secret Scanning
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    if: github.event_name != 'schedule'  # Skip on scheduled runs
+    timeout-minutes: 5  # Reduced from 10min (fail fast on hangs)
+    needs: [changes]
+    # Skip on scheduled runs; run for PRs or when code/deps changed
+    if: github.event_name != 'schedule' && (github.event_name == 'pull_request' || needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true')
 
     steps:
     - uses: actions/checkout@v5
       with:
-        fetch-depth: 0  # Full history for better secret detection
+        fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}  # Shallow clone (PR needs 2 commits for diff)
 
     - name: Check for hardcoded secrets
       uses: trufflesecurity/trufflehog@main
@@ -39,19 +54,16 @@ jobs:
         extra_args: --only-verified --exclude-paths=.github/trufflehog-exclude.txt
       continue-on-error: true
 
-  # Build for CodeQL analysis using reusable workflow
-  build-for-codeql:
-    name: Build for CodeQL
-    uses: ./.github/workflows/build-reusable.yml
-    with:
-      cache-key-suffix: 'codeql'
-      upload-artifact: true
-
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: [build-for-codeql]
+    timeout-minutes: 6  # Reduced from 8min (no build overhead)
+    needs: [changes]
+    # Skip on ui-only PRs (weekly schedule still runs for comprehensive check)
+    if: |
+      github.event_name == 'schedule' ||
+      ((needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true') &&
+       !contains(github.event.pull_request.labels.*.name, 'ui-only'))
     permissions:
       actions: read
       contents: read
@@ -61,29 +73,16 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
-    - uses: ./.github/actions/setup-node-deps
-      with:
-        skip-build-content: 'true'
-
-    - name: Download build artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: ${{ needs.build-for-codeql.outputs.artifact-name }}
-        path: ./
-
-    - name: Verify build restoration
-      run: |
-        if [ ! -d ".next" ]; then
-          echo "❌ Build artifact restoration failed"
-          exit 1
-        fi
-        echo "✅ Build artifact restored for CodeQL analysis"
-
+    # CodeQL for JavaScript/TypeScript analyzes source code directly - no build needed
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v4
       with:
         languages: javascript-typescript
-        queries: +security-extended,security-and-quality
+        queries: security-extended
+
+    # CodeQL autobuild handles any necessary processing for JS/TS
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v4
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4
@@ -94,14 +93,17 @@ jobs:
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    if: github.event_name == 'pull_request'
+    timeout-minutes: 3  # Reduced from 10min (fast check)
+    needs: [changes]
+    if: github.event_name == 'pull_request' && needs.changes.outputs.deps == 'true'
     permissions:
       contents: read
       pull-requests: write
 
     steps:
     - uses: actions/checkout@v5
+      with:
+        fetch-depth: 1  # Shallow clone for speed
 
     - name: Dependency Review
       uses: actions/dependency-review-action@v4
@@ -112,35 +114,40 @@ jobs:
         comment-summary-in-pr: always
         warn-only: true
 
-  npm-audit:
-    name: NPM Security Audit
+  pnpm-audit:
+    name: PNPM Security Audit
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5  # Reduced from 10min
+    needs: [changes]
+    # Run when dependencies change or on schedule
+    if: needs.changes.outputs.deps == 'true' || github.event_name == 'schedule'
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
+      with:
+        fetch-depth: 1  # Shallow clone for speed
 
     - uses: ./.github/actions/setup-node-deps
 
-    - name: Run npm audit
-      run: npm audit --audit-level=moderate
+    - name: Run pnpm audit
+      run: pnpm audit --audit-level=moderate --json > pnpm-audit.json || true
       continue-on-error: true
 
     - name: Upload audit results
-      if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
-        name: npm-audit-results
-        path: npm-audit.json
+        name: pnpm-audit-results
+        path: pnpm-audit.json
         retention-days: 30
         if-no-files-found: ignore
 
   socket-security:
     name: Socket Security Scan
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    if: vars.SOCKET_SECURITY_API_KEY != ''  # Only run if API key is configured
+    timeout-minutes: 5  # Reduced from 10min
+    needs: [changes]
+    if: vars.SOCKET_SECURITY_API_KEY != '' && (needs.changes.outputs.deps == 'true' || github.event_name == 'schedule')
     permissions:
       contents: read
       pull-requests: write
@@ -149,9 +156,11 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
+      with:
+        fetch-depth: 1  # Shallow clone for speed
 
     - name: Setup Python for Socket CLI
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.x'
 

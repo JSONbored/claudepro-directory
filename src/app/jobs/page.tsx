@@ -1,7 +1,13 @@
+/**
+ * Jobs Listing Page - Database-First Job Board
+ * Single RPC call to filter_jobs() - all filtering in PostgreSQL
+ */
+
+import { unstable_cache } from 'next/cache';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { JobCard } from '@/src/components/domain/job-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent } from '@/src/components/primitives/card';
 import { Input } from '@/src/components/primitives/input';
@@ -13,128 +19,133 @@ import {
   SelectValue,
 } from '@/src/components/primitives/select';
 import { ROUTES } from '@/src/lib/constants/routes';
-import { getJobs, type Job } from '@/src/lib/data/jobs';
 import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
-import {
-  type JobsSearchParams,
-  jobsSearchSchema,
-  parseSearchParams,
-} from '@/src/lib/schemas/search.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database.types';
+
+const UnifiedNewsletterCapture = dynamic(
+  () =>
+    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+      default: mod.UnifiedNewsletterCapture,
+    })),
+  {
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+  }
+);
+
+export const revalidate = 1800; // 30 minutes ISR
 
 export async function generateMetadata({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
-  const params = parseSearchParams(jobsSearchSchema, rawParams, 'jobs page metadata');
-
   return generatePageMetadata('/jobs', {
     filters: {
-      category: (params as JobsSearchParams).category,
-      remote: params.remote,
+      category: rawParams?.category as string | undefined,
+      remote: rawParams?.remote === 'true',
     },
-  });
-}
-
-// Enable ISR - revalidate every 4 hours for job listings
-
-// Server-side filtering function
-function filterJobs(jobs: Job[], params: JobsSearchParams): Job[] {
-  return jobs.filter((job) => {
-    // Use validated search query - combined from q, query, or search fields
-    const searchQuery = params.q || params.query || params.search || params.location;
-    const matchesSearch =
-      !searchQuery ||
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (params.location && job.location?.toLowerCase().includes(params.location.toLowerCase()));
-
-    // Handle category filtering with the validated enum
-    const matchesCategory =
-      !params.category || params.category === 'all' || job.category === params.category;
-
-    // Handle employment type
-    const matchesType =
-      !params.employment ||
-      params.employment === 'any' ||
-      job.type === params.employment.replace('-', ' '); // Convert 'full-time' to 'full time'
-
-    // Handle remote filtering with validated boolean
-    const matchesRemote = params.remote !== true || job.remote === true;
-
-    // Handle experience level filtering - skip since Job type doesn't have level field
-    const matchesExperience = !params.experience || params.experience === 'any';
-
-    return matchesSearch && matchesCategory && matchesType && matchesRemote && matchesExperience;
   });
 }
 
 export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
+  const supabase = createAnonClient();
 
-  // Validate and parse search parameters with Zod
-  const params = parseSearchParams(jobsSearchSchema, rawParams, 'jobs page');
+  const searchQuery =
+    (rawParams?.q as string) || (rawParams?.query as string) || (rawParams?.search as string);
+  const category = rawParams?.category as string | undefined;
+  const employment = rawParams?.employment as string | undefined;
+  const experience = rawParams?.experience as string | undefined;
+  const remote = rawParams?.remote === 'true';
+  const page = Number(rawParams?.page) || 1;
+  const limit = Math.min(Number(rawParams?.limit) || 20, 100);
+  const offset = (page - 1) * limit;
 
-  // Fetch jobs from database
-  const allJobs = await getJobs();
-
-  // Log validated parameters for monitoring
   logger.info('Jobs page accessed', {
-    search: params.q || params.query || params.search || '',
-    location: params.location || '',
-    category: params.category,
-    employment: params.employment,
-    remote: params.remote ? 'true' : 'false',
-    experience: params.experience,
-    page: params.page,
-    limit: params.limit,
-    totalJobs: allJobs.length,
+    searchQuery: searchQuery || 'none',
+    category: category || 'all',
+    employment: employment || 'any',
+    remote,
+    page,
+    limit,
   });
 
-  const filteredJobs = filterJobs(allJobs, params);
+  // Enhanced RPC: 2 queries → 1 (50% reduction)
+  // Wrapped in unstable_cache for additional performance boost
+  const { data: jobsData, error } = await unstable_cache(
+    async () => {
+      return supabase.rpc('filter_jobs', {
+        ...(searchQuery && { p_search_query: searchQuery }),
+        ...(category && category !== 'all' && { p_category: category }),
+        ...(employment && employment !== 'any' && { p_employment_type: employment }),
+        ...(remote && { p_remote_only: remote }),
+        ...(experience && experience !== 'any' && { p_experience_level: experience }),
+        p_limit: limit,
+        p_offset: offset,
+      });
+    },
+    [
+      `jobs-${searchQuery || ''}-${category || ''}-${employment || ''}-${remote}-${experience || ''}-${page}-${limit}`,
+    ],
+    {
+      revalidate: 1800, // 30 minutes (matches page ISR)
+      tags: ['jobs', ...(category ? [`jobs-${category}`] : [])],
+    }
+  )();
 
-  // Generate stable, unique IDs for accessibility
+  if (error) {
+    logger.error('Failed to load jobs page data', error);
+  }
+
+  // Type assertion to database-generated Json type
+  type JobsResponse = {
+    jobs: Array<Tables<'jobs'>>;
+    total_count: number;
+  };
+
+  const { jobs, total_count } = (jobsData || {
+    jobs: [],
+    total_count: 0,
+  }) as unknown as JobsResponse;
+
+  const totalJobs = total_count;
+
   const baseId = 'jobs-page';
   const searchInputId = `${baseId}-search`;
   const categoryFilterId = `${baseId}-category`;
   const employmentFilterId = `${baseId}-employment`;
 
-  // Build current filter URL for form actions with validated params
   const buildFilterUrl = (newParams: Record<string, string | boolean | undefined>) => {
     const urlParams = new URLSearchParams();
 
-    // Convert validated params back to URL-compatible strings
     const currentParams: Record<string, string | undefined> = {
-      search: params.search || params.q || params.query || undefined,
-      location: params.location,
-      category: params.category !== 'all' ? params.category : undefined,
-      employment: params.employment !== 'any' ? params.employment : undefined,
-      experience: params.experience !== 'any' ? params.experience : undefined,
-      remote: params.remote === true ? 'true' : undefined,
+      search: searchQuery,
+      category: category !== 'all' ? category : undefined,
+      employment: employment !== 'any' ? employment : undefined,
+      experience: experience !== 'any' ? experience : undefined,
+      remote: remote ? 'true' : undefined,
     };
 
-    // Merge with new params
     const merged = { ...currentParams, ...newParams };
 
-    Object.entries(merged).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(merged)) {
       if (value !== undefined && value !== null && value !== '') {
         urlParams.set(key, String(value));
       }
-    });
+    }
 
     return `/jobs${urlParams.toString() ? `?${urlParams.toString()}` : ''}`;
   };
 
   return (
     <div className={'min-h-screen bg-background'}>
-      {/* Hero Section - Server Rendered */}
       <section className={UI_CLASSES.CONTAINER_OVERFLOW_BORDER}>
         <div className={'container mx-auto px-4 py-20'}>
-          <div className={'text-center max-w-3xl mx-auto'}>
-            <div className={'flex justify-center mb-6'}>
-              <div className={'p-3 bg-accent/10 rounded-full'}>
+          <div className={'mx-auto max-w-3xl text-center'}>
+            <div className={'mb-6 flex justify-center'}>
+              <div className={'rounded-full bg-accent/10 p-3'}>
                 <Briefcase className="h-8 w-8 text-primary" />
               </div>
             </div>
@@ -146,10 +157,10 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
               From startups to industry giants, find your perfect role.
             </p>
 
-            <div className={'flex flex-wrap justify-center gap-2 mb-8'}>
+            <div className={'mb-8 flex flex-wrap justify-center gap-2'}>
               <UnifiedBadge variant="base" style="secondary">
-                <Briefcase className="h-3 w-3 mr-1" />
-                {allJobs.length} Jobs Available
+                <Briefcase className="mr-1 h-3 w-3" />
+                {totalJobs || 0} Jobs Available
               </UnifiedBadge>
               <UnifiedBadge variant="base" style="outline">
                 Community Driven
@@ -169,27 +180,26 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
         </div>
       </section>
 
-      {/* Filters Section */}
-      {allJobs.length > 0 && (
+      {(totalJobs || 0) > 0 && (
         <section className={'px-4 pb-8'}>
           <div className={'container mx-auto'}>
             <Card className="card-gradient glow-effect">
               <CardContent className="p-6">
                 <form method="GET" action="/jobs" className={UI_CLASSES.GRID_RESPONSIVE_4}>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
                     <Input
                       id={searchInputId}
                       name="search"
                       placeholder="Search jobs, companies, or skills..."
-                      defaultValue={params.search || params.q || params.query || ''}
+                      defaultValue={searchQuery || ''}
                       className="pl-10"
                     />
                   </div>
 
-                  <Select name="category" defaultValue={params.category || 'all'}>
+                  <Select name="category" defaultValue={category || 'all'}>
                     <SelectTrigger id={categoryFilterId} aria-label="Filter jobs by category">
-                      <Filter className={'h-4 w-4 mr-2'} />
+                      <Filter className={'mr-2 h-4 w-4'} />
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -203,12 +213,12 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                     </SelectContent>
                   </Select>
 
-                  <Select name="employment" defaultValue={params.employment || 'any'}>
+                  <Select name="employment" defaultValue={employment || 'any'}>
                     <SelectTrigger
                       id={employmentFilterId}
                       aria-label="Filter jobs by employment type"
                     >
-                      <Clock className={'h-4 w-4 mr-2'} />
+                      <Clock className={'mr-2 h-4 w-4'} />
                       <SelectValue placeholder="Employment Type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -223,16 +233,16 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   <div className={UI_CLASSES.FLEX_GAP_2}>
                     <Button
                       type="button"
-                      variant={params.remote === true ? 'default' : 'outline'}
+                      variant={remote ? 'default' : 'outline'}
                       className="flex-1"
                       asChild
                     >
                       <Link
                         href={buildFilterUrl({
-                          remote: params.remote === true ? undefined : 'true',
+                          remote: remote ? undefined : 'true',
                         })}
                       >
-                        <MapPin className={'h-4 w-4 mr-2'} />
+                        <MapPin className={'mr-2 h-4 w-4'} />
                         Remote
                       </Link>
                     </Button>
@@ -242,19 +252,15 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   </div>
                 </form>
 
-                {/* Active Filters */}
-                {(params.search ||
-                  params.q ||
-                  params.query ||
-                  params.location ||
-                  (params.category && params.category !== 'all') ||
-                  (params.employment && params.employment !== 'any') ||
-                  params.remote) && (
-                  <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4 pt-4 border-t border-border`}>
+                {(searchQuery ||
+                  (category && category !== 'all') ||
+                  (employment && employment !== 'any') ||
+                  remote) && (
+                  <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4 border-border border-t pt-4`}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Active filters:</span>
-                    {(params.search || params.q || params.query) && (
+                    {searchQuery && (
                       <UnifiedBadge variant="base" style="secondary">
-                        Search: {params.search || params.q || params.query}
+                        Search: {searchQuery}
                         <Link
                           href={buildFilterUrl({ search: undefined })}
                           className="ml-1 hover:text-destructive"
@@ -264,9 +270,9 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         </Link>
                       </UnifiedBadge>
                     )}
-                    {params.category && params.category !== 'all' && (
+                    {category && category !== 'all' && (
                       <UnifiedBadge variant="base" style="secondary">
-                        {params.category.charAt(0).toUpperCase() + params.category.slice(1)}
+                        {category.charAt(0).toUpperCase() + category.slice(1)}
                         <Link
                           href={buildFilterUrl({ category: undefined })}
                           className="ml-1 hover:text-destructive"
@@ -276,10 +282,10 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         </Link>
                       </UnifiedBadge>
                     )}
-                    {params.employment && params.employment !== 'any' && (
+                    {employment && employment !== 'any' && (
                       <UnifiedBadge variant="base" style="secondary">
-                        {params.employment.charAt(0).toUpperCase() +
-                          params.employment.slice(1).replace('time', ' Time')}
+                        {employment.charAt(0).toUpperCase() +
+                          employment.slice(1).replace('time', ' Time')}
                         <Link
                           href={buildFilterUrl({ employment: undefined })}
                           className="ml-1 hover:text-destructive"
@@ -289,7 +295,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         </Link>
                       </UnifiedBadge>
                     )}
-                    {params.remote === true && (
+                    {remote && (
                       <UnifiedBadge variant="base" style="secondary">
                         Remote
                         <Link
@@ -314,18 +320,16 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
         </section>
       )}
 
-      {/* Jobs Content */}
       <section className={'container mx-auto px-4 py-12'}>
         <div className="space-y-8">
-          {allJobs.length === 0 ? (
-            /* Empty State */
+          {(totalJobs || 0) === 0 ? (
             <Card>
               <CardContent className={'flex flex-col items-center justify-center py-24'}>
-                <div className={'p-4 bg-accent/10 rounded-full mb-6'}>
+                <div className={'mb-6 rounded-full bg-accent/10 p-4'}>
                   <Briefcase className={'h-12 w-12 text-muted-foreground'} />
                 </div>
-                <h3 className="text-2xl font-bold mb-4">No Jobs Available Yet</h3>
-                <p className={'text-muted-foreground text-center mb-8 max-w-md leading-relaxed'}>
+                <h3 className="mb-4 font-bold text-2xl">No Jobs Available Yet</h3>
+                <p className={'mb-8 max-w-md text-center text-muted-foreground leading-relaxed'}>
                   We're building our jobs board! Soon you'll find amazing opportunities with
                   companies working on the future of AI. Be the first to know when new positions are
                   posted.
@@ -333,7 +337,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                 <div className="flex gap-4">
                   <Button asChild>
                     <Link href={ROUTES.PARTNER}>
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="mr-2 h-4 w-4" />
                       Post the First Job
                     </Link>
                   </Button>
@@ -343,13 +347,12 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                 </div>
               </CardContent>
             </Card>
-          ) : filteredJobs.length === 0 ? (
-            /* No Results State */
+          ) : jobs.length === 0 ? (
             <Card>
               <CardContent className={'flex flex-col items-center justify-center py-16'}>
-                <Briefcase className={'h-16 w-16 text-muted-foreground mb-4'} />
-                <h3 className={'text-xl font-semibold mb-2'}>No Jobs Found</h3>
-                <p className={'text-muted-foreground text-center mb-6 max-w-md'}>
+                <Briefcase className={'mb-4 h-16 w-16 text-muted-foreground'} />
+                <h3 className={'mb-2 font-semibold text-xl'}>No Jobs Found</h3>
+                <p className={'mb-6 max-w-md text-center text-muted-foreground'}>
                   No jobs match your current filters. Try adjusting your search criteria.
                 </p>
                 <Button variant="outline" asChild>
@@ -358,19 +361,18 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
               </CardContent>
             </Card>
           ) : (
-            /* Jobs Results */
             <>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                 <div>
-                  <h2 className="text-2xl font-bold">
-                    {filteredJobs.length} {filteredJobs.length === 1 ? 'Job' : 'Jobs'} Found
+                  <h2 className="font-bold text-2xl">
+                    {jobs.length} {jobs.length === 1 ? 'Job' : 'Jobs'} Found
                   </h2>
                   <p className="text-muted-foreground">Showing all available positions</p>
                 </div>
               </div>
 
               <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
-                {filteredJobs.map((job) => (
+                {jobs.map((job) => (
                   <JobCard key={job.slug} job={job} />
                 ))}
               </div>
@@ -379,15 +381,8 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
         </div>
       </section>
 
-      {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
-        <UnifiedNewsletterCapture
-          source="content_page"
-          variant="hero"
-          context="jobs-page"
-          headline="Join 1,000+ Claude Power Users"
-          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
-        />
+        <UnifiedNewsletterCapture source="content_page" variant="hero" context="jobs-page" />
       </section>
     </div>
   );

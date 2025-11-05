@@ -8,17 +8,9 @@
  */
 
 import type { ReactNode } from 'react';
+import type { CategoryId } from '@/src/lib/config/category-config';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import type { LucideIcon } from '@/src/lib/icons';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
-
-/**
- * Troubleshooting item structure
- */
-export interface TroubleshootingItem {
-  issue: string;
-  solution: string;
-}
 
 /**
  * Installation steps structure
@@ -45,7 +37,7 @@ export interface InstallationSteps {
 export interface ActionButtonConfig {
   label: string;
   icon: ReactNode;
-  handler: (item: UnifiedContentItem) => void | Promise<void>;
+  handler: (item: ContentItem) => void | Promise<void>;
 }
 
 /**
@@ -54,7 +46,7 @@ export interface ActionButtonConfig {
 export interface SectionConfig {
   features: boolean;
   installation: boolean;
-  useCases: boolean;
+  use_cases: boolean;
   configuration: boolean;
   security: boolean;
   troubleshooting: boolean;
@@ -62,28 +54,29 @@ export interface SectionConfig {
 }
 
 /**
- * Generator functions for auto-generating content
+ * Generator functions - DEPRECATED
+ *
+ * Generators have been migrated to PostgreSQL database (content_generator_configs table).
+ * All generation logic now happens in the database via triggers using generate_content_field() RPC.
+ *
+ * This interface is kept for backwards compatibility but should not be used.
+ * All content fields (installation, use_cases, troubleshooting, etc.) are now pre-populated
+ * in the database before TypeScript ever sees them.
  */
-export interface GeneratorConfig {
-  installation?: (item: UnifiedContentItem) => InstallationSteps;
-  useCases?: (item: UnifiedContentItem) => string[];
-  features?: (item: UnifiedContentItem) => string[];
-  troubleshooting?: (item: UnifiedContentItem) => TroubleshootingItem[];
-  requirements?: (item: UnifiedContentItem) => string[];
-}
+export type GeneratorConfig = Record<string, never>;
 
 /**
  * Custom renderer functions for specialized content
  */
 export interface RendererConfig {
-  configRenderer?: (item: UnifiedContentItem, handlers?: Record<string, () => void>) => ReactNode;
+  configRenderer?: (item: ContentItem, handlers?: Record<string, () => void>) => ReactNode;
   sidebarRenderer?: (
-    item: UnifiedContentItem,
-    relatedItems: UnifiedContentItem[],
+    item: ContentItem,
+    relatedItems: ContentItem[],
     router: { push: (path: string) => void; back: () => void }
   ) => ReactNode;
-  installationRenderer?: (item: UnifiedContentItem, installation: InstallationSteps) => ReactNode;
-  useCasesRenderer?: (item: UnifiedContentItem, useCases: string[]) => ReactNode;
+  installationRenderer?: (item: ContentItem, installation: InstallationSteps) => ReactNode;
+  useCasesRenderer?: (item: ContentItem, use_cases: string[]) => ReactNode;
 }
 
 /**
@@ -98,6 +91,7 @@ export interface ContentTypeConfig {
   typeName: string; // "Agent", "Command", "MCP Server", etc.
   icon: LucideIcon; // Lucide icon component
   colorScheme: string; // Tailwind color class for badges (e.g., "purple-500")
+  description?: string; // Category description
 
   // Primary action button
   primaryAction: ActionButtonConfig;
@@ -124,9 +118,9 @@ export interface ContentTypeConfig {
 
 /**
  * Type-safe content type discriminator
- * Re-exported from canonical schema definition
+ * Re-exported from canonical category configuration
  */
-export type { CategoryId } from '@/src/lib/schemas/shared.schema';
+export type { CategoryId } from '@/src/lib/config/category-config';
 
 /**
  * Configuration registry type

@@ -76,7 +76,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
   if (checking) {
     return (
       <motion.div
-        className={'text-sm text-muted-foreground'}
+        className={'text-muted-foreground text-sm'}
         animate={{ opacity: [1, 0.5, 1] }}
         transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
       >
@@ -94,7 +94,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
       <AlertTriangle className="h-4 w-4 text-yellow-400" />
       <AlertTitle className="text-yellow-400">Suggestion</AlertTitle>
       <AlertDescription>
-        <p className={'text-sm text-muted-foreground'}>{warning}</p>
+        <p className={'text-muted-foreground text-sm'}>{warning}</p>
       </AlertDescription>
     </Alert>
   );

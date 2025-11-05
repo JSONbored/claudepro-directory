@@ -22,14 +22,14 @@
  * Build Time: ~11.7s for all 187 pages (including 6 category pages)
  * Page Size: 7 kB per category page (minimal client JavaScript)
  * First Load JS: 382 kB (shared bundle + category page bundle)
- * Cache Hit: ~1.66ms (Redis) vs 48ms (file system)
+ * Cache Hit: ~5-20ms (database) vs 48ms (file system)
  * TTFB: <100ms (static pages served from CDN)
  *
  * @example
  * // Data flow for /agents request:
  * // 1. isValidCategory('agents') → validates category exists
  * // 2. getCategoryConfig('agents') → loads display config
- * // 3. getContentByCategory('agents') → loads items with Redis caching
+ * // 3. getContentByCategory('agents') → loads items from database
  * // 4. ContentListServer → renders list with search/filters
  *
  * @see {@link https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes}
@@ -40,29 +40,22 @@
 
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content-list-server';
-import { statsRedis } from '@/src/lib/cache.server';
-import { isValidCategory, UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
-import { getContentByCategory } from '@/src/lib/content/content-loaders';
+import {
+  type CategoryId,
+  getCategoryConfig,
+  isValidCategory,
+} from '@/src/lib/config/category-config';
+import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**
- * ISR Configuration - Category listing pages
- * Static configurations with view count updates - revalidate every 5 minutes
- * Balances fresh analytics with performance for category browsing
- */
-export const revalidate = 300;
-
-/**
- * ISR revalidation interval in seconds (4 hours)
- *
- * @description
- * Revalidate every 4 hours (14400 seconds) to pick up new content.
- * Balances freshness with build frequency - content doesn't change often enough
- * to warrant hourly revalidation, but 4 hours ensures same-day updates appear.
+ * ISR revalidation interval for category listing pages
  *
  * @constant {number}
+ * @description Pages revalidate every 1 hour to pick up new content and analytics updates.
  */
+export const revalidate = 3600; // 1 hour
 
 /**
  * Generate static params for all valid categories
@@ -85,11 +78,24 @@ export const revalidate = 300;
  * // ]
  */
 export async function generateStaticParams() {
-  const { VALID_CATEGORIES } = await import('@/src/lib/config/category-config');
+  try {
+    const { VALID_CATEGORIES } = await import('@/src/lib/config/category-config');
 
-  return VALID_CATEGORIES.map((category) => ({
-    category,
-  }));
+    return VALID_CATEGORIES.map((category) => ({
+      category,
+    }));
+  } catch (error) {
+    logger.error(
+      'generateStaticParams error in [category]',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        phase: 'build-time',
+        route: '[category]/page.tsx',
+      }
+    );
+    // Return empty array (prevents build failure, skips category pages)
+    return [];
+  }
 }
 
 /**
@@ -124,11 +130,11 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     });
   }
 
-  const categoryConfig = UNIFIED_CATEGORY_REGISTRY[category];
+  const categoryConfig = await getCategoryConfig(category as CategoryId);
 
   return generatePageMetadata('/:category', {
     params: { category },
-    categoryConfig,
+    categoryConfig: categoryConfig || undefined,
     category,
   });
 }
@@ -138,7 +144,7 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
  *
  * @description
  * Server component that renders a list of content items for a given category.
- * Handles validation, config loading, content fetching with Redis caching, and rendering.
+ * Handles validation, config loading, content fetching from database, and rendering.
  * Returns 404 if category is invalid.
  *
  * @param {Object} props - Component props
@@ -157,28 +163,33 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;
 
-  // Validate category
   if (!isValidCategory(category)) {
-    logger.warn('Invalid category requested', { category });
+    logger.warn('Invalid category in list page', { category });
     notFound();
   }
 
-  // Get category configuration
-  const config = UNIFIED_CATEGORY_REGISTRY[category];
+  const config = await getCategoryConfig(category as CategoryId);
   if (!config) {
     notFound();
   }
 
-  // Load content for this category
-  const itemsData = await getContentByCategory(category);
-
-  // Enrich with view and copy counts from Redis (parallel batch operation)
-  const items = await statsRedis.enrichWithAllCounts(
-    itemsData.map((item) => ({
-      ...item,
-      category,
-    }))
-  );
+  // Load content for this category (enriched with analytics, sponsorship, etc.)
+  let items: Awaited<ReturnType<typeof getContentByCategory>>;
+  try {
+    items = await getContentByCategory(category);
+  } catch (error) {
+    logger.error(
+      'getContentByCategory error in [category]',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        category,
+        phase: 'page-render',
+        route: '[category]/page.tsx',
+      }
+    );
+    // Return empty array on error (shows empty state instead of crashing)
+    items = [];
+  }
 
   // Process badges (handle dynamic count badges)
   const badges = config.listPage.badges.map((badge) => {
@@ -193,18 +204,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     return processed;
   });
 
-  logger.info('Category page rendered', {
-    category,
-    itemCount: items.length,
-  });
-
   return (
     <ContentListServer
       title={config.pluralTitle}
       description={config.description}
       icon={config.icon.displayName?.toLowerCase() || 'sparkles'}
       items={items}
-      type={category} // MODERNIZATION: No cast needed - category already CategoryId from route params
+      type={category}
       searchPlaceholder={config.listPage.searchPlaceholder}
       badges={badges}
     />

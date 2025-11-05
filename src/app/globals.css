@@ -765,6 +765,50 @@
   }
 }
 
+/* Global Link Reset - Removes Browser Default Underlines */
+@layer base {
+  /* Remove default browser underlines from all links
+     Component-level classes (like .claude-link with hover:underline) will still work
+     Custom accent underlines in navigation will display correctly without double underlines */
+  a {
+    text-decoration: none;
+  }
+}
+
+/* Link Micro-Interaction Utilities */
+@layer utilities {
+  /* Custom accent underline (orange) on hover - matches navigation style */
+  .link-accent-underline {
+    position: relative;
+    display: inline-block;
+  }
+
+  .link-accent-underline::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--color-accent);
+    transition: width 0.3s ease;
+  }
+
+  .link-accent-underline:hover::after {
+    width: 100%;
+  }
+
+  /* Icon links - no underline, just color change */
+  .link-icon {
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .link-icon:hover {
+    color: var(--color-accent);
+  }
+}
+
 /* Component Classes */
 @layer components {
   /* Hero Section with Claude Orange Gradient */
@@ -959,7 +1003,7 @@
      Phase 1: Unified styling + max-height
      ======================================== */
 
-  /* Shiki syntax highlighting - line and word highlights */
+  /* Sugar High syntax highlighting - line and word highlights */
   .line--highlighted {
     background-color: var(--color-accent-subtle);
     border-left: 2px solid var(--color-accent);
@@ -1242,17 +1286,8 @@
     font-weight: 600;
   }
 
-  /* Smooth theme transition */
-  .theme-transition,
-  .theme-transition *,
-  .theme-transition *::before,
-  .theme-transition *::after {
-    transition:
-      background-color 300ms ease-in-out,
-      border-color 300ms ease-in-out,
-      color 300ms ease-in-out,
-      box-shadow 300ms ease-in-out !important;
-  }
+  /* Smooth theme transition - REMOVED conflicting universal selector */
+  /* Now handled by micro-interactions.css with targeted selectors for better performance */
 
   /* ========================================
      VIEW TRANSITIONS API - CIRCLE BLUR ANIMATION
@@ -1490,23 +1525,6 @@
   }
 }
 
-@keyframes meteor {
-  0% {
-    transform: translateY(-200%) translateX(-200%) rotate(35deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) translateX(100vh) rotate(35deg);
-    opacity: 0;
-  }
-}
-
 @keyframes borderBeamSpin {
   0% {
     transform: rotate(0deg);
@@ -1596,10 +1614,6 @@
 
 .animate-pulse {
   animation: pulse-accent var(--duration-1000) var(--ease-in-out) infinite;
-}
-
-.animate-meteor {
-  animation: meteor 3s linear infinite;
 }
 
 .animate-shimmer {

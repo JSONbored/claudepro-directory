@@ -3,13 +3,13 @@
  * Shared types for personalization features
  */
 
-import type { ContentId } from '@/src/lib/schemas/branded-types.schema';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 
 /**
  * Content item with personalization metadata
+ * Uses intersection type with ContentItem
  */
-export interface PersonalizedContentItem extends UnifiedContentItem {
+export type PersonalizedContentItem = ContentItem & {
   affinity_score?: number;
   similarity_score?: number;
   recommendation_source?:
@@ -20,7 +20,7 @@ export interface PersonalizedContentItem extends UnifiedContentItem {
     | 'similar'
     | 'usage';
   recommendation_reason?: string;
-}
+};
 
 /**
  * User interaction summary for affinity calculation
@@ -39,7 +39,7 @@ export interface InteractionSummary {
  */
 export interface AffinityCalculation {
   content_type: string;
-  content_slug: ContentId;
+  content_slug: string;
   affinity_score: number;
   breakdown: {
     views: number;

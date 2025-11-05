@@ -1,6 +1,11 @@
 /**
- * Personalization Engine - Zod Schemas
+ * Personalization Engine - Zod Schemas (Database-First)
  * Type-safe schemas for personalization features
+ *
+ * Architecture:
+ * - Database schemas from db-schemas.ts (user_interactions, user_affinities, etc.)
+ * - Transform schemas for client inputs (omit server fields)
+ * - Response schemas for API outputs (non-database types)
  *
  * Covers:
  * - User interactions
@@ -10,67 +15,56 @@
  */
 
 import { z } from 'zod';
-import { contentIdSchema, sessionIdSchema, userIdSchema } from './branded-types.schema';
-import { percentage, positiveInt } from './primitives/base-numbers';
-import { nonEmptyString } from './primitives/base-strings';
-import { categoryIdSchema } from './shared.schema';
+import { Constants, type Enums } from '@/src/types/database.types';
+import {
+  publicContentSimilaritiesRowSchema,
+  publicUserAffinitiesRowSchema,
+  publicUserInteractionsInsertSchema,
+  publicUserInteractionsRowSchema,
+  publicUserSimilaritiesRowSchema,
+} from './generated/db-schemas';
+import { nonEmptyString, percentage, positiveInt } from './primitives';
+
+/**
+ * Category ID validation schema
+ * Derives from database enum: Constants.public.Enums.content_category
+ * @see Database enum: content_category
+ */
+const categoryIdSchema = z.enum([...Constants.public.Enums.content_category] as [
+  Enums<'content_category'>,
+  ...Enums<'content_category'>[],
+]);
+
+const contentSlugSchema = nonEmptyString.max(200).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+const userIdSchema = nonEmptyString.uuid();
 
 // =====================================================
-// USER INTERACTIONS
+// USER INTERACTIONS (Database-First)
 // =====================================================
 
+// Database row schema (for query results)
+export const userInteractionSchema = publicUserInteractionsRowSchema;
+export type UserInteraction = z.infer<typeof userInteractionSchema>;
+
+// Interaction type enum (extracted from database)
 export const interactionTypeSchema = z.enum(['view', 'copy', 'bookmark', 'click', 'time_spent']);
 export type InteractionType = z.infer<typeof interactionTypeSchema>;
 
-export const userInteractionSchema = z.object({
-  id: z.string().uuid().optional(),
-  user_id: userIdSchema,
-  content_type: categoryIdSchema,
-  content_slug: contentIdSchema,
-  interaction_type: interactionTypeSchema,
-  session_id: sessionIdSchema.optional(),
-  metadata: z.record(z.string(), z.unknown()).default({}),
-  created_at: z.string().datetime().optional(),
-});
-
-export type UserInteraction = z.infer<typeof userInteractionSchema>;
-
-// Input schema for tracking interactions
-export const trackInteractionSchema = z.object({
-  content_type: categoryIdSchema,
-  content_slug: contentIdSchema,
-  interaction_type: interactionTypeSchema,
-  session_id: sessionIdSchema.optional(),
-  metadata: z
-    .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
-    .optional()
-    .default({}),
+// Client input schema for tracking interactions (omit server fields)
+export const trackInteractionSchema = publicUserInteractionsInsertSchema.omit({
+  id: true,
+  created_at: true,
+  user_id: true, // Server adds from auth
 });
 
 export type TrackInteractionInput = z.infer<typeof trackInteractionSchema>;
 
 // =====================================================
-// AFFINITY SCORES
+// AFFINITY SCORES (Database-First)
 // =====================================================
 
-export const affinityScoreSchema = z.object({
-  id: z.string().uuid().optional(),
-  user_id: userIdSchema,
-  content_type: categoryIdSchema,
-  content_slug: contentIdSchema,
-  affinity_score: z.number().min(0).max(100),
-  based_on: z
-    .object({
-      views: positiveInt.default(0),
-      bookmarks: positiveInt.default(0),
-      copies: positiveInt.default(0),
-      time_spent: positiveInt.default(0), // seconds
-      recency_boost: z.number().default(0),
-    })
-    .optional(),
-  calculated_at: z.string().datetime().optional(),
-});
-
+// Database row schema (for query results)
+export const affinityScoreSchema = publicUserAffinitiesRowSchema;
 export type AffinityScore = z.infer<typeof affinityScoreSchema>;
 
 // Response for user's top affinities
@@ -83,40 +77,15 @@ export const userAffinitiesResponseSchema = z.object({
 export type UserAffinitiesResponse = z.infer<typeof userAffinitiesResponseSchema>;
 
 // =====================================================
-// SIMILARITY MATRICES
+// SIMILARITY MATRICES (Database-First)
 // =====================================================
 
-// User similarity
-export const userSimilaritySchema = z.object({
-  id: z.string().uuid().optional(),
-  user_a_id: userIdSchema,
-  user_b_id: userIdSchema,
-  similarity_score: z.number().min(0).max(1),
-  common_items: positiveInt.default(0),
-  calculated_at: z.string().datetime().optional(),
-});
-
+// User similarity (database row schema)
+export const userSimilaritySchema = publicUserSimilaritiesRowSchema;
 export type UserSimilarity = z.infer<typeof userSimilaritySchema>;
 
-// Content similarity
-export const contentSimilaritySchema = z.object({
-  id: z.string().uuid().optional(),
-  content_a_type: categoryIdSchema,
-  content_a_slug: contentIdSchema,
-  content_b_type: categoryIdSchema,
-  content_b_slug: contentIdSchema,
-  similarity_score: z.number().min(0).max(1),
-  similarity_factors: z
-    .object({
-      tag_overlap: z.number().min(0).max(1).optional(),
-      category_match: z.number().min(0).max(1).optional(),
-      co_bookmark: z.number().min(0).max(1).optional(),
-      description_similarity: z.number().min(0).max(1).optional(),
-    })
-    .optional(),
-  calculated_at: z.string().datetime().optional(),
-});
-
+// Content similarity (database row schema)
+export const contentSimilaritySchema = publicContentSimilaritiesRowSchema;
 export type ContentSimilarity = z.infer<typeof contentSimilaritySchema>;
 
 // =====================================================
@@ -137,7 +106,7 @@ export type RecommendationSource = z.infer<typeof recommendationSourceSchema>;
 
 // Single recommendation item
 export const personalizedRecommendationSchema = z.object({
-  slug: contentIdSchema,
+  slug: contentSlugSchema,
   title: nonEmptyString,
   description: z.string(),
   category: categoryIdSchema,
@@ -146,7 +115,7 @@ export const personalizedRecommendationSchema = z.object({
   // Scoring
   score: percentage,
   source: recommendationSourceSchema,
-  reason: z.string().optional(), // Human-readable explanation
+  reason: z.string().optional(),
 
   // Metadata
   view_count: positiveInt.optional(),
@@ -172,7 +141,7 @@ export type ForYouFeedResponse = z.infer<typeof forYouFeedResponseSchema>;
 export const similarConfigsResponseSchema = z.object({
   similar_items: z.array(personalizedRecommendationSchema),
   source_item: z.object({
-    slug: contentIdSchema,
+    slug: contentSlugSchema,
     category: categoryIdSchema,
   }),
   algorithm_version: z.string().default('v1.0'),
@@ -204,7 +173,7 @@ export type ForYouQuery = z.infer<typeof forYouQuerySchema>;
 
 export const similarConfigsQuerySchema = z.object({
   content_type: categoryIdSchema,
-  content_slug: contentIdSchema,
+  content_slug: contentSlugSchema,
   limit: positiveInt.max(20).default(6),
 });
 
@@ -224,20 +193,20 @@ export const affinityCalculatedEventSchema = z.object({
 export const recommendationShownEventSchema = z.object({
   recommendation_source: z.string(),
   position: z.number(),
-  content_slug: contentIdSchema,
+  content_slug: contentSlugSchema,
   content_type: z.string(),
 });
 
 export const recommendationClickedEventSchema = z.object({
-  content_slug: contentIdSchema,
+  content_slug: contentSlugSchema,
   content_type: z.string(),
   position: z.number(),
   recommendation_source: z.string(),
 });
 
 export const similarConfigClickedEventSchema = z.object({
-  source_slug: contentIdSchema,
-  target_slug: contentIdSchema,
+  source_slug: contentSlugSchema,
+  target_slug: contentSlugSchema,
   similarity_score: z.number(),
 });
 

@@ -14,6 +14,9 @@ import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from 
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { BADGE_COLORS, type SubmissionStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 
+// Force dynamic rendering - requires authentication
+export const dynamic = 'force-dynamic';
+
 export const metadata = generatePageMetadata('/account/submissions');
 
 export default async function SubmissionsPage() {
@@ -35,7 +38,7 @@ export default async function SubmissionsPage() {
 
     return (
       <UnifiedBadge variant="base" style="outline" className={colorClass}>
-        <Icon className="h-3 w-3 mr-1" />
+        <Icon className="mr-1 h-3 w-3" />
         {variant.label}
       </UnifiedBadge>
     );
@@ -57,14 +60,14 @@ export default async function SubmissionsPage() {
     <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
-          <h1 className="text-3xl font-bold mb-2">My Submissions</h1>
+          <h1 className="mb-2 font-bold text-3xl">My Submissions</h1>
           <p className="text-muted-foreground">
             {submissions.length} {submissions.length === 1 ? 'submission' : 'submissions'}
           </p>
         </div>
         <Button asChild>
           <Link href={ROUTES.SUBMIT}>
-            <Send className="h-4 w-4 mr-2" />
+            <Send className="mr-2 h-4 w-4" />
             New Submission
           </Link>
         </Button>
@@ -73,15 +76,15 @@ export default async function SubmissionsPage() {
       {submissions.length === 0 ? (
         <Card>
           <CardContent className={'flex flex-col items-center py-12'}>
-            <Send className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No submissions yet</h3>
-            <p className={'text-muted-foreground text-center max-w-md mb-4'}>
+            <Send className="mb-4 h-12 w-12 text-muted-foreground" />
+            <h3 className="mb-2 font-semibold text-xl">No submissions yet</h3>
+            <p className={'mb-4 max-w-md text-center text-muted-foreground'}>
               Share your Claude configurations with the community! Your contributions help everyone
               build better AI workflows.
             </p>
             <Button asChild>
               <Link href={ROUTES.SUBMIT}>
-                <Send className="h-4 w-4 mr-2" />
+                <Send className="mr-2 h-4 w-4" />
                 Submit Your First Configuration
               </Link>
             </Button>
@@ -109,7 +112,7 @@ export default async function SubmissionsPage() {
               </CardHeader>
 
               <CardContent>
-                <div className={'flex flex-wrap gap-4 mb-4 text-sm text-muted-foreground'}>
+                <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
                   <div>Submitted {new Date(submission.created_at).toLocaleDateString()}</div>
                   {submission.merged_at && (
                     <>
@@ -126,15 +129,15 @@ export default async function SubmissionsPage() {
                 </div>
 
                 {submission.status === 'rejected' && submission.rejection_reason && (
-                  <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded">
-                    <p className={'text-sm font-medium text-red-400 mb-1'}>Rejection Reason:</p>
-                    <p className={'text-sm text-muted-foreground'}>{submission.rejection_reason}</p>
+                  <div className="mb-4 rounded border border-red-500/20 bg-red-500/10 p-3">
+                    <p className={'mb-1 font-medium text-red-400 text-sm'}>Rejection Reason:</p>
+                    <p className={'text-muted-foreground text-sm'}>{submission.rejection_reason}</p>
                   </div>
                 )}
 
                 {submission.status === 'merged' && (
-                  <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded">
-                    <p className={'text-sm font-medium text-green-400'}>
+                  <div className="mb-4 rounded border border-green-500/20 bg-green-500/10 p-3">
+                    <p className={'font-medium text-green-400 text-sm'}>
                       🎉 Your contribution is now live on ClaudePro Directory!
                     </p>
                   </div>
@@ -144,9 +147,9 @@ export default async function SubmissionsPage() {
                   {submission.pr_url && (
                     <Button variant="outline" size="sm" asChild>
                       <a href={submission.pr_url} target="_blank" rel="noopener noreferrer">
-                        <GitPullRequest className="h-3 w-3 mr-1" />
+                        <GitPullRequest className="mr-1 h-3 w-3" />
                         View PR
-                        <ExternalLink className="h-3 w-3 ml-1" />
+                        <ExternalLink className="ml-1 h-3 w-3" />
                       </a>
                     </Button>
                   )}
@@ -154,7 +157,7 @@ export default async function SubmissionsPage() {
                   {submission.status === 'merged' && (
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/${submission.content_type}/${submission.content_slug}`}>
-                        <ExternalLink className="h-3 w-3 mr-1" />
+                        <ExternalLink className="mr-1 h-3 w-3" />
                         View Live
                       </Link>
                     </Button>
@@ -174,8 +177,8 @@ export default async function SubmissionsPage() {
               className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
             />
             <div className="flex-1">
-              <p className={'text-sm font-medium text-blue-400'}>How it works</p>
-              <p className={'text-sm text-muted-foreground mt-1'}>
+              <p className={'font-medium text-blue-400 text-sm'}>How it works</p>
+              <p className={'mt-1 text-muted-foreground text-sm'}>
                 When you submit a configuration, we automatically create a Pull Request on GitHub.
                 Our team reviews it for quality, security, and accuracy. Once approved and merged,
                 your contribution goes live for everyone to use!

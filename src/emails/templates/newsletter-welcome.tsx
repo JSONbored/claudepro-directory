@@ -11,6 +11,8 @@
  */
 
 import { Button, Hr, Section, Text } from '@react-email/components';
+import { addUTMToURL } from '@/src/lib/utils/email-utm';
+import { EMAIL_UTM_TEMPLATES } from '@/src/lib/utils/utm-templates';
 import { BaseLayout } from '../layouts/base-layout';
 import {
   contentSection,
@@ -56,11 +58,17 @@ export interface NewsletterWelcomeProps {
  * ```
  */
 export function NewsletterWelcome({ email }: NewsletterWelcomeProps) {
+  const baseUrl = 'https://claudepro.directory';
+  const utm = EMAIL_UTM_TEMPLATES.ONBOARDING_WELCOME;
+
   return (
-    <BaseLayout preview="Welcome to ClaudePro Directory! Get weekly updates on new tools & guides.">
+    <BaseLayout
+      preview="Welcome to Claude Pro Directory! Get weekly updates on new tools & guides."
+      utm={utm}
+    >
       {/* Hero section */}
       <Section style={heroSection}>
-        <Text style={headingStyle}>Welcome to ClaudePro Directory! 🎉</Text>
+        <Text style={headingStyle}>Welcome to Claude Pro Directory! 🎉</Text>
         <Text style={subheadingStyle}>
           You're now subscribed to weekly updates on the best Claude agents, MCP servers, and
           productivity tools.
@@ -105,11 +113,17 @@ export function NewsletterWelcome({ email }: NewsletterWelcomeProps) {
           Explore our directory and discover tools that will supercharge your Claude experience.
         </Text>
 
-        <Button href="https://claudepro.directory" style={primaryButtonStyle}>
+        <Button
+          href={addUTMToURL(baseUrl, { ...utm, content: 'primary_cta' })}
+          style={primaryButtonStyle}
+        >
           Browse the Directory
         </Button>
 
-        <Button href="https://claudepro.directory/trending" style={secondaryButtonStyle}>
+        <Button
+          href={addUTMToURL(`${baseUrl}/trending`, { ...utm, content: 'trending_cta' })}
+          style={secondaryButtonStyle}
+        >
           View Trending Tools
         </Button>
       </Section>

@@ -105,20 +105,20 @@ export function SwipeableCardWrapper({
     <div className="relative">
       {/* Swipe Indicator - Copy (Right) */}
       <motion.div
-        className="absolute inset-y-0 left-0 w-20 flex items-center justify-start pl-4 pointer-events-none z-0"
+        className="pointer-events-none absolute inset-y-0 left-0 z-0 flex w-20 items-center justify-start pl-4"
         style={{ opacity: copyIndicatorOpacity }}
       >
-        <div className="bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/30 rounded-lg p-3">
+        <div className="rounded-lg border border-green-500/30 bg-green-500/20 p-3 text-green-600 dark:text-green-400">
           <CopyIcon className="h-5 w-5" aria-hidden="true" />
         </div>
       </motion.div>
 
       {/* Swipe Indicator - Bookmark (Left) */}
       <motion.div
-        className="absolute inset-y-0 right-0 w-20 flex items-center justify-end pr-4 pointer-events-none z-0"
+        className="pointer-events-none absolute inset-y-0 right-0 z-0 flex w-20 items-center justify-end pr-4"
         style={{ opacity: bookmarkIndicatorOpacity }}
       >
-        <div className="bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 rounded-lg p-3">
+        <div className="rounded-lg border border-blue-500/30 bg-blue-500/20 p-3 text-blue-600 dark:text-blue-400">
           <Bookmark className="h-5 w-5" aria-hidden="true" />
         </div>
       </motion.div>
