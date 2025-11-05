@@ -18,7 +18,7 @@ inputs:
 outputs:
   cache-hit:
     description: 'Whether dependencies cache was hit'
-    value: 'true'  # Always true - setup-node handles caching
+    value: ${{ steps.setup-node.outputs.cache-hit }}
 
 runs:
   using: 'composite'
@@ -29,6 +29,7 @@ runs:
         version: 10.20.0
 
     - name: Setup Node.js
+      id: setup-node
       uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.node-version }}

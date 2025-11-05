@@ -338,6 +338,7 @@ export function buildDatabasePayload(params: {
   authorProfileUrl?: string;
   githubUrl?: string;
   tags?: string[];
+  submissionType?: string; // Optional: defaults to category if not provided
 }): {
   p_submission_type: string;
   p_name: string;
@@ -350,7 +351,9 @@ export function buildDatabasePayload(params: {
   p_tags?: string[];
 } {
   return {
-    p_submission_type: params.category,
+    // Use explicit submission_type if provided, otherwise default to category
+    // (for discovery submissions, category IS the submission type)
+    p_submission_type: params.submissionType || params.category,
     p_name: params.name,
     p_description: params.description,
     p_category: params.category,

@@ -115,57 +115,62 @@ jobs:
               submission: submission
             };
 
+      - name: Install Supabase client
+        run: pnpm install -g @supabase/supabase-js
+
       - name: Insert to Supabase via RPC (Database-First)
         if: steps.extract.outputs.result && fromJSON(steps.extract.outputs.result).valid
+        uses: nick-fields/retry@v3
         env:
           SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: |
-          # Install Supabase JS client using pnpm
-          pnpm install -g @supabase/supabase-js
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          retry_on: error
+          command: |
+            # Create Node.js script to call RPC function (database-first)
+            cat > insert-via-rpc.mjs << 'EOF'
+            import { createClient } from '@supabase/supabase-js';
+            import { readFileSync } from 'fs';
 
-          # Create Node.js script to call RPC function (database-first)
-          cat > insert-via-rpc.mjs << 'EOF'
-          import { createClient } from '@supabase/supabase-js';
-          import { readFileSync } from 'fs';
+            const supabaseUrl = process.env.SUPABASE_URL;
+            const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+            const submissionData = JSON.parse(readFileSync('submission.json', 'utf8'));
 
-          const supabaseUrl = process.env.SUPABASE_URL;
-          const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-          const submissionData = JSON.parse(readFileSync('submission.json', 'utf8'));
+            const supabase = createClient(supabaseUrl, supabaseKey);
 
-          const supabase = createClient(supabaseUrl, supabaseKey);
+            // Call database RPC function (includes validation, rate limiting, auto-approve)
+            const { data, error } = await supabase.rpc('submit_content_for_review', {
+              p_submission_type: submissionData.submission_type,
+              p_name: submissionData.name,
+              p_description: submissionData.description,
+              p_category: submissionData.category,
+              p_author: submissionData.author,
+              p_content_data: submissionData.content_data,
+              p_author_profile_url: submissionData.author_profile_url || null,
+              p_github_url: submissionData.github_url || null,
+              p_tags: submissionData.tags || []
+            });
 
-          // Call database RPC function (includes validation, rate limiting, auto-approve)
-          const { data, error } = await supabase.rpc('submit_content_for_review', {
-            p_submission_type: submissionData.submission_type,
-            p_name: submissionData.name,
-            p_description: submissionData.description,
-            p_category: submissionData.category,
-            p_author: submissionData.author,
-            p_content_data: submissionData.content_data,
-            p_author_profile_url: submissionData.author_profile_url || null,
-            p_github_url: submissionData.github_url || null,
-            p_tags: submissionData.tags || []
-          });
+            if (error) {
+              console.error('RPC error:', error);
+              process.exit(1);
+            }
 
-          if (error) {
-            console.error('RPC error:', error);
-            process.exit(1);
-          }
+            console.log('Submission created via RPC:', data);
+            console.log('SUBMISSION_ID=' + data.submission_id);
+            console.log('STATUS=' + data.status);
+            console.log('MESSAGE=' + data.message);
+            EOF
 
-          console.log('Submission created via RPC:', data);
-          console.log('SUBMISSION_ID=' + data.submission_id);
-          console.log('STATUS=' + data.status);
-          console.log('MESSAGE=' + data.message);
-          EOF
-
-          # Write submission to file to avoid environment variable size limits
-          cat > submission.json << 'SUBMISSION_EOF'
-          ${{ steps.extract.outputs.result.submission }}
-          SUBMISSION_EOF
-          
-          # Run RPC call
-          node insert-via-rpc.mjs
+            # Write submission to file to avoid environment variable size limits
+            cat > submission.json << 'SUBMISSION_EOF'
+            ${{ steps.extract.outputs.result.submission }}
+            SUBMISSION_EOF
+            
+            # Run RPC call
+            node insert-via-rpc.mjs
 
       - name: Comment on PR - Success
         if: steps.extract.outputs.result && fromJSON(steps.extract.outputs.result).valid && success()
