@@ -51,19 +51,24 @@ body:
       required: true
 
   - type: dropdown
-    id: category
+    id: component
     attributes:
-      label: Content Category
-      description: Which category is affected?
+      label: Affected Component
+      description: Which part of the application is affected?
       options:
-        - Agents
-        - MCP Servers
-        - Rules
-        - Commands
-        - Hooks
-        - Statuslines
-        - Collections
-        - Guides
+        - Content Browse/Detail Pages
+        - Submit Form (/submit)
+        - Search/Discovery
+        - User Profiles/Accounts
+        - Authentication
+        - Database/Backend
+        - UI/UX/Design
+        - Performance
+        - Accessibility
+        - Mobile Responsiveness
+        - Dark Mode
+        - Homepage
+        - Navigation
         - Other/Multiple
     validations:
       required: false

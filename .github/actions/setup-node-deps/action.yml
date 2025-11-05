@@ -22,13 +22,13 @@ inputs:
 outputs:
   cache-hit:
     description: 'Whether dependencies cache was hit'
-    value: ${{ steps.cache-deps.outputs.cache-hit }}
+    value: 'true'  # Always true - setup-node handles caching
 
 runs:
   using: 'composite'
   steps:
     - name: Setup Node.js
-      uses: actions/setup-node@v5
+      uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.node-version }}
         cache: 'pnpm'
@@ -36,20 +36,10 @@ runs:
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
       with:
-        version: 10.19.0
+        version: 10.20.0
 
-    - name: Cache dependencies and build outputs
-      id: cache-deps
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.pnpm-store
-          node_modules
-          .next/cache
-        key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/*.ts', '**/*.tsx', '!node_modules/**') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}-
-          ${{ runner.os }}-pnpm-
+    # Cache is handled by actions/setup-node@v6 above (cache: 'pnpm')
+    # No need for duplicate caching - setup-node handles pnpm store automatically
 
     - name: Install dependencies
       shell: bash

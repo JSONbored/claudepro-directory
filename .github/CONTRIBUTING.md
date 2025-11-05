@@ -4,154 +4,95 @@ Thank you for your interest in contributing to ClaudePro Directory! This guide w
 
 ## 📋 Quick Start
 
-**Option 1: Use GitHub Issue Templates** (Recommended for non-developers)
+**Option 1: Web Submission Form** (Recommended - Easiest)
 
-- [Submit via Issue Templates](../../issues/new/choose) - Structured forms guide you through submission
+Visit [claudepro.directory/submit](https://claudepro.directory/submit) to submit through our database-driven form:
+- ✅ Dynamic field validation based on content type
+- ✅ Auto-complete from curated database templates
+- ✅ Real-time duplicate detection
+- ✅ Automatic schema compliance checking
 
-**Option 2: Submit via Pull Request** (For developers)
+**Option 2: GitHub PR Submission** (For developers who prefer Git workflow)
 
-1. **Fork** the repository to your GitHub account
-2. **Clone** your fork locally and add your content as a JSON file
-3. **Test locally** with `npm run dev`
-4. **Submit a PR** using our [PR template](../pull_request_template.md)
-
-## 🔄 Development Workflow
-
-### Contribution Process
-
-1. Fork the repository
-2. Clone your fork:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/claudepro-directory.git
-   cd claudepro-directory
-   ```
-3. Create a feature branch:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-4. Make your changes
-5. Commit with clear messages:
-   ```bash
-   git commit -m "Add [Type]: Brief description"
-   ```
-6. Push to your fork:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-7. Open a Pull Request targeting the `main` branch
+1. **Fork** the repository
+2. **Open a PR** using our [PR template](pull_request_template.md)
+3. Our automation will extract your submission and validate it against our database schema
+4. Once approved, your content will be automatically synced to our database
 
 ## 🎯 Content Types We Accept
 
-| Type            | Description                           | Submit via Issue                                                     | Example Files                                        |
-| --------------- | ------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------- |
-| **Agents**      | Specialized AI personas               | [Submit Agent](../../issues/new?template=submit_agent.yml)           | [View Examples](../../tree/main/content/agents)      |
-| **MCP Servers** | Model Context Protocol integrations   | [Submit MCP](../../issues/new?template=submit_mcp.yml)               | [View Examples](../../tree/main/content/mcp)         |
-| **Commands**    | Quick automation slash commands       | [Submit Command](../../issues/new?template=submit_command.yml)       | [View Examples](../../tree/main/content/commands)    |
-| **Rules**       | System prompts & behavior guidelines  | [Submit Rule](../../issues/new?template=submit_rule.yml)             | [View Examples](../../tree/main/content/rules)       |
-| **Hooks**       | Event-driven automation scripts       | [Submit Hook](../../issues/new?template=submit_hook.yml)             | [View Examples](../../tree/main/content/hooks)       |
-| **Statuslines** | Custom CLI status displays            | [Submit Statusline](../../issues/new?template=submit_statusline.yml) | [View Examples](../../tree/main/content/statuslines) |
-| **Collections** | Curated bundles of related configs    | [Submit Collection](../../issues/new?template=submit_collection.yml) | [View Examples](../../tree/main/content/collections) |
-| **Skills**      | Task-focused capability guides        | [Submit Skill](../../issues/new?template=submit_skill.yml)           | [View Examples](../../tree/main/content/skills)      |
-| **Collections** | Curated configuration bundles | [Submit Collection](../../issues/new?template=submit_collection.yml) | [View Examples](../../tree/main/content/collections) |
+| Type            | Description                           | Browse Live Examples                                  |
+| --------------- | ------------------------------------- | ----------------------------------------------------- |
+| **Agents**      | Specialized AI personas               | [claudepro.directory/agents](https://claudepro.directory/agents)           |
+| **MCP Servers** | Model Context Protocol integrations   | [claudepro.directory/mcp](https://claudepro.directory/mcp)                 |
+| **Commands**    | Quick automation slash commands       | [claudepro.directory/commands](https://claudepro.directory/commands)       |
+| **Rules**       | System prompts & behavior guidelines  | [claudepro.directory/rules](https://claudepro.directory/rules)             |
+| **Hooks**       | Event-driven automation scripts       | [claudepro.directory/hooks](https://claudepro.directory/hooks)             |
+| **Statuslines** | Custom CLI status displays            | [claudepro.directory/statuslines](https://claudepro.directory/statuslines) |
+| **Collections** | Curated bundles of related configs    | [claudepro.directory/collections](https://claudepro.directory/collections) |
+| **Skills**      | Task-focused capability guides        | [claudepro.directory/skills](https://claudepro.directory/skills)           |
 
-## 📝 How to Add Content
+**Submit any content type at:** [claudepro.directory/submit](https://claudepro.directory/submit)
 
-### 1. Choose the Right Directory
+## 📝 How to Submit Content
 
-Place your JSON file in the appropriate directory:
+### Method 1: Web Form (Recommended)
 
-```
-content/
-├── agents/       # AI agent configurations
-├── mcp/          # MCP server configs
-├── commands/     # Automation slash commands
-├── rules/        # System prompts & behavior guidelines
-├── hooks/        # Event-driven automation scripts
-├── statuslines/  # Custom CLI status displays
-├── collections/  # Curated bundles of related configs
-└── skills/       # Task-focused capability guides (PDF, DOCX, etc.)
-```
+1. **Visit** [claudepro.directory/submit](https://claudepro.directory/submit)
+2. **Sign in** with your GitHub account (required for submissions)
+3. **Select** your content type from the dropdown
+4. **Use Template** (optional) - Click to pre-fill with database examples
+5. **Fill out** the dynamically generated form fields
+6. **Submit** - Your submission enters our database as `pending` status
+7. **Review** - Moderators review in our database
+8. **Published** - Approved content goes live on the website
 
-### 2. Create Your JSON File
+### Method 2: GitHub PR
 
-**Start with a template**, then customize it:
+1. **Fork** this repository
+2. **Create** a pull request with your content submission
+3. **Format** your submission using the plaintext template in our [PR template](pull_request_template.md)
+4. **Validation** - Our GitHub workflow extracts and validates your submission against database schemas
+5. **Review** - Same moderation process as web submissions
+6. **Merge** - Approved PRs are auto-merged and synced to our database
 
-#### Templates (Copy & Customize)
+## 🗄️ Our Database-First Architecture
 
-- **Agent**: [`agents-template-simple.json`](../../blob/main/templates/content/agents-template-simple.json) | [Full template](../../blob/main/templates/content/agents-template.json)
-- **MCP Server**: [`mcp-template-simple.json`](../../blob/main/templates/content/mcp-template-simple.json) | [Full template](../../blob/main/templates/content/mcp-template.json)
-- **Command**: [`commands-template-simple.json`](../../blob/main/templates/content/commands-template-simple.json) | [Full template](../../blob/main/templates/content/commands-template.json)
-- **Rule**: [`rules-template-simple.json`](../../blob/main/templates/content/rules-template-simple.json) | [Full template](../../blob/main/templates/content/rules-template.json)
-- **Hook**: [`hooks-template-simple.json`](../../blob/main/templates/content/hooks-template-simple.json) | [Full template](../../blob/main/templates/content/hooks-template.json)
-- **Statusline**: [`statuslines-template-simple.json`](../../blob/main/templates/content/statuslines-template-simple.json) | [Full template](../../blob/main/templates/content/statuslines-template.json)
-- **Collection**: [`collections-template-simple.json`](../../blob/main/templates/content/collections-template-simple.json) | [Full template](../../blob/main/templates/content/collections-template.json)
-- **Skill**: [`skills-template-simple.json`](../../blob/main/templates/content/skills-template-simple.json) | [Full template](../../blob/main/templates/content/skills-template.json)
+**All content is stored in PostgreSQL, not JSON files.**
 
-#### Real-World Examples
+- ✅ **Dynamic forms**: Generated from `form_field_definitions` table
+- ✅ **Validation**: PostgreSQL CHECK constraints enforce data quality
+- ✅ **Templates**: Curated examples stored in `content_templates` table
+- ✅ **Published content**: Lives in `content` table with full-text search
+- ✅ **Submissions**: Tracked in `content_submissions` table with moderation workflow
 
-- **Agent**: [`code-reviewer-agent.json`](../../blob/main/content/agents/code-reviewer-agent.json)
-- **Command**: [`git-smart-commit.json`](../../blob/main/content/commands/git-smart-commit.json)
-- **Hook**: [`auto-code-formatter-hook.json`](../../blob/main/content/hooks/auto-code-formatter-hook.json)
-- **MCP**: [`github-mcp-server.json`](../../blob/main/content/mcp/github-mcp-server.json)
-- **Rule**: [`react-expert.json`](../../blob/main/content/rules/react-expert.json)
-- **Statusline**: [`git-status-statusline.json`](../../blob/main/content/statuslines/git-status-statusline.json)
-- **Collection**: [`developer-productivity-booster.json`](../../blob/main/content/collections/developer-productivity-booster.json)
+**Note for developers:** The `content/skills/*.zip` files in this repo are backup copies only. Live skill downloads are served from Supabase Storage.
 
-### 3. Categories
+## 🧪 Testing Code Changes (For Developers)
 
-Use one of these standard categories:
-
-**For Rules/Agents/Commands/Hooks:**
-
-- `development` - Programming & software development
-- `productivity` - Task management & efficiency
-- `creative` - Writing, art, design
-- `business` - Business analysis & strategy
-- `data` - Data analysis & processing
-- `automation` - Workflow automation
-- `other` - Doesn't fit other categories
-
-**For MCP Servers:**
-
-- `database` - Database connections
-- `development` - Dev tools & APIs
-- `productivity` - Productivity tools
-- `automation` - Automation services
-- `file-system` - File operations
-- `other` - Other integrations
-
-### 4. File Naming
-
-Use kebab-case (lowercase with hyphens): `typescript-expert.json`, `react-code-reviewer.json`
-
-## 🧪 Testing Your Contribution
+If you're contributing **code changes** (not content submissions):
 
 1. **Install dependencies:**
-
    ```bash
-   npm install
+   pnpm install
    ```
 
-2. **Build content:**
-
+2. **Run dev server:**
    ```bash
-   npm run build:content
+   pnpm dev
    ```
 
-3. **Run dev server:**
-
+3. **Build:**
    ```bash
-   npm run dev
+   pnpm build
    ```
 
-4. **Verify your content:**
-   - Navigate to the appropriate section
-   - Check that your content appears
-   - Test the detail page works
+4. **Lint:**
+   ```bash
+   pnpm lint
+   ```
 
-## 📤 Submitting Your PR
-
-When opening a pull request, our [PR template](../pull_request_template.md) will guide you through the process.
+## 📤 PR Guidelines
 
 ### PR Title Format
 
@@ -160,21 +101,28 @@ Add [Type]: [Your Content Title]
 ```
 
 Examples:
-
 - `Add Agent: TypeScript Code Reviewer`
 - `Add MCP: PostgreSQL Server`
 - `Add Rule: React Best Practices`
 
-## ✅ Checklist Before Submitting
+Or for code changes:
+- `fix: resolve build error in submit form`
+- `feat: add new validation rule`
 
-- [ ] JSON file is valid (no syntax errors)
-- [ ] Used appropriate category
-- [ ] Added relevant tags (3-5 recommended)
-- [ ] Content is useful and well-written
-- [ ] No duplicate content exists
+### Checklist Before Submitting
+
+**For Content Submissions:**
+- [ ] Tested your configuration and it works
+- [ ] Removed all API keys, secrets, and personal information
+- [ ] Content is original or properly attributed
+- [ ] No spam or promotional content
+
+**For Code Changes:**
+- [ ] Build passes (`pnpm build`)
+- [ ] Linting passes (`pnpm lint`)
+- [ ] Type checking passes (`pnpm type-check`)
 - [ ] Tested locally
-- [ ] PR follows naming convention
-- [ ] Only one content addition per PR
+- [ ] Updated documentation if needed
 
 ## 🚫 What NOT to Include
 
@@ -186,11 +134,11 @@ Examples:
 
 ## 💡 Tips for Great Contributions
 
-1. **Clear Titles** - Be specific about what your content does
-2. **Detailed Descriptions** - Help users understand the value
+1. **Clear Names** - Be specific about what your content does
+2. **Detailed Descriptions** - Help users understand the value (1-2 sentences)
 3. **Comprehensive Content** - Include examples and explanations
 4. **Proper Formatting** - Use markdown for better readability
-5. **Relevant Tags** - Help users discover your content
+5. **Relevant Tags** - Help users discover your content (3-5 recommended)
 
 ## 🤝 Community Guidelines
 
@@ -199,23 +147,12 @@ Examples:
 - Report issues or improvements
 - Share knowledge and learn from others
 
-## 📚 Real-World Examples
+## 📚 Additional Resources
 
-Browse production examples in our content directories:
-
-- **Agents**: [`content/agents/`](../../tree/main/content/agents)
-- **Commands**: [`content/commands/`](../../tree/main/content/commands)
-- **Hooks**: [`content/hooks/`](../../tree/main/content/hooks)
-- **MCP**: [`content/mcp/`](../../tree/main/content/mcp)
-- **Rules**: [`content/rules/`](../../tree/main/content/rules)
-- **Statuslines**: [`content/statuslines/`](../../tree/main/content/statuslines)
-- **Collections**: [`content/collections/`](../../tree/main/content/collections)
-
-## 🙋 Need Help?
-
-- [Browse existing content](../../tree/main/content) for examples
-- [Open an issue](../../issues/new/choose) for questions
-- [Check closed PRs](../../pulls?q=is%3Apr+is%3Aclosed) for patterns
+- **Browse Live Examples**: [claudepro.directory](https://claudepro.directory)
+- **Submit Form**: [claudepro.directory/submit](https://claudepro.directory/submit)
+- **Open an Issue**: [Report bugs or request features](../../issues/new/choose)
+- **View Closed PRs**: [See contribution patterns](../../pulls?q=is%3Apr+is%3Aclosed)
 
 ---
 

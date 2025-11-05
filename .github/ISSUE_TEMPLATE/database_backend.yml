@@ -1,0 +1,130 @@
+name: Database/Backend Issue
+description: Report database schema, backend logic, or data integrity issues
+title: "[Database]: "
+labels: ["database", "backend", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report database schema issues, RPC function bugs, data integrity problems, or backend logic errors.
+
+        **Our Database-First Architecture:**
+        - PostgreSQL with Supabase
+        - RPC functions for business logic
+        - Generated TypeScript types from database schema
+        - Row-Level Security (RLS) policies
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which database/backend component is affected?
+      options:
+        - Database Schema/Tables
+        - RPC Functions (Stored Procedures)
+        - Database Migrations
+        - Row-Level Security (RLS) Policies
+        - Database Indexes/Performance
+        - Generated Types (database.types.ts)
+        - Supabase Edge Functions
+        - Database Triggers
+        - Data Integrity/Constraints
+        - Realtime Subscriptions
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue Description
+      description: Describe the database/backend issue
+      placeholder: |
+        What's wrong?
+        - Table/function name
+        - Expected vs actual behavior
+        - Data integrity concerns
+        - Performance problems
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction Steps
+      description: How to reproduce the issue
+      placeholder: |
+        1. Call RPC function: get_content_templates('agents')
+        2. Expected return: [...]
+        3. Actual return: null
+        4. Error message: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: sql_query
+    attributes:
+      label: Relevant SQL/RPC Call
+      description: Provide the SQL query or RPC function call that causes the issue
+      placeholder: |
+        ```sql
+        SELECT * FROM content WHERE category = 'agents';
+        ```
+
+        Or:
+
+        ```typescript
+        const { data, error } = await supabase.rpc('function_name', { params });
+        ```
+      render: sql
+
+  - type: textarea
+    id: error_logs
+    attributes:
+      label: Error Logs/Messages
+      description: Paste any error messages or logs
+      placeholder: |
+        ERROR: 42703: column "field_name" does not exist
+        LINE 5: field_name,
+                ^
+      render: shell
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this issue?
+      options:
+        - Critical - Data loss/corruption
+        - High - Blocks core functionality
+        - Medium - Workaround available
+        - Low - Minor inconvenience
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_fix
+    attributes:
+      label: Proposed Fix (Optional)
+      description: If you know how to fix this, describe the solution
+      placeholder: |
+        Migration needed:
+        ```sql
+        ALTER TABLE content ADD COLUMN new_field TEXT;
+        ```
+
+        Or RPC function update needed...
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have verified this against the live database schema
+          required: true
+        - label: I have checked database.types.ts for type mismatches
+          required: false
+        - label: I have searched existing issues for duplicates
+          required: true
