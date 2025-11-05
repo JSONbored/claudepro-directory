@@ -6,10 +6,10 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 import type { Database } from '../_shared/database.types.ts';
 
 const SITE_URL = Deno.env.get('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
-const SUPABASE_URL = Deno.env.get('NEXT_PUBLIC_SUPABASE_URL')!;
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-type InteractionType = Database['public']['Enums']['interaction_type'];
+type InteractionType = 'view' | 'copy' | 'bookmark' | 'click' | 'time_spent' | 'search' | 'filter' | 'screenshot' | 'share' | 'embed_generated' | 'download';
 
 function getContentItemUrl(category: string, slug: string): string {
   return `${SITE_URL}/${category}/${slug}`;
@@ -106,20 +106,13 @@ async function handleTrackInteraction(
   user: any,
   body: any
 ) {
-  if (!user) {
-    return new Response(
-      JSON.stringify({ success: false, message: 'User not authenticated' }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
-
   const { content_type, content_slug, interaction_type, session_id, metadata } = body;
 
   const { error } = await supabase.from('user_interactions').insert({
     content_type,
     content_slug,
     interaction_type: interaction_type as InteractionType,
-    user_id: user.id,
+    user_id: user?.id || null,  // Allow anonymous tracking
     session_id: session_id || null,
     metadata: metadata || null,
   });

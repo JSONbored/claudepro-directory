@@ -2,6 +2,7 @@
  * Analytics Client - Thin wrapper for Supabase Edge Function
  */
 
+import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
 
 const EDGE_FUNCTION_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/analytics`;
@@ -12,18 +13,32 @@ async function callEdgeFunction(action: string, data: Record<string, unknown> = 
     data: { session },
   } = await supabase.auth.getSession();
 
+  // Use session token if available, otherwise use anon key from env
+  const token = session?.access_token || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!token) {
+    logger.error('No auth token or anon key available for analytics');
+    throw new Error('Authentication token not available');
+  }
+
   const response = await fetch(EDGE_FUNCTION_URL, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${session?.access_token || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ action, ...data }),
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Edge function call failed');
+    const errorText = await response.text();
+    logger.error('Analytics edge function error', errorText, { status: response.status, action });
+    try {
+      const error = JSON.parse(errorText);
+      throw new Error(error.message || 'Edge function call failed');
+    } catch {
+      throw new Error(`Edge function call failed: ${response.status}`);
+    }
   }
 
   return response.json();
