@@ -3,6 +3,16 @@
  * Standardized error/success responses for all email handlers
  */
 
+/**
+ * CORS headers for cross-origin requests
+ * Allows frontend to call Edge Functions directly
+ */
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Email-Action, Authorization',
+};
+
 export function errorResponse(error: unknown, context: string): Response {
   console.error(`${context} failed:`, error);
   return new Response(
@@ -13,7 +23,7 @@ export function errorResponse(error: unknown, context: string): Response {
     }),
     {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
     }
   );
 }
@@ -21,7 +31,7 @@ export function errorResponse(error: unknown, context: string): Response {
 export function successResponse(data: unknown, status: number = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...corsHeaders },
   });
 }
 
@@ -33,6 +43,7 @@ export function methodNotAllowedResponse(allowedMethod: string = 'POST'): Respon
       headers: {
         'Content-Type': 'application/json',
         'Allow': allowedMethod,
+        ...corsHeaders,
       },
     }
   );
@@ -43,7 +54,7 @@ export function badRequestResponse(message: string): Response {
     JSON.stringify({ error: 'Bad Request', message }),
     {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
     }
   );
 }
@@ -53,7 +64,7 @@ export function unauthorizedResponse(message: string = 'Unauthorized'): Response
     JSON.stringify({ error: 'Unauthorized', message }),
     {
       status: 401,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
     }
   );
 }

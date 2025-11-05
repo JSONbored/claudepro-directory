@@ -42,6 +42,18 @@ const supabase = createClient(SUPABASE_ENV.url, SUPABASE_ENV.serviceRoleKey);
 const hookSecret = AUTH_HOOK_ENV.secret.replace('v1,whsec_', '');
 
 Deno.serve(async (req: Request) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, X-Email-Action, Authorization',
+      },
+    });
+  }
+
   if (req.method !== 'POST') {
     return methodNotAllowedResponse('POST');
   }
@@ -157,7 +169,12 @@ async function handleSubscribe(req: Request): Promise<Response> {
           }),
           {
             status: 429,
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'POST, OPTIONS',
+              'Access-Control-Allow-Headers': 'Content-Type, X-Email-Action, Authorization',
+            },
           }
         );
       }
