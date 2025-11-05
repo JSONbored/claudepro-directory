@@ -675,6 +675,26 @@ export type PublicExtractTagsForSearchReturns = z.infer<
 >;
 export type PublicFilterJobsArgs = z.infer<typeof generated.publicFilterJobsArgsSchema>;
 export type PublicFilterJobsReturns = z.infer<typeof generated.publicFilterJobsReturnsSchema>;
+export type PublicFormatDateIsoArgs = z.infer<typeof generated.publicFormatDateIsoArgsSchema>;
+export type PublicFormatDateIsoReturns = z.infer<typeof generated.publicFormatDateIsoReturnsSchema>;
+export type PublicFormatDateLongArgs = z.infer<typeof generated.publicFormatDateLongArgsSchema>;
+export type PublicFormatDateLongReturns = z.infer<
+  typeof generated.publicFormatDateLongReturnsSchema
+>;
+export type PublicFormatDateShortArgs = z.infer<typeof generated.publicFormatDateShortArgsSchema>;
+export type PublicFormatDateShortReturns = z.infer<
+  typeof generated.publicFormatDateShortReturnsSchema
+>;
+export type PublicFormatRelativeDateArgs = z.infer<
+  typeof generated.publicFormatRelativeDateArgsSchema
+>;
+export type PublicFormatRelativeDateReturns = z.infer<
+  typeof generated.publicFormatRelativeDateReturnsSchema
+>;
+export type PublicFormatWeekRangeArgs = z.infer<typeof generated.publicFormatWeekRangeArgsSchema>;
+export type PublicFormatWeekRangeReturns = z.infer<
+  typeof generated.publicFormatWeekRangeReturnsSchema
+>;
 export type PublicGenerateCommandInstallationArgs = z.infer<
   typeof generated.publicGenerateCommandInstallationArgsSchema
 >;
@@ -730,6 +750,12 @@ export type PublicGetActiveSponsoredContentArgs = z.infer<
 >;
 export type PublicGetActiveSponsoredContentReturns = z.infer<
   typeof generated.publicGetActiveSponsoredContentReturnsSchema
+>;
+export type PublicGetActiveSubscribersArgs = z.infer<
+  typeof generated.publicGetActiveSubscribersArgsSchema
+>;
+export type PublicGetActiveSubscribersReturns = z.infer<
+  typeof generated.publicGetActiveSubscribersReturnsSchema
 >;
 export type PublicGetAllContentCategoriesArgs = z.infer<
   typeof generated.publicGetAllContentCategoriesArgsSchema
@@ -865,12 +891,20 @@ export type PublicGetContentTemplatesArgs = z.infer<
 export type PublicGetContentTemplatesReturns = z.infer<
   typeof generated.publicGetContentTemplatesReturnsSchema
 >;
+export type PublicGetCurrentWeekStartArgs = z.infer<
+  typeof generated.publicGetCurrentWeekStartArgsSchema
+>;
+export type PublicGetCurrentWeekStartReturns = z.infer<
+  typeof generated.publicGetCurrentWeekStartReturnsSchema
+>;
 export type PublicGetDatabaseFingerprintArgs = z.infer<
   typeof generated.publicGetDatabaseFingerprintArgsSchema
 >;
 export type PublicGetDatabaseFingerprintReturns = z.infer<
   typeof generated.publicGetDatabaseFingerprintReturnsSchema
 >;
+export type PublicGetDaysAgoArgs = z.infer<typeof generated.publicGetDaysAgoArgsSchema>;
+export type PublicGetDaysAgoReturns = z.infer<typeof generated.publicGetDaysAgoReturnsSchema>;
 export type PublicGetDueSequenceEmailsArgs = z.infer<
   typeof generated.publicGetDueSequenceEmailsArgsSchema
 >;
@@ -978,6 +1012,12 @@ export type PublicGetNewContentForWeekArgs = z.infer<
 >;
 export type PublicGetNewContentForWeekReturns = z.infer<
   typeof generated.publicGetNewContentForWeekReturnsSchema
+>;
+export type PublicGetPendingResendSyncsArgs = z.infer<
+  typeof generated.publicGetPendingResendSyncsArgsSchema
+>;
+export type PublicGetPendingResendSyncsReturns = z.infer<
+  typeof generated.publicGetPendingResendSyncsReturnsSchema
 >;
 export type PublicGetPendingSubmissionsArgs = z.infer<
   typeof generated.publicGetPendingSubmissionsArgsSchema
@@ -1215,6 +1255,8 @@ export type PublicGetUserSettingsArgs = z.infer<typeof generated.publicGetUserSe
 export type PublicGetUserSettingsReturns = z.infer<
   typeof generated.publicGetUserSettingsReturnsSchema
 >;
+export type PublicGetWeekEndArgs = z.infer<typeof generated.publicGetWeekEndArgsSchema>;
+export type PublicGetWeekEndReturns = z.infer<typeof generated.publicGetWeekEndReturnsSchema>;
 export type PublicGetWeeklyDigestArgs = z.infer<typeof generated.publicGetWeeklyDigestArgsSchema>;
 export type PublicGetWeeklyDigestReturns = z.infer<
   typeof generated.publicGetWeeklyDigestReturnsSchema
@@ -1237,6 +1279,24 @@ export type PublicHandleWebhookComplaintArgs = z.infer<
 export type PublicHandleWebhookComplaintReturns = z.infer<
   typeof generated.publicHandleWebhookComplaintReturnsSchema
 >;
+export type PublicHandleWebhookContactCreatedArgs = z.infer<
+  typeof generated.publicHandleWebhookContactCreatedArgsSchema
+>;
+export type PublicHandleWebhookContactCreatedReturns = z.infer<
+  typeof generated.publicHandleWebhookContactCreatedReturnsSchema
+>;
+export type PublicHandleWebhookContactDeletedArgs = z.infer<
+  typeof generated.publicHandleWebhookContactDeletedArgsSchema
+>;
+export type PublicHandleWebhookContactDeletedReturns = z.infer<
+  typeof generated.publicHandleWebhookContactDeletedReturnsSchema
+>;
+export type PublicHandleWebhookEmailSentArgs = z.infer<
+  typeof generated.publicHandleWebhookEmailSentArgsSchema
+>;
+export type PublicHandleWebhookEmailSentReturns = z.infer<
+  typeof generated.publicHandleWebhookEmailSentReturnsSchema
+>;
 export type PublicImportRedisSeedDataArgs = z.infer<
   typeof generated.publicImportRedisSeedDataArgsSchema
 >;
@@ -1257,6 +1317,10 @@ export type PublicIsBookmarkedArgs = z.infer<typeof generated.publicIsBookmarked
 export type PublicIsBookmarkedReturns = z.infer<typeof generated.publicIsBookmarkedReturnsSchema>;
 export type PublicIsFollowingArgs = z.infer<typeof generated.publicIsFollowingArgsSchema>;
 export type PublicIsFollowingReturns = z.infer<typeof generated.publicIsFollowingReturnsSchema>;
+export type PublicIsInFutureArgs = z.infer<typeof generated.publicIsInFutureArgsSchema>;
+export type PublicIsInFutureReturns = z.infer<typeof generated.publicIsInFutureReturnsSchema>;
+export type PublicIsInPastArgs = z.infer<typeof generated.publicIsInPastArgsSchema>;
+export type PublicIsInPastReturns = z.infer<typeof generated.publicIsInPastReturnsSchema>;
 export type PublicJobSlugArgs = z.infer<typeof generated.publicJobSlugArgsSchema>;
 export type PublicJobSlugReturns = z.infer<typeof generated.publicJobSlugReturnsSchema>;
 export type PublicManageCollectionArgs = z.infer<typeof generated.publicManageCollectionArgsSchema>;
@@ -1273,6 +1337,12 @@ export type PublicManagePostArgs = z.infer<typeof generated.publicManagePostArgs
 export type PublicManagePostReturns = z.infer<typeof generated.publicManagePostReturnsSchema>;
 export type PublicManageReviewArgs = z.infer<typeof generated.publicManageReviewArgsSchema>;
 export type PublicManageReviewReturns = z.infer<typeof generated.publicManageReviewReturnsSchema>;
+export type PublicMarkResendSyncCompleteArgs = z.infer<
+  typeof generated.publicMarkResendSyncCompleteArgsSchema
+>;
+export type PublicMarkResendSyncCompleteReturns = z.infer<
+  typeof generated.publicMarkResendSyncCompleteReturnsSchema
+>;
 export type PublicMarkSequenceEmailProcessedArgs = z.infer<
   typeof generated.publicMarkSequenceEmailProcessedArgsSchema
 >;
@@ -1374,6 +1444,12 @@ export type PublicSubmitContentForReviewArgs = z.infer<
 >;
 export type PublicSubmitContentForReviewReturns = z.infer<
   typeof generated.publicSubmitContentForReviewReturnsSchema
+>;
+export type PublicSubscribeNewsletterArgs = z.infer<
+  typeof generated.publicSubscribeNewsletterArgsSchema
+>;
+export type PublicSubscribeNewsletterReturns = z.infer<
+  typeof generated.publicSubscribeNewsletterReturnsSchema
 >;
 export type PublicSuggestVacuumCommandsArgs = z.infer<
   typeof generated.publicSuggestVacuumCommandsArgsSchema

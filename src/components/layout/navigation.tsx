@@ -477,7 +477,7 @@ const NavigationComponent = () => {
                       <Button
                         key={link.href}
                         asChild
-                        variant="default"
+                        variant="outline"
                         size="sm"
                         className={'hidden md:flex'}
                       >

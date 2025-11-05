@@ -151,6 +151,7 @@ export const publicNewsletterSourceSchema = z.union([
   z.literal('content_page'),
   z.literal('inline'),
   z.literal('post_copy'),
+  z.literal('resend_import'),
 ]);
 
 export const publicNotificationPrioritySchema = z.union([
@@ -2223,10 +2224,14 @@ export const publicNewsletterSubscriptionsRowSchema = z.object({
   id: z.string(),
   ip_address: z.unknown(),
   last_email_sent_at: z.string().nullable(),
+  last_sync_at: z.string().nullable(),
   referrer: z.string().nullable(),
+  resend_contact_id: z.string().nullable(),
   source: publicNewsletterSourceSchema.nullable(),
   status: z.string(),
   subscribed_at: z.string().nullable(),
+  sync_error: z.string().nullable(),
+  sync_status: z.string().nullable(),
   unsubscribed_at: z.string().nullable(),
   updated_at: z.string().nullable(),
   user_agent: z.string().nullable(),
@@ -2245,10 +2250,14 @@ export const publicNewsletterSubscriptionsInsertSchema = z.object({
   id: z.string().optional(),
   ip_address: z.unknown().optional(),
   last_email_sent_at: z.string().optional().nullable(),
+  last_sync_at: z.string().optional().nullable(),
   referrer: z.string().optional().nullable(),
+  resend_contact_id: z.string().optional().nullable(),
   source: publicNewsletterSourceSchema.optional().nullable(),
   status: z.string().optional(),
   subscribed_at: z.string().optional().nullable(),
+  sync_error: z.string().optional().nullable(),
+  sync_status: z.string().optional().nullable(),
   unsubscribed_at: z.string().optional().nullable(),
   updated_at: z.string().optional().nullable(),
   user_agent: z.string().optional().nullable(),
@@ -2267,10 +2276,14 @@ export const publicNewsletterSubscriptionsUpdateSchema = z.object({
   id: z.string().optional(),
   ip_address: z.unknown().optional(),
   last_email_sent_at: z.string().optional().nullable(),
+  last_sync_at: z.string().optional().nullable(),
   referrer: z.string().optional().nullable(),
+  resend_contact_id: z.string().optional().nullable(),
   source: publicNewsletterSourceSchema.optional().nullable(),
   status: z.string().optional(),
   subscribed_at: z.string().optional().nullable(),
+  sync_error: z.string().optional().nullable(),
+  sync_status: z.string().optional().nullable(),
   unsubscribed_at: z.string().optional().nullable(),
   updated_at: z.string().optional().nullable(),
   user_agent: z.string().optional().nullable(),
@@ -4737,6 +4750,38 @@ export const publicFilterJobsArgsSchema = z.object({
 
 export const publicFilterJobsReturnsSchema = jsonSchema;
 
+export const publicFormatDateIsoArgsSchema = z.object({
+  input_date: z.string(),
+});
+
+export const publicFormatDateIsoReturnsSchema = z.string();
+
+export const publicFormatDateLongArgsSchema = z.object({
+  input_date: z.string(),
+});
+
+export const publicFormatDateLongReturnsSchema = z.string();
+
+export const publicFormatDateShortArgsSchema = z.object({
+  input_date: z.string(),
+});
+
+export const publicFormatDateShortReturnsSchema = z.string();
+
+export const publicFormatRelativeDateArgsSchema = z.object({
+  input_date: z.string(),
+  max_days: z.number().optional(),
+  style: z.string().optional(),
+});
+
+export const publicFormatRelativeDateReturnsSchema = z.string();
+
+export const publicFormatWeekRangeArgsSchema = z.object({
+  week_start: z.string(),
+});
+
+export const publicFormatWeekRangeReturnsSchema = z.string();
+
 export const publicGenerateCommandInstallationArgsSchema = z.object({
   p_slug: z.string(),
   p_title: z.string(),
@@ -4837,6 +4882,10 @@ export const publicGetActiveSponsoredContentReturnsSchema = z.array(
     user_id: z.string(),
   })
 );
+
+export const publicGetActiveSubscribersArgsSchema = z.never();
+
+export const publicGetActiveSubscribersReturnsSchema = z.array(z.string());
 
 export const publicGetAllContentCategoriesArgsSchema = z.never();
 
@@ -5070,9 +5119,19 @@ export const publicGetContentTemplatesArgsSchema = z.object({
 
 export const publicGetContentTemplatesReturnsSchema = jsonSchema;
 
+export const publicGetCurrentWeekStartArgsSchema = z.never();
+
+export const publicGetCurrentWeekStartReturnsSchema = z.string();
+
 export const publicGetDatabaseFingerprintArgsSchema = z.never();
 
 export const publicGetDatabaseFingerprintReturnsSchema = jsonSchema;
+
+export const publicGetDaysAgoArgsSchema = z.object({
+  input_date: z.string(),
+});
+
+export const publicGetDaysAgoReturnsSchema = z.number();
 
 export const publicGetDueSequenceEmailsArgsSchema = z.never();
 
@@ -5357,6 +5416,22 @@ export const publicGetNewContentForWeekReturnsSchema = z.array(
     slug: z.string(),
     title: z.string(),
     url: z.string(),
+  })
+);
+
+export const publicGetPendingResendSyncsArgsSchema = z.object({
+  p_limit: z.number().optional(),
+});
+
+export const publicGetPendingResendSyncsReturnsSchema = z.array(
+  z.object({
+    email: z.string(),
+    id: z.string(),
+    referrer: z.string(),
+    source: z.string(),
+    status: z.string(),
+    subscribed_at: z.string(),
+    unsubscribed_at: z.string(),
   })
 );
 
@@ -5767,6 +5842,12 @@ export const publicGetUserSettingsArgsSchema = z.object({
 
 export const publicGetUserSettingsReturnsSchema = jsonSchema;
 
+export const publicGetWeekEndArgsSchema = z.object({
+  week_start: z.string(),
+});
+
+export const publicGetWeekEndReturnsSchema = z.string();
+
 export const publicGetWeeklyDigestArgsSchema = z.object({
   p_week_start: z.string().optional(),
 });
@@ -5802,6 +5883,27 @@ export const publicHandleWebhookComplaintArgsSchema = z.object({
 });
 
 export const publicHandleWebhookComplaintReturnsSchema = z.undefined();
+
+export const publicHandleWebhookContactCreatedArgsSchema = z.object({
+  p_event_data: jsonSchema,
+  p_webhook_id: z.string(),
+});
+
+export const publicHandleWebhookContactCreatedReturnsSchema = z.undefined();
+
+export const publicHandleWebhookContactDeletedArgsSchema = z.object({
+  p_event_data: jsonSchema,
+  p_webhook_id: z.string(),
+});
+
+export const publicHandleWebhookContactDeletedReturnsSchema = z.undefined();
+
+export const publicHandleWebhookEmailSentArgsSchema = z.object({
+  p_event_data: jsonSchema,
+  p_webhook_id: z.string(),
+});
+
+export const publicHandleWebhookEmailSentReturnsSchema = z.undefined();
 
 export const publicImportRedisSeedDataArgsSchema = z.object({
   redis_data: jsonSchema,
@@ -5853,6 +5955,18 @@ export const publicIsFollowingArgsSchema = z.object({
 });
 
 export const publicIsFollowingReturnsSchema = z.boolean();
+
+export const publicIsInFutureArgsSchema = z.object({
+  input_date: z.string(),
+});
+
+export const publicIsInFutureReturnsSchema = z.boolean();
+
+export const publicIsInPastArgsSchema = z.object({
+  input_date: z.string(),
+});
+
+export const publicIsInPastReturnsSchema = z.boolean();
 
 export const publicJobSlugArgsSchema = z.object({
   p_title: z.string(),
@@ -5907,6 +6021,15 @@ export const publicManageReviewArgsSchema = z.object({
 });
 
 export const publicManageReviewReturnsSchema = jsonSchema;
+
+export const publicMarkResendSyncCompleteArgsSchema = z.object({
+  p_error_message: z.string().optional(),
+  p_resend_contact_id: z.string(),
+  p_subscription_id: z.string(),
+  p_success: z.boolean().optional(),
+});
+
+export const publicMarkResendSyncCompleteReturnsSchema = z.undefined();
 
 export const publicMarkSequenceEmailProcessedArgsSchema = z.object({
   p_email: z.string(),
@@ -6221,6 +6344,19 @@ export const publicSubmitContentForReviewArgsSchema = z.object({
 });
 
 export const publicSubmitContentForReviewReturnsSchema = jsonSchema;
+
+export const publicSubscribeNewsletterArgsSchema = z.object({
+  p_copy_category: z.string().optional(),
+  p_copy_slug: z.string().optional(),
+  p_copy_type: z.string().optional(),
+  p_email: z.string(),
+  p_ip_address: z.unknown().optional(),
+  p_referrer: z.string().optional(),
+  p_source: z.string().optional(),
+  p_user_agent: z.string().optional(),
+});
+
+export const publicSubscribeNewsletterReturnsSchema = jsonSchema;
 
 export const publicSuggestVacuumCommandsArgsSchema = z.object({
   p_min_bloat_ratio: z.number().optional(),

@@ -1970,10 +1970,14 @@ export type Database = {
           id: string;
           ip_address: unknown;
           last_email_sent_at: string | null;
+          last_sync_at: string | null;
           referrer: string | null;
+          resend_contact_id: string | null;
           source: Database['public']['Enums']['newsletter_source'] | null;
           status: string;
           subscribed_at: string | null;
+          sync_error: string | null;
+          sync_status: string | null;
           unsubscribed_at: string | null;
           updated_at: string | null;
           user_agent: string | null;
@@ -1991,10 +1995,14 @@ export type Database = {
           id?: string;
           ip_address?: unknown;
           last_email_sent_at?: string | null;
+          last_sync_at?: string | null;
           referrer?: string | null;
+          resend_contact_id?: string | null;
           source?: Database['public']['Enums']['newsletter_source'] | null;
           status?: string;
           subscribed_at?: string | null;
+          sync_error?: string | null;
+          sync_status?: string | null;
           unsubscribed_at?: string | null;
           updated_at?: string | null;
           user_agent?: string | null;
@@ -2012,10 +2020,14 @@ export type Database = {
           id?: string;
           ip_address?: unknown;
           last_email_sent_at?: string | null;
+          last_sync_at?: string | null;
           referrer?: string | null;
+          resend_contact_id?: string | null;
           source?: Database['public']['Enums']['newsletter_source'] | null;
           status?: string;
           subscribed_at?: string | null;
+          sync_error?: string | null;
+          sync_status?: string | null;
           unsubscribed_at?: string | null;
           updated_at?: string | null;
           user_agent?: string | null;
@@ -4480,6 +4492,14 @@ export type Database = {
         };
         Returns: Json;
       };
+      format_date_iso: { Args: { input_date: string }; Returns: string };
+      format_date_long: { Args: { input_date: string }; Returns: string };
+      format_date_short: { Args: { input_date: string }; Returns: string };
+      format_relative_date: {
+        Args: { input_date: string; max_days?: number; style?: string };
+        Returns: string;
+      };
+      format_week_range: { Args: { week_start: string }; Returns: string };
       generate_command_installation: {
         Args: { p_slug: string; p_title: string };
         Returns: Json;
@@ -4550,6 +4570,7 @@ export type Database = {
           user_id: string;
         }[];
       };
+      get_active_subscribers: { Args: never; Returns: string[] };
       get_all_content_categories: {
         Args: never;
         Returns: {
@@ -4767,7 +4788,9 @@ export type Database = {
               view_count: number;
             }[];
           };
+      get_current_week_start: { Args: never; Returns: string };
       get_database_fingerprint: { Args: never; Returns: Json };
+      get_days_ago: { Args: { input_date: string }; Returns: number };
       get_due_sequence_emails: { Args: never; Returns: Json };
       get_dynamic_featured_content: {
         Args: { p_category: string; p_limit?: number };
@@ -5000,6 +5023,18 @@ export type Database = {
           slug: string;
           title: string;
           url: string;
+        }[];
+      };
+      get_pending_resend_syncs: {
+        Args: { p_limit?: number };
+        Returns: {
+          email: string;
+          id: string;
+          referrer: string;
+          source: string;
+          status: string;
+          subscribed_at: string;
+          unsubscribed_at: string;
         }[];
       };
       get_pending_submissions: {
@@ -5303,6 +5338,7 @@ export type Database = {
         Returns: Json;
       };
       get_user_settings: { Args: { p_user_id: string }; Returns: Json };
+      get_week_end: { Args: { week_start: string }; Returns: string };
       get_weekly_digest: { Args: { p_week_start?: string }; Returns: Json };
       get_weekly_new_content: {
         Args: { p_category?: string };
@@ -5327,6 +5363,18 @@ export type Database = {
         Returns: undefined;
       };
       handle_webhook_complaint: {
+        Args: { p_event_data: Json; p_webhook_id: string };
+        Returns: undefined;
+      };
+      handle_webhook_contact_created: {
+        Args: { p_event_data: Json; p_webhook_id: string };
+        Returns: undefined;
+      };
+      handle_webhook_contact_deleted: {
+        Args: { p_event_data: Json; p_webhook_id: string };
+        Returns: undefined;
+      };
+      handle_webhook_email_sent: {
         Args: { p_event_data: Json; p_webhook_id: string };
         Returns: undefined;
       };
@@ -5365,6 +5413,8 @@ export type Database = {
         Args: { follower_id: string; following_id: string };
         Returns: boolean;
       };
+      is_in_future: { Args: { input_date: string }; Returns: boolean };
+      is_in_past: { Args: { input_date: string }; Returns: boolean };
       job_slug: { Args: { p_title: string }; Returns: string };
       manage_collection: {
         Args: { p_action: string; p_data: Json; p_user_id: string };
@@ -5389,6 +5439,15 @@ export type Database = {
       manage_review: {
         Args: { p_action: string; p_data: Json; p_user_id: string };
         Returns: Json;
+      };
+      mark_resend_sync_complete: {
+        Args: {
+          p_error_message?: string;
+          p_resend_contact_id: string;
+          p_subscription_id: string;
+          p_success?: boolean;
+        };
+        Returns: undefined;
       };
       mark_sequence_email_processed: {
         Args: {
@@ -5656,6 +5715,19 @@ export type Database = {
         };
         Returns: Json;
       };
+      subscribe_newsletter: {
+        Args: {
+          p_copy_category?: string;
+          p_copy_slug?: string;
+          p_copy_type?: string;
+          p_email: string;
+          p_ip_address?: unknown;
+          p_referrer?: string;
+          p_source?: string;
+          p_user_agent?: string;
+        };
+        Returns: Json;
+      };
       suggest_vacuum_commands: {
         Args: { p_min_bloat_ratio?: number };
         Returns: {
@@ -5787,7 +5859,14 @@ export type Database = {
         | 'embed_generated'
         | 'download';
       job_status: 'draft' | 'pending_review' | 'active' | 'expired' | 'rejected';
-      newsletter_source: 'footer' | 'homepage' | 'modal' | 'content_page' | 'inline' | 'post_copy';
+      newsletter_source:
+        | 'footer'
+        | 'homepage'
+        | 'modal'
+        | 'content_page'
+        | 'inline'
+        | 'post_copy'
+        | 'resend_import';
       notification_priority: 'high' | 'medium' | 'low';
       notification_type: 'announcement' | 'feedback';
       sort_direction: 'asc' | 'desc';
@@ -5996,7 +6075,15 @@ export const Constants = {
         'download',
       ],
       job_status: ['draft', 'pending_review', 'active', 'expired', 'rejected'],
-      newsletter_source: ['footer', 'homepage', 'modal', 'content_page', 'inline', 'post_copy'],
+      newsletter_source: [
+        'footer',
+        'homepage',
+        'modal',
+        'content_page',
+        'inline',
+        'post_copy',
+        'resend_import',
+      ],
       notification_priority: ['high', 'medium', 'low'],
       notification_type: ['announcement', 'feedback'],
       sort_direction: ['asc', 'desc'],

@@ -22,6 +22,7 @@ function getEmailSubscriptionEvent(source: NewsletterSource): string {
     content_page: 'email_subscribed_content_page',
     inline: 'email_subscribed_inline',
     post_copy: 'email_subscribed_post_copy',
+    resend_import: 'email_subscribed_resend_import',
   };
   return eventMap[source];
 }
