@@ -3,8 +3,8 @@
  * All configuration from PostgreSQL, zero hardcoded rules
  */
 
+import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ContentItem, FullContentItem } from '@/src/lib/content/supabase-content-loader';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import {
   buildBreadcrumb,
   buildCreativeWork,

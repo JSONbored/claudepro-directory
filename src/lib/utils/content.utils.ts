@@ -1,8 +1,12 @@
 /**
  * Content Utilities - Database-First Architecture
  */
+
+import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import type { CategoryId, GuideSubcategory } from '@/src/lib/schemas/shared.schema';
+import { Constants, type Enums } from '@/src/types/database.types';
+
+type GuideSubcategory = Enums<'guide_subcategory'>;
 
 const normalizeSlug = (value: string): string =>
   value
@@ -222,13 +226,11 @@ export function generateHookFilename(
   return `${identifier}-${suffix}.${ext}`;
 }
 
-const GUIDE_SUBCATEGORIES: GuideSubcategory[] = [
-  'tutorials',
-  'comparisons',
-  'workflows',
-  'use-cases',
-  'troubleshooting',
-];
+/**
+ * Guide subcategories - derived from database enum
+ * @see Database enum: guide_subcategory
+ */
+const GUIDE_SUBCATEGORIES = Constants.public.Enums.guide_subcategory;
 
 export function isGuideSubcategory(value: unknown): value is GuideSubcategory {
   return typeof value === 'string' && GUIDE_SUBCATEGORIES.includes(value as GuideSubcategory);

@@ -15,6 +15,7 @@
  */
 
 import { z } from 'zod';
+import { Constants, type Enums } from '@/src/types/database.types';
 import {
   publicContentSimilaritiesRowSchema,
   publicUserAffinitiesRowSchema,
@@ -23,7 +24,16 @@ import {
   publicUserSimilaritiesRowSchema,
 } from './generated/db-schemas';
 import { nonEmptyString, percentage, positiveInt } from './primitives';
-import { categoryIdSchema } from './shared.schema';
+
+/**
+ * Category ID validation schema
+ * Derives from database enum: Constants.public.Enums.content_category
+ * @see Database enum: content_category
+ */
+const categoryIdSchema = z.enum([...Constants.public.Enums.content_category] as [
+  Enums<'content_category'>,
+  ...Enums<'content_category'>[],
+]);
 
 const contentSlugSchema = nonEmptyString.max(200).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 const userIdSchema = nonEmptyString.uuid();

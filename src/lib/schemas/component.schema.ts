@@ -3,12 +3,12 @@
  * Database function validate_content_metadata() enforces all validation rules
  */
 
+import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import type { SearchResult } from '@/src/lib/search/server-search';
 import type { Database } from '@/src/types/database.types';
 import type { HomePageClientProps } from './components/page-props.schema';
 import type { SortOption } from './content-filter.schema';
-import type { CategoryId } from './shared.schema';
 
 export type DisplayableContent = ContentItem | SearchResult;
 

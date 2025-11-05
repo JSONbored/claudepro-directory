@@ -8,9 +8,9 @@
  */
 
 import type { ReactNode } from 'react';
+import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import type { LucideIcon } from '@/src/lib/icons';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Installation steps structure
@@ -118,9 +118,9 @@ export interface ContentTypeConfig {
 
 /**
  * Type-safe content type discriminator
- * Re-exported from canonical schema definition
+ * Re-exported from canonical category configuration
  */
-export type { CategoryId } from '@/src/lib/schemas/shared.schema';
+export type { CategoryId } from '@/src/lib/config/category-config';
 
 /**
  * Configuration registry type

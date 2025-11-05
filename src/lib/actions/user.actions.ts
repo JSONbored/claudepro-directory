@@ -9,7 +9,7 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
-import type { Enums } from '@/src/types/database.types';
+import { Constants, type Enums } from '@/src/types/database.types';
 
 // TypeScript types for RPC function returns (database validates, TypeScript trusts)
 type ActivitySummary = {
@@ -78,7 +78,6 @@ type ActivityTimelineResponse = {
 };
 
 import { nonEmptyString } from '@/src/lib/schemas/primitives';
-import { categoryIdSchema } from '@/src/lib/schemas/shared.schema';
 import {
   bookmarkInsertTransformSchema,
   removeBookmarkSchema,
@@ -282,7 +281,10 @@ export const addBookmarkBatch = authedAction
       items: z
         .array(
           z.object({
-            content_type: categoryIdSchema,
+            content_type: z.enum([...Constants.public.Enums.content_category] as [
+              Enums<'content_category'>,
+              ...Enums<'content_category'>[],
+            ]),
             content_slug: nonEmptyString,
           })
         )

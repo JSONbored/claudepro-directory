@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
+import type { CategoryId } from '@/src/lib/config/category-config';
 import {
   Bookmark,
   BookOpen,
@@ -31,7 +32,6 @@ import {
   Zap,
 } from '@/src/lib/icons';
 import type { ContentItem } from '@/src/lib/schemas/component.schema';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 

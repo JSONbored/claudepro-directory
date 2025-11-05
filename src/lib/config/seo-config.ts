@@ -4,9 +4,9 @@
  */
 
 import { z } from 'zod';
+import type { CategoryId } from '@/src/lib/config/category-config';
 import { getCategoryConfigs } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
-import type { CategoryId } from '@/src/lib/schemas/shared.schema';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 
 const SEPARATOR = ' - ';
