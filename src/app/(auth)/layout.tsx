@@ -9,16 +9,18 @@
  * - Modern viewport units (dvh with vh fallback)
  * - Centered flexbox layout
  * - Responsive padding
+ * - Explicit background color
  *
  * Research: October 2025 best practices for auth pages
  * - Mobile-first viewport containment (iOS Safari support)
- * - min-h-screen as fallback (100vh equivalent)
- * - min-h-dvh for modern browsers (accounts for mobile browser chrome)
+ * - h-screen as fallback (100vh equivalent)
+ * - h-[100dvh] for modern browsers (accounts for mobile browser chrome)
+ * - CSS class order: h-screen first, then h-[100dvh] overrides for modern browsers
  */
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-[100dvh] h-screen items-center justify-center overflow-hidden px-4">
+    <div className="flex h-[100dvh] h-screen items-center justify-center overflow-hidden bg-background px-4">
       {children}
     </div>
   );
