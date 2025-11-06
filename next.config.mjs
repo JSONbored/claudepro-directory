@@ -65,6 +65,12 @@ const nextConfig = {
   compress: true,
   reactStrictMode: true,
 
+  // 🚀 Production source map optimization (SHA-4212)
+  // Disabled in production to save ~200 MB per deployment
+  // Source maps are not needed in production and expose source code
+  // Development still has source maps enabled for debugging
+  productionBrowserSourceMaps: false,
+
   // ✨ React Compiler (STABLE) - Automatic memoization without manual optimization
   reactCompiler: true,
 

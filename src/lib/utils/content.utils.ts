@@ -4,9 +4,6 @@
 
 import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import { Constants, type Enums } from '@/src/types/database.types';
-
-type GuideSubcategory = Enums<'guide_subcategory'>;
 
 const normalizeSlug = (value: string): string =>
   value
@@ -27,28 +24,6 @@ export function formatCopyCount(count: number): string {
     return `${(count / 1000).toFixed(1)}k used`;
   }
   return `${count} used`;
-}
-
-export function isNewContent(date_added?: string): boolean {
-  if (!date_added) return false;
-  const now = Date.now();
-  const added = new Date(date_added).getTime();
-  const daysOld = (now - added) / (1000 * 60 * 60 * 24);
-  return daysOld >= 0 && daysOld <= 7;
-}
-
-export function generateDisplayTitle(title: string): string {
-  const acronyms = ['API', 'MCP', 'AI', 'CLI', 'SDK', 'UI', 'UX', 'REST', 'GraphQL', 'SQL'];
-  return title
-    .split(/[\s-_]+/)
-    .map((word) => {
-      const upperWord = word.toUpperCase();
-      if (acronyms.includes(upperWord)) {
-        return upperWord;
-      }
-      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-    })
-    .join(' ');
 }
 
 const MAX_FILENAME_LENGTH = 100;
@@ -224,16 +199,6 @@ export function generateHookFilename(
 
   const identifier = sanitizeFilename(item.slug || 'hook');
   return `${identifier}-${suffix}.${ext}`;
-}
-
-/**
- * Guide subcategories - derived from database enum
- * @see Database enum: guide_subcategory
- */
-const GUIDE_SUBCATEGORIES = Constants.public.Enums.guide_subcategory;
-
-export function isGuideSubcategory(value: unknown): value is GuideSubcategory {
-  return typeof value === 'string' && GUIDE_SUBCATEGORIES.includes(value as GuideSubcategory);
 }
 
 export function getContentItemUrl(item: {

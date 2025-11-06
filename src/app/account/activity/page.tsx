@@ -1,4 +1,4 @@
-import { ActivityTimeline } from '@/src/components/features/reputation/activity-timeline';
+import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
 import {
   Card,
   CardContent,
@@ -111,15 +111,7 @@ export default async function ActivityPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ActivityTimeline
-            initialActivities={activities}
-            summary={{
-              total_posts: summary.total_posts ?? 0,
-              total_comments: summary.total_comments ?? 0,
-              total_votes: summary.total_votes ?? 0,
-              total_submissions: summary.total_submissions ?? 0,
-            }}
-          />
+          <ActivityTimeline activities={activities} />
         </CardContent>
       </Card>
     </div>

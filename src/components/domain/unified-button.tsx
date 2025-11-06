@@ -17,9 +17,9 @@ import { trackUsage } from '@/src/lib/actions/content.actions';
 import { getGitHubStars } from '@/src/lib/actions/github.actions';
 import { copyMarkdownAction, downloadMarkdownAction } from '@/src/lib/actions/markdown-actions';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
-import { trackInteraction } from '@/src/lib/analytics/client';
 import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
+import { trackInteraction } from '@/src/lib/edge/client';
 import {
   ArrowLeft,
   Bookmark,

@@ -12,7 +12,7 @@ import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { Separator } from '@/src/components/primitives/separator';
 import { getQuizConfiguration } from '@/src/lib/actions/quiz.actions';
-import { generateConfigRecommendations } from '@/src/lib/analytics/client';
+import { generateConfigRecommendations } from '@/src/lib/edge/client';
 
 type QuizQuestion = {
   id: string;

@@ -115,19 +115,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   }
 
   // Extract member_count and top_contributors from consolidated response
-  type UserRow = Pick<
-    Tables<'users'>,
-    | 'id'
-    | 'slug'
-    | 'name'
-    | 'image'
-    | 'bio'
-    | 'work'
-    | 'reputation_score'
-    | 'tier'
-    | 'tier_name'
-    | 'tier_progress'
-  >;
+  type UserRow = Pick<Tables<'users'>, 'id' | 'slug' | 'name' | 'image' | 'bio' | 'work' | 'tier'>;
 
   const memberCount = homepageError
     ? 0

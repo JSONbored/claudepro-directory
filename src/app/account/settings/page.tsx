@@ -50,7 +50,6 @@ export default async function SettingsPage() {
       | 'profile_public'
       | 'follow_email'
       | 'created_at'
-      | 'reputation_score'
     > | null;
     user_data: Pick<Tables<'users'>, 'slug' | 'name' | 'image' | 'tier'> | null;
   };
@@ -132,10 +131,6 @@ export default async function SettingsPage() {
                   day: 'numeric',
                 })}
               </p>
-            </div>
-            <div>
-              <p className={'font-medium text-sm'}>Reputation</p>
-              <p className="text-muted-foreground">{profile.reputation_score} points</p>
             </div>
           </div>
         </CardContent>

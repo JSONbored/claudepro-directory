@@ -19,9 +19,9 @@ import { UnifiedButton } from '@/src/components/domain/unified-button';
 import type { CopyType } from '@/src/components/features/growth/unified-newsletter-capture';
 import { Button } from '@/src/components/primitives/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
-import { trackInteraction } from '@/src/lib/analytics/client';
 import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { trackInteraction } from '@/src/lib/edge/client';
 import { ArrowLeft, Check, Copy } from '@/src/lib/icons';
 import { toasts } from '@/src/lib/utils/toast.utils';
 

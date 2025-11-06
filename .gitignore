@@ -127,3 +127,5 @@ supabase/schema.sql
 .launchd/README.md
 
 .launchd/uninstall.sh
+
+REPUTATION_BADGE_REMOVAL_PLAN.md

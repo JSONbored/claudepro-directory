@@ -46,7 +46,7 @@ export interface ReadProgressProps {
 
   /**
    * Z-index for stacking context
-   * @default 49 (below navigation at z-50)
+   * @default 51 (above navigation at z-50)
    */
   zIndex?: number;
 
@@ -74,7 +74,7 @@ export function ReadProgress({
   position = 'below-nav',
   color = 'accent',
   height = 3,
-  zIndex = 49,
+  zIndex = 51,
   springConfig = {
     stiffness: 100,
     damping: 30,

@@ -85,7 +85,7 @@ function UnifiedSearchComponent({
       if (sanitized && sanitized.length > 0) {
         const category = pathname?.split('/')[1] || 'global';
 
-        import('@/src/lib/analytics/client')
+        import('@/src/lib/edge/client')
           .then((module) =>
             module.trackInteraction({
               interaction_type: 'click',
