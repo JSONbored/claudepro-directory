@@ -34,7 +34,7 @@ import { logger } from '@/src/lib/logger';
 
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchMap } from '@/src/lib/utils/batch.utils';
-import { getViewTransitionStyle } from '@/src/lib/utils/view-transitions.utils';
+import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
 import type { Database } from '@/src/types/database.types';
 
 interface ItemWithData {
@@ -129,7 +129,10 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
     | undefined;
 
   return (
-    <div className="space-y-12" style={getViewTransitionStyle('card', collection.slug)}>
+    <div
+      className="space-y-12"
+      style={{ viewTransitionName: getViewTransitionName('card', collection.slug) }}
+    >
       {/* Prerequisites Section */}
       {prerequisites && prerequisites.length > 0 && (
         <Card>

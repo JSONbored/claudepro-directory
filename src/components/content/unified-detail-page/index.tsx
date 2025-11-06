@@ -18,14 +18,13 @@ import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { getDisplayTitle } from '@/src/lib/utils';
-import { batchFetch } from '@/src/lib/utils/batch.utils';
 import {
   generateFilename,
   generateHookFilename,
   generateMultiFormatFilename,
   transformMcpConfigForDisplay,
 } from '@/src/lib/utils/content.utils';
-import { getViewTransitionStyle } from '@/src/lib/utils/view-transitions.utils';
+import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
 import type { Database } from '@/src/types/database.types';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
@@ -200,7 +199,7 @@ export async function UnifiedDetailPage({
       };
 
       try {
-        const [highlightedHookConfig, highlightedScript] = await batchFetch([
+        const [highlightedHookConfig, highlightedScript] = await Promise.all([
           config.hookConfig
             ? Promise.resolve(highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json'))
             : Promise.resolve(null),
@@ -453,7 +452,7 @@ export async function UnifiedDetailPage({
       {/* Main content */}
       <div
         className="container mx-auto px-4 py-8"
-        style={getViewTransitionStyle('card', item.slug)}
+        style={{ viewTransitionName: getViewTransitionName('card', item.slug) }}
       >
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Primary content */}

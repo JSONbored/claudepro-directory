@@ -10,7 +10,6 @@ import { getActivitySummary, getActivityTimeline } from '@/src/lib/actions/user.
 import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { batchFetch } from '@/src/lib/utils/batch.utils';
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -19,7 +18,7 @@ export const metadata = generatePageMetadata('/account/activity');
 
 export default async function ActivityPage() {
   // Fetch activity data
-  const [summaryResult, timelineResult] = await batchFetch([
+  const [summaryResult, timelineResult] = await Promise.all([
     getActivitySummary(),
     getActivityTimeline({ limit: 50, offset: 0 }),
   ]);

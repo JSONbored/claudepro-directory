@@ -46,87 +46,14 @@ export interface BatchOptions {
 // CORE BATCH PROCESSING
 // ============================================
 
-/** Execute promises in parallel - all must complete (allSettled wrapper) */
-export async function batchAllSettled<T>(
-  promises: Promise<T>[],
-  operationName = 'batch_operation'
-): Promise<BatchResult<T>> {
-  const startTime = Date.now();
-
-  const results = await Promise.allSettled(promises);
-
-  const successes: T[] = [];
-  const failures: Array<{ item: unknown; error: Error }> = [];
-
-  for (const result of results) {
-    if (result.status === 'fulfilled') {
-      successes.push(result.value);
-    } else {
-      failures.push({
-        item: null, // No original item context in Promise.allSettled
-        error: result.reason instanceof Error ? result.reason : new Error(String(result.reason)),
-      });
-    }
-  }
-
-  const duration = Date.now() - startTime;
-  const successRate = promises.length > 0 ? successes.length / promises.length : 0;
-
-  logger.debug(`Batch operation completed: ${operationName}`, {
-    total: promises.length,
-    successes: successes.length,
-    failures: failures.length,
-    duration,
-    successRate: `${(successRate * 100).toFixed(1)}%`,
-  });
-
-  return {
-    successes,
-    failures,
-    duration,
-    successRate,
-  };
-}
-
-/** Execute promises in parallel - fail-fast (Promise.all wrapper) */
-export async function batchAll<T>(
-  promises: Promise<T>[],
-  operationName = 'batch_operation'
-): Promise<T[]> {
-  const startTime = Date.now();
-
-  try {
-    const results = await Promise.all(promises);
-
-    const duration = Date.now() - startTime;
-
-    logger.debug(`Batch operation succeeded: ${operationName}`, {
-      count: results.length,
-      duration,
-    });
-
-    return results;
-  } catch (error) {
-    const duration = Date.now() - startTime;
-
-    logger.error(
-      `Batch operation failed: ${operationName}`,
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        count: promises.length,
-        duration,
-      }
-    );
-
-    throw error;
-  }
-}
-
 // ============================================
 // MAPPED BATCH PROCESSING
 // ============================================
 
-/** Map array to promises with optional concurrency control */
+/**
+ * Map array to promises with optional concurrency control
+ * Performance-optimized: Prevents memory spikes by processing in controlled chunks
+ */
 export async function batchMap<T, R>(
   items: readonly T[],
   mapper: (item: T, index: number) => Promise<R>,
@@ -145,28 +72,48 @@ export async function batchMap<T, R>(
 
   const startTime = Date.now();
 
-  // No concurrency limit - use Promise.all
+  // No concurrency limit - use Promise.all/allSettled directly
   if (concurrency === Number.POSITIVE_INFINITY) {
     const promises = items.map((item, index) => mapper(item, index));
 
     if (failFast) {
-      const results = await batchAll(promises, operationName);
+      // Fail-fast: Stop on first error
+      const results = await Promise.all(promises);
+      logger.debug(`Batch completed: ${operationName}`, {
+        count: results.length,
+        duration: Date.now() - startTime,
+      });
       return results;
     }
 
-    const batchResult = await batchAllSettled(promises, operationName);
+    // Collect all results, log failures
+    const results = await Promise.allSettled(promises);
+    const successes: R[] = [];
+    let failures = 0;
 
-    if (batchResult.failures.length > 0) {
-      logger.warn(`Batch map had ${batchResult.failures.length} failures`, {
-        operationName,
-        failures: batchResult.failures.length,
-      });
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        successes.push(result.value);
+      } else {
+        failures++;
+      }
     }
 
-    return batchResult.successes;
+    if (failures > 0) {
+      logger.warn(`Batch had ${failures} failures`, { operationName, failures });
+    }
+
+    logger.debug(`Batch completed: ${operationName}`, {
+      total: items.length,
+      successes: successes.length,
+      failures,
+      duration: Date.now() - startTime,
+    });
+
+    return successes;
   }
 
-  // With concurrency limit - process in controlled batches
+  // With concurrency limit - process in controlled chunks (resource-optimized)
   const results: R[] = [];
   let processed = 0;
 
@@ -175,24 +122,29 @@ export async function batchMap<T, R>(
     const chunkPromises = chunk.map((item, localIndex) => mapper(item, i + localIndex));
 
     if (failFast) {
-      const chunkResults = await batchAll(chunkPromises, `${operationName}_chunk_${i}`);
+      const chunkResults = await Promise.all(chunkPromises);
       results.push(...chunkResults);
     } else {
-      const chunkBatchResult = await batchAllSettled(chunkPromises, `${operationName}_chunk_${i}`);
-      results.push(...chunkBatchResult.successes);
+      const chunkResults = await Promise.allSettled(chunkPromises);
+      let chunkFailures = 0;
 
-      if (chunkBatchResult.failures.length > 0) {
-        logger.warn(`Chunk ${i} had failures`, {
-          operationName,
-          failures: chunkBatchResult.failures.length,
-        });
+      for (const result of chunkResults) {
+        if (result.status === 'fulfilled') {
+          results.push(result.value);
+        } else {
+          chunkFailures++;
+        }
+      }
+
+      if (chunkFailures > 0) {
+        logger.warn(`Chunk ${i} had failures`, { operationName, failures: chunkFailures });
       }
     }
 
     processed += chunk.length;
 
     if (logProgress) {
-      logger.info(`Batch map progress: ${operationName}`, {
+      logger.info(`Batch progress: ${operationName}`, {
         processed,
         total: items.length,
         percentage: `${((processed / items.length) * 100).toFixed(1)}%`,
@@ -202,23 +154,11 @@ export async function batchMap<T, R>(
 
   const duration = Date.now() - startTime;
 
-  logger.debug(`Batch map completed: ${operationName}`, {
+  logger.debug(`Batch completed: ${operationName}`, {
     total: items.length,
     processed: results.length,
     duration,
   });
 
   return results;
-}
-
-// ============================================
-// TYPE-SAFE PARALLEL FETCH
-// ============================================
-
-/** Parallel fetch with type-safe tuple return */
-export async function batchFetch<T extends readonly Promise<unknown>[] | []>(
-  promises: T
-): Promise<{ [K in keyof T]: Awaited<T[K]> }> {
-  const results = await Promise.all(promises);
-  return results as { [K in keyof T]: Awaited<T[K]> };
 }

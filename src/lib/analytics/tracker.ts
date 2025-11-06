@@ -14,7 +14,13 @@
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
-import { isUmamiAvailable } from './umami';
+
+/**
+ * Check if Umami is available in browser
+ */
+const isUmamiAvailable = (): boolean => {
+  return typeof window !== 'undefined' && typeof window.umami !== 'undefined';
+};
 
 /**
  * Event configuration from database
