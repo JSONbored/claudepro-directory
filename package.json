@@ -135,7 +135,7 @@
     "prettier": "^3.6.2",
     "supazod": "^4.1.0",
     "turbo": "^2.6.0",
-    "ultracite": "^6.2.1"
+    "ultracite": "^6.3.0"
   },
   "pnpm": {
     "overrides": {
