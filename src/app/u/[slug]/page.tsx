@@ -45,7 +45,7 @@ type UserProfile = {
   image: string | null;
   bio: string | null;
   website: string | null;
-  location: string | null;
+  tier: string | null;
   created_at: string;
 };
 
@@ -70,16 +70,14 @@ type RPCContribution = Pick<
   Tables<'user_content'>,
   | 'id'
   | 'content_type'
+  | 'slug'
   | 'name'
   | 'description'
   | 'featured'
   | 'view_count'
   | 'download_count'
   | 'created_at'
-> & {
-  content_slug: string;
-  status: string;
-};
+>;
 
 // Base profile data from get_user_profile()
 type ProfileData = {
@@ -342,7 +340,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {contributions.map((item) => (
                     <Card key={item.id} className={UI_CLASSES.CARD_INTERACTIVE}>
-                      <a href={`/${item.content_type}/${item.content_slug}`}>
+                      <a href={`/${item.content_type}/${item.slug}`}>
                         <CardHeader>
                           <div className={'mb-2 flex items-center justify-between'}>
                             <UnifiedBadge variant="base" style="secondary" className="text-xs">

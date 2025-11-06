@@ -431,3 +431,32 @@ export const getActivityTimeline = authedAction
       throw error;
     }
   });
+
+export const getUserIdentities = authedAction
+  .metadata({ actionName: 'getUserIdentities', category: 'user' })
+  .schema(z.void())
+  .action(async ({ ctx }) => {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('get_user_identities', {
+        p_user_id: ctx.userId,
+      });
+      if (error) throw new Error(`Failed to fetch user identities: ${error.message}`);
+
+      return data as {
+        identities: Array<{
+          provider: string;
+          email: string;
+          created_at: string;
+          last_sign_in_at: string;
+        }>;
+      };
+    } catch (error) {
+      logger.error(
+        'Failed to get user identities',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId }
+      );
+      throw error;
+    }
+  });

@@ -1,13 +1,13 @@
 /**
  * Collection Detail View Component
  *
- * @server This is a SERVER-ONLY component (imports batch.utils → cache.server)
+ * @server This is a SERVER-ONLY component (async server component)
  *
  * Extracted from src/app/collections/[slug]/page.tsx for reuse in UnifiedDetailPage.
  * Renders collection-specific sections: prerequisites, embedded items, installation order, compatibility.
  *
  * **Architecture:**
- * - Server Component: Uses batchFetch from batch.utils
+ * - Server Component: Parallel content loading with Promise.all
  * - NOT Storybook-compatible (requires server-side execution)
  * - Follows composition pattern from unified-detail-page
  * - Reuses ConfigCard for embedded item display
@@ -33,7 +33,6 @@ import { AlertTriangle, CheckCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { batchMap } from '@/src/lib/utils/batch.utils';
 import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
 import type { Database } from '@/src/types/database.types';
 
@@ -69,33 +68,35 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
   const items =
     (metadata.items as Array<{ category: string; slug: string; reason?: string }>) || [];
 
-  const itemsWithContent = await batchMap(items, async (itemRef): Promise<ItemWithData | null> => {
-    const refData = itemRef as { category: string; slug: string; reason?: string };
+  const itemsWithContent = await Promise.all(
+    items.map(async (itemRef): Promise<ItemWithData | null> => {
+      const refData = itemRef as { category: string; slug: string; reason?: string };
 
-    try {
-      // Type guard validation
-      if (!isValidCategory(refData.category)) {
-        logger.error(
-          'Invalid category in collection item reference',
-          new Error('Invalid category'),
-          {
-            category: refData.category,
-            slug: refData.slug,
-          }
-        );
+      try {
+        // Type guard validation
+        if (!isValidCategory(refData.category)) {
+          logger.error(
+            'Invalid category in collection item reference',
+            new Error('Invalid category'),
+            {
+              category: refData.category,
+              slug: refData.slug,
+            }
+          );
+          return null;
+        }
+
+        const item = await getContentBySlug(refData.category, refData.slug);
+        return item ? { ...refData, data: item } : null;
+      } catch (error) {
+        logger.error('Failed to load collection item', error as Error, {
+          category: refData.category,
+          slug: refData.slug,
+        });
         return null;
       }
-
-      const item = await getContentBySlug(refData.category, refData.slug);
-      return item ? { ...refData, data: item } : null;
-    } catch (error) {
-      logger.error('Failed to load collection item', error as Error, {
-        category: refData.category,
-        slug: refData.slug,
-      });
-      return null;
-    }
-  });
+    })
+  );
 
   // Filter out failed loads
   const validItems = itemsWithContent.filter(

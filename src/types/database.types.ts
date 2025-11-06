@@ -1935,57 +1935,6 @@ export type Database = {
           },
         ];
       };
-      profiles: {
-        Row: {
-          bio: string | null;
-          created_at: string;
-          display_name: string | null;
-          follow_email: boolean;
-          id: string;
-          interests: string[] | null;
-          profile_public: boolean;
-          social_x_link: string | null;
-          total_bookmarks: number;
-          total_submissions: number;
-          total_views: number;
-          updated_at: string;
-          website: string | null;
-          work: string | null;
-        };
-        Insert: {
-          bio?: string | null;
-          created_at?: string;
-          display_name?: string | null;
-          follow_email?: boolean;
-          id: string;
-          interests?: string[] | null;
-          profile_public?: boolean;
-          social_x_link?: string | null;
-          total_bookmarks?: number;
-          total_submissions?: number;
-          total_views?: number;
-          updated_at?: string;
-          website?: string | null;
-          work?: string | null;
-        };
-        Update: {
-          bio?: string | null;
-          created_at?: string;
-          display_name?: string | null;
-          follow_email?: boolean;
-          id?: string;
-          interests?: string[] | null;
-          profile_public?: boolean;
-          social_x_link?: string | null;
-          total_bookmarks?: number;
-          total_submissions?: number;
-          total_views?: number;
-          updated_at?: string;
-          website?: string | null;
-          work?: string | null;
-        };
-        Relationships: [];
-      };
       quiz_options: {
         Row: {
           created_at: string | null;
@@ -2991,6 +2940,7 @@ export type Database = {
           bookmark_count: number;
           comment_count: number;
           created_at: string;
+          display_name: string | null;
           email: string | null;
           follow_email: boolean | null;
           follower_count: number;
@@ -3001,6 +2951,7 @@ export type Database = {
           interests: Json | null;
           name: string | null;
           post_count: number;
+          profile_public: boolean | null;
           public: boolean | null;
           search_vector: unknown;
           slug: string | null;
@@ -3018,6 +2969,7 @@ export type Database = {
           bookmark_count?: number;
           comment_count?: number;
           created_at?: string;
+          display_name?: string | null;
           email?: string | null;
           follow_email?: boolean | null;
           follower_count?: number;
@@ -3028,6 +2980,7 @@ export type Database = {
           interests?: Json | null;
           name?: string | null;
           post_count?: number;
+          profile_public?: boolean | null;
           public?: boolean | null;
           search_vector?: unknown;
           slug?: string | null;
@@ -3045,6 +2998,7 @@ export type Database = {
           bookmark_count?: number;
           comment_count?: number;
           created_at?: string;
+          display_name?: string | null;
           email?: string | null;
           follow_email?: boolean | null;
           follower_count?: number;
@@ -3055,6 +3009,7 @@ export type Database = {
           interests?: Json | null;
           name?: string | null;
           post_count?: number;
+          profile_public?: boolean | null;
           public?: boolean | null;
           search_vector?: unknown;
           slug?: string | null;
@@ -3561,6 +3516,10 @@ export type Database = {
         Returns: Json;
       };
       generate_hook_installation: { Args: { p_slug: string }; Returns: Json };
+      generate_llms_txt_content: {
+        Args: { p_category: string; p_slug: string };
+        Returns: Json;
+      };
       generate_markdown_export: {
         Args: {
           p_category: string;
@@ -4305,6 +4264,7 @@ export type Database = {
         Args: { p_limit?: number; p_user_id: string };
         Returns: string[];
       };
+      get_user_identities: { Args: { p_user_id: string }; Returns: Json };
       get_user_interaction_summary: {
         Args: { p_user_id: string };
         Returns: Json;
@@ -4633,6 +4593,7 @@ export type Database = {
           bookmark_count: number;
           comment_count: number;
           created_at: string;
+          display_name: string | null;
           email: string | null;
           follow_email: boolean | null;
           follower_count: number;
@@ -4643,6 +4604,7 @@ export type Database = {
           interests: Json | null;
           name: string | null;
           post_count: number;
+          profile_public: boolean | null;
           public: boolean | null;
           search_vector: unknown;
           slug: string | null;
@@ -4735,7 +4697,7 @@ export type Database = {
           p_bio?: string;
           p_display_name?: string;
           p_follow_email?: boolean;
-          p_interests?: string[];
+          p_interests?: Json;
           p_profile_public?: boolean;
           p_social_x_link?: string;
           p_user_id: string;
