@@ -85,6 +85,9 @@ interface BaseGridProps {
 
   /** Callback to fetch more items (for pagination) */
   onFetchMore?: () => Promise<void>;
+
+  /** Server-side pagination: indicates if server has more data to fetch */
+  serverHasMore?: boolean;
 }
 
 /**
@@ -182,6 +185,7 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
     keyExtractor,
     prefetchCount = 0,
     onFetchMore,
+    serverHasMore = false,
   } = props;
 
   const router = useRouter();
@@ -208,14 +212,15 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
   // Determine items to display
   const displayedItems = infiniteScroll ? items.slice(0, displayCount) : items;
 
-  // Trigger onFetchMore when we've displayed all loaded items
+  // For server-side pagination: Check if we need to fetch more from server
+  // When displayCount >= client items AND server has more data
   useEffect(() => {
-    if (infiniteScroll && onFetchMore && displayCount >= items.length && hasMore) {
+    if (infiniteScroll && onFetchMore && displayCount >= items.length && serverHasMore) {
       onFetchMore().catch(() => {
         // Silent fail - pagination will retry on next scroll
       });
     }
-  }, [displayCount, items.length, infiniteScroll, onFetchMore, hasMore]);
+  }, [displayCount, items.length, infiniteScroll, onFetchMore, serverHasMore]);
 
   // Default key extractor uses slug (present in both ContentItem and SearchResult)
   const getKey = keyExtractor || ((item: DisplayableContent, index: number) => item.slug || index);
@@ -275,8 +280,8 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
         })}
       </motion.div>
 
-      {/* Infinite scroll sentinel (only shown when enabled and hasMore) */}
-      {infiniteScroll && hasMore && (
+      {/* Infinite scroll sentinel (shown when client-side OR server-side has more) */}
+      {infiniteScroll && (hasMore || serverHasMore) && (
         <div
           ref={sentinelRef}
           className="flex items-center justify-center py-8"

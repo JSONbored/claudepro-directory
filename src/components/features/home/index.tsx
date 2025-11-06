@@ -381,6 +381,7 @@ function HomePageClientComponent({ initialData, featuredByCategory, stats }: Hom
             onTabChange={handleTabChange}
             categoryConfigs={categoryConfigs}
             onFetchMore={handleFetchMore}
+            serverHasMore={hasMoreAllConfigs}
           />
         )}
       </section>

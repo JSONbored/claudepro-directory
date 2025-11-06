@@ -204,7 +204,6 @@ async function handleSubscribe(req: Request): Promise<Response> {
     try {
       await supabase.rpc('enroll_in_email_sequence', {
         p_email: normalizedEmail,
-        p_sequence_type: 'onboarding',
       });
     } catch (sequenceError) {
       // Log sequence error but don't fail - subscription is saved

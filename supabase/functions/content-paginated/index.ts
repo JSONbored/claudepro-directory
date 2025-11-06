@@ -47,7 +47,10 @@ Deno.serve(async (req: Request) => {
     const url = new URL(req.url);
     const offset = Number.parseInt(url.searchParams.get('offset') || '0', 10);
     const limit = Number.parseInt(url.searchParams.get('limit') || '30', 10);
-    const category = url.searchParams.get('category') || 'all';
+    const categoryParam = url.searchParams.get('category') || 'all';
+
+    // Convert 'all' to NULL for RPC function (means "no category filter")
+    const category = categoryParam === 'all' ? null : categoryParam;
 
     // Validation - check for NaN first
     if (Number.isNaN(offset) || offset < 0) {

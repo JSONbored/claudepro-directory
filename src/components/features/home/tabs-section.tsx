@@ -34,6 +34,7 @@ interface TabsSectionProps {
   onTabChange: (value: string) => void;
   categoryConfigs: Record<string, UnifiedCategoryConfig>;
   onFetchMore?: () => Promise<void>;
+  serverHasMore?: boolean;
 }
 
 const TabsSectionComponent: FC<TabsSectionProps> = ({
@@ -42,6 +43,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   onTabChange,
   categoryConfigs,
   onFetchMore,
+  serverHasMore = false,
 }) => {
   // Get content tabs (exclude 'community' which has custom content)
   const contentTabs = useMemo(
@@ -102,7 +104,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
               renderCard={(item) => (
                 <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
               )}
-              {...(tab === 'all' && onFetchMore ? { onFetchMore } : {})}
+              {...(tab === 'all' && onFetchMore ? { onFetchMore, serverHasMore } : {})}
             />
           </TabsContent>
         );
