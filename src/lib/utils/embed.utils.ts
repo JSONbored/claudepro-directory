@@ -71,26 +71,6 @@ export function generateEmbedCode(options: EmbedOptions): string {
 }
 
 /**
- * Generate WordPress shortcode for embed
- * Alternative format for WordPress users
- */
-export function generateWordPressShortcode(options: EmbedOptions): string {
-  const { category, slug, codeId, width = 600, height = 400 } = options;
-
-  const codeParam = codeId ? ` code="${codeId}"` : '';
-  return `[claudepro category="${category}" slug="${slug}"${codeParam} width="${width}" height="${height}"]`;
-}
-
-/**
- * Generate Markdown embed code
- * For markdown-based blogs/documentation
- */
-export function generateMarkdownEmbed(options: EmbedOptions): string {
-  const embedCode = generateEmbedCode(options);
-  return `\`\`\`html\n${embedCode}\n\`\`\``;
-}
-
-/**
  * Copy embed code to clipboard
  */
 export async function copyEmbedCode(options: EmbedOptions): Promise<boolean> {
@@ -105,24 +85,6 @@ export async function copyEmbedCode(options: EmbedOptions): Promise<boolean> {
   } catch {
     return false;
   }
-}
-
-/**
- * Generate embed preview URL
- * For showing users what the embed will look like
- */
-export function generateEmbedPreviewUrl(options: EmbedOptions): string {
-  const { category, slug, codeId, theme = 'auto' } = options;
-
-  const previewUrl = new URL(`${APP_CONFIG.url}/embed/${category}/${slug}`);
-
-  if (codeId) {
-    previewUrl.searchParams.set('code', codeId);
-  }
-  previewUrl.searchParams.set('theme', theme);
-  previewUrl.searchParams.set('preview', 'true');
-
-  return previewUrl.toString();
 }
 
 /**

@@ -10,6 +10,7 @@
  * - Accessibility features
  */
 
+import React from 'npm:react@18.3.1';
 import {
   Body,
   Container,
@@ -21,7 +22,6 @@ import {
   Section,
   Text,
 } from 'npm:@react-email/components@0.0.22';
-import type * as React from 'react';
 import { addUTMToURL } from '../utils/email-utm.ts';
 import type { EmailUTMParams } from '../utils/utm-templates.ts';
 import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme.ts';

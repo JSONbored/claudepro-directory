@@ -62,12 +62,11 @@ content/api-docs/*.mdx
 coverage/
 .coverage-baseline.json
 .coverage-history.json
-.db-schema-hash
 .vitest/
 .parcel-cache/
 .turbo/
 .temp/
-.vercel-cache/
+.build-cache/
 
 # Test artifacts
 test-results/
@@ -86,7 +85,6 @@ config/reports/lighthouse/
 *.orig
 *.bak
 backups/
-.backup-db-hash
 
 # Build analysis
 stats.html
@@ -115,13 +113,9 @@ MIGRATION_GUIDE.md
 
 redis-export.json
 
-.zod-schema-hash
-
 scripts/import-redis-seed-data.ts
 
 scripts/redis-export.ts
-
-.skill-packages-hash-cache
 
 # Supabase schema dump (contains secrets in trigger definitions)
 supabase/schema.sql

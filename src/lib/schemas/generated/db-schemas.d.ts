@@ -879,12 +879,6 @@ export type PublicGetContentDetailCompleteArgs = z.infer<
 export type PublicGetContentDetailCompleteReturns = z.infer<
   typeof generated.publicGetContentDetailCompleteReturnsSchema
 >;
-export type PublicGetContentPaginatedArgs = z.infer<
-  typeof generated.publicGetContentPaginatedArgsSchema
->;
-export type PublicGetContentPaginatedReturns = z.infer<
-  typeof generated.publicGetContentPaginatedReturnsSchema
->;
 export type PublicGetContentTemplatesArgs = z.infer<
   typeof generated.publicGetContentTemplatesArgsSchema
 >;
@@ -922,6 +916,12 @@ export type PublicGetEnrichedContentArgs = z.infer<
 >;
 export type PublicGetEnrichedContentReturns = z.infer<
   typeof generated.publicGetEnrichedContentReturnsSchema
+>;
+export type PublicGetEnrichedContentListArgs = z.infer<
+  typeof generated.publicGetEnrichedContentListArgsSchema
+>;
+export type PublicGetEnrichedContentListReturns = z.infer<
+  typeof generated.publicGetEnrichedContentListReturnsSchema
 >;
 export type PublicGetFeaturedJobsArgs = z.infer<typeof generated.publicGetFeaturedJobsArgsSchema>;
 export type PublicGetFeaturedJobsReturns = z.infer<

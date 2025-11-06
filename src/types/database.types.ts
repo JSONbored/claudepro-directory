@@ -4747,19 +4747,37 @@ export type Database = {
         Args: { p_category: string; p_slug: string; p_user_id?: string };
         Returns: Json;
       };
-      get_content_paginated: {
-        Args: {
-          p_author?: string;
-          p_category?: string;
-          p_limit?: number;
-          p_offset?: number;
-          p_order_by?: string;
-          p_order_direction?: string;
-          p_search?: string;
-          p_tags?: string[];
-        };
-        Returns: Json;
-      };
+      get_content_paginated:
+        | {
+            Args: {
+              p_author?: string;
+              p_category?: string;
+              p_limit?: number;
+              p_offset?: number;
+              p_order_by?: string;
+              p_order_direction?: string;
+              p_search?: string;
+              p_tags?: string[];
+            };
+            Returns: Json;
+          }
+        | {
+            Args: { p_category?: string; p_limit?: number; p_offset?: number };
+            Returns: {
+              author: string;
+              category: string;
+              copy_count: number;
+              created_at: string;
+              date_added: string;
+              description: string;
+              id: string;
+              slug: string;
+              source: string;
+              tags: string[];
+              title: string;
+              view_count: number;
+            }[];
+          };
       get_content_templates: { Args: { p_category: string }; Returns: Json };
       get_content_with_analytics:
         | {
@@ -4815,6 +4833,15 @@ export type Database = {
           p_limit?: number;
           p_offset?: number;
           p_slug?: string;
+          p_slugs?: string[];
+        };
+        Returns: Json;
+      };
+      get_enriched_content_list: {
+        Args: {
+          p_category?: string;
+          p_limit?: number;
+          p_offset?: number;
           p_slugs?: string[];
         };
         Returns: Json;
@@ -5598,7 +5625,6 @@ export type Database = {
           discovery_metadata: Json;
           examples: Json;
           features: Json;
-          fts_vector: unknown;
           id: string;
           relevance_score: number;
           slug: string;

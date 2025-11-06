@@ -6,8 +6,8 @@
  * Content: How to use configurations, top agents, quick start guide
  */
 
+import React from 'npm:react@18.3.1';
 import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import type * as React from 'react';
 import { addUTMToURL } from '../utils/email-utm.ts';
 import { EMAIL_UTM_TEMPLATES } from '../utils/utm-templates.ts';
 import { BaseLayout } from '../layouts/base-layout.tsx';

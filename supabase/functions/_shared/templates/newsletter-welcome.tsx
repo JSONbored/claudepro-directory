@@ -10,6 +10,7 @@
  * - Email client compatible
  */
 
+import React from 'npm:react@18.3.1';
 import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
 import { addUTMToURL } from '../utils/email-utm.ts';
 import { EMAIL_UTM_TEMPLATES } from '../utils/utm-templates.ts';

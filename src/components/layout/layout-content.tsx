@@ -41,6 +41,16 @@ const NotificationSheet = dynamic(
   }
 );
 
+const UnifiedNewsletterCapture = dynamic(
+  () =>
+    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+      default: mod.UnifiedNewsletterCapture,
+    })),
+  {
+    loading: () => null,
+  }
+);
+
 interface LayoutContentProps {
   children: React.ReactNode;
   announcement: Tables<'announcements'> | null;
@@ -48,8 +58,26 @@ interface LayoutContentProps {
 
 export function LayoutContent({ children, announcement }: LayoutContentProps) {
   const pathname = usePathname();
-  const isAuthRoute = pathname.startsWith('/login') || pathname.includes('/(auth)/');
 
+  // Auth route prefixes - Next.js strips route groups like (auth) from URLs
+  const AUTH_ROUTE_PREFIXES = ['/login', '/auth-code-error', '/auth/'];
+  const isAuthRoute = AUTH_ROUTE_PREFIXES.some((prefix) =>
+    prefix.endsWith('/') ? pathname.startsWith(prefix) : pathname === prefix
+  );
+
+  // Auth routes: minimal wrapper with no height constraints for true fullscreen experience
+  if (isAuthRoute) {
+    return (
+      <>
+        {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
+        <main id="main-content" className="h-[100dvh] w-full overflow-hidden">
+          {children}
+        </main>
+      </>
+    );
+  }
+
+  // Normal routes: full layout with navigation, footer, and all features
   return (
     <>
       <a
@@ -61,17 +89,18 @@ export function LayoutContent({ children, announcement }: LayoutContentProps) {
         Skip to main content
       </a>
       <div className={'flex min-h-screen flex-col bg-background'}>
-        {!isAuthRoute && announcement && <AnnouncementBannerClient announcement={announcement} />}
-        {!isAuthRoute && <Navigation />}
+        {announcement && <AnnouncementBannerClient announcement={announcement} />}
+        <Navigation />
         {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
         <main id="main-content" className="flex-1">
           {children}
         </main>
-        {!isAuthRoute && <Footer />}
-        {!isAuthRoute && <FloatingMobileSearch />}
-        {!isAuthRoute && <BackToTopButton />}
-        {!isAuthRoute && <NotificationFAB />}
-        {!isAuthRoute && <NotificationSheet />}
+        <Footer />
+        <FloatingMobileSearch />
+        <BackToTopButton />
+        <NotificationFAB />
+        <NotificationSheet />
+        <UnifiedNewsletterCapture variant="footer-bar" source="footer" />
       </div>
     </>
   );

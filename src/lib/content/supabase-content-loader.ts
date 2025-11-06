@@ -41,7 +41,8 @@ export async function getContentByCategory(category: CategoryId): Promise<Conten
   return withErrorHandling(
     async () => {
       const supabase = createAnonClient();
-      const { data, error } = await supabase.rpc('get_enriched_content', {
+      // Bandwidth optimized: use list RPC (excludes content/examples/discovery_metadata)
+      const { data, error } = await supabase.rpc('get_enriched_content_list', {
         p_category: category,
         p_limit: 1000,
         p_offset: 0,

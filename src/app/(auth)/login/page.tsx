@@ -1,13 +1,9 @@
 import { Suspense } from 'react';
-import { UnifiedButton } from '@/src/components/domain/unified-button';
-import { LazySection } from '@/src/components/infra/lazy-section';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/card';
+import { AuthBrandPanel } from '@/src/components/auth/auth-brand-panel';
+import { AuthFormPanel } from '@/src/components/auth/auth-form-panel';
+import { AuthMobileHeader } from '@/src/components/auth/auth-mobile-header';
+import { OAuthProviderButton } from '@/src/components/auth/oauth-provider-button';
+import { SplitAuthLayout } from '@/src/components/auth/split-auth-layout';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 export const metadata = generatePageMetadata('/login');
@@ -18,44 +14,21 @@ export default async function LoginPage({
   searchParams: Promise<{ redirect?: string }>;
 }) {
   const resolvedSearchParams = await searchParams;
+  const redirectTo = resolvedSearchParams.redirect;
+
   return (
     <Suspense fallback={null}>
-      <LazySection variant="scale" delay={0.1}>
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Welcome to ClaudePro</CardTitle>
-            <CardDescription>
-              Sign in to bookmark configurations, submit content, and join the community
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div>
-              <UnifiedButton
-                variant="auth-signin"
-                provider="github"
-                className="mb-2 w-full"
-                {...(resolvedSearchParams.redirect
-                  ? { redirectTo: resolvedSearchParams.redirect }
-                  : {})}
-              />
-
-              <UnifiedButton
-                variant="auth-signin"
-                provider="google"
-                buttonVariant="outline"
-                className="w-full"
-                {...(resolvedSearchParams.redirect
-                  ? { redirectTo: resolvedSearchParams.redirect }
-                  : {})}
-              />
-            </div>
-
-            <p className={'mt-4 text-center text-muted-foreground text-xs'}>
-              By signing in, you agree to our Terms of Service and Privacy Policy
-            </p>
-          </CardContent>
-        </Card>
-      </LazySection>
+      <SplitAuthLayout
+        brandPanel={<AuthBrandPanel />}
+        mobileHeader={<AuthMobileHeader />}
+        authPanel={
+          <AuthFormPanel title="Sign in" description="Choose your preferred sign-in method">
+            <OAuthProviderButton provider="github" redirectTo={redirectTo} />
+            <OAuthProviderButton provider="google" redirectTo={redirectTo} />
+            <OAuthProviderButton provider="discord" redirectTo={redirectTo} />
+          </AuthFormPanel>
+        }
+      />
     </Suspense>
   );
 }

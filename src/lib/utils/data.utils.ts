@@ -3,7 +3,7 @@
  * Date calculations migrated to PostgreSQL (SHA-4137)
  */
 
-import { parse as devalueParse, stringify as devalueStringify } from 'devalue';
+import { parse as devalueParse } from 'devalue';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
 
@@ -21,22 +21,6 @@ const parseOptionsSchema = z.object({
 });
 
 export type ParseOptions = z.infer<typeof parseOptionsSchema>;
-
-const stringifyOptionsSchema = z.object({
-  strategy: z.nativeEnum(ParseStrategy).default(ParseStrategy.DEVALUE),
-  space: z.number().min(0).max(10).optional(),
-  enableLogging: z.boolean().default(true),
-});
-
-export type StringifyOptions = z.infer<typeof stringifyOptionsSchema>;
-
-export interface SafeParseResult<T> {
-  success: boolean;
-  data?: T;
-  error?: Error;
-  strategy: ParseStrategy;
-  parseTime?: number;
-}
 
 const MAX_SAFE_SIZE = 10_000_000;
 
@@ -196,60 +180,6 @@ export function safeParse<T = unknown>(
   );
 }
 
-export function safeParseSafe<T = unknown>(
-  str: string,
-  schema?: z.ZodType<T>,
-  options?: Partial<ParseOptions>
-): SafeParseResult<T> {
-  const startTime = performance.now();
-  const opts = parseOptionsSchema.parse(options || {});
-
-  try {
-    const data = safeParse<T>(str, schema, options);
-    return {
-      success: true,
-      data,
-      strategy: opts.strategy,
-      parseTime: performance.now() - startTime,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error : new Error(String(error)),
-      strategy: opts.strategy,
-      parseTime: performance.now() - startTime,
-    };
-  }
-}
-
-export function safeStringify<T = unknown>(value: T, options?: Partial<StringifyOptions>): string {
-  const opts = stringifyOptionsSchema.parse(options || {});
-
-  try {
-    switch (opts.strategy) {
-      case ParseStrategy.DEVALUE:
-      case ParseStrategy.VALIDATED_JSON:
-        return devalueStringify(value);
-
-      case ParseStrategy.UNSAFE_JSON:
-        return JSON.stringify(value, null, opts.space);
-
-      default:
-        throw new Error(`Unknown stringify strategy: ${opts.strategy}`);
-    }
-  } catch (error) {
-    if (opts.enableLogging) {
-      logger.error('Stringify failed', error instanceof Error ? error : new Error(String(error)), {
-        strategy: String(opts.strategy),
-        type: typeof value,
-      });
-    }
-    throw new Error(
-      `Stringify failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
-  }
-}
-
 /**
  * **INTERNAL USE ONLY**: This utility validates JSON syntax without returning parsed data.
  * Direct JSON.parse is acceptable HERE because the result is discarded (validation only).
@@ -261,15 +191,6 @@ export function isValidJSON(str: string): boolean {
     return true;
   } catch {
     return false;
-  }
-}
-
-export function estimateSize<T = unknown>(value: T): number {
-  try {
-    const str = safeStringify(value);
-    return str.length * 2;
-  } catch {
-    return 0;
   }
 }
 
@@ -354,80 +275,4 @@ export function formatRelativeDate(date: string | Date, options: RelativeDateOpt
 
 export function formatDistanceToNow(date: Date): string {
   return formatRelativeDate(date, { style: 'detailed' });
-}
-
-export function parseDate(input: string): Date | null {
-  try {
-    const date = new Date(input);
-    return Number.isNaN(date.getTime()) ? null : date;
-  } catch {
-    return null;
-  }
-}
-
-export function isValidDate(date: unknown): boolean {
-  if (date instanceof Date) {
-    return !Number.isNaN(date.getTime());
-  }
-  if (typeof date === 'string') {
-    return parseDate(date) !== null;
-  }
-  return false;
-}
-
-export interface RetryOptions {
-  maxAttempts?: number;
-  initialDelay?: number;
-  exponentialBackoff?: boolean;
-  maxDelay?: number;
-  operationName?: string;
-}
-
-export async function withRetry<T>(
-  operation: () => Promise<T>,
-  options: RetryOptions = {}
-): Promise<T> {
-  const {
-    maxAttempts = 3,
-    initialDelay = 1000,
-    exponentialBackoff = true,
-    maxDelay = 10000,
-    operationName = 'operation',
-  } = options;
-
-  let lastError: Error | null = null;
-
-  for (let attempt = 0; attempt <= maxAttempts; attempt++) {
-    try {
-      return await operation();
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
-
-      if (attempt < maxAttempts) {
-        const baseDelay = exponentialBackoff ? initialDelay * 2 ** attempt : initialDelay;
-        const delay = Math.min(baseDelay, maxDelay);
-
-        logger.warn('Operation failed, retrying', {
-          operation: operationName,
-          attempt: attempt + 1,
-          maxAttempts: maxAttempts + 1,
-          nextRetryIn: `${delay}ms`,
-          error: lastError.message,
-        });
-
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
-    }
-  }
-
-  if (!lastError) {
-    lastError = new Error('Operation failed with unknown error');
-  }
-
-  logger.error('Operation failed after all retries', lastError, {
-    operation: operationName,
-    attempts: maxAttempts + 1,
-  });
-
-  throw lastError;
 }

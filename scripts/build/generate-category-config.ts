@@ -11,13 +11,12 @@
  *   pnpm generate:categories  # Generate static config from database
  */
 
-import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
+import { computeHash, hasHashChanged, setHash } from '../utils/build-cache.js';
 import { ensureEnvVars } from '../utils/env.js';
-import { hasHashChanged, setHash } from '../utils/hash-cache.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = join(__dirname, '../..');
@@ -90,7 +89,7 @@ async function generateCategoryConfig() {
     console.log(`✅ Found ${categoryIds.length} categories: ${categoryIds.join(', ')}\n`);
 
     // Generate content hash for change detection
-    const contentHash = createHash('sha256').update(JSON.stringify(data)).digest('hex');
+    const contentHash = computeHash(data);
 
     if (!hasHashChanged('category-config', contentHash)) {
       console.log('✓ Category config unchanged (database data identical), skipping generation');
@@ -272,10 +271,14 @@ export const CACHEABLE_CATEGORY_IDS = ${JSON.stringify(
     }
     writeFileSync(OUTPUT_FILE, output, 'utf-8');
 
-    // Save hash for next build
-    setHash('category-config', contentHash);
-
     const duration = Date.now() - startTime;
+
+    // Save hash for next build with metadata
+    setHash('category-config', contentHash, {
+      reason: 'Category config regenerated from database',
+      duration,
+      files: [OUTPUT_FILE],
+    });
     console.log(`✅ Category config generated in ${duration}ms`);
     console.log(`📝 Output: ${OUTPUT_FILE}`);
     console.log(`🎯 Categories: ${categoryIds.length} configs cached\n`);

@@ -18,16 +18,6 @@ import './sugar-high.css';
 import dynamic from 'next/dynamic';
 import { Toaster } from 'sonner';
 
-const UnifiedNewsletterCapture = dynamic(
-  () =>
-    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
-      default: mod.UnifiedNewsletterCapture,
-    })),
-  {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
-  }
-);
-
 const NotificationToastHandler = dynamic(
   () =>
     import('@/src/components/features/notifications/notification-toast-handler').then((mod) => ({
@@ -184,7 +174,7 @@ export default async function RootLayout({
             </ErrorBoundary>
             <Toaster />
             <NotificationToastHandler />
-            <UnifiedNewsletterCapture variant="footer-bar" source="footer" />
+            {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
           </PostCopyEmailProvider>
         </ThemeProvider>
         <Analytics />

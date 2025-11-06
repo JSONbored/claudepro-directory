@@ -1,18 +1,19 @@
 /**
  * Newsletter Subscription Hook - Client-side state management for newsletter forms
- * Thin wrapper over subscribeToNewsletter server action with analytics tracking
+ * Calls Supabase Edge Function directly for better observability
  */
 
 'use client';
 
 import { useCallback, useState, useTransition } from 'react';
-import { subscribeToNewsletter } from '@/src/lib/actions/newsletter-signup';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { logger } from '@/src/lib/logger';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Enums } from '@/src/types/database.types';
 
 export type NewsletterSource = Enums<'newsletter_source'>;
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 function getEmailSubscriptionEvent(source: NewsletterSource): string {
   const eventMap: Record<NewsletterSource, string> = {
@@ -34,6 +35,17 @@ export interface UseNewsletterOptions {
   successMessage?: string;
   errorTitle?: string;
   showToasts?: boolean;
+  /** Optional metadata for contextual tracking (copy actions, campaigns, etc.) */
+  metadata?: {
+    copy_type?: string;
+    copy_category?: string;
+    copy_slug?: string;
+    [key: string]: unknown;
+  };
+  /** Optional custom analytics event name (overrides default source-based event) */
+  customAnalyticsEvent?: string;
+  /** Optional context for error logging (variant, component-specific metadata) */
+  logContext?: Record<string, unknown>;
 }
 
 export interface UseNewsletterReturn {
@@ -53,6 +65,9 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
     successMessage = "You're now subscribed to our newsletter.",
     errorTitle = 'Subscription failed',
     showToasts = true,
+    metadata,
+    customAnalyticsEvent,
+    logContext,
   } = options;
 
   const [email, setEmail] = useState('');
@@ -79,29 +94,44 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
       try {
         const referrer = typeof window !== 'undefined' ? window.location.href : undefined;
 
-        const result = await subscribeToNewsletter({
-          email,
-          source,
-          ...(referrer && { referrer }),
+        if (!SUPABASE_URL) {
+          throw new Error('Supabase URL not configured');
+        }
+
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/email-handler`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Email-Action': 'subscribe',
+          },
+          body: JSON.stringify({
+            email,
+            source,
+            ...(referrer && { referrer }),
+            ...(metadata && metadata),
+          }),
         });
 
-        if (result?.data) {
+        const result = await response.json();
+
+        if (response.ok && result.success) {
           if (showToasts) {
             toasts.raw.success('Welcome!', {
               description: successMessage,
             });
           }
 
-          const eventName = getEmailSubscriptionEvent(source);
+          const eventName = customAnalyticsEvent || getEmailSubscriptionEvent(source);
           trackEvent(eventName, {
-            contact_id: result.data.id,
+            contact_id: result.subscription_id,
             ...(referrer && { referrer }),
+            ...(metadata && metadata),
           });
 
           reset();
           onSuccess?.();
         } else {
-          const errorMessage = result?.serverError || 'Please try again later.';
+          const errorMessage = result.message || result.error || 'Please try again later.';
 
           setError(errorMessage);
 
@@ -117,6 +147,8 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
             component: 'useNewsletter',
             source,
             email: `${email.substring(0, 3)}***`,
+            status: response.status,
+            ...logContext,
           });
         }
       } catch (err) {
@@ -136,10 +168,23 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
         logger.error('Newsletter subscription error', err instanceof Error ? err : undefined, {
           component: 'useNewsletter',
           source,
+          ...logContext,
         });
       }
     });
-  }, [email, source, onSuccess, onError, successMessage, errorTitle, showToasts, reset]);
+  }, [
+    email,
+    source,
+    onSuccess,
+    onError,
+    successMessage,
+    errorTitle,
+    showToasts,
+    reset,
+    customAnalyticsEvent,
+    metadata,
+    logContext,
+  ]);
 
   return {
     email,

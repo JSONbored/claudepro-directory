@@ -6,8 +6,8 @@
 // Production-safe logging - only in development
 const isDev =
   location.hostname === "localhost" || location.hostname === "127.0.0.1";
-const log = isDev ? console.log.bind(console) : () => {};
-const error = isDev ? console.error.bind(console) : () => {};
+const log = isDev ? console.log.bind(console) : () => { /* no-op in production */ };
+const error = isDev ? console.error.bind(console) : () => { /* no-op in production */ };
 
 // Security constants (synchronized with src/lib/constants/security.ts SECURITY_CONFIG)
 const TRUSTED_HOSTNAMES = {
@@ -92,6 +92,7 @@ self.addEventListener("activate", (event) => {
               log("Deleting old cache:", cacheName);
               return caches.delete(cacheName);
             }
+            return undefined;
           }),
         );
       })
@@ -160,7 +161,7 @@ async function longTermCacheStrategy(request, cacheName, ttl) {
   // Check if cached and still within TTL
   if (cached) {
     const cacheTimestamp = cached.headers.get("sw-cache-timestamp");
-    if (cacheTimestamp && Date.now() - parseInt(cacheTimestamp) < ttl) {
+    if (cacheTimestamp && Date.now() - Number.parseInt(cacheTimestamp, 10) < ttl) {
       return cached;
     }
   }
@@ -234,7 +235,7 @@ async function networkFirstStrategy(request, cacheName) {
     if (cached) {
       // Check if cached response is less than 5 minutes old
       const timestamp = cached.headers.get("sw-cache-timestamp");
-      if (timestamp && Date.now() - parseInt(timestamp) < 5 * 60 * 1000) {
+      if (timestamp && Date.now() - Number.parseInt(timestamp, 10) < 5 * 60 * 1000) {
         return cached;
       }
     }
@@ -347,13 +348,13 @@ async function retryFailedRequest(tag) {
 
       // Notify clients of success
       const clients = await self.clients.matchAll();
-      clients.forEach((client) => {
+      for (const client of clients) {
         client.postMessage({
           type: "sync-success",
           url: requestData.url,
           id: requestData.id,
         });
-      });
+      }
     } else if (requestData.attempt < MAX_RETRY_ATTEMPTS) {
       // Failed but can retry
       requestData.attempt++;
@@ -363,7 +364,7 @@ async function retryFailedRequest(tag) {
       await cache.put(new Request(tag), newResponse);
 
       // Register for another sync
-      if (self.registration && self.registration.sync) {
+      if (self.registration?.sync) {
         await self.registration.sync.register(tag);
       }
     } else {
@@ -373,14 +374,14 @@ async function retryFailedRequest(tag) {
 
       // Notify clients of failure
       const clients = await self.clients.matchAll();
-      clients.forEach((client) => {
+      for (const client of clients) {
         client.postMessage({
           type: "sync-failed",
           url: requestData.url,
           id: requestData.id,
           error: "Max retry attempts reached",
         });
-      });
+      }
     }
   } catch (err) {
     error("Error retrying request:", err);
@@ -394,7 +395,7 @@ async function retryFailedRequest(tag) {
       await cache.put(new Request(tag), newResponse);
 
       // Register for another sync
-      if (self.registration && self.registration.sync) {
+      if (self.registration?.sync) {
         await self.registration.sync.register(tag);
       }
     } else {
