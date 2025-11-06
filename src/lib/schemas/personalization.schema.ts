@@ -46,10 +46,6 @@ const userIdSchema = nonEmptyString.uuid();
 export const userInteractionSchema = publicUserInteractionsRowSchema;
 export type UserInteraction = z.infer<typeof userInteractionSchema>;
 
-// Interaction type enum (extracted from database)
-export const interactionTypeSchema = z.enum(['view', 'copy', 'bookmark', 'click', 'time_spent']);
-export type InteractionType = z.infer<typeof interactionTypeSchema>;
-
 // Client input schema for tracking interactions (omit server fields)
 export const trackInteractionSchema = publicUserInteractionsInsertSchema.omit({
   id: true,

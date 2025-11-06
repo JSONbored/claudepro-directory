@@ -12,7 +12,6 @@ import { usePostCopyEmail } from '@/src/components/infra/providers/post-copy-ema
 import { Button } from '@/src/components/primitives/button';
 import { useButtonSuccess } from '@/src/hooks/use-button-success';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
-import { deleteJob, toggleJobStatus } from '@/src/lib/actions/business.actions';
 import { trackUsage } from '@/src/lib/actions/content.actions';
 import { getGitHubStars } from '@/src/lib/actions/github.actions';
 import { copyMarkdownAction, downloadMarkdownAction } from '@/src/lib/actions/markdown-actions';
@@ -866,18 +865,32 @@ function JobToggleButton({
 }: JobToggleVariant) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const supabase = createClient();
 
   const handleToggle = () => {
     const newStatus = currentStatus === 'active' ? 'draft' : 'active';
 
     startTransition(async () => {
       try {
-        const result = await toggleJobStatus({
-          id: jobId,
-          status: newStatus as 'draft' | 'pending_review' | 'active' | 'expired' | 'rejected',
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) throw new Error('You must be signed in to manage jobs');
+
+        const { data, error } = await supabase.rpc('manage_job', {
+          p_action: 'toggle_status',
+          p_user_id: user.id,
+          p_data: {
+            id: jobId,
+            status: newStatus,
+          },
         });
 
-        if (result?.data?.success) {
+        if (error) throw new Error(error.message);
+
+        const result = data as unknown as { success: boolean };
+
+        if (result.success) {
           toasts.success.actionCompleted(
             newStatus === 'active' ? 'Job listing resumed' : 'Job listing paused'
           );
@@ -885,7 +898,12 @@ function JobToggleButton({
         } else {
           toasts.error.actionFailed('update job status');
         }
-      } catch (_error) {
+      } catch (error) {
+        logger.error(
+          'Failed to toggle job status',
+          error instanceof Error ? error : new Error(String(error)),
+          { jobId, newStatus }
+        );
         toasts.error.serverError();
       }
     });
@@ -927,6 +945,7 @@ function JobDeleteButton({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isDeleting, setIsDeleting] = useState(false);
+  const supabase = createClient();
 
   const handleDelete = () => {
     if (
@@ -938,16 +957,34 @@ function JobDeleteButton({
     setIsDeleting(true);
     startTransition(async () => {
       try {
-        const result = await deleteJob({ id: jobId });
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) throw new Error('You must be signed in to delete jobs');
 
-        if (result?.data?.success) {
+        const { data, error } = await supabase.rpc('manage_job', {
+          p_action: 'delete',
+          p_user_id: user.id,
+          p_data: { id: jobId },
+        });
+
+        if (error) throw new Error(error.message);
+
+        const result = data as unknown as { success: boolean };
+
+        if (result.success) {
           toasts.success.itemDeleted('Job listing');
           router.refresh();
         } else {
           toasts.error.actionFailed('delete job listing');
           setIsDeleting(false);
         }
-      } catch (_error) {
+      } catch (error) {
+        logger.error(
+          'Failed to delete job',
+          error instanceof Error ? error : new Error(String(error)),
+          { jobId }
+        );
         toasts.error.serverError();
         setIsDeleting(false);
       }
