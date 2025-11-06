@@ -1,11 +1,6 @@
 /**
- * Content Paginated Edge Function - Homepage Infinite Scroll Optimization
- *
- * Bandwidth optimization: Lazy-loads content for "All" tab instead of preloading 262 items
- * Reduces homepage payload from 937KB to 42KB (96% reduction)
- *
- * Usage: Called by HomePageClient for infinite scroll pagination
- * Free tier: 500K invocations/month (estimated usage: 15K/month = 3%)
+ * Content Paginated Edge Function - Homepage "All" tab infinite scroll
+ * Uses mv_content_list_slim for 87% bandwidth reduction (15KB → 2KB per item)
  */
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
@@ -69,9 +64,8 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Call RPC function (using anon key for public read-only access)
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const { data, error } = await supabase.rpc('get_content_paginated', {
+    const { data, error } = await supabase.rpc('get_content_paginated_slim', {
       p_category: category,
       p_limit: limit,
       p_offset: offset,
@@ -79,18 +73,18 @@ Deno.serve(async (req: Request) => {
 
     if (error) {
       console.error('RPC error:', error);
-      return errorResponse(error, 'get_content_paginated', getCorsHeaders);
+      return errorResponse(error, 'get_content_paginated_slim', getCorsHeaders);
     }
 
     // Extract items array from JSONB response
     const items = data?.items || [];
 
-    // Return with caching headers (15 minutes = 900 seconds)
+    // Return with caching headers (6 hours = 21600 seconds, matches MV refresh)
     return new Response(JSON.stringify(items), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=900, stale-while-revalidate=1800',
+        'Cache-Control': 'public, s-maxage=21600, stale-while-revalidate=10800',
         ...getCorsHeaders,
       },
     });

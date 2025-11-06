@@ -978,6 +978,7 @@ export type Database = {
       };
       content_submissions: {
         Row: {
+          approved_slug: string | null;
           author: string;
           author_profile_url: string | null;
           category: string;
@@ -1001,8 +1002,11 @@ export type Database = {
           submitter_ip: unknown;
           tags: string[] | null;
           updated_at: string;
+          webhook_announcement_sent_at: string | null;
+          webhook_notification_sent_at: string | null;
         };
         Insert: {
+          approved_slug?: string | null;
           author: string;
           author_profile_url?: string | null;
           category: string;
@@ -1026,8 +1030,11 @@ export type Database = {
           submitter_ip?: unknown;
           tags?: string[] | null;
           updated_at?: string;
+          webhook_announcement_sent_at?: string | null;
+          webhook_notification_sent_at?: string | null;
         };
         Update: {
+          approved_slug?: string | null;
           author?: string;
           author_profile_url?: string | null;
           category?: string;
@@ -1051,6 +1058,8 @@ export type Database = {
           submitter_ip?: unknown;
           tags?: string[] | null;
           updated_at?: string;
+          webhook_announcement_sent_at?: string | null;
+          webhook_notification_sent_at?: string | null;
         };
         Relationships: [];
       };
@@ -1523,57 +1532,6 @@ export type Database = {
           stars?: number;
           updated_at?: string;
           watchers?: number | null;
-        };
-        Relationships: [];
-      };
-      index_usage_snapshots: {
-        Row: {
-          created_at: string;
-          id: string;
-          idx_blks_hit: number;
-          idx_blks_read: number;
-          idx_scan: number;
-          idx_tup_fetch: number;
-          idx_tup_read: number;
-          index_definition: string;
-          index_size_bytes: number;
-          indexname: string;
-          schemaname: string;
-          snapshot_date: string;
-          table_size_bytes: number;
-          tablename: string;
-        };
-        Insert: {
-          created_at?: string;
-          id?: string;
-          idx_blks_hit: number;
-          idx_blks_read: number;
-          idx_scan: number;
-          idx_tup_fetch: number;
-          idx_tup_read: number;
-          index_definition: string;
-          index_size_bytes: number;
-          indexname: string;
-          schemaname: string;
-          snapshot_date?: string;
-          table_size_bytes: number;
-          tablename: string;
-        };
-        Update: {
-          created_at?: string;
-          id?: string;
-          idx_blks_hit?: number;
-          idx_blks_read?: number;
-          idx_scan?: number;
-          idx_tup_fetch?: number;
-          idx_tup_read?: number;
-          index_definition?: string;
-          index_size_bytes?: number;
-          indexname?: string;
-          schemaname?: string;
-          snapshot_date?: string;
-          table_size_bytes?: number;
-          tablename?: string;
         };
         Relationships: [];
       };
@@ -2335,6 +2293,13 @@ export type Database = {
             foreignKeyName: 'sponsored_clicks_sponsored_id_fkey';
             columns: ['sponsored_id'];
             isOneToOne: false;
+            referencedRelation: 'mv_content_list_slim';
+            referencedColumns: ['sponsored_content_id'];
+          },
+          {
+            foreignKeyName: 'sponsored_clicks_sponsored_id_fkey';
+            columns: ['sponsored_id'];
+            isOneToOne: false;
             referencedRelation: 'sponsored_content';
             referencedColumns: ['id'];
           },
@@ -2429,6 +2394,13 @@ export type Database = {
           user_id?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: 'sponsored_impressions_sponsored_id_fkey';
+            columns: ['sponsored_id'];
+            isOneToOne: false;
+            referencedRelation: 'mv_content_list_slim';
+            referencedColumns: ['sponsored_content_id'];
+          },
           {
             foreignKeyName: 'sponsored_impressions_sponsored_id_fkey';
             columns: ['sponsored_id'];
@@ -2700,54 +2672,6 @@ export type Database = {
             referencedColumns: ['id'];
           },
         ];
-      };
-      table_bloat_snapshots: {
-        Row: {
-          autovacuum_count: number | null;
-          bloat_ratio: number;
-          created_at: string;
-          dead_tuples: number;
-          id: string;
-          last_autovacuum: string | null;
-          last_vacuum: string | null;
-          live_tuples: number;
-          schemaname: string;
-          snapshot_date: string;
-          tablename: string;
-          total_bytes: number;
-          vacuum_count: number | null;
-        };
-        Insert: {
-          autovacuum_count?: number | null;
-          bloat_ratio: number;
-          created_at?: string;
-          dead_tuples: number;
-          id?: string;
-          last_autovacuum?: string | null;
-          last_vacuum?: string | null;
-          live_tuples: number;
-          schemaname: string;
-          snapshot_date?: string;
-          tablename: string;
-          total_bytes: number;
-          vacuum_count?: number | null;
-        };
-        Update: {
-          autovacuum_count?: number | null;
-          bloat_ratio?: number;
-          created_at?: string;
-          dead_tuples?: number;
-          id?: string;
-          last_autovacuum?: string | null;
-          last_vacuum?: string | null;
-          live_tuples?: number;
-          schemaname?: string;
-          snapshot_date?: string;
-          tablename?: string;
-          total_bytes?: number;
-          vacuum_count?: number | null;
-        };
-        Relationships: [];
       };
       tier_display_config: {
         Row: {
@@ -3306,6 +3230,31 @@ export type Database = {
         };
         Relationships: [];
       };
+      mv_content_list_slim: {
+        Row: {
+          author: string | null;
+          author_profile_url: string | null;
+          bookmark_count: number | null;
+          category: string | null;
+          copy_count: number | null;
+          created_at: string | null;
+          date_added: string | null;
+          description: string | null;
+          display_title: string | null;
+          id: string | null;
+          is_sponsored: boolean | null;
+          popularity_score: number | null;
+          slug: string | null;
+          source: string | null;
+          sponsored_content_id: string | null;
+          sponsorship_tier: string | null;
+          tags: string[] | null;
+          title: string | null;
+          updated_at: string | null;
+          view_count: number | null;
+        };
+        Relationships: [];
+      };
       mv_content_stats: {
         Row: {
           author: string | null;
@@ -3610,23 +3559,6 @@ export type Database = {
         Returns: number;
       };
       cancel_email_sequence: { Args: { p_email: string }; Returns: undefined };
-      capture_index_usage_snapshot: {
-        Args: never;
-        Returns: {
-          indexes_captured: number;
-          snapshot_id: string;
-          unused_indexes: number;
-        }[];
-      };
-      capture_table_bloat_snapshot: {
-        Args: never;
-        Returns: {
-          bloated_tables: number;
-          max_bloat_ratio: number;
-          snapshot_id: string;
-          tables_captured: number;
-        }[];
-      };
       check_vacuum_needed: {
         Args: never;
         Returns: {
@@ -3785,21 +3717,6 @@ export type Database = {
         Args: { p_category?: string; p_environment?: string };
         Returns: Json;
       };
-      get_bloated_tables: {
-        Args: { p_min_bloat_ratio?: number; p_min_dead_tuples?: number };
-        Returns: {
-          autovacuum_count: number;
-          bloat_ratio: number;
-          dead_tuples: number;
-          last_autovacuum: string;
-          last_vacuum: string;
-          live_tuples: number;
-          recommendation: string;
-          table_size_mb: number;
-          tablename: string;
-          vacuum_count: number;
-        }[];
-      };
       get_bookmark_counts_by_category: {
         Args: { category_filter: string };
         Returns: {
@@ -3917,6 +3834,16 @@ export type Database = {
           p_order_direction?: string;
           p_search?: string;
           p_tags?: string[];
+        };
+        Returns: Json;
+      };
+      get_content_paginated_slim: {
+        Args: {
+          p_category?: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_order_by?: string;
+          p_order_direction?: string;
         };
         Returns: Json;
       };
@@ -4110,18 +4037,6 @@ export type Database = {
             Returns: Json;
           }
         | { Args: { p_category_ids: string[] }; Returns: Json };
-      get_index_usage_trends: {
-        Args: { p_weeks_lookback?: number };
-        Returns: {
-          indexname: string;
-          tablename: string;
-          trend: string;
-          week_1_scans: number;
-          week_2_scans: number;
-          week_3_scans: number;
-          week_4_scans: number;
-        }[];
-      };
       get_job_detail: { Args: { p_slug: string }; Returns: Json };
       get_jobs_by_category: {
         Args: { p_category: string };
@@ -4337,10 +4252,6 @@ export type Database = {
           isSetofReturn: true;
         };
       };
-      get_tier_progress_from_score: {
-        Args: { p_score: number };
-        Returns: number;
-      };
       get_top_contributors: { Args: { p_limit?: number }; Returns: Json };
       get_top_tags_for_category: {
         Args: { p_category: string; p_limit?: number };
@@ -4388,17 +4299,6 @@ export type Database = {
           p_period?: Database['public']['Enums']['trending_period'];
         };
         Returns: Json;
-      };
-      get_unused_indexes: {
-        Args: { p_days_lookback?: number; p_min_size_mb?: number };
-        Returns: {
-          index_definition: string;
-          index_size_mb: number;
-          indexname: string;
-          recommendation: string;
-          tablename: string;
-          total_scans: number;
-        }[];
       };
       get_usage_recommendations: {
         Args: {
@@ -4600,6 +4500,7 @@ export type Database = {
           total_updated: number;
         }[];
       };
+      process_pending_webhooks: { Args: never; Returns: Json };
       refresh_mv_site_urls: { Args: never; Returns: undefined };
       refresh_profile_from_oauth: { Args: { user_id: string }; Returns: Json };
       refresh_user_stats: {

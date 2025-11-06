@@ -43,7 +43,7 @@ import type { Tables } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/');
 
-export const revalidate = 900; // 15 minutes ISR
+export const revalidate = 21600; // 6 hours ISR (matches mv_content_list_slim refresh)
 
 type CategoryMetadata = ContentItem & { category: CategoryId };
 type EnrichedMetadata = CategoryMetadata & { viewCount: number; copyCount: number };

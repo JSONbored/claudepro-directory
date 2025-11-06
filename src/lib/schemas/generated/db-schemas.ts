@@ -1216,6 +1216,7 @@ export const publicContentSimilaritiesUpdateSchema = z.object({
 });
 
 export const publicContentSubmissionsRowSchema = z.object({
+  approved_slug: z.string().nullable(),
   author: z.string(),
   author_profile_url: z.string().nullable(),
   category: z.string(),
@@ -1239,9 +1240,12 @@ export const publicContentSubmissionsRowSchema = z.object({
   submitter_ip: z.unknown(),
   tags: z.array(z.string()).nullable(),
   updated_at: z.string(),
+  webhook_announcement_sent_at: z.string().nullable(),
+  webhook_notification_sent_at: z.string().nullable(),
 });
 
 export const publicContentSubmissionsInsertSchema = z.object({
+  approved_slug: z.string().optional().nullable(),
   author: z.string(),
   author_profile_url: z.string().optional().nullable(),
   category: z.string(),
@@ -1265,9 +1269,12 @@ export const publicContentSubmissionsInsertSchema = z.object({
   submitter_ip: z.unknown().optional(),
   tags: z.array(z.string()).optional().nullable(),
   updated_at: z.string().optional(),
+  webhook_announcement_sent_at: z.string().optional().nullable(),
+  webhook_notification_sent_at: z.string().optional().nullable(),
 });
 
 export const publicContentSubmissionsUpdateSchema = z.object({
+  approved_slug: z.string().optional().nullable(),
   author: z.string().optional(),
   author_profile_url: z.string().optional().nullable(),
   category: z.string().optional(),
@@ -1291,6 +1298,8 @@ export const publicContentSubmissionsUpdateSchema = z.object({
   submitter_ip: z.unknown().optional(),
   tags: z.array(z.string()).optional().nullable(),
   updated_at: z.string().optional(),
+  webhook_announcement_sent_at: z.string().optional().nullable(),
+  webhook_notification_sent_at: z.string().optional().nullable(),
 });
 
 export const publicContentTemplatesRowSchema = z.object({
@@ -1769,57 +1778,6 @@ export const publicGithubRepoStatsUpdateSchema = z.object({
   stars: z.number().optional(),
   updated_at: z.string().optional(),
   watchers: z.number().optional().nullable(),
-});
-
-export const publicIndexUsageSnapshotsRowSchema = z.object({
-  created_at: z.string(),
-  id: z.string(),
-  idx_blks_hit: z.number(),
-  idx_blks_read: z.number(),
-  idx_scan: z.number(),
-  idx_tup_fetch: z.number(),
-  idx_tup_read: z.number(),
-  index_definition: z.string(),
-  index_size_bytes: z.number(),
-  indexname: z.string(),
-  schemaname: z.string(),
-  snapshot_date: z.string(),
-  table_size_bytes: z.number(),
-  tablename: z.string(),
-});
-
-export const publicIndexUsageSnapshotsInsertSchema = z.object({
-  created_at: z.string().optional(),
-  id: z.string().optional(),
-  idx_blks_hit: z.number(),
-  idx_blks_read: z.number(),
-  idx_scan: z.number(),
-  idx_tup_fetch: z.number(),
-  idx_tup_read: z.number(),
-  index_definition: z.string(),
-  index_size_bytes: z.number(),
-  indexname: z.string(),
-  schemaname: z.string(),
-  snapshot_date: z.string().optional(),
-  table_size_bytes: z.number(),
-  tablename: z.string(),
-});
-
-export const publicIndexUsageSnapshotsUpdateSchema = z.object({
-  created_at: z.string().optional(),
-  id: z.string().optional(),
-  idx_blks_hit: z.number().optional(),
-  idx_blks_read: z.number().optional(),
-  idx_scan: z.number().optional(),
-  idx_tup_fetch: z.number().optional(),
-  idx_tup_read: z.number().optional(),
-  index_definition: z.string().optional(),
-  index_size_bytes: z.number().optional(),
-  indexname: z.string().optional(),
-  schemaname: z.string().optional(),
-  snapshot_date: z.string().optional(),
-  table_size_bytes: z.number().optional(),
-  tablename: z.string().optional(),
 });
 
 export const publicJobsRowSchema = z.object({
@@ -2596,6 +2554,13 @@ export const publicSponsoredClicksRelationshipsSchema = z.tuple([
     foreignKeyName: z.literal('sponsored_clicks_sponsored_id_fkey'),
     columns: z.tuple([z.literal('sponsored_id')]),
     isOneToOne: z.literal(false),
+    referencedRelation: z.literal('mv_content_list_slim'),
+    referencedColumns: z.tuple([z.literal('sponsored_content_id')]),
+  }),
+  z.object({
+    foreignKeyName: z.literal('sponsored_clicks_sponsored_id_fkey'),
+    columns: z.tuple([z.literal('sponsored_id')]),
+    isOneToOne: z.literal(false),
     referencedRelation: z.literal('sponsored_content'),
     referencedColumns: z.tuple([z.literal('id')]),
   }),
@@ -2694,6 +2659,13 @@ export const publicSponsoredImpressionsUpdateSchema = z.object({
 });
 
 export const publicSponsoredImpressionsRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal('sponsored_impressions_sponsored_id_fkey'),
+    columns: z.tuple([z.literal('sponsored_id')]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal('mv_content_list_slim'),
+    referencedColumns: z.tuple([z.literal('sponsored_content_id')]),
+  }),
   z.object({
     foreignKeyName: z.literal('sponsored_impressions_sponsored_id_fkey'),
     columns: z.tuple([z.literal('sponsored_id')]),
@@ -2969,54 +2941,6 @@ export const publicSubscriptionsRelationshipsSchema = z.tuple([
     referencedColumns: z.tuple([z.literal('id')]),
   }),
 ]);
-
-export const publicTableBloatSnapshotsRowSchema = z.object({
-  autovacuum_count: z.number().nullable(),
-  bloat_ratio: z.number(),
-  created_at: z.string(),
-  dead_tuples: z.number(),
-  id: z.string(),
-  last_autovacuum: z.string().nullable(),
-  last_vacuum: z.string().nullable(),
-  live_tuples: z.number(),
-  schemaname: z.string(),
-  snapshot_date: z.string(),
-  tablename: z.string(),
-  total_bytes: z.number(),
-  vacuum_count: z.number().nullable(),
-});
-
-export const publicTableBloatSnapshotsInsertSchema = z.object({
-  autovacuum_count: z.number().optional().nullable(),
-  bloat_ratio: z.number(),
-  created_at: z.string().optional(),
-  dead_tuples: z.number(),
-  id: z.string().optional(),
-  last_autovacuum: z.string().optional().nullable(),
-  last_vacuum: z.string().optional().nullable(),
-  live_tuples: z.number(),
-  schemaname: z.string(),
-  snapshot_date: z.string().optional(),
-  tablename: z.string(),
-  total_bytes: z.number(),
-  vacuum_count: z.number().optional().nullable(),
-});
-
-export const publicTableBloatSnapshotsUpdateSchema = z.object({
-  autovacuum_count: z.number().optional().nullable(),
-  bloat_ratio: z.number().optional(),
-  created_at: z.string().optional(),
-  dead_tuples: z.number().optional(),
-  id: z.string().optional(),
-  last_autovacuum: z.string().optional().nullable(),
-  last_vacuum: z.string().optional().nullable(),
-  live_tuples: z.number().optional(),
-  schemaname: z.string().optional(),
-  snapshot_date: z.string().optional(),
-  tablename: z.string().optional(),
-  total_bytes: z.number().optional(),
-  vacuum_count: z.number().optional().nullable(),
-});
 
 export const publicTierDisplayConfigRowSchema = z.object({
   active: z.boolean().nullable(),
@@ -3583,6 +3507,29 @@ export const publicMvAnalyticsSummaryRowSchema = z.object({
   view_count: z.number().nullable(),
 });
 
+export const publicMvContentListSlimRowSchema = z.object({
+  author: z.string().nullable(),
+  author_profile_url: z.string().nullable(),
+  bookmark_count: z.number().nullable(),
+  category: z.string().nullable(),
+  copy_count: z.number().nullable(),
+  created_at: z.string().nullable(),
+  date_added: z.string().nullable(),
+  description: z.string().nullable(),
+  display_title: z.string().nullable(),
+  id: z.string().nullable(),
+  is_sponsored: z.boolean().nullable(),
+  popularity_score: z.number().nullable(),
+  slug: z.string().nullable(),
+  source: z.string().nullable(),
+  sponsored_content_id: z.string().nullable(),
+  sponsorship_tier: z.string().nullable(),
+  tags: z.array(z.string()).nullable(),
+  title: z.string().nullable(),
+  updated_at: z.string().nullable(),
+  view_count: z.number().nullable(),
+});
+
 export const publicMvContentStatsRowSchema = z.object({
   author: z.string().nullable(),
   bookmark_count: z.number().nullable(),
@@ -3821,27 +3768,6 @@ export const publicCancelEmailSequenceArgsSchema = z.object({
 
 export const publicCancelEmailSequenceReturnsSchema = z.undefined();
 
-export const publicCaptureIndexUsageSnapshotArgsSchema = z.never();
-
-export const publicCaptureIndexUsageSnapshotReturnsSchema = z.array(
-  z.object({
-    indexes_captured: z.number(),
-    snapshot_id: z.string(),
-    unused_indexes: z.number(),
-  })
-);
-
-export const publicCaptureTableBloatSnapshotArgsSchema = z.never();
-
-export const publicCaptureTableBloatSnapshotReturnsSchema = z.array(
-  z.object({
-    bloated_tables: z.number(),
-    max_bloat_ratio: z.number(),
-    snapshot_id: z.string(),
-    tables_captured: z.number(),
-  })
-);
-
 export const publicCheckVacuumNeededArgsSchema = z.never();
 
 export const publicCheckVacuumNeededReturnsSchema = z.array(
@@ -4060,26 +3986,6 @@ export const publicGetAppSettingsArgsSchema = z.object({
 
 export const publicGetAppSettingsReturnsSchema = jsonSchema;
 
-export const publicGetBloatedTablesArgsSchema = z.object({
-  p_min_bloat_ratio: z.number().optional(),
-  p_min_dead_tuples: z.number().optional(),
-});
-
-export const publicGetBloatedTablesReturnsSchema = z.array(
-  z.object({
-    autovacuum_count: z.number(),
-    bloat_ratio: z.number(),
-    dead_tuples: z.number(),
-    last_autovacuum: z.string(),
-    last_vacuum: z.string(),
-    live_tuples: z.number(),
-    recommendation: z.string(),
-    table_size_mb: z.number(),
-    tablename: z.string(),
-    vacuum_count: z.number(),
-  })
-);
-
 export const publicGetBookmarkCountsByCategoryArgsSchema = z.object({
   category_filter: z.string(),
 });
@@ -4241,6 +4147,16 @@ export const publicGetContentPaginatedArgsSchema = z.object({
 });
 
 export const publicGetContentPaginatedReturnsSchema = jsonSchema;
+
+export const publicGetContentPaginatedSlimArgsSchema = z.object({
+  p_category: z.string().optional(),
+  p_limit: z.number().optional(),
+  p_offset: z.number().optional(),
+  p_order_by: z.string().optional(),
+  p_order_direction: z.string().optional(),
+});
+
+export const publicGetContentPaginatedSlimReturnsSchema = jsonSchema;
 
 export const publicGetContentTemplatesArgsSchema = z.object({
   p_category: z.string(),
@@ -4446,22 +4362,6 @@ export const publicGetHomepageContentEnrichedArgsSchema = z.object({
 });
 
 export const publicGetHomepageContentEnrichedReturnsSchema = jsonSchema;
-
-export const publicGetIndexUsageTrendsArgsSchema = z.object({
-  p_weeks_lookback: z.number().optional(),
-});
-
-export const publicGetIndexUsageTrendsReturnsSchema = z.array(
-  z.object({
-    indexname: z.string(),
-    tablename: z.string(),
-    trend: z.string(),
-    week_1_scans: z.number(),
-    week_2_scans: z.number(),
-    week_3_scans: z.number(),
-    week_4_scans: z.number(),
-  })
-);
 
 export const publicGetJobDetailArgsSchema = z.object({
   p_slug: z.string(),
@@ -4753,12 +4653,6 @@ export const publicGetSubmissionStatsSummaryReturnsSchema = z.array(
   })
 );
 
-export const publicGetTierProgressFromScoreArgsSchema = z.object({
-  p_score: z.number(),
-});
-
-export const publicGetTierProgressFromScoreReturnsSchema = z.number();
-
 export const publicGetTopContributorsArgsSchema = z.object({
   p_limit: z.number().optional(),
 });
@@ -4818,22 +4712,6 @@ export const publicGetTrendingPageArgsSchema = z.object({
 });
 
 export const publicGetTrendingPageReturnsSchema = jsonSchema;
-
-export const publicGetUnusedIndexesArgsSchema = z.object({
-  p_days_lookback: z.number().optional(),
-  p_min_size_mb: z.number().optional(),
-});
-
-export const publicGetUnusedIndexesReturnsSchema = z.array(
-  z.object({
-    index_definition: z.string(),
-    index_size_mb: z.number(),
-    indexname: z.string(),
-    recommendation: z.string(),
-    tablename: z.string(),
-    total_scans: z.number(),
-  })
-);
 
 export const publicGetUsageRecommendationsArgsSchema = z.object({
   p_category: z.string().optional(),
@@ -5147,6 +5025,10 @@ export const publicPopulateContentSeoDataReturnsSchema = z.array(
     total_updated: z.number(),
   })
 );
+
+export const publicProcessPendingWebhooksArgsSchema = z.never();
+
+export const publicProcessPendingWebhooksReturnsSchema = jsonSchema;
 
 export const publicRefreshMvSiteUrlsArgsSchema = z.never();
 
