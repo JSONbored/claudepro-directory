@@ -31,7 +31,7 @@ import {
   Terminal,
   Zap,
 } from '@/src/lib/icons';
-import type { ContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 

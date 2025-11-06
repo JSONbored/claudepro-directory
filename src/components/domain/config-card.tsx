@@ -35,7 +35,7 @@ import {
   Sparkles,
 } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
+import type { ConfigCardProps } from '@/src/lib/types/component.types';
 import { BADGE_COLORS, CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { formatCopyCount, formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';

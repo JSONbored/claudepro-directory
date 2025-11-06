@@ -137,7 +137,6 @@ async function generateCategoryConfig() {
     showOnHomepage: ${features.show_on_homepage ?? true},
     keywords: '${dbConfig.keywords.replace(/'/g, "\\'")}',
     metaDescription: '${dbConfig.meta_description.replace(/'/g, "\\'")}',
-    schema: SCHEMA_MAP['${categoryId}'] ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: '${dbConfig.title.replace(/'/g, "\\'")}',
     generateFullContent: ${features.generate_full_content ?? true},
     metadataFields: ${JSON.stringify(dbConfig.metadata_fields)},
@@ -191,7 +190,6 @@ async function generateCategoryConfig() {
  * To update: pnpm generate:categories
  */
 
-import type { z } from 'zod';
 import {
   BookOpen,
   Briefcase,
@@ -204,12 +202,7 @@ import {
   Terminal,
   Webhook,
 } from '@/src/lib/icons';
-import {
-  publicContentRowSchema,
-  publicJobsRowSchema,
-} from '@/src/lib/schemas/generated/db-schemas';
-// biome-ignore lint: Import from .types file to break circular dependency
-import type { CategoryId, ContentType, UnifiedCategoryConfig } from './category-config.types';
+import type { CategoryId, UnifiedCategoryConfig } from './category-config.types';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Sparkles,
@@ -223,24 +216,11 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Code,
 };
 
-const SCHEMA_MAP: Partial<Record<CategoryId, z.ZodType<ContentType>>> = {
-  agents: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  mcp: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  commands: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  rules: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  hooks: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  statuslines: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  skills: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  collections: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  guides: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  jobs: publicJobsRowSchema as unknown as z.ZodType<ContentType>,
-};
-
 /**
  * Static category configurations (generated at build time)
  * ZERO runtime database queries - 100% faster than unstable_cache
  */
-export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<ContentType, CategoryId>> = {
+export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<CategoryId>> = {
 ${configEntries}
 };
 

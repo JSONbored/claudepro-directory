@@ -39,8 +39,8 @@ import {
 import { ROUTES } from '@/src/lib/constants/routes';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
-import type { DisplayableContent, FilterState } from '@/src/lib/schemas/component.schema';
-import type { HomePageClientProps } from '@/src/lib/schemas/components/page-props.schema';
+import type { DisplayableContent, FilterState } from '@/src/lib/types/component.types';
+import type { HomePageClientProps } from '@/src/lib/types/page-props.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Database } from '@/src/types/database.types';
 

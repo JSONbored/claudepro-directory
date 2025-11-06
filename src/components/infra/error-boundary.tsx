@@ -12,7 +12,7 @@ import {
 } from '@/src/components/primitives/card';
 import { createErrorBoundaryFallback } from '@/src/lib/error-handler/client';
 import { AlertTriangle, Home, RefreshCw } from '@/src/lib/icons';
-import type { ErrorBoundaryProps, ErrorFallbackProps } from '@/src/lib/schemas/component.schema';
+import type { ErrorBoundaryProps, ErrorFallbackProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Client-safe environment check - doesn't trigger server env validation

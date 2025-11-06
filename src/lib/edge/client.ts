@@ -4,8 +4,25 @@
  */
 
 import { logger } from '@/src/lib/logger';
-import type { ForYouFeedResponse } from '@/src/lib/schemas/personalization.schema';
 import { createClient } from '@/src/lib/supabase/client';
+
+// Type inlined from database RPC response structure
+type ForYouFeedResponse = {
+  recommendations: Array<{
+    slug: string;
+    title: string;
+    description: string;
+    category: string;
+    url: string;
+    score: number;
+    source: string;
+    reason?: string;
+  }>;
+  total_count: number;
+  sources_used: string[];
+  user_has_history: boolean;
+  generated_at: string;
+};
 
 const EDGE_BASE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1`;
 

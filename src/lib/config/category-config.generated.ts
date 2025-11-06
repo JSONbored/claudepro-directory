@@ -7,7 +7,6 @@
  * To update: pnpm generate:categories
  */
 
-import type { z } from 'zod';
 import {
   BookOpen,
   Briefcase,
@@ -20,11 +19,7 @@ import {
   Terminal,
   Webhook,
 } from '@/src/lib/icons';
-import {
-  publicContentRowSchema,
-  publicJobsRowSchema,
-} from '@/src/lib/schemas/generated/db-schemas';
-import type { CategoryId, ContentType, UnifiedCategoryConfig } from './category-config.types';
+import type { CategoryId, UnifiedCategoryConfig } from './category-config.types';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Sparkles,
@@ -38,27 +33,11 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Code,
 };
 
-const SCHEMA_MAP: Partial<Record<CategoryId, z.ZodType<ContentType>>> = {
-  agents: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  mcp: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  commands: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  rules: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  hooks: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  statuslines: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  skills: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  collections: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  guides: publicContentRowSchema as unknown as z.ZodType<ContentType>,
-  jobs: publicJobsRowSchema as unknown as z.ZodType<ContentType>,
-};
-
 /**
  * Static category configurations (generated at build time)
  * ZERO runtime database queries - 100% faster than unstable_cache
  */
-export const CATEGORY_CONFIGS: Record<
-  CategoryId,
-  UnifiedCategoryConfig<ContentType, CategoryId>
-> = {
+export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<CategoryId>> = {
   mcp: {
     id: 'mcp' as const,
     title: 'MCP Server',
@@ -72,7 +51,6 @@ export const CATEGORY_CONFIGS: Record<
       'MCP servers, Model Context Protocol, Claude Desktop, external tools, API integration',
     metaDescription:
       'MCP servers for Claude Desktop in October 2025. Extend Claude with file systems, databases, APIs, and custom tools via Model Context Protocol.',
-    schema: SCHEMA_MAP.mcp ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'MCP Server',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -125,7 +103,6 @@ export const CATEGORY_CONFIGS: Record<
     keywords: 'Claude jobs, AI jobs, engineering jobs, remote AI positions',
     metaDescription:
       'Job opportunities in Claude and AI in October 2025. Find roles working with Claude, AI engineering positions, and remote opportunities.',
-    schema: SCHEMA_MAP.jobs ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Job',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -177,7 +154,6 @@ export const CATEGORY_CONFIGS: Record<
     keywords: 'Claude hooks, event hooks, automation, Claude Code hooks, git hooks',
     metaDescription:
       'Event-driven hooks for Claude Code in October 2025. Automate workflows with pre-commit, post-merge, and custom event triggers.',
-    schema: SCHEMA_MAP.hooks ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Hook',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -229,7 +205,6 @@ export const CATEGORY_CONFIGS: Record<
     keywords: 'Claude rules, custom rules, behavior rules, project rules, .cursorrules',
     metaDescription:
       'Custom rules for Claude in October 2025. Define coding standards, architectural guidelines, and project-specific behavior for consistent AI assistance.',
-    schema: SCHEMA_MAP.rules ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Rule',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -282,7 +257,6 @@ export const CATEGORY_CONFIGS: Record<
     keywords: 'Claude agents, AI agents, specialized assistants, workflow automation, Claude AI',
     metaDescription:
       'Specialized Claude AI agents for October 2025. Community-contributed coding, writing, research, and automation configurations ready for Claude Desktop and Code.',
-    schema: SCHEMA_MAP.agents ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'AI Agent',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -335,7 +309,6 @@ export const CATEGORY_CONFIGS: Record<
     keywords: 'Claude guides, tutorials, how-to guides, best practices, workflows',
     metaDescription:
       'Comprehensive guides for Claude in October 2025. Tutorials, comparisons, workflows, and troubleshooting for Claude Desktop and Code.',
-    schema: SCHEMA_MAP.guides ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Guide',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -388,7 +361,6 @@ export const CATEGORY_CONFIGS: Record<
     keywords: 'Claude skills, AI capabilities, task guides, skill packages, Claude Desktop skills',
     metaDescription:
       'Claude skills for October 2025. Downloadable capability packages with requirements, examples, and instructions for specific tasks.',
-    schema: SCHEMA_MAP.skills ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Skill',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -441,7 +413,6 @@ export const CATEGORY_CONFIGS: Record<
     keywords: 'Claude commands, slash commands, custom commands, Claude Code, CLI',
     metaDescription:
       'Custom slash commands for Claude Code in October 2025. Community-created prompt templates, automation commands, and workflow shortcuts.',
-    schema: SCHEMA_MAP.commands ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Command',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -494,7 +465,6 @@ export const CATEGORY_CONFIGS: Record<
     keywords: 'changelog, updates, release notes, new features, bug fixes',
     metaDescription:
       'ClaudePro Directory changelog for October 2025. Track new features, improvements, and bug fixes.',
-    schema: SCHEMA_MAP.changelog ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Changelog Entry',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -547,7 +517,6 @@ export const CATEGORY_CONFIGS: Record<
     keywords: 'Claude collections, curated content, workflow bundles, themed collections',
     metaDescription:
       'Curated Claude collections for October 2025. Pre-assembled bundles of agents, commands, and tools for specific use cases and workflows.',
-    schema: SCHEMA_MAP.collections ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Collection',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -600,7 +569,6 @@ export const CATEGORY_CONFIGS: Record<
     keywords: 'Claude statusline, CLI statusline, terminal status, Claude Code customization',
     metaDescription:
       'Statusline scripts for Claude Code CLI in October 2025. Display git status, project info, and custom metrics in your terminal.',
-    schema: SCHEMA_MAP.statuslines ?? (publicContentRowSchema as unknown as z.ZodType<ContentType>),
     typeName: 'Statusline',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],

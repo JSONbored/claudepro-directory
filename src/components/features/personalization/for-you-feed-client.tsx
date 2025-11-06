@@ -10,9 +10,27 @@ import { ConfigCard } from '@/src/components/domain/config-card';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import type { ForYouFeedResponse } from '@/src/lib/schemas/personalization.schema';
 
-// Database import removed - discovery_metadata deleted from schema
+// Type inlined from database RPC response structure
+type ForYouFeedResponse = {
+  recommendations: Array<{
+    slug: string;
+    title: string;
+    description: string;
+    category: string;
+    url: string;
+    score: number;
+    source: string;
+    reason?: string;
+    tags?: string[];
+    author?: string;
+    popularity?: number;
+  }>;
+  total_count: number;
+  sources_used: string[];
+  user_has_history: boolean;
+  generated_at: string;
+};
 
 interface ForYouFeedClientProps {
   initialData: ForYouFeedResponse;

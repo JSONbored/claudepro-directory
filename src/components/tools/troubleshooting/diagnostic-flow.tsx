@@ -15,7 +15,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { CheckCircle } from '@/src/lib/icons';
-import type { DiagnosticFlowProps } from '@/src/lib/schemas/component.schema';
+import type { DiagnosticFlowProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function DiagnosticFlow(props: DiagnosticFlowProps) {

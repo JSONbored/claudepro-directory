@@ -22,7 +22,7 @@ import {
 } from '@/src/components/primitives/select';
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
-import type { FilterState, UnifiedSearchProps } from '@/src/lib/schemas/component.schema';
+import type { FilterState, UnifiedSearchProps } from '@/src/lib/types/component.types';
 import { cn } from '@/src/lib/utils';
 
 export type { FilterState };

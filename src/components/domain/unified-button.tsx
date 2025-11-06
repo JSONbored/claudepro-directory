@@ -13,7 +13,6 @@ import { Button } from '@/src/components/primitives/button';
 import { useButtonSuccess } from '@/src/hooks/use-button-success';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { trackUsage } from '@/src/lib/actions/content.actions';
-import { getGitHubStars } from '@/src/lib/actions/github.actions';
 import { copyMarkdownAction, downloadMarkdownAction } from '@/src/lib/actions/markdown-actions';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
 import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
@@ -1016,42 +1015,17 @@ function GitHubStarsButton({
   disabled = false,
 }: GitHubStarsVariant) {
   const [stars, setStars] = useState<number | null>(null);
-  const { executeAsync, status } = useAction(getGitHubStars);
 
   useEffect(() => {
-    const fetchStars = async () => {
-      try {
-        const result = await executeAsync({ repo_url: repoUrl });
-
-        if (
-          result &&
-          'data' in result &&
-          result.data &&
-          typeof result.data === 'object' &&
-          'stars' in result.data
-        ) {
-          setStars(result.data.stars as number);
-        }
-      } catch (err) {
-        logger.error(
-          'Failed to fetch GitHub stars',
-          err instanceof Error ? err : new Error(String(err)),
-          { repoUrl }
-        );
-      }
-    };
-
-    fetchStars().catch(() => {
-      // Intentional
-    });
-  }, [repoUrl, executeAsync]);
+    fetch('https://api.github.com/repos/JSONbored/claudepro-directory')
+      .then((res) => res.json())
+      .then((data) => setStars(data.stargazers_count))
+      .catch(() => setStars(null));
+  }, []);
 
   const handleClick = () => {
     window.open(repoUrl, '_blank', 'noopener,noreferrer');
   };
-
-  const isLoading = status === 'executing';
-  const hasError = status === 'hasErrored';
 
   return (
     <Button
@@ -1060,13 +1034,10 @@ function GitHubStarsButton({
       onClick={handleClick}
       disabled={disabled}
       className={cn('gap-2', className)}
-      aria-label={`Star us on GitHub${stars ? ` - ${stars} stars` : ''}${hasError ? ' (star count unavailable)' : ''}`}
-      title={hasError ? 'Star count temporarily unavailable. Click to visit GitHub.' : undefined}
+      aria-label={`Star us on GitHub${stars ? ` - ${stars} stars` : ''}`}
     >
       <Github className="h-4 w-4" aria-hidden="true" />
-      {!isLoading && stars !== null && !hasError && (
-        <span className="font-medium tabular-nums">{stars.toLocaleString()}</span>
-      )}
+      {stars !== null && <span className="font-medium tabular-nums">{stars.toLocaleString()}</span>}
     </Button>
   );
 }

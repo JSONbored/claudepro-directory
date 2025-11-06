@@ -18,7 +18,7 @@
 
 import { useCallback, useState } from 'react';
 import { useLocalStorage } from '@/src/hooks/use-local-storage';
-import type { FilterState } from '@/src/lib/schemas/component.schema';
+import type { FilterState } from '@/src/lib/types/component.types';
 
 export interface UseUnifiedSearchOptions {
   initialSort?: FilterState['sort'];

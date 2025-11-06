@@ -1493,48 +1493,6 @@ export type Database = {
           },
         ];
       };
-      github_repo_stats: {
-        Row: {
-          created_at: string;
-          forks: number | null;
-          id: string;
-          last_fetched_at: string;
-          open_issues: number | null;
-          repo_name: string;
-          repo_owner: string;
-          repo_url: string;
-          stars: number;
-          updated_at: string;
-          watchers: number | null;
-        };
-        Insert: {
-          created_at?: string;
-          forks?: number | null;
-          id?: string;
-          last_fetched_at?: string;
-          open_issues?: number | null;
-          repo_name: string;
-          repo_owner: string;
-          repo_url: string;
-          stars?: number;
-          updated_at?: string;
-          watchers?: number | null;
-        };
-        Update: {
-          created_at?: string;
-          forks?: number | null;
-          id?: string;
-          last_fetched_at?: string;
-          open_issues?: number | null;
-          repo_name?: string;
-          repo_owner?: string;
-          repo_url?: string;
-          stars?: number;
-          updated_at?: string;
-          watchers?: number | null;
-        };
-        Relationships: [];
-      };
       jobs: {
         Row: {
           active: boolean | null;
@@ -4012,17 +3970,6 @@ export type Database = {
         }[];
       };
       get_generation_config: { Args: { p_category?: string }; Returns: Json };
-      get_github_stars: {
-        Args: { p_repo_url: string };
-        Returns: {
-          forks: number;
-          is_cached: boolean;
-          last_fetched_at: string;
-          open_issues: number;
-          stars: number;
-          watchers: number;
-        }[];
-      };
       get_homepage_complete: {
         Args: { p_category_ids?: string[] };
         Returns: Json;
@@ -4796,16 +4743,6 @@ export type Database = {
           p_work?: string;
         };
         Returns: Json;
-      };
-      upsert_github_stars: {
-        Args: {
-          p_forks?: number;
-          p_open_issues?: number;
-          p_repo_url: string;
-          p_stars: number;
-          p_watchers?: number;
-        };
-        Returns: undefined;
       };
       validate_content_metadata: { Args: { metadata: Json }; Returns: boolean };
     };

@@ -37,18 +37,11 @@ function getLogger(): {
  */
 const serverEnvSchema = z
   .object({
-    // Node environment
     NODE_ENV: z
       .enum(['development', 'production', 'test'])
       .default('development')
       .describe('Application runtime environment mode'),
 
-    // Arcjet security - Required in production for rate limiting and DDoS protection
-    ARCJET_KEY: nonEmptyString
-      .optional()
-      .describe('Arcjet API key for rate limiting and DDoS protection (required in production)'),
-
-    // Vercel environment
     VERCEL: z.enum(['1']).optional().describe('Flag indicating if running on Vercel platform'),
     VERCEL_ENV: z
       .enum(['production', 'preview', 'development'])
@@ -66,7 +59,6 @@ const serverEnvSchema = z
       .optional()
       .describe('Git commit author name of the deployment'),
 
-    // Analytics configuration (optional for development)
     UMAMI_WEBSITE_ID: z
       .string()
       .uuid()
@@ -76,48 +68,41 @@ const serverEnvSchema = z
       .optional()
       .describe('Umami API endpoint URL for server-side analytics'),
 
-    // Rate limiting secrets
     RATE_LIMIT_SECRET: z
       .string()
       .min(32)
       .optional()
       .describe('Secret key for rate limiting token generation (minimum 32 characters)'),
 
-    // Cache warming authorization
     CACHE_WARM_AUTH_TOKEN: z
       .string()
       .min(32)
       .optional()
       .describe('Authorization token for cache warming endpoints (minimum 32 characters)'),
 
-    // Development cache bypass flags
     BYPASS_RELATED_CACHE: z
       .enum(['true', 'false'])
       .optional()
       .describe('Development flag to bypass related content caching'),
 
-    // View count security salt
     VIEW_COUNT_SALT: z
       .string()
       .min(16)
       .optional()
       .describe('Salt for secure view count hashing (minimum 16 characters)'),
 
-    // Webhook security
     WEBHOOK_SECRET: z
       .string()
       .min(32)
       .optional()
       .describe('Secret key for webhook signature validation (minimum 32 characters)'),
 
-    // Cron job security
     CRON_SECRET: z
       .string()
       .min(32)
       .optional()
       .describe('Secret key for cron job authorization (minimum 32 characters)'),
 
-    // ISR revalidation security
     REVALIDATE_SECRET: z
       .string()
       .min(32)
@@ -126,7 +111,6 @@ const serverEnvSchema = z
         'Secret key for on-demand ISR revalidation from Supabase webhooks (minimum 32 characters)'
       ),
 
-    // BetterStack Heartbeat Monitoring (optional - for cron job health monitoring)
     BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE: urlString
       .optional()
       .describe('BetterStack heartbeat URL for daily maintenance cron monitoring'),
@@ -134,32 +118,26 @@ const serverEnvSchema = z
       .optional()
       .describe('BetterStack heartbeat URL for weekly tasks cron monitoring'),
 
-    // Email provider (Resend)
     RESEND_API_KEY: nonEmptyString
       .optional()
       .describe('Resend API key for transactional email and newsletter subscriptions'),
-
     RESEND_AUDIENCE_ID: nonEmptyString
       .optional()
       .describe('Resend Audience ID for newsletter contact management'),
-
     RESEND_WEBHOOK_SECRET: nonEmptyString
       .optional()
       .describe('Resend webhook signing secret (from Svix) for verifying webhook authenticity'),
 
-    // Supabase (server-side only)
     SUPABASE_SERVICE_ROLE_KEY: nonEmptyString
       .optional()
       .describe('Supabase service role key for admin operations (bypasses RLS)'),
 
-    // GitHub (content submissions)
     GITHUB_BOT_TOKEN: nonEmptyString
       .optional()
       .describe(
         'GitHub Personal Access Token for automated PR creation (requires Contents + Pull Requests permissions)'
       ),
 
-    // Polar.sh (payments)
     POLAR_ACCESS_TOKEN: nonEmptyString
       .optional()
       .describe('Polar.sh API access token for payment operations'),
@@ -181,12 +159,10 @@ const serverEnvSchema = z
  */
 const buildEnvSchema = z
   .object({
-    // Package version from npm
     npm_package_version: nonEmptyString
       .default('1.0.0')
       .describe('NPM package version from package.json'),
     npm_package_name: z.string().optional().describe('NPM package name from package.json'),
-    // Server port
     PORT: nonEmptyString.default('3000').describe('Server port for local development'),
   })
   .describe('Build-time environment variables available during the build process');
@@ -198,7 +174,6 @@ const buildEnvSchema = z
  */
 const clientEnvSchema = z
   .object({
-    // Public analytics
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: z
       .string()
       .uuid()
@@ -208,7 +183,6 @@ const clientEnvSchema = z
       .optional()
       .describe('Public Umami analytics script URL for client-side tracking'),
 
-    // Debug flags
     NEXT_PUBLIC_DEBUG_ANALYTICS: z
       .enum(['true', 'false'])
       .optional()
@@ -218,11 +192,9 @@ const clientEnvSchema = z
       .optional()
       .describe('Enable Progressive Web App features'),
 
-    // Public API endpoints
     NEXT_PUBLIC_API_URL: urlString.optional().describe('Public API endpoint URL'),
     NEXT_PUBLIC_SITE_URL: urlString.optional().describe('Public site URL for canonical links'),
 
-    // Supabase (client-side safe)
     NEXT_PUBLIC_SUPABASE_URL: urlString
       .optional()
       .describe('Supabase project URL (safe for client-side)'),
@@ -255,12 +227,11 @@ export type Env = z.infer<typeof envSchema>;
  * These must be set in production for security and functionality
  */
 const productionRequiredEnvs = [
-  'ARCJET_KEY', // DDoS and rate limiting protection
-  'RATE_LIMIT_SECRET', // Rate limiting security
-  'CACHE_WARM_AUTH_TOKEN', // Cache warming authorization
-  'VIEW_COUNT_SALT', // Secure view count generation
-  'WEBHOOK_SECRET', // Webhook signature validation
-  'CRON_SECRET', // Cron job authorization
+  'RATE_LIMIT_SECRET',
+  'CACHE_WARM_AUTH_TOKEN',
+  'VIEW_COUNT_SALT',
+  'WEBHOOK_SECRET',
+  'CRON_SECRET',
 ] as const;
 
 /**
@@ -305,9 +276,7 @@ function validateEnv(): Env {
     return cachedEnv;
   }
 
-  // Additional production validation - ONLY RUN SERVER-SIDE
-  // Security-critical: This validation MUST NEVER run client-side
-  // Client bundles must not include server-only env var names or validation logic
+  // Production validation - server-side only for security
   const isServer = typeof window === 'undefined';
   const isBuildPhase =
     process.env.NEXT_PHASE === 'phase-production-build' ||
@@ -315,8 +284,6 @@ function validateEnv(): Env {
   const isProductionRuntime =
     process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
 
-  // Only validate server-only env vars on server, outside build phase, in production runtime
-  // This ensures: 1) No client-side exposure 2) No build-time failures 3) Runtime security enforcement
   if (isServer && !isBuildPhase && isProductionRuntime) {
     const missingRequiredEnvs = productionRequiredEnvs.filter((envVar) => !process.env[envVar]);
 
@@ -324,14 +291,12 @@ function validateEnv(): Env {
       const log = getLogger();
       const missingVars = missingRequiredEnvs.join(', ');
 
-      // Security: Log without exposing which specific vars are missing in production logs
       log.error('Missing required production environment variables for security features');
       throw new Error(
         `Missing required production environment variables: ${missingVars}. These are required for security and functionality in production.`
       );
     }
 
-    // Validate minimum security token lengths - fail fast on weak secrets
     const securityValidations = [
       {
         name: 'RATE_LIMIT_SECRET',
@@ -390,10 +355,9 @@ export const isProduction = env.NODE_ENV === 'production';
  * Production Security: Frozen to prevent runtime mutations
  */
 export const securityConfig = Object.freeze({
-  arcjetKey: env.ARCJET_KEY,
   rateLimitSecret: env.RATE_LIMIT_SECRET,
   cacheWarmToken: env.CACHE_WARM_AUTH_TOKEN,
-  isSecured: !!(env.ARCJET_KEY && env.RATE_LIMIT_SECRET),
+  isSecured: !!env.RATE_LIMIT_SECRET,
 } as const);
 
 /**
