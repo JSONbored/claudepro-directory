@@ -51,6 +51,9 @@ verify_jwt = false  # Database-triggered webhook (internal)
 [functions.discord-submission-notification]
 verify_jwt = false  # Database-triggered webhook (internal)
 
+[functions.changelog-auto-sync]
+verify_jwt = false  # Vercel webhook with signature verification
+
 # =============================================================================
 # Authenticated Functions - Require JWT Verification
 # =============================================================================
