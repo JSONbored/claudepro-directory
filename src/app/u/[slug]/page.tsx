@@ -29,7 +29,7 @@ interface UserProfilePageProps {
 /**
  * ISR revalidation interval for user profile pages
  */
-export const revalidate = 1800; // 30 minutes
+export const revalidate = false;
 
 export async function generateMetadata({ params }: UserProfilePageProps): Promise<Metadata> {
   const { slug } = await params;

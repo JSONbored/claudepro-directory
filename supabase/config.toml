@@ -23,6 +23,9 @@ verify_jwt = false  # Public health check endpoint
 [functions.feeds]
 verify_jwt = false  # Public RSS/Atom feed endpoints (changelog + all content categories)
 
+[functions.json-api]
+verify_jwt = false  # Public JSON API endpoint with JSON-LD structured data
+
 # =============================================================================
 # Webhook Functions - No JWT Verification (Use Signature Verification)
 # =============================================================================

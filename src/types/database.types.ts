@@ -3511,18 +3511,34 @@ export type Database = {
         Args: { p_category: string };
         Returns: string;
       };
+      generate_changelog_atom_feed: {
+        Args: { p_limit?: number };
+        Returns: string;
+      };
       generate_changelog_entry_llms_txt: {
         Args: { p_slug: string };
         Returns: string;
       };
       generate_changelog_llms_txt: { Args: never; Returns: string };
+      generate_changelog_rss_feed: {
+        Args: { p_limit?: number };
+        Returns: string;
+      };
       generate_command_installation: {
         Args: { p_slug: string; p_title: string };
         Returns: Json;
       };
+      generate_content_atom_feed: {
+        Args: { p_category?: string; p_limit?: number };
+        Returns: string;
+      };
       generate_content_field: {
         Args: { p_category: string; p_field_type: string; p_slug: string };
         Returns: Json;
+      };
+      generate_content_rss_feed: {
+        Args: { p_category?: string; p_limit?: number };
+        Returns: string;
       };
       generate_hook_installation: { Args: { p_slug: string }; Returns: Json };
       generate_llms_txt_content: {
@@ -3542,6 +3558,7 @@ export type Database = {
         Args: { p_context: Json; p_route?: string; p_route_pattern: string };
         Returns: Json;
       };
+      generate_sitemap_xml: { Args: { p_base_url?: string }; Returns: string };
       generate_sitewide_llms_txt: { Args: never; Returns: string };
       generate_slug: { Args: { p_name: string }; Returns: string };
       generate_slug_from_filename: {
@@ -3632,13 +3649,9 @@ export type Database = {
               total_views: number;
             }[];
           };
-      get_api_category_content: {
-        Args: { p_category: string; p_limit?: number; p_offset?: number };
-        Returns: Json;
-      };
-      get_api_content: {
-        Args: { p_category: string; p_slug: string };
-        Returns: Json;
+      get_api_content_full: {
+        Args: { p_base_url?: string; p_category: string; p_slug: string };
+        Returns: string;
       };
       get_api_health: { Args: never; Returns: Json };
       get_app_settings: {

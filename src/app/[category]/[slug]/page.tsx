@@ -23,7 +23,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Database } from '@/src/types/database.types';
 
-export const revalidate = 21600;
+export const revalidate = false; // Static generation - zero database egress during serving
 
 export async function generateStaticParams() {
   try {

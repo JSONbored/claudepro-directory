@@ -621,10 +621,11 @@ const nextConfig = {
         source: '/:category/:slug/llms.txt',
         destination: `${edgeBase}?type=item&category=:category&slug=:slug`,
       },
-      // JSON API routes
+      // JSON API routes - proxy to edge function for database-first architecture
       {
-        source: '/:category/:slug.json',
-        destination: '/api/json/:category/:slug',
+        source:
+          '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/:slug.json',
+        destination: `${supabaseUrl}/functions/v1/json-api/:category/:slug`,
       },
     ];
   },

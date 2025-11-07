@@ -63,7 +63,7 @@ export const metadata = generatePageMetadata('/submit');
  * ISR Configuration: Marketing pages update infrequently
  * revalidate: 86400 = Revalidate every 24 hours
  */
-export const revalidate = 86400;
+export const revalidate = false;
 
 export default async function SubmitPage() {
   const supabase = await createClient();

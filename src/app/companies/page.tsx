@@ -34,7 +34,7 @@ type CompanyJobStats = Database['public']['Views']['company_job_stats']['Row'];
 export const metadata = generatePageMetadata('/companies');
 
 // ISR: Revalidate every 1 hour (materialized view refreshes hourly)
-export const revalidate = 3600;
+export const revalidate = false;
 
 export default async function CompaniesPage() {
   const supabase = await createAdminClient();

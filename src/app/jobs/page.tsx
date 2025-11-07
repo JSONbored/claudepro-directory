@@ -37,7 +37,7 @@ const UnifiedNewsletterCapture = dynamic(
   }
 );
 
-export const revalidate = 1800; // 30 minutes ISR
+export const revalidate = false;
 
 export async function generateMetadata({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;

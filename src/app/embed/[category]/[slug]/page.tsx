@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: EmbedPageProps): Promise<Meta
   };
 }
 
-export const revalidate = 3600; // 1 hour ISR
+export const revalidate = false;
 
 async function getContentData(category: string, slug: string) {
   const supabase = createAnonClient();

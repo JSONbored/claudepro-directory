@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 // ISR: Revalidate every 15 minutes
-export const revalidate = 900;
+export const revalidate = false;
 
 async function getGalleryData() {
   const supabase = createAnonClient();
