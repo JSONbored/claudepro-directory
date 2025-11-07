@@ -57,6 +57,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
 
     if (error) throw new Error(error.message);
 
+    // Validate RPC response structure
     if (!rpcData || typeof rpcData !== 'object' || !('success' in rpcData)) {
       throw new Error('Invalid response from manage_job RPC');
     }
@@ -66,7 +67,21 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
       job: Tables<'jobs'>;
     };
 
+    // Verify success is boolean
+    if (typeof result.success !== 'boolean') {
+      throw new Error('Invalid response: success field must be boolean');
+    }
+
     if (result.success) {
+      // When success is true, verify job object exists with required properties
+      if (!result.job || typeof result.job !== 'object') {
+        throw new Error('Invalid response: job object missing on successful update');
+      }
+
+      if (!result.job.slug || typeof result.job.slug !== 'string') {
+        throw new Error('Invalid response: job slug missing or invalid');
+      }
+
       revalidatePath('/jobs');
       revalidatePath(`/jobs/${result.job.slug}`);
       revalidatePath('/account/jobs');

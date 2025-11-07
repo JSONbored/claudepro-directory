@@ -3554,10 +3554,7 @@ export type Database = {
         };
         Returns: Json;
       };
-      generate_metadata_for_route: {
-        Args: { p_context: Json; p_route?: string; p_route_pattern: string };
-        Returns: Json;
-      };
+      generate_metadata_complete: { Args: { p_route: string }; Returns: Json };
       generate_sitemap_xml: { Args: { p_base_url?: string }; Returns: string };
       generate_sitewide_llms_txt: { Args: never; Returns: string };
       generate_slug: { Args: { p_name: string }; Returns: string };
@@ -4019,10 +4016,6 @@ export type Database = {
       };
       get_jobs_count: { Args: never; Returns: number };
       get_jobs_list: { Args: never; Returns: Json };
-      get_metadata_template: {
-        Args: { p_route_pattern: string };
-        Returns: Json;
-      };
       get_my_submissions: {
         Args: { p_limit?: number; p_offset?: number };
         Returns: Json;
@@ -4374,9 +4367,24 @@ export type Database = {
         };
         Returns: boolean;
       };
+      is_bookmarked_batch: {
+        Args: { p_items: Json; p_user_id: string };
+        Returns: {
+          content_slug: string;
+          content_type: string;
+          is_bookmarked: boolean;
+        }[];
+      };
       is_following: {
         Args: { follower_id: string; following_id: string };
         Returns: boolean;
+      };
+      is_following_batch: {
+        Args: { p_followed_user_ids: string[]; p_follower_id: string };
+        Returns: {
+          followed_user_id: string;
+          is_following: boolean;
+        }[];
       };
       is_in_future: { Args: { input_date: string }; Returns: boolean };
       is_in_past: { Args: { input_date: string }; Returns: boolean };
@@ -4454,10 +4462,6 @@ export type Database = {
           p_user_id: string;
         };
         Returns: Json;
-      };
-      render_guide_sections_to_markdown: {
-        Args: { sections: Json };
-        Returns: string;
       };
       reorder_collection_items: {
         Args: { p_collection_id: string; p_items: Json; p_user_id: string };
@@ -4702,6 +4706,15 @@ export type Database = {
       toggle_review_helpful: {
         Args: { p_helpful: boolean; p_review_id: string; p_user_id: string };
         Returns: Json;
+      };
+      track_content_usage: {
+        Args: {
+          p_action_type: string;
+          p_content_slug: string;
+          p_content_type: string;
+          p_user_id?: string;
+        };
+        Returns: undefined;
       };
       track_sponsored_event: {
         Args: { p_data: Json; p_event_type: string; p_user_id: string };

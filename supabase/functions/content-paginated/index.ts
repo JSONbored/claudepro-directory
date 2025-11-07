@@ -80,12 +80,13 @@ Deno.serve(async (req: Request) => {
     // Extract items array from JSONB response
     const items = data?.items || [];
 
-    // Return with caching headers (6 hours = 21600 seconds, matches MV refresh)
+    // Return with caching headers (1 day = 86400 seconds, matches MV refresh)
     return new Response(JSON.stringify(items), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=21600, stale-while-revalidate=10800',
+        'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=43200',
+        'CDN-Cache-Control': 'max-age=86400',
         ...getCorsHeaders,
       },
     });

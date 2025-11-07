@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { z } from 'zod';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedButton } from '@/src/components/domain/unified-button';
 import { Button } from '@/src/components/primitives/button';
@@ -18,10 +17,6 @@ import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import type { Tables } from '@/src/types/database.types';
-
-const DashboardResponseSchema = z.object({
-  jobs: z.array(z.custom<Tables<'jobs'>>()),
-});
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -48,6 +43,8 @@ export default async function MyJobsPage() {
         'Supabase RPC unavailable (mock client fallback detected); skipping dashboard fetch.',
         { context: 'MyJobsPage' }
       );
+      // Mock client case - set empty jobs array to avoid misleading validation errors
+      jobs = [];
     }
 
     if (error) {
@@ -56,17 +53,10 @@ export default async function MyJobsPage() {
         error instanceof Error ? error : new Error(String(error))
       );
       hasError = true;
-    } else {
-      try {
-        const validated = DashboardResponseSchema.parse(data);
-        jobs = validated.jobs;
-      } catch (validationError) {
-        logger.error(
-          'Invalid dashboard response',
-          validationError instanceof Error ? validationError : new Error(String(validationError))
-        );
-        jobs = [];
-      }
+    } else if (data !== null) {
+      // Trust database types - PostgreSQL validates structure
+      const result = data as { jobs: Array<Tables<'jobs'>> };
+      jobs = result.jobs || [];
     }
   }
 

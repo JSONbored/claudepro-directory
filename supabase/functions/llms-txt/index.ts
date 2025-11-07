@@ -418,6 +418,7 @@ Deno.serve(async (req) => {
         'Content-Length': content.length.toString(),
         'X-Robots-Tag': 'index, follow',
         'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200',
+        'CDN-Cache-Control': 'max-age=3600',
         'X-RateLimit-Limit': '1000',
         'X-RateLimit-Window': '3600',
         ...getCorsHeaders,

@@ -1,12 +1,13 @@
 import type { MetadataRoute } from 'next';
-import { SEO_CONFIG } from '@/src/lib/config/seo-config';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG, getContentDescription } from '@/src/lib/constants';
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const description = await getContentDescription();
+
   return {
     name: APP_CONFIG.name,
     short_name: 'ClaudePro',
-    description: SEO_CONFIG.defaultDescription,
+    description,
     start_url: '/',
     scope: '/',
     display: 'standalone',

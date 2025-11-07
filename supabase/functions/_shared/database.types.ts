@@ -48,6 +48,10 @@ export interface Database {
         Args: { p_user_id: string }
         Returns: Json
       }
+      generate_metadata_complete: {
+        Args: { p_route: string }
+        Returns: Json
+      }
       get_user_recent_interactions: {
         Args: { p_user_id: string; p_limit?: number }
         Returns: Json
