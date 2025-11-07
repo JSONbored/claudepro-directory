@@ -31,9 +31,12 @@ import type { Database } from '@/src/types/database.types';
 // Database-first types (from generated database schema)
 type CompanyJobStats = Database['public']['Views']['company_job_stats']['Row'];
 
-export const metadata = generatePageMetadata('/companies');
+export async function generateMetadata() {
+  return await generatePageMetadata('/companies');
+}
 
-// ISR disabled - page is fully static (materialized view refreshes hourly)
+// Page is fully static - updates only on deployment (not when materialized view refreshes)
+// To see hourly DB updates: implement revalidatePath('/companies') via webhook or cron
 export const revalidate = false;
 
 export default async function CompaniesPage() {

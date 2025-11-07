@@ -17,21 +17,28 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = generatePageMetadata('/account/connected-accounts');
+export async function generateMetadata() {
+  return await generatePageMetadata('/account/connected-accounts');
+}
 
 export default async function ConnectedAccountsPage() {
   const result = await getUserIdentities();
 
-  if (!result.data) {
+  const pageHeader = (
+    <div>
+      <h1 className="mb-2 font-bold text-3xl">Connected Accounts</h1>
+      <p className="text-muted-foreground">Manage your OAuth provider connections</p>
+    </div>
+  );
+
+  if (!result.data || result.serverError) {
+    const errorMessage =
+      result.serverError || 'Failed to load connected accounts. Please try again later.';
+
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="mb-2 font-bold text-3xl">Connected Accounts</h1>
-          <p className="text-muted-foreground">Manage your OAuth provider connections</p>
-        </div>
-        <div className="text-destructive">
-          Failed to load connected accounts. Please try again later.
-        </div>
+        {pageHeader}
+        <div className="text-destructive">{errorMessage}</div>
       </div>
     );
   }
@@ -40,10 +47,7 @@ export default async function ConnectedAccountsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="mb-2 font-bold text-3xl">Connected Accounts</h1>
-        <p className="text-muted-foreground">Manage your OAuth provider connections</p>
-      </div>
+      {pageHeader}
 
       <Card>
         <CardHeader>

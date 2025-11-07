@@ -294,6 +294,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
           p_description: submissionData.description as string,
           p_category: submissionData.category as string,
           p_author: submissionData.author as string,
+          // Cast to Json - database validates structure via CHECK constraints
           p_content_data: submissionData as Json,
         };
 

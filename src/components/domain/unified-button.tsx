@@ -385,6 +385,8 @@ function CopyMarkdownButton({
         }).catch(() => {
           // Intentionally empty - analytics failures should not affect UX
         });
+      } else {
+        logger.debug('X-Content-ID header missing from markdown response', { category, slug });
       }
 
       // Trigger email modal
@@ -506,6 +508,8 @@ function DownloadMarkdownButton({
         }).catch(() => {
           // Intentionally empty - analytics failures should not affect UX
         });
+      } else {
+        logger.debug('X-Content-ID header missing from markdown response', { category, slug });
       }
 
       // Track analytics (fire-and-forget)
@@ -860,7 +864,10 @@ function JobToggleButton({
 
         if (error) throw new Error(error.message);
 
-        const result = data as unknown as { success: boolean };
+        if (!data || typeof data !== 'object' || !('success' in data)) {
+          throw new Error('Invalid response from manage_job RPC');
+        }
+        const result = data as { success: boolean };
 
         if (result.success) {
           toasts.success.actionCompleted(
@@ -942,7 +949,10 @@ function JobDeleteButton({
 
         if (error) throw new Error(error.message);
 
-        const result = data as unknown as { success: boolean };
+        if (!data || typeof data !== 'object' || !('success' in data)) {
+          throw new Error('Invalid response from manage_job RPC');
+        }
+        const result = data as { success: boolean };
 
         if (result.success) {
           toasts.success.itemDeleted('Job listing');
