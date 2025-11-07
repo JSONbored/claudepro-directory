@@ -78,8 +78,8 @@
     "@react-email/components": "^0.5.7",
     "@react-email/render": "^1.4.0",
     "@supabase/ssr": "^0.7.0",
-    "@supabase/supabase-js": "^2.79.0",
-    "@tailwindcss/postcss": "^4.1.16",
+    "@supabase/supabase-js": "^2.80.0",
+    "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
@@ -92,7 +92,7 @@
     "embla-carousel-react": "^8.6.0",
     "html2canvas-pro": "^1.5.13",
     "lucide-react": "^0.546.0",
-    "marked": "^16.4.1",
+    "marked": "^16.4.2",
     "motion": "^12.23.24",
     "next": "16.0.0",
     "next-safe-action": "^8.0.11",
@@ -108,7 +108,7 @@
     "sonner": "^2.0.7",
     "sugar-high": "^0.9.4",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^4.1.16",
+    "tailwindcss": "^4.1.17",
     "tsx": "^4.20.6",
     "type-fest": "^5.2.0",
     "typescript": "5.9.3",
@@ -116,16 +116,16 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.925.0",
+    "@aws-sdk/client-s3": "^3.926.0",
     "@biomejs/biome": "2.2.7",
     "@next/bundle-analyzer": "^16.0.1",
     "@types/archiver": "^7.0.0",
     "archiver": "^7.0.1",
-    "knip": "^5.67.1",
+    "knip": "^5.68.0",
     "lefthook": "^2.0.2",
     "ora": "^8.2.0",
     "turbo": "^2.6.0",
-    "ultracite": "^6.3.0"
+    "ultracite": "^6.3.2"
   },
   "pnpm": {
     "overrides": {
