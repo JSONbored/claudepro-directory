@@ -509,19 +509,6 @@ const nextConfig = {
         ],
       },
       {
-        source: '/sitemap.xml',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=86400, stale-while-revalidate=604800', // 1 day cache for sitemap
-          },
-          {
-            key: 'Content-Type',
-            value: 'application/xml',
-          },
-        ],
-      },
-      {
         source: '/robots.txt',
         headers: [
           {
@@ -570,8 +557,15 @@ const nextConfig = {
   // Rewrites for .json API routes and llms.txt routes
   async rewrites() {
     const edgeBase = `${process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co'}/functions/v1/llms-txt`;
+    const supabaseUrl =
+      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co';
 
     return [
+      // Sitemap.xml - proxy to edge function
+      {
+        source: '/sitemap.xml',
+        destination: `${supabaseUrl}/functions/v1/sitemap`,
+      },
       // LLMs.txt routes - all proxy to single edge function with type parameter
       {
         source: '/llms.txt',

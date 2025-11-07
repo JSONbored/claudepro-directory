@@ -8,6 +8,9 @@
 [functions.llms-txt]
 verify_jwt = false  # Public API serving LLMs.txt documentation
 
+[functions.sitemap]
+verify_jwt = false  # Public sitemap.xml endpoint
+
 [functions.gallery]
 verify_jwt = false  # Public gallery endpoint
 
