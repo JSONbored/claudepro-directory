@@ -43,7 +43,7 @@ import type { Tables } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/');
 
-export const revalidate = false; // Static generation - zero database egress during serving
+export const revalidate = 86400; // 24 hour ISR - fresh stats daily
 
 type CategoryMetadata = ContentItem & { category: CategoryId };
 type EnrichedMetadata = CategoryMetadata & { viewCount: number; copyCount: number };
