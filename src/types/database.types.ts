@@ -3507,6 +3507,15 @@ export type Database = {
         Returns: string;
       };
       format_week_range: { Args: { week_start: string }; Returns: string };
+      generate_category_llms_txt: {
+        Args: { p_category: string };
+        Returns: string;
+      };
+      generate_changelog_entry_llms_txt: {
+        Args: { p_slug: string };
+        Returns: string;
+      };
+      generate_changelog_llms_txt: { Args: never; Returns: string };
       generate_command_installation: {
         Args: { p_slug: string; p_title: string };
         Returns: Json;
@@ -3533,11 +3542,13 @@ export type Database = {
         Args: { p_context: Json; p_route?: string; p_route_pattern: string };
         Returns: Json;
       };
+      generate_sitewide_llms_txt: { Args: never; Returns: string };
       generate_slug: { Args: { p_name: string }; Returns: string };
       generate_slug_from_filename: {
         Args: { p_filename: string };
         Returns: string;
       };
+      generate_tool_llms_txt: { Args: { p_tool_name: string }; Returns: string };
       get_account_dashboard: { Args: { p_user_id: string }; Returns: Json };
       get_active_notifications: {
         Args: { p_dismissed_ids?: string[] };

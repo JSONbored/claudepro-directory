@@ -7,6 +7,11 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const RESEND_WEBHOOK_SECRET = Deno.env.get('RESEND_WEBHOOK_SECRET');
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+// Singleton Supabase client - reused across all requests for optimal performance
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 Deno.serve(async (req) => {
   // CORS preflight
@@ -61,10 +66,6 @@ Deno.serve(async (req) => {
     }
 
     // Insert into webhook_events table (triggers will handle business logic)
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
 
     const { error } = await supabase.from('webhook_events').insert({
       svix_id: svixId,

@@ -567,9 +567,37 @@ const nextConfig = {
     ];
   },
 
-  // Rewrites for .json API routes
+  // Rewrites for .json API routes and llms.txt routes
   async rewrites() {
+    const edgeBase = `${process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co'}/functions/v1/llms-txt`;
+
     return [
+      // LLMs.txt routes - all proxy to single edge function with type parameter
+      {
+        source: '/llms.txt',
+        destination: `${edgeBase}?type=sitewide`,
+      },
+      {
+        source: '/changelog/llms.txt',
+        destination: `${edgeBase}?type=changelog-index`,
+      },
+      {
+        source: '/changelog/:slug/llms.txt',
+        destination: `${edgeBase}?type=changelog-entry&slug=:slug`,
+      },
+      {
+        source: '/tools/config-recommender/llms.txt',
+        destination: `${edgeBase}?type=tool&tool=config-recommender`,
+      },
+      {
+        source: '/:category/llms.txt',
+        destination: `${edgeBase}?type=category&category=:category`,
+      },
+      {
+        source: '/:category/:slug/llms.txt',
+        destination: `${edgeBase}?type=item&category=:category&slug=:slug`,
+      },
+      // JSON API routes
       {
         source: '/:category/:slug.json',
         destination: '/api/json/:category/:slug',

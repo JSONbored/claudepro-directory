@@ -17,6 +17,9 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   throw new Error('Missing required environment variables: SUPABASE_URL and/or SUPABASE_ANON_KEY');
 }
 
+// Singleton Supabase client - reused across all requests for optimal performance
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // GET-specific CORS headers for read-only public endpoint with Authorization support
 const getCorsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -63,8 +66,6 @@ Deno.serve(async (req: Request) => {
         getCorsHeaders
       );
     }
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const { data, error } = await supabase.rpc('get_content_paginated_slim', {
       p_category: category,
       p_limit: limit,

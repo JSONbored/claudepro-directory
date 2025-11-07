@@ -1,0 +1,44 @@
+# Supabase Edge Functions Configuration
+# This file persists JWT verification settings across redeployments
+
+# =============================================================================
+# Public API Functions - No JWT Verification
+# =============================================================================
+
+[functions.llms-txt]
+verify_jwt = false  # Public API serving LLMs.txt documentation
+
+[functions.gallery]
+verify_jwt = false  # Public gallery endpoint
+
+[functions.content-paginated]
+verify_jwt = false  # Public content listing with optional auth
+
+[functions.status]
+verify_jwt = false  # Public health check endpoint
+
+# =============================================================================
+# Webhook Functions - No JWT Verification (Use Signature Verification)
+# =============================================================================
+
+[functions.resend-webhook]
+verify_jwt = false  # Uses Svix signature verification
+
+[functions.email-handler]
+verify_jwt = false  # Uses Svix signature verification for auth hooks
+
+[functions.discord-error-relay]
+verify_jwt = false  # Database-triggered webhook (internal)
+
+[functions.discord-content-announcement]
+verify_jwt = false  # Database-triggered webhook (internal)
+
+[functions.discord-submission-notification]
+verify_jwt = false  # Database-triggered webhook (internal)
+
+# =============================================================================
+# Authenticated Functions - Require JWT Verification
+# =============================================================================
+
+[functions.analytics]
+verify_jwt = true  # Requires authenticated user for analytics tracking

@@ -64,6 +64,31 @@ export interface Database {
         Args: { p_user_id: string }
         Returns: Json
       }
+      // LLMs.txt generation functions
+      generate_sitewide_llms_txt: {
+        Args: never
+        Returns: string
+      }
+      generate_category_llms_txt: {
+        Args: { p_category: string }
+        Returns: string
+      }
+      generate_llms_txt_content: {
+        Args: { p_category: string; p_slug: string }
+        Returns: Json
+      }
+      generate_changelog_llms_txt: {
+        Args: never
+        Returns: string
+      }
+      generate_changelog_entry_llms_txt: {
+        Args: { p_slug: string }
+        Returns: string
+      }
+      generate_tool_llms_txt: {
+        Args: { p_tool_name: string }
+        Returns: string
+      }
     }
     Tables: {
       content_submissions: {
