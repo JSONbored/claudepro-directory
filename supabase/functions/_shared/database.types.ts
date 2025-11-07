@@ -49,7 +49,7 @@ export interface Database {
         Returns: Json
       }
       generate_metadata_complete: {
-        Args: { p_route: string }
+        Args: { p_route: string; p_include?: string }
         Returns: Json
       }
       get_user_recent_interactions: {

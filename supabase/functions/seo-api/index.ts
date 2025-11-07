@@ -1,41 +1,7 @@
 /**
- * Metadata API Edge Function - Database-First Architecture
- * Single consolidated endpoint for all SEO metadata generation.
- *
- * Replaces: 766 lines of TypeScript (metadata-generator.ts, metadata-templates.ts,
- *           route-classifier.ts, pattern-matcher.ts)
- *
- * Performance:
- * - Single RPC call to generate_metadata_complete()
- * - 24hr CDN cache (99.9% hit rate expected)
- * - Reduces 19,473 PostgREST requests/day → ~20 requests/day
- * - Saves 1.1GB/month uncached egress
- *
- * Supported Routes:
- * - All Next.js pages (29 total)
- * - 8 route patterns: HOMEPAGE, CATEGORY, CONTENT_DETAIL, USER_PROFILE, ACCOUNT, TOOL, STATIC, AUTH
- *
- * Query Parameters:
- * - route (required): Full route path (e.g., '/agents/some-slug', '/', '/u/john')
- *
- * Response Format (JSONB):
- * {
- *   title: string,
- *   description: string,
- *   keywords: string[],
- *   openGraphType: string,
- *   twitterCard: string,
- *   robots: { index: boolean, follow: boolean },
- *   authors: { name: string }[] | null,
- *   publishedTime: string | null,
- *   modifiedTime: string | null,
- *   shouldAddLlmsTxt: boolean,
- *   isOverride: boolean
- * }
- *
- * Environment Variables:
- *   SUPABASE_URL          - Supabase project URL
- *   SUPABASE_ANON_KEY     - Anonymous key for RPC calls
+ * SEO API - Unified metadata + pre-generated structured data schemas
+ * Single RPC call to generate_metadata_complete(p_route, p_include)
+ * Query params: route (required), include ('metadata' or 'metadata,schemas')
  */
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
@@ -75,30 +41,32 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const route = url.searchParams.get('route');
+    const include = url.searchParams.get('include') || 'metadata';
 
     // Validate route parameter
     if (!route) {
       return badRequestResponse(
-        'Missing required parameter: route. Example: ?route=/agents/some-slug',
+        'Missing required parameter: route. Example: ?route=/agents/some-slug&include=metadata,schemas',
         getCorsHeaders
       );
     }
 
-    // Call consolidated RPC function (single call, complete metadata)
+    // Call consolidated RPC function with include parameter
     // Type-safe: Database['public']['Functions']['generate_metadata_complete']
     const { data, error } = await supabase.rpc('generate_metadata_complete', {
       p_route: route,
+      p_include: include,
     });
 
     if (error) {
-      console.error('RPC error (metadata-api):', error);
+      console.error('RPC error (seo-api):', error);
       return errorResponse(error, 'generate_metadata_complete', getCorsHeaders);
     }
 
     if (!data) {
       return new Response(
         JSON.stringify({
-          error: 'Metadata generation failed',
+          error: 'SEO generation failed',
           message: 'RPC returned null',
         }),
         {
@@ -111,29 +79,32 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('Metadata generated:', {
+    console.log('SEO generated:', {
       route,
-      pattern: data._debug?.pattern,
-      titleLength: data.title?.length || 0,
+      include,
+      pattern: data._debug?.pattern || data.metadata?._debug?.pattern,
+      titleLength: data.title?.length || data.metadata?.title?.length || 0,
+      schemaCount: data.schemas?.length || 0,
     });
 
-    // Return complete metadata with aggressive caching
-    return new Response(JSON.stringify(data), {
+    // Return complete SEO data with aggressive caching
+    const responseBody = JSON.stringify(data);
+    return new Response(responseBody, {
       status: 200,
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
-        'Content-Length': JSON.stringify(data).length.toString(),
+        'Content-Length': responseBody.length.toString(),
         'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800', // 24hr cache, 7 day stale
         'CDN-Cache-Control': 'max-age=86400', // Cloudflare 24hr cache
         'X-Robots-Tag': 'index, follow',
         'X-Content-Type-Options': 'nosniff',
         'X-Generated-By': 'Supabase Edge Function',
-        'X-Content-Source': 'PostgreSQL generate_metadata_complete',
+        'X-Content-Source': 'PostgreSQL generate_metadata_complete (metadata + pre-generated JSON-LD schemas)',
         ...getCorsHeaders,
       },
     });
   } catch (error) {
     console.error('Edge function error:', error);
-    return errorResponse(error as Error, 'metadata-api', getCorsHeaders);
+    return errorResponse(error as Error, 'seo-api', getCorsHeaders);
   }
 });

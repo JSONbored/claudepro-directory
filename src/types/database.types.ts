@@ -805,57 +805,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      content_seo_overrides: {
-        Row: {
-          category: string;
-          content_id: string;
-          created_at: string;
-          created_by: string | null;
-          description: string | null;
-          id: string;
-          keywords: string[] | null;
-          notes: string | null;
-          og_type: string | null;
-          robots_follow: boolean | null;
-          robots_index: boolean | null;
-          title: string | null;
-          twitter_card: string | null;
-          updated_at: string;
-        };
-        Insert: {
-          category: string;
-          content_id: string;
-          created_at?: string;
-          created_by?: string | null;
-          description?: string | null;
-          id?: string;
-          keywords?: string[] | null;
-          notes?: string | null;
-          og_type?: string | null;
-          robots_follow?: boolean | null;
-          robots_index?: boolean | null;
-          title?: string | null;
-          twitter_card?: string | null;
-          updated_at?: string;
-        };
-        Update: {
-          category?: string;
-          content_id?: string;
-          created_at?: string;
-          created_by?: string | null;
-          description?: string | null;
-          id?: string;
-          keywords?: string[] | null;
-          notes?: string | null;
-          og_type?: string | null;
-          robots_follow?: boolean | null;
-          robots_index?: boolean | null;
-          title?: string | null;
-          twitter_card?: string | null;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
       content_similarities: {
         Row: {
           calculated_at: string;
@@ -1976,72 +1925,6 @@ export type Database = {
           },
         ];
       };
-      seo_config: {
-        Row: {
-          description: string | null;
-          key: string;
-          updated_at: string;
-          value: Json;
-        };
-        Insert: {
-          description?: string | null;
-          key: string;
-          updated_at?: string;
-          value: Json;
-        };
-        Update: {
-          description?: string | null;
-          key?: string;
-          updated_at?: string;
-          value?: Json;
-        };
-        Relationships: [];
-      };
-      seo_enrichment_rules: {
-        Row: {
-          category: string;
-          created_at: string;
-          enabled: boolean;
-          example_questions: Json;
-          focus_areas: Json;
-          id: string;
-          max_questions: number;
-          min_questions: number;
-          performance_config: Json;
-          quality_standards: Json | null;
-          seo_config: Json;
-          updated_at: string;
-        };
-        Insert: {
-          category: string;
-          created_at?: string;
-          enabled?: boolean;
-          example_questions?: Json;
-          focus_areas?: Json;
-          id?: string;
-          max_questions?: number;
-          min_questions?: number;
-          performance_config?: Json;
-          quality_standards?: Json | null;
-          seo_config?: Json;
-          updated_at?: string;
-        };
-        Update: {
-          category?: string;
-          created_at?: string;
-          enabled?: boolean;
-          example_questions?: Json;
-          focus_areas?: Json;
-          id?: string;
-          max_questions?: number;
-          min_questions?: number;
-          performance_config?: Json;
-          quality_standards?: Json | null;
-          seo_config?: Json;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
       sponsored_clicks: {
         Row: {
           created_at: string;
@@ -3100,6 +2983,15 @@ export type Database = {
         Args: { p_items: Json; p_user_id: string };
         Returns: Json;
       };
+      build_breadcrumb_json_ld: {
+        Args: { p_category: string; p_slug: string };
+        Returns: Json;
+      };
+      build_changelog_json_ld: { Args: { p_slug: string }; Returns: Json };
+      build_complete_content_schemas: {
+        Args: { p_category: string; p_slug: string };
+        Returns: Json;
+      };
       build_enriched_content_base:
         | {
             Args: {
@@ -3167,6 +3059,10 @@ export type Database = {
             };
             Returns: Json;
           };
+      build_organization_json_ld: { Args: never; Returns: Json };
+      build_software_application_schema:
+        | { Args: { p_category: string; p_slug: string }; Returns: Json }
+        | { Args: { p_config: Json; p_content_row: Json }; Returns: Json };
       calculate_content_popularity_score: {
         Args: {
           p_bookmark_count: number;
@@ -3263,7 +3159,10 @@ export type Database = {
         };
         Returns: Json;
       };
-      generate_metadata_complete: { Args: { p_route: string }; Returns: Json };
+      generate_metadata_complete: {
+        Args: { p_include?: string; p_route: string };
+        Returns: Json;
+      };
       generate_sitemap_xml: { Args: { p_base_url?: string }; Returns: string };
       generate_sitewide_llms_txt: { Args: never; Returns: string };
       generate_slug: { Args: { p_name: string }; Returns: string };
@@ -3322,7 +3221,6 @@ export type Database = {
           category: string;
         }[];
       };
-      get_all_seo_config: { Args: never; Returns: Json };
       get_all_structured_data_configs: { Args: never; Returns: Json };
       get_analytics_summary:
         | {
@@ -3811,7 +3709,6 @@ export type Database = {
           suggestion: string;
         }[];
       };
-      get_seo_config: { Args: { p_key: string }; Returns: Json };
       get_sidebar_guides_data: { Args: { p_limit?: number }; Returns: Json };
       get_similar_content: {
         Args: {
