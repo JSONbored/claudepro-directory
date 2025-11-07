@@ -30,15 +30,6 @@ export function formatChangelogDateShort(isoDate: string): string {
   }
 }
 
-export function formatChangelogDateRFC822(isoDate: string): string {
-  try {
-    const date = new Date(isoDate);
-    return date.toUTCString();
-  } catch {
-    return new Date().toUTCString();
-  }
-}
-
 export function formatChangelogDateISO8601(isoDate: string): string {
   try {
     const date = new Date(isoDate);

@@ -566,6 +566,36 @@ const nextConfig = {
         source: '/sitemap.xml',
         destination: `${supabaseUrl}/functions/v1/sitemap`,
       },
+      // RSS/Atom feeds - unified edge function for changelog + all content categories
+      // Site-wide feeds
+      {
+        source: '/rss.xml',
+        destination: `${supabaseUrl}/functions/v1/feeds?type=rss`,
+      },
+      {
+        source: '/atom.xml',
+        destination: `${supabaseUrl}/functions/v1/feeds?type=atom`,
+      },
+      // Changelog feeds
+      {
+        source: '/changelog/rss.xml',
+        destination: `${supabaseUrl}/functions/v1/feeds?type=rss&category=changelog`,
+      },
+      {
+        source: '/changelog/atom.xml',
+        destination: `${supabaseUrl}/functions/v1/feeds?type=atom&category=changelog`,
+      },
+      // Category-specific feeds (mcp, agents, rules, commands, hooks, guides, skills, statuslines, collections)
+      {
+        source:
+          '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/rss.xml',
+        destination: `${supabaseUrl}/functions/v1/feeds?type=rss&category=:category`,
+      },
+      {
+        source:
+          '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/atom.xml',
+        destination: `${supabaseUrl}/functions/v1/feeds?type=atom&category=:category`,
+      },
       // LLMs.txt routes - all proxy to single edge function with type parameter
       {
         source: '/llms.txt',

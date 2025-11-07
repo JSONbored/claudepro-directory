@@ -20,6 +20,9 @@ verify_jwt = false  # Public content listing with optional auth
 [functions.status]
 verify_jwt = false  # Public health check endpoint
 
+[functions.feeds]
+verify_jwt = false  # Public RSS/Atom feed endpoints (changelog + all content categories)
+
 # =============================================================================
 # Webhook Functions - No JWT Verification (Use Signature Verification)
 # =============================================================================
