@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from '@/src/components/primitives/select';
 import { Slider } from '@/src/components/primitives/slider';
-import type { FilterState } from '@/src/lib/schemas/component.schema';
+import type { FilterState } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export interface SearchFilterPanelProps {

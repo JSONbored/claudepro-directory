@@ -10,8 +10,27 @@ import { ConfigCard } from '@/src/components/domain/config-card';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import type { ForYouFeedResponse } from '@/src/lib/schemas/personalization.schema';
-import type { Database } from '@/src/types/database.types';
+
+// Type inlined from database RPC response structure
+type ForYouFeedResponse = {
+  recommendations: Array<{
+    slug: string;
+    title: string;
+    description: string;
+    category: string;
+    url: string;
+    score: number;
+    source: string;
+    reason?: string;
+    tags?: string[];
+    author?: string;
+    popularity?: number;
+  }>;
+  total_count: number;
+  sources_used: string[];
+  user_has_history: boolean;
+  generated_at: string;
+};
 
 interface ForYouFeedClientProps {
   initialData: ForYouFeedResponse;
@@ -54,8 +73,7 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
         seo_title: null,
         content: null,
         popularity_score: rec.popularity ?? null,
-        discovery_metadata:
-          {} as Database['public']['Tables']['content']['Row']['discovery_metadata'],
+        // discovery_metadata removed (bandwidth optimization)
         _recommendationSource: rec.source,
         _recommendationReason: rec.reason,
       })) as unknown as ContentItem[],

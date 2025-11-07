@@ -58,7 +58,7 @@ import type {
   FeatureGridProps,
   QuickReferenceProps,
   TLDRSummaryProps,
-} from '@/src/lib/schemas/component.schema';
+} from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // ============================================================================

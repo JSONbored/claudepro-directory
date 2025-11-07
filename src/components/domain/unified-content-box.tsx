@@ -14,7 +14,7 @@ import type {
   CalloutProps,
   FAQProps,
   InfoBoxProps,
-} from '@/src/lib/schemas/component.schema';
+} from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { serializeJsonLd } from '@/src/lib/utils/jsonld.utils';

@@ -17,7 +17,18 @@ import { refreshProfileFromOAuth, updateProfile } from '@/src/lib/actions/user.a
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Tables } from '@/src/types/database.types';
 
-type ProfileData = Tables<'profiles'>;
+// Profile data consolidated into users table - use generated types
+type ProfileData = Pick<
+  Tables<'users'>,
+  | 'display_name'
+  | 'bio'
+  | 'work'
+  | 'website'
+  | 'social_x_link'
+  | 'interests'
+  | 'profile_public'
+  | 'follow_email'
+>;
 
 const profileFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
@@ -53,7 +64,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
       work: profile.work || '',
       website: profile.website || '',
       social_x_link: profile.social_x_link || '',
-      interests: Array.isArray(profile.interests) ? profile.interests : [],
+      interests: Array.isArray(profile.interests) ? (profile.interests as string[]) : [],
       public: profile.profile_public ?? true,
       follow_email: profile.follow_email ?? true,
     },

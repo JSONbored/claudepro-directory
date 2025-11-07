@@ -26,7 +26,7 @@ import {
   type UnifiedCategoryConfig,
 } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
-import type { DisplayableContent } from '@/src/lib/schemas/component.schema';
+import type { DisplayableContent } from '@/src/lib/types/component.types';
 
 interface TabsSectionProps {
   activeTab: string;

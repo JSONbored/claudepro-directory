@@ -34,14 +34,13 @@ export default async function AccountDashboard() {
   // Type assertion to database-generated Json type
   type DashboardResponse = {
     bookmark_count: number;
-    profile: Pick<Tables<'users'>, 'name' | 'reputation_score' | 'tier' | 'created_at'>;
+    profile: Pick<Tables<'users'>, 'name' | 'tier' | 'created_at'>;
   };
 
   const { bookmark_count, profile } = (dashboardData || {
     bookmark_count: 0,
     profile: {
       name: null,
-      reputation_score: null,
       tier: null,
       created_at: new Date().toISOString(),
     },
@@ -60,20 +59,7 @@ export default async function AccountDashboard() {
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Reputation</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <span className="text-2xl">🏆</span>
-              <span className="font-bold text-3xl">{profile?.reputation_score || 0}</span>
-            </div>
-            <p className={'mt-2 text-muted-foreground text-xs'}>Total points</p>
-          </CardContent>
-        </Card>
-
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Bookmarks</CardTitle>

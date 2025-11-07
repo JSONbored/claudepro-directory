@@ -33,6 +33,10 @@ Allow: /changelog
 Allow: /changelog/*
 Allow: /changelog/rss.xml
 Allow: /changelog/atom.xml
+Allow: /rss.xml
+Allow: /atom.xml
+Allow: /*/rss.xml
+Allow: /*/atom.xml
 Allow: /llms.txt
 Allow: /*/llms.txt
 Allow: /*/*/llms.txt
@@ -85,3 +89,32 @@ Disallow: /private*
 
 # Sitemap location
 Sitemap: https://claudepro.directory/sitemap.xml
+
+# RSS/Atom Feed locations (site-wide + per-category feeds)
+# Site-wide feeds
+Sitemap: https://claudepro.directory/rss.xml
+Sitemap: https://claudepro.directory/atom.xml
+
+# Changelog feeds
+Sitemap: https://claudepro.directory/changelog/rss.xml
+Sitemap: https://claudepro.directory/changelog/atom.xml
+
+# Category-specific feeds
+Sitemap: https://claudepro.directory/agents/rss.xml
+Sitemap: https://claudepro.directory/agents/atom.xml
+Sitemap: https://claudepro.directory/mcp/rss.xml
+Sitemap: https://claudepro.directory/mcp/atom.xml
+Sitemap: https://claudepro.directory/rules/rss.xml
+Sitemap: https://claudepro.directory/rules/atom.xml
+Sitemap: https://claudepro.directory/commands/rss.xml
+Sitemap: https://claudepro.directory/commands/atom.xml
+Sitemap: https://claudepro.directory/hooks/rss.xml
+Sitemap: https://claudepro.directory/hooks/atom.xml
+Sitemap: https://claudepro.directory/guides/rss.xml
+Sitemap: https://claudepro.directory/guides/atom.xml
+Sitemap: https://claudepro.directory/skills/rss.xml
+Sitemap: https://claudepro.directory/skills/atom.xml
+Sitemap: https://claudepro.directory/statuslines/rss.xml
+Sitemap: https://claudepro.directory/statuslines/atom.xml
+Sitemap: https://claudepro.directory/collections/rss.xml
+Sitemap: https://claudepro.directory/collections/atom.xml

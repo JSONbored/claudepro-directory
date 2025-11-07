@@ -65,6 +65,12 @@ const nextConfig = {
   compress: true,
   reactStrictMode: true,
 
+  // 🚀 Production source map optimization (SHA-4212)
+  // Disabled in production to save ~200 MB per deployment
+  // Source maps are not needed in production and expose source code
+  // Development still has source maps enabled for debugging
+  productionBrowserSourceMaps: false,
+
   // ✨ React Compiler (STABLE) - Automatic memoization without manual optimization
   reactCompiler: true,
 
@@ -503,19 +509,6 @@ const nextConfig = {
         ],
       },
       {
-        source: '/sitemap.xml',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=86400, stale-while-revalidate=604800', // 1 day cache for sitemap
-          },
-          {
-            key: 'Content-Type',
-            value: 'application/xml',
-          },
-        ],
-      },
-      {
         source: '/robots.txt',
         headers: [
           {
@@ -561,12 +554,78 @@ const nextConfig = {
     ];
   },
 
-  // Rewrites for .json API routes
+  // Rewrites for .json API routes and llms.txt routes
   async rewrites() {
+    const edgeBase = `${process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co'}/functions/v1/llms-txt`;
+    const supabaseUrl =
+      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co';
+
     return [
+      // Sitemap.xml - proxy to edge function
       {
-        source: '/:category/:slug.json',
-        destination: '/api/json/:category/:slug',
+        source: '/sitemap.xml',
+        destination: `${supabaseUrl}/functions/v1/sitemap`,
+      },
+      // RSS/Atom feeds - unified edge function for changelog + all content categories
+      // Site-wide feeds
+      {
+        source: '/rss.xml',
+        destination: `${supabaseUrl}/functions/v1/feeds?type=rss`,
+      },
+      {
+        source: '/atom.xml',
+        destination: `${supabaseUrl}/functions/v1/feeds?type=atom`,
+      },
+      // Changelog feeds
+      {
+        source: '/changelog/rss.xml',
+        destination: `${supabaseUrl}/functions/v1/feeds?type=rss&category=changelog`,
+      },
+      {
+        source: '/changelog/atom.xml',
+        destination: `${supabaseUrl}/functions/v1/feeds?type=atom&category=changelog`,
+      },
+      // Category-specific feeds (mcp, agents, rules, commands, hooks, guides, skills, statuslines, collections)
+      {
+        source:
+          '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/rss.xml',
+        destination: `${supabaseUrl}/functions/v1/feeds?type=rss&category=:category`,
+      },
+      {
+        source:
+          '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/atom.xml',
+        destination: `${supabaseUrl}/functions/v1/feeds?type=atom&category=:category`,
+      },
+      // LLMs.txt routes - all proxy to single edge function with type parameter
+      {
+        source: '/llms.txt',
+        destination: `${edgeBase}?type=sitewide`,
+      },
+      {
+        source: '/changelog/llms.txt',
+        destination: `${edgeBase}?type=changelog-index`,
+      },
+      {
+        source: '/changelog/:slug/llms.txt',
+        destination: `${edgeBase}?type=changelog-entry&slug=:slug`,
+      },
+      {
+        source: '/tools/config-recommender/llms.txt',
+        destination: `${edgeBase}?type=tool&tool=config-recommender`,
+      },
+      {
+        source: '/:category/llms.txt',
+        destination: `${edgeBase}?type=category&category=:category`,
+      },
+      {
+        source: '/:category/:slug/llms.txt',
+        destination: `${edgeBase}?type=item&category=:category&slug=:slug`,
+      },
+      // JSON API routes - proxy to edge function for database-first architecture
+      {
+        source:
+          '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/:slug.json',
+        destination: `${supabaseUrl}/functions/v1/json-api/:category/:slug`,
       },
     ];
   },

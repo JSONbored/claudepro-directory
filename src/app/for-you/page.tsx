@@ -23,7 +23,7 @@ const UnifiedNewsletterCapture = dynamicImport(
   }
 );
 
-import { getForYouFeed } from '@/src/lib/analytics/client';
+import { getForYouFeed } from '@/src/lib/edge/client';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 

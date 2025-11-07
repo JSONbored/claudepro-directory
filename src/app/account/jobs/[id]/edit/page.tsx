@@ -2,12 +2,12 @@
  * Edit Job Page - Update existing job postings.
  */
 
+import { revalidatePath } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/forms/job-form';
-import { updateJob } from '@/src/lib/actions/business.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
-import type { Database } from '@/src/types/database.types';
+import type { Json, Tables } from '@/src/types/database.types';
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -37,17 +37,36 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
 
   if (error || !data) notFound();
 
-  const job = data as Database['public']['Tables']['jobs']['Row'];
+  const job = data as Tables<'jobs'>;
 
-  const handleSubmit = async (data: Omit<Parameters<typeof updateJob>[0], 'id'>) => {
+  const handleSubmit = async (data: Record<string, unknown>) => {
     'use server';
 
-    const result = await updateJob({
-      ...data,
-      id: resolvedParams.id,
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) throw new Error('You must be signed in to update jobs');
+
+    const { data: rpcData, error } = await supabase.rpc('manage_job', {
+      p_action: 'update',
+      p_user_id: user.id,
+      p_data: { ...data, id: resolvedParams.id } as Json,
     });
 
-    if (result?.data?.success) {
+    if (error) throw new Error(error.message);
+
+    const result = rpcData as unknown as {
+      success: boolean;
+      job: Tables<'jobs'>;
+    };
+
+    if (result.success) {
+      revalidatePath('/jobs');
+      revalidatePath(`/jobs/${result.job.slug}`);
+      revalidatePath('/account/jobs');
+
       redirect('/account/jobs');
     }
 

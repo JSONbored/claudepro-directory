@@ -12,14 +12,12 @@ import { usePostCopyEmail } from '@/src/components/infra/providers/post-copy-ema
 import { Button } from '@/src/components/primitives/button';
 import { useButtonSuccess } from '@/src/hooks/use-button-success';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
-import { deleteJob, toggleJobStatus } from '@/src/lib/actions/business.actions';
 import { trackUsage } from '@/src/lib/actions/content.actions';
-import { getGitHubStars } from '@/src/lib/actions/github.actions';
 import { copyMarkdownAction, downloadMarkdownAction } from '@/src/lib/actions/markdown-actions';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
-import { trackInteraction } from '@/src/lib/analytics/client';
 import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
+import { trackInteraction } from '@/src/lib/edge/client';
 import {
   ArrowLeft,
   Bookmark,
@@ -866,18 +864,32 @@ function JobToggleButton({
 }: JobToggleVariant) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const supabase = createClient();
 
   const handleToggle = () => {
     const newStatus = currentStatus === 'active' ? 'draft' : 'active';
 
     startTransition(async () => {
       try {
-        const result = await toggleJobStatus({
-          id: jobId,
-          status: newStatus as 'draft' | 'pending_review' | 'active' | 'expired' | 'rejected',
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) throw new Error('You must be signed in to manage jobs');
+
+        const { data, error } = await supabase.rpc('manage_job', {
+          p_action: 'toggle_status',
+          p_user_id: user.id,
+          p_data: {
+            id: jobId,
+            status: newStatus,
+          },
         });
 
-        if (result?.data?.success) {
+        if (error) throw new Error(error.message);
+
+        const result = data as unknown as { success: boolean };
+
+        if (result.success) {
           toasts.success.actionCompleted(
             newStatus === 'active' ? 'Job listing resumed' : 'Job listing paused'
           );
@@ -885,7 +897,12 @@ function JobToggleButton({
         } else {
           toasts.error.actionFailed('update job status');
         }
-      } catch (_error) {
+      } catch (error) {
+        logger.error(
+          'Failed to toggle job status',
+          error instanceof Error ? error : new Error(String(error)),
+          { jobId, newStatus }
+        );
         toasts.error.serverError();
       }
     });
@@ -927,6 +944,7 @@ function JobDeleteButton({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isDeleting, setIsDeleting] = useState(false);
+  const supabase = createClient();
 
   const handleDelete = () => {
     if (
@@ -938,16 +956,34 @@ function JobDeleteButton({
     setIsDeleting(true);
     startTransition(async () => {
       try {
-        const result = await deleteJob({ id: jobId });
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) throw new Error('You must be signed in to delete jobs');
 
-        if (result?.data?.success) {
+        const { data, error } = await supabase.rpc('manage_job', {
+          p_action: 'delete',
+          p_user_id: user.id,
+          p_data: { id: jobId },
+        });
+
+        if (error) throw new Error(error.message);
+
+        const result = data as unknown as { success: boolean };
+
+        if (result.success) {
           toasts.success.itemDeleted('Job listing');
           router.refresh();
         } else {
           toasts.error.actionFailed('delete job listing');
           setIsDeleting(false);
         }
-      } catch (_error) {
+      } catch (error) {
+        logger.error(
+          'Failed to delete job',
+          error instanceof Error ? error : new Error(String(error)),
+          { jobId }
+        );
         toasts.error.serverError();
         setIsDeleting(false);
       }
@@ -979,42 +1015,17 @@ function GitHubStarsButton({
   disabled = false,
 }: GitHubStarsVariant) {
   const [stars, setStars] = useState<number | null>(null);
-  const { executeAsync, status } = useAction(getGitHubStars);
 
   useEffect(() => {
-    const fetchStars = async () => {
-      try {
-        const result = await executeAsync({ repo_url: repoUrl });
-
-        if (
-          result &&
-          'data' in result &&
-          result.data &&
-          typeof result.data === 'object' &&
-          'stars' in result.data
-        ) {
-          setStars(result.data.stars as number);
-        }
-      } catch (err) {
-        logger.error(
-          'Failed to fetch GitHub stars',
-          err instanceof Error ? err : new Error(String(err)),
-          { repoUrl }
-        );
-      }
-    };
-
-    fetchStars().catch(() => {
-      // Intentional
-    });
-  }, [repoUrl, executeAsync]);
+    fetch('https://api.github.com/repos/JSONbored/claudepro-directory')
+      .then((res) => res.json())
+      .then((data) => setStars(data.stargazers_count))
+      .catch(() => setStars(null));
+  }, []);
 
   const handleClick = () => {
     window.open(repoUrl, '_blank', 'noopener,noreferrer');
   };
-
-  const isLoading = status === 'executing';
-  const hasError = status === 'hasErrored';
 
   return (
     <Button
@@ -1023,13 +1034,10 @@ function GitHubStarsButton({
       onClick={handleClick}
       disabled={disabled}
       className={cn('gap-2', className)}
-      aria-label={`Star us on GitHub${stars ? ` - ${stars} stars` : ''}${hasError ? ' (star count unavailable)' : ''}`}
-      title={hasError ? 'Star count temporarily unavailable. Click to visit GitHub.' : undefined}
+      aria-label={`Star us on GitHub${stars ? ` - ${stars} stars` : ''}`}
     >
       <Github className="h-4 w-4" aria-hidden="true" />
-      {!isLoading && stars !== null && !hasError && (
-        <span className="font-medium tabular-nums">{stars.toLocaleString()}</span>
-      )}
+      {stars !== null && <span className="font-medium tabular-nums">{stars.toLocaleString()}</span>}
     </Button>
   );
 }

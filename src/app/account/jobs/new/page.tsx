@@ -1,7 +1,9 @@
+import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/forms/job-form';
-import { createJob } from '@/src/lib/actions/business.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { createClient } from '@/src/lib/supabase/server';
+import type { Json } from '@/src/types/database.types';
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -9,15 +11,38 @@ export const dynamic = 'force-dynamic';
 export const metadata = generatePageMetadata('/account/jobs/new');
 
 export default function NewJobPage() {
-  const handleSubmit = async (data: Parameters<typeof createJob>[0]) => {
+  const handleSubmit = async (data: Record<string, unknown>) => {
     'use server';
 
-    const result = await createJob(data);
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (result?.data?.success) {
+    if (!user) throw new Error('You must be signed in to create a job listing');
+
+    const { data: rpcData, error } = await supabase.rpc('manage_job', {
+      p_action: 'create',
+      p_user_id: user.id,
+      p_data: data as Json,
+    });
+
+    if (error) throw new Error(error.message);
+
+    const result = rpcData as unknown as {
+      success: boolean;
+      job: { id: string; slug: string };
+      requiresPayment: boolean;
+      message: string;
+    };
+
+    if (result.success) {
+      revalidatePath('/jobs');
+      revalidatePath('/account/jobs');
+
       // If requires payment (featured/premium), stay on page with message
-      if (result.data.requiresPayment) {
-        return result.data;
+      if (result.requiresPayment) {
+        return result;
       }
 
       // Standard plan - redirect to jobs list

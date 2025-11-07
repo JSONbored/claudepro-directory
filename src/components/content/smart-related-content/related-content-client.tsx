@@ -1,23 +1,7 @@
 'use client';
 
 /**
- * Related Content Client Component
- * Modern client-side implementation using UnifiedCardGrid
- *
- * **Architecture Changes (2025 Modernization):**
- * - ✅ Client component (removed next/headers server dependency)
- * - ✅ Uses UnifiedCardGrid for consistency
- * - ✅ Uses BaseCard with topAccent for visual distinction
- * - ✅ Browser-compatible data fetching with useEffect
- * - ✅ Dynamic analytics imports (Storybook compatible)
- * - ✅ Proper loading/error states
- *
- * **Replaces:**
- * - carousel.tsx (338 LOC) - Custom card rendering
- * - index.tsx (118 LOC) - Server component with next/headers
- * - with-metadata.tsx (43 LOC) - Metadata wrapper
- *
- * @module components/smart-related-content/related-content-client
+ * Related Content - Client-side fetching with UnifiedCardGrid
  */
 
 import { useEffect, useState } from 'react';
@@ -35,9 +19,6 @@ import type { Database } from '@/src/types/database.types';
 type RelatedContentRPCResult =
   Database['public']['Functions']['get_related_content']['Returns'][number];
 
-/**
- * Extended ContentItem for related content with matching metadata
- */
 type RelatedContentItem = ContentItem & {
   score?: number;
   matchType?: string;
@@ -47,34 +28,17 @@ type RelatedContentItem = ContentItem & {
   };
 };
 
-/**
- * Props for SmartRelatedContentProps
- */
 export interface SmartRelatedContentProps {
-  /** Current pathname for context */
   pathname?: string;
-  /** Current tags for matching */
   currentTags?: string[];
-  /** Current keywords for matching */
   currentKeywords?: string[];
-  /** Show featured content */
   featured?: boolean;
-  /** Slugs to exclude from results */
   exclude?: string[];
-  /** Maximum number of items to show */
   limit?: number;
-  /** Enable analytics tracking */
-  trackingEnabled?: boolean;
-  /** Section title */
   title?: string;
-  /** Show section title */
   showTitle?: boolean;
 }
 
-/**
- * Get category color styles for badges
- * Matches existing carousel.tsx pattern
- */
 function getCategoryBadgeClass(category: string): string {
   const classes: Record<string, string> = {
     agents: 'badge-category-agents',
@@ -92,9 +56,6 @@ function getCategoryBadgeClass(category: string): string {
   return classes[category as keyof typeof classes] || 'bg-muted/20 text-muted border-muted/30';
 }
 
-/**
- * Get match type badge configuration
- */
 function getMatchTypeBadge(matchType: string): {
   label: string;
   variant: 'default' | 'secondary' | 'outline';
@@ -111,48 +72,24 @@ function getMatchTypeBadge(matchType: string): {
   return badges[matchType] || { label: 'Related', variant: 'outline' };
 }
 
-/**
- * Extract category from pathname
- */
 function getCategoryFromPath(pathname: string | undefined): string {
   if (!pathname) return 'unknown';
   const pathParts = pathname.split('/').filter(Boolean);
   return pathParts[0] || 'unknown';
 }
 
-/**
- * RelatedContentClient Component
- *
- * Client-side related content with UnifiedCardGrid integration.
- * Fetches data on mount and renders using BaseCard composition.
- *
- * @example
- * ```tsx
- * <RelatedContentClient
- *   pathname="/agents/code-reviewer"
- *   currentTags={['typescript', 'code-review']}
- *   limit={3}
- * />
- * ```
- */
 export function RelatedContentClient({
   featured = false,
   exclude = [],
   limit = 3,
-  trackingEnabled = true,
   currentTags = [],
   currentKeywords = [],
   pathname: providedPathname,
   title = 'Related Content',
   showTitle = true,
 }: SmartRelatedContentProps) {
-  // Extended ContentItem with related content properties already exists in schema
   const [items, setItems] = useState<RelatedContentItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cacheHit, setCacheHit] = useState(false);
-
-  // Get pathname from props or window.location (browser-safe)
-  // Nullish coalescing ensures type safety (only falls back on null/undefined, not empty string)
   const pathname: string =
     providedPathname ?? (typeof window !== 'undefined' ? window.location.pathname : '/');
 
@@ -187,9 +124,7 @@ export function RelatedContentClient({
           })
         ) as RelatedContentItem[];
 
-        // Service now returns properly typed RelatedContentItem[] with all required fields
         setItems(convertedItems);
-        setCacheHit(response.performance.cacheHit);
       } catch (error) {
         logger.error(
           'Failed to fetch related content',
@@ -210,19 +145,6 @@ export function RelatedContentClient({
       );
     });
   }, [pathname, currentTags, currentKeywords, featured, exclude, limit]);
-
-  // Track view when component loads (dynamic import for Storybook)
-  useEffect(() => {
-    if (!trackingEnabled || items.length === 0) return;
-
-    import('@/src/lib/analytics/events/related-content')
-      .then((module) => {
-        module.trackRelatedContentView(pathname, items.length, cacheHit);
-      })
-      .catch(() => {
-        // Silent failure in Storybook
-      });
-  }, [trackingEnabled, pathname, items.length, cacheHit]);
 
   return (
     <section
@@ -264,8 +186,7 @@ export function RelatedContentClient({
         loading={loading}
         emptyMessage="No related content available"
         loadingMessage="Finding related content..."
-        renderCard={(item, index) => {
-          // Cast back to RelatedContentItem to access extended properties
+        renderCard={(item) => {
           const relatedItem = item as RelatedContentItem;
           const matchBadge = getMatchTypeBadge(relatedItem.matchType ?? 'unknown');
           const categoryBadge = getCategoryBadgeClass(relatedItem.category);
@@ -283,28 +204,6 @@ export function RelatedContentClient({
               topAccent
               compactMode
               ariaLabel={`Related: ${relatedItem.title}`}
-              onBeforeNavigate={() => {
-                // Track click with dynamic import (Storybook compatible)
-                if (trackingEnabled) {
-                  const itemUrl = getContentItemUrl({
-                    category: relatedItem.category as CategoryId,
-                    slug: relatedItem.slug,
-                  });
-
-                  import('@/src/lib/analytics/events/related-content')
-                    .then((module) => {
-                      module.trackRelatedContentClick(
-                        pathname,
-                        itemUrl,
-                        index + 1,
-                        relatedItem.score ?? 0
-                      );
-                    })
-                    .catch(() => {
-                      // Silent failure in Storybook
-                    });
-                }
-              }}
               renderTopBadges={() => (
                 <div className="flex w-full items-center justify-between gap-2">
                   <UnifiedBadge

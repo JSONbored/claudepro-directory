@@ -37,46 +37,34 @@ export default async function SettingsPage() {
     p_user_id: user.id,
   });
 
-  // Type assertion to database-generated Json type
-  type SettingsResponse = {
-    profile: Pick<
-      Tables<'profiles'>,
-      | 'display_name'
-      | 'bio'
-      | 'work'
-      | 'website'
-      | 'social_x_link'
-      | 'interests'
-      | 'profile_public'
-      | 'follow_email'
-      | 'created_at'
-      | 'reputation_score'
-    > | null;
-    user_data: Pick<Tables<'users'>, 'slug' | 'name' | 'image' | 'tier'> | null;
-  };
+  // RPC returns Json - use generated database types
+  type UserDataResult = Pick<Tables<'users'>, 'slug' | 'name' | 'image' | 'tier'>;
+  type ProfileResult = Pick<
+    Tables<'users'>,
+    | 'display_name'
+    | 'bio'
+    | 'work'
+    | 'website'
+    | 'social_x_link'
+    | 'interests'
+    | 'profile_public'
+    | 'follow_email'
+    | 'created_at'
+  >;
 
-  const { profile: profileData, user_data } = (settingsData || {
-    profile: null,
-    user_data: null,
-  }) as unknown as SettingsResponse;
+  const settingsResult = settingsData as { user_data?: UserDataResult; profile?: ProfileResult };
+  const userData = settingsResult?.user_data;
+  const profile = settingsResult?.profile;
 
-  const userData = user_data;
-  const profile = profileData as Database['public']['Tables']['profiles']['Row'] | null;
-
-  if (!profile) {
-    await supabase.from('profiles').upsert({
-      id: user.id,
-      follow_email: true,
-      profile_public: true,
-    } as Database['public']['Tables']['profiles']['Insert']);
-  }
-
+  // Initialize user if missing (consolidated - no more profiles table)
   if (!userData) {
     await supabase.from('users').upsert({
       id: user.id,
       email: user.email ?? null,
       name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
       image: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+      profile_public: true,
+      follow_email: true,
     } as Database['public']['Tables']['users']['Insert']);
   }
 
@@ -107,7 +95,7 @@ export default async function SettingsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <ProfileEditForm profile={profile} />
+          <ProfileEditForm profile={profile as ProfileResult} />
         </CardContent>
       </Card>
 
@@ -126,16 +114,14 @@ export default async function SettingsPage() {
             <div>
               <p className={'font-medium text-sm'}>Member Since</p>
               <p className="text-muted-foreground">
-                {new Date(profile.created_at).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
+                {profile?.created_at
+                  ? new Date(profile.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })
+                  : 'N/A'}
               </p>
-            </div>
-            <div>
-              <p className={'font-medium text-sm'}>Reputation</p>
-              <p className="text-muted-foreground">{profile.reputation_score} points</p>
             </div>
           </div>
         </CardContent>
@@ -149,7 +135,7 @@ export default async function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {userData?.image && (
+          {userData?.image && typeof userData.image === 'string' && (
             <div className="flex items-center gap-4">
               <Image
                 src={userData.image}

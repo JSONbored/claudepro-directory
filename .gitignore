@@ -46,7 +46,7 @@ public/downloads/skills/*.zip
 # Exception: Allow skill ZIPs in content/skills/ (overrides global ~/.gitignore_global *.zip rule)
 !content/skills/*.zip
 
-# Dynamic sitemap served by src/app/sitemap.ts (do not commit generated file)
+# Dynamic sitemap served by Supabase edge function (do not commit local copies)
 public/sitemap.xml
 
 # Sitemap URL extraction and submission batches (temporary files for manual submission)
@@ -99,9 +99,6 @@ core
 
 manifest.json
 
-# Lefthook creates this in root despite using config/tools/lefthook.yml
-lefthook.yml
-
 # Technical debt tracking (personal baseline, not committed)
 config/tools/tech-debt/.baseline.json
 config/tools/tech-debt/.history.json
@@ -127,3 +124,5 @@ supabase/schema.sql
 .launchd/README.md
 
 .launchd/uninstall.sh
+
+REPUTATION_BADGE_REMOVAL_PLAN.md

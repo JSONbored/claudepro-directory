@@ -9,22 +9,81 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction, rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
-import { nonEmptyString } from '@/src/lib/schemas/primitives';
-// categoryIdSchema removed - using generated types only
-import {
-  collectionInsertTransformSchema,
-  collectionItemInsertTransformSchema,
-  createPostSchema,
-  getReviewsSchema,
-  helpfulVoteSchema,
-  reorderItemsSchema,
-  reviewDeleteSchema,
-  reviewInsertTransformSchema,
-  reviewUpdateInputSchema,
-  updatePostSchema,
-} from '@/src/lib/schemas/transforms/data-normalization.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import type { Tables } from '@/src/types/database.types';
+
+// Manual Zod schemas (database validates, Zod just provides type safety)
+const collectionSchema = z.object({
+  name: z.string(),
+  slug: z.string(),
+  description: z.string().optional().nullable(),
+  is_public: z.boolean().default(false),
+});
+
+const collectionItemSchema = z.object({
+  collection_id: z.string(),
+  content_type: z.string(),
+  content_slug: z.string(),
+  notes: z.string().optional().nullable(),
+  order: z.number().int().optional(),
+});
+
+const reviewSchema = z.object({
+  content_type: z.string(),
+  content_slug: z.string(),
+  rating: z.number().int().min(1).max(5),
+  review_text: z.string().optional().nullable(),
+});
+
+const postSchema = z
+  .object({
+    title: z.string().min(1),
+    content: z.string().optional().nullable(),
+    url: z.string().optional().nullable(),
+  })
+  .refine((data) => data.content || data.url, {
+    message: 'Post must have either content or a URL',
+  });
+
+const getReviewsSchema = z.object({
+  content_type: z.string(),
+  content_slug: z.string(),
+  sort_by: z.enum(['recent', 'helpful', 'rating_high', 'rating_low']).default('recent'),
+  limit: z.number().int().min(1).max(100).default(20),
+  offset: z.number().int().min(0).default(0),
+});
+
+const reorderItemsSchema = z.object({
+  collection_id: z.string(),
+  items: z.array(
+    z.object({
+      id: z.string(),
+      order: z.number().int(),
+    })
+  ),
+});
+
+const reviewUpdateSchema = z.object({
+  review_id: z.string(),
+  rating: z.number().int().min(1).max(5).optional(),
+  review_text: z.string().optional().nullable(),
+});
+
+const helpfulVoteSchema = z.object({
+  review_id: z.string(),
+  helpful: z.boolean(),
+});
+
+const reviewDeleteSchema = z.object({
+  review_id: z.string(),
+});
+
+const updatePostSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1).optional(),
+  content: z.string().optional().nullable(),
+  url: z.string().optional().nullable(),
+});
 
 // =====================================================
 // COLLECTION ACTIONS
@@ -35,7 +94,7 @@ import type { Tables } from '@/src/types/database.types';
  */
 export const createCollection = authedAction
   .metadata({ actionName: 'createCollection', category: 'user' })
-  .schema(collectionInsertTransformSchema)
+  .schema(collectionSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       const supabase = await createClient();
@@ -74,7 +133,7 @@ export const createCollection = authedAction
  */
 export const updateCollection = authedAction
   .metadata({ actionName: 'updateCollection', category: 'user' })
-  .schema(collectionInsertTransformSchema.extend({ id: z.string() }))
+  .schema(collectionSchema.extend({ id: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
       const supabase = await createClient();
@@ -149,7 +208,7 @@ export const deleteCollection = authedAction
  */
 export const addItemToCollection = authedAction
   .metadata({ actionName: 'addItemToCollection', category: 'user' })
-  .schema(collectionItemInsertTransformSchema)
+  .schema(collectionItemSchema)
   .action(async ({ parsedInput, ctx }) => {
     const supabase = await createClient();
     const { data, error } = await supabase.rpc('manage_collection', {
@@ -238,107 +297,6 @@ export const reorderCollectionItems = authedAction
       updated: result.updated,
     };
   });
-
-/**
- * Get user's collections
- */
-export async function getUserCollections() {
-  const { createClient } = await import('@/src/lib/supabase/server');
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return [];
-  }
-
-  const { data, error } = await supabase
-    .from('user_collections')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new Error(`Failed to fetch user collections: ${error.message}`);
-  }
-
-  return data || [];
-}
-
-/**
- * Get a specific collection with its items
- */
-export async function getCollectionWithItems(collectionId: string) {
-  const { createClient } = await import('@/src/lib/supabase/server');
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // Get collection with items (optimized JOIN query with LIMIT for scalability)
-  const { data, error } = await supabase
-    .from('user_collections')
-    .select(
-      `
-      *,
-      items:collection_items(*)
-    `
-    )
-    .eq('id', collectionId)
-    .order('order', { referencedTable: 'collection_items', ascending: true })
-    .limit(100)
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST116') {
-      throw new Error('Collection not found');
-    }
-    throw new Error(`Failed to fetch collection: ${error.message}`);
-  }
-
-  return {
-    ...data,
-    isOwner: user?.id === data.user_id,
-  };
-}
-
-/**
- * Get a public collection by user slug and collection slug
- * Optimized: Single JOIN query batches user lookup, collection lookup, and items fetch
- */
-export async function getPublicCollectionBySlug(userSlug: string, collectionSlug: string) {
-  const { createClient } = await import('@/src/lib/supabase/server');
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('user_collections')
-    .select(
-      `
-      *,
-      items:collection_items(*),
-      user:users!user_collections_user_id_fkey(slug)
-    `
-    )
-    .eq('slug', collectionSlug)
-    .eq('is_public', true)
-    .eq('users.slug', userSlug)
-    .order('order', { referencedTable: 'collection_items', ascending: true })
-    .limit(100)
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST116') {
-      throw new Error('Collection not found');
-    }
-    throw new Error(`Failed to fetch public collection: ${error.message}`);
-  }
-
-  return data;
-}
-
 // ============================================
 // REVIEW ACTIONS
 // ============================================
@@ -348,7 +306,7 @@ export async function getPublicCollectionBySlug(userSlug: string, collectionSlug
  */
 export const createReview = authedAction
   .metadata({ actionName: 'createReview', category: 'user' })
-  .schema(reviewInsertTransformSchema)
+  .schema(reviewSchema)
   .action(async ({ parsedInput, ctx }) => {
     const supabase = await createClient();
     const { data, error } = await supabase.rpc('manage_review', {
@@ -389,7 +347,7 @@ export const createReview = authedAction
  */
 export const updateReview = authedAction
   .metadata({ actionName: 'updateReview', category: 'user' })
-  .schema(reviewUpdateInputSchema)
+  .schema(reviewUpdateSchema)
   .action(async ({ parsedInput, ctx }) => {
     const supabase = await createClient();
     const { data, error } = await supabase.rpc('manage_review', {
@@ -541,7 +499,7 @@ export const getReviewsWithStats = rateLimitedAction
  */
 export const createPost = authedAction
   .metadata({ actionName: 'createPost', category: 'form' })
-  .schema(createPostSchema)
+  .schema(postSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       const supabase = await createClient();
@@ -655,7 +613,7 @@ export const createComment = authedAction
   .schema(
     z.object({
       post_id: z.string(),
-      content: nonEmptyString.min(1).max(2000),
+      content: z.string().min(1).max(2000),
     })
   )
   .action(async ({ parsedInput, ctx }) => {

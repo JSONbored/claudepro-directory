@@ -8,7 +8,7 @@ import type { Tables } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/community/directory');
 
-export const revalidate = 3600; // 1 hour ISR
+export const revalidate = false;
 
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
   const supabase = await createClient();

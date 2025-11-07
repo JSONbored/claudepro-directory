@@ -249,7 +249,6 @@ async function handleWelcome(req: Request): Promise<Response> {
     // Enroll in onboarding sequence
     await supabase.rpc('enroll_in_email_sequence', {
       p_email: email,
-      p_sequence_type: 'onboarding',
     });
 
     return successResponse({ sent: true, id: data?.id, subscription_id });

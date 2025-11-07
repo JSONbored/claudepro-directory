@@ -7,12 +7,12 @@
 
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
-import { publicContentCategorySchema } from '@/src/lib/schemas/generated/db-schemas';
 import { createClient } from '@/src/lib/supabase/server';
 import { rateLimitedAction } from './safe-action';
 
+// Manual Zod schema (database validates via CHECK constraint)
 const markdownExportSchema = z.object({
-  category: publicContentCategorySchema,
+  category: z.string(),
   slug: z.string().min(1).max(200),
   includeMetadata: z.boolean().default(true),
   includeFooter: z.boolean().default(true),

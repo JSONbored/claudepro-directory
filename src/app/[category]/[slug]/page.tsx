@@ -23,7 +23,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Database } from '@/src/types/database.types';
 
-export const revalidate = 21600;
+export const revalidate = false; // Static generation - zero database egress during serving
 
 export async function generateStaticParams() {
   try {
@@ -175,6 +175,19 @@ export default async function DetailPage({
   const response = detailData as Record<string, unknown>;
   const fullItem = response.content as ContentItem;
   const itemData = fullItem;
+
+  // Null safety: If content doesn't exist in database, return 404
+  if (!fullItem) {
+    logger.warn('Content not found in RPC response', {
+      category,
+      slug,
+      rpcFunction: 'get_content_detail_complete',
+      phase: 'page-render',
+      hasResponse: !!response,
+    });
+    notFound();
+  }
+
   const analytics = response.analytics as { view_count: number } | null;
   const viewCount = analytics?.view_count || 0;
   const relatedItems = (response.related as ContentItem[]) || [];
@@ -184,7 +197,7 @@ export default async function DetailPage({
 
   // Type-safe breadcrumb name with discriminated union
   const breadcrumbName =
-    fullItem && 'display_title' in fullItem ? fullItem.display_title : itemData.title;
+    fullItem && 'display_title' in fullItem ? fullItem.display_title : fullItem.title;
 
   // Conditional rendering: Collections use specialized CollectionDetailView
   // TypeScript narrows fullItem type based on category check

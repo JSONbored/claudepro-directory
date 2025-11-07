@@ -23,8 +23,8 @@ import { BorderBeam } from '@/src/components/magic/border-beam';
 import { Button } from '@/src/components/primitives/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { addBookmark } from '@/src/lib/actions/user.actions';
-import { trackInteraction } from '@/src/lib/analytics/client';
 import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
+import { trackInteraction } from '@/src/lib/edge/client';
 import {
   Award,
   Copy as CopyIcon,
@@ -35,7 +35,7 @@ import {
   Sparkles,
 } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
+import type { ConfigCardProps } from '@/src/lib/types/component.types';
 import { BADGE_COLORS, CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { formatCopyCount, formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';

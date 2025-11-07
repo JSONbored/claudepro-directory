@@ -8,7 +8,7 @@ import type { SearchFilters } from '@/src/lib/search/server-search';
 import { searchContent } from '@/src/lib/search/server-search';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const revalidate = 3600; // 1 hour ISR
+export const revalidate = false;
 
 interface SearchPageProps {
   searchParams: Promise<{

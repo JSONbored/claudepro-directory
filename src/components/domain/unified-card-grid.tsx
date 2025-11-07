@@ -34,7 +34,7 @@ import { memo, useEffect } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
-import type { DisplayableContent } from '@/src/lib/schemas/component.schema';
+import type { DisplayableContent } from '@/src/lib/types/component.types';
 
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

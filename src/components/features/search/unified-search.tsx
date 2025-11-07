@@ -22,7 +22,7 @@ import {
 } from '@/src/components/primitives/select';
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
-import type { FilterState, UnifiedSearchProps } from '@/src/lib/schemas/component.schema';
+import type { FilterState, UnifiedSearchProps } from '@/src/lib/types/component.types';
 import { cn } from '@/src/lib/utils';
 
 export type { FilterState };
@@ -85,7 +85,7 @@ function UnifiedSearchComponent({
       if (sanitized && sanitized.length > 0) {
         const category = pathname?.split('/')[1] || 'global';
 
-        import('@/src/lib/analytics/client')
+        import('@/src/lib/edge/client')
           .then((module) =>
             module.trackInteraction({
               interaction_type: 'click',

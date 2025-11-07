@@ -43,7 +43,7 @@ export async function generateStaticParams() {
 }
 
 // ISR: Revalidate every 15 minutes
-export const revalidate = 900;
+export const revalidate = false;
 
 async function getCategoryGalleryData(category: string) {
   const supabase = createAnonClient();

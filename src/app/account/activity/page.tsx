@@ -1,4 +1,4 @@
-import { ActivityTimeline } from '@/src/components/features/reputation/activity-timeline';
+import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
 import {
   Card,
   CardContent,
@@ -10,7 +10,6 @@ import { getActivitySummary, getActivityTimeline } from '@/src/lib/actions/user.
 import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { batchFetch } from '@/src/lib/utils/batch.utils';
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -19,7 +18,7 @@ export const metadata = generatePageMetadata('/account/activity');
 
 export default async function ActivityPage() {
   // Fetch activity data
-  const [summaryResult, timelineResult] = await batchFetch([
+  const [summaryResult, timelineResult] = await Promise.all([
     getActivitySummary(),
     getActivityTimeline({ limit: 50, offset: 0 }),
   ]);
@@ -111,15 +110,7 @@ export default async function ActivityPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ActivityTimeline
-            initialActivities={activities}
-            summary={{
-              total_posts: summary.total_posts ?? 0,
-              total_comments: summary.total_comments ?? 0,
-              total_votes: summary.total_votes ?? 0,
-              total_submissions: summary.total_submissions ?? 0,
-            }}
-          />
+          <ActivityTimeline activities={activities} />
         </CardContent>
       </Card>
     </div>

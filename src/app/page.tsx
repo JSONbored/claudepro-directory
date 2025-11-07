@@ -43,7 +43,7 @@ import type { Tables } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/');
 
-export const revalidate = 900; // 15 minutes ISR
+export const revalidate = 86400; // 24 hour ISR - fresh stats daily
 
 type CategoryMetadata = ContentItem & { category: CategoryId };
 type EnrichedMetadata = CategoryMetadata & { viewCount: number; copyCount: number };
@@ -115,19 +115,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   }
 
   // Extract member_count and top_contributors from consolidated response
-  type UserRow = Pick<
-    Tables<'users'>,
-    | 'id'
-    | 'slug'
-    | 'name'
-    | 'image'
-    | 'bio'
-    | 'work'
-    | 'reputation_score'
-    | 'tier'
-    | 'tier_name'
-    | 'tier_progress'
-  >;
+  type UserRow = Pick<Tables<'users'>, 'id' | 'slug' | 'name' | 'image' | 'bio' | 'work' | 'tier'>;
 
   const memberCount = homepageError
     ? 0

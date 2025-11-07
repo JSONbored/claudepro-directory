@@ -1,0 +1,166 @@
+# Lefthook Configuration - Claude Pro Directory
+# Version: 2.0.2 (November 2025)
+# Database-first architecture: No JSON content validation needed
+
+# ============================================================================
+# OUTPUT CONTROL
+# ============================================================================
+output:
+  - execution      # Show what's running
+  - execution_out  # Show command output
+  - skips         # Show skipped commands
+  - failure       # Always show failures
+
+# ============================================================================
+# PRE-COMMIT: Fast checks on staged files only
+# Runs in parallel for speed, fails fast on critical issues
+# ============================================================================
+pre-commit:
+  parallel: true
+  follow: true
+  commands:
+    # 1. Type checking for TypeScript files
+    type-check:
+      glob: "*.{ts,tsx}"
+      run: |
+        echo "🔍 Type checking..."
+        pnpm type-check
+      fail_text: "❌ Type errors found. Fix them before committing."
+
+    # 2. Format check (Biome)
+    format-check:
+      glob: "*.{ts,tsx,js,jsx,json}"
+      run: |
+        echo "✨ Checking code formatting..."
+        pnpm lint || (echo "❌ Run 'pnpm format' to auto-fix formatting issues" && exit 1)
+      fail_text: "❌ Formatting issues found. Run 'pnpm format' to fix."
+
+    # 3. Run tests for changed files (smart test runner)
+    test-changed:
+      glob: "{src,tests}/**/*.{ts,tsx}"
+      exclude: "*.test.{ts,tsx}|*.spec.{ts,tsx}"
+      run: |
+        CHANGED=$(git diff --cached --name-only --diff-filter=ACMR -- 'src/**/*.{ts,tsx}' 'tests/**/*.{ts,tsx}')
+
+        if [ -z "$CHANGED" ]; then
+          echo "ℹ️  No source files changed, skipping tests"
+          exit 0
+        fi
+
+        TEST_FILES=$(echo "$CHANGED" | while read file; do
+          if [[ $file == src/* ]]; then
+            test_file="tests/unit/${file#src/}"
+            [ -f "${test_file%.tsx}.test.tsx" ] && echo "${test_file%.tsx}.test.tsx"
+            [ -f "${test_file%.ts}.test.ts" ] && echo "${test_file%.ts}.test.ts"
+          elif [[ $file == tests/* ]]; then
+            echo "$file"
+          fi
+        done | sort -u)
+
+        if [ -n "$TEST_FILES" ]; then
+          echo "🧪 Running tests for changed files..."
+          pnpm test:unit -- $TEST_FILES --run --reporter=dot
+        else
+          echo "⚠️  No tests found for changed files. Consider adding tests."
+        fi
+      fail_text: "❌ Tests failed. Fix them before committing."
+
+# ============================================================================
+# PRE-PUSH: Comprehensive checks before code reaches remote
+# ============================================================================
+pre-push:
+  parallel: false
+  commands:
+    # 1. Full test suite (non-blocking warnings)
+    test-suite:
+      run: |
+        echo "🧪 Running full test suite..."
+        pnpm test:unit -- --run --reporter=dot || echo "⚠️  Some tests failed but not blocking push"
+      fail_text: "⚠️  Test suite has failures (not blocking - fix iteratively)."
+
+    # 2. Production build verification (CRITICAL - must pass)
+    build:
+      run: |
+        echo "🏗️  Verifying production build..."
+        pnpm build
+      fail_text: "❌ Build failed. Fix errors before pushing."
+
+    # 3. Security audit (warnings only, not blocking)
+    security:
+      run: |
+        echo "🔒 Running security audit..."
+        pnpm audit --audit-level=moderate --prod || true
+      fail_text: "⚠️  Security vulnerabilities found (not blocking)."
+
+# ============================================================================
+# COMMIT-MSG: Enforce conventional commits
+# ============================================================================
+commit-msg:
+  commands:
+    conventional-commits:
+      use_stdin: true
+      run: |
+        MSG=$(cat {1})
+
+        # Skip merge commits
+        if echo "$MSG" | grep -qE "^Merge (branch|pull request)"; then
+          exit 0
+        fi
+
+        # Skip fixup/squash commits
+        if echo "$MSG" | grep -qE "^(fixup|squash)!"; then
+          exit 0
+        fi
+
+        # Validate conventional commit format
+        if ! echo "$MSG" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|wip)(\(.+\))?: .{1,}"; then
+          echo "⚠️  Commit message doesn't follow Conventional Commits format"
+          echo ""
+          echo "Format: type(scope): description"
+          echo "Types: feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|wip"
+          echo ""
+          echo "Examples:"
+          echo "  feat(auth): add Google OAuth"
+          echo "  fix(api): resolve race condition"
+          echo "  wip: experimenting with new feature"
+          echo ""
+          echo "💡 Tip: Set LEFTHOOK_EXCLUDE=commit-msg to skip this check"
+          exit 1
+        fi
+
+# ============================================================================
+# POST-MERGE: Auto-install dependencies when package.json changes
+# ============================================================================
+post-merge:
+  piped: true
+  commands:
+    deps-install:
+      files: git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD
+      glob: "{package.json,pnpm-lock.yaml}"
+      run: |
+        echo "📦 Dependencies changed. Installing updates..."
+        pnpm install
+      fail_text: "⚠️  Dependency installation failed. Run 'pnpm install' manually."
+
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
+colors: true
+no_tty: false
+min_version: 1.13.0
+
+# ============================================================================
+# USAGE TIPS
+# ============================================================================
+# Skip specific commands:
+#   LEFTHOOK_EXCLUDE=test-changed,type-check git commit
+#
+# Skip commit-msg validation:
+#   LEFTHOOK_EXCLUDE=commit-msg git commit
+#
+# Verbose debugging:
+#   LEFTHOOK_VERBOSE=1 git commit
+#
+# Skip all hooks (use sparingly):
+#   git commit --no-verify
+# ============================================================================

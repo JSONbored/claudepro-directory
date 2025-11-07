@@ -6,7 +6,7 @@ import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import { Clock, Star, TrendingUp } from '@/src/lib/icons';
-import type { ContentItem, TrendingContentProps } from '@/src/lib/schemas/component.schema';
+import type { ContentItem, TrendingContentProps } from '@/src/lib/types/component.types';
 
 /**
  * Trending Content Component

@@ -77,13 +77,14 @@ type ActivityTimelineResponse = {
   total: number;
 };
 
-import { nonEmptyString } from '@/src/lib/schemas/primitives';
-import {
-  bookmarkInsertTransformSchema,
-  removeBookmarkSchema,
-} from '@/src/lib/schemas/transforms/data-normalization.schema';
-
 import { createClient } from '@/src/lib/supabase/server';
+
+// Manual Zod schemas (database validates, Zod just provides type safety)
+const bookmarkSchema = z.object({
+  content_type: z.string(),
+  content_slug: z.string(),
+  notes: z.string().optional().nullable(),
+});
 
 export const updateProfile = authedAction
   .metadata({
@@ -176,7 +177,7 @@ export const addBookmark = authedAction
     actionName: 'addBookmark',
     category: 'user',
   })
-  .schema(bookmarkInsertTransformSchema)
+  .schema(bookmarkSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       const { content_type, content_slug, notes } = parsedInput;
@@ -218,7 +219,7 @@ export const removeBookmark = authedAction
     actionName: 'removeBookmark',
     category: 'user',
   })
-  .schema(removeBookmarkSchema)
+  .schema(bookmarkSchema.pick({ content_type: true, content_slug: true }))
   .action(async ({ parsedInput, ctx }) => {
     try {
       const { content_type, content_slug } = parsedInput;
@@ -285,7 +286,7 @@ export const addBookmarkBatch = authedAction
               Enums<'content_category'>,
               ...Enums<'content_category'>[],
             ]),
-            content_slug: nonEmptyString,
+            content_slug: z.string().min(1),
           })
         )
         .min(1)
@@ -426,6 +427,35 @@ export const getActivityTimeline = authedAction
         'Failed to get activity timeline',
         error instanceof Error ? error : new Error(String(error)),
         { userId: ctx.userId, type: type || 'all', limit, offset }
+      );
+      throw error;
+    }
+  });
+
+export const getUserIdentities = authedAction
+  .metadata({ actionName: 'getUserIdentities', category: 'user' })
+  .schema(z.void())
+  .action(async ({ ctx }) => {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('get_user_identities', {
+        p_user_id: ctx.userId,
+      });
+      if (error) throw new Error(`Failed to fetch user identities: ${error.message}`);
+
+      return data as {
+        identities: Array<{
+          provider: string;
+          email: string;
+          created_at: string;
+          last_sign_in_at: string;
+        }>;
+      };
+    } catch (error) {
+      logger.error(
+        'Failed to get user identities',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId }
       );
       throw error;
     }

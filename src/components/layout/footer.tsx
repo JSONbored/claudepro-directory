@@ -10,14 +10,15 @@
 
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { HeyClaudeLogo } from '@/src/components/layout/heyclaude-logo';
 import { ThemeToggle } from '@/src/components/layout/theme-toggle';
 import { APP_CONFIG, EXTERNAL_SERVICES, SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
-import { DiscordIcon, ExternalLink, Github, Sparkles } from '@/src/lib/icons';
+import { DiscordIcon, ExternalLink, Github, Rss, Sparkles } from '@/src/lib/icons';
 
 /**
  * Footer Component
@@ -31,6 +32,36 @@ function FooterComponent() {
   const currentYear = new Date().getFullYear();
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
+
+  // Context-aware RSS feed URL - shows most relevant feed for current page
+  const rssUrl = useMemo(() => {
+    if (pathname?.startsWith('/agents')) return '/agents/rss.xml';
+    if (pathname?.startsWith('/mcp')) return '/mcp/rss.xml';
+    if (pathname?.startsWith('/rules')) return '/rules/rss.xml';
+    if (pathname?.startsWith('/commands')) return '/commands/rss.xml';
+    if (pathname?.startsWith('/hooks')) return '/hooks/rss.xml';
+    if (pathname?.startsWith('/statuslines')) return '/statuslines/rss.xml';
+    if (pathname?.startsWith('/skills')) return '/skills/rss.xml';
+    if (pathname?.startsWith('/collections')) return '/collections/rss.xml';
+    if (pathname?.startsWith('/guides')) return '/guides/rss.xml';
+    if (pathname?.startsWith('/changelog')) return '/changelog/rss.xml';
+    return '/rss.xml'; // Default: site-wide feed
+  }, [pathname]);
+
+  const rssLabel = useMemo(() => {
+    if (pathname?.startsWith('/agents')) return 'Agents Feed';
+    if (pathname?.startsWith('/mcp')) return 'MCP Feed';
+    if (pathname?.startsWith('/rules')) return 'Rules Feed';
+    if (pathname?.startsWith('/commands')) return 'Commands Feed';
+    if (pathname?.startsWith('/hooks')) return 'Hooks Feed';
+    if (pathname?.startsWith('/statuslines')) return 'Statuslines Feed';
+    if (pathname?.startsWith('/skills')) return 'Skills Feed';
+    if (pathname?.startsWith('/collections')) return 'Collections Feed';
+    if (pathname?.startsWith('/guides')) return 'Guides Feed';
+    if (pathname?.startsWith('/changelog')) return 'Changelog Feed';
+    return 'RSS Feed'; // Default: site-wide
+  }, [pathname]);
 
   // Wait for client-side mount to avoid hydration mismatch
   useEffect(() => {
@@ -152,6 +183,7 @@ function FooterComponent() {
                 { href: ROUTES.COMMUNITY, label: 'Community', icon: null },
                 { href: ROUTES.SUBMIT, label: 'Submit Content', icon: null },
                 { href: ROUTES.PARTNER, label: 'Partner Program', icon: null },
+                { href: rssUrl, label: rssLabel, icon: Rss },
                 { href: ROUTES.LLMS_TXT, label: 'LLMs.txt', icon: Sparkles },
               ].map((link, index) => (
                 <motion.li

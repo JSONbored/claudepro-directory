@@ -6,7 +6,7 @@
  */
 
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from '@/src/lib/icons';
-import type { MetricsDisplayProps } from '@/src/lib/schemas/component.schema';
+import type { MetricsDisplayProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 

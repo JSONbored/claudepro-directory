@@ -162,11 +162,3 @@ export function getViewTransitionName(type: 'card' | 'detail' | 'image', slug: s
  * </div>
  * ```
  */
-export function getViewTransitionStyle(
-  type: 'card' | 'detail' | 'image',
-  slug: string
-): { viewTransitionName: string } {
-  return {
-    viewTransitionName: getViewTransitionName(type, slug),
-  };
-}
